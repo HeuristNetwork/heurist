@@ -3,11 +3,14 @@ namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 
     /**
-    * db access to sysImportFiles table
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbSysImportFiles
+     *
+     * Provides database access and operations for the `sysImportFiles` table.
+     * This table stores information about file import sessions, including the temporary
+     * data table created and processing information.
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -27,6 +30,15 @@ class DbSysImportFiles extends DbEntityBase
     private $is_table_exists = true;
 
 
+    /**
+     * Initializes the DbSysImportFiles entity.
+     *
+     * Sets `requireAdminRights` to false.
+     * Checks if the `sysImportFiles` table exists and attempts to create it if it doesn't.
+     * The table stores metadata about file import sessions.
+     *
+     * @return void
+     */
     public function init(){
 
         $this->requireAdminRights = false;
@@ -56,16 +68,30 @@ class DbSysImportFiles extends DbEntityBase
     }
 
     /**
-    */
+     * Checks if the entity is valid.
+     *
+     * An entity is valid if its underlying table (`sysImportFiles`) exists
+     * and the parent `isvalid()` check (configuration loaded) also passes.
+     *
+     * @return bool True if the entity is valid, false otherwise.
+     */
     public function isvalid(){
         return $this->is_table_exists && parent::isvalid();
     }
 
 
     /**
-    *  search import sessions
-    *
-    *  sysUGrps.ugr_ID
+     * Searches for import session records in the `sysImportFiles` table.
+     *
+     * Supports filtering by `sif_ID` and `sif_UGrpID`.
+     * The level of detail returned (`id`, `name`, `list`, or `full`) is controlled by `$this->data['details']`.
+     * Results are ordered by `sif_ID` DESC by default if no other order is specified and IDs are requested.
+     *
+     * @return array|false An array of found import session records, or false on error.
+     */
+    public function search(){
+
+        if(parent::search()===false){
     *  sysUGrps.ugr_Type
     *  sysUGrps.ugr_Name
     *  sysUGrps.ugr_Enabled
@@ -154,6 +180,15 @@ class DbSysImportFiles extends DbEntityBase
     //
     //
     //
+    /**
+     * Saves import session records.
+     *
+     * Currently, this method primarily calls `parent::save()`.
+     * Commented-out code suggests potential future functionality for handling thumbnails,
+     * but it's not active.
+     *
+     * @return array|false The result from `parent::save()` (array of saved IDs or false).
+     */
     public function save(){
 
         $ret = parent::save();
@@ -179,6 +214,17 @@ class DbSysImportFiles extends DbEntityBase
     //
     //
     //
+    /**
+     * Deletes import session records and their associated temporary data tables.
+     *
+     * If `sif_ID` is provided in `$this->data`, only that session is deleted.
+     * Otherwise (if `sif_ID` is not provided or is 0), it attempts to delete all import sessions
+     * and any orphaned `import20%` tables.
+     *
+     * @param bool $disable_foreign_checks Unused in this implementation.
+     * @return bool True on successful deletion, false on failure.
+     *              Errors are added to the system object on failure.
+     */
     public function delete($disable_foreign_checks = false){
 
         if(!$this->_validatePermission()){

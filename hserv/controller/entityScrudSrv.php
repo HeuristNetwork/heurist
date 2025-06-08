@@ -28,6 +28,16 @@
     //  a - action
     //  details
     //
+/**
+ * Executes an action on a specified entity.
+ *
+ * Resolves the entity name, instantiates the corresponding entity class,
+ * and runs the requested action.
+ *
+ * @param \hserv\System $system The system object.
+ * @param array $params Parameters for the entity action, including 'entity' and 'a' (action).
+ * @return mixed|false The result of the entity action, or false on error.
+ */
     function entityExecute($system, $params){
 
         $entity = null;
@@ -51,6 +61,18 @@
     //
     //
     //
+/**
+ * Refreshes entity definitions.
+ *
+ * Loads or reloads definitions for specified entities. Can fetch all definitions,
+ * definitions for a specific set of entities, or definitions related to a particular record.
+ *
+ * @param \hserv\System $system The system object.
+ * @param string|array $entities A comma-separated string or an array of entity names, or 'all'.
+ * @param bool|array $need_config Whether to include configuration information. If an array, it's populated with config data.
+ * @param array|null $search_params Optional parameters to filter definitions, e.g., by record ID or type.
+ * @return array|false An array of entity definitions, or false on error.
+ */
     function entityRefreshDefs( $system, $entities, $need_config, $search_params=null){
 
         $search_criteria = array();
@@ -134,6 +156,15 @@
     //
     //
     //
+/**
+ * Resolves an entity short name or alias to its full class name component.
+ *
+ * For example, 'rty' resolves to 'defRecTypes'.
+ * Validates that the resolved name contains only alphabetic characters.
+ *
+ * @param string $entity_name The short name or alias of the entity.
+ * @return string|null The resolved entity name component, or null if invalid.
+ */
     function entityResolveName($entity_name)
     {
             if($entity_name=='rtg') {$entity_name = 'defRecTypeGroups';}
@@ -156,6 +187,17 @@
     //
     // Returns full path, content type and url by entity name, view version (icon,thumb) and entity id;
     //
+/**
+ * Resolves the filename, content type, and URL for an entity's associated file (e.g., icon, thumbnail).
+ *
+ * @global string $defaultRootFileUploadURL The base URL for file uploads.
+ * @param string $entity_name The name of the entity.
+ * @param int|string $rec_id The record ID or database name (for sysDatabases).
+ * @param string|null $version The version of the file (e.g., 'icon', 'thumbnail', 'full'). Defaults to 'icon' for defRecTypes, 'thumbnail' otherwise.
+ * @param string|null $db_name The database name. Defaults to HEURIST_DBNAME if defined.
+ * @param string|null $extension The specific file extension to look for. If null, common image extensions are checked.
+ * @return array An array containing the absolute file path, content type, and URL. Returns [null, null, null] if not found or on error.
+ */
     function resolveEntityFilename($entity_name, $rec_id, $version, $db_name=null, $extension=null){
         global $defaultRootFileUploadURL;
 

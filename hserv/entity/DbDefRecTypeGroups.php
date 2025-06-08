@@ -3,11 +3,13 @@ namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 
     /**
-    * db access to sysUGrpps table
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbDefRecTypeGroups
+     *
+     * Provides database access and operations for the `defRecTypeGroups` table,
+     * which stores groups for record types.
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -25,6 +27,14 @@ use hserv\entity\DbEntityBase;
 class DbDefRecTypeGroups extends DbEntityBase
 {
 
+    /**
+     * Initializes the DbDefRecTypeGroups entity.
+     *
+     * Sets up duplication checks based on `rtg_Name` and foreign key checks
+     * to prevent deletion of non-empty groups (groups that still contain record types).
+     *
+     * @return void
+     */
     public function init(){
         $this->duplicationCheck = array('rtg_Name'=>'Record type group cannot be saved. The provided name already exists');
 
@@ -36,8 +46,15 @@ class DbDefRecTypeGroups extends DbEntityBase
     }
 
     /**
-    *  search rectype groups
-    */
+     * Searches for record type groups.
+     *
+     * Supports searching by `rtg_ID` and `rtg_Name`.
+     * The level of detail returned (`id`, `name`, `list`, or `full`) is controlled by `$this->data['details']`.
+     * The 'list' and 'full' details include an `rtg_RtCount` which counts the number of record types in each group.
+     * Results are ordered by `rtg_Order`.
+     *
+     * @return array|false An array of found record type groups, or false on error.
+     */
     public function search(){
 
         if(parent::search()===false){ //init search mgr
@@ -62,6 +79,15 @@ class DbDefRecTypeGroups extends DbEntityBase
     //
     //
     //
+    /**
+     * Prepares records before saving.
+     *
+     * Sets the `rtg_Modified` field to the current date/time, ensures `rtg_Order`
+     * defaults to 2 if not set, and determines if a record is new.
+     * This method overrides the parent `prepareRecords` and calls it.
+     *
+     * @return bool Returns the result of `parent::prepareRecords()`.
+     */
     protected function prepareRecords(){
 
         $ret = parent::prepareRecords();

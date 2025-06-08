@@ -3,11 +3,13 @@ namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 
     /**
-    * db access to usrTags table
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbUsrTags
+     *
+     * Provides database access and operations for the `usrTags` table,
+     * which stores user-created tags that can be applied to records.
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -36,7 +38,9 @@ class DbUsrTags extends DbEntityBase
     *  limit
     *  request_id
     *
-    *  @todo overwrite
+    * @return array|false An array of found tag records, or false on error.
+    *                     The structure of the returned array elements depends on the 'details' parameter.
+    *                     'full' details include `tag_Usage` count.
     */
     public function search(){
 
@@ -88,6 +92,16 @@ class DbUsrTags extends DbEntityBase
     // validate permission for edit tag
     // for delete and assign see appropriate methods
     //
+    /**
+     * Validates if the current user has permission to modify/delete the specified tags.
+     *
+     * Users can only manage tags they own or that belong to groups they are part of,
+     * unless they are the database owner.
+     * This method overrides the parent `_validatePermission`.
+     *
+     * @return bool True if the user has permission, false otherwise.
+     *              Errors are added to the system object on permission failure.
+     */
     protected function _validatePermission(){
 
         if(!$this->system->isDbOwner() && !isEmptyArray($this->recordIDs)){ //there are tags to update/delete
@@ -118,6 +132,14 @@ class DbUsrTags extends DbEntityBase
     //
     //
     //
+    /**
+     * Prepares tag records before saving.
+     *
+     * - For new tags, sets `tag_UGrpID` to the current user's ID if not already set.
+     * - Sets `tag_Modified` to the current date/time.
+     *
+     * @return bool Returns the result of `parent::prepareRecords()`.
+     */
     protected function prepareRecords(){
 
         $ret = parent::prepareRecords();
@@ -141,7 +163,8 @@ class DbUsrTags extends DbEntityBase
     * 2. find wrong permission
     * 3. find in use
     *
-    * @returns  array of 'deleted', 'no enough right'  and  'in use' ids
+    * @param bool $disable_foreign_checks Passed to `parent::delete()`.
+    * @return bool|array Result of `parent::delete()` if successful, false if deletion is blocked.
     */
     public function delete($disable_foreign_checks = false){
 
@@ -175,6 +198,14 @@ class DbUsrTags extends DbEntityBase
     //
     //  Replace one or several tags ($this->recordIDs) to new ONE ($this->newTagID)
     //
+    /**
+     * Replaces occurrences of one or more old tags with a single new tag in `usrRecTagLinks`.
+     *
+     * Optionally removes the old tags after replacement if `$this->data['removeOld']` is true.
+     *
+     * @return int|false The usage count of the new tag after replacement on success, or false on failure.
+     *                   Errors are added to the system object on failure.
+     */
     private function replaceTags(){
 
 
@@ -225,6 +256,26 @@ class DbUsrTags extends DbEntityBase
     //
     // D) replace several old tags (tagIDs) to new ONE (newTagID) see $this->replaceTags()
     //
+    /**
+     * Performs batch actions on tags and their assignments to records (`usrRecTagLinks`).
+     *
+     * Supported actions:
+     * 1. **Replace Tags**: If `newTagID` is provided in `$this->data`, calls `replaceTags()` to replace
+     *    tags specified in `tagIDs` with `newTagID`.
+     * 2. **Manage Record-Tag Links**: Otherwise, manages links between records (`recIDs`) and tags (`tagIDs`).
+     *    - `mode = 'replace'`: Removes all existing tags for the specified records, then assigns the new set of tags.
+     *    - `mode = 'remove'`: Removes the specified tags from the specified records.
+     *    - `mode = 'assign'` (default): Assigns the specified tags to the specified records.
+     *    Also handles creation of bookmarks if private tags are assigned.
+     *
+     * Requires permission validation for the tags being manipulated.
+     *
+     * @return array|bool|int Result of the batch operation:
+     *                        - For replace: Usage count of the new tag or false.
+     *                        - For link management: An array with counts of processed records, added/removed tags,
+     *                          and new bookmarks, or false on failure.
+     *                        Returns false if initial validation (e.g., missing IDs) fails.
+     */
     public function batch_action(){
 
         //tags ids

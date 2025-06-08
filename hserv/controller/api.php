@@ -223,6 +223,16 @@ exit;
 //
 //
 //
+/**
+ * Outputs a JSON error message and exits the script.
+ *
+ * Sets the HTTP response code and content type, then prints a JSON
+ * encoded error message before terminating the script.
+ *
+ * @param string $message The error message.
+ * @param int $code The HTTP status code.
+ * @return void
+ */
 function exitWithError($message, $code){
 
     header(HEADER_CORS_POLICY);
@@ -233,6 +243,15 @@ function exitWithError($message, $code){
     exit;
 }
 
+/**
+ * Converts an HTTP method to a corresponding action string.
+ *
+ * Maps HTTP methods (GET, POST, PUT, DELETE) to internal action
+ * identifiers ('search', 'add', 'save', 'delete').
+ *
+ * @param string $method The HTTP method string.
+ * @return string|null The corresponding action string, or null if the method is not recognized.
+ */
 function getAction($method){
     if($method=='GET'){
         return 'search';

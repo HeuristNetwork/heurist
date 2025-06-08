@@ -5,13 +5,22 @@ use hserv\System;
 use hserv\entity\DbRecUploadedFiles;
 
     /**
-    * Function specific to the Heurist_Job_Tracker database on HeuristRef.net
-    *  Queries user for issue details and populates a Type 56 (concept ID 8-23)
-    *  Task (Features, Bug, Issue) record in the database
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbSysBugreport
+     *
+     * Handles bug reports and contact form submissions.
+     *
+     * This class has two main functionalities:
+     * 1. Creating bug report records: It can create new task records (Type 56, e.g., "Features, Bug, Issue")
+     *    in a designated Heurist bug tracker database (often `HEURIST_BUGREPORT_DATABASE` on `HEURIST_MAIN_SERVER`).
+     *    This may involve remote communication if the current Heurist instance is not the main server.
+     *    It also handles sending email notifications about the bug report.
+     * 2. Processing website contact forms: If specific 'email' and 'content' fields are provided,
+     *    it sends an email to the database owner or a specified address.
+     *
+     * Search and direct delete/batch operations on bug reports via this class are typically disabled.
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -31,8 +40,10 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
 class DbSysBugreport extends DbEntityBase
 {
 
-    private $performLogout = false; // perform logout after completing the required action
+    /** @var bool Flag to determine if logout should be performed after an action (e.g., public bug submission). */
+    private $performLogout = false;
 
+    /** @var string Email template for bug report notifications. Placeholders like __LINK__, __DESC__ are replaced. */
     private $reportEmail = <<<EMAIL
     Your bug report has been successfully added to the Heurist Job tracker database.<br> <br>
     
@@ -47,13 +58,35 @@ class DbSysBugreport extends DbEntityBase
     Bug description:__DESC__
     EMAIL;
     
+    /** @var int The Heurist Record Type ID for bug reports/tasks (typically 56). */
     private $bugReportType = 56;
 
+    /**
+     * Constructor for DbSysBugreport.
+     *
+     * Calls the parent constructor and sets `requireAdminRights` to false,
+     * allowing non-admin users (including guests for public bug tracker) to submit reports.
+     *
+     * @param \hserv\System $system The main Heurist system object.
+     * @param array|null $data Optional data to initialize the entity with.
+     */
     public function __construct( $system, $data=null ) {
        parent::__construct( $system, $data );
        $this->requireAdminRights = false;
     }
 
+    /**
+     * Validates user permissions for bug report submission.
+     *
+     * Overrides the parent method. If the initial permission check fails
+     * (e.g., user not logged in) and the current database is the public
+     * bug report database on the main server, it attempts to log in as
+     * a public guest user ('extern') to allow submission.
+     * Sets `$this->performLogout` if public login is successful.
+     *
+     * @return bool True if permissions are sufficient (either originally or via public guest login),
+     *              false otherwise.
+     */
     protected function _validatePermission(){
 
         $res = parent::_validatePermission();
@@ -83,7 +116,7 @@ class DbSysBugreport extends DbEntityBase
     *  limit
     *  request_id
     *
-    *  @todo overwrite
+    * @return null This method is disabled for DbSysBugreport.
     */
     public function search(){
         return null;
@@ -92,6 +125,28 @@ class DbSysBugreport extends DbEntityBase
     //
     //   This is virtual "save". In fact it sends email
     //
+    /**
+     * Handles saving a bug report or processing a contact form email.
+     *
+     * This method has two main operational modes:
+     * 1. **Contact Form Email (Website Integration):** If `$this->records[0]` contains 'email' and 'content' keys
+     *    (typically from a CMS website contact form), it calls `_prepareEmail()` to send the content
+     *    to the database owner or a pre-configured address.
+     * 2. **Bug Report Creation:** Otherwise, it proceeds to create a bug report.
+     *    - If `$this->data['new_record']` is set (indicating a request from an external Heurist server),
+     *      it calls `createBugReportRecord()` with that data.
+     *    - Otherwise, it processes `$this->records[0]` (prepared from `$this->data['fields']` by `prepareRecords`),
+     *      gathers necessary information (user details, browser agent, Heurist version, URLs),
+     *      and then either creates the record directly (if on the main bug tracker server)
+     *      or makes a remote request to the main server's `entityScrud.php` to create the record.
+     *    - Sends an email notification with details of the created bug report.
+     *
+     * Validates user permissions (potentially logging in a public guest user) and mandatory fields.
+     *
+     * @return array|bool For contact form: Result of `_prepareEmail()`.
+     *                    For bug report: An array containing a success message and link on success,
+     *                                   or false on failure. Errors are added to the system object.
+     */
     public function save(){
 
         if(!$this->prepareRecords()){
@@ -307,6 +362,21 @@ class DbSysBugreport extends DbEntityBase
         }
     }
 
+    /**
+     * Creates a bug report record in the Heurist Job Tracker database.
+     *
+     * This method handles the actual insertion of the bug report data as a new record.
+     * If the current Heurist instance is not the main job tracker, it may involve
+     * creating a temporary System object to interact with the job tracker database.
+     * It registers any attached files (screenshots) with the job tracker database
+     * and populates default values for the bug report record.
+     * After successfully creating the record, it sends an email notification.
+     *
+     * @param array $record The bug report data, structured as a Heurist record array
+     *                      (including 'RecTypeID', 'details', etc.).
+     * @return array|false An associative array `['status' => HEURIST_OK, 'data' => ['recID' => ..., 'email_sent' => ...]]`
+     *                     on success, or false on failure. Errors are added to `$this->system`.
+     */
     private function createBugReportRecord($record){
 
         if(empty(@$record['details'])){
@@ -406,6 +476,21 @@ class DbSysBugreport extends DbEntityBase
     // this is response to emailForm widget
     // it sends email to owner of database or to email specified in website_id record
     //
+    /**
+     * Prepares and sends an email from a website contact form.
+     *
+     * Validates captcha, retrieves recipient email (either from a specified website record
+     * or the database owner), constructs the email title and content, and sends it.
+     *
+     * @param array $fields An associative array containing contact form data:
+     *                      - 'captcha': The user-entered captcha.
+     *                      - 'content': The email message content.
+     *                      - 'email': The sender's email address.
+     *                      - 'person': (Optional) The sender's name.
+     *                      - 'website_id': (Optional) Record ID of a website record from which to get recipient details.
+     * @return array|false `[1]` on successful email send, false otherwise.
+     *                     Errors are added to the system object on failure (captcha, missing fields).
+     */
     private function _prepareEmail($fields){
 
         //1. verify captcha
@@ -492,6 +577,12 @@ class DbSysBugreport extends DbEntityBase
     //
     //
     //
+    /**
+     * Disables direct deletion of bug reports via this entity class.
+     *
+     * @param bool $disable_foreign_checks Unused.
+     * @return false Always returns false.
+     */
     public function delete($disable_foreign_checks = false){
         return false;
     }
@@ -500,6 +591,11 @@ class DbSysBugreport extends DbEntityBase
     // batch action for users
     // 1) import users from another db
     //
+    /**
+     * Disables batch actions for bug reports via this entity class.
+     *
+     * @return false Always returns false.
+     */
     public function batch_action(){
          return false;
     }
@@ -507,6 +603,17 @@ class DbSysBugreport extends DbEntityBase
     //
     // Add missing values that have a default value
     //
+    /**
+     * Adds default values to a bug report record's details.
+     *
+     * Retrieves default values defined in the `defRecStructure` for the bug report
+     * record type and applies them to the `$record['details']` if the corresponding
+     * detail field is not already present or is empty.
+     *
+     * @param \hserv\System $system The system object (used to get mysqli connection).
+     * @param array &$record The bug report record array (passed by reference), specifically its 'details' sub-array.
+     * @return void
+     */
     private function addDefaultValues($system, $record){
 
         $def_values = mysql__select_assoc2($system->getMysqli(), "SELECT rst_DetailTypeID, rst_DefaultValue FROM defRecStructure WHERE rst_RecTypeID = {$this->bugReportType}");

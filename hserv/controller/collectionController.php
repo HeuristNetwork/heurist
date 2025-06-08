@@ -53,6 +53,12 @@ if (@$_COOKIE['heurist-sessionid']) {
 // note $collection is a reference - SW also we suppress warnings to let the system create the key
 $collection = &$_SESSION[$dbname_full]['record-collection'];
 
+/**
+ * Checks if a string contains only digits.
+ *
+ * @param string $s The string to check.
+ * @return bool True if the string contains only digits, false otherwise.
+ */
 function digits ($s) {
     return preg_match('/^\d+$/', $s);
 }

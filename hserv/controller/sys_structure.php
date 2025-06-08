@@ -227,6 +227,14 @@ header('Content-Encoding: gzip');
 echo $output;
 unset($output);
 
+/**
+ * Generates a formatted error message response for issues contacting a remote database.
+ *
+ * @param string $remoteURL The URL of the remote database that could not be reached.
+ * @param string|int $code The error code (e.g., 'curl', HEURIST_SYSTEM_FATAL, or other HEURIST_STATUS_CODES).
+ * @param string $err_msg The specific error message encountered.
+ * @return array An associative array representing the error response, with 'status', 'message', and 'sysmsg' keys.
+ */
 function __getErrMsg($remoteURL, $code, $err_msg){
 
             if($code=='curl'){

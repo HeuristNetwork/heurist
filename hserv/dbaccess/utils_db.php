@@ -77,11 +77,15 @@ use hserv\structure\ConceptCode;
     */
 
     /**
-    * Connect to database server and use given database
-    * 
-    * @param mixed $dbname
-    * @return a MySQL instance on success or array with code and error message on failure.
-    */
+     * Connects to the database server and selects the specified database.
+     *
+     * Uses connection parameters (server name, admin credentials, port) defined
+     * in `heuristConfigIni.php`.
+     *
+     * @param string $dbname The name of the database to select.
+     * @return \mysqli|array A mysqli instance on success, or an array with an error code
+     *                       and message on failure.
+     */
     function mysql__init($dbname){
         
         //connecction parameter defined in heuristConfigIni.php
@@ -100,14 +104,15 @@ use hserv\structure\ConceptCode;
     }
     
     /**
-    * Connect to db server
-    *
-    * @param mixed $dbHost
-    * @param mixed $dbUsername
-    * @param mixed $dbPassword
-    *
-    * @return a MySQL instance on success or array with code and error message on failure.
-    */
+     * Establishes a connection to the MySQL database server.
+     *
+     * @param string $dbHost The hostname or IP address of the database server.
+     * @param string $dbUsername The MySQL username.
+     * @param string $dbPassword The MySQL password.
+     * @param int|null $dbPort The port number to use for the connection. Defaults to null (MySQL default).
+     * @return \mysqli|array A mysqli instance on successful connection, or an array
+     *                       containing an error code and message on failure.
+     */
     function mysql__connection($dbHost, $dbUsername, $dbPassword, $dbPort=null){
 
         if(null==$dbHost || $dbHost==""){
@@ -138,10 +143,14 @@ use hserv\structure\ConceptCode;
     }
 
     /**
-    * open database
-    *
-    * @param mixed $dbname
-    */
+     * Selects a database to use for the current MySQL connection.
+     *
+     * Also sets the character set to utf8mb4.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $dbname The name of the database to select.
+     * @return bool|array True on success, or an array with an error code and message on failure.
+     */
     function mysql__usedatabase($mysqli, $dbname){
 
         if($dbname){
@@ -177,6 +186,15 @@ use hserv\structure\ConceptCode;
     //
     // Avoid illegal chars in db
     //
+    /**
+     * Validates a database name.
+     *
+     * Checks for emptiness, illegal characters (allows only alphanumeric and underscore),
+     * and excessive length (max 64 characters).
+     *
+     * @param string $db_name The database name to validate.
+     * @return string|null An error message if validation fails, null otherwise.
+     */
     function mysql__check_dbname($db_name){
 
         $res = null;
@@ -195,6 +213,15 @@ use hserv\structure\ConceptCode;
     //
     // $db_name - full databas name
     //
+    /**
+     * Creates a new database.
+     *
+     * The database is created with the utf8 character set and utf8_general_ci collation by default.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $db_name The full name of the database to create (e.g., including prefix).
+     * @return bool|array True on success, or an array with an error code and message on failure.
+     */
     function mysql__create_database( $mysqli, $db_name ){
 
         $res = mysql__check_dbname($db_name);
@@ -227,6 +254,13 @@ use hserv\structure\ConceptCode;
     //
     //
     //
+    /**
+     * Drops (deletes) a database.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $db_name The full name of the database to drop.
+     * @return bool True on success, false on failure.
+     */
     function mysql__drop_database( $mysqli, $db_name ){
 
         return $mysqli->query('DROP DATABASE `'.$db_name.'`');
@@ -235,6 +269,13 @@ use hserv\structure\ConceptCode;
     //
     // on / off foreign indexes verification
     //
+    /**
+     * Enables or disables foreign key checks for the current session.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param bool $is_on True to enable foreign key checks, false to disable.
+     * @return void
+     */
     function mysql__foreign_check( $mysqli, $is_on ){
         $mysqli->query('SET FOREIGN_KEY_CHECKS = '.($is_on?'1':'0'));
     }
@@ -242,6 +283,15 @@ use hserv\structure\ConceptCode;
     //
     //
     //
+    /**
+     * Enables or disables update triggers for the current session via a session variable.
+     *
+     * Sets `@SUPPRESS_UPDATE_TRIGGER` to 1 to suppress triggers, or NULL to enable them.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param bool $is_on True to suppress triggers, false to enable them.
+     * @return void
+     */
     function mysql__supress_trigger($mysqli, $is_on ){
         $mysqli->query('SET @SUPPRESS_UPDATE_TRIGGER='.($is_on?'1':'NULL'));
     }
@@ -249,6 +299,13 @@ use hserv\structure\ConceptCode;
     //
     //
     //
+    /**
+     * Enables or disables SQL safe updates for the current session.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param bool $is_on True to enable safe updates, false to disable.
+     * @return void
+     */
     function mysql__safe_updatess($mysqli, $is_on ){
         $mysqli->query('SET SQL_SAFE_UPDATES='.($is_on?'1':'0'));
     }
@@ -256,6 +313,14 @@ use hserv\structure\ConceptCode;
     //
     // FOUND_ROWS function are deprecated; expect them to be removed in a future version of MySQL
     //
+    /**
+     * Retrieves the number of rows found by the previous SELECT query.
+     *
+     * Note: `FOUND_ROWS()` is deprecated in newer MySQL versions.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @return int|null The number of found rows, or null on error.
+     */
     function mysql__found_rows($mysqli){
         return mysql__select_value($mysqli, 'SELECT FOUND_ROWS()');
     }
@@ -263,6 +328,16 @@ use hserv\structure\ConceptCode;
     //
     // get database name with and without hdb prefix
     //
+    /**
+     * Gets the database name with and without the Heurist prefix.
+     *
+     * If no database name is provided, it uses `HEURIST_DBNAME` and `HEURIST_DBNAME_FULL`.
+     *
+     * @param string|null $db The database name. If it starts with `HEURIST_DB_PREFIX`,
+     *                        the prefix is stripped for the short name. Otherwise, the
+     *                        prefix is added for the full name.
+     * @return array An array containing two elements: `[$database_name_full, $database_name]`.
+     */
     function mysql__get_names( $db=null ){
 
         if($db==null){
@@ -281,18 +356,16 @@ use hserv\structure\ConceptCode;
     }
 
     /**
-     * Returns a list of databases as an array.
+     * Returns a list of databases filtered by various criteria.
      *
-     * @param mysqli $mysqli - The MySQLi connection object
-     * @param bool $with_prefix - Whether to include the prefix (default: false)
-     * @param string|null $starts_with - Optional string to filter database names by a prefix
-     * @param string|null $email - The email of the current user for role filtering
-     * @param string|null $role - The role to filter by ('admin' or 'user')
-     * @param string $prefix - The prefix used for database names (default: HEURIST_DB_PREFIX)
-     *
-     * @return array - List of database names matching the criteria
-     *
-     * @throws Exception - If the SQL query fails
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param bool $with_prefix If true, returned database names will include `HEURIST_DB_PREFIX`. Default is false.
+     * @param string|null $starts_with Optional filter to list only databases whose names start with this string (after the prefix).
+     * @param string|null $email Optional email of the user to filter databases based on user roles.
+     * @param string|null $role Optional role ('admin' or 'user') to filter databases. Requires $email to be set.
+     * @param string $prefix The database prefix to use (defaults to `HEURIST_DB_PREFIX`).
+     * @return array An array of database names.
+     * @throws \Exception If the `SHOW DATABASES` query fails.
      */
     function mysql__getdatabases4($mysqli, $with_prefix = false, $starts_with = null,
                                   $email = null, $role = null, $prefix = HEURIST_DB_PREFIX)
@@ -333,14 +406,14 @@ use hserv\structure\ConceptCode;
 
 
     /**
-     * Checks that given database user has specified role
+     * Checks if a user has a specified role in a given database.
      *
-     * @param mysqli $mysqli - The MySQLi connection object
-     * @param string $database - The database name
-     * @param string|null $email - The user's email for filtering
-     * @param string|null $role - The role to filter by ('admin' or 'user')
-     *
-     * @return bool - True if the database matches the role and email filter, false otherwise
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $database The full name of the database (including prefix).
+     * @param string|null $email The email of the user. If empty or null, role check is skipped and returns true.
+     * @param string|null $role The role to check for ('admin' or 'user'). If empty or null, role check is skipped.
+     * @return bool True if the user has the specified role (or if email/role is not provided for filtering),
+     *              false otherwise or if the user is not found with that role.
      */
     function mysql__checkUserRole($mysqli, $database, $email, $role) {
         if(empty($email) || !$role){
@@ -367,7 +440,14 @@ use hserv\structure\ConceptCode;
     }
 
 
-
+    /**
+     * Executes a simple MySQL SELECT query.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $query The SQL query string.
+     * @return \mysqli_result|null A mysqli_result object if the query was successful,
+     *                             null otherwise. Errors are logged.
+     */
     function mysql__select($mysqli, $query){
 
         $res = null;
@@ -390,8 +470,16 @@ $mysqli->kill($thread_id);
     }
 
     /**
-    * returns array  key_column=>val_column for given table
-    */
+     * Executes a query and returns the result as an associative array mapping the first column's values to the second column's values.
+     *
+     * Example: If query returns rows ( (1, 'apple'), (2, 'banana') ),
+     * the function returns `[1 => 'apple', 2 => 'banana']`.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $query The SQL query string. Expected to return at least two columns.
+     * @return array An associative array where keys are values from the first column
+     *               and values are from the second column of the result set.
+     */
     function mysql__select_assoc2($mysqli, $query):array{
 
         $matches = array();
@@ -414,8 +502,10 @@ $mysqli->kill($thread_id);
     * @param mixed $mysqli
     * @param mixed $query
     * @param mixed $mode
-    *                   0 - two dimensional array of records
-    *                   1 - array of records with index from first column
+    *                   0 - Returns a numerically indexed array of associative arrays (each representing a row).
+    *                   1 - Returns an associative array where keys are the values of the first column
+    *                       of each row, and values are associative arrays of the remaining columns for that row.
+    * @return array The result set as an array, formatted according to the $mode.
     */
     function mysql__select_assoc($mysqli, $query, $mode=1):array{
 
@@ -439,8 +529,15 @@ $mysqli->kill($thread_id);
     }
 
     /**
-    * returns array of FIRST column values
-    * alwasys return array
+    * Returns an array containing the values of the first column from the result set.
+    *
+    * Optionally, a callback function can be applied to each value.
+    * Always returns an array, even if the query fails or returns no results.
+    *
+    * @param \mysqli $mysqli The mysqli connection object.
+    * @param string $query The SQL query string.
+    * @param callable|null $functionName An optional callback function to apply to each value from the first column.
+    * @return array A list of values from the first column of the result set.
     */
     function mysql__select_list2($mysqli, $query, $functionName=null):array {
 
@@ -469,17 +566,30 @@ $mysqli->kill($thread_id);
         return $matches;
     }
 
+    /**
+     * Selects a list of values from a single column in a table based on a condition.
+     *
+     * This is a convenience wrapper around `mysql__select_list2`.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $table The name of the table.
+     * @param string $column The name of the column to select.
+     * @param string $condition The WHERE clause condition (without the 'WHERE' keyword).
+     * @return array A list of values from the specified column matching the condition.
+     */
     function mysql__select_list($mysqli, $table, $column, $condition):array {
         $query = "SELECT $column FROM $table WHERE $condition";
         return mysql__select_list2($mysqli, $query);
     }
 
     /**
-    * return the first column of first row
-    *
-    * @param mixed $mysqli
-    * @param mixed $query
-    */
+     * Executes a query and returns the value of the first column of the first row.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $query The SQL query string.
+     * @param array|null $params Optional parameters for a prepared statement (see `mysql__select_param_query`).
+     * @return mixed|null The value of the first column of the first row, or null if no result or on error.
+     */
     function mysql__select_value($mysqli, $query, $params=null) {
         $row = mysql__select_row($mysqli, $query, $params);
 
@@ -492,11 +602,13 @@ $mysqli->kill($thread_id);
     }
 
     /**
-    * returns first row
-    *
-    * @param mixed $mysqli
-    * @param mixed $query
-    */
+     * Executes a query and returns the first row of the result set as a numerically indexed array.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $query The SQL query string.
+     * @param array|null $params Optional parameters for a prepared statement (see `mysql__select_param_query`).
+     * @return array|null The first row as a numerically indexed array, or null if no result or on error.
+     */
     function mysql__select_row($mysqli, $query, $params=null) {
         $result = null;
         if($mysqli){
@@ -516,11 +628,12 @@ $mysqli->kill($thread_id);
     }
 
     /**
-    * returns first row with assoc field names
-    *
-    * @param mixed $mysqli
-    * @param mixed $query
-    */
+     * Executes a query and returns the first row of the result set as an associative array.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $query The SQL query string.
+     * @return array|null The first row as an associative array, or null if no result or on error.
+     */
     function mysql__select_row_assoc($mysqli, $query) {
         $result = null;
         if($mysqli){
@@ -543,9 +656,13 @@ $mysqli->kill($thread_id);
     * @param mixed $mysqli
     * @param mixed $query
     * @param mixed $mode
-    *                   0 - two dimensional array of records
-    *                   1 - array of records with index from first column
-    * @return []
+    *                   0 - Returns a numerically indexed array of numerically indexed arrays (each representing a row).
+    *                   1 - Returns an associative array where keys are the values of the first column
+    *                       of each row, and values are numerically indexed arrays of the remaining columns for that row.
+    * @param int $i_trim If > 0, trims each value in the row to this maximum length using `trim_item`. Default is 0 (no trim).
+    * @return array|null An array containing all rows from the result set, formatted according to $mode,
+    *                    or null if the mysqli object is not valid. Returns an empty array if the query executes
+    *                    successfully but returns no rows, or if there's a MySQL error during execution.
     */
     function mysql__select_all($mysqli, $query, $mode=0, $i_trim=0) {
 
@@ -578,6 +695,13 @@ $mysqli->kill($thread_id);
 
     //
     //
+    /**
+     * Retrieves the column names of a specified table.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $table The name of the table.
+     * @return array|null An array of column names, or null if the query fails.
+     */
     function mysql__get_table_columns($mysqli, $table){
 
         $res = $mysqli->query('DESCRIBE '.$table);
@@ -594,6 +718,16 @@ $mysqli->kill($thread_id);
 //
 //
 //
+    /**
+     * Duplicates a record within a table, assigning a new ID.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $table The name of the table.
+     * @param string $idfield The name of the primary key ID field.
+     * @param int $oldid The ID of the record to duplicate.
+     * @param int $newid The new ID for the duplicated record.
+     * @return int|string The insert ID of the new record on success, or an error string on failure.
+     */
     function mysql__duplicate_table_record($mysqli, $table, $idfield, $oldid, $newid){
 
         $columns = mysql__get_table_columns($mysqli, $table);
@@ -637,11 +771,12 @@ $mysqli->kill($thread_id);
     *
     * returns record ID in case success or error message
     *
-    * @param mixed $mysqli
-    * @param mixed $table_name
-    * @param mixed $table_prefix
-    * @param mixed $record   - array(fieldname=>value) - all values considered as String except when field ended with ID
-    *                          fields that don't have specified prefix are ignored
+    * @param \mysqli $mysqli The mysqli connection object.
+    * @param string $table_name The name of the table.
+    * @param string $table_prefix The prefix for the ID field (e.g., 'rec' for 'rec_ID').
+    *                             A '_' will be appended if not present.
+    * @param int|string|array $rec_ID A single ID, a comma-separated string of IDs, or an array of IDs to delete.
+    * @return bool|string True on successful deletion, or an error message string on failure or invalid input.
     */
     function mysql__delete($mysqli, $table_name, $table_prefix, $rec_ID){
 
@@ -677,12 +812,23 @@ $mysqli->kill($thread_id);
     *
     * returns record ID in case success or error message
     *
-    * @param mixed $mysqli
-    * @param mixed $table_name
-    * @param mixed $table_prefix  - config array of fields or table prefix
-    * @param mixed $record   - array(fieldname=>value) - all values considered as String except when field ended with ID
-    *                          fields that don't have specified prefix are ignored
-    * @param boolean $allow_insert_with_newid if true, negative record id will be abs and turns into new record id
+    * @param \mysqli $mysqli The mysqli connection object.
+    * @param string $table_name The name of the table.
+    * @param string|array $table_prefix If a string, it's the prefix for the primary key field (e.g., 'rec' for 'rec_ID').
+    *                                   A '_' will be appended if not present.
+    *                                   If an array, it's a configuration array mapping field names to their properties
+    *                                   (like 'dty_Role', 'dty_Type'), used to identify the primary key and filter fields.
+    * @param array $record An associative array representing the record data (fieldname => value).
+    *                      Field names not matching the prefix (if string $table_prefix) or not in the config array
+    *                      (if array $table_prefix) are ignored.
+    *                      Values for fields ending in 'ID' (case-insensitive) are treated as integers; others as strings.
+    *                      `dtl_Geo` values are handled with `ST_GeomFromText`.
+    * @param bool $allow_insert_with_newid If true and inserting a record with an integer primary key,
+    *                                      a negative record ID in $record will be made positive and used as the new ID.
+    *                                      Default is false.
+    * @return int|string|null The ID of the inserted/updated record (for integer primary keys),
+    *                         true for non-integer primary key updates if successful,
+    *                         or null/error string on failure.
     */
     function mysql__insertupdate($mysqli, $table_name, $table_prefix, $record, $allow_insert_with_newid=false){
 
@@ -813,6 +959,16 @@ $mysqli->kill($thread_id);
     //
     // returns for SELECT - $stmt->get_result() or false
     //
+    /**
+     * Executes a SELECT SQL query, optionally using prepared statements if parameters are provided.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $query The SQL query string. Can contain '?' placeholders if $params are used.
+     * @param array|null $params An array for parameterized queries. The first element must be a string
+     *                           specifying the types of the parameters (e.g., 'isd' for integer, string, double).
+     *                           Subsequent elements are the parameter values. If null, a direct query is executed.
+     * @return \mysqli_result|false A mysqli_result object on success, or false on failure.
+     */
     function mysql__select_param_query($mysqli, $query, $params=null){
 
         $result = false;
@@ -920,8 +1076,11 @@ $mysqli->kill($thread_id);
     /**
     * Execute mysql script file
     *
-    * @param mixed $database_name_full
-    * @param mixed $script_file
+    * @param string $database_name_full The full name of the database.
+    * @param string $script_file The name of the SQL script file.
+    * @param string|null $dbfolder Optional path to the folder containing the script. If null,
+    *                              defaults to `HEURIST_DIR . 'admin/setup/dbcreate/'`.
+    * @return bool|array True on success, or an array with an error code and message(s) on failure.
     */
     function mysql__script($database_name_full, $script_file, $dbfolder=null) {
         global $errorScriptExecution;
@@ -1021,11 +1180,14 @@ $mysqli->kill($thread_id);
     }
     
     /**
-    * Return database version
-    * 
-    * @param mixed $mysqli
-    * @return version or null
-    */
+     * Returns the Heurist database schema version.
+     *
+     * Retrieves version components (sys_dbVersion, sys_dbSubVersion, sys_dbSubSubVersion)
+     * from the `sysIdentification` table and concatenates them.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @return string|null The database version string (e.g., "6.5.0") or null if not found or on error.
+     */
     function getDbVersion($mysqli){
         
         $db_version = null;
@@ -1047,12 +1209,13 @@ $mysqli->kill($thread_id);
     
 
     /**
-    * Returns values from sysIdentification
-    *
-    * @todo move to specific entity class
-    *
-    * @param mixed $mysqli
-    */
+     * Returns all values from the `sysIdentification` table for the current database.
+     *
+     * @todo This function could potentially be moved to a more specific entity class related to system identification.
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @return array|null An associative array of all columns and their values from the
+     *                    `sysIdentification` table, or null if the query fails or no data is found.
+     */
     function getSysValues($mysqli){
 
         $sysValues = null;
@@ -1069,11 +1232,12 @@ $mysqli->kill($thread_id);
     }
 
     /**
-    * Check that db function exists
-    *
-    * @param mixed $mysqli
-    * @param mixed $name
-    */
+     * Checks if a MySQL stored function exists in the current database.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $name The name of the function to check.
+     * @return bool True if the function exists, false otherwise.
+     */
     function isFunctionExists($mysqli, $name){
         $res = false;
         try{
@@ -1095,8 +1259,13 @@ $mysqli->kill($thread_id);
 
     /**
     * This function is called on login
-    * Validate the presence of db functions. If one of functions does not exist - run admin/setup/dbcreate/addProceduresTriggers.sql
+    * Validates the presence of essential Heurist database functions (like `getEstDate`).
+    * If a key function is missing, it attempts to recreate them by executing the
+    * `addProceduresTriggers.sql` script.
     *
+    * @param \mysqli $mysqli The mysqli connection object.
+    * @return bool|array True if functions exist or are successfully recreated,
+    *                    or an array with error details if script execution fails.
     */
     function checkDatabaseFunctions($mysqli){
 
@@ -1114,6 +1283,16 @@ $mysqli->kill($thread_id);
     //
     //  NEW_LIPOSUCTION_255 is used in recordDupes
     //
+    /**
+     * Checks for the presence of database functions required for duplication detection.
+     *
+     * Specifically, it checks for `NEW_LIPOSUCTION_255`. If missing, it attempts
+     * to create it by executing the `addFunctions.sql` script.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @return bool|array True if the function exists or is successfully created,
+     *                    or an array with error details if script execution fails.
+     */
     function checkDatabaseFunctionsForDuplications($mysqli){
 
          if(!isFunctionExists($mysqli, 'NEW_LIPOSUCTION_255')){
@@ -1130,6 +1309,17 @@ $mysqli->kill($thread_id);
     //
     //
     //
+    /**
+     * Recreates the `recLinks` table, which caches record relationships.
+     *
+     * If `$is_forced` is true or the `recLinks` table does not exist, the table is dropped (if exists)
+     * and then recreated by executing `addProceduresTriggers.sql` (to ensure triggers are up-to-date)
+     * and `sqlCreateRecLinks.sql` (to populate the table).
+     *
+     * @param \hserv\System $system The system object.
+     * @param bool $is_forced If true, the `recLinks` table will be recreated even if it already exists.
+     * @return bool True on success, false on failure (errors will be added to the system object).
+     */
     function recreateRecLinks($system, $is_forced)
     {
 
@@ -1172,6 +1362,34 @@ $mysqli->kill($thread_id);
     // $need_populate - adds entries to recDetailsDateIndex
     // $json_for_record_details - update recDetails - change Plain string temporals to JSON
     //
+    /**
+     * Recreates and optionally populates the `recDetailsDateIndex` table.
+     *
+     * This table caches parsed min/max dates from temporal data in `recDetails` for faster querying.
+     * If `$json_for_record_details` is true (legacy, not directly used for this decision anymore but implies data conversion intention),
+     * it also converts plain string temporal values in `recDetails` to JSON format.
+     *
+     * The process involves:
+     * 1. Dropping and recreating `recDetailsDateIndex` if `$offset` is 0.
+     * 2. If `$offset` is 0, recreating triggers by running `addProceduresTriggers.sql`.
+     * 3. If `$need_populate` is true:
+     *    a. Iterating through date-type details in `recDetails`.
+     *    b. Parsing the temporal value.
+     *    c. If the date is not a simple YYYY format or parsing results in a complex temporal object,
+     *       the original `dtl_Value` in `recDetails` is updated to its JSON representation.
+     *    d. Inserting the calculated min/max dates into `recDetailsDateIndex`.
+     *    e. Logging errors and complex temporal conversions.
+     *    f. Reporting progress if `$progress_report_step` is provided.
+     *
+     * @param \hserv\System $system The system object.
+     * @param bool $need_populate If true, the `recDetailsDateIndex` table will be populated with data from `recDetails`.
+     * @param bool $json_for_record_details If true, indicates an intention to convert plain string temporals in `recDetails` to JSON.
+     *                                      (Actual conversion depends on the nature of the parsed date).
+     * @param int $offset The starting offset for processing records (for batch processing). Defaults to 0.
+     * @param int $progress_report_step If >= 0, progress will be reported via `DbUtils::setSessionVal`.
+     *                                  The value will be "$progress_report_step,$percentage". Defaults to -1 (no progress reporting).
+     * @return array|false An array with report messages on success, or false on failure.
+     */
     function recreateRecDetailsDateIndex($system, $need_populate, $json_for_record_details, $offset=0, $progress_report_step=-1){
 
         $mysqli = $system->getMysqli();
@@ -1473,6 +1691,17 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     //
     //
     //
+    /**
+     * Trims an item (string) to a specified length.
+     *
+     * This function is often used as a callback for `array_walk`.
+     * It first trims whitespace from the item, then truncates it to `$len` characters.
+     *
+     * @param string &$item The item to be trimmed (passed by reference).
+     * @param mixed $key The key of the item in the array (unused).
+     * @param int $len The maximum length to trim the item to.
+     * @return void
+     */
     function trim_item(&$item, $key, $len){
         if($item!='' && $item!=null){
             $item = substr(trim($item),0,$len);
@@ -1482,7 +1711,16 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     //
     //
     //
-    function repalce_nulls(&$item, $key){
+    /**
+     * Replaces null values in an array item with an empty string.
+     *
+     * This function is often used as a callback for `array_walk`.
+     *
+     * @param mixed &$item The item to check and potentially modify (passed by reference).
+     * @param mixed $key The key of the item in the array (unused).
+     * @return void
+     */
+    function replace_nulls(&$item, $key){
         if($item==null){
             $item = '';
         }
@@ -1491,6 +1729,18 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     //
     // for strip accents
     //
+    /**
+     * Multi-byte safe version of strtr (character translation).
+     *
+     * Translates characters in `$inputStr` from `$from` to their corresponding
+     * characters in `$to`.
+     *
+     * @param string $inputStr The input string.
+     * @param string $from A string containing characters to be replaced.
+     * @param string $to A string containing the replacement characters.
+     * @param string $encoding The character encoding. Defaults to 'UTF-8'.
+     * @return string The translated string.
+     */
     function my_strtr($inputStr, $from, $to, $encoding = 'UTF-8') {
         $inputStrLength = mb_strlen($inputStr, $encoding);
 
@@ -1515,6 +1765,15 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     //
     //
     //
+    /**
+     * Removes common accents from a string.
+     *
+     * Replaces accented characters (e.g., à, é, ñ) with their non-accented equivalents (a, e, n).
+     * Handles both lowercase and uppercase accented characters.
+     *
+     * @param string $stripAccents The input string with potential accents.
+     * @return string The string with accents removed.
+     */
     function stripAccents($stripAccents){
         return my_strtr($stripAccents,'àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝß',
                                       'aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUYs');
@@ -1523,6 +1782,15 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     //
     // trim including &nbsp; and &xef; (BOM)
     //
+    /**
+     * Trims whitespace, non-breaking spaces (`&nbsp;`), and Byte Order Marks (BOM) from a string.
+     *
+     * Recursively removes leading/trailing instances of regular whitespace,
+     * `\xC2\xA0` (UTF-8 non-breaking space), and `\xEF\xBB\xBF` (UTF-8 BOM).
+     *
+     * @param string $str The input string.
+     * @return string The trimmed string.
+     */
     function super_trim( $str ){
 
         $str = trim($str);
@@ -1552,25 +1820,67 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     //
     //
     //
+    /**
+     * Trims, converts to lowercase, and strips accents from a string.
+     *
+     * Uses `super_trim`, `stripAccents`, and `mb_strtolower`.
+     *
+     * @param string $item The input string.
+     * @return string The processed string.
+     */
     function  trim_lower_accent($item){
         return mb_strtolower(stripAccents(super_trim($item)));//including &nbsp; and &xef; (BOM)
     }
 
+    /**
+     * Applies `trim_lower_accent` to an item, designed for use with `array_walk`.
+     *
+     * Modifies the item by reference.
+     *
+     * @param string &$item The item to process (passed by reference).
+     * @param mixed $key The key of the item in the array (unused).
+     * @return void
+     */
     function  trim_lower_accent2(&$item, $key){
         $item = trim_lower_accent($item);
     }
 
+    /**
+     * Multi-byte safe case-insensitive string comparison.
+     *
+     * @param string $str1 The first string.
+     * @param string $str2 The second string.
+     * @param string|null $encoding The character encoding. Defaults to `mb_internal_encoding()`.
+     * @return int < 0 if $str1 is less than $str2; > 0 if $str1 is greater than $str2, and 0 if they are equal.
+     */
     function mb_strcasecmp($str1, $str2, $encoding = null) {
         if (null === $encoding) { $encoding = mb_internal_encoding();}
         return strcmp(mb_strtoupper($str1, $encoding), mb_strtoupper($str2, $encoding));
     }
 
+    /**
+     * Checks if a value represents a boolean true.
+     *
+     * Considers true, 'y', 'yes', 'true', 't', 'ok' (case-insensitive) as true.
+     *
+     * @param mixed $val The value to check.
+     * @return bool True if the value represents true, false otherwise.
+     */
     function is_true($val){
         return $val===true || (is_string($val) && in_array(strtolower($val), array('y','yes','true','t','ok')));
     }
     //
     //
     //
+    /**
+     * Escapes special characters in an array of string values for use in an SQL statement.
+     *
+     * Modifies the input array by reference.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param array &$values An array of string values to be escaped (passed by reference).
+     * @return void
+     */
     function escapeValues($mysqli, &$values){
         foreach($values as $idx=>$v){
             $values[$idx] = $mysqli->real_escape_string($v);
@@ -1581,6 +1891,16 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     // $rec_IDs - may by csv string or array
     // returns array of integers
     //
+    /**
+     * Prepares a list of IDs, ensuring they are positive integers.
+     *
+     * Accepts a single ID, a comma-separated string of IDs, or an array of IDs.
+     * Filters out non-numeric values and values less than or equal to 0 (unless $can_be_zero is true).
+     *
+     * @param int|string|array|null $ids The ID(s) to prepare.
+     * @param bool $can_be_zero If true, allows 0 as a valid ID. Defaults to false.
+     * @return array An array of valid integer IDs. Returns an empty array if input is null.
+     */
     function prepareIds($ids, $can_be_zero=false){
 
         if($ids==null){
@@ -1607,6 +1927,14 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     //
     //
     //
+    /**
+     * Prepares a list of string IDs by enclosing each in double quotes.
+     *
+     * Accepts a comma-separated string of IDs or an array of IDs.
+     *
+     * @param string|array $ids The ID(s) to prepare.
+     * @return array An array of string IDs, each enclosed in double quotes.
+     */
     function prepareStrIds($ids){
 
         if(!is_array($ids)){
@@ -1625,6 +1953,21 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     // if $operation not null it returns empty string for empty $ids and
     //    full predictate
     //
+    /**
+     * Constructs an SQL predicate for a field based on a list of IDs.
+     *
+     * Examples:
+     * - `predicateId('rec_ID', 1)` returns "(`rec_ID`=1)"
+     * - `predicateId('rec_ID', [1,2,3])` returns "(`rec_ID` IN (1,2,3))"
+     * - `predicateId('rec_ID', [], 'AND')` returns "" (empty string)
+     * - `predicateId('rec_ID', [1], 'AND')` returns " AND (`rec_ID`=1)"
+     * - `predicateId('rec_ID', [])` returns "(1=0)" (SQL_FALSE)
+     *
+     * @param string $field The name of the database field.
+     * @param int|string|array $ids A single ID, a comma-separated string of IDs, or an array of IDs.
+     * @param string|null $operation Optional SQL operation (e.g., 'AND', 'OR') to prepend if IDs are present.
+     * @return string The SQL predicate string.
+     */
     function predicateId($field, $ids, $operation=null)
     {
         $ids = prepareIds($ids);
@@ -1646,6 +1989,13 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     // returns null if some of csv is not integer
     // otherwise returns validated string with CSV
     //
+    /**
+     * Validates if a comma-separated string or an array contains only integer IDs.
+     *
+     * @param string|array $value A comma-separated string of IDs or an array of IDs.
+     * @return string|null The original comma-separated string (or joined array) if all IDs are integers,
+     *                     null otherwise.
+     */
     function getCommaSepIds($value)
     {
         if(is_array($value)){
@@ -1675,6 +2025,16 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     //
     //
     //
+    /**
+     * Checks if the byte length of a string exceeds MySQL TEXT field limits.
+     *
+     * Determines an appropriate limit (32KB or 64KB) based on the difference
+     * between byte length and multi-byte character length.
+     *
+     * @param string $dtl_Value The string value to check.
+     * @return int Returns the limit exceeded (e.g., 32000 or 64000) if the length is too great,
+     *             0 otherwise.
+     */
     function checkMaxLength2($dtl_Value){
         $dtl_Value = trim($dtl_Value);
         $len  = strlen($dtl_Value);//number of bytes
@@ -1690,6 +2050,13 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     //
     // check max length for TEXT field
     //
+    /**
+     * Checks if a string value exceeds the maximum length for a TEXT field, returning a user-friendly message.
+     *
+     * @param string $dty_Name The name of the detail type (field name) for the error message.
+     * @param string $dtl_Value The string value to check.
+     * @return string|null An error message if the length is exceeded, null otherwise.
+     */
     function checkMaxLength($dty_Name, $dtl_Value){
 
         $lim = checkMaxLength2($dtl_Value);
@@ -1711,6 +2078,17 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     //
     // returns timestamp of last update of db denitions
     //
+    /**
+     * Gets the timestamp of the last modification to database definitions.
+     *
+     * Checks `rst_Modified`, `rty_Modified`, `dty_Modified`, and `trm_Modified` fields
+     * in their respective tables (`defRecStructure`, `defRecTypes`, `defDetailTypes`, `defTerms`).
+     * Converts the timestamp to UTC (+00:00).
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param bool $recstructure_only If true, only checks `defRecStructure`. Defaults to false.
+     * @return \DateTime|false A DateTime object representing the last modification time, or false on failure.
+     */
     function getDefinitionsModTime($mysqli, $recstructure_only=false)
     {
         //CONVERT_TZ(MAX(trm_Modified), @@session.time_zone, '+00:00')
@@ -1736,6 +2114,15 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     //
     //
     //
+    /**
+     * Begins a database transaction.
+     *
+     * Disables autocommit if it's enabled and starts a new transaction.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @return bool Returns true if autocommit was originally enabled (and thus disabled by this function),
+     *              false if autocommit was already disabled.
+     */
     function mysql__begin_transaction($mysqli){
 
         $keep_autocommit = mysql__select_value($mysqli, 'SELECT @@autocommit');
@@ -1752,6 +2139,16 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
         return $keep_autocommit;
     }
 
+    /**
+     * Ends a database transaction by committing or rolling back.
+     *
+     * Optionally re-enables autocommit if it was disabled by `mysql__begin_transaction`.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param bool $res If true, the transaction is committed. If false, it's rolled back.
+     * @param bool $keep_autocommit If true, autocommit will be re-enabled.
+     * @return void
+     */
     function mysql__end_transaction($mysqli, $res, $keep_autocommit){
 
         if($res){
@@ -1769,6 +2166,21 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     //
     // now it is not database based - session values are in file
     //
+    /**
+     * Updates or retrieves a progress value stored in a session file.
+     *
+     * Session files are stored in `HEURIST_SCRATCH_DIR` named `session<session_id>`.
+     *
+     * @param \mysqli|null $mysqli The mysqli connection object (currently unused in this function's logic
+     *                             but kept for historical reasons or potential future use).
+     * @param int $session_id The session ID.
+     * @param bool $is_init Unused parameter.
+     * @param string|null $value If not null, this value is written to the session file.
+     *                           If 'REMOVE', the session file is deleted.
+     *                           If null, the current value from the session file is returned.
+     * @return string|null The current progress value, 'terminate' if removed or previously terminated,
+     *                     or null if session_id is invalid or scratch directory is not defined.
+     */
     function mysql__update_progress($mysqli, $session_id, $is_init, $value){
 
         $session_id = intval($session_id);
@@ -1801,12 +2213,14 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
 
 
     /**
-    * Validates the present of all tables in given or current database
-    *
-    * @param mixed $mysqli
-    * @param mixed $db_name
-    * @return either array of missed tables or SQL error
-    */
+     * Validates the presence of all essential Heurist tables in a given or current database.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string|null $db_name Optional database name. If null, uses the current database.
+     * @return array|string An array of missing table names if validation passes but some tables are missing.
+     *                      A string with an error message if the `SHOW TABLES` query fails or a MySQL connection error occurs.
+     *                      An empty array if all essential tables are present.
+     */
     function hasAllTables($mysqli, $db_name=null){
 
         $query = '';
@@ -1858,13 +2272,18 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     }
 
     /**
-    * 
-    * 
-    * @param mixed $system
-    * @param mixed $table_name
-    * @param mixed $query
-    * @param mixed $recreate
-    */
+     * Creates a table in the database.
+     *
+     * Optionally drops the table if it already exists and `$recreate` is true.
+     *
+     * @param \hserv\System $system The system object.
+     * @param string $table_name The name of the table to create.
+     * @param string $query The SQL `CREATE TABLE` statement.
+     * @param bool $recreate If true, drops the table if it exists before creating. Defaults to false.
+     * @return array An array with two elements: a boolean indicating if an action was taken (true if created/recreated),
+     *               and a string message (e.g., "$table_name created", "$table_name already exists").
+     * @throws \Exception If the table creation query fails.
+     */
     function createTable($system, $table_name, $query, $recreate = false){
 
         $mysqli = $system->getMysqli();
@@ -1887,13 +2306,19 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     }
 
     /**
-    * 
-    * 
-    * @param mixed $mysqli
-    * @param mixed $table_name
-    * @param mixed $db_name
-    * @return mixed
-    */
+     * Alters a table to add or modify a column.
+     *
+     * @param \hserv\System $system The system object.
+     * @param string $table_name The name of the table to alter.
+     * @param string $field_name The name of the field to add or modify.
+     * @param string $query The SQL `ALTER TABLE` statement (typically an `ADD COLUMN` clause).
+     * @param bool $modify_if_exists If true and the column already exists, attempts to modify it
+     *                                (by changing `ADD COLUMN` to `MODIFY` in the query and removing `AFTER` clause).
+     *                                Defaults to false.
+     * @return array An array with two elements: a boolean indicating if an action was taken (true if added/altered),
+     *               and a string message.
+     * @throws \Exception If the alter table query fails.
+     */
     function alterTable($system, $table_name, $field_name, $query, $modify_if_exists = false){
 
         $mysqli = $system->getMysqli();
@@ -1929,12 +2354,13 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     }
 
     /**
-    * Returns true if table exists in database
-    *
-    * @param mixed $mysqli
-    * @param mixed $table_name
-    * @param mixed $db_name
-    */
+     * Checks if a table exists in the specified (or current) database.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $table_name The name of the table to check.
+     * @param string|null $db_name Optional. The name of the database. If null, checks in the current database.
+     * @return bool True if the table exists, false otherwise.
+     */
     function hasTable($mysqli, $table_name, $db_name=null){
 
             $query = '';
@@ -1949,13 +2375,16 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     }
 
     /**
-    * Returns true if column exists in given table
-    *
-    * @param mixed $mysqli
-    * @param mixed $table_name
-    * @param mixed $column_name
-    * @param mixed $db_name
-    */
+     * Checks if a column exists in a given table, and optionally if it has a specific data type.
+     *
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param string $table_name The name of the table.
+     * @param string $column_name The name of the column to check.
+     * @param string|null $db_name Optional. The name of the database. If null, uses the current database.
+     * @param string|null $given_type Optional. The expected data type of the column (e.g., 'varchar(255)').
+     *                                If provided, the function returns true only if the column exists AND matches this type.
+     * @return bool True if the column exists (and matches type if specified), false otherwise.
+     */
     function hasColumn($mysqli, $table_name, $column_name, $db_name=null, $given_type=null){
 
         if($db_name==null){
@@ -1988,6 +2417,22 @@ SELECT dtl_RecID, dtl_DetailTypeID, dtl_ID, dtl_Value FROM recDetails, defDetail
     // Checks that sysUGrps.ugr_Enabled has proper set ENUM('y','n','y_no_add','y_no_delete','y_no_add_delete')
     // @todo - remove, it duplicates hasColumn
     //
+    /**
+     * Checks and updates the ENUM definition for the `sysUGrps.ugr_Enabled` column.
+     *
+     * Ensures the `ugr_Enabled` column includes all necessary ENUM values
+     * ('y','n','y_no_add','y_no_delete','y_no_add_delete'). If not, it attempts to
+     * alter the table to update the ENUM definition.
+     *
+     * @todo This function seems to duplicate some functionality of `hasColumn` and `alterTable`
+     *       and might be a candidate for removal or refactoring.
+     *
+     * @param \hserv\System $system The system object.
+     * @param string $db_source Optional. The full name of the database to check.
+     *                          Defaults to `HEURIST_DBNAME_FULL` if defined and `$db_source` is empty.
+     * @return bool True if the column has the correct ENUM definition or was successfully updated,
+     *              false on error (errors are added to the system object).
+     */
     function checkUserStatusColumn($system, $db_source = ''){
 
         if(empty($db_source) && defined(HEURIST_DBNAME_FULL)){

@@ -3,11 +3,13 @@ namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 
     /**
-    * db access to usrSavedSearches table for saved searches
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbUsrSavedSearches
+     *
+     * Provides database access and operations for the `usrSavedSearches` table,
+     * which stores user-defined saved search queries.
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -28,6 +30,15 @@ require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';//send email m
 class DbUsrSavedSearches extends DbEntityBase
 {
 
+    /**
+     * Searches for saved search records.
+     *
+     * Supports filtering by `svs_ID`, `svs_Name`, and `svs_UGrpID`.
+     * The level of detail returned (`id`, `name`, or `list`/`full`) is controlled by `$this->data['details']`.
+     * Results are ordered by `svs_Name` ASC by default.
+     *
+     * @return array|false An array of found saved search records, or false on error.
+     */
     public function search(){
 
         if(parent::search()===false){
@@ -57,6 +68,15 @@ class DbUsrSavedSearches extends DbEntityBase
     // validate permission for edit tag
     // for delete and assign see appropriate methods
     //
+    /**
+     * Validates if the current user has permission to modify/delete the specified saved searches.
+     *
+     * Users can only manage saved searches belonging to groups they administer, unless they are a system admin.
+     * This method overrides the parent `_validatePermission`.
+     *
+     * @return bool True if the user has permission, false otherwise.
+     *              Errors are added to the system object on permission failure.
+     */
     protected function _validatePermission(){
 
         if(!$this->system->isAdmin() &&
@@ -86,6 +106,16 @@ class DbUsrSavedSearches extends DbEntityBase
     //
     //
     //
+    /**
+     * Prepares saved search records before saving.
+     *
+     * - Sets `svs_Modified` to the current date/time.
+     * - Validates `svs_Name` for duplication within the same `svs_UGrpID`.
+     * - Sets `is_new` flag.
+     *
+     * @todo Add captcha validation for registration (as per comment in code).
+     * @return bool True if preparation is successful and validation passes, false otherwise.
+     */
     protected function prepareRecords(){
 
         $ret = parent::prepareRecords();

@@ -3,11 +3,14 @@ namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 
     /**
-    * db access to sysIdentification table
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbSysIdentification
+     *
+     * Provides database access and operations for the `sysIdentification` table.
+     * This table stores a single row of database-specific properties and settings,
+     * such as its name, version, owner, and various configuration options.
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -56,7 +59,9 @@ class DbSysIdentification extends DbEntityBase
     *  limit
     *  request_id
     *
-    *  @todo overwrite
+    * @return array|false An array containing the single `sysIdentification` record,
+    *                     formatted as a standard search result. Includes a calculated `sys_dbVersion` field.
+    *                     Returns false on database error.
     */
     public function search(){
 
@@ -100,6 +105,15 @@ class DbSysIdentification extends DbEntityBase
         return $response;
     }
 
+    /**
+     * Saves the `sysIdentification` record.
+     *
+     * Before calling `parent::save()`, it checks if the `sys_ExternalReferenceLookups` column
+     * exists in the `sysIdentification` table and attempts to add it if missing.
+     * After saving, it handles the `sys_Thumb` image by renaming any temporary file.
+     *
+     * @return array|false The result from `parent::save()` (array of saved IDs, typically just one, or false).
+     */
     public function save(){
 
 
@@ -134,6 +148,14 @@ class DbSysIdentification extends DbEntityBase
     //
     // deletion not allowed for db properties
     //
+    /**
+     * Disables deletion of the `sysIdentification` record.
+     *
+     * This record is essential for database operation and should not be deleted.
+     *
+     * @param bool $disable_foreign_checks Unused.
+     * @return false Always returns false.
+     */
     public function delete($disable_foreign_checks = false){
         //virtual method
         return false;

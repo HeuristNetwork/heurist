@@ -4,11 +4,13 @@ use hserv\entity\DbEntityBase;
 use hserv\utilities\USanitize;
 
     /**
-    * db access to usrReminders table
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbSysWorkflowRules
+     *
+     * Provides database access and operations for the `sysWorkflowRules` table,
+     * which defines workflow rules and stages for different record types.
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -35,7 +37,9 @@ class DbSysWorkflowRules extends DbEntityBase
     *  limit
     *  request_id
     *
-    *  @todo overwrite
+    * @return array|false An array of found workflow rules, or false on error.
+    *                     If `details` is 'rty', returns a list of distinct `swf_RecTypeID`s.
+    *                     The structure of other returned array elements depends on the 'details' parameter.
     */
     public function search(){
 
@@ -117,6 +121,19 @@ class DbSysWorkflowRules extends DbEntityBase
     //
     //
     //
+    /**
+     * Prepares workflow rule records before saving.
+     *
+     * - Normalizes empty string values for certain fields to null.
+     * - Sets `swf_Order` to 0 if empty or less than 0, and caps it at 255.
+     * - Sets `swf_RecEmailField` to null if not a positive integer.
+     * - Validates and cleans `swf_EmailList` (comma-separated emails).
+     * - Sanitizes and formats `swf_EmailText` (replaces newlines with `<br>`).
+     * - Temporarily, may alter the `swf_EmailText` column type to TEXT if it's currently VARCHAR(255)
+     *   and the text length is >= 200 (this part is marked as @temporary).
+     *
+     * @return bool Returns the result of `parent::prepareRecords()`.
+     */
     protected function prepareRecords(){
 
         $ret = parent::prepareRecords();
@@ -177,6 +194,17 @@ class DbSysWorkflowRules extends DbEntityBase
     // 1) adds entire ruleset for record type
     // 2) set order of stages per record type
     //
+    /**
+     * Performs batch actions for workflow rules, primarily adding a default ruleset for a record type.
+     *
+     * If `rty_ID` is provided in `$this->data`:
+     * - Checks if rules already exist for this record type; if so, blocks action.
+     * - Requires admin rights.
+     * - Inserts a new set of rules for the `rty_ID` based on terms defined under `TRM_SWF` (workflow stages vocabulary).
+     *
+     * @return bool True on success, false on failure (e.g., rules already exist, not admin, DB error).
+     *              Errors are added to the system object on failure.
+     */
     public function batch_action(){
 
         $ret = true;

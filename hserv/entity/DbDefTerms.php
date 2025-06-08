@@ -5,11 +5,15 @@ use hserv\utilities\USystem;
 use hserv\utilities\USanitize;
 
 /**
-* db access to defTerms table
-*
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
+ * Class DbDefTerms
+ *
+ * Provides database access and operations for the `defTerms` table, which stores
+ * vocabulary terms used for enumerated fields and relationship types.
+ * Handles searching, creating, updating, deleting, importing, and managing term hierarchies
+ * and translations.
+ *
+ * @package     Heurist academic knowledge management system
+ * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -62,7 +66,8 @@ class DbDefTerms extends DbEntityBase
     *  limit
     *  request_id
     *
-    *  @todo overwrite
+    * @return array|false An array of found term definitions, or false on error.
+    *                     The structure of the returned array elements depends on the 'details' parameter.
     */
     public function search(){
 
@@ -188,6 +193,14 @@ class DbDefTerms extends DbEntityBase
     //
     // loads all term links   from defTermsLinks
     //
+    /**
+     * Loads all term links (parent-child relationships) from `defTermsLinks` or `defTerms`.
+     *
+     * The source table depends on the database version.
+     * Returns an associative array where keys are parent term IDs and values are arrays of child term IDs.
+     *
+     * @return array An associative array of term links (parent_id => [child_id1, child_id2,...]).
+     */
     public function getTermLinks(){
 
         $matches = array();
@@ -225,6 +238,14 @@ class DbDefTerms extends DbEntityBase
     //
     // get list of icons ids
     //
+    /**
+     * Gets a list of term IDs that have associated thumbnail images.
+     *
+     * Scans the `entity/defTerms/thumbnail/` directory for .png files
+     * where the filename (without extension) is a numeric term ID.
+     *
+     * @return array An array of term IDs that have thumbnails.
+     */
     public function getTermIcons(){
         
         $res = [];
@@ -243,6 +264,17 @@ class DbDefTerms extends DbEntityBase
     //
     // trm_Label may have periods. Periods are taken as indicators of hierarchy.
     //
+    /**
+     * Imports terms, potentially creating a hierarchy based on a separator in `trm_Label`.
+     *
+     * This method processes records from `$this->records` (expected to be prepared by `prepareRecords`).
+     * If a `trm_ParentTermID` is set in the first record, it assumes a flat list import under that parent.
+     * Otherwise, it parses `trm_Label` fields using a separator (default '.') to build a tree structure,
+     * then saves this tree using `_saveTree`.
+     *
+     * @return array|false An array of added term IDs on success, or false on failure.
+     *                     Returns an empty array if no records to import.
+     */
     private function _importTerms(){
 
         //extract records from $_REQUEST data
@@ -306,6 +338,17 @@ class DbDefTerms extends DbEntityBase
     //
     //
     //
+    /**
+     * Parses a flat list of term labels into a hierarchical tree structure.
+     *
+     * Uses a specified separator (default '.') within the term labels to determine hierarchy.
+     * For example, "Animal.Mammal.Dog" becomes a tree: Animal -> Mammal -> Dog.
+     * Optionally retains parent labels in child keys (e.g., "Animal.Mammal" instead of just "Mammal").
+     *
+     * @param array $input An array of term records, each expected to have a 'trm_Label' key.
+     * @return array A nested array representing the term hierarchy.
+     *               Keys are term labels, values are arrays of children (or an empty array for leaf nodes).
+     */
     private function _parseHierarchy($input) {
         $result = array();
 
@@ -356,6 +399,22 @@ class DbDefTerms extends DbEntityBase
     //
     // tree: idx->array(idx->array(),.... )
     //
+    /**
+     * Recursively saves a tree of terms to the database.
+     *
+     * For each term in the current level of the tree:
+     * - Checks if a term with the same label already exists under the given `$parentID`.
+     * - If not, or if the existing term is different, it prepares and saves the new term.
+     * - Recursively calls itself to save any children of the current term.
+     *
+     * Uses `$this->labels_to_idx` and `$this->records_all` to map parsed labels back to original
+     * record data and update/create term records.
+     *
+     * @param array $tree The current level of the term tree (label => children_array).
+     * @param int $parentID The `trm_ID` of the parent for the current level of terms.
+     * @param string $parentLabel The concatenated label of the parent path (used for reconstructing full labels).
+     * @return array|false An array of newly added term IDs on success, or false on any save failure.
+     */
     private function _saveTree($tree, $parentID, $parentLabel){
 
         //reset array of record for save
@@ -439,6 +498,20 @@ class DbDefTerms extends DbEntityBase
     //
     // Validates values before save and sets default values
     //
+    /**
+     * Prepares term records before saving.
+     *
+     * Validates `trm_Label` for duplication within the same parent/vocabulary.
+     * Validates `trm_Code` for duplication if provided.
+     * Prevents moving a term to a different vocabulary if it or its children are in use.
+     * Sets default values for `trm_Modified`, `trm_Domain`, `trm_Status`, `trm_InverseTermID`, `trm_OrderInBranch`.
+     * Sets `is_new` flag.
+     *
+     * @param bool $ignore_duplications If true, duplicate labels/codes will not immediately cause failure,
+     *                                  but the duplicate records will be removed from `$this->records`.
+     *                                  Used by `_importTerms`. Defaults to false.
+     * @return bool True if preparation is successful and validation passes, false otherwise.
+     */
     protected function prepareRecords($ignore_duplications=false){
 
         $ret = parent::prepareRecords();
@@ -566,6 +639,20 @@ class DbDefTerms extends DbEntityBase
     //
     // returns array of saved record ids or false
     //
+    /**
+     * Saves term records.
+     *
+     * Calls `parent::save()` and then performs additional operations:
+     * - Updates `trm_OriginatingDBID`, `trm_NameInOriginatingDB`, `trm_IDInOriginatingDB` for new terms.
+     * - Updates `trm_LocallyModified` for existing terms.
+     * - Handles term thumbnail image (renaming temporary file or deleting).
+     * - Manages symmetrical inverse term relationships (`trm_InverseTermID`).
+     *
+     * The behavior can be modified by `$this->data['isfull']` (defaults to true if not set),
+     * which controls whether thumbnail and inverse term logic is executed.
+     *
+     * @return array|false An array of saved term IDs on success, false on failure.
+     */
     public function save(){
 
         $mysqli = $this->system->getMysqli();
@@ -671,6 +758,29 @@ class DbDefTerms extends DbEntityBase
     //   3) import terms from csv
     //   4) get_translations - from defTranslations
     //
+    /**
+     * Performs batch actions on terms.
+     *
+     * Supported actions (determined by parameters in `$this->data`):
+     * - **Reference Management**: Add/move/remove terms as references under a vocabulary/parent term.
+     *   (Requires: `reference=1`, `trm_ID` (array), `new_VocabID`, `new_ParentTermID`, `old_VocabID`, `old_ParentTermID`)
+     * - **Term Merging**: Merge one term (`merge_id`) into another (`retain_id`).
+     *   (Requires: `merge_id`, `retain_id`, optionally `trm_Code`, `trm_Description` for the retained term)
+     * - **Get Translations**: Retrieves translations for terms.
+     *   (Requires: `get_translations` (array of term IDs or single ID), optionally `search_by` ('trm_ParentTermID' or 'trm_ID'))
+     * - **Set Translations**: Saves translations for terms.
+     *   (Requires: `set_translations` (array of translation data), `vcb_ID`)
+     * - **Import Terms (CSV)**: Imports terms, potentially creating hierarchies. (Calls `_importTerms`)
+     *   (Default action if others are not specified, expects term data in `$this->records` or via `prepareRecords()`)
+     *
+     * Most actions are performed within a database transaction.
+     *
+     * @return array|bool|null Result of the specific batch action.
+     *                         - For reference management, merge, import: True on success, false on failure.
+     *                         - For get_translations: Array of translation data.
+     *                         - For set_translations: Array with counts of added/updated/etc. translations.
+     *                         Returns false if an invalid action or parameters are provided.
+     */
     public function batch_action(){
 
         $mysqli = $this->system->getMysqli();
@@ -949,6 +1059,15 @@ class DbDefTerms extends DbEntityBase
     //
     // Retrieve and create a recordset of term translations
     //
+    /**
+     * Retrieves term translations from the `defTranslations` table.
+     *
+     * @param bool $label_only If true, only retrieves translations for 'trm_Label'. Otherwise, for all 'trm_%' sources.
+     * @param string|array|null $trm_ids A single term ID, an array of term IDs, or a comma-separated string of term IDs
+     *                                   to filter translations. If null, retrieves for all terms matching $label_only criteria.
+     * @return array An associative array representing a recordset of translations,
+     *               with keys 'reccount', 'fields', 'records', 'order', 'entityName'.
+     */
     private function _getTermTranslations($label_only = true, $trm_ids = null){
 
         $mysqli = $this->system->getMysqli();
@@ -996,6 +1115,17 @@ class DbDefTerms extends DbEntityBase
     //
     //
     //
+    /**
+     * Sets (inserts or updates) term translations in the `defTranslations` table.
+     *
+     * Input data is expected to be an array where each item has a 'ref_id' (original term label)
+     * and then key-value pairs for field_name => "lang_code:translated_value".
+     *
+     * @param int $vcb_ID The vocabulary ID to which these terms belong (used for context, not direct filtering here).
+     * @param array|string $data An array of translation data, or a JSON string representing such an array.
+     * @return array|false An array with counts of operations (lang_missed, not_found, added, updated, error)
+     *                     on success, or false on initial validation failure.
+     */
     private function _setTermTranslations($vcb_ID, $data){
         if(!($vcb_ID>0)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Vocabulary not defined');
@@ -1098,6 +1228,17 @@ class DbDefTerms extends DbEntityBase
     //  Checks that term can be removed
     //   1) Has no
     //
+    /**
+     * Validates if the current user has permission for the requested term operation (especially delete).
+     *
+     * - Only administrators can perform operations.
+     * - For deletions, it checks if the term or its children are in use (referenced by other
+     *   detail types or used in records). If so, deletion is blocked.
+     * - If a term and its children can be deleted, their IDs are added to `$this->recordIDs` for deletion.
+     *
+     * @return bool True if the user has permission and (for deletions) the term is not in use,
+     *              false otherwise (errors are added to the system object).
+     */
     protected function _validatePermission()
     {
 
@@ -1144,6 +1285,12 @@ class DbDefTerms extends DbEntityBase
     //
     //  get all enum and relmarker fields where vocabulary is in use
     //
+    /**
+     * Gets all detail type IDs (enum or relmarker) that use the given vocabulary ID.
+     *
+     * @param int $trm_ID The vocabulary term ID (trm_ParentTermID = 0 or NULL).
+     * @return array An array of dty_ID values.
+     */
     private function getFieldsThatUseVocabulary($trm_ID){
 
         $mysqli = $this->system->getMysqli();
@@ -1164,6 +1311,20 @@ class DbDefTerms extends DbEntityBase
     // $infield - check in base fields
     // $indetails - check in recDetails
     //
+    /**
+     * Checks if a term (and its children, if it's a vocabulary root) is currently in use.
+     *
+     * A term is considered "in use" if:
+     * - It's referenced as a vocabulary by any detail type (`dty_JsonTermIDTree`) (if `$infield` is true).
+     * - It or its children are used as values in `recDetails` for relevant enum/relationtype fields (if `$indetails` is true).
+     *
+     * @param int $trm_ID The ID of the term (can be a vocabulary root or any term).
+     * @param bool $infield If true, checks usage in `defDetailTypes.dty_JsonTermIDTree`.
+     * @param bool $indetails If true, checks usage in `recDetails.dtl_Value`.
+     * @return bool|array True if the term is not in use. An array detailing usage (children count,
+     *                    detail types using it, record count using it, and specific record IDs if count is low)
+     *                    if it is in use. False on MySQL error.
+     */
     private function isTermNotInUse($trm_ID, $infield, $indetails){
 
         $mysqli = $this->system->getMysqli();
@@ -1197,6 +1358,15 @@ class DbDefTerms extends DbEntityBase
     // uses defTermsLinks
     // $all_levels - false return direct children only
     //
+    /**
+     * Gets all children (descendants) of given parent term(s).
+     *
+     * Wraps the global function `getTermChildrenAll`.
+     *
+     * @param int|array $parent_ids A single parent term ID or an array of parent term IDs.
+     * @param bool $all_levels If true, retrieves all descendants; if false, only direct children. Defaults to true.
+     * @return array A flat array of child term IDs.
+     */
     private function getChildren($parent_ids, $all_levels=true){
         return getTermChildrenAll($this->system->getMysqli(),$parent_ids, $all_levels);
     }
@@ -1204,6 +1374,14 @@ class DbDefTerms extends DbEntityBase
     //
     // get flat array of trm_ID=>trm_Label for given parent
     //
+    /**
+     * Gets the labels and codes for all children of a given parent term.
+     *
+     * @param int $parent_id The ID of the parent term.
+     * @param bool $all_levels If true, retrieves for all descendants; if false, only direct children. Defaults to true.
+     * @return array|null An associative array (`trm_ID => ['trm_Label' => ..., 'trm_Code' => ...]`)
+     *                    or null if no children are found.
+     */
     private function getLabelsAndCodes($parent_id, $all_levels=true){
 
         //get first level children
@@ -1221,6 +1399,21 @@ class DbDefTerms extends DbEntityBase
     //
     //
     //
+    /**
+     * Finds records where a given term (or its children) is used.
+     *
+     * Checks `recDetails.dtl_Value` for enum or relationtype fields.
+     * If `$check_dty_IDs` is provided, limits the search to those detail types. Otherwise,
+     * it determines relevant detail types by finding those that use the term's vocabulary.
+     *
+     * @param int $trm_ID The term ID whose usage is to be checked.
+     * @param array|null $check_dty_IDs Optional array of specific `dty_ID`s to check.
+     *                                   If null, relevant `dty_ID`s are determined from the term's vocabulary.
+     * @return array|false An array containing `reccount` (total records using the term/children),
+     *                     `records` (array of up to 10000 rec_IDs if total is below that or memory allows),
+     *                     `recID` (the input $trm_ID), `fields` (the dty_IDs checked), and `children` (count of children checked).
+     *                     Returns false on MySQL error.
+     */
     private function findRecordWhereTermInUse($trm_ID, $check_dty_IDs){
 
         $ret = array();
@@ -1287,6 +1480,17 @@ class DbDefTerms extends DbEntityBase
     // Counts:
     //  term_usage => count the usage for the provided term ids
     //
+    /**
+     * Retrieves usage counts for specified terms.
+     *
+     * Supports 'term_usage' mode, which counts how many distinct records use each of the
+     * provided term IDs (`trmID` in `$this->data`) in `enum` type fields (`recDetails`)
+     * and as `relationtype` in `recLinks`.
+     *
+     * @return array|false An associative array `[trm_ID => usage_count]` on success.
+     *                     If no usage, term IDs might be keys with value 0 or based on input.
+     *                     Returns false on error or invalid input.
+     */
     public function counts(){
 
         $mysqli = $this->system->getMysqli();

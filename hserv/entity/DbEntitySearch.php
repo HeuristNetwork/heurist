@@ -2,11 +2,15 @@
 namespace hserv\entity;
 
     /**
-    *
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbEntitySearch
+     *
+     * Handles the construction and execution of search queries for database entities.
+     * It validates search parameters, builds SQL WHERE clauses based on these parameters,
+     * and executes the query, returning results in various formats.
+     * This class is typically instantiated and used by `DbEntityBase` and its subclasses.
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -22,22 +26,34 @@ namespace hserv\entity;
     */
 class DbEntitySearch
 {
+    /** @var \hserv\System The main Heurist system object. */
     private $system;
 
-    private $data = array();//request - assigned in validate params
+    /** @var array Holds the validated search request data. Initialized by `validateParams()`. */
+    private $data = array();
 
-    //name of primary key field from $config  by dty_Role="primary"
+    /** @var string|null The name of the primary key field for the entity being searched. */
     private $primaryField;
 
+    /** @var array An array of SQL WHERE conditions built from search parameters. */
     private $whereConditions;
 
-    //data types: ids, int, float, date, bool, enum
-    //structure
-    private $fields = array(); //fields from configuration
+    /** @var array Associative array describing the entity's fields, from its JSON configuration. */
+    private $fields = array();
 
-    private $config = array(); //configuration
+    /** @var array Entity configuration array, loaded from its JSON file. */
+    private $config = array(); 
 
-
+    /**
+     * Constructor for DbEntitySearch.
+     *
+     * Initializes the search manager with the system object, entity configuration,
+     * and field definitions.
+     *
+     * @param \hserv\System $system The main Heurist system object.
+     * @param array $config The configuration array for the entity.
+     * @param array $fields An associative array of field definitions for the entity.
+     */
     public function __construct( $system, $config, $fields) {
        $this->system = $system;
        $this->fields = $fields;
@@ -48,6 +64,16 @@ class DbEntitySearch
     //
     //
     //
+    /**
+     * Validates if the given field's value(s) are valid IDs (numeric).
+     *
+     * Handles single IDs or comma-separated strings/arrays of IDs.
+     *
+     * @param string $fieldname The name of the field to validate.
+     * @param string|null $data_type The data type of the field (e.g., 'freetext'). If 'freetext', validation is skipped.
+     * @return bool True if valid or not applicable, false if any ID is non-numeric.
+     *              Errors are added to the system object on validation failure.
+     */
     private function _validateIds($fieldname, $data_type=null){
 
         $values = @$this->data[$fieldname];
@@ -115,6 +141,16 @@ class DbEntitySearch
     //
     //
     //
+    /**
+     * Validates and normalizes a boolean field value.
+     *
+     * Converts boolean true/'y'/1 to 1, and others to 0.
+     *
+     * @param string $fieldname The name of the field to validate.
+     * @param string|null $data_type Unused.
+     * @return int|false 1 for true, 0 for false. Returns false if the input cannot be resolved to a boolean.
+     *                   Errors are added to the system object on validation failure.
+     */
     private function _validateBoolean($fieldname, $data_type=null){
 
         $value = @$this->data[$fieldname];
@@ -139,10 +175,15 @@ class DbEntitySearch
 
 
     /**
-     * Validates the input data based on the field configuration.
+     * Validates all input search parameters based on the entity's field configurations.
      *
-     * @param array $data The input data to validate.
-     * @return array|bool Returns the validated data or false if validation fails.
+     * Iterates through configured fields and calls specific validation methods
+     * (e.g., `_validateIds`, `_validateEnum`, `_validateBoolean`) based on field type.
+     * Sets the `primaryField` property.
+     *
+     * @param array $data The raw input data array (typically request parameters).
+     * @return array|false The validated and potentially modified data array on success,
+     *                     or false if any validation fails.
      */
     public function validateParams($data){
 
@@ -173,6 +214,18 @@ class DbEntitySearch
         return $this->data;
     }
 
+    /**
+     * Validates a single search parameter value against its field configuration.
+     *
+     * Dynamically calls a specific validation method (e.g., `_validateIds` for ID types,
+     * `_validateEnum` for enum types) based on the `dty_Type` or if it's a primary key.
+     *
+     * @param string $fieldname The name of the field whose value is being validated.
+     * @param array $field_config The configuration array for this specific field.
+     * @return bool True if validation is successful or not applicable, false otherwise.
+     *              If a validation method returns a non-boolean (e.g., a normalized value),
+     *              `$this->data[$fieldname]` is updated with that value and true is returned.
+     */
     private function validateParam($fieldname, $field_config){
 
             $data_type = $field_config['dty_Type'];
@@ -200,6 +253,15 @@ class DbEntitySearch
     //
     // remove quoted values and double spaces
     //
+    /**
+     * Cleans a quoted search value by removing surrounding quotes and normalizing spaces.
+     *
+     * If the value starts and ends with a double quote, these are removed.
+     * Multiple spaces within the value are then condensed to single spaces.
+     *
+     * @param string $val The input string value.
+     * @return string The cleaned string value.
+     */
     private function _cleanQuotedValue($val) {
         if (strlen($val)>0 && $val[0] == '"') {
             if ($val[strlen($val)-1] == '"'){
@@ -213,7 +275,16 @@ class DbEntitySearch
         return $val;
     }
 
-
+    /**
+     * Generates an SQL predicate for a given field and adds it to the internal list of WHERE conditions.
+     *
+     * Uses `getPredicate()` to create the condition string.
+     *
+     * @param string $fieldname The name of the field for the predicate.
+     * @param bool $is_ids True if the field should be treated as an ID list for `IN()` or `NOT IN()` clauses.
+     *                     Defaults to false.
+     * @return void
+     */
     public function addPredicate($fieldname, $is_ids=false) {
 
         $pred = $this->getPredicate($fieldname, $is_ids);
@@ -221,13 +292,31 @@ class DbEntitySearch
 
     }
 
+    /**
+     * Sets the fields to be selected in the search query.
+     *
+     * Updates `$this->data['details']` with the provided field list if it's not already an array.
+     *
+     * @param string|array $fields A comma-separated string or an array of field names to select.
+     * @return void
+     */
     public function setSelFields($fields){
         if(!is_array(@$this->data['details'])){
             $this->data['details'] = $fields;
         }
     }
 
-
+    /**
+     * Composes the final SQL query from selected fields, WHERE conditions, and ordering, then executes it.
+     *
+     * Ensures the primary key field is the first in the SELECT list if multiple fields are selected.
+     *
+     * @param string|null $orderBy The ORDER BY clause string (e.g., "fieldName ASC").
+     * @param string|null $sup_tables Additional tables to include in the FROM clause (e.g., for JOINs).
+     * @param string|null $sup_where Additional WHERE clause conditions to append.
+     * @return array|false The result of the search query execution, typically an array from `DbEntitySearch::execute()`,
+     *                     or false on error.
+     */
     public function composeAndExecute($orderBy, $sup_tables=null, $sup_where=null){
 
         if(!is_array($this->data['details'])){ //specific list of fields
@@ -285,6 +374,21 @@ class DbEntitySearch
     //
     // extract first charcter to determine comparison opeartor =,like, >, <, between
     //
+    /**
+     * Generates an SQL predicate string for a given field based on its value and type.
+     *
+     * Handles various comparison operators (exact match, negation, less than, greater than, between)
+     * and data types (IDs, text, numeric, date).
+     * - For ID fields (`$is_ids` is true or field is primary/entity ref): Handles single IDs,
+     *   comma-separated lists (for IN/NOT IN), and negation.
+     * - For other types: Parses operators like '=', '<', '>', '<>' (between), and leading '-' (negation).
+     *   Uses LIKE for text fields unless an exact match ('=') is specified.
+     *
+     * @param string $fieldname The name of the field.
+     * @param bool $is_ids If true, treat the field value as a list of IDs. Defaults to false.
+     * @return string|null The SQL predicate string (e.g., "fieldName = 'value'", "fieldName IN (1,2)"),
+     *                     or null if the value is empty or invalid.
+     */
     public function getPredicate($fieldname, $is_ids=false) {
 
         $value = @$this->data[$fieldname];
@@ -455,6 +559,13 @@ class DbEntitySearch
     //
     // @todo inherit
     //
+    /**
+     * Gets the SQL OFFSET clause string based on `data['offset']`.
+     *
+     * @return string|false The OFFSET clause (e.g., " OFFSET 10") or false if offset is invalid.
+     *                      Returns an empty string if no offset is specified.
+     *                      Adds an error to the system if offset is invalid.
+     */
     public function getOffset(){
         if(@$this->data['offset']){
             $offset = intval($this->data['offset']);
@@ -469,6 +580,13 @@ class DbEntitySearch
     //
     // @todo inherit
     //
+    /**
+     * Gets the SQL LIMIT clause string based on `data['limit']`.
+     *
+     * @return string|false The LIMIT clause (e.g., " LIMIT 100") or false if limit is invalid.
+     *                      Returns an empty string if no limit is specified.
+     *                      Adds an error to the system if limit is invalid.
+     */
     public function getLimit(){
         if(@$this->data['limit']){
             $limit = intval($this->data['limit']);
@@ -484,6 +602,12 @@ class DbEntitySearch
     //
     //
     //
+    /**
+     * Determines the ORDER BY clause based on `data` parameters (e.g., `sort:[fieldName]=1` for ASC, `0` for DESC).
+     *
+     * @param string|null $default Default ORDER BY string if no sort parameter is found.
+     * @return string|null The ORDER BY clause string (e.g., "fieldName ASC") or the default.
+     */
     public function setOrderBy($default=null){
         $orderby = null;
         foreach($this->data as $key=>$value){
@@ -505,6 +629,24 @@ class DbEntitySearch
     //
     // $calculatedFields - is function that returns array of fieldnames or calculate and adds values of this field to result row
     //
+    /**
+     * Executes the constructed SQL query and formats the results.
+     *
+     * Handles different result formats:
+     * - If `$is_ids_only` is true: Returns an array of record IDs.
+     * - Otherwise: Returns a structured array including field names, record data (potentially with
+     *   calculated fields and multi-language translations), total count, offset, etc.
+     * - Supports a `restapi` format for simpler output.
+     *
+     * @param string $query The SQL query to execute.
+     * @param bool $is_ids_only If true, only primary key IDs are fetched and returned.
+     * @param string|null $entityName The name of the entity, defaults to `$this->config['entityName']`.
+     * @param callable|null $calculatedFields A callback function to add or modify fields/values in the result set.
+     *                                      It's called twice: once to get additional field names, once per row to add values.
+     *                                      `function ($fields_array, $row_array=null)`
+     * @param array|null $multiLangs An array of field names that support multiple languages, for which translations should be fetched.
+     * @return array|false The formatted search result array, or false on database error.
+     */
     public function execute($query, $is_ids_only, $entityName=null, $calculatedFields=null, $multiLangs=null){
 
         $mysqli = $this->system->getMysqli();

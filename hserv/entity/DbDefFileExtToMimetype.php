@@ -3,11 +3,13 @@ namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 
     /**
-    * db access to defFileExtToMimetype table
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbDefFileExtToMimetype
+     *
+     * Provides database access and operations for the `defFileExtToMimetype` table,
+     * which maps file extensions to MIME types.
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -58,7 +60,8 @@ class DbDefFileExtToMimetype extends DbEntityBase
     *  limit
     *  request_id
     *
-    *  @todo overwrite
+    * @return array|false An array of found MIME type mappings, or false on error.
+    *                     The structure of the returned array elements depends on the 'details' parameter.
     */
     public function search(){
 
@@ -136,6 +139,16 @@ class DbDefFileExtToMimetype extends DbEntityBase
     //
     // Since in this table primary key is varchar need special treatment
     //
+    /**
+     * Deletes a file extension to MIME type mapping.
+     *
+     * The primary key for this table (`fxm_Extension`) is a VARCHAR, so this method
+     * handles deletion based on this string key.
+     *
+     * @param bool $disable_foreign_checks Unused in this implementation, but part of parent signature.
+     * @return bool True on successful deletion, false on failure (e.g., record ID not provided,
+     *              permission denied, or database error).
+     */
     public function delete($disable_foreign_checks = false){
 
         $rec_ID = @$this->data[$this->primaryField];

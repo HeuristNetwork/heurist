@@ -8,11 +8,14 @@
 */
 
 /**
-* exportRecordsGEOJSON.php - class to export records as GeoJson
-*
-* Controller is records_output
-*
-* @package     Heurist academic knowledge management system
+ * Class ExportRecordsGEOJSON
+ *
+ * Extends `ExportRecords` to provide functionality for exporting Heurist records
+ * in GeoJSON format. It handles the specific structure of GeoJSON Features and
+ * FeatureCollections, including geometry conversion from WKT, property inclusion,
+ * and options for Leaflet compatibility (which may include separate timeline data).
+ *
+ * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
@@ -33,29 +36,57 @@ use hserv\structure\ConceptCode;
 */
 class ExportRecordsGEOJSON extends ExportRecords {
 
+    /** @var bool Indicates if the output should be Leaflet-compatible (includes separate timeline data). */
     private $is_leaflet = false;
 
+    /** @var array|bool List of record type IDs to consider as sources for geographic data via pointers, or true to enable generic place searching. */
     private $find_geo_by_pointer_rty = false;
+    /** @var array|null List of specific detail type IDs (resource pointers) to use for finding linked geographic data. */
     private $find_geo_by_pointer_dty = null;
+    /** @var array|null List of specific geo-detail type IDs to use for fetching geometry. Can include query conditions for linked records. */
     private $find_by_geofields = null;
+    /** @var bool If true, all geo-fields are searched for geometry; if false, only those specified or linked via `find_geo_by_pointer_rty` are used. */
     private $search_all_geofields = true;
 
     // variables for leaflet
+    /** @var array Stores record IDs included in the GeoJSON output when in Leaflet mode. */
     private $geojson_ids = array();
-    private $geojson_dty_ids = array(); //unique list of all geofields
+    /** @var array Stores unique detail type IDs of geo-fields included in Leaflet output. */
+    private $geojson_dty_ids = array();
+    /** @var array Stores unique record type IDs included in Leaflet GeoJSON output. */
     private $geojson_rty_ids = array();
-    private $timeline_dty_ids = array(); //unique list of all date fields
+    /** @var array Stores unique detail type IDs of date fields used for Leaflet timeline. */
+    private $timeline_dty_ids = array();
 
+    /** @var array Stores data for the Leaflet timeline component. */
     private $timeline_data = array();
-    private $layers_record_ids = array(); //list of ids RT_MAP_LAYER if this is search for layers in clearinghouse
+    /** @var array Stores record IDs of map layers (RT_MAP_LAYER) when exporting for a clearinghouse in Leaflet mode. */
+    private $layers_record_ids = array();
 
+    /** @var bool If true, WKT geometries will be simplified. */
     private $simplify_wkt = true;
+    /** @var int Mode for including details in properties (0 for minimal/Leaflet, 1 for inline, 2 for 'details' subarray). */
     private $detail_mode = 0;
+    /** @var bool If true and a record has multiple geometries, create separate GeoJSON features for each. Otherwise, use GeometryCollection. */
     private $separate_entity = false;
 
-//
-//
-//
+    /**
+     * Prepares for GeoJSON export, extending the parent method.
+     *
+     * Initializes GeoJSON-specific parameters based on `$params`:
+     * - `leaflet`: Sets `$this->is_leaflet`.
+     * - `simplify`: Sets `$this->simplify_wkt`.
+     * - `detail_mode`: Sets `$this->detail_mode`.
+     * - `separate`: Sets `$this->separate_entity` (for Leaflet).
+     * - `geofields`, `suppress_linked_places`: Configure how geographic data is found,
+     *   populating `$this->find_geo_by_pointer_rty`, `$this->find_geo_by_pointer_dty`,
+     *   `$this->find_by_geofields`, and `$this->search_all_geofields`.
+     * Defines constants for specific place-related detail types.
+     *
+     * @param array $data The raw data array from a record search.
+     * @param array $params An associative array of export parameters.
+     * @return bool True if preparation is successful, false otherwise.
+     */
 protected function _outputPrepare($data, $params){
 
     $res = parent::_outputPrepare($data, $params);
@@ -157,6 +188,16 @@ protected function _outputPrepare($data, $params){
 //
 //
 //
+    /**
+     * Prepares the list of fields to be retrieved for GeoJSON export.
+     *
+     * If Leaflet mode (`$this->is_leaflet`) is active, it restricts header fields to
+     * 'rec_ID', 'rec_RecTypeID', 'rec_Title' and sets detail fields to null (minimal details).
+     * Otherwise, it calls the parent method to determine fields based on parameters.
+     *
+     * @param array $params Parameters controlling field retrieval (e.g., 'columns', 'detail').
+     * @return void
+     */
 protected function _outputPrepareFields($params){
 
     if($this->is_leaflet){
@@ -170,6 +211,15 @@ protected function _outputPrepareFields($params){
 //
 //
 //
+    /**
+     * Outputs the header for the GeoJSON export.
+     *
+     * If Leaflet mode is active, starts with `{"geojson":`.
+     * Otherwise, starts with `{"type":"FeatureCollection","features":`.
+     * In both cases, opens the main array `[`.
+     *
+     * @return void
+     */
 protected function _outputHeader(){
 
     if($this->is_leaflet){
@@ -194,6 +244,18 @@ protected function _outputHeader(){
 //
 //
 //
+    /**
+     * Outputs a single record as a GeoJSON Feature or multiple Features.
+     *
+     * Retrieves the GeoJSON feature(s) for the record using `_getGeoJsonFeature()`.
+     * If in Leaflet mode, processes timeline data and geometry IDs separately.
+     * If the feature has multiple geometries and `$this->separate_entity` is true,
+     * each geometry is written as a separate Feature. Otherwise, a single Feature
+     * (possibly with a GeometryCollection) is written.
+     *
+     * @param array $record The Heurist record data.
+     * @return bool Always returns true (to continue processing).
+     */
 protected function _outputRecord($record){
 
     $feature = $this->_getGeoJsonFeature($record,
@@ -280,6 +342,16 @@ protected function _outputRecord($record){
 //
 //
 //
+    /**
+     * Outputs the footer for the GeoJSON export.
+     *
+     * Closes the main features array `]`.
+     * If Leaflet mode is active, appends timeline data, and lists of GeoJSON/timeline
+     * related IDs (record IDs, geo-field dty_IDs, date-field dty_IDs, layer record IDs).
+     * Finally, closes the main JSON object `}`.
+     *
+     * @return void
+     */
 protected function _outputFooter(){
 
 
@@ -316,6 +388,24 @@ protected function _outputFooter(){
 //                        or it is array of rectypes defined in sys_TreatAsPlaceRefForMapping + RT_PLACE
 // $this->find_geo_by_pointer_dty - list of pointer fields linked to record with geo field (narrow $this->find_geo_by_pointer_rty)
 //
+/**
+ * Converts a Heurist record into a GeoJSON Feature structure.
+ *
+ * Extracts properties, geometry (from WKT in details or linked records),
+ * and temporal data. Supports various modes for detail inclusion and geometry handling.
+ *
+ * @param array $record The Heurist record data (header and details).
+ * @param bool $extended If true, includes extended information like term labels/codes and field types. Defaults to false.
+ * @param bool $simplify If true, simplifies complex geometries. Defaults to false.
+ * @param int $detail_mode Mode for including details in properties:
+ *                         0: Minimal (for Leaflet - title, ID, type, description).
+ *                         1: Details inlined as properties.
+ *                         2: Details in a 'details' subarray (default).
+ * @param bool $separate_geo_by_dty If true and record has multiple geometries, they become separate 'geometries'
+ *                                   in the feature; otherwise, a single 'geometry' (possibly GeometryCollection) is formed.
+ *                                   Used by `_outputRecord` to potentially create multiple features.
+ * @return array The GeoJSON Feature-like associative array.
+ */
 private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $detail_mode=2, $separate_geo_by_dty=false){
 
     if(!($detail_mode==0 || $detail_mode==1 || $detail_mode==2)){
@@ -679,6 +769,16 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
 // Convert WKT to geojson and simplifies coordinates
 // @TODO use mapCoordinates.php
 //
+/**
+ * Converts a WKT (Well-Known Text) string to a GeoJSON geometry array.
+ *
+ * Optionally simplifies complex geometries (LineString, Polygon, MultiPolygon, MultiLineString).
+ * Uses the geoPHP library for WKT parsing and GeoJSON conversion.
+ *
+ * @param string $wkt The WKT geometry string.
+ * @param bool $simplify If true, simplifies coordinates of complex geometries. Defaults to true.
+ * @return array|null The GeoJSON geometry array, or null if WKT is invalid or geometry is empty.
+ */
 private static function _getJsonFromWkt($wkt, $simplify=true)
 {
         $geom = \geoPHP::load($wkt, 'wkt');

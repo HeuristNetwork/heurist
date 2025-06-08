@@ -35,9 +35,9 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  CommonPHP
 */
-use hserv\utilities\USystem;
 
-require_once dirname(__FILE__).'/../../utilities/Temporal.php';
+use hserv\utilities\USystem;
+use hserv\utilities\Temporal;
 
 
 define('ERROR_REP_WARN', 0);// returns general message that titlemask is invalid - default
@@ -53,29 +53,51 @@ define('TITLEMASK_EMPTY_MSG', '**** No data in title fields for this record ****
 //
 // static class
 //
+/**
+ * Static class for handling Heurist record title masks.
+ *
+ * Provides methods to check the validity of a title mask, fill a mask with record data
+ * to generate a title, and convert masks between internal coded format and human-readable format.
+ * Title masks allow dynamic generation of record titles based on field values and static text.
+ */
 class TitleMask {
 
-     /**
-     * Construct won't be called inside this class and is uncallable from
-     * the outside. This prevents instantiating this class.
-     * This is by purpose, because we want a static class.
+    /**
+     * Private constructor to prevent instantiation, as this is a static class.
      */
     private function __construct() {}
+
+    /** @var \hserv\System|null The Heurist system object, initialized by `initialize()`. */
     private static $system = null;
+    /** @var \mysqli|null The mysqli database connection object, initialized by `initialize()`. */
     private static $mysqli = null;
+    /** @var int The registered ID of the current database, initialized by `initialize()`. */
     private static $db_regid = 0;
+    /** @var bool Flag indicating whether the class has been initialized. */
     private static $initialized = false;
 
+    /** @var array|null Stores field correspondence mappings, used during import processes. */
     private static $fields_correspondence = null;
-    private static $rdt = null;  //detail types array indexed by id,name and concept code
-    private static $rdr = null;  //record detail types
-    //private static $rectypes = null;
+    /** @var array|null Cache for detail type definitions, indexed by ID, name, and concept code. */
+    private static $rdt = null;
+    /** @var array|null Cache for record detail type structures (from defRecStructure), indexed by record type ID. */
+    private static $rdr = null;
+    /** @var array|null Cache for record data, indexed by record ID. */
     private static $records = null;
 
-    private static $provided_mask = null; // provided title mask - for checking/testing
+    /** @var string|null Stores the title mask currently being checked or processed. */
+    private static $provided_mask = null;
 
-    //private static $DT_PARENT_ENTITY = 0;
-
+    /**
+     * Initializes the TitleMask static class with necessary system context.
+     *
+     * This method must be called before any other static methods of this class are used.
+     * It sets up the system object, mysqli connection, database registration ID,
+     * and defines the DT_PARENT_ENTITY constant if available.
+     *
+     * @param \hserv\System|null $_system Optional. The Heurist system object. If null, it will try to use a global $system variable.
+     * @return void
+     */
     public static function initialize($_system=null)
     {
 
@@ -95,18 +117,30 @@ class TitleMask {
         self::$system->defineConstant('DT_PARENT_ENTITY');
     }
 
+    /**
+     * Sets the field correspondence map, used for title mask generation during imports.
+     *
+     * This allows mapping source field identifiers to target Heurist field identifiers
+     * when a title mask from a source system refers to fields by different IDs.
+     *
+     * @param array|null $fields_correspondence An associative array mapping source field IDs to target field IDs.
+     * @return void
+     */
     public static function set_fields_correspondence($fields_correspondence){
         self::$fields_correspondence = $fields_correspondence;
     }
 
 /**
-* Check that the given title mask is well-formed for the given reference type
-* Returns an error string describing any faults in the mask.
-*
-* @param mixed $mask
-* @param mixed $rt
-* @param mixed $checkempty
-*/
+ * Checks if a given title mask string is well-formed for a specific record type.
+ *
+ * It uses `TitleMask::execute()` in mode 1 (convert to coded format) and checks for errors.
+ *
+ * @param string $mask The title mask string to check.
+ * @param int $rt The record type ID for which the mask is intended.
+ * @param bool $checkempty If true, an empty mask or a mask without any field placeholders `[field]`
+ *                         will be considered an error.
+ * @return string An empty string if the mask is valid, or an error message string if faults are found.
+ */
  public static function check($mask, $rt, $checkempty) {
 
     self::initialize();
@@ -129,12 +163,15 @@ class TitleMask {
 }
 
 /**
-* Execute titlemask - replace tags with values
-*
-* @param mixed $mask
-* @param mixed $rec_id
-* @param mixed $rt
-*/
+ * Fills a title mask with values from a specific record to generate the record's title.
+ *
+ * If `$mask` is not provided, it fetches the `rty_TitleMask` for the record's type.
+ * It then calls `TitleMask::execute()` in mode 0 to substitute field placeholders with actual values.
+ *
+ * @param int $rec_id The ID of the record whose title is to be generated.
+ * @param string|null $mask Optional. The title mask string. If null, it's retrieved from the record type definition.
+ * @return string The generated title string, or an error message if the record is not found or the mask is invalid.
+ */
 public static function fill($rec_id, $mask=null){
 
     self::initialize();
@@ -155,12 +192,20 @@ public static function fill($rec_id, $mask=null){
 * Converts titlemask to coded, human readable or fill mask with values
 * In case of invalid titlemask it returns either general warning, error message or empty string (see $rep_mode)
 *
-* @param mixed $mask - titlemask
-* @param mixed $rt - record type
-* @param mixed $mode - 0 get value from coded, 1 to coded, 2 - to human readable, 3 get value from human readable
-* @param mixed $rec_id - record id for value mode
-* @param mixed $rep_mode - output in case failure: 0 - general message(ERROR_REP_WARN), 1- detailed message, 2 - empty string (ERROR_REP_SILENT)
-* @return string
+* @param string $mask The title mask string.
+* @param int $rt The record type ID.
+* @param int $mode The execution mode:
+*                  - 0: Fill coded mask with values from `$rec_id` to produce the final title.
+*                  - 1: Convert human-readable mask to internal coded format (field names to concept codes/IDs).
+*                  - 2: Convert internal coded mask to human-readable format (concept codes/IDs to field names).
+*                  - 3: Fill human-readable mask with values (effectively mode 1 then mode 0).
+* @param int|null $rec_id The record ID, required if mode is 0 or 3.
+* @param int $rep_mode Error reporting mode:
+*                      - `ERROR_REP_WARN` (0): Return a generic error message (default).
+*                      - `ERROR_REP_MSG` (1): Return a detailed error message.
+*                      - `ERROR_REP_SILENT` (2): Return an empty string on error (or default title if mode 0).
+* @return string|array The processed title mask string, the generated title, or an error array (if mode 1 or 2 fails with $rep_mode=ERROR_REP_MSG).
+*                      If mode 0 and all fields are blank, returns a default "no data" message or result of `__get_forempty`.
 */
 public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_REP_WARN) {
 
@@ -369,9 +414,16 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
 //-------------- private methods -----------------
 
 /**
-* If the title mask is blank or contains no valid fields, build the title using the values of the first three
-* data fields (excluding memo fields) truncated to 40 characters if longer, separated with pipe symbols
-*/
+ * Generates a default title if the title mask is blank or contains no valid fields.
+ *
+ * The default title is constructed using the values of the first three non-empty,
+ * non-memo data fields, truncated to 40 characters each, and separated by pipe symbols.
+ * If no such data is found, a generic "Record ID X - no data..." message is returned.
+ *
+ * @param int $rec_id The record ID.
+ * @param int $rt The record type ID.
+ * @return string The generated default title.
+ */
 private static function __get_forempty($rec_id, $rt){
 
     $rdr = self::__get_rec_detail_types($rt);
@@ -402,6 +454,14 @@ private static function __get_forempty($rec_id, $rt){
 /*
 * Returns ALL field types definitions and keeps it into static array
 */
+/**
+ * Retrieves all detail type definitions and caches them.
+ *
+ * Fetches from `defDetailTypes` and stores them in `self::$rdt`, indexed by
+ * `dty_ID`, lowercase `dty_Name`, and `dty_ConceptCode`.
+ *
+ * @return array The cached array of all detail type definitions.
+ */
 private static function __get_detail_types() {
 
     if (! self::$rdt) {
@@ -441,6 +501,16 @@ private static function __get_detail_types() {
 * keeps it in static array
 * this array for each given record type
 */
+/**
+ * Retrieves the record structure (fields) for a given record type and caches it.
+ *
+ * Fetches from `defRecStructure` joined with `defDetailTypes`.
+ * Stores the result in `self::$rdr[$rt]`, indexed by `dty_ID`,
+ * lowercase `rst_DisplayName`, and `dty_ConceptCode`.
+ *
+ * @param int $rt The record type ID.
+ * @return array The cached array of field definitions for the specified record type.
+ */
 private static function __get_rec_detail_types($rt) {
 
     if (!self::$rdr) {
@@ -495,6 +565,17 @@ private static function __get_rec_detail_types($rt) {
 /*
 * Returns array of related record ids for given record and relmarker field
 */
+/**
+ * Retrieves IDs of records related via a specific 'relmarker' (relationship marker) field.
+ *
+ * Considers both direct and reverse relationships based on `recLinks`.
+ * Filters by relation types (terms under the field's vocabulary) and record type
+ * constraints defined for the relmarker field.
+ *
+ * @param int $rec_id The ID of the source/target record.
+ * @param int $dty_ID The detail type ID of the 'relmarker' field.
+ * @return array An array of related record IDs.
+ */
 private static function __get_related_record_ids($rec_id, $dty_ID) {
 
     //1. find all relation types
@@ -555,6 +636,18 @@ private static function __get_related_record_ids($rec_id, $dty_ID) {
 *
 * @param mixed $rec_id
 */
+/**
+ * Retrieves and caches the data for a specific record, including its header and details.
+ *
+ * Fetches from `Records` and `recDetails` tables. Skips forbidden fields.
+ * Caches results in `self::$records` to avoid redundant queries for the same record.
+ *
+ * @param int $rec_id The ID of the record to retrieve.
+ * @param bool $reset If true, forces a refresh of the cache for this record. Defaults to false.
+ * @return array|null The record data as an associative array, or null if not found.
+ *                    The array includes 'rec_ID', 'rec_Title', 'rec_Modified', 'rec_RecTypeID',
+ *                    'rty_Name', 'rty_TitleMask', and 'rec_Details' (an array of detail rows).
+ */
 private static function __get_record_value($rec_id, $reset=false) {
 
 /*
@@ -614,6 +707,20 @@ private static function __get_record_value($rec_id, $reset=false) {
 * @param mixed $enum_id
 * @param mixed $enum_param_name
 */
+/**
+ * Retrieves a specific attribute of an enumeration term (e.g., label, code, concept ID).
+ *
+ * If 'label' is requested and the term has a parent, it constructs a hierarchical label
+ * (e.g., "Parent.Child.Grandchild").
+ *
+ * @param int $enum_id The ID of the term.
+ * @param string|null $enum_param_name The attribute to retrieve:
+ *                                     'label' or 'term' (default): The term's label (potentially hierarchical).
+ *                                     'id' or 'internalid': The term's `trm_ID`.
+ *                                     'code': The term's `trm_Code`.
+ *                                     'conceptid': The term's `trm_ConceptID`.
+ * @return string|null The requested term attribute value, or null if not found.
+ */
 private static function __get_enum_value($enum_id, $enum_param_name)
 {
 
@@ -674,6 +781,15 @@ private static function __get_enum_value($enum_id, $enum_param_name)
 //
 //
 //
+/**
+ * Gets the display name for an uploaded file.
+ *
+ * If the file is external (ULF_REMOTE), returns its `ulf_ExternalFileReference`.
+ * Otherwise, returns `ulf_OrigFileName`.
+ *
+ * @param int $ulf_ID The ID of the uploaded file (`recUploadedFiles.ulf_ID`).
+ * @return string The filename or URL, or an empty string if not found.
+ */
 private static function __get_file_name($ulf_ID){
 
     if($ulf_ID>0){
@@ -791,6 +907,21 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
 * @param mixed $search_fieldname  - search value: name of attribute(field) of detail type: dty_ID, rst_DisplayName, dty_ConceptCode
 * @param mixed $result_fieldname - result filed
 */
+/**
+ * Retrieves a specific attribute of a detail type definition.
+ *
+ * Searches first within the context of a specific record type's structure (`self::$rdr`),
+ * then falls back to the global list of detail types (`self::$rdt`) if not found in the structure
+ * (and mode is not 1, which implies strict structure adherence for coded masks).
+ * Handles special "Parent Entity" field name.
+ *
+ * @param int $rt The current record type ID (context for `rst_DisplayName`).
+ * @param string $search_fieldname The identifier to search for (can be dty_ID, rst_DisplayName, or dty_ConceptCode).
+ * @param int $mode The current processing mode (affects fallback search behavior).
+ * @param string $result_fieldname The name of the attribute to return from the detail type definition
+ *                                 (e.g., 'dty_ConceptCode', 'dty_Type', 'originalName'). Defaults to 'dty_ConceptCode'.
+ * @return mixed|null The value of the requested attribute, or null if the field is not found.
+ */
 private static function __get_dt_field($rt, $search_fieldname, $mode, $result_fieldname='dty_ConceptCode'){
 
     $rdr = self::__get_rec_detail_types($rt);
@@ -824,6 +955,17 @@ private static function __get_dt_field($rt, $search_fieldname, $mode, $result_fi
 //
 // get rectype id by name, cc or id
 //
+/**
+ * Retrieves record type information (ID, concept code, name) by various identifiers.
+ *
+ * Searches `defRecTypes` by:
+ * 1. Concept code (e.g., "DBID-RTID").
+ * 2. Record type ID (`rty_ID`).
+ * 3. Record type name (`rty_Name`, case-insensitive).
+ *
+ * @param string|int $rt_search The identifier to search for.
+ * @return array An array `[rty_ID, rty_ConceptCode, rty_Name]`. Returns `[0, '', '']` if not found.
+ */
 private static function __get_rt_id( $rt_search ){
 
         $query = 'SELECT rty_ID, rty_Name, rty_OriginatingDBID, rty_IDInOriginatingDB FROM defRecTypes where ';
@@ -1249,6 +1391,14 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
 //
 // replace local dty_ID to concept code (for import)
 //
+/**
+ * Replaces a local detail type ID with its corresponding concept code during import.
+ *
+ * Uses the `self::$fields_correspondence` map if available.
+ *
+ * @param string|int $dty_ID The local detail type ID or an existing concept code.
+ * @return string|int The concept code if a replacement is found, otherwise the original `$dty_ID`.
+ */
 private static function __replaceInCaseOfImport($dty_ID){
     //special case - replace dty_ID in case of definition import
     if(strpos($dty_ID,"-")===false && is_numeric($dty_ID)){ //this is not concept code and numeric
@@ -1263,6 +1413,15 @@ private static function __replaceInCaseOfImport($dty_ID){
 //
 // Check if provided field is for a record's parent entity
 //
+/**
+ * Checks if a given field name refers to a "Parent Entity" type field.
+ *
+ * Matches against common names ("parent entity", "record parent"), the defined
+ * constant `DT_PARENT_ENTITY`, or the specific concept code "2-247".
+ *
+ * @param string $field_name The field name to check (case-insensitive).
+ * @return bool True if it's considered a parent entity field, false otherwise.
+ */
 private static function _is_parent_entity($field_name){
 
     $field_name = mb_strtolower($field_name, 'UTF-8');
@@ -1276,7 +1435,23 @@ private static function _is_parent_entity($field_name){
 }//end of class
 
 if (! function_exists('array_str_replace')) {
-
+    /**
+     * Replaces all occurrences of the search strings with the replacement strings,
+     * processing from left to right and ensuring non-overlapping replacements.
+     *
+     * This function is designed to behave more predictably than PHP's built-in `str_replace`
+     * when `$search` is an array, especially when search strings might overlap or when
+     * replacements might re-introduce earlier search strings. It processes the subject string
+     * by finding the earliest occurrence of any search string, performing that replacement,
+     * and then continuing the search on the remainder of the string.
+     *
+     * @param array|string $search The value being searched for, otherwise known as the needle.
+     *                             An array may be used to designate multiple needles.
+     * @param array|string $replace The replacement value that replaces found search values.
+     *                              An array may be used to designate multiple replacements.
+     * @param string $subject The string being searched and replaced on, otherwise known as the haystack.
+     * @return string A string with the replaced values.
+     */
     function array_str_replace($search, $replace, $subject) {
         /*
         * PHP's built-in str_replace is broken when $search is an array:

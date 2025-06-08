@@ -24,42 +24,112 @@
 namespace hserv\records\export;
 use hserv\records\export\ExportRecords;
 
+/**
+ * Defines the Dublin Core title predicate.
+ * @var string DC_TITLE Predicate for title (dc:title).
+ */
 define('DC_TITLE', 'dc:title');
 
 /**
-*
-*  setSession - switch current datbase
-*  output - main method
-*
-*/
+ * Class ExportRecordsRDF
+ *
+ * Extends ExportRecords to provide functionality for exporting records in RDF format
+ * using the EasyRdf library. It supports various RDF serializations like RDF/XML,
+ * N-Triples, Turtle, and JSON-LD (if dependencies are met).
+ * This class is typically controlled by the 'records_output' controller.
+ * It maps Heurist record structures and semantic URLs to RDF resources and predicates.
+ *
+ * @package hserv\records\export
+ */
 class ExportRecordsRDF extends ExportRecords {
 
+    /**
+     * @var \EasyRdf\Graph The EasyRdf graph object where RDF triples are accumulated.
+     */
     private $graph;
 
-    //indexes in defintions
+    // Property names are self-descriptive for their use as indexes into Heurist definition arrays.
+    /**
+     * @var int|null Index for record type name in definition arrays.
+     */
     private $idx_rty_name;
+    /**
+     * @var int|null Index for record type concept ID in definition arrays.
+     */
     private $idx_rty_ccode;
+    /**
+     * @var int|null Index for record type semantic reference URL in definition arrays.
+     */
     private $idx_rty_surl;
+    /**
+     * @var int|null Index for record type originating DB ID in definition arrays.
+     */
     private $idx_rty_dbid;
 
+    /**
+     * @var int|null Index for record structure (field) display name in definition arrays.
+     */
     private $idx_rst_name;
+    /**
+     * @var int|null Index for record structure (field) semantic reference URL in definition arrays.
+     */
     private $idx_rst_surl;
+    /**
+     * @var int|null Index for record structure (field) originating DB ID in definition arrays.
+     */
     private $idx_rst_dbid;
 
+    /**
+     * @var int|null Index for detail type concept ID in definition arrays.
+     */
     private $idx_dty_ccode;
+    /**
+     * @var int|null Index for detail type semantic reference URL in definition arrays.
+     */
     private $idx_dty_surl;
 
+    /**
+     * @var int|null Index for detail type's data type (e.g., 'enum', 'date') in definition arrays.
+     */
     private $idx_dtype;
 
+    /**
+     * @var string|null The requested RDF serialization format (e.g., 'rdfxml', 'turtle').
+     */
     private $serial_format = null;
+    /**
+     * @var string|null The registered ID of the current Heurist database.
+     */
     private $dbid;
 
+    /**
+     * @var bool Flag to include rdfs:label with the record type name for the main resource.
+     */
     private $include_definition_label = true;
+    /**
+     * @var bool Flag to include dc:title with the record title for linked resources.
+     */
     private $include_resource_rec_title = true;
+    /**
+     * @var bool Flag to include dc:title with the term label for linked term resources.
+     */
     private $include_resource_term_label = true;
+    /**
+     * @var bool Flag to include dc:title (filename) and dc:description for linked file resources.
+     */
     private $include_resource_file_info = true;
 
-
+    /**
+     * Prepares for RDF export.
+     *
+     * Initializes RDF-specific settings like serialization format, the database's registered ID,
+     * defines a base URI (`HEURIST_REF`) if not already set, and parses parameters
+     * to control the inclusion of extended information (labels, titles) in the RDF output.
+     *
+     * @param array $data The data to be exported.
+     * @param array $params Parameters for the export. May include 'serial_format' and 'extinfo'.
+     * @return bool True if preparation was successful, false otherwise.
+     */
 protected function _outputPrepare($data, $params)
 {
     $res = parent::_outputPrepare($data, $params);
@@ -91,6 +161,14 @@ protected function _outputPrepare($data, $params)
 //
 //
 //
+    /**
+     * Initializes the RDF graph and prepares necessary definitions for export.
+     *
+     * Creates a new EasyRdf\Graph instance, sets standard namespaces (xsd, base, db, dc).
+     * It preloads Heurist record type and detail type definitions and initializes
+     * internal index properties (e.g., `$this->idx_rty_name`) for efficient access
+     * to these definitions during record processing.
+     */
 protected function _outputHeader(){
      $this->graph = new \EasyRdf\Graph();
 
@@ -124,6 +202,12 @@ protected function _outputHeader(){
 //
 //
 //
+    /**
+     * Initializes term definitions if they haven't been loaded yet.
+     *
+     * This is a helper method to ensure that `self::$defTerms` is populated
+     * with term data (from `dbs_GetTerms`) before it's accessed.
+     */
 private function initializeTerms(){
     if(self::$defTerms==null) {
         self::$defTerms = dbs_GetTerms($this->system);
@@ -138,6 +222,19 @@ private function initializeTerms(){
 // 1. https://www.ica.org/standards/RiC/ontology#Person  => rico:Person
 // 2. rico => https://www.ica.org/standards/RiC/ontology#
 //
+    /**
+     * Converts a semantic URL (SURL) or Heurist internal identifier into a prefixed URI
+     * and registers its namespace with EasyRdf.
+     *
+     * Parses the input SURL. If it matches known URI patterns (e.g., RiC, FOAF, Heurist schema),
+     * it assigns a short prefix (e.g., 'rico', 'foaf', 'heurist') and registers the full URI
+     * with EasyRdf\RdfNamespace. If the SURL is an internal Heurist identifier (like 'dty-2-1'
+     * or includes an originating DB ID), it constructs a URI within the HEURIST_REF namespace.
+     *
+     * @param string|null $surl The semantic URL or Heurist identifier (e.g., 'http://xmlns.com/foaf/0.1/Person', 'dty-ConceptID', 'rty-OriginatingDBID-ConceptID').
+     * @param string|int|null $original_dbid The originating database ID, used to construct URIs for definitions from other Heurist DBs.
+     * @return string|null A prefixed URI (e.g., "foaf:Person"), a full URI if no prefix is mapped, or null if the input is empty.
+     */
 private function _prepareURI($surl, $original_dbid=null){
 
     $ns = null;
@@ -252,6 +349,17 @@ private function _prepareURI($surl, $original_dbid=null){
 //
 //
 //
+    /**
+     * Processes a single Heurist record and adds its RDF representation to the graph.
+     *
+     * Determines the RDF type for the record using its semantic URL or concept ID via `_prepareURI`.
+     * If a type is determined, it creates an EasyRdf\Resource for the record (using a
+     * HEURIST_REF based URI like `HEURIST_REF.'db/record/'.$this->dbid.'-'.$recID`).
+     * Then, it calls `_setResourceProps` to populate the resource with properties and relationships.
+     *
+     * @param array $record The Heurist record array to process.
+     * @return bool Always true to continue processing.
+     */
 protected function _outputRecord($record){
 
     $recID = intval($record['rec_ID']);
@@ -291,6 +399,15 @@ protected function _outputRecord($record){
 //
 //
 //
+    /**
+     * Finalizes the RDF export by serializing and outputting the graph.
+     *
+     * If the graph is not empty, it serializes the accumulated RDF triples
+     * into the format specified by `$this->serial_format` (defaulting to 'rdfxml'
+     * if the requested format is invalid or not set). Supported formats include
+     * 'rdfxml', 'json', 'ntriples', 'turtle'.
+     * The serialized data is written to the output stream.
+     */
 protected function _outputFooter(){
 
     if(!$this->graph->isEmpty()){
@@ -321,10 +438,26 @@ protected function _outputFooter(){
 
 
 //
-// convert heurist record to more interpretable format
 //
-// $extended_mode = 0 - as is, 1 - details in format {dty_ID: val: }, 2 - with concept codes and names/labels
-//
+    /**
+     * Sets properties for a given RDF resource based on a Heurist record's data.
+     *
+     * Adds rdfs:label (record type name) and dc:title (record title) to the resource.
+     * Iterates through the record's details:
+     * - Determines the predicate URI for each field using `_getFieldURI`.
+     * - For file details: creates a new RDF resource for the file, adding dc:title (filename)
+     *   and dc:description if enabled by `$this->include_resource_file_info`.
+     * - For enum/term details: creates/retrieves an RDF resource for the term using its SURL or
+     *   concept ID via `_prepareURI`. Adds dc:title (term label) if enabled by
+     *   `$this->include_resource_term_label`.
+     * - For literal types (date, year, float, integer, boolean, text): creates an
+     *   EasyRdf\Literal with the appropriate XSD datatype.
+     * - Adds the triple: `$resource $predicateURI $valueOrResource`.
+     * Finally, calls `_composeLinks` to add relationships to other resources.
+     *
+     * @param array $record The Heurist record array.
+     * @param \EasyRdf\Resource $resource The EasyRdf resource to add properties to.
+     */
 private function _setResourceProps($record, &$resource){
 
     $rec_ID = $record['rec_ID'];
@@ -519,6 +652,24 @@ private function _setResourceProps($record, &$resource){
 //
 //
 //
+    /**
+     * Adds relationship triples (links) from a source RDF resource to target RDF resources.
+     *
+     * Iterates through a list of relations. For each relation:
+     * - Determines the predicate URI using `_getRelationURI` for typed relations (terms)
+     *   or `_getFieldURI` for simple links (detail fields).
+     * - If the direction is 'reverse', it tries to find an inverse term for the predicate.
+     * - Creates/retrieves an RDF resource for the target record.
+     * - If `$this->include_resource_rec_title` is true, adds dc:title (target record's title)
+     *   to the target resource.
+     * - Adds the triple: `$resource $predicateURI $targetResource`.
+     *
+     * @param \EasyRdf\Resource $resource The source EasyRdf resource.
+     * @param array $relations An array of relationship objects (typically from `recordSearchRelated`).
+     * @param string $direction 'direct' or 'reverse', indicating the direction of the relationship.
+     * @param int $rty_ID The record type ID of the source record (used by `_getFieldURI` if relation is via detail field).
+     * @param array $headers An array mapping record IDs to their titles (used for `dc:title` on target resources).
+     */
 private function _composeLinks(&$resource, $relations, $direction, $rty_ID, $headers){
 
     /*
@@ -599,6 +750,19 @@ private function _composeLinks(&$resource, $relations, $direction, $rty_ID, $hea
 //
 //
 //
+    /**
+     * Determines the predicate URI for a Heurist detail type (field).
+     *
+     * It prioritizes the semantic URL defined in the record type's structure for that field (`rst_SemanticReferenceURL`).
+     * If not found, it falls back to the semantic URL defined directly in the detail type (`dty_SemanticReferenceURL`).
+     * If still not found, it attempts to construct a URI using the detail type's concept ID
+     * (e.g., 'heurist:dty-ConceptID').
+     * Uses `_prepareURI` to potentially get a prefixed URI.
+     *
+     * @param int $rty_ID The record type ID (to look up field settings within the record type structure).
+     * @param int $dty_ID The detail type ID.
+     * @return string|null The predicate URI for the field, or null if no suitable SURL or concept ID is found.
+     */
 private function _getFieldURI($rty_ID, $dty_ID){
 
     $field_URI = $this->_prepareURI(self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$this->idx_rst_surl],
@@ -618,6 +782,17 @@ private function _getFieldURI($rty_ID, $dty_ID){
 //
 //
 //
+    /**
+     * Determines the predicate URI for a Heurist term (used for typed relationships).
+     *
+     * It prioritizes the semantic reference URL defined for the term (`trm_ReferenceURL`).
+     * If not found, it attempts to construct a URI using the term's concept ID
+     * (e.g., 'heurist:trm-ConceptID').
+     * Uses `_prepareURI` to potentially get a prefixed URI.
+     *
+     * @param int $trm_ID The term ID.
+     * @return string|null The predicate URI for the term, or null if no suitable SURL or concept ID is found.
+     */
 private function _getRelationURI($trm_ID){
 
     //$term = self::$defTerms->getTerm($trm_ID);

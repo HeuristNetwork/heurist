@@ -3,19 +3,32 @@ namespace hserv\filestore;
 use hserv\utilities\USanitize;
 
 /**
-*  Searches registered and not registered user's files in database folder
-*  (in specified folder or set of subfolders)
-*/
+     * Class FilestoreHarvest
+     *
+     * Searches for files within specified directories of the Heurist database filestore.
+     * It can categorize these files as registered (present in `recUploadedFiles`) or
+     * non-registered based on database lookups. This is typically used for media
+     * indexing and management tasks.
+     */
 class FilestoreHarvest
 {
+        /** @var \hserv\System The main Heurist system object. */
     private $system;
     
+        /** @var mixed Stores issues found during reporting (currently not fully utilized in provided code). */
     private $rep_issues;
+        /** @var array Stores information about registered and non-registered files.
+         *             Format: `['reg' => [...filenames...], 'nonreg' => [...filenames...]]`
+         */
     private $reg_info;
 
-    //
-    // constructor
-    //
+    /**
+     * Constructor for FilestoreHarvest.
+     *
+     * Initializes the system object and resets report/registration info containers.
+     *
+     * @param \hserv\System $system The main Heurist system object.
+     */
     public function __construct( $system ) {
         
         $this->system = $system;
@@ -28,6 +41,16 @@ class FilestoreHarvest
     //
     // return folders and extents to index
     //
+    /**
+     * Retrieves the list of media folders and allowed file extensions for indexing.
+     *
+     * Reads `sys_MediaFolders` and `sys_MediaExtensions` settings from the database.
+     * If not set, defaults to the 'uploaded_files' directory and `HEURIST_ALLOWED_EXT`.
+     * Ensures 'file_uploads' is always included. Folder paths are sanitized.
+     *
+     * @return array An associative array with 'dirs' (array of folder paths)
+     *               and 'exts' (array of allowed extensions).
+     */
     public function getMediaFolders() {
         
         $mediaFolders = $this->system->settings->get('sys_MediaFolders');
@@ -63,7 +86,13 @@ class FilestoreHarvest
         return array('dirs'=>$mediaFolders, 'exts'=>$mediaExts);
     }
     
-
+    /**
+     * Returns the currently stored registration information.
+     *
+     * This information is populated by `getFilesInDir` and `doHarvest`.
+     *
+     * @return array An associative array: `['reg' => [...registered files...], 'nonreg' => [...non-registered files...]]`.
+     */
     public function getRegInfoResult(){
         return $this->reg_info;
     }
@@ -75,6 +104,22 @@ class FilestoreHarvest
     // 0 - all
     // 1 - reg and unreg separately
     //
+    /**
+     * Scans a directory for files and categorizes them based on registration status and mode.
+     *
+     * Populates `$this->reg_info` with found files.
+     * Skips directories, specific system files (fieldhelper.xml, index.html, .htaccess),
+     * and files not matching `$mediaExts`.
+     *
+     * @param string $dir The directory path to scan.
+     * @param array $mediaExts An array of allowed file extensions (lowercase).
+     * @param int $imode Categorization mode:
+     *                   - 0: Adds all matching files to `$this->reg_info` (assumes flat list, current usage might differ).
+     *                   - 1: Categorizes files into `$this->reg_info['reg']` (registered in `recUploadedFiles`)
+     *                        and `$this->reg_info['nonreg']` (not registered). Checks to avoid adding thumbnails
+     *                        of already processed non-registered files.
+     * @return void
+     */
     private function getFilesInDir($dir, $mediaExts, $imode) {
 
         $all_files = scandir($dir);
@@ -127,13 +172,20 @@ class FilestoreHarvest
     // folders "thumbnail" will be skipped
     //
     /**
-    * collests user's files in database folder 
-    * 
-    * @param mixed $dirs_and_exts - set of subfolders and extensions
-    * @param mixed $is_report - 
-    * @param mixed $imode
-    * @param mixed $allowed_system_folders
-    */
+     * Recursively harvests files from specified directories based on allowed extensions.
+     *
+     * Populates `$this->reg_info` by calling `getFilesInDir` for each valid directory.
+     * Skips system folders unless explicitly allowed, and skips 'thumbnail' subdirectories.
+     * Can optionally print report messages during harvesting if `$is_report` is true.
+     *
+     * @param array $dirs_and_exts An associative array from `getMediaFolders()`:
+     *                             `['dirs' => [...folder paths...], 'exts' => [...allowed extensions...]]`.
+     * @param bool $is_report If true, prints status/error messages during processing.
+     * @param int $imode Mode passed to `getFilesInDir` (0 for all, 1 for reg/nonreg categorization).
+     * @param array|null $allowed_system_folders Optional array of system folder names that are allowed to be scanned.
+     *                                           Defaults to `['file_uploads']`.
+     * @return void
+     */
     public function doHarvest($dirs_and_exts, $is_report, $imode, $allowed_system_folders=null) {
 
         $this->reg_info = array('reg'=>array(),'nonreg'=>array());

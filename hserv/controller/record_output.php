@@ -292,12 +292,15 @@
 
 
 /**
- * Write file references out into CSV format
+ * Writes file references out into CSV format.
  *
- * @param hserv\System $system Initialised Heurist system
- * @param string|array $ids File ids to include (comma separated string or array)
- * @return none
- *  Output CSV file containing file references, or error message
+ * Retrieves details for specified uploaded files and outputs them as a CSV file.
+ * The CSV includes information such as file ID, name, path, URL, description,
+ * uploader, dates, and records referencing the file.
+ *
+ * @param \hserv\System $system Initialised Heurist system object.
+ * @param string|array $ids File IDs to include (comma-separated string, array, or 'all').
+ * @return void Outputs a CSV file or an HTML error message.
  */
 function downloadFileReferences($system, $ids){
 

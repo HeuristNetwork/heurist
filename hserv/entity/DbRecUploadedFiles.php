@@ -9,11 +9,20 @@ use hserv\utilities\UImage;
 use hserv\filestore\FilestoreHarvest;
 
     /**
-    * db access to recUploadedFiles table
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbRecUploadedFiles
+     *
+     * Provides database access and operations for the `recUploadedFiles` table.
+     * This includes registering local and remote files, handling IIIF images/manifests,
+     * managing thumbnails, searching, deleting, and performing batch operations on files.
+     *
+     * Key public methods for file registration include:
+     * - `registerImage()`: Saves base64 encoded image data as a file and registers it.
+     * - `registerFile()`: Registers an existing file (local or temporary).
+     * - `registerURL()`: Registers a remote URL, optionally downloading it.
+     * - `downloadAndRegisterdURL()`: Downloads a file from a URL and then registers it as a local file.
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -41,11 +50,18 @@ require_once dirname(__FILE__).'/../records/edit/recordModify.php';
 */
 class DbRecUploadedFiles extends DbEntityBase
 {
+    /** @var string Default error message for unrecognized file extensions/MIME types. */
     private $error_ext;
 
-    //
-    // constructor - load configuration from json file
-    //
+    /**
+     * Constructor for DbRecUploadedFiles.
+     *
+     * Calls the parent constructor and initializes a default error message
+     * for issues related to file format recognition during uploads.
+     *
+     * @param \hserv\System $system The main Heurist system object.
+     * @param array|null $data Optional data to initialize the entity with.
+     */
     public function __construct( $system, $data=null ) {
 
        parent::__construct( $system, $data );
@@ -65,7 +81,10 @@ class DbRecUploadedFiles extends DbEntityBase
     *  limit
     *  request_id
     *
-    *  @todo overwrite
+    * @return array|false An array of found file records, or false on error.
+    *                     The structure of the returned array elements depends on the 'details' parameter.
+    *                     'list' and 'full' details include a calculated `ulf_PlayerTag`.
+    *                     If `needRelations` is true (for 'full' details), related record information is also fetched.
     */
     public function search(){
 
@@ -248,6 +267,15 @@ class DbRecUploadedFiles extends DbEntityBase
     //
     //
     //
+    /**
+     * Validates if the current user has permission to modify/delete the specified file records.
+     *
+     * Users can only modify/delete files they uploaded unless they are the database owner.
+     * This method overrides the parent `_validatePermission`.
+     *
+     * @return bool True if the user has permission, false otherwise.
+     *              Errors are added to the system object on permission failure.
+     */
     protected function _validatePermission(){
 
         if(!$this->system->isDbOwner() && !isEmptyArray($this->recordIDs)){
@@ -275,6 +303,17 @@ class DbRecUploadedFiles extends DbEntityBase
 
     }
 
+    /**
+     * Validates specific values for `recUploadedFiles` records before saving.
+     *
+     * Checks:
+     * - If `ulf_MimeExt` corresponds to a known MIME type in `defFileExtToMimetype`.
+     * - If `ulf_FileSizeKB` is a non-negative number.
+     * This method extends `parent::_validateValues()`.
+     *
+     * @return bool True if all validations pass, false otherwise.
+     *              Errors are added to the system object on validation failure.
+     */
     protected function _validateValues(){
 
         $ret = parent::_validateValues();
@@ -305,6 +344,24 @@ class DbRecUploadedFiles extends DbEntityBase
     //
     //
     //
+    /**
+     * Prepares `recUploadedFiles` records before saving.
+     *
+     * Handles various scenarios for local files, remote URLs, and IIIF resources:
+     * - For new local files (from `ulf_FileUpload`), gathers file info using `getFileInfoForReg`.
+     * - For remote URLs (`ulf_ExternalFileReference`):
+     *   - Detects IIIF manifests or images by inspecting JSON content if MIME type is JSON.
+     *   - Sets `ulf_OrigFileName` to special markers like `_heurist_iiif_` or `_heurist_remote_`.
+     *   - Sets `ulf_PreferredSource` accordingly.
+     *   - May populate `ulf_Description` and `ulf_TempThumbUrl` from IIIF manifest.
+     * - Sets `ulf_PreferredSource` to 'local' for non-external files.
+     * - For new records, sets `ulf_UploaderUGrpID` and `ulf_Added` date.
+     * - Ensures `ulf_MimeExt` is a valid extension (looking up from MIME type if necessary).
+     * - Defaults `ulf_FileSizeKB` to 0 if not set.
+     *
+     * @return bool True if preparation is successful and validation passes, false otherwise.
+     *              Errors are added to the system object on failure.
+     */
     protected function prepareRecords(){
 
         $ret = parent::prepareRecords();
@@ -479,6 +536,23 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     // 2) remote - save as usual and define ulf_ObfuscatedFileID and ulf_FileName
     // 3) update just parent:save
     //
+    /**
+     * Saves uploaded file records.
+     *
+     * After calling `parent::save()`, this method handles:
+     * - Generating and saving `ulf_ObfuscatedFileID` for new records.
+     * - Setting `ulf_FileName` for new local files if not already set.
+     * - For tiled images (`ULF_TILED_IMAGE` or `tiled` preferred source):
+     *   - If `ulf_ExternalFileReference` is not set, constructs it.
+     *   - Copies/unzips files from `ulf_TempFile` to the appropriate tilestacks directory.
+     *   - Creates a placeholder thumbnail.
+     * - For IIIF images/manifests with a `ulf_TempThumbUrl`, downloads and saves the thumbnail.
+     * - For other local files with `ulf_TempFile`, copies the main file and its thumbnail
+     *   from scratch space to the final upload directories.
+     *
+     * @return array|false The result from `parent::save()` (array of saved IDs or false on failure).
+     *                     May also return false if post-save operations (like file copying) fail.
+     */
     public function save(){
 
         $ret = parent::save();
@@ -689,6 +763,25 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //    create_media_records
     //    bulk_reg_filestore
     //    import_data
+    /**
+     * Performs batch actions on uploaded file records.
+     *
+     * Supported actions (determined by parameters in `$this->data`):
+     * - `csv_import`: Imports new media files from CSV data. URLs can be optionally downloaded.
+     * - `delete_selected`: Deletes file records that are not currently in use.
+     * - `regRawImages`: Bulk registers base64 encoded images.
+     * - `regExternalFiles`: Registers multiple external URLs and returns their details.
+     * - `merge_duplicates`: Merges duplicate local and remote file entries.
+     * - `create_media_records`: Creates "Multi Media" records for files that don't have one.
+     * - `get_media_records`: Retrieves IDs of "Multi Media" records referencing specified files.
+     * - `bulk_reg_filestore`: Bulk registers files found in predefined filestore subfolders.
+     * - `import_data`: Imports metadata for existing files based on various ID types.
+     *
+     * Most operations are performed within a database transaction.
+     *
+     * @return mixed The result of the specific batch operation, which varies depending on the action.
+     *               Often an array with counts or status messages, or boolean for success/failure.
+     */
     public function batch_action(){
 
         $mysqli = $this->system->getMysqli();
@@ -1055,6 +1148,20 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //
     //
     //
+    /**
+     * Deletes uploaded file records and their associated files.
+     *
+     * - Calls `deletePrepare()` to validate permissions and identify records.
+     * - If `$check_referencing` is true (default), prevents deletion if the file is referenced by other records.
+     * - If deletion proceeds:
+     *   - Removes the database entry from `recUploadedFiles`.
+     *   - If `$keep_uploaded_files` is false (default), deletes the physical file from storage.
+     *   - Deletes associated thumbnail and any web/blurred cache images.
+     *
+     * @param bool $keep_uploaded_files If true, only the database record is deleted, physical files are kept. Defaults to false.
+     * @param bool $check_referencing If true, checks if the file is referenced in `recDetails` before deleting. Defaults to true.
+     * @return bool True on successful deletion, false otherwise (errors are added to system object).
+     */
     public function delete($keep_uploaded_files=false, $check_referencing=true){ //$disable_foreign_checks = false
 
         $this->recordIDs = null;
@@ -1150,6 +1257,23 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //
     //  get information for information for uploaded file
     //
+    /**
+     * Gathers information about a file to prepare it for registration in `recUploadedFiles`.
+     *
+     * Handles different input types for `$file`:
+     * - A string path: Assumes it's a local file.
+     * - An array (typically from multi-file uploads): Uses the first element.
+     * - An stdClass object (typically from `UploadHandler`): Extracts necessary properties.
+     *
+     * Determines original filename, extension (MIME type initially, then resolved to extension),
+     * file size, and sets paths for temporary storage.
+     *
+     * @param string|array|\stdClass $file The file identifier (path, array of file info, or UploadHandler file object).
+     * @param string|null $newname Optional new name for the file. If null, original name is used.
+     * @return array|false An associative array of file properties (`ulf_OrigFileName`, `ulf_MimeExt`,
+     *                       `ulf_FileSizeKB`, `ulf_FilePath`, `ulf_TempFile`, `ulf_TempFileThumb`)
+     *                       on success, or false on error (e.g., file not found).
+     */
     private function getFileInfoForReg($file, $newname){
 
         if(!is_a($file, 'stdClass')){
@@ -1240,11 +1364,17 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
 
     /**
-    * Save encoded image data as file and register it
-    *
-    * @param mixed $data - image data
-    * @param mixed $newname
-    */
+     * Saves base64 encoded image data as a file and then registers it.
+     *
+     * Validates the image data URI scheme, decodes the base64 data,
+     * saves it to a temporary file in the scratch directory, and then calls
+     * `registerFile()` to complete the registration.
+     *
+     * @param string $data The base64 encoded image data (e.g., "data:image/png;base64,...").
+     * @param string $newname The desired base name for the new file (without extension).
+     * @return array|false The result from `registerFile()` (array of saved IDs or false).
+     *                     Returns false if data URI is invalid, decoding fails, or type is unsupported.
+     */
     public function registerImage($data, $newname){
 
         if (preg_match('/^data:image\/(\w+);base64,/', $data, $type)) {
@@ -1278,17 +1408,20 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
 
     /**
-    * register file in database
-    *
-    * @param mixed $file - flle object see UploadHabdler->get_file_object)
-    *
-            $file = new \stdClass();
-            original_name, type, name, size, url (get_download_url),
-    *
-    *
-    * @param mixed $needclean - remove file from temp location after reg
-    * @returns record or false
-    */
+     * Registers an existing file (local or temporary) into the `recUploadedFiles` table.
+     *
+     * Gathers file information using `getFileInfoForReg()`, sets preferred source,
+     * and then calls the main `save()` method.
+     *
+     * @param string|array|\stdClass $file The file identifier (path, array of file info, or UploadHandler file object).
+     * @param string|null $newname Optional new name for the file. If null, original name is used.
+     * @param bool $needclean Unused parameter in current implementation (file cleanup is handled elsewhere or assumed).
+     * @param bool $tiledImageStack If true, registers the file as a tiled image stack, setting
+     *                              `ulf_OrigFileName` and `ulf_PreferredSource` accordingly. Defaults to false.
+     * @param array|null $_fields Optional additional fields to merge into the file record before saving
+     *                             (e.g., `ulf_Description`).
+     * @return array|false An array of saved record IDs from `save()`, or false on failure.
+     */
     public function registerFile($file, $newname, $needclean = true, $tiledImageStack=false, $_fields=null){
 
        $this->records = null; //reset
@@ -1326,10 +1459,14 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     /**
     * Download url to server and register as local file
     *
-    * $validate_same_file - 0: don't validate at all, 1: validata name only, 2: name and hash
-    * if the same name exists - returns ulf_ID of existing registered file
+    * $validate_same_file - 0: don't validate at all, 1: validate name only, 2: name and hash.
+    *                       If a matching file exists (based on validation level), its `ulf_ID` is returned.
     *
-    * @param mixed $url
+    * @param string $url The URL of the file to download.
+    * @param array|null $fields Optional additional fields to pass to `registerFile()` (e.g., description, caption).
+    * @param int $validate_same_file Validation level to check for existing identical files. Defaults to 0.
+    * @return int|false The `ulf_ID` of the registered file (new or existing) on success, or false on failure
+    *                   (e.g., download fails, registration fails, or validation criteria not met for existing file).
     */
     public function downloadAndRegisterdURL($url, $fields=null, $validate_same_file=0){
 
@@ -1399,8 +1536,12 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     *
     * $dtl_ID - update recDetails as well
     *
-    * @param mixed $url
-    * @param mixed $generate_thumbmail
+    * @param string $url The URL of the remote resource.
+    * @param bool $tiledImageStack If true, registers as a tiled image stack. Defaults to false.
+    * @param int $dtl_ID If > 0, updates the `recDetails` entry with this `dtl_ID` to link to the newly
+    *                    registered `ulf_ID` and clears its `dtl_Value`. Defaults to 0.
+    * @param array|null $fields Optional additional fields to set for the `recUploadedFiles` record.
+    * @return int|false The `ulf_ID` of the registered URL record on success, or false on failure.
     */
     public function registerURL($url, $tiledImageStack=false, $dtl_ID=0, $fields=null){
 
@@ -1452,6 +1593,17 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //
     // $is_concatente - true, concatenate all unique values, otherwise takes first non empty
     //
+    /**
+     * Merges a specific field's values from duplicate file records into a main record.
+     *
+     * @param string $fieldName The name of the field to merge (e.g., 'ulf_Description').
+     * @param int $ulf_ID The ID of the main `recUploadedFiles` record to merge into.
+     * @param string $dup_IDs A comma-separated string of `ulf_ID`s for the duplicate records.
+     * @param bool $is_concatenate If true, all unique non-empty values from duplicates are concatenated
+     *                             (newline separated) with the main value. If false (default), only the first
+     *                             non-empty unique value from duplicates is used if the main record's field is empty.
+     * @return void
+     */
     private function mergeDuplicatesFields($fieldName, $ulf_ID, $dup_IDs, $is_concatenate=false){
 
         $mysqli = $this->system->getMysqli();
@@ -1493,6 +1645,21 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //
     // actions on set of files (called from butch_action)
     //
+    /**
+     * Merges duplicate `recUploadedFiles` entries.
+     *
+     * Identifies duplicates based on:
+     * 1. Same `ulf_FilePath` and `ulf_FileName` (local files).
+     * 2. Same `ulf_OrigFileName`, size, and MD5 checksum (local files with potentially different uploaded names).
+     * 3. Same `ulf_ExternalFileReference` (remote files).
+     *
+     * For each set of duplicates, it merges metadata into one retained record and updates
+     * `recDetails` to point to the retained `ulf_ID`. Duplicate `recUploadedFiles` entries are then deleted.
+     *
+     * @return array|bool An array with counts of fixes if successful, or false on error.
+     *                    Counts include: 'local' (by path/name), 'local_checksum', 'remote', 'tumbnails' (typo, likely meant thumbnails).
+     *                    Errors are added to the system object.
+     */
     private function mergeDuplicates(){
 
             set_time_limit(0);
@@ -1816,6 +1983,17 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //
     //
     //
+    /**
+     * Creates "Multi Media" type records for `recUploadedFiles` entries that don't already have one.
+     *
+     * It checks for necessary record type (RT_MEDIA_RECORD) and detail types (DT_FILE_RESOURCE, DT_NAME, etc.).
+     * For each provided `ulf_ID` that doesn't have a referencing media record, it creates one,
+     * populating fields like title, description, filename, path, extension, and size from the file record.
+     *
+     * @return array|false An array with counts of 'new' media records created, 'error' during creation,
+     *                     and 'skipped' (already had a media record), or false if essential
+     *                     record/detail types are not defined.
+     */
     private function createMediaRecords()
     {
             $ret = false;
@@ -1972,6 +2150,26 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //              rec_cnt   - count of recrds
     //              file_ids   - file ids
     //
+    /**
+     * Retrieves records that reference specified media file IDs (`ulf_ID`s).
+     *
+     * Can search for references in:
+     * - `recDetails.dtl_UploadedFileID` (direct file links).
+     * - `recDetails.dtl_Value` (text fields containing the file's `ulf_ObfuscatedFileID`).
+     *
+     * The return format can be:
+     * - 'rec_ids': A flat list of referencing `rec_ID`s.
+     * - 'rec_full': Detailed information including target `rec_ID`, `dtl_ID`, and original `ulf_ID` (as `recID`),
+     *               plus header information (ID, Title, RecTypeID) for the referencing records.
+     * - 'rec_cnt': A total count of distinct referencing `rec_ID`s.
+     * - 'file_ids': A list of unique `ulf_ID`s that have references.
+     *
+     * @param string|array $ids A comma-separated string or an array of `ulf_ID`s to check.
+     * @param string $search_mode 'both' (default), 'file_fields' (only `dtl_UploadedFileID`), or 'text_fields' (only `dtl_Value`).
+     * @param string $return_mode 'rec_ids' (default), 'rec_full', 'rec_cnt', or 'file_ids'.
+     * @return array|int Depending on `$return_mode`. For 'rec_full', returns an array `['direct' => ..., 'headers' => ...]`.
+     *                   For 'rec_cnt', returns an integer. Otherwise, returns an array of IDs.
+     */
     public function getMediaRecords($ids, $search_mode, $return_mode)
     {
         $ids = prepareIds($ids);
@@ -2101,6 +2299,18 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //
     //
     //
+    /**
+     * Deletes selected `recUploadedFiles` entries if they are not currently in use.
+     *
+     * "In use" means the file's `ulf_ID` is referenced in `recDetails.dtl_UploadedFileID` or its
+     * `ulf_ObfuscatedFileID` is found in `recDetails.dtl_Value`.
+     *
+     * `$this->data['mode']` can be 'delete' (to actually delete) or another value (to just list files for deletion).
+     *
+     * @return int|array|false If mode is 'delete', returns the count of successfully deleted files or false on error.
+     *                         Otherwise, returns an array with 'files' (list of deletable files),
+     *                         'cnt_in_use', and 'cnt_ref_recs'.
+     */
     private function deleteSelected()
     {
 
@@ -2179,6 +2389,15 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //
     // Bulk register files from database folders
     //
+    /**
+     * Bulk registers files found in pre-defined or specified Heurist filestore subfolders.
+     *
+     * It uses `FilestoreHarvest` to get a list of non-registered files or processes
+     * a list of files provided in `$this->data['files']`.
+     * For each valid file, it calls `fileRegister()` to add it to `recUploadedFiles`.
+     *
+     * @return string A summary string detailing counts of created, skipped, and errored files.
+     */
     private function bulkRegisterFiles(){
         
             $error = array();// file missing or other errors
@@ -2306,6 +2525,15 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
     //
     // Bulk register base64 encoded (i.e. starts with data:image) images
     //
+    /**
+     * Bulk registers base64 encoded images.
+     *
+     * Expects an array of file details (each with 'encoded' data and optional 'name')
+     * in `$this->data['files']`. Calls `registerImage()` for each.
+     *
+     * @return array|false An array of newly created `ulf_ID`s on success, or false if any registration fails
+     *                     or input data is invalid. Errors are added to the system object.
+     */
     private function bulkRegisterImages(){
 
         $files = @$this->data['files'];

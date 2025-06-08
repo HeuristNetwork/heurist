@@ -6,11 +6,13 @@ use hserv\entity\DbRecUploadedFiles;
 use hserv\utilities\USanitize;
 
     /**
-    * dbAnnotations
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbAnnotations
+     *
+     * Manages IIIF annotations, providing functionality to search, create, update, and delete annotations.
+     * It interacts with Heurist record structures, linking annotations to uploaded files or existing records.
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -31,7 +33,15 @@ class DbAnnotations extends DbEntityBase
 {
     private $dtyAnnotationInfo;
 
-
+    /**
+     * Constructor for DbAnnotations.
+     *
+     * Initializes the system object, data, and defines necessary Heurist constants
+     * related to annotation record types and detail types.
+     *
+     * @param \hserv\System $system The main Heurist system object.
+     * @param array|null $data Optional data passed to the entity, typically request parameters.
+     */
     public function __construct( $system, $data=null ) {
         $this->system = $system;
         $this->data = $data;
@@ -56,16 +66,29 @@ class DbAnnotations extends DbEntityBase
 
     }
 
+    /**
+     * Checks if the current entity instance is valid.
+     *
+     * This implementation always returns true.
+     *
+     * @return bool Always true.
+     */
     public function isvalid(){
         return true;
     }
 
     /**
-    *  Search all annotaions for given uri (IIIF manifest)
-    *  or particular annotaion id
-    *
-    *  Mirador requests our Annotation server (via api/annotations) for annotations per page(canvas).
-    */
+     * Searches for annotations.
+     *
+     * Handles different search scenarios:
+     * - If `recID` is 'edit', redirects to the record edit page for the annotation (found by UUID).
+     * - If `recID` is a specific annotation UUID, returns that single annotation.
+     * - If `recID` is 'pages' and a 'uri' (canvas URI) is provided, returns all annotations for that canvas.
+     * The response is formatted as an IIIF AnnotationPage.
+     *
+     * @return array An array representing an IIIF AnnotationPage containing found annotations.
+     *               May trigger a redirect if 'recID' is 'edit'.
+     */
     public function search(){
 
         if($this->data['recID']=='edit'){
@@ -160,6 +183,15 @@ class DbAnnotations extends DbEntityBase
     //
     //
     //
+    /**
+     * Deletes an annotation.
+     *
+     * The annotation to be deleted is identified by its UUID, which is expected
+     * in `$this->data['recID']`. It validates user permissions before deletion.
+     *
+     * @param bool $disable_foreign_checks Unused in this implementation.
+     * @return array|false A result array from `recordDelete` on success, or false on failure.
+     */
     public function delete($disable_foreign_checks = false){
 
         if($this->data['recID']){  //annotation UUID
@@ -293,6 +325,19 @@ class DbAnnotations extends DbEntityBase
     //
     //
     //
+    /**
+     * Saves an annotation (creates or updates).
+     *
+     * Parses the annotation data (either Open Annotation or Web Annotation format),
+     * extracts relevant information, and saves it as a Heurist record.
+     * Optionally creates a thumbnail for the annotated region.
+     * Can link the annotation to an existing uploaded file (`$ulf_ID`) or a source record.
+     *
+     * @param bool $createThumbnail If true, attempts to generate a thumbnail for the annotation. Defaults to true.
+     * @param int $ulf_ID Optional ID of an `recUploadedFiles` record to link to this annotation. Defaults to 0.
+     * @return array|false An array containing the result of the save operation (including status and record ID),
+     *                     or false on failure. The result array may include 'is_new' or 'is_retained' flags.
+     */
     public function save($createThumbnail=true, $ulf_ID=0){
 
 

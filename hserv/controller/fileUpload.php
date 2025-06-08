@@ -303,6 +303,17 @@ if($response!=null){
 //------------
 //  NOT USED. verification of uploaded file integrated with UploadHandler
 //
+/**
+ * Handles file selection in a POST request, performing validation checks.
+ *
+ * NOTE: This function is marked as NOT USED, as file upload verification
+ * is integrated with UploadHandler.
+ *
+ * Checks for various upload errors (size limits, partial uploads, etc.)
+ * and server configuration limits (post_max_size, upload_max_filesize).
+ *
+ * @return string An error message if validation fails, or an empty string if successful.
+ */
 function postmode_file_selection() {
 
     $param_name = 'file';

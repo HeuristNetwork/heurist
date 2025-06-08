@@ -488,6 +488,16 @@ print json_encode($response);
 //
 //
 //
+/**
+ * Composes a database name from request parameters.
+ *
+ * Optionally prepends a sanitized username to a sanitized database name.
+ * Sets an error in the system object if the database name is missing.
+ *
+ * @param \hserv\System $system The system object.
+ * @param array $req_params The request parameters containing 'uname' (optional) and 'dbname'.
+ * @return string|false The composed database name, or false on error.
+ */
 function __composeDbName($system, $req_params){
 
     $uName = '';
