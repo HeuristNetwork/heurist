@@ -1373,13 +1373,6 @@ function recordUpdateOwnerAccess($system, $params){
 
 }
 
-/*
-returns
-
-$res = array("error" => $msg_error.'  '.$mysqli->error);
-OR
-$res = array("deleted"=>$deleted, "bkmk_count"=>$bkmk_count, "rels_count"=>$rels_count);
-*/
 /**
  * Deletes a single record and all its associated data.
  *
@@ -1603,9 +1596,6 @@ function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedBy
 }
 
 
-//
-// remove reverse pointer detail field from child record in case there is not direct pointer to child record
-//
 /**
  * Removes "Parent Entity" (reverse pointer) details from child records if the corresponding
  * forward pointer from the parent no longer exists or is not a `rst_CreateChildIfRecPtr` field.
@@ -1721,10 +1711,6 @@ function addParentToChildPointer($mysqli, $child_id, $child_rectype, $parent_id,
 
 }
 
-//
-// add/update pointer detail field TO child record
-// return -1 - error, 0 - nothing done, 1 - insert
-//
 /**
  * Adds or updates a resource pointer detail in a source record, pointing to a target record.
  *
@@ -1929,11 +1915,6 @@ function recordCanChangeOwnerwhipAndAccess($system, $recID, &$owner_grps, &$acce
 
 }
 
-//
-// check that this record my affect other records with calculated fields
-// 1. cfn_RecTypeIDs -> cfn_ID
-// 2. defRecStructure where rst_CalcFunctionID  -> rst_RecTypeID+rst_DetailTypeID
-//
 /**
  * Finds and updates calculated fields in records of other types that might be affected
  * by changes in records of the given record type (`$rty_ID`).
@@ -1963,11 +1944,6 @@ function findAndUpdateAffectedCalcFields( $system, $rty_ID ){
     }
 }
 
-//
-// $recID - record(s) to be updated. If it is omitted it updates all records for $rty_ID
-// $rty_ID - record type(s)
-// if both parameters are null it updates all calculated fields for entire database
-//
 /**
  * Updates calculated fields for specified records or record types.
  *
@@ -2250,12 +2226,6 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
     }
 }
 
-//
-// $params - array
-//     template - string with code
-//     records - record ids
-//     mode - eval or string (re-use)
-//
 /**
  * Executes a Smarty template, typically used for calculated fields.
  *
@@ -3084,10 +3054,6 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex
 
 } //END _prepareDetails
 
-
-//
-//
-//
 /**
  * Prepares a geographic value by validating its WKT (Well-Known Text) format and extracting its type.
  *
@@ -3325,9 +3291,6 @@ function recordDuplicate($system, $id){
 
 }
 
-//
-// Update usrRecPermissions for multigroup view permission
-//
 /**
  * Updates record permissions in `usrRecPermissions` for a set of records.
  *
@@ -3433,9 +3396,6 @@ function isValidRectype($system, $rectype_tocheck, $dtyID, $rectype)
     return true;
 }
 
-//
-//
-//
 /**
  * Gets a human-readable string describing the record type constraints for a pointer field.
  *
@@ -3731,9 +3691,6 @@ function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
     return $res;
 }
 
-//
-// Re-add missing parent values if the parent has a child record pointer field that could point validly to the current record
-//
 /**
  * Validates and potentially re-adds "Parent Entity" pointers to a child record's details.
  *

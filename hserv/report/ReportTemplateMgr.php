@@ -27,29 +27,38 @@ use hserv\utilities\USanitize;
 /**
  * Class ReportTemplateMgr
  *
- * Handles operations with Smarty template files, including saving, deleting,
- * retrieving, listing, exporting, and converting between local and global codes.
+ * Manages Smarty template files for Heurist reports. This includes operations such as
+ * listing available templates, retrieving template content, saving, deleting,
+ * and handling the import/export of templates. A key feature is the ability
+ * to convert Heurist-specific field identifiers within templates between local database IDs
+ * (e.g., `f123`) and global concept codes (e.g., `f10-23` or `f[[10-23]]`) to facilitate
+ * template sharing and interoperability between different Heurist databases.
+ * It also handles the conversion of older `.gpl` template formats to the standard `.tpl` format.
+ *
+ * @package hserv\report
  */
 class ReportTemplateMgr
 {
     /**
-     * @var mixed $system The system object for interacting with Heurist.
+     * @var \hserv\System The Heurist system object.
      */
     protected $system;
 
     /**
-     * @var string $dir The directory where Smarty template files are stored.
+     * @var string The directory path where Smarty template files are stored.
      */
     protected $dir;
 
     /**
      * ReportTemplateMgr constructor.
      *
-     * Initializes the object with the system and directory parameters. If the directory
-     * is not passed, it uses the default defined 'HEURIST_SMARTY_TEMPLATES_DIR'.
+     * Initializes the template manager with the Heurist system object and the template directory.
+     * If no directory is explicitly provided, it defaults to the path defined by the
+     * `HEURIST_SMARTY_TEMPLATES_DIR` constant.
      *
-     * @param mixed $_system The system object.
-     * @param string $_dir The directory where templates are stored.
+     * @param \hserv\System $_system The Heurist system object.
+     * @param string|null $_dir (Optional) The directory where templates are stored.
+     *                             Defaults to `HEURIST_SMARTY_TEMPLATES_DIR`.
      */
     public function __construct($_system, $_dir = null)
     {
@@ -60,12 +69,15 @@ class ReportTemplateMgr
     }
 
     /**
-     * Returns a list of available templates in the Smarty directory as a JSON array.
+     * Retrieves a list of available Smarty template files.
      *
-     * This method scans the template directory for files, converts .gpl files to .tpl,
-     * and returns all available .tpl files.
+     * Scans the template directory (`$this->dir`). It processes `.gpl` files by converting
+     * them to `.tpl` format using `processGplFile` (which includes deleting the original `.gpl`).
+     * It lists all `.tpl` files, excluding temporary files (those starting with an underscore).
      *
-     * @return array filename=>name (template name)
+     * @return array An array of associative arrays, where each inner array has:
+     *               - 'filename': The `.tpl` filename (e.g., "my_report.tpl").
+     *               - 'name': The template name (filename without the .tpl extension).
      */
     public function getList()
     {
@@ -100,10 +112,16 @@ class ReportTemplateMgr
     }
 
     /**
-    * Converts gpl file to tpl
-    *
-    * @param mixed $filename
-    */
+     * Processes a `.gpl` template file by converting it to the `.tpl` format.
+     *
+     * The conversion involves translating global concept IDs used in `.gpl` files
+     * to local Heurist field IDs using `convertTemplate()` with mode 1.
+     * The newly created `.tpl` file is saved, and the original `.gpl` file is deleted.
+     *
+     * @param string $filename The basename of the `.gpl` file in the template directory.
+     * @return array|null An associative array `['filename' => ..., 'name' => ...]` for the
+     *                    newly created `.tpl` file if successful, or null on failure.
+     */
     private function processGplFile($filename)
     {
         $template_body = file_get_contents($this->dir . $filename);
@@ -125,10 +143,16 @@ class ReportTemplateMgr
 
 
     /**
-     * Returns the content of a specified template file.
+     * Outputs the content of a specified template file, typically for browser download/display.
      *
-     * @param string $template_file The name of the template file to retrieve.
-     * @return void Outputs the content of the template file or throws error message if not found.
+     * If `$template_file` is empty or null, it defaults to outputting a standard
+     * 'template.tpl' example file located within the same directory as this class.
+     * Otherwise, it validates the provided filename using `checkTemplate`.
+     * Sets 'Content-type: text/html' header before outputting the file content.
+     *
+     * @param string|null $template_file The basename of the template file to download.
+     *                                   Defaults to a standard example template if null/empty.
+     * @return void Outputs directly to the browser or prints an error message on failure.
      */
     public function downloadTemplate($template_file)
     {
@@ -155,11 +179,16 @@ class ReportTemplateMgr
     }
 
     /**
-     * Saves the provided template content into a file.
+     * Saves template content to a specified file within the template directory.
      *
-     * @param string $template_body The body/content of the template to save.
-     * @param string $template_file The name of the template file to save.
-     * @return string The file name if successful, throws error otherwise.
+     * Ensures the filename ends with '.tpl'. It checks if the template directory exists
+     * (and creates it if not, though `folderExists` with `true` usually means it checks/creates).
+     * Uses `fileSave` (presumably a global helper or system method) for the actual saving.
+     *
+     * @param string $template_body The string content of the template.
+     * @param string $template_file The desired basename for the template file.
+     * @return string The final filename (e.g., "my_template.tpl") if successful.
+     * @throws \Exception If the directory is not writable or `fileSave` fails.
      */
     public function saveTemplate($template_body, $template_file)
     {
@@ -178,10 +207,13 @@ class ReportTemplateMgr
     }
 
     /**
-     * Deletes the specified template file.
+     * Deletes a specified template file from the template directory.
      *
-     * @param string $template_file The name of the template file to delete.
-     * @return string 'deleted' if the file is successfully deleted.
+     * Uses `checkTemplate()` to validate the filename and get the full path before attempting to delete.
+     *
+     * @param string $template_file The basename of the template file to delete.
+     * @return string Returns the string "deleted" on successful deletion.
+     * @throws \Exception If `checkTemplate` fails (e.g., file not found).
      */
     public function deleteTemplate($template_file)
     {
@@ -191,11 +223,14 @@ class ReportTemplateMgr
     }
 
     /**
-     * Validates and returns the full path of the template file.
+     * Validates a template filename and returns its full, sanitized path.
      *
-     * @param string $template_file The name of the template file to check.
-     * @return string The full path to the template file.
-     * @throws \Exception If the file is not found.
+     * Ensures that the provided `$template_file` (basename) exists within the configured
+     * template directory (`$this->dir`). It uses `basename()` to prevent directory traversal issues.
+     *
+     * @param string $template_file The basename of the template file.
+     * @return string The full, verified path to the template file.
+     * @throws \Exception If the template file does not exist in the directory.
      */
     public function checkTemplate($template_file)
     {
@@ -209,11 +244,30 @@ class ReportTemplateMgr
     }
 
     /**
-     * Converts a template by replacing local IDs with concept IDs or vice versa.
+     * Converts Heurist-specific identifiers within a template string between local database IDs and global concept codes.
      *
-     * @param string $template The template content to be converted.
-     * @param int $mode 0 to convert to concept code, 1 to convert to local code.
-     * @return mixed Returns the converted template or an array with errors.
+     * This method uses regular expressions to find Smarty-like variable tags (e.g., `{$record.f123}`)
+     * within the template content. It then processes these identifiers:
+     * - **Mode 0 (Export to Global Concept IDs):** Converts local detail type IDs (e.g., `f123`)
+     *   to their corresponding concept codes (e.g., `f10-23` or `f[[10-23]]` if it includes underscores).
+     *   This is used when exporting a template to be shared.
+     * - **Mode 1 (Import to Local IDs):** Converts concept codes (e.g., `f10-23` or `f[[10-23]]`)
+     *   back to local detail type IDs specific to the current database. If a concept code
+     *   cannot be mapped to a local ID (i.e., the field doesn't exist), it's marked with `[[...]]`
+     *   and added to a `details_not_found` list. This mode is used when importing a template
+     *   or processing `.gpl` files.
+     *
+     * The conversion handles field suffixes like 's' (e.g., `f123s` for plural/array access)
+     * and `_originalvalue`.
+     *
+     * @param string $template The template content string to be converted.
+     * @param int $mode The conversion mode:
+     *                  - 0: Convert local IDs to global concept codes.
+     *                  - 1: Convert global concept codes to local IDs.
+     * @return string|array If mode is 0, returns the converted template string.
+     *                      If mode is 1, returns an associative array:
+     *                      `['template' => (string)converted_template, 'details_not_found' => (array)list_of_unmapped_concept_codes]`
+     * @throws \Exception If the input template string is empty.
      */
     public function convertTemplate($template, $mode)
     {
@@ -329,12 +383,23 @@ class ReportTemplateMgr
     }
 
     /**
-     * Converts local IDs in a template file to global concept IDs and outputs the result.
+     * Converts local Heurist field IDs in a template to global concept codes and prepares it for export.
      *
-     * @param string $filename The name of the template file.
-     * @param bool $is_check_only Whether to only check or export the file.
-     * @param string|null $template_body The template content, if null, it is loaded from the file.
-     * @return void Outputs the converted template or an error in JSON format.
+     * This method is used to make a template portable between different Heurist databases.
+     * It reads the template content (either from a specified file or a provided string),
+     * then uses `convertTemplate()` in mode 0 to replace local field IDs (e.g., `{$record.f123}`)
+     * with their global concept code equivalents (e.g., `{$record.f10-23}`).
+     *
+     * If `$is_check_only` is true, it only verifies that the database is registered (a prerequisite for export)
+     * and returns 'ok' without outputting the file. Otherwise, it sends appropriate HTTP headers
+     * for file download and prints the converted template content. The downloaded file will have a `.gpl` extension.
+     *
+     * @param string|null $filename The basename of the template file to export. Used if `$template_body` is null.
+     * @param bool $is_check_only If true, performs only pre-checks and doesn't output the file.
+     * @param string|null $template_body (Optional) The direct template content string. If provided, `$filename` is used for naming the output.
+     * @return string|void Returns 'ok' if `$is_check_only` is true and checks pass. Otherwise, outputs the file content
+     *                     directly to the browser and script execution typically ends. Returns null implicitly.
+     * @throws \Exception If the database is not registered (required for concept codes) or if the template is empty.
      */
     public function exportTemplate($filename, $is_check_only, $template_body = null)
     {
@@ -368,11 +433,24 @@ class ReportTemplateMgr
     }
 
     /**
-     * Imports a template from the provided data.
+     * Imports a template file (typically `.gpl` or `.tpl`), converting global concept IDs to local field IDs.
      *
-     * @param array $params The uploaded file parameters.
-     * @param string|null $for_cms Indicates a CMS template upload if provided.
-     * @return array with the name of the template and a list of unrecognized details.
+     * This method handles a file upload (passed via `$params`), reads its content,
+     * and then uses `convertTemplate()` in mode 1 to map global concept IDs (e.g., `f10-23`)
+     * to local Heurist field IDs (e.g., `f123`).
+     * The converted template is then saved as a `.tpl` file in the template directory
+     * using a unique filename derived from the original.
+     *
+     * If `$for_cms` is provided, it implies the template is a CMS snippet and is saved
+     * to a specific CMS templates/snippets directory with the given name.
+     *
+     * @param array $params An array describing the uploaded file, typically from `$_FILES`
+     *                      (must include 'name', 'size', 'tmp_name').
+     * @param string|null $for_cms (Optional) If importing for CMS, this is the target filename
+     *                             (without path) for the snippet.
+     * @return array An associative array:
+     *               `['filename' => (string)saved_tpl_filename, 'details_not_found' => (array)list_of_unmapped_concept_codes]`
+     * @throws \Exception If the upload is invalid, file cannot be read, or template content is empty.
      */
     public function importTemplate($params, $for_cms = null)
     {
@@ -423,6 +501,19 @@ class ReportTemplateMgr
      * @param string $subject The string in which to perform replacements.
      * @return string The modified string with replacements applied.
      */
+    /**
+     * A custom string replacement function that iterates through search terms to replace them.
+     *
+     * This method is designed to handle replacements more carefully than a simple `str_replace`
+     * by finding the earliest match in each iteration and replacing it, then continuing
+     * with the rest of the string. This can be useful to avoid issues where a replacement
+     * might create a new match for an earlier search term.
+     *
+     * @param array $search An array of strings to search for.
+     * @param array $replace An array of strings to replace with.
+     * @param string $subject The subject string.
+     * @return string The string with all occurrences of search terms replaced.
+     */
     private function arrayStrReplace($search, $replace, $subject)
     {
         $result = '';
@@ -445,9 +536,21 @@ class ReportTemplateMgr
     /**
      * Helper function to find the next match for any of the search terms.
      *
-     * @param array $search Array of search strings.
-     * @param string $subject The subject string in which to search.
-     * @return array An array with the match index and offset.
+     * @param array $search Array of strings to search for.
+     * @param string $subject The string to search within.
+     * @return array An array containing two elements: the index of the found search term in the `$search`
+     *               array (or -1 if no match), and the offset of the match within `$subject` (or -1 if no match).
+     */
+    /**
+     * Finds the first occurrence of any of the given search terms in a subject string.
+     *
+     * Iterates through the `$search` array and finds which term appears earliest in `$subject`.
+     *
+     * @param array $search An array of strings to search for.
+     * @param string $subject The string to search in.
+     * @return array Returns `[$match_idx, $match_offset]`. `$match_idx` is the index in `$search`
+     *               of the term found, or -1 if no terms are found. `$match_offset` is the starting
+     *               position of the found term in `$subject`, or -1.
      */
     private function findNextMatch($search, $subject)
     {
@@ -470,8 +573,16 @@ class ReportTemplateMgr
     }
 
     //
-    // in php v8 use str_ends_with
-    //
+    /**
+     * Checks if a string (`$haystack`) ends with a specific substring (`$needle`).
+     *
+     * Note: For PHP 8.0+, `str_ends_with()` provides this functionality natively.
+     *
+     * @param string $haystack The string to check.
+     * @param string $needle The substring to look for at the end of `$haystack`.
+     * @return bool True if `$haystack` ends with `$needle`, false otherwise.
+     *              Returns true if `$needle` is an empty string.
+     */
     private static function endsWith($haystack, $needle) {
         // search forward starting from end minus needle length characters
         return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);

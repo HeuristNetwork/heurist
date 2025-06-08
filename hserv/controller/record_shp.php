@@ -296,9 +296,6 @@ global $is_api;
 
     $system->dbclose();
 
-//
-//
-//
 /**
  * Checks if the coordinates are within WGS84 bounds.
  *
@@ -319,7 +316,6 @@ function checkWGS($system, $orig_points, $check_number_or_all=3){
     $cnt = 0;
     foreach ($orig_points as $point) {
         //if not integer and less than 180/90 this is wgs
-        //!(($point[1]!=round($point[1])) || ($point[0]!=round($point[0]))
         if (!((abs($point[0])<200) && (abs($point[1])<90))){
                 $system->errorExitApi(
 'Cannot process shp file. Heurist uses WGS84 (World Geographic System) '
@@ -338,12 +334,6 @@ function checkWGS($system, $orig_points, $check_number_or_all=3){
     return true;
 }
 
-//
-// $fileinfo as fileGetFullInfo
-//
-// 1) external file is saved in scratch
-// 2) zipped extracted into scratch
-//
 /**
  * Retrieves the path to a file, handling local files, remote URLs, and archives.
  *
@@ -361,7 +351,7 @@ function checkWGS($system, $orig_points, $check_number_or_all=3){
 function fileRetrievePath($fileinfo, $need_ext=null, $isArchive=false){
 
     if(@$fileinfo['file']){
-        $fileinfo = $fileinfo['file'];//
+        $fileinfo = $fileinfo['file'];
     }
 
     $filepath = $fileinfo['fullPath'];//concat(ulf_FilePath,ulf_FileName as fullPath

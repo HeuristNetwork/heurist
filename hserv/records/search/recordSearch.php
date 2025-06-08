@@ -3389,23 +3389,18 @@ function recordGetField($record, $field_id){
     }
 }
 
-//
-// load details for given record plus id,type and title for linked records
-//
-/*
-
-details
-dty_ID
-dtl_ID=>value
-
-value
-for file  file=>ulf_ID, fileid=>ulf_ObfuscatedFileID
-for resource id=>rec_ID, type=>rec_RecTypeID, title=>rec_Title
-for geo   geo => array(type=> , wkt=> )
-
-*/
 /**
 * Adds details element to $record array (by reference)
+* 
+* details
+* dty_ID
+* dtl_ID=>value
+
+* value
+* for file  file=>ulf_ID, fileid=>ulf_ObfuscatedFileID
+* for resource id=>rec_ID, type=>rec_RecTypeID, title=>rec_Title
+* for geo   geo => array(type=> , wkt=> )
+*  
 *
 * @param mixed $system
 * @param mixed $record - record array - details to be added

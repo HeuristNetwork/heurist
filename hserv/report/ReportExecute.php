@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2024 University of Sydney
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -30,74 +30,96 @@ require_once dirname(__FILE__).'/../utilities/Temporal.php';
 require_once dirname(__FILE__).'/../records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';
 
+/**
+ * HTML tag string for closing head element.
+ * @var string
+ */
 define('HEAD_E','</head>');
 
 /**
  * Class ReportExecute
  *
- * This class manages the execution of Smarty templates for reports, handling the
- * output of reports in various formats (HTML, JS, etc.) and dealing with records
- * fetched from the system.
+ * This class is responsible for executing reports defined by Smarty templates.
+ * It fetches data based on Heurist query parameters, processes it through Smarty
+ * using a specified template, and handles various output modes such as displaying
+ * in the browser, saving to a file, or providing a downloadable file.
+ * It also manages different publishing modes that control output limits and behavior,
+ * JavaScript inclusion, custom CSS, and error/debug reporting levels.
+ *
+ * @package hserv\report
  */
 class ReportExecute
 {
+    /** @var \Smarty\Smarty Instance of the Smarty templating engine. */
     private $smarty;
 
-    private $templateFile = null; //basename of template file
+    /** @var string|null Basename of the Smarty template file (e.g., "my_report.tpl"). */
+    private $templateFile = null;
 
+    /** @var string|null Sanitized name for the output file if the report is saved or downloaded. */
     private $outputfile;
-    private $outputmode; //output format
-    private $isVoid = false;   //if true - not browser output
-    //private $maxAllowedDepth = 2; not used
-
-    // 0 in UI (including tests in editor)
-    // 1 saves into generated-reports and produces info page (user report) only
-    // 2 downloads ONLY it under given output name (no file save, no browser output)
-    // 3 saves into generated-reports and outputs report into browser (without UI limits)
-    // 4 calculation field
-    private $publishmode;
-
-    private $smartySessionId;
-    private $executionCounter;
-    private $executionCounterTotal;
-
-    //private $is_included = false;    true if this report is included into anpther one - NOT USED
-
-    private $isJsAllowed;
-    private $recordWithCustomCSS; //record that contains CSS
-    private $isHeadless; //output without html header and styles - for snippet (loading as content of existing html element) and xml output
-
-    private $limit;
-    private $replevel;
-
-    private $system;
-    private $params;
-
-    private $messageAboutTruncation;
-    private $messageError;
-
-/*
-* parameters
-* 'template' or 'template_body' - template file name or template value as a text
-* 'replevel'  - 1 notices, 2 all, 3 debug mode
-*
-* 'output' -  name of file to be saved in generated-reports folder
-* 'mode' -    output format if publish>0: js, xml, txt, json or html (default)
-* 'publish' - 0 for user interface only (including editor)
-*             1 if output defined, saves into generated-reports and produces info page (user report)
-*             2 downloads ONLY it under given output name (no file save, no browser output)
-*             3 if output defined it saves into generated-reports and outputs report into browser (without UI limits)
-*             4 calculation field
-*
-* other parameters are hquery's
-*/
-
+    /** @var string Output format of the report (e.g., 'html', 'js', 'txt', 'xml', 'json', 'css'). Default 'html'. */
+    private $outputmode;
+    /** @var bool If true, suppresses direct browser output; used when the primary action is saving to a file. */
+    private $isVoid = false;
 
     /**
-     * Constructor
+     * @var int Defines the publishing mode and behavior of the report execution.
+     *          - 0: UI preview (e.g., in template editor), applies limits, HTML output.
+     *          - 1: Saves to file in `generated-reports/` and shows an info page (user-generated report).
+     *          - 2: Forces download of the report with a given output name; no server-side file save.
+     *          - 3: Saves to file and also outputs to browser (no UI limits).
+     *          - 4: Calculation field mode (specialized output, usually direct value).
+     */
+    private $publishmode;
+
+    /** @var string|int|null Session ID for tracking progress of report generation, especially for long reports. */
+    private $smartySessionId;
+    /** @var int Counter for records processed during Smarty loop, used for progress updates. */
+    private $executionCounter;
+    /** @var int Total number of records to be processed, used for progress calculation. */
+    private $executionCounterTotal;
+
+    /** @var bool Whether JavaScript output/inclusion is allowed, based on system settings. */
+    private $isJsAllowed;
+    /** @var int|null Record ID that might contain custom CSS definitions (DT_CMS_CSS) to be included in the report. */
+    private $recordWithCustomCSS;
+    /** @var bool If true, generates HTML output as a snippet (without `<html>`, `<head>`, `<body>` tags), suitable for embedding. */
+    private $isHeadless;
+
+    /** @var int The maximum number of records to fetch and process for the report. */
+    private $limit;
+    /** @var int Debugging/error reporting level for Smarty (0: off, 1: notices, 2: all except strict/notice, 3: Smarty debug console). */
+    private $replevel;
+
+    /** @var \hserv\System The Heurist system object, providing access to database, settings, user info etc. */
+    private $system;
+    /** @var array Parameters for the report execution, typically from `$_REQUEST` or similar source. Contains query, template info, etc. */
+    private $params;
+
+    /** @var string|null Message about report truncation if the number of records exceeds the display limit in UI preview mode. */
+    private $messageAboutTruncation;
+    /** @var string|null Stores an error message if one occurs during report execution. */
+    private $messageError;
+
+    /**
+     * Constructor for ReportExecute.
      *
-     * @param mixed $system The system object used for database and other interactions.
-     * @param array|null $params The parameters array typically passed from $_REQUEST.
+     * Initializes the system object and sets up report parameters using `setParameters()`.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param array|null $params (Optional) Parameters for the report execution, typically from `$_REQUEST`.
+     *                           Expected keys include:
+     *                           - 'template' or 'template_body': Template file name or template string.
+     *                           - 'replevel': Error reporting level (0-3).
+     *                           - 'output': Desired output filename (if saving/downloading).
+     *                           - 'mode': Output format ('html', 'js', 'xml', etc.).
+     *                           - 'publish': Publishing mode (0-4).
+     *                           - 'cssid': Record ID for custom CSS.
+     *                           - 'session': Progress session ID.
+     *                           - 'snippet': Boolean for headless HTML output.
+     *                           - 'void': Boolean to suppress browser output when saving.
+     *                           - Plus Heurist query parameters ('q', 'w', 'limit', 'offset', etc.).
      */
     public function __construct($system, $params=null)
     {
@@ -110,9 +132,18 @@ class ReportExecute
     }
 
     /**
-     * Main function to execute the Smarty template with the provided parameters.
+     * Executes the report generation process.
      *
-     * @return bool Returns true on successful execution, false on failure.
+     * This is the main public method to run a report. It involves:
+     * 1. Validating system and parameter initialization.
+     * 2. Initializing the Smarty templating engine (`initSmarty`).
+     * 3. Loading the Smarty template content (`loadTemplateContent`).
+     * 4. Fetching the record IDs based on the query parameters (`fetchRecordIDs`).
+     * 5. Handling cases where the result set is empty (`handleEmptyResultSet`).
+     * 6. If records are found, processing them through the Smarty template (`executeTemplate`).
+     *
+     * @return bool True if the report execution completes successfully (data processing and templating),
+     *              false if a critical error occurs at any stage.
      */
     public function execute()
     {
@@ -158,6 +189,17 @@ class ReportExecute
      * Sets the search limit based on publishing mode or user preferences.
      *
      * @param array|null $params The parameters array to set.
+     */
+    /**
+     * Sets and sanitizes various operational parameters for the report execution.
+     *
+     * This method initializes class properties based on the input `$params` array,
+     * applying defaults and sanitizing values for:
+     * - `publishmode`: Clamped between 0 and 4.
+     * - `outputmode`: Validated against a list of allowed extensions (html, js, txt, etc.), defaults to 'html'.
+     * - `recordWithCustomCSS`, `smartySessionId`, `isHeadless`, `isVoid`, `isJsAllowed`, `replevel`.
+     *
+     * @param array|null $params An associative array of parameters. If null, uses previously set `$this->params`.
      */
     public function setParameters($params=null)
     {
@@ -207,6 +249,16 @@ class ReportExecute
      *
      * @return string The sanitized output file name.
      */
+    /**
+     * Prepares and sanitizes the output file name for saving or downloading.
+     *
+     * It uses the 'output' parameter if provided, otherwise falls back to the
+     * template file name, or 'heurist_output' as a last resort.
+     * The filename is sanitized using `USanitize::sanitizeFileName()`, and the
+     * correct extension based on `$this->outputmode` is appended.
+     *
+     * @return string The sanitized and extension-appended output file name.
+     */
     private function prepareOutputFile(){
         $this->outputfile = $this->params["output"] ?? $this->templateFile ?? 'heurist_output';
         $path_parts = pathinfo($this->outputfile);
@@ -218,7 +270,19 @@ class ReportExecute
     /**
      * Fetch record IDs based on the provided query parameters.
      *
-     * @return array The query result containing records and record count.
+     * @return array|null The query result as an array (expected to contain 'records' and 'reccount'),
+     *                    or null if fetching fails (e.g., `recordSearch` returns an error).
+     */
+    /**
+     * Fetches the set of record IDs to be processed in the report.
+     *
+     * It first calls `setLimit()` to determine the maximum number of records.
+     * Then, if `params['recordset']` is provided, it uses that predefined set of records
+     * (via `handleRecordset`). Otherwise, it performs a database search using `searchRecords`
+     * based on the query parameters in `$this->params`.
+     *
+     * @return array|null An array containing 'records' (an array of record IDs) and 'reccount' (total count),
+     *                    or null if an error occurred during search.
      */
     private function fetchRecordIDs()
     {
@@ -237,8 +301,14 @@ class ReportExecute
     }
 
     /**
-    * Sets the search limit based on publishing mode or user preferences.
-    */
+     * Sets the record limit for the report query.
+     *
+     * If `params["limit"]` is not already set:
+     * - If `publishmode` is 0 (UI preview), it uses the 'smarty-output-limit' user preference,
+     *   defaulting to 50 if the preference is not set or invalid.
+     * - For other `publishmode` values, it defaults to `PHP_INT_MAX` (effectively no limit).
+     * The determined limit is stored in `$this->limit` and also updates `$this->params["limit"]`.
+     */
     private function setLimit()
     {
         if (!isset($this->params["limit"])) {
@@ -256,10 +326,17 @@ class ReportExecute
     }
 
     /**
-    * recordset (list of record ids) is already defined
-    *
-    * @param mixed $recordset
-    */
+     * Processes a predefined set of record IDs.
+     *
+     * If a `recordset` (array or JSON string of record IDs) is passed in parameters,
+     * this method uses it instead of querying the database.
+     * For UI previews (`publishmode == 0`), it truncates the recordset to `$this->limit`
+     * and sets `$this->messageAboutTruncation` if truncation occurs.
+     *
+     * @param array|string $recordset An array of record IDs or a JSON string representing such an array.
+     * @return array An array with 'records' (array of record IDs, potentially truncated)
+     *               and 'reccount' (original count of records in the provided set).
+     */
     private function handleRecordset($recordset)
     {
         if (is_array($recordset)) {
@@ -294,8 +371,15 @@ class ReportExecute
     }
 
     /**
-    *  get recordset from query/search results
-    */
+     * Performs a record search to get the list of record IDs for the report.
+     *
+     * It sets `params['detail'] = 'ids'` to ensure `recordSearch` only returns IDs.
+     * If the search fails or returns an error status, `$this->params['emptysetmessage']`
+     * is populated with the error.
+     *
+     * @return array|null The 'data' part of the `recordSearch` result (containing 'records' and 'reccount')
+     *                    on success, or `null` on failure.
+     */
     private function searchRecords()
     {
         $this->params['detail'] = 'ids';
@@ -316,8 +400,19 @@ class ReportExecute
     /**
      * Handles empty result sets and outputs an appropriate error message or info.
      *
-     * @param array $qresult The query result containing records and record count.
-     * @return bool Returns false if result is empty, true otherwise.
+     * @param array|null $qresult The query result, expected to have 'records' and 'reccount'.
+     * @return bool True if the result set is not empty and valid, false otherwise (and outputs an error/message).
+     */
+    /**
+     * Checks if the fetched record set is empty and handles output accordingly.
+     *
+     * If the record set (`$qresult['records']`) is empty or `reccount` is not positive:
+     * - For calculation fields (`publishmode == 4`), it echoes a sanitized empty message or an empty string.
+     * - For other modes, it calls `outputError()` with a relevant message (either from
+     *   `$params['emptysetmessage']` or a default one based on `publishmode`).
+     *
+     * @param array|null $qresult The query result array.
+     * @return bool True if the result set is valid and non-empty, false otherwise.
      */
     private function handleEmptyResultSet($qresult)
     {
@@ -347,7 +442,20 @@ class ReportExecute
     /**
      * Loads the template content from a file or from a provided template body.
      *
-     * @return string|false Returns the template content or false if the file or content is invalid.
+     * @return string|false The loaded template content as a string, or `false` on failure (e.g., template empty).
+     *                      Errors are set using `outputError()`.
+     */
+    /**
+     * Loads the Smarty template content, either from a specified file or directly from parameters.
+     *
+     * It determines the template source:
+     * - If `params['template']` is set, it uses `loadTemplateFile()` to load from a .tpl file.
+     * - Otherwise, it uses `params['template_body']` as the direct template content.
+     *
+     * It also finalizes the `$this->outputfile` name and path if output is to a file.
+     * If the content is empty after loading, it sets an error.
+     *
+     * @return string|false The template content, or false if loading fails or content is empty.
      */
     private function loadTemplateContent()
     {
@@ -381,10 +489,15 @@ class ReportExecute
     }
 
     /**
-    * Loads template content from file
-    *
-    * @param mixed $templateFile
-    */
+     * Loads template content from a specified .tpl file.
+     *
+     * Ensures the filename ends with ".tpl" and constructs the full path using
+     * the system's Smarty templates directory.
+     *
+     * @param string $templateFile The basename of the template file.
+     * @return string|false The content of the template file, or `false` if the file doesn't exist.
+     *                      Sets an error via `outputError()` on failure.
+     */
     private function loadTemplateFile($templateFile)
     {
         if (substr($templateFile, -4) !== ".tpl") {
@@ -405,8 +518,22 @@ class ReportExecute
     /**
      * Initializes the Smarty engine if it is not already initialized.
      *
-     * @param bool $force_init Force reinitialization of the Smarty engine if set to true.
-     * @return bool Returns true on successful initialization, false otherwise.
+     * @param bool $force_init If true, forces re-initialization even if Smarty is already initialized.
+     * @return bool True if Smarty is successfully initialized (or was already), false on error.
+     *              Errors are set via `outputError()`.
+     */
+    /**
+     * Initializes the Smarty templating engine.
+     *
+     * If Smarty is not already initialized (or if `$force_init` is true), this method
+     * calls the global `smartyInit()` function to get a Smarty instance.
+     * It then registers Heurist-specific Smarty plugins/functions:
+     * - `progressCallback`: For updating progress during template loops.
+     * - `out`: For `printLabelValuePair`.
+     * - `wrap`: For `printProcessedValue`.
+     *
+     * @param bool $force_init If true, forces re-initialization.
+     * @return bool True on successful initialization, false if `smartyInit()` fails.
      */
      public function initSmarty($force_init=false)
     {
@@ -439,8 +566,19 @@ class ReportExecute
      * Executes the Smarty template with the provided records and template content.
      *
      * @param array $qresult The result set containing records.
-     * @param string $content The content of the template.
-     * @return bool Returns true on successful execution, false otherwise.
+     * @param string $content The Smarty template string content.
+     * @return bool True if template execution and output handling complete without critical errors, false otherwise.
+     */
+    /**
+     * Sets up Smarty variables and plugins, then initiates template processing.
+     *
+     * Assigns the main record set (`$results`) and individual records (via `ReportRecord` instance)
+     * to Smarty variables. It also registers custom Smarty modifiers for accessing file data and field labels.
+     * Finally, it calls `executeTemplateContinue()` to perform the actual template fetching and output.
+     *
+     * @param array $qresult The query result, containing 'records' (an array of record IDs) and 'reccount'.
+     * @param string $content The template string to be processed by Smarty.
+     * @return bool Returns the result of `executeTemplateContinue()`.
      */
     public function executeTemplate($qresult, $content)
     {
@@ -500,8 +638,24 @@ class ReportExecute
      * Continues the template execution by processing output and handling filters.
      *
      * @param string $content The template content.
-     * @param array $results The result records.
-     * @return bool True on success, false otherwise.
+     * @param array $results An array of record IDs to be processed by the template.
+     * @return bool True if the template fetches and is handled successfully, false on Smarty exception.
+     */
+    /**
+     * Continues template execution: sets up filters, fetches, and handles output.
+     *
+     * - If `template_body` was used, saves it to a temporary file via `saveTemporaryTemplate()`.
+     * - Registers Smarty pre-filter `translateTerms` and post-filter `addProgressCallback`.
+     * - Calls `smarty->fetch()` to process the template.
+     * - Passes the fetched output to `handleTemplateOutput()`.
+     * - Manages progress session updates and cleanup.
+     * - Displays truncation messages if applicable.
+     * - Deletes any temporary template file.
+     *
+     * @param string $content The template string (used only if a temporary template needs to be created from `template_body`).
+     *                        If `$this->templateFile` is already set, this parameter's value for content isn't directly used for fetch.
+     * @param array $results The array of record IDs.
+     * @return bool True on successful completion, false if a Smarty exception occurs.
      */
     private function executeTemplateContinue($content, $results)
     {
@@ -574,6 +728,17 @@ class ReportExecute
     //
     //
     //
+    /**
+     * Configures PHP and Smarty error reporting levels based on the provided report level.
+     *
+     * - `$replevel` 0: Display errors off.
+     * - `$replevel` 1: PHP display errors on, Smarty reports E_NOTICE.
+     * - `$replevel` 2: PHP display errors on, Smarty reports E_ALL & ~E_STRICT & ~E_NOTICE.
+     * - `$replevel` 3: PHP display errors on, Smarty debugging enabled, Smarty reports E_ALL & ~E_STRICT & ~E_NOTICE.
+     * Sets the Smarty debug template if `$replevel` > 0.
+     *
+     * @param int $replevel The reporting level (0-3).
+     */
     private function setupErrorReporting($replevel){
 
         $this->smarty->debugging = false;
@@ -597,8 +762,16 @@ class ReportExecute
     }
 
     //
-    // helper function. It saves template_body into temporary tempalte file
-    //
+    /**
+     * Saves template content (typically from `params['template_body']`) to a temporary file.
+     *
+     * The temporary file is named based on the current user's name (sanitized) and
+     * created in the Smarty template directory. This allows Smarty to process
+     * template content that was not loaded from a pre-existing .tpl file.
+     *
+     * @param string $content The template content string to save.
+     * @return string The basename of the created temporary template file (e.g., "_username.tpl").
+     */
     private function saveTemporaryTemplate($content){
         //save temporary template
         //this is user name $templateFile = "_temp.tpl";
@@ -617,6 +790,16 @@ class ReportExecute
     //
     //
     //
+    /**
+     * Handles the display or storage of an error message.
+     *
+     * Stores the error message in `$this->messageError`.
+     * It then calls `handleTemplateOutput()` to display the message, formatted as HTML
+     * if the `outputmode` is 'html'.
+     *
+     * @param string|null $error_msg The error message to output. If null, it retrieves
+     *                               the last error from `$this->system->getErrorMsg()`.
+     */
     private function outputError($error_msg=null){
 
         if(!isset($error_msg)){
@@ -634,15 +817,29 @@ class ReportExecute
         $this->handleTemplateOutput($error_msg);
     }
 
+    /**
+     * Retrieves the last error message stored by `outputError()`.
+     *
+     * @return string|null The last error message, or null if no error has been set.
+     */
     public function getError(){
         return $this->messageError;
     }
 
     //SMARTY FILTERS
 
-    //
-    // Convert short form term translations (before Smarty processes the report)
-    //
+    /**
+     * Smarty pre-filter to handle shorthand term translations.
+     *
+     * This filter searches for patterns like `{trm_id \Language_1 \Language_2 ...}` in the template source.
+     * For each match, it attempts to find a translation for `trm_id` in the specified languages
+     * (in order) from `defTranslations`. If no translation is found, it falls back to the
+     * term's default label from `defTerms`. The matched shorthand is replaced with the found label/translation.
+     *
+     * @param string $tpl_source The raw template source code.
+     * @param \Smarty\Template $template The Smarty template object.
+     * @return string The modified template source with shorthand terms translated.
+     */
     public function translateTerms($tpl_source, \Smarty\Template $template){
 
         $matches = array();
@@ -694,8 +891,17 @@ class ReportExecute
     }
 
     //
-    // adds a small piece of code in main loop with function "progressCallback" - need to maintain progress
-    //
+    /**
+     * Smarty post-filter to inject a progress callback into template loops.
+     *
+     * This filter searches for the beginning of Smarty's compiled `foreach` loops
+     * and inserts a call to the `progressCallback` Smarty plugin. This allows
+     * for progress tracking during the rendering of large datasets.
+     *
+     * @param string $tpl_source The compiled template source code.
+     * @param \Smarty\Template $template The Smarty template object.
+     * @return string The modified compiled template source with the progress callback injected.
+     */
     public function addProgressCallback($tpl_source, \Smarty\Template $template)
     {
         //find fist foreach and insert as first operation
@@ -1332,10 +1538,20 @@ Javascript wrap:<br>
 
 
     //
-    // Runtime tag - smarty plugin function
-    //
-    // progress call back
-    //
+    /**
+     * Smarty plugin function for progress tracking within template loops.
+     *
+     * This function is called by the code injected by `addProgressCallback`.
+     * It updates the progress session on the server side via `mysql__update_progress`
+     * periodically (e.g., every 10 records or near the beginning/end).
+     * It also checks if the user has requested to terminate the report generation.
+     *
+     * @param array $params Parameters passed from the Smarty tag. Expected (optional):
+     *                      'done': Current number of items processed.
+     *                      'tot_count': Total number of items to process.
+     * @param \Smarty\Template $smarty The Smarty template object (passed by reference, but not strictly needed by this method's logic for `$smarty` object itself).
+     * @return bool True if the process was terminated by the user, false otherwise.
+     */
     public function progressCallback($params, &$smarty){
 
         if($this->publishmode!=0 || $this->smartySessionId==null){ //check that this call from ui
@@ -1374,10 +1590,17 @@ Javascript wrap:<br>
     }
 
 
-    // Runtime tag - smarty plugin function
-    //
-    //  prints <div>label: value</div>
-    //
+    /**
+     * Smarty plugin function `{out}` to print a label-value pair, typically in a div structure.
+     *
+     * Example: `{out lbl="Name" var=$record.name}`
+     *
+     * @param array $params Parameters from the Smarty tag:
+     *                      - 'lbl': The label string.
+     *                      - 'var': The variable/value to display.
+     * @param \Smarty\Template $smarty The Smarty template object (passed by reference).
+     * @return string HTML string `<div><div class="tlbl">Label: </div><b>Value</b></div>` if 'var' is not empty, otherwise empty string.
+     */
     public function printLabelValuePair($params, &$smarty)
     {
         if($params['var']){
@@ -1387,20 +1610,28 @@ Javascript wrap:<br>
         }
     }
 
-    // Runtime tag - smarty plugin function
-    //
-    //
-    // {wrap var=$s.f8_originalvalue dt="file" width="100" height="auto" mode=""}
-    //
-    // $params - array of
-    // var - value
-    // dt - detail type: url, file, geo
-    // mode - for dt=file only:   thumbnail, link or player by default
-    // lbl - description
-    // fancybox - fills rec_Files with file info, rec_Files will be data source for fancybox viewer
-    // style or width,height
-    // limit - limits output for multivalue fields
-    //
+    /**
+     * Smarty plugin function `{wrap}` for versatile display of field values with formatting options.
+     *
+     * This function handles different data types ('url', 'file', 'geo', 'date', text/CMS content)
+     * and applies specific formatting, linking, or media player generation based on parameters.
+     *
+     * @param array $params Parameters from the Smarty tag:
+     *                      - 'var': The field value or array of values.
+     *                      - 'dt': (Optional) The detail type (e.g., 'url', 'file', 'geo', 'date').
+     *                              If not set, treated as general text/CMS content.
+     *                      - 'mode': (Optional) Specific mode for certain data types:
+     *                                - For 'file': 'thumbnail', 'link', or player (default).
+     *                                - For 'date': Date format specifier (passed to `Temporal::toHumanReadable`).
+     *                      - 'lbl': (Optional) A label to prepend to the output.
+     *                      - 'fancybox': (Optional) If true for 'file' type, prepares data for Fancybox media viewer.
+     *                      - 'style': (Optional) Inline CSS style string for the output element.
+     *                      - 'width', 'height': (Optional) Dimensions for images, players, maps.
+     *                      - 'limit': (Optional) For multi-value fields, limits the number of items displayed.
+     *                      - 'calendar': (Optional) For 'date' type, calendar system for display.
+     * @param \Smarty\Template $smarty The Smarty template object (passed by reference).
+     * @return string The formatted HTML output for the field value.
+     */
     public function printProcessedValue($params, &$smarty)
     {
         if(!isset($params['var'])){

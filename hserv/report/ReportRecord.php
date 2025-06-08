@@ -1,4 +1,16 @@
 <?php
+/*
+* ReportReport.php - data provider and formatting helper for Smarty templates
+*
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     6.6
+*/
+
 namespace hserv\report;
 
 use hserv\structure\ConceptCode;
@@ -14,32 +26,59 @@ require_once dirname(__FILE__).'/../structure/dbsTerms.php';
 require_once dirname(__FILE__).'/../utilities/Temporal.php';
 require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
 
+/**
+ * Suffix used for Smarty variables to access the original, unprocessed value of a field.
+ * @var string
+ */
 define('RAW','_originalvalue');
+/**
+ * A string of allowed HTML tags for sanitizing record titles, typically used in link generation.
+ * @var string
+ */
 define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br>');//for recTitle
 
 /**
  * Class ReportRecord
  *
- * A helper class to access Heurist data from Smarty reports. Provides methods to get record details,
- * related records, file field info, and to access Heurist constants.
+ * This class serves as a data provider and formatting helper for Smarty templates used in Heurist reports.
+ * It provides methods to access various aspects of Heurist records, including their details,
+ * related records, associated files, and definitions (like record type names, field labels, term labels).
+ * It also offers utility functions to retrieve system information, constants, and formatted links.
+ * The class employs caching for frequently accessed data like record details and definitions
+ * to optimize performance within the scope of a single report execution.
+ *
+ * An instance of this class is typically made available to Smarty templates under a variable
+ * like `$heurist` or `$h`, allowing template designers to easily fetch and display Heurist data
+ * using syntax like `{$heurist->getRecord($rec_id).f10}` or `{$heurist->rty_Name($record.recTypeID)}`.
+ *
+ * @package hserv\report
  */
 class ReportRecord
 {
-    protected $recordsCache;  // Cache for loaded records
-    protected $rtyNames;      // Record type names
-    protected $dtyTypes;      // Detail types   dty_ID => dty_Type
-    protected $rstFields;     // Detail types   rty_ID => array(dty_ID => rst_DisplayName)
-    protected $dtTerms = null;    // Detail terms  
-    protected $dbsTerms;     // Database terms object
-    protected $system;       // System object
-    protected $translations; // Cache for translated db definitions (terms,...)
+    /** @var array Cache for fully loaded and formatted record data, keyed by record ID. */
+    protected $recordsCache;
+    /** @var array Cache for record type names, keyed by record type ID (rty_ID). */
+    protected $rtyNames;
+    /** @var array Cache for detail type definitions (dty_ID => dty_Type string), loaded from `dbs_GetDetailTypes`. */
+    protected $dtyTypes;
+    /** @var array Cache for record type structures, storing field display names. Format: `[rty_ID => [dty_ID => rst_DisplayName, ...]]`. */
+    protected $rstFields;
+    /** @var array|null Cache for term definitions, populated by `$dbsTerms`. Initially null. */
+    protected $dtTerms = null;
+    /** @var \DbsTerms|null Instance of the DbsTerms class for accessing term information. */
+    protected $dbsTerms;
+    /** @var \hserv\System The Heurist system object. */
+    protected $system;
+    /** @var array Cache for translated strings (e.g., term labels), structured by entity type (e.g., 'trm') and language code. */
+    protected $translations;
 
     /**
      * ReportRecord constructor.
      *
-     * Initializes system, loads record type names and detail types, and sets up cache structures.
+     * Initializes the ReportRecord object with the Heurist system context.
+     * It pre-caches record type names and basic detail type information.
      *
-     * @param mixed $system The system object used for database and other interactions.
+     * @param \hserv\System $system The main Heurist system object.
      */
     public function __construct($system)
     {
@@ -52,11 +91,14 @@ class ReportRecord
     }
 
     /**
-     * Returns the value of Heurist constants for Record and Detail types.
+     * Returns the value of a Heurist system constant (e.g., a predefined Record Type ID or Detail Type ID).
      *
-     * @param string $name The name of the constant.
-     * @param mixed|null $smarty_obj Unused Smarty object reference.
-     * @return mixed|null The constant value or null if not defined.
+     * Example in Smarty: `{$heurist->constant('RT_PERSON')}`
+     *
+     * @param string $name The name of the Heurist constant (e.g., "RT_PERSON", "DT_NAME").
+     * @param mixed|null $smarty_obj This parameter is present for compatibility with Smarty plugin registration
+     *                               but is not used by the method.
+     * @return mixed|null The value of the defined constant, or null if the constant is not defined.
      */
     public function constant($name, $smarty_obj = null)
     {
@@ -65,9 +107,11 @@ class ReportRecord
     }
 
     /**
-     * Returns the base URL of the system.
+     * Returns the base URL of the Heurist instance.
      *
-     * @return string The base URL of the system (HEURIST_BASE_URL).
+     * Example in Smarty: `{$heurist->baseURL()}`
+     *
+     * @return string The base URL as defined by `HEURIST_BASE_URL`.
      */
     public function baseURL()
     {
@@ -75,10 +119,19 @@ class ReportRecord
     }
 
     /**
-     * Returns various system information like database record counts or language settings.
+     * Retrieves various pieces of system or database-level information.
      *
-     * @param string $param The system information parameter to retrieve.
-     * @return mixed|null The requested system information.
+     * Supported parameters for `$param`:
+     * - 'db_total_records': Total count of non-temporary records in the database.
+     * - 'db_rty_counts': An associative array of record counts per record type ID.
+     * - 'lang': The current layout language code (3-letter, e.g., 'eng').
+     * - 'dbname': The name of the current Heurist database.
+     * - 'user': An array of information about the current user (excluding preferences).
+     *
+     * Example in Smarty: `{$heurist->getSysInfo('dbname')}`
+     *
+     * @param string $param The specific piece of system information requested.
+     * @return mixed|null The requested information, or null if the parameter is not recognized.
      */
     public function getSysInfo($param)
     {
@@ -104,10 +157,12 @@ class ReportRecord
     }
 
     /**
-     * Returns the name of a record type by its ID.
+     * Retrieves the name of a record type given its ID.
      *
-     * @param int $rty_ID The record type ID.
-     * @return string The name of the record type.
+     * Example in Smarty: `{$heurist->rty_Name($record.recTypeID)}`
+     *
+     * @param int $rty_ID The Record Type ID.
+     * @return string The name of the record type, or an empty string if not found.
      */
     public function rty_Name($rty_ID)
     {
@@ -115,11 +170,13 @@ class ReportRecord
     }
 
     /**
-     * Returns the local record type ID for a given concept code.
+     * Retrieves the local Heurist Record Type ID for a given concept code.
      *
-     * @param string $conceptCode The concept code.
+     * Example in Smarty: `{$heurist->rty_id('CMSRecord')}`
+     *
+     * @param string $conceptCode The concept code of the record type (e.g., "RTEvent", "1-23").
      * @param mixed|null $smarty_obj Unused Smarty object reference.
-     * @return int The local record type ID.
+     * @return int The local Record Type ID, or 0 if not found/invalid.
      */
     public function rty_id($conceptCode, $smarty_obj = null)
     {
@@ -127,11 +184,13 @@ class ReportRecord
     }
 
     /**
-     * Returns the local detail type ID for a given concept code.
+     * Retrieves the local Heurist Detail Type ID for a given concept code.
      *
-     * @param string $conceptCode The concept code.
+     * Example in Smarty: `{$heurist->dty_id('hasTitle')}`
+     *
+     * @param string $conceptCode The concept code of the detail type (e.g., "DTDescription", "2-45").
      * @param mixed|null $smarty_obj Unused Smarty object reference.
-     * @return int The local detail type ID.
+     * @return int The local Detail Type ID, or 0 if not found/invalid.
      */
     public function dty_id($conceptCode, $smarty_obj = null)
     {
@@ -139,11 +198,13 @@ class ReportRecord
     }
 
     /**
-     * Returns the local term ID for a given concept code.
+     * Retrieves the local Heurist Term ID for a given concept code.
      *
-     * @param string $conceptCode The concept code.
+     * Example in Smarty: `{$heurist->trm_id('eventType:Conference')}`
+     *
+     * @param string $conceptCode The concept code of the term (e.g., "relationType:isParentOf", "3-100").
      * @param mixed|null $smarty_obj Unused Smarty object reference.
-     * @return int The local term ID.
+     * @return int The local Term ID, or 0 if not found/invalid.
      */
     public function trm_id($conceptCode, $smarty_obj = null)
     {
@@ -151,11 +212,19 @@ class ReportRecord
     }
 
     /**
-     * Retrieves record information by record ID, formatted for Smarty reports.
+     * Retrieves and formats a Heurist record for use in Smarty templates.
      *
-     * @param mixed $rec The record ID or record array.
+     * Fetches the record data using `recordSearchByID` if not already cached.
+     * Formats the record into a Smarty-friendly associative array where detail fields
+     * are accessible via keys like `f<ID>` (e.g., `f10`).
+     * Also includes record header fields prefixed with `rec` (e.g., `recTitle`, `recID`),
+     * `recTypeName`, `rec_Tags` (comma-separated), and `rec_IsVisible`.
+     *
+     * @param int|array $rec The Record ID, or an array containing `recID`.
+     * @param bool $details If true (default), fetches full record details. If false,
+     *                      may fetch only header data (depends on `recordSearchByID` behavior).
      * @param mixed|null $smarty_obj Unused Smarty object reference.
-     * @return array|null The record information formatted for Smarty.
+     * @return array|null The formatted record array suitable for Smarty, or null if the record is not found.
      */
     public function getRecord($rec, $details=true, $smarty_obj = null)
     {
@@ -185,11 +254,14 @@ class ReportRecord
     
     
     /**
-    * Returns default thumbnail for given record
-    * 
-    * @param mixed $rec
-    * @param mixed $smarty_obj
-    */
+     * Returns the URL of the default thumbnail for a given record.
+     *
+     * It uses `fileGetThumbnailURL()` to determine the thumbnail.
+     *
+     * @param int|array $rec The Record ID or a record array containing `recID`.
+     * @param mixed|null $smarty_obj Unused Smarty object reference.
+     * @return string|null The URL of the thumbnail, or null if no thumbnail is found.
+     */
     public function getRecordThumbnail($rec, $smarty_obj = null){
         
         $rec_ID = is_array($rec) && $rec['recID'] ? $rec['recID'] : $rec;
@@ -206,10 +278,16 @@ class ReportRecord
             
 
     /**
-     * Returns whether a record is visible to the current user.
+     * Checks if a given record is visible to the current user based on its visibility settings and user's permissions.
      *
-     * @param array $rec The record array.
-     * @return bool True if the record is visible, false otherwise.
+     * - Temporary records (`rec_FlagTemporary` = 1) are not visible.
+     * - Database owners (user ID 2) can see all non-temporary records.
+     * - 'hidden' records are not visible to others.
+     * - For 'viewable' records, it checks if the current user is the owner or belongs to a group
+     *   that has explicit permission via `usrRecPermissions`.
+     *
+     * @param array $rec The Heurist record array (must contain `rec_FlagTemporary`, `rec_NonOwnerVisibility`, `rec_OwnerUGrpID`, `rec_ID`).
+     * @return bool True if the record is deemed visible to the current user, false otherwise.
      */
     public function recordIsVisible($rec)
     {
@@ -243,11 +321,21 @@ class ReportRecord
     }
 
     /**
-     * Returns an array of related records with additional relation details.
+     * Retrieves records related to the given record via Heurist relationships.
      *
-     * @param mixed $rec The record ID or record array.
+     * For each relationship, it fetches details of the related record and information
+     * about the relationship itself (type, notes, start/end dates).
+     * The relationship record itself is also fetched and included.
+     *
+     * @param int|array $rec The Record ID or a record array containing `recID`.
      * @param mixed|null $smarty_obj Unused Smarty object reference.
-     * @return array The array of related records with relationship details.
+     * @return array An array of formatted related records. Each element includes:
+     *               - Standard formatted fields of the related record (from `getRecord()`).
+     *               - `recRelationID`: ID of the relationship record.
+     *               - `recRelationType`: Label of the relationship type term.
+     *               - `recRelationNotes`: Notes from the relationship record.
+     *               - `recRelationStartDate`, `recRelationEndDate`: Formatted dates from the relationship.
+     *               - `relationRecord`: The fully formatted relationship record itself.
      */
     public function getRelatedRecords($rec, $smarty_obj = null)
     {
@@ -307,11 +395,17 @@ class ReportRecord
     /**
      * Returns an array of linked records for a given record.
      *
-     * @param mixed $rec The record ID or record array.
-     * @param int|null $rty_ID The record type ID to filter linked records (optional).
-     * @param string|null $direction The direction of the link ('linkedto', 'linkedfrom', or null for both directions).
+     * @param int|array $rec The Record ID or a record array containing `recID`.
+     * @param int|null $rty_ID (Optional) Filter linked records by this Record Type ID.
+     * @param string|null $direction (Optional) Direction of links:
+     *                               - 'linkedto': Records linked *to* by `$rec`.
+     *                               - 'linkedfrom': Records linked *from* by `$rec`.
+     *                               - null (default): Both directions.
      * @param mixed|null $smarty_obj Unused Smarty object reference.
-     * @return array An array with keys 'linkedto' and 'linkedfrom' containing linked record IDs.
+     * @return array An associative array with two keys:
+     *               - 'linkedto': An array of record IDs that `$rec` links to.
+     *               - 'linkedfrom': An array of record IDs that link to `$rec`.
+     *               Each array is empty if no links are found for that direction or filter.
      */
     public function getLinkedRecords($rec, $rty_ID = null, $direction = null, $smarty_obj = null)
     {                        
@@ -344,8 +438,24 @@ class ReportRecord
     /**
      * Converts a record array into an array that can be assigned to a Smarty variable.
      *
-     * @param array $rec The record array to convert.
-     * @return array|null The converted record array or null if the record is invalid.
+     * @param array|null $rec The raw record data array from `recordSearchByID`.
+     * @return array|null A Smarty-friendly associative array representing the record,
+     *                    or null if input `$rec` is null.
+     */
+    /**
+     * Converts a raw Heurist record array into a format more accessible for Smarty templates.
+     *
+     * - Standard record fields (rec_ID, rec_Title, etc.) are mapped to keys like `recID`, `recTitle`.
+     * - Record Type ID is mapped to `recTypeID` and its name to `recTypeName`.
+     * - Tags are included as `rec_Tags` (comma-separated string).
+     * - Visibility is checked and stored in `rec_IsVisible`.
+     * - Detail fields are processed by `processRecordDetails` and added as `f<ID>` keys.
+     * - Woot text is fetched via `getWootText` and added as `recWootText`.
+     *
+     * Caches the processed record in `$this->recordsCache`.
+     *
+     * @param array|null $rec Raw record data.
+     * @return array|null Formatted record array for Smarty, or null if input is null.
      */
     private function getRecordForSmarty($rec)
     {
@@ -378,6 +488,17 @@ class ReportRecord
         return $record;
     }
 
+    /**
+     * Helper function for `getRecordForSmarty` to process standard record header fields.
+     *
+     * Maps fields like `rec_ID` to `recID`, `rec_Title` to `recTitle`, etc.
+     * Sets `recTypeID` and `recTypeName`. Fetches Woot text for `recWootText`.
+     *
+     * @param array &$record The Smarty-formatted record array being built (passed by reference).
+     * @param string $key The original key of the record field (e.g., "rec_ID").
+     * @param mixed $value The value of the record field.
+     * @param int &$recTypeID Passed by reference; this variable is updated if the current key is "rec_RecTypeID".
+     */
     private function processRecordField(&$record, $key, $value, &$recTypeID)
     {
         $record['rec' . substr($key, 4)] = $value;
@@ -393,6 +514,18 @@ class ReportRecord
         }
     }
 
+    /**
+     * Helper function for `getRecordForSmarty` to process the 'details' part of a raw record.
+     *
+     * Iterates through each detail field, calling `getDetailForSmarty` to format it,
+     * and then merges the formatted detail into the main `$record` array being built for Smarty.
+     *
+     * @param array &$record The Smarty-formatted record array being built (passed by reference).
+     * @param array $details The 'details' array from the raw Heurist record.
+     * @param int $recTypeID The Record Type ID of the current record.
+     * @param int $recordID The Record ID of the current record.
+     * @param string $lang The current language code for translations.
+     */
     private function processRecordDetails(&$record, $details, $recTypeID, $recordID, $lang)
     {
         foreach ($details as $dtKey => $dtValue) {
@@ -404,8 +537,14 @@ class ReportRecord
     }
 
     /**
-    *
-    */
+     * Helper function to concatenate a new term value to an existing string of term values.
+     *
+     * If the result string `$res` is not empty, a comma and space are appended before adding `$val`.
+     *
+     * @param string $res The existing string of concatenated term values.
+     * @param string|null $val The new term value to add.
+     * @return string The updated string of concatenated term values.
+     */
     private function addTermValue($res, $val){
 
         if($val){
@@ -416,9 +555,29 @@ class ReportRecord
     }
 
     /**
-    * convert details to array to be assigned to smarty variable
-    * $dtKey - detailtype ID, if <1 this dummy relationship detail
-    */
+     * Formats a single detail field's value(s) for Smarty.
+     *
+     * This is a key formatting method that handles different Heurist detail types:
+     * - 'enum', 'relationtype': Uses `getDetailForEnum`.
+     * - 'date': Formats using `Temporal::toHumanReadable`.
+     * - 'file': Generates links or player tags, potentially preparing data for Fancybox.
+     * - 'geo': Creates a link to Google Maps for point data.
+     * - 'resource': Stores the linked record ID.
+     * - Text types ('freetext', 'blocktext'): Handles translations and basic text.
+     *
+     * The formatted field is returned as an array with keys:
+     * - `f<ID>`: Concatenated string of processed values (e.g., term labels, formatted dates).
+     * - `f<ID>s`: Array of processed values (e.g., array of term objects, array of file link strings).
+     * - `f<ID>_originalvalue`: Array of original, raw values from the database.
+     * - For 'geo' type, it also adds `f<ID>_geojson` with the GeoJSON representation.
+     *
+     * @param int|string $dtKey The Detail Type ID, or a special key for non-standard details (e.g., relationship info).
+     * @param mixed $dtValue The raw value(s) of the detail field.
+     * @param int $recTypeID The Record Type ID of the parent record.
+     * @param int $recordID The Record ID of the parent record.
+     * @param string $lang The current language code for translations.
+     * @return array|null An associative array with formatted values for Smarty, or null if the detail type is unknown/unhandled.
+     */
     private function getDetailForSmarty($dtKey, $dtValue, $recTypeID, $recID, $lang){
 
         $dtname = null;
@@ -664,12 +823,24 @@ class ReportRecord
     }
 
     /**
-    * Converts enum field value for smarty
-    *
-    * @param mixed $dtname
-    * @param mixed $dtValue
-    * @param mixed $lang
-    */
+     * Formats enumeration or relationtype fields for Smarty.
+     *
+     * For each term ID in `$dtValue`:
+     * - Fetches the term object using `DbsTerms`.
+     * - Retrieves translations for term label and description if applicable.
+     * - Constructs an array for Smarty containing `id` (term ID), `internalid` (term ID),
+     *   `code`, `label` (translated), `term` (full hierarchical label), `conceptid`, and `desc` (translated).
+     *
+     * The returned array for Smarty includes:
+     * - `f<ID>`: Comma-separated string of translated term labels.
+     * - `f<ID>s`: Array of the term objects described above.
+     * - `f<ID>_originalvalue`: Array of original term IDs.
+     *
+     * @param string $dtname The Smarty variable base name for this field (e.g., "f10").
+     * @param array $dtValue An array of term IDs.
+     * @param string $lang The current language code for translations.
+     * @return array|null An associative array with formatted term data for Smarty, or null if no valid terms processed.
+     */
     private function getDetailForEnum($dtname, $dtValue, $lang){
 
         if($this->dtTerms==null){
@@ -728,10 +899,14 @@ class ReportRecord
     }
 
     /**
-     * Retrieves Woot text associated with a record.
+     * Retrieves Woot (collaborative text editor) content associated with a record.
      *
-     * @param int $recID The record ID.
-     * @return string The Woot text.
+     * Note: The current implementation indicates Woot functionality is disabled
+     * and this method will return an empty string. The original logic for loading
+     * Woot data is commented out.
+     *
+     * @param int $recID The Record ID for which to retrieve Woot text.
+     * @return string The Woot text, or an empty string if disabled/not found.
      */
     public function getWootText($recID)
     {
@@ -761,11 +936,18 @@ class ReportRecord
     }
 
     /**
-     * Returns the record IDs for a given query.
+     * Executes a Heurist search query and returns an array of matching record IDs.
      *
-     * @param string|array $query The Heurist query or JSON object.
-     * @param mixed|null $current_rec The current record ID or array (optional).
-     * @return array|null An array of record IDs or null if none are found.
+     * If the query string contains the placeholder `[ID]`, and `$current_rec` (a record ID)
+     * is provided, `[ID]` will be replaced with the current record's ID in the query.
+     * This allows for context-dependent sub-queries within a report.
+     *
+     * Example in Smarty: `{$heurist->getRecords('t:Person AND f123:[ID]')}`
+     *
+     * @param string|array $query A Heurist query string or its JSON representation as a PHP array.
+     * @param int|array|null $current_rec (Optional) The current record's ID or a record array containing `recID`.
+     *                                    Used for substituting `[ID]` in the query.
+     * @return array|null An array of record IDs matching the query, or null if the search fails or returns no results.
      */
     public function getRecords($query, $current_rec = null)
     {
@@ -793,12 +975,26 @@ class ReportRecord
     }
 
     /**
-     * Returns aggregation values for a set of records or query.
+     * Performs aggregation (count, sum, average) on specified fields for a given set of records.
      *
-     * @param array $functions An array of pairs (field_id, avg|count|sum) specifying the aggregation functions.
-     * @param string|array $query_or_ids Heurist query or record IDs.
-     * @param mixed|null $current_rec The current record ID or array (optional).
-     * @return array|mixed|null Aggregation result, or null if none are found.
+     * The set of records can be defined by a list of IDs or by a Heurist query.
+     *
+     * Example in Smarty:
+     * `{$aggr = $heurist->getRecordsAggr([ [10, 'sum'], [12, 'count'] ], $myRecordIds)}`
+     * `Sum of field 10: {$aggr[0][2]}`
+     *
+     * @param array $functions An array of aggregation function definitions. Each definition is an array:
+     *                         `[detail_type_ID, aggregation_type]`, where `aggregation_type`
+     *                         is 'avg', 'count', or 'sum'. If `detail_type_ID` is 0 or not positive for 'count',
+     *                         it counts records (`count(rec_ID)`).
+     * @param string|array $query_or_ids Either a Heurist query string/JSON array to select records,
+     *                                   or a comma-separated string/array of record IDs.
+     * @param int|array|null $current_rec (Optional) The current record context, used if `$query_or_ids` is a query
+     *                                    containing `[ID]`.
+     * @return array|mixed|null If multiple functions are specified, returns an array where each element is
+     *                          `[detail_type_ID, aggregation_type, result_value]`.
+     *                          If a single function is specified, returns just the `result_value`.
+     *                          Returns null if no functions, no IDs, or an error occurs.
      */
     public function getRecordsAggr($functions, $query_or_ids, $current_rec = null)
     {
@@ -856,13 +1052,19 @@ class ReportRecord
     }
 
     /**
-     * Returns a translated value for a given entity and field.
+     * Retrieves translations for Heurist definition labels (terms, record types, detail types).
      *
-     * @param string $entity The entity type ('trm', 'rty', 'dty').
-     * @param mixed $ids The entity IDs.
-     * @param string|null $field The field to translate (default is 'Label').
-     * @param string|null $language_code The language code for the translation (optional).
-     * @return array|string The translated value(s).
+     * It fetches translations from the `defTranslations` table for the specified entity IDs
+     * and language. If a translation is not found for a specific ID in the requested language,
+     * it falls back to the default label of the entity. Results are cached per language per entity type.
+     *
+     * @param string $entity The type of entity to translate: 'trm' (term), 'rty' (record type), 'dty' (detail type).
+     * @param int|string|array $ids A single ID, or a comma-separated string/array of IDs for the entities.
+     * @param string|null $field The specific field to translate. For 'trm', can be 'trm_Label' (default) or 'trm_Description'.
+     *                           For 'rty'/'dty', it defaults to 'rty_Name'/'dty_Name'.
+     * @param string|null $language_code The 3-letter language code (e.g., 'fre'). If null, uses the current system language.
+     * @return string|array If a single ID was provided, returns the translated string.
+     *                      If multiple IDs were provided, returns an associative array `[ID => translated_string]`.
      */
     public function getTranslation($entity, $ids, $field = null, $language_code = null)
     {
@@ -926,10 +1128,14 @@ class ReportRecord
     }
 
     /**
-    * fill array with term labels for given set of term ids
-    *
-    * @param mixed $ids
-    */
+     * Helper function to get default term names/descriptions for a list of term IDs.
+     *
+     * Used by `getTranslation` as a fallback when a specific language translation is not found.
+     *
+     * @param array $ids Array of term IDs.
+     * @param string $field The term field to retrieve ('trm_Label' or 'trm_Description').
+     * @return array Associative array `[term_ID => default_value]`.
+     */
     private function fillTermNames($ids, $field){
 
         $def_values = array();
@@ -949,11 +1155,25 @@ class ReportRecord
     }
 
     /**
-     * Returns the specific field for uploaded media information.
+     * Retrieves a specific metadata field (e.g., description, caption, copyright) for one or more uploaded files.
      *
-     * @param mixed $file_details The file details array.
-     * @param string $field The field to retrieve ('name', 'desc', 'cap', etc.).
-     * @return string|array The value(s) for the requested field.
+     * The input `$file_details` can be:
+     * - A single file detail array (as stored in `ReportRecord`'s cache for `f<ID>_originalvalue`).
+     * - An array of such file detail arrays.
+     * - A comma-separated string of file URLs (from which obfuscated file IDs are extracted).
+     *
+     * The `$field` parameter specifies which metadata to retrieve, using short aliases
+     * (e.g., 'desc' for description, 'cap' for caption, 'rights' for copyright).
+     *
+     * Example in Smarty: `{$heurist->getFileField($myFile, 'desc')}`
+     *
+     * @param array|string $file_details File information.
+     * @param string $field Alias for the metadata field to retrieve (default 'name' for `ulf_OrigFileName`).
+     *                      Valid aliases: 'desc'/'description', 'cap'/'caption', 'rights'/'copyright',
+     *                      'owner'/'copyowner', 'type'/'ext'/'extension', 'filename'/'name'.
+     * @return string|array If a single file's data is processed, returns the string value of the field.
+     *                      If multiple files are processed, returns an array of string values.
+     *                      Returns the original `$file_details` if `$field` is unrecognized.
      */
     public function getFileField($file_details, $field = 'name')
     {
@@ -1012,10 +1232,15 @@ class ReportRecord
     */
 
     /**
-    * Returns array of fields (DisplayNames) for given record ordered by rectype structure
-    *     
-    * @param mixed $rec - record values
-    */
+     * Retrieves the defined structure (ordered fields and their display names) for a given record's type.
+     *
+     * Uses `DbDefRecStructure` to fetch the field structure for the record's type (`$rec['recTypeID']`).
+     * Results are cached in `$this->rstFields` to optimize repeated calls for the same record type.
+     *
+     * @param array $rec A Smarty-formatted record array, which must contain `recTypeID`.
+     * @return array|null An associative array `[detail_type_ID => display_name, ...]` for the record type,
+     *                    or null if the record type is invalid or has no defined structure.
+     */
     public function getRecordStructure($rec){
         
         if(!($rec && @$rec['recTypeID']>0)){
@@ -1046,11 +1271,15 @@ class ReportRecord
     }
 
     /**
-    * Returns field label (DisplayName) for rectype and field
-    * 
-    * @param mixed $rec
-    * @param mixed $dty_ID
-    */
+     * Retrieves the display label for a specific detail type (field) within a given record's type.
+     *
+     * Uses `getRecordStructure()` to get all field labels for the record's type,
+     * then returns the label for the specified `$dty_ID`.
+     *
+     * @param array $rec A Smarty-formatted record array (must contain `recTypeID`).
+     * @param int $dty_ID The Detail Type ID of the field.
+     * @return string The display label of the field, or "Field [dty_ID]" if not found.
+     */
     public function getFieldLabel($rec, $dty_ID){
 
         $rst = $this->getRecordStructure($rec);
@@ -1063,6 +1292,12 @@ class ReportRecord
         return @$rst[$dty_ID];
     }
     
+    /**
+     * Retrieves the data type string (e.g., 'enum', 'freetext', 'date') for a given Detail Type ID.
+     *
+     * @param int $dty_ID The Detail Type ID.
+     * @return string|null The data type string, or 'relmarker' if $dty_ID < 1, or null if not found.
+     */
     public function getFieldType($dty_ID){
         
         $detailType = null;
@@ -1076,14 +1311,20 @@ class ReportRecord
     }
     
     /**
-    * 1. Finds empty groups
-    * 2. Prepare values - replace fNNN with array of
-    *      freetext, blocktext - translated value 
-    *      enum - labels
-    *      file    
-    * 
-    * @param mixed $rec
-    */
+     * Prepares a record for display, primarily by identifying and flagging empty field groups (sections).
+     *
+     * It iterates through the fields defined in the record's type structure. If a field is a 'separator'
+     * and all subsequent fields until the next separator (or end) are empty in the given `$rec` data,
+     * the separator field itself (e.g., `$rec['f123']`) is set to the string 'empty'.
+     * It also calculates `recGroupCount` which is the number of non-empty groups.
+     *
+     * Note: This method modifies the input `$rec` array indirectly by potentially setting separator fields to 'empty'.
+     *
+     * @param array $rec A Smarty-formatted record array.
+     * @param string|null $lang Language code, currently unused in this method's logic but kept for potential future use.
+     * @return array The modified (or original if no changes made) record array with `recGroupCount` and potentially
+     *               separator fields marked as 'empty'. Returns the original `$rec` if structure is not found.
+     */
     public function prepareRecord($rec, $lang=null){
         
         $rts = $this->getRecordStructure($rec);
@@ -1131,8 +1372,20 @@ class ReportRecord
     }
     
     //
-    //
-    //
+    /**
+     * Composes an HTML link to a Heurist record, optionally using a specified report template for display.
+     *
+     * If a `$template_name` is provided and the record is visible, the link will point to the report
+     * generated by that template for the given record. Otherwise, or if the record is not visible,
+     * it returns the sanitized record title.
+     * The link is constructed to open in a popup (`target="_popup"`) and uses `open_link()` JavaScript.
+     *
+     * @param int $rec_ID The ID of the record to link to.
+     * @param string|null $template_name The basename of the Smarty template file to use for displaying the record.
+     *                                   If null, only the record title is returned.
+     * @return string An HTML `<a>` tag linking to the record/report, or the sanitized record title.
+     *                Returns an empty string if the record is not found.
+     */
     public function composeRecLink($rec_ID, $template_name){
         
         $rec = recordSearchByID($this->system, $rec_ID, false);
@@ -1153,8 +1406,17 @@ class ReportRecord
     }
     
     //
-    //
-    //
+    /**
+     * Composes an HTML link for a file, including an icon and file information.
+     *
+     * Generates an `<a>` tag that links to the file (either its external URL or a Heurist download link).
+     * The link text includes an external link icon, the IIIF logo if applicable, the filename
+     * (or URL if no filename), and the file size in KB.
+     *
+     * @param array $fileinfo An associative array of file metadata, typically from a `ulf_` prefixed field set
+     *                        (e.g., `ulf_ExternalFileReference`, `ulf_OrigFileName`, `ulf_FileSizeKB`, `ulf_ObfuscatedFileID`).
+     * @return string The generated HTML string for the file link.
+     */
     public function composeFileLink($fileinfo){
         
         $filepath = $fileinfo['fullPath'];

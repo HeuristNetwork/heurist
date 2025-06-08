@@ -21,6 +21,35 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
+/**
+ * This file provides a library of functions for managing Users and Groups within the Heurist system.
+ * These functions interact primarily with the `sysUGrps` table (for user and group definitions)
+ * and `sysUsrGrpLinks` table (for user-to-group memberships and roles).
+ *
+ * Functionality includes:
+ * - Retrieving user and group information by various criteria (ID, name, email).
+ * - Managing user passwords, including reset mechanisms via PIN or random generation.
+ * - Handling user preferences, stored in the session and database.
+ * - User registration, profile updates, and associated email notifications.
+ * - Synchronizing user credentials across linked Heurist databases.
+ * - Managing system notifications for users.
+ * - Handling credentials for external data repositories.
+ * - Helper functions for access control checks.
+ *
+ * Most functions are prefixed with `user_`.
+ *
+ * @package     hserv\structure
+ */
+
+    /*
+     * Note: The following constants appear to be commented out in the original source
+     * and are likely not in active use. They might represent an older design
+     * or a planned feature for abstracting table/field names.
+     *
+     * define('USERS_TABLE', 'sysUGrps');
+     * define('USERS_ID_FIELD', 'ugr_ID');
+     * // ... and other similar constants ...
+     */
     /*
     define('USERS_TABLE', 'sysUGrps');
     define('USERS_ID_FIELD', 'ugr_ID');
@@ -74,10 +103,19 @@
     */
 
     /**
-    * Get user/group by field value
-    *
-    * @param mixed $ugr_Name - user name
-    */
+     * Retrieves a user or group record by matching a specific field with a given value.
+     *
+     * Allows searching in the current database or an optionally specified external database
+     * (if the MySQL user has appropriate cross-database permissions).
+     *
+     * @param \mysqli $mysqli The mysqli database connection object.
+     * @param string $field The name of the field in `sysUGrps` to search against (e.g., 'ugr_Name', 'ugr_eMail').
+     * @param mixed $value The value to search for in the specified field.
+     * @param string|null $database (Optional) The name of an alternative database to query.
+     *                              If null, queries the current database.
+     * @return array|null An associative array representing the user/group record if found,
+     *                    otherwise null.
+     */
     function user_getByField($mysqli, $field, $value, $database=null){
 
         if($database!=null){
@@ -102,21 +140,28 @@
     }
 
     /**
-    * Get user/group by ID
-    *
-    * @param mixed $ugr_ID - user ID
-    */
+     * Retrieves a user or group record by its ID (`ugr_ID`).
+     * This is a convenience wrapper for `user_getByField`.
+     *
+     * @param \mysqli $mysqli The mysqli database connection object.
+     * @param int $ugr_ID The User/Group ID.
+     * @return array|null An associative array of the user/group record, or null if not found.
+     */
     function user_getById($mysqli, $ugr_ID){
         return user_getByField($mysqli, 'ugr_ID', $ugr_ID);
     }
 
     /**
-    * Finds user by ID
-    *
-    * @param mixed $system
-    * @param mixed $ugr_IDs
-    * @return array
-    */
+     * Retrieves the display names for a list of user/group IDs.
+     *
+     * For users, it concatenates `ugr_FirstName` and `ugr_LastName`.
+     * For groups, it uses `ugr_Name`.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param array|string $ugr_IDs An array or comma-separated string of User/Group IDs.
+     * @return array|false An associative array `[ugr_ID => display_name]` on success,
+     *                     or `false` if input IDs are invalid or a database error occurs.
+     */
     function user_getNamesByIds($system, $ugr_IDs){
 
         $ugr_IDs = prepareIds($ugr_IDs);
@@ -133,11 +178,17 @@
 
 
     /**
-    * get db owner user or specific field of this user
-    *
-    * @param mixed $field
-    * @return mixed
-    */
+     * Retrieves the database owner's record (ugr_ID = 2) or a specific field from it.
+     *
+     * The database owner has special privileges in Heurist.
+     *
+     * @param \mysqli $mysqli The mysqli database connection object.
+     * @param string|null $field (Optional) If specified, returns only the value of this field
+     *                           from the owner's record (e.g., 'ugr_eMail'). If null, returns
+     *                           the entire user record array.
+     * @return array|mixed|null The full user record array, a specific field value, or null if
+     *                          user ID 2 is not found or the specified field doesn't exist.
+     */
     function user_getDbOwner($mysqli, $field=null)
     {
         $user = user_getById($mysqli, 2);
@@ -154,11 +205,16 @@
     }
 
     /**
-    * Generates new passowrd and send it by email
-    *
-    * @param mixed $system
-    * @param mixed $ugr_Name
-    */
+     * Resets a user's password to a randomly generated one and emails it to the user.
+     *
+     * The user can be identified by either username or email address.
+     * It checks if SMTP is configured before attempting to send an email.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param string $username The username or email address of the user whose password is to be reset.
+     * @return bool True on successful password reset and email sending, false otherwise.
+     *              Errors are added to `$system`.
+     */
     function user_ResetPasswordRandom($system, $username){
         if($username){
             $mysqli = $system->getMysqli();
@@ -220,11 +276,34 @@
      *  Validates the provided pin, allowing a password reset
      *
      * @param object $system - initialised System class object
-     * @param string $username - username or user's email
-     * @param string $pin - if provided, validate pin; otherwise setup reset pin
-     * @param string $captcha - caotcha answer
+     * @param string $username User's username or email address.
+     * @param string $pin (Optional) If provided and not empty, this function attempts to validate this PIN.
+     *                    If 1, it forces a resend. If empty, it attempts to generate and send a new PIN.
+     * @param string $captcha (Optional) The user's answer to a CAPTCHA challenge, required when generating a new PIN.
+     * @return bool|string Returns `true` if a PIN is successfully validated or successfully sent.
+     *                     Returns a specific string message if a PIN is re-sent or an old one expired and a new one sent.
+     *                     Returns `false` on any error (e.g., user not found, CAPTCHA failed, email failed, too many attempts).
+     *                     Errors are added to `$system`.
+     */
+    /**
+     * Manages the PIN-based password reset process.
      *
-     * @return bool|string - returns true or a string on success (string being a message), otherwise false on error
+     * This function has multiple modes based on the `$pin` parameter:
+     * 1. Initial request (empty `$pin`, `$captcha` provided): Validates CAPTCHA, generates a new PIN,
+     *    stores its hash and expiry in the PHP session, and emails the PIN to the user.
+     * 2. PIN validation (`$pin` provided by user): Checks the provided PIN against the stored hash
+     *    and its expiry. If valid, marks the PIN as "redeemed" in the session.
+     * 3. PIN resend (`$pin` is 1): Generates and sends a new PIN, updating session details.
+     *
+     * It includes rate limiting for PIN resends and overall attempts to prevent abuse.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param string $username The username or email of the user requesting a password reset.
+     * @param string $pin The PIN provided by the user for validation, or '1' to request a resend, or empty for initial request.
+     * @param string $captcha The CAPTCHA answer, required for initial PIN request.
+     * @return bool|string True if PIN is validated or a new PIN is successfully sent.
+     *                     A string message can be returned for specific scenarios like PIN resend/expiry.
+     *                     False on error.
      */
     function user_HandleResetPin($system, $username, $pin = '', $captcha = ''){
 
@@ -387,11 +466,26 @@
      * Resets user's password to the provided value, via the use of a reset pin
      *
      * @param object $system - initialised System class object
-     * @param string $username - username or user's email
-     * @param string $password - user's new password
-     * @param string $pin - used to validate that the pin is both correct and has already been checked by user_HandleResetPin
+     * @param string $username User's username or email address.
+     * @param string $password The new password to set.
+     * @param string $pin The reset PIN previously validated by `user_HandleResetPin`.
+     * @return bool True if the password was successfully reset, false otherwise.
+     *              Errors are added to `$system`.
+     */
+    /**
+     * Resets a user's password after successful PIN validation.
      *
-     * @return bool - returns true on password reset, otherwise false on error
+     * This function should be called after `user_HandleResetPin` has successfully validated a PIN
+     * (by returning true and setting the 'redeemed' flag in the session).
+     * It verifies the PIN again against the session data and, if valid and redeemed,
+     * updates the user's password in the database with the new (hashed) password.
+     * The PIN information is then cleared from the session.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param string $username The username or email of the user.
+     * @param string $password The new plaintext password.
+     * @param string $pin The reset PIN that was previously validated.
+     * @return bool True on successful password update, false on any error or validation failure.
      */
     function user_ResetPassword($system, $username, $password, $pin){
 
@@ -450,23 +544,25 @@
     }
     
     /**
-    * Update password field in database
-    * 
-    * @param mixed $mysqli
-    * @param mixed $ugr_ID
-    * @param mixed $ugr_Password - hashed password
-    */
+     * Updates the user's password hash in the database.
+     *
+     * @param \mysqli $mysqli The mysqli database connection object.
+     * @param int $ugr_ID The User ID.
+     * @param string $ugr_Password The new hashed password.
+     * @return int|string The result of `mysql__insertupdate` (typically number of affected rows or error string).
+     */
     function userUpdatePassword($mysqli, $ugr_ID, $ugr_Password){
         $record = array("ugr_ID"=>intval($ugr_ID), "ugr_Password"=>$ugr_Password);// prepare record
         return mysql__insertupdate($mysqli, "sysUGrps", "ugr_", $record);
     }
 
     /**
-    * Update the last login datetime
-    *
-    * @param mixed $mysqli
-    * @param mixed $ugr_ID - user ID
-    */
+     * Updates the user's last login time to NOW() and increments their login count.
+     *
+     * @param \mysqli $mysqli The mysqli database connection object.
+     * @param int $ugr_ID The User ID.
+     * @return int The number of affected rows (should be 1 on success).
+     */
     function user_updateLoginTime($mysqli, $ugr_ID){
         $query = 'update sysUGrps set ugr_LastLoginTime=now(), ugr_LoginCount=ugr_LoginCount+1 where ugr_ID='.intval($ugr_ID);
         $mysqli->query($query);
@@ -476,12 +572,22 @@
     }
 
     /**
-    * Gets list of groups for given user
-    *
-    * @param mixed $mysqli
-    * @param mixed $ugr_ID
-    * @param mixed $isfull  - if false returns only id and role, otherwise additional fields: name and description
-    */
+     * Retrieves the list of workgroups a specific user belongs to, along with their role in each group.
+     *
+     * Can optionally fetch full group details (name, description) or just IDs and roles.
+     * Can also query a specified external database.
+     *
+     * @param \mysqli $mysqli The mysqli database connection object.
+     * @param int $ugr_ID The User ID for whom to fetch group memberships.
+     * @param bool $isfull (Optional) If true, fetches `ugr_Name` and `ugr_Description` for each group.
+     *                     If false (default), fetches only `ugl_GroupID` and `ugl_Role`.
+     * @param string|null $database (Optional) The name of an alternative database to query.
+     *                              If null, queries the current database.
+     * @return array An associative array where keys are group IDs (`ugl_GroupID`).
+     *               If `$isfull` is false, values are the user's role (`ugl_Role`) in that group.
+     *               If `$isfull` is true, values are arrays `[ugl_Role, ugr_Name, ugr_Description]`.
+     *               Returns an empty array if the user belongs to no groups or on error.
+     */
     function user_getWorkgroups($mysqli, $ugr_ID, $isfull=false, $database=null){
 
         $result = array();
@@ -522,15 +628,18 @@
             return $result;
     }
 
-    //@todo verify why it returns db onwer
+    //@todo verify why it returns db onwer - The original query did not explicitly exclude ugr_ID=2, so it might have been intended.
     /**
-    * Gets short list of all groups ID=>Name
-    *
-    * @param mixed $mysqli
-    * @return array
-    */
+     * Retrieves a list of all workgroups in the system.
+     *
+     * Excludes entities of type 'user'.
+     *
+     * @param \mysqli $mysqli The mysqli database connection object.
+     * @return array An associative array `[ugr_ID => ugr_Name]` for all workgroups, ordered by name.
+     *               Returns an empty array if no workgroups exist.
+     */
     function user_getAllWorkgroups($mysqli){
-//OR (ugr_ID=2)
+//OR (ugr_ID=2) // Original comment, implies ugr_ID=2 (DB Owner) might have been considered for exclusion or special handling.
         $query = 'SELECT ugr_ID, ugr_Name FROM sysUGrps WHERE (ugr_Type != "user") ORDER BY ugr_Name';
         $result = mysql__select_assoc2($mysqli, $query);
 
@@ -540,11 +649,18 @@
     }
 
     /**
-    * Gets list of members for given group (this is non admin short info)
-    *
-    * @param mixed $mysqli
-    * @param mixed $ugr_ID
-    */
+     * Retrieves a list of members for a specific workgroup.
+     *
+     * Fetches users who are enabled and are of type 'user'.
+     * Provides role, first name, last name, and organisation for each member.
+     * This is described as "non admin short info".
+     *
+     * @param \mysqli $mysqli The mysqli database connection object.
+     * @param int $ugr_ID The Group ID for which to fetch members.
+     * @return array An associative array where keys are user IDs (`ugl_UserID`) and values are arrays
+     *               `[ugl_Role, ugr_FirstName, ugr_LastName, ugr_Organisation]`.
+     *               Returns an empty array if the group has no members or on error.
+     */
     function user_getWorkgroupMembers($mysqli, $ugr_ID){
 
         $result = array();
@@ -571,10 +687,13 @@
     //==========================================================================
 
     /**
-    * Get default set of properties
-    *
-    * private
-    */
+     * Returns a default set of user preferences.
+     *
+     * These preferences are used for new users or when a user's preferences
+     * cannot be loaded from the database or session.
+     *
+     * @return array An associative array of default preference key-value pairs.
+     */
     function user_getDefaultPreferences(){
         return array(
         "layout_language" => "en",
@@ -600,8 +719,19 @@
     //@$_SESSION[$system->dbnameFull()]['ugr_Groups'] = user_getWorkgroups( $this->mysqli, $userID );
 
     /**
-    * Save set of properties into database
-    */
+     * Saves a user's preferences to both the PHP session and the database.
+     *
+     * Iterates through the provided `$params`, saving each key-value pair into the
+     * current user's session preferences (`$_SESSION[$dbname]["ugr_Preferences"]`).
+     * Excludes certain parameters like 'a', 'db', 'DBGSESSID'.
+     * Then, it persists the entire preference set (including any existing ones not
+     * being modified in this call, and potentially external repository credentials)
+     * as a JSON string into the `ugr_Preferences` field of the `sysUGrps` table
+     * for the current logged-in user.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param array $params An associative array of preference key-value pairs to save.
+     */
     function user_setPreferences($system, $params){
 
         $mysqli = $system->getMysqli();
@@ -637,11 +767,15 @@
     }
 
     /**
-    * Restores preferences from database and put it into SESSION (see login_verify)
-    * to get individual property use $system->userGetPreference
+    * Restores user preferences, loading from the database for logged-in users,
+    * or falling back to session or default preferences.
     *
-    * @param mixed $system
-    * @return null
+    * This function is typically called during user login (see `login_verify`) to populate
+    * the session with the user's stored preferences. To subsequently get an individual
+    * preference value, `$system->userGetPreference()` should be used.
+    *
+    * @param \hserv\System $system The Heurist system object.
+    * @return array An associative array of user preferences.
     */
     function user_getPreferences( $system ){
 
@@ -668,9 +802,16 @@
 
 
     /**
-    *  if user is not enabled and login count=0 - this is approvement operation
-    * private
-    */
+     * Checks if a user account is pending administrative approval.
+     *
+     * A user is considered pending approval if their account type is 'user',
+     * they are not enabled (`ugr_Enabled` = 'n'), and their login count (`ugr_LoginCount`) is 0.
+     * This check is typically performed by an administrator.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param int $recID The User ID to check.
+     * @return bool True if the user is pending approval, false otherwise or if current user is not admin.
+     */
     function user_isApprovement( $system, $recID ) {
 
         $ret = false;
@@ -687,6 +828,24 @@
     //
     //
     //
+    /**
+     * Manages a user's "working set" of records.
+     *
+     * A working set is a temporary collection of record IDs associated with a user.
+     * This function can:
+     * - Clear the current user's existing working set.
+     * - If `$params['clear']` is not 1 and `$params['ids']` is provided, it populates
+     *   the `usrWorkingSubsets` table with the given record IDs for the current user.
+     *   This involves writing IDs to a temporary file and then using `LOAD DATA LOCAL INFILE`.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param array $params Parameters for the operation:
+     *                      - 'ids': (Optional) An array or comma-separated string of record IDs to add to the set.
+     *                      - 'clear': (Optional) If 1, only clears the set. Otherwise, populates with 'ids'.
+     * @return bool|int Returns `true` if the set was only cleared successfully.
+     *                  Returns the count of added records if records were added successfully.
+     *                  Returns `false` on error (e.g., user not logged in, DB error, file error).
+     */
     function user_WorkSet( $system, $params ){
 
         $res = false;
@@ -760,13 +919,32 @@
     }
 
     /**
-    * Used only for registration only
-    *
-    * @param mixed $system
-    * @param mixed $record
-    * @param mixed $allow_registration - force registration despite of sys_AllowRegistration
-    * @return {false|null|true}
-    */
+     * Handles user/group creation (registration) or profile updates.
+     *
+     * This function performs several checks and operations:
+     * - Validates the input record data using `user_Validate()`.
+     * - For new user registrations (`$recID` < 1, `ugr_Type` = 'user'):
+     *   - Checks guest registration daily limits.
+     *   - Checks if registration is allowed by system settings (`sys_AllowRegistration`), unless `$allow_registration` is true.
+     *   - Validates CAPTCHA if provided.
+     *   - Ensures username and email are unique.
+     *   - Hashes the password.
+     *   - Sets the `ugr_Enabled` status (e.g., 'n' for new non-guest users, 'y' if `$allow_registration` forces it).
+     *   - Sends notification emails about the new user or approval using `user_EmailAboutNewUser()` or `user_EmailApproval()`.
+     *   - Synchronizes credentials to linked databases if applicable (`user_SyncCommonCredentials`).
+     * - For updates or group creation:
+     *   - Checks if the current user has permission to modify the target user/group.
+     * - Saves the data to `sysUGrps` table using `mysql__insertupdate`.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param array $record An associative array of user/group data (ugr_ prefixed fields).
+     *                      Must include 'ugr_Type'. For new users, password and required profile fields are necessary.
+     * @param bool $allow_registration (Optional) If true, allows user registration even if the global
+     *                                 `sys_AllowRegistration` setting is off. Also, makes the new user enabled ('y') directly.
+     * @return int|string|false The ID of the created/updated user/group on success.
+     *                          Returns `false` or an error string from `mysql__insertupdate` on failure.
+     *                          Errors are added to `$system`.
+     */
     function user_Update($system, $record, $allow_registration=false){
 
         if (user_Validate($system, $record))
@@ -895,13 +1073,17 @@
     }
 
     /**
-    * Validates user record (for update)
-    * private
-    *
-    * @param mixed $system
-    * @param mixed $record
-    * @return {false|true}
-    */
+     * Validates user or workgroup data before saving.
+     *
+     * Checks for the presence of required fields based on whether it's a 'user' or 'workgroup'.
+     * For users: 'ugr_Name', 'ugr_eMail', 'ugr_FirstName', 'ugr_LastName', 'ugr_Organisation', 'ugr_Interests'.
+     *            Password ('ugr_Password') is also required for new users.
+     * For workgroups: 'ugr_Name', 'ugr_eMail'.
+     *
+     * @param \hserv\System $system The Heurist system object (used for adding errors).
+     * @param array $record An associative array of user/group data. Must contain 'ugr_Type'.
+     * @return bool True if validation passes, false otherwise (errors are added to `$system`).
+     */
     function user_Validate($system, $record){
         $res = false;
 
@@ -939,12 +1121,25 @@
 
 
     /**
-    * Updates (adds) user info into databases listed in sys_UGrpsDatabase
-    *
-    * @param mixed $system
-    * @param mixed $recID
-    * @param mixed $fromImport
-    */
+     * Synchronizes user credentials (adds or enables user) to other Heurist databases
+     * that are configured for mutual credential sharing.
+     *
+     * This function is typically called after a new user is created or an existing user is approved.
+     * It checks the `sys_UGrpsDatabase` setting in the current database to find a list of
+     * linked databases. For each linked database, it verifies that the link is mutual
+     * (i.e., the target database also lists the current database for credential sharing).
+     * If mutual linking is confirmed:
+     * - It checks if the user (by email) already exists in the linked database.
+     * - If not, it attempts to insert a copy of the user's record (excluding some fields like login count)
+     *   into the linked database's `sysUGrps` table. The username in the linked DB becomes the user's email.
+     * - If the user exists and `$is_approvement` is true (indicating an approval action),
+     *   it attempts to update the user's `ugr_Enabled` status in the linked database.
+     *
+     * @param \hserv\System $system The Heurist system object for the current database.
+     * @param int $userID The ID of the user whose credentials are to be synchronized.
+     * @param bool|string $is_approvement If true or a 'y' status string, indicates an approval action,
+     *                                    which may trigger enabling the user in linked databases.
+     */
     function user_SyncCommonCredentials($system, $userID, $is_approvement){
 
         $dbname_full = $system->dbnameFull();
@@ -1013,8 +1208,19 @@
     }
 
     /**
-    * Send emails to DB Onwer and  System admin about new user
-    */
+     * Sends an email notification to the database owner (and potentially system admin)
+     * about a new user registration or import.
+     *
+     * The email content varies slightly based on whether the user was imported or registered directly,
+     * and if it's a guest registration. It includes user details and a link to the database.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param int $recID The ID of the newly registered/imported user.
+     * @param bool $fromImport (Optional) True if the user was imported from another database. Default false.
+     * @param bool $is_guest_registration (Optional) True if it's a guest registration. Default false.
+     * @return bool True if the email was sent successfully, false otherwise.
+     *              Errors are added to `$system`.
+     */
     function user_EmailAboutNewUser($system, $recID, $fromImport = false, $is_guest_registration=false){
 
         $mysqli = $system->getMysqli();
@@ -1063,8 +1269,19 @@
     }
 
     /**
-    *   Send approval message to user
-    */
+     * Sends an email to a user upon account creation or approval.
+     *
+     * The email includes login details (username and temporary password if provided)
+     * and a link to the Heurist database.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param int $recID The ID of the user.
+     * @param string|null $tmp_password (Optional) The temporary password to include in the email.
+     * @param bool|string $is_approvement If true or a 'y' status string, the email text indicates account approval.
+     *                                    Otherwise, it indicates account creation.
+     * @return bool True if the email was sent successfully, false otherwise.
+     *              Errors are added to `$system`.
+     */
     function user_EmailApproval($system, $recID, $tmp_password, $is_approvement){
 
         $mysqli = $system->getMysqli();
@@ -1124,9 +1341,29 @@
      *
      * Monthly bug / suggestion report is handled separatly
      *
-     * @param \hserv\System - initialised system object
+     * @param \hserv\System $system The Heurist system object.
+     * @return array An array of notification messages to display to the user. Each message
+     *               can be a string or an array with 'message' and 'links' components.
+     *               Currently, only a 'bug_report' notification type is implemented.
+     */
+    /**
+     * Retrieves system notifications to be displayed to the current user.
      *
-     * @return array - messages to show
+     * This function checks for conditions under which specific notifications should be shown,
+     * such as periodic reminders (e.g., for bug reports) or one-time informational messages.
+     * It uses user preferences stored in the database (`sys_dbsettings.Notifications`) to
+     * track when notifications were last shown or if they've been blocked by the user.
+     *
+     * Currently implemented notifications:
+     * - 'bug_report': A periodic reminder to report bugs/suggestions.
+     *
+     * It avoids showing notifications if the user is seeing a "new version" popup or if they've
+     * logged in very recently (within the last 3 days, to avoid immediate repeat notifications).
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @return array An array of notification messages. Each key is a notification type (e.g., 'bug_report'),
+     *               and the value is an array containing 'message' (the message string, possibly with placeholders
+     *               like '#bug-reporter') and 'links' (an array defining interactive elements for the notification).
      */
     function user_getNotifications($system){
 
@@ -1315,10 +1552,20 @@
     /**
      * Set blocked notifications to avoid displaying to the current user
      *
-     * @param \hserv\System $system - initialised system object
-     * @param string|array $blocking - list of notification types to set
+     * @param \hserv\System $system The Heurist system object.
+     * @param string|array $blocking A comma-separated string or an array of notification type keys
+     *                               (e.g., 'bug_report') to be blocked for the current user.
+     * @return bool True on success, false on failure (errors are added to `$system`).
+     */
+    /**
+     * Allows the current user to block (snooze/dismiss) specific types of system notifications.
      *
-     * @return boolean success or failure (error is set to System object)
+     * Updates the 'Notifications' setting in `sys_dbsettings` for the current user,
+     * adding the specified notification types to a 'block' list.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param string|array $blocking Notification type(s) to block.
+     * @return bool True if preferences were successfully updated, false otherwise.
      */
     function user_blockNotifications($system, $blocking){
 

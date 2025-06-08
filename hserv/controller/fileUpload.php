@@ -300,9 +300,6 @@ if($response!=null){
 
     $system->dbclose();
 
-//------------
-//  NOT USED. verification of uploaded file integrated with UploadHandler
-//
 /**
  * Handles file selection in a POST request, performing validation checks.
  *

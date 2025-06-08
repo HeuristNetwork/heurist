@@ -22,13 +22,8 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
-    //
-    // $params
-    //  entity
-    //  a - action
-    //  details
-    //
-/**
+
+    /**
  * Executes an action on a specified entity.
  *
  * Resolves the entity name, instantiates the corresponding entity class,
@@ -58,10 +53,7 @@
         }
     }
 
-    //
-    //
-    //
-/**
+    /**
  * Refreshes entity definitions.
  *
  * Loads or reloads definitions for specified entities. Can fetch all definitions,
@@ -153,10 +145,7 @@
         return $res;
     }
 
-    //
-    //
-    //
-/**
+    /**
  * Resolves an entity short name or alias to its full class name component.
  *
  * For example, 'rty' resolves to 'defRecTypes'.
@@ -184,10 +173,7 @@
             return $entity_name;
     }
 
-    //
-    // Returns full path, content type and url by entity name, view version (icon,thumb) and entity id;
-    //
-/**
+    /**
  * Resolves the filename, content type, and URL for an entity's associated file (e.g., icon, thumbnail).
  *
  * @global string $defaultRootFileUploadURL The base URL for file uploads.

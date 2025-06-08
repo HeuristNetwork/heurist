@@ -31,10 +31,98 @@ require_once dirname(__FILE__).'/../../structure/import/dbsImport.php';
 require_once dirname(__FILE__).'/../../../admin/verification/verifyValue.php';
 
 
+/**
+ * Error message constant for XML import failures.
+ */
 define('ERR_XML_IMPORT','XML import error');
 
-/*
-main methods
+/**
+ * Class ImportHeurist
+ *
+ * Handles the import of records and definitions directly from Heurist exchange format files
+ * (JSON or HML/XML). This class is central to operations like inter-database imports
+ * or restoring data from Heurist backups. It can manage the import of not only record
+ * data but also the associated definitions (record types, detail fields, terms, etc.),
+ * ensuring that the target database has the necessary structures before data import.
+ *
+ * Special handling is implemented for importing data from unregistered Heurist databases,
+ * where concept codes like '0000-xxx' (indicating a local, unregistered definition)
+ * are typically mapped to '9999-xxx' in the target database to avoid conflicts and
+ * denote their imported, originally local, nature.
+ *
+ * Key public methods:
+ * - `getDefintions()`: Reads an import file to identify record types and detail fields,
+ *   comparing them against the current database to determine what needs to be imported or mapped.
+ * - `importDefintions()`: Imports the actual definitions (record types, fields, vocabularies, terms)
+ *   into the current database, using the DbsImport class for complex dependency management.
+ * - `importRecords()`: The main method for importing record data from a file,
+ *   handling mapping of definitions, file attachments, resource links, and terms.
+ * - `importRecordsFromDatabase()`: A wrapper that facilitates record import directly
+ *   from another Heurist database by first fetching its data via `record_output.php`.
+ * - `saveMapDocumentSnapShot()`: A utility to save a snapshot image for a map document record.
+ *
+ * This class is typically controlled by `hserv/controller/importController.php`.
+ *
+ * @package hserv\records\import
+ */
+class ImportHeurist {
+
+    /**
+     * @var \hserv\System|null The Heurist system object.
+     */
+    private static $system = null;
+    /**
+     * @var \mysqli|null The mysqli database connection object.
+     */
+    private static $mysqli = null;
+    /**
+     * @var bool Flag indicating if the class has been initialized.
+     */
+    private static $initialized = false;
+
+    /**
+     * Initializes the class with the global Heurist system object.
+     *
+     * Ensures that essential static properties like `$system` and `$mysqli` are set.
+     * It also defines the `HEURIST_DBID` constant (registered ID of the current database)
+     * if it's not already defined.
+     * The `$fields_correspondence` parameter is not used.
+     *
+     * @param mixed|null $fields_correspondence This parameter is not currently used.
+     */
+    private static function initialize($fields_correspondence=null)
+    {
+        if (self::$initialized) {return;}
+
+        global $system;
+        self::$system  = $system;
+        self::$mysqli = $system->getMysqli();
+        self::$initialized = true;
+
+        if(!defined('HEURIST_DBID')){
+            define('HEURIST_DBID', $system->settings->get('sys_dbRegisteredID'));
+        }
+    }
+
+    /**
+     * Reads a Heurist data file (JSON or HML/XML) and parses it into a PHP array.
+     *
+     * Handles specific Heurist starter record filenames by looking in a predefined widget directory.
+     * Otherwise, assumes the file is in the scratch directory or a full path is provided.
+     * If the file is XML (identified by `isXMLfile`), it's converted to JSON structure using `hmlToJson`.
+     * If `$validate` is true, it performs a basic check to ensure the parsed data appears to be
+     * a valid Heurist export (specifically, by looking for the 'heurist->database->rectypes' path).
+     *
+     * @param string $filename The name or path of the import file.
+     * @param string|null $type This parameter is not currently used.
+     * @param bool $validate If true, performs basic validation on the parsed data structure.
+     * @return array|null The parsed data as a PHP array, or null if the file cannot be read,
+     *                    is unparsable, or fails basic validation. Errors are added to `$this->system`.
+     */
+    private static function _readDataFile($filename, $type=null, $validate=true){
+
+        $data=null;
+        try{
 
 getDefintions - returns list of definitions (record types to be imported)
 importDefintions - Imports missed record types from remote database (uses dbsImport)
@@ -133,6 +221,30 @@ class ImportHeurist {
     // @todo use XMLReader to allow stream read,
     // simplexml_load_file - loads the entire file into memory
     //
+    /**
+     * Converts a Heurist HML (XML) export file into a JSON-like PHP array structure.
+     *
+     * This method parses a Heurist XML export file using `simplexml_load_file`. It then
+     * transforms the XML structure into a PHP array that mimics the Heurist JSON exchange format.
+     * This includes extracting database metadata, record data (ID, type, title, URL, notes,
+     * visibility, timestamps), and detail field values.
+     *
+     * Special attention is given to converting various detail types:
+     * - Record Pointers: Stored as is (ID).
+     * - Terms: Term ID is extracted if present and from a registered database.
+     * - Geographic Data: WKT (Well-Known Text) is extracted.
+     * - Files: File metadata (ID, original name, URL, MIME type, nonce, description, date) is extracted.
+     *   It attempts to determine if file URLs are external or relative to the source database.
+     *
+     * It also gathers lists of all record types and detail field types encountered in the XML,
+     * which can be used later for definition checking and import.
+     *
+     * @param string $filename The path to the HML/XML file.
+     * @return array|null A PHP array representing the converted data in a structure similar to
+     *                    Heurist's JSON export format, or null if XML parsing fails, the XML
+     *                    is malformed (e.g., missing `<database>` element), or no valid record IDs are found.
+     *                    Errors are logged via `error_log` and added to `$this->system`.
+     */
     private static function hmlToJson($filename){
 
         $xml_doc = simplexml_load_file($filename, 'SimpleXMLElement', LIBXML_PARSEHUGE);
@@ -323,21 +435,44 @@ class ImportHeurist {
 
 
     /**
-    * returns list of definitions (record types to be imported)
-    *
-    * It reads manifest files and tries to find all record types in current database by concept code. All record types from manifest file
-    * Returns array of rectypes, false otherwise
-    * $res = array(
-    'database'=> database id
-    'database_name'=>
-    'rectypes'=> array(source_rectype_id => array(name,code,count,target_RecTypeID),...
-    'detailtypes'=>$imp_detailtypes  //need to show missed detail fields
-    );
-    *
-    *
-    *
-    * @param mixed $filename
-    */
+     * Reads a Heurist import file (JSON or HML/XML) and identifies the definitions it contains.
+     *
+     * This method parses the import file to extract information about the source database
+     * and the record types and detail field types present in the imported data.
+     * It then compares these definitions (primarily using concept codes) against the
+     * definitions in the current (target) Heurist database.
+     * The goal is to determine which definitions from the import file already exist locally
+     * (and their local IDs) and which ones might be missing or different.
+     *
+     * @param string $filename The path to the Heurist import file.
+     * @return array|false An associative array summarizing the definitions found, or `false` on error.
+     *                     The returned array structure is:
+     *                     ```
+     *                     [
+     *                         'database'      => (string) Source database registered ID,
+     *                         'database_name' => (string) Source database name,
+     *                         'database_url'  => (string) Source database URL,
+     *                         'rectypes'      => [ source_rt_id|concept_code =>
+     *                                              [
+     *                                                  'id' => (string) source_rt_id,
+     *                                                  'name' => (string) source_rt_name,
+     *                                                  'code' => (string) source_rt_concept_code,
+     *                                                  'count' => (int) number of records of this type in file,
+     *                                                  'target_RecTypeID' => (int|null) local ID if matched
+     *                                              ], ...
+     *                                          ],
+     *                         'detailtypes'   => [ source_dt_id|concept_code =>
+     *                                              [
+     *                                                  'id' => (string) source_dt_id,
+     *                                                  'name' => (string) source_dt_name,
+     *                                                  'code' => (string) source_dt_concept_code,
+     *                                                  'target_dtyID' => (int|null) local ID if matched
+     *                                              ], ...
+     *                                          ]
+     *                     ]
+     *                     ```
+     *                     Errors are added to `$this->system`.
+     */
     public static function getDefintions($filename){
 
         self::initialize();
@@ -408,9 +543,22 @@ class ImportHeurist {
     }
 
     //
-    // Imports missed record types from remote database (along with all dependencies).
-    // It uses dbsImport.php
-    //
+    /**
+     * Imports definitions (record types, detail fields, vocabularies, terms) from a Heurist
+     * import file or a remote Heurist database into the current database.
+     *
+     * This method leverages the `DbsImport` class to handle the complex process of importing
+     * database structure. It first reads the definitions from the specified `$filename`
+     * (which might be a previously downloaded export file). Then, it prepares the import
+     * by identifying all necessary definitions (including dependencies like vocabularies
+     * and terms associated with record types and fields) and finally performs the import.
+     *
+     * @param string $filename The path to the Heurist import file (JSON or HML/XML).
+     * @param string|int $session_id A session ID for progress tracking during the import of definitions.
+     * @return string|false Returns 'ok' on successful completion of the definition import.
+     *                      Returns `false` if any critical error occurs during the process.
+     *                      Errors are added to `$this->system`.
+     */
     public static function importDefintions($filename, $session_id){
 
         self::initialize();
@@ -471,8 +619,37 @@ class ImportHeurist {
     }
 
     /**
-    Import records from another database on the same server
-    */
+     * Imports records from another Heurist database, potentially on the same or a different server.
+     *
+     * This method automates the process of fetching records from a specified source Heurist database
+     * and then importing them into the current database.
+     * 1. Constructs a URL to the `record_output.php` controller of the source database,
+     *    passing parameters like record IDs (`recID`, `ids`), query (`q`), filtering rules (`rules`),
+     *    and special flags like `tlcmap` (for TLCMap dataset to map layer conversion).
+     * 2. Downloads the record data (expected in JSON format) from the source database
+     *    and saves it to a temporary file in the scratch directory.
+     * 3. Calls `self::importRecords()` to process this temporary file, using provided
+     *    parameters for ownership, public visibility, and definition mapping.
+     * 4. If a `tlcmapshot` (thumbnail for a TLCMap mapspace) is provided, it calls
+     *    `saveMapDocumentSnapShot()` to save this thumbnail for the imported map document record.
+     * 5. Deletes the temporary file.
+     *
+     * @param array $params Parameters for the import. Key parameters include:
+     *                      - 'source_db': The name of the source Heurist database.
+     *                      - 'recID': (Optional) A single record ID to import.
+     *                      - 'ids': (Optional) An array of record IDs to import.
+     *                      - 'q': (Optional) A query string for selecting records from the source DB.
+     *                      - 'rules': (Optional) JSON string of filtering rules.
+     *                      - 'rulesonly': (Optional) If true, applies rules only.
+     *                      - 'tlcmapspace': (Optional) Name for a TLCMap mapspace to be created.
+     *                      - 'session': (Optional) Progress session ID.
+     *                      - 'make_public': (Optional) Boolean, if true, imported records are made public. Defaults to true.
+     *                      - 'owner_id': (Optional) User/group ID to set as owner. Defaults to current user.
+     *                      - 'mapping': (Optional) Definition mapping data.
+     *                      - 'tlcmapshot': (Optional) Base64 encoded image for map document thumbnail.
+     * @return array|false The result from `self::importRecords()`, which is typically an array
+     *                     summarizing the import, or `false` on error.
+     */
     public static function importRecordsFromDatabase($params){
 
         self::initialize();
@@ -548,14 +725,20 @@ class ImportHeurist {
     }
 
     //
-    // save snapshot as mapspace thumbnail
-    // $ids - record ids of all mapdocument records
-    // $tlcmapshot - base64 encoded image
-    //
-    //1. find mapdocument among ids
-    //2. save encoded image as file and register it
-    //3. add DT_THUMBNAIL detail to mapdocume record
-    //
+    /**
+     * Saves a snapshot image (base64 encoded) as a thumbnail for a map document record.
+     *
+     * 1. Takes a base64 encoded image string.
+     * 2. Uses `DbRecUploadedFiles->registerImage()` to save this image as a new file
+     *    in Heurist (e.g., 'map_snapshot_[rec_ID].png') and get its ULF ID.
+     * 3. If successful, it uses `RecordsBatch->detailsAdd()` to add a new detail of type
+     *    DT_THUMBNAIL to the specified map document record (`$rec_ID`), linking to the newly registered image file.
+     *
+     * @param int $rec_ID The Heurist record ID of the map document.
+     * @param string $tlcmapshot A base64 encoded image string for the thumbnail.
+     * @return array|false The result of the `RecordsBatch->detailsAdd()` operation,
+     *                     or `false` if `DT_THUMBNAIL` is not defined or `rec_ID` is invalid.
+     */
     public static function saveMapDocumentSnapShot($rec_ID, $tlcmapshot){
 
         if(($rec_ID>0) && self::$system->defineConstant('DT_THUMBNAIL')){
@@ -603,6 +786,58 @@ class ImportHeurist {
     resource_notfound
 
     */
+    /**
+     * Imports records from a Heurist JSON or HML/XML file into the current database.
+     *
+     * This is the core method for processing a Heurist data export file. It handles:
+     * - Reading and parsing the data file (`_readDataFile`).
+     * - Initializing progress tracking and database connection.
+     * - Determining if the source database is the same as the target, or if definitions
+     *   need to be mapped/imported using `DbsImport` (especially if `$mapping_defs` are provided).
+     * - Iterating through each record in the import file:
+     *   - Identifying the target record type ID, potentially mapping from source IDs or concept codes.
+     *   - If a `unique_field_id` is specified in `$params`, using this to check if a record
+     *     already exists (by looking for a matching value in `DT_ORIGINAL_RECORD_ID`).
+     *     This determines if the operation is an insert or update, respecting `allow_insert` and `update_mode`.
+     *   - Preparing the record data for saving:
+     *     - Mapping source detail type IDs/concept codes to target detail type IDs.
+     *     - Converting term values (IDs, codes, or labels) to target term IDs, potentially
+     *       creating new terms if necessary (via `validateEnumeration` and later `addNewTerm`).
+     *     - Handling file details: downloading remote files or copying local files (if source is on the same server),
+     *       then registering them in the target database to get new ULF IDs.
+     *     - Storing resource pointer (linked record) IDs temporarily; these are resolved to target DB IDs
+     *       in a second pass after all records have been initially created/updated.
+     *     - Converting geographic data if UTM conversion is specified.
+     *   - Calling `recordSave()` (via `hserv\records\edit\recordModify.php`) to save each record.
+     * - After the initial pass, it resolves and updates:
+     *   - Term fields that were temporarily stored as labels/UIDs.
+     *   - Resource pointer fields, replacing source DB record IDs with target DB record IDs.
+     *   - Parent-child relationships.
+     *   - Record titles (if title masks are used).
+     * - Manages database transactions and foreign key checks.
+     * - Updates special concept codes (e.g., 0000-xxx to 9999-xxx) if importing from an unregistered DB.
+     *
+     * @param string $filename The path to the Heurist import file.
+     * @param array $params Parameters controlling the import process. Key options include:
+     *                      - 'session': (Optional) Progress session ID.
+     *                      - 'is_cms_init': (Optional) Boolean, if true, special handling for CMS starter records.
+     *                      - 'make_public': (Optional) Boolean, sets imported records to public if true. Default true.
+     *                      - 'owner_id': (Optional) User/group ID for record ownership. Default 1 (DB Managers).
+     *                      - 'mapping_defs': (Optional) Pre-defined mapping for record types and fields, typically
+     *                                        used when importing from a known, different Heurist database.
+     *                      - 'unique_field_id': (Optional) Detail Type ID from the source data to be used as a unique
+     *                                           identifier for matching records (stored in DT_ORIGINAL_RECORD_ID).
+     *                      - 'allow_insert': (Optional) Boolean, whether to allow insertion of new records if no match
+     *                                        is found via `unique_field_id`. Default true.
+     *                      - 'update_mode': (Optional) Integer (0-4) defining how to handle updates if a match is found.
+     *                                       Default 1 (overwrite).
+     *                      - 'same_source': (Optional) Boolean, hints if the source DB is effectively the same logical source,
+     *                                       influencing definition mapping for unregistered DBs.
+     * @return array|false An associative array summarizing the import results, including counts
+     *                     (imported, inserted, updated, ignored, existing, details_empty), lists of problematic
+     *                     resources (`resource_notfound`), new/existing record IDs, and CMS-specific page IDs
+     *                     (`home_page_id`, `page_id_for_blog`). Returns `false` on critical error.
+     */
     public static function importRecords($filename, $params){
 
         self::initialize();
@@ -1483,13 +1718,28 @@ EOD;
     //
 
     //
-    // check $term_value for field $dt_id of $recordType
-    // $defs - database definitions
-    // $term_value can be term id, term code or label
-    //
-    // returns term_id of $term_value is allowed,
-    //        otherwise it is condsidered as label and added to array to be added
-    //
+    /**
+     * Validates a term value against the allowed vocabulary for a specific field.
+     *
+     * This method checks if a given `$term_value` (which can be a term ID, code, or label)
+     * is a valid term for the specified detail type (`$dt_id`) within the context of a
+     * record type (`$recTypeID`). It uses the vocabulary definitions (`$dt_def[$idx_term_tree]`,
+     * `$dt_def[$idx_term_nosel]`) associated with the field in the database structure (`$dbdefs`).
+     *
+     * It attempts to match the `$term_value` in the following order:
+     * 1. As a numeric term ID (if `$term_value` is numeric).
+     * 2. As a term label (case-insensitive, accent-insensitive).
+     * 3. As a term code (case-insensitive, accent-insensitive).
+     *
+     * @param int $recTypeID The ID of the record type context.
+     * @param int $dt_id The ID of the detail type (field) for which the term is being validated.
+     * @param string|int $term_value The term value (ID, code, or label) to validate.
+     * @param array $dbdefs An array containing the database definitions, typically including
+     *                      'rectypes' and 'detailtypes' structures from `dbs_GetRectypeStructures`
+     *                      and `dbs_GetDetailTypes`.
+     * @return int|false The valid Heurist term ID if found, or `false` if the value is not a valid
+     *                   term for the specified field or if the field definition cannot be found.
+     */
     private static function validateEnumeration($recTypeID, $dt_id, $term_value, $dbdefs){
 
 
@@ -1546,11 +1796,25 @@ EOD;
     }
 
     //
-    // Import term by label for given field
-    // 1.Detect vocabulary or set of terms
-    // 2.Get parent term id
-    // 3.Add new term
-    //
+    /**
+     * Adds a new term with the given label to the vocabulary associated with a specific field.
+     *
+     * 1. Determines the vocabulary (parent term ID) for the given detail type (`$dt_id`)
+     *    within the context of a record type (`$recTypeID`), using the field's term tree definition.
+     * 2. If a valid parent term ID is found, it checks if a term with `$term_label` already
+     *    exists under that parent.
+     * 3. If the term does not exist, it creates a new term with the given label under the
+     *    determined parent term.
+     *
+     * @param int $recTypeID The ID of the record type context.
+     * @param int $dt_id The ID of the detail type (field) to which the new term is related.
+     * @param string $term_label The label for the new term.
+     * @param array $dbdefs An array containing database definitions, used to find the
+     *                      field's vocabulary settings.
+     * @return int|false The ID of the newly created or existing term if successful, or -1 (or false,
+     *                   though current code returns -1) if the vocabulary cannot be determined or
+     *                   the term creation fails.
+     */
     private static function addNewTerm($recTypeID, $dt_id, $term_label, $dbdefs){
 
         //@todo use dbDefTerms _prepareddata.push({trm_Label:lbl, trm_ParentTermID:trm_ParentTermID, trm_Domain:'enum'});

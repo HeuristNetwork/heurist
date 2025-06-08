@@ -483,11 +483,6 @@ $sErrorMsg = "Sorry, the database $db_source must be registered with an ID less 
 header(CTYPE_JSON);
 print json_encode($response);
 
-
-
-//
-//
-//
 /**
  * Composes a database name from request parameters.
  *

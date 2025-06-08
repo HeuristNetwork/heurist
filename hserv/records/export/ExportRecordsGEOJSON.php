@@ -371,23 +371,6 @@ protected function _outputFooter(){
 
 }
 
-//
-// convert heurist record to GeoJSON Feasture
-//
-// $extended - include concept codes, term code and labels
-// $simplify - simplify paths with more than 1000 vertices
-// $detail_mode - 0  - only header fields rec_ID, RecTypeID, rec_Title and description if details are defined (for leaflet output)
-//                1  - details inline
-//                2  - all details in "details" subarray
-// $separate_geo_by_dty - if true it separates multi geo values per record as separate entries, otherwise it creates GeometryCollection
-//
-/// $this->find_by_geofields - search only specified geo fields (in main or linked records)
-// if $this->find_by_geofields is not defined and
-// if there is not geo data in main record it may search geo in linked records
-// $this->find_geo_by_pointer_rty - if true it searches for linked RT_PLACE
-//                        or it is array of rectypes defined in sys_TreatAsPlaceRefForMapping + RT_PLACE
-// $this->find_geo_by_pointer_dty - list of pointer fields linked to record with geo field (narrow $this->find_geo_by_pointer_rty)
-//
 /**
  * Converts a Heurist record into a GeoJSON Feature structure.
  *
@@ -765,10 +748,6 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
 
 } // _getGeoJsonFeature
 
-//
-// Convert WKT to geojson and simplifies coordinates
-// @TODO use mapCoordinates.php
-//
 /**
  * Converts a WKT (Well-Known Text) string to a GeoJSON geometry array.
  *
@@ -778,6 +757,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
  * @param string $wkt The WKT geometry string.
  * @param bool $simplify If true, simplifies coordinates of complex geometries. Defaults to true.
  * @return array|null The GeoJSON geometry array, or null if WKT is invalid or geometry is empty.
+ * @todo use mapCoordinates.php
  */
 private static function _getJsonFromWkt($wkt, $simplify=true)
 {

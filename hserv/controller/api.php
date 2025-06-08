@@ -1,11 +1,27 @@
 <?php
-/*
-Add to httpd.conf
-
-RewriteEngine On
-#if URI starts with api/ redirect it to controller/api.php
-RewriteRule ^/heurist/api/(.*)$ /heurist/hserv/controller/api.php
-
+/**
+* Entry point for the Heurist application to retrieve entity data 
+* (database defintions), Heurist record and iiif presentation via api requests
+* 
+* in format   /api/my_database/entitys_name/identification|query
+* https://example.net/api/mydbname/rst/12
+*
+* This script initializes and runs the particular entity class, which is responsible
+* for handling incoming requests
+* or routing to record_output.php controller for Records and iiif_presentation.php for iiif
+* 
+* To activate this service, add to httpd.conf
+* RewriteEngine On
+* RewriteRule ^/heurist/api/(.*)$ /heurist/hserv/controller/api.php
+* 
+* if URI starts with api/ redirect request to controller/api.php
+* 
+*
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     6.6
 */
 use hserv\utilities\USanitize;
 use hserv\utilities\USystem;
@@ -220,9 +236,6 @@ else
 }
 exit;
 
-//
-//
-//
 /**
  * Outputs a JSON error message and exits the script.
  *

@@ -1,0 +1,1 @@
+This directory contains files for importing database structure information. These scripts are typically used to process schema definitions from external sources (like SQL or XML files) and apply them to the current Heurist database, facilitating migration or synchronization of database structures.

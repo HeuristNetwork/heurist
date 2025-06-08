@@ -50,9 +50,6 @@ define('TITLEMASK_ERROR_MSG2', 'Error in title mask. Please look for syntax erro
 
 define('TITLEMASK_EMPTY_MSG', '**** No data in title fields for this record ****');
 
-//
-// static class
-//
 /**
  * Static class for handling Heurist record title masks.
  *
@@ -451,9 +448,6 @@ private static function __get_forempty($rec_id, $rt){
 }
 
 
-/*
-* Returns ALL field types definitions and keeps it into static array
-*/
 /**
  * Retrieves all detail type definitions and caches them.
  *
@@ -496,11 +490,6 @@ private static function __get_detail_types() {
     return self::$rdt;
 }
 
-/*
-* Fill record type structure
-* keeps it in static array
-* this array for each given record type
-*/
 /**
  * Retrieves the record structure (fields) for a given record type and caches it.
  *
@@ -562,9 +551,6 @@ private static function __get_rec_detail_types($rt) {
 
 }
 
-/*
-* Returns array of related record ids for given record and relmarker field
-*/
 /**
  * Retrieves IDs of records related via a specific 'relmarker' (relationship marker) field.
  *
@@ -631,11 +617,6 @@ private static function __get_related_record_ids($rec_id, $dty_ID) {
     return $record_ids;
 }
 
-/*
-* load the record values (except forbidden fields)
-*
-* @param mixed $rec_id
-*/
 /**
  * Retrieves and caches the data for a specific record, including its header and details.
  *
@@ -701,12 +682,6 @@ private static function __get_record_value($rec_id, $reset=false) {
     return self::$records[$rec_id];
 }
 
-/*
-* find and return value for enumeration field
-*
-* @param mixed $enum_id
-* @param mixed $enum_param_name
-*/
 /**
  * Retrieves a specific attribute of an enumeration term (e.g., label, code, concept ID).
  *
@@ -778,9 +753,6 @@ private static function __get_enum_value($enum_id, $enum_param_name)
         return $ret;
 }
 
-//
-//
-//
 /**
  * Gets the display name for an uploaded file.
  *
@@ -899,14 +871,6 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
     }
 }
 
-/*
-* Returns detail type attribute by  dty_ID, rst_DisplayName, dty_ConceptCode
-* returns  dty_ConceptCode, dty_Type or original name (not lowercased)
-*
-* @param mixed $rt - record type
-* @param mixed $search_fieldname  - search value: name of attribute(field) of detail type: dty_ID, rst_DisplayName, dty_ConceptCode
-* @param mixed $result_fieldname - result filed
-*/
 /**
  * Retrieves a specific attribute of a detail type definition.
  *
@@ -952,9 +916,6 @@ private static function __get_dt_field($rt, $search_fieldname, $mode, $result_fi
     return null;
 }
 
-//
-// get rectype id by name, cc or id
-//
 /**
  * Retrieves record type information (ID, concept code, name) by various identifiers.
  *
@@ -1388,9 +1349,6 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
     return "";
 }
 
-//
-// replace local dty_ID to concept code (for import)
-//
 /**
  * Replaces a local detail type ID with its corresponding concept code during import.
  *
@@ -1410,9 +1368,6 @@ private static function __replaceInCaseOfImport($dty_ID){
     return $dty_ID;
 }
 
-//
-// Check if provided field is for a record's parent entity
-//
 /**
  * Checks if a given field name refers to a "Parent Entity" type field.
  *

@@ -1,0 +1,1 @@
+This directory contains files for exporting database structure information. These scripts are typically used to generate representations of the database schema, such as SQL dumps or XML descriptions, for backup, migration, or documentation purposes.

@@ -101,48 +101,48 @@ if(!$is_subset){
 // ------------------------------------------------------------------------------------------
 // defRecTypeGroups
 
-do_print_table2('defRecTypeGroups');
+doPrintTableXML('defRecTypeGroups');
 
 
 // ------------------------------------------------------------------------------------------
 // defDetailTypeGroups
 
-do_print_table2('defDetailTypeGroups');
+doPrintTableXML('defDetailTypeGroups');
 
 // ------------------------------------------------------------------------------------------
 // defVocabularyGroups
 
-do_print_table2('defVocabularyGroups');
+doPrintTableXML('defVocabularyGroups');
 
 // ------------------------------------------------------------------------------------------
 // Detail Type ONTOLOGIES
 
-do_print_table2('defOntologies');
+doPrintTableXML('defOntologies');
 
 }
 // ------------------------------------------------------------------------------------------
 // Detail Type TERMS
 if(!$is_subset || $trm_ID>0){
 
-    do_print_table2('defTerms', $trm_ID);
+    doPrintTableXML('defTerms', $trm_ID);
 }
 // ------------------------------------------------------------------------------------------
 // RECORD TYPES (this will be repeated for each of the tables)
 if(!$is_subset || $rty_ID>0){
 
-    do_print_table2('defRecTypes', $rty_ID);
+    doPrintTableXML('defRecTypes', $rty_ID);
 }
 // ------------------------------------------------------------------------------------------
 // DETAIL TYPES
 if(!$is_subset || $dty_ID>0){
 
-    do_print_table2('defDetailTypes', $dty_ID);
+    doPrintTableXML('defDetailTypes', $dty_ID);
 }
 // ------------------------------------------------------------------------------------------
 // RECORD STRUCTURE
 if(!$is_subset || $rty_ID>0){
 
-    do_print_table2('defRecStructure', $rty_ID);
+    doPrintTableXML('defRecStructure', $rty_ID);
 
 }
 
@@ -151,37 +151,37 @@ if(!$is_subset){
 // ------------------------------------------------------------------------------------------
 // RELATIONSHIP CONSTRAINTS
 
-do_print_table2('defRelationshipConstraints');
+doPrintTableXML('defRelationshipConstraints');
 
 // ------------------------------------------------------------------------------------------
 // defFileExtToMimetype
 
-do_print_table2('defFileExtToMimetype');
+doPrintTableXML('defFileExtToMimetype');
 
 // ------------------------------------------------------------------------------------------
 // defTranslations
 
-do_print_table2('defTranslations');
+doPrintTableXML('defTranslations');
 
 // ------------------------------------------------------------------------------------------
 // sysDashboard
 
-do_print_table2('sysDashboard');
+doPrintTableXML('sysDashboard');
 
 // ------------------------------------------------------------------------------------------
 // defCalcFunctions
 
-do_print_table2('defCalcFunctions');
+doPrintTableXML('defCalcFunctions');
 
 // ------------------------------------------------------------------------------------------
 // defCrosswalk
 
-do_print_table2('defCrosswalk');
+doPrintTableXML('defCrosswalk');
 
 // ------------------------------------------------------------------------------------------
 // defURLPrefixes
 
-do_print_table2('defURLPrefixes');
+doPrintTableXML('defURLPrefixes');
 
 }
 // ------------------------------------------------------------------------------------------
@@ -203,32 +203,47 @@ if(!$is_subset){
 // ------------------------------------------------------------------------------------------
 // sysUGrps
 
-do_print_table2('sysUGrps');
+doPrintTableXML('sysUGrps');
 
 // ------------------------------------------------------------------------------------------
 // sysUsrGrpLinks
 
-do_print_table2('sysUsrGrpLinks');
+doPrintTableXML('sysUsrGrpLinks');
 
 // ------------------------------------------------------------------------------------------
 // usrHyperlinkFilters
 
-do_print_table2('usrHyperlinkFilters');
+doPrintTableXML('usrHyperlinkFilters');
 
 // ------------------------------------------------------------------------------------------
 // usrTags
 
-do_print_table2('usrTags');
+doPrintTableXML('usrTags');
 
 }
 
 print "\n</hml_structure>";// end of file
 
 
-//
-//
-//
-function do_print_table2( $tname, $id=0 )
+/**
+ * Prints the data of a given table as XML elements.
+ *
+ * Fetches rows from the specified table (optionally filtered by an ID)
+ * and outputs each row as an XML element named after the table's prefix (e.g., `<rty>`),
+ * with child elements for each field named after the field name.
+ * String values are HTML-escaped. Special handling for originating DB IDs and record IDs
+ * is applied similar to `do_print_table` in the SQL export script.
+ *
+ * @global \mysqli $mysqli The global mysqli database connection object.
+ *
+ * @param string $tname The name of the database table to export (e.g., 'defRecTypes').
+ * @param int $id (Optional) If provided and positive, filters the table records by this ID.
+ *                The specific ID field used for filtering depends on the table's prefix
+ *                (e.g., `rst_RecTypeID` for 'defRecStructure', or primary key for others).
+ *                Defaults to 0 (no specific ID filter).
+ * @return void
+ */
+function doPrintTableXML( $tname, $id=0 )
 {
     global $mysqli;
 

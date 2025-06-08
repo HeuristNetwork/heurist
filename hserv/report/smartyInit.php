@@ -26,11 +26,29 @@ use Smarty\Smarty;
 use Smarty\Security;
 use Smarty\Template;
 
+/**
+ * Class HeuristSecurityPolicy
+ *
+ * Custom Smarty security policy for Heurist. This class defines which PHP functions,
+ * modifiers, and language features are accessible from within Smarty templates.
+ * It extends the base Smarty Security class to tailor the security settings
+ * for the Heurist environment.
+ *
+ * @package hserv\report
+ */
 class HeuristSecurityPolicy extends Security {
 
-  // disable acess to static classes
+  /**
+   * @var null Disables access to static classes from Smarty templates.
+   */
   public $static_classes = null;
 
+  /**
+   * @var array Whitelist of allowed Smarty modifiers. This restricts PHP functions
+   *            callable as modifiers in templates to a predefined safe set.
+   *            Includes common array, string, math, and date functions, as well as
+   *            custom Heurist-specific modifiers like 'translate', 'label', etc.
+   */
   public $allowed_modifiers = array('isset', 'empty', 'escape', 'constant',
                     'sizeof', 'in_array', 'is_array', 'intval', 'implode', 'explode', 'split',
                     'array_key_exists', 'array_column', 'array_keys', 'array_multisort',
@@ -53,14 +71,45 @@ class HeuristSecurityPolicy extends Security {
                     'out','wrap',  
                     'upper','utf8_encode','wordwrap');
                     
+  /**
+   * @var bool If true, allows access to superglobals like $_GET, $_POST, $_SERVER, etc., from templates. Default is true.
+   */
   public $allow_super_globals = true; //default true
 
+  /**
+   * @var bool If false (default), allows most standard Smarty tags unless specifically restricted.
+   *           Setting to an array of allowed tags would restrict usage to only those tags.
+   */
   public $allowed_tags = false;
 
+  /**
+   * @var bool If true (default), allows access to PHP constants from templates.
+   */
   public $allow_constants = true;
 
 }
 
+/**
+ * Initializes and configures a Smarty templating engine instance for Heurist.
+ *
+ * This function performs several setup tasks:
+ * 1. Sets the template, compile, cache, and config directories for Smarty.
+ *    It ensures these directories exist, creating them if necessary.
+ *    The base template directory defaults to `HEURIST_SMARTY_TEMPLATES_DIR`.
+ * 2. Instantiates and enables the `HeuristSecurityPolicy` to control access to
+ *    PHP functions and features from within templates.
+ * 3. Loads custom Smarty plugins located in `vendor/smarty/smarty/libs/customplugins/`.
+ * 4. Registers a whitelist of safe PHP functions as Smarty modifiers.
+ * 5. Registers Heurist-specific custom modifiers (e.g., for array sorting, translations,
+ *    accessing constants) that provide additional functionality to templates.
+ *
+ * @param \hserv\System $system The Heurist system object, used for accessing system paths and settings.
+ * @param string|null $smarty_templates_dir (Optional) The base directory for Smarty templates.
+ *                                          If null, defaults to the path defined by the
+ *                                          `HEURIST_SMARTY_TEMPLATES_DIR` constant.
+ * @return Smarty A fully configured Smarty instance.
+ * @throws \Exception If essential Smarty directories do not exist and cannot be created.
+ */
 function smartyInit($system, $smarty_templates_dir=null){
 
 
@@ -146,28 +195,67 @@ function smartyInit($system, $smarty_templates_dir=null){
         return $smarty;
 }
 
+/**
+ * Smarty modifier: Sorts an array using PHP's `sort()` function.
+ *
+ * @param array $arr The array to sort.
+ * @return array The sorted array.
+ */
 function heuristModifierArraySort($arr){
     sort($arr);
     return $arr;
 }
+/**
+ * Smarty modifier: Sorts an array using PHP's `asort()` function (maintains index association).
+ *
+ * @param array $arr The array to sort (passed by reference).
+ * @return array The sorted array.
+ */
 function heuristModifierArrayASort(&$arr){
     asort($arr);
     return $arr;
 }
+/**
+ * Smarty modifier: Sorts an array by keys using PHP's `ksort()` function.
+ *
+ * @param array $arr The array to sort.
+ * @return array The sorted array.
+ */
 function heuristModifierArrayKSort($arr){
     ksort($arr);
     return $arr;
 }
 
+/**
+ * Smarty modifier: Sorts multiple or multi-dimensional arrays using PHP's `array_multisort()`.
+ * The last array passed to `array_multisort` (which is modified to be sorted) is returned.
+ *
+ * @param mixed ...$params The arrays to sort, followed by optional sort order and sort flags.
+ * @return array The last array, sorted according to the parameters.
+ */
 function heuristModifierArrayMultiSort(...$params){
     array_multisort(...$params);
     return end($params);
 }
 
+/**
+ * Smarty modifier: Checks if a key exists in an array using `array_key_exists()`.
+ *
+ * @param mixed $key The key to check.
+ * @param array $arr The array to check in.
+ * @return bool True if the key exists, false otherwise.
+ */
 function heuristModifierArrayKeyExists($key, $arr){
     return is_array($arr) && array_key_exists($key, $arr);
 }
 
+/**
+ * Smarty modifier: Returns the values from a single column of a multi-dimensional array, using `array_column()`.
+ *
+ * @param array $arr The multi-dimensional array.
+ * @param mixed $column The column key to retrieve.
+ * @return array|string An array containing the values from the specified column, or an empty string if input is not an array.
+ */
 function heuristModifierArrayColumn($arr, $column){
     if(is_array($arr)){ // && array_key_exists($column, $arr[0])
         return array_column($arr, $column);
@@ -175,28 +263,47 @@ function heuristModifierArrayColumn($arr, $column){
         return '';
     }
 }
+/**
+ * Smarty modifier: Translates a given input string using Heurist's `getTranslation` mechanism.
+ * (Assumes a global `getTranslation` function is available, likely from `ULocale.php`).
+ *
+ * @param mixed $input The string or entity ID to translate.
+ * @param string $lang The target language code.
+ * @param string|null $field (Optional) The specific field of the entity to translate if applicable.
+ * @return string The translated string.
+ */
 function heuristModifierTranslate($input, $lang, $field=null)
 {
     return getTranslation($input, $lang, $field);//see ULocale
 }
 
 /**
-* Smarty Plugin - Array Sort
-* Sorts an array by supplied fields
-*
-* $sortby - comma separated string or array of columns/keys
-*           prefix '-' sort desc, prefix '#' - sort numeric
-*
-* for example
-*       foreach $arr|arraysortby:"-auteur,#auteurid"
-* or
-*       $arr=arraysortby($arr,"auteur")
-*
-* if $sortby is not defined it sorts
-*   a) by first column for multidimensional array
-*   b) use "sort" function for flat array
-*
-*/
+ * Smarty modifier `arraysortby`: Sorts an array of associative arrays by one or more specified fields.
+ *
+ * This modifier allows complex sorting of arrays directly within Smarty templates.
+ * The `$sortby` parameter can be a comma-separated string or an array of strings,
+ * where each string specifies a field name to sort by.
+ * Prefixes can be used with field names:
+ * - `-` (minus sign): Sorts in descending order for that field.
+ * - `#` (hash sign): Treats the field as numeric for sorting.
+ *
+ * If `$sortby` is not provided:
+ * - For a multi-dimensional array, it sorts by the first column of the inner arrays.
+ * - For a flat array, it uses PHP's standard `sort()` function.
+ *
+ * The sort is stable; if multiple sort fields are provided, subsequent fields are used
+ * to sort items that are equal according to preceding fields.
+ *
+ * Example usage in Smarty:
+ * ```smarty
+ * {$myArray|arraysortby:"-lastName,#age"}
+ * {$myArray|arraysortby:['lastName', 'firstName']}
+ * ```
+ *
+ * @param array $arr The array of associative arrays to be sorted.
+ * @param string|array|null $sortby (Optional) The field(s) to sort by, with optional prefixes for direction and type.
+ * @return array The sorted array.
+ */
 function heuristModifierArraySortByFields($arr, $sortby=null)
 {
 
@@ -251,6 +358,14 @@ function heuristModifierArraySortByFields($arr, $sortby=null)
     return $arr;
 }
 
+/**
+ * Legacy Smarty function `progress`.
+ *
+ * This function appears to be for backward compatibility and currently does nothing but return `false`.
+ * It might have been intended for a progress update mechanism in older Smarty versions or a different plugin system.
+ *
+ * @return false Always returns false.
+ */
 //do not remove - for backward capability
 function smarty_function_progress(){
     return false;

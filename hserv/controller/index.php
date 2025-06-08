@@ -12,7 +12,6 @@
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @version     6.6
  */
-
 use hserv\controller\FrontController;
 
 require_once dirname(__FILE__).'/../../autoload.php';
