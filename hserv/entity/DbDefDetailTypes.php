@@ -30,14 +30,34 @@ use hserv\utilities\USanitize;
 
 class DbDefDetailTypes extends DbEntityBase
 {
-    /**
-     * Searches for detail type definitions.
+   /**
+     * Searches for Detail Type (Base Field) definitions based on criteria in `$this->data`.
      *
-     * Supports searching by `dty_ID`, `dty_Name`, `dty_Type`, `dty_Status`,
-     * `dty_Modified`, and `dty_DetailTypeGroupID`.
-     * The level of detail returned (`id`, `name`, `list`, or `full`) is controlled by `$this->data['details']`.
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+     * common search parameters from `$this->data`.
      *
-     * @return array|false An array of found detail type definitions, or false on error.
+     * It then adds specific predicates for this entity:
+     * - `dty_ID`: If provided in `$this->data['dty_ID']`.
+     * - `dty_Name`: If provided in `$this->data['dty_Name']`.
+     * - `dty_Type`: If provided in `$this->data['dty_Type']`.
+     * - `dty_Status`: If provided in `$this->data['dty_Status']`.
+     * - `dty_Modified`: If provided in `$this->data['dty_Modified']`.
+     * - `dty_DetailTypeGroupID`: If provided in `$this->data['dty_DetailTypeGroupID']`.
+     *
+     * The fields returned in the search results depend on `$this->data['details']`:
+     * - 'id': Returns only `dty_ID`.
+     * - 'name': Returns `dty_ID`, `dty_Name`.
+     * - 'list': Returns `dty_ID`, `dty_Name`, `dty_ShowInLists`, `dty_HelpText`, `dty_Type`, `dty_Status`, `dty_DetailTypeGroupID`.
+     * - Default ('full'): Returns all fields defined in `$this->fieldNames` for this entity.
+     *
+     * The order of results is determined by `$this->searchMgr->setOrderBy()`, which processes
+     * sort parameters from `$this->data`. If no specific order is set, the default database order is used.
+     *
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     typically including 'records', 'count', 'total_count', etc.
+     *                     Returns `false` if `parent::search()` fails (e.g., parameter validation error)
+     *                     or if the database query fails.
      */
     public function search(){
 

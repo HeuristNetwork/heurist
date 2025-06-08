@@ -78,17 +78,29 @@ class DbAnnotations extends DbEntityBase
     }
 
     /**
-     * Searches for annotations.
+     * Searches for IIIF annotations based on criteria provided in `$this->data`.
      *
-     * Handles different search scenarios:
-     * - If `recID` is 'edit', redirects to the record edit page for the annotation (found by UUID).
-     * - If `recID` is a specific annotation UUID, returns that single annotation.
-     * - If `recID` is 'pages' and a 'uri' (canvas URI) is provided, returns all annotations for that canvas.
-     * The response is formatted as an IIIF AnnotationPage.
+     * This method overrides the base `search()` behavior to implement specific search logic
+     * for IIIF annotations. It does not use `DbEntitySearch` in the same way other entities might.
+     * The search behavior is determined by the `recID` and other parameters in `$this->data`:
      *
-     * @return array An array representing an IIIF AnnotationPage containing found annotations.
-     *               May trigger a redirect if 'recID' is 'edit'.
-     */
+     * - If `$this->data['recID']` is 'edit':
+     *   It expects `$this->data['uuid']` to be set. It finds the Heurist record ID associated
+     *   with the annotation UUID and redirects the user to the record edit page.
+     *
+     * - If `$this->data['recID']` is a specific annotation UUID (and not 'pages' or 'edit'):
+     *   It fetches and returns the single annotation matching that UUID.
+     *
+     * - If `$this->data['recID']` is 'pages':
+     *   It expects `$this->data['uri']` (the canvas URI) to be set. It fetches all
+     *   Web Annotations associated with that canvas URI.
+     *
+     * The results are formatted as an IIIF AnnotationPage.
+     *
+     * @return array An associative array structured as an IIIF AnnotationPage.
+     *               The 'items' key will contain an array of found annotation objects (decoded from JSON).
+     *               In the 'edit' case, this method triggers an HTTP redirect and does not return directly.
+     */     
     public function search(){
 
         if($this->data['recID']=='edit'){

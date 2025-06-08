@@ -30,18 +30,35 @@ class DbUsrTags extends DbEntityBase
 {
 
     /**
-    *  search tags
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    * @return array|false An array of found tag records, or false on error.
-    *                     The structure of the returned array elements depends on the 'details' parameter.
-    *                     'full' details include `tag_Usage` count.
-    */
+     * Searches for user tags (`usrTags`) based on criteria in `$this->data`.
+     *
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+     * common search parameters. If `tag_UGrpID` is not provided in `$this->data`,
+     * it defaults to the current user's group IDs.
+     *
+     * It then adds specific predicates for this entity:
+     * - `tag_ID`: If provided in `$this->data['tag_ID']`.
+     * - `tag_Text`: If provided in `$this->data['tag_Text']`.
+     * - `tag_Modified`: If provided in `$this->data['tag_Modified']`.
+     * - `tag_UGrpID`: If provided or defaulted.
+     * - `rtl_RecID`: If provided in `$this->data['rtl_RecID']`, it joins with `usrRecTagLinks`
+     *   to find tags associated with specific record(s).
+     *
+     * The fields returned depend on `$this->data['details']`:
+     * - 'id': Returns only `tag_ID`.
+     * - 'label': Returns `tag_ID`, `tag_Text`.
+     * - 'name': Returns `tag_ID`, `tag_Text`, `tag_UGrpID`.
+     * - Default ('full'): Returns `tag_ID`, `tag_Text`, `tag_Description`, `tag_Modified`, `tag_UGrpID`,
+     *   and a calculated `tag_Usage` (count of records using the tag from `usrRecTagLinks`).
+     * - If `$this->data['details']` is an array or comma-separated string, those specific fields are selected.
+     *
+     * The order of results is determined by `$this->searchMgr->setOrderBy()`.
+     *
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     typically including 'records', 'count', 'total_count', etc.
+     *                     Returns `false` if `parent::search()` fails or a database query fails.
+     */
     public function search(){
 
         //fields - from configuration - list of field names

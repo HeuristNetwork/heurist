@@ -26,17 +26,31 @@ use hserv\entity\DbEntityBase;
 class DbDefVocabularyGroups extends DbEntityBase
 {
     /**
-    *  search vocab groups
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    * @return array|false An array of found vocabulary groups, or false on error.
-    *                     The structure of the returned array elements depends on the 'details' parameter.
-    */
+     * Searches for Vocabulary Groups based on criteria in `$this->data`.
+     *
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+     * common search parameters from `$this->data`.
+     *
+     * It then adds specific predicates for this entity:
+     * - `vcg_ID`: If provided in `$this->data['vcg_ID']`.
+     * - `vcg_Name`: If provided in `$this->data['vcg_Name']`.
+     *
+     * The fields returned in the search results depend on `$this->data['details']` (defaults to 'full'):
+     * - 'id': Returns only `vcg_ID`.
+     * - 'name': Returns `vcg_ID`, `vcg_Name`.
+     * - 'list': Returns `vcg_ID`, `vcg_Name`, `vcg_Description`, `vcg_Order`.
+     * - 'full': Returns all fields defined in `$this->fieldNames` for this entity.
+     * - If `$this->data['details']` is an array or comma-separated string, those specific fields are selected.
+     *
+     * The primary key `vcg_ID` is always included as the first field in the results.
+     * Results are ordered by `vcg_Order`.
+     *
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     typically including 'records', 'count', 'total_count', etc.
+     *                     Returns `false` if `parent::search()` fails (e.g., parameter validation error)
+     *                     or if the database query fails.
+     */
     public function search(){
 
         if(parent::search()===false){

@@ -41,28 +41,28 @@ class DbSysIdentification extends DbEntityBase
 */
 
     /**
-    *  search user or/and groups
-    *
-    *  sysUGrps.ugr_ID
-    *  sysUGrps.ugr_Type
-    *  sysUGrps.ugr_Name
-    *  sysUGrps.ugr_Enabled
-    *  sysUGrps.ugr_Modified
-    *  sysUsrGrpLinks.ugl_UserID
-    *  sysUsrGrpLinks.ugl_GroupID
-    *  sysUsrGrpLinks.ugl_Role
-    *  (omit table name)
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    * @return array|false An array containing the single `sysIdentification` record,
-    *                     formatted as a standard search result. Includes a calculated `sys_dbVersion` field.
-    *                     Returns false on database error.
-    */
+     * Retrieves the single record from the `sysIdentification` table.
+     *
+     * This table contains database-specific properties and settings. This method
+     * directly queries the table (expecting only one row) and formats the result
+     * to mimic a standard Heurist search result structure.
+     *
+     * It adds a calculated field `sys_dbVersion` to the result, which is a concatenation of
+     * `sys_dbVersion`, `sys_dbSubVersion`, and `sys_dbMinorVersion` from the table.
+     *
+     * Note: This method does not use `parent::search()` or the `DbEntitySearch` manager
+     * as it targets a single, specific row.
+     *
+     * @return array|false An array structured like a search result:
+     *                     - `count`: 1 if the record is found.
+     *                     - `reccount`: 1 if the record is found.
+     *                     - `fields`: Array of field names from `sysIdentification` plus 'sys_dbVersion'.
+     *                     - `records`: An associative array where the key is the `sys_ID` (typically 1)
+     *                       and the value is a numerically indexed array of the record's values.
+     *                     - `order`: The `sys_ID` of the record.
+     *                     - `entityName`: 'sysIdentification'.
+     *                     Returns `false` if there's a database query error.
+     */
     public function search(){
 
         $query = 'SELECT * FROM sysIdentification LIMIT 1';

@@ -47,28 +47,45 @@ class DbDefTerms extends DbEntityBase
     'trm_LocallyModified'=>'bool2',
     */
 
+
     /**
-    *  search user or/and groups
-    *
-    *  sysUGrps.ugr_ID
-    *  sysUGrps.ugr_Type
-    *  sysUGrps.ugr_Name
-    *  sysUGrps.ugr_Enabled
-    *  sysUGrps.ugr_Modified
-    *  sysUsrGrpLinks.ugl_UserID
-    *  sysUsrGrpLinks.ugl_GroupID
-    *  sysUsrGrpLinks.ugl_Role
-    *  (omit table name)
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    * @return array|false An array of found term definitions, or false on error.
-    *                     The structure of the returned array elements depends on the 'details' parameter.
-    */
+     * Searches for Term definitions based on criteria in `$this->data`.
+     *
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+     * common search parameters from `$this->data`.
+     *
+     * It then adds specific predicates for this entity:
+     * - `trm_ID`: If provided in `$this->data['trm_ID']`. Can be filtered by `$this->data['withimages']==1`
+     *   to only include terms with associated images.
+     * - `trm_Label`: If provided in `$this->data['trm_Label']`.
+     * - `trm_Domain`: If provided in `$this->data['trm_Domain']`.
+     * - `trm_Status`: If provided in `$this->data['trm_Status']`.
+     * - `trm_Modified`: If provided in `$this->data['trm_Modified']`.
+     * - `trm_Code`: If provided in `$this->data['trm_Code']`.
+     * - `trm_ParentTermID`: If provided in `$this->data['trm_ParentTermID']`.
+     *
+     * The fields returned in the search results depend on `$this->data['details']`:
+     * - 'id': Returns only `trm_ID`.
+     * - 'name' (or null/default): Returns `trm_ID`, `trm_Label`.
+     * - 'list': Returns `trm_ID`, `trm_Label`, `trm_InverseTermID`, `trm_Description`, `trm_Domain`,
+     *   `trm_ParentTermID` (defaulted to 0 if null), `trm_VocabularyGroupID`, `trm_OrderInBranch`, `trm_Code`, `trm_Status`.
+     * - 'full': Returns an extended set of fields including `trm_ID`, `trm_Label`, `trm_Description`,
+     *   `trm_InverseTermID`, `trm_ParentTermID` (defaulted to 0 if null), `trm_VocabularyGroupID`,
+     *   `trm_OrderInBranch`, `trm_Code`, `trm_Status`, `trm_Domain`, `trm_SemanticReferenceURL`,
+     *   `trm_OriginatingDBID`, `trm_IDInOriginatingDB`, and an empty `trm_Parents` (likely for future use or client-side population).
+     *   Multi-language fields are handled if `$this->multilangFields` is populated.
+     * - If `$this->data['details']` is an array or comma-separated string, those specific fields are selected.
+     *
+     * The primary key `trm_ID` is always included as the first field in the results.
+     * Ordering is not explicitly defined in this method, relying on `DbEntitySearch::setOrderBy()` if called,
+     * or default database order.
+     *
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     typically including 'records', 'count', 'total_count', etc.
+     *                     Returns `false` if `parent::search()` fails (e.g., parameter validation error)
+     *                     or if the database query fails.
+     */
     public function search(){
 
 

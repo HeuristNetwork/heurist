@@ -44,13 +44,29 @@ class DbDefCalcFunctions extends DbEntityBase
                 );
     }
 
+
     /**
-     * Searches for calculated field definitions.
+     * Searches for calculated field definitions based on criteria in `$this->data`.
      *
-     * Supports searching by `cfn_ID` and `cfn_Name`.
-     * The level of detail returned (`id`, `name`, or `full`) is controlled by `$this->data['details']`.
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+     * common search parameters from `$this->data`.
      *
-     * @return array|false An array of found calculated field definitions, or false on error.
+     * It then adds specific predicates for this entity:
+     * - `cfn_ID`: If provided in `$this->data['cfn_ID']`.
+     * - `cfn_Name`: If provided in `$this->data['cfn_Name']`.
+     *
+     * The fields returned in the search results depend on `$this->data['details']`:
+     * - 'id': Returns only `cfn_ID`.
+     * - 'name': Returns `cfn_ID`, `cfn_Name`.
+     * - Default ('full'): Returns `cfn_ID`, `cfn_Name`, `cfn_FunctionSpecification`, `cfn_RecTypeIDs`.
+     *
+     * Results are ordered by `cfn_Name`.
+     *
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     typically including 'records', 'count', 'total_count', etc.
+     *                     Returns `false` if `parent::search()` fails (e.g., parameter validation error)
+     *                     or if the database query fails.
      */
     public function search(){
 

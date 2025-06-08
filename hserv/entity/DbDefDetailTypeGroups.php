@@ -43,15 +43,30 @@ class DbDefDetailTypeGroups extends DbEntityBase
                 );
     }
 
-    /**
-     * Searches for detail type groups.
+   /**
+     * Searches for Detail Type Groups (Field Groups) based on criteria in `$this->data`.
      *
-     * Supports searching by `dtg_ID` and `dtg_Name`.
-     * The level of detail returned (`id`, `name`, `list`, or `full`) is controlled by `$this->data['details']`.
-     * The 'list' and 'full' details include a `dtg_FieldCount` which counts the number of detail types in each group.
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+     * common search parameters from `$this->data`.
+     *
+     * It then adds specific predicates for this entity:
+     * - `dtg_ID`: If provided in `$this->data['dtg_ID']`.
+     * - `dtg_Name`: If provided in `$this->data['dtg_Name']`.
+     *
+     * The fields returned in the search results depend on `$this->data['details']`:
+     * - 'id': Returns only `dtg_ID`.
+     * - 'name': Returns `dtg_ID`, `dtg_Name`.
+     * - 'list': Returns `dtg_ID`, `dtg_Name`, `dtg_Description`, `dtg_Order`, and `dtg_FieldCount` (calculated).
+     * - Default ('full'): Returns all fields defined in `$this->fieldNames` plus `dtg_FieldCount`.
+     * The `dtg_FieldCount` is a calculated field representing the number of detail types within each group.
+     *
      * Results are ordered by `dtg_Order`.
      *
-     * @return array|false An array of found detail type groups, or false on error.
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     typically including 'records', 'count', 'total_count', etc.
+     *                     Returns `false` if `parent::search()` fails (e.g., parameter validation error)
+     *                     or if the database query fails.
      */
     public function search(){
 

@@ -72,20 +72,34 @@ class DbRecUploadedFiles extends DbEntityBase
 .'Otherwise please '.CONTACT_SYSADMIN.' or '.CONTACT_HEURIST_TEAM.'.';
     }
 
+
     /**
-    *  search uploaded fils
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    * @return array|false An array of found file records, or false on error.
-    *                     The structure of the returned array elements depends on the 'details' parameter.
-    *                     'list' and 'full' details include a calculated `ulf_PlayerTag`.
-    *                     If `needRelations` is true (for 'full' details), related record information is also fetched.
-    */
+     * Searches for uploaded file records (`recUploadedFiles`) based on criteria in `$this->data`.
+     *
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+     * common search parameters from `$this->data`.
+     *
+     * It then adds specific predicates for this entity based on fields like:
+     * `ulf_ID`, `ulf_OrigFileName`, `ulf_Caption`, `ulf_Copyright`, `ulf_Copyowner`,
+     * `ulf_ExternalFileReference`, `ulf_FilePath`, `ulf_Modified`, `ulf_UploaderUGrpID`, `ulf_WhoCanView`.
+     * It can also filter by `fxm_MimeType` (joining with `defFileExtToMimetype`) and
+     * whether a file is referenced (`ulf_Referenced` = 'yes'/'no' by joining with `recDetails`).
+     *
+     * The fields returned depend on `$this->data['details']`:
+     * - 'id': Returns `DISTINCT ulf_ID`.
+     * - 'name': Returns `DISTINCT ulf_ID`, `ulf_OrigFileName`.
+     * - 'list': Returns key file details including `fxm_MimeType` and a calculated `ulf_PlayerTag`.
+     * - 'full': Returns an extensive set of file details, `fxm_MimeType`, calculated `ulf_PlayerTag`,
+     *   and if `$this->data['needRelations']` is true, fetches related record information via `getMediaRecords()`.
+     * - If `$this->data['details']` is an array or comma-separated string, those specific fields are selected.
+     *
+     * Default sort order is by `ulf_OrigFileName ASC`. Other sort options include `ulf_Added` and `ulf_FileSizeKB`.
+     *
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     potentially augmented with related records information.
+     *                     Returns `false` if `parent::search()` fails or a database query fails.
+     */
     public function search(){
 
         if(parent::search()===false){

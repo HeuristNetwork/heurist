@@ -1428,15 +1428,35 @@ abstract class DbEntityBase
 
     }
 
+
     /**
-     * Initializes the search manager and validates search parameters.
+     * Prepares for a search operation by initializing the search manager and validating search parameters.
      *
-     * This method sets up the `DbEntitySearch` manager for the current entity
-     * and validates the search parameters provided in `$this->data`.
-     * It's a prerequisite before specific entity search methods compose and execute queries.
+     * This base method is a prerequisite for conducting searches on the entity. It performs the following:
+     * 1. Checks if the current entity instance is valid (i.e., configuration loaded) using `isvalid()`.
+     * 2. If valid, it instantiates a `DbEntitySearch` manager (`$this->searchMgr`) with the
+     *    current system, entity configuration (`$this->config`), and field definitions (`$this->fields`).
+     * 3. It then calls the `validateParams()` method of the `DbEntitySearch` manager, passing
+     *    the current entity's data (`$this->data`) which typically contains the search query and options.
+     *    `$this->data` may be updated by `validateParams()` if parameter modifications occur (e.g., defaults applied).
      *
-     * @return bool True if the entity is valid and search parameters are validated successfully,
-     *              false otherwise.
+     * Note: This method itself does not execute the search query or return search results.
+     * Concrete subclasses are expected to either override this method to perform the full search
+     * or use the initialized `$this->searchMgr` in subsequent steps to execute the query and retrieve results.
+     *
+     * The search parameters are expected to be in `$this->data`, often populated from `$_REQUEST`.
+     * Common parameters managed by `DbEntitySearch` might include:
+     * - `q`: The search query string or structured query.
+     * - `details`: Specifies which fields to return ('ids', 'full', 'name', or an array of field names).
+     * - `limit`: The maximum number of records to return.
+     * - `offset`: The starting offset for results (for pagination).
+     * - `sortby`: Field(s) to sort by.
+     * - `facet`: Fields for faceted search.
+     * - `fmt`: Output format (though this base method doesn't handle final output).
+     *
+     * @return bool True if the entity is valid and search parameters are successfully validated by `DbEntitySearch`.
+     *              Returns false if the entity is invalid or parameter validation fails.
+     *              Errors are typically added to the system object by `DbEntitySearch::validateParams()` on failure.
      */
     public function search(){
 

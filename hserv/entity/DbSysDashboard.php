@@ -45,12 +45,31 @@ class DbSysDashboard extends DbEntityBase
     }
 
     /**
-     * Searches for dashboard entries.
+     * Searches for dashboard entries based on criteria in `$this->data`.
      *
-     * Supports searching by `dsh_ID`, `dsh_Label`, `dsh_Enabled`, and `dsh_ShowIfNoRecords`.
-     * The level of detail returned (`id`, `name`, `list`, or `full`) is controlled by `$this->data['details']`.
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+     * common search parameters from `$this->data`.
      *
-     * @return array|false An array of found dashboard entries, or false on error.
+     * It then adds specific predicates for this entity:
+     * - `dsh_ID`: If provided in `$this->data['dsh_ID']`.
+     * - `dsh_Label`: If provided in `$this->data['dsh_Label']`.
+     * - `dsh_Enabled`: If provided in `$this->data['dsh_Enabled']`.
+     * - `dsh_ShowIfNoRecords`: If provided in `$this->data['dsh_ShowIfNoRecords']`.
+     *
+     * The fields returned in the search results depend on `$this->data['details']`:
+     * - 'id': Returns only `dsh_ID`.
+     * - 'name': Returns `dsh_ID`, `dsh_Label`.
+     * - Default (if 'details' is not 'id' or 'name'): Returns `dsh_ID`, `dsh_Order`, `dsh_Label`,
+     *   `dsh_Description`, `dsh_Enabled`, `dsh_ShowIfNoRecords`, `dsh_CommandToRun`, `dsh_Parameters`.
+     *
+     * Ordering is not explicitly defined in this method (passed as `null` to `composeAndExecute`),
+     * so it relies on the database's default order or an externally set order via `DbEntitySearch::setOrderBy()`.
+     *
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     typically including 'records', 'count', 'total_count', etc.
+     *                     Returns `false` if `parent::search()` fails (e.g., parameter validation error)
+     *                     or if the database query fails.
      */
     public function search(){
 

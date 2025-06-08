@@ -49,16 +49,28 @@ class DbUsrReminders extends DbEntityBase
        parent::__construct( $system, $data );
     }
 
-    /**
+   /**
      * Searches for user reminders.
      *
-     * Defaults to searching reminders owned by the current user if `rem_OwnerUGrpID` is not specified.
-     * Supports filtering by `rem_ID`, `rem_OwnerUGrpID`, `rem_RecID`, `rem_Message`, `rem_ToWorkgroupID`,
+     * Defaults to searching reminders owned by the current user if `rem_OwnerUGrpID` is not specified in `$this->data`.
+     * Supports filtering by `rem_ID`, `rem_OwnerUGrpID`, `rem_RecID`, `rem_Message` (LIKE query), `rem_ToWorkgroupID`,
      * `rem_ToUserID`, and `rem_ToEmail`.
-     * The level of detail returned (`id`, `list`/`name`, or `full`) is controlled by `$this->data['details']`.
-     * 'list' and 'name' details include recipient names and record titles by joining with `sysUGrps` and `Records`.
      *
-     * @return array|false An array of found reminder records, or false on error.
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate common search parameters.
+     *
+     * The fields returned depend on `$this->data['details']`:
+     * - 'id': Returns only `rem_ID`.
+     * - 'list' or 'name': Returns core reminder fields plus `rem_ToWorkgroupName` (from `sysUGrps u1`),
+     *   `rem_ToUserName` (from `sysUGrps u2`), and `rem_RecTitle` (from `Records`). This involves JOINs.
+     * - Default ('full'): Returns `rem_ID`, `rem_RecID`, `rem_OwnerUGrpID`, `rem_ToWorkgroupID`, `rem_ToUserID`,
+     *   `rem_ToEmail`, `rem_Message`, `rem_StartDate`, `rem_Freq`.
+     *
+     * The order of results is determined by `$this->searchMgr->setOrderBy()`.
+     *
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     typically including 'records', 'count', 'total_count', etc.
+     *                     Returns `false` if `parent::search()` fails or a database query fails.
      */
     public function search(){
 

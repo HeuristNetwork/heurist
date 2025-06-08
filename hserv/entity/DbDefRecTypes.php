@@ -32,18 +32,38 @@ class DbDefRecTypes extends DbEntityBase
     private $rty_counts = null;
 
     /**
-    *  search users
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    * @return array|false An array of found record type definitions, or false on error.
-    *                     The structure of the returned array elements depends on the 'details' parameter.
-    *                     'full' details include a calculated `rty_RecCount` and a human-readable `rty_TitleMask`.
-    */
+     * Searches for Record Type definitions based on criteria in `$this->data`.
+     *
+     * This method extends the base search functionality. It first calls `parent::search()`
+     * to initialize the `DbEntitySearch` manager (`$this->searchMgr`) and validate
+     * common search parameters from `$this->data`.
+     *
+     * It then adds specific predicates for this entity:
+     * - `rty_ID`: If provided in `$this->data['rty_ID']`.
+     * - `rty_Name`: If provided in `$this->data['rty_Name']`.
+     * - `rty_RecTypeGroupID`: If provided in `$this->data['rty_RecTypeGroupID']`.
+     *
+     * The fields returned in the search results depend on `$this->data['details']` (defaults to 'full'):
+     * - 'id': Returns only `rty_ID`.
+     * - 'name': Returns `rty_ID`, `rty_Name`.
+     * - 'count': Returns `rty_ID`, `rty_Name`, and a calculated `rty_RecCount`.
+     * - 'list': Returns `rty_ID`, `rty_Name`, `rty_Description`, `rty_ShowInLists`, `rty_Status`, `rty_RecTypeGroupID`.
+     * - 'full': Returns a comprehensive set of fields including `rty_ID`, `rty_Name`, `rty_OrderInGroup`,
+     *   `rty_Description`, a human-readable `rty_TitleMask` (original stored in `rty_CanonicalTitleMask`),
+     *   `rty_Plural` (calculated if empty), `rty_Status`, `rty_OriginatingDBID`, `rty_IDInOriginatingDB`,
+     *   `rty_ShowInLists`, `rty_RecTypeGroupID`, `rty_ReferenceURL`, `rty_ShowURLOnEditForm`,
+     *   `rty_ShowDescriptionOnEditForm`, `rty_Modified`, and a calculated `rty_RecCount`.
+     *   The `rty_RecCount` and human-readable `rty_TitleMask` are added via a `$calculatedFields` callback.
+     * - If `$this->data['details']` is an array or comma-separated string, those specific fields are selected.
+     *
+     * The order of results is determined by `$this->searchMgr->setOrderBy()`. If no specific order is set,
+     * the default database order is used.
+     *
+     * @return array|false An array containing the search results as structured by `DbEntitySearch::execute()`,
+     *                     typically including 'records', 'count', 'total_count', etc.
+     *                     Returns `false` if `parent::search()` fails (e.g., parameter validation error)
+     *                     or if the database query fails.
+     */
     public function search(){
 
         if(parent::search()===false){
