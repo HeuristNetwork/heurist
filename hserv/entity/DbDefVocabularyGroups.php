@@ -3,11 +3,13 @@ namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 
     /**
-    * db access to sysUGrpps table
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbDefVocabularyGroups
+     *
+     * Provides database access and operations for the `defVocabularyGroups` table,
+     * which stores groups for vocabularies (collections of terms).
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -32,7 +34,8 @@ class DbDefVocabularyGroups extends DbEntityBase
     *  limit
     *  request_id
     *
-    *  @todo overwrite
+    * @return array|false An array of found vocabulary groups, or false on error.
+    *                     The structure of the returned array elements depends on the 'details' parameter.
     */
     public function search(){
 
@@ -110,6 +113,15 @@ class DbDefVocabularyGroups extends DbEntityBase
     //
     //
     //
+    /**
+     * Deletes vocabulary group(s).
+     *
+     * Before deletion, it sets up a foreign key check to prevent deletion of non-empty groups
+     * (groups that still contain vocabularies/root terms).
+     *
+     * @param bool $disable_foreign_checks Unused in this implementation, passed to parent.
+     * @return bool|array Result of `parent::delete()`.
+     */
     public function delete($disable_foreign_checks = false){
 
         $this->isDeleteReady = false;
@@ -125,6 +137,17 @@ class DbDefVocabularyGroups extends DbEntityBase
     //
     //
     //
+    /**
+     * Prepares vocabulary group records before saving.
+     *
+     * Validates `vcg_Name` for duplication.
+     * Sets `vcg_Modified` to the current date/time.
+     * Sets `vcg_Domain` to 'relation' if `vcg_ID` is 9 or `vcg_Domain` is already 'relation', otherwise defaults to 'enum'.
+     * Sets `vcg_Order` to 2 if not already a positive integer.
+     * Sets `is_new` flag.
+     *
+     * @return bool True if preparation is successful and validation passes, false otherwise.
+     */
     protected function prepareRecords(){
 
         $ret = parent::prepareRecords();

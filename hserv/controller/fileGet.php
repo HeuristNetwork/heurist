@@ -232,9 +232,15 @@ if($filename){ //download from scratch (for csv import)
 }
 
 
-//
-//
-//
+/**
+ * Outputs a file for download.
+ *
+ * Sets appropriate headers and reads the file content to the output buffer.
+ *
+ * @param string $filename The path to the file to be downloaded.
+ * @param string|null $content_type The MIME type of the file. If null, it's omitted from headers.
+ * @return void
+ */
 function _download_file($filename, $content_type){
 
         ob_start();

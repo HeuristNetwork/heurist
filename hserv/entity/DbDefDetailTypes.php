@@ -6,11 +6,13 @@ use hserv\utilities\USystem;
 use hserv\utilities\USanitize;
 
     /**
-    * db access to sysUGrpps table
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbDefDetailTypes
+     *
+     * Provides database access and operations for the `defDetailTypes` table,
+     * which stores definitions for detail types (field types).
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -29,8 +31,14 @@ use hserv\utilities\USanitize;
 class DbDefDetailTypes extends DbEntityBase
 {
     /**
-    *  search detail fields
-    */
+     * Searches for detail type definitions.
+     *
+     * Supports searching by `dty_ID`, `dty_Name`, `dty_Type`, `dty_Status`,
+     * `dty_Modified`, and `dty_DetailTypeGroupID`.
+     * The level of detail returned (`id`, `name`, `list`, or `full`) is controlled by `$this->data['details']`.
+     *
+     * @return array|false An array of found detail type definitions, or false on error.
+     */
     public function search(){
 
         if(parent::search()===false){
@@ -64,6 +72,15 @@ class DbDefDetailTypes extends DbEntityBase
     //
     //
     //
+    /**
+     * Deletes detail type(s).
+     *
+     * Prevents deletion if the detail type is used in `recDetails`.
+     * Currently, only single deletions are supported (not batch).
+     *
+     * @param bool $disable_foreign_checks Unused in this implementation, but part of parent signature.
+     * @return bool|array False if deletion is blocked or fails, otherwise the result of `parent::delete()`.
+     */
     public function delete($disable_foreign_checks = false){
 
         if(!$this->deletePrepare()){
@@ -98,6 +115,21 @@ class DbDefDetailTypes extends DbEntityBase
     //
     //
     //
+    /**
+     * Prepares records (detail type definitions) before saving.
+     *
+     * Handles:
+     * - Setting `is_new` flag.
+     * - Validating `dty_Name` for duplication and formatting (strips extra spaces).
+     * - Setting default values for new records (`dty_LocallyModified`, `dty_IDInOriginatingDB`).
+     * - For existing enum/relmarker types, prevents changing vocabulary (`dty_JsonTermIDTree`)
+     *   if terms from the old vocabulary are in use.
+     * - Unsetting `dty_IDInOriginatingDB` and `dty_LocallyModified` if they are empty strings
+     *   for existing records (to allow NULL values).
+     * - Setting `dty_Modified` to the current date/time.
+     *
+     * @return bool True if preparation is successful and validation passes, false otherwise.
+     */
     protected function prepareRecords(){
 
         $ret = parent::prepareRecords();
@@ -187,6 +219,15 @@ class DbDefDetailTypes extends DbEntityBase
 
     }
 
+    /**
+     * Saves detail type definitions.
+     *
+     * After saving via `parent::save()`, this method updates additional fields
+     * for new records (`dty_OriginatingDBID`, `dty_NameInOriginatingDB`, `dty_IDInOriginatingDB`)
+     * or sets `dty_LocallyModified` for existing records.
+     *
+     * @return array|false An array of saved record IDs on success, false on failure.
+     */
     public function save(){
 
         $savedRecIds = parent::save();
@@ -226,6 +267,27 @@ class DbDefDetailTypes extends DbEntityBase
     // batch action for rectypes
     // 1) import detailtypes from another db
     //
+    /**
+     * Performs batch actions, specifically CSV import for new detail types.
+     *
+     * Validates CSV data, creates new vocabularies if needed for enum/relmarker types,
+     * and then saves the new detail type definitions.
+     *
+     * Expected `$this->data` structure for 'csv_import':
+     * [
+     *   'csv_import' => true,
+     *   'fields' => [ // array of records, or JSON string of this array
+     *     ['dty_Name' => 'Name1', 'dty_HelpText' => 'Desc1', 'dty_Type' => 'text', ...],
+     *     ['dty_Name' => 'Name2', 'dty_HelpText' => 'Desc2', 'dty_Type' => 'enum', 'dty_JsonTermIDTree' => 123, ...],
+     *     // ... other records
+     *   ],
+     *   'dtg_ID' => (optional) ID of the detail type group to assign new fields to.
+     * ]
+     *
+     * @return array|false An array of results for each imported row (messages or created IDs),
+     *                     or false if the overall batch action fails.
+     *                     May include a 'refresh_terms' => true flag in the result if new vocabularies were made.
+     */
     public function batch_action(){
 
         $mysqli = $this->system->getMysqli();
@@ -477,6 +539,15 @@ class DbDefDetailTypes extends DbEntityBase
     //
     //
     //
+    /**
+     * Retrieves counts related to detail types.
+     *
+     * Currently supports 'record_usage' mode, which counts how many times a specific
+     * detail type (`dty_ID` provided in `recID`) is used in `recDetails`.
+     *
+     * @return int|false|null The count if successful, false if the system reports an error,
+     *                        or null if the mode is not 'record_usage' or `recID` is invalid.
+     */
     public function counts(){
 
         $mysqli = $this->system->getMysqli();

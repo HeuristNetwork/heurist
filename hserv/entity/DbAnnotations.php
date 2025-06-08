@@ -5,25 +5,27 @@ use hserv\entity\DbEntityBase;
 use hserv\entity\DbRecUploadedFiles;
 use hserv\utilities\USanitize;
 
-    /**
-    * dbAnnotations
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
+/**
+* Class DbAnnotations
+*
+* Manages IIIF annotations, providing functionality to search, create, update, and delete annotations.
+* It interacts with Heurist record structures, linking annotations to uploaded files or existing records.
+*
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
 
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
 
 require_once dirname(__FILE__).'/../structure/import/dbsImport.php';
 
@@ -31,7 +33,15 @@ class DbAnnotations extends DbEntityBase
 {
     private $dtyAnnotationInfo;
 
-
+    /**
+     * Constructor for DbAnnotations.
+     *
+     * Initializes the system object, data, and defines necessary Heurist constants
+     * related to annotation record types and detail types.
+     *
+     * @param \hserv\System $system The main Heurist system object.
+     * @param array|null $data Optional data passed to the entity, typically request parameters.
+     */
     public function __construct( $system, $data=null ) {
         $this->system = $system;
         $this->data = $data;
@@ -56,16 +66,29 @@ class DbAnnotations extends DbEntityBase
 
     }
 
+    /**
+     * Checks if the current entity instance is valid.
+     *
+     * This implementation always returns true.
+     *
+     * @return bool Always true.
+     */
     public function isvalid(){
         return true;
     }
 
     /**
-    *  Search all annotaions for given uri (IIIF manifest)
-    *  or particular annotaion id
-    *
-    *  Mirador requests our Annotation server (via api/annotations) for annotations per page(canvas).
-    */
+     * Searches for annotations.
+     *
+     * Handles different search scenarios:
+     * - If `recID` is 'edit', redirects to the record edit page for the annotation (found by UUID).
+     * - If `recID` is a specific annotation UUID, returns that single annotation.
+     * - If `recID` is 'pages' and a 'uri' (canvas URI) is provided, returns all annotations for that canvas.
+     * The response is formatted as an IIIF AnnotationPage.
+     *
+     * @return array An array representing an IIIF AnnotationPage containing found annotations.
+     *               May trigger a redirect if 'recID' is 'edit'.
+     */
     public function search(){
 
         if($this->data['recID']=='edit'){
@@ -113,9 +136,9 @@ class DbAnnotations extends DbEntityBase
         return $sjson;
     }
 
-    //
-    // returns Annotation description by Canvas URI
-    //
+    /**
+    * returns Annotation description by Canvas URI
+    */
     private function findItemsByCanvas($canvasUri){
         if($this->dtyAnnotationInfo>0 && defined('DT_URL')){
             $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2 WHERE '
@@ -128,9 +151,9 @@ class DbAnnotations extends DbEntityBase
         }
     }
 
-    //
-    //
-    //
+    /**
+    * returns Annotation description by UUID
+    */
     private function findItembyUUID($uuid){
         if($this->dtyAnnotationInfo>0 && defined('DT_ORIGINAL_RECORD_ID')){
             $query = 'SELECT d2.dtl_Value FROM recDetails d1, recDetails d2 WHERE '
@@ -143,9 +166,9 @@ class DbAnnotations extends DbEntityBase
         }
     }
 
-    //
-    //
-    //
+    /**
+    * returns Annotation heurist record ID by UUID
+    */
     private function findRecIDbyUUID($uuid){
         if(defined('DT_ORIGINAL_RECORD_ID')){
             $query = 'SELECT dtl_RecID FROM recDetails WHERE dtl_DetailTypeID='.DT_ORIGINAL_RECORD_ID.' AND dtl_Value="'.$uuid.'"';
@@ -157,9 +180,15 @@ class DbAnnotations extends DbEntityBase
         return $recordId;
     }
 
-    //
-    //
-    //
+    /**
+     * Deletes an annotation.
+     *
+     * The annotation to be deleted is identified by its UUID, which is expected
+     * in `$this->data['recID']`. It validates user permissions before deletion.
+     *
+     * @param bool $disable_foreign_checks Unused in this implementation.
+     * @return array|false A result array from `recordDelete` on success, or false on failure.
+     */
     public function delete($disable_foreign_checks = false){
 
         if($this->data['recID']){  //annotation UUID
@@ -184,9 +213,9 @@ class DbAnnotations extends DbEntityBase
         return false;
     }
 
-    //
-    //
-    //
+    /**
+    * 
+    */
     private function assignField(&$details, $id, $value){
 
         //field id
@@ -215,6 +244,9 @@ class DbAnnotations extends DbEntityBase
         return $was_changed;
     }
 
+    /**
+    * 
+    */
     private function checkRequiredDefintions(){
 
         if(!defined('RT_MAP_ANNOTATION')){
@@ -245,10 +277,10 @@ class DbAnnotations extends DbEntityBase
         return true;
     }
 
-    //
-    // see similar in importAction
-    // to implement - make general function
-    //
+    /**
+    * See similar in importAction
+    * @todo - makes general function
+    */
     private function findOriginalRecord($recordId, &$details){
 
         if(!$recordId){
@@ -276,9 +308,9 @@ class DbAnnotations extends DbEntityBase
 
     }
 
-    //
-    //
-    //
+    /**
+    * 
+    */
     private function getAnnotationId($anno){
 
         $anno_uid = $this->removeUriSchema($this->isOpenAnnotation($anno)?@$anno['@id']:@$anno['uuid']);
@@ -290,9 +322,19 @@ class DbAnnotations extends DbEntityBase
         return $anno_uid;
     }
 
-    //
-    //
-    //
+    /**
+     * Saves an annotation (creates or updates).
+     *
+     * Parses the annotation data (either Open Annotation or Web Annotation format),
+     * extracts relevant information, and saves it as a Heurist record.
+     * Optionally creates a thumbnail for the annotated region.
+     * Can link the annotation to an existing uploaded file (`$ulf_ID`) or a source record.
+     *
+     * @param bool $createThumbnail If true, attempts to generate a thumbnail for the annotation. Defaults to true.
+     * @param int $ulf_ID Optional ID of an `recUploadedFiles` record to link to this annotation. Defaults to 0.
+     * @return array|false An array containing the result of the save operation (including status and record ID),
+     *                     or false on failure. The result array may include 'is_new' or 'is_retained' flags.
+     */
     public function save($createThumbnail=true, $ulf_ID=0){
 
 
@@ -369,9 +411,9 @@ class DbAnnotations extends DbEntityBase
         return $out;
     }
 
-    //
-    //
-    //
+    /**
+    * 
+    */
     private function parseAnnotation(&$details, $anno, $createThumbnail, $sourceRecordId, $manifestUrl){
 
         if($this->isOpenAnnotation($anno)){
@@ -506,11 +548,16 @@ class DbAnnotations extends DbEntityBase
             ]
     */
 
+    /**
+    * 
+    */
     private function isOpenAnnotation($anno){
        return @$anno['@type']=='oa:Annotation';
     }
 
-
+    /**
+    * 
+    */
     private function parseOpenAnnotation(&$details, $anno, $createThumbnail, $sourceRecordId, $manifestUrl){
 
         $anno_uid = $this->removeUriSchema(@$anno['@id']);
@@ -556,7 +603,9 @@ class DbAnnotations extends DbEntityBase
         return true;
     }
 
-
+    /**
+    * 
+    */
     private function extractImageUrlFromCanvas($canvas, $url) {
         if($canvas['@id']!=$url || !is_array(@$canvas['images'])){
             return null;
@@ -570,7 +619,9 @@ class DbAnnotations extends DbEntityBase
         return null;
     }
 
-
+    /**
+    * 
+    */
     private function getImageUrlV2($iiif_manifest, $url){
 
         if(!is_array(@$iiif_manifest['sequences'])){
@@ -591,7 +642,9 @@ class DbAnnotations extends DbEntityBase
         return null;
     }
 
-
+    /**
+    * 
+    */
     private function extractImageUrlFromAnnotationPage($annot_page) {
 
         if(@$annot_page['type']=='AnnotationPage' && is_array(@$annot_page['items']))
@@ -610,6 +663,9 @@ class DbAnnotations extends DbEntityBase
         return null;
     }
 
+    /**
+    * 
+    */
     private function getImageUrlV3($iiif_manifest, $url){
 
         if(!is_array(@$iiif_manifest['items'])){
@@ -631,6 +687,9 @@ class DbAnnotations extends DbEntityBase
         return $url;
     }
 
+    /**
+    * 
+    */
     private function getAnnotationImage($manifestUrl, $anno_uid, $region, $canvas_url){
 
         if(!$region){

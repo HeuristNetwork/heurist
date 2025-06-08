@@ -203,7 +203,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         //init Insert Pattern controls
         let rtSelect = this._$('#rectype_selector');
         let $rec_select = window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), 
-                                        this.options.rty_ID,
+                                        this.options.listAllRecTypes ? null : this.options.rty_ID,
                                         this.options.rty_ID>0?null:window.hWin.HR('select record type'), true );
         this._on($rec_select,{change: function(){
            this._loadRecordTypeTreeView();
@@ -213,6 +213,8 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         if(!this.options.rty_ID && this.is_snippet_editor){
             rtSelect.val(rtSelect.find('option').get(1).value);
             rtSelect.trigger('change');
+        }else if(this.options.rty_ID){
+            rtSelect.val(this.options.rty_ID).trigger('change');
         }
         
       
@@ -305,7 +307,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         
         let inputs = '';
         for (let [key, value] of Object.entries(request)) {
-          inputs += `<input type="hidden" name="${key}" value="${value}"/>`;
+            inputs += `<input type="hidden" name="${key}" value="${value}"/>`;
         }       
         
         if(this._tempForm){
@@ -320,7 +322,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                 this._showWarningAboutDisabledFunction();
             }});
         }
-        
+
         this._tempForm.html(inputs);
         this._tempForm.find('input[name="recordset"]').val(JSON.stringify(recset));
         this._tempForm.find('input[name="template_body"]').val(template_body);
@@ -856,7 +858,12 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                 if(ele.is('a')){
                     
                     if(ele.text()=='insert'){
-                        if(that.is_snippet_editor){
+
+                        let code = data.node.data.code;
+                        let parts = code.split(':');
+                        let multival = $Db.rst(parts[parts.length - 2], parts[parts.length - 1], 'rst_MaxValues') != 1;
+
+                        if(that.options.is_snippet_editor && !multival){
                             that._insertSelectedVars2(data.node, 0, false, 0);
                         }else{
                             //insert-popup
@@ -1472,19 +1479,19 @@ this_id       : "term"
                     
                 
                 //search for record type
-                window.hWin.HAPI4.RecordMgr.search_new(server_request,
-                        function(response){
+                window.hWin.HAPI4.RecordMgr.search_new(server_request, function(response){
 
-                           if(window.hWin.HEURIST4.util.isJSON(response)) {
-                               let options = [];
-                               response.records.forEach((item) => {
-                                    options.push({key:item.rec_ID, 
-                                    title:window.hWin.HEURIST4.util.stripTags(item.rec_Title)});
-                               });
-                               window.hWin.HEURIST4.ui.createSelector(selector, options);
-                           }else{
-                                window.hWin.HEURIST4.msg.showMsgErr(response);
-                           }
+                    if(window.hWin.HEURIST4.util.isJSON(response)) {
+                        let options = [];
+                        response.records.forEach((item) => {
+                            let rec_Title = window.hWin.HEURIST4.util.stripTags(item.rec_Title);
+                            rec_Title = rec_Title.length > 60 ? `${rec_Title.slice(0, 60)}...` : rec_Title;
+                            options.push({ key: item.rec_ID, title: rec_Title });
+                        });
+                        window.hWin.HEURIST4.ui.createSelector(selector, options);
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
                 });            
         }
     },

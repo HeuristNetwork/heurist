@@ -409,6 +409,16 @@
 
     }
 
+    /**
+     * Retrieves a list of Record Type IDs.
+     *
+     * Can fetch all record type IDs or a filtered list based on provided IDs.
+     *
+     * @param \mysqli $mysqli The mysqli database connection object.
+     * @param mixed $_rty_IDs Either a boolean `true` to fetch all IDs, or an array/comma-separated
+     *                        string of specific Record Type IDs to retrieve.
+     * @return array An array of integer Record Type IDs. Returns an empty array if no matching IDs are found.
+     */
     function dbs_GetRectypeIDs($mysqli, $_rty_IDs){
 
         if(is_true($_rty_IDs)){
@@ -838,6 +848,20 @@ function dbs_GetRectypeConstraint($system) {
     //
     // get inverse term and all its children terms
     //
+    /**
+     * Retrieves the inverse terms (and optionally their children) for a given set of parent terms.
+     *
+     * For each term ID in `$parent_ids`, this function finds its `trm_InverseTermID`.
+     * If `$all_levels` is true, it then recursively fetches all children of these inverse terms
+     * using `getTermChildrenAll`.
+     *
+     * @param \mysqli $mysqli The mysqli database connection object.
+     * @param array|string $parent_ids An array or comma-separated string of term IDs for which to find inverse terms.
+     * @param bool $all_levels (Optional) If true (default), fetches all children of the inverse terms.
+     *                         If false, only the direct inverse terms are returned.
+     * @return array An array of term IDs, including the inverse terms and their children (if requested).
+     *               Returns an empty array if no inverse terms or children are found.
+     */
     function getTermInverseAll($mysqli, $parent_ids, $all_levels=true){
 
         //compose query
@@ -856,6 +880,19 @@ function dbs_GetRectypeConstraint($system) {
     //
     // get all children including by reference as a flat array
     //
+    /**
+     * Retrieves all child term IDs for a given set of parent term IDs, including those linked by reference.
+     *
+     * This function fetches children from `defTermsLinks`. If `$all_levels` is true,
+     * it recursively calls itself to get children of children, effectively flattening the
+     * entire descendant tree (including referenced branches) into a single array.
+     *
+     * @param \mysqli $mysqli The mysqli database connection object.
+     * @param array|string $parent_ids An array or comma-separated string of parent term IDs.
+     * @param bool $all_levels (Optional) If true (default), recursively fetches all descendants.
+     *                         If false, only fetches direct children.
+     * @return array An array of child term IDs.
+     */
     function getTermChildrenAll($mysqli, $parent_ids, $all_levels=true){
 
         //compose query
@@ -921,6 +958,16 @@ function dbs_GetRectypeConstraint($system) {
     //
     // get tree for domain
     //
+    /**
+     * Retrieves a flat list of all term IDs belonging to a specific domain, including all their descendants.
+     *
+     * It first fetches all top-level terms (those with no parent or parent ID 0) in the given domain.
+     * Then, for each top-level term, it uses `getTermOffspringList` to get all its descendant terms.
+     *
+     * @param \mysqli $mysqli The mysqli database connection object.
+     * @param string $termDomain The domain to retrieve terms from (e.g., 'enum', 'relation').
+     * @return array A flat array containing all term IDs in the specified domain and their offspring.
+     */
     function getTermListAll($mysqli, $termDomain){
 
         $terms = array();
@@ -1550,6 +1597,16 @@ function dbs_GetRectypeConstraint($system) {
     //
     // utility
     //
+    /**
+     * Removes a trailing number from a string if the number is preceded by a space.
+     *
+     * For example, "Record Type 1" would become "Record Type".
+     * If there's no space before the trailing number or no trailing number,
+     * the original string is returned.
+     *
+     * @param string $name The input string.
+     * @return string The string with the trailing number removed, or the original string.
+     */
     function removeLastNum($name){
 
         $k = strrpos($name," ");//find last space

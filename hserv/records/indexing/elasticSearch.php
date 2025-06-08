@@ -62,19 +62,52 @@
     */
 require_once 'elasticSearchHelper.php';
 
-// it is assumed that $system is already inited
+/**
+ * Class ElasticSearch
+ *
+ * Provides a static interface for interacting with an Elasticsearch server to index,
+ * update, delete, and manage Heurist record data. It aims to keep Elasticsearch
+ * synchronized with the MySQL database.
+ *
+ * This class relies on helper functions in `elasticSearchHelper.php` for actual
+ * HTTP communication with the Elasticsearch server (e.g., `isElasticUp`, `putElastic`,
+ * `deleteElastic`, `postElastic`, `getElasticAddress`, `checkElasticResponse`).
+ *
+ * The indexing process involves creating an Elasticsearch index per Heurist database,
+ * with types within that index corresponding to Heurist record types. Record data,
+ * including both header fields and detail fields, is indexed.
+ *
+ * Note: The class includes comments indicating it was developed around 2012 by Jan Jaap de Groot
+ * and might not have been fully integrated or kept up-to-date with later Heurist versions
+ * or Elasticsearch best practices due to security concerns at the time regarding
+ * running Elasticsearch on the server.
+ *
+ * @package hserv\records\indexing
+ */
 class ElasticSearch {
 
-     /**
-     * Construct won't be called inside this class and is uncallable from
-     * the outside. This prevents instantiating this class.
-     * This is by purpose, because we want a static class.
+    /**
+     * Private constructor to prevent instantiation, as this class provides only static methods.
      */
     private function __construct() {}
+
+    /**
+     * @var \mysqli|null The mysqli database connection object, initialized from the global $system object.
+     */
     private static $mysqli = null;
+
+    /**
+     * @var bool Flag indicating if the class (and its $mysqli property) has been initialized.
+     */
     private static $initialized = false;
 
 
+    /**
+     * Initializes the static class properties, primarily setting up the mysqli connection.
+     *
+     * This method fetches the global `$system` object to get the mysqli connection.
+     * It ensures initialization happens only once.
+     */
     private static function initialize()
     {
         if (self::$initialized)  {return;}
@@ -86,12 +119,21 @@ class ElasticSearch {
 
     // ****************************************************************************************************************
     /**
-    * Add a new key or update an existing key - ElasticSearch adds or updates as appropriate, no need to specify
-    * By reading record from database we ensure that we are indexing only records which have been successfully written
-    * @param string $dbName  The name of the Heurist database, excluding prefix
-    * @param int $recTypeID  The record type ID of the record being indexed
-    * @return bool True if successful
-    */
+     * Adds or updates a record's entry in the Elasticsearch index.
+     *
+     * Retrieves the specified record's header and detail data from the MySQL database
+     * and then sends it to Elasticsearch for indexing. If the record's record type ID
+     * has changed, it first deletes the old entry from the index.
+     * Elasticsearch handles whether it's an add or update operation internally.
+     *
+     * @param string $dbName The name of the Heurist database (excluding prefix).
+     * @param int $recTypeID The record type ID of the record. This is the type under which
+     *                       the record *should* be indexed. If the record's actual type in DB
+     *                       is different, the old entry is removed.
+     * @param int $recID The ID of the record to update in the index.
+     * @return bool True if the operation was successful (Elasticsearch acknowledged 'created' or 'updated'),
+     *              false otherwise (e.g., Elasticsearch not up, DB query failed, ES error).
+     */
     public static function updateRecordIndexEntry ($dbName, $recTypeID, $recID) {
 
         if(isElasticUp()) {
@@ -178,12 +220,15 @@ class ElasticSearch {
 
     // ****************************************************************************************************************
     /**
-    * Delete the index entry for a specified record - use when record type changed or record deleted
-    * @param string $dbName The name of the Heurist databasem, excluding prefix
-    * @param int $recTypeID The record type ID of the record being deleted from the index
-    * @param int $recID     The record to be deleted from the index
-    * @return bool True if successful
-    */
+     * Deletes a specific record's entry from the Elasticsearch index.
+     *
+     * This is used when a record is deleted or its record type changes.
+     *
+     * @param string $dbName The name of the Heurist database (excluding prefix).
+     * @param int $recTypeID The record type ID under which the record is currently indexed.
+     * @param int $recID The ID of the record to delete from the index.
+     * @return bool True if Elasticsearch acknowledges the deletion, false otherwise.
+     */
     public static function deleteRecordIndexEntry ($dbName, $recTypeID, $recID ) {
         if(isElasticUp()) {
 
@@ -204,11 +249,12 @@ class ElasticSearch {
 
     // ****************************************************************************************************************
     /**
-    * Delete the index for a specified record type
-    * @param string $dbName The name of the Heurist database, excluding prefix
-    * @param int $recTypeID The record type ID of the record being deleted from the index
-    * @return bool True if successfully deleted RecType from index.
-    */
+     * Deletes all Elasticsearch index entries for a specific record type within a database.
+     *
+     * @param string $dbName The name of the Heurist database (excluding prefix).
+     * @param int $recTypeID The record type ID whose entries are to be deleted.
+     * @return bool True if Elasticsearch acknowledges the deletion, false otherwise.
+     */
     private static function deleteIndexForRectype ($dbName, $recTypeID) {
         if(isElasticUp()) {
             // Delete record from ElasticSearch
@@ -228,10 +274,11 @@ class ElasticSearch {
 
     // ****************************************************************************************************************
     /**
-    * Delete the index for a specified database
-    * @param string $dbName The name of the Heurist database, excluding prefix
-    * @return bool True if successfully deleted complete index from ElasticSearch.
-    */
+     * Deletes the entire Elasticsearch index for a specified Heurist database.
+     *
+     * @param string $dbName The name of the Heurist database (excluding prefix) whose index will be deleted.
+     * @return bool True if Elasticsearch acknowledges the deletion, false otherwise.
+     */
     public static function deleteIndexForDatabase ($dbName) {
         if(isElasticUp()) {
 
@@ -252,11 +299,23 @@ class ElasticSearch {
 
     // ****************************************************************************************************************
     /**
-    * Rebuild the index for a specified record type
-    * @param string $dbName   The name of the Heurist databasem, excluding prefix
-    * @param int $recTypeID   The record type to rebuild for
-    * @return bool True if successful
-    */
+     * Rebuilds the Elasticsearch index for all records of a specific record type.
+     *
+     * This involves first deleting all existing index entries for that record type
+     * using `deleteIndexForRectype`, and then iterating through all records of that
+     * type in the MySQL database and re-indexing them using `updateRecordIndexEntry`.
+     *
+     * Note: This method is public but not static. It seems intended to be callable,
+     * but `buildAllIndices` calls it statically, which would cause an error.
+     * It should likely be `public static function`.
+     *
+     * @param string $dbName The name of the Heurist database (excluding prefix).
+     * @param int $recTypeID The record type ID for which to rebuild the index.
+     * @return bool True if the process completes (i.e., all records of the type are iterated
+     *              and `updateRecordIndexEntry` is called for each, regardless of individual
+     *              successes/failures of those calls, as long as the DB query succeeds).
+     *              Returns `false` if Elasticsearch is not up or the initial DB query fails.
+     */
     public function buildIndexForRectype ($dbName, $recTypeID) {
         if(isElasticUp()) {
 
@@ -286,10 +345,18 @@ class ElasticSearch {
 
     // ****************************************************************************************************************
     /**
-    * Rebuild the index for all record types
-    * @param string $dbName The name of the Heurist database, excluding prefix
-    * @return bool True if OK, false if Error
-    */
+     * Rebuilds all Elasticsearch indices for all record types in a specified database.
+     *
+     * It first determines the highest record type ID in the database. Then, it iterates
+     * from record type ID 1 up to this maximum, calling `buildIndexForRectype` for each.
+     * Optionally prints progress messages.
+     *
+     * @param string $dbName The name of the Heurist database (excluding prefix).
+     * @param bool $print If true, prints progress messages to output. Default true.
+     * @return bool True if the process completes (iterates through all potential record type IDs),
+     *              `false` if Elasticsearch is not up or the initial query for max recTypeID fails.
+     *              Individual failures within `buildIndexForRectype` calls might not cause this to return `false`.
+     */
     public static function buildAllIndices ($dbName, $print=true) {
         if(!isElasticUp()) {
             print "ElasticSearch service not detected";
@@ -327,7 +394,14 @@ class ElasticSearch {
     } // buildAllIndices
 
     /**
-     * Checks if ElasticSearch is synchronised, called by functions in elasticSearch.php
+     * Checks if Elasticsearch appears to be synchronized with the MySQL database by comparing timestamps.
+     *
+     * It retrieves the highest modification timestamp from both MySQL (`getHighestMySqlTimestamp`)
+     * and Elasticsearch (`getHighestElasticTimestamp`). If these timestamps do not match,
+     * it currently logs an error message (though the error_log call for non-matching timestamps is commented out).
+     * This method is called after operations that modify the Elasticsearch index.
+     *
+     * @param string $dbName The name of the Heurist database (excluding prefix) to check.
      */
     private static function checkElasticSync($dbName) {
 
@@ -348,8 +422,10 @@ class ElasticSearch {
     }
 
     /**
-     * Attempts to retrieve the highest rec_Modified timestamp in the MySql database
-     * @return null|string Null, or timestamp in the following form: 2017-05-16 11:26:52
+     * Retrieves the highest (most recent) `rec_Modified` timestamp from the `Records` table in MySQL.
+     *
+     * @return string|null The most recent modification timestamp as a string (e.g., "YYYY-MM-DD HH:MM:SS"),
+     *                     or null if the query fails or no records exist.
      */
     private static function getHighestMySqlTimestamp() {
 
@@ -365,8 +441,15 @@ class ElasticSearch {
     }
 
     /**
-     * Attempts to retrieve the highest rec_Modified timestamp in the Elastic instance
-     * @return null|string Null, or timestamp in the following form: 2017-05-16 11:26:52
+     * Retrieves the highest 'Modified' timestamp from the Elasticsearch index for a given database.
+     *
+     * It performs a search in Elasticsearch for all record types (`_search`) within the specified
+     * database's index, sorts by the `Modified.raw` field in descending order, and limits the result to 1.
+     * It then extracts the `Modified` value from the `_source` of the top hit.
+     *
+     * @param string $dbName The name of the Heurist database (excluding prefix).
+     * @return string|null The most recent 'Modified' timestamp string from Elasticsearch,
+     *                     or null if the search fails, returns no hits, or the field is missing.
      */
     private static function getHighestElasticTimestamp($dbName) {
         $address = getElasticAddress($dbName) . '/_search?size=1';

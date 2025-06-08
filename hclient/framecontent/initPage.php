@@ -353,9 +353,7 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
     }
 
     function updateDatabaseStatistics(){
-        
-        return; //2025-04-11 TEMP DISABLED since heuristref is down
-        
+
         let ajax_opts = {
             "url": `${window.hWin.HAPI4.baseURL}/admin/describe/dbStatsBackground.php`,
             "type": "POST",

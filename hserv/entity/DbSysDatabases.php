@@ -3,11 +3,17 @@ namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 
     /**
-    * db access to Heurist_DBs_index.sysIdentifications and sysUsers tables
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbSysDatabases
+     *
+     * This class provides functionality to list databases accessible to a user.
+     * It does not directly interact with a `sysDatabases` table for CRUD operations
+     * in the same way other DbEntityBase subclasses do. Instead, its `search()` method
+     * utilizes `mysql__getdatabases4` to retrieve a list of databases based on
+     * server-level access and user roles (filtered by email if provided).
+     * Direct save and delete operations are disabled for this entity.
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -43,7 +49,10 @@ class DbSysDatabases extends DbEntityBase
     *  limit
     *  request_id
     *
-    *  @todo overwrite
+    * @return array|false An array containing a list of accessible database names under the 'records' key,
+    *                     formatted similarly to other entity search results. Returns false on error (though
+    *                     current implementation doesn't explicitly return false from this path).
+    *                     The 'fields' key will contain ['sys_Database'].
     */
     public function search(){
 
@@ -84,10 +93,25 @@ class DbSysDatabases extends DbEntityBase
     //
     // deletion and not allowed
     //
+    /**
+     * Disables direct deletion of database entries through this class.
+     *
+     * Database deletion is handled by other mechanisms (e.g., `databaseController.php`).
+     *
+     * @param bool $disable_foreign_checks Unused.
+     * @return false Always returns false.
+     */
     public function delete($disable_foreign_checks = false){
         //virtual method
         return false;
     }
+    /**
+     * Disables direct saving/creation of database entries through this class.
+     *
+     * Database creation is handled by other mechanisms (e.g., `databaseController.php`).
+     *
+     * @return false Always returns false.
+     */
     public function save(){
         //virtual method
         return false;

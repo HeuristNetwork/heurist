@@ -280,6 +280,18 @@
 
     }
 
+    /**
+     * Finds invalid UTF-8 strings in a recursive array walk.
+     *
+     * This function is typically used as a callback for array_walk_recursive.
+     * It checks if a string value contains invalid UTF-8 characters.
+     * If an invalid string is found, it throws an Exception with the
+     * UTF-8 converted string.
+     *
+     * @param mixed $val The value to check.
+     * @throws \Exception If an invalid UTF-8 string is found.
+     * @return void
+     */
     function find_invalid_string($val){
         if(is_string($val)){
             $stripped_val = iconv('UTF-8', 'UTF-8//IGNORE', $val);/* important */

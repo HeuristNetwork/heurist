@@ -21,14 +21,38 @@
 */
 
 /**
-*
-*/
+ * Class ImportSession
+ *
+ * Provides static methods to manage import session data. Import sessions store
+ * information about an ongoing or completed import process, such as the temporary
+ * data table name, column mappings, record counts, and processing state. This data
+ * is persisted in the `sysImportFiles` database table, typically with detailed
+ * information stored as a JSON string in the `sif_ProcessingInfo` column.
+ *
+ * @package hserv\records\import
+ */
 class ImportSession {
 
+    /**
+     * @var \hserv\System|null The Heurist system object.
+     */
     private static $system = null;
+    /**
+     * @var \mysqli|null The mysqli database connection object.
+     */
     private static $mysqli = null;
+    /**
+     * @var bool Flag indicating if the class has been initialized.
+     */
     private static $initialized = false;
 
+    /**
+     * Initializes the class with the global Heurist system object.
+     *
+     * Ensures that essential static properties like `$system` and `$mysqli` are set.
+     * This method is called internally by other static methods if the class
+     * hasn't been initialized yet.
+     */
 private static function initialize()
 {
     if (self::$initialized)  {return;}
@@ -39,12 +63,19 @@ private static function initialize()
     self::$initialized = true;
 }
 
-/**
-* Loads import sessions by ID
-*
-* @param mixed $import_id
-* @return string as error of array with session values
-*/
+    /**
+     * Loads import session data from the `sysImportFiles` table by its ID.
+     *
+     * The core session data is stored as a JSON string in the `sif_ProcessingInfo` column,
+     * which is decoded by this method. The temporary data table name (`sif_TempDataTable`)
+     * is also retrieved and added to the resulting session array.
+     *
+     * @param int $import_id The ID of the import session to load (sif_ID).
+     * @return array|false An associative array containing the decoded session data,
+     *                     including 'import_id' and 'import_file' (or 'import_table' for backward compatibility),
+     *                     or `false` if the session is not found or `$import_id` is invalid.
+     *                     Errors are added to `$this->system`.
+     */
 public static function load($import_id){
 
     self::initialize();
@@ -71,9 +102,25 @@ public static function load($import_id){
 /**
 * update record in import session table
 *
-* @param mixed $mysqli
-* @param mixed $imp_session
+* @param array $imp_session The import session data array to be saved.
+*                           This array will be JSON encoded and stored in `sif_ProcessingInfo`.
+*                           It should contain keys like 'import_name' (used for `sif_TempDataTable`).
+*                           The 'import_id' key will be used to determine if it's an update or insert.
+* @return array|string The updated `$imp_session` array (with `import_id` potentially newly assigned
+*                      if it was an insert) on success. On failure, returns the error code/message
+*                      from `mysql__insertupdate`.
 */
+    /**
+     * Saves or updates an import session's data in the `sysImportFiles` table.
+     *
+     * The provided `$imp_session` array is JSON encoded and stored in the `sif_ProcessingInfo` column.
+     * The `sif_TempDataTable` is set from `$imp_session["import_name"]`.
+     * If `$imp_session["import_id"]` is set, it updates the existing session; otherwise, it creates a new one.
+     *
+     * @param array $imp_session The associative array of session data to save.
+     * @return array|string The updated `$imp_session` array (including the `import_id`) on success,
+     *                      or an error string/code from `mysql__insertupdate` on database error.
+     */
 public static function save($imp_session){
 
     self::initialize();
@@ -94,9 +141,24 @@ public static function save($imp_session){
 
 
 //
-// 1. saves new primary rectype in session
-// 2. returns treeview strucuture for given rectype
-//
+    /**
+     * Sets the primary record type for an import session or retrieves its structure tree.
+     *
+     * - If `$sequence` data is provided: It loads the import session specified by `$imp_ID`,
+     *   updates its 'primary_rectype' and 'sequence' information, and saves the session back.
+     * - If `$sequence` is null: It calls `dbs_GetRectypeStructureTree` to get a hierarchical
+     *   structure of the specified record type (`$rty_ID`), likely for display in the UI
+     *   to show dependent types or for field mapping selection.
+     *
+     * @param int $imp_ID The ID of the import session (used when updating the session).
+     * @param int $rty_ID The Heurist record type ID to set as primary or for which to get the structure tree.
+     * @param array|null $sequence If provided, this array contains new sequence information to be saved
+     *                             in the import session. If null, the method retrieves the structure tree.
+     * @return string|array|false Returns 'ok' if the session was successfully updated.
+     *                            Returns the record type structure tree (array) if `$sequence` was null and successful.
+     *                            Returns `false` on any error (e.g., session not found, DB error).
+     *                            Errors are added to `$this->system`.
+     */
 public static function setPrimaryRectype($imp_ID, $rty_ID, $sequence){
 
      self::initialize();
@@ -133,9 +195,19 @@ public static function setPrimaryRectype($imp_ID, $rty_ID, $sequence){
 
 
 //
-// searches all sessions and find matchings for given rectype
-// it is used to quick restore field matching for chunks csv import (similar csv files)
-//
+    /**
+     * Retrieves field mapping samples from previous import sessions for a given record type.
+     *
+     * This method queries the `sysImportFiles` table for all import sessions (excluding the current `$imp_ID`),
+     * decodes their `sif_ProcessingInfo`, and looks for sequences that match the specified `$rty_ID`.
+     * If a match is found and that sequence contains field mapping information (`mapping_flds`),
+     * it's added to the results. This is useful for suggesting mappings to the user based on past imports.
+     *
+     * @param int $imp_ID The ID of the current import session (to exclude it from the search).
+     * @param int $rty_ID The Heurist record type ID for which to find mapping samples.
+     * @return array An associative array where keys are the names of past import sessions (`import_name`)
+     *               and values are the `mapping_flds` arrays from those sessions that matched the `$rty_ID`.
+     */
 public static function getMatchingSamples($imp_ID, $rty_ID){
 
      self::initialize();
@@ -169,9 +241,23 @@ public static function getMatchingSamples($imp_ID, $rty_ID){
 /**
 * load records from import table
 *
-* @param mixed $rec_id
-* @param mixed $import_table
+* @param string $import_table The name of the temporary import table.
+* @param array $imp_ids An array of `imp_id` values (row IDs from the import table) to retrieve.
+* @return array|null The first row found that matches any of the provided `imp_id`s,
+*                    or `null` if no matching row is found.
+*                    Note: Despite accepting multiple `imp_ids`, this method, due to `mysql__select_row`,
+*                    will only return the first matching row.
 */
+    /**
+     * Retrieves the first matching row from a temporary import table by a list of import row IDs.
+     *
+     * Note: Although the query can match multiple `imp_id`s, this function uses `mysql__select_row`
+     * which will only return the data for the first row found.
+     *
+     * @param string $import_table The name of the temporary import table.
+     * @param array $imp_ids An array of `imp_id`s (row IDs in the import table).
+     * @return array|null The first row found as an associative array, or null if no match.
+     */
 public static function getRecordsFromImportTable1( $import_table, $imp_ids) {
 
     self::initialize();
@@ -187,8 +273,31 @@ public static function getRecordsFromImportTable1( $import_table, $imp_ids) {
 }
 
 //
-// $output - csv, json
-//
+    /**
+     * Retrieves records from a temporary import table with filtering, field selection, and pagination.
+     *
+     * This method allows fetching data from an import table for display or further processing,
+     * typically for previewing records that are marked for insert, update, or all records.
+     *
+     * - Filtering: Based on `$mode` ('insert', 'update', 'all') and the values in `$id_field` column
+     *   (negative for insert, positive for update).
+     * - Field Selection: If `$mapping` is provided, it selects only the mapped fields. Otherwise, selects all (`*`).
+     *   The `$id_field` is usually included for ordering.
+     * - Pagination: Uses `$limit` and `$offset`.
+     * - Output format hint: `$output` ('csv' or other) influences how many details might be fetched by `mysql__select_all`
+     *   (though its direct effect here is minimal beyond potentially fetching slightly more data for non-csv).
+     *
+     * @param string $import_table The name of the temporary import table.
+     * @param string|null $id_field The name of the column in the import table that stores assigned Heurist record IDs.
+     *                              Used for filtering by `$mode` and for ordering.
+     * @param string $mode Filter mode: 'insert' (negative/null IDs), 'update' (positive IDs), or 'all'.
+     * @param string|array|null $mapping JSON string or array defining field mappings. If provided,
+     *                                   only mapped fields are selected. Keys are import column indices.
+     * @param int $offset The offset for pagination.
+     * @param int $limit The maximum number of records to return. Default 100.
+     * @param string $output Output format hint (e.g., 'csv'). Primarily affects detail level in `mysql__select_all`.
+     * @return array|null An array of associative arrays representing the fetched rows, or null on error.
+     */
 public static function getRecordsFromImportTable2( $import_table, $id_field, $mode, $mapping, $offset, $limit=100, $output ){
 
     self::initialize();

@@ -14,9 +14,10 @@ use hserv\entity\DbEntitySearch;
 /**
 * Base class for all database entities.
 *
-* This abstract class handles core functionalities such as reading configurations, handling
-* field data, and providing save, delete, and search operations for database entities.
-* Base class for all db entities
+* This abstract class handles core functionalities such as reading configurations from JSON files,
+* managing entity field data, and providing base save, delete, and search operations
+* for specific database entity classes that extend it. It forms the foundation for
+* interacting with various tables in the Heurist database schema.
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -27,77 +28,90 @@ use hserv\entity\DbEntitySearch;
 */
 abstract class DbEntityBase
 {
-    /** @var mixed $system System handler for operations */
+    /** @var \hserv\System System handler for core Heurist operations. */
     protected $system;
 
-    /** @var bool $need_transaction Set to true if the action requires a transaction */
+    /** @var bool Indicates if database operations should be wrapped in a transaction. Defaults to true. */
     protected $need_transaction = true;
 
-    /** @var bool $is_addition Flag to reset all primary fields to zero to force addition (POST request) */
+    /** @var bool Flag indicating if the current operation is an addition (insert). Forces primary key to zero. */
     protected $is_addition = false;
 
     /**
-     * @var array|null $data Field values used for search and update.
-     * Contains `data[fields]` for particular records, initiated in prepareRecords().
-     * usually this is $_REQUEST
+     * @var array|null Holds the input data for the entity, typically from `$_REQUEST`.
+     *                 It's processed by methods like `prepareRecords()` and can contain
+     *                 `fields` for record data, action parameters (`a`), etc.
      */
     protected $data = null;
 
-    /** @var array|null $config Configuration loaded from a JSON file */
+    /** @var array|null Entity configuration loaded from its corresponding JSON file (e.g., `defRecTypes.json`). */
     protected $config;
 
-    /** @var string $primaryField Name of the primary key field from $config marked with dty_Role="primary" */
+    /** @var string|null Name of the primary key field for this entity, derived from the JSON config (`dty_Role="primary"`). */
     protected $primaryField;
 
-    /** @var array $multilangFields Names of multi-language fields from $config with rst_MultiLang=1 */
+    /** @var array Names of fields that support multiple languages, derived from JSON config (`rst_MultiLang=1`). */
     protected $multilangFields = array();
 
-    /** @var array $fields Fields structure description from JSON, used for validation and access */
+    /** @var array Associative array describing the entity's fields, loaded from JSON config. Used for validation and access. */
     protected $fields;
 
-    /** @var array $fieldsNames Non-virtual field names */
+    /** @var array Numerically indexed array of non-virtual field names for this entity. */
     protected $fieldNames;
 
     /**
-     * @var array $records Holds several records for delete/update actions.
-     * Extracted from $data in prepareRecords().
+     * @var array Holds one or more records being processed for save or delete operations.
+     *            Populated from `$this->data['fields']` by `prepareRecords()`.
      */
     protected $records = array();
 
     /**
-     * @var array $translation Translated values for fields extracted from the request in prepareRecords().
+     * @var array Stores translated values for multi-language fields, extracted during `prepareRecords()`.
+     *            Structured as `[$record_idx][$fieldname][$lang_code] = $translated_value`.
      */
     protected $translation = array();
 
     /**
-     * @var array $recordIDs IDs of records to update/delete, extracted from $data in prepareRecords().
-     * Necessary for permission validation.
+     * @var array Stores IDs of records targeted by update or delete operations.
+     *            Populated by `prepareRecords()` and used for permission validation.
      */
     protected $recordIDs = array();
 
-    /** @var string $entityName The name of the table or entity */
+    /** @var string The name of the entity (e.g., "defRecTypes"), derived from the class name. */
     private $entityName;
 
-    /** @var array|null $foreignChecks Array of queries to validate references before deletion */
+    /**
+     * @var array|null Defines foreign key checks to be performed before deletion.
+     *                 Each item is an array: `['SELECT COUNT(*) FROM ... WHERE field = ', 'Error message if count > 0']`.
+     *                 `#IDS#` in the query string will be replaced by the record IDs being deleted.
+     */
     protected $foreignChecks = null;
 
-    /** @var bool $isDeleteReady Flag indicating if the entity is ready for deletion */
+    /** @var bool Flag set by `deletePrepare()` indicating if pre-deletion checks passed. */
     protected $isDeleteReady = false;
 
-    /** @var bool $requireAdminRights Set to true if admin rights are required for the operation */
+    /** @var bool If true, administrative rights are required for operations on this entity. Defaults to true. */
     protected $requireAdminRights = true;
 
-    /** @var array|null $duplicationCheck Check for duplication */
+    /**
+     * @var array|null Configuration for duplication checks.
+     *                 Example: `['fieldName' => 'Error message if duplicate found']`.
+     */
     protected $duplicationCheck = null;
 
-    /** @var mixed $searchMgr Instance of EntitySearch for setting up and executing search queries on entities */
+    /** @var DbEntitySearch|null Instance used for building and executing search queries. */
     protected $searchMgr;
 
-     /**
-     * Constructor - Loads configuration from JSON file.
+    /**
+     * Constructor for DbEntityBase.
      *
-     * @param mixed $system The system instance.
-     * @param array|null $data The data to be initialized.
+     * Initializes the system object and entity name. If `$data` is provided,
+     * it sets the entity's data and reads its configuration. Otherwise, it sets
+     * a basic configuration based on the entity name. Calls the `init()` method
+     * if it exists in the concrete subclass.
+     *
+     * @param \hserv\System $system The main Heurist system object.
+     * @param array|null $data Optional data to initialize the entity with (e.g., request parameters).
      */
     public function __construct( $system, $data=null ) {
        $this->system = $system;
@@ -127,7 +141,13 @@ abstract class DbEntityBase
     }
 
     /**
-     * Read configuration from the JSON file.
+     * Reads and parses the JSON configuration file for the entity.
+     *
+     * The configuration file is expected to be in the same directory as this class,
+     * named `[entityName].json` (e.g., `defRecTypes.json`).
+     * It populates `$this->config`, `$this->fields`, `$this->primaryField`,
+     * `$this->multilangFields`, and `$this->fieldNames`.
+     * Sets a fatal error in the system object if the config file is missing or invalid.
      *
      * @return void
      */
@@ -164,16 +184,25 @@ abstract class DbEntityBase
     }
 
     /**
-     * Initialize the entity (abstract method to be implemented in subclasses).
+     * Initializes the concrete entity class.
+     *
+     * This method is intended to be overridden by subclasses to perform
+     * specific initialization tasks, such as setting up `$foreignChecks` or
+     * `$duplicationCheck` properties.
      *
      * @return void
      */
     public function init(){}
 
     /**
-     * Set data for the entity from the client request.
+     * Sets the data for the entity, typically from client request parameters.
      *
-     * @param array $data Data to be set.
+     * If the entity's configuration (`$this->fields`) hasn't been loaded yet,
+     * this method also triggers reading the configuration file via `_readConfig()`.
+     * It attempts to map generic 'ID' or 'recID' from input data to the entity's
+     * actual primary key field name.
+     *
+     * @param array $data The data to be set for the entity.
      * @return void
      */
     public function setData($data){
@@ -194,18 +223,20 @@ abstract class DbEntityBase
     }
 
     /**
-     * Get the current data of the entity.
+     * Gets the current data array of the entity.
      *
-     * @return array|null Returns the current data.
+     * @return array|null The current data stored in the entity.
      */
     public function getData(){
         return $this->data;
     }
 
     /**
-     * Set records for deletion or update actions.
+     * Sets the records to be processed by the entity.
      *
-     * @param array $records Records to be set.
+     * This is typically used before update or delete actions.
+     *
+     * @param array $records An array of records.
      * @return void
      */
     public function setRecords($records){
@@ -232,30 +263,33 @@ abstract class DbEntityBase
     
 
     /**
-     * Get the current records.
+     * Gets the current records being processed by the entity.
      *
-     * @return array Returns the current records.
+     * @return array The array of records.
      */
     public function records(){
         return $this->records;
     }
 
 
-     /**
-     * Set whether a transaction is required.
+    /**
+     * Sets the flag indicating whether a database transaction is needed for operations.
      *
-     * @param bool $value True if transaction is required, false otherwise.
+     * @param bool $value True if a transaction is required, false otherwise.
      * @return void
      */
     public function setNeedTransaction($value){
         $this->need_transaction = $value;
     }
 
-     /**
-     * Get the configuration.
+    /**
+     * Gets the entity's configuration, optionally localized.
      *
-     * @param string $locale Locale for configuration.
-     * @return array|null Configuration data.
+     * If a locale different from the currently loaded one is requested,
+     * it attempts to load the localized configuration via `_readConfigLocale()`.
+     *
+     * @param string $locale The desired locale code (e.g., 'en', 'fr'). Defaults to 'en'.
+     * @return array|null The entity configuration array, or null if not loaded.
      */
     public function config( $locale='en' ){
 
@@ -273,6 +307,31 @@ abstract class DbEntityBase
     //
     // working with config/setting  see configEntity.js
     //
+    /**
+     * Manages entity-specific configuration files (e.g., for datatables, CSV exports).
+     *
+     * Supports operations like listing, getting, putting (saving/creating), renaming,
+     * and deleting these `.cfg` files within predefined subfolders (`datatable`, `csvexport`, `crosstabs`)
+     * under the entity's storage directory (`HEURIST_FILESTORE_DIR/entity/[entityName]/`).
+     *
+     * Requires admin privileges.
+     *
+     * @param array $action An associative array specifying the operation and parameters:
+     *                      - `folder`: The subfolder (e.g., 'datatable').
+     *                      - `operation`: 'list', 'get', 'put', 'rename', 'delete'.
+     *                      - `content`: (For 'put') The JSON string content to save.
+     *                      - `file`: (For 'get', 'put', 'rename', 'delete') The filename (e.g., 'myconfig.cfg').
+     *                      - `fileOld`: (For 'rename') The old filename.
+     *                      - `rec_ID`: Optional record ID to scope files to a specific record's subfolder.
+     *                                  Can be 'all' for listing across all record-specific folders.
+     * @return mixed The result of the file operation:
+     *               - For 'list': An array from `folderContent()`.
+     *               - For 'get': The file content as a string.
+     *               - For 'put', 'rename': The new/renamed filename on success.
+     *               - For 'delete': True on success.
+     *               - False on any failure or if permissions are insufficient.
+     *               Errors are added to the system object.
+     */
     public function files( $action ){
 
         if(!($this->system->getUserId()>0)){
@@ -504,6 +563,14 @@ abstract class DbEntityBase
     //
     //
     //
+    /**
+     * Clears the database definition cache if the current entity is one that affects it.
+     *
+     * Checks if the entity's `tablePrefix` is in a predefined list of cache-affecting prefixes
+     * (rty, dty, rst, trm, rtg, dtg, vcg, swf).
+     *
+     * @return void
+     */
     private function _cleanDbDefCache(){
 
         if(is_array($this->config) &&
@@ -514,9 +581,20 @@ abstract class DbEntityBase
     }
 
     /**
-     * Save the records to the database.
+     * Saves one or more entity records to the database.
      *
-     * @return array|false An array of saved record IDs or false on failure.
+     * This method orchestrates the save process:
+     * 1. Prepares records using `prepareRecords()` if not already done.
+     * 2. Validates user permissions via `_validatePermission()`.
+     * 3. Validates mandatory fields and general field values for each record
+     *    using `_validateMandatory()` and `_validateValues()`.
+     * 4. If all validations pass, iterates through records and saves them using `mysql__insertupdate()`.
+     *    - Handles database transactions if `need_transaction` is true.
+     *    - Updates translations for multi-language fields.
+     * 5. Clears the database definition cache if applicable.
+     *
+     * @return array|false An array of saved record IDs on success, or false if any step fails.
+     *                     Errors are added to the system object.
      */
     public function save(){
 
@@ -644,9 +722,13 @@ abstract class DbEntityBase
     }//save
 
     /**
-     * Prepare records for deletion by checking their IDs and permissions.
+     * Prepares for a delete operation by validating record IDs and permissions.
      *
-     * @return bool True if the records are ready for deletion, false otherwise.
+     * Also performs foreign key checks if `foreignChecks` is configured for the entity.
+     * Sets the `isDeleteReady` flag.
+     *
+     * @return bool True if all checks pass and records are ready for deletion, false otherwise.
+     *              Errors are added to the system object on failure.
      */
      protected function deletePrepare(){
 
@@ -696,10 +778,20 @@ abstract class DbEntityBase
     }
 
     /**
-     * Delete records from the database.
+     * Deletes records from the database.
      *
-     * @param bool $disable_foreign_checks Disable foreign key checks.
-     * @return bool True on successful deletion, false otherwise.
+     * Calls `deletePrepare()` if not already done. If preparation is successful,
+     * it proceeds to delete the records specified in `$this->recordIDs`.
+     * Handles disabling/enabling foreign key checks around the delete query.
+     * Also deletes associated translations for multi-language fields.
+     * Clears the database definition cache if applicable.
+     *
+     * @param bool $disable_foreign_checks If true, foreign key checks are temporarily disabled
+     *                                     during the delete operation. This parameter is effectively
+     *                                     ignored as foreign key checks are always disabled/re-enabled
+     *                                     around the main delete query.
+     * @return bool True on successful deletion of all specified records, false otherwise.
+     *              Errors (e.g., no records found, DB error) are added to the system object.
      */
     public function delete($disable_foreign_checks=false){
 
@@ -744,9 +836,9 @@ abstract class DbEntityBase
     }
 
     /**
-     * Batch action handler (to be implemented in subclasses).
+     * Placeholder for batch actions. Concrete entity classes should override this.
      *
-     * @return mixed Result of the batch action.
+     * @return false Always returns false in the base class.
      */
     public function batch_action(){
         return false;
@@ -755,6 +847,11 @@ abstract class DbEntityBase
     //
     // various counts(aggregations) request - implementation depends on entity
     //
+    /**
+     * Placeholder for count/aggregation queries. Concrete entity classes should override this.
+     *
+     * @return int Always returns 0 in the base class.
+     */
     public function counts(){
         return 0;
     }
@@ -762,6 +859,16 @@ abstract class DbEntityBase
     //
     //
     //
+    /**
+     * Validates field names requested for a search operation.
+     *
+     * Ensures that all field names specified in `$this->data['details']` exist in
+     * the entity's field configuration (`$this->fields`).
+     * Also ensures the primary key field is the first field in the list if multiple fields are requested.
+     *
+     * @return bool True if all requested fields are valid, false otherwise.
+     *              Errors are added to the system object for invalid field names.
+     */
     protected function _validateFieldsForSearch(){
 
             foreach($this->data['details'] as $fieldname){
@@ -787,6 +894,16 @@ abstract class DbEntityBase
     //
     // Validates permission for delete and update operations
     //
+    /**
+     * Validates if the current user has the necessary permissions for the operation.
+     *
+     * Checks if admin rights are required (`$this->requireAdminRights`) and if the user is an admin.
+     * Also checks if the user is logged in.
+     * This method is typically called before save or delete operations involving specific records.
+     *
+     * @return bool True if permissions are sufficient, false otherwise.
+     *              Errors are added to the system object on permission failure.
+     */
     protected function _validatePermission(){
 
 
@@ -817,6 +934,17 @@ abstract class DbEntityBase
     //
     //
     //
+    /**
+     * Validates field values based on their type.
+     *
+     * Currently, it ensures that 'resource' type fields (except 'ulf_MimeExt')
+     * are set to null if their integer value is less than 1.
+     * This method is intended to be called on a single record's data, typically
+     * stored in `$this->data['fields']`.
+     *
+     * @return bool Always returns true in the current implementation.
+     *              (Future extensions might add more validation rules and return false.)
+     */
     protected function _validateValues(){
 
         $fieldvalues = $this->data['fields'];//current record
@@ -838,6 +966,17 @@ abstract class DbEntityBase
     //
     //
     //
+    /**
+     * Validates that all mandatory fields have values.
+     *
+     * Checks fields marked with `rst_RequirementType = 'required'` in the entity's
+     * field configuration (`$this->fields`).
+     * This method operates on a single record's data, typically from `$this->data['fields']`.
+     * For multi-language fields, it checks the first value if it's an array.
+     *
+     * @return bool True if all mandatory fields are filled, false otherwise.
+     *              Errors are added to the system object for missing mandatory fields.
+     */
     protected function _validateMandatory(){
 
         $fieldvalues = $this->data['fields'];
@@ -874,6 +1013,15 @@ abstract class DbEntityBase
     //
     // Returns localized configuration
     //
+    /**
+     * Reads localized entity configuration (title, plural title, field display names, help text).
+     *
+     * Merges localized values into the existing `$this->config` if a locale-specific
+     * JSON file (e.g., `[entityName]_[locale].json`) is found.
+     *
+     * @param string $locale The locale code (e.g., 'fr', 'de'). Defaults to 'en'.
+     * @return void
+     */
     private function _readConfigLocale( $locale='en' ){
 
         $entity_file = dirname(__FILE__).'/'.lcfirst(@$this->data['entity']) //HEURIST_DIR.'hserv/entity/'
@@ -895,6 +1043,13 @@ abstract class DbEntityBase
     //
     //
     //
+    /**
+     * Recursively searches for a field definition by its ID within a nested field structure.
+     *
+     * @param string $id The 'dtID' of the field to find.
+     * @param array $fields An array of field definition objects, potentially with 'children'.
+     * @return array|null The field definition array if found, null otherwise.
+     */
     private function _getFieldByID($id, $fields){
         foreach($fields as $field){
 
@@ -913,6 +1068,15 @@ abstract class DbEntityBase
     //
     // assign localized name and description for fields
     //
+    /**
+     * Recursively applies localized display names and help text to a nested field structure.
+     *
+     * Modifies the `$fields` array by reference.
+     *
+     * @param array &$fields The field structure to update (passed by reference).
+     * @param array $fields_locale The localized field definitions containing `rst_DisplayName` and `rst_DisplayHelpText`.
+     * @return void
+     */
     private function _fieldsSetLocale( &$fields, $fields_locale ){
 
         foreach($fields as $idx=>$field){
@@ -947,6 +1111,16 @@ abstract class DbEntityBase
     // read fields definition from config file
     // assign primaryField, multilangFields
     //
+    /**
+     * Recursively reads field definitions from the configuration and populates internal properties.
+     *
+     * Populates `$this->fieldNames`, `$this->fields`, `$this->primaryField`,
+     * and `$this->multilangFields` based on the provided field structure.
+     *
+     * @param array $fields An array of field definition objects from the JSON configuration,
+     *                      potentially with nested 'children'.
+     * @return void
+     */
     private function _readFields($fields){
 
         foreach($fields as $field){
@@ -975,6 +1149,19 @@ abstract class DbEntityBase
     // $tempfile - file to be either
     // 1) renamed to recID (if it is temp file started with ~)
     // 2) copied
+    /**
+     * Renames or copies a temporary entity image file to its permanent location.
+     *
+     * Handles different versions (icon, thumbnail, full). If a temporary file
+     * (name starting with '~') is provided, it's moved. Otherwise, the provided
+     * `$tempfile` is copied. Also handles removing existing files with different extensions
+     * if a new image replaces an old one (e.g. png replacing svg).
+     *
+     * @param string $tempfile The path to the temporary image file or its temporary name (starting with '~').
+     * @param int $recID The record ID to associate the image with (used in the permanent filename).
+     * @param string|null $version Optional image version ('icon', 'thumbnail'). If null, processes full image and thumbnail.
+     * @return void
+     */
     protected function renameEntityImage($tempfile, $recID, $version=null){
 
         $isSuccess = false;
@@ -1045,6 +1232,14 @@ abstract class DbEntityBase
     }
 
     //find $tempfile among temporary files in entity folder and return file info
+    /**
+     * Finds a temporary entity image file within the entity's image directory.
+     *
+     * Searches for a file matching `[tempfile].[extension]` in the entity's base image directory.
+     *
+     * @param string $tempfile The base name of the temporary file (without extension, e.g., starting with '~').
+     * @return \DirectoryIterator|null A DirectoryIterator object for the found file, or null if not found.
+     */
     protected function getTempEntityFile($tempfile){
         $entity_name = $this->config['entityName'];
 
@@ -1070,6 +1265,17 @@ abstract class DbEntityBase
     //
     //
     //
+    /**
+     * Gets the server file path for an entity's image.
+     *
+     * Wraps `resolveEntityFilename` to get the filename component.
+     *
+     * @param int $recID The record ID.
+     * @param string|null $version The image version (e.g., 'icon', 'thumbnail').
+     * @param string|null $db_name Optional database name.
+     * @param string|null $extension Optional file extension.
+     * @return string|null The absolute file path to the image, or null if not found.
+     */
     protected function getEntityImagePath($recID, $version=null, $db_name=null, $extension=null){
 
             $entity_name = $this->config['entityName'];
@@ -1082,6 +1288,19 @@ abstract class DbEntityBase
     //
     // validate duplication
     //
+    /**
+     * Performs a duplication check for a specific field value.
+     *
+     * Checks if the value of `$this->records[$idx][$field]` already exists in another record
+     * for the specified `$field`.
+     *
+     * @param int $idx The index of the current record in `$this->records`.
+     * @param string $field The name of the field to check for duplication.
+     * @param string $message The error message to set if a duplicate is found.
+     * @param string $title Optional title for the error message.
+     * @return bool True if no duplicate is found, false otherwise.
+     *              Errors are added to the system object on duplication.
+     */
     protected function doDuplicationCheck($idx, $field, $message, $title = ''){
 
             if(@$this->records[$idx][$field]){
@@ -1110,6 +1329,19 @@ abstract class DbEntityBase
     //  fields:[fldname1:value,fieldname2:values,.....]
     //  translation:[fldname:"lang:value",fieldname2:"lang:value",.....]
     //
+    /**
+     * Prepares records from `$this->data` for save or delete operations.
+     *
+     * - Parses `$this->data['fields']` (which can be a single record or an array of records).
+     * - Populates `$this->records` with the record(s) to be processed.
+     * - Populates `$this->recordIDs` with the primary key values of these records.
+     * - Extracts translations for multi-language fields into `$this->translation`.
+     * - Performs duplication checks if `$this->duplicationCheck` is configured.
+     *
+     * @return bool True if records are prepared successfully and duplication checks pass,
+     *              false if `fields` parameter is missing or a duplication check fails.
+     *              Errors are added to the system object on failure.
+     */
     protected function prepareRecords(){
         //fields contains record data
         if(@$this->data['fields'] && is_string($this->data['fields'])){
@@ -1188,6 +1420,14 @@ abstract class DbEntityBase
     //
     //
     //
+    /**
+     * Searches for entity records and returns only their titles (or names).
+     *
+     * Sets the 'details' parameter to 'name' and calls the main `search()` method.
+     * It then extracts the second column (assumed to be the name/title) from each result.
+     *
+     * @return array|false An array of titles/names, or false if the search fails.
+     */
     public function search_title(){
 
         $this->data['details'] = 'name';
@@ -1207,9 +1447,14 @@ abstract class DbEntityBase
     }
 
     /**
-     * Perform search on the database records.
+     * Initializes the search manager and validates search parameters.
      *
-     * @return mixed Result of the search.
+     * This method sets up the `DbEntitySearch` manager for the current entity
+     * and validates the search parameters provided in `$this->data`.
+     * It's a prerequisite before specific entity search methods compose and execute queries.
+     *
+     * @return bool True if the entity is valid and search parameters are validated successfully,
+     *              false otherwise.
      */
     public function search(){
 

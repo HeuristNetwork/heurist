@@ -30,13 +30,48 @@
 use hserv\utilities\USanitize;
 use hserv\utilities\UArchive;
 
+/**
+ * Error message constant for files that are not readable.
+ */
 define('ERR_MSG_NOT_READABLE',' is not readable');
 
+/**
+ * Class ImportParser
+ *
+ * Handles the initial stages of importing data from files, primarily CSV and KML/KMZ.
+ * This class is responsible for:
+ * - Saving uploaded or pasted data to temporary files.
+ * - Detecting and converting file encodings to UTF-8.
+ * - Parsing CSV data based on specified delimiters, enclosures, and line breaks.
+ * - Parsing KML/KMZ files to extract placemark data.
+ * - Performing initial validation and data type detection (e.g., numeric, date, memo, multi-value).
+ * - Generating previews of the data for user verification.
+ * - For full processing, preparing the data and loading it into a temporary SQL table
+ *   for subsequent processing by `ImportAction`.
+ *
+ * All methods are static and this class is typically invoked by `hserv/controller/importController.php`
+ * as part of the import workflow.
+ *
+ * @package hserv\records\import
+ */
 class ImportParser {
 
+    /**
+     * @var \hserv\System|null The Heurist system object.
+     */
     private static $system = null;
+    /**
+     * @var bool Flag indicating if the class has been initialized.
+     */
     private static $initialized = false;
 
+    /**
+     * Initializes the class with the global Heurist system object.
+     *
+     * Sets static properties for the system object and marks the class as initialized.
+     * This method is called internally by other static methods if the class
+     * hasn't been initialized yet.
+     */
 private static function initialize()
 {
     if (self::$initialized) {return;}
@@ -46,13 +81,18 @@ private static function initialize()
     self::$initialized = true;
 }
 
-/**
-*  STEP 0
-*  save CSV from $content into temp file in scratch folder, returns filename
-*                    (used to post pasted csv to server side)
-*
-*  returns  array( "filename"=> temp file name );
-*/
+    /**
+     * Saves provided content (typically pasted CSV data) to a temporary file.
+     *
+     * This is often the first step when handling data pasted directly by the user.
+     * The file is created in the Heurist scratch directory.
+     *
+     * @param string $content The content to save to the file.
+     * @param string $extension The desired file extension for the temporary file (default 'csv').
+     * @return array|false An associative array with 'filename' (basename) and 'fullpath'
+     *                     of the created temporary file on success, or `false` on failure.
+     *                     Errors are added to `$this->system`.
+     */
 public static function saveToTempFile($content, $extension='csv'){
 
     self::initialize();
@@ -92,13 +132,25 @@ public static function saveToTempFile($content, $extension='csv'){
 
 //--------------------------------------
 // STEP 1
-/**
- * Encodes the uploaded file to UTF-8 if necessary and generates a preview by parsing the first X lines.
- *
- * @param string $upload_file_name The name of the uploaded file.
- * @param array $params Parameters that include the CSV encoding information.
- * @return bool|string Returns the preview data or false if an error occurs.
- */
+    /**
+     * Validates an uploaded file, handles encoding conversion to UTF-8, and generates a data preview.
+     *
+     * This method serves as the first primary step in processing an uploaded import file.
+     * It performs the following actions:
+     * 1. Validates the file's existence and readability using `validateUploadedFile()`.
+     * 2. If the file is KML or KMZ, it bypasses encoding checks and directly calls
+     *    `parseAndValidate()` to get a preview.
+     * 3. For other file types (typically CSV), it reads the file header using `readFileHeader()`.
+     * 4. Detects the file's character encoding. If not UTF-8, it attempts to convert the
+     *    content to UTF-8 using `convertEncodingIfNeeded()`, saving the result to a new temporary file.
+     * 5. Calls `parseAndValidate()` on the (potentially re-encoded) file to generate a preview
+     *    of the first 1000 lines.
+     *
+     * @param string $upload_file_name The basename of the uploaded file, expected to be in `HEURIST_SCRATCH_DIR`.
+     * @param array $params An array of parameters, primarily used for `csv_encoding` hint.
+     * @return array|false The preview data array from `parseAndValidate()`, or `false` if any step fails.
+     *                     Errors are added to `$this->system`.
+     */
 public static function encodeAndGetPreview($upload_file_name, $params)
 {
     self::initialize();
@@ -137,10 +189,18 @@ public static function encodeAndGetPreview($upload_file_name, $params)
 /**
  * Validates the uploaded file existence, readability, and checks for errors.
  *
- * @param string $upload_file_name The name of the uploaded file.
- * @param string $contact_team The contact message for error reporting.
- * @return bool Returns true if the file is valid, false if an error occurs.
+ * @param string $upload_file_name The full path to the uploaded file.
+ * @param string $contact_team A contact message suffix for error reporting to the user.
+ * @return bool True if the file is valid (exists, is readable), false otherwise.
+ *              Errors are added to `$this->system`.
  */
+    /**
+     * Validates if the uploaded file exists and is readable.
+     *
+     * @param string $upload_file_name Full path to the uploaded file.
+     * @param string $contact_team Contact message part for error reporting.
+     * @return bool True if file is valid, false otherwise. Errors are added to system messages.
+     */
 private static function validateUploadedFile($upload_file_name, $contact_team)
 {
     if (!$upload_file_name) {
@@ -162,9 +222,18 @@ private static function validateUploadedFile($upload_file_name, $contact_team)
 /**
  * Reads the first line of the uploaded file as the header for further processing.
  *
- * @param string $upload_file_name The name of the uploaded file.
- * @return string|bool Returns the first line of the file or false if an error occurs.
+ * @param string $upload_file_name The full path to the uploaded file.
+ * @return string|false The first line (header) of the file, or `false` on error (e.g., cannot open, empty header).
+ *                      Errors are added to `$this->system`.
  */
+    /**
+     * Reads and returns the first line (header) of a file.
+     *
+     * Sets locale to 'en_US.utf8' to assist with encoding handling during fgets.
+     *
+     * @param string $upload_file_name Full path to the file.
+     * @return string|false The header line, or false on error. System messages are updated on error.
+     */
 private static function readFileHeader($upload_file_name)
 {
     $handle = @fopen($upload_file_name, "r");
@@ -190,10 +259,27 @@ private static function readFileHeader($upload_file_name)
  *
  * @param string $upload_file_name The name of the uploaded file.
  * @param string $original_filename The original filename of the uploaded file.
- * @param array $params Parameters that include the CSV encoding information.
- * @param string $line The first line of the file (header).
- * @return string|bool Returns the name of the encoded file or false if an error occurs.
+ * @param array $params Parameters, including 'csv_encoding' hint.
+ * @param string $line The first line of the file (header), not directly used here but part of the calling logic.
+ * @return string|false The full path to the UTF-8 encoded file (which might be the original
+ *                      `$upload_file_name` if no conversion was needed, or a new temporary
+ *                      file if conversion occurred). Returns `false` on conversion failure.
+ *                      Errors are added to `$this->system`.
  */
+    /**
+     * Detects and converts the file's encoding to UTF-8 if it's not already.
+     *
+     * If `$params['csv_encoding']` is provided and is not 'UTF-8', it uses that as the source encoding.
+     * Otherwise, it attempts to auto-detect the encoding using `mb_detect_encoding` on the file content.
+     * If conversion is needed, it reads the whole file, converts it using `mb_convert_encoding`,
+     * and writes the result to a new temporary file in `HEURIST_SCRATCH_DIR`.
+     *
+     * @param string $upload_file_name Full path to the original uploaded file.
+     * @param string $original_filename Basename of the original file (used for naming the new temp file).
+     * @param array $params Parameters, potentially containing 'csv_encoding'.
+     * @param string $line The first line of the file (header). Not used in this method.
+     * @return string|false Path to the UTF-8 encoded file, or false on error. System messages updated on error.
+     */
 private static function convertEncodingIfNeeded($upload_file_name, $original_filename, $params, $line)
 {
     $csv_encoding = $params['csv_encoding'] ?? null;
@@ -246,6 +332,55 @@ private static function convertEncodingIfNeeded($upload_file_name, $original_fil
 // read file, remove spaces, convert dates, validate identifies/integers, find memo and multivalues
 // if there are no errors and $limit=0 invokes  saveToDatabase - to save prepared csv into database
 //
+    /**
+     * Parses and validates the content of an import file (CSV, KML, KMZ).
+     *
+     * This is a major method that performs several key operations:
+     * 1. File Type Handling:
+     *    - For KML/KMZ: Parses XML, extracts data from `<Placemark>` elements using `parseKMLPlacemark`.
+     *                   Standardizes KML data into a row/column format.
+     *    - For CSV: Uses `fgetcsv` (or `str_getcsv` if line endings are auto-detected) to parse rows,
+     *               respecting specified delimiter, enclosure, and linebreak settings.
+     * 2. Data Cleaning and Type Detection (for CSV):
+     *    - Trims whitespace from fields.
+     *    - Identifies potential multi-value fields (containing '|').
+     *    - Detects memo fields (long text or multi-line).
+     *    - Converts date fields to a standard format using `prepareDateField` based on `$params['csv_dateformat']`.
+     *    - Validates integer fields using `prepareIntegerField`, checking for non-numeric values or out-of-range IDs,
+     *      especially for user-designated key fields.
+     *    - Tracks which fields appear to be entirely numeric, integer, or empty.
+     * 3. Preview or Full Processing:
+     *    - If `$limit` > 0: Parses only up to `$limit` lines and returns a preview data structure
+     *      containing headers, parsed values, and auto-detected field characteristics (integer, numeric, empty, etc.).
+     *      The path to the (potentially re-encoded) file is saved via `_saveEncodedFilename` for later full processing.
+     *    - If `$limit` == 0 (full processing):
+     *      - Writes the cleaned and prepared data to a new temporary CSV file.
+     *      - If no critical parsing errors (e.g., column count mismatches, encoding issues, invalid keyfields) occur,
+     *        it calls `saveToDatabase()` to load this prepared CSV into a temporary SQL table.
+     *      - Cleans up temporary files after `saveToDatabase` (if successful).
+     *      - If errors occur, it returns an error summary instead of calling `saveToDatabase`.
+     *
+     * @param string|int $encoded_filename Full path to the UTF-8 encoded import file, or an ID previously returned
+     *                                     by `_saveEncodedFilename` if continuing a multi-step import.
+     * @param string $original_filename The basename of the original uploaded file (for naming temporary files).
+     * @param int $limit The number of lines to parse for a preview. If 0, processes the entire file.
+     * @param array $params An array of parameters controlling parsing and validation. Key options include:
+     *                      - 'kmldata', 'csvdata': Booleans indicating the data type if not derivable from extension.
+     *                      - 'keyfield', 'datefield', 'memofield': Arrays mapping column indices to user-defined field types.
+     *                      - 'csv_dateformat': Format string for date parsing.
+     *                      - 'csv_mvsep', 'csv_delimiter', 'csv_linebreak', 'csv_enclosure': CSV format settings.
+     * @return array|false If `$limit` > 0 (preview mode): Returns an associative array with preview data:
+     *                     `['encoded_filename_id', 'original_filename', 'step'=>1, 'col_count', 'err_colnums',
+     *                      'err_encoding', 'err_encoding_count', 'int_fields', 'empty_fields', 'num_fields',
+     *                      'empty75_fields', 'fields' (headers), 'values' (parsed rows)]`.
+     *                     If `$limit` == 0 (full processing mode):
+     *                     - On successful load to DB via `saveToDatabase()`: Returns the result of `saveToDatabase()`
+     *                       (which is typically an import session array).
+     *                     - If parsing/validation errors occur before DB load: Returns an array summarizing errors,
+     *                       similar to preview mode but with `step`=2 and including `field_sizes`, `multivals`.
+     *                     Returns `false` on critical unrecoverable errors (e.g., file not readable).
+     *                     Errors are added to `$this->system`.
+     */
 public static function parseAndValidate($encoded_filename, $original_filename, $limit, $params){
 
     self::initialize();
@@ -799,6 +934,19 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
  * @param string $encoded_filename The name of the encoded file to be saved.
  * @return int|bool Returns the ID of the saved record on success, false on failure.
  */
+    /**
+     * Saves a record of an intermediate encoded import file's name to a temporary SQL table.
+     *
+     * This function maintains a table `import_tmp_file` which stores the basenames
+     * of temporary files created during the import process (e.g., after encoding conversion).
+     * This allows the system to retrieve the file path in a subsequent step or request
+     * using the returned ID.
+     * It also includes a cleanup mechanism to delete files and entries older than 2 days.
+     *
+     * @param string $encoded_filename The full path to the temporary encoded file.
+     *                                 Only its basename is stored in the database.
+     * @return int|false The auto-increment ID of the entry in `import_tmp_file`, or `false` on failure.
+     */
 private static function _saveEncodedFilename($encoded_filename)
 {
     // Validate the file
@@ -849,6 +997,12 @@ private static function _saveEncodedFilename($encoded_filename)
     return false;
 }
 
+    /**
+     * Retrieves the full path to a previously saved temporary encoded file using its ID.
+     *
+     * @param int $encoded_filename_id The ID obtained from `_saveEncodedFilename`.
+     * @return string The full path to the file in the `HEURIST_SCRATCH_DIR`.
+     */
 private static function _getEncodedFilename($encoded_filename_id){
     $mysqli = self::$system->getMysqli();
     $encoded_filename = mysql__select_value($mysqli,
@@ -857,6 +1011,12 @@ private static function _getEncodedFilename($encoded_filename_id){
     return HEURIST_SCRATCH_DIR.basename($encoded_filename);
 }
 
+    /**
+     * Deletes the record of a temporary encoded file from the `import_tmp_file` table.
+     * Note: This only deletes the database entry, not the actual file from disk.
+     *
+     * @param int $encoded_filename_id The ID of the entry to delete.
+     */
 private static function _deleteEncodedFilename($encoded_filename_id){
     $mysqli = self::$system->getMysqli();
     $query = 'DELETE FROM `import_tmp_file` WHERE imp_ID='.intval($encoded_filename_id);
@@ -866,6 +1026,18 @@ private static function _deleteEncodedFilename($encoded_filename_id){
 //
 // $csv_dateformat 1 - dd/mm/yyyy,  2 - mm/dd/yyyy
 //
+    /**
+     * Prepares a date field by converting it to ISO 8601 format.
+     *
+     * Uses `Temporal::dateToISO()` for the conversion. If the conversion results
+     * in 'Temporal' (indicating an error or unparseable date by that method) or null,
+     * the original field value is retained.
+     *
+     * @param string $field The date string to prepare.
+     * @param string|null $csv_dateformat The expected date format (e.g., 'dd/mm/yyyy', 'mm/dd/yyyy').
+     *                                    Used by `Temporal::dateToISO()`.
+     * @return string The prepared date string (potentially ISO 8601) or the original string.
+     */
 private static function prepareDateField($field, $csv_dateformat){
 
     $t3 = Temporal::dateToISO($field, $csv_dateformat);//@todo - parse simple range
@@ -885,10 +1057,25 @@ private static function prepareDateField($field, $csv_dateformat){
  * @param string $field The field value to be processed.
  * @param mixed $k The key used to identify the field.
  * @param bool $check_keyfield_K A flag to determine if key field checks should be performed.
- * @param array &$err_keyfields An array to store error details for invalid key fields.
- * @param array &$int_fields An array of fields that are valid integers.
+ * @param array &$err_keyfields Passed by reference. An array to store error details for key fields that are not valid positive integers.
+ * @param array &$int_fields Passed by reference. An array where keys are field indices (`$k`); if a field is not a valid integer, its entry is set to null.
  * @return void
  */
+    /**
+     * Validates and prepares an integer field value.
+     *
+     * Checks if values within a field (potentially multi-valued, separated by '|') are valid positive integers
+     * and within MySQL's signed INT range (up to 2147483646).
+     * If `$check_keyfield_K` is true and a value is invalid, it's recorded in `$err_keyfields`.
+     * If any value in the field is invalid, the field's entry in `$int_fields` is nullified.
+     * Empty strings are treated as 0 for key field checks but otherwise might nullify the field in `$int_fields`.
+     *
+     * @param string $field The field value (potentially multi-valued with '|').
+     * @param int|string $k The index/key of the field being processed.
+     * @param bool $check_keyfield_K If true, treat this field as a key field and record specific errors in `$err_keyfields`.
+     * @param array &$err_keyfields Array to collect errors for key fields. Structure: `[$k => [[invalid_value1,...], [out_of_range_value1,...]]]`
+     * @param array &$int_fields Array indicating if fields are consistently integer; `$int_fields[$k]` is set to null if any part is non-integer.
+     */
 private static function prepareIntegerField($field, $k, $check_keyfield_K, &$err_keyfields, &$int_fields){
 
     if($field==''){
@@ -925,6 +1112,24 @@ private static function prepareIntegerField($field, $k, $check_keyfield_K, &$err
 //
 //
 //
+    /**
+     * Parses a KML `<Placemark>` DOMElement to extract its properties and geometry.
+     *
+     * Iterates through the child nodes of the Placemark:
+     * - If a geometry node (e.g., `<Point>`, `<LineString>`, `<Polygon>`, `MultiGeometry`) is found,
+     *   it's converted to WKT format using `geoPHP::load()` with a KML adapter.
+     * - If an `<ExtendedData>` node is found, its `<Data>` (with name attribute) or `<SchemaData>`
+     *   children are parsed into key-value properties.
+     * - If a `<TimeSpan>` node is found, its `<begin>` and `<end>` values are extracted.
+     * - Other simple text content nodes (excluding 'lookat', 'style', 'styleurl') are taken as properties.
+     *
+     * Text content is trimmed and newlines/excess spaces are normalized.
+     *
+     * @param \DOMElement $placemark The KML Placemark DOMElement.
+     * @param array $geom_types An associative array mapping KML geometry tag names (lowercase) to their geoPHP type codes.
+     * @return array|null An associative array of extracted properties. The geometry is stored under the 'geometry' key as WKT.
+     *                    Returns `null` if no geometry is found in the Placemark (as per original logic).
+     */
 private static function parseKMLPlacemark($placemark, &$geom_types){
 
         $nodeText = '#text';
@@ -993,8 +1198,39 @@ private static function parseKMLPlacemark($placemark, &$geom_types){
 }
 
 //
-//  save content of file into import table, create session object and saves it to sysImportFiles table, returns session
-//
+    /**
+     * Saves the content of a prepared CSV file into a new temporary SQL table and creates an import session.
+     *
+     * This is a critical step in the full import process (when not just previewing).
+     * 1. Creates a new temporary SQL table (e.g., `import20230101123045`) with column definitions
+     *    derived from `$preproc['field_sizes']` (varchar or mediumtext).
+     *    It attempts to optimize column sizes but has a fallback for very wide rows.
+     * 2. Uses `LOAD DATA LOCAL INFILE` to efficiently load the data from `$prepared_filename`
+     *    into this new table. MySQL `local_infile` setting must be enabled.
+     * 3. Calculates unique value counts for each column in the new table.
+     * 4. Creates an import session array containing metadata about the import, including:
+     *    - `reccount`: Total number of rows imported into the temporary table.
+     *    - `import_table`: Name of the new temporary SQL table.
+     *    - `import_name`: A descriptive name for the import.
+     *    - `columns`: Array of header names from the CSV.
+     *    - `multivals`: Array of column indices that were detected as potentially multi-valued.
+     *    - `csv_enclosure`, `csv_mvsep`: CSV formatting info.
+     *    - `uniqcnt`: Array of unique value counts per column.
+     *    - `indexes`: User-defined keyfields from `$preproc['keyfields']`.
+     * 5. Saves this session data using `ImportSession::save()`.
+     *
+     * @param array $preproc An array of pre-processing information, including:
+     *                       - 'fields': Array of header names.
+     *                       - 'field_sizes': Array mapping column index to detected max size or 'memo'.
+     *                       - 'multivals': Array of indices for multi-value columns.
+     *                       - 'keyfields': Array of user-designated key fields.
+     *                       - 'original_filename': Basename of the original file.
+     *                       - 'csv_enclosure', 'csv_mvsep': CSV formatting.
+     * @param string|null $prepared_filename The full path to the prepared CSV file (output by `parseAndValidate`).
+     * @return array|false The newly created import session array from `ImportSession::save()`,
+     *                     or `false` on critical error (e.g., cannot create table, load data, or save session).
+     *                     Errors are added to `$this->system`.
+     */
 private static function saveToDatabase($preproc, $prepared_filename=null){
 
 
@@ -1179,8 +1415,25 @@ private static function saveToDatabase($preproc, $prepared_filename=null){
 }
 
 //
-// parse csv from content parameter (for terms import)
-//
+    /**
+     * Parses a CSV string content into an array of arrays.
+     *
+     * This is a simpler CSV parser, likely intended for cases where CSV data is provided
+     * directly as a string (e.g., pasted by a user for term import) rather than from a file.
+     * It uses `str_getcsv` for parsing.
+     *
+     * It handles different delimiters (comma, tab, space) and line break conventions.
+     * A special case for `$params['csv_linebreak']` being a positive integer implies
+     * grouping a flat list of CSV values into rows of that many items.
+     *
+     * @param array $params Parameters for parsing:
+     *                      - 'content': The CSV string content.
+     *                      - 'csv_delimiter': (Optional) Delimiter character (',', 'tab', 'space'). Default ','.
+     *                      - 'csv_enclosure': (Optional) Enclosure character ('"' or 1 for "'"). Default '"'.
+     *                      - 'csv_linebreak': (Optional) Line break type ('auto', 'win', 'nix', 'mac') or an integer
+     *                                         for grouping items into rows. Default 'auto'.
+     * @return array An array of arrays, where each inner array represents a row of CSV values.
+     */
 public static function simpleCsvParser($params){
 
     $content = $params['content'];
@@ -1240,10 +1493,28 @@ public static function simpleCsvParser($params){
 }
 
 //
-// Converts data prepared by parseAndValidate to record format recordSearchByID/recordSearchDetails
-// $parsed - parseAndValidate output
-// $mapping - $dtyID=> column name in $parsed['fields']
-//
+    /**
+     * Converts data from `parseAndValidate` (typically preview data) into a Heurist record-like structure.
+     *
+     * This utility function takes the parsed values and headers (e.g., from a KML file preview)
+     * and transforms them into an array of associative arrays, where each inner array
+     * resembles a simplified Heurist record structure (with 'rec_ID', 'rec_RecTypeID', 'rec_Title',
+     * and a 'details' array). The mapping from CSV columns to detail type IDs is provided
+     * via the `$mapping` parameter.
+     *
+     * This seems primarily useful for displaying KML data or other simple table previews
+     * in a format that might be more easily consumed by UI components expecting record-like data.
+     *
+     * @param array $parsed The output of `parseAndValidate` when run in preview mode (i.e., `$limit > 0`).
+     *                      Expected to contain 'fields' (array of headers) and 'values' (array of data rows).
+     * @param array $mapping An associative array mapping Heurist Detail Type IDs (dty_ID) or special
+     *                       keys like 'latitude', 'longitude', DT_NAME, DT_EXTENDED_DESCRIPTION, DT_GEO_OBJECT
+     *                       to column header names found in `$parsed['fields']`.
+     * @param int|null $rec_RecTypeID The Heurist Record Type ID to assign to the generated records.
+     *                                Defaults to 12 (typically 'Place' in older Heurist versions,
+     *                                but this might not be universally true).
+     * @return array An array of record-like associative arrays.
+     */
 public static function convertParsedToRecords($parsed, $mapping, $rec_RecTypeID=null){
 
     $fields = $parsed['fields'];

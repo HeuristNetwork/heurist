@@ -25,18 +25,44 @@ namespace hserv\records\export;
 use hserv\records\export\ExportRecords;
 
 /**
-*
-*  setSession - switch current datbase
-*  output - main method
-*
-*/
+ * Class ExportRecordsIIIF
+ *
+ * Extends ExportRecords to provide functionality for exporting records
+ * in IIIF (International Image Interoperability Framework) Presentation API format.
+ * This class is typically controlled by the 'records_output' controller.
+ * It can generate manifests for IIIF Presentation API v2 and v3.
+ *
+ * @package hserv\records\export
+ */
 class ExportRecordsIIIF extends ExportRecords {
 
+    /**
+     * @var int The IIIF Presentation API version to use (2 or 3). Default is 3.
+     */
     private $iiif_version = 3;
+
+    /**
+     * @var string|null The obfuscated ID of a specific uploaded file to export.
+     *                  If set, only this file will be processed into the manifest.
+     */
     private $ulf_ObfuscatedFileID = null;
+
+    /**
+     * @var int Counter for the number of records (canvases) outputted.
+     *          Used to limit the number of items per manifest.
+     */
     private $cnt = 0;
 
-
+    /**
+     * Prepares for the export operation.
+     *
+     * Sets the IIIF API version based on input parameters and calls the parent's
+     * prepare method.
+     *
+     * @param array $data The data to be exported (typically records).
+     * @param array $params Parameters for the export, may include 'version' or 'v' to specify IIIF API version.
+     * @return bool True if preparation was successful, false otherwise.
+     */
 protected function _outputPrepare($data, $params){
 
     $params['depth'] = 0;
@@ -52,6 +78,14 @@ protected function _outputPrepare($data, $params){
 //
 //
 //
+    /**
+     * Prepares the fields required for the IIIF export.
+     *
+     * Specifies that 'file' details are needed and sets standard header fields.
+     * It also initializes the specific IIIF image to be used from parameters, if provided.
+     *
+     * @param array $params Parameters for the export, may include 'iiif_image' for a specific file.
+     */
 protected function _outputPrepareFields($params){
 
     $this->retrieve_detail_fields = array('file');
@@ -64,6 +98,13 @@ protected function _outputPrepareFields($params){
 //
 //
 //
+    /**
+     * Outputs the header of the IIIF manifest.
+     *
+     * Writes the initial JSON structure for the manifest, which differs
+     * depending on whether IIIF Presentation API v2 or v3 is being used.
+     * Initializes a counter for the number of canvases.
+     */
 protected function _outputHeader(){
 
     if($this->iiif_version==2){
@@ -131,6 +172,17 @@ IIIF;
 //
 //
 //
+    /**
+     * Outputs a single record as an IIIF canvas.
+     *
+     * Converts the given Heurist record into an IIIF canvas object using `getIiifResource`.
+     * Writes the canvas JSON to the output stream.
+     * Limits the total number of canvases to 1000 per manifest, unless a specific
+     * file ID was provided (in which case, only that file is processed).
+     *
+     * @param array $record The Heurist record to process.
+     * @return bool True to continue processing, false to stop (e.g., if limit is reached).
+     */
 protected function _outputRecord($record){
 
     $canvas = self::getIiifResource($this->system, $record, $this->iiif_version, $this->ulf_ObfuscatedFileID);
@@ -149,6 +201,12 @@ protected function _outputRecord($record){
 //
 //
 //
+    /**
+     * Outputs the footer of the IIIF manifest.
+     *
+     * Writes the closing JSON structure for the manifest, which differs
+     * depending on whether IIIF Presentation API v2 or v3 is being used.
+     */
 protected function _outputFooter(){
 
     if($this->iiif_version==2){
@@ -164,6 +222,24 @@ protected function _outputFooter(){
 //
 // return null if not media content found
 //
+    /**
+     * Converts a Heurist record or a specific file into an IIIF resource representation.
+     *
+     * This method generates the JSON structure for an IIIF resource, which can be
+     * a Canvas, AnnotationPage, or Annotation, based on the `$type_resource` parameter.
+     * It handles different media types (image, video, audio) and can process
+     * files linked to a record or a single file specified by its obfuscated ID.
+     * It also supports images served via an IIIF Image API.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param array|null $record The Heurist record array. If null, `$ulf_ObfuscatedFileID` must be provided.
+     * @param int $iiif_version The IIIF Presentation API version (2 or 3).
+     * @param string|null $ulf_ObfuscatedFileID The obfuscated ID of a specific uploaded file.
+     *                                          Used if `$record` is null or to pinpoint a specific file within a record.
+     * @param string $type_resource The type of IIIF resource to generate ('Canvas', 'AnnotationPage', 'Annotation').
+     *                              Default is 'Canvas'.
+     * @return string|false The JSON string for the IIIF resource, or false on error or if no suitable media content is found.
+     */
 public static function getIiifResource($system, $record, $iiif_version, $ulf_ObfuscatedFileID, $type_resource='Canvas'){
 
     $mysqli = $system->getMysqli();
@@ -495,6 +571,11 @@ private static function genUUID2() {
 //
 //
 //
+    /**
+     * Generates a Version 4 UUID (Universally Unique Identifier).
+     *
+     * @return string The generated UUID.
+     */
 private static function genUUID() {
     return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
         // 32 bits for "time_low"

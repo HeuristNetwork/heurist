@@ -30,99 +30,81 @@ require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
 
 /**
- * Abstract class ExportRecords
+ * Abstract base class for exporting Heurist records in various formats.
  *
- * Handles the export of records from the system in multiple formats such as JSON, GeoJSON, XML, etc.
- * It supports fetching related records, applying various filters, and exporting to file or direct output.
+ * This class provides common functionalities for record export, such as
+ * initializing system and database connections, preparing data (including fetching
+ * related records based on depth parameters), managing temporary files for output,
+ * and handling common export parameters. Concrete subclasses must implement
+ * `_outputHeader()`, `_outputRecord()`, and `_outputFooter()` to define the
+ * specifics of a particular export format.
  */
 abstract class ExportRecords {
 
-    /**
-     * @var bool $initialized Indicates if the class has been initialized
-     */
+    /** @var bool Flag indicating if the class has been initialized. */
     private $initialized = false;
 
-    /**
-     * @var mixed $system The system instance used for database and system-wide operations
-     */
+    /** @var \hserv\System|null The Heurist system object. */
     protected $system = null;
 
-    /**
-     * @var mysqli $mysqli The MySQLi connection instance
-     */
+    /** @var \mysqli|null The mysqli database connection object. */
     protected $mysqli = null;
 
-    /**
-     * @var array $records An array to store the records to be exported
-     */
+    /** @var array Stores the records (typically IDs or basic data) to be exported. Populated by `_outputPrepare`. */
     protected $records;
 
-    /**
-     * @var array $rt_counts Counts of records grouped by record type ID (rty_ID => count)
-     */
+    /** @var array Associative array storing counts of records per record type ID (`rty_ID => count`). */
     protected $rt_counts;
 
-    /**
-     * @var string $tmp_destination Path to the temporary file for storing export data
-     */
+    /** @var string|false Path to the temporary file used for building the export output. */
     private $tmp_destination;
 
-    /**
-     * @var resource $fd File handler for writing to the export file
-     */
+    /** @var resource|false File descriptor for the temporary export file. */
     protected $fd;
 
-    /**
-     * @var string $comma Separator used for JSON formatting
-     */
+    /** @var string Separator string, often used for JSON/CSV formatting (e.g., a comma). Initialized to empty. */
     protected $comma = '';
 
-    /**
-     * @var string|null $retrieve_header_fields CSV of header fields to be retrieved
-     */
+    /** @var string|null A comma-separated string of record header fields to retrieve (e.g., 'rec_ID,rec_Title'). Null means all. */
     protected $retrieve_header_fields = null;
 
-    /**
-     * @var array|bool $retrieve_detail_fields Array of detail fields to be retrieved
-     */
+    /** @var array|bool An array of detail type IDs to retrieve. True means all details, false means no details. */
     protected $retrieve_detail_fields = false;
 
     /**
-     * @var int $extended_mode Defines the output format for extended data
-     * 0 = Heurist internal format
-     * 1 = Interpretable format
-     * 2 = Include concept code and labels
-     * 3 = Format for media viewer
+     * @var int Mode for exporting extended data in JSON/GeoJSON formats:
+     *          0: Heurist internal format (default).
+     *          1: Interpretable format.
+     *          2: Include concept codes and labels for terms.
+     *          3: Simplified format suitable for media viewers.
      */
     protected $extended_mode = 0;
 
-    /**
-     * @var array|null $defRecTypes Static cache for default record types
-     */
+    /** @var array|null Static cache for record type definitions. */
     protected static $defRecTypes = null;
 
-    /**
-     * @var array|null $defDetailtypes Static cache for default detail types
-     */
+    /** @var array|null Static cache for detail type definitions. */
     protected static $defDetailtypes = null;
 
-    /**
-     * @var array|null $defTerms Static cache for default terms
-     */
+    /** @var array|null Static cache for term definitions. */
     protected static $defTerms = null;
 
     /**
-     * Constructor for ExportRecords
+     * Constructor for ExportRecords.
      *
-     * @param mixed $system System instance to be used by the class
+     * @param \hserv\System $system The Heurist system object.
      */
     public function __construct($system) {
         $this->setSession($system);
     }
 
     /**
-     * Initializes the class by setting the system and database connection.
-     * Ensures that initialization is only done once.
+     * Initializes the class with the Heurist system object and database connection.
+     *
+     * This method is called by `_outputPrepare` or `setSession` and ensures that
+     * initialization (setting up `$this->system` and `$this->mysqli`) occurs only once.
+     *
+     * @return void
      */
     private function initialize() {
         if ($this->initialized) { return; }
@@ -134,9 +116,12 @@ abstract class ExportRecords {
     }
 
     /**
-     * Sets the session system instance and initializes the database connection.
+     * Sets the Heurist system instance and initializes the database connection.
      *
-     * @param mixed $system System instance
+     * Also sets the `$initialized` flag to true.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @return void
      */
     public function setSession($system) {
         $this->system = $system;
@@ -145,12 +130,20 @@ abstract class ExportRecords {
     }
 
     /**
-     * Prepares the output by initializing, fetching records, and applying depth for linked records.
+     * Prepares for the export process.
      *
-     * @param array $data Record search response data
-     * @param array $params Parameters controlling the export (format, depth, etc.)
+     * Initializes the class, checks input data validity, sets up a temporary file for output,
+     * and fetches related records based on depth and link mode parameters.
+     * Populates `$this->records` and `$this->tmp_destination`, `$this->fd`.
      *
-     * @return bool True if successful, false otherwise
+     * @param array $data The raw data array from a record search (expected to have 'status' and 'data' keys).
+     * @param array $params An associative array of export parameters, including:
+     *                      - 'depth': Depth for fetching linked records ('all' or numeric).
+     *                      - 'linkmode': 'none', 'direct', 'direct_links', or 'all' (default).
+     *                      - 'format': Export format (e.g., 'gephi', 'iiif').
+     *                      - 'limit': (For 'gephi') Limit for related records.
+     *                      - 'extended': (For JSON/GeoJSON) Extended data mode.
+     * @return bool True if preparation is successful, false otherwise (errors are added to the system object).
      */
     protected function _outputPrepare($data, $params) {
         $this->initialize();
@@ -218,9 +211,14 @@ abstract class ExportRecords {
     }
 
     /**
-     * Detects which header and detail fields should be retrieved for export based on the given parameters.
+     * Determines and prepares the list of header and detail fields to be included in the export.
      *
-     * @param array $params Parameters controlling the retrieval of fields (columns, details, etc.)
+     * Based on `$params['detail']` or `$params['columns']`.
+     * Populates `$this->retrieve_header_fields` (string or null) and `$this->retrieve_detail_fields` (array or bool).
+     * Ensures 'rec_ID' and 'rec_RecTypeID' are always included if specific header fields are requested.
+     *
+     * @param array $params Parameters that may contain 'detail' or 'columns' to specify fields.
+     * @return void
      */
     protected function _outputPrepareFields($params) {
         $default_all_fields = true;
@@ -262,65 +260,56 @@ abstract class ExportRecords {
     }
 
     /**
-     * Outputs the header for the export (must be implemented by subclasses).
+     * Abstract method for outputting the header of the export format.
+     *
+     * Must be implemented by concrete subclasses.
+     *
+     * @return void
      */
     abstract protected function _outputHeader();
 
     /**
-     * Outputs a single record for the export (must be implemented by subclasses).
+     * Abstract method for outputting a single record in the export format.
      *
-     * @param array $record The record data to be output
+     * Must be implemented by concrete subclasses.
+     *
+     * @param array $record The record data (header and details) to be output.
+     * @return bool Should return true on success, false on failure to stop processing.
      */
     abstract protected function _outputRecord($record);
 
     /**
-     * Outputs the footer for the export (must be implemented by subclasses).
+     * Abstract method for outputting the footer of the export format.
+     *
+     * Must be implemented by concrete subclasses.
+     *
+     * @return void
      */
     abstract protected function _outputFooter();
 
     /**
-    * Manages the entire export process by preparing data, outputting headers, records, and footers.
-    * Also handles file compression and download, if specified.
-    *
-    * @param array $data Record search response data
-    * @param array $params Parameters controlling the export
-    *
-    *    format - json|geojson|xml|gephi|iiif
-    *    linkmode = direct, direct_links, none, all
-    *    defs  0|1  include database definitions
-    *    file  0|1
-    *    filename - export into file with given name
-    *    zip   0|1
-    *    depth 0|1|2|...all
-    *
-    *    tlcmap 0|1  convert tlcmap records to layer
-    *    restapi 0|1  - json output in format {records:[]}
-    *
-    * prefs for iiif
-    *     version 2 or 3(default)
-
-    * prefs for geojson, json
-    *    extended 0 as is (in heurist internal format), 1 - interpretable, 2 include concept code and labels, 3 - for media viewer
-    *
-    *    datatable -   datatable session id  - returns json suitable for datatable ui component
-    *              >1 and "q" is defined - save query request in session to result set returned,
-    *              >1 and "q" not defined and "draw" is defined - takes query from session
-    *              1 - use "q" parameter
-    *    columns - array of header and detail fields to be returned
-    *    detail_mode  0|1|2  - 0- no details, 1 - inline, 2 - fill in "details" subarray
-    *
-    *    leaflet - 0|1 returns strict geojson and timeline data as two separate arrays, without details, only header fields rec_ID, RecTypeID and rec_Title
-    *        geofields  - additional filter - get geodata from specified fields only (in facetsearch format rt:dt:rt:dt )
-    *        suppress_linked_places - do not retriev geodata from linked places
-    *        separate - do not create GeometryCollection for heurist record
-    *    simplify  0|1 simplify  paths with more than 1000 vertices
-    *
-    *    limit for leaflet and gephi only
-    *
-    *
-    *
-    * @return bool True if successful, false otherwise
-    */
+     * Main method to orchestrate the record export process.
+     *
+     * It calls `_outputPrepare` to initialize and fetch data, then `_outputPrepareFields`
+     * to determine which fields to include. It then iterates through records, calling
+     * the abstract `_outputRecord` for each, and finally calls `_outputHeader` and `_outputFooter`
+     * (typo, should be `_outputFooter` after records).
+     * After generating the content in a temporary file, it calls `_outputResult` to handle
+     * sending the file to the client (e.g., download, inline, zipped).
+     *
+     * @param array $data The raw data array from a record search.
+     * @param array $params An associative array of export parameters. Key parameters include:
+     *   - `format`: (string) The desired output format (e.g., 'json', 'xml', 'csv').
+     *   - `linkmode`: (string) How to handle linked records ('none', 'direct', 'direct_links', 'all').
+     *   - `depth`: (int|string) Depth for fetching related records ('all' or a number).
+     *   - `file`: (bool) If true, prompt for download with a filename.
+     *   - `filename`: (string) Suggested filename for download.
+     *   - `zip`: (bool) If true, compress the output as a ZIP file.
+     *   - `extended`: (int) Mode for extended JSON/GeoJSON output.
+     *   - `columns` or `detail`: (array|string) Specific fields to include.
+     *   Other format-specific parameters may also be present.
+     * @return bool True if the export process completes successfully, false otherwise.
+     */
     public function output($data, $params) {
         if (!$this->_outputPrepare($data, $params)) {
             return false;
@@ -354,6 +343,24 @@ abstract class ExportRecords {
         return true;
     }
 
+    /**
+     * Handles the final output of the generated export file.
+     *
+     * Sends appropriate HTTP headers (MIME type, Content-Disposition for download,
+     * Content-Encoding for GZIP) and streams the content of the temporary export file
+     * to the client. Deletes the temporary file afterwards.
+     *
+     * @param array $params Parameters controlling the output, including:
+     *                      - `format`: The export format (used to determine MIME type and filename extension).
+     *                      - `serial_format`: (For RDF) Specific RDF serialization (e.g., 'ntriples', 'turtle').
+     *                      - `zip`: If true, GZIPs the content.
+     *                      - `filename`: Suggested base name for downloaded file.
+     *                      - `metadata`: If present, indicates a metadata- kèm theo export, affecting filename.
+     *                      - `file`: If true, forces download.
+     *                      - `restapi`: If true, sets CORS headers and HTTP status codes.
+     *                      - `db`: Database name, used in default filenames.
+     * @return void
+     */
     private function _outputResult($params){
 
         $format = @$params['format'];
@@ -505,6 +512,18 @@ abstract class ExportRecords {
     //
     //
     //
+    /**
+     * Gathers basic information about the current database and the record types being exported.
+     *
+     * Used to include metadata in some export formats (e.g., XML, JSON).
+     *
+     * @return array An associative array containing:
+     *               - 'id': Registered ID of the database.
+     *               - 'url': Base URL of the Heurist instance.
+     *               - 'db': Name of the current database.
+     *               - 'rectypes': An array where each key is a `rty_ID` present in the export,
+     *                             and the value is an array `['name'=>..., 'code'=>..., 'count'=>...]`.
+     */
     protected function _getDatabaseInfo(){
 
         //add database information to be able to load definitions later

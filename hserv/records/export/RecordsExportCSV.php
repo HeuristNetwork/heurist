@@ -38,25 +38,62 @@ if(!defined('H_ID')){
 }
 
 /**
-*
-*  setSession - work with different database
-*  output - main method
-*
-*/
+ * Class RecordsExportCSV
+ *
+ * Provides functionality to export Heurist records to CSV format.
+ * This class is designed to be called statically and is typically used by the 'records_output' controller.
+ * It offers a wide range of options for customizing the CSV output, including:
+ * - Selection of specific fields for different record types.
+ * - Handling of multi-value fields, terms (with options for ID, code, label, hierarchy),
+ *   resource links (IDs and titles), and file details (ID, name, path, URL).
+ * - Inclusion of record URLs (HTML, XML).
+ * - Outputting data into separate files per record type or a single joined table.
+ * - Advanced data processing options like grouping, summing, counting, sorting, and percentages.
+ * - Generation of CSV templates with field details and term pickup lists.
+ *
+ * Due to its extensive feature set, this class is considerably complex.
+ *
+ * @package hserv\records\export
+ */
 class RecordsExportCSV {
 
+    /**
+     * @var \hserv\System|null The Heurist system object.
+     */
     private static $system = null;
+    /**
+     * @var \mysqli|null The mysqli database connection object.
+     */
     private static $mysqli = null;
+    /**
+     * @var bool Flag indicating if the class has been initialized.
+     */
     private static $initialized = false;
-    private static $version = 3;
+    /**
+     * @var int Version number, currently hardcoded to 3.
+     */
+    private static $version = 3; // TODO: Purpose of this version unclear from context.
 
+    /**
+     * @var array|null Cached record type definitions from dbs_GetRectypeStructures.
+     */
     private static $defRecTypes = null;
+    /**
+     * @var array|null Cached detail type definitions from dbs_GetDetailTypes.
+     */
     private static $defDetailtypes = null;
+    /**
+     * @var \DbsTerms|null Cached terms definitions, wrapped in a DbsTerms object.
+     */
     private static $defTerms = null;
 
-//
-//
-//
+    /**
+     * Initializes the class with the global Heurist system object.
+     *
+     * Sets static properties for the system object, mysqli connection,
+     * and marks the class as initialized. This method is called internally
+     * if the class hasn't been initialized yet.
+     */
 private static function initialize()
 {
     if (self::$initialized) {return;}
@@ -68,9 +105,14 @@ private static function initialize()
     self::$version = 3;
 }
 
-//
-// set session different that current global one (to work with different database)
-//
+    /**
+     * Allows setting a specific Heurist system session for the class to operate on.
+     *
+     * This is useful if CSV export needs to be performed on a database context
+     * different from the current global one.
+     *
+     * @param \hserv\System $system The Heurist system object to use.
+     */
 public static function setSession($system){
     self::$system  = $system;
     self::$mysqli = $system->getMysqli();
@@ -99,6 +141,53 @@ for constrained resource (record pointer) fields we use "dt#:rt#"
 
 NOTE: fastest way it simple concatenation in comparison to fputcsv and implode. We use fputcsv
 */
+    /**
+     * Outputs Heurist records in CSV format.
+     *
+     * This is the primary method for generating CSV exports. It takes a dataset of records
+     * and a set of parameters to customize the output.
+     *
+     * Key functionalities:
+     * - Handles various export preferences specified in `$params['prefs']`, such as:
+     *   - `fields`: An array defining which fields to export for each record type.
+     *     Format: `[rtID => [field_id_1, field_id_2, 'dt_id:constr_rt_id', ...]]`
+     *   - `join_record_types`: Boolean, if true, attempts to join data from different
+     *     record types into a single CSV table.
+     *   - `main_record_type_ids`: Array of primary record type IDs for the export,
+     *     especially important when `join_record_types` is true.
+     *   - `term_ids_only`, `include_term_ids`, `include_term_codes`, `include_term_hierarchy`:
+     *     Options for how term (enum) fields are represented.
+     *   - `include_resource_titles`: Option to include titles of linked records.
+     *   - `include_file_url`: Option to include direct URLs for files.
+     *   - `include_record_url_html`, `include_record_url_xml`: Options to include Heurist URLs for records.
+     *   - `include_temporals`: Option to include raw temporal data for date fields.
+     *   - `csv_delimiter`, `csv_enclosure`, `csv_mvsep` (multi-value separator), `csv_header`:
+     *     CSV formatting options.
+     *   - `advanced_options`: An array for specifying grouping, sorting, summing, counting,
+     *     and percentage calculations on specific fields.
+     *     Format: `[fieldCode => ['total' => 'group'|'sum'|'count', 'sort' => 'asc'|'desc', 'use_percentage' => bool]]`
+     *     (fieldCode is typically 'rtID:dt_id')
+     * - Determines output filename and directory.
+     * - Prepares CSV headers based on selected fields and options.
+     * - Iterates through records, fetching necessary details and related records.
+     * - Formats each field value according to its type and selected options (e.g., terms,
+     *   resources, files, dates). Multi-value fields are joined by `csv_mvsep`.
+     * - Handles linked records: if a linked record's type is also selected for export,
+     *   its ID is added to the list of records to process, enabling chained exports.
+     * - If `has_advanced` options (like grouping or joining) are enabled, data is typically
+     *   accumulated in memory (`$csvData`) before final processing. Otherwise, it's written
+     *   to temporary streams.
+     * - Performs joining, grouping, summing, counting, percentage calculation, and sorting if specified.
+     * - Finally, calls `writeResults` to output the CSV data to browser or file.
+     *
+     * @param array $data The input data structure, typically from a record search operation.
+     *                    Expected to have a 'data' key containing 'records' (an array of record IDs)
+     *                    and 'reccount'.
+     * @param array $params An array of parameters controlling the export. Key settings are under
+     *                      `$params['prefs']` and `$params['file']`.
+     * @return string|void If `$params['save_to_file']` is true, may return a status message.
+     *                     Otherwise, outputs directly to the browser and exits.
+     */
 public static function output($data, $params){
 
     if (!($data && @$data['status']==HEURIST_OK)){
@@ -926,8 +1015,37 @@ public static function output($data, $params){
 } //output
 
 //
-// output rectordtype template as csv (and terms pckup list)
 //
+    /**
+     * Outputs a CSV template for specified record types, including field details and term pickup lists.
+     *
+     * This method generates a CSV file that serves as a template or a descriptive guide
+     * for the structure of selected record types. Instead of record data, it outputs:
+     * - CSV headers based on selected fields (from `$params['prefs']['fields']`).
+     * - Detailed information about each field, including its ID, name, type, multivalue status,
+     *   requirement, usage count, concept ID, and base name. This can be output as rows
+     *   or as additional header rows depending on `$params['prefs']['output_rows']`.
+     * - For 'enum' or 'relationtype' fields, it can generate "pickup lists" of allowed terms,
+     *   showing the term hierarchy.
+     *
+     * Key parameters from `$params['prefs']`:
+     *   - `fields`: Defines which fields to include for each record type.
+     *   - `include_term_ids`, `include_term_codes`, `include_term_hierarchy`: Options for term representation.
+     *   - `include_resource_titles`, `include_file_url`, `include_record_url_html`,
+     *     `include_record_url_xml`, `include_temporals`: Similar to `output()` method, affecting header names.
+     *   - `output_rows`: Boolean, if true, field details are output as separate rows per field.
+     *     Otherwise, field details (like type, count etc.) are output as additional header rows.
+     *   - `csv_delimiter`, `csv_enclosure`: CSV formatting options.
+     *
+     * The output is written to temporary memory streams, one per record type, and then
+     * assembled into a single CSV file or a ZIP archive by `writeResults`.
+     *
+     * @param array $data Although a `$data` parameter is accepted (likely for consistency with `output`),
+     *                    it's not directly used for fetching record data in this method.
+     * @param array $params An array of parameters controlling the template generation.
+     *                      Key settings are under `$params['prefs']`.
+     * @return void Outputs directly to the browser or prepares data for file save via `writeResults`.
+     */
 public static function output_header($data, $params)
 {
 
@@ -1229,8 +1347,36 @@ public static function output_header($data, $params)
 
 
 //
-// save CSV streams into file and zip
 //
+    /**
+     * Writes the generated CSV data from memory streams to the output (browser or file).
+     *
+     * This method handles the final stage of CSV export.
+     * If there's only one stream (or effectively one, as others might be empty or just headers):
+     * - It retrieves the content from the stream.
+     * - If `$save_to_file` is true, it saves the content to the specified `$temp_name` (which
+     *   might include a directory path).
+     * - Otherwise, it sends appropriate HTTP headers for CSV download and echoes the content.
+     *   A BOM (Byte Order Mark) is prepended for UTF-8 compatibility.
+     *
+     * If there are multiple streams (typically one per record type with actual data):
+     * - It creates a ZIP archive.
+     * - Each stream's content is added as a separate CSV file within the ZIP archive.
+     *   Filenames are generated based on record type ID and name.
+     * - An error log (if provided) is added as 'log.txt' to the ZIP.
+     * - HTTP headers for ZIP download are sent, and the ZIP file is streamed to the browser.
+     * - The temporary ZIP file is deleted afterwards.
+     *
+     * @param array $streams An array of file pointer resources (memory streams) containing the CSV data for each record type.
+     * @param string $temp_name The base filename for the output. For single CSV, this is the filename.
+     *                          For ZIP, this is part of the ZIP filename and the target path for saving if `$save_to_file` is true.
+     * @param array $headers An array of headers, used to determine if a stream for a record type actually produced data beyond just a header.
+     * @param array|null $error_log An array of error messages to include in a log file (primarily for ZIP output).
+     * @param bool $save_to_file If true, attempts to save the output to a file on the server
+     *                           instead of streaming to the browser. Default is false.
+     * @return int|void If `$save_to_file` is true, returns the number of bytes written (or a negative value on error).
+     *                  Otherwise, no explicit return value as it exits after output.
+     */
 private static function writeResults( $streams, $temp_name, $headers, $error_log, $save_to_file=false ) {
 
     if(is_array($streams) && count($streams)<2){
@@ -1388,6 +1534,19 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
  *
  * @return array The grouped CSV rows.
  */
+    /**
+     * Groups CSV rows based on specified column indices and calculates sums and counts.
+     *
+     * Iterates through rows. If a row matches an existing group (based on values in `$groupColIndices`),
+     * it updates sum and count columns for that group. Otherwise, it starts a new group.
+     * Sum and count columns are initialized appropriately for new groups.
+     *
+     * @param array $rows The array of CSV rows to process.
+     * @param array $groupColIndices Array of column indices to group by.
+     * @param array $sumColIndices Array of column indices on which to perform a sum for each group.
+     * @param array $countColIndices Array of column indices for which to count occurrences in each group (values are incremented).
+     * @return array An array of new CSV rows, grouped and with calculated sums/counts.
+     */
 private static function groupCSVRows(array $rows, array $groupColIndices = [], array $sumColIndices = [], array $countColIndices = []) {
     if (!empty($groupColIndices)) {
         $groupedRows = [];
@@ -1445,6 +1604,33 @@ private static function usePercentageForCSVHeaders(array $headers, array $usePer
     return $headers;
 }
 
+    /**
+     * Adds percentage column headers to an existing header array.
+     *
+     * For each column index specified in `$usePercentageColIndices`, this function
+     * inserts a new header immediately after it. The new header is the original
+     * header text suffixed with '(%)'.
+     *
+     * @param array $headers The original array of CSV headers.
+     * @param array $usePercentageColIndices Array of column indices for which percentage columns will be added.
+     * @return array The modified header array with added percentage headers.
+     */
+private static function usePercentageForCSVHeaders(array $headers, array $usePercentageColIndices = []) {
+    if (!empty($usePercentageColIndices)) {
+        $colIncrease = 0;
+        for ($i = 0; $i < count($usePercentageColIndices); $i++) {
+            $colIndex = $usePercentageColIndices[$i] + $colIncrease;
+            if ($colIndex + 1 > count($headers) - 1) {
+                $headers[] = $headers[$colIndex] . '(%)';
+            } else {
+                array_splice($headers, $colIndex + 1, 0, [$headers[$colIndex] . '(%)']);
+            }
+            $colIncrease++;
+        }
+    }
+    return $headers;
+}
+
 /**
  * Calculate the percentage value of the specified columns in the CSV rows.
  *
@@ -1453,6 +1639,18 @@ private static function usePercentageForCSVHeaders(array $headers, array $usePer
  *
  * @return array The CSV rows with the percentage values calculated.
  */
+    /**
+     * Calculates percentage values for specified columns and inserts them as new columns.
+     *
+     * First, it calculates the total sum for each column specified in `$usePercentageColIndices`.
+     * Then, for each row, it calculates the percentage of that row's value relative to the total sum
+     * for each specified column. The percentage (multiplied by 100) is inserted as a new column
+     * immediately after the original value column.
+     *
+     * @param array $rows The array of CSV rows. Each row is an array of values.
+     * @param array $usePercentageColIndices Array of column indices for which to calculate percentages.
+     * @return array The modified array of CSV rows, with new percentage columns added.
+     */
 private static function usePercentageForCSVRows(array $rows, array $usePercentageColIndices = []) {
     if (!empty($usePercentageColIndices)) {
         $colTotal = [];
@@ -1497,6 +1695,21 @@ private static function usePercentageForCSVRows(array $rows, array $usePercentag
  *
  * @return array The sorted CSV rows.
  */
+    /**
+     * Sorts an array of CSV rows based on specified columns and sort orders.
+     *
+     * Uses `usort` with a custom comparison function. The comparison function
+     * iterates through the `$sortByColIndices`. For each specified column, it compares
+     * the values in rows `$a` and `$b`. If values are numeric, a numeric comparison
+     * is done; otherwise, `strcmp` is used. Sorting respects the corresponding
+     * order in `$sortOrders` ('asc' or 'desc'). The sort is stable in the sense
+     * that if primary sort keys are equal, it moves to the next specified sort key.
+     *
+     * @param array $rows The array of CSV rows to sort.
+     * @param array $sortByColIndices An array of column indices to sort by, in order of precedence.
+     * @param array $sortOrders An array of sort orders ('asc' or 'desc') corresponding to `$sortByColIndices`.
+     * @return array The sorted array of CSV rows.
+     */
 private static function sortCSVRows(array $rows, array $sortByColIndices = [], array $sortOrders = []) {
     if (!empty($sortByColIndices)) {
         usort($rows, function($a, $b) use ($sortByColIndices, $sortOrders) {
@@ -1545,6 +1758,25 @@ private static function sortCSVRows(array $rows, array $sortByColIndices = [], a
  *
  * @return array The joint CSV data.
  */
+    /**
+     * Creates a single CSV table by joining data from multiple record types.
+     *
+     * This method takes CSV data that has been pre-processed and separated by record type
+     * (`$csvData`) and merges it into a single array of rows. The merging is based on
+     * following resource links defined in the main record type's data.
+     *
+     * It first builds lookup tables (`$csvRowLookups`) for non-main record types, keyed by record ID.
+     * Then, it iterates through each row of the main record type and calls `createJointCSVRow`
+     * to recursively build the full joined row.
+     *
+     * @param array $csvData An array where keys are record type IDs and values are arrays of CSV rows for that type.
+     * @param array &$columnInfo Passed by reference. An array holding column information for each record type.
+     *                           This will be updated by `createJointCSVRow` to reflect new column indices in the joined table.
+     * @param int $mainRecordTypeID The ID of the primary record type from which joins originate.
+     * @param string $filedValueDelimiter The delimiter used for multi-value fields (passed to `createJointCSVRow`).
+     * @param bool $includeHeader Whether the input CSV data includes a header row (used for lookup construction).
+     * @return array An array of rows representing the single, joined CSV table.
+     */
 private static function createJointCSVTables($csvData, &$columnInfo, $mainRecordTypeID, $filedValueDelimiter, $includeHeader = true) {
     $csvRows = $csvData[$mainRecordTypeID];
 
@@ -1593,6 +1825,27 @@ private static function createJointCSVTables($csvData, &$columnInfo, $mainRecord
  * @param string $filedValueDelimiter The delimiter used for multi-value field.
  * @param int $level The depth of the current record type.
  */
+    /**
+     * Recursively creates a single row for a joined CSV table.
+     *
+     * This method takes a row from a specific record type and expands it by appending
+     * data from linked records. It iterates through the columns of the current row.
+     * If a column represents a link to another record type (identified by ':' in `field_id`),
+     * it looks up the linked record(s) in `$csvRowLookups` and recursively calls itself
+     * to append that linked record's data.
+     *
+     * It updates `$colInfo['joint_column_index']` to store the new column index in the
+     * flattened `$jointRow`.
+     *
+     * @param array &$jointRow Passed by reference. The array being built to represent the full joined row.
+     * @param array $row The current row data from a specific record type.
+     * @param int $recordTypeID The record type ID of `$row`.
+     * @param array &$columnInfo Passed by reference. Contains column metadata; `joint_column_index` is updated here.
+     * @param array $csvRowLookups Lookup table for finding rows of linked records.
+     * @param array &$recordTypeIDTrack Passed by reference. Keeps track of record types already processed in the current join path to avoid infinite loops (though current usage seems to allow re-visiting, controlled by `$level` and specific conditions).
+     * @param string $filedValueDelimiter Delimiter for multi-value fields, used by `findInCSVRowLookup`.
+     * @param int $level Current recursion depth.
+     */
 private static function createJointCSVRow(&$jointRow, $row, $recordTypeID, &$columnInfo, $csvRowLookups, &$recordTypeIDTrack, $filedValueDelimiter, $level = 1) {
     $recordTypeIDTrack[] = (int) $recordTypeID;
     foreach ($columnInfo[$recordTypeID] as &$colInfo) {
@@ -1640,8 +1893,26 @@ private static function createJointCSVRow(&$jointRow, $row, $recordTypeID, &$col
  * @param string $csvRowLookups The lookup data.
  * @param string $filedValueDelimiter The delimiter used for multiple IDs.
  *
- * @return array|bool
+ * @return array|bool False if no records found, otherwise an array representing the (potentially merged) row.
  */
+    /**
+     * Looks up and potentially merges row data for one or more record IDs from the CSV lookup table.
+     *
+     * If `$recordIDLiteral` contains multiple record IDs (separated by `$filedValueDelimiter`),
+     * this function finds each corresponding row in `$csvRowLookups[$targetRecordTypeID]`.
+     * It then "merges" these rows by concatenating the values in each column with the
+     * `$filedValueDelimiter`. This is used when a single field in the parent row links to
+     * multiple records, and these multiple linked records need to be represented within
+     * the cells of the (single) joined row being constructed for the parent.
+     *
+     * @param string $recordIDLiteral A string containing one or more record IDs, possibly separated by `$filedValueDelimiter`.
+     * @param string|int $targetRecordTypeID The ID of the target record type to look up in `$csvRowLookups`.
+     * @param array $csvRowLookups The lookup data, where keys are record type IDs, and values are arrays
+     *                             of rows (keyed by record ID) for that type.
+     * @param string $filedValueDelimiter The delimiter used for separating multiple record IDs in `$recordIDLiteral`
+     *                                    and for joining values in the merged row.
+     * @return array|false An array representing the found (and possibly merged) row, or false if no record IDs produce a match.
+     */
 private static function findInCSVRowLookup($recordIDLiteral, $targetRecordTypeID, $csvRowLookups, $filedValueDelimiter) {
     $recordIDs = explode($filedValueDelimiter, $recordIDLiteral);
     $lookupRow = [];
@@ -1676,8 +1947,21 @@ private static function findInCSVRowLookup($recordIDLiteral, $targetRecordTypeID
  * @param string $targetRecordTypeID The ID of the target record type.
  * @param array $csvRowLookups The lookup data.
  *
- * @return array
+ * @return array An array of empty strings.
  */
+    /**
+     * Generates an array of empty strings, with the count matching the number of
+     * columns (minus one, for the ID column) of a given target record type.
+     *
+     * This is used by `createJointCSVRow` to insert appropriate padding when a linked
+     * record cannot be found or a link field is empty, ensuring the joined CSV row
+     * maintains consistent column structure.
+     *
+     * @param string|int $targetRecordTypeID The ID of the target record type.
+     * @param array $csvRowLookups The lookup data, used here only to determine the number of columns
+     *                             for the `$targetRecordTypeID` by looking at its first available row.
+     * @return array An array of empty strings.
+     */
 private static function generateEmptyCellsForTargetRecordType($targetRecordTypeID, $csvRowLookups) {
     $cells = [];
     if (!empty($csvRowLookups[$targetRecordTypeID])) {
@@ -1700,8 +1984,26 @@ private static function generateEmptyCellsForTargetRecordType($targetRecordTypeI
  * @param array $columnInfo The column information. After the csv data is joined,
  *   this array contains the new column indices in the joint CSV table.
  *
- * @return array The new column indices.
+ * @return array The new column indices, structured similarly to the input but reflecting indices in the joined table.
  */
+    /**
+     * Adjusts column indices used for advanced options (grouping, summing, etc.)
+     * after CSV tables have been joined.
+     *
+     * When tables are joined, the column indices from original, separate record type CSVs
+     * change. This function maps the original column indices (stored in `$columnIndices`
+     * and keyed by record type ID) to their new indices in the final joined table
+     * (which are stored in `$columnInfo[$recordTypeID][$columnIndex]['joint_column_index']`).
+     *
+     * @param array $columnIndices Original column indices for advanced options, keyed by record type ID,
+     *                             e.g., `[rtID1 => [colIdx1, colIdx2], rtID2 => [colIdx3]]`.
+     * @param int|string $mainRecordTypeID The ID of the main record type in the joined table.
+     *                                     All adjusted indices will be under this key in the output.
+     * @param array $columnInfo Column metadata, which should contain the `joint_column_index` mapping
+     *                          after `createJointCSVRow` has run.
+     * @return array The adjusted column indices, now all under the `$mainRecordTypeID` key,
+     *               e.g., `[mainRtID => [newColIdxA, newColIdxB, newColIdxC]]`.
+     */
 private static function changeAdvancedOptionColumnIndex($columnIndices, $mainRecordTypeID, $columnInfo) {
     if (empty($columnIndices)) {
         return $columnIndices;
@@ -1725,8 +2027,23 @@ private static function changeAdvancedOptionColumnIndex($columnIndices, $mainRec
  * @param array $sortOrders The original sorting orders.
  * @param array $mainRecordTypeID The ID of the root record type to export.
  *
- * @return array The new sorting orders.
+ * @return array The new sorting orders, structured similarly to the input but consolidated under the main record type ID.
  */
+    /**
+     * Consolidates sort orders for different record types into a single array
+     * under the main record type ID, after CSV tables have been joined.
+     *
+     * This function is similar to `changeAdvancedOptionColumnIndex` but for sort orders.
+     * It takes sort orders originally defined per record type and flattens them into
+     * a single list associated with the `$mainRecordTypeID`, corresponding to the
+     * new, consolidated list of sort column indices.
+     *
+     * @param array $sortOrders Original sort orders, keyed by record type ID,
+     *                          e.g., `[rtID1 => ['asc', 'desc'], rtID2 => ['asc']]`.
+     * @param int|string $mainRecordTypeID The ID of the main record type in the joined table.
+     * @return array The adjusted sort orders, now all under the `$mainRecordTypeID` key,
+     *               e.g., `[mainRtID => ['asc', 'desc', 'asc']]`.
+     */
 private static function changeSortOrders($sortOrders, $mainRecordTypeID) {
     if (empty($sortOrders)) {
         return $sortOrders;
@@ -1747,8 +2064,18 @@ private static function changeSortOrders($sortOrders, $mainRecordTypeID) {
  *
  * @param $value
  *
- * @return int
+ * @return int|float The numeric value.
  */
+    /**
+     * Converts a value to a numeric type (integer or float).
+     *
+     * If the input value is not already numeric, it's converted to an integer using `intval()`.
+     * This is a simple utility primarily used before performing arithmetic operations
+     * (like summing) on CSV cell values.
+     *
+     * @param mixed $value The value to convert.
+     * @return int|float The numeric representation of the value.
+     */
 private static function valueToNumeric($value) {
     if (!is_numeric($value)) {
         $value = intval($value);

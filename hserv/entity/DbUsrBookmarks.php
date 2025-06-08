@@ -3,11 +3,13 @@ namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 
     /**
-    * db access to usrBoomarks table
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbUsrBookmarks
+     *
+     * Provides database access and operations for the `usrBookmarks` table,
+     * which stores user-specific bookmarks on records, including ratings and notes.
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -36,7 +38,8 @@ class DbUsrBookmarks extends DbEntityBase
     *  limit
     *  request_id
     *
-    *  @todo overwrite
+    * @return array|false An array of found bookmark records, or false on error.
+    *                     The structure of the returned array elements depends on the 'details' parameter.
     */
     public function search(){
 
@@ -64,6 +67,15 @@ class DbUsrBookmarks extends DbEntityBase
     // validate permission for edit/delete bookmark
     // for delete and assign see appropriate methods
     //
+    /**
+     * Validates if the current user has permission to modify/delete the specified bookmarks.
+     *
+     * Users can only modify/delete their own bookmarks unless they are the database owner.
+     * This method overrides the parent `_validatePermission`.
+     *
+     * @return bool True if the user has permission, false otherwise.
+     *              Errors are added to the system object on permission failure.
+     */
     protected function _validatePermission(){
 
         if(!$this->system->isDbOwner() && !isEmptyArray($this->recordIDs)){ //there are records to update/delete
@@ -95,6 +107,15 @@ class DbUsrBookmarks extends DbEntityBase
     //
     //
     //
+    /**
+     * Prepares bookmark records before saving.
+     *
+     * - For new bookmarks, sets `bkm_UGrpID` to the current user's ID if not already set.
+     * - Sets `bkm_Added` to the current date/time if it's a new record or not already set.
+     * - Sets `bkm_Modified` to the current date/time.
+     *
+     * @return bool Returns the result of `parent::prepareRecords()`.
+     */
     protected function prepareRecords(){
 
         $ret = parent::prepareRecords();
@@ -119,6 +140,15 @@ class DbUsrBookmarks extends DbEntityBase
     //
     //
     //
+    /**
+     * Deletes bookmark(s).
+     *
+     * Before deletion, it sets up a foreign key check to prevent deletion if the bookmarked
+     * record has personal tags associated by the current user.
+     *
+     * @param bool $disable_foreign_checks Passed to `parent::delete()`.
+     * @return bool|array Result of `parent::delete()`.
+     */
     public function delete($disable_foreign_checks = false){
 
         $this->recordIDs = null; //reset to obtain ids from $data
@@ -138,6 +168,19 @@ class DbUsrBookmarks extends DbEntityBase
     //
     // add/remove bookmarks in batch, set rating in batch
     //
+    /**
+     * Performs batch actions on bookmarks: unbookmarking or setting ratings.
+     *
+     * Actions are determined by `$this->data['mode']`:
+     * - 'unbookmark': Deletes bookmarks and detaches associated personal tags for the current user.
+     *   Expects `bkm_RecID` (array of record IDs) or `bkm_ID` (array of bookmark IDs) in `$this->data`.
+     * - Default (set rating): Updates the `bkm_Rating` for specified bookmarks.
+     *   Expects `bkm_ID` (array of bookmark IDs) and `rating` (0-5) in `$this->data`.
+     *
+     * @return array|false An array with counts of processed/updated/deleted items on success,
+     *                     or false on failure (e.g., invalid parameters, no matching bookmarks).
+     *                     Errors are added to the system object on failure.
+     */
     public function batch_action(){
 
         $is_unbookmark = (@$this->data['mode']=='unbookmark');

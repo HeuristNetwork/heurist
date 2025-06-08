@@ -296,9 +296,19 @@ global $is_api;
 
     $system->dbclose();
 
-//
-//
-//
+/**
+ * Checks if the coordinates are within WGS84 bounds.
+ *
+ * Iterates through a sample of points (or all points) to check if their
+ * longitude and latitude fall within the valid WGS84 range (-180 to 180 for longitude, -90 to 90 for latitude).
+ * Exits with an error if coordinates are outside these bounds.
+ *
+ * @global bool $is_api Flag indicating if the request is an API call.
+ * @param \hserv\System $system The system object.
+ * @param array $orig_points An array of points, where each point is an array [longitude, latitude].
+ * @param int|true $check_number_or_all The number of points to check, or true to check all points. Defaults to 3.
+ * @return bool True if all checked points are within WGS84 bounds.
+ */
 function checkWGS($system, $orig_points, $check_number_or_all=3){
 
     global $is_api;
@@ -306,7 +316,6 @@ function checkWGS($system, $orig_points, $check_number_or_all=3){
     $cnt = 0;
     foreach ($orig_points as $point) {
         //if not integer and less than 180/90 this is wgs
-        //!(($point[1]!=round($point[1])) || ($point[0]!=round($point[0]))
         if (!((abs($point[0])<200) && (abs($point[1])<90))){
                 $system->errorExitApi(
 'Cannot process shp file. Heurist uses WGS84 (World Geographic System) '
@@ -325,16 +334,24 @@ function checkWGS($system, $orig_points, $check_number_or_all=3){
     return true;
 }
 
-//
-// $fileinfo as fileGetFullInfo
-//
-// 1) external file is saved in scratch
-// 2) zipped extracted into scratch
-//
+/**
+ * Retrieves the path to a file, handling local files, remote URLs, and archives.
+ *
+ * If the file is remote, it's downloaded to a temporary location.
+ * If it's an archive and $isArchive is true, it's extracted, and the path
+ * to the file with the specified $need_ext extension is returned.
+ *
+ * @param array $fileinfo Associative array containing file information (e.g., from fileGetFullInfo).
+ *                        Expected keys: 'fullPath', 'ulf_ExternalFileReference', 'ulf_OrigFileName', 'fxm_MimeType'.
+ *                        Can also be nested under a 'file' key.
+ * @param string|null $need_ext The required file extension if extracting from an archive.
+ * @param bool $isArchive True if the file is an archive that needs extraction, false otherwise.
+ * @return string|null The path to the file, or null if not found or an error occurs.
+ */
 function fileRetrievePath($fileinfo, $need_ext=null, $isArchive=false){
 
     if(@$fileinfo['file']){
-        $fileinfo = $fileinfo['file'];//
+        $fileinfo = $fileinfo['file'];
     }
 
     $filepath = $fileinfo['fullPath'];//concat(ulf_FilePath,ulf_FileName as fullPath

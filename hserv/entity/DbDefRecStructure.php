@@ -3,11 +3,13 @@ namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 
     /**
-    * db access to defRecStructure.php table
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbDefRecStructure
+     *
+     * Provides database access and operations for the `defRecStructure` table,
+     * which defines the structure of record types (i.e., which fields they include and how).
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -47,7 +49,8 @@ class DbDefRecStructure extends DbEntityBase
     *  limit
     *  request_id
     *
-    *  @todo overwrite
+    * @return array|false An array of found record structure definitions, or false on error.
+    *                     The structure of the returned array elements depends on the 'details' parameter.
     */
     public function search(){
 
@@ -136,6 +139,17 @@ class DbDefRecStructure extends DbEntityBase
     //
     //
     //
+    /**
+     * Prepares record structure records before saving.
+     *
+     * This method determines if a record is new or an update by checking existing
+     * `rst_ID` for the given `rst_DetailTypeID` and `rst_RecTypeID`.
+     * It sets `rst_LocallyModified` accordingly for new or existing records.
+     * It also sets default values for `rst_Status`, `rst_DisplayName` (if 'tabs'),
+     * `rst_MaxValues`, and updates `rst_Modified`.
+     *
+     * @return bool True if preparation is successful, false otherwise.
+     */
     protected function prepareRecords(){
 
         $ret = parent::prepareRecords();
@@ -184,6 +198,15 @@ class DbDefRecStructure extends DbEntityBase
 
     }
 
+    /**
+     * Saves record structure definitions.
+     *
+     * After saving via `parent::save()`, this method reconstructs the `$savedRecIds`
+     * array to contain `rst_DetailTypeID` values instead of `rst_ID` values.
+     *
+     * @return array|false An array of `rst_DetailTypeID`s for the saved records on success,
+     *                     false on failure.
+     */
     public function save(){
 
         $savedRecIds = parent::save();
@@ -196,6 +219,16 @@ class DbDefRecStructure extends DbEntityBase
         return $savedRecIds;
     }
 
+    /**
+     * Deletes record structure entries.
+     *
+     * Can delete by `rst_ID` (if `recID` in `$this->data` is numeric),
+     * by a composite key "rty_ID.dty_ID" (if `recID` is in this format),
+     * or all entries for a specific `dtyID`.
+     *
+     * @param bool $disable_foreign_checks Unused in this implementation, but part of parent signature.
+     * @return bool|array False on error or if no records found to delete, otherwise result of `parent::delete()`.
+     */
     public function delete($disable_foreign_checks = false){
 
         $mysqli = $this->system->getMysqli();
@@ -243,6 +276,18 @@ class DbDefRecStructure extends DbEntityBase
     // A. update order for fields in record type - see parameter "orders"
     // B. add set of new fields - see parameter "newfields"
     //
+    /**
+     * Performs batch actions on record structures.
+     *
+     * Supported actions:
+     * - Adding new fields to a record type (if `newfields` is in `$this->data`).
+     * - Setting the display order of fields in a record type (if `orders` is in `$this->data`).
+     *
+     * Requires `rtyID` (record type ID) to be present in `$this->data`.
+     *
+     * @return bool|array|null Result of the specific batch action (e.g., from `addNewFields` or `setNewFieldOrder`),
+     *                         or false if `rtyID` is missing or no valid action is specified.
+     */
     public function batch_action(){
 
         if(!(@$this->data['rtyID']>0)){
@@ -259,6 +304,14 @@ class DbDefRecStructure extends DbEntityBase
     //
     //
     //
+    /**
+     * Sets the display order for a list of fields within a specific record type.
+     *
+     * Expects `rtyID`, `recID` (array of dty_IDs), and `orders` (array of order values)
+     * in `$this->data`.
+     *
+     * @return bool True on success, false if input is invalid or a database error occurs.
+     */
     private function setNewFieldOrder(){
 
         $rty_ID = $this->data['rtyID'];
@@ -426,6 +479,20 @@ class DbDefRecStructure extends DbEntityBase
     // Counts:
     //  rectype_field_usage: count all bits of data for all records of the provided record type
     //
+    /**
+     * Retrieves counts related to record structure and field usage.
+     *
+     * Currently supports 'rectype_field_usage' mode:
+     * Counts the usage of each detail type (field) for a given record type (`rtyID`).
+     * This includes counts from `recDetails` and also calculates usage for `relmarker` type fields
+     * by checking `recLinks`.
+     * If `get_meta_counts` is requested, it also includes total record count, URL count, and tag count for the record type.
+     *
+     * @return array|false|null An associative array 현실 `[dty_ID => usage_count]` or `['rec_ID' => count, ...]`
+     *                          if `get_meta_counts` is true. Returns `[0]` if no usage found.
+     *                          Returns false on database error or invalid input.
+     *                          Returns null if mode is not 'rectype_field_usage'.
+     */
     public function counts(){
 
         $mysqli = $this->system->getMysqli();

@@ -23,11 +23,28 @@
     * See the License for the specific language governing permissions and limitations under the License.
     */
 
+/**
+ * This file contains functions for managing Saved Searches within the Heurist system.
+ * These functions provide CRUD (Create, Read, Update, Delete) operations for
+ * saved search definitions, which are stored in the `usrSavedSearches` table.
+ * They also handle the organization and storage of these saved searches within
+ * hierarchical navigation trees, typically stored in the `ugr_NavigationTree`
+ * field of the `sysUGrps` table for users and groups.
+ *
+ * Functions in this file are typically prefixed with `svs_`.
+ *
+ * @package     hserv\structure
+ */
+
     /**
-    * Get all saved searches for given list of ids
-    *
-    * @param mixed $system
-    */
+     * Retrieves specific saved searches by their IDs.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param array|string|null $rec_ids An array or comma-separated string of saved search IDs (svs_ID).
+     * @return array|false An associative array where keys are `svs_ID` and values are arrays
+     *                     containing `[svs_Name, svs_Query, svs_UGrpID]`. Returns `false` on error
+     *                     or if no valid IDs are provided.
+     */
     function svsGetByIds($system, $rec_ids=null){
 
         if ($rec_ids) {
@@ -64,12 +81,24 @@
 
 
     /**
-    * Get all saved searches for given user
-    *
-    * @param mixed $system
-    * @param mixed $ugrID - if not defined it searches all
-    * @param $keep_order - keep order as define in groups tree
-    */
+     * Retrieves all saved searches accessible to a specified user or group, or the current user by default.
+     *
+     * It fetches searches owned by the user and also searches owned by any groups the user is a member of.
+     * Administrators can see searches belonging to group 0 (guest/public).
+     * Optionally, results can be ordered according to the structure defined in the user's or group's
+     * navigation tree (`ugr_NavigationTree`).
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param int|string|null $ugrID (Optional) A specific User/Group ID or a comma-separated list of IDs.
+     *                               If null, defaults to the current user and their associated groups.
+     * @param bool $keep_order (Optional) If true, the returned searches are ordered based on their
+     *                         appearance in the relevant navigation tree(s). Default is false.
+     * @return array|false If `$keep_order` is true, returns an associative array:
+     *                     `['order' => [ordered_svs_IDs...], 'svs' => [svs_ID => [svs_Name, svs_Query, svs_UGrpID], ...]]`.
+     *                     If `$keep_order` is false, returns a simpler associative array:
+     *                     `[svs_ID => [svs_Name, svs_Query, svs_UGrpID], ...]`.
+     *                     Returns `false` on database error.
+     */
     function svsGetByUser($system, $ugrID=null, $keep_order=false){
 
         $mysqli = $system->getMysqli();
@@ -142,6 +171,15 @@
     //
     //
     //
+    /**
+     * Recursively traverses a decoded JSON navigation tree to extract the order of saved search IDs.
+     *
+     * The navigation tree is expected to be an array (from `json_decode`). Nodes that are
+     * not folders and have a 'key' (which is assumed to be an `svs_ID`) are added to the `$order` array.
+     *
+     * @param array $tree The navigation tree structure (PHP array).
+     * @param array &$order Passed by reference. An array to which the ordered `svs_ID`s are appended.
+     */
     function svsGetOrderFromTree($tree, &$order){
 
         foreach($tree as $key=>$value){
@@ -156,11 +194,17 @@
     }
 
     /**
-    * Duplicate given saved search
-    *
-    * @param mixed $system
-    * @param mixed $record
-    */
+     * Duplicates an existing saved search.
+     *
+     * The new search will have "(copy)" appended to its name. The current user must be a member
+     * of the group that owns the original saved search to be able to copy it.
+     * The duplicated search is owned by the same group as the original.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param array $record An associative array containing `svs_ID` (the ID of the saved search to duplicate).
+     * @return array|false An array containing the data of the newly created saved search
+     *                     (svs_ID, svs_Name, svs_Query, svs_UGrpID) on success, or `false` on error.
+     */
     function svsCopy($system, $record){
 
         if (!(@$record['svs_ID']>0)){
@@ -209,11 +253,26 @@
     }
 
     /**
-    * Insert/update saved search
-    *
-    * @param mixed $system
-    * @param mixed $record  - [ svs_ID, svs_UGrpID, svs_Name, svs_Query ]
-    */
+     * Saves (inserts or updates) a saved search definition.
+     *
+     * - If `svs_ID` is provided and positive, it updates an existing saved search.
+     * - Otherwise, it inserts a new saved search.
+     * The current user must be a member of the specified `svs_UGrpID` (group) to save the search.
+     * If `svs_UGrpID` is not provided for a new search, it defaults to the current user's ID.
+     * This function can also handle a batch update if `$record['svs_ID']` is an array of IDs,
+     * applying the same name, query, and group to all of them (which might be unusual usage).
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param array $record An associative array containing the saved search data:
+     *                      - 'svs_ID': (Optional|int|array) ID(s) of the search to update. If not set or < 1, inserts new.
+     *                      - 'svs_UGrpID': (Optional|int) User/Group ID to own the search.
+     *                      - 'svs_Name': (string) Name of the saved search. Required for new searches.
+     *                      - 'svs_Query': (string) The query string/JSON. Required for new searches.
+     *                      - Other `svs_` fields can also be included.
+     * @return int|string|false The ID (`svs_ID`) of the created or updated saved search on success.
+     *                          If multiple IDs were processed (batch mode), it returns the ID of the last one.
+     *                          Returns an error code/message from `mysql__insertupdate` or `false` on validation/permission error.
+     */
     function svsSave($system, $record){
 
         if( !(@$record['svs_ID']>0) && !@$record['svs_Name']){
@@ -270,11 +329,18 @@
     }
 
     /**
-    * Delete saved search
-    *
-    * @param mixed $system
-    * @param mixed $rec_ids  - comma separeted list of IDs
-    */
+     * Deletes one or more saved searches.
+     *
+     * The current user must have administrative access to the group specified by `$ugrID`
+     * (or their own user group if `$ugrID` is null) to delete its saved searches.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param array|string $rec_ids An array or comma-separated string of saved search IDs (svs_ID) to delete.
+     * @param int|null $ugrID (Optional) The User/Group ID context for permission checking.
+     *                        If null, defaults to the current user's ID.
+     * @return array|false An array `["status"=>HEURIST_OK, "data"=> affected_rows_count]` on success,
+     *                     or `false` if an error occurs (permission denied, invalid IDs, DB error).
+     */
     function svsDelete($system, $rec_ids, $ugrID=null){
 
         //verify that current user can delete
@@ -315,8 +381,21 @@
     }
 
     /**
-    * Save saved searches tree data into sysUGrps
-    */
+     * Saves the hierarchical tree structure for organizing saved searches (and other items)
+     * for users and groups.
+     *
+     * The input `$data` is a JSON string representing an object where keys are User/Group IDs
+     * (or special keys like "bookmark", "all" for the current user's personal tree) and
+     * values are the tree structures themselves (also JSON, typically representing nested lists
+     * of items with 'key', 'title', 'folder' attributes).
+     * This method updates the `ugr_NavigationTree` field in the `sysUGrps` table for each
+     * specified user/group ID that the current user has permission to modify.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param string $data A JSON string representing the tree data for one or more users/groups.
+     * @return string|false The modification timestamp (`ugr_Modified`) of the last updated user/group
+     *                      record on success, or `false` on error.
+     */
     function svsSaveTreeData($system, $data){
 
         $mysqli = $system->getMysqli();
@@ -372,8 +451,21 @@
     }
 
     //
-    // $grpID - load tree data only for particular group
-    //
+    /**
+     * Retrieves the navigation tree data for the current user and their groups, or for a specific group.
+     *
+     * The navigation tree (`ugr_NavigationTree` from `sysUGrps`) stores the hierarchical
+     * organization of items like saved searches. This function fetches this JSON string.
+     * For the current user, it fetches their personal tree and the trees of all groups they are a member of.
+     * If `$grpID` is specified, it only fetches the tree for that group.
+     * The individual JSON tree strings are combined into a single JSON object string.
+     *
+     * @param \hserv\System $system The Heurist system object.
+     * @param int|string|null $grpID (Optional) A specific Group ID or a comma-separated list of Group IDs.
+     *                               If null, fetches data for the current user and their groups.
+     * @return string|false A JSON string representing the combined navigation tree data
+     *                      (e.g., `{"userID":{"tree..."}, "groupID":{"tree..."}}`), or `false` on error.
+     */
     function svsGetTreeData($system, $grpID=null){
 
         $mysqli = $system->getMysqli();

@@ -34,36 +34,108 @@ require_once dirname(__FILE__).'/../../utilities/geo/mapCoordConverter.php';
 require_once dirname(__FILE__).'/../../../vendor/autoload.php';//for geoPHP
 require_once dirname(__FILE__).'/../../../admin/verification/verifyValue.php';
 
+/**
+ * SQL error message prefix for validation query failures.
+ */
 define('ERR_VALIDATION_QUERY','SQL error: Cannot perform validation query: ');
+/**
+ * Progress message for validation of numeric fields.
+ */
 define('MSG_VALIDATION_1','validation of numeric fields');
+/**
+ * Progress message for validation of record pointer fields.
+ */
 define('MSG_VALIDATION_2','validation of record pointer fields');
 
 /**
-* 3 public methods
-* assignRecordIds  (matching)
-* validateImport
-* performImport
-*
-*/
+ * Class ImportAction
+ *
+ * Provides static methods to manage the Heurist data import process after initial parsing.
+ * This class orchestrates the core import workflow, which includes:
+ * 1. Matching: Identifying existing Heurist records that correspond to rows in the temporary import table.
+ *    This involves dynamic query building based on user-defined field mappings and handling disambiguation.
+ *    The result is the assignment of Heurist record IDs (or temporary negative IDs for new records)
+ *    to each row in the import table. (Handled by `assignRecordIds` and its helpers).
+ * 2. Validation: Checking the data in the import table for integrity, conformity to field types
+ *    (enum, resource, numeric, date, geo), and adherence to required field constraints.
+ *    (Handled by `validateImport` and its helpers).
+ * 3. Performing Import: Creating new Heurist records or updating existing ones based on the
+ *    validated data from the import table. This step uses the `recordSave` functionality.
+ *    (Handled by `performImport` and its helpers).
+ *
+ * The class also includes utility methods for importing terms (`importTerms`) and modifying
+ * the import table structure (`insertNewColumns`).
+ *
+ * All methods are static and this class is typically invoked by `hserv/controller/importController.php`.
+ * It operates on data stored in a temporary import table associated with an import session.
+ *
+ * @package hserv\records\import
+ */
 class ImportAction {
 
+    /**
+     * @var \hserv\System|null The Heurist system object.
+     */
     private static $system = null;
+    /**
+     * @var \mysqli|null The mysqli database connection object.
+     */
     private static $mysqli = null;
+    /**
+     * @var bool Flag indicating if the class has been initialized.
+     */
     private static $initialized = false;
 
+    /**
+     * @var int Counter for processed records during an import operation (used by `performImport`).
+     */
     private static $rep_processed = 0;
+    /**
+     * @var int Counter for added records during an import operation (used by `performImport`).
+     */
     private static $rep_added     = 0;
+    /**
+     * @var int Counter for updated records during an import operation (used by `performImport`).
+     */
     private static $rep_updated   = 0;
+    /**
+     * @var int Counter for skipped records due to errors during an import operation (used by `performImport`).
+     */
     private static $rep_skipped    = 0;
+    /**
+     * @var array Accumulates details of skipped records/errors (used by `performImport`).
+     */
     private static $rep_skipped_details = array();
+    /**
+     * @var int Counter for records skipped due to permission issues (used by `performImport`).
+     */
     private static $rep_permission  = 0;
+    /**
+     * @var array Keeps track of unique record IDs processed to avoid double counting updates (used by `performImport`).
+     */
     private static $rep_unique_ids = array();
-    //private static $imp_session;
 
+    /**
+     * @var int Counter for invalid geographic data encountered during CSV import (used by `performImport`).
+     */
     private static $invalid_geo = 0;
 
-    private static $increment_fields = array();// array(rty_ID => array(dty_ID1, dty_ID2, ...))
+    /**
+     * @var array Cache for auto-increment field values during import.
+     *            Format: `[rty_ID => [dty_ID1 => last_value1, dty_ID2 => last_value2, ...]]`
+     */
+    private static $increment_fields = array();
 
+    /**
+     * Initializes the class with the global Heurist system object.
+     *
+     * Sets static properties for the system object and mysqli connection,
+     * and marks the class as initialized. This method is called internally
+     * by other static methods if the class hasn't been initialized yet.
+     * The `$fields_correspondence` parameter is not used.
+     *
+     * @param mixed|null $fields_correspondence This parameter is not currently used.
+     */
 private static function initialize($fields_correspondence=null)
 {
     if (self::$initialized) {return;}
@@ -76,6 +148,20 @@ private static function initialize($fields_correspondence=null)
 
 //-------------------------------- MATCHING ----------------------------------------
 
+    /**
+     * Finds a user's disambiguation resolution for a given key value.
+     *
+     * When matching imported data yields multiple possible Heurist records for a
+     * set of key values, the user might be prompted to choose one. This choice
+     * is stored in `$disamb_resolv`. This function looks up that choice.
+     *
+     * @param string $keyvalue The specific combination of key field values from an import row
+     *                         that led to a disambiguation situation.
+     * @param array|null $disamb_resolv An array of disambiguation choices made by the user.
+     *                                  Each element is expected to be an associative array
+     *                                  like `['key' => $keyvalue, 'recid' => $chosen_record_id]`.
+     * @return int|null The chosen Heurist record ID (`recid`) if a resolution is found for `$keyvalue`, otherwise null.
+     */
 private static function findDisambResolution($keyvalue, $disamb_resolv){
 
     $idx = findInArray($disamb_resolv, 'key', $keyvalue);
@@ -86,17 +172,52 @@ private static function findDisambResolution($keyvalue, $disamb_resolv){
     return null;
 }
 
+    /**
+     * Composes a basic SELECT query string to retrieve specified fields from the import table.
+     *
+     * @param array $fields An array of field names (columns in the import table) to select.
+     * @param string $import_table The name of the temporary import table.
+     * @return string The SQL SELECT query string.
+     */
 private static function composeQuery($fields, $import_table){
     return "SELECT imp_id, `".implode("`,`",$fields)."` FROM `$import_table` ";
 }
 
-/**
-* Perform matching - find record id in heurist db
-*
-* @param mixed $mysqli
-* @param mixed $imp_session
-* @param mixed $params
-*/
+    /**
+     * Core logic for matching rows in the import table to existing Heurist records.
+     *
+     * Iterates through each row of the temporary import table (`$imp_session['import_table']`).
+     * For each row, it constructs a dynamic SQL query based on the fields mapped by the user
+     * for matching (`$params['mapping']`). This query attempts to find existing Heurist records
+     * that match the values in the current import row.
+     *
+     * Handles:
+     * - Different field types for matching (ID, URL, detail fields including enums).
+     * - Multi-value fields: If a field designated as `$params['multifield']` is used for matching,
+     *   it splits its content and attempts to match each individual value in conjunction with other key fields.
+     * - Disambiguation: If a set of key values from an import row matches multiple Heurist records,
+     *   it checks `$params['disamb_resolv']` for a user's explicit choice. If no resolution is found,
+     *   the row is flagged for disambiguation.
+     * - Caching: Remembers matches found for a unique combination of key values (`$pairs`) to avoid re-querying.
+     *
+     * Populates `$imp_session['validation']` with:
+     * - `recs_insert`: Rows from import table that appear to be new records (assigned temporary negative IDs).
+     * - `recs_update`: Rows from import table that match existing records (associated with the matched Heurist record ID).
+     * - `disambiguation`: Information about rows that require disambiguation.
+     * - `records`: An array mapping each import row's `imp_id` to a Heurist record ID (or a list of IDs if multi-value matching occurred).
+     * - Counts for inserts, updates, ignored rows.
+     *
+     * @param array $imp_session The import session data, including 'import_table' name and 'reccount'.
+     *                           The 'validation' sub-array will be heavily populated by this method.
+     * @param array $params Parameters controlling the matching process, including:
+     *                      - 'session': Progress session ID.
+     *                      - 'multifield': Name of the field in the import table treated as multi-valued for matching.
+     *                      - 'disamb_resolv': User's disambiguation choices.
+     *                      - 'sa_rectype': The target Heurist record type for the import.
+     *                      - 'ignore_rectype': Boolean, if true, record type is not part of matching criteria.
+     *                      - 'mapping': Array defining how columns in the import table map to Heurist fields for matching.
+     * @return array|false The updated `$imp_session` array with matching results, or `false` on critical DB error.
+     */
 private static function findRecordIds($imp_session, $params){
 
     $progress_session_id = @$params['session'];
@@ -502,10 +623,25 @@ private static function findRecordIds($imp_session, $params){
 *
 * since we do match and assign in ONE STEP - first we call findRecordIds
 *
-* @param mixed $mysqli
-* @param mixed $imp_session
-* @param mixed $params
-* @return mixed
+* @param array $params Parameters controlling the record ID assignment process. Expected keys:
+*                      - 'imp_ID': The ID of the import session.
+*                      - 'sa_rectype': The target Heurist record type ID.
+*                      - 'seq_index': Index for sequence processing (if part of a multi-step import).
+*                      - 'match_mode': Integer indicating matching strategy:
+*                        0 = Match by mapped fields (calls `findRecordIds`).
+*                        1 = Match by a specific ID field from the import data (assumes IDs are Heurist rec_IDs).
+*                        2 = Skip matching (treat all rows as new records).
+*                      - 'idfield': (Optional) Name of the column in the import table that contains existing Heurist record IDs
+*                                   (used when `match_mode` is 1, or as the target field to write resolved IDs to).
+*                                   If not provided, a new column might be generated.
+*                      - 'mapping': (Optional) Field mapping definitions, used if `match_mode` is 0.
+*                      - 'disamb_resolv', 'disamb_id', 'disamb_key': (Optional) User's disambiguation choices.
+*                      - 'session': (Optional) Progress session ID.
+*
+* @return array|false The updated import session array (`$imp_session`) containing matching results
+*                     (counts, disambiguation info, record ID mappings), or `false` on critical error.
+*                     If disambiguation is required, the returned array will contain disambiguation details,
+*                     and the process typically pauses for user input.
 */
 public static function assignRecordIds($params){
 
@@ -800,8 +936,41 @@ public static function assignRecordIds($params){
 * ignore_update - ignore records to be updated
 * mapping
 *
-* @param mixed $mysqli
+* @param array $params Parameters controlling the validation. Key parameters include:
+*                      - 'imp_ID': The ID of the import session.
+*                      - 'sa_rectype': The target Heurist record type ID.
+*                      - 'seq_index': (Optional) Index for sequence processing.
+*                      - 'recid_field': The name of the column in the import table that stores the matched/assigned record IDs.
+*                      - 'ignore_insert', 'ignore_update': Booleans to skip validation for rows intended for insert or update.
+*                      - 'mapping': Array defining how columns in the import table map to Heurist fields.
+*                      - 'session': (Optional) Progress session ID.
+*
+* @return array|false The updated import session array, with the 'validation' key extensively populated
+*                     with error and warning details, counts of records for insert/update, and samples
+*                     of rows for preview. Returns `false` on critical error (e.g., DB error, essential param missing).
 */
+    /**
+     * Validates the data in the temporary import table after record IDs have been assigned.
+     *
+     * This method performs a series of checks on the imported data:
+     * 1. Calculates counts of records to be updated vs. inserted based on the assigned record IDs.
+     * 2. If an ID field from the original CSV is used (not one generated during matching), it validates
+     *    that these IDs correspond to records of the correct target record type.
+     * 3. Checks if all required fields (as defined in the Heurist record type structure)
+     *    are mapped and have non-empty values for records being inserted (or updated, depending on settings).
+     * 4. Validates data types and constraints for mapped fields:
+     *    - Enumeration fields: Checks if values are valid terms (by label, code, or ID) within the allowed vocabulary.
+     *    - Resource pointer fields: Checks if IDs point to existing Heurist records of an allowed type.
+     *    - Numeric fields: Checks if values are valid numbers.
+     *    - Date/Year fields: Checks if values are in recognizable date/year formats.
+     *    - Geo fields: Performs basic WKT validation and checks for potential UTM coordinate warnings.
+     *
+     * Validation results (errors and warnings) are collected in the `$imp_session['validation']` array,
+     * including counts, messages, and sample rows with highlighted issues.
+     *
+     * @param array $params Parameters controlling the validation process. See detailed list in class PHPDoc for `validateImport`.
+     * @return array|false The updated import session array with validation results, or `false` on critical error.
+     */
 public static function validateImport($params) {
 
     self::initialize();
@@ -1633,8 +1802,28 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 * @param mixed $message
 * @param mixed $imp_session
 * @param mixed $fields_checked
-* @param mixed $type  error or warning
+* @param string $type The type of issue, either 'error' or 'warning'.
+* @return array|string|null The updated `$imp_session` array if wrong records are found,
+*                           a string error message if the query fails, or null if no wrong records are found.
 */
+    /**
+     * Executes a validation query and formats any resulting "wrong" records for the import session report.
+     *
+     * This is a generic helper used by various validation checks. It runs the provided SQL query,
+     * which is expected to return rows from the import table that violate a specific validation rule.
+     * If such rows are found, it formats them along with error messages and counts into the
+     * `$imp_session['validation'][$type]` array.
+     *
+     * @param string $query The SQL query to find problematic rows in the import table.
+     * @param array $imp_session The current import session data. The 'validation' part will be updated.
+     * @param string $message A descriptive message explaining the validation rule violation.
+     * @param string $short_message A shorter title for this type of validation issue.
+     * @param string|array $fields_checked The name(s) of the field(s) in the import table that were checked.
+     * @param string $type The category of the issue, typically 'error' or 'warning'.
+     * @return array|string|null Returns the modified `$imp_session` if violations are found.
+     *                           Returns an error string constant (ERR_VALIDATION_QUERY) plus SQL error if the query fails.
+     *                           Returns null if no violations are found by the query.
+     */
 private static function getWrongRecords($query, $imp_session, $message, $short_message, $fields_checked, $type='error'){
 
     $mysqli = self::$mysqli;
@@ -1682,9 +1871,34 @@ private static function getWrongRecords($query, $imp_session, $message, $short_m
 * @param mixed $dt_id - mapped detail type ID
 * @param mixed $field_idx - index of validation field in query result (to get value)
 * @param mixed $recStruc - record type structure
-* @param mixed $message - error message
-* @param mixed $short_message
+* @param string $message The error message to display for invalid terms.
+* @param string $short_message A short title for this validation error type.
+* @param string|int|null $progress_session_id ID for updating progress.
+* @return array|string|null The updated `$imp_session` if errors are found, an error string on query failure, or null.
 */
+    /**
+     * Validates enumeration (term) fields in the import data.
+     *
+     * Iterates through rows returned by `$query`. For each row, it extracts values from the
+     * column specified by `$fields_checked` (using `$field_idx`). If the field is multi-valued
+     * (based on `$imp_session['csv_mvsep']`), it splits the string.
+     * Each individual value is then checked against the allowed terms for the given detail type (`$dt_id`)
+     * using `VerifyValue::isValidTerm`, `VerifyValue::isValidTermLabel`, and `VerifyValue::isValidTermCode`.
+     * If a value is not a valid term, the row is marked as erroneous, and the specific invalid value
+     * is highlighted with a red span for display.
+     *
+     * @param string $query SQL query to select rows from the import table.
+     * @param array $imp_session Current import session data.
+     * @param string $fields_checked Name of the field in the import table being validated.
+     * @param int $dt_id The Heurist detail type ID for this enumeration field.
+     * @param int $field_idx Index of the `$fields_checked` column in the result of `$query`.
+     * @param array $recStruc Record type structure definition for the target record type.
+     * @param int $recordType The target Heurist record type ID.
+     * @param string $message Error message for invalid terms.
+     * @param string $short_message Short title for this validation error type.
+     * @param string|int|null $progress_session_id Progress session ID.
+     * @return array|string|null Updated `$imp_session` if errors found, error string on query fail, or null.
+     */
 private static function validateEnumerations($query, $imp_session, $fields_checked, $dt_id, $field_idx, $recStruc, $recordType,
             $message, $short_message, $progress_session_id){
 
@@ -1795,9 +2009,32 @@ private static function validateEnumerations($query, $imp_session, $fields_check
 * @param mixed $imp_session
 * @param mixed $fields_checked - name of field to be verified
 * @param mixed $dt_id - mapped detail type ID
-* @param mixed $field_idx - index of validation field in query result (to get value)
-* @param mixed $recStruc - record type structure
+* @param int $field_idx Index of the `$fields_checked` column in the result of `$query`.
+* @param array $recStruc Record type structure definition for the target record type.
+* @param int $recordType The target Heurist record type ID.
+* @param string|int|null $progress_session_id Progress session ID.
+* @return array|string|null The updated `$imp_session` if errors are found, an error string on query failure, or null.
 */
+    /**
+     * Validates resource pointer fields in the import data.
+     *
+     * Iterates through rows from `$query`. For each row, it extracts values from the
+     * column `$fields_checked`. If multi-valued, values are split.
+     * Each individual ID is validated using `VerifyValue::isValidPointer` against the
+     * allowed pointer types defined in the record structure (`$dt_def[$idx_pointer_types]`).
+     * Invalid pointers are highlighted in the row data for error reporting.
+     *
+     * @param \mysqli $mysqli The mysqli connection (note: uses `self::$mysqli` internally, so param is redundant).
+     * @param string $query SQL query to select rows from the import table.
+     * @param array $imp_session Current import session data.
+     * @param string $fields_checked Name of the field in the import table being validated.
+     * @param int $dt_id The Heurist detail type ID for this resource pointer field.
+     * @param int $field_idx Index of the `$fields_checked` column in the result of `$query`.
+     * @param array $recStruc Record type structure definition.
+     * @param int $recordType The target Heurist record type ID.
+     * @param string|int|null $progress_session_id Progress session ID.
+     * @return array|string|null Updated `$imp_session` if errors found, error string on query fail, or null.
+     */
 private static function validateResourcePointers($mysqli, $query, $imp_session,
                                         $fields_checked, $dt_id, $field_idx, $recStruc, $recordType, $progress_session_id){
 
@@ -1871,11 +2108,27 @@ private static function validateResourcePointers($mysqli, $query, $imp_session,
 * put your comment there...
 *
 * @param mixed $mysqli
-* @param mixed $query
-* @param mixed $imp_session
-* @param mixed $fields_checked - name of field to be verified
-* @param mixed $field_idx - index of validation field in query result (to get value)
+* @param string $type Type of validation issue ('error' or 'warning').
+* @param string|int|null $progress_session_id Progress session ID.
+* @return array|string|null The updated `$imp_session` if errors are found, an error string on query failure, or null.
 */
+    /**
+     * Validates numeric fields in the import data.
+     *
+     * Iterates through rows from `$query`. For each row, it extracts values from the
+     * column `$fields_checked`. If multi-valued, values are split.
+     * Each individual value is checked using `is_numeric()`. Non-numeric values
+     * are highlighted in the row data for error reporting.
+     *
+     * @param \mysqli $mysqli The mysqli connection (note: uses `self::$mysqli` internally, so param is redundant).
+     * @param string $query SQL query to select rows from the import table.
+     * @param array $imp_session Current import session data.
+     * @param string $fields_checked Name of the field in the import table being validated.
+     * @param int $field_idx Index of the `$fields_checked` column in the result of `$query`.
+     * @param string $type Type of validation issue ('error' or 'warning').
+     * @param string|int|null $progress_session_id Progress session ID.
+     * @return array|string|null Updated `$imp_session` if errors found, error string on query fail, or null.
+     */
 private static function validateNumericField($mysqli, $query, $imp_session, $fields_checked, $field_idx, $type, $progress_session_id){
 
     $res = $mysqli->query($query);
@@ -1942,11 +2195,27 @@ private static function validateNumericField($mysqli, $query, $imp_session, $fie
 * put your comment there...
 *
 * @param mixed $mysqli
-* @param mixed $query
-* @param mixed $imp_session
-* @param mixed $fields_checked - name of field to be verified
-* @param mixed $field_idx - index of validation field in query result (to get value)
+* @param string $type Type of validation issue ('error' or 'warning').
+* @return array|string|null The updated `$imp_session` if errors are found, an error string on query failure, or null.
 */
+    /**
+     * Validates date or year fields in the import data.
+     *
+     * Iterates through rows from `$query`. For each row, it extracts values from the
+     * column `$fields_checked`. If multi-valued, values are split.
+     * Each individual value is checked:
+     * - If it matches a year-only regex (`REGEX_YEARONLY`), it's considered valid.
+     * - Otherwise, it's passed to `new Temporal()`. If the `Temporal` object is valid, the date is good.
+     * - As a fallback, it tries parsing with `new DateTime()`.
+     * Invalid date values are highlighted in the row data for error reporting.
+     *
+     * @param string $query SQL query to select rows from the import table.
+     * @param array $imp_session Current import session data.
+     * @param string $fields_checked Name of the field in the import table being validated.
+     * @param int $field_idx Index of the `$fields_checked` column in the result of `$query`.
+     * @param string $type Type of validation issue ('error' or 'warning').
+     * @return array|string|null Updated `$imp_session` if errors found, error string on query fail, or null.
+     */
 private static function validateDateField($query, $imp_session, $fields_checked, $field_idx, $type){
 
     $res = self::$mysqli->query($query);
@@ -2029,9 +2298,25 @@ private static function validateDateField($query, $imp_session, $fields_checked,
 *
 * @param mixed $wkt - Geo value to validate
 * @param int $rec_id - Record id within import table
-* @param mixed $table - Import table name
-* @param mixed $field - Import field name within table
+* @param string $table Name of the import table.
+* @param string $field Name of the geo field in the import table.
+* @return string|false The corrected WKT string (e.g., "POINT (x y)") if validation and correction were successful,
+*                      or `false` if the value could not be validated or corrected to a simple point.
 */
+    /**
+     * Validates and potentially corrects a geographic WKT value.
+     *
+     * Attempts to parse a WKT string. If it fails or the WKT is simple comma/space separated coordinates,
+     * it tries to interpret it as a pair of coordinates (x, y) and constructs a "POINT (x y)" WKT string.
+     * If successful and the original field value in the import table was different, it updates
+     * the import table with the corrected WKT string.
+     *
+     * @param string $wkt The geographic value (potentially WKT) from the import table.
+     * @param int $rec_id The `imp_id` of the row in the import table.
+     * @param string $table The name of the import table.
+     * @param string $field The name of the column in the import table containing the geo value.
+     * @return string|false The corrected "POINT (x y)" WKT string if successful, or `false`.
+     */
 private static function validateGeoField($wkt, $rec_id, $table, $field){
 
     $res = false;
@@ -2102,9 +2387,23 @@ private static function validateGeoField($wkt, $rec_id, $table, $field){
 /**
 * Split multivalue field
 *
-* @param array|string $values
-* @param mixed $csv_enclosure
+* @param string|array $values The string (or an array, though typically a string is expected here) containing the value(s).
+* @param string|int $csv_enclosure The CSV enclosure character (e.g., '"', "'", or 1 for single quote, 'none' for no enclosure).
+* @param string $csv_mvsep The multi-value separator character.
+* @return array An array of individual values, trimmed.
 */
+    /**
+     * Splits a string containing potentially multiple values into an array of individual values.
+     *
+     * Handles values separated by `$csv_mvsep`. If `$csv_mvsep` is 'none', the input value
+     * is returned as a single-element array. It also attempts to handle CSV enclosure
+     * characters around individual values if present.
+     *
+     * @param string $values The string from the CSV cell.
+     * @param string|int $csv_enclosure The CSV enclosure character used during parsing (e.g., '"', "'", 1 for ', or 'none').
+     * @param string $csv_mvsep The multi-value separator character defined for the import.
+     * @return array An array of trimmed string values.
+     */
 private static function getMultiValues($values, $csv_enclosure, $csv_mvsep){
 
     $nv = array();
@@ -2139,8 +2438,20 @@ private static function getMultiValues($values, $csv_enclosure, $csv_mvsep){
 
 //=================
 //
-// assign real record ID into import (source) table  NOT USED
 //
+    /**
+     * Updates the record ID field in the import table for a given import row.
+     *
+     * NOTE: This method appears to be unused in the current codebase.
+     * Its original intention was likely to update the `$id_field` in the `$import_table`
+     * for a specific `imp_id` with a list of `$newids` (joined by `$csv_mvsep`).
+     *
+     * @param string $import_table The name of the import table.
+     * @param int $imp_id The ID of the row in the import table to update.
+     * @param string $id_field The name of the ID column in the import table.
+     * @param array $newids An array of new record IDs to write into the ID field.
+     * @param string $csv_mvsep The separator to use if multiple new IDs are provided.
+     */
 private static function updateRecIds($import_table, $imp_id, $id_field, $newids, $csv_mvsep){
 
     if(!isEmptyArray($newids)){
@@ -2159,6 +2470,19 @@ private static function updateRecIds($import_table, $imp_id, $id_field, $newids,
 //
 //
 //
+    /**
+     * Fetches the existing details of a Heurist record.
+     *
+     * Retrieves the record's URL, ScratchPad content, and all its detail field values
+     * (including standard values, geo data as WKT, and uploaded file IDs).
+     * The details are structured in an array format similar to how they are prepared
+     * for `recordSave`, with detail type IDs prefixed by "t:" and detail IDs by "bd:".
+     *
+     * @param int $recordId The ID of the Heurist record to fetch.
+     * @return array An associative array containing the record's existing data.
+     *               Keys include 'recordURL', 'recordNotes', and 't:<dty_ID>' => ['bd:<dtl_ID>' => value, ...].
+     *               Returns an empty array if the record is not found.
+     */
 private static function findOriginalRecord($recordId){
 
     $details = array();
@@ -2199,6 +2523,41 @@ private static function findOriginalRecord($recordId){
 //
 //
 //
+    /**
+     * Inserts or updates a single Heurist record using the `recordSave` function.
+     *
+     * This method is the core database writer for the import process. It:
+     * - Checks write permissions for the record if it's an update using `recordCanChangeOwnerwhipAndAccess`.
+     * - Assembles the `$record` array in the format expected by `recordSave()`, including details,
+     *   URL, ScratchPad, and flags like `AddedByImport` and `no_validation`.
+     * - Handles auto-increment fields for new records by fetching next values using
+     *   `recordGetAllIncremenetedValues` if not provided in `$details`,
+     *   and caching them in `self::$increment_fields`.
+     * - Calls `_isRecordUpdating` to check if the update operation would actually change data,
+     *   to avoid "empty" updates when counting.
+     * - Calls `recordSave()` to perform the database operation.
+     * - Updates import report statistics (`self::$rep_...` counters) based on the outcome.
+     * - If a new record is created (`$recordId` was 0 or negative) or if the record ID in the
+     *   import table needs to reflect a resolved (multi-value) ID, it updates the
+     *   corresponding row(s) in the import table with the actual Heurist record ID.
+     *
+     * @param int|null $recordId The Heurist record ID to update. If 0, null, or negative, a new record is created.
+     *                           A negative ID implies an insert using that specific (negated) ID if available.
+     * @param string $import_table The name of the temporary import table.
+     * @param int $recordType The Heurist record type ID.
+     * @param string $csv_mvsep The multi-value separator (used when updating the ID field in import table if it was multi-valued).
+     * @param array $details An associative array of field data for the record. Keys are detail type IDs
+     *                       (prefixed with "t:") or special keys like 'URL', 'ScratchPad', 'imp_id'.
+     *                       Values are the field values. 'imp_id' contains an array of original import table row IDs.
+     * @param string|null $id_field The name of the ID column in the `$import_table`.
+     * @param int|null $old_id_in_idfield If the `$id_field` in the import table contained a temporary/multi-value ID
+     *                                    that resolved to `$recordId`, this is that original temporary ID. Used to
+     *                                    update the correct rows in `$import_table` if `$id_field` itself is multi-valued.
+     * @param string $mode_output Output mode for error messages (e.g., 'html', 'json').
+     * @param bool $ignore_errors If true, 'no_validation' is passed to `recordSave` to bypass some checks.
+     * @param int $record_count Total number of records being processed (passed to `recordSave`).
+     * @return int|null The new or updated Heurist record ID if successful, otherwise null (error occurred or skipped).
+     */
 private static function doInsertUpdateRecord($recordId, $import_table, $recordType, $csv_mvsep,
                                                                     $details, $id_field, $old_id_in_idfield, $mode_output,
                                                                     $ignore_errors, $record_count){
@@ -2417,9 +2776,20 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
 /*
 * Get values for given ID from imort table (to preview values on UI)
 *
-* @param mixed $rec_id
-* @param mixed $import_table
+* @param int $rec_id The `imp_id` (import row ID) to look up.
+* @param string $import_table The name of the import table.
+* @return array|null An array containing all values for the specified row, or null if not found.
 */
+    /**
+     * Retrieves all values for a specific row from the import table.
+     *
+     * This is typically used for error reporting or displaying sample data,
+     * allowing the system to show the original imported values that caused an issue.
+     *
+     * @param int $rec_id The `imp_id` of the row to retrieve.
+     * @param string $import_table The name of the import table.
+     * @return array|null An array of all field values for the specified row, or null if not found.
+     */
 private static function getImportValue($rec_id, $import_table){
 
     $query = "select * from $import_table where imp_id=".$rec_id;
@@ -2430,17 +2800,72 @@ private static function getImportValue($rec_id, $import_table){
 /**
 * create or update records
 *
-* @param mixed $params
-*         is_csv_import
-*         session
-*         imp_ID  - import session id
-*         download_files - download remote files and register
-*         sa_rectype
-*         utm_zone
-*         seq_index
-*         recid_field
-*         mapping
+* @param array $params Parameters controlling the import execution. Notable keys:
+*                      - 'imp_ID': ID of the import session.
+*                      - 'sa_rectype': Target Heurist record type ID.
+*                      - 'recid_field': Name of the column in the import table holding assigned Heurist record IDs.
+*                      - 'mapping': Array defining how columns in the import table map to Heurist fields.
+*                      - 'ignore_insert': Boolean, if true, rows marked for insertion are skipped.
+*                      - 'ignore_update': Boolean, if true, rows marked for update are skipped.
+*                      - 'ignore_errors': Boolean, if true, some data validation in `recordSave` might be bypassed.
+*                      - 'sa_upd': Integer defining update mode (0: append distinct, 1: add if empty, 2: replace all, 3: add all).
+*                      - 'sa_upd2': (Used with sa_upd=2) Integer, if 1, delete existing values even if no new data is supplied.
+*                      - 'utm_zone': (Optional) UTM zone for converting geographic coordinates.
+*                      - 'csv_mvsep': Multi-value separator character.
+*                      - 'csv_enclosure': CSV enclosure character.
+*                      - 'session': (Optional) Progress session ID.
+*                      - 'is_csv_import': (Optional) Flag indicating if the source is CSV, affecting geo error counting.
+* @param string $mode_output Output mode for error messages during the process (e.g., 'html', 'json').
+* @return array|false The updated import session array, now including an 'import_report' with statistics
+*                     (processed, inserted, updated, skipped, permissions issues, etc.), or `false` on critical error.
 */
+    /**
+     * Performs the actual import of data into Heurist records (creation or update).
+     *
+     * This is the final step in the import process. It iterates through the validated data
+     * in the temporary import table and uses `recordSave()` (via `doInsertUpdateRecord`)
+     * to save the data into Heurist.
+     *
+     * Key operations:
+     * - Initializes import report counters (`self::$rep_...` properties).
+     * - Loads the import session and mapping details.
+     * - Sets up geographic coordinate conversion if a UTM zone is specified.
+     * - Iterates through rows in the import table, ordered by the assigned record ID field
+     *   to group data for the same Heurist record.
+     * - For each Heurist record (which might span multiple rows in the import table if data was denormalized):
+     *   - Determines if it's an insert (new record) or update based on the record ID from the ID field.
+     *   - Gathers all field values from the import row(s) for the current Heurist record.
+     *   - Converts/processes values for specific field types (enum, resource, file, geo, date).
+     *     This includes resolving term labels/codes to IDs, file paths/URLs to ULF IDs,
+     *     and converting geo data if needed.
+     *   - Handles multi-value fields by splitting them based on `csv_mvsep`.
+     *   - For updates, it can fetch existing record details using `findOriginalRecord` to apply
+     *     update rules based on `$params['sa_upd']` (e.g., retain existing, replace all,
+     *     add new only if empty, add all).
+     *   - Calls `doInsertUpdateRecord` to save the assembled record data.
+     * - Manages database transactions for atomicity (commits every 1000 records).
+     * - Updates the import session with a final report including counts of processed,
+     *   added, updated, and skipped records.
+     *
+     * @param array $params Parameters controlling the import execution. Notable keys:
+     *                      - 'imp_ID': ID of the import session.
+     *                      - 'sa_rectype': Target Heurist record type ID.
+     *                      - 'recid_field': Name of the column in the import table holding assigned Heurist record IDs.
+     *                      - 'mapping': Array defining how columns in the import table map to Heurist fields.
+     *                      - 'ignore_insert': Boolean, if true, rows marked for insertion are skipped.
+     *                      - 'ignore_update': Boolean, if true, rows marked for update are skipped.
+     *                      - 'ignore_errors': Boolean, if true, some data validation in `recordSave` might be bypassed.
+     *                      - 'sa_upd': Integer defining update mode (0: append distinct, 1: add if empty, 2: replace all, 3: add all).
+     *                      - 'sa_upd2': (Used with sa_upd=2) Integer, if 1, delete existing values even if no new data is supplied.
+     *                      - 'utm_zone': (Optional) UTM zone for converting geographic coordinates.
+     *                      - 'csv_mvsep': Multi-value separator character.
+     *                      - 'csv_enclosure': CSV enclosure character.
+     *                      - 'session': (Optional) Progress session ID.
+     *                      - 'is_csv_import': (Optional) Flag indicating if the source is CSV, affecting geo error counting.
+     * @param string $mode_output Output mode for error messages during the process (e.g., 'html', 'json').
+     * @return array|false The updated import session array, now including an 'import_report' with statistics
+     *                     (processed, inserted, updated, skipped, permissions issues, etc.), or `false` on critical error.
+     */
 public static function performImport($params, $mode_output){
 
     self::initialize();
@@ -3302,8 +3727,26 @@ public static function performImport($params, $mode_output){
 } //end performImport
 
 //
-// Imports all missing terms
 //
+    /**
+     * Imports new terms into specified vocabularies based on data from the import table.
+     *
+     * This method allows for batch creation of new terms. For each field specified in `$params['fields']`,
+     * it reads distinct values from the corresponding column in the import table. Each distinct value
+     * is then treated as a label for a new term to be created under the specified parent term ID (vocabulary).
+     * It uses `DbDefTerms->batch_action()` for efficient term creation.
+     *
+     * @param array $params Parameters for the term import. Expected keys:
+     *                      - 'imp_ID': The ID of the import session.
+     *                      - 'fields': An array where each element is an array:
+     *                        `[field_id_in_import_table, dty_ID (unused), parent_term_ID_for_vocabulary]`.
+     *                      - 'trm_Separator': (Optional) If '.', allows hierarchical term creation based on dot notation.
+     *                      - 'trm_RetainParentLabel': (Optional) Option for hierarchical term creation.
+     *                      - 'session': (Optional) Progress session ID.
+     * @return array An array summarizing the term import results, including counts of successes,
+     *               errors, and invalid parameters, keyed by the index of the field in the input `$params['fields']`.
+     *               Also includes a general 'added' count for successfully created terms.
+     */
 public static function importTerms($params){
 
     self::initialize();
@@ -3467,8 +3910,20 @@ public static function importTerms($params){
 }
 
 //
-// Insert a new column into each record row, with pre-filled data
 //
+    /**
+     * Inserts a new column into the temporary import table and pre-fills it with specified data.
+     *
+     * This utility function allows for the modification of the import table's structure
+     * during an import session, for example, to add a constant value or a calculated
+     * field to all rows before further processing.
+     *
+     * @param array $params Parameters for inserting the new column. Expected keys:
+     *                      - 'imp_ID': The ID of the import session.
+     *                      - 'column_name': The desired name for the new column (will appear in UI).
+     *                      - 'column_data': The data to pre-fill in every row of the new column.
+     * @return bool True on success, `false` on failure (errors are set in the system object).
+     */
 public static function insertNewColumns($params){
 
     self::initialize();
@@ -3526,9 +3981,24 @@ public static function insertNewColumns($params){
  * Checks if the record is actually being updated with new values
  *
  * @param integer $rec_ID - record ID
- * @param array $record - record to be saved, needs to contain the 'details' key
- * @return bool whether the record can be considered to be updating
+ * @param array $record The incoming record data intended for saving (must contain a 'details' key).
+ * @return bool True if the incoming data differs from the existing record's data or if header fields
+ *              (URL, ScratchPad) are different, false otherwise. Also true if the existing record has no details.
  */
+    /**
+     * Checks if the incoming record data would actually result in an update to an existing record.
+     *
+     * Compares the header fields (URL, ScratchPad) and all detail values of the incoming `$record`
+     * data with the current data of the Heurist record identified by `$rec_ID`.
+     * This is used to prevent counting an import operation as an "update" if the submitted data
+     * is identical to what's already stored.
+     *
+     * @param int $rec_ID The ID of the existing Heurist record.
+     * @param array $record An array containing the new data to be potentially saved, structured
+     *                      similarly to how `recordSave` expects it (especially the 'details' part).
+     * @return bool True if differences are found (i.e., an update would occur), false otherwise.
+     *              Returns true if the existing record has no details (implying any new details are an update).
+     */
 private static function _isRecordUpdating($rec_ID, $record){
 
     $existing_record = recordSearchByID(self::$system, $rec_ID, false);

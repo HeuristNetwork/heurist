@@ -3,11 +3,13 @@ namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 
     /**
-    * db access to defDetailTypeGroups table
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbDefDetailTypeGroups
+     *
+     * Provides database access and operations for the `defDetailTypeGroups` table,
+     * which stores groups for detail types (field types).
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -24,6 +26,14 @@ use hserv\entity\DbEntityBase;
 
 class DbDefDetailTypeGroups extends DbEntityBase
 {
+    /**
+     * Initializes the DbDefDetailTypeGroups entity.
+     *
+     * Sets up duplication checks based on `dtg_Name` and foreign key checks
+     * to prevent deletion of non-empty groups (groups that still contain detail types).
+     *
+     * @return void
+     */
     public function init(){
         $this->duplicationCheck = array('dtg_Name'=>'Field type group cannot be saved. The provided name already exists');
 
@@ -34,8 +44,15 @@ class DbDefDetailTypeGroups extends DbEntityBase
     }
 
     /**
-    *  search field gruops
-    */
+     * Searches for detail type groups.
+     *
+     * Supports searching by `dtg_ID` and `dtg_Name`.
+     * The level of detail returned (`id`, `name`, `list`, or `full`) is controlled by `$this->data['details']`.
+     * The 'list' and 'full' details include a `dtg_FieldCount` which counts the number of detail types in each group.
+     * Results are ordered by `dtg_Order`.
+     *
+     * @return array|false An array of found detail type groups, or false on error.
+     */
     public function search(){
 
         if(parent::search()===false){
@@ -60,6 +77,15 @@ class DbDefDetailTypeGroups extends DbEntityBase
     //
     //
     //
+    /**
+     * Prepares records before saving.
+     *
+     * Sets the `dtg_Modified` field to the current date/time, ensures `dtg_Order`
+     * defaults to 2 if not set, and determines if a record is new.
+     * This method overrides the parent `prepareRecords` and calls it.
+     *
+     * @return bool Returns the result of `parent::prepareRecords()`.
+     */
     protected function prepareRecords(){
 
         $ret = parent::prepareRecords();

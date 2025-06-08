@@ -22,6 +22,17 @@
 use hserv\utilities\DbRegis;
 use hserv\structure\ConceptCode;
 
+/**
+ * Handles the import of database structure definitions from another Heurist database.
+ *
+ * This class manages the process of fetching definitions (record types, detail types, terms)
+ * from a source database (specified by URL or registration ID), preparing them for import
+ * by resolving dependencies and concept codes, and then performing the actual import
+ * into the target (current) database. It includes conflict resolution mechanisms like
+ * renaming and mapping existing entities.
+ *
+ * @package hserv\structure\import
+ */
 require_once dirname(__FILE__).'/../search/dbsData.php';
 require_once dirname(__FILE__).'/../edit/saveStructureLib.php';
 require_once dirname(__FILE__).'/../../controller/entityScrudSrv.php';
@@ -82,7 +93,13 @@ class DbsImport {
 
     private $url_from_reference = false;
 
-    //  $data =
+    /**
+     * Constructor for the DbsImport class.
+     *
+     * Initializes the importer with the Heurist system object.
+     *
+     * @param \hserv\System $system The main Heurist system object.
+     */
     public function __construct( $system ) {
         $this->system = $system;
     }
@@ -100,6 +117,17 @@ class DbsImport {
     //
     // getter
     //
+    /**
+     * Retrieves either the target or source database definitions collected during the import preparation.
+     *
+     * 'target' definitions refer to the current database into which data is being imported.
+     * 'source' definitions refer to the remote database from which data is being fetched.
+     * These definitions are typically populated by the `doPrepare()` method.
+     *
+     * @param string $type Specifies whether to return 'target' or 'source' definitions. Defaults to 'target'.
+     * @return array|null The requested set of database definitions (an array structured by entity type like 'rectypes', 'terms'),
+     *                    or null if the specified type's definitions haven't been loaded.
+     */
     public function getDefinitions($type='target'){
         if($type=='target'){
             return $this->target_defs;
@@ -528,6 +556,28 @@ class DbsImport {
     //
     // Perform database action - add rectypes, structure, fields and terms into our database
     //
+    /**
+     * Executes the import process after `doPrepare()` has collected and mapped definitions.
+     *
+     * This method performs the actual database modifications:
+     * 1. Imports vocabularies (terms and vocabulary groups).
+     * 2. Corrects inverse term relationships.
+     * 3. Imports record type groups.
+     * 4. Imports record types (creating new or updating existing based on preparation).
+     * 5. Imports detail type groups (field groups).
+     * 6. Imports detail types (base fields).
+     * 7. Updates record structures (`defRecStructure`) for imported/updated record types.
+     * 8. Updates title masks for newly created record types.
+     * 9. Imports calculated field definitions if any.
+     * 10. Imports translations for terms, detail types, and record types.
+     *
+     * All database operations are performed within a transaction, which is committed on
+     * success or rolled back on failure. The system's definition cache is cleaned upon successful import.
+     *
+     * @global \mysqli $mysqli The global mysqli database connection object, set from the system object.
+     * @return bool True if the entire import process completes successfully, false on any error.
+     *              Errors are added to `$this->system` and potentially trigger a rollback.
+     */
     public function doImport( ){
 
         global $mysqli;
@@ -1117,6 +1167,20 @@ $mysqli->commit();
     //  fill "fake" source_defs for record types on base of mappping
     //  it is required for $this->getTargetIdBySourceId
     //
+    /**
+     * Populates a simplified internal representation of source record type definitions
+     * based on a provided mapping.
+     *
+     * This method is used to set up a "fake" source definition structure, primarily
+     * for use with `getTargetIdBySourceId` when a full source definition fetch via
+     * `doPrepare` is not performed, but a direct mapping of source IDs to target IDs
+     * is available (e.g., during record import where only ID correspondences are needed).
+     *
+     * @param array $mapping An associative array where keys are source record type IDs
+     *                       and values are arrays containing the target `rty_ID`.
+     *                       Example: `[source_rty_id1 => ['rty_ID' => target_rty_id1], ...]`.
+     * @return void
+     */
     public function doMapping($mapping){
 
         $defType = 'rectypes';
@@ -1240,6 +1304,24 @@ $mysqli->commit();
     // finds target id by source id via concept code
     // get concept code in source - find local in target
     //
+    /**
+     * Retrieves the target database's local ID for a given source definition ID or concept code.
+     *
+     * This function translates a source entity's identifier (which can be its local ID
+     * in the source database or its global concept code) into the corresponding local ID
+     * in the target (current) database. It relies on the `source_defs` (populated by
+     * `doPrepare` or `doMapping`) to find the concept code of the source entity, and
+     * `target_defs` to find a matching concept code in the target database.
+     *
+     * It handles 'rectype', 'detailtype', 'enum', and 'relationtype' entity types.
+     * Unregistered concept codes (e.g., "0-xxx") are converted to "9999-xxx" before lookup.
+     *
+     * @param string $defType The type of the definition ('rectype', 'detailtype', 'enum', 'relationtype').
+     * @param string|int $source_id The source definition's local ID or its concept code (e.g., "dbID-entityID").
+     * @return int|null The local ID of the corresponding entity in the target database if a match
+     *                  is found by concept code, or 0 if no match. Returns null if source definition
+     *                  cannot be resolved.
+     */
     public function getTargetIdBySourceId($defType, $source_id){
 
         $iscc = (strpos($source_id,'-')!==false);
@@ -1310,6 +1392,26 @@ $mysqli->commit();
     //
     // get local code by concept code or verifies that element with given code/localid exists
     //
+    /**
+     * Retrieves the local ID(s) for an entity within a given set of database definitions,
+     * based on its concept code or local ID (if unregistered from DB 0).
+     *
+     * This function searches through the provided `$database_defs` (which can be
+     * source or target definitions) to find a matching entity.
+     * - If `$conceptCode` is a local ID from an unregistered database (e.g., "0-123" becomes 123),
+     *   it directly checks if that ID exists in the definitions.
+     * - Otherwise, it iterates through the definitions to find an entity with a matching concept code.
+     *
+     * Supports 'rectype', 'detailtype', 'enum', and 'relationtype'. For terms ('enum', 'relationtype'),
+     * it can search across both domains if necessary.
+     *
+     * @param string $defType The type of definition ('rectype', 'detailtype', 'enum', 'relationtype').
+     * @param array $database_defs The database definitions structure to search within (e.g., `$this->source_defs` or `$this->target_defs`).
+     * @param string|int $conceptCode The concept code (e.g., "dbID-entityID") or a local ID (if from DB 0).
+     * @param bool $sall If true, returns an array of all matching IDs. If false (default), returns the first matching ID or null.
+     * @return int|array|null If `$sall` is false, returns the first matching local ID or null if not found.
+     *                        If `$sall` is true, returns an array of all matching local IDs, or an empty array if none found.
+     */
     public static function getLocalCode($defType, $database_defs, $conceptCode, $sall=false){
         $res = array();
         $defs2 = null;
@@ -1401,6 +1503,20 @@ $mysqli->commit();
     //
     // If concept code is from unregistered database (0000-xxx), it converts it to 9999-xxx
     //
+    /**
+     * Converts a concept code from an "unregistered" database (ID 0) to a "locally registered"
+     * equivalent (ID 9999) for internal consistency during import/export.
+     *
+     * If the input `$conceptCode` is null or empty and a `$defID` (local definition ID)
+     * is provided, it generates a new concept code in the format "9999-$defID".
+     * If the `$conceptCode` already represents an unregistered DB (e.g., "0-123"),
+     * it changes the database part to "9999" (e.g., "9999-123").
+     * Otherwise, the original concept code is returned unchanged.
+     *
+     * @param string|null $conceptCode The concept code to convert (e.g., "dbID-entityID").
+     * @param int|null $defID (Optional) The local definition ID, used if `$conceptCode` is missing.
+     * @return string The (potentially) converted concept code.
+     */
     public static function convertUnregisteredCode($conceptCode, $defID=null){
 
         if(!$conceptCode && $defID>0){
@@ -2025,6 +2141,24 @@ $mysqli->commit();
     // replace term_ids in string to new ones
     // function that translates all term ids in the passed string to their local/imported value
     //
+    /**
+     * Translates term IDs within a string (JSON or comma-separated) to their corresponding
+     * target database IDs based on the import mapping.
+     *
+     * This function is used to update structures like `dty_JsonTermIDTree`,
+     * `dty_TermIDTreeNonSelectableIDs`, or default values that store term IDs.
+     * It uses the `$this->terms_correspondence` map (populated during `doPrepare` and `_importVocabulary`)
+     * to find the target ID for each source term ID found in the input string.
+     *
+     * @param string|null $sterms A string containing term IDs. This can be a JSON string
+     *                            (where term IDs are typically quoted, e.g., "\"123\"") or a
+     *                            comma-separated list of IDs.
+     * @param string $domain The domain of the terms ('enum' or 'relationtype'/'relmarker', which maps to 'relation').
+     *                       This parameter seems to primarily ensure the domain context, though the current
+     *                       `$this->terms_correspondence` doesn't seem to be domain-segregated.
+     * @return string|null The modified string with term IDs replaced by their target equivalents,
+     *                     or the original string if null or empty.
+     */
     public function replaceTermIds( $sterms, $domain ) {
 
         if($sterms==null || $sterms=="") {return $sterms;}
@@ -2056,6 +2190,23 @@ $mysqli->commit();
     // Preparation report output
     // it returns updated definitions (as json) and html snippets with report about imported definitions
     //
+    /**
+     * Generates a report summarizing the results of the import process.
+     *
+     * The report includes:
+     * - HTML snippets detailing which record types, detail types (fields), and terms were
+     *   mapped (source ID, source name, source concept code, target ID, target name).
+     * - Lists of added and updated entity IDs for each definition type (terms, detailtype, rectype),
+     *   categorized by the primary definition type of the import operation.
+     * - Information about any broken terms (terms that could not be imported) and the reasons.
+     * - Optionally, the full set of updated definitions from the target database if `$need_updated_defs` is true.
+     *
+     * @param bool $need_updated_defs (Optional) If true (default), the report will include the
+     *                                complete current definitions (record types, detail types, terms, sysinfo)
+     *                                from the target database. Setting to false can make the report smaller.
+     * @return array An associative array containing the report data, structured with keys like
+     *               'report' (containing HTML and lists of changes) and optionally 'defs'.
+     */
     public function getReport($need_updated_defs=true){
 
         //reload structures
@@ -2528,6 +2679,17 @@ $mysqli->commit();
     //
     // Check and download missed record type 
     //
+    /**
+     * Checks if a specific record type (identified by its concept code, e.g., "2-123")
+     * exists in the target database and, if not, attempts to import it from the
+     * Heurist core definitions database (assumed to be DB ID 2).
+     *
+     * This is a utility function to ensure that essential record types are present.
+     * It performs a mini import operation (prepare and import) specifically for the given record type.
+     *
+     * @param string $rty_ID The concept code of the record type to check and potentially import (e.g., "2-123").
+     * @return bool True if the record type exists or was successfully imported, false otherwise.
+     */
     public function checkAndImportRty($rty_ID){
         
         //import missed record type

@@ -52,7 +52,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
             }
             this.options.title = "Select formula for calculated field";
         }
-        
+
         this.options.edit_height = 640;
         this.options.edit_width = 1200;
         
@@ -112,9 +112,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
             this.recordList.resultList('option','rendererHeader','');
             this.recordList.resultList('option','show_toolbar',false);
             this.recordList.resultList('option','view_mode','list');
-           
 
-            
             this.recordList.find('.div-result-list-content').css({'display':'table','width':'99%'});
             
             this._on( this.searchForm, {
@@ -153,7 +151,16 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
             let ele2 = this._editing.getFieldByName('cfn_ID');
             ele2.editing_input('setValue', this.options.cfn_ID );
         }
-  
+
+        if(!this.editForm.find('#single_rectype').is(':checked')){
+            let rectypes = this._editing.getValue('cfn_RecTypeIDs');
+
+            if(window.hWin.HEURIST4.util.isempty(rectypes) || (rectypes.length === 1 && rectypes[0] === '')){
+                window.hWin.HEURIST4.msg.showMsgErr('Please select additional record types, or uncheck the checkbox above the required field.');
+                return;
+            }
+        }
+
         this._super();
     },
     
@@ -187,16 +194,46 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
 
         this._super();
 
+        let $multiRecTypes = this._editing.getFieldByName('cfn_RecTypeIDs');
+        let multiRecTypeIDs = this._editing.getValue('cfn_RecTypeIDs');
+
+        if($multiRecTypes){
+
+            let checked = this._currentEditID !== -1 && multiRecTypeIDs.length === 1 && multiRecTypeIDs[0] === '';
+
+            let $multiRtyChkb = $('<input>', {type: 'checkbox', id: 'single_rectype', checked: checked ? 'checked' : false});
+            let $container = $('<div>', {
+                html: '<div></div><span style="min-width: 40px; display: table-cell;"></span><div style="padding-bottom: 5px;"></div>'
+            }).insertBefore($multiRecTypes);
+            $container.find('div').last().text('The formula depends only on the record type containing the result').prepend($multiRtyChkb);
+
+            checked ? $multiRecTypes.hide() : $multiRecTypes.show();
+
+            this._on($multiRtyChkb, {
+                change: () => {
+                    if($multiRtyChkb.is(':checked')){
+                        $multiRecTypes.hide();
+                    }else{
+                        $multiRecTypes.show();
+                    }
+                }
+            });
+
+            $multiRecTypes.find('.header').addClass('required').removeClass('optional');
+        }
+
         this.formulaeditor = $( "<div>" )
                     .addClass('ent_wrapper')
-                    .css({'top': '155px'})
+                    .css({'top': '170px'})
                     .appendTo( this.editForm );
                     
         let that = this;
 
         let cfn_Content = this._editing.getValue('cfn_FunctionSpecification')[0];
+        let rty_ID = !window.hWin.HEURIST4.util.isPositiveInt(this.options.rst_RecTypeID) ? null : this.options.rst_RecTypeID;
 
-        let popup_dialog_options = {path: 'widgets/report/', 
+        let popup_dialog_options = {
+                    path: 'widgets/report/', 
                     //default_palette_class: 'ui-heurist-design',
                     keep_instance:false, 
                     
@@ -207,13 +244,18 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
                     
                     isdialog: false,
                     container: this.formulaeditor,
-                    
+
+                    is_snippet_editor: true, 
+                    rty_ID: rty_ID,
+                    listAllRecTypes: true,
+                    rec_ID: 0,
+
                     onChange: function(context){
                         if(!context) return;
                         
                         that._editing.setFieldValueByName2('cfn_FunctionSpecification', context);
-
                     }
+
         };
         window.hWin.HEURIST4.ui.showRecordActionDialog('reportEditor', popup_dialog_options);
 

@@ -3,11 +3,13 @@ namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 
     /**
-    * db access to sysDashboard table
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbSysDashboard
+     *
+     * Provides database access and operations for the `sysDashboard` table,
+     * which stores configuration for dashboard entries (shortcuts, links, actions).
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -28,22 +30,28 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
 class DbSysDashboard extends DbEntityBase
 {
 
+    /**
+     * Constructor for DbSysDashboard.
+     *
+     * Calls the parent constructor and sets `requireAdminRights` to false,
+     * as dashboard entries can often be managed by non-admin users for their own context.
+     *
+     * @param \hserv\System $system The main Heurist system object.
+     * @param array|null $data Optional data to initialize the entity with.
+     */
     public function __construct( $system, $data=null ) {
        parent::__construct( $system, $data );
        $this->requireAdminRights = false;
     }
 
     /**
-    *  search groups
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    *  @todo overwrite
-    */
+     * Searches for dashboard entries.
+     *
+     * Supports searching by `dsh_ID`, `dsh_Label`, `dsh_Enabled`, and `dsh_ShowIfNoRecords`.
+     * The level of detail returned (`id`, `name`, `list`, or `full`) is controlled by `$this->data['details']`.
+     *
+     * @return array|false An array of found dashboard entries, or false on error.
+     */
     public function search(){
 
         if(parent::search()===false){
@@ -67,6 +75,17 @@ class DbSysDashboard extends DbEntityBase
     //
     //
     //
+    /**
+     * Prepares dashboard entry records before saving.
+     *
+     * - Sets `dsh_Enabled` to 'y' if not provided.
+     * - Sets `dsh_Order` to 1 if not a positive integer.
+     * - Consolidates `dsh_ParameterAddRecord` or `dsh_ParameterSavedSearch` into `dsh_Parameters`
+     *   based on `dsh_CommandToRun`.
+     * - Validates `dsh_Label` for duplication.
+     *
+     * @return bool True if preparation is successful and validation passes, false otherwise.
+     */
     protected function prepareRecords(){
 
         $ret = parent::prepareRecords();
@@ -101,6 +120,14 @@ class DbSysDashboard extends DbEntityBase
     //
     //
     //
+    /**
+     * Saves dashboard entry records.
+     *
+     * After calling `parent::save()`, this method handles renaming any associated
+     * temporary image file (for `dsh_Image`) to its permanent name.
+     *
+     * @return array|false The result from `parent::save()` (array of saved IDs or false).
+     */
     public function save(){
 
         $savedRecIds = parent::save();
@@ -128,6 +155,16 @@ class DbSysDashboard extends DbEntityBase
     //
     // delete group
     //
+    /**
+     * Deletes dashboard entry/entries.
+     *
+     * After calling `parent::delete()` to remove the database record(s),
+     * this method also deletes any associated image file for each deleted entry.
+     *
+     * @param bool $disable_foreign_checks Passed to `parent::delete()`.
+     * @return bool True if database deletion was successful (regardless of image file deletion status),
+     *              false otherwise.
+     */
     public function delete($disable_foreign_checks = false){
 
         $ret = parent::delete();

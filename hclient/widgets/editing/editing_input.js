@@ -145,9 +145,13 @@ $.widget( "heurist.editing_input", {
         }
         
         this.detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
-        
-        if((!(this.options.rectypeID>0)) && this.options.recordset){ //detect rectype for (heurist data) Records/recDetails
-            this.options.rectypeID = this.options.recordset.fld(this.options.recID, 'rec_RecTypeID'); //this.options.recordset.getFirstRecord()
+        this._isForRecords = this.options?.recordset?.entityName == 'Records' || this.configMode?.entity == 'records';
+
+        if(!window.hWin.HEURIST4.util.isPositiveInt(this.options.rectypeID) && this.options.recordset){ // detect rectype for (heurist data) Records/recDetails
+            this.options.rectypeID = this.options.recordset.fld(this.options.recID, 'rec_RecTypeID'); // this.options.recordset.getFirstRecord()
+        }
+        if(!window.hWin.HEURIST4.util.isPositiveInt(this.options.rectypeID) && this.options?.recordset?.entityName == 'defRecStructure'){
+            this.options.rectypeID = this.options.recordset.fld(this.options.recID, 'rst_RecTypeID');
         }
         
         //custom classes to manipulate visibility and styles in editing space separated
@@ -168,8 +172,6 @@ $.widget( "heurist.editing_input", {
         {
             this.configMode = {entity:'records'};
         }
-
-        this._isForRecords = this.options?.recordset?.entityName == 'Records' || this.configMode?.entity == 'records';
 
         this.isFileForRecord = (this.detailType=='file' && this._isForRecords);
         if(this.isFileForRecord){
@@ -2479,45 +2481,47 @@ $.widget( "heurist.editing_input", {
 
             let __show_select_dialog = function(event){
                 
-                    if(that.is_disabled) return;
+                if(that.is_disabled) return;
 
-                    event.preventDefault();
-                    
-                    let usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+this.configMode.entity, 
-                        {width: null,  //null triggers default width within particular widget
-                        height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
-        
-                    popup_options.width = usrPreferences.width;
-                    popup_options.height = usrPreferences.height;
-                    let sels = this.newvalues[$input.attr('id')];
-                    
-                    if(!window.hWin.HEURIST4.util.isempty(sels)){
-                        popup_options.selection_on_init = sels.split(',');
-                    } else {
-                        popup_options.selection_on_init = null;    
-                    }                                
-                    
-                    if(this.configMode.initial_filter){
-                        popup_options.initial_filter = this.configMode.initial_filter;    
-                    }
-                    if(!window.hWin.HEURIST4.util.isnull(this.configMode.search_form_visible)){
-                        popup_options.search_form_visible = this.configMode.search_form_visible;    
-                    }
+                event.preventDefault();
 
-                    let popup_options2 = popup_options;
-                    if(this.configMode.popup_options){
-                         popup_options2  = $.extend(popup_options, this.configMode.popup_options);
-                    }
-                    //init dialog to select related entities
-                    window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options2);
+                let usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_'+this.configMode.entity, 
+                    { width: null, height: (window.hWin?window.hWin.innerHeight:window.innerHeight) * 0.95 });
+
+                popup_options.width = usrPreferences.width;
+                popup_options.height = usrPreferences.height;
+                let sels = this.newvalues[$input.attr('id')];
+
+                if(!window.hWin.HEURIST4.util.isempty(sels)){
+                    popup_options.selection_on_init = sels.split(',');
+                }else{
+                    popup_options.selection_on_init = null;    
+                }                                
+
+                if(this.configMode.initial_filter){
+                    popup_options.initial_filter = this.configMode.initial_filter;    
+                }
+                if(!window.hWin.HEURIST4.util.isnull(this.configMode.search_form_visible)){
+                    popup_options.search_form_visible = this.configMode.search_form_visible;    
+                }
+
+                let popup_options2 = popup_options;
+                if(this.configMode.popup_options){
+                    popup_options2  = $.extend(popup_options, this.configMode.popup_options);
+                }
+
+                if(this.configMode.entity === 'DefCalcFunctions' && window.hWin.HEURIST4.util.isPositiveInt(this.options.rectypeID)){
+                    popup_options2['rst_RecTypeID'] = this.options.rectypeID;
+                }
+
+                //init dialog to select related entities
+                window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options2);
             }
-            
-            
-           
+
             this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
             this._on( $gicon, { click: __show_select_dialog } );
             this._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
-            
+
             if(value){
                 this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
                 $input.attr('data-value', value);

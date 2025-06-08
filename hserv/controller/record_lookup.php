@@ -1127,7 +1127,13 @@ if(@$params['serviceType'] == 'geonames' || @$params['serviceType'] == 'tlcmap')
 dataOutput($remote_data);
 
 //------------------------------------------------------------------------------
-
+/**
+ * Retrieves Opentheso thesauruses, potentially refreshing from the cache or server.
+ *
+ * @param \hserv\System $system The system object.
+ * @param array $params Parameters, including 'refresh' (optional boolean).
+ * @return array An array of thesauruses grouped by server, or an empty array on error.
+ */
 function getOpenthesoThesauruses($system, $params){
 
     $opentheso_file = HEURIST_FILESTORE_ROOT . 'OPENTHESO_thesauruses.json';
@@ -1173,7 +1179,9 @@ function getOpenthesoThesauruses($system, $params){
 /**
 * Get list of thesauruses
 *
-* @param bool $is_refresh
+* @param \hserv\System $system The system object.
+* @param array $params Parameters, including 'servers' (optional array of server keys to update).
+* @return array An array of updated thesaurus data, including a 'last_update' timestamp.
 */
 function updateOpenthesoThesauruses($system, $params = array()){
 
@@ -1354,15 +1362,15 @@ function getOpenthesoCollections($system, $params){
 }
 
 /**
-* Retrieves Nakala metadata based on the provided type.
-*
-* It checks if the metadata in the NAKALA_metadata_values.json file is up-to-date.
-* If the data is outdated or the file doesn't exist, it updates the metadata before returning the data.
-*
-* @param object $system The system object for error handling and other functionality.
-* @param string $type The type of metadata to retrieve ('types', 'licenses', 'years', or 'all').
-* @return array The metadata corresponding to the requested type, or an empty array if not found.
-*/
+ * Retrieves Nakala metadata based on the provided type.
+ *
+ * It checks if the metadata in the NAKALA_metadata_values.json file is up-to-date.
+ * If the data is outdated or the file doesn't exist, it updates the metadata before returning the data.
+ *
+ * @param \hserv\System $system The system object for error handling and other functionality.
+ * @param string $type The type of metadata to retrieve ('types', 'licenses', 'years', or 'all').
+ * @return array The metadata corresponding to the requested type, or an empty array if not found or on error.
+ */
 function getNakalaMetadata($system, $type){
     // check NAKALA_metadata_values.json
     // if date in file is old (data.last_update), update metadata first (all types)
@@ -1407,9 +1415,9 @@ function getNakalaMetadata($system, $type){
 /**
 * Returns the requested Nakala data type or the full data.
 *
-* @param array $data The Nakala metadata.
-* @param string $type The requested type ('types', 'licenses', 'years', or 'all').
-* @return array The requested metadata or full data if 'all' is specified.
+* @param array $data The Nakala metadata array.
+* @param string $type The requested type of metadata ('types', 'licenses', 'years', or 'all').
+* @return array The requested subset of metadata, or the full data if 'all' is specified.
 */
 function getRequestedNakalaData($data, $type) {
     switch ($type) {
@@ -1424,7 +1432,16 @@ function getRequestedNakalaData($data, $type) {
     }
 }
 
-
+/**
+ * Updates the cached Nakala metadata by fetching fresh data from the Nakala API.
+ *
+ * Retrieves information about data types, licenses, and creation years.
+ * Stores the updated metadata in a JSON file.
+ *
+ * @param \hserv\System $system The system object.
+ * @return array The updated Nakala metadata array, including a 'last_update' timestamp.
+ *               Returns an empty array and sets an error in the system object on failure.
+ */
 function updateNakalaMetadata($system){
     // update NAKALA_metadata_values.json
     $nakala_file = HEURIST_FILESTORE_ROOT . 'NAKALA_metadata_values.json';

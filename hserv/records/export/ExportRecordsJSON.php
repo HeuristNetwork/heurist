@@ -26,32 +26,91 @@ use hserv\records\export\ExportRecords;
 
 
 /**
-*
-*
-*/
+ * Class ExportRecordsJSON
+ *
+ * Extends ExportRecords to provide functionality for exporting records in JSON format.
+ * This class handles various JSON output requirements, including those for
+ * jQuery DataTables, a generic REST API, a media viewer, and a specialized
+ * "TLC" (possibly Timemap/Layer Cake) export involving map data.
+ * It is typically controlled by the 'records_output' controller.
+ *
+ * @package hserv\records\export
+ */
 class ExportRecordsJSON extends ExportRecords {
 
+    /**
+     * @var bool Flag indicating if the output is intended for a REST API.
+     */
     private $is_restapi = false;
 
+    /**
+     * @var int Total number of records available (used by DataTables).
+     */
     private $records_cnt = 0;
+    /**
+     * @var int Number of records after filtering (used by DataTables).
+     */
     private $records_cnt_filtered = 0;
 
+    /**
+     * @var int Session ID for DataTables export, determines specific JSON structure.
+     *          0 = standard/REST API, 1 = simple DataTables, >1 = full DataTables with draw/counts.
+     */
     private $datatable_session_id = 0;
+    /**
+     * @var int Draw counter for DataTables AJAX requests.
+     */
     private $datatable_draw = 0;
+    /**
+     * @var array|null Structure defining columns for DataTables output.
+     */
     private $datatable_columns;
+    /**
+     * @var array|null Placeholder structure for a row in DataTables output.
+     */
     private $datatable_row_placeholder;
 
-    //see ImportHerist->importRecordsFromDatabase
+    // Properties related to a specialized export, possibly for Timemap/Layer Cake (TLC)
+    /**
+     * @var bool Flag indicating if the export is for the "TLC" format.
+     * @see \hserv\import\ImportHeurist::importRecordsFromDatabase() for related import logic.
+     */
     private $is_tlc_export = false;
+    /**
+     * @var string|null Name of the TLC map document being exported.
+     */
     private $tlc_mapdoc_name = null;
+    /**
+     * @var array|null List of detail type IDs relevant for MAP_LAYER record types in TLC export.
+     */
     private $maplayer_fields = null;
+    /**
+     * @var array Default values for certain fields in a MAP_DOCUMENT record for TLC export.
+     */
     private $mapdoc_defaults = array();
+    /**
+     * @var array Accumulates records that will form map layers in the TLC export.
+     */
     private $maplayer_records = array();
-    private $maplayer_extents = array();//to calculate summary extent
+    /**
+     * @var array Accumulates geographic extents of map layers to calculate a summary extent for TLC export.
+     */
+    private $maplayer_extents = array();
 
 //
 //
 //
+    /**
+     * Prepares for JSON export.
+     *
+     * Initializes flags and counters based on parameters, determining if the export
+     * is for DataTables, a REST API, etc. Calls the parent's prepare method.
+     *
+     * @param array $data The data to be exported.
+     * @param array $params Parameters for the export, may include 'datatable', 'draw',
+     *                      'restapi', 'recordsTotal', 'recordsFiltered'.
+     * @return bool True if preparation was successful, false otherwise.
+     */
 protected function _outputPrepare($data, $params){
 
     $res = parent::_outputPrepare($data, $params);
@@ -74,6 +133,31 @@ protected function _outputPrepare($data, $params){
 //
 //
 //
+    /**
+     * Prepares fields required for the JSON export based on the output mode.
+     *
+     * This method configures which record fields (header, detail, relational) need to be
+     * retrieved and how they should be structured, depending on whether the output is for
+     * DataTables, a media viewer, a "TLC" (Timemap/Layer Cake) export, or a default JSON structure.
+     *
+     * For DataTables:
+     * - Parses 'columns' parameter to determine the fields for each column.
+     * - Sets up `$datatable_columns` and `$datatable_row_placeholder`.
+     * - Ensures 'rec_ID' and 'rec_RecTypeID' are always retrieved.
+     *
+     * For Media Viewer (extended_mode == 3):
+     * - Specifies that 'file' details and basic record header fields are needed.
+     *
+     * For TLC Export (`is_tlc_export`):
+     * - Retrieves detail type IDs for MAP_LAYER records.
+     * - Gets default values for MAP_DOCUMENT fields.
+     * - Initializes arrays for map layer records and extents.
+     *
+     * Otherwise, calls parent's `_outputPrepareFields`.
+     *
+     * @param array $params Parameters for the export. May include 'columns' for DataTables,
+     *                      'tlcmap' for TLC export, etc.
+     */
 protected function _outputPrepareFields($params){
 
 
@@ -190,6 +274,15 @@ protected function _outputPrepareFields($params){
 //
 //
 //
+    /**
+     * Outputs the header for the JSON export.
+     *
+     * The structure of the header depends on the export mode:
+     * - DataTables (session_id > 1): `{"draw": ..., "recordsTotal": ..., "recordsFiltered": ..., "data":[`
+     * - DataTables (session_id == 1): `{"data": [`
+     * - REST API: `{"records":[`
+     * - Default: `{"heurist":{"records":[`
+     */
 protected function _outputHeader(){
 
     if($this->datatable_session_id>1){ //session id
@@ -228,6 +321,19 @@ protected function _outputHeader(){
 //
 //
 //
+    /**
+     * Outputs a single record in JSON format.
+     *
+     * The formatting of the record depends on the export mode:
+     * - DataTables: Uses `_getJsonFlat()` to produce a flat JSON object.
+     * - Extended modes (1, 2): Uses `_getJsonFeature()` for richer JSON.
+     * - Media viewer mode (3): Uses `_getMediaViewerData()` for file-specific JSON.
+     * - TLC export: Transforms TLCMAP_DATASET records to MAP_LAYER, collects data for summary.
+     * - Default: Outputs the record JSON encoded as is.
+     *
+     * @param array $record The Heurist record to process and output.
+     * @return bool Always true to continue processing (unless an exception occurs).
+     */
 protected function _outputRecord($record){
 
     if($this->datatable_session_id>0){
@@ -286,6 +392,16 @@ protected function _outputRecord($record){
 //
 //
 //
+    /**
+     * Outputs the footer for the JSON export.
+     *
+     * The structure of the footer depends on the export mode:
+     * - DataTables: `]}`
+     * - REST API: `]}`
+     * - Default: Closes the 'records' array. If it's a TLC export, it calculates and
+     *            outputs a summary map document record. It then adds database information.
+     *            `],"database":{...}}}`
+     */
 protected function _outputFooter(){
 
     if($this->datatable_session_id>0){ //session id
@@ -320,14 +436,25 @@ protected function _outputFooter(){
 }
 
 
-/*
-Produces json for DataTable widget
-
-$columns:
-0: ["rec_ID","rec_Title"],
-3: ["rec_ID", "rec_RecTypeID", "1", "949", "9", "61"]
-5: ["1", "38"]
-*/
+    /**
+     * Produces a flattened JSON-like array structure for a record, suitable for DataTables.
+     *
+     * This method recursively processes a record and its linked resources/relmarkers
+     * to create a flat array where keys correspond to column names or field IDs
+     * (potentially prefixed for linked records). It handles various field types,
+     * including standard record fields, details, tags, and linked record titles.
+     *
+     * Note on `$columns` structure:
+     * It's an array keyed by record type ID (0 for the main record, 'tX' for linked records of type X).
+     * Each value is an array of column/field identifiers to include for that record type.
+     * Example: `[0 => ["rec_ID", "rec_Title", "dty_123"], "t5" => ["rec_Title", "dty_456"]]`
+     *
+     * @param array $record The Heurist record array to flatten.
+     * @param array $columns Structure defining which columns/fields to include from which record types.
+     * @param array $row_placeholder An array template for the main record's row.
+     * @param int $level Current recursion level (0 for the main record).
+     * @return array|null The flattened record as an array, or null if the record type is not in columns.
+     */
 private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
 
     $res = ($level==0)?$row_placeholder:array();
@@ -491,10 +618,25 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
 }
 
 //
-// convert heurist record to more interpretable format
 //
-// $extended_mode = 0 - as is, 1 - details in format {dty_ID: val: }, 2 - with concept codes and names/labels
-//
+    /**
+     * Converts a Heurist record to a more interpretable JSON-like array structure.
+     *
+     * This method enhances the basic record structure based on the `$extended_mode`.
+     * Mode 0: Returns the record as is.
+     * Mode 1: (Currently implies mode 2 logic due to fall-through) Structures details as an array of objects,
+     *         each containing `dty_ID` and `value`.
+     * Mode 2: Includes record type name, concept IDs (for record type and fields),
+     *         field names, field types, and term labels/codes for enum/relationtype fields.
+     *         Temporal values are decoded from JSON strings.
+     *
+     * @param array $record The Heurist record array.
+     * @param int $extended_mode The mode of extension:
+     *                           0 - as is.
+     *                           1 - (effectively same as 2) basic detail structuring.
+     *                           2 - with concept codes, names/labels for terms and fields.
+     * @return array The processed record array.
+     */
 private function _getJsonFeature($record, $extended_mode){
 
     if($extended_mode==0){ //leave as is
@@ -578,10 +720,17 @@ private function _getJsonFeature($record, $extended_mode){
 }
 
 //
-// convert heurist record to plain object for mediaViewer
 //
-// return null if not media content found
-//
+    /**
+     * Converts a Heurist record to a JSON string containing data for a media viewer.
+     *
+     * Extracts file information (ID, MIME type, filename, external URL, caption)
+     * from the 'file' fields of a record. It formats this information as a
+     * comma-separated list of JSON objects. Skips tiled images and SoundCloud links.
+     *
+     * @param array $record The Heurist record array, expected to have 'details' with 'file' fields.
+     * @return string A JSON string of media items, or an empty string if no suitable media is found.
+     */
 private static function _getMediaViewerData($record){
 
     $res = '';
@@ -646,6 +795,20 @@ private static function _getMediaViewerData($record){
 //
 //
 //
+    /**
+     * Calculates a summary geographic extent from collected map layer extents.
+     *
+     * Iterates through `$this->maplayer_extents` (populated from geo fields of records
+     * processed during TLC export) to find the overall bounding box.
+     * It can then return this extent as a WKT polygon string or as part of a
+     * new "map document" record.
+     *
+     * @param bool $is_return_rec If true, returns a complete map document record array.
+     *                            If false, returns only the WKT string of the summary extent.
+     * @return array|string|null An array representing the map document record if `$is_return_rec` is true.
+     *                           A WKT string for the calculated extent if `$is_return_rec` is false and an extent exists.
+     *                           Null if no extent could be calculated and `$is_return_rec` is false.
+     */
 private function _calculateSummaryExtent($is_return_rec){
 
         $zoomKm = 0;
@@ -716,6 +879,15 @@ private function _calculateSummaryExtent($is_return_rec){
 //
 //
 //
+    /**
+     * Extracts a bounding box from a WKT (Well-Known Text) geometry string.
+     *
+     * Uses the geoPHP library to parse the WKT and get its bounding box.
+     *
+     * @param string $wkt The WKT geometry string.
+     * @return array|null An array representing the bounding box (e.g., ['minx'=>..., 'miny'=>..., 'maxx'=>..., 'maxy'=>...])
+     *                    or null if the geometry is empty or invalid.
+     */
 private static function _getExtentFromWkt($wkt)
 {
         $bbox = null;

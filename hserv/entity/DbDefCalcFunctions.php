@@ -3,11 +3,13 @@ namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 
     /**
-    * db access to dbDefCalcFunctions table
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
+     * Class DbDefCalcFunctions
+     *
+     * Provides database access and operations for the `defCalcFunctions` table,
+     * which stores definitions for calculated fields.
+     *
+     * @package     Heurist academic knowledge management system
+     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -25,6 +27,14 @@ use hserv\entity\DbEntityBase;
 class DbDefCalcFunctions extends DbEntityBase
 {
 
+    /**
+     * Initializes the DbDefCalcFunctions entity.
+     *
+     * Sets up duplication checks based on `cfn_Name` and foreign key checks
+     * to prevent deletion of calculations used in `defRecStructure`.
+     *
+     * @return void
+     */
     public function init(){
         $this->duplicationCheck = array('cfn_Name'=>'Field calculation cannot be saved. The provided name already exists');
 
@@ -35,8 +45,13 @@ class DbDefCalcFunctions extends DbEntityBase
     }
 
     /**
-    *  search claculcated fields
-    */
+     * Searches for calculated field definitions.
+     *
+     * Supports searching by `cfn_ID` and `cfn_Name`.
+     * The level of detail returned (`id`, `name`, or `full`) is controlled by `$this->data['details']`.
+     *
+     * @return array|false An array of found calculated field definitions, or false on error.
+     */
     public function search(){
 
         if(parent::search()===false){
@@ -58,6 +73,14 @@ class DbDefCalcFunctions extends DbEntityBase
     //
     //
     //
+    /**
+     * Prepares records before saving.
+     *
+     * Sets the `cfn_Modified` field to the current date/time and determines if a record is new.
+     * This method overrides the parent `prepareRecords` and calls it.
+     *
+     * @return bool Returns the result of `parent::prepareRecords()`.
+     */
     protected function prepareRecords(){
 
         $ret = parent::prepareRecords();

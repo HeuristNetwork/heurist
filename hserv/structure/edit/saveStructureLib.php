@@ -1,21 +1,6 @@
 <?php
-
-/*
-* Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* https://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
 /**
-* saveStructureLib.php. Functions to update the system structural definitions -
+* saveStructureLib.php. Functions library to update the system structural definitions -
 * rectypes, detailtypes, terms and constraints.
 *
 * @author      Tom Murtagh
@@ -30,6 +15,25 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+
+/**
+ * This library provides a set of functions for directly manipulating Heurist database
+ * structure definitions. These functions are typically used by administrative interfaces
+ * to create, update, delete, or otherwise manage core schema elements such as:
+ * - Record Types (`defRecTypes`, `defRecStructure`)
+ * - Detail Types (Fields) (`defDetailTypes`)
+ * - Terms and Vocabularies (`defTerms`, `defTermsLinks`)
+ * - Record Type Groups (`defRecTypeGroups`)
+ * - Detail Type Groups (`defDetailTypeGroups`)
+ * - Relationship Constraints (`defRelationshipConstraints`) - though marked as not used.
+ *
+ * The functions often interact directly with the database tables storing these definitions.
+ * Global arrays like `$rtyColumnNames`, `$dtyColumnNames`, etc., are used within this
+ * file to define simple schemas (column name to type mapping) for constructing
+ * parameterized SQL queries.
+ *
+ * @package     hserv\structure\edit
+ */
 use hserv\structure\ConceptCode;
 
 require_once dirname(__FILE__).'/../../records/edit/recordTitleMask.php';
@@ -37,6 +41,10 @@ require_once dirname(__FILE__).'/../../records/edit/recordModify.php';//to delet
 
 global $rtyColumnNames, $rstColumnNames, $rcsColumnNames, $dtyColumnNames, $rtgColumnNames, $dtgColumnNames, $trmColumnNames;
 
+/**
+ * @var array $rtyColumnNames Defines column names and their types for the `defRecTypes` table.
+ *      'i' for integer, 's' for string. Used by `addParam` for query building.
+ */
 $rtyColumnNames = array(
     "rty_ID"=>"i",
     "rty_Name"=>"s",
@@ -98,6 +106,9 @@ $rstColumnNames = array(
     "rst_TermsAsButtons"=>"i"
 );
 
+/**
+ * @var array $rcsColumnNames Defines column names and their types for the `defRelationshipConstraints` table.
+ */
 $rcsColumnNames = array(
     "rcs_ID"=>"i",
     "rcs_SourceRectypeID"=>"i",
@@ -135,7 +146,9 @@ $dtyColumnNames = array(
     "dty_SemanticReferenceURL"=>"s"
 );
 
-//field names and types for defRecTypeGroups
+/**
+ * @var array $rtgColumnNames Defines column names and their types for the `defRecTypeGroups` table.
+ */
 $rtgColumnNames = array(
     "rtg_ID"=>"i",
     "rtg_Name"=>"s",
@@ -152,6 +165,9 @@ $dtgColumnNames = array(
     "dtg_Modified"=>"s"
 );
 
+/**
+ * @var array $trmColumnNames Defines column names and their types for the `defTerms` table.
+ */
 $trmColumnNames = array(
     "trm_ID"=>"i",
     "trm_Label"=>"s",
@@ -175,10 +191,18 @@ $trmColumnNames = array(
     "trm_VocabularyGroupID"=>"i"
 );
 
-
-//
-// helper function
-//
+/**
+ * Helper function to build a parameter array for `mysql__exec_param_query`.
+ *
+ * It appends the type character to the first element of the `$parameters` array
+ * (which holds the type string for `mysqli_stmt::bind_param`) and appends the value
+ * to the array. String values are trimmed.
+ *
+ * @param array $parameters The array of parameters being built. Element 0 is the type string.
+ * @param string $type The type character for the value ('s', 'i', 'd', 'b').
+ * @param mixed $val The value to add to the parameters array.
+ * @return array The modified parameters array.
+ */
 function addParam($parameters, $type, $val){
     $parameters[0] = $parameters[0].$type;  //concat
     if($type=="s" && $val!=null){
@@ -191,9 +215,14 @@ function addParam($parameters, $type, $val){
     return $parameters;
 }
 
-//
-// format SQL error message and send email to bug info
-//
+/**
+ * Formats an SQL error message and adds it to the global system error reporting.
+ *
+ * @param string $msg A descriptive message about the context of the error.
+ * @param string $query The SQL query that caused the error.
+ * @param string|null $sqlerror (Optional) The specific error message from mysqli. If null, it attempts to get it from global `$mysqli->error`.
+ * @return false Always returns false, intended to be returned by calling functions to indicate failure.
+ */
 function handleError($msg, $query, $sqlerror=null){
 
     global $system, $mysqli;
@@ -208,12 +237,19 @@ function handleError($msg, $query, $sqlerror=null){
 }
 
 /**
-* deleteRectype - Helper function that delete a rectype from defRecTypes table.if there are no existing records of this type
-*
-* @author Stephen White
-* @param $rtyID rectype ID to delete
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**///NOT USED
+ * Deletes a record type from `defRecTypes` if it's not in use.
+ *
+ * Checks for various dependencies before deletion:
+ * - If the record type is a target in any `dty_PtrTargetRectypeIDs` of existing detail types.
+ * - If it's listed in `sysIdentification.sys_TreatAsPlaceRefForMapping`.
+ * - If there are any existing non-temporary records of this type.
+ * If dependencies exist, an error is generated, and deletion is blocked.
+ * Temporary records of this type are deleted before the record type itself is deleted.
+ *
+ * @param int $rtyID The ID of the record type to delete.
+ * @return array|false `['result' => $rtyID]` on success, `false` on failure/block.
+ * @deprecated Marked as NOT USED in the source.
+ */
 function deleteRecType($rtyID) {
     global $system, $mysqli;
 
@@ -308,16 +344,33 @@ function deleteRecType($rtyID) {
     }
     return $ret;
 }
+
 /**
-* Rename record type (and todo reassign description)
-*
-* @param mixed $rty_ID
-* @param mixed $name
-* @param mixed $alt_name
-*/
+ * Updates the name, description, reference URL, and plural name of an existing record type.
+ *
+ * @global \mysqli $mysqli The global mysqli database connection object.
+ * @param int $rty_ID The ID of the record type to update.
+ * @param array $def An associative array where keys are `defRecTypes` column indices (from `$def_rts`)
+ *                   and values are the new values for those columns (e.g., name, description).
+ * @param array $def_rts An associative array mapping `defRecTypes` column names to their indices,
+ *                       used to access values in the `$def` array.
+ *                       Example: `['rty_Name' => 0, 'rty_Description' => 1, ...]`
+ * @return void
+ */
 function renameRectype($rty_ID, $def, $def_rts){
     global $mysqli;
 
+    /**
+     * Updates the name, description, reference URL, and plural name of an existing record type.
+     *
+     * @param int $rty_ID The ID of the record type to update.
+     * @param array $def An associative array where keys are `defRecTypes` column indices (from `$def_rts`)
+     *                   and values are the new values for those columns (e.g., name, description).
+     * @param array $def_rts An associative array mapping `defRecTypes` column names to their indices,
+     *                       used to access values in the `$def` array.
+     *                       Example: `['rty_Name' => 0, 'rty_Description' => 1, ...]`
+     * @return void
+     */
     /*
     $query= 'SELECT rty_Name from defRecTypes WHERE rty_ID='.$rty_ID;
     $val = mysql__select_value($mysqli, $query);
@@ -346,6 +399,18 @@ function renameRectype($rty_ID, $def, $def_rts){
 
 }
 
+/**
+ * Updates the name, documentation, extended description, semantic reference URL, and help text
+ * of an existing detail type (base field definition).
+ *
+ * @global \mysqli $mysqli The global mysqli database connection object.
+ * @param int $dty_ID The ID of the detail type to update.
+ * @param array $def An associative array where keys are `defDetailTypes` column indices (from `$def_dts`)
+ *                   and values are the new values for those columns.
+ * @param array $def_dts An associative array mapping `defDetailTypes` column names to their indices.
+ *                       Example: `['dty_Name' => 0, 'dty_Documentation' => 1, ...]`
+ * @return void
+ */
 function renameDetailtype($dty_ID, $def, $def_dts){
     global $mysqli;
     /*
@@ -375,6 +440,17 @@ function renameDetailtype($dty_ID, $def, $def_dts){
     $mysqli->query($query);
 }
 
+/**
+ * Updates the label, description, code, and semantic reference URL of an existing term.
+ *
+ * @global \mysqli $mysqli The global mysqli database connection object.
+ * @param int $term_id The ID of the term to update.
+ * @param array $def An associative array where keys are `defTerms` column indices (from `$columnNames`)
+ *                   and values are the new values for those columns.
+ * @param array $columnNames An associative array mapping `defTerms` column names to their indices.
+ *                           Example: `['trm_Label' => 0, 'trm_Description' => 1, ...]`
+ * @return void
+ */
 function renameTerm($term_id, $def, $columnNames){
     global $mysqli;
     $idx_name = $columnNames['trm_Label'];
@@ -391,15 +467,27 @@ function renameTerm($term_id, $def, $columnNames){
 }
 
 /**
-* createRectypes - Function that inserts a new rectype into defRecTypes table.and use the rty_ID to insert any
-* fields into the defRecStructure table
-* @author Stephen White
-* @param $commonNames an array valid column names in the defRecTypes table which match the order of data in the $rt param
-* @param $dtFieldNames an array valid column names in the defRecStructure table
-* @param $rt astructured array of which can contain the column names and data for one or more rectypes with fields
-* @param $icon_filename - filename from icon library - for new record type ONLY
-* @return $ret - either error string or negative new record type ID
-**/
+ * Creates one or more new record types in `defRecTypes`.
+ *
+ * It takes an array defining the properties for the new record type(s).
+ * Checks for duplicate names before insertion. After insertion, it updates the new
+ * record type's `rty_OriginatingDBID` and `rty_IDInOriginatingDB` to reflect
+ * its creation in the current database.
+ *
+ * If `$isAddDefaultSetOfFields` is true, it calls `addDefaultFieldForNewRecordType`
+ * to populate the new record type with a default set of fields (or fields specified in `$newfields`).
+ * If a title mask is provided and `$convertTitleMask` is true, it's processed by `updateTitleMask`.
+ *
+ * @param array $commonNames An array of `defRecTypes` column names that correspond to the values in `$rt['common']`.
+ * @param array $rt A structured array containing the data for the new record type(s).
+ *                  Expected format: `[0 => ['common' => [value1, value2, ...]], ...]`
+ *                  where `common` holds values for columns specified in `$commonNames`.
+ * @param bool $isAddDefaultSetOfFields If true, adds a default set of fields to the new record type.
+ * @param bool $convertTitleMask (Optional) If true (default), processes the `rty_TitleMask`.
+ * @param string|null $icon_filename (Optional) Filename for an icon (purpose/usage not fully clear in this function).
+ * @param array|null $newfields (Optional) Custom fields to add if `$isAddDefaultSetOfFields` is true.
+ * @return int|string The new Record Type ID (prefixed with '-') on success, or an error string.
+ */
 function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTitleMask=true, $icon_filename=null, $newfields=null) {
     global $system, $mysqli, $rtyColumnNames;
 
@@ -490,15 +578,19 @@ function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTit
 }
 
 /**
-* updateRectype - Function that updates rectypes in the defRecTypes table.and updates or inserts any
-* fields into the defRecStructure table for the given rtyID
-* @author
-* @param $commonNames an array valid column names in the defRecTypes table which match the order of data in the $rt param
-* @param $dtFieldNames an array valid column names in the defRecStructure table
-* @param $rtyID id of the rectype to update
-* @param $rt a structured array of which can contain the column names and data for one or more rectypes with fields
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
+ * Updates an existing record type in the `defRecTypes` table.
+ *
+ * It constructs an SQL UPDATE statement based on the provided column names and new values.
+ * Sets `rty_LocallyModified` if the record type has an `rty_OriginatingDBID`.
+ * If `rty_TitleMask` is among the updated fields, its value is processed by `TitleMask::execute()`
+ * to convert it to the coded/internal format.
+ * Checks for duplicate names before committing the update.
+ *
+ * @param array $commonNames An array of `defRecTypes` column names that correspond to values in `$rt[0]['common']`.
+ * @param int $rtyID The ID of the record type to update.
+ * @param array $rt Data for the update, expected: `[0 => ['common' => [new_value_for_col1, ...]]]`.
+ * @return int|string The `$rtyID` on success, or an error string on failure.
+ */
 function updateRectype($commonNames, $rtyID, $rt) {
 
     global $system, $mysqli, $rtyColumnNames;
@@ -584,9 +676,16 @@ function updateRectype($commonNames, $rtyID, $rt) {
 
 }
 
-//
-// converts titlemask to concept codes
-//
+/**
+ * Updates the `rty_TitleMask` for a specific record type.
+ *
+ * The provided human-readable `$mask` string is converted to its internal coded
+ * format using `TitleMask::execute()` before being saved to the database.
+ *
+ * @param int $rtyID The ID of the record type whose title mask is to be updated.
+ * @param string $mask The new human-readable title mask string.
+ * @return int|string 0 on success, or an error string if the SQL update fails.
+ */
 function updateTitleMask($rtyID, $mask) {
     global $mysqli;
 
@@ -607,9 +706,20 @@ function updateTitleMask($rtyID, $mask) {
     return $ret;
 }
 
-// not used
-// used in editRecStructure to prevent detail type delete
-//
+/**
+ * Finds record types that use a specific detail type (field) in their title mask.
+ *
+ * This function queries `defRecTypes` to find entries where `rty_TitleMask` contains
+ * the concept ID of the given `$dtyID`.
+ *
+ * @param int|null $rtyID (Optional) If provided, restricts the search to this specific record type ID.
+ *                        If null, searches all record types.
+ * @param int $dtyID The Detail Type ID (local ID) to search for in title masks.
+ * @return array An associative array `[rty_ID => rty_Name]` of record types using the field in their title mask.
+ * @note Marked as NOT USED in the source code. It was likely intended for validation purposes,
+ *       e.g., to prevent deletion of a field if it's used in title masks.
+ * @deprecated
+ */
 function findTitleMaskEntries($rtyID, $dtyID) {
     global $mysqli;
 
@@ -639,9 +749,19 @@ function findTitleMaskEntries($rtyID, $dtyID) {
 }
 
 
-//
-//
-//
+/**
+ * Helper function to initialize a new field structure (rst) entry with default values.
+ *
+ * This function assembles an array representing a new row for `defRecStructure`,
+ * populating it with default values or values derived from the base detail type definition.
+ *
+ * @param array $ri Associative array mapping `defRecStructure` column names to their indices (from `dbs_GetRectypeStructures`).
+ * @param array $di Associative array mapping `defDetailTypes` common column names to their indices (from `dbs_GetDetailTypes`).
+ * @param array $dt The `typedefs` part of `dbs_GetDetailTypes` output, containing all detail type definitions.
+ * @param int $dtid The Detail Type ID for which to create the structure entry.
+ * @param array $defvals An array of default settings: `[requirementType, minValues, displayWidth, displayOrder]`.
+ * @return array An associative array representing the new `defRecStructure` entry, with keys as column indices from `$ri`.
+ */
 function _getInitRty($ri, $di, $dt, $dtid, $defvals){
 
     $dt = $dt[$dtid]['commonFields'];
@@ -684,9 +804,19 @@ function _getInitRty($ri, $di, $dt, $dtid, $defvals){
     return $arr_target;
 }
 
-//
-//
-//
+/**
+ * Adds a default set of fields (or a specified set) to a newly created record type.
+ *
+ * If `$newfields` is provided, it uses that definition. Otherwise, it adds a standard
+ * set including DT_NAME and DT_SHORT_SUMMARY, and potentially separators if found
+ * in the system's detail types.
+ * It then calls `updateRecStructure` to save these new field structures.
+ *
+ * @param int $rtyID The ID of the newly created record type.
+ * @param array|string|null $newfields (Optional) A JSON string or decoded array specifying the fields to add.
+ *                                     If null, default fields (Name, Short Summary) are added.
+ *                                     The structure of `$newfields` is expected to be `['fields' => [dty_id1, dty_id2,...], 'reqs' => [required_dty_id1,...]]`.
+ */
 function addDefaultFieldForNewRecordType($rtyID, $newfields)
 {
     global $system;
@@ -758,10 +888,23 @@ function addDefaultFieldForNewRecordType($rtyID, $newfields)
     updateRecStructure($dtFieldNames, $rtyID, $data);
 }
 
-//================================
-//
-// update structure for record type
-//
+/**
+ * Updates the field structure (entries in `defRecStructure`) for a given record type.
+ *
+ * This function processes an array of field definitions (`$rt['dtFields']`), where each key
+ * is a Detail Type ID and the value is an array of properties for that field within the
+ * context of the `$rtyID`. For each field, it determines if it's an insert or update
+ * to `defRecStructure` and builds/executes the appropriate SQL query.
+ * It sets `rst_LocallyModified` if the record type itself originates from another database.
+ *
+ * @param array $dtFieldNames An array of `defRecStructure` column names, corresponding to the order of values in `$rt['dtFields'][dtyID]`.
+ * @param int $rtyID The ID of the Record Type whose structure is being updated.
+ * @param array $rt A structured array containing the field definitions. Expected format:
+ *                  `['dtFields' => [dtyID1 => [val1, val2,...], dtyID2 => [val1, val2,...]]]`
+ * @return array|false An array where the key is `$rtyID` and the value is an array of Detail Type IDs
+ *                     that were successfully processed. Returns `false` on critical error.
+ *                     Individual field processing errors are handled by `handleError`.
+ */
 function updateRecStructure( $dtFieldNames , $rtyID, $rt) {
 
     global $system, $mysqli, $rstColumnNames;
@@ -875,10 +1018,16 @@ function updateRecStructure( $dtFieldNames , $rtyID, $rt) {
     return $ret;
 }
 
-//================================
-//
-// update structure for record type
-//
+/**
+ * Deletes a field (Detail Type) from a Record Type's structure.
+ *
+ * This removes an entry from the `defRecStructure` table.
+ *
+ * @param int $rtyID The ID of the Record Type.
+ * @param int $dtyID The ID of the Detail Type to remove from the Record Type's structure.
+ * @return array|false An array `['result' => $dtyID]` on success, or `false` on error.
+ *                     Errors are added to `$system` or returned by `handleError`.
+ */
 function deleteRecStructure($rtyID, $dtyID) {
     global $system, $mysqli;
 
@@ -898,14 +1047,14 @@ function deleteRecStructure($rtyID, $dtyID) {
 }
 
 /**
-* createRectypeGroups - Helper function that inserts a new rectypegroup into defRecTypeGroups table
-*
-* @author Artem Osmakov
-* @param $columnNames an array valid column names in the defRecTypeGroups table which match the order of data in the $rt param
-* @param $rt array of data
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
-
+ * Creates one or more new Record Type Groups in the `defRecTypeGroups` table.
+ *
+ * Checks for duplicate group names before insertion.
+ *
+ * @param array $columnNames Column names for `defRecTypeGroups` corresponding to values in `$rt`.
+ * @param array $rt Data for the new group(s). Each element is `['values' => [value_for_col1, ...]]`.
+ * @return array|false `['result' => new_rtg_ID]` on success, or `false` on error.
+ */
 function createRectypeGroups($columnNames, $rt) {
     global $system, $rtgColumnNames;
 
@@ -964,14 +1113,15 @@ function createRectypeGroups($columnNames, $rt) {
 
 
 /**
-* updateRectypeGroup - Helper function that updates group in the defRecTypeGroups table
-* @author Artem Osmakov
-* @param $columnNames an array valid column names in the defRecTypeGroups table which match the order of data in the $rt param
-* @param $rtgID id of the group to update
-* @param $rt - data
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
-
+ * Updates an existing Record Type Group in the `defRecTypeGroups` table.
+ *
+ * Checks if the group exists and if the new name (if provided) would cause a duplicate.
+ *
+ * @param array $columnNames Column names for `defRecTypeGroups` corresponding to values in `$rt`.
+ * @param int $rtgID The ID of the group to update.
+ * @param array $rt An array of new values for the group.
+ * @return array|false `['result' => $rtgID]` on success, or `false` on error.
+ */
 function updateRectypeGroup($columnNames, $rtgID, $rt) {
     global $system, $mysqli, $rtgColumnNames;
 
@@ -1036,12 +1186,15 @@ function updateRectypeGroup($columnNames, $rtgID, $rt) {
     return $ret;
 }
 
+
 /**
-* deleteRectypeGroup - Helper function that delete a group from defRecTypeGroups table.if there are no existing defRectype of this group
-* @author Artem Osmakov
-* @param $rtgID rectype group ID to delete
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
+ * Deletes a Record Type Group from `defRecTypeGroups`.
+ *
+ * The deletion is blocked if the group still contains any Record Types.
+ *
+ * @param int $rtgID The ID of the group to delete.
+ * @return array|false `['result' => $rtgID]` on success, `false` on failure.
+ */
 function deleteRectypeGroup($rtgID) {
     global $system, $mysqli;
 
@@ -1080,15 +1233,15 @@ function deleteRectypeGroup($rtgID) {
     return $ret;
 }
 
-
 /**
-* createDettypeGroups - Helper function that inserts a new dettypegroup into defDetailTypeGroups table
-* @author Artem Osmakov
-* @param $columnNames an array valid column names in the defDetailTypeGroups table which match the order of data in the $rt param
-* @param $rt array of data
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
-
+ * Creates one or more new Detail Type Groups (Field Groups) in the `defDetailTypeGroups` table.
+ *
+ * Checks for duplicate group names before insertion.
+ *
+ * @param array $columnNames Column names for `defDetailTypeGroups` corresponding to values in `$rt`.
+ * @param array $rt Data for the new group(s). Each element is `['values' => [value_for_col1, ...]]`.
+ * @return array|false `['result' => new_dtg_ID]` on success, or `false` on error.
+ */
 function createDettypeGroups($columnNames, $rt)
 {
     global $system, $mysqli, $dtgColumnNames;
@@ -1147,14 +1300,15 @@ function createDettypeGroups($columnNames, $rt)
 
 
 /**
-* updateDettypeGroup - Helper function that updates group in the defDetailTypeGroups table
-* @author Artem Osmakov
-* @param $columnNames an array valid column names in the defDetailTypeGroups table which match the order of data in the $rt param
-* @param $dtgID id of the group to update
-* @param $rt - data
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
-
+ * Updates an existing Detail Type Group (Field Group) in the `defDetailTypeGroups` table.
+ *
+ * Checks if the group exists and if the new name (if provided) would cause a duplicate.
+ *
+ * @param array $columnNames Column names for `defDetailTypeGroups` corresponding to values in `$rt`.
+ * @param int $dtgID The ID of the group to update.
+ * @param array $rt An array of new values for the group.
+ * @return array|false `['result' => $dtgID]` on success, or `false` on error.
+ */
 function updateDettypeGroup($columnNames, $dtgID, $rt) {
     global $system, $mysqli, $dtgColumnNames;
 
@@ -1219,11 +1373,13 @@ function updateDettypeGroup($columnNames, $dtgID, $rt) {
 }
 
 /**
-* deleteDettypeGroup - Helper function that delete a group from defDetailTypeGroups table.if there are no existing defRectype of this group
-* @author Artem Osmakov
-* @param $rtgID rectype group ID to delete
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
+ * Deletes a Detail Type Group (Field Group) from `defDetailTypeGroups`.
+ *
+ * The deletion is blocked if the group still contains any Detail Types.
+ *
+ * @param int $dtgID The ID of the group to delete.
+ * @return array|false `['result' => $dtgID]` on success, `false` on failure.
+ */
 function deleteDettypeGroup($dtgID) {
     global $system, $mysqli;
 
@@ -1256,14 +1412,18 @@ function deleteDettypeGroup($dtgID) {
 }
 
 // -------------------------------  DETAILS ---------------------------------------
-/**
-* createDetailTypes - Helper function that inserts a new detailTypes into defDetailTypes table
-* @author Stephen White
-* @param $commonNames an array valid column names in the defDetailTypes table which match the order of data in the $dt param
-* @param $dt a structured array of data which can contain the column names and data for one or more detailTypes
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
 
+/**
+ * Creates one or more new Detail Types (Base Field Definitions) in the `defDetailTypes` table.
+ *
+ * Checks for duplicate names before insertion. After successful insertion, it updates
+ * the new detail type's `dty_OriginatingDBID` and `dty_IDInOriginatingDB` to reflect
+ * its creation in the current database.
+ *
+ * @param array $commonNames Column names for `defDetailTypes` corresponding to values in `$dt['common']`.
+ * @param array $dt Data for the new detail type(s), expected `['common' => [value_for_col1,...]]`.
+ * @return int|string The new Detail Type ID (prefixed with '-') on success, or an error string.
+ */
 function createDetailTypes($commonNames, $dt) {
     global $system, $mysqli, $dtyColumnNames;
 
@@ -1324,21 +1484,13 @@ function createDetailTypes($commonNames, $dt) {
 }
 
 /**
-* updateDetailType - Helper function that updates detailTypes in the defDetailTypes table.
-* @author Stephen White
-* @param $commonNames an array valid column names in the defDetailTypes table which match the order of data in the $dt param
-* @param $dtyID id of the rectype to update
-* @param $dt a structured array of which can contain the column names and data for one or more detailTypes with fields
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
-
-/**
-* deleteDetailType - Helper function that deletes a detailtype from defDetailTypes table.if there are no existing details of this type
-* @author Stephen White
-* @param $dtyID detailtype ID to delete
-* @return $ret an array of return values for the various data elements created or errors if they occurred
-**/
-
+ * Deletes a Detail Type (Base Field Definition) from `defDetailTypes`.
+ *
+ * The deletion is blocked if the detail type is currently used in any records (`recDetails`).
+ *
+ * @param int $dtyID The ID of the detail type to delete.
+ * @return array|false `['result' => $dtyID]` on success, `false` on failure.
+ */
 function deleteDetailType($dtyID) {
     global $system, $mysqli;
 
@@ -1364,7 +1516,17 @@ function deleteDetailType($dtyID) {
     return $ret;
 }
 
-//
+/**
+ * Updates an existing Detail Type (Base Field Definition) in the `defDetailTypes` table.
+ *
+ * Checks if the detail type exists and if the new name (if provided) would cause a duplicate.
+ * Sets `dty_LocallyModified` if the detail type originates from another database.
+ *
+ * @param array $commonNames An array of `defDetailTypes` column names corresponding to values in `$dt['common']`.
+ * @param int $dtyID The ID of the Detail Type to update.
+ * @param array $dt Data for the update, expected: `['common' => [new_value_for_col1,...]]`.
+ * @return int|string The `$dtyID` on success, or an error string on failure (e.g., not found, duplicate name, SQL error).
+ */
 function updateDetailType($commonNames,$dtyID,$dt) {
 
     global $mysqli, $dtyColumnNames;

@@ -4,11 +4,14 @@ use hserv\System;
 use hserv\entity\DbEntityBase;
 
 /**
-* db access to usrUGrps table for users
-*
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
+ * Class DbSysUsers
+ *
+ * Provides database access and operations for user accounts stored in the `sysUGrps` table (where `ugr_Type` = 'user').
+ * It handles searching, creating, updating, and deleting users, as well as special actions
+ * like transferring database ownership and importing users from another database.
+ *
+ * @package     Heurist academic knowledge management system
+ * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -29,14 +32,36 @@ require_once dirname(__FILE__).'/../structure/dbsUsersGroups.php';//send email m
 
 class DbSysUsers extends DbEntityBase
 {
+    /** @var bool Stores the original autocommit status during a transaction. */
     private $keep_autocommit = false;
+    /** @var bool Flag to track if a transaction is currently active. */
     private $transaction = false;
 
+    /**
+     * Constructor for DbSysUsers.
+     *
+     * Calls the parent constructor and sets `requireAdminRights` to false,
+     * as some user operations (like self-update) might be allowed for non-admins.
+     * Specific actions are still permission-checked.
+     *
+     * @param \hserv\System $system The main Heurist system object.
+     * @param array|null $data Optional data to initialize the entity with.
+     */
     public function __construct( $system, $data=null ) {
         parent::__construct( $system, $data );
         $this->requireAdminRights = false;
     }
 
+    /**
+     * Searches for user records.
+     *
+     * Filters by `ugr_Type="user"`. Supports searching by `ugr_ID`, `ugr_Name`, `ugr_Enabled`, `ugr_eMail`,
+     * and group membership/role (`ugl_GroupID`, `ugl_Role`).
+     * Can also find users *not* in a specified group.
+     * The level of detail returned is controlled by `$this->data['details']`.
+     *
+     * @return array|false An array of found user records, or false on error.
+     */
     public function search(){
 
         $not_in_group = @$this->data['not:ugl_GroupID'];
@@ -197,6 +222,16 @@ class DbSysUsers extends DbEntityBase
     // validate permission for edit tag
     // for delete and assign see appropriate methods
     //
+    /**
+     * Validates if the current user has permission to modify/delete the specified user accounts.
+     *
+     * Users can only modify/delete their own account unless they are an admin.
+     * Admins cannot modify/delete the main database owner (ID 2) unless they are that owner.
+     * This method overrides the parent `_validatePermission`.
+     *
+     * @return bool True if the user has permission, false otherwise.
+     *              Errors are added to the system object on permission failure.
+     */
     protected function _validatePermission(){
 
         $ugrID = $this->system->getUserId();
@@ -224,6 +259,15 @@ class DbSysUsers extends DbEntityBase
     //
     //
     //
+    /**
+     * Validates specific values for user records before saving.
+     *
+     * Ensures `ugr_eMail` is a valid email format.
+     * This method extends `parent::_validateValues()`.
+     *
+     * @return bool True if email is valid (or not provided), false if invalid.
+     *              Errors are added to the system object on validation failure.
+     */
     protected function _validateValues(){
 
         $ret = parent::_validateValues();
@@ -252,6 +296,20 @@ class DbSysUsers extends DbEntityBase
     //
     //
     //
+    /**
+     * Prepares user records before saving.
+     *
+     * - Sets `ugr_Type` to 'user'.
+     * - Sets `ugr_Modified` to the current date/time.
+     * - Hashes `ugr_Password` if provided, and stores the plain password temporarily in `tmp_password`.
+     * - Defaults `ugr_Name` to `ugr_eMail` if not provided.
+     * - Sets `ugr_Enabled` to 'n' for new users not being created by an admin, otherwise validates existing status.
+     * - Validates `ugr_Name` and `ugr_eMail` for duplication.
+     * - Sets `is_approvement` flag if an admin is enabling a previously disabled new user.
+     * - Sets `is_new` flag.
+     *
+     * @return bool True if preparation is successful and validation passes, false otherwise.
+     */
     protected function prepareRecords(){
 
         $ret = parent::prepareRecords();
@@ -318,6 +376,18 @@ class DbSysUsers extends DbEntityBase
     //
     //
     //
+    /**
+     * Saves user records.
+     *
+     * After calling `parent::save()`:
+     * - Handles renaming any associated temporary user image file (`ugr_Thumb`).
+     * - If a `ugl_GroupID` is provided in the record data, adds the user to that group as a 'member'.
+     * - Sends notification emails for new user registrations or account approvals.
+     * - Synchronizes common credentials for approved users.
+     *
+     * @return array|false The result from `parent::save()` (array of saved IDs or false).
+     *                     May also return false if email sending fails in critical scenarios.
+     */
     public function save(){
 
         $savedRecIds = parent::save();
@@ -374,6 +444,20 @@ class DbSysUsers extends DbEntityBase
     //
     //
     //
+    /**
+     * Deletes user account(s).
+     *
+     * Prevents deletion of the main "Database Owner" user (ID 2) or users who own non-temporary records.
+     * Checks if the user is the last admin of any workgroup and prevents deletion if so.
+     * Before deleting the user from `sysUGrps`:
+     * - Deletes associated temporary records owned by the user.
+     * - Deletes links from `sysUsrGrpLinks`.
+     * - Deletes associated entries from `usrHyperlinkFilters`, `usrRemindersBlockList`, `usrSavedSearches`, `usrTags`, and `usrRecPermissions`.
+     *
+     * @todo Add deletion of associated user images.
+     * @param bool $disable_foreign_checks Passed to `parent::delete()`.
+     * @return bool True on successful deletion, false otherwise.
+     */
     public function delete($disable_foreign_checks = false){
 
 
@@ -576,6 +660,22 @@ class DbSysUsers extends DbEntityBase
     // 1) import users from another db
     // 2) transfer database ownership to another user
     //
+    /**
+     * Performs batch actions related to user accounts.
+     *
+     * Supported actions:
+     * - **Transfer Ownership**: If `transferOwner` is in `$this->data`, calls `transferOwner()`.
+     * - **Import Users**: Imports users from another Heurist database.
+     *   Requires `sourceDB` and `userIDs` in `$this->data`. Optionally `roles` for group assignments
+     *   and `check_password` if importing a single user from login popup.
+     *   Prevents import if users with the same email or username already exist (unless `exit_if_exists` is false).
+     *
+     * Admin rights are generally required unless importing via login popup.
+     *
+     * @param bool $ignore_permissions If true, admin permission checks are bypassed (used internally). Defaults to false.
+     * @return bool|string True or a success message string on success, false on failure.
+     *                     Specific messages for user import counts.
+     */
     public function batch_action($ignore_permissions=false){
 
         $provided_pwd = $this->data['check_password'];

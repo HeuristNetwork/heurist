@@ -1,0 +1,1 @@
+This directory contains files used for searching, querying, or retrieving Heurist database structure definitions. These scripts might provide functionalities to look up specific schema elements, fetch lists of definitions based on criteria, or support interfaces that allow users to explore the database structure.

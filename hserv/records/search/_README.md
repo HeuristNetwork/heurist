@@ -1,27 +1,17 @@
-Directory:    /hserv/records/search
+This directory contains files related to record searching and retrieval.
 
-Overview: General and specific search functions. Query composer (plain text and json to sql)
+These files provide functionalities for constructing and executing search queries, fetching record data, and managing related aspects like file information and duplicate detection.
+
+**Key Files:**
+- `composeSql.php`: Implements a query composer that translates JSON (and plain text via JSON) search criteria into SQL queries. This is crucial for dynamic search capabilities.
+- `composeSqlOld.php`: Likely an older version of the SQL composer, possibly kept for backward compatibility or reference.
+- `recordSearch.php`: Contains core functions for performing record searches based on various criteria, retrieving record data, and related helper functions.
+- `recordFile.php`: Manages operations related to files attached to records, such as retrieving file information or paths.
+- `recordsDupes.php`: Provides functionalities for finding and managing duplicate records within the database.
+- `relationshipData.php`: Handles the retrieval and processing of relationship data between records.
+
+**Original Overview (from _README.md):**
+General and specific search functions. Query composer (plain text and json to sql)
 
 composeSql.php - json (and  plain text to json)  to sql query composer
 
-Updated: 26th October 2023
-
--------------------------------------------------------------------------------------------------------------------------------------
-
-/**
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/

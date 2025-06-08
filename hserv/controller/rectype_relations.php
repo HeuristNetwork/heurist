@@ -56,10 +56,12 @@
     }
 
     /**
-    * Retrieves all RecTypes
-    * @param mixed $system System reference
-    * @return Array of nodes
-    */
+     * Retrieves all Record Types and their instance counts.
+     *
+     * @param \hserv\System $system System reference.
+     * @return array An array of stdClass objects, each representing a record type
+     *               with properties: id, name, count (non-temporary instances), and image URL.
+     */
     function getRectypes($system) {
         $rectypes = array();
 
@@ -84,8 +86,11 @@
     *
     * Find all constrained resource (record pointer) and relmarker fields
     *
-    * @param mixed $system   System reference
-    * @param mixed $rectype  Record type
+    * @param \hserv\System $system System reference.
+    * @param \stdClass $rectype A stdClass object representing the record type (must have an 'id' property).
+    * @return array An array of stdClass objects, each representing a relation field
+    *               with properties: id (detail type ID), name (display name), count (initialized to 0),
+    *               type (relation type, e.g., 'resource', 'relmarker'), and ids (comma-separated target rectype IDs).
     */
     function getConstrainedResourceAndRelmarkerFields($system, $rectype) {
         $relations = array();
@@ -117,9 +122,11 @@
     /**
     * Find count of links/relation by pair of source->target rectypes
     *
-    * @param mixed $system   System reference
-    * @param mixed $rectype  Parent rectype
-    * @param mixed $relation Relation object
+    * @param \hserv\System $system System reference.
+    * @param \stdClass $rectype Parent record type object (must have an 'id' property).
+    * @param \stdClass $relation Relation object (must have 'id', 'ids', and 'type' properties).
+    * @return array An array of stdClass objects, each representing a target record type
+    *               with properties: id (target record type ID) and count (number of links).
     */
     function getTargets($system, $rectype, $relation) {
         $targets = array();
@@ -168,9 +175,9 @@
     /**
     * Helper method to find the index of $target in the $rectypes array
     *
-    * @param mixed $rectypes Array of rectypes
-    * @param mixed $target   A target object
-    * @return mixed The index
+    * @param array $rectypes Array of record type objects (each must have an 'id' property).
+    * @param \stdClass $target A target object (must have an 'id' property).
+    * @return int The index of the target record type in the $rectypes array, or 0 if not found.
     */
     function getIndex($rectypes, $target) {
         for($i = 0; $i < sizeof($rectypes); $i++) {
@@ -184,8 +191,11 @@
     /**
     * Retrieves all links for a certain RecType
     *
-    * @param mixed $system  System reference
-    * @param mixed $rectype Rectype reference
+    * @param \hserv\System $system System reference.
+    * @param array $rectypes Array of record type objects (nodes).
+    * @return array An array of stdClass objects, each representing a link between record types.
+    *               Each link object has properties: source (index in $rectypes), target (index in $rectypes),
+    *               relation (the relation object), targetcount, and relation->count.
     */
     function getLinks($system, $rectypes) {
         $links = array();
