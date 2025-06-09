@@ -5,12 +5,12 @@
 * Main usage - search the records and output data as a json (for HRecordSet).
 *
 * parameters
-* db - heurist database
-* remote=master - request to HEURIST_INDEX_DATABASE
-* a  - action
-*      minmax - seach numeric min and max value for "dt" (field) or "rt" (record type)
-*      getfacets -   finds all possible facet values for current query and calculates counts for every value
-*      related -   finds all related record IDs for given set record "ids"
+* db - The target Heurist database name.
+* remote=master - If set to 'master', directs the request to the HEURIST_INDEX_DATABASE.
+* a  - action: Specifies the operation to perform.
+*      minmax - Search for numeric minimum and maximum values for a "dt" (detail type/field) or "rt" (record type).
+*      getfacets - Finds all possible facet values for the current query and calculates counts for each value.
+*      related - Finds all related record IDs for a given set of record IDs ("ids" parameter).
 *      search - default
 *
 * @package     Heurist academic knowledge management system
@@ -43,34 +43,34 @@
     *       FOR RULES
     *       rules - rules queries - to search related records on server side
     *       getrelrecs (=1) - search relationship records (along with related) on server side
-    *       topids - list of records ids, it is used to compose 'parentquery' parameter to use in rules (@todo - replace with new rules algorithm)
+    *       topids - List of record IDs, used to compose the 'parentquery' parameter for use in rules (@todo - replace with new rules algorithm).
     *
-    *       INTERNAL/recursive
-    *       parentquery - sql expression to substiture in rule query
-    *       sql - sql expression to execute (used as recursive parameters to search relationship records)
+    *       INTERNAL/recursive (Not intended for direct client use)
+    *       parentquery - SQL expression to substitute in a rule query.
+    *       sql - SQL expression to execute (used as a recursive parameter for searching relationship records).
     *
-    *       SEARCH parameters that are used to compose sql expression
-    *       q - query string (old mode) or json array (new mode)
-    *       w (=all|bookmark a|b) - search among all or bookmarked records
-    *       limit  - limit for sql query is set explicitely on client side
-    *       offset - offset parameter value for sql query
-    *       s - sort order
+    *       SEARCH parameters (used to compose SQL expressions)
+    *       q - Query string (old mode) or JSON array (new mode).
+    *       w - (=all|bookmark a|b) - Search scope: 'all' records or bookmarked records.
+    *       limit  - Limit for the SQL query, set explicitly on the client side.
+    *       offset - Offset parameter value for the SQL query.
+    *       s - Sort order.
     *
     *       OUTPUT parameters
-    *       needall (=1) - by default it returns only first 1000, to return all set it to 1,
-    *                      it is set to 1 for server-side rules searches
-    *       publiconly (=1) - ignore current user and returns only public records
+    *       needall - (=1) - If 1, returns all matching records; by default, returns only the first 1000. Set to 1 for server-side rules searches.
+    *       publiconly - (=1) - If 1, ignores the current user and returns only public records.
     *
-    *       detail (former 'f') - ids       - only record ids
-    *                             header    - record header
-    *                             timemap   - record header + timemap details
-    *                             detail    - record header + all details
-    *                             structure - record header + all details + record type structure (for editing) - NOT USED
+    *       detail (formerly 'f') - Level of detail for returned records:
+    *                             ids       - Only record IDs.
+    *                             header    - Record header information.
+    *                             timemap   - Record header + timemap details.
+    *                             detail    - Record header + all details.
+    *                             structure - Record header + all details + record type structure (for editing) - NOT USED.
     *
-    *       CLIENT SIDE
-    *       id - unque id to sync with client side
-    *       source - id of html element that is originator of this search
-    *       qname - original name of saved search (for messaging)
+    *       CLIENT SIDE parameters (used for UI tracking and context)
+    *       id - Unique ID to synchronize with the client-side request.
+    *       source - ID of the HTML element that originated this search.
+    *       qname - Original name of a saved search (used for messaging).
 
     */
 

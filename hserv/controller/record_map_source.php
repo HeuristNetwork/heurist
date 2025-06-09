@@ -5,17 +5,18 @@
 * Converts kml,csv,dbf to geojson or downloads file based on Datasource record id
 *
 * Reads file map source record (KML, CSV or DBF) and returns content
-* either as geojson (conversion), ogriginal file (acts as proxy) or zip archive
-* (with metadata). No functions
-* Usage: viewers/map/mapLayer.js and hapi.load_kml_as_geojson - to load kml,csv,dbf source as geojson.
+* either as GeoJSON (conversion), original file (acts as proxy), or zip archive
+* (with metadata). No functions.
+* Usage: viewers/map/mapLayer.js and hapi.load_kml_as_geojson - to load KML, CSV, DBF source as GeoJSON.
 *
 * Parameters:
-* recID   datasource record ID
-* format  geojson - converts file to geojson,
-*         rawfile - return zipped original file with metadata
-*         n/a - works as proxy - it downloads original file with http header (mimetype, size)
+* recID - The ID of the datasource record.
+* format - Specifies the output format. Possible values:
+*          geojson - Converts the file to GeoJSON format.
+*          rawfile - Returns a zipped archive containing the original file and metadata.
+*          (not specified) - Acts as a proxy, downloading the original file with appropriate HTTP headers (MIME type, size).
 *
-* metadata - 1 include text file with link to flathml for format=rawfile
+* metadata - (Optional) If set to 1 and format is 'rawfile', includes a text file with a link to a flat HML representation.
 *
 * When it generates geojson it simplifies path by removing extra points with given tolerance
 *

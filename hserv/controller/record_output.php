@@ -6,46 +6,47 @@
 * For usage see HRecordMgr.search_new in hapi.js or export routines.
 *
 * parameters
-* db - heurist database
-* format = geojson|json|csv|kml|xml|hml|gephi|iiif
-* linkmode = direct, direct_links, none, all
-* prefs:{ format specific parameters }, }
+* db - The target Heurist database name.
+* format - Output format for the records. Supported: geojson, json, csv, kml, xml, hml, gephi, iiif.
+* linkmode - Specifies how links between records are handled. Options: direct, direct_links, none, all.
+* prefs - An object containing format-specific parameters.
 *
-* prefs for csv
-*         csv_delimiter :','
-*         csv_enclosure :'""
-*         csv_mvsep     :'|',
-*         csv_linebreak :'nix',
-*         csv_header    :true
-*         csv_headeronly:false
-*         fields        : {rtid:[dtid1, dtid3, dtid2]}
-*         include_term_ids
-*         include_term_codes
-*         include_file_url
-*         include_record_url_html
-*         include_record_url_xml
-*         include_term_hierarchy
-*         include_resource_titles
-*         include_temporals
+* prefs for csv:
+*   csv_delimiter : (char) Delimiter character, e.g., ','.
+*   csv_enclosure : (char) Field enclosure character, e.g., '"'.
+*   csv_mvsep     : (char) Separator for multi-value fields, e.g., '|'.
+*   csv_linebreak : (string) Line break style, e.g., 'nix' (\n), 'win' (\r\n), 'mac' (\r).
+*   csv_header    : (boolean) If true, include a header row.
+*   csv_headeronly: (boolean) If true, output only the header row.
+*   fields        : (object) Defines specific fields to include, e.g., {rtid:[dtid1, dtid3, dtid2]} where rtid is record type ID and dtid is detail type ID.
+*   include_term_ids        : (boolean) If true, include term IDs.
+*   include_term_codes      : (boolean) If true, include term codes.
+*   include_file_url        : (boolean) If true, include file URLs.
+*   include_record_url_html : (boolean) If true, include HTML record URLs.
+*   include_record_url_xml  : (boolean) If true, include XML record URLs.
+*   include_term_hierarchy  : (boolean) If true, include term hierarchy information.
+*   include_resource_titles : (boolean) If true, include titles of linked resources.
+*   include_temporals       : (boolean) If true, include temporal data.
 *
-* prefs for json,xml
-*           zip  : 0|1  compress
-*           file : 0|1  output as file or printout (force download in browser)
-*           defs : 0|1  include database definitions - NOT USED
-*           restapi: 0|1  not include db description and heurist header
+* prefs for json, xml:
+*   zip     : (0|1) If 1, compress the output.
+*   file    : (0|1) If 1, output as a downloadable file; otherwise, print to output.
+*   defs    : (0|1) Include database definitions (Currently NOT USED).
+*   restapi : (0|1) If 1, does not include database description and Heurist header, suitable for REST API responses.
 *
-* prefs for geojson, json
-*   extended 0 as is (in heurist internal format),
-*            1 - interpretable,
-*            2 - include concept code and labels
-*            3 - simple plain object for mediaViewer (only records with file fields are included)
-*   leaflet - true|false returns strict geojson and timeline data as two separate arrays, without details, only header fields rec_ID, RecTypeID and rec_Title
-*   simplify  true|false simplify  paths with more than 1000 vertices
+* prefs for geojson, json:
+*   extended: (0|1|2|3) Specifies the level of detail for JSON/GeoJSON output:
+*             0 - As is (Heurist internal format).
+*             1 - Interpretable format.
+*             2 - Include concept codes and labels.
+*             3 - Simple plain object for mediaViewer (only records with file fields are included).
+*   leaflet : (true|false) If true, returns strict GeoJSON and timeline data as separate arrays, including only header fields (rec_ID, RecTypeID, rec_Title) and no other details.
+*   simplify: (true|false) If true, simplifies geometry paths with more than 1000 vertices.
 *
-* datatable -   datatable session id (exports data for in datatable widget format)
-*               >1 and "q" is defined - save query request in session to result set returned,
-*               >1 and "q" not defined and "draw" is defined - takes query from session
-*                1 - use "q" parameter
+* datatable - Session ID for datatable integration. Controls behavior for requests from a datatable widget:
+*             If >1 and "q" (query) is defined: Saves the query request in the session for the returned result set.
+*             If >1 and "q" is not defined and "draw" is defined: Takes the query from the session.
+*             If 1: Uses the "q" parameter directly for the search.
 *
 * @package     Heurist academic knowledge management system
 * @subpackage  controller
