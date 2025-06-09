@@ -15,10 +15,10 @@
 namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 use hserv\utilities\USanitize;
+use hserv\utilities\Temporal;
 
 require_once dirname(__FILE__).'/../records/edit/recordModify.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
-require_once dirname(__FILE__).'/../utilities/Temporal.php';
 
 /**
 * Class DbSysArchive
@@ -426,7 +426,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
                         $value = $json_value;
                     }
 
-                    $value = \Temporal::toHumanReadable($value, true, 1);
+                    $value = Temporal::toHumanReadable($value, true, 1);
 
                     $value = USanitize::cleanupSpaces($value);
 
@@ -781,7 +781,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
                             break;
 
                         case 'date':
-                            $arc_Value = \Temporal::getValueForRecDetails( $arc_Value, $useNewTemporalFormatInRecDetails );
+                            $arc_Value = Temporal::getValueForRecDetails( $arc_Value, $useNewTemporalFormatInRecDetails );
                             break;
 
                         case 'file':

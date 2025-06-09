@@ -110,6 +110,7 @@ if (@$argv) {
 }
 
 use hserv\structure\ConceptCode;
+use hserv\utilities\Temporal;
 
 require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';

@@ -42,6 +42,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 use hserv\utilities\USystem;
+use hserv\utilities\Temporal;
 use hserv\entity\DbsUsersGroups;
 use hserv\structure\ConceptCode;
 use hserv\entity\DbRecUploadedFiles;
@@ -50,7 +51,6 @@ require_once 'recordFile.php';//it includes UFile.php
 require_once 'composeSql.php';
 require_once dirname(__FILE__).'/../../structure/search/dbsData.php';
 require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
-require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 
 define('MSG_SAVED_FILTER', 'Saved filter: ');
 define('MSG_MEMORY_LIMIT', ' records are in result of search query. Memory limit does not allow to retrieve all of them. Please filter to a smaller set of results.');

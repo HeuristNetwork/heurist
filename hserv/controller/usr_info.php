@@ -19,6 +19,7 @@
 * @since       3.0
 */
     use hserv\utilities\USanitize;
+    use hserv\utilities\Temporal;
 
     require_once dirname(__FILE__).'/../../autoload.php';
 

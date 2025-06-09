@@ -66,7 +66,6 @@
     require_once dirname(__FILE__).'/../records/search/recordSearch.php';
     require_once dirname(__FILE__).'/../records/search/recordFile.php';
     require_once dirname(__FILE__).'/../structure/dbsTerms.php';
-    require_once dirname(__FILE__).'/../utilities/Temporal.php';
     require_once dirname(__FILE__).'/../../admin/verification/verifyValue.php';
 
     $response = array();

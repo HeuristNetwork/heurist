@@ -1,19 +1,4 @@
 <?php
-
-/*
-* Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* https://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
 /**
 * Brief description of file
 *
@@ -35,11 +20,13 @@
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @link        https://HeuristNetwork.org
-* @version     3.1.0
+* @since       3.1.0
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
+namespace hserv\utilities;
+
 
 /*
 * 1. Public methods
@@ -72,7 +59,6 @@
 *       toReadable      - human readble
 *       toReadableExt   - human readble extended
 */
-
 class Temporal {
 
     protected $tDate = null;
@@ -576,14 +562,14 @@ class Temporal {
             if($deviation!=null){
                 $dt = Temporal::dateToISO($timestamp);
                 try{
-                    $tStart = new DateTime($dt);
-                    $tEnd = new DateTime($dt);
+                    $tStart = new \DateTime($dt);
+                    $tEnd = new \DateTime($dt);
                 } catch (Exception  $e){
                 }
                 $deviation = strtoupper($deviation);
                 $i = null;
                 try{
-                    $i = new DateInterval($deviation);
+                    $i = new \DateInterval($deviation);
                 } catch (Exception  $e){
                 }
 
@@ -667,7 +653,7 @@ class Temporal {
                 $res = intval($date['in']);
                 if($deviation!=null){
                     try{
-                        $i = new DateInterval($deviation);
+                        $i = new \DateInterval($deviation);
                         $res = $res + $direction * $i->y;
                         if($res<0){
                             $res = '-'.str_pad(substr(strval($res),1),6,'0',STR_PAD_LEFT);
@@ -835,7 +821,7 @@ class Temporal {
                     $origHasDays = substr_count($value,'-')>1 || substr_count($value,' ')>1 || substr_count($value,'/')>1;
 
 
-                    $t2 = new DateTime($value);
+                    $t2 = new \DateTime($value);
                     $datestamp = $t2->format(DATE_8601);
                     $date = date_parse($datestamp);
 
@@ -882,7 +868,7 @@ class Temporal {
                 $date = trim($date);
 
                 if($today_date!=null){ // && preg_match('/^today|now|yesterday|tomorrow|-1 day|+1 day$/i',$date)){
-                    $t2 = new DateTime($today_date);
+                    $t2 = new \DateTime($today_date);
 
                     $sdate = strtolower($date);
                     if($sdate=='today'){
@@ -1208,14 +1194,14 @@ class Temporal {
 
             try{
                 $dt1 = Temporal::dateToISO($dt1);
-                $early = new DateTime($dt1);
+                $early = new \DateTime($dt1);
                 $early->setTime(0, 0);
             }catch(Exception $e){
                 //$system->addError(HEURIST_INVALID_REQUEST, "An invalid starting date has been provided, " . $e->errorMessage());
             }
             try{
                 $dt2 = Temporal::dateToISO($dt2);
-                $latest = new DateTime($dt2);
+                $latest = new \DateTime($dt2);
                 $latest->setTime(0, 0);
             }catch(Exception $e){
                 //$system->addError(HEURIST_INVALID_REQUEST, "An invalid latest date has been provided, " . $e->errorMessage());
@@ -1368,7 +1354,7 @@ class Temporal {
         $ret = '';
 
         try{
-            $i = new DateInterval($value);
+            $i = new \DateInterval($value);
             if($i){
                 $ret = ($i->y ? ("$prefix{$i->y} years") :
                     ($i->m ? ("$prefix{$i->m} months") :
@@ -1809,7 +1795,7 @@ class Temporal {
         if(preg_match('/01$/', $start) && preg_match('/(?:02(?:28|29)|(?:01|03|05|07|08|10|12)31|(?:04|06|09|11)30)$/', $end)){
 
             $start = self::decimalToYMD($start);
-            $start = new DateTime($start);
+            $start = new \DateTime($start);
 
             $resDate['Date'] = $start->format('F Y');
         }

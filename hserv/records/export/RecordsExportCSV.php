@@ -24,12 +24,12 @@ namespace hserv\records\export;
 
 use hserv\utilities\USystem;
 use hserv\utilities\USanitize;
+use hserv\utilities\Temporal;
 use hserv\entity\DbDefRecStructure;
 
 require_once dirname(__FILE__).'/../../../vendor/autoload.php';//for geoPHP
 require_once dirname(__FILE__).'/../../utilities/geo/mapSimplify.php';
 require_once dirname(__FILE__).'/../../utilities/geo/mapCoordConverter.php';
-require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
 require_once dirname(__FILE__).'/../../../admin/verification/verifyValue.php';
 
@@ -783,7 +783,7 @@ public static function output($data, $params){
                             }
                         }elseif($dt_type=='date'){
                             foreach($values as $val){
-                                $vals[] = \Temporal::toHumanReadable(trim($val));
+                                $vals[] = Temporal::toHumanReadable(trim($val));
                                 if($include_temporals){
                                     $date_temporals[] = trim($val);
                                 }

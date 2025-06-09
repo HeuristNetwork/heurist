@@ -23,10 +23,10 @@
 
 namespace hserv\utilities;
 use hserv\utilities\DbUtils;
+use hserv\utilities\Temporal;
 
 require_once dirname(__FILE__).'/../../admin/verification/verifyValue.php';
 require_once dirname(__FILE__).'/../../admin/verification/verifyFieldTypes.php';
-require_once dirname(__FILE__).'/../utilities/Temporal.php';
 require_once dirname(__FILE__)."/../utilities/geo/mapCoordinates.php";
 
 class DbVerify {
@@ -2506,7 +2506,7 @@ FIXMSG
                         list($y1, $y2) = explode('-',$date_val);
                         if(preg_match('/^\d{4}$/', $y1) && preg_match('/^\d{4}$/', $y2)){
                             //this is year range
-                            $row['new_value'] = \Temporal::getValueForRecDetails($date_val, $useNewTemporalFormatInRecDetails);
+                            $row['new_value'] = Temporal::getValueForRecDetails($date_val, $useNewTemporalFormatInRecDetails);
                             $autofix = true;
                         }else{
                             $row['is_ambig'] = 'we suggest using a date range';
@@ -2516,7 +2516,7 @@ FIXMSG
                     if($row['new_value']==null && $row['is_ambig']===true){
 
                         //parse and validate value order 2 (mm/dd), don't add day if it is not defined
-                        $row['new_value'] = \Temporal::dateToISO($date_val, 2, false, $row['rec_Added']);
+                        $row['new_value'] = Temporal::dateToISO($date_val, 2, false, $row['rec_Added']);
                         if($row['new_value']==$date_val){ //nothing to correct - result is the same
 
                             if(strlen($date_val)>=8 && strpos($date_val,'-')==false){ // try automatic convert to ISO format
@@ -2541,7 +2541,7 @@ FIXMSG
                             continue;
                         }
                         if($row['new_value']!=null && $row['new_value']!=''){
-                            $row['is_ambig'] = \Temporal::correctDMYorder($date_val, true);
+                            $row['is_ambig'] = Temporal::correctDMYorder($date_val, true);
                             $autofix = ($row['is_ambig']===false);
                         }
                     }
