@@ -1,5 +1,16 @@
 <?php
-namespace hserv\entity;
+/**
+* DbRecUploadedFiles.php - Class DbRecUploadedFiles
+*
+* .
+*
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @since       6.0
+*/namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 use hserv\utilities\UArchive;
 use hserv\utilities\USanitize;
@@ -40,14 +51,7 @@ use hserv\filestore\FilestoreHarvest;
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 require_once dirname(__FILE__).'/../records/edit/recordModify.php';
 
-/**
-* some public methods
-*
-*   registerImage - saves encoded image data as file and register it
-*   registerFile - uses getFileInfoForReg to get file info
-*   registerURL - register url: retrieves MimeExt
-*
-*/
+
 class DbRecUploadedFiles extends DbEntityBase
 {
     /** @var string Default error message for unrecognized file extensions/MIME types. */

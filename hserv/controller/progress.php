@@ -1,22 +1,25 @@
 <?php
 /**
- * Handles progress updates and termination for background processes.
- *
- * This script is used to get the current progress of a long-running task
- * or to signal a task to terminate. Progress is typically stored in
- * a temporary location (e.g., scratch directory).
- *
- * Parameters:
- * - db: The database name.
- * - session: The session ID for the progress tracking.
- * - terminate: (Optional) If set to 1, signals the process to terminate.
- *
- * @package     Heurist academic knowledge management system
- * @link        https://HeuristNetwork.org
- * @copyright   (C) 2005-2024 University of Sydney
- * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
- * @version     6.6
- */
+* progress.php - Handles progress updates and termination for background processes
+*
+* This script is used to get the current progress of a long-running task
+* or to signal a task to terminate. Progress is typically stored in
+* a temporary location (e.g., scratch directory).
+*
+* Parameters:
+* - db: The database name.
+* - session: The session ID for the progress tracking.
+* - terminate: (Optional) If set to 1, signals the process to terminate.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  controller
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @since       6.6
+*/
     require_once dirname(__FILE__).'/../../autoload.php';
 
     $res = '';

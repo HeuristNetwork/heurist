@@ -1306,15 +1306,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     }                            
                     
                     return data;                                                   
-                    /* from server
-                    let node = data.node;
-                    let sURL = window.hWin.HAPI4.baseURL + "hserv/controller/sys_structure.php";
-                    data.result = {
-                        url: sURL,
-                        data: {db:window.hWin.HAPI4.database, mode:5, parentcode:node.data.code, 
-                            rectypes:node.data.rt_ids, fieldtypes:allowed_fieldtypes}
-                    } 
-                    */                                   
+                                  
                 },
                 expand: function(e, data){
                     that.showHideReverse();

@@ -2048,7 +2048,7 @@ $mysqli->kill($thread_id);
      * Session files are stored in `HEURIST_SCRATCH_DIR` named `session<session_id>`.
      *
      * @param \mysqli|null $mysqli The mysqli connection object (currently unused in this function's logic
-     *                             but kept for historical reasons or potential future use).
+     *                             but kept for historical reasons or potential future use - to store progress in database table).
      * @param int $session_id The session ID.
      * @param bool $is_init Unused parameter.
      * @param string|null $value If not null, this value is written to the session file.

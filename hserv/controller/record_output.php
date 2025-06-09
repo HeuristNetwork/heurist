@@ -1,70 +1,61 @@
 <?php
-    /**
-    * Application interface. See HRecordMgr in hapi.js
-    * Record search and output in required format
-    * used in recordExportCSV.js
-    *
-    *
-    * parameters
-    * db - heurist database
-    * format = geojson|json|csv|kml|xml|hml|gephi|iiif
-    * linkmode = direct, direct_links, none, all
-    * prefs:{ format specific parameters }, }
-    *
-    * prefs for csv
-                csv_delimiter :','
-                csv_enclosure :'""
-                csv_mvsep     :'|',
-                csv_linebreak :'nix',
-                csv_header    :true
-                csv_headeronly:false
-                fields        : {rtid:[dtid1, dtid3, dtid2]}
-                include_term_ids
-                include_term_codes
-                include_file_url
-                include_record_url_html
-                include_record_url_xml
-                include_term_hierarchy
-                include_resource_titles
-                include_temporals
-    *
-    *
-    *
-    * prefs for json,xml
-    *           zip  : 0|1  compress
-    *           file : 0|1  output as file or printout (force download in browser)
-    *           defs : 0|1  include database definitions - NOT USED
-    *           restapi: 0|1  not include db description and heurist header
-    *
-    * prefs for geojson, json
-    *   extended 0 as is (in heurist internal format),
-    *            1 - interpretable,
-    *            2 - include concept code and labels
-    *            3 - simple plain object for mediaViewer (only records with file fields are included)
-    *   leaflet - true|false returns strict geojson and timeline data as two separate arrays, without details, only header fields rec_ID, RecTypeID and rec_Title
-    *   simplify  true|false simplify  paths with more than 1000 vertices
-    *
-    * datatable -   datatable session id
-    *               >1 and "q" is defined - save query request in session to result set returned,
-    *               >1 and "q" not defined and "draw" is defined - takes query from session
-    *                1 - use "q" parameter
-    *
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
-
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
+/**
+* record_output.php - Handler for records search and export
+*
+* It searches the records and outputs data in the required format.
+* For usage see HRecordMgr.search_new in hapi.js or export routines.
+*
+* parameters
+* db - heurist database
+* format = geojson|json|csv|kml|xml|hml|gephi|iiif
+* linkmode = direct, direct_links, none, all
+* prefs:{ format specific parameters }, }
+*
+* prefs for csv
+*         csv_delimiter :','
+*         csv_enclosure :'""
+*         csv_mvsep     :'|',
+*         csv_linebreak :'nix',
+*         csv_header    :true
+*         csv_headeronly:false
+*         fields        : {rtid:[dtid1, dtid3, dtid2]}
+*         include_term_ids
+*         include_term_codes
+*         include_file_url
+*         include_record_url_html
+*         include_record_url_xml
+*         include_term_hierarchy
+*         include_resource_titles
+*         include_temporals
+*
+* prefs for json,xml
+*           zip  : 0|1  compress
+*           file : 0|1  output as file or printout (force download in browser)
+*           defs : 0|1  include database definitions - NOT USED
+*           restapi: 0|1  not include db description and heurist header
+*
+* prefs for geojson, json
+*   extended 0 as is (in heurist internal format),
+*            1 - interpretable,
+*            2 - include concept code and labels
+*            3 - simple plain object for mediaViewer (only records with file fields are included)
+*   leaflet - true|false returns strict geojson and timeline data as two separate arrays, without details, only header fields rec_ID, RecTypeID and rec_Title
+*   simplify  true|false simplify  paths with more than 1000 vertices
+*
+* datatable -   datatable session id (exports data for in datatable widget format)
+*               >1 and "q" is defined - save query request in session to result set returned,
+*               >1 and "q" not defined and "draw" is defined - takes query from session
+*                1 - use "q" parameter
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  controller
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @since       4.0
+*/
 
     use hserv\utilities\USanitize;
     use hserv\records\export\RecordsExportCSV;

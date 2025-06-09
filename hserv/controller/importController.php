@@ -1,92 +1,89 @@
 <?php
 /**
-* Interface/Controller for CSV,KML parse and import
-*
+* importController.php - Controller for CSV,KML parse and import
+* 
 * @package     Heurist academic knowledge management system
+* @subpackage  controller
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       4.0
+* 
+* @todo - convert to class, use FronController to init
 */
 
 // @todo  move all session routines to csvSession.php ?
 // all parse routines to csvParser.php
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
 
-    /*
-    =================== parameters for csv/kml import
+/*
+=================== parameters for csv/kml import
 
-    content
-        function parse_content - parse CSV from content parameter and returns parsed array (used in import terms)
+content
+    function parse_content - parse CSV from content parameter and returns parsed array (used in import terms)
 
-    records
-        get records from import table
+records
+    get records from import table
 
 
-    action
+action
 
-    set_primary_rectype
-        set main rectype for given session and returns list of dependencies (resource/record pointer field->rectype)
+set_primary_rectype
+    set main rectype for given session and returns list of dependencies (resource/record pointer field->rectype)
 
 
-    1) step0
-        ImportCsvParser::saveToTempFile   save CSV form "data" parameter into temp file in scratch folder, returns filename
-                     (used to post pasted csv to server side)
+1) step0
+    ImportCsvParser::saveToTempFile   save CSV form "data" parameter into temp file in scratch folder, returns filename
+                 (used to post pasted csv to server side)
 
-    2) step1
-        parse_step1  check encoding, save file in new encoding invoke parse_step2 with limit 1000 to get parse preview
+2) step1
+    parse_step1  check encoding, save file in new encoding invoke parse_step2 with limit 1000 to get parse preview
 
-    3) step2
-        parse_step2 -  if limit>1000 returns first 1000 lines to preview parse (used after set of parse parameters)
-                       otherwise (used after set of field roles)
-                            remove spaces, convert dates, validate identifies, find memo and multivalues
-                            if id and date fields are valid invokes parse_db_save
-                            otherwise returns error array and first 1000
+3) step2
+    parse_step2 -  if limit>1000 returns first 1000 lines to preview parse (used after set of parse parameters)
+                   otherwise (used after set of field roles)
+                        remove spaces, convert dates, validate identifies, find memo and multivalues
+                        if id and date fields are valid invokes parse_db_save
+                        otherwise returns error array and first 1000
 
-        parse_db_save - save content of file into import table, create session object and saves it to sysImportFiles table, returns session
+    parse_db_save - save content of file into import table, create session object and saves it to sysImportFiles table, returns session
 
-        saveSession - saves session object into  sysImportFiles table (todo move to entity class SysImportFiles)
-        getImportSession - get session from sysImportFiles  (todo move to entity class SysImportFiles)
+    saveSession - saves session object into  sysImportFiles table (todo move to entity class SysImportFiles)
+    getImportSession - get session from sysImportFiles  (todo move to entity class SysImportFiles)
 
-    -------------------
+-------------------
 
-        getMultiValues  - split multivalue field
+    getMultiValues  - split multivalue field
 
-    -------------------
+-------------------
 
-    4) step3
-        assignRecordIds -  Assign record ids to field in import table (negative if not found)
-                findRecordIds - find exisiting /matching records in heurist db by provided mapping
+4) step3
+    assignRecordIds -  Assign record ids to field in import table (negative if not found)
+            findRecordIds - find exisiting /matching records in heurist db by provided mapping
 
-    5) step4
-        ImportAction::validateImport - verify mapping parameter for valid detail values (numeric,date,enum,pointers)
+5) step4
+    ImportAction::validateImport - verify mapping parameter for valid detail values (numeric,date,enum,pointers)
 
-            getWrongRecords
-            validateEnumerations
-            validateResourcePointers
-            validateNumericField
-            validateDateField
+        getWrongRecords
+        validateEnumerations
+        validateResourcePointers
+        validateNumericField
+        validateDateField
 
-    5) step5
-        ImportAction::performImport - do import - add/update records in heurist database
+5) step5
+    ImportAction::performImport - do import - add/update records in heurist database
 
-    ============== parameters for xml/json import
+============== parameters for xml/json import
 
-    filename - name of temp file with import data
+filename - name of temp file with import data
 
-    action
-        import_prepare      - reads import file and returns list of records to be imported
-        import_definitions  -
-        import_records
+action
+    import_prepare      - reads import file and returns list of records to be imported
+    import_definitions  -
+    import_records
 
-    */
+*/
 
 use hserv\utilities\USanitize;
 use hserv\entity\DbSysImportFiles;

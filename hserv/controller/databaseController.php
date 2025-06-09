@@ -1,28 +1,15 @@
 <?php
 /**
-* databaseController.php
-* Interface/Controller for manipulations with database(s)
+* databaseController.php - Controller to manipulations with database(s)
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  controller
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-action
-
-List
-
-Clear
-Clone
-Create
-Delete
-Rename
-Restore
-
+* @since       4.0
 */
 set_time_limit(0);
 
