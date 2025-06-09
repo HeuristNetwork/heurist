@@ -1,6 +1,6 @@
 <?php
 /**
-* sampl.php - simplesaml authentification
+* saml.php - simplesaml authentification
 *
 * parameters:
 * db - database name

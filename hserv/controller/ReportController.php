@@ -1,5 +1,5 @@
 <?php
-/*
+/**
 * ReportController.php - Class ReportController
 *
 * Handler actions for report templates.
