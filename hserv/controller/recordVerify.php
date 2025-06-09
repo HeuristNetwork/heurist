@@ -6,9 +6,9 @@
 * @see recordDupes.php for actions
 *
 * parameters
-* db - heurist database
-* a or action
-*   dupes
+* db - The target Heurist database name.
+* a or action - The action to perform.
+*   dupes - Find duplicate records based on the following sub-parameters:
 *        mode - levenshtein or metaphone
 *        rty_ID
 *        fields - comma separated list or array of dty_IDs and header fields

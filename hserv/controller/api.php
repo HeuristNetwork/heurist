@@ -3,7 +3,7 @@
 * api.php - Entry point for api requests
 * 
 * Entry point for the Heurist application to retrieve entity data 
-* (database defintions), Heurist record and iiif presentation via api requests
+* (database definitions), Heurist record and iiif presentation via api requests
 * in format   /api/my_database/entitys_name/identification|query
 * https://example.net/api/mydbname/rst/12
 *

@@ -3,23 +3,22 @@
 * fileDownload.php - handler to download registered Records files
 * 
 * Download (or proxy) files that are registered in Heurist database (recUploadedFiles)
-* Usually it is callled via redirection from index.php (if there is parameter file, thumb or url).
+* Usually it is called via redirection from index.php (if there is parameter file, thumb or url).
 * For entity images (rt icons, user, group images) see fileGet.php.
 *
 * For entity images (rt icons, user, group images) see fileGet.php.
 *
 * Parameters: 
-* db - database
-* thumb - obfuscated file id - returns existing thumbnail or resized image
-* file - obfuscated file id - uses fileGetFullInfo to get path to file or URL
-*
-* mode
-*   page - return
-*   tag - returns html wrap iframe with embed player, video, audio or img tag
-*   size - returns width and height (for images only!)
-*   url - rerurns url for uploaded_tilestacks
-* size - width and height for html tag
-* embedplayer - for player
+* db - The target database name.
+* thumb - Obfuscated file ID for generating and returning a thumbnail or a resized image.
+* file - Obfuscated file ID for retrieving the full file; uses fileGetFullInfo to get the file path or URL.
+* mode - (Optional) Specifies the output mode. Possible values:
+*   page - Returns a full HTML page with an embedded player (if applicable).
+*   tag - Returns an HTML snippet (e.g., iframe, img, video, audio tag) for embedding the media.
+*   size - Returns the width and height of an image file.
+*   url - Returns the URL for uploaded_tilestacks.
+* size - (Optional) Specifies width and height for an HTML tag (e.g., for an image).
+* embedplayer - (Optional) If set to 1, attempts to embed a player for media types.
 *
 * Notes about thumbnails
 *    for uploaded file - thumbnail is created in
