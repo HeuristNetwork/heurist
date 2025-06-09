@@ -6,14 +6,15 @@
 *
 * parameters:
 * 
-* rty_id - record type id to check
-* mask - title mask, if not defined we get current mask if check=0
-* rec_id - execute mask for this record
+* rty_id - The ID of the record type to check or use.
+* mask   - The title mask string. If not defined and 'check' is 0, the current mask for the rty_id is used.
+* rec_id - (Optional) The record ID for which to execute/generate the title mask. Used when 'check' is 0.
 * 
-* check 0 - execute for given record id
-*       1 - validate mask
-*       2 - get coded mask
-*       3-  get human readable
+* check  - (Optional) Defines the operation mode:
+*          0 - Execute: Generate title for the given rec_id using the mask (default if 'check' is not provided).
+*          1 - Validate: Validate the provided title mask syntax for the given rty_id.
+*          2 - Get Coded: Convert the human-readable mask to its internal coded format.
+*          3 - Get Human Readable: Convert the internal coded mask back to a human-readable format.
 * 
 * @package     Heurist academic knowledge management system
 * @subpackage  controller

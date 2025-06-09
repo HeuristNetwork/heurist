@@ -6,9 +6,9 @@
 * .(see https://iiif.io/api/presentation/3.0/)
 * 
 * parameters
-* db - heurist database
-* resource - name of resource: Canvas, Annotation Page, Annotation, Image
-* id - unique identificator of object. In case of Heurist this is obfuscation ID of registered image
+* db - The target Heurist database name.
+* resource - The name/type of the IIIF resource to generate (e.g., Canvas, AnnotationPage, Annotation, Image).
+* id - Unique identifier of the object, typically the obfuscated ID of a registered image file in Heurist.
 *
 * @package     Heurist academic knowledge management system
 * @subpackage  controller

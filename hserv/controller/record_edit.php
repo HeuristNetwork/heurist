@@ -1,6 +1,6 @@
 <?php
 /**
-* record_batch.php - Handler for CUD actions for Heurst record
+* record_edit.php - Handler for CUD actions for Heurst record
 * 
 * Handler for CUD (create/update/delete) actions for Heurst record.
 * Application interface. See HRecordMgr in hapi.js.

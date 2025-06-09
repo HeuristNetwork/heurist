@@ -5,12 +5,12 @@
 * Converts shp+dbf files to geojson output or downloads zip archive based on Datasource record id.
 *
 * $_REQUEST parameters:
-* recID   datasource record ID
-* format  geojson - converts file to geojson,
-*         rawfile - return zipped original file with metadata
-*         n/a - works as proxy - it downloads original file with http header (mimetype, size)
-*
-* metadata - 1 include text file with link to flathml for format=rawfile
+* recID    - The ID of the datasource record (containing SHP/DBF files or a ZIP archive).
+* format   - (Optional) Specifies the output format. Possible values:
+*            geojson - Converts the SHP/DBF data to GeoJSON format.
+*            rawfile - Returns a zipped archive containing the original file(s) and metadata.
+*            (not specified) - Acts as a proxy, downloading the original file(s) with appropriate HTTP headers.
+* metadata - (Optional) If set to 1 and 'format' is 'rawfile', includes a text file with a link to a flat HML representation in the ZIP archive.
 *
 * When it generates geojson it simplifies path by removing extra points with given tolerance
 *

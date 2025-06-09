@@ -1,6 +1,6 @@
 <?php
 /**
-* progres.php - Handles progress updates and termination for background processes
+* progress.php - Handles progress updates and termination for background processes
 *
 * This script is used to get the current progress of a long-running task
 * or to signal a task to terminate. Progress is typically stored in

@@ -1,12 +1,13 @@
 <?php
 /**
-* sampl.php - simplesaml authentification
+* saml.php - simplesaml authentification
 *
 * parameters:
-* db - database name
-* sp - service prodiver
-* a - logout -  logout heurist and simplesaml
-*   - login  - does saml authentication, closes dialog (javascript), returns user id as context
+* db - The target Heurist database name for SAML authentication.
+* sp - The service provider identifier for SimpleSAMLphp. Defaults to 'default-sp'.
+* a  - Action to perform. Possible values:
+*      logout - Logs the user out of both Heurist and the SimpleSAMLphp session.
+*      login  - Initiates SAML authentication. On success, closes the authentication dialog (JavaScript) and returns the user ID as context.
 * 
 * @package     Heurist academic knowledge management system
 * @subpackage  controller

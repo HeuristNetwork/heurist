@@ -8,17 +8,17 @@
 * (for recUploadFiles see fileDownload.php)
 * 
 * Parameters:
-* db
-* entity - entity name (rst, dty...)
-* id - entity record id
-* version - icon or thumb
-* color - icon color
-* circle - in circle
-* bg - bg color of circle
+* db - The target database name.
+* entity - The name of the entity type (e.g., rst, dty) for which to retrieve an image.
+* id - The record ID of the specific entity instance.
+* version - (Optional) Specifies the image version to retrieve, typically 'icon' or 'thumb'.
+* color - (Optional) Specifies the color for the icon (if applicable and not an SVG).
+* circle - (Optional) If set, renders the icon within a circle.
+* bg - (Optional) Specifies the background color of the circle (if `circle` is used).
 * 
-* Special parameter for csv import file downloading
-* file - name of file
-* encoding - file encoding
+* Special parameter for csv import file downloading:
+* file - The name of the CSV file (located in the scratch folder) to be downloaded.
+* encoding - (Optional) The character encoding of the CSV file, if it's not UTF-8 (will be converted to UTF-8).
 * 
 *
 * @package     Heurist academic knowledge management system

@@ -3,14 +3,12 @@
 * repoController.php - Handler for external repository configuration and file manipulations
 * 
 * Parameters:
-* action
-*   list -  get list of available external repositories for given user - user_getRepositoryList
-*     (need select available repositories on file upload )
-* 
-*   get - returns credentials for given service and current user - user_getRepositoryCredentials
-*     (1. returns values to edit on client side 2. returns parameters to create url or login to repository)
-* 
-*   update - save/delete credentials in ugr_Preferences - user_saveRepositoryCredentials
+* action - Specifies the operation to perform regarding external repositories. Possible values:
+*   list   - Retrieves a list of available external repositories for the current user (calls user_getRepositoryList).
+*            Used to populate selection options, e.g., during file upload.
+*   get    - Fetches credentials for a given service and the current user (calls user_getRepositoryCredentials).
+*            Can return values for editing on the client-side or parameters to create a URL/login to the repository.
+*   update - Saves or deletes repository credentials in user preferences (ugr_Preferences) (calls user_saveRepositoryCredentials).
 *
 * @package     Heurist academic knowledge management system
 * @subpackage  controller
