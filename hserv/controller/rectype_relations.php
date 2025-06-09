@@ -15,7 +15,6 @@
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @since       4.0
 */
-
     require_once dirname(__FILE__).'/../../autoload.php';
 
     if(isset($_REQUEST['db'])) {
