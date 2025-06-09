@@ -232,7 +232,7 @@ function onPageInit(success){
             $(window).on('onresize',onVisualizeResize);
             onVisualizeResize();
 
-            $("#visualize").visualize({
+            $("#visualize").visualise({
 
                 data: data,
                 request: new_request,

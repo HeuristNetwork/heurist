@@ -37,6 +37,18 @@ class VisualiseSelection{
 
         this.visualiser = visualiserContext;
 
+        this.addSelectionBox();
+
+        if(Array.isArray(selectedNodeIds)){
+            this.#selectedNodeIds = selectedNodeIds;
+        }else if(window.hWin.HEURIST4.util.isPositiveInt(selectedNodeIds)){
+            this.#selectedNodeIds = [selectedNodeIds];
+        }
+        this.#cleanSelectedIDs();
+    }
+
+    addSelectionBox(){
+
         let group = this.visualiser.svg.append('g')
                                        .attr('class', 'selector-group');
 
@@ -49,13 +61,6 @@ class VisualiseSelection{
                            .on('mousedown', () => this.#onMouseDown())
                            .on('mousemove', () => this.#onMouseMove())
                            .on('mouseup', () => this.#onMouseUp());
-
-        if(Array.isArray(selectedNodeIds)){
-            this.#selectedNodeIds = selectedNodeIds;
-        }else if(window.hWin.HEURIST4.util.isPositiveInt(selectedNodeIds)){
-            this.#selectedNodeIds = [selectedNodeIds];
-        }
-        this.#cleanSelectedIDs();
     }
 
     #onMouseDown(){

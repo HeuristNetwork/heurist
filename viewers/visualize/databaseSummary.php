@@ -308,7 +308,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                         putSetting('rectypes', displayed_rectypes);
 
                         // Update visualisation
-                        filterData();
+                        $('#visualisation').visualize('filterData');
                     });
 
                     // Listen to the 'show-all' checkbox
@@ -336,7 +336,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
                         putSetting('rectypes', displayed_rectypes);
 
-                        filterData();
+                        $('#visualisation').visualize('filterData');
                     });
 
                     // Listen to the 'group_chkbox' checkboxes, toggles all checkboxes within a record type group
@@ -364,7 +364,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
                             putSetting('rectypes', displayed_rectypes);
 
-                            filterData();
+                            $('#visualisation').visualize('filterData');
                         }
                     });
 
@@ -420,7 +420,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                         // Call plugin
                         const data_to_vis = getData(json_data);
 
-                        $("#visualisation").visualize({
+                        $("#visualisation").visualise({
                             data: json_data,
                             getData: () => data_to_vis,
                             isStructure: true,
