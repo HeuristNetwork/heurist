@@ -1588,23 +1588,7 @@ private static function groupCSVRows(array $rows, array $groupColIndices = [], a
     }
 }
 
-private static function usePercentageForCSVHeaders(array $headers, array $usePercentageColIndices = []) {
-    if (!empty($usePercentageColIndices)) {
-        $colIncrease = 0;
-        for ($i = 0; $i < count($usePercentageColIndices); $i++) {
-            $colIndex = $usePercentageColIndices[$i] + $colIncrease;
-            if ($colIndex + 1 > count($headers) - 1) {
-                $headers[] = $headers[$colIndex] . '(%)';
-            } else {
-                array_splice($headers, $colIndex + 1, 0, [$headers[$colIndex] . '(%)']);
-            }
-            $colIncrease++;
-        }
-    }
-    return $headers;
-}
-
-    /**
+/**
      * Adds percentage column headers to an existing header array.
      *
      * For each column index specified in `$usePercentageColIndices`, this function
