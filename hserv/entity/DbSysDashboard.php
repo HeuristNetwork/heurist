@@ -23,7 +23,7 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
 * Provides database access and operations for the `sysDashboard` table,
 * which stores configuration for dashboard entries (shortcuts, links, actions).
 *
-* @package  hserv\entity 
+* @subpackage  hserv\entity 
 */
 class DbSysDashboard extends DbEntityBase
 {

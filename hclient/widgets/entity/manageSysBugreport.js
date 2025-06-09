@@ -202,8 +202,6 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
                 remote: `${window.hWin.HAPI4.sysinfo.referenceServerURL}?db=${window.hWin.HAPI4.sysinfo.referenceServerBugreportDatabase}`
             };
 
-console.log('AAA',request.remote)            
-            
             window.hWin.HAPI4.SystemMgr.get_defs(request, (response) => {
 
                 if(response.status != window.hWin.ResponseStatus.OK){

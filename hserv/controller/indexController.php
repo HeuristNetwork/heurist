@@ -1,25 +1,18 @@
 <?php
 /**
-* indexController.php
-* Interface/Controller for requests to Heurist_Reference_Index database
+* indexController.php - Controller for requests to Heurist_Reference_Index database
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  controller
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       6.0
+* 
+* @todo - convert to class, use FronController to init
 */
-
-/*
-action
-
-info
-register
-update
-delete
-*/
-
 use hserv\utilities\DbRegis;
 use hserv\utilities\USanitize;
 

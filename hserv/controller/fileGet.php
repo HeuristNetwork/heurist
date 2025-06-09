@@ -1,26 +1,34 @@
 <?php
 /**
-* Service to get icons and thumbs for entities
-* (for recUploadFiles see fileDownload.php)
+* fileGet.php - handler to get icons and thumbs for entities
 *
-* fileGet.php - 1) get image for given entity, record ID, version and color
-*               2) get or check file from code folders - tips, help, doc content
-*               3) load file from scratch folder (tries to convert to UTF8) - for import terms
+* 1) get image for given entity, record ID, version and color
+* 2) get or check file from code folders - tips, help, doc content
+* 3) load file from scratch folder (tries to convert to UTF8) - for import terms
+* (for recUploadFiles see fileDownload.php)
+* 
+* Parameters:
+* db
+* entity - entity name (rst, dty...)
+* id - entity record id
+* version - icon or thumb
+* color - icon color
+* circle - in circle
+* bg - bg color of circle
+* 
+* Special parameter for csv import file downloading
+* file - name of file
+* encoding - file encoding
+* 
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  controller
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @since       4.0
 */
 use hserv\utilities\USanitize;
 

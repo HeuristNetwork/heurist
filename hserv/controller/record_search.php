@@ -1,25 +1,27 @@
 <?php
-
-    /**
-    * Application interface. See HRecordMgr in hapi.js
-    * Record search
-    *
-    * parameters
-    * db - heurist database
-    * remote=master - request to HEURIST_INDEX_DATABASE
-    * a  - action
-    *       minmax - seach numeric min and max value for "dt" (field) or "rt" (record type)
-    *       getfacets -   finds all possible facet values for current query and calculates counts for every value
-    *       related -   finds all related record IDs for given set record "ids"
-    *       search - default
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
+/**
+* record_search.php - Handler for records search
+*
+* Main usage - search the records and output data as a json (for HRecordSet).
+*
+* parameters
+* db - heurist database
+* remote=master - request to HEURIST_INDEX_DATABASE
+* a  - action
+*      minmax - seach numeric min and max value for "dt" (field) or "rt" (record type)
+*      getfacets -   finds all possible facet values for current query and calculates counts for every value
+*      related -   finds all related record IDs for given set record "ids"
+*      search - default
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  controller
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @since       4.0
+*/
 
     /*
     * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance

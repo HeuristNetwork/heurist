@@ -1,6 +1,6 @@
 <?php
 /**
-* DbSysArchive.php - Class primarily
+* DbSysArchive.php - Class DbSysArchive
 *
 * Operations for the `sysArchive` table.
 *
