@@ -30,7 +30,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
     // Callback function for initialization
     function onPageInit(success){
         if(success){
-            SelectLinkField();
+            new linkFields();
         }
     }
 </script>
@@ -140,7 +140,6 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 </button>
             </div>
         </div>
-
 
     </div>
 
