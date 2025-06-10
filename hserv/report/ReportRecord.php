@@ -16,6 +16,8 @@ namespace hserv\report;
 use hserv\structure\ConceptCode;
 use hserv\entity\DbDefRecStructure;
 use hserv\utilities\USanitize;
+use hserv\utilities\Temporal;
+
 
 require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../structure/search/dbsData.php';
@@ -23,7 +25,6 @@ require_once dirname(__FILE__).'/../records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../records/search/relationshipData.php';
 require_once dirname(__FILE__).'/../structure/dbsTerms.php';
 
-require_once dirname(__FILE__).'/../utilities/Temporal.php';
 require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
 
 /**
@@ -376,8 +377,8 @@ class ReportRecord
                 $record["recRelationID"] = $value['recID'];
                 $record["recRelationType"] = $value['RelTerm'];
                 $record["recRelationNotes"] = $value['Notes'] ?? null;
-                $record["recRelationStartDate"] = \Temporal::toHumanReadable($value['StartDate']) ?? null;
-                $record["recRelationEndDate"] = \Temporal::toHumanReadable($value['EndDate']) ?? null;
+                $record["recRelationStartDate"] = Temporal::toHumanReadable($value['StartDate']) ?? null;
+                $record["recRelationEndDate"] = Temporal::toHumanReadable($value['EndDate']) ?? null;
 
                 $record["relationRecord"] = $this->getRecord($value['recID']);
 
@@ -624,7 +625,7 @@ class ReportRecord
                 $preparedvalues = array();
                 foreach ($dtValue as $value){
                     if(strlen($res)>0) {$res = $res.", ";}
-                    $val = \Temporal::toHumanReadable($value, true, 0, '|', 'native');
+                    $val = Temporal::toHumanReadable($value, true, 0, '|', 'native');
                     $res = $res.$val;
                     array_push($preparedvalues, $val);
                     array_push($origvalues, $value);

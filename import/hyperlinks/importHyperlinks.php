@@ -565,7 +565,7 @@ function records_check($url, $title, $notes, $user_rec_id) {
 
     } elseif (! $user_rec_id) {
 
-        $rec_ids = similar_urls($mysqli, $url);//see testSimilarURls
+        $rec_ids = similarUrlFindAll($mysqli, $url);//see testSimilarURls
         if ($rec_ids) {return $rec_ids;}
 /*
         $par_url = preg_replace('/[?].*'.'/', '', $url);

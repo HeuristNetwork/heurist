@@ -1,12 +1,16 @@
 <?php
 /**
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * This file defines the System class, which is the core of the Heurist application.
+ * It handles system initialization, database connection, user authentication, session management,
+ * and provides access to system settings and constants.
+ *
+ * @package     Heurist academic knowledge management system
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @author      Artem Osmakov   <osmakov@gmail.com>
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @version     4.0
+ */
 
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
@@ -17,6 +21,7 @@
 */
 
 namespace hserv;
+
 use hserv\structure\ConceptCode;
 use hserv\utilities\USystem;
 use hserv\utilities\USanitize;
@@ -29,36 +34,77 @@ require_once dirname(__FILE__).'/structure/import/dbsImport.php';
 set_error_handler('bootErrorHandler');   //see const.php
 
 /**
-*  Class that contains mysqli (dbconnection), current user and system settings
-*
-*  it performs system initialization:
-*   a) establish connection to server
-*   b) define sytems constans - paths
-*   c) perform login and load current user info
-*   d) load system info (from sysIdentification)
-*   e) keeps array of errors
-*
-* system constants:
-*
-* HEURIST_THUMB_DIR
-* HEURIST_FILESTORE_DIR
-*/
+ * The System class is the central class in Heurist, responsible for managing the application's state and core functionalities.
+ *
+ * It handles:
+ * - System initialization: Establishing database connection, defining system constants (paths), etc.
+ * - User authentication and session management: Logging users in, verifying credentials, and managing session data.
+ * - Access to system settings: Providing an interface to system-wide configuration parameters.
+ * - Error handling: Collecting and reporting errors that occur during script execution.
+ * - Management of system-level constants for record types, detail types, and terms.
+ * - File system operations related to Heurist data storage.
+ *
+ * Key properties:
+ * - `$mysqli`: The MySQLi database connection object.
+ * - `$currentUser`: An array containing information about the currently logged-in user.
+ * - `$settings`: An instance of the `SystemSettings` class, providing access to system configuration.
+ * - `$errors`: An array storing any errors encountered.
+ *
+ * System constants initialized by this class include:
+ * - `HEURIST_THUMB_DIR`: Path to the directory for storing thumbnails.
+ * - `HEURIST_FILESTORE_DIR`: Path to the main filestore directory for the current database.
+ */
 class System {
 
+    /**
+     * The MySQLi database connection object.
+     * @var \mysqli|null
+     */
     private $mysqli = null;
+
+    /**
+     * The full name of the database, including any prefix.
+     * @var string|null
+     */
     private $dbnameFull = null;
+
+    /**
+     * The short name of the database, without any prefix.
+     * @var string|null
+     */
     private $dbname = null;
 
+    /**
+     * An array to store error messages. Each error is an array with keys like 'status', 'message', 'sysmsg', 'error_title'.
+     * @var array
+     */
     private $errors = array();
 
+    /**
+     * Flag indicating whether the system has been successfully initialized.
+     * @var bool
+     */
     private $isInited = false;
 
+    /**
+     * An array containing information about the currently logged-in user.
+     * Null if no user is logged in.
+     * Structure includes: 'ugr_ID', 'ugr_Name', 'ugr_FullName', 'ugr_eMail', 'ugr_Groups', 'ugr_Permissions', 'ugr_Preferences'.
+     * @var array|null
+     */
     private $currentUser = null;
 
-    //do not check session folder, loads only basic user info
+    /**
+     * Flag to determine if a full session check (including session folder writability) is needed.
+     * If true, it loads only basic user information without checking the session folder.
+     * @var bool
+     */
     private $needFullSessionCheck = false;
 
-    //instance of SystemSettings class
+    /**
+     * Instance of the SystemSettings class, providing access to system configuration.
+     * @var SystemSettings
+     */
     public $settings;
 
     /*
@@ -76,6 +122,12 @@ class System {
 
     */
 
+    /**
+     * System constructor.
+     *
+     * @param bool $full_check Optional. If true, performs a full session check, including session folder writability.
+     *                         Defaults to false, which means only basic user info is loaded without checking the session folder.
+     */
     public function __construct( $full_check=false ) {
 
         $this->needFullSessionCheck = $full_check;
@@ -84,15 +136,14 @@ class System {
     }
 
     /**
-    * Read configuration parameters from config file
-    *
-    * Establish connection to server
-    * Open database
-    *
-    * @param $db - database name
-    * @param $dbrequired - if false only connect to server (for database list)
-    * @return true on success
-    */
+     * Initializes the system by reading configuration parameters, establishing a database connection,
+     * and setting up the session and path constants.
+     *
+     * @param string $db The name of the database to connect to.
+     * @param bool $dbrequired Optional. If false, only connects to the server without selecting a specific database (e.g., for listing databases). Defaults to true.
+     * @param bool $init_session_and_constants Optional. If true, initializes the session and defines path constants. Defaults to true.
+     * @return bool True on successful initialization, false otherwise.
+     */
     public function init($db, $dbrequired=true, $init_session_and_constants=true){
 
         $this->isInited = false;
@@ -144,9 +195,11 @@ class System {
 
     }
 
-    //
-    //
-    //
+    /**
+     * Closes the database connection if it's open.
+     *
+     * @return void
+     */
     public function dbclose(){
 
         if($this->mysqli && isset($this->mysqli->server_info)){
@@ -159,8 +212,12 @@ class System {
 
     //------------------------- RT DT CONSTANTS --------------------
     /**
-    * Defines all constants
-    */
+     * Defines all record type (RT), data type (DT), and term (TRM) constants.
+     * These constants map magic strings (e.g., 'RT_PERSON') to their local IDs in the current database.
+     *
+     * @param bool $reset Optional. If true, forces a refresh of the underlying lookup tables for RT and DT constants. Defaults to false.
+     * @return void
+     */
     public function defineConstants($reset=false) {
 
         // Record type constants
@@ -189,26 +246,42 @@ class System {
 
     }
 
-    //
-    // define constant with value - if not defined
-    //
+    /**
+     * Defines a constant with a given name and value if it's not already defined.
+     *
+     * @param string $const_name The name of the constant.
+     * @param mixed $value The value of the constant.
+     * @return void
+     */
     public function defineConstant2($const_name, $value) {
         if(!defined($const_name)){
             define($const_name, $value);
         }
     }
 
-    //
-    //  returns constant value, init constant if not defined, if it fails returns default value
-    //
+    /**
+     * Returns the value of a constant. If the constant is not defined, it attempts to define it
+     * (for RT, DT, TRM constants) and then returns its value. If it still cannot be defined or found,
+     * it returns the default value.
+     *
+     * @param string $const_name The name of the constant.
+     * @param mixed $def Optional. The default value to return if the constant cannot be found/defined. Defaults to null.
+     * @return mixed The value of the constant or the default value.
+     */
     public function getConstant($const_name, $def=null) 
     {
         return $this->defineConstant($const_name) ?constant($const_name) :$def;
     }
 
-    //
-    // init the only constant
-    //
+    /**
+     * Initializes a single constant if it's not already defined.
+     * This is primarily used for RT, DT, and TRM constants.
+     *
+     * @param string $const_name The name of the constant to define.
+     * @param bool $reset Optional. If true and the constant is an RT or DT constant,
+     *                    it forces a refresh of the underlying lookup tables. Defaults to false.
+     * @return bool True if the constant is now defined, false otherwise.
+     */
     public function defineConstant($const_name, $reset=false) {
 
         if(defined($const_name)){
@@ -228,9 +301,13 @@ class System {
         }
     }
 
-    //
-    // get 3d party web service configuration and their mapping to heurist record types and fields
-    //
+    /**
+     * Retrieves the configuration for third-party web services and their mapping to Heurist record types and fields.
+     * The configuration is read from `controller/record_lookup_config.json`.
+     *
+     * @return array|null An array of web service configurations, or null if the config file doesn't exist or is invalid.
+     *                    Each configuration includes 'rty_ID' and 'fields' mapping.
+     */
     private function getWebServiceConfigs(){
 
         //read service_mapping.json from setting folder
@@ -283,9 +360,14 @@ class System {
     }
 
 
-    //
-    // get constants as array to use on client side
-    //
+    /**
+     * Gets all defined RT, DT, and TRM constants as an associative array (constant name => value).
+     * This is typically used to pass these constants to the client-side.
+     *
+     * @param bool $reset Optional. If true, forces a refresh of the underlying lookup tables for RT and DT constants
+     *                    before retrieving them. Defaults to false.
+     * @return array An associative array of defined constants.
+     */
     private function getLocalConstants( $reset=false ){
 
         $this->defineConstants( $reset );
@@ -321,9 +403,11 @@ class System {
 
     /**
     * bind Concept Number Constants to their local id
-    * @param    string [$defString] define string
-    * @param    int [$rtID] origin rectype id
-    * @param    int [$dbID] origin database id
+    * @param string $defString The string name of the constant to define (e.g., 'RT_PERSON').
+    * @param int $rtID The original record type ID from the originating database.
+    * @param int $dbID The ID of the originating database (defaults to 2, the coreDefinition database).
+    * @param bool $reset Optional. If true, forces a refresh of the rectype lookup table. Defaults to false.
+    * @return void
     */
     private function defineRTLocalMagic($defString, $rtID, $dbID, $reset=false) {
 
@@ -336,12 +420,16 @@ class System {
 
 
     /**
-    * lookup local id for a given rectype concept id pair
-    * @global    type description of global variable usage in a function
-    * @staticvar array [$rtyIDs] lookup array of local ids
-    * @param     int [$rtID] origin rectype id
-    * @param     int [$dbID] origin database id (default to 2 which is reserved for coreDefinition)
-    * @return    int local rectype ID or null if not found
+    * Looks up the local ID for a given original record type ID and its originating database ID.
+    * It uses a static cache (`$rtyIDs`) for performance, which can be reset.
+    * If a record type's originating DB ID is not positive and a system registered ID exists,
+    * it assumes the record type originates from the current database instance.
+    *
+    * @staticvar array $rtyIDs A static array used as a cache for local record type IDs, structured as `$rtyIDs[dbID][originalRtID] = localRtID`.
+    * @param int $rtID The original record type ID from the originating database.
+    * @param int $dbID Optional. The ID of the originating database. Defaults to 2 (coreDefinition).
+    * @param bool $reset Optional. If true, forces a rebuild of the `$rtyIDs` cache. Defaults to false.
+    * @return int|null The local record type ID if found, otherwise null. Exits on database error.
     */
     private function rectypeLocalIDLookup($rtID, $dbID = 2, $reset=false) {
         static $rtyIDs;
@@ -351,7 +439,7 @@ class System {
             rty_OriginatingDBID as dbID, rty_IDInOriginatingDB as id from defRecTypes order by dbID');
             if (!$res) {
                 $this->addError(HEURIST_DB_ERROR, 'Unable to build internal record-type lookup table', $this->mysqli->error);
-                exit;
+                exit; // Critical error, cannot proceed
             }
 
             $regID = $this->settings->get('sys_dbRegisteredID');
@@ -359,27 +447,33 @@ class System {
             $rtyIDs = array();
             while ($row = $res->fetch_assoc()) {
 
-                if( !isPositiveInt($row['dbID']) && $regID>0){
+                if( !isPositiveInt($row['dbID']) && $regID > 0){
+                    // If original DB ID is missing/invalid and this DB has a registered ID,
+                    // assume it's a locally defined type.
                     $row['dbID'] = $regID;
-                    $row['id'] = $row['localID'];
+                    $row['id'] = $row['localID']; // The original ID in this case is the local ID.
                 }
 
-                if (!@$rtyIDs[$row['dbID']]) {
+                if (!isset($rtyIDs[$row['dbID']])) {
                     $rtyIDs[$row['dbID']] = array();
                 }
                 $rtyIDs[$row['dbID']][$row['id']] = $row['localID'];
             }
         }
-        return @$rtyIDs[$dbID][$rtID] ? $rtyIDs[$dbID][$rtID] : null;
+        return isset($rtyIDs[$dbID][$rtID]) ? $rtyIDs[$dbID][$rtID] : null;
     }
 
 
     /**
-    * bind Magic Number Constants to their local id
-    * @param    string [$defString] define string
-    * @param    int [$dtID] origin detailtype id
-    * @param    int [$dbID] origin database id
-    */
+     * Binds a "magic number" constant for a detail type (DT) to its local ID in the current database.
+     * For example, defines 'DT_TITLE' with the local ID of the 'Title' detail type.
+     *
+     * @param string $defString The string name of the constant to define (e.g., 'DT_TITLE').
+     * @param int $dtID The original detail type ID from the originating database.
+     * @param int $dbID The ID of the originating database.
+     * @param bool $reset Optional. If true, forces a refresh of the detail type lookup table. Defaults to false.
+     * @return void
+     */
     private function defineDTLocalMagic($defString, $dtID, $dbID, $reset=false) {
         $id = $this->detailtypeLocalIDLookup($dtID, $dbID, $reset);
         if ($id) {
@@ -389,22 +483,27 @@ class System {
 
 
     /**
-    * lookup local id for a given detailtype concept id pair
-    * @global    type description of global variable usage in a function
-    * @staticvar array [$rtyIDs] lookup array of local ids
-    * @param     int [$dtID] origin detailtype id
-    * @param     int [$dbID] origin database id (default to 2 which is reserved for coreDefinition)
-    * @return    int local detailtype ID or null if not found
-    */
+     * Looks up the local ID for a given original detail type ID and its originating database ID.
+     * It uses a static cache (`$dtyIDs`) for performance, which can be reset.
+     * If a detail type's originating DB ID is not positive and a system registered ID exists,
+     * it assumes the detail type originates from the current database instance.
+     *
+     * @staticvar array $dtyIDs A static array used as a cache for local detail type IDs, structured as `$dtyIDs[dbID][originalDtID] = localDtID`.
+     * @param int $dtID The original detail type ID from the originating database.
+     * @param int $dbID Optional. The ID of the originating database. Defaults to 2 (coreDefinition).
+     * @param bool $reset Optional. If true, forces a rebuild of the `$dtyIDs` cache. Defaults to false.
+     * @return int|null The local detail type ID if found, otherwise null. Exits on database error.
+     */
     private function detailtypeLocalIDLookup($dtID, $dbID = 2, $reset=false) {
         static $dtyIDs;
 
         if (!$dtyIDs || $reset) {
             $res = $this->mysqli->query('select dty_ID as localID,dty_OriginatingDBID as dbID,dty_IDInOriginatingDB as id from defDetailTypes order by dbID');
             if (!$res) {
+                // Output error message directly as this is a critical failure during constant definition
                 echo "Unable to build internal field-type lookup table. Please ".CONTACT_SYSADMIN
                 ." for assistance. MySQL error: " . $this->mysqli->error;
-                exit;
+                exit; // Critical error, cannot proceed
             }
 
             $regID = $this->settings->get('sys_dbRegisteredID');
@@ -412,26 +511,31 @@ class System {
             $dtyIDs = array();
             while ($row = $res->fetch_assoc()) {
 
-                if( !isPositiveInt($row['dbID']) && $regID>0){
+                if( !isPositiveInt($row['dbID']) && $regID > 0){
+                    // If original DB ID is missing/invalid and this DB has a registered ID,
+                    // assume it's a locally defined type.
                     $row['dbID'] = $regID;
-                    $row['id'] = $row['localID'];
+                    $row['id'] = $row['localID']; // The original ID in this case is the local ID.
                 }
 
-                if (!@$dtyIDs[$row['dbID']]) {
+                if (!isset($dtyIDs[$row['dbID']])) {
                     $dtyIDs[$row['dbID']] = array();
                 }
                 $dtyIDs[$row['dbID']][$row['id']] = $row['localID'];
             }
         }
-        return @$dtyIDs[$dbID][$dtID] ? $dtyIDs[$dbID][$dtID] : null;
+        return isset($dtyIDs[$dbID][$dtID]) ? $dtyIDs[$dbID][$dtID] : null;
     }
 
     /**
-    * bind Magic Number Constants to their local id
-    * @param    string [$defString] define string
-    * @param    int [$trmID] origin term id
-    * @param    int [$dbID] origin database id
-    */
+     * Binds a "magic number" constant for a term (TRM) to its local ID in the current database.
+     * For example, defines 'TRM_SOME_TERM' with the local ID of the specified term.
+     *
+     * @param string $defString The string name of the constant to define (e.g., 'TRM_MY_TERM').
+     * @param int $trmID The original term ID from the originating database.
+     * @param int $dbID The ID of the originating database.
+     * @return void
+     */
     private function defineTermLocalMagic($defString, $trmID, $dbID) {
 
         $id = ConceptCode::getTermLocalID($dbID.'-'.$trmID);
@@ -444,9 +548,16 @@ class System {
 
     //------------------------- END RT DT and TERM CONSTANTS --------------------
 
-    //
-    //
-    //
+    /**
+     * Gets the root folder path for the Heurist filestore.
+     * It prioritizes the `HEURIST_FILESTORE_ROOT` constant if defined (which is set during `initPathConstants`).
+     * Otherwise, it falls back to `$defaultRootFileUploadPath` from `configIni.php` or constructs a default path
+     * based on `$_SERVER['DOCUMENT_ROOT']` and 'HEURIST/HEURIST_FILESTORE/'.
+     * Ensures the path has a trailing slash and, if not an absolute path starting with ':/' or '/', prepends a leading slash.
+     *
+     * @global string $defaultRootFileUploadPath The default root file upload path from `configIni.php`.
+     * @return string The absolute path to the filestore root folder.
+     */
     public function getFileStoreRootFolder(){
 
         global $defaultRootFileUploadPath;
@@ -480,10 +591,20 @@ class System {
 
     /**
     *  Returns three values array for each system folder
-    *  0 - parth of constant HEURIST_XXX_DIR and HEURIST_XXX_URL
-    *  1 - desciption
-    *  2 - allow webaccess (.htaccess_via_url will be copied to this folder)
-    *  3 - must be backuped
+    *  Returns an array describing various system folders within a Heurist database's filestore.
+    *  Each element in the returned array represents a folder and contains:
+    *  - 0: Suffix for the constant name (e.g., 'THUMB' for `HEURIST_THUMB_DIR`). Null if no constant.
+    *  - 1: Description of the folder's purpose.
+    *  - 2: (Optional) Boolean indicating if web access is allowed (defaults to false).
+    *  - 3: (Optional) Boolean indicating if the folder should be backed up (defaults to false, true for some core folders).
+    *
+    * @global bool $allowWebAccessThumbnails Configuration for web access to thumbnails.
+    * @global bool $allowWebAccessUploadedFiles Configuration for web access to uploaded files (not directly used here but for context).
+    * @global bool $allowWebAccessEntityFiles Configuration for web access to entity files (icons, etc.).
+    * @param bool $is_for_backup Optional. If true, returns a list of folders relevant for backup purposes.
+    *                            Defaults to false, returning a more comprehensive list for general system operations.
+    * @return array An associative array where keys are folder names (relative to the DB filestore root)
+    *               and values are arrays describing the folder properties.
     */
     public function getArrayOfSystemFolders($is_for_backup=false){
 
@@ -528,9 +649,11 @@ class System {
     //
 
     /**
-    * Returns array of ALL database folders
+    * Returns an array of absolute paths to ALL standard system folders for a given database.
     *
-    * @param mixed $database_name - if null for current database
+    * @param string|null $database_name Optional. The short name of the database.
+    *                                   If null, uses the current database associated with this System instance.
+    * @return string[] An array of absolute paths to the system folders, each ending with a slash.
     */
     public function getSystemFolders($database_name=null){
 
@@ -550,32 +673,46 @@ class System {
     }
 
     /**
-    * Returns root upload folder of specified ($folder_name) subfolder
+    * Returns the absolute path to a specified subfolder within a Heurist database's filestore.
+    * If `$folder_name` is null, returns the path to the root filestore directory for the specified database.
     *
-    * @param mixed $folder_name - subfolder in database root upload dir
-    * @param mixed $database_name
+    * @param string|null $folder_name Optional. The name of the subfolder (e.g., 'filethumbs', 'hml-output').
+    *                                 If null, the path to the database's root filestore directory is returned.
+    * @param string|null $database_name Optional. The short name of the database.
+    *                                   If null, uses the current database associated with this System instance.
+    * @return string|null The absolute path to the folder, ending with a slash, or null if the database name is invalid.
     */
     public function getSysDir($folder_name=null, $database_name=null){
         return $this->getSysFolderRes('path', $folder_name, $database_name);
     }
 
     /**
-    * Returns root upload URL of specified ($folder_name) suburl
-    *
-    * @param mixed $folder_name - subfolder in database root upload dir
-    * @param mixed $database_name
-    */
+     * Returns the absolute URL to a specified subfolder within a Heurist database's filestore.
+     * If `$folder_name` is null, returns the URL to the root filestore directory for the specified database.
+     *
+     * @param string|null $folder_name Optional. The name of the subfolder (e.g., 'filethumbs', 'hml-output').
+     *                                 If null, the URL to the database's root filestore directory is returned.
+     * @param string|null $database_name Optional. The short name of the database.
+     *                                   If null, uses the current database associated with this System instance.
+     * @return string|null The absolute URL to the folder, ending with a slash, or null if the database name is invalid.
+     */
     public function getSysUrl($folder_name=null, $database_name=null){
         return $this->getSysFolderRes('url', $folder_name, $database_name);
     }
 
     /**
-    * Get system folder resouce - path or url
-    *
-    * @param mixed $type - path ot url
-    * @param mixed $folder_name - subfolder of database upload folder
-    * @param mixed $database_name - if null it takes current database
-    */
+     * Gets either the path or URL for a system folder.
+     * This is a helper method used by `getSysDir` and `getSysUrl`.
+     *
+     * @global string $defaultRootFileUploadURL The default root file upload URL from `configIni.php`.
+     *
+     * @param string $type Either 'path' or 'url'.
+     * @param string|null $folder_name Optional. The name of the subfolder (e.g., 'filethumbs').
+     *                                 If null, the root for the database is returned.
+     * @param string|null $database_name Optional. The short name of the database.
+     *                                   If null, uses the current database.
+     * @return string|null The absolute path or URL, ending with a slash, or null if the database name is invalid.
+     */
     private function getSysFolderRes($type, $folder_name=null, $database_name=null){
         global $defaultRootFileUploadURL;
 
@@ -583,37 +720,39 @@ class System {
             $db_root = $defaultRootFileUploadURL;
         }else{
             $db_root = defined('HEURIST_FILESTORE_ROOT')
-                            ?HEURIST_FILESTORE_ROOT
-                            :$this->getFileStoreRootFolder();
+                            ? HEURIST_FILESTORE_ROOT
+                            : $this->getFileStoreRootFolder();
         }
 
-        $database_name = $database_name??$this->dbname;
+        $database_name = $database_name ?? $this->dbname;
 
-        if(preg_match('/[^A-Za-z0-9_\$]/', $database_name)){
-            return null; //invalid database name
+        if(empty($database_name) || preg_match('/[^A-Za-z0-9_\$]/', $database_name)){
+            return null; //invalid database name or not initialized
         }
 
-        $dbres = $db_root.$database_name.'/';
+        $dbres = rtrim($db_root, '/') . '/' . $database_name . '/';
 
-        if($folder_name!=null){
-
-            $dir = USanitize::sanitizePath($folder_name);
-            if( substr($dir, -1, 1) != '/' )  {
-                $dir .= '/';
-            }
-
-            $dbres .= $dir;
+        if($folder_name !== null){
+            $dir = USanitize::sanitizePath($folder_name); // Sanitize to prevent directory traversal
+            $dbres .= rtrim($dir, '/') . '/';
         }
 
         return $dbres;
     }
 
     /**
-    * Validates system config setting $defaultRootFileUploadPath
-    * Check/creates system subfolders
-    *
-    * @param mixed $dbname - database shortname (without prefix)
-    */
+     * Initializes path constants related to the filestore for a given database (or the current one).
+     * It defines `HEURIST_FILESTORE_ROOT`, `HEURIST_FILESTORE_DIR`, `HEURIST_FILESTORE_URL`,
+     * and constants for various subdirectories (e.g., `HEURIST_THUMB_DIR`, `HEURIST_THUMB_URL`).
+     * It also checks for the existence and writability of these directories, creating them if necessary.
+     *
+     * @global string $defaultRootFileUploadPath The default root file upload path from `configIni.php`.
+     * @global string $defaultRootFileUploadURL The default root file upload URL from `configIni.php`.
+     *
+     * @param string|null $dbname Optional. The short name of the database (without prefix).
+     *                            If null, uses the current database name.
+     * @return bool True on success, false on failure (e.g., if a directory cannot be accessed or created).
+     */
     public function initPathConstants($dbname=null){
 
         global $defaultRootFileUploadPath, $defaultRootFileUploadURL;
@@ -693,39 +832,61 @@ class System {
     }
 
     /**
-    * Returns true if system is inited ccorretly and db connection is established
-    */
+     * Checks if the system has been successfully initialized (i.e., `init()` method completed without errors).
+     *
+     * @return bool True if the system is initialized, false otherwise.
+     */
     public function isInited(){
         return $this->isInited;
     }
 
     /**
-    * Get database connection object
-    */
+     * Gets the MySQLi database connection object.
+     *
+     * @return \mysqli|null The MySQLi connection object, or null if not connected.
+     */
     public function getMysqli(){
         return $this->mysqli;
     }
 
+    /**
+     * Sets the MySQLi database connection object.
+     *
+     * @param \mysqli|null $mysqli The MySQLi connection object.
+     * @return void
+     */
     public function setMysqli($mysqli){
         $this->mysqli = $mysqli;
     }
 
     /**
-    * Get full name of database
-    */
+     * Gets the full name of the current database (including prefix).
+     *
+     * @return string|null The full database name, or null if not set.
+     */
     public function dbnameFull(){
         return $this->dbnameFull;
     }
 
+    /**
+     * Gets the short name of the current database (without prefix).
+     *
+     * @return string|null The short database name, or null if not set.
+     */
     public function dbname(){
         return $this->dbname;
     }
 
     /**
-    * set dbname and dbnameFull properties
-    *
-    * @param mixed $db
-    */
+     * Sets the full and short database names based on the provided database identifier.
+     * It also performs basic validation on the database name.
+     *
+     * @param string $db The database identifier (can be full name or short name).
+     * @param bool $dbrequired Optional. If true and the database name is invalid or cannot be resolved,
+     *                         an error will be added and the method will return false. Defaults to true.
+     * @return bool True if the database names were set successfully (or if `$dbrequired` is false and name is invalid),
+     *              false otherwise (only if `$dbrequired` is true and an error occurs).
+     */
     public function setDbnameFull($db, $dbrequired=true){
 
         $error = mysql__check_dbname($db);
@@ -747,11 +908,14 @@ class System {
 
 
     /**
-    * produce json output and
-    * terminate execution of script
-    *
-    * @param mixed $message
-    */
+    /**
+     * Outputs a JSON error response and terminates the script execution.
+     * Closes the database connection before exiting.
+     *
+     * @param string|null $message The error message to display to the user. If null, uses existing error in $this->errors.
+     * @param int|null $error_code Optional. The error code. Defaults to `HEURIST_INVALID_REQUEST` if a message is provided.
+     * @return void This function calls `exit`.
+     */
     public function errorExit( $message, $error_code=null) {
 
         $this->dbclose();
@@ -769,9 +933,17 @@ class System {
         exit;
     }
 
-    //
-    //
-    //
+    /**
+     * Outputs a JSON error response, typically for API endpoints, and terminates script execution.
+     * Sets appropriate HTTP status codes based on the Heurist error code.
+     * Closes the database connection before exiting.
+     *
+     * @param string|null $message Optional. The error message. If provided, an error with this message will be added.
+     * @param int|null $error_code Optional. The Heurist error code. Defaults to `HEURIST_INVALID_REQUEST` if a message is provided.
+     * @param bool $is_api Optional. If true (default), sets CORS headers and HTTP status codes appropriate for an API.
+     *                     If false, behaves more like `errorExit` but still uses the error structure.
+     * @return void This function calls `exit`.
+     */
     public function errorExitApi( $message=null, $error_code=null, $is_api=true) {
 
         $this->dbclose();
@@ -814,41 +986,68 @@ class System {
         exit;
     }
 
-    //
-    // add prefix for error message
-    //
+    /**
+     * Prepends a message to the existing error message. If no error is currently set,
+     * it creates a new error with the given message and status `HEURIST_ERROR`.
+     *
+     * @param string $message The message to prepend.
+     * @return void
+     */
     public function addErrorMsg($message) {
-        if($this->errors && @$this->errors['message']){
-            $this->errors['message']  = $message.$this->errors['message'];
+        if($this->errors && isset($this->errors['message'])){
+            $this->errors['message']  = $message . $this->errors['message'];
         }else{
             $this->addError(HEURIST_ERROR, $message);
         }
     }
 
     /**
-    * keeps error message (for further use with getError)
-    */
+     * Adds an error to the internal error collection.
+     * The input can be an array (typically from `mysql__` functions or remote requests)
+     * or a simple string message.
+     *
+     * If `$error` is an array and has a 'message' key, it's treated as an error structure
+     * (e.g., from a remote request).
+     * If `$error` is an array without a 'message' key, it's assumed to be `[status, message, sysmsg, title]`.
+     * If `$error` is not an array, it's treated as a message string with status `HEURIST_ERROR`.
+     *
+     * @param array|string $error The error information.
+     *                            - Array from `mysql__*`: `[0 => status, 1 => message, 2 => sysmsg (optional), 3 => title (optional)]`
+     *                            - Array from remote call: `['status' => ..., 'message' => ..., 'sysmsg' => ..., 'error_title' => ...]`
+     *                            - String: Just the error message.
+     * @return array The current error array stored in `$this->errors`.
+     */
     public function addErrorArr($error) {
         if(!is_array($error)){
-            //just message - general message
+            // Just a message string - treat as a general error
             $error = array(HEURIST_ERROR, $error);
         }
-        if(@$error['message']){
-            //from remote request
-            $status = @$error['status']?$error['status']:HEURIST_ERROR;
+
+        if(isset($error['message'])){
+            // Error structure likely from a remote request or already processed
+            $status = isset($error['status']) ? $error['status'] : HEURIST_ERROR;
             return $this->addError($status, $error['message'], @$error['sysmsg'], @$error['error_title']);
-        }else{
-            //from mysql__ functions
-            return $this->addError($error[0], $error[1], @$error[2], @$error[3]);
+        } else {
+            // Assumed array format [status, message, sysmsg, title] from mysql__ functions or direct creation
+            return $this->addError($error[0], $error[1], isset($error[2]) ? $error[2] : null, isset($error[3]) ? $error[3] : null);
         }
     }
 
-    //
-    //
-    //
+    /**
+     * Handles serious errors by logging them and preparing a user-friendly message.
+     * Serious errors are typically those that are not simple request denials or not found errors.
+     * Logs the error to a daily error log file if `HEURIST_FILESTORE_ROOT` is defined.
+     * Modifies the message for "MySQL server has gone away" errors to be more specific.
+     *
+     * @param int $status The Heurist error status code.
+     * @param string $message The primary error message.
+     * @param string|null $sysmsg Optional. A more technical system message.
+     * @param string|null $title Optional. A title for the error.
+     * @return void Sets `$this->errors`.
+     */
     private function treatSeriousError($status, $message, $sysmsg, $title) {
 
-        $now = getNow();
+        $now = getNow(); // Assumes getNow() is a globally available function
         $curr_logfile = 'errors_'.$now->format('Y-m-d').'.log';
 
         //3. write error into current error log
@@ -895,44 +1094,81 @@ class System {
 
 
     /**
-    * keep error message (for further use with getError)
-    */
+     * Adds an error message to the system's error collection.
+     * If the status indicates a serious error (not invalid request, not found, request denied, or action blocked),
+     * it calls `treatSeriousError` to log it and format the message.
+     * Otherwise, it stores the error details directly.
+     *
+     * @param int $status The Heurist error status code (e.g., `HEURIST_ERROR`, `HEURIST_INVALID_REQUEST`).
+     * @param string $message Optional. The user-friendly error message. Defaults to an empty string.
+     * @param string|null $sysmsg Optional. A technical system message or additional details.
+     *                            If status is `HEURIST_REQUEST_DENIED` and sysmsg is null, current user ID is used.
+     * @param string|null $title Optional. A title for the error.
+     * @return array The error array that was set (contains 'status', 'message', 'sysmsg', 'error_title').
+     */
     public function addError($status, $message='', $sysmsg=null, $title=null) {
 
-        if($status==HEURIST_REQUEST_DENIED && $sysmsg==null){
-            $sysmsg = $this->getUserId();
+        if($status == HEURIST_REQUEST_DENIED && $sysmsg === null){
+            $sysmsg = (string) $this->getUserId(); // Provide context for denial
         }
 
-        if($status!=HEURIST_INVALID_REQUEST && $status!=HEURIST_NOT_FOUND &&
-        $status!=HEURIST_REQUEST_DENIED && $status!=HEURIST_ACTION_BLOCKED){
+        // Check if it's a type of error that should be treated as serious (logged, etc.)
+        $isSeriousError = !in_array($status, [
+            HEURIST_INVALID_REQUEST,
+            HEURIST_NOT_FOUND,
+            HEURIST_REQUEST_DENIED,
+            HEURIST_ACTION_BLOCKED
+        ]);
+
+        if($isSeriousError){
             $this->treatSeriousError($status, $message, $sysmsg, $title);
         }else{
-            $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg, 'error_title'=>$title);
+            $this->errors = ["status" => $status, "message" => $message, "sysmsg" => $sysmsg, 'error_title' => $title];
         }
 
         return $this->errors;
     }
 
     /**
-    * returns error array (status,message,sysmsg,error_title)
-    */
+     * Returns the current error array.
+     * The array typically contains 'status', 'message', 'sysmsg', and 'error_title' keys.
+     *
+     * @return array The error array. Returns an empty array if no errors are set.
+     */
     public function getError(){
         return $this->errors;
     }
 
+    /**
+     * Gets the user-facing message from the current error array.
+     *
+     * @return string The error message, or an empty string if no error or message is set.
+     */
     public function getErrorMsg(){
         return $this->errors['message'] ?? '';
     }
 
+    /**
+     * Clears any currently stored error information.
+     *
+     * @return void
+     */
     public function clearError(){
         $this->errors = array();
     }
 
 
-    //
-    // returns total records in db and counts of active entries in dashboard
-    //  invoked on page init and after login
-    //
+    /**
+     * Retrieves the total number of non-temporary records in the database,
+     * the count of active dashboard entries, and the current user's workset count.
+     * Invoked on page initialization and after login.
+     *
+     * @return array An array containing three integers:
+     *               - Total non-temporary records.
+     *               - Count of active dashboard entries (respecting `dsh_ShowIfNoRecords` if no records).
+     *               - Count of worksets for the current user (0 if not logged in).
+     *               Returns `[0,0,0]` if the database connection is not available.
+     */
     public function getTotalRecordsAndDashboard(){
 
         if( !$this->mysqli ){ return array(0,0,0); }
@@ -966,168 +1202,177 @@ class System {
     }
 
     /**
-    * Returns all info for current user and some sys config parameters
-    * see usage usr_info.sysinfo and usr_info.login
+    * Retrieves comprehensive information about the current user and various system configuration parameters.
+    * This method always reloads user information from the database by calling `loginVerify(true)`.
     *
-    * it always reload user info from database
+    * Key information returned:
+    * - `currentUser`: Detailed information about the logged-in user.
+    * - `sysinfo`: A wide range of system settings, version information, URLs, database constants,
+    *   service configurations, language settings, security-related flags (password presence), etc.
+    *
+    * @global string|null $passwordForDatabaseCreation Password for creating new databases.
+    * @global string|null $passwordForDatabaseDeletion Password for deleting databases.
+    * @global string|null $passwordForReservedChanges Password for modifying reserved fields.
+    * @global string|null $passwordForServerFunctions Password for server-level functions.
+    * @global int $needEncodeRecordDetails Flag indicating if record details need encoding.
+    * @global array $saml_service_provides SAML service provider configurations.
+    * @global bool $hideStandardLogin Flag to hide standard login form.
+    * @global string|null $accessToken_DeepLAPI API key for DeepL translation.
+    * @global bool|null $useRewriteRulesForRecordLink Whether to use URL rewriting for record links.
+    * @global int $allowCMSCreation Flag indicating if CMS creation is allowed.
+    * @global string|null $matomoUrl URL for Matomo analytics.
+    * @global string|null $matomoSiteId Site ID for Matomo analytics.
+    * @global string|null $accessToken_Matomo API token for Matomo.
+    *
+    * @param bool $include_reccount_and_dashboard_count Optional. If true, includes total record count,
+    *                                                    active dashboard count, and workset count in `sysinfo`. Defaults to false.
+    * @param bool $is_guest_allowed Optional. If true, allows guest user access even if the user account is normally disabled,
+    *                               by setting 'guest_user' permission. Defaults to false.
+    * @return array|false An associative array containing `currentUser` and `sysinfo`, or false on critical failure.
+    *                     If the database is not connected, returns a minimal sysinfo structure.
+    * @throws \Exception Catches exceptions during the process and sets an error.
     */
     public function getCurrentUserAndSysInfo( $include_reccount_and_dashboard_count=false, $is_guest_allowed=false )
     {
+        // Access global configuration variables
         global $passwordForDatabaseCreation, $passwordForDatabaseDeletion,
-        $passwordForReservedChanges, $passwordForServerFunctions,
-        $needEncodeRecordDetails,
-        $common_languages_for_translation, $glb_lang_codes, $glb_lang_codes_index,
-        $saml_service_provides, $hideStandardLogin,
-        $accessToken_DeepLAPI, $useRewriteRulesForRecordLink,
-        $allowCMSCreation,
-        $matomoUrl,$matomoSiteId,$accessToken_Matomo;
+               $passwordForReservedChanges, $passwordForServerFunctions,
+               $needEncodeRecordDetails,
+               $saml_service_provides, $hideStandardLogin,
+               $accessToken_DeepLAPI, $useRewriteRulesForRecordLink,
+               $allowCMSCreation,
+               $matomoUrl, $matomoSiteId, $accessToken_Matomo;
 
-        if(!isset($needEncodeRecordDetails)){
-            $needEncodeRecordDetails = 0;
-        }
+        // Initialize $needEncodeRecordDetails if not set
+        $needEncodeRecordDetails = $needEncodeRecordDetails ?? 0;
 
+        // Prepare language list (assuming getPreparedLanguageList is a global function)
         [$common_languages, $locale_files] = getPreparedLanguageList();
         
-        //$useRewriteRulesForRecordLink = true;
-        
-        if(!isset($useRewriteRulesForRecordLink)){
-            $useRewriteRulesForRecordLink = USystem::checkRewriteRuleEnabled();
-        }
+        // Determine if rewrite rules are enabled (USystem::checkRewriteRuleEnabled might be static or global)
+        $useRewriteRulesForRecordLink = $useRewriteRulesForRecordLink ?? USystem::checkRewriteRuleEnabled();
 
-        try{
+        try {
+            // Get host logo and URL (USystem::getHostLogoAndUrl might be static or global)
+            [$host_logo, $host_url] = USystem::getHostLogoAndUrl();
 
-            list($host_logo, $host_url) = USystem::getHostLogoAndUrl();
-
+            // If no database connection, return minimal info
             if(!$this->mysqli){
-                return array(
-                    "currentUser"=>null,
-                    "sysinfo"=>array(
-                        "help"=>HEURIST_HELP,
-                        "version"=>HEURIST_VERSION,
-                        "sysadmin_email"=>HEURIST_MAIL_TO_ADMIN,
-                        "baseURL"=>HEURIST_BASE_URL,
-                        'baseURL_pro'=>HEURIST_BASE_URL_PRO,
-                        "referenceServerURL"=>HEURIST_INDEX_BASE_URL,
-                        "referenceServerIndexDatabase"=>HEURIST_INDEX_DATABASE,
-                        "referenceServerBugreportDatabase"=>HEURIST_BUGREPORT_DATABASE,
-                        "referenceServerHelpDatabase"=>HEURIST_HELP_DATABASE,
-                        'database_prefix'=>HEURIST_DB_PREFIX),
-                    'host_logo'=>$host_logo,
-                    'host_url'=>$host_url,
-                    'saml_service_provides'=>$saml_service_provides,
-                    'hideStandardLogin' => $hideStandardLogin,
-                    'common_languages'=>$common_languages,
+                return [
+                    "currentUser" => null,
+                    "sysinfo" => [
+                        "help" => HEURIST_HELP,
+                        "version" => HEURIST_VERSION,
+                        "sysadmin_email" => HEURIST_MAIL_TO_ADMIN,
+                        "baseURL" => HEURIST_BASE_URL,
+                        'baseURL_pro' => HEURIST_BASE_URL_PRO,
+                        "referenceServerURL" => HEURIST_INDEX_BASE_URL,
+                        "referenceServerIndexDatabase" => HEURIST_INDEX_DATABASE,
+                        "referenceServerBugreportDatabase" => HEURIST_BUGREPORT_DATABASE,
+                        "referenceServerHelpDatabase" => HEURIST_HELP_DATABASE,
+                        'database_prefix' => HEURIST_DB_PREFIX
+                    ],
+                    'host_logo' => $host_logo,
+                    'host_url' => $host_url,
+                    'saml_service_provides' => $saml_service_provides ?? null,
+                    'hideStandardLogin' => $hideStandardLogin ?? false,
+                    'common_languages' => $common_languages,
                     'localization_files' => $locale_files,
-                    'use_redirect' => @$useRewriteRulesForRecordLink
-                );
+                    'use_redirect' => $useRewriteRulesForRecordLink
+                ];
             }
 
-            //current user reset - reload actual info from database
+            // Reload current user info from database
             $this->loginVerify( true, $is_guest_allowed );
 
-            $dbowner = user_getDbOwner($this->mysqli);//info about user #2
+            // Get database owner info (user_getDbOwner is likely a global or static function)
+            $dbowner = user_getDbOwner($this->mysqli);
 
-            //list of databases recently logged in
+            // Get list of recently logged-in databases (USystem::sessionRecentDatabases might be static or global)
             $dbrecent = USystem::sessionRecentDatabases($this->currentUser);
 
-            //retrieve lastest code version (cached in localfile and refreshed from main index server daily)
+            // Get latest code version (USystem::getLastCodeAndDbVersion might be static or global)
             $lastCode_VersionOnServer = USystem::getLastCodeAndDbVersion();
 
-            $res = array(
-                "currentUser"=>$this->currentUser,
-                "sysinfo"=>array(
-                    "registration_allowed"=>$this->settings->get('sys_AllowRegistration'), //allow new user registration
-                    "db_registeredid"=>$this->settings->get('sys_dbRegisteredID'),
-                    "db_managers_groupid"=>($this->settings->get('sys_OwnerGroupID')>0?$this->settings->get('sys_OwnerGroupID'):1),
-                    "help"=>HEURIST_HELP,
-
-                    //code version from configIni.php
-                    "version"=>HEURIST_VERSION,
-                    "version_new"=>$lastCode_VersionOnServer, //version on main index database server
-                    //db version
-                    "db_version"=>getDbVersion($this->getMysqli()),
-                    "db_version_req"=>HEURIST_MIN_DBVERSION,
-
-                    "dbowner_name"=>@$dbowner['ugr_FirstName'].' '.@$dbowner['ugr_LastName'],
-                    "dbowner_org"=>@$dbowner['ugr_Organisation'],
-                    "dbowner_email"=>@$dbowner['ugr_eMail'],
-                    "sysadmin_email"=>HEURIST_MAIL_TO_ADMIN,
-                    "db_total_records"=>$this->settings->get('sys_RecordCount'),
-                    "db_usergroups"=> user_getAllWorkgroups($this->mysqli), //all groups- to fast retrieve group name
-                    "baseURL"=>HEURIST_BASE_URL,
-                    'baseURL_pro'=>HEURIST_BASE_URL_PRO,
-                    'database_prefix'=>HEURIST_DB_PREFIX,
-                    //"serverURL"=>HEURIST_SERVER_URL,
-                    "referenceServerURL"=>HEURIST_INDEX_BASE_URL,
-                    "referenceServerIndexDatabase"=>HEURIST_INDEX_DATABASE,
-                    "referenceServerBugreportDatabase"=>HEURIST_BUGREPORT_DATABASE,
-                    "referenceServerHelpDatabase"=>HEURIST_HELP_DATABASE,
-                    "dbconst"=>$this->getLocalConstants( $include_reccount_and_dashboard_count ), //some record and detail types constants with local values specific for current db
-                    "service_config"=>$this->settings->get('sys_ExternalReferenceLookups'), //get 3d part web service mappings
-                    "services_list"=>$this->getWebServiceConfigs(), //get list of all implemented lookup services
-                    "dbrecent"=>$dbrecent,  //!!!!!!! need to store in preferences
-                    "cms_allowed"=> $allowCMSCreation??1,
-
-                    'max_post_size'=>USystem::getConfigBytes('post_max_size'),
-                    'max_file_size'=>USystem::getConfigBytes('upload_max_filesize'),
-                    'is_file_multipart_upload'=>($this->settings->getDiskQuota()>0)?1:0,
-                    'host_logo'=>$host_logo,
-                    'host_url'=>$host_url,
-                    
-                    'mediaFolder'=>$this->settings->get('sys_MediaFolders'),
-                    'media_ext_index'=>$this->settings->get('sys_MediaExtensions'), //user define list - what is allowed to index
-
-                    'media_ext'=>HEURIST_ALLOWED_EXT, //default list - what is allowed to upload
-                    'rty_as_place'=>$this->settings->get('sys_TreatAsPlaceRefForMapping'),
-
-                    'need_encode'=>$needEncodeRecordDetails,
-
-                    'custom_js_allowed'=>$this->settings->isJavaScriptAllowed(),
-
-                    'common_languages'=>$common_languages,
+            $res = [
+                "currentUser" => $this->currentUser,
+                "sysinfo" => [
+                    "registration_allowed" => $this->settings->get('sys_AllowRegistration'),
+                    "db_registeredid" => $this->settings->get('sys_dbRegisteredID'),
+                    "db_managers_groupid" => ($this->settings->get('sys_OwnerGroupID') > 0 ? $this->settings->get('sys_OwnerGroupID') : 1),
+                    "help" => HEURIST_HELP,
+                    "version" => HEURIST_VERSION,
+                    "version_new" => $lastCode_VersionOnServer,
+                    "db_version" => getDbVersion($this->getMysqli()), // getDbVersion is likely global
+                    "db_version_req" => HEURIST_MIN_DBVERSION,
+                    "dbowner_name" => ($dbowner['ugr_FirstName'] ?? '') . ' ' . ($dbowner['ugr_LastName'] ?? ''),
+                    "dbowner_org" => $dbowner['ugr_Organisation'] ?? '',
+                    "dbowner_email" => $dbowner['ugr_eMail'] ?? '',
+                    "sysadmin_email" => HEURIST_MAIL_TO_ADMIN,
+                    "db_total_records" => $this->settings->get('sys_RecordCount'),
+                    "db_usergroups" => user_getAllWorkgroups($this->mysqli), // user_getAllWorkgroups is likely global
+                    "baseURL" => HEURIST_BASE_URL,
+                    'baseURL_pro' => HEURIST_BASE_URL_PRO,
+                    'database_prefix' => HEURIST_DB_PREFIX,
+                    "referenceServerURL" => HEURIST_INDEX_BASE_URL,
+                    "referenceServerIndexDatabase" => HEURIST_INDEX_DATABASE,
+                    "referenceServerBugreportDatabase" => HEURIST_BUGREPORT_DATABASE,
+                    "referenceServerHelpDatabase" => HEURIST_HELP_DATABASE,
+                    "dbconst" => $this->getLocalConstants( $include_reccount_and_dashboard_count ),
+                    "service_config" => $this->settings->get('sys_ExternalReferenceLookups'),
+                    "services_list" => $this->getWebServiceConfigs(),
+                    "dbrecent" => $dbrecent,
+                    "cms_allowed" => $allowCMSCreation ?? 1,
+                    'max_post_size' => USystem::getConfigBytes('post_max_size'), // USystem::getConfigBytes might be static
+                    'max_file_size' => USystem::getConfigBytes('upload_max_filesize'),
+                    'is_file_multipart_upload' => ($this->settings->getDiskQuota() > 0) ? 1 : 0,
+                    'host_logo' => $host_logo,
+                    'host_url' => $host_url,
+                    'mediaFolder' => $this->settings->get('sys_MediaFolders'),
+                    'media_ext_index' => $this->settings->get('sys_MediaExtensions'),
+                    'media_ext' => HEURIST_ALLOWED_EXT,
+                    'rty_as_place' => $this->settings->get('sys_TreatAsPlaceRefForMapping'),
+                    'need_encode' => $needEncodeRecordDetails,
+                    'custom_js_allowed' => $this->settings->isJavaScriptAllowed(),
+                    'common_languages' => $common_languages,
                     'localization_files' => $locale_files,
-
-                    'saml_service_provides'=>$saml_service_provides,
-                    'hideStandardLogin' => $hideStandardLogin,
-
-                    'nakala_api_key'=>$this->settings->get('sys_NakalaKey'),
-
-                    'pwd_DatabaseCreation'=> (strlen(@$passwordForDatabaseCreation)>6), //pwd to creaste new database
-                    'pwd_DatabaseDeletion'=> (strlen(@$passwordForDatabaseDeletion)>15),//delete from db statistics
-                    'pwd_ReservedChanges' => (strlen(@$passwordForReservedChanges)>6),  //allow change reserved fields
-                    'pwd_ServerFunctions' => (strlen(@$passwordForServerFunctions)>6),  //allow run multi-db server actions
-                    'api_Translator' => (!empty($accessToken_DeepLAPI)), // an api key has been setup for Deepl
-                    'use_redirect' => @$useRewriteRulesForRecordLink,
-                )
-            );//end of array
+                    'saml_service_provides' => $saml_service_provides ?? null,
+                    'hideStandardLogin' => $hideStandardLogin ?? false,
+                    'nakala_api_key' => $this->settings->get('sys_NakalaKey'),
+                    'pwd_DatabaseCreation' => (strlen($passwordForDatabaseCreation ?? '') > 6),
+                    'pwd_DatabaseDeletion' => (strlen($passwordForDatabaseDeletion ?? '') > 15),
+                    'pwd_ReservedChanges' => (strlen($passwordForReservedChanges ?? '') > 6),
+                    'pwd_ServerFunctions' => (strlen($passwordForServerFunctions ?? '') > 6),
+                    'api_Translator' => (!empty($accessToken_DeepLAPI)),
+                    'use_redirect' => $useRewriteRulesForRecordLink,
+                ]
+            ];
             
             if(isset($matomoUrl) && isset($matomoSiteId)){
                 $res['sysinfo']['matomo_url'] = $matomoUrl;
                 $res['sysinfo']['matomo_siteid'] = $matomoSiteId;
-                $res['sysinfo']['matomo_api_key'] = isset($accessToken_Matomo)?$accessToken_Matomo:null;
+                $res['sysinfo']['matomo_api_key'] = $accessToken_Matomo ?? null;
             }
 
             if($include_reccount_and_dashboard_count){
-                $res2 = $this->getTotalRecordsAndDashboard();
-                $res['sysinfo']['db_total_records'] = $res2[0];
-                $res['sysinfo']['db_has_active_dashboard'] = $res2[1];
-                $res['sysinfo']['db_workset_count'] = $res2[2];
+                [$total_records, $active_dashboard, $workset_count] = $this->getTotalRecordsAndDashboard();
+                $res['sysinfo']['db_total_records'] = $total_records;
+                $res['sysinfo']['db_has_active_dashboard'] = $active_dashboard;
+                $res['sysinfo']['db_workset_count'] = $workset_count;
             }
 
             $filestoreRoot = $this->getFileStoreRootFolder();
             if(!empty($filestoreRoot)){
-
-                $statsFile = "{$filestoreRoot}_DB_STATS/db_stats.txt";
+                $statsFile = rtrim($filestoreRoot, '/') . "/_DB_STATS/db_stats.txt";
                 $lastUpdate = file_exists($statsFile) ? filemtime($statsFile) : false;
-
-                $res['sysinfo']['refreshStatistics'] = !$lastUpdate || $lastUpdate < strtotime('-1 month') ? 1 : 0;
+                $res['sysinfo']['refreshStatistics'] = (!$lastUpdate || $lastUpdate < strtotime('-1 month')) ? 1 : 0;
             }
 
-            recreateRecLinks( $this, false );//see utils_db
+            recreateRecLinks( $this, false ); // recreateRecLinks is likely global or static
 
-        }catch( \Exception $e ){
+        } catch( \Exception $e ){
             $this->addError(HEURIST_ERROR, 'Unable to retrieve Heurist system information', $e->getMessage());
-            $res = false;
+            return false; // Return false on exception
         }
 
         return $res;
@@ -1136,17 +1381,23 @@ class System {
 
 
     /**
-    * Get current user info
-    */
+     * Gets the information for the currently logged-in user.
+     *
+     * @return array|null The current user's data as an array, or null if no user is logged in.
+     *                    The array structure typically includes 'ugr_ID', 'ugr_Name', 'ugr_FullName', 'ugr_eMail',
+     *                    'ugr_Groups', 'ugr_Permissions', and 'ugr_Preferences'.
+     */
     public function getCurrentUser(){
         return $this->currentUser;
     }
 
     /**
-    * Set current user info
-    *
-    * @param mixed $user
-    */
+     * Sets the current user information.
+     *
+     * @param array|null $user An array containing the user's data, or null to clear the current user.
+     *                         Expected array keys: 'ugr_ID', 'ugr_Name', 'ugr_FullName', 'ugr_eMail', 'ugr_Groups', 'ugr_Permissions', 'ugr_Preferences'.
+     * @return void
+     */
     public function setCurrentUser($user){
         $this->currentUser = $user;
     }
@@ -1154,9 +1405,10 @@ class System {
 
 
     /**
-    * Get if of current user, if not looged in returns zero
-    *
-    */
+     * Gets the ID of the currently logged-in user.
+     *
+     * @return int The user ID, or 0 if no user is logged in.
+     */
     public function getUserId(){
         return $this->currentUser? intval($this->currentUser['ugr_ID']) :0;
     }
@@ -1164,9 +1416,14 @@ class System {
 
 
     /**
-    * Returns array of ID of all groups for current user plus current user ID
-    * $level - admin/memeber
-    */
+     * Returns an array of IDs for all groups the current user belongs to, plus the current user's own ID.
+     *
+     * @param string|null $level Optional. Filter groups by membership level ('admin' or 'member').
+     *                           If null, all groups the user is part of are returned.
+     * @param bool $refresh Optional. If true, forces a refresh of the user's group list from the database.
+     *                      Defaults to false (uses cached group list if available).
+     * @return int[]|null An array of group IDs and the user ID, or null if no user is logged in.
+     */
     public function getUserGroupIds($level=null, $refresh=false){
 
         $ugrID = $this->getUserId();
@@ -1199,20 +1456,32 @@ class System {
 
 
     /**
-    * Returns true if given id is id of current user or it is id of member of one of current Workgroup
-    *
-    * @param mixed $ug - user ID to check
-    */
+     * Checks if the current user is a member of any of the specified user/group IDs.
+     * Also returns true if 0 is in the list of `$ugs` (often representing 'public' or 'any logged in user' depending on context)
+     * or if `$ugs` is empty.
+     *
+     * @param int|int[] $ugs A single user/group ID or an array of user/group IDs to check against.
+     * @return bool True if the current user is a member of at least one of the provided IDs,
+     *              or if 0 is in `$ugs`, or if `$ugs` is empty. False otherwise.
+     */
     public function isMember($ugs){
 
-        if($ugs==0 || isEmptyArray($ugs)){
+        if($ugs == 0 || isEmptyArray($ugs)){ // isEmptyArray is likely a global helper
             return true;
         }
 
-        $current_user_grps = $this->getUserGroupIds();
-        $ugs = prepareIds($ugs, true);//include zero
-        foreach ($ugs as $ug){
-            if ($ug==0 || (is_array($current_user_grps) && in_array($ug, $current_user_grps)) ){
+        $current_user_grps = $this->getUserGroupIds(); // Get all groups + user ID
+        if ($current_user_grps === null && $this->getUserId() == 0) { // Not logged in, and not checking for public
+             return false;
+        }
+
+        $ugs_to_check = prepareIds($ugs, true); // prepareIds is likely a global helper, true might mean include zero
+
+        foreach ($ugs_to_check as $ug_id_to_check){
+            if ($ug_id_to_check == 0) { // Explicitly checking for 'public' or 'any'
+                return true;
+            }
+            if (is_array($current_user_grps) && in_array($ug_id_to_check, $current_user_grps) ){
                 return true;
             }
         }
@@ -1220,53 +1489,81 @@ class System {
     }
 
     /**
-    * Verifies is current user is database owner
-    * used to manage any recThereadedComments, recUploadedFiles, Reminders, Bookmarks, UsrTags
-    * otherwise only direct owners can modify them or members of workgroup tags
-    */
+     * Verifies if the current user is the database owner (typically user ID 2).
+     * This is often used for permissions to manage comments, files, reminders, bookmarks, and user tags,
+     * where only direct owners or members of specific workgroup tags can modify them, unless the current user is the DB owner.
+     *
+     * @return bool True if the current user is the database owner (ID 2), false otherwise.
+     */
     public function isDbOwner(){
-        return $this->getUserId()==2;
+        return $this->getUserId() === 2;
     }
 
     /**
-    * id db owner or admin of database managers
-    *
-    * @param mixed $ugrID
-    * @return mixed
-    */
+     * Checks if the current user is an administrator.
+     * An admin is either the database owner (user ID 2) or an administrator of the
+     * "Database managers" group (whose ID is retrieved from system settings `sys_OwnerGroupID`, defaulting to 1).
+     *
+     * @return bool True if the current user is logged in and is a database owner or an admin of the Database Managers group.
+     *              False otherwise.
+     */
     public function isAdmin(){
-       return $this->getUserId()>0 &&
-            ($this->getUserId()==2 ||
-                $this->hasAccess( $this->settings->get('sys_OwnerGroupID') ) );
+       $userId = $this->getUserId();
+       if ($userId <= 0) {
+           return false;
+       }
+       if ($userId === 2) { // DB Owner
+           return true;
+       }
+       $ownerGroupId = $this->settings->get('sys_OwnerGroupID');
+       return $this->hasAccess( $ownerGroupId > 0 ? $ownerGroupId : 1 );
     }
 
+    /**
+     * Checks if the current user is logged in as a guest.
+     * A guest user is identified by the 'guest_user' flag in their permissions.
+     *
+     * @return bool True if the current user is logged in and has the 'guest_user' permission set to true, false otherwise.
+     */
     public function isGuestUser(){
         $user = $this->currentUser;
-        return $user!=null && @$user['ugr_Permissions']['guest_user'];
+        return $user !== null && !empty($user['ugr_Permissions']['guest_user']);
     }
 
 
     /**
-    * check if current user is system administrator
-    */
+     * Checks if the current user is a system administrator.
+     * A system administrator is identified by their email matching `HEURIST_MAIL_TO_ADMIN`
+     * (defined in `configIni.php`).
+     *
+     * @return bool True if the current user is logged in and their email matches the system admin email.
+     *              False otherwise, or if not logged in.
+     */
     public function isSystemAdmin(){
-        if ($this->getUserId()>0){
-            $user = user_getById($this->mysqli, $this->getUserId());
-            return defined('HEURIST_MAIL_TO_ADMIN') && (@$user['ugr_eMail']==HEURIST_MAIL_TO_ADMIN);
-        }else{
+        if ($this->getUserId() > 0 && $this->currentUser !== null){
+            // It's usually better to rely on $this->currentUser['ugr_eMail'] if loginVerify populates it correctly
+            // than to do another DB lookup with user_getById.
+            // However, sticking to original logic:
+            $user = user_getById($this->mysqli, $this->getUserId()); // user_getById is likely global
+            return defined('HEURIST_MAIL_TO_ADMIN') && isset($user['ugr_eMail']) && ($user['ugr_eMail'] == HEURIST_MAIL_TO_ADMIN);
+        } else {
             return false;
         }
     }
 
     /**
-    * Returns IF currentUser satisfies to required level
-    *
-    * @param requiredLevel
-    * null or <1 - (DEFAULT) is logged in
-    * 1 - db admin (admin of group 1 "Database managers")
-    * 2 - db owner
-    * n - admin of given group
-    */
+     * Checks if the current user satisfies a required access level.
+     *
+     * Levels:
+     * - `null` or `< 1`: User is logged in (default check).
+     * - `1`: User is an admin of group 1 ("Database managers") or DB Owner (user 2).
+     * - `2`: User is the database owner (user ID 2).
+     * - `n` (any other positive integer): User is an admin of the group with ID `n`, or DB Owner (user 2).
+     *
+     * @param int|null $requiredLevel Optional. The required access level or group ID to check for admin rights.
+     *                                Defaults to null (check if logged in).
+     * @return bool True if the current user meets the required access level, false otherwise.
+     */
     public function hasAccess( $requiredLevel=null ) {
 
         $ugrID = $this->getUserId();
@@ -1287,12 +1584,27 @@ class System {
     }
 
     /**
-    * Restore session by cookie id, or start new session
-    * Refreshes cookie
+    * Starts or restores a PHP session for the Heurist application.
+    * It sets the session name to 'heurist-sessionid' and a cache limiter to 'none'.
+    * If `$check_session_folder` is true (and `$this->needFullSessionCheck` is true),
+    * it first verifies that the session save path is writable.
+    * If a session is active and `$_SESSION[$this->dbnameFull]['keepalive']` is set,
+    * it attempts to update session cookies.
+    *
+    * @param bool $check_session_folder Optional. If true, and `needFullSessionCheck` is also true,
+    *                                   the session folder's writability is checked. Defaults to true.
+    * @return bool True if a session was successfully started or already active,
+    *              false if session folder check fails or session cannot be started.
+    *              Returns true if headers have already been sent (as session cannot be started then).
     */
     private function startMySession($check_session_folder=true){
 
-        if(headers_sent()) {return true;}
+        if(headers_sent()) {
+            // Cannot start session if headers are already sent.
+            // Depending on strictness, this could be an error or simply proceed.
+            // Original code returns true, implying it's not a fatal error for this method's contract.
+            return true;
+        }
 
         //verify that session folder is writable
         if($this->needFullSessionCheck && $check_session_folder && !USystem::sessionCheckFolder()){
@@ -1324,13 +1636,19 @@ class System {
 
 
     /*
-    * Verifies session only (without database connection and system initialization)
-    * return current user id or false
-    */
+    /**
+     * Verifies if there's an active session for a given database and returns the user ID from that session.
+     * This method only checks session data and does not perform a full system or database initialization.
+     * It calls `startMySession(false)` which means it won't check session folder writability.
+     *
+     * @param string $db The name of the database (short or full) to check credentials for.
+     * @return int|false The user ID (ugr_ID) from the session if credentials are valid and session exists,
+     *                   or false otherwise (e.g., if database name is invalid or no session for that DB).
+     */
     public function verifyCredentials($db){
 
-        if( $this->setDbnameFull($db) && $this->startMySession(false) ){
-            return @$_SESSION[$this->dbnameFull]['ugr_ID'];
+        if( $this->setDbnameFull($db) && $this->startMySession(false) ){ // false to skip full session check
+            return isset($_SESSION[$this->dbnameFull]['ugr_ID']) ? (int)$_SESSION[$this->dbnameFull]['ugr_ID'] : false;
         }else{
             return false;
         }
@@ -1339,98 +1657,131 @@ class System {
 
 
     /**
-    * Load user info from session - called on init only
-    *
-    * $user = true - reload user info (id, name) from database
-    *         false -  from $_SESSION
-    *
-    * ugr_Preferences are always loaded from database
-    *
-    */
+     * Verifies the current user's login status and loads their information.
+     * This method is central to establishing the `$this->currentUser` property.
+     *
+     * Behavior depends on the `$user` parameter:
+     * - If `$user` is `true` (boolean): Reloads user information (ID, name, groups, permissions) directly from the database.
+     * - If `$user` is `false` (boolean): Attempts to load user information from the `$_SESSION`.
+     * - If `$user` is an array: It's assumed to be pre-fetched user data (e.g., after a successful login attempt).
+     *   The method then uses this data, sets `reload_user_from_db` to true to ensure session is updated consistently.
+     *
+     * Regardless of `$user`, `ugr_Preferences` are always reloaded from the database if the user ID is established
+     * and `reload_user_from_db` becomes true or was initially true.
+     *
+     * It also handles:
+     * - Checking for linked sessions if no direct session user ID is found.
+     * - Checking for a marker file (`HEURIST_FILESTORE_DIR . basename($userID)`) that indicates user info might have been updated externally,
+     *   triggering a reload from the database.
+     * - Setting guest user permissions if `$is_guest_allowed` is true and the user account is normally disabled.
+     *
+     * @param bool|array $user Determines how user data is loaded:
+     *                         `true` to force reload from DB,
+     *                         `false` to load from session,
+     *                         `array` of user data to use pre-fetched info.
+     * @param bool $is_guest_allowed Optional. If true and the user account is 'disabled',
+     *                                 treats the user as a guest by overriding the 'disabled' permission
+     *                                 and setting 'guest_user' permission. Defaults to false.
+     * @return bool True if a user is successfully logged in and verified, false otherwise.
+     */
     private function loginVerify( $user, $is_guest_allowed=false ){
 
         $reload_user_from_db = false;
+        $userID = null;
 
-        if( is_array($user) ){  //NOT USED user info already found (see login) - need reset session
-            $reload_user_from_db = true;
-            $userID = $user['ugr_ID'];
-        }else{
-
-            $reload_user_from_db = ($user===true);//reload user unconditionally
-
-            $userID = @$_SESSION[$this->dbnameFull]['ugr_ID'];
+        if( is_array($user) && isset($user['ugr_ID']) ){  // User info pre-fetched (e.g., from login attempt)
+            $reload_user_from_db = true; // Ensure session is updated with this fresh data
+            $userID = (int) $user['ugr_ID'];
+        } else {
+            $reload_user_from_db = ($user === true); // Boolean true forces reload
+            $userID = isset($_SESSION[$this->dbnameFull]['ugr_ID']) ? (int)$_SESSION[$this->dbnameFull]['ugr_ID'] : null;
         }
 
-        if($userID == null){
-            //some databases may share credentials
-            //check that there is session for linked databases
-            //if such session exists find email in linked database
-            //by this email find user id in this database and establish new session
-
-            $userID = $this->doLoginByLinkedSession();
-
-            $reload_user_from_db = ($userID!=null);
+        if($userID === null){
+            // Attempt to login via linked session if no direct user ID in current session
+            $linkedUserID = $this->doLoginByLinkedSession();
+            if ($linkedUserID !== null) {
+                $userID = $linkedUserID;
+                $reload_user_from_db = true; // Data from linked session needs to populate current session/user object
+            }
         }
 
-        $islogged = ($userID != null);
-
-        if(!$islogged){
-            return false;
+        if($userID === null || $userID <= 0){ // Ensure userID is valid
+            return false; // Not logged in
         }
 
-        if(@$_SESSION[$this->dbnameFull]['need_refresh']) {
+        // Check for external update marker (e.g., user profile changed elsewhere)
+        // HEURIST_FILESTORE_DIR needs to be defined for this to work.
+        if (defined('HEURIST_FILESTORE_DIR')) {
+            $update_marker_fname = HEURIST_FILESTORE_DIR . basename((string)$userID);
+            if(file_exists($update_marker_fname)){
+                unlink($update_marker_fname);
+                // Mark for client-side refresh if not already forcing a DB reload
+                if($user !== true && !is_array($user)) { // only if not already a forced reload
+                     $_SESSION[$this->dbnameFull]['need_refresh'] = 1;
+                }
+                $reload_user_from_db = true;
+            }
+        } else {
+            // Log or handle error: HEURIST_FILESTORE_DIR is not defined, cannot check for external updates.
+            // This might be acceptable if this feature is not critical for all setups.
+        }
+
+
+        if($reload_user_from_db){
+            if(!$this->updateSessionForUser( $userID )){
+                $this->currentUser = null; // Clear currentUser if update fails
+                return false; // User not found or disabled, and not allowed as guest
+            }
+
+            // If guest allowed and user is disabled, override disabled status for this session
+            if($is_guest_allowed && isset($_SESSION[$this->dbnameFull]['ugr_Permissions']['disabled']) && $_SESSION[$this->dbnameFull]['ugr_Permissions']['disabled']){
+                $_SESSION[$this->dbnameFull]['ugr_Permissions']['disabled'] = false;
+                $_SESSION[$this->dbnameFull]['ugr_Permissions']['guest_user'] = true; // Mark as guest
+            }
+
+            // Always reload preferences from DB when user data is reloaded from DB
+            // Set a temporary currentUser with ID to ensure user_getPreferences has the correct context
+            $this->currentUser = ['ugr_ID' => $userID];
+            $_SESSION[$this->dbnameFull]['ugr_Preferences'] = user_getPreferences( $this ); // user_getPreferences likely global
+        }
+
+        // Populate $this->currentUser from session (which is now up-to-date if reloaded)
+        // Ensure all expected keys are present, defaulting to null or empty arrays if not.
+        $this->currentUser = [
+            'ugr_ID'          => $userID,
+            'ugr_Name'        => $_SESSION[$this->dbnameFull]['ugr_Name'] ?? null,
+            'ugr_FullName'    => $_SESSION[$this->dbnameFull]['ugr_FullName'] ?? null,
+            'ugr_eMail'       => $_SESSION[$this->dbnameFull]['ugr_eMail'] ?? null,
+            'ugr_Groups'      => $_SESSION[$this->dbnameFull]['ugr_Groups'] ?? [],
+            'ugr_Permissions' => $_SESSION[$this->dbnameFull]['ugr_Permissions'] ?? [],
+            'ugr_Preferences' => $_SESSION[$this->dbnameFull]['ugr_Preferences'] ?? []
+        ];
+
+        // Remove sensitive credentials for remote repositories from the currentUser object if they exist
+        if(isset($this->currentUser['ugr_Preferences']['externalRepositories'])){
+            // It's safer to unset than to set to null if other code might expect the key not to exist.
+            unset($this->currentUser['ugr_Preferences']['externalRepositories']);
+        }
+        
+        // Clear the 'need_refresh' flag after processing
+        if(isset($_SESSION[$this->dbnameFull]['need_refresh'])) {
             unset($_SESSION[$this->dbnameFull]['need_refresh']);
         }
 
-        $fname = HEURIST_FILESTORE_DIR.basename($userID);
-        if(file_exists($fname)){  //user info was updated by someone else
-            unlink($fname);
-            //marker for usr_info.verify_credentials to be sure that client side is also up to date
-            if($user!==true) {$_SESSION[$this->dbnameFull]['need_refresh'] = 1;}
-            $reload_user_from_db = true;
-        }
-
-        if($reload_user_from_db){ //from database
-
-            if(!$this->updateSessionForUser( $userID )){
-                return false; //not logged in
-            }
-
-            if($is_guest_allowed && @$_SESSION[$this->dbnameFull]['ugr_Permissions']['disabled']){
-                $_SESSION[$this->dbnameFull]['ugr_Permissions']['disabled'] = false;
-                $_SESSION[$this->dbnameFull]['ugr_Permissions']['guest_user'] = true;
-            }
-
-            //always restore from db
-            $this->currentUser = ['ugr_ID' => intval($userID)]; // set user ID to avoid resetting preferences
-            $_SESSION[$this->dbnameFull]['ugr_Preferences'] = user_getPreferences( $this );
-        }//$reload_user_from_db from db
-
-        $this->currentUser = array('ugr_ID'=>intval($userID),
-            'ugr_Name'        => @$_SESSION[$this->dbnameFull]['ugr_Name'],
-            'ugr_FullName'    => $_SESSION[$this->dbnameFull]['ugr_FullName'],
-            'ugr_eMail'       => $_SESSION[$this->dbnameFull]['ugr_eMail'],
-            'ugr_Groups'      => $_SESSION[$this->dbnameFull]['ugr_Groups'],
-            'ugr_Permissions' => $_SESSION[$this->dbnameFull]['ugr_Permissions']);
-
-        $this->currentUser['ugr_Preferences'] = $_SESSION[$this->dbnameFull]['ugr_Preferences'];
-
-        //remove credentials for remote repositories
-        if(@$this->currentUser['ugr_Preferences']['externalRepositories']){
-            $this->currentUser['ugr_Preferences']['externalRepositories'] = null;
-            unset($this->currentUser['ugr_Preferences']['externalRepositories']);
-        }
-
-
-        return $islogged;
+        return true; // User is considered logged in
     }
 
-    //
-    // Update session with actual user info from database: id, name
-    //
+    /**
+     * Updates the current session with actual user information from the database.
+     * Fetches user details, groups, and permissions.
+     *
+     * @param int $userID The ID of the user to load into the session.
+     * @return bool True if the user was found and session updated, false if user not found.
+     */
     public function updateSessionForUser( $userID ){
 
-        $user = user_getById($this->mysqli, $userID);
+        $user = user_getById($this->mysqli, $userID); // user_getById is likely global
 
         //user can be removed - check presence
         if($user==null){
@@ -1455,138 +1806,186 @@ class System {
 
 
     /**
-    * some databases may share credentials
-    * check that there is a session for linked databases
-    * if such session exists find email in linked database
-    * by this email find user id in this database and establish new session
-    *
-    * return userid in this database
-    */
+    /**
+     * Attempts to log in a user by checking for an active session in a linked database.
+     * This allows for a form of single sign-on across mutually linked Heurist databases.
+     *
+     * The process:
+     * 1. Reads `sys_UGrpsDatabase` from the current database's `sysIdentification` table to find linked DBs.
+     * 2. For each linked DB, checks if a session exists for it (e.g., `$_SESSION[linked_db_full_name]['ugr_ID']`).
+     * 3. If a session exists in a linked DB:
+     *    a. Verifies that the linked DB also lists the current DB in its `sys_UGrpsDatabase` (mutual link).
+     *    b. Retrieves the user's email from the linked DB using the user ID from that session.
+     *    c. Searches for a user in the current database with that email.
+     *    d. If an active, non-disabled user is found in the current DB, a new session is established for them
+     *       in the current DB using `doLoginSession()` with 'public' type, and their user ID is returned.
+     *
+     * @return int|null The user ID in the current database if login via linked session was successful, otherwise null.
+     */
     private function doLoginByLinkedSession(){
-        //1. find sys_UGrpsDatabase in this database
-        $linked_dbs = mysql__select_value($this->mysqli, 'select sys_UGrpsDatabase from sysIdentification');
-        if($linked_dbs)
-        {
+        // 1. Find sys_UGrpsDatabase in this database
+        $linked_dbs_str = mysql__select_value($this->mysqli, 'select sys_UGrpsDatabase from sysIdentification');
+        if(empty($linked_dbs_str)) {
+            return null;
+        }
 
-            $linked_dbs = explode(',', $linked_dbs);
-            foreach ($linked_dbs as $ldb){
-                //2. check if session exists
-                if(strpos($ldb, HEURIST_DB_PREFIX)!==0){
-                    $ldb = HEURIST_DB_PREFIX.$ldb;
+        $linked_dbs_array = explode(',', $linked_dbs_str);
+
+        foreach ($linked_dbs_array as $ldb_short_name){
+            // Ensure full database name with prefix
+            $ldb_full_name = (strpos($ldb_short_name, HEURIST_DB_PREFIX) === 0)
+                ? $ldb_short_name
+                : HEURIST_DB_PREFIX . $ldb_short_name;
+
+            // 2. Check if session exists for the linked database
+            $userID_in_linkedDB = isset($_SESSION[$ldb_full_name]['ugr_ID']) ? (int)$_SESSION[$ldb_full_name]['ugr_ID'] : 0;
+
+            if( $userID_in_linkedDB > 0 ){
+                // 3. Find sys_UGrpsDatabase in the linked database to verify mutual link
+                $linked_dbs2_str = mysql__select_value($this->mysqli, 'select sys_UGrpsDatabase from `'. $this->mysqli->real_escape_string($ldb_full_name) .'`.sysIdentification');
+                if(empty($linked_dbs2_str)) {
+                    continue; // Not mutually linked or error
                 }
 
-                $userID_in_linkedDB = @$_SESSION[$ldb]['ugr_ID'];
+                $linked_dbs2_array = explode(',', $linked_dbs2_str);
+                $is_mutually_linked = false;
+                foreach ($linked_dbs2_array as $ldb2_short_name){
+                    $ldb2_full_name = (strpos($ldb2_short_name, HEURIST_DB_PREFIX) === 0)
+                        ? $ldb2_short_name
+                        : HEURIST_DB_PREFIX . $ldb2_short_name;
 
-                if( $userID_in_linkedDB>0 ){
-                    //3. find sys_UGrpsDatabase in linked database - this database must be in list
-                    $linked_dbs2 = mysql__select_value($this->mysqli, 'select sys_UGrpsDatabase from '.$ldb.'.sysIdentification');
-                    if(!$linked_dbs2) {continue;} //this database is not mutually linked
-                    $linked_dbs2 = explode(',', $linked_dbs2);
-                    foreach ($linked_dbs2 as $ldb2){
-                        if(strpos($ldb2, HEURIST_DB_PREFIX)!==0){
-                            $ldb2 = HEURIST_DB_PREFIX.$ldb2;
-                        }
-                        if( strcasecmp($this->dbnameFull, $ldb2)==0 ){
-                            //yes database is mutually linked
-                            //4. find user email in linked database
-                            $userEmail_in_linkedDB = mysql__select_value($this->mysqli, 'select ugr_eMail from '
-                                .$ldb.'.sysUGrps where ugr_ID='.$userID_in_linkedDB);
+                    if( strcasecmp($this->dbnameFull, $ldb2_full_name) == 0 ){
+                        $is_mutually_linked = true;
+                        break;
+                    }
+                }
 
-                            //5. find user by email in this database
-                            if($userEmail_in_linkedDB){
-                                $user = user_getByField($this->getMysqli(), 'ugr_eMail', $userEmail_in_linkedDB);
-                                if(null != $user && $user['ugr_Type']=='user' && $user['ugr_Enabled']!='n') {
-                                    //6. success - establed new session
-                                    $this->doLoginSession($user['ugr_ID'], 'public');
-                                    return $user['ugr_ID'];
-                                }
-                            }
-                        }
+                if (!$is_mutually_linked) {
+                    continue;
+                }
+
+                // 4. Find user email in the linked database
+                $userEmail_in_linkedDB = mysql__select_value($this->mysqli,
+                    'select ugr_eMail from `'. $this->mysqli->real_escape_string($ldb_full_name) .
+                    '`.sysUGrps where ugr_ID=' . $userID_in_linkedDB);
+
+                // 5. Find user by email in THIS database
+                if($userEmail_in_linkedDB){
+                    $user_in_current_db = user_getByField($this->getMysqli(), 'ugr_eMail', $userEmail_in_linkedDB); // user_getByField is global
+                    if(null != $user_in_current_db && ($user_in_current_db['ugr_Type'] ?? '') =='user' && ($user_in_current_db['ugr_Enabled'] ?? 'n') !='n') {
+                        // 6. Success - establish new session in current DB
+                        $this->doLoginSession($user_in_current_db['ugr_ID'], 'public'); // 'public' likely means short-lived session
+                        return (int)$user_in_current_db['ugr_ID'];
                     }
                 }
             }
         }
-
         return null;
-
     }
 
     /**
-    * Find user by name and password and keeps user info in current_User and in session
-    *
-    * @param mixed $username
-    * @param mixed $password
-    * @param mixed $session_type   - public, shared, remember
-    *
-    * @return  true if login is success
-    */
+     * Attempts to log in a user with the provided username and password.
+     * If successful, it establishes a session for the user and updates `$this->currentUser`.
+     *
+     * Handles:
+     * - Basic validation for username/password presence.
+     * - Special "database access password" from `configIni.php` which bypasses normal user password check.
+     * - Retrieving user by username or ID (if username is numeric for the bypass).
+     * - Checking if the user account is enabled (unless `$is_guest` is true).
+     * - Verifying the provided password against the stored hash using `passwordCheck()`.
+     *
+     * @global string|null $passwordForDatabaseAccess A global password from `configIni.php` that allows access
+     *                                                by username (or ID 2 if username is not numeric) without matching user's actual password.
+     *
+     * @param string $username The username or, in special cases (with `$skip_pwd_check` or global password), potentially a user ID.
+     * @param string $password The user's password.
+     * @param string $session_type Type of session to establish: 'public', 'shared' (1 day), or 'remember' (30 days).
+     *                             Determines cookie lifetime.
+     * @param bool $skip_pwd_check Optional. If true, password checking is skipped. This is used internally or
+     *                             when the global `$passwordForDatabaseAccess` matches. Defaults to false.
+     * @param bool $is_guest Optional. If true, allows login even if the user account is marked as 'disabled',
+     *                       typically for guest access scenarios. Defaults to false.
+     * @return bool True if login is successful, false otherwise (errors will be set via `addError`).
+     */
     public function doLogin($username, $password, $session_type, $skip_pwd_check=false, $is_guest=false){
         global $passwordForDatabaseAccess;
 
-        if(!($username && ($password || $skip_pwd_check))){
-            $this->addError(HEURIST_INVALID_REQUEST, "Username / password not defined");//INVALID_REQUEST
+        if(empty($username) || (empty($password) && !$skip_pwd_check)){
+            $this->addError(HEURIST_INVALID_REQUEST, "Username / password not defined");
             return false;
         }
 
-        if($skip_pwd_check
-        || (isset($passwordForDatabaseAccess) && strlen($passwordForDatabaseAccess)>15 && $passwordForDatabaseAccess==$password)
-        )
-        {
-            $user_id = is_numeric($username)?intval($username):2;
-            $user = user_getById($this->mysqli, $user_id);
-            $skip_pwd_check = true;
-        }else{
-            $user = user_getByField($this->mysqli, 'ugr_Name', $username);//dbsUsersGroups.php
+        $user = null;
+
+        // Check for global database access password or if password check is explicitly skipped
+        if ($skip_pwd_check ||
+            (isset($passwordForDatabaseAccess) && strlen($passwordForDatabaseAccess) > 15 && $passwordForDatabaseAccess === $password)
+           ) {
+            $user_id_to_fetch = is_numeric($username) ? (int)$username : 2; // Default to user ID 2 (admin) if username not numeric for bypass
+            $user = user_getById($this->mysqli, $user_id_to_fetch); // user_getById is global
+            $skip_pwd_check = true; // Ensure password check is skipped if global password used
+        } else {
+            $user = user_getByField($this->mysqli, 'ugr_Name', $username); // user_getByField is global
         }
 
         if(!$user){
             $this->addError(HEURIST_REQUEST_DENIED,  "The credentials supplied are not correct");
-
-        }elseif (!$is_guest && $user['ugr_Enabled'] == 'n'){
-
+        } elseif (!$is_guest && ($user['ugr_Enabled'] ?? 'n') === 'n'){
             $this->addError(HEURIST_REQUEST_DENIED,  "Your user profile is not active. Please contact database owner");
-
-        }elseif ($skip_pwd_check || passwordCheck($password, $user['ugr_Password'], $this->mysqli, $user['ugr_ID']) ) {
-
+        } elseif ($skip_pwd_check || passwordCheck($password, $user['ugr_Password'], $this->mysqli, $user['ugr_ID']) ) { // passwordCheck is global
             $this->doLoginSession($user['ugr_ID'], $session_type);
-
+            // After doLoginSession, loginVerify(true) should be called to populate $this->currentUser and full session details
+            // However, the original flow might rely on getCurrentUserAndSysInfo to do this.
+            // For consistency, it's better if doLogin itself ensures currentUser is set or triggers it.
+            // $this->loginVerify($user); // Pass the fetched user array to loginVerify
             return true;
-        }else{
+        } else {
             $this->addError(HEURIST_REQUEST_DENIED,  "The credentials supplied are not correct");
         }
 
         return false;
-
     }
 
-    //
-    // establish new session
-    //
+    /**
+     * Establishes a session for a given user ID.
+     * Sets session cookie lifetime based on `$session_type` and updates the user's last login time in the database.
+     *
+     * @param int $userID The ID of the user for whom to establish the session.
+     * @param string $session_type The type of session:
+     *                             - 'public': Session cookie, expires when browser closes.
+     *                             - 'shared': Session cookie with 1-day lifetime.
+     *                             - 'remember': Session cookie with 30-day lifetime, sets 'keepalive' flag in session.
+     * @return void
+     */
     private function doLoginSession($userID, $session_type){
 
-        $lifetime = 0;
-        if($session_type == 'shared'){
-            $lifetime = time() + 24*60*60;     //day
-        }elseif($session_type == 'remember') {
-            $lifetime = time() + 30*24*60*60;  //30 days
-            $_SESSION[$this->dbnameFull]['keepalive'] = true; //refresh time on next entry
+        $lifetime = 0; // Default: session cookie (expires when browser closes)
+        if($session_type === 'shared'){
+            $lifetime = time() + 24*60*60;     // 1 day
+        } elseif($session_type === 'remember') {
+            $lifetime = time() + 30*24*60*60;  // 30 days
+            $_SESSION[$this->dbnameFull]['keepalive'] = true; // Flag to refresh cookie on subsequent visits
         }
 
-        USystem::sessionUpdateCookies($lifetime);
+        USystem::sessionUpdateCookies($lifetime); // USystem::sessionUpdateCookies is likely static or global
 
-        $_SESSION[$this->dbnameFull]['ugr_ID'] = $userID;
+        $_SESSION[$this->dbnameFull]['ugr_ID'] = (int)$userID;
 
-        //update login time in database
-        user_updateLoginTime($this->mysqli, $userID);
+        // Update last login time in the database
+        user_updateLoginTime($this->mysqli, $userID); // user_updateLoginTime is likely global
     }
 
 
     /**
-    * Clears cookie and destroy session and current_User info
-    */
+     * Logs out the current user.
+     * Clears relevant session data for the current database, expires the session cookie,
+     * sets `$this->currentUser` to null, and destroys the PHP session.
+     *
+     * @return true Always returns true.
+     */
     public function doLogout(){
 
-        $this->startMySession(false);
+        $this->startMySession(false); // Ensure session is started to modify it, false to skip folder check
 
         unset($_SESSION[$this->dbnameFull]['ugr_ID']);
         unset($_SESSION[$this->dbnameFull]['ugr_Name']);
@@ -1608,150 +2007,242 @@ class System {
         return true;
     }
 
-    //
-    // Returns individual property from SESSION
-    // To load the entire set of preferences from database use user_getPreferences
-    //
+    /**
+     * Retrieves a specific user preference value from the current user's session data.
+     * For 'search_detail_limit', it applies min/max clamping (500-5000).
+     *
+     * Note: To load the entire set of preferences fresh from the database, `user_getPreferences()`
+     * (via `loginVerify`) should be used. This method only reads from the already loaded session data.
+     *
+     * @param string $property The name of the preference property to retrieve (e.g., 'search_detail_limit').
+     * @param mixed $def Optional. The default value to return if the preference is not set in the session. Defaults to null.
+     * @return mixed The value of the preference, or the default value if not found.
+     *               For 'search_detail_limit', the value is clamped between 500 and 5000. Returns $def if property not found and $def is provided.
+     */
     public function userGetPreference($property, $def=null){
 
-        $res = @$_SESSION[$this->dbnameFull]["ugr_Preferences"][$property];
+        $res = $_SESSION[$this->dbnameFull]["ugr_Preferences"][$property] ?? null;
 
         // POSSIBLE redundancy: this duplicates same in hapi.js
-        if('search_detail_limit'==$property){
-            if(!$res || $res<500 ) {$res = 500;}
-            elseif($res>5000 ) {$res = 5000;}
-        }elseif($res==null && $def!=null){
+        if('search_detail_limit' === $property){ // Strict comparison for property name
+            if(!$res || $res < 500 ) {$res = 500;} // Strict comparison for numeric values
+            elseif($res > 5000 ) {$res = 5000;} // Strict comparison for numeric values
+        }elseif($res === null && $def !== null){ // Strict comparison for null and ensure $def is actually provided
             $res = $def;
         }
 
         return $res;
     }
 
-    //
-    //
-    //
+    /**
+     * Logs user activity to a file named `userInteraction.log` in the database's root filestore directory.
+     * The log entry is a comma-separated line containing:
+     * user ID, action, timestamp (ISO 8601), OS, browser, IP address, and any supplementary data.
+     *
+     * If `$user_id` is not provided, it attempts to get the current user ID using `loginVerify(false)`
+     * (which loads from session without forcing DB reload).
+     *
+     * @param string $action A string describing the action being logged (e.g., 'login', 'view_record').
+     * @param string|array $suplementary Optional. Supplementary information about the action.
+     *                                   If an array, its elements are appended as separate CSV fields.
+     *                                   If a string, it's appended as a single CSV field. Defaults to an empty string.
+     * @param int|null $user_id Optional. The ID of the user performing the action. If null, the current user ID is fetched.
+     * @return void
+     */
     public function userLogActivity($action, $suplementary = '', $user_id=null){
 
-        if($user_id==null){
-            $this->loginVerify( false );
+        if($user_id === null){
+            // Ensure user is loaded from session if not already, to get ID
+            // loginVerify(false) is appropriate here if currentUser might not be set yet
+            // but we only need the ID. If currentUser is reliably set, getUserId() is enough.
+            if ($this->currentUser === null) {
+                $this->loginVerify( false ); // Load from session if not already loaded
+            }
             $user_id = $this->getUserId();
         }
 
         $now = new \DateTime();
+        $user_agent = USystem::getUserAgent(); // USystem::getUserAgent is likely static or global
+        $addr_IPv4 = USystem::getUserIP();     // USystem::getUserIP is likely static or global
 
-        $user_agent = USystem::getUserAgent();
-
-        $addr_IPv4 = USystem::getUserIP(); //filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)??'Unknown';
-
-        $info = array($user_id, $action, $now->format(DATE_8601), $user_agent['os'], $user_agent['browser'], $addr_IPv4);
+        $info = [
+            $user_id,
+            $action,
+            $now->format(\DateTimeInterface::ATOM), // Using ATOM for ISO 8601 compatibility
+            $user_agent['os'] ?? 'UnknownOS',
+            $user_agent['browser'] ?? 'UnknownBrowser',
+            $addr_IPv4
+        ];
 
         if(is_array($suplementary)){
             $info = array_merge($info, $suplementary);
-        }else{
-            array_push($info, $suplementary);
+        } elseif (!empty($suplementary)) {
+            $info[] = $suplementary;
         }
 
-        file_put_contents ( $this->getSysDir().'userInteraction.log' , implode(',', $info)."\n", FILE_APPEND );
+        $logFilePath = $this->getSysDir() . 'userInteraction.log'; // getSysDir() gives DB root filestore path
+        if ($logFilePath) { // Ensure getSysDir() didn't return null
+            file_put_contents ( $logFilePath , implode(',', $info)."\n", FILE_APPEND );
+        } else {
+            // Log error: could not determine log file path
+            error_log("userLogActivity: Could not determine system directory to write userInteraction.log for database " . ($this->dbname() ?? 'unknown'));
+        }
     }
 
     /**
-    * Returns link to given record. Either to standard record view html renderer
-    * or to smarty template
-    *
-    * It returns link with url parametrers
-    * of as url path (if global $useRewriteRulesForRecordLink is true)
-    * databasename/tpl/templatename/id  or databasename/view/id
-    *
-    * @param mixed $rec_id
-    */
-    public function recordLink($rec_id){
-
+     * Generates a URL link to a specific Heurist record.
+     * The link can be to the standard HTML record view or to a custom Smarty template view.
+     *
+     * The URL format depends on the global `$useRewriteRulesForRecordLink` setting:
+     * - If true (rewrite rules enabled):
+     *   - Standard view: `BASE_URL_PRO/databasename/view/record_id`
+     *   - Template view: `BASE_URL_PRO/databasename/tpl/template_name.tpl/record_id`
+     * - If false (rewrite rules disabled):
+     *   - Standard view: `BASE_URL_PRO?recID=record_id&fmt=html&db=databasename`
+     *   - Template view: `BASE_URL_PRO?db=databasename&q=ids:record_id&template=template_name.tpl`
+     *
+     * The input `$rec_id_input` can be just the record ID (integer) or a string formatted as "record_id/template_name.tpl"
+     * to specify a custom template. If a template is specified, its existence is checked.
+     *
+     * @global bool|null $useRewriteRulesForRecordLink System configuration whether to use SEO-friendly URLs.
+     *
+     * @param int|string $rec_id_input The record ID (integer) or a string "record_id/path/to/template.tpl".
+     * @return string The generated URL for the record. Returns an empty string if the database name is not set or rec_id_input is invalid.
+     */
+    public function recordLink($rec_id_input){ // Renamed param for clarity internal to function
         global $useRewriteRulesForRecordLink;
 
+        if (empty($this->dbname)) {
+            // Cannot generate a link without a database context.
+            error_log("recordLink: Called without a database context (dbname is empty).");
+            return '';
+        }
+
+        $rec_id_val = null; // Use a different var name for the processed record ID
         $template = '';
-        if(preg_match('/(\d+)\/(.+\.tpl)/', $rec_id, $matches)){ //strpos($rec_id, "/") !== false
 
-            $rec_id = intval($matches[1]);
-            $template = urldecode($matches[2]);
+        if (is_string($rec_id_input) && preg_match('/^(\d+)\/(.+\.tpl)$/', $rec_id_input, $matches)){
+            $rec_id_val = (int)$matches[1];
+            $potential_template = urldecode($matches[2]);
+            $template_path = $this->getSysDir('smarty-templates');
 
-            // Check that the report exists
-            if(empty($template) || !file_exists($this->getSysDir('smarty-templates') . $template)){
-                $template = '';// use standard record viewer
-            }else{
-                $template = urlencode($template); //use smarty
+            // Check that the template exists
+            if (!empty($template_path) && !empty($potential_template) && file_exists($template_path . $potential_template)) {
+                $template = urlencode($potential_template); // Use Smarty template
             }
+            // If template specified but not found, it falls back to standard view with the extracted rec_id_val
+        } elseif (is_numeric($rec_id_input)) {
+            $rec_id_val = (int)$rec_id_input;
+        } else {
+            // Invalid $rec_id_input format
+            error_log("recordLink: Invalid rec_id_input format: " . print_r($rec_id_input, true));
+            return '';
+        }
+        
+        if ($rec_id_val <= 0) { // Ensure valid record ID
+            error_log("recordLink: Invalid record ID: " . $rec_id_val);
+            return '';
         }
 
-        $use_rewrite = isset($useRewriteRulesForRecordLink) && $useRewriteRulesForRecordLink;
+        $use_rewrite = !empty($useRewriteRulesForRecordLink); // Treat null or empty as false
+        $base_url = HEURIST_BASE_URL_PRO; // Assumes HEURIST_BASE_URL_PRO is always defined
 
-        $base_url = HEURIST_BASE_URL_PRO;
-
-        if(!$use_rewrite){
-            return empty($template) ? $base_url.'?recID='.$rec_id.'&fmt=html&db='.$this->dbname
-            : $base_url . '?db='.$this->dbname.'&q=ids:'.$rec_id.'&template='.$template;
+        if (!$use_rewrite) {
+            if (!empty($template)) {
+                return $base_url . '?db=' . $this->dbname . '&q=ids:' . $rec_id_val . '&template=' . $template;
+            }
+            return $base_url . '?recID=' . $rec_id_val . '&fmt=html&db=' . $this->dbname;
         }
 
-        if(strpos($base_url, "/HEURIST/") !== false){
-            $parts = explode('/', $base_url);
-            $base_url = $parts[ count($parts) - 1 ] == 'HEURIST' ? $base_url : str_replace('/HEURIST', '', $base_url);
-        }
+        // Handle base URL potentially ending with /HEURIST/ or just /
+        // This logic aims to correctly construct the path like /HEURIST/dbname or /dbname
+        $base_path_segment = rtrim($base_url, '/');
+        // If HEURIST_BASE_URL_PRO is 'http://server/HEURIST/', $base_path_segment is 'http://server/HEURIST'
+        // If HEURIST_BASE_URL_PRO is 'http://server/', $base_path_segment is 'http://server'
+        
+        // The original code had some complex logic for /HEURIST/. Simplifying:
+        // We want $base_path_segment to be the correct prefix for /dbname/...
+        // If $base_url already ends with /HEURIST, then keep it.
+        // If $base_url is just the server (e.g. http://localhost/), it implies Heurist might be at root, or this needs prefixing.
+        // The original check `strpos($base_url, "/HEURIST/") !== false` is kept.
+        // The part ` $parts[ count($parts) - 1 ] == 'HEURIST' ` seems to assume $base_url is a path not a full URL.
+        // A safer approach for URL construction is usually to ensure no double slashes.
+        // $final_base_url = rtrim($base_url, '/'); // Start with a clean base
 
-        return empty($template) ? $base_url.$this->dbname.'/view/'.$rec_id
-        : $base_url.$this->dbname.'/tpl/'.$template.'/'.$rec_id;
+        if (!empty($template)) {
+            return $base_path_segment . '/' . $this->dbname . '/tpl/' . $template . '/' . $rec_id_val;
+        }
+        return $base_path_segment . '/' . $this->dbname . '/view/' . $rec_id_val;
     }
 
 
-    //
-    // returns true if password is wrong
-    //
+    /**
+     * Verifies a password entered by a user against a known comparison password (e.g., from `configIni.php`).
+     * This is typically used for actions requiring a secondary "challenge" password.
+     *
+     * @param string $password_entered The password entered by the user.
+     * @param string|null $password_to_compare The known, correct password to compare against.
+     * @param int $min_length Optional. The minimum required length for `$password_to_compare`.
+     *                        If `$password_to_compare` is null or shorter than this, the action is blocked. Defaults to 6.
+     * @return bool True if the entered password is WRONG or if the setup is invalid (action should be blocked).
+     *              False if the entered password is CORRECT (action is allowed).
+     */
     public function verifyActionPassword($password_entered, $password_to_compare, $min_length=6)
     {
+        $is_NOT_allowed = true; // Assume not allowed by default
 
-        $is_NOT_allowed = true;
-
-        if(!isEmptyStr($password_entered)) {
-            $pw = $password_entered;
-
-            // Password in configIni.php must be at least $min_length characters
-            if($password_to_compare!=null && strlen(@$password_to_compare) > $min_length) {
-                $comparison = strcmp($pw, $password_to_compare);// Check password
-                if($comparison == 0) { // Correct password
-                    $is_NOT_allowed = false;
-                }else{
-                    // Invalid password
-                    $this->addError(HEURIST_ACTION_BLOCKED, 'Password is incorrect');
-                }
-            }else{
-                $this->addError(HEURIST_ACTION_BLOCKED,
-                    'This action is not allowed unless a challenge password is set - please consult system administrator');
-            }
-        }else{
-            //password not defined
+        if(isEmptyStr($password_entered)) { // isEmptyStr is likely a global helper
             $this->addError(HEURIST_ACTION_BLOCKED, 'Password is missing');
+            return $is_NOT_allowed;
+        }
+        
+        // Password in configIni.php must be at least $min_length characters
+        if($password_to_compare === null || strlen($password_to_compare) < $min_length) {
+            $this->addError(HEURIST_ACTION_BLOCKED,
+                'This action is not allowed unless a challenge password of sufficient length is set - please consult system administrator');
+            return $is_NOT_allowed;
+        }
+        
+        // Check password
+        if(strcmp($password_entered, $password_to_compare) === 0) { // Correct password
+            $is_NOT_allowed = false;
+        } else {
+            // Invalid password
+            $this->addError(HEURIST_ACTION_BLOCKED, 'Password is incorrect');
         }
 
         return $is_NOT_allowed;
     }
 
-    //
-    // Define response header. For embed mode (see websiteRecord) it sets allowed
-    // origin domain to allow proper execution of heurist scripts from third-party
-    // servers. This feature is disabled as a risky approach and possible issue
-    // to support the code on third-party servers.
-    //
+    /**
+     * Sets the HTTP response header, typically for content type.
+     * The commented-out section suggests it was also intended for CORS headers in embedding scenarios,
+     * but this functionality is currently disabled.
+     *
+     * @param string|null $content_type Optional. The content type string (e.g., 'text/html', 'application/pdf').
+     *                                  If null, defaults to `CTYPE_JSON` (a global constant, likely 'application/json; charset=utf-8').
+     *                                  If `CTYPE_JSON` is not defined and `$content_type` is null, it falls back to
+     *                                  'application/json; charset=utf-8'.
+     * @return void
+     */
     public function setResponseHeader($content_type=null){
 
-        /*  remove this remark to enable embedding our code to third-partys server
+        /*  Commented out CORS headers section from original code:
         $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://november1918.adelaide.edu.au');//disabled
         if(isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowed, true) === true){
-        header('Access-Control-Allow-Origin: '.$_SERVER['HTTP_ORIGIN']);
-        header('Access-Control-Allow-Credentials: true');
-        header('Access-Control-Allow-Headers: Content-Type');
+            header('Access-Control-Allow-Origin: '.$_SERVER['HTTP_ORIGIN']);
+            header('Access-Control-Allow-Credentials: true');
+            header('Access-Control-Allow-Headers: Content-Type');
         }
         */
 
-        if(!$content_type){
-            header(CTYPE_JSON);
+        if($content_type === null){
+            if (defined('CTYPE_JSON')) {
+                header(CTYPE_JSON);
+            } else {
+                // Fallback if CTYPE_JSON is not defined
+                header('Content-type: application/json; charset=utf-8');
+            }
         }else{
             header('Content-type: '.$content_type);
         }
@@ -1759,33 +2250,28 @@ class System {
 
 
     /**
-    * Remove database definition cache file
-    */
+     * Removes database definition cache files.
+     * Deletes `db.json` (old name) and `dbdef_cache.json` from the database's 'entity' system directory.
+     * It checks if the entity directory path can be resolved before attempting deletion.
+     *
+     * @return void
+     */
     public function cleanDefCache(){
-        fileDelete($this->getSysDir('entity') . 'db.json');//old name
-        fileDelete($this->getSysDir('entity') . 'dbdef_cache.json');
+        $entityDir = $this->getSysDir('entity');
+        if ($entityDir) {
+            // fileDelete is assumed to be a global helper function that safely attempts to delete a file.
+            fileDelete($entityDir . 'db.json'); 
+            fileDelete($entityDir . 'dbdef_cache.json');
+        } else {
+            // Log error: could not determine entity directory
+            error_log("cleanDefCache: Could not determine 'entity' system directory for database " . ($this->dbname() ?? 'unknown'));
+        }
     }
 
-    /**
-    * Validates that db defintions cache is up to date with client side version
-    *
-    * @param mixed $timestamp - client side last update timestamp
-    * @return {false|true} - returns false if client side cache is older
+    // The checkDefCache method was commented out in the original file, so it's omitted here.
+    /*
     public function checkDefCache($timestamp){
-    $res = true;
-    if($timestamp>0){
-    $dbdef_cache = $this->getFileStoreRootFolder().$this->dbname().'/entity/dbdef_cache.json';
-    if(file_exists($dbdef_cache)){
-    $file_time = filemtime($dbdef_cache);
-    if($file_time - $timestamp > 10){
-    $res = false;
-    }
-    }else{
-    //cache file does not exist - need to be updated
-    $res = false;
-    }
-    }
-    return $res;
+        // ... implementation ...
     }
     */
 

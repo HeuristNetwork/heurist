@@ -24,9 +24,9 @@ namespace hserv\report;
 
 use hserv\report\ReportRecord;
 use hserv\utilities\USanitize;
+use hserv\utilities\Temporal;
 
 require_once 'smartyInit.php';
-require_once dirname(__FILE__).'/../utilities/Temporal.php';
 require_once dirname(__FILE__).'/../records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';
 
@@ -1753,7 +1753,7 @@ Javascript wrap:<br>
                         $params['var'] = $params['var'][0];
                     }
 
-                    $content = \Temporal::toHumanReadable($params['var'], true, $mode, '|', $calendar);
+                    $content = Temporal::toHumanReadable($params['var'], true, $mode, '|', $calendar);
 
                     if($label!="") {$label = $label.": ";}
                     $result = $label.$content.'<br>';

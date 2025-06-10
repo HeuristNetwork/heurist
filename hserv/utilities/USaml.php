@@ -1,25 +1,25 @@
 <?php
 /**
-* Simplesaml utilities
+* USaml.php - SimpleSAMLphp Utilities
 *
-* logout
-* login
+* This file provides functions to integrate SimpleSAMLphp for Single Sign-On (SSO)
+* capabilities within the Heurist application. It handles SAML-based login
+* and logout procedures.
+*
+* Key functions include:
+* - samlLogin: Initiates SAML authentication, registers/logs in users based on SAML attributes.
+* - samlLogout: Terminates the local Heurist session and initiates SAML logout.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6.0
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 $saml_script = '/var/simplesamlphp/lib/_autoload.php';
 $is_debug = true;
 if(file_exists($saml_script)){
@@ -27,9 +27,15 @@ if(file_exists($saml_script)){
     $is_debug = false;
 }
 
-//
-//
-//
+/**
+ * Handles SAML logout.
+ * Destroys the local Heurist session and then redirects to the SimpleSAMLphp logout endpoint.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param string $sp The Service Provider identifier for SimpleSAMLphp.
+ * @param string $back_url The URL to return to after SAML logout is complete.
+ * @return void This function typically causes a redirect and does not return.
+ */
 function samlLogout($system, $sp, $back_url)
 {
     if($system->doLogout()){ //destroy session
@@ -40,11 +46,25 @@ function samlLogout($system, $sp, $back_url)
     }
 }
 
-//
-// $require_auth - true - opens saml login page
-//                 false -  returns 0 if not authenticated
-// $noframe - load SAML login in place of Heurist
-//
+/**
+ * Handles SAML login.
+ * Checks if the user is authenticated via SAML. If not, and $require_auth is true,
+ * it initiates the SAML authentication process.
+ * If authenticated, it retrieves user attributes, attempts to find or register a local Heurist user
+ * based on these attributes (email, uid), and logs them in.
+ *
+ * @global bool $is_debug Debug flag (though not directly used in logic, it's declared global).
+ * @param \hserv\System $system The Heurist system object.
+ * @param string $sp The Service Provider identifier for SimpleSAMLphp.
+ * @param string $dbname The name of the Heurist database.
+ * @param bool $require_auth If true, redirects to SAML IdP for authentication if not already authenticated.
+ *                           If false, returns 0 if not authenticated.
+ * @param bool $noframe Optional. If true, loads Heurist again after successful login (intended for non-framed context).
+ *                      Otherwise, handles login within the existing page flow. Defaults to false.
+ * @return int The Heurist user ID (ugr_ID) if login is successful, or 0 if not authenticated (and $require_auth is false) or on error.
+ *             If $require_auth is true and user is not authenticated, this function will cause a redirect.
+ *             If $noframe is true and login fails, it includes an info page.
+ */
 function samlLogin($system, $sp, $dbname, $require_auth, $noframe=false){
     global $is_debug;
 

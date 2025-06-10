@@ -1,9 +1,21 @@
 <?php
+/**
+* utils_db.php - Library of mySql database functions
+*
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
+* 
+* @todo convert to class
+*/
 use hserv\utilities\DbUtils;
 use hserv\utilities\USanitize;
+use hserv\utilities\Temporal;
 use hserv\structure\ConceptCode;
-
-//@TODO convert to class
 
     /**
     *  Database utilities :   mysql_ - prefix for function
@@ -59,21 +71,6 @@ use hserv\structure\ConceptCode;
     *  hasTable - Returns true if table exists in database
     *  hasColumn - Returns true if column exists in given table
     *  checkUserStatusColumn - Checks that sysUGrps.ugr_Enabled has proper set - @todo remove
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
-
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
     */
 
     /**
@@ -1127,7 +1124,7 @@ $mysqli->kill($thread_id);
             }else{ //3d party function that uses PDO
 
                 if(!function_exists('execute_db_script')){
-                        include_once dirname(__FILE__).'/../utilities/utils_db_load_script.php';// used to load procedures/triggers
+                        include_once dirname(__FILE__).'/../utilities/DbExecuteScript.php';// used to load procedures/triggers
                 }
                 if(db_script($database_name_full, $script_file, false)){
                         $res = true;

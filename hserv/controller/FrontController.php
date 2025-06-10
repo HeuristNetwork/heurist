@@ -8,10 +8,10 @@
 * @subpackage  controller
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @since     6.6
+* @since       6.6
 */
 namespace hserv\controller;
 
@@ -28,7 +28,6 @@ use hserv\web\WebSite;
  * This class is responsible for managing the overall system flow and handling
  * requests by detecting and delegating to the appropriate controller.
  *
- * @package hserv\controller
  */
 class FrontController
 {

@@ -1,30 +1,28 @@
 <?php
-
-/*
-* Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* https://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
 /**
-* encode polyline
+* mapEncodePolyline.php
+* 
+* Provides functions for encoding polylines, suitable for mapping services (e.g., Google Maps Polyline Algorithm).
+* This includes:
+* - A Douglas-Peucker like simplification algorithm (`dpEncode`).
+* - Encoding of coordinates and zoom levels into compact string representations.
 *
-* @author      Kim Jackson
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* The encoding process is configured by several global variables:
+* - `$numLevels`: The number of zoom levels to consider for encoding.
+* - `$zoomFactor`: The change in magnification between zoom levels.
+* - `$verySmall`: The length of a barely visible object at the highest zoom level, used as a threshold for simplification.
+* - `$forceEndpoints`: Boolean indicating whether endpoints should always be visible at all zoom levels.
+* - `$zoomLevelBreaks`: An array calculated from the above, defining distance thresholds for each zoom level.
+* 
 * @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-*/
+* @subpackage  hserv\utilities\geo
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Kim Jackson
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       3.1.0
+ */
 
 // where numLevels and zoomFactor indicate how many
 // different levels of magnification the polyline has
@@ -47,6 +45,14 @@ for($i = 0; $i < $numLevels; $i++)
     $zoomLevelBreaks[$i] = $verySmall * pow($zoomFactor, $numLevels-$i-1);
 }
 
+/**
+ * Computes the appropriate zoom level for a given distance (detail delta).
+ *
+ * @global float $verySmall The smallest distance considered significant.
+ * @global array $zoomLevelBreaks Array of distance thresholds for each zoom level.
+ * @param float $dd The distance (detail delta) to compute the level for.
+ * @return int The computed zoom level (0-indexed).
+ */
 function computeLevel($dd)
 {
     global $verySmall, $zoomLevelBreaks;
@@ -62,6 +68,14 @@ function computeLevel($dd)
     return $lev;
 }
 
+/**
+ * Encodes a polyline using a Douglas-Peucker like simplification algorithm.
+ *
+ * @global float $verySmall The tolerance for simplification (smallest significant distance).
+ * @param array $points An array of points, where each point is an array [latitude, longitude].
+ * @return array An array containing the encoded points string, encoded levels string,
+ *               and a version of the encoded points string with backslashes escaped.
+ */
 function dpEncode($points)
 {
     global $verySmall;
@@ -104,6 +118,17 @@ function dpEncode($points)
     return encodedPoints($points, $dists, $absMaxDist);
 }
 
+/**
+ * Packages the results of polyline encoding.
+ *
+ * @param array $points Original array of points.
+ * @param array $dists Array of distances for simplified points.
+ * @param float $absMaxDist Absolute maximum distance found during simplification.
+ * @return array An array containing:
+ *               0: (string) Encoded points string.
+ *               1: (string) Encoded levels string.
+ *               2: (string) Encoded points string with backslashes escaped (literal).
+ */
 function encodedPoints($points, $dists, $absMaxDist){
     $encodedPoints = createEncodings($points, $dists);
     $encodedLevels = encodeLevels($points, $dists, $absMaxDist);
@@ -112,6 +137,15 @@ function encodedPoints($points, $dists, $absMaxDist){
     return array($encodedPoints, $encodedLevels, $encodedPointsLiteral);
 }
 
+/**
+ * Calculates the perpendicular distance from a point ($p0) to a line segment defined by $p1 and $p2.
+ * If the perpendicular projection falls outside the segment, it returns the distance to the closest endpoint.
+ *
+ * @param array $p0 The point, as an array [latitude, longitude].
+ * @param array $p1 The first point of the line segment, as an array [latitude, longitude].
+ * @param array $p2 The second point of the line segment, as an array [latitude, longitude].
+ * @return float The calculated distance.
+ */
 function distance($p0, $p1, $p2)
 {
     if($p1[0] == $p2[0] && $p1[1] == $p2[1])
@@ -137,6 +171,14 @@ function distance($p0, $p1, $p2)
     return $out;
 }
 
+/**
+ * Encodes a signed number into the polyline format.
+ * This involves shifting the number left (multiplying by 2) and inverting bits if negative,
+ * then passing to `encodeNumber`.
+ *
+ * @param int|float $num The signed number to encode.
+ * @return string The encoded string representation of the number.
+ */
 function encodeSignedNumber($num)
 {
     $sgn_num = $num << 1;
@@ -147,6 +189,16 @@ function encodeSignedNumber($num)
     return encodeNumber($sgn_num);
 }
 
+/**
+ * Creates the encoded points string from an array of points and their simplification distances.
+ * Only points that are part of the simplified polyline (i.e., in $dists or endpoints) are included.
+ * Coordinates are encoded relative to the previous point.
+ *
+ * @param array $points An array of points, where each point is [latitude, longitude].
+ * @param array $dists An associative array where keys are indices of points in the simplified polyline
+ *                     and values are their calculated distances (used to determine if a point is kept).
+ * @return string The encoded points string.
+ */
 function createEncodings($points, $dists)
 {
     $encoded_points = "";
@@ -171,6 +223,17 @@ function createEncodings($points, $dists)
     return $encoded_points;
 }
 
+/**
+ * Encodes the zoom levels for the simplified polyline points.
+ *
+ * @global int $numLevels The total number of zoom levels.
+ * @global bool $forceEndpoints Whether to force endpoints to be visible at the highest detail.
+ * @param array $points The original array of points.
+ * @param array $dists An associative array of distances for simplified points.
+ * @param float $absMaxDist The absolute maximum distance found during simplification,
+ *                          used for endpoints if not forcing them.
+ * @return string The encoded levels string.
+ */
 function encodeLevels($points, $dists, $absMaxDist)
 {
     global $numLevels, $forceEndpoints;
@@ -202,6 +265,14 @@ function encodeLevels($points, $dists, $absMaxDist)
     return $encoded_levels;
 }
 
+/**
+ * Encodes a non-negative number into the polyline character format.
+ * Each character represents 5 bits of the number, with a continuation bit.
+ * Characters are offset by 63.
+ *
+ * @param int|float $num The non-negative number to encode.
+ * @return string The encoded string.
+ */
 function encodeNumber($num)
 {
     $encodeString = "";

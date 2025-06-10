@@ -65,12 +65,20 @@ $hasAccess = ($system->isAdmin());
     $dbname = (preg_match('[\W]', $dbname))?'':$dbname;
 ?>
 <script>
-var login_warning = ''
-var requiredLevel = 0; //1-admin, 2-owner, 0 logged in
-var database = '<?php echo htmlspecialchars($dbname);?>';
+var login_warning = ''; // Holds any warning message related to login.
+var requiredLevel = 0;  // Specifies the required access level: 0 for any logged-in user, 1 for admin, 2 for owner.
+var database = '<?php echo htmlspecialchars($dbname);?>'; // The current database name.
 //
 //
 //
+/**
+ * Callback function executed after HAPI (Heurist API) is initialized.
+ * If HAPI initialization fails, it shows an error message.
+ * Otherwise, it populates HAPI sysinfo with database statistics
+ * and then calls verify_credentials.
+ *
+ * @param {boolean} success - Indicates whether HAPI initialization was successful.
+ */
 function onHapiInit(success){
 
     if(!success){
@@ -93,6 +101,15 @@ function onHapiInit(success){
     verify_credentials( false );
 }
 
+/**
+ * Verifies if the current user has the required access level.
+ * If the user does not have access, it constructs a message and
+ * either shows a warning dialog (if show_warning is true) or
+ * directly shows the login dialog.
+ *
+ * @param {boolean} show_warning - If true, a warning dialog is shown before the login dialog.
+ *                                 If false, the login dialog is shown directly.
+ */
 function verify_credentials( show_warning ){
 
     if(window.hWin.HAPI4.has_access(requiredLevel)){
@@ -137,6 +154,11 @@ function verify_credentials( show_warning ){
 //
 //init hapi
 //
+/**
+ * Executes when the HTML document is fully loaded and parsed.
+ * Initializes the HAPI (Heurist API) interface with the current database
+ * and sets onHapiInit as the callback function.
+ */
 $(document).ready(function() {
     window.hWin.HAPI4 = new hAPI(database, onHapiInit);
 });

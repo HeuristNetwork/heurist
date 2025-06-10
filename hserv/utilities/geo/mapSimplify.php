@@ -1,21 +1,42 @@
 <?php
 /**
- * Simplify path by removing extra points with given tolerance
- * Port of simplify.js algorithm
- * http://github.com/andreychumak/simplify-php
- *
- * (c) 2013, Vladimir Agafonkin
- * Simplify.js, a high-performance JS polyline simplification library
- * http://mourner.github.io/simplify-js
+* mapSimplify.php - Class Simplify
+* 
+* Provides polyline simplification capabilities using a port of the simplify.js algorithm.
+* This algorithm is based on the Douglas-Peucker method for reducing the number of points in a polyline
+* while retaining its essential shape, given a tolerance.
+*
+* This file contains:
+* - The `Simplify` class with a static `run` method to perform the simplification.
+* - A global utility function `simplifyCoordinates` that uses the `Simplify` class, typically for GeoJSON coordinate arrays.
+*
+* Original simplify.js library by Vladimir Agafonkin.
+* @link http://mourner.github.io/simplify-js
+* Ported to PHP by Andreychumak.
+* @link http://github.com/andreychumak/simplify-php
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  Utilities/Geo
 */
 
+/**
+* Class Simplify
+* 
+* A PHP port of the simplify.js library for high-performance polyline simplification.
+* Uses a combination of radial distance and Douglas-Peucker algorithms to reduce
+* the number of points in a series of coordinates.
+*/
 class Simplify {
 
     /**
-     * @param array $points
-     * @param float|int $tolerance
-     * @param bool $highestQuality
-     * @return array
+     * Simplifies an array of points.
+     *
+     * @param array $points An array of points, where each point is an associative array with 'x' and 'y' keys.
+     * @param float|int $tolerance Optional. The tolerance for simplification (the square of this value is used).
+     *                             Higher values result in more simplification. Defaults to 1.
+     * @param bool $highestQuality Optional. If true, performs a slower but higher-quality simplification by retaining
+     *                             original points. If false (default), uses a faster radial distance pre-processing step.
+     * @return array The simplified array of points.
      */
     public static function run(array $points, $tolerance = 1, $highestQuality = false) {
         if (count($points) <= 1) {return $points;}
@@ -130,9 +151,17 @@ class Simplify {
 
 }
 
-//
-//
-//
+/**
+ * Simplifies an array of coordinates (typically [longitude, latitude] or [easting, northing] pairs) in place.
+ * This function is a utility wrapper around the `Simplify::run` method. It converts the input coordinate
+ * pairs to the {x, y} format required by `Simplify::run`, performs simplification if the point count
+ * exceeds 1000, and then converts the result back to the original [coord1, coord2] format.
+ * The simplification tolerance is incrementally increased if the point count remains too high after initial attempts.
+ *
+ * @param array &$orig_points An array of coordinate pairs (e.g., `[[lon1, lat1], [lon2, lat2], ...]`).
+ *                            This array is passed by reference and will be modified directly.
+ * @return void The `$orig_points` array is modified in place.
+ */
 function simplifyCoordinates(&$orig_points){
 
     if(count($orig_points)>1000){

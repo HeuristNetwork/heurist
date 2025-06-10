@@ -1,16 +1,17 @@
 <?php
 /**
 * DbDefVocabularyGroups.php - Class DbDefVocabularyGroups
-*
-* .
+* 
+* Operations for the `defVocabularyGroups` table
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\entity 
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @since       6.0
+* @since       4.0
 */
 namespace hserv\entity;
 use hserv\entity\DbEntityBase;
@@ -21,7 +22,6 @@ use hserv\entity\DbEntityBase;
 * Provides database access and operations for the `defVocabularyGroups` table,
 * which stores groups for vocabularies (collections of terms).
 *
-* @package  hserv\entity 
 */
 class DbDefVocabularyGroups extends DbEntityBase
 {

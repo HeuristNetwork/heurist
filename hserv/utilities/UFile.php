@@ -1,97 +1,50 @@
 <?php
+/**
+* UFile.php - Utility functions for file and folder manipulation in Heurist
+* 
+* This file provides a collection of global functions for tasks such as:
+* - Checking existence, creating, and deleting folders (folderExists, folderCreate, folderDelete, folderDelete2, folderCreate2).
+* - Managing folder content and structure (folderAddIndexHTML, allowWebAccessForForlder, folderContent, folderSize, folderSize2, folderFirstFile, folderGetSubFolders, folderTree, folderRecurseCopy, folderSubs).
+* - Basic file operations (fileCopy, fileSave, fileOpen, fileDelete, fileAdd, getUniqueFileName).
+* - Path manipulation (getRelativePath, isPathInHeuristUploadFolder).
+* - Remote content retrieval using cURL (saveURLasFile, getTitleFromURL, loadRemoteURLContentSpecial, loadRemoteURLContent, loadRemoteURLContentWithRange, loadRemoteURLContentType).
+* - MIME type recognition (recognizeMimeTypeFromURL, getURLExtension).
+* - Script output capture (getScriptOutput).
+* - CSV separator detection (autoDetectSeparators).
+* - XML file check (isXMLfile).
+* - Action progress locking (isActionInProgress).
+* - Uploading files to Nakala (uploadFileToNakala).
+* - Memory-efficient file reading and size retrieval (fileReadByChunks, getFileSize).
+*
+* Note: This file was previously described as a class "UFile", but currently contains global functions.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  hserv\utilities
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
+*/
 use hserv\utilities\USanitize;
 use hserv\utilities\USystem;
-
-    /**
-    * File library - convert to static class
-    * File/folder utilities
-    *
-    * folderExists
-    * folderCreate
-    * folderDelete
-    * folderDelete2   using RecursiveIteratorIterator
-    *
-    * folderCreate2  - create folder, check write permissions, add index.html, write htaccess
-    * folderAddIndexHTML
-    * allowWebAccessForForlder
-    *
-    * folderContent  - get list of files in folder as search result (record list)
-    * folderSize2
-    * folderSize
-    * folderTree
-    * folderTreeToFancyTree - NOT USED
-    * folderFirstFile - returns first file from first folder (search first file given ext or just first file in subfolders
-    *                   used for tiled image stack
-    * folderGetSubFolders - Returns array of subfolders
-    *
-    * fileCopy
-    * fileSave
-    * fileOpen - check existance, readability, opens and returns file handle, or -1 not exist, -2 not readable -3 can't open
-    * fileDelete
-    *
-    * getRelativePath
-    * folderRecurseCopy
-    * folderSubs - list of subfolders
-    *
-    *
-    * fileReadByChunks - Reads a file in chunks and outputs it to the client in a memory-efficient manner.
-    * getFileSize - Retrieves the size of a file, with an optional cache-clearing mechanism.
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
-
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
-
-    /*
-
-    isPathInHeuristUploadFolder - checks that path is HEURIST_FILESTORE_DIR
-
-    ----
-
-    @todo move from record_shp? fileRetrievePath returns fullpath to file is storage, or to tempfile,
-                   if it requires it extracts zip archive to tempfile or download remote url to tempfile
-
-    ===
-    move these function to separate uCurl
-
-    saveURLasFile  loadRemoteURLContent + fileSave
-    getTitleFromURL
-
-    loadRemoteURLContentSpecial tries to avoid curl if url on the same domain
-
-    loadRemoteURLContent
-    loadRemoteURLContentWithRange  load data with curl
-    loadRemoteURLContentType
-
-    getScriptOutput
-
-    =====
-
-    autoDetectSeparators
-
-    */
 
     $glb_curl_code = null;
     $glb_curl_error = null;
 
 
-
-    //--------------------------------------------------------------------------
-    // 1 - OK
-    // -1  not exists
-    // -2  not writable
-    // -3  file with the same name cannot be deleted
+    /**
+     * Checks if a folder exists and optionally if it's writable.
+     * Also handles cases where a file with the same name as the folder exists.
+     *
+     * @param string $folder The path to the folder.
+     * @param bool $testWrite If true, also checks if the folder is writable.
+     * @return int 1 if folder exists (and is writable if $testWrite is true),
+     *             -1 if path does not exist (or a conflicting file was deleted),
+     *             -2 if folder exists but is not writable (and $testWrite is true),
+     *             -3 if a file with the same name exists but cannot be deleted.
+     */
     function folderExists($folder, $testWrite){
 
         if(file_exists($folder)){
@@ -118,6 +71,14 @@ use hserv\utilities\USystem;
 
     }
 
+    /**
+     * Provides a verbose error message based on the result of folderExists.
+     *
+     * @param string $folder The path to the folder.
+     * @param bool $testWrite If true, write permissions were tested.
+     * @param string $folderName A descriptive name for the folder (used in error messages).
+     * @return string|true True if folder exists and meets conditions, otherwise an error message string.
+     */
     function folderExistsVerbose($folder, $testWrite, $folderName){
 
         $res = folderExists($folder, $testWrite);
@@ -139,12 +100,13 @@ use hserv\utilities\USystem;
 
 
     /**
-    *
-    *
-    * @param mixed $folder
-    * @param mixed $testWrite
-    * @return mixed
-    */
+     * Creates a folder if it doesn't exist.
+     * Relies on folderExists to check status before creation.
+     *
+     * @param string $folder The path to the folder to create.
+     * @param bool $testWrite If true, checks if the parent directory (or existing folder) is writable.
+     * @return bool True if the folder exists or was successfully created, false on failure to create.
+     */
     function folderCreate($folder, $testWrite){
 
         // -1  not exists
@@ -164,12 +126,14 @@ use hserv\utilities\USystem;
 
 
     /**
-    * create folder, check write permissions, add index.html, write htaccess
-    *
-    * @param mixed $folder
-    * @param mixed $message
-    * @param mixed $allowWebAccess
-    */
+     * Creates a folder, checks write permissions, adds an index.html file to prevent browsing,
+     * and optionally adds an .htaccess file to allow web access.
+     *
+     * @param string $folder The path to the folder to create.
+     * @param string $message A descriptive message used in error reporting if folder creation fails (related to the purpose of the folder).
+     * @param bool $allowWebAccess Optional. If true, attempts to copy an .htaccess file to allow web access. Defaults to false.
+     * @return string An error message string if folder creation or setup fails, otherwise an empty string.
+     */
     function folderCreate2($folder, $message, $allowWebAccess=false){
 
         $swarn = '';
@@ -203,10 +167,12 @@ use hserv\utilities\USystem;
     }
 
     /**
-    * add index.html to folder
-    *
-    * @param mixed $directory
-    */
+     * Adds an index.html file to the specified folder to prevent directory browsing.
+     * The file contains a simple "Sorry, this folder cannot be browsed" message.
+     *
+     * @param string $folder The path to the folder.
+     * @return void
+     */
     function folderAddIndexHTML($folder) {
 
         $filename = $folder."/index.html";
@@ -220,9 +186,13 @@ use hserv\utilities\USystem;
     }
 
 
-    //
-    // It copies .htaccess_via_url that allow access (not index/listing view) to destination folder
-    //
+    /**
+     * Allows web access to a folder by copying a pre-configured .htaccess file into it.
+     * This .htaccess typically allows direct access to files but not directory listing.
+     *
+     * @param string $folder The path to the folder.
+     * @return bool True if the .htaccess file was copied successfully or already exists, false on failure to copy.
+     */
     function allowWebAccessForForlder($folder){
         $res = true;
         $folder = USanitize::sanitizePath($folder);
@@ -233,10 +203,13 @@ use hserv\utilities\USystem;
     }
 
     /**
-    * clean folder and itself
-    *
-    * @param mixed $dir
-    */
+     * Recursively deletes a folder and its contents.
+     *
+     * @param string $dir The path to the directory to delete.
+     * @param bool $rmdir Optional. If true (default), removes the directory itself after deleting its contents.
+     * @param bool $verbos Optional. If true, returns an array of messages about deleted files/folders. Defaults to false.
+     * @return array|null If $verbos is true, an array of messages. Otherwise, null.
+     */
     function folderDelete($dir, $rmdir=true, $verbos = false) {
 
         $msgs = [];
@@ -268,9 +241,13 @@ use hserv\utilities\USystem;
         return $verbos ? $msgs : null;
     }
 
-    //
-    // remove folder and all its content
-    //
+    /**
+     * Removes a folder and all its contents using RecursiveIteratorIterator.
+     *
+     * @param string $dir The path to the directory to delete.
+     * @param bool $rmdir If true, removes the directory itself after deleting its contents.
+     * @return bool True if the operation was successful or the directory didn't exist, false if rmdir failed.
+     */
     function folderDelete2($dir, $rmdir) {
 
         if(file_exists($dir)){
@@ -293,14 +270,20 @@ use hserv\utilities\USystem;
         return true;
     }
 
-    //
-    // get list of files in folder as search result (record list)
-    // It is used to get 1) all cfg files for entity configuration
-    //                   2) browse for available icons in iconLibrary
-    // $include_dates  search for old archives in form hdb_ztucs_passages.sql.bz2.2022-08-17
-    //
-    // @todo , $is_reqursive=false
-    //
+    /**
+     * Gets a list of files in specified directories, optionally filtered by extensions.
+     * Formats the output similarly to a Heurist search result list.
+     * Used for tasks like finding entity configuration files or browsing icon libraries.
+     *
+     * @param string|array $dirs A single directory path or an array of directory paths to scan.
+     * @param string|array|null $exts Optional. A single file extension or an array of extensions to filter by (e.g., 'cfg', ['jpg', 'png']).
+     *                                If null, all files are included.
+     * @param bool $include_dates Optional. If true, attempts to parse dates from filenames (e.g., "file.sql.bz2.YYYY-MM-DD")
+     *                            and adjust the extension accordingly. Defaults to false.
+     * @return array An array structured like a Heurist search result, containing file details.
+     *               Keys: 'pageno', 'offset', 'count', 'reccount', 'fields', 'records', 'order', 'entityName'.
+     * @todo Implement $is_reqursive parameter for recursive scanning.
+     */
     function folderContent($dirs, $exts=null, $include_dates=false) {
 
         $records = array();
@@ -377,9 +360,13 @@ use hserv\utilities\USystem;
 
     }
 
-    //
-    // Returns summary size of all files in folder in bytes
-    //
+    /**
+     * Calculates the total size of all files within a directory (recursively).
+     * This is an alternative implementation of folderSize.
+     *
+     * @param string $dir The path to the directory.
+     * @return int The total size of files in the directory in bytes. Returns 0 if the directory is not valid.
+     */
     function folderSize2($dir){
 
         $size = 0;
@@ -398,7 +385,14 @@ use hserv\utilities\USystem;
         return $size;
     }
 
-
+    /**
+     * Calculates the total size of a directory or a file.
+     * For directories, it attempts to use system commands (`du`) for efficiency on non-Windows systems,
+     * or COM objects on Windows. Falls back to recursive PHP iteration if system calls fail.
+     *
+     * @param string $dir The path to the directory or file.
+     * @return int The total size in bytes.
+     */
     function folderSize($dir)
     {
         $dir = rtrim(str_replace('\\', '/', $dir), '/');
@@ -449,9 +443,14 @@ use hserv\utilities\USystem;
         }
     }
 
-    //
-    //
-    //
+    /**
+     * Finds the first file in a directory, optionally matching a specific extension and recursing into subdirectories.
+     *
+     * @param string $dir The path to the directory to search.
+     * @param string|null $ext Optional. The file extension to filter by (e.g., 'jpg'). If null, the first file found is returned.
+     * @param bool $recursion Optional. If true (default), searches recursively into subdirectories.
+     * @return string|null The full path to the first matching file found, or null if no file is found or directory is invalid.
+     */
     function folderFirstFile($dir, $ext=null, $recursion=true){
 
         $dir = realpath($dir);
@@ -489,9 +488,12 @@ use hserv\utilities\USystem;
         return null;
     }
 
-    //
-    // Returns array of subfolders
-    //
+    /**
+     * Returns an array of subfolder names within a given directory.
+     *
+     * @param string $dir The path to the directory to scan.
+     * @return array An array of subfolder names. Returns an empty array if the directory is invalid or has no subfolders.
+     */
     function folderGetSubFolders($dir){
         $dir = realpath($dir);
 
@@ -517,15 +519,16 @@ use hserv\utilities\USystem;
     /**
      * Creates a tree-structured array of directories and files from a given root folder.
      *
-     * @param string $dir
-     * @param string $params
-     *                  withFiles: false
-     *                  refex: file filter
-     *                  ignoreEmtpty: not include emoty folder
-     *                  systemFolders:
-     *                  format: fancy (for fancyTree)
-     * @param boolean $ignoreEmpty Do not add empty directories to the tree
-     * @return array
+     * @param string|null $dir The root directory path. Defaults to HEURIST_FILESTORE_DIR if null. Can also be a DirectoryIterator object.
+     * @param array $params An associative array of parameters:
+     *                      'withFiles' (bool): False to exclude files, true to include. Default false.
+     *                      'regex' (string): A regex to filter file names. Default empty (no filter).
+     *                      'ignoreEmtpty' (bool): True to not include empty folders in the tree. Default false.
+     *                      'systemFolders' (array|null): An array keyed by folder names to mark them as system folders.
+     *                      'format' (string): If 'fancy', formats output for FancyTree with 'key', 'title', 'folder', 'issystem', 'children', 'files_count'.
+     *                                       Otherwise, returns a nested associative array structure.
+     * @return array The tree structure. If 'format' is 'fancy', returns `['children' => ..., 'count' => ...]`.
+     *               Otherwise, returns a nested array where keys are folder names and values are their subtrees or arrays of file names.
      */
     function folderTree($dir, $params)
     {
@@ -610,9 +613,16 @@ use hserv\utilities\USystem;
         return $ret;
     }
 
-    //
-    //  NOT USED
-    //
+    /**
+     * Converts a nested array structure (as returned by folderTree without 'fancy' format)
+     * into a format suitable for the FancyTree jQuery plugin.
+     * NOTE: This function is marked as NOT USED in the original source code comments.
+     *
+     * @param array $data The nested array data representing the folder structure.
+     * @param int $lvl Current recursion level (internal use).
+     * @param array|null $sysfolders Optional. Array to mark system folders.
+     * @return array An array formatted for FancyTree.
+     */
     function folderTreeToFancyTree($data, $lvl=0, $sysfolders=null){
         //for fancytree
         $fancytree = array();
@@ -633,10 +643,15 @@ use hserv\utilities\USystem;
 
 
 
-    //
-    // check file existance, readability and opens the file
-    // returns file handle, or -1 not exist, -2 not readable -3 can't open
-    //
+    /**
+     * Checks file existence, readability, and opens it for binary reading.
+     *
+     * @param string $file The path to the file.
+     * @return resource|int Returns a file handle resource on success.
+     *                      Returns -1 if the file does not exist or is not a file.
+     *                      Returns -2 if the file is not readable.
+     *                      Returns -3 if fopen fails.
+     */
     function fileOpen($file)
     {
         if (!(file_exists($file) && is_file($file))) {
@@ -652,9 +667,14 @@ use hserv\utilities\USystem;
         return $handle;
     }
 
-    //
-    //
-    //
+    /**
+     * Copies a file from source to destination.
+     * Creates the destination directory if it doesn't exist.
+     *
+     * @param string $s1 Source file path.
+     * @param string $s2 Destination file path.
+     * @return bool True on successful copy, false otherwise.
+     */
     function fileCopy($s1, $s2) {
         $path = pathinfo($s2);
 
@@ -670,16 +690,28 @@ use hserv\utilities\USystem;
         return true;
     }
 
+    /**
+     * Deletes a file if it exists.
+     *
+     * @param string $filename The path to the file to delete.
+     * @return void
+     */
     function fileDelete( $filename ){
         if(!empty($filename) && file_exists($filename)){
             unlink($filename);
         }
     }
 
-    // Usage:
-    // 1) save version in System.php
-    // 2) save remote content in temporary file in scratch folder
-    //
+    /**
+     * Saves raw data to a file. If the file exists, it's deleted first.
+     * Used for saving system version or temporary remote content.
+     *
+     * @param string $rawdata The data to save.
+     * @param string $filename The path to the file.
+     * @return int|false The number of bytes written to the file on success, or 0 if $rawdata is empty or $filename is not a string.
+     *                   (Note: original code returns filesize, which could be 0 for an empty successful write.
+     *                   Returning 0 for invalid input is consistent with that possible outcome).
+     */
     function fileSave($rawdata, $filename)
     {
         if(!empty($rawdata) && is_string($filename)){
@@ -693,9 +725,15 @@ use hserv\utilities\USystem;
             return 0;
         }
     }
-    //
-    // Writes $rawdata to the end of $filename
-    //
+    /**
+     * Appends raw data to the end of a file.
+     *
+     * @param string $rawdata The data to append.
+     * @param string $filename The path to the file.
+     * @return int|false The new file size after appending, or 0 if $rawdata is empty.
+     *                   (Note: original code returns filesize, which could be 0 if file becomes empty or $rawdata is empty.
+     *                   Returning 0 for empty $rawdata is consistent).
+     */
     function fileAdd($rawdata, $filename)
     {
         if($rawdata){
@@ -708,7 +746,7 @@ use hserv\utilities\USystem;
                     fclose($fp);
                 }
 
-            }catch(Exception  $e){
+            }catch(\Exception  $e){
                 // Cannot open file '.$filename.'  Error:'.$e->getMessage()
             }
 
@@ -718,9 +756,15 @@ use hserv\utilities\USystem;
         }
     }
 
-    //
-    // Adds counter to the end of file name
-    //
+    /**
+     * Generates a unique filename in a given directory by appending a counter if a file with the same name already exists.
+     * Example: if "file.txt" exists, it will try "file(1).txt", then "file(2).txt", and so on.
+     *
+     * @param string $folder The directory path where the file should be unique.
+     * @param string $filename The base name of the file (without extension as it's extracted via pathinfo).
+     * @param string $ext The file extension (e.g., ".txt" or "txt").
+     * @return string The full path to a unique filename.
+     */
     function getUniqueFileName($folder, $filename, $ext){
 
         $path_parts = pathinfo($filename);
@@ -990,17 +1034,14 @@ function isPathInHeuristUploadFolder($path, $check_existance=true){
 
 
 /**
-* Save remote url as file and returns the size of saved file
-*
-* Usage
-* 1) save import from other database in temp file
-* 2) remote image to create thumbnail
-*
-* Remote data are saved in scratch folder as temporary file
-*
-* @param mixed $url
-* @param mixed $filename
-*/
+     * Saves content from a remote URL to a local file.
+     * Uses `loadRemoteURLContent` to fetch data. Data is saved in the scratch folder as a temporary file.
+     * Primarily used for saving imports from other databases or remote images for thumbnail generation.
+     *
+     * @param string $url The URL to fetch content from.
+     * @param string $filename The local path to save the file to.
+     * @return int The size of the saved file in bytes, or 0 if fetching or saving fails.
+     */
 function saveURLasFile($url, $filename)
 {
     //Download file from remote server
@@ -1014,11 +1055,11 @@ function saveURLasFile($url, $filename)
 }
 
 /**
-* Returns title of html dcoument for given url
-*
-* @param mixed $url
-* @return $title
-*/
+     * Fetches the content of a remote URL and extracts the HTML title tag.
+     *
+     * @param string $url The URL of the HTML document.
+     * @return string|null The extracted title string, or null if not found or on error.
+     */
 function getTitleFromURL($url){
 
     $title = null;
@@ -1041,13 +1082,15 @@ function getTitleFromURL($url){
     return $title;
 }
 
-//
-// if the same server - try to include script instead of CURL request
-// usage:
-// 1. get registered database URL
-// 2. database registration
-// 3. get current db version
-//
+    /**
+     * Loads content from a URL, with special handling for URLs on the same Heurist server.
+     * If the URL is local to the server, it attempts to include and execute the script directly
+     * instead of making an HTTP request via cURL. Otherwise, falls back to `loadRemoteURLContentWithRange`.
+     * Used for fetching registered database URLs, database registration, and getting current DB version.
+     *
+     * @param string $url The URL to load content from.
+     * @return string|false The content fetched from the URL, or false on failure.
+     */
 function loadRemoteURLContentSpecial($url){
 
     if(strpos($url, HEURIST_SERVER_URL)===0){
@@ -1074,16 +1117,32 @@ function loadRemoteURLContentSpecial($url){
     }
 }
 
-//
-//
-//
+    /**
+     * Loads content from a remote URL using cURL. This is a wrapper for `loadRemoteURLContentWithRange` without a specific byte range.
+     *
+     * @global int|string|null $glb_curl_code Stores cURL error code or status.
+     * @global string|null $glb_curl_error Stores cURL error message.
+     * @param string $url The URL to fetch content from.
+     * @param bool $bypassProxy Optional. If true, attempts to bypass any configured HTTP proxy. Defaults to true.
+     * @return string|false The fetched content as a string on success, or false on failure.
+     */
 function loadRemoteURLContent($url, $bypassProxy = true) {
     return loadRemoteURLContentWithRange($url, null, $bypassProxy);
 }
 
-//
-// $range - loads first n bytes (for example to detect title of web page)
-//
+    /**
+     * Loads content from a remote URL using cURL, with options for range requests, proxy bypass, and timeout.
+     * Updates global variables $glb_curl_code and $glb_curl_error with cURL status.
+     *
+     * @global int|string|null $glb_curl_code Stores cURL error code or status.
+     * @global string|null $glb_curl_error Stores cURL error message.
+     * @param string $url The URL to fetch content from.
+     * @param string|null $range Optional. A specific byte range to fetch (e.g., "0-500"). Null to fetch entire content.
+     * @param bool $bypassProxy Optional. If true, attempts to bypass any configured HTTP proxy. Defaults to true.
+     * @param int $timeout Optional. cURL timeout in seconds. Defaults to 30.
+     * @param array|null $additional_headers Optional. Additional HTTP headers to send with the request.
+     * @return string|false The fetched content as a string on success, or false on failure.
+     */
 function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeout=30, $additional_headers=null) {
 
     global $glb_curl_code, $glb_curl_error;
@@ -1193,12 +1252,14 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     }
 }
 
-// Detects mimetype for given url
-//
-// alternative2: get_headers()
-// alternative3: https://stackoverflow.com/questions/37731544/get-mime-type-by-url
-// for local file use mime_content_type
-//
+    /**
+     * Detects the MIME content type of a remote URL using cURL by fetching its headers.
+     *
+     * @param string $url The URL to check.
+     * @param bool $bypassProxy Optional. If true, attempts to bypass any configured HTTP proxy. Defaults to true.
+     * @param int $timeout Optional. cURL timeout in seconds. Defaults to 30.
+     * @return string|false The MIME content type string on success, or false on failure or if URL is invalid.
+     */
 function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
 
     if(!function_exists("curl_init"))  {
@@ -1250,9 +1311,12 @@ function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
     return $content_type;
 }
 
-//
-//
-//
+    /**
+     * Extracts the file extension from a URL's path component.
+     *
+     * @param string $url The URL to parse.
+     * @return string|null The file extension in lowercase, or null if no path or extension is found.
+     */
 function getURLExtension($url){
     $extension = null;
     $ap = parse_url($url);
@@ -1265,9 +1329,16 @@ function getURLExtension($url){
     return $extension;
 }
 
-//
-// recognize mime type from url, update ext table if missed and returns extension
-//
+    /**
+     * Recognizes the MIME type from a URL, updates the `defFileExtToMimetype` table if a new mapping is found
+     * (especially for known services like YouTube, Vimeo, SoundCloud), and returns the determined file extension.
+     *
+     * @param \mysqli $mysqli The mysqli database connection object.
+     * @param string $url The URL to analyze.
+     * @param bool $use_default_ext Optional. If true (default) and no specific extension can be determined,
+     *                              returns 'bin' as a generic binary extension.
+     * @return array An associative array with 'extension' (string|null), 'mimeType' (string|null), and 'needrefresh' (bool).
+     */
 function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true){
 
 
@@ -1353,9 +1424,16 @@ function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true){
 
 
 //----------------------------------
-//
-//
-//
+    /**
+     * Captures the output of a PHP script by including it within an output buffer.
+     *
+     * @global \hserv\System $system The global system object (though not directly used in this function's logic, it's declared global).
+     * @param string $path The path to the PHP script to execute.
+     * @param bool $print Optional. If false (default), returns the captured output as a string.
+     *                    If true, echoes the output directly and returns nothing.
+     * @return string|false|void If $print is false, returns the script's output as a string, or false if the script is not readable.
+     *                           If $print is true, echoes output and returns void (implicitly null).
+     */
 function getScriptOutput($path, $print = false)
 {
     global $system;
@@ -1381,13 +1459,17 @@ function getScriptOutput($path, $print = false)
 
 //----------------------------------------------- PARSING
 
-//
-// try to read file and detect separtors
-// return an aray with suggestions array('csv_delimiter'=>, 'csv_delimiter'=> , 'csv_enclosure'=>)
-//
-// Important: it works only in case file is UTF8
-//
-//
+    /**
+     * Auto-detects CSV file delimiters (delimiter, line break, enclosure).
+     * Reads the beginning of the file to infer these settings.
+     * IMPORTANT: This function assumes the file is UTF-8 encoded for reliable detection.
+     *
+     * @param string $filename Path to the CSV file.
+     * @param string $csv_linebreak Optional. Initial guess or forced line break type ('auto', 'win', 'nix', 'mac'). Defaults to 'auto'.
+     * @param string $csv_enclosure Optional. CSV enclosure character. Defaults to '"'. If empty or 'none', a rare character is used internally.
+     * @return array An associative array with detected 'csv_linebreak', 'csv_delimiter', 'csv_enclosure',
+     *               or an 'error' key if the file cannot be read or is not UTF-8.
+     */
 function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='"'){
 
     $handle = @fopen($filename, 'r');
@@ -1509,9 +1591,12 @@ function autoDetectSeparators($filename, $csv_linebreak='auto', $csv_enclosure='
     return array('csv_linebreak'=>$csv_linebreak, 'csv_delimiter'=>$csv_delimiter, 'csv_enclosure'=>$csv_enclosure);
 }
 
-//
-//
-//
+    /**
+     * Checks if a file is likely an XML file by reading its first few bytes for an XML declaration.
+     *
+     * @param string $filename Path to the file.
+     * @return bool True if the file starts with '<?xml' (possibly after BOM), false otherwise or if file is unreadable.
+     */
 function isXMLfile($filename){
 
     $res = false;
@@ -1525,10 +1610,17 @@ function isXMLfile($filename){
     return $res;
 }
 
-//
-// Working with semaphore file for particular long action
-// if $range_minutes<0 - remove log file
-//
+    /**
+     * Manages a semaphore-like lock file for long-running actions to prevent concurrent execution.
+     * Checks if an action is already in progress or updates/creates a timestamp for the action.
+     *
+     * @param string $action A unique name for the action (e.g., 'backup', 'verify_urls').
+     * @param int $range_minutes The duration in minutes. If an existing lock file for the action is older than this,
+     *                           it's considered stale and can be overridden. If $range_minutes < 0, the lock file is removed.
+     * @param string $db_name Optional. Database name to make the lock specific to a database. Defaults to empty (global lock).
+     * @return bool True if the action can proceed (no current lock or lock is stale/removed).
+     *              False if an action is currently in progress and the lock is not stale.
+     */
 function isActionInProgress($action, $range_minutes, $db_name=''){
 
     $progress_flag = HEURIST_FILESTORE_ROOT.'_operation_locks'.($db_name?('_'.$db_name):'').'.info';
@@ -1589,25 +1681,30 @@ function isActionInProgress($action, $range_minutes, $db_name=''){
     return true;
 }
 
-//
-// Upload file to Nakala and return URL to new Nakala file
-// $system => Initiated System object
-// $params => array(
-//      'api_key' => User's Nakala API Key (retrieved from User Preferences)
-//      'file' => array(
-//          'path' => path to file
-//          'type' => mime type
-//          'name' => file name
-//      ),
-//      'files' => array( formatted array of files values, already uploaded to Nakala )
-//      'meta' => array( formatted array of Nakala Metadata values )
-// )
-// $uri_parts => return new file + Nakala generated DOI in array(sha1, doi) or uri format
-// $upload_only => only upload file, returns sha1 value (usually for a file part of a set of files)
-//
+    /**
+     * Uploads a file to the Nakala repository and returns its Nakala URL.
+     * Handles API key authentication, file upload, metadata submission, and error checking.
+     *
+     * @global int|string|null $glb_curl_code Stores cURL error code from Nakala API calls.
+     * @global string|null $glb_curl_error Stores cURL error message from Nakala API calls.
+     * @global \hserv\System $system The Heurist system instance (re-declared global, also passed as param).
+     * @param \hserv\System $system The Heurist system instance.
+     * @param array $params An associative array of parameters:
+     *                      'api_key' (string): User's Nakala API Key.
+     *                      'file' (array): Details of the file to upload:
+     *                          'path' (string): Path to the local file.
+     *                          'type' (string): MIME type of the file.
+     *                          'name' (string): Name of the file.
+     *                          'description' (string, optional): Description of the file.
+     *                      'meta' (array): Array of Nakala metadata values.
+     *                      'status' (string, optional): Status for the Nakala deposit (e.g., 'pending', 'published'). Defaults to 'pending'.
+     *                      'use_test_url' (int, optional): If 1, uses Nakala test API URLs.
+     *                      'return_type' (string, optional): If 'editor', returns URL to private view. Otherwise, public URL.
+     * @return string|false The Nakala URL of the uploaded file on success, or false on failure.
+     */
 function uploadFileToNakala($system, $params) {
 
-    global $glb_curl_code, $glb_curl_error, $system;
+        global $glb_curl_code, $glb_curl_error, $system; // $system is passed as param, also global.
     $glb_curl_code = null;
     $glb_curl_error = null;
 
@@ -1882,9 +1979,13 @@ function uploadFileToNakala($system, $params) {
     return $external_url;
 }
 
-//
-// not used
-//
+    /**
+     * Flushes PHP's output buffers.
+     * Note: This function is marked as "not used" in the original source comments.
+     *
+     * @param bool $start Optional. If true (default), restarts output buffering after flushing.
+     * @return void
+     */
 function flush_buffers($start=true){
     //ob_end_flush();
     @ob_flush();
@@ -1899,8 +2000,10 @@ function flush_buffers($start=true){
  * and outputs it directly to the client to avoid exhausting memory.
  *
  * @param string $file_path The path to the file to be read and output.
- *
- * @return int|false Returns the size of the file in bytes if successful, or false on failure.
+ * @param int $range_min Optional. The starting byte position for reading a range. Defaults to 0.
+ * @param int $range_max Optional. The ending byte position for reading a range. If 0, reads to the end. Defaults to 0.
+ * @return int|false|void Returns the size of the file (or range) in bytes if successful and not outputting entire file through readfile(),
+ *                        false on failure to open file, or void if file is empty. `readfile` output is directly to client.
  */
 function fileReadByChunks($file_path, $range_min=0, $range_max=0)
 {
@@ -1954,9 +2057,8 @@ function fileReadByChunks($file_path, $range_min=0, $range_max=0)
  * if the file is being modified during runtime.
  *
  * @param string $file_path The path to the file whose size is to be determined.
- * @param bool $clear_stat_cache (Optional) If true, clears the file status cache before checking the file size.
- *                               Default is false.
- *
+ * @param bool $clear_stat_cache Optional. If true, clears the file status cache before checking the file size.
+ *                               Defaults to false.
  * @return int The size of the file in bytes. Returns 0 if the file does not exist.
  */
 function getFileSize($file_path, $clear_stat_cache = false) {

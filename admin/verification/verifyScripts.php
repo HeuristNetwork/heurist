@@ -33,7 +33,7 @@ ini_set('max_execution_time', '0');
 define('PDIR','../../');//need for proper path to js and css
 
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/utils_db_load_script.php';
+require_once dirname(__FILE__).'/../../hserv/utilities/DbExecuteScript.php';
 require_once dirname(__FILE__).'/../setup/dbupgrade/DBUpgrade_1.3.0_to_1.3.14.php';
 
 global $mysqli, $databases;

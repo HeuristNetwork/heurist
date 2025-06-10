@@ -25,9 +25,9 @@
 if(!defined('PDIR')) {define('PDIR','../../');}//need for proper path to js and css
 
 use hserv\utilities\USanitize;
+use hserv\utilities\Temporal;
 
 require_once dirname(__FILE__).'/../../autoload.php';
-require_once dirname(__FILE__).'/../../hserv/utilities/Temporal.php';
 require_once dirname(__FILE__).'/../../hserv/structure/dbsTerms.php';
 
 $system = new hserv\System();

@@ -1,33 +1,36 @@
 <?php
+/**
+* ULocale.php - Utility functions for localization
+* 
+* Localization utility functions for Heurist.
+* This file provides a collection of global functions for tasks such as:
+* - Initializing and retrieving standard language codes (initLangCodes, getLangCode3, getLangCode2).
+* - Extracting language prefixes from strings (extractLangPrefix).
+* - Retrieving translations for content, including integration with Smarty (getTranslation, getCurrentTranslation).
+* - Performing external translations using services like DeepL API (getExternalTranslation).
+* - Handling "no translate" tags for content passed to translation services (addNoTranslateTags, removeNoTranslateTags).
+* - Preparing a list of languages for UI presentation (getPreparedLanguageList).
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  hserv\utilities
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
+*/
 
     /**
-    * Localization utilities
-    *
-    * getLangCode3 - validates lang code and returns upper case 3 letters code
-    * extractLangPrefix - splits and extract language code and value from string code:value
-    * getTranslation - for smarty modifier
-    * getCurrentTranslation - returns translated value for multivalue field
-    * getExternalTranslation - translates given string to traget language via Deepl's API
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
-
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
-
-    //
-    //
-    //
+     * Initializes global language code arrays if they haven't been already.
+     * Reads language codes from a JSON file and populates $glb_lang_codes and $glb_lang_codes_index.
+     * $glb_lang_codes: Array of language code objects.
+     * $glb_lang_codes_index: An associative array mapping 3-letter codes (uppercase) to 2-letter codes (uppercase).
+     *
+     * @global array $glb_lang_codes Holds the list of language code objects.
+     * @global array $glb_lang_codes_index Holds an index mapping 3-letter to 2-letter language codes.
+     * @return void
+     */
     function initLangCodes(){
         global $glb_lang_codes, $glb_lang_codes_index;
 
@@ -39,11 +42,15 @@
         }
     }
 
-    //
-    // get 3 letters ISO code
-    //
+    /**
+     * Validates a given language code (2 or 3 letters) and returns its 3-letter ISO 639-2 code (uppercase).
+     *
+     * @global array $glb_lang_codes_index An index mapping 3-letter to 2-letter language codes.
+     * @param string|null $lang The language code to validate (e.g., "en", "ENG").
+     * @return string|null The 3-letter ISO 639-2 language code (uppercase) if valid, otherwise null.
+     */
     function getLangCode3($lang){
-        global $glb_lang_codes, $glb_lang_codes_index;
+        global $glb_lang_codes, $glb_lang_codes_index; // $glb_lang_codes is not directly used here but initLangCodes loads it.
 
         $res = null;
 
@@ -75,12 +82,16 @@
         return $res;
     }
 
-    //
-    // get 2 letters ISO code
-    //
+    /**
+     * Validates a given language code (2 or 3 letters) and returns its 2-letter ISO 639-1 code (uppercase).
+     *
+     * @global array $glb_lang_codes_index An index mapping 3-letter to 2-letter language codes.
+     * @param string|null $lang The language code to validate (e.g., "en", "ENG").
+     * @return string|null The 2-letter ISO 639-1 language code (uppercase) if valid, otherwise null.
+     */
     function getLangCode2($lang){
 
-        global $glb_lang_codes, $glb_lang_codes_index;
+        global $glb_lang_codes, $glb_lang_codes_index; // $glb_lang_codes is not directly used here but initLangCodes loads it.
 
         $res = null;
 
@@ -102,13 +113,18 @@
         return $res;
     }
 
-    //
-    //  splits and extract language code and value from string code:value
-    //  if $val is 2 chars code ISO639-1 - it will be converted to 3 chars ISO639-2
-    //
+    /**
+     * Splits and extracts a language code and value from a string formatted as "code:value" or "code: html_value".
+     * If the extracted language code is a 2-letter ISO 639-1 code, it's converted to its 3-letter ISO 639-2 equivalent.
+     * Handles cases where the value might be wrapped in <p> or <span> tags.
+     *
+     * @param string|mixed $val The input string potentially containing a language prefix. If not a string or too short, it's returned as is with no lang.
+     * @return array An array containing two elements:
+     *               0: The extracted 3-letter language code (uppercase) or "ALL", or null if no valid prefix is found.
+     *               1: The value part of the string. If a prefix was found, this is the substring after the prefix. Otherwise, it's the original value.
+     */
     function extractLangPrefix($val){
 
-        //global $glb_lang_codes, $common_languages_for_translation;
         $lang = null;
 
         if(is_string($val) && mb_strlen($val)>4){
@@ -163,10 +179,20 @@
         return array($lang, $val);
     }
 
-    //
-    // For smarty modifier "translate"
-    // $filed - label or desc - for terms
-    //
+    /**
+     * Retrieves a translation for a given input, typically used as a Smarty modifier.
+     * It can handle translations for Heurist terms (labels or descriptions) or regular record detail fields.
+     *
+     * @global Smarty|null $smarty The Smarty template engine instance.
+     * @param string|array $input The input value to translate. Can be a string (for record details) or an array (for terms).
+     *                            If an array for a term, it should contain 'id' and the field to translate (e.g., 'label').
+     * @param string $lang The target language code (2 or 3 letters).
+     * @param string|null $field Optional. If translating a term, specifies which field of the term to translate (e.g., 'label', 'desc').
+     *                           Defaults to 'label' for terms.
+     * @return string|array|null The translated string if found. If no translation is available for the specified language,
+     *                    it returns the original input (for strings) or the default language value.
+     *                    Returns null if input is invalid or Smarty context is unavailable for term translation.
+     */
     function getTranslation($input, $lang, $field=null){
         global $smarty;
 
@@ -200,11 +226,18 @@
         return $ret;
     }
 
-    //
-    // It returns translated value for multivalue field
-    // if all values have language prefix (except default one)
-    // $input - array of values
-    //
+    /**
+     * Retrieves the translation for a specific language from a potentially multi-lingual input.
+     * The input can be an array of values (where each value might have a language prefix) or a single string.
+     * If $input is an array, it iterates through values, looking for one matching the target $lang.
+     * If no match is found, it returns a default (non-prefixed) value if available.
+     * If $input is a string, it simply extracts the language prefix and value.
+     *
+     * @param string|array $input The input value or array of values. Values can be strings like "ENG:Hello" or "Bonjour".
+     * @param string $lang The target language code (2 or 3 letters).
+     * @return string|null The translated string for the target language, the default language string,
+     *                     or null if no suitable translation is found or input is invalid.
+     */
     function getCurrentTranslation($input, $lang){
 
         $res = null;
@@ -244,17 +277,23 @@
     }
 
     /**
-     * Translate given string to traget language via Deepl's API
-     *  A valid Deepl API key needs to be assigned to the variable $accessToken_DeepLAPI within heuristConfigIni.php
+     * Translates a given string to a target language using the DeepL API.
+     * Requires a valid DeepL API key to be configured in `$accessToken_DeepLAPI`.
+     * Handles HTML and XML content by attempting to preserve tags using DeepL's tag handling.
      *
-     * @param object $system - Heurist's initialised system object
-     * @param string $string - String to be translated
-     * @param string $target_language - AR2 or AR3 of language being translated to
-     * @param string $source_language - AR2 or AR3 of language being translated from (if missing Deepl uses auto-detection)
+     * @global array $glb_lang_codes_index Global array mapping 3-letter to 2-letter language codes.
+     * @global string|null $accessToken_DeepLAPI The DeepL API authentication key.
+     * @param \hserv\System $system Heurist's initialized system object.
+     * @param string $string The string to be translated.
+     * @param string $target_language The target language code (2 or 3 letters, e.g., "EN", "FRA").
+     * @param string|null $source_language Optional. The source language code (2 or 3 letters).
+     *                                     If null, DeepL attempts auto-detection.
+     * @return string|false The translated string on success, or false on failure (e.g., API error, invalid language).
+     *                      Error details are added to the $system object.
      */
     function getExternalTranslation($system, $string, $target_language, $source_language = null){
 
-        global $glb_lang_codes, $glb_lang_codes_index, $accessToken_DeepLAPI;
+        global $glb_lang_codes, $glb_lang_codes_index, $accessToken_DeepLAPI; // $glb_lang_codes is loaded by initLangCodes
 
         initLangCodes();
 
@@ -525,6 +564,15 @@
         return [$string, $handleEntity, $handleCopyRight];
     }
 
+    /**
+     * Removes <notranslate> or <span translate='no'> tags from a string that were added by addNoTranslateTags.
+     *
+     * @param string $string The string potentially containing "no translate" tags.
+     * @param bool $isXML True if the original string was XML, false if HTML. This determines the tag format to remove.
+     * @param bool $handlEntity Indicates if entity-specific "no translate" tags were added.
+     * @param bool $handleCopyRight Indicates if copyright-specific "no translate" tags were added.
+     * @return string The string with "no translate" tags removed.
+     */
     function removeNoTranslateTags($string, $isXML, $handlEntity, $handleCopyRight){
 
         // Remove notranslate tags
@@ -574,6 +622,16 @@
         return $string;
     }
 
+    /**
+     * Prepares a list of common languages for translation and available UI localization files.
+     * Used to populate language selection UI elements.
+     *
+     * @global array $common_languages_for_translation Array of common language codes (3-letter) defined in heuristConfigIni.php.
+     * @global array $glb_lang_codes Global array of language code objects.
+     * @return array An array containing two elements:
+     *               0: An associative array of common languages (uppercase 3-letter code => language object).
+     *               1: An array of available UI locale file language codes (2-letter, lowercase).
+     */
     function getPreparedLanguageList(){
 
         global $common_languages_for_translation, $glb_lang_codes;

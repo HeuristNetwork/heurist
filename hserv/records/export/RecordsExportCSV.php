@@ -24,12 +24,12 @@ namespace hserv\records\export;
 
 use hserv\utilities\USystem;
 use hserv\utilities\USanitize;
+use hserv\utilities\Temporal;
 use hserv\entity\DbDefRecStructure;
 
 require_once dirname(__FILE__).'/../../../vendor/autoload.php';//for geoPHP
 require_once dirname(__FILE__).'/../../utilities/geo/mapSimplify.php';
 require_once dirname(__FILE__).'/../../utilities/geo/mapCoordConverter.php';
-require_once dirname(__FILE__).'/../../utilities/Temporal.php';
 require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
 require_once dirname(__FILE__).'/../../../admin/verification/verifyValue.php';
 
@@ -783,7 +783,7 @@ public static function output($data, $params){
                             }
                         }elseif($dt_type=='date'){
                             foreach($values as $val){
-                                $vals[] = \Temporal::toHumanReadable(trim($val));
+                                $vals[] = Temporal::toHumanReadable(trim($val));
                                 if($include_temporals){
                                     $date_temporals[] = trim($val);
                                 }
@@ -1588,23 +1588,7 @@ private static function groupCSVRows(array $rows, array $groupColIndices = [], a
     }
 }
 
-private static function usePercentageForCSVHeaders(array $headers, array $usePercentageColIndices = []) {
-    if (!empty($usePercentageColIndices)) {
-        $colIncrease = 0;
-        for ($i = 0; $i < count($usePercentageColIndices); $i++) {
-            $colIndex = $usePercentageColIndices[$i] + $colIncrease;
-            if ($colIndex + 1 > count($headers) - 1) {
-                $headers[] = $headers[$colIndex] . '(%)';
-            } else {
-                array_splice($headers, $colIndex + 1, 0, [$headers[$colIndex] . '(%)']);
-            }
-            $colIncrease++;
-        }
-    }
-    return $headers;
-}
-
-    /**
+/**
      * Adds percentage column headers to an existing header array.
      *
      * For each column index specified in `$usePercentageColIndices`, this function

@@ -2,14 +2,15 @@
 /**
 * DbAnnotations.php - Class DbAnnotations
 *
-* Manages IIIF annotations.
+* Manages IIIF annotations records.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\entity 
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @since       6.0
 */
 namespace hserv\entity;
@@ -21,11 +22,10 @@ use hserv\utilities\USanitize;
 require_once dirname(__FILE__).'/../structure/import/dbsImport.php';
 
 /**
-* DbAnnotations.php - Class DbAnnotations
+* Class DbAnnotations
 *
-* Manages IIIF annotations, providing functionality to search, create, update, and delete annotations. It interacts with Heurist record structures, linking annotations to uploaded files or existing records.
-*
-* @package  hserv\entity 
+* Manages records with type IIIF annotations, providing functionality to search, create, update, and delete annotations. It interacts with Heurist record structures, linking annotations to uploaded files or existing records.
+* 
 */
 class DbAnnotations extends DbEntityBase
 {

@@ -1,4 +1,23 @@
 <?php
+/**
+* UploadHandler.php - Class UploadHandler
+* 
+* Provides the UploadHandler class for managing server-side file uploads.
+* This class is an adaptation of the PHP Class from the jQuery File Upload Plugin by Sebastian Tschan.
+* It handles various aspects of file uploading including GET, POST, DELETE requests,
+* image versioning, validation, and response generation.
+*
+* jQuery File Upload Plugin PHP Class
+* https://github.com/blueimp/jQuery-File-Upload
+* 
+* @package     Heurist academic knowledge management system
+* @subpackage  hserv\utilities
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2010, Sebastian Tschan
+* @copyright   (C) https://blueimp.net
+* @license     http://www.opensource.org/licenses/MIT
+* @since       6.0
+*/
 namespace hserv\utilities;
 use hserv\System;
 use hserv\utilities\USanitize;
@@ -6,17 +25,6 @@ use hserv\utilities\USystem;
 use hserv\utilities\UImage;
 
 /*
- * jQuery File Upload Plugin PHP Class
- * https://github.com/blueimp/jQuery-File-Upload
- *
- * Copyright 2010, Sebastian Tschan
- * https://blueimp.net
- *
- * Licensed under the MIT license:
- * http://www.opensource.org/licenses/MIT
- */
-
- /*
 // Set to 0 to use the GD library to scale and orient images,
 // set to 1 to use imagick (if installed, falls back to GD),
 // set to 2 to use the ImageMagick convert binary directly: via command line
@@ -31,7 +39,20 @@ use hserv\utilities\UImage;
 define('HEADER_403','HTTP/1.1 403 Forbidden');
 define('AMP','&amp;');
 
-
+/**
+* Class UploadHandler
+* 
+* Manages server-side file uploads, based on the jQuery File Upload Plugin PHP Class.
+*
+* This class handles file uploads via POST, downloads via GET, and deletions via DELETE.
+* It supports features like chunked uploads, image resizing and versioning,
+* validation of file types and sizes, and generation of JSON responses suitable
+* for the jQuery File Upload plugin. It has been adapted for integration within the
+* Heurist academic knowledge management system.
+*
+* Original jQuery File Upload Plugin by Sebastian Tschan.
+* @link https://github.com/blueimp/jQuery-File-Upload
+*/
 class UploadHandler
 {
 
@@ -69,6 +90,16 @@ class UploadHandler
 
     protected $image_objects = array();
 
+    /**
+     * Constructor for UploadHandler.
+     * Initializes options, validates system context, and sets up upload directory.
+     *
+     * @param array|null $options Optional. An array of options to configure the handler.
+     *                            See the `options` property for available settings.
+     * @param bool $initialize Optional. If true (default), calls the `initialize()` method
+     *                         to handle the current HTTP request.
+     * @param array|null $error_messages Optional. An array of custom error messages to override defaults.
+     */
     public function __construct($options = null, $initialize = true, $error_messages = null) {
 
         if($options==null) {$options=array();}
@@ -1765,10 +1796,21 @@ class UploadHandler
         return $content;
     }
 
+    /**
+     * Gets the response array that has been prepared by other methods (e.g., get, post, delete).
+     *
+     * @return array The response array, typically containing file information or error messages.
+     */
     public function get_response () {
         return $this->response;
     }
 
+    /**
+     * Handles HTTP HEAD and OPTIONS requests.
+     * Sends appropriate headers for caching, content disposition, and access control.
+     *
+     * @return void
+     */
     public function head() {
         $this->header('Pragma: no-cache');
         $this->header('Cache-Control: no-store, no-cache, must-revalidate');
@@ -1781,6 +1823,15 @@ class UploadHandler
         $this->send_content_type_header();
     }
 
+    /**
+     * Handles HTTP GET requests.
+     * Serves file downloads or lists existing files in the upload directory.
+     *
+     * @param bool $print_response Optional. If true (default), generates and prints the JSON response.
+     *                             If false, returns the response array without printing.
+     * @return array|void If $print_response is false, returns the response array. Otherwise, no explicit return (outputs JSON).
+     *                    If downloading a file, this method might terminate execution after sending file data.
+     */
     public function get($print_response = true) {
         if ($print_response && $this->get_query_param('download')) {
             return $this->download();
@@ -1799,6 +1850,16 @@ class UploadHandler
         return $this->generate_response($response, $print_response);
     }
 
+    /**
+     * Handles HTTP POST requests for file uploads.
+     * Processes uploaded files, performs validation, handles chunked uploads,
+     * and creates image versions if applicable.
+     * Can also handle DELETE requests tunneled via POST with a `_method=DELETE` parameter.
+     *
+     * @param bool $print_response Optional. If true (default), generates and prints the JSON response.
+     *                             If false, returns the response array without printing.
+     * @return array|void If $print_response is false, returns the response array. Otherwise, no explicit return (outputs JSON).
+     */
     public function post($print_response = true) {
         if ($this->get_query_param('_method') === 'DELETE') {
             return $this->delete($print_response);
@@ -1903,6 +1964,14 @@ class UploadHandler
         return $this->generate_response($response, $print_response);
     }
 
+    /**
+     * Handles HTTP DELETE requests to remove uploaded files and their versions.
+     *
+     * @param bool $print_response Optional. If true (default), generates and prints the JSON response
+     *                             indicating success or failure for each file.
+     *                             If false, returns the response array without printing.
+     * @return array|void If $print_response is false, returns the response array. Otherwise, no explicit return (outputs JSON).
+     */
     public function delete($print_response = true) {
         // Get file names either from parameters or fallback to a single file param
         $file_names = $this->get_file_names_params();

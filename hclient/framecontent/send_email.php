@@ -16,7 +16,7 @@
 * @version     4.0.0
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @subpackage  UserInterface
 */
 use hserv\utilities\USanitize;
 
@@ -170,27 +170,52 @@ if(isset($_POST['data'])) {
 
     <!-- Javascript -->
     <script type="text/javascript">
-        var storage_key = "email";// Key used to store data
-        var dropdowns = ["#email", "#firstname", "#familyname", "#field1", "#field2", "#field3"];// ID's of the dropdowns
-        var text_types = ["freetext", "blocktext"];// Text only types for the dropdowns
-        var all_types = ["freetext", "blocktext", "memo", "seperator", "numeric", "date", "enum"];// All types that can be selected from the dropdown
-        var definitions; // Record type field definitions
-        var ids =  window.hWin.HAPI4.selectedRecordIds; // Selected record ID's
+        /** @type {string} Key used as a prefix for storing data in localStorage. */
+        var storage_key = "email";
+        /** @type {string[]} Array of jQuery selectors for the dropdown elements. */
+        var dropdowns = ["#email", "#firstname", "#familyname", "#field1", "#field2", "#field3"];
+        /** @type {string[]} Array of field type codes considered as text-only fields. */
+        var text_types = ["freetext", "blocktext"];
+        /** @type {string[]} Array of all field type codes that can be selected in the general dropdowns. */
+        var all_types = ["freetext", "blocktext", "memo", "seperator", "numeric", "date", "enum"];
+        /** @type {object} Holds the record type field definitions for the first record's type. */
+        var definitions;
+        /** @type {number[]} Array of selected record IDs from the parent window's HAPI. */
+        var ids =  window.hWin.HAPI4.selectedRecordIds;
+        /** @type {HRecordSet} A Heurist recordset object containing the selected records. */
         var recordset = window.hWin.HAPI4.currentRecordset.getSubSetByIds(ids);
-        var records = recordset.getRecords();// Array of record objects
-        var first_record = recordset.getFirstRecord();// First record in the list, used to determine the Record Types
+        /** @type {object[]} Array of record data objects from the recordset. */
+        var records = recordset.getRecords();
+        /** @type {object} The first record object from the recordset, used to determine the record type for field definitions. */
+        var first_record = recordset.getFirstRecord();
 
-        // Retrieves an item from localStorage
+        /**
+         * Retrieves an item from localStorage, prefixed with storage_key.
+         * @param {string} name - The name of the item to retrieve (without prefix).
+         * @returns {string|null} The value from localStorage, or null if not found.
+         */
         function getItem(name) {
             return localStorage[storage_key+name];
         }
 
-        // Stores an item in localStorage
+        /**
+         * Stores an item in localStorage, prefixed with storage_key.
+         * @param {string} name - The name of the item to store (without prefix).
+         * @param {string} value - The value to store.
+         */
         function putItem(name, value) {
             localStorage[storage_key+name] = value;
         }
 
-        // Determines valid options
+        /**
+         * Determines valid options for dropdowns based on field types and record definitions.
+         * It iterates through the field definitions of the first record's type, filters them
+         * by the provided `types` array, sorts them alphabetically, and generates HTML
+         * for `<option>` elements.
+         *
+         * @param {string[]} types - An array of allowed field type codes (e.g., text_types, all_types).
+         * @returns {string} HTML string containing `<option>` elements.
+         */
         function determineOptions(types) {
             // Determine options
             var options = [];
@@ -219,7 +244,15 @@ if(isset($_POST['data'])) {
             return html;
         }
 
-        // Fills a dropdown with options
+        /**
+         * Fills a specific dropdown (identified by its index in the `dropdowns` array)
+         * with the provided HTML options. It also restores the last selected index for that
+         * dropdown from localStorage and sets up a change listener to save future selections
+         * and trigger the `redo()` function.
+         *
+         * @param {number} i - The index of the dropdown in the `dropdowns` array.
+         * @param {string} options - HTML string of `<option>` elements.
+         */
         function fillDropdown(i, options) {
             // Append options to each dropdown
             $(dropdowns[i]).html(options);
@@ -239,7 +272,15 @@ if(isset($_POST['data'])) {
             });
         }
 
-        // Sets up all fields
+        /**
+         * Sets up the entire email form interface.
+         * This function is called on body onload. It:
+         * - Displays the count of selected records.
+         * - Determines the record type of the first selected record to get field definitions.
+         * - Populates the dropdowns for email, first name, family name (text fields only).
+         * - Populates the dropdowns for additional fields (all allowed types).
+         * - Sets up event listeners and restores saved values for the subject and message fields.
+         */
         function setup() {
             // Selected records
             $("#selected-records").html("# of records selected: " + ids.length);
@@ -286,7 +327,17 @@ if(isset($_POST['data'])) {
             })
         }
 
-         // Determines the actual record value at the given index
+        /**
+         * Retrieves a specific detail value from a record object based on the field type and its ID (index).
+         * Handles different data types appropriately (e.g., direct value for text/date, term label for enum).
+         * Note: Some types (memo, separator, numeric, termlist) currently have alert placeholders
+         * and may need further implementation to return meaningful values.
+         *
+         * @param {object} record - The Heurist record object (from recordset.getRecords()).
+         * @param {string} type - The field type code (e.g., "freetext", "enum").
+         * @param {number} index - The ID of the detail type (dty_ID) to retrieve.
+         * @returns {string|null} The formatted value of the field, or null if not found/handled.
+         */
         function getValue(record, type, index) {
             // Determine type
             if(type == "freetext" || type =="blocktext" || type == "date") {
@@ -315,7 +366,12 @@ if(isset($_POST['data'])) {
             return null;
         }
 
-        // get list of field types
+        /**
+         * Gets a comma-separated string of selected field type IDs (dty_ID) from the dropdowns.
+         * Only includes IDs for dropdowns where a valid field has been selected (value > 0).
+         *
+         * @returns {string} A comma-separated string of selected dty_IDs.
+         */
         function getSelectedFieldTypeIds() {
             var res = [];
             for(var i=0; i<dropdowns.length; i++) {
@@ -329,13 +385,22 @@ if(isset($_POST['data'])) {
         }
 
 
-        // Replaces the raw message text with fields in a record
+        /**
+         * Replaces placeholder hashtags (like #email, #firstname) in the raw message text
+         * with actual content from the given record's fields.
+         * The `fields` parameter (which is `definitions` in practice) is used to determine field types.
+         *
+         * @param {string} message - The raw message template with placeholders.
+         * @param {object} record - The Heurist record object.
+         * @param {object} fields - The record type field definitions (same as global `definitions`).
+         * @returns {string} The message with placeholders replaced by record data.
+         */
         function prepareMessage(message, record, fields) {
             // Replace hashtags by actual content
             for(var i=0; i<dropdowns.length; i++) {
                 // Index selected in the dropdown
                 var dty_ID = $(dropdowns[i]).val();// field type index
-                var value = "?";
+                var value = "?"; // Default if field not selected or value not found
                 if(dty_ID && dty_ID > 0) {
                     var field_type = $Db.dty(dty_ID, 'dty_Type');
                     value = getValue(record, field_type, dty_ID);// Record value at the given index
@@ -348,7 +413,19 @@ if(isset($_POST['data'])) {
             return message;
         }
 
-        // Prepares the email
+        /**
+         * Handles the two-stage process of preparing and sending emails.
+         * If the button text is "Prepare emails":
+         *  - It generates a preview of the first email by calling `prepareMessage`.
+         *  - It loads necessary record details if not already present.
+         *  - It updates the UI to show the prepared message and changes the button text to "Send emails".
+         * If the button text is "Send emails":
+         *  - It constructs a data object containing the subject and an array of email objects
+         *    (each with recipients and a personalized message for each record).
+         *  - It includes an email to the database owner.
+         *  - It POSTs this data to `send_email.php` for actual sending.
+         *  - It displays the server's response in a dialog.
+         */
         function prepare() {
             // Raw message
             var rawMessage =  $("#message").val();

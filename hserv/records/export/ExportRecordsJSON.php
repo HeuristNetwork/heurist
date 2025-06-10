@@ -23,6 +23,7 @@
 
 namespace hserv\records\export;
 use hserv\records\export\ExportRecords;
+use hserv\utilities\Temporal;
 
 
 /**
@@ -598,7 +599,7 @@ private function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
 
                 }elseif($this->datatable_session_id > 0 && $field_type=='date'){
 
-                    $temporal = new \Temporal($field_value);
+                    $temporal = new Temporal($field_value);
                     $field_value = $temporal && $temporal->isValid() ? $temporal->toReadableExt('', true) : $field_value;
 
                 }

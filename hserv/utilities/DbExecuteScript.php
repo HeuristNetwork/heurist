@@ -1,25 +1,19 @@
 <?php
 /**
-* utils_db_load_script.php: Executes SQL script. Heavily modified from bigdump.php (ozerov.de/bigdump)
-*                           allowing processing of very large MySQL dump files
+* DbExecuteScript.php: Executes SQL script. 
+* 
+* Heavily modified from bigdump.php (ozerov.de/bigdump) allowing processing of very large MySQL dump files
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\utilities
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @link        http://www.ozerov.de/bigdump 
+* @copyright   (C) 2003-2013 
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
+* @author      Alexey Ozerov (alexey at ozerov dot de) 
+* @author      Krzysiek Herod (kr81uni at wp dot pl)
+* @since       4.0
 */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 
 //error_reporting(E_ALL);
 
@@ -28,9 +22,9 @@
 // Even through the webservers with hard runtime limit and those in safe mode
 // Works fine with Internet Explorer 7.0 and Firefox 2.x
 
-// Author:       Alexey Ozerov (alexey at ozerov dot de)
+// Author:       Alexey Ozerov (alexey at ozerov dot de) 
 //               AJAX & CSV functionalities: Krzysiek Herod (kr81uni at wp dot pl)
-// Copyright:    GPL (C) 2003-2013
+// Copyright:    GPL (C) 
 // More Infos:   http://www.ozerov.de/bigdump
 
 // This program is free software; you can redistribute it and/or modify it under the

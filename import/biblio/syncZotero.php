@@ -21,6 +21,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 use hserv\structure\ConceptCode;
+use hserv\utilities\Temporal;
 
 ini_set('max_execution_time', '0');
 

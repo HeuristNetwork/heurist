@@ -27,6 +27,7 @@
 namespace hserv\records\export;
 use hserv\records\export\ExportRecords;
 use hserv\structure\ConceptCode;
+use hserv\utilities\Temporal;
 
 /**
 *
@@ -477,7 +478,7 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
                         $date_end = $value;
                     }elseif($value!=null){
                         //parse temporal
-                        $ta = new \Temporal($value);
+                        $ta = new Temporal($value);
                         $ta = $ta->getTimespan(true);
                         if($ta!=null){
                             $ta[] = $dty_ID;
@@ -705,13 +706,13 @@ private function _getGeoJsonFeature($record, $extended=false, $simplify=false, $
         $dty_ID = intval(DT_START_DATE);
 
         if($date_start && $date_end){ //both are defined
-            $dt = \Temporal::mergeTemporals($date_start, $date_end);
+            $dt = Temporal::mergeTemporals($date_start, $date_end);
         }else{
             if(!$date_start){
                 $date_start = $date_end;
                 $dty_ID = intval(DT_END_DATE);
             }
-            $dt = new \Temporal($date_start);
+            $dt = new Temporal($date_start);
         }
 
         if($dt && $dt->isValid())

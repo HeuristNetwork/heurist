@@ -1,63 +1,60 @@
 <?php
+/**
+* DbUtils.php - Class DbUtils
+* 
+* Handles various database lifecycle and utility operations with database folders.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  hserv\utilities
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
+*/
+
 namespace hserv\utilities;
 use hserv\utilities\DbRegis;
 use hserv\utilities\UArchive;
 
-/**
-* dbUtils.php : Functions to create, delelet, clean the entire HEURIST database
-*               and other functions to do with database file structure
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
-* @subpackage  DataStore
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-/**
-* Static class to perform database operations
-*
-* Methods:
-*
-* databaseDrop - Removes database entirely with optional beforehand archiving
-* databaseDump - dumps all tables (except csv import cache) into SQL dump
-* databaseCreateFull - Creates new heurist database, with file folders, given user and ready to use
-* databaseValidateName - Verifies that database name is valid and optionally that database exists or unique
-* databaseRestoreFromArchive - Restores database from archive
-* databaseEmpty - Clears data tables (retains defintions)
-* databaseCloneFull - clones database including folders
-* databaseResetRegistration
-* databaseRename - renames database (in fact it clones database with new name and archive/drop old database)
-*
-* databaseCheckNewDefs
-* updateOriginatingDB - Assigns given Origin ID for rectype, detail and term defintions
-* updateImportedOriginatingDB - Assigns Origin ID for rectype, detail and term defintions after import from unregistered database
-*
-* private:
-*
-* _databaseInitForNew - updates dbowner, adds default saved searches and lookups
-* databaseClone - copy all tables (except csv import cache) from one db to another (@todo rename to _databaseCopyTables)
-* _emptyTable - delete all records for given table
-* databaseCreateFolders - creates if not exists the set of folders for given database
-* databaseCreate - Creates new heurist database
-* databaseCreateConstraintsAndTriggers - Recreates constraints and triggers
-*/
-
-require_once 'utils_db_load_script.php';
+require_once 'DbExecuteScript.php';
 require_once dirname(__FILE__).'/../../external/php/Mysqldump8.php';
 require_once dirname(__FILE__).'/../structure/import/importDefintions.php';
 
+
+/**
+* Class DbUtils
+* 
+* Static class to perform various database lifecycle and utility operations.
+*
+* This class provides functionality for creating, dropping, cloning, renaming, dumping,
+* restoring, and emptying Heurist databases. It also includes methods for managing
+* database folders, validating names, handling database registration aspects,
+* and managing definition origins. Progress tracking for long operations is also supported.
+*
+* Public Static Methods:
+* - initialize(\mysqli|null $mysqli): Initializes the DbUtils class.
+* - setSessionId(int $id): Sets the session ID for progress tracking.
+* - setSessionVal(mixed $session_val): Updates the progress value for the current session.
+* - databaseCheckNewDefs(string|null $database): Checks for new (unregistered) definitions.
+* - databaseDrop(bool $verbose, string|null $database_name, bool|string $createArchive): Removes a database entirely.
+* - databaseDump(string|null $database_name, string|null $database_dumpfile, array|null $dump_options, bool $verbose): Dumps database tables to an SQL file.
+* - databaseCreateFull(string $database_name, array &$user_record, string|null $templateFileName): Creates a new, fully functional Heurist database.
+* - databaseValidateName(string $database_name, int $check_exist_or_unique): Validates a database name.
+* - databaseRestoreFromArchive(string $database_name, string $archive_file, int $archive_folder): Restores a database from an archive.
+* - databaseCreate(string $database_name, int $level, string|null $dumpfile): Creates a new Heurist database, potentially from a dump.
+* - databaseCreateConstraintsAndTriggers(string $database_name): Recreates constraints and triggers for a database.
+* - databaseCreateFolders(string $database_name): Creates the standard set of folders for a database.
+* - databaseEmpty(string $database_name, bool $verbose): Clears data tables from a database, retaining definitions.
+* - databaseClone(string $db_source, string $db_target, bool $verbose, bool $nodata, bool $isCloneTemplate): Copies tables from one database to another.
+* - databaseCloneFull(string|null $db_source, string $db_target, bool $nodata, bool $isCloneTemplate): Clones an entire database, including folders.
+* - databaseResetRegistration(string $dbname): Removes registration info and assigns origin ID after cloning.
+* - databaseUpdateRegistration(string $dbname, array $reg_record): Updates database registration info.
+* - databaseRename(string $db_source, string $db_target, bool $createArchive): Renames a database.
+* - updateOriginatingDB(int $dbID): Assigns a given Origin ID to definitions.
+* - updateImportedOriginatingDB(): Assigns Origin ID for definitions imported from an unregistered database.
+*/
 class DbUtils {
 
      /**
@@ -73,6 +70,13 @@ class DbUtils {
     private static $session_id = 0;
     private static $progress_step = 0;
 
+    /**
+     * Initializes the DbUtils class.
+     * Sets the system and mysqli objects.
+     *
+     * @param \mysqli|null $mysqli Optional mysqli object. If not provided, it's retrieved from the global $system object.
+     * @return void
+     */
     public static function initialize($mysqli=null)
     {
         if (self::$initialized) {return;}
@@ -89,18 +93,24 @@ class DbUtils {
         self::$initialized = true;
     }
 
-    //
-    // init progress session
-    //
+    /**
+     * Sets the session ID for progress tracking.
+     *
+     * @param int $id The session ID.
+     * @return void
+     */
     public static function setSessionId($id){
         self::$session_id = $id;
         self::$progress_step = 0;
     }
 
-    //
-    // update progress session value
-    // returns true if session has been terminated
-    //
+    /**
+     * Updates the progress value for the current session.
+     * Handles incremental progress steps. Checks if the session has been terminated.
+     *
+     * @param mixed $session_val The value to add to the progress or the absolute progress value.
+     * @return bool True if the session has been terminated by the client, false otherwise.
+     */
     public static function setSessionVal($session_val){
 
         if(self::$progress_step>0 && intval($session_val)>0){
@@ -116,9 +126,12 @@ class DbUtils {
         }
     }
 
-    //
-    //
-    //
+    /**
+     * Checks for new (unregistered) definitions (record types, detail types, terms) in a given database.
+     *
+     * @param string|null $database Optional. The name of the database to check. Defaults to the current database.
+     * @return string|false A string listing counts of new definitions if found, otherwise false.
+     */
     public static function databaseCheckNewDefs($database=null){
 
         if($database!=null){
@@ -149,12 +162,14 @@ class DbUtils {
     }
 
     /**
-    * Removes database entirely
-    *
-    * @param mixed $verbose
-    * @param mixed $database_name - name of database to be deleted
-    * @param true $createArchive - if true - creates db dump and archives all uploaded files
-    */
+     * Removes a database entirely, with an option to create an archive before deletion.
+     *
+     * @param bool $verbose If true, outputs detailed messages. Defaults to false.
+     * @param string|null $database_name Name of the database to be deleted. If null, an error is generated.
+     * @param bool|string $createArchive If true, creates a db dump and archives uploaded files.
+     *                                   Can be 'zip' or 'tar' to specify archive format (defaults to 'zip' if true). Defaults to false.
+     * @return bool True on successful deletion, false on failure.
+     */
     public static function databaseDrop( $verbose=false, $database_name=null, $createArchive=false ){
 
         // 1. Create an SQL dump in the filestore direcory
@@ -364,13 +379,14 @@ class DbUtils {
 
 
     /**
-    * Dumps all tables into SQL dump
-    *
-    * @param mixed $database_name   - database name if not defined - current database
-    * @param mixed $database_dumpfile - name of dumpfile
-    * @param mixed $dump_options
-    * @param mixed $verbose
-    */
+     * Dumps all tables of a specified database into an SQL file.
+     *
+     * @param string|null $database_name Database name. Defaults to the current database if null.
+     * @param string|null $database_dumpfile Path to the output SQL dump file. If null, a default path is generated.
+     * @param array|null $dump_options Options for mysqldump or the PHP-based dumper. See code for details.
+     * @param bool $verbose If true, outputs detailed messages. Defaults to false.
+     * @return string|false The path to the created dump file on success, false on failure.
+     */
     public static function databaseDump($database_name=null, $database_dumpfile=null, $dump_options=null, $verbose=false ) {
 
         self::initialize();
@@ -559,14 +575,14 @@ class DbUtils {
     }
 
     /**
-    * Creates new heurist database with file folders, given user and ready to use
-    *
-    * @param mixed $database_name - target db name
-    * @param mixed $user_record   - user that will added as dbowner
-    * @param mixed $templateFileName  - text based database definitions (coreDefinitions.txt by default)
-    *
-    * @returns false or array of warnings
-    */
+     * Creates a new Heurist database with file folders, initializes it with a given user, and makes it ready to use.
+     *
+     * @param string $database_name Target database name.
+     * @param array &$user_record User data (by reference) that will be set as the db owner.
+     * @param string|null $templateFileName Path to a text file with database definitions (e.g., "coreDefinitions.txt").
+     *                                      Defaults to HEURIST_DIR."admin/setup/dbcreate/coreDefinitions.txt".
+     * @return array|false An array of warning messages on success (can be empty), or false on critical failure.
+     */
     public static function databaseCreateFull($database_name, &$user_record, $templateFileName=null){
 
             self::initialize();
@@ -804,11 +820,14 @@ class DbUtils {
 
 
     /**
-    * Verifies that database name is valid and optionally that database exists or unique
-    *
-    * @param mixed $database_name
-    * @param mixed $check_exist_or_unique - 1 must be unique, 2 - must exist, 0 - skip this check
-    */
+     * Verifies that a database name is valid and optionally checks if the database exists or is unique.
+     *
+     * @param string $database_name The name of the database to validate.
+     * @param int $check_exist_or_unique Optional. 0 to skip existence/uniqueness check (default).
+     *                                     1 to check if the database name is unique (must not exist).
+     *                                     2 to check if the database exists.
+     * @return string|null Null if the name is valid and passes checks, otherwise an error message string.
+     */
     public static function databaseValidateName($database_name, $check_exist_or_unique=1){
 
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
@@ -841,12 +860,17 @@ class DbUtils {
     }
 
     /**
-    * Restores database from archive
-    *
-    * @param mixed $database_name - name of target dastabase
-    * @param mixed $archive_file - name of zip file
-    * @param mixed $archive_folder - id of source folder (DATABASE_DELETED by default)
-    */
+     * Restores a database from an archive file.
+     *
+     * @param string $database_name Name of the target database to create/restore.
+     * @param string $archive_file Name of the archive file (e.g., .zip, .tar.bz2).
+     * @param int $archive_folder Identifier for the source folder of the archive.
+     *                            1: DELETED_DATABASES (default)
+     *                            2: /srv/BACKUP/
+     *                            3: /srv/BACKUP/ARCHIVE/ (or HEURIST_FILESTORE_ROOT.'BACKUP/ARCHIVE/' for local dev)
+     *                            4: DBS_TO_RESTORE
+     * @return bool True on success, false on failure.
+     */
     public static function databaseRestoreFromArchive($database_name, $archive_file, $archive_folder=1){
 
         self::initialize();
@@ -991,12 +1015,17 @@ class DbUtils {
     }
 
     /**
-    * Creates new heurist database
-    *
-    * @param mixed $database_name
-    * @param mixed $level - 0 empty db, 1 +structure, 2 +constraints and triggers
-    * @param mixed $dumpfile - database dump file to restore if $level>0
-    */
+     * Creates a new Heurist database.
+     *
+     * @param string $database_name The name for the new database.
+     * @param int $level Optional. Level of creation:
+     *                   0: Create an empty database.
+     *                   1: Create database and import structure (typically from $dumpfile).
+     *                   2: Create database, import structure, and add constraints/triggers (default).
+     * @param string|null $dumpfile Optional. Name of the SQL dump file to use for creating structure/data.
+     *                              Defaults to 'blankDBStructure.sql'. Assumed to be in the db folder or admin/setup/dbcreate.
+     * @return bool True on success, false on failure.
+     */
     public static function databaseCreate($database_name, $level=2, $dumpfile=null){
 
         self::initialize();
@@ -1082,11 +1111,11 @@ class DbUtils {
 
 
     /**
-    * Recreates constraints and triggers (executes sql commands from files)
-    *
-    * @param mixed $database_name
-    * @return {false|true}
-    */
+     * Recreates constraints and triggers for a specified database by executing SQL script files.
+     *
+     * @param string $database_name The name of the database.
+     * @return bool True on success, false if any script fails.
+     */
     public static function databaseCreateConstraintsAndTriggers($database_name){
 
         self::initialize();
@@ -1109,10 +1138,11 @@ class DbUtils {
     }
 
     /**
-    * Creates if not exists set of folders for given database
-    *
-    * @param mixed $database_name
-    */
+     * Creates the standard set of folders required for a Heurist database if they do not already exist.
+     *
+     * @param string $database_name The name of the database for which to create folders.
+     * @return array An array of warning messages if any folder creation failed. Empty if all successful.
+     */
     public static function databaseCreateFolders($database_name){
 
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
@@ -1216,12 +1246,13 @@ class DbUtils {
     }
 
     /**
-    * Clears data tables (retains defintions)
-    *
-    * @param mixed $database_name - target database
-    * @param mixed $verbose
-    * @return {false|mysqli_result|true}
-    */
+     * Clears data from tables in a specified database, retaining table structures and definitions.
+     * Empties tables like Records, recDetails, recLinks, etc.
+     *
+     * @param string $database_name The name of the database to empty.
+     * @param bool $verbose Optional. If true, outputs detailed messages. Defaults to true.
+     * @return bool True on success, false on failure.
+     */
     public static function databaseEmpty($database_name, $verbose=true){
 
         self::initialize();
@@ -1311,11 +1342,15 @@ class DbUtils {
     *
     * $isCloneTemplate - true for clone curated database
     *
-    * @param mixed $db_source - full name (with hdb_) for source database
-    * @param mixed $db_target - must exist as new empty heurist database created by  databaseCreate($db_target, 1)
-    * @param mixed $verbose
+    * @param string $db_source Full name (e.g., hdb_source) for the source database.
+    * @param string $db_target Full name (e.g., hdb_target) for the target database.
+    *                          The target database must exist (e.g., created by databaseCreate($db_target, 1)).
+    * @param bool $verbose If true, outputs detailed messages.
+    * @param bool $nodata Optional. If true, only table structures are copied, not data from data_tables. Defaults to false.
+    * @param bool $isCloneTemplate Optional. If true, special handling for cloning a template database. Defaults to false.
+    * @return bool True on success, false on failure.
     *
-    * @todo make private and rename to databaseCopyTables
+    * @todo Make private and rename to _databaseCopyTables (as per original @todo).
     */
     public static function databaseClone($db_source, $db_target, $verbose, $nodata=false, $isCloneTemplate=false){
 
@@ -1497,14 +1532,15 @@ class DbUtils {
     }
 
     /**
-    * Clones database including folders
-    *
-    * @param $db_source - source database by default current one (HEURIST_DBNAME)
-    * @param mixed $db_target - target database
-    * @param mixed $nodata - if true only defintions will be clone (no Records)
-    * @param false $isCloneTemplate - clone from curated registered datbase -NOT USED ANYMORE
-    *           db onwer will be changed to current user
-    */
+     * Clones an entire database, including its file structure and data.
+     *
+     * @param string|null $db_source Source database name. Defaults to the current database (HEURIST_DBNAME) if null.
+     * @param string $db_target Target database name.
+     * @param bool $nodata Optional. If true, only definitions and structure are cloned (no record data). Defaults to false.
+     * @param bool $isCloneTemplate Optional. If true, specific logic for cloning a template database is applied.
+     *                              The database owner will be changed to the current user. Defaults to false.
+     * @return bool True on success, false on failure.
+     */
     public static function databaseCloneFull($db_source, $db_target, $nodata=false, $isCloneTemplate=false)
     {
         global $passwordForServerFunctions;
@@ -1645,11 +1681,12 @@ class DbUtils {
 
 
     /**
-    * Removes registration info and assign originID for definitions
-    * (after clone)
-    *
-    * @param mixed $dbname
-    */
+     * Resets database registration information and assigns a new origin ID for its definitions.
+     * Typically used after cloning a database.
+     *
+     * @param string $dbname The name of the database to reset registration for.
+     * @return void
+     */
     public static function databaseResetRegistration($dbname){
 
         self::initialize();
@@ -1670,6 +1707,16 @@ class DbUtils {
         }
     }
 
+    /**
+     * Updates the registration information for a database.
+     * This includes setting the OriginatingDBID for definitions and updating sysIdentification.
+     *
+     * @param string $dbname The name of the database to update.
+     * @param array $reg_record An array containing registration details. Expected keys:
+     *                          'dbID' (int) - The registration ID of the database.
+     *                          'dbTitle' (string) - The title or description of the database.
+     * @return void
+     */
     public static function databaseUpdateRegistration($dbname, $reg_record){
 
         self::initialize();
@@ -1694,13 +1741,14 @@ class DbUtils {
 
 
     /**
-    * Renames database (in fact it clones database with new name and archive/drop old database)
-    *
-    * @param mixed $db_source
-    * @param mixed $db_target
-    * @param mixed $createArchive - if true creates archive of old db before dropping
-    * @return true on success
-    */
+     * Renames a database. This is typically achieved by cloning the database to a new name
+     * and then dropping the original database (optionally archiving it first).
+     *
+     * @param string $db_source The current name of the database.
+     * @param string $db_target The new name for the database.
+     * @param bool $createArchive Optional. If true, the original database is archived before being dropped. Defaults to false.
+     * @return bool True on successful rename, false on failure.
+     */
     public static function databaseRename($db_source, $db_target, $createArchive=false){
 
         /*
@@ -1777,11 +1825,12 @@ class DbUtils {
 
 
     /**
-    * Assigns given Origin ID for rectype, detail and term defintions
-    *
-    * @param mixed $dbID  - database registration id
-    * @return {false|true}
-    */
+     * Assigns a given Originating Database ID (dbID) to record types, detail types, and terms
+     * in the current database that do not yet have an OriginatingDBID set (or it's '0').
+     *
+     * @param int $dbID The database registration ID to set as the OriginatingDBID.
+     * @return bool True on success, false if any update query fails.
+     */
     public static function updateOriginatingDB($dbID){
 
         self::initialize();
@@ -1818,9 +1867,13 @@ class DbUtils {
     }
 
     /**
-    * Assigns Origin ID for rectype, detail and term defintions if they equal 9999
-    * (after import from unregistered database)
-    */
+     * Assigns the current database's registration ID (HEURIST_DBID if defined) as the
+     * OriginatingDBID for record types, detail types, and terms that have a placeholder
+     * OriginatingDBID of '9999'. This is typically used after importing definitions
+     * from an unregistered database.
+     *
+     * @return bool True on success, false if any update query fails or HEURIST_DBID is not defined.
+     */
     public static function updateImportedOriginatingDB(){
 
         self::initialize();

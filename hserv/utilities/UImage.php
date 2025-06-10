@@ -1,60 +1,59 @@
 <?php
+/**
+* UImage.php - Class UImage
+*
+* Image manipulation utilities.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  hserv\utilities
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
+*/
 namespace hserv\utilities;
 use hserv\utilities\USanitize;
 use hserv\utilities\USystem;
 
-/**
-* Image manipulation library
-*
-* createFromString - creates image with given text
-* makeURLScreenshot - makes screenshot for given url
-* getRemoteImage - downloads image from given url
-* getImageFromFile - returns image object for given file
-* changeImageColor - changes black color in given image to new one (for icons), adds circle and circle background
-* getImageType - returns extension based of exif
-* checkMemoryForImage - verifies if image can be loaded into memory
-*
-* safeLoadImage -  memory safe load from file to image object
-* createScaledImageFile - creates thumbnail for given image file
-* resizeImage - resizes given image
-* getPdfThumbnail - creates thumbnail from pdf file
-*
-* getPrevailBackgroundColor - finds prevail background color
-*
-* private
-* _resizeImageGD - creates scaled image with native GD php functions
-* _parseColor
-* _rgb2hex
-*
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+//use Screen\Capture; //for micorweber
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+/**
+* Class UImage
+* 
+* Image manipulation utilities.
+*
+* Provides static methods for various image operations including:
+* - Creating images from text strings.
+* - Generating screenshots of URLs.
+* - Fetching remote images.
+* - Loading images from files with memory safety checks.
+* - Modifying image colors, particularly for icons.
+* - Determining image type and orientation using EXIF data.
+* - Resizing and scaling images (thumbnails) using GD or Imagick.
+* - Generating thumbnails for PDF files and IIIF manifests.
+* - Analyzing images to find the prevailing background color.
+*
+*/
+class UImage {
+
+    /**
+     * Creates an image with the given text rendered on it.
+     * The text is word-wrapped and centered on a 100x100 white background with a simple border.
+     * Font size is adjusted if the text is too long.
+     *
+     * @param string $desc The text to be inserted into the image.
+     * @return \GdImage|false The GD image resource on success (current implementation always returns a resource, never false).
+     */
+    public static function createFromString($desc) {
+        $desc = preg_replace('/\\s+/', ' ', $desc);
 * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
 * Unless required by applicable law or agreed to in writing, software distributed under the License is
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-//use Screen\Capture; //for micorweber
-
-class UImage {
-
-    /**
-    * Creates image with given text
-    *
-    * @param mixed $desc - text to be inserted into resulted image
-    * @return resource - image with the given text
-    */
-    public static function createFromString($desc) {
-        $desc = preg_replace('/\\s+/', ' ', $desc);
 
         $font = 3; $fw = imagefontwidth($font); $fh = imagefontheight($font);
         $desc_lines = explode("\n", wordwrap($desc, intval(100/$fw)-1, "\n", false));
@@ -102,11 +101,14 @@ class UImage {
 
 
     /**
-    * makes screenshot for given url (using either WEBSITE_THUMBNAIL_SERVICE
-    * or Google PageSpeed Insights API
-    *
-    * @param mixed $url
-    */
+     * Makes a screenshot of a given URL.
+     * Uses either a configured WEBSITE_THUMBNAIL_SERVICE or Google PageSpeed Insights API.
+     * Saves the screenshot to a temporary file.
+     *
+     * @param string $siteURL The URL to take a screenshot of.
+     * @return object|array An object with file details (original_name, name, fullpath, size, type) on success,
+     *                      or an array with an 'error' key on failure.
+     */
     public static function makeURLScreenshot($siteURL){
 
         if(!filter_var($siteURL, FILTER_VALIDATE_URL)){
@@ -178,11 +180,13 @@ class UImage {
     }
 
     /**
-    * Downloads image from given url
-    *
-    * @param mixed $remote_url
-    * @return resource
-    */
+     * Downloads an image from a given URL.
+     * Optionally extracts EXIF orientation if the $orientation parameter is passed by reference.
+     *
+     * @param string $remote_url The URL of the image to download.
+     * @param int|null &$orientation Optional. Passed by reference. If provided, will be populated with the image's EXIF orientation code (0 if none or error).
+     * @return \GdImage|false The GD image resource on success, or false on failure (e.g., cURL error, invalid image data).
+     */
     public static function getRemoteImage($remote_url, &$orientation=null){  //get_remote_image
 
         $img = null;
@@ -213,11 +217,13 @@ class UImage {
 
 
     /**
-    * Returns image object for given filename
-    *
-    * @param mixed $filename
-    * @return {false|GdImage|null}
-    */
+     * Returns a GD image resource from a given image file.
+     * Determines the image type and uses a memory-safe loading function.
+     *
+     * @param string $filename The path to the image file.
+     * @return \GdImage|false|null A GD image resource on success, false if loading fails or type is unsupported,
+     *                             null if the file does not exist or is not a recognized image type.
+     */
     public static function getImageFromFile($filename){
         $mimeExt = UImage::getImageType($filename);
         $image = null;
@@ -228,9 +234,17 @@ class UImage {
     }
 
     /**
-    * Changes black color in given image to new one (for icons)
-    * Adds circle and circle background
-    */
+     * Changes black color in a source PNG image to a new specified color,
+     * optionally adding a circular border and background. Saves or outputs the modified image.
+     * Primarily used for Heurist icons.
+     *
+     * @param string $filename Path to the source PNG image file.
+     * @param string|null $filename_new Path to save the new image. If null, outputs image directly to browser.
+     * @param string|array|null $color_new The new color to replace black. Can be hex string (e.g., "#FF0000") or RGB array. Defaults to red if null.
+     * @param string|array|null $circle_color Color for the circle border. Null for no border.
+     * @param string|array|null $bg_circle_color Color for the filled circle background. Null for no background fill.
+     * @return void
+     */
     public static function changeImageColor($filename, $filename_new, $color_new, $circle_color, $bg_circle_color){
 
         if(file_exists($filename)){
@@ -318,11 +332,12 @@ class UImage {
     }
 
     /**
-    * Returns extension based of exif
-    *
-    * @param mixed $filename
-    * @return null
-    */
+     * Determines the image type (extension) of a file using EXIF data if available,
+     * otherwise falls back to pathinfo.
+     *
+     * @param string $filename The path to the image file.
+     * @return string|null The image type extension (e.g., 'jpg', 'png', 'gif') or null if not determinable or file doesn't exist.
+     */
     public static function getImageType($filename){
 
         $mimeExt = null;
@@ -367,11 +382,12 @@ class UImage {
 
 
     /**
-    * Returns orientation based of exif
-    *
-    * @param mixed $file_path
-    * @return int
-    */
+     * Retrieves the EXIF orientation code from an image file.
+     *
+     * @param string $file_path The path to the image file.
+     * @return int The EXIF orientation code (1-8). Returns 0 if no orientation data,
+     *             EXIF extension not available, or file error.
+     */
     public static function getImageOrientation($file_path){
 
         if (!function_exists('exif_read_data')) {
@@ -391,11 +407,13 @@ class UImage {
     }
 
     /**
-    * Verifies the size of image - is it possible to load into allowed memory
-    *
-    * @param mixed $filename
-    * @param mixed $mimeExt
-    */
+     * Estimates memory needed to load an image and checks if it's within allowed limits.
+     *
+     * @param string $filename The path to the image file.
+     * @param string $mimeExt The MIME type or extension of the image (e.g., 'jpg', 'image/png').
+     * @return string|null An error message string if memory check fails (memory needed exceeds limits),
+     *                     or null if memory requirements are acceptable or type is not checked.
+     */
     public static function checkMemoryForImage($filename, $mimeExt){
 
         $errorMsg = null;
@@ -435,11 +453,14 @@ class UImage {
     }
 
     /**
-    * memory safe load from file to image object
-    *
-    * @param mixed $filename
-    * @param mixed $mimeExt
-    */
+     * Safely loads an image from a file into a GD image resource.
+     * Handles potential errors during image creation from various formats and sets up an error handler
+     * to catch GD library warnings/errors, sending an email to admin if issues occur.
+     *
+     * @param string $filename The path to the image file.
+     * @param string $mimeExt The MIME type or extension of the image (e.g., 'jpg', 'image/png', 'gif').
+     * @return \GdImage|false A GD image resource on success, or false if loading fails or the image type is unsupported.
+     */
     public static function safeLoadImage($filename, $mimeExt){
 
         $img = null;
@@ -489,8 +510,18 @@ class UImage {
     }
 
     /**
-    * Creates thumbnail for given image file
-    */
+     * Creates a scaled thumbnail for a given image file.
+     * Uses Imagick if available, otherwise falls back to GD.
+     * If thumbnail creation fails and $create_error_thumb is true, an error image is generated.
+     *
+     * @param string $filename Path to the source image file.
+     * @param string $scaled_file Path to save the scaled thumbnail.
+     * @param int $max_width Optional. Maximum width of the thumbnail. Defaults to 200.
+     * @param int $max_height Optional. Maximum height of the thumbnail. Defaults to 200.
+     * @param bool $create_error_thumb Optional. If true, creates an image with an error message if scaling fails. Defaults to true.
+     * @param string $force_type Optional. Force output type ('png' or 'jpg'). Defaults to 'png'.
+     * @return bool|string True on success, or an error message string on failure.
+     */
     public static function createScaledImageFile($filename, $scaled_file, $max_width = 200, $max_height = 200, $create_error_thumb=true, $force_type='png'){
 
         $mimeExt = UImage::getImageType($filename);
@@ -531,12 +562,17 @@ class UImage {
 
 
     /**
-    * Resizes given image to PNG
-    * saves into $thumbnail_file and returns true if success
-    * Used ONLY in recordFile.php fileCreateThumbnail
-    *
-    * @param mixed $filename
-    */
+     * Resizes a given GD image resource to specified dimensions and saves it as a PNG file.
+     * Handles EXIF orientation if provided.
+     * Used primarily by recordFile.php's fileCreateThumbnail function.
+     *
+     * @param \GdImage $img The source GD image resource.
+     * @param string|null $thumbnail_file Optional. Path to save the resized PNG image. If null, the image is created but not saved (and then destroyed).
+     * @param int $x Optional. Target width for the resized image. Defaults to 200.
+     * @param int $y Optional. Target height for the resized image. Defaults to 200.
+     * @param int $orientation Optional. EXIF orientation code (1-8) to apply before resizing. Defaults to 0 (no orientation change).
+     * @return bool True on successful resizing and saving (if $thumbnail_file is provided), false otherwise (though current path always returns true).
+     */
     public static function resizeImage($img, $thumbnail_file=null, $x = 200, $y = 200, $orientation=0){
 
         if($orientation>0){
@@ -723,11 +759,14 @@ class UImage {
     
     
     /**
-    * Downloads thumbnail for iiif manifest of image
-    *
-    * @param mixed $file
-    * @param mixed $thumbnail_file
-    */
+     * Downloads or constructs a thumbnail URL from a IIIF manifest or IIIF image URL,
+     * then downloads and saves it as a scaled image file.
+     *
+     * @param string $iiif_url The URL of the IIIF manifest or IIIF image info.json.
+     * @param array|null $iiif_manifest Optional. A pre-parsed IIIF manifest array. If null, it will be fetched from $iiif_url.
+     * @param string $thumbnail_file Path to save the generated thumbnail image.
+     * @return string|null The URL of the thumbnail image used, or null if processing fails or no suitable thumbnail is found.
+     */
     public static function getIiifThumbnail( $iiif_url, $iiif_manifest, $thumbnail_file ){
 
         $thumbUrl = null;
@@ -818,11 +857,13 @@ class UImage {
     }
 
     /**
-    * Creates thumbnail from pdf file
-    *
-    * @param mixed $filename
-    * @param mixed $thumbnail_file
-    */
+     * Creates a thumbnail image from the first page of a PDF file.
+     * Uses ImageMagick's `convert` command if Imagick extension is not loaded, otherwise uses Imagick.
+     *
+     * @param string $filename Path to the source PDF file.
+     * @param string $thumbnail_file Path to save the generated thumbnail image (typically PNG).
+     * @return bool True on success, false on failure.
+     */
     public static function getPdfThumbnail( $filename, $thumbnail_file ){
 
         if(!extension_loaded('imagick')){
@@ -862,10 +903,13 @@ class UImage {
     }
 
     /**
-    * Finds prevail background color need php version >5.5
-    * NOT USED
-    * @param mixed $file
-    */
+     * Finds the prevailing background color of an image by scaling it to 1x1 pixel.
+     * Requires PHP version >5.5 for `imagescale`.
+     * NOTE: This method is marked as NOT USED in the original source.
+     *
+     * @param string $filename Path to the image file.
+     * @return string A hex color string (e.g., "#RRGGBB"), or "#FFFFFF" (white) if image processing fails.
+     */
     public static function getPrevailBackgroundColor2($filename){
 
         $image = UImage::getImageFromFile($filename);
@@ -888,10 +932,13 @@ class UImage {
 
 
     /**
-    * Finds prevail background color
-    *
-    * @param mixed $file
-    */
+     * Finds the prevailing background color of an image using a histogram method.
+     * It analyzes the color distribution to determine the most dominant color.
+     *
+     * @param string $filename Path to the image file.
+     * @return string A hex color string (e.g., "#RRGGBB") representing the prevailing color,
+     *                or "#FFFFFF" (white) if image processing fails.
+     */
     public static function getPrevailBackgroundColor($filename){
         // histogram options
 
@@ -971,11 +1018,15 @@ class UImage {
     }
 
     /**
-    * Creates scaled image with Imagic
-    * saves into $thumbnail_file and returns true or error message
-    *
-    * @param mixed $filename
-    */
+     * Resizes an image using the Imagick extension and saves it.
+     *
+     * @param string $filename Path to the source image file.
+     * @param string $scaled_file Path to save the scaled image.
+     * @param int $max_width Optional. Maximum width of the scaled image. Defaults to 200.
+     * @param int $max_height Optional. Maximum height of the scaled image. Defaults to 200.
+     * @param string $force_type Optional. Force output image type ('png' or 'jpg'). Defaults to 'png'.
+     * @return bool|string True on success, or an error message string on ImagickException.
+     */
     private static function _resizeImageImagic($filename, $scaled_file, $max_width = 200, $max_height = 200, $force_type='png'){
 
         try{
@@ -1016,11 +1067,16 @@ class UImage {
 
 
     /**
-    * Creates scaled PNG image with native GD php functions
-    * saves into $thumbnail_file and returns true or false
-    *
-    * @param mixed $filename
-    */
+     * Resizes an image using GD library functions and saves it.
+     * Handles transparency for PNGs.
+     *
+     * @param \GdImage $src_img The source GD image resource.
+     * @param string $scaled_file Path to save the scaled image.
+     * @param int $max_width Optional. Maximum width of the scaled image. Defaults to 200.
+     * @param int $max_height Optional. Maximum height of the scaled image. Defaults to 200.
+     * @param string $scale_type Optional. Output image type ('png' or 'jpg'). Defaults to 'png'.
+     * @return bool True on success, false on failure (e.g., if imagecreatetruecolor is not available or saving fails).
+     */
     private static function _resizeImageGD($src_img, $scaled_file, $max_width = 200, $max_height = 200, $scale_type = 'png'){
 
         if (!function_exists('imagecreatetruecolor')) {
@@ -1105,9 +1161,12 @@ class UImage {
     }
 
 
-    //
-    //
-    //
+    /**
+     * Parses a color string (hex or rgb) into an RGB array.
+     *
+     * @param string|null $param_color The color string (e.g., "#FF0000", "rgb(255,0,0)") or null.
+     * @return array|null An array [R, G, B] or null if input is null. Defaults to red if parsing fails on non-null input.
+     */
     private static function _parseColor($param_color){
 
         if($param_color!=null){
@@ -1132,9 +1191,12 @@ class UImage {
     }
 
 
-    //
-    //
-    //
+    /**
+     * Converts an RGB color array to a hex color string.
+     *
+     * @param array $rgb An array with three integer elements [R, G, B].
+     * @return string The hex color string (e.g., "#RRGGBB").
+     */
     private static function _rgb2hex($rgb) {
         $hex = "#";
         $hex .= str_pad(dechex($rgb[0]), 2, '0', STR_PAD_LEFT);

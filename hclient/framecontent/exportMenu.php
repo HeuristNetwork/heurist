@@ -25,7 +25,12 @@ require_once 'initPage.php';
 <script type="text/javascript">
     var editing;
 
-    // Callback function on initialization
+    /**
+     * Callback function executed on page initialization.
+     * Initializes the export menu if the page setup was successful.
+     *
+     * @param {boolean} success Indicates whether the page initialization was successful.
+     */
     function onPageInit(success){
         if(success){
             var exportMenu = new hexportMenu( $('body') );

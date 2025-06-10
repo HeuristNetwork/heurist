@@ -3,6 +3,7 @@ use hserv\entity\DbRecUploadedFiles;
 use hserv\entity\DbDefRecTypes;
 use hserv\utilities\USanitize;
 use hserv\utilities\UImage;
+use hserv\utilities\Temporal;
 use hserv\structure\ConceptCode;
 use hserv\report\ReportRecord;
 
