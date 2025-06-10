@@ -2168,7 +2168,7 @@ function temporalToHumanReadableString(inputStr) {
             */
             if(isMonthSpan(tpq, taq)){
                 let date = new TDate(tpq);
-                month = TDate.getMonthName(date.getMonth());
+                const month = TDate.getMonthName(date.getMonth());
                 str = `${month} ${date.getYear()}`;
             }else{
                 str = formatGregJulian(tpq, isgj) + " to " + formatGregJulian(taq, isgj);
