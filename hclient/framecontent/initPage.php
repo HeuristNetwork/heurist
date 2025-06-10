@@ -257,7 +257,12 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
 
     //            }
 
-
+    /**
+     * Overrides the standard jQuery show() method.
+     * After calling the original show() method, it triggers a custom event 'myOnShowEvent'.
+     * This allows widgets or elements to listen for this event and refresh their content
+     * or perform actions when they become visible.
+     */
     var orgShow = $.fn.show;
     $.fn.show = function()
     {
@@ -269,7 +274,13 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
     //
     // overwrite datepicker method
     //
-
+    /**
+     * Overrides the jQuery UI Datepicker's _gotoToday function.
+     * Ensures that when "Today" is clicked, the date is selected and the datepicker closes,
+     * consistent with how selecting any other date works.
+     * @param {string} id The ID of the datepicker input field.
+     * @param {object} inst The datepicker instance.
+     */
     $.datepicker._gotoToday = function(event){
 
         var target = $(event),
@@ -289,10 +300,14 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
 
 
     window.onAboutInit = null;
-    window.onPageInit = null;
-    window.isHapiInited = false;
+    window.onPageInit = null; // User-defined page initialization function
+    window.isHapiInited = false; // Flag to track HAPI initialization status
 
-    // if hAPI is not defined in parent(top most) window we have to create new instance
+    /**
+     * Executes when the HTML document is fully loaded and parsed.
+     * Initializes HAPI (Heurist API) if it's not already initialized in the parent window.
+     * Calls onHapiInit as a callback.
+     */
     $(document).ready(function() {
 
         // Standalone check
@@ -308,6 +323,14 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
     //
     // Callback function on hAPI initialization
     //
+    /**
+     * Callback function executed after HAPI (Heurist API) is initialized.
+     * It applies the theme, calls a user-defined about init (if any),
+     * updates database statistics if needed, and then loads database definitions.
+     * Finally, it calls the user-defined onPageInit function.
+     *
+     * @param {boolean} success - Indicates whether HAPI initialization was successful.
+     */
     function onHapiInit(success)
     {
         window.isHapiInited = true;
@@ -316,7 +339,7 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
         {
             applyTheme();
 
-            if(!window.hWin.HEURIST4.util.isnull(window.onAboutInit) 
+            if(!window.hWin.HEURIST4.util.isnull(window.onAboutInit)
                 && window.hWin.HEURIST4.util.isFunction(window.onAboutInit))
             {
                     window.onAboutInit();//init about dialog
@@ -343,6 +366,10 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
         }
     }
 
+    /**
+     * Updates database statistics by sending a background AJAX request.
+     * This is typically triggered if HAPI sysinfo indicates a refresh is needed.
+     */
     function updateDatabaseStatistics(){
 
         let ajax_opts = {
@@ -372,6 +399,15 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
     //
     //
     //
+    /**
+     * Loads initial database definitions (like record types, fields, etc.) if they haven't been loaded yet.
+     * This function is crucial for the application to understand the database structure.
+     *
+     * @param {?(object|string)} params - Parameters for refreshing entity data. Can be 'all' or an object specifying specific entities.
+     * @param {?function(boolean)} callback - A callback function to execute after definitions are loaded (or failed to load).
+     *                                       It receives a boolean indicating success.
+     * @returns {boolean} True if definitions are being loaded, false if they were already loaded.
+     */
     function initialLoadDatabaseDefintions(params, callback){
 
             if($.isEmptyObject(window.hWin.HAPI4.EntityMgr.getEntityData2('defRecTypes'))){ //defintions are not loaded
@@ -436,6 +472,12 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
     //
     // it itakes name of theme from preferences , oherwise default theme is heurist
     //
+    /**
+     * Applies the user-selected or default theme to the page.
+     * It also sets the current layout ID in HAPI's sysinfo.
+     * Note: Dynamic theme loading via CSS link injection was found problematic and is commented out.
+     * The theme is expected to be set on the server side or via existing CSS.
+     */
     function applyTheme(){
 
         var prefs = window.hWin.HAPI4.get_prefs();

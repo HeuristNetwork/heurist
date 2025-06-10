@@ -15,17 +15,42 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+ * Initializes and manages the export menu functionality.
+ * This includes setting up UI elements, handling user interactions for various export formats,
+ * and constructing URLs for data export.
+ *
+ * @param {jQuery} container - The jQuery object representing the container for the export menu.
+ *                             This could be the main body for a dedicated export page or a specific
+ *                             menu container element.
+ * @returns {object} An object with public methods to interact with the export menu instance.
+ */
 function hexportMenu( container ) {
-    const _className = "exportMenu",
-    _version   = "0.4";
+    /** @const {string} _className - The name of this class module. */
+    const _className = "exportMenu";
+    /** @const {string} _version - The version of this class module. */
+    const _version   = "0.4";
+    /** @type {?object} dialog_options - Options to be passed to dialogs, can be set externally. */
     let dialog_options=null;
 
+    /**
+     * Initializes the export menu. Currently, it directly calls `_initMenu`.
+     * @private
+     * @param {jQuery} container - The jQuery object for the export menu container.
+     */
     function _init( container ){
 
         _initMenu( container );        
         
     }
 
+    /**
+     * Sets up the export menu, including link behaviors and handling of direct export via URL parameters.
+     * Differentiates initialization based on container type (e.g., 'menu_container' or 'heurist-export-menu6').
+     * Also handles the 'output' URL parameter to trigger specific exports or show a selection dialog.
+     * @private
+     * @param {jQuery} container - The jQuery object for the export menu container.
+     */
     function _initMenu( container ){
 
         if(container && container.attr('id')=='menu_container'){
@@ -82,7 +107,15 @@ function hexportMenu( container ) {
     }
     
     
-    //init listeners for auto-popup links
+    /**
+     * Initializes click listeners and href attributes for export links, typically for a layout
+     * where export actions are triggered by buttons associated with anchor tags.
+     * It modifies hrefs to include the database name and handles h3link compatibility.
+     * Click events on anchor tags or associated spans can trigger `_menuActionHandler` or `_onPopupLink`.
+     * @private
+     * @param {jQuery} [menu] - The menu container. Though not directly used in the current logic,
+     *                          it's passed as a parameter, possibly for future use or by convention.
+     */
     function _initLinks(menu){
 
         $('.export-button').each(function(){
@@ -106,26 +139,28 @@ function hexportMenu( container ) {
                         let save_as_file = true;
                         
                         let ele = $(event.target);
-                        if(ele.is('span')){
-                            save_as_file = false;
+                        if(ele.is('span')){ // If a span inside the link (e.g., for feed icons) is clicked
+                            save_as_file = false; // Feed links don't save as files directly
                             
                             if(ele.hasClass('mirador')){
-                                save_as_file = 'mirador';
+                                save_as_file = 'mirador'; // Special case for Mirador
                             }
                             
-                            ele = ele.parent();
+                            ele = ele.parent(); // Get the parent anchor tag
                         }
                         let action = ele.attr('data-action');
                         if(action){
                             _menuActionHandler(event, action, ele.attr('data-logaction'), save_as_file);
                             return false;
                         }else{
+                            // Fallback for links without a data-action, potentially for generic popups
                             _onPopupLink(event);
                         }
                     }
                 );
             }
 
+            // Make the button itself trigger the click on its associated anchor tag
             ele.button().on('click',
                     function(event){
                         $(this).parent().find('a').trigger('click');
@@ -135,20 +170,23 @@ function hexportMenu( container ) {
         
     }
 
-    //
-    // init listeners for links in ui-menu version 6
-    //
+    /**
+     * Initializes click listeners for links in a "version 6" UI menu.
+     * Assumes `li` elements with `data-export-action` attributes.
+     * @private
+     * @param {jQuery} menu - The jQuery object for the v6 menu container.
+     */
     function _initLinks_v6(menu){
      
         menu.find('li[data-export-action]').on({click:function(event){
             
             let ele = $(event.target);
-            if(!ele.is('li')){
+            if(!ele.is('li')){ // Ensure the event target is the li element itself
                 ele = ele.parents('li');
             }
             let action = ele.attr('data-export-action');
 
-            _menuActionHandler(event, action, ele.attr('data-logaction'), true);
+            _menuActionHandler(event, action, ele.attr('data-logaction'), true); // save_as_file is true by default for v6 menu actions
             
             return false;
         }});
@@ -156,12 +194,18 @@ function hexportMenu( container ) {
         menu.find('li[data-export-action]').css({'font-size':'smaller', padding:'6px'});
     }
     
-    //
-    //
-    //    
+    /**
+     * Handles clicks on links that are intended to open a popup dialog.
+     * It determines the URL and dimensions for the popup based on the link's classes and attributes.
+     * It also appends current query parameters to the URL if available.
+     * User activity is logged if `data-logaction` is present.
+     * @private
+     * @param {Event} event - The click event object.
+     * @returns {boolean} False to prevent default link behavior.
+     */
     function _onPopupLink(event){
         
-        let action = $(event.target).attr('id');
+        let action = $(event.target).attr('id'); // Potentially used for specific logic, though not in current flow
         
         let body = $(window.hWin.document).find('body');
         let dim = {h:body.innerHeight(), w:body.innerWidth()},
@@ -218,9 +262,13 @@ function hexportMenu( container ) {
         return false;
     }
     
-    //
-    // similar in resultListMenu
-    //
+    /**
+     * Checks if the current result set is empty.
+     * If it is, it displays a message dialog to the user.
+     * This function is similar to one in resultListMenu.
+     * @private
+     * @returns {boolean} True if the result set is empty, false otherwise.
+     */
     function isResultSetEmpty(){
         let recIDs_all = window.hWin.HAPI4.getSelection("all", true);
         if (window.hWin.HEURIST4.util.isempty(recIDs_all)) {
@@ -232,9 +280,17 @@ function hexportMenu( container ) {
         }
     }
     
-    //
-    //
-    //
+    /**
+     * Handles menu actions triggered by user clicks.
+     * It logs the action (if `action_log` is provided) and then calls the appropriate
+     * export function based on the `action` string.
+     * @private
+     * @param {Event} event - The click event object.
+     * @param {string} action - The action identifier (e.g., "menu-export-csv", "menu-export-hml-resultset").
+     * @param {string} [action_log] - An optional string for logging the user action.
+     * @param {boolean|string} save_as_file - Indicates whether the export should be saved as a file.
+     *                                        Can be boolean `true`/`false`, or string 'mirador'.
+     */
     function _menuActionHandler(event, action, action_log, save_as_file){
 
         if(action_log){
@@ -290,9 +346,27 @@ function hexportMenu( container ) {
         event.preventDefault();
     }
     
-    //
-    // opts: {format, isAll, includeRelated, multifile, save_as_file}
-    //
+    /**
+     * Handles the export of records in various formats (HML, JSON, GeoJSON, RDF, IIIF, GEPHI).
+     *
+     * It constructs the export URL based on the provided options, current query,
+     * and user selections (e.g., for following pointers, including human-readable names,
+     * selecting specific fields for GEPHI).
+     * It also handles format-specific checks (like RDF registration) and dialogs.
+     *
+     * @private
+     * @param {object} opts - Options for the export.
+     * @param {string} opts.format - The export format (e.g., 'hml', 'json', 'geojson', 'rdf', 'iiif', 'gephi').
+     * @param {boolean} [opts.isAll=true] - If true, exports the current result set. If false, exports only currently selected records (though this path seems less used now).
+     * @param {boolean} [opts.includeRelated] - (Potentially deprecated by linksMode) If true, includes related records.
+     * @param {boolean} [opts.multifile=false] - If true (for HML), exports as multiple files (HuNI format).
+     * @param {boolean|string} opts.save_as_file - If true, prompts to save as a file. If 'mirador' (for IIIF), opens in Mirador.
+     * @param {string} [opts.linksMode] - Controls how linked records are handled ('direct', 'direct_links', 'none', 'all'). Set via dialog.
+     * @param {boolean} [opts.questionResolved] - Internal flag to track if the pointer-following dialog has been shown.
+     * @param {boolean} [opts.showHumanReadableNames] - (For HML) If true, includes human-readable names.
+     * @param {string} [opts.fields] - (For GEPHI) Comma-separated string of dty_IDs for additional fields to export.
+     * @returns {boolean|void} False if there's an issue preventing export, otherwise void as it opens a new window/tab.
+     */
     function _exportRecords(opts){ // isAll = resultset, false = current selection only
 
         if(opts.format=='rdf' && !(window.hWin.HAPI4.sysinfo['db_registeredid']>0) ){
@@ -484,9 +558,16 @@ function hexportMenu( container ) {
         return false;
     }
     
-    //
-    //
-    //
+    /**
+     * Handles the export of records in KML format.
+     *
+     * It constructs the KML export URL based on the current query or selected records.
+     *
+     * @private
+     * @param {boolean} isAll - If true, exports the current result set. If false, exports only currently selected records.
+     * @param {boolean} save_as_file - If true, prompts to save the KML as a file.
+     * @returns {boolean|void} False if there's an issue preventing export (e.g., no records selected), otherwise void.
+     */
     function _exportKML(isAll, save_as_file){
 
         let q = "";
@@ -522,9 +603,12 @@ function hexportMenu( container ) {
         return false;
     }
 
-    //
-    // hidden - noy used 
-    //
+    /**
+     * Handles the export of records as an RSS or Atom feed.
+     * Note: This function is marked as hidden/not used in comments.
+     * @private
+     * @param {string} mode - The feed type, typically 'rss' or 'atom'.
+     */
     function _exportFeed(mode){
 
         if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
@@ -550,9 +634,15 @@ function hexportMenu( container ) {
         }
     }
 
-    //
-    // Get fields to output
-    //
+    /**
+     * Displays a dialog to allow the user to select additional fields for export.
+     * This is typically used for formats like GEPHI where users might want to include
+     * specific data attributes. If fields are selected, they are added to the `opts.fields`
+     * property and then `_exportRecords` is called.
+     * @private
+     * @param {object} opts - The export options object, which will be modified with selected fields
+     *                        and then passed to `_exportRecords`.
+     */
     function _popupFields(opts){
 
         let $dlg;
@@ -569,16 +659,16 @@ function hexportMenu( container ) {
                 width: 540,
                 selection_on_init: [],
                 title: 'Select fields to export',
-                filters: {
+                filters: { // Define which field types can be selected
                     types: [ "enum", "float", "date", "file", "geo", "freetext", "blocktext", "integer", "year", "boolean" ]
                 },
-                onselect:function(event, data){
+                onselect:function(event, data){ // Callback when fields are selected
     
                     if(data && data.selection){
-                        opts['fields'] = data.selection.join();
+                        opts['fields'] = data.selection.join(); // Add selected field IDs to opts
                     }
     
-                    _exportRecords(opts);
+                    _exportRecords(opts); // Proceed with export
                 }
             }
     
@@ -596,11 +686,28 @@ function hexportMenu( container ) {
      
     //public members
     let that = {
-
+        /**
+         * Gets the class name of this module.
+         * @returns {string} The class name "exportMenu".
+         */
         getClass: function () {return _className;},
+        /**
+         * Checks if the given string matches the class name of this module.
+         * @param {string} strClass - The class name to check.
+         * @returns {boolean} True if `strClass` is "exportMenu", false otherwise.
+         */
         isA: function (strClass) {return (strClass === _className);},
+        /**
+         * Gets the version of this module.
+         * @returns {string} The version number.
+         */
         getVersion: function () {return _version;},
         
+        /**
+         * Sets dialog options that might be used by functions within this module
+         * when showing dialogs (e.g., for CSV export options).
+         * @param {object} _dialog_options - The dialog options object.
+         */
         setDialogOptions: function( _dialog_options ){
             dialog_options = _dialog_options
         }
