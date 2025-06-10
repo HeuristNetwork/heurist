@@ -52,7 +52,7 @@ class VisualiseExporter{
                             <attvalue for="0" value="${name}"/>
                             <attvalue for="1" value="${image_url}"/>
                             <attvalue for="2" value="${rectype}"/>
-                            <attvalue for="3" value="${node.count > 0 ? node.count : 0}"/>
+                            <attvalue for="3" value="${window.hWin.HEURIST4.util.isPositiveInt(node.count) ? node.count : 0}"/>
                         </attvalues>
                     </node>`;
         }
@@ -64,7 +64,7 @@ class VisualiseExporter{
 
             const edge = data.links[id];
             const name = window.hWin.HEURIST4.util.htmlEscape(edge.relation.name);
-            const weight = edge.targetcount > 0 ? edge.targetcount : 1;
+            const weight = window.hWin.HEURIST4.util.isPositiveInt(edge.targetcount) ? edge.targetcount : 1;
             const rel_ID = window.hWin.HEURIST4.util.isPositiveInt(edge.relation.id) ? edge.relation.id : 0;
             const image_url = Object.hasOwn(edge.relation, 'image') && !window.hWin.HEURIST4.util.isempty(edge.relation.image)
                 ? edge.relation.image.replace(/&/g,'&amp;') : '';

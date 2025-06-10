@@ -191,7 +191,7 @@ class VisualiseDrag{
         }
 
         //cancel timer
-        if(this.#linkTimer > 0){
+        if(window.hWin.HEURIST4.util.isPositiveInt(this.#linkTimer)){
             clearTimeout(this.#linkTimer);
             this.#linkTimer = 0;
         }
@@ -220,7 +220,7 @@ class VisualiseDrag{
         if(this.#linkLine) this.#linkLine.remove();
         this.#linkLine = null;
 
-        if(this.#linkTimer > 0){
+        if(window.hWin.HEURIST4.util.isPositiveInt(this.#linkTimer)){
             clearTimeout(this.#linkTimer);
             this.#linkTimer = 0;
         }

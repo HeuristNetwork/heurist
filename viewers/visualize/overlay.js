@@ -426,7 +426,7 @@ class VisualiseOverlay{
                         if(index > 0 && data.subheader==1){
                             return 'info-mode-full namelabel';
                         }else{
-                            return (index > 0 ? 'info-mode ':'nodelabel ')+'namelabel';     
+                            return `${index > 0 ? 'info-mode' : 'nodelabel'} namelabel`;
                         }
                     })
                     .attr('x', () => offset) // Some left padding
@@ -436,7 +436,7 @@ class VisualiseOverlay{
                             if(position == 16){
                                 position += 3;
                             }
-                            if(data.xpos > 0){
+                            if(window.hWin.HEURIST4.util.isPositiveInt(data.xpos)){
                                 position = position + data.xpos;
                             }
                         }
@@ -468,13 +468,13 @@ class VisualiseOverlay{
 
                 let ids = '';
 
-                if(rtyid && rtyid > 0){
+                if(window.hWin.HEURIST4.util.isPositiveInt(rtyid)){
 
                     ids = $Db.getLinkedRecordTypes_cache(rtyid, false, 'from');
                     ids = ids.join(', #');
 
                     ids = !window.hWin.HEURIST4.util.isempty(ids) ? `#${ids}` : '';
-                }else if(dtyid && dtyid > 0){
+                }else if(window.hWin.HEURIST4.util.isPositiveInt(dtyid)){
 
                     ids = $Db.dty(data.dtyid, 'dty_PtrTargetRectypeIDs');
                     ids = ids.indexOf(',') !== -1 ? ids.replaceAll(/,/g, ', #') : ids;
@@ -995,7 +995,7 @@ class VisualiseOverlay{
         let url = `${window.hWin.HAPI4.baseURL}viewers/visualize/selectLinkField.php?&db=${window.hWin.HAPI4.database}&source_ID=${source_ID}`
         let dlg_title = 'Select or Create new link field type';   
 
-        if(target_ID>0){
+        if(window.hWin.HEURIST4.util.isPositiveInt(target_ID)){
             url += `&target_ID=${target_ID}`;
         }
 
@@ -1034,7 +1034,7 @@ class VisualiseOverlay{
     #linkTwoRecords(source_ID, target_ID){
 
         function __onCloseAddLink(context){
-            if(context && context.count > 0){
+            if(window.hWin.HEURIST4.util.isPositiveInt(context?.count)){
                 // Trigger refresh
                 this.visualiser.refreshData();
             }
