@@ -857,7 +857,7 @@ function includeJQuery($useBootstrap=false){
 <?php
         }else{
 ?>        
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.3/jquery.fancytree-all.js" integrity="sha384-BSBg3ImWc3aK3fo7lX3qP5Ben/mH1jIVv4MJPkG7txP2Qg+kmn7l5u6XWDCxrrYK" crossorigin="anonymous"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.4/jquery.fancytree-all-deps.min.js" integrity="sha512-Gen1g8qeMKOVWYwCewgdNjSWojg8NdLFe8sNLFkqVviziLFuExjUduvYAWFEB0QnJ4Gw0Y4hgybMKCVJktCThQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
    <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.widgets/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 <?php
         }

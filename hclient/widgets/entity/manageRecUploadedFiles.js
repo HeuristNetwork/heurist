@@ -1053,6 +1053,8 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, {type: 'ulf'}); // refresh thumbnails
                     });
                 }
+                
+                break;
             }
             default: {
                 is_resolved = false;
