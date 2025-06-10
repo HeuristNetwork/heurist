@@ -96,7 +96,13 @@ if(!in_array($action_type, $allowed_actions)){
 
 
 <script type="text/javascript">
-    // Callback function on page init complete
+    /**
+     * Callback function executed when the page initialization is complete.
+     * If initialization was successful, it retrieves URL parameters (action, scope, ft, value)
+     * and instantiates the hRecordAction JavaScript object to manage the record action UI and logic.
+     *
+     * @param {boolean} success - Indicates whether the page initialization (via initPage.php) was successful.
+     */
     function onPageInit(success){
         if(success){
 

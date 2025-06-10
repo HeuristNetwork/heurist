@@ -97,6 +97,14 @@ if(isset($message)){
     exit;
 }
 
+/**
+ * Outputs a message.
+ * Note: This function prints the message but does not explicitly flush the output buffer.
+ * For flushing, see echo_flush2().
+ *
+ * @param string $msg The message to output.
+ * @return void
+ */
 function echo_flush($msg){
 
     print $msg;
@@ -105,9 +113,13 @@ function echo_flush($msg){
 
 }
 
-//
-// For script progress messages to web browser
-//
+/**
+ * Outputs a message and forces the output buffer to be sent to the browser.
+ * Useful for sending progress messages during long-running scripts.
+ *
+ * @param string $msg The message to output and flush.
+ * @return void
+ */
 function echo_flush2($msg){
     ob_start();
     print $msg;

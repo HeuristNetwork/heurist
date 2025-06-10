@@ -19,9 +19,10 @@
 */
 
 /*
-
-There are 3 color themes in Heurist.
-Main (gray) with option of different bg (white) for lists and popups
+* Developer Notes on Heurist Color Themes:
+*
+* There are 3 color themes in Heurist.
+* Main (gray) with option of different bg (white) for lists and popups
 Editor (light blue)
 Header (iron head flower color)
 Each theme has its own set for text/label, background, inputs bg and border colors.  Main and Editor share the same Color for buttons/clickable elements (default:lightgray; focus:gray with border; pressed:blue). Header’s buttons are always the same color as main background.
@@ -131,6 +132,18 @@ $def_ut = array(
 
 );
 
+/**
+ * Outputs a user-defined theme value or a default value.
+ *
+ * This function checks the global $ut array (user theme settings) for a value
+ * at the given index. If the value is null or an empty string, it prints the
+ * provided default value. Otherwise, it prints the user's theme value.
+ *
+ * @global array $ut User theme settings.
+ * @param string $idx The index (key) of the theme setting in the $ut array.
+ * @param string $def The default value to print if the user setting is not found or is empty.
+ * @return void
+ */
 function uout($idx, $def){
     global $ut;
     if(@$ut[$idx]==null || @$ut[$idx]==''){

@@ -214,8 +214,20 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/buttonsMenu.js"></script>
 
         <script type="text/javascript">
+            /** @type {jQuery} A jQuery object representing the main container for the record editing UI. */
             var $container;
-            // Callback function on page initialization
+            /** @type {object} An object populated by PHP, containing pre-processed parameters for record editing or creation. */
+            // var prepared_params; // Initialized by PHP: print '<script>var prepared_params = '.json_encode($params).';</script>';
+
+            /**
+             * Callback function executed when the main page initialization (from initPage.php) is complete.
+             * It ensures the user is logged in, then sets up the record editing interface
+             * using the manageRecords widget. It determines whether to edit an existing record
+             * or create a new one based on parameters passed from PHP via `prepared_params`
+             * or directly from URL parameters.
+             *
+             * @param {boolean} success - Indicates whether the HAPI initialization was successful.
+             */
             function onPageInit(success){
                 if(success){
 
@@ -229,6 +241,14 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
 
                     var isPopup = (window.hWin.HEURIST4.util.getUrlParameter('popup', window.location.search)==1);
 
+                    /**
+                     * Helper function to retrieve a parameter's value.
+                     * It first checks the `prepared_params` object (populated by PHP from various request parameters)
+                     * and falls back to checking direct URL parameters if not found there.
+                     *
+                     * @param {string} pname - The name of the parameter to retrieve.
+                     * @returns {*} The value of the parameter, or undefined if not found.
+                     */
                     function __param(pname){
                         //in case of bookmarklet or annotation addition url parameters may be parsed and prepared
                         if($.isEmptyObject(prepared_params) ||
@@ -340,6 +360,10 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
                 }
             }
 
+            /**
+             * Function called before the window is closed.
+             * It triggers the 'saveUiPreferences' method on the manageRecords widget.
+             */
             function onBeforeClose(){
                 $container.manageRecords('saveUiPreferences');
             }

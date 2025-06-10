@@ -8,6 +8,7 @@
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
 */
 
 /*
@@ -19,10 +20,10 @@
 */
 use hserv\utilities\USanitize;
 
-$is_inlcuded = false;
+$is_included = false; // True if this file is included by another script, false if accessed directly
 
 if(!defined('PDIR')) {
-    $is_inlcuded = true;
+    $is_included = true;
     define('PDIR','../../');
     require_once dirname(__FILE__).'/../../autoload.php';
 }
@@ -32,7 +33,7 @@ if(!isset($is_error)){
     $is_error = true;
 }
 
-$is_error_unknown = false;
+$is_error_unknown = false; // True if the source or exact nature of the error is unknown
 
 //variable message can be defined as global
 if(!isset($message)){
@@ -118,6 +119,10 @@ if(!isset($message)){
 
         <script>
 
+            /**
+             * Callback function executed after HAPI (Heurist API) is initialized.
+             * Sets up a click handler for login links if present.
+             */
             function onHapiInit() {
                 let $login_ele = $(document).find('.login-link');
                 if($login_ele.length > 0 && window.hWin && window.hWin.HEURIST4){
@@ -137,6 +142,10 @@ if(!isset($message)){
                 }
             }
 
+            /**
+             * Executes when the HTML document is fully loaded and parsed.
+             * Initializes the HAPI interface.
+             */
             $(document).ready(() => {
                 window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($dbname);?>', onHapiInit);
             });

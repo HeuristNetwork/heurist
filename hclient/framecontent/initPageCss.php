@@ -1,6 +1,8 @@
 <?php
 /**
-* Include into page minium set of css for Heurist
+* Includes the minimum set of CSS for Heurist pages.
+* This file links base jQuery UI CSS, core Heurist styles (h4styles.css),
+* potentially h6styles.css based on the layout, and includes dynamic theme-specific CSS.
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -19,9 +21,10 @@
 */
 
 /*
-
-There are 3 color themes in Heurist.
-Main (gray) with option of different bg (white) for lists and popups
+* Developer Notes on Heurist Color Themes:
+*
+* There are 3 color themes in Heurist.
+* Main (gray) with option of different bg (white) for lists and popups
 Editor (light blue)
 Header (iron head flower color)
 Each theme has its own set for text/label, background, inputs bg and border colors.  Main and Editor share the same Color for buttons/clickable elements (default:lightgray; focus:gray with border; pressed:blue). Header’s buttons are always the same color as main background.
