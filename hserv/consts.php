@@ -862,8 +862,7 @@ function includeJQuery($useVersion3=false){
 <?php
    } // End of JQuery version selection
 ?>
-   <!-- Fancytree (common for both jQuery versions, assuming compatibility) -->
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.3/jquery.fancytree-all-deps.min.js" integrity="sha512-R1Y5WiG3hStLPQ9qL2wB8s2NAUZBo2WRYQ70G1M5bU22Fh/y3e93u/3E2jS7g4ZzZp7t2Y2yBfEGBz2v8vT4w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> <!-- Changed to all-deps.min.js for better bundling -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.4/jquery.fancytree-all-deps.min.js" integrity="sha512-Gen1g8qeMKOVWYwCewgdNjSWojg8NdLFe8sNLFkqVviziLFuExjUduvYAWFEB0QnJ4Gw0Y4hgybMKCVJktCThQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
    <link rel="stylesheet" type="text/css" href="<?php echo $pdir_esc;?>external/jquery.widgets/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 <?php
 } // End of includeJQuery function
