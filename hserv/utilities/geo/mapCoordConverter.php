@@ -318,7 +318,7 @@ class GpointConverter
      */
     public function convertLLtoTM($LongOrigin = null)
     {
-        // Constants for UTM conversion
+    /*    
      * East Longitudes are positive, West longitudes are negative.
      * North latitudes are positive, South latitudes are negative
      * Lat and Long are in decimal degrees
@@ -362,8 +362,6 @@ class GpointConverter
      *
      * @param float $LongOrigin
      */
-    public function convertLLtoTM($LongOrigin = null)
-    {
         // Constants for UTM conversion
         $k0 = 0.9996;
         $falseEasting = 500000.0; // Standard UTM false easting value
