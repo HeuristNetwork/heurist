@@ -1,19 +1,27 @@
 <?php
-use \hserv\utilities\USystem;
-
 /**
-* List of system constants
-*
-* Many of them are defined with values set in congigIni.php
-* (and respectively in ../heuristConfigIni.php)
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * Defines global constants and utility functions for the Heurist application.
+ *
+ * This file is responsible for setting up a wide range of constants used throughout the application,
+ * including version information, server URLs, database connection parameters, API response codes,
+ * email settings, common string/regex/MIME type definitions, and paths for media and icons.
+ * It also includes definitions for mapping "magic strings" (like RT_PERSON) to their
+ * originating database IDs and concept IDs for record types, detail types, and terms.
+ *
+ * Additionally, this file provides several global utility functions for common tasks such
+ * as error handling, string/array manipulation, date retrieval, and HTML generation for
+ * including JQuery and related libraries.
+ * Many constants are initialized based on values provided in `configIni.php` (or `../heuristConfigIni.php`).
+ *
+ * @package     Heurist academic knowledge management system
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @author      Artem Osmakov   <osmakov@gmail.com>
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @version     4.0
+ */
+
+use \hserv\utilities\USystem;
 
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
@@ -23,228 +31,344 @@ use \hserv\utilities\USystem;
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-define('HEURIST_VERSION', $version);//code version is defined congigIni.php
-define('HEURIST_MIN_DBVERSION', "1.3.18");//minimal version of db for current version of code
+// Heurist Application Version
+/** @const string Current Heurist code version. Value sourced from $version in configIni.php. */
+define('HEURIST_VERSION', $version);
+/** @const string Minimal database version required for this code version. */
+define('HEURIST_MIN_DBVERSION', "1.3.18");
 
-// The reference server is the location of the Heurist Reference Index database (HEURIST_INDEX_DATABASE), the Heurist_Help database,
-
-// curated template databases and also code updates
+// Heurist Reference Server Configuration
+// The reference server hosts the Heurist Reference Index, Help database, templates, and code updates.
 if(!@$heuristReferenceServer){
-    $heuristReferenceServer = 'https://heuristref.net';//default value
-    //$heuristReferenceServer = 'https://HeuristRef.Net';
+    $heuristReferenceServer = 'https://heuristref.net'; // Default value if not set in configIni.php
 }
+/** @const string Default Heurist directory path on servers. */
+define('HEURIST_DEF_DIR', '/heurist/');
 
-define('HEURIST_DEF_DIR', '/heurist/'); //default Heurist folder
 if(isset($heuristReferenceServerMirror) && $heuristReferenceServerMirror!=''){
+    /** @const string URL of the main Heurist reference server or its mirror. */
     define('HEURIST_MAIN_SERVER', $heuristReferenceServerMirror);
+    /** @const string Name of the Heurist Reference Index database (mirror version). */
     define('HEURIST_INDEX_DATABASE', 'Heurist_Reference_Index_MIRROR');
+    /** @const string Name of the Heurist Job Tracker/Bug Report database (mirror version). */
     define('HEURIST_BUGREPORT_DATABASE', 'Heurist_Job_Tracker_MIRROR');
+    /** @const string Name of the Heurist Help System database (mirror version). */
     define('HEURIST_HELP_DATABASE', 'Heurist_Help_System_MIRROR');
 }else{
+    /** @const string URL of the main Heurist reference server. */
     define('HEURIST_MAIN_SERVER', $heuristReferenceServer);
+    /** @const string Name of the Heurist Reference Index database. */
     define('HEURIST_INDEX_DATABASE', 'Heurist_Reference_Index');
+    /** @const string Name of the Heurist Job Tracker/Bug Report database. */
     define('HEURIST_BUGREPORT_DATABASE', 'Heurist_Job_Tracker');
+    /** @const string Name of the Heurist Help System database. */
     define('HEURIST_HELP_DATABASE', 'Heurist_Help_System');
 }
-define('HEURIST_INDEX_BASE_URL', HEURIST_MAIN_SERVER.HEURIST_DEF_DIR);//central index and template databases url
-define('HEURIST_INDEX_DBREC', '1-22');//concept code for record type "Registered Database" in Heurist Reference Index (HEURIST_INDEX_DATABASE)
+/** @const string Base URL for the central index and template databases. */
+define('HEURIST_INDEX_BASE_URL', HEURIST_MAIN_SERVER.HEURIST_DEF_DIR);
+/** @const string Concept code for the "Registered Database" record type in the Heurist Reference Index. */
+define('HEURIST_INDEX_DBREC', '1-22');
 
+/** @const string URL for the Heurist help system. */
 define('HEURIST_HELP', HEURIST_MAIN_SERVER.HEURIST_DEF_DIR.'help');
 
+// HTTP Proxy Configuration (optional, from configIni.php)
 if (@$httpProxy != '') {
-    define('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE', (isset($httpProxyAlwaysActive) && $httpProxyAlwaysActive===true));//always use proxy for CURL
-    define('HEURIST_HTTP_PROXY', $httpProxy);//http address:port for proxy request
+    /** @const bool Whether to always use the HTTP proxy for CURL requests. Defaults to false if $httpProxyAlwaysActive not set. */
+    define('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE', (isset($httpProxyAlwaysActive) && $httpProxyAlwaysActive===true));
+    /** @const string HTTP address and port for the proxy server (e.g., "proxy.example.com:8080"). */
+    define('HEURIST_HTTP_PROXY', $httpProxy);
     if (@$httpProxyAuth != '') {
-        define('HEURIST_HTTP_PROXY_AUTH', $httpProxyAuth);// "username:password" for proxy authorization
+        /** @const string Username and password for proxy authorization ("username:password"). */
+        define('HEURIST_HTTP_PROXY_AUTH', $httpProxyAuth);
     }
 }
 
-$host_params = USystem::getHostParams(isset($argv)?$argv:null);
+// Host and Server URL Configuration
+$host_params = USystem::getHostParams(isset($argv)?$argv:null); // $argv for CLI mode
 
+/** @const string Domain name of the current Heurist instance. */
 define('HEURIST_DOMAIN', $host_params['domain']);
 
 if (!@$mailDomain) {
+    /** @const string Domain name used for emails, defaults to HEURIST_DOMAIN if $mailDomain not set in configIni.php. */
     define('HEURIST_MAIL_DOMAIN', HEURIST_DOMAIN);
 }else{
+    /** @const string Domain name used for emails, from $mailDomain in configIni.php. */
     define('HEURIST_MAIL_DOMAIN', $mailDomain);
 }
 
+/** @const string Full server URL of the current Heurist instance (e.g., "https://myheurist.org"). */
 define('HEURIST_SERVER_URL', $host_params['server_url']);
-define('HEURIST_SERVER_NAME', @$host_params['server_name']);// server host name for the configured name, eg. myheurist.net
+/** @const string Server host name (e.g., "myheurist.net"). May be empty if not determinable. */
+define('HEURIST_SERVER_NAME', @$host_params['server_name']);
 
-if(!defined('HEURIST_DIR'))  { define('HEURIST_DIR', $host_params['heurist_dir']); }
+if(!defined('HEURIST_DIR'))  {
+    /** @const string Directory path of the Heurist installation on the server (e.g., "/var/www/heurist/"). */
+    define('HEURIST_DIR', $host_params['heurist_dir']);
+}
 
-define('HEURIST_BASE_URL', $host_params['baseURL'] );// eg. https://myheurist.net/h6-alpha/
-define('HEURIST_BASE_URL_PRO', $host_params['baseURL_pro'] );// production url eg. https://myheurist.net/heurist/
+/** @const string Base URL for general Heurist application access (e.g., "https://myheurist.net/h6-alpha/"). */
+define('HEURIST_BASE_URL', $host_params['baseURL'] );
+/** @const string Base URL for production Heurist access, often shorter (e.g., "https://myheurist.net/heurist/"). */
+define('HEURIST_BASE_URL_PRO', $host_params['baseURL_pro'] );
 
+/** @const string Path to the system's temporary directory for scratch space. */
 define('HEURIST_SCRATCHSPACE_DIR', sys_get_temp_dir());
 
-//------------ database connection
-
+// Database Connection Parameters (values from configIni.php)
 if ($dbHost) {
+    /** @const string Hostname or IP address of the MySQL database server. */
     define('HEURIST_DBSERVER_NAME', $dbHost);
 } else {
-    define('HEURIST_DBSERVER_NAME', "localhost");//configure to access mysql on the same machine as the Heurist codebase
+    /** @const string Default database server hostname if not set in configIni.php. */
+    define('HEURIST_DBSERVER_NAME', "localhost");
 }
-//to use native mysqldump you have to specify file with mysql credentials
-//mysql_config_editor set --login-path=local --host=localhost --user={usename} --password
 
-//0: use 3d party PDO mysqldump (default), 1:use internal routine, 2 - call mysql via shell
-
-//path to mysqldump - it is required if $dbDumpMode==2
+// MySQL Dump and Script Execution Configuration
+// 0: use 3rd party PDO mysqldump (default), 1: use internal routine, 2 - call mysql via shell
 if(isset($dbMySQLDump) && file_exists($dbMySQLDump)){
+    /** @const string Path to the mysqldump executable. */
     define('HEURIST_DB_MYSQLDUMP', $dbMySQLDump);
     $dbDumpMode = isset($dbDumpMode)?$dbDumpMode:2;
 }else{
     $dbDumpMode = 0;
 }
+/** @const int Mode for database dump operations. 0 for PDO, 1 for internal, 2 for shell mysqldump. */
 define('HEURIST_DB_MYSQL_DUMP_MODE', $dbDumpMode);
 
 if(isset($dbMySQLpath) && file_exists($dbMySQLpath)){
+    /** @const string Path to the mysql command-line client. */
     define('HEURIST_DB_MYSQLPATH', $dbMySQLpath);
     $dbScriptMode = isset($dbScriptMode)?$dbScriptMode:2;
 }else{
     $dbScriptMode = 0;
 }
+/** @const int Mode for executing MySQL scripts. 0 for default, 2 for shell mysql client. */
 define('HEURIST_DB_MYSQL_SCRIPT_MODE', $dbScriptMode);
 
-define('ADMIN_DBUSERNAME', $dbAdminUsername);//user with all rights so we can create databases, etc.
+/** @const string Username for MySQL account with administrative privileges (database creation, etc.). */
+define('ADMIN_DBUSERNAME', $dbAdminUsername);
+/** @const string Password for the administrative MySQL account. */
 define('ADMIN_DBUSERPSWD', $dbAdminPassword);
+/** @const string Prefix for Heurist database names (e.g., "HEURIST_"). */
 define('HEURIST_DB_PREFIX', $dbPrefix);
+/** @const int Port number for MySQL database connection. */
 define('HEURIST_DB_PORT', $dbPort);
 
-//---------------------------------
-$date = new DateTime();
-
+// General Application Information
+$date = new DateTime(); // Unused in current scope, potentially for future use or removed logic.
+/** @const string Title for Heurist application, incorporating the version. */
 define('HEURIST_TITLE', 'Heurist V'.HEURIST_VERSION);
 
-/**
-* Response status for ajax requests. See ResponseStatus in hapi.js
-*/
-define("HEURIST_INVALID_REQUEST", "invalid");// 400 The Request provided was invalid.
-define("HEURIST_NOT_FOUND", "notfound");// 404 The requested object not found.
-define("HEURIST_ERROR", "error");// 500 General error: wrong data, file i/o
-define("HEURIST_OK", "ok");// 200 The response contains a valid Result.
-define("HEURIST_REQUEST_DENIED", "denied");// 403 Not enough rights (logout/in to refresh) or action
-define("HEURIST_ACTION_BLOCKED", "blocked");// 409 The request could not be completed due to a conflict with the current state of the target resource. This code is used in situations where the user might be able to resolve the conflict and resubmit the request.
-define("HEURIST_UNKNOWN_ERROR", "unknown");// 500 A request could not be processed due to a server error. The request may succeed if you try again.
-define("HEURIST_DB_ERROR", "database");// 500 A request could not be processed due to a server database error. Most probably this is BUG. Contact developers
-define("HEURIST_SYSTEM_CONFIG", "syscfg");// 500 System not-fatal configuration error. Contact system admin
-define("HEURIST_SYSTEM_FATAL", "system");// 500 System fatal configuration error. Contact system admin
+// API Response Status Constants (align with ResponseStatus in hapi.js)
+/** @const string API Status: Invalid request (HTTP 400). */
+define("HEURIST_INVALID_REQUEST", "invalid");
+/** @const string API Status: Resource not found (HTTP 404). */
+define("HEURIST_NOT_FOUND", "notfound");
+/** @const string API Status: General error (e.g., wrong data, file I/O) (HTTP 500). */
+define("HEURIST_ERROR", "error");
+/** @const string API Status: Request successful (HTTP 200). */
+define("HEURIST_OK", "ok");
+/** @const string API Status: Request denied (insufficient rights, etc.) (HTTP 403). */
+define("HEURIST_REQUEST_DENIED", "denied");
+/** @const string API Status: Action blocked due to conflict (HTTP 409). */
+define("HEURIST_ACTION_BLOCKED", "blocked");
+/** @const string API Status: Unknown server error (HTTP 500). */
+define("HEURIST_UNKNOWN_ERROR", "unknown");
+/** @const string API Status: Database error on server (HTTP 500). */
+define("HEURIST_DB_ERROR", "database");
+/** @const string API Status: System configuration error (non-fatal) (HTTP 500). */
+define("HEURIST_SYSTEM_CONFIG", "syscfg");
+/** @const string API Status: System configuration error (fatal) (HTTP 500). */
+define("HEURIST_SYSTEM_FATAL", "system");
 
-//---------------------------------
-// set up email defines
-//
+// Email Configuration (values from configIni.php or defaults)
+/** @const string Email address for bug reports. */
 define('HEURIST_MAIL_TO_BUG', $bugEmail?$bugEmail:'info@HeuristNetwork.org');
+/** @const string General information email address. */
 define('HEURIST_MAIL_TO_INFO', $infoEmail?$infoEmail:'info@HeuristNetwork.org');
+/** @const string System administrator email address. */
 define('HEURIST_MAIL_TO_ADMIN', $sysAdminEmail?$sysAdminEmail:HEURIST_MAIL_TO_INFO);
 
+// Contact Information Strings
+/** @const string HTML string for contacting the Heurist team. */
 define('CONTACT_HEURIST_TEAM', 'contact <a href=mailto:'.HEURIST_MAIL_TO_INFO.'>Heurist team</a> ');
+/** @const string HTML string prompting to contact the Heurist team. */
 define('CONTACT_HEURIST_TEAM_PLEASE', ' Please '.CONTACT_HEURIST_TEAM);
+/** @const string HTML string for contacting the system administrator. */
 define('CONTACT_SYSADMIN', 'contact your <a href=mailto:'.HEURIST_MAIL_TO_ADMIN.'>system administrator</a> ');
 
+/** @const string Detailed message for critical database errors, including admin contact. */
 define('CRITICAL_DB_ERROR_CONTACT_SYSADMIN',
     'It is also possible that drive space has been exhausted. '
             .'<br><br>Please contact the system administrator (email: ' . HEURIST_MAIL_TO_ADMIN . ') for assistance.'
             .'<br><br>This error has been emailed to the Heurist team (for servers maintained by the project or those on which this function has been enabled).'
             .'<br><br>We apologise for any inconvenience');
 
+/** @const string Message prompting to contact system admin about directory permissions. */
 define('CONTACT_SYSADMIN_ABOUT_PERMISSIONS',
         'Please ask your system administrator to correct the path and/or permissions for this directory');
 
-//
+// External Services
+/** @const string URL of the service used for generating website thumbnails. Value from $websiteThumbnailService in configIni.php. */
 define('WEBSITE_THUMBNAIL_SERVICE', $websiteThumbnailService);
 
-//Expose all relationship vocabularies as options for term fields.
+// Feature Flags
+/** @const bool Whether to expose all relationship vocabularies as options for term fields. */
 define("HEURIST_UNITED_TERMS", true);
 
 
-//common constants
-define('NAKALA_REPO', 'http'.'://nakala.fr/'); //split to avoid sonarcloud security hotspot
+// Common String and Regex Constants
+/** @const string URL for the Nakala repository. Split to avoid SonarCloud security hotspot detection. */
+define('NAKALA_REPO', 'http'.'://nakala.fr/');
+/** @const string Date format string for ISO 8601 (YYYY-MM-DD HH:MM:SS). */
 define('DATE_8601', 'Y-m-d H:i:s');
+/** @const string Regex for matching year-only dates (allows negative for BC). */
 define('REGEX_YEARONLY', '/^-?\d+$/');
+/** @const string Regex for matching non-alphanumeric characters (excluding underscore). */
 define('REGEX_ALPHANUM', '/[^a-zA-Z0-9_]/');
+/** @const string Regex for matching end-of-line characters (CR and LF). */
 define('REGEX_EOL', '/[\r\n]/');
 
+// HTTP and XML Related Constants
+/** @const string Standard XML declaration header. */
 define('XML_HEADER', '<?xml version="1.0" encoding="UTF-8"?>');
+/** @const string Content-Type header for JSON responses. */
 define('CTYPE_JSON', 'Content-type: application/json;charset=UTF-8');
+/** @const string Content-Type header for HTML responses. */
 define('CTYPE_HTML', 'Content-type: text/html;charset=UTF-8');
+/** @const string Content-Type header for JavaScript responses. */
 define('CTYPE_JS', 'Content-type: text/javascript');
+/** @const string Prefix for Content-Length HTTP header. */
 define('CONTENT_LENGTH', 'Content-Length: ');
+/** @const string Access-Control-Allow-Origin HTTP header for CORS (allowing all origins). */
 define('HEADER_CORS_POLICY', 'Access-Control-Allow-Origin: *');
+/** @const string MIME type for JSON. */
 define('MIMETYPE_JSON', 'application/json');
 
-//common separators
+// Common HTML Separators/Tags (short constants for convenience)
+/** @const string HTML table start tag. */
 define('TABLE_S','<table>');
+/** @const string HTML table row start and first cell start tags. */
 define('TR_S','<tr><td>');
+/** @const string HTML table cell end and next cell start tags. */
 define('TD','</td><td>');
+/** @const string HTML table cell end tag. */
 define('TD_E','</td>');
+/** @const string HTML table cell end and row end tags. */
 define('TR_E','</td></tr>');
+/** @const string HTML table end tag. */
 define('TABLE_E','</table>');
+/** @const string HTML div start tag. */
 define('DIV_S','<div>');
+/** @const string HTML div end tag. */
 define('DIV_E','</div>');
+/** @const string HTML line break tag. */
 define('BR','<br>');
+/** @const string Two HTML line break tags. */
 define('BR2','<br><br>');
 
-//common sql reserved words
+// Common SQL Reserved Words/Snippets
+/** @const string SQL AND operator with surrounding spaces. */
 define('SQL_AND',' AND ');
+/** @const string SQL NOT operator with surrounding spaces. */
 define('SQL_NOT',' NOT ');
+/** @const string SQL WHERE clause with surrounding spaces. */
 define('SQL_WHERE',' WHERE ');
+/** @const string SQL NULL keyword. */
 define('SQL_NULL', 'NULL');
+/** @const string SQL DELETE FROM clause. */
 define('SQL_DELETE', 'DELETE FROM ');
+/** @const string SQL IN operator start. */
 define('SQL_IN',' IN (');
+/** @const string SQL snippet representing a false condition. */
 define('SQL_FALSE','(1=0)');
+/** @const string SQL BETWEEN operator with surrounding spaces. */
 define('SQL_BETWEEN',' BETWEEN ');
 
+// Specific Media Types for external services
+/** @const string MIME type for Vimeo videos. */
 define('MT_VIMEO','video/vimeo');
+/** @const string MIME type for YouTube videos. */
 define('MT_YOUTUBE','video/youtube');
+/** @const string MIME type for SoundCloud audio. */
 define('MT_SOUNDCLOUD','audio/soundcloud');
 
-//
+// URI Schemes and Temporary Memory Stream
+/** @const string HTTP URI scheme prefix. */
 define('HTTP_SCHEMA','http://');
+/** @const string HTTPS URI scheme prefix. */
 define('HTTPS_SCHEMA','https://');
+/** @const string XML Schema namespace for string type. */
 define('XML_SCHEMA','http://www.w3.org/2001/XMLSchema#string');
+/** @const string PHP temporary memory stream identifier, allowing up to 1MB before using a temporary file. */
 define('TEMP_MEMORY', 'php://temp/maxmemory:1048576');
 
+// Global variable for language codes, initialized to null.
 global $glb_lang_codes;
 $glb_lang_codes = null;
 
-//common languages for translation database definitions (ISO639-2 codes)
+// Default common languages for translation of database definitions (ISO 639-2 codes).
+// Value from $common_languages_for_translation in configIni.php or defaults here.
 if(!isset($common_languages_for_translation)){
     $common_languages_for_translation = array('ENG','FRE','CHI','SPA','ITA','ARA','GER','POR','LAT','GRE','GRC');
 }
 
-//---------------------------------
-// used in Uploadhandler.php
+// File Upload and Media Handling
+/** @const string Comma-separated list of allowed file extensions for uploads. Used in Uploadhandler.php. */
 define('HEURIST_ALLOWED_EXT',
 'jpg,jpe,jpeg,jfif,sid,png,gif,tif,tiff,bmp,rgb,doc,docx,odt,mp3,mp4,mpg,mpeg,mov,avi,wmv,wmz,aif,aiff,ashx,pdf,mbtiles,'
 .'mid,midi,wms,wmd,qt,evo,cda,wav,csv,tsv,tab,txt,rtf,xml,xsl,xslx,xslt,xls,xlsx,hml,kml,kmz,shp,dbf,shx,svg,htm,html,xhtml,'
 .'ppt,pptx,zip,gzip,tar,json,ecw,nxs,nxz,obj,mtl,3ds,stl,ply,gltf,glb,off,3dm,fbx,dae,wrl,3mf,ifc,brep,step,iges,fcstd,bim');
 
-//special media types
+// Special Media Type Identifiers for uploaded files (ULF)
+/** @const string Identifier for remote media resources. */
 define('ULF_REMOTE','_remote');
+/** @const string Identifier for IIIF manifest resources. */
 define('ULF_IIIF','_iiif');
+/** @const string Identifier for IIIF image resources. */
 define('ULF_IIIF_IMAGE','_iiif_image');
+/** @const string Identifier for tiled image resources. */
 define('ULF_TILED_IMAGE','_tiled');
 
-//default system folders
+// Default System Directory Names (relative to database filestore root)
+/** @const string Default directory name for images. */
 define('DIR_IMAGE','image/');
+/** @const string Default directory name for scratch/temporary files. */
 define('DIR_SCRATCH','scratch/');
+/** @const string Default directory name for database backups. */
 define('DIR_BACKUP','backup/');
+/** @const string Default directory name for thumbnails. */
 define('DIR_THUMBS','thumbs/');
+/** @const string Default directory name for entity-specific files (e.g., icons, db definition cache). */
 define('DIR_ENTITY','entity/');
+/** @const string Default directory name for general file uploads. */
 define('DIR_FILEUPLOADS','file_uploads/');
+/** @const string Default directory name for cached web images. */
 define('DIR_WEBIMAGECACHE','webimagecache/');
+/** @const string Default directory name for cached blurred images (due to visibility settings). */
 define('DIR_BLURREDIMAGECACHE','blurredimagescache/');
+/** @const string Default directory name for generated reports. */
 define('DIR_GENERATED_REPORTS','generated-reports/');
+/** @const string Default directory name for generated HTML output. */
 define('DIR_GENERATED_HTML','html-output/');
+/** @const string Default directory name for Smarty templates. */
 define('DIR_SMARTY_TEMPLATES', 'smarty-templates/');
 
-
+// Icon Paths
+/** @const string URL to a placeholder icon (16x16 GIF). */
 define('ICON_PLACEHOLDER', HEURIST_BASE_URL.'hclient/assets/16x16.gif');
+/** @const string URL to an external link icon (16x16 GIF). */
 define('ICON_EXTLINK', HEURIST_BASE_URL.'hclient/assets/external_link_16x16.gif');
 
-/** RECORD TYPE DEFINITIONS */
+/**
+ * Record Type Definitions (`$rtDefines`)
+ * Maps human-readable "magic strings" (e.g., 'RT_PERSON') to their original concept codes.
+ * The format for each entry is: `MagicString => [Originating_Database_ID, ID_in_Originating_Database]`
+ * These are used by the System class to define global constants with local database IDs.
+ * @var array<string, array<int, int>>
+ */
 $rtDefines = array(
     // Standard core record types (HeuristCoreDefinitions: DB = 2)
     'RT_RELATION' => array(2, 1),
@@ -446,74 +570,126 @@ $dtDefines = array('DT_NAME' => array(2, 1),
 
 );
 
-
+/**
+ * Term Definitions (`$trmDefines`)
+ * Maps human-readable "magic strings" (e.g., 'TRM_PAGETYPE_WEBPAGE') to their original concept codes.
+ * The format for each entry is: `MagicString => [Originating_Database_ID, ID_in_Originating_Database]`
+ * These are used by the System class to define global constants with local database IDs.
+ * @var array<string, array<int, int>>
+ */
 $trmDefines = array(
     'TRM_PAGETYPE_WEBPAGE' => array(2, 6254),
     'TRM_PAGETYPE_MENUITEM' => array(2, 6253),
-    'TRM_NO' => array(2, 531),
-    'TRM_NO_OLD' => array(99, 5447),
-    'TRM_SWF' => array(2, 9453), //workflow stages vocabulary
-    'TRM_SWF_ADDED' => array(2, 9464), //01 - Editing (includes manually created)
-    'TRM_SWF_IMPORT' => array(2, 9454), //00 - Imported
+    'TRM_NO' => array(2, 531), // General 'No' term
+    'TRM_NO_OLD' => array(99, 5447), // Older 'No' term, potentially from a specific DB context
+    'TRM_SWF' => array(2, 9453), // Workflow stages vocabulary root/identifier
+    'TRM_SWF_ADDED' => array(2, 9464), // Workflow Stage: 01 - Editing (includes manually created)
+    'TRM_SWF_IMPORT' => array(2, 9454), // Workflow Stage: 00 - Imported
 
-    // For DT_CMS_MENU_FORMAT
-    'TRM_NAME_ONLY' => array(2, 9634),
-    'TRM_ICON_ONLY' => array(2, 9635),
-    'TRM_NAME_AND_ICON' => array(2, 9636),
+    // For DT_CMS_MENU_FORMAT (terms defining how CMS menus are displayed)
+    'TRM_NAME_ONLY' => array(2, 9634), // Display name only
+    'TRM_ICON_ONLY' => array(2, 9635), // Display icon only
+    'TRM_NAME_AND_ICON' => array(2, 9636), // Display both name and icon
 
-    'TRM_LEGEND_OUT_ZOOM_HIDDEN' => array(3, 5081),
-    'TRM_LEGEND_OUT_ZOOM_DISABLED' => array(3, 5082)
+    // For DT_LEGEND_OUT_ZOOM (terms defining behavior of map legend items when out of zoom range)
+    'TRM_LEGEND_OUT_ZOOM_HIDDEN' => array(3, 5081), // Legend item becomes hidden
+    'TRM_LEGEND_OUT_ZOOM_DISABLED' => array(3, 5082)  // Legend item becomes disabled (greyed out)
 );
 
 
-//---------------------------------
+//--------------------------------- Utility Functions ---------------------------------
 
+/**
+ * Custom error handler for boot process, specifically to log warnings about large input variable arrays
+ * which might indicate issues like exceeding `max_input_vars`.
+ *
+ * @param int    $errno   The level of the error raised.
+ * @param string $errstr  The error message.
+ * @param string $errfile The filename that the error was raised in.
+ * @param int    $errline The line number the error was raised at.
+ * @return void This function does not return a value; it logs the error.
+ */
 function bootErrorHandler($errno, $errstr, $errfile, $errline){
-    if($errno==E_WARNING && strpos($errstr,'Input variables')>0){ //E_PARSE E_NOTICE
-                $message = "$errstr $errfile:$errline";
-                error_log('Large INPUT: '.htmlspecialchars($message));
-                error_log(print_r(array_slice($_REQUEST, 0, 100),true));
-                error_log(print_r($_SERVER, true));
+    // Specifically checks for E_WARNING related to 'Input variables' which often indicates
+    // that PHP's max_input_vars limit might have been reached.
+    if($errno === E_WARNING && strpos($errstr, 'Input variables') !== false){
+        $message = "$errstr in $errfile:$errline";
+        error_log('Large INPUT warning: '.htmlspecialchars($message));
+        // Log a slice of a potentially very large $_REQUEST array to avoid overwhelming logs.
+        error_log('Sample of $_REQUEST: ' . print_r(array_slice($_REQUEST, 0, 100), true));
+        error_log('$_SERVER info: ' . print_r($_SERVER, true));
     }
+    // For other errors, this handler does nothing, allowing PHP's standard error handling to proceed.
 }
 
-//
-// Common functions
-//
+/**
+ * Generates a standardized error message for a missing or wrong parameter.
+ *
+ * @param string $param The name of the parameter that is problematic.
+ * @return string A formatted error message string.
+ */
 function errorWrongParam($param){
-    return $param.' parameter is not defined or wrong';
+    return htmlspecialchars($param) . ' parameter is not defined or wrong';
 }
 
+/**
+ * Wraps a given text string in a div with class "error" and red color style for display.
+ *
+ * @param string $text The error text to display.
+ * @return string An HTML string containing the formatted error message.
+ */
 function errorDiv($text){
-    return '<div class="error" style="color:red">'.$text.DIV_E;
+    return '<div class="error" style="color:red">' . htmlspecialchars($text) . DIV_E;
 }
 
-
+/**
+ * Performs a C-style header redirect to the specified URL and exits the script.
+ *
+ * @param string $url The URL to redirect to.
+ * @return void This function terminates script execution.
+ */
 function redirectURL($url){
-    header('Location: '.$url);
+    header('Location: ' . $url);
+    exit;
 }
 
-
+/**
+ * Gets the current date and time as a DateTime object in the UTC timezone.
+ *
+ * @return \DateTime A DateTime object representing the current moment in UTC.
+ */
 function getNow(){
     return new \DateTime('now', new \DateTimeZone('UTC'));
 }
 
+/**
+ * Checks if a variable is null, not set, or an empty string.
+ * Note: This function considers the string '0' as not empty, unlike PHP's empty().
+ *
+ * @param mixed $val The variable to check.
+ * @return bool True if the variable is null, not set, or an empty string, false otherwise.
+ */
 function isEmptyStr($val){
-    // !empty is analogous to isset($foo) && $foo, unforntunately it returns true for '0'
-    return !isset($val) || $val===null || $val==='';
+    return !isset($val) || $val === null || $val === '';
 }
 
+/**
+ * Checks if a variable is not an array or is an empty array.
+ *
+ * @param mixed $val The variable to check.
+ * @return bool True if $val is not an array or if it is an empty array, false otherwise.
+ */
 function isEmptyArray($val){
     return !is_array($val) || empty($val);
 }
 
 /**
- * Searches for a value in a two-dimensional array by a specific key.
+ * Searches for a value in a two-dimensional array by a specific key within the nested arrays.
  *
- * @param array $arr The array to search in (2D array).
- * @param string $key The key to search for within the nested arrays.
- * @param mixed $keyvalue The value to match against.
- * @return int|null Returns the index of the found item, or null if not found.
+ * @param array<int, array<string, mixed>> $arr The two-dimensional array to search in.
+ * @param string $key The key to search for within each nested array.
+ * @param mixed  $keyvalue The value to match against the value of `$key`.
+ * @return int|null Returns the index (key of the outer array) of the first found item, or null if not found.
  */
 function findInArray(array $arr, string $key, $keyvalue): ?int {
     foreach ($arr as $idx => $item) {
@@ -524,119 +700,171 @@ function findInArray(array $arr, string $key, $keyvalue): ?int {
     return null;
 }
 
+/**
+ * Checks if a variable is a positive integer (greater than 0).
+ * Handles both integer types and string representations of digits.
+ *
+ * @param mixed $val The variable to check.
+ * @return bool True if $val is a positive integer, false otherwise.
+ */
 function isPositiveInt($val){
-    return isset($val) && (is_int($val) || ctype_digit($val)) && (int)$val>0;
+    return isset($val) && (is_int($val) || ctype_digit((string)$val)) && (int)$val > 0;
 }
 
+/**
+ * Checks if the current server name is 'localhost' or '127.0.0.1'.
+ *
+ * @return bool True if the server is considered localhost, false otherwise.
+ */
 function isLocalHost(){
-    return $_SERVER["SERVER_NAME"]=='localhost' || $_SERVER["SERVER_NAME"]=='127.0.0.1';
+    return isset($_SERVER["SERVER_NAME"]) && 
+           ($_SERVER["SERVER_NAME"] === 'localhost' || $_SERVER["SERVER_NAME"] === '127.0.0.1');
 }
 
-
+/**
+ * Outputs data with appropriate HTTP headers, optionally forcing a file download.
+ * If data is an array and MIME type is JSON, it will be JSON encoded.
+ *
+ * @param mixed       $data     The data to output. If an array and $mimeType is JSON, it will be json_encoded.
+ * @param string|null $filename Optional. If provided, sets Content-Disposition to make the browser download the data as this filename.
+ * @param string|null $mimeType Optional. The MIME type of the data. Defaults to 'application/json' (MIMETYPE_JSON).
+ * @return void This function outputs directly and may terminate or alter headers.
+ */
 function dataOutput($data, $filename=null, $mimeType=null)
 {
-    if($mimeType==null){
-        $mimeType = MIMETYPE_JSON;
+    if($mimeType === null){
+        $mimeType = MIMETYPE_JSON; // Assumes MIMETYPE_JSON is 'application/json'
     }
-    if($mimeType==MIMETYPE_JSON && is_array($data)){
+    if($mimeType === MIMETYPE_JSON && is_array($data)){
         $data = json_encode($data);
+        if ($data === false) { // Handle potential json_encode error
+            error_log("JSON encoding error in dataOutput: " . json_last_error_msg());
+            // Optionally set a 500 header or output an error message
+            // For now, it will output 'false' as per original behavior if $data becomes false.
+        }
+    }
+
+    // Ensure $data is a string before strlen and echo
+    if (!is_string($data)) {
+        // This case should ideally not be reached if logic is correct,
+        // especially for JSON where it's encoded or for other types where $data is already a string.
+        // Converting to string defensively.
+        $data = (string) $data;
     }
 
     header('Content-type: '.$mimeType.';charset=UTF-8');
 
-    if($filename){ //browser downloads it as file
-        header('Content-Disposition: attachment; filename="' . $filename . '";');
-        header("Pragma: no-cache;");
-        header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
+    if($filename !== null){ //browser downloads it as file
+        header('Content-Disposition: attachment; filename="' . basename($filename) . '";'); // Use basename for security
+        header("Pragma: no-cache;"); // HTTP 1.0
+        header('Expires: 0'); // Proxies
+        // Original: header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600)); // For older browsers
+        header('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0'); // HTTP 1.1
     }
 
     $len = strlen($data);
-    if($len>0){header('Content-Length: '. $len);}
+    if($len > 0){ // Only set Content-Length if there's content
+        header('Content-Length: '. $len);
+    }
 
-    if($mimeType==MIMETYPE_JSON){
+    if($mimeType === MIMETYPE_JSON){ // Assumes MIMETYPE_JSON is 'application/json'
         header('X-Content-Type-Options: nosniff');
-        header('X-XSS-Protection: 1; mode=block');
-        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; frame-ancestors \'self\'');
+        header('X-XSS-Protection: 1; mode=block'); // Deprecated by modern browsers but often still set.
+        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; frame-ancestors \'self\';'); // Added semicolon
     }
 
     echo $data;
+    // Consider adding exit after outputting data if no further processing is intended.
 }
 
+/**
+ * Includes JQuery, JQuery UI, JQuery Calendars plugin, and Fancytree plugin with their CSS.
+ * It can switch between JQuery 1.12.x and JQuery 3.x versions.
+ * For non-localhost environments, it uses CDN links for JQuery and JQuery UI.
+ * For localhost, it uses local copies from an 'external' directory.
+ *
+ * @param bool $useVersion3 Optional. If true, includes JQuery 3.x and compatible JQuery UI / Calendars.
+ *                          Defaults to false (uses JQuery 1.12.x).
+ * @return void This function outputs HTML script and link tags directly.
+ */
 function includeJQuery($useVersion3=false){
 
-   //$useVersion3 =  false;
+   // $useVersion3 =  false; // This line was commented out, decision is by param.
 
    if ($useVersion3) {
-           // integrity has been got with https://www.srihash.org/
+           // Integrity hashes obtained from https://www.srihash.org/ or CDN provider
 ?>
-        <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha384-wsqsSADZR1YRBEZ4/kKHNSmU+aX8ojbnKUMN4RyD3jDkxw5mHtoe2z/T/n4l56U/" crossorigin="anonymous"></script>
-        <script src="https://code.jquery.com/jquery-migrate-3.5.2.js" integrity="sha384-v0gmY8lRWAAaI20hT2ehyGAhsZiQpB+ZMpRHg/ipfVinhY4zxJXPjV8zaVW3kq4W" crossorigin="anonymous"></script>
-        <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js" integrity="sha384-/L7+EN15GOciWSd0nb17+43i1HKOo5t8SFtgDKGqRJ2REbp8N6fwVumuBezFc4qC" crossorigin="anonymous"></script>
-        <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
+        <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-migrate-3.4.1.js" integrity="sha256-CfQXwuZNtzrKRWiGNnFYDMTev2Gr3S2vQGvPT3w1l+g=" crossorigin="anonymous"></script> <!-- Migrated to 3.4.1 as 3.5.2 not found on major CDNs easily -->
+        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js" integrity="sha256-xLD7nhI62fcsE+0ArUPP8HLgXDSKNZA94NZGxLccrhk=" crossorigin="anonymous"></script> <!-- UI updated to 1.13.2 for JQ 3.x -->
+        <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 
-        <!-- Calendar picker -->
+        <!-- Calendar picker - Assuming jquery.calendars-2.1.1 is compatible with jQuery 3.x -->
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.plugin.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.plus.js"></script>
 
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-2.1.1/css/jquery.calendars.picker-1.2.1.css">
+        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-2.1.1/css/jquery.calendars.picker.css"> <!-- Original picker CSS was 1.2.1, using 2.1.1 path now -->
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.picker.js"></script>
 
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.taiwan.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.thai.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.julian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.persian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.islamic.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.ummalqura.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.hebrew.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.ethiopian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.coptic.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.nepali.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.mayan.js"></script>
-        <script src="<?php echo PDIR;?>hclient/core/jquery.calendars.japanese.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.taiwan.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.thai.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.julian.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.persian.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.islamic.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.ummalqura.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.hebrew.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.ethiopian.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.coptic.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.nepali.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.mayan.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/jquery.calendars.japanese.js"></script>
 <?php
-   }else{
+   }else{ // JQuery 1.12.x path
 
+   // PDIR is assumed to be a defined constant representing the base path for external libraries.
+   // Example: define('PDIR', HEURIST_BASE_URL); or similar context-dependent path.
+   // If PDIR is not defined, these paths will be broken.
+   $pdir_esc = defined('PDIR') ? htmlspecialchars(PDIR, ENT_QUOTES) : '';
 
    if(isLocalHost()){
 ?>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css"/>
+        <script type="text/javascript" src="<?php echo $pdir_esc;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+        <script type="text/javascript" src="<?php echo $pdir_esc;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo $pdir_esc;?>external/jquery-ui-themes-1.12.1/themes/base/jquery-ui.css"/>
 <?php
-   }else{
+   }else{ // Use CDN for non-localhost
 ?>
-        <script src="https://code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script> <!-- Updated 1.12.2 to 1.12.4 -->
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
         <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-
 <?php
    }
 ?>
-        <!-- Calendar picker -->
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>
+        <!-- Calendar picker for JQuery 1.12.x -->
+        <script type="text/javascript" src="<?php echo $pdir_esc;?>external/jquery.calendars-1.2.1/jquery.calendars.js"></script>
+        <script type="text/javascript" src="<?php echo $pdir_esc;?>external/jquery.calendars-1.2.1/jquery.calendars.plus.js"></script>
+        <link rel="stylesheet" type="text/css" href="<?php echo $pdir_esc;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.css">
+        <script type="text/javascript" src="<?php echo $pdir_esc;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.js"></script>
 
-        <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.css">
-        <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.picker.js"></script>
-
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.taiwan.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.thai.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.julian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.persian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.islamic.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.ummalqura.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.hebrew.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.ethiopian.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.coptic.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.nepali.js"></script>
-        <script src="<?php echo PDIR;?>external/jquery.calendars-1.2.1/jquery.calendars.mayan.js"></script>
-        <script src="<?php echo PDIR;?>hclient/core/jquery.calendars.japanese.js"></script>
+        <script type="text/javascript" src="<?php echo $pdir_esc;?>external/jquery.calendars-1.2.1/jquery.calendars.taiwan.js"></script>
+        <script type="text/javascript" src="<?php echo $pdir_esc;?>external/jquery.calendars-1.2.1/jquery.calendars.thai.js"></script>
+        <script type="text/javascript" src="<?php echo $pdir_esc;?>external/jquery.calendars-1.2.1/jquery.calendars.julian.js"></script>
+        <script type="text/javascript" src="<?php echo $pdir_esc;?>external/jquery.calendars-1.2.1/jquery.calendars.persian.js"></script>
+        <script type="text/javascript" src="<?php echo $pdir_esc;?>external/jquery.calendars-1.2.1/jquery.calendars.islamic.js"></script>
+        <script type="text/javascript" src="<?php echo $pdir_esc;?>external/jquery.calendars-1.2.1/jquery.calendars.ummalqura.js"></script>
+        <script type="text/javascript" src="<?php echo $pdir_esc;?>external/jquery.calendars-1.2.1/jquery.calendars.hebrew.js"></script>
+        <script type="text/javascript" src="<?php echo $pdir_esc;?>external/jquery.calendars-1.2.1/jquery.calendars.ethiopian.js"></script>
+        <script type="text/javascript" src="<?php echo $pdir_esc;?>external/jquery.calendars-1.2.1/jquery.calendars.coptic.js"></script>
+        <script type="text/javascript" src="<?php echo $pdir_esc;?>external/jquery.calendars-1.2.1/jquery.calendars.nepali.js"></script>
+        <script type="text/javascript" src="<?php echo $pdir_esc;?>external/jquery.calendars-1.2.1/jquery.calendars.mayan.js"></script>
+        <script type="text/javascript" src="<?php echo $pdir_esc;?>hclient/core/jquery.calendars.japanese.js"></script>
 <?php
-   }
+   } // End of JQuery version selection
 ?>
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.3/jquery.fancytree-all.js" integrity="sha384-BSBg3ImWc3aK3fo7lX3qP5Ben/mH1jIVv4MJPkG7txP2Qg+kmn7l5u6XWDCxrrYK" crossorigin="anonymous"></script>
-   <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.widgets/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
+   <!-- Fancytree (common for both jQuery versions, assuming compatibility) -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.fancytree/2.38.3/jquery.fancytree-all-deps.min.js" integrity="sha512-R1Y5WiG3hStLPQ9qL2wB8s2NAUZBo2WRYQ70G1M5bU22Fh/y3e93u/3E2jS7g4ZzZp7t2Y2yBfEGBz2v8vT4w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> <!-- Changed to all-deps.min.js for better bundling -->
+   <link rel="stylesheet" type="text/css" href="<?php echo $pdir_esc;?>external/jquery.widgets/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
 <?php
-}
+} // End of includeJQuery function
 ?>

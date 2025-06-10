@@ -1,11 +1,14 @@
 
-Directory:    hserv/dbaccess
+Directory:    /hserv/dbaccess
 
-Overview:     Classes to work with database server.
+Overview:    Classes to work with database server.
+
+Files:
+- utils_db.php: library of mySql database functions
 
 Notes:        
 
-Updated:     26 Oct 2023
+Updated:     2025-06-10
 
 ----------------------------------------------------------------------------------------------------------------
 

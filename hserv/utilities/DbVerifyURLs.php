@@ -1,27 +1,17 @@
 <?php
-/*
-* Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* https://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
 /**
-* DbVerifyURLs.php - class to check and validate URLs from various sources in the database.
+* DbVerifyURLs.php - Class DbVerifyURLs
+* 
+* Checks and validates URLs from various sources in the database.
 *
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\utilities
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       3.1.0
 */
 namespace hserv\utilities;
 use hserv\utilities\DbUtils;
@@ -32,15 +22,18 @@ define('CURL_ERR', 'Fatal curl error');
 
 /**
  * Class DbVerifyURLs
- * A class to check and validate URLs from various sources in the database.
+ * 
+ * A class to check and validate URLs from various sources within the Heurist database.
+ * It can identify broken or problematic URLs in record fields, text fields, and external file references.
+ * Supports session-based processing for large datasets and can output results in various formats.
+ *
  */
 class DbVerifyURLs {
 
-    /** @var mysqli $mysqli Database connection */
     private $system;
     private $mysqli;
 
-    /** @var string $heuristDomain  domain for this Heurist server  */
+    /** @var string $heuristDomain  domain for this Heurist server */
     private $heuristDomain;
 
     /** @var bool $isHeuristReferenceIndex Whether the database is Heurist_Reference_Index */
@@ -49,8 +42,10 @@ class DbVerifyURLs {
     /** @var array $passedRecIds Array of record IDs that passed URL validation */
     private $passedRecIds = [];
 
-
+    /** @var bool Indicates if the process is running within a session. */
     private $isSession = false;
+    
+    /** @var bool Flag to indicate if the process was terminated. */
     private $isTerminated = false;
     
     /** @var bool $isVerbose Whether echo results at once */
@@ -60,6 +55,7 @@ class DbVerifyURLs {
     /** @var int $maxCountToCheck  */
     private $maxCountToCheck = 150;
 
+    /** @var int $checkedCount Number of URLs checked in the current run */
     private $checkedCount = 0;
 
     
@@ -74,9 +70,9 @@ class DbVerifyURLs {
     /**
      * Constructor for DbVerifyURLs.
      *
-     * @param mysqli $mysqli
-     * @param string $heuristDomain
-     * @param bool $isHeuristReferenceIndex
+     * @param \hserv\System $system The Heurist system instance.
+     * @param string $heuristDomain The domain of the current Heurist server.
+     * @param bool $isHeuristReferenceIndex True if the current database is the Heurist Reference Index.
      */
     public function __construct($system, $heuristDomain, $isHeuristReferenceIndex) {
         
@@ -108,9 +104,13 @@ class DbVerifyURLs {
         $this->passedRecIds = []; // reset the array
     }
     
-    //
-    // Returns info about previous or current session
-    //
+    /**
+     * Retrieves information about the current or previous URL verification session.
+     * Reads session data from the database settings.
+     *
+     * @return array An array containing session information, such as 'session_id' if a session is in progress,
+     *               or 'total_checked' and 'total_bad' from a previous completed session. Empty if no info.
+     */
     public function getCurrentSessionInfo(){
 
         //load previous result
@@ -129,11 +129,17 @@ class DbVerifyURLs {
     /**
      * Check URLs in various sources and validate them.
      *
-     * @param bool $isVerbose echo results at once
-     * @param bool $listOnly Only list the URLs, do not perform any validations.
-     * @param int $maxCountToCheck
-     * @param int $mode - 0 start from last position, 1 check existing bad urls fist, 2 - from scratch
-     * @return array Results of the URL validation or boolean.
+     * @param bool $isVerbose Optional. If true, echoes results immediately. Defaults to false.
+     * @param bool $listOnly Optional. If true, only lists URLs without performing validation. Defaults to false.
+     * @param int $maxCountToCheck Optional. Maximum number of URLs to check in this run. Defaults to 150.
+     * @param int $mode Optional. Mode of operation:
+     *                  0: Start from the last processed position.
+     *                  1: Check existing bad URLs first (not fully implemented/used this way).
+     *                  2: Start from scratch (resets previous results).
+     *                  Defaults to 0.
+     * @param int $session_id Optional. If > 0, indicates processing within a managed session. Defaults to 0.
+     * @return array|false Results of the URL validation as an array, or false if a fatal CURL error occurred.
+     *                     The results array contains counts and lists of processed/bad URLs.
      */
     public function checkURLs($isVerbose = false, $listOnly = false, $maxCountToCheck=150, $mode=0, $session_id=0) {
 
@@ -229,9 +235,14 @@ class DbVerifyURLs {
         return $total;
     }
 
-    //
-    //
-    //
+    /**
+     * Outputs a summary of bad URLs found in a previous check as a CSV file.
+     * Reads results from the stored session data.
+     * The CSV contains columns: rec_ID, dty_ID, URL.
+     * Exits after sending CSV headers and data.
+     *
+     * @return void
+     */
     public function outputSummaryInfoAsCSV(){
         
         $this->readResultFile();

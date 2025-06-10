@@ -1,26 +1,18 @@
 <?php
 /**
-* dbVerify.php : methods to validate and fix database struture and data integrity
-* see databaseController $action=='verify'
+* DbVerify.php - Class DbVerify
+* 
+* Methods to validate and fix database struture and data integrity.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
-* @subpackage  utilities
+* @since       4.0
 */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 namespace hserv\utilities;
 use hserv\utilities\DbUtils;
 use hserv\utilities\Temporal;
@@ -29,6 +21,14 @@ require_once dirname(__FILE__).'/../../admin/verification/verifyValue.php';
 require_once dirname(__FILE__).'/../../admin/verification/verifyFieldTypes.php';
 require_once dirname(__FILE__)."/../utilities/geo/mapCoordinates.php";
 
+/**
+* Class DbVerify
+* Provides methods to validate and fix database structure and data integrity issues.
+* Works in conjunction with databaseController's 'verify' action.
+* Offers checks for various aspects like ownership, term validity, field types,
+* data pointers, required fields, character validity, title masks, caches, etc.
+* Many checks also offer a "fix" mode.
+*/
 class DbVerify {
 
     private $mysqli = null;
@@ -37,6 +37,11 @@ class DbVerify {
     private $out = null; //output stream
     private $keep_autocommit = null;
 
+    /**
+     * Constructor for DbVerify.
+     *
+     * @param \hserv\System $system The system instance.
+     */
     public function __construct($system) {
        $this->system = $system;
        $this->mysqli = $system->getMysqli();
@@ -308,10 +313,14 @@ class DbVerify {
     }
 
     /**
-    * Check
-    *
-    * @param array $params
-    */
+     * Checks for duplicate terms, terms with missing parent or inverse term references.
+     * Optionally fixes issues if 'fix' mode is enabled in $params.
+     *
+     * @param array|null $params Optional parameters.
+     *                           'data' can contain pre-fetched term issue lists.
+     *                           'fix' (string "1") enables auto-fixing.
+     * @return array An associative array with 'status' (bool) and 'message' (string).
+     */
     public function check_dup_terms($params=null){
         global $trmLookup;
 
@@ -448,11 +457,10 @@ class DbVerify {
      * and record type constraints. It can also auto-repair invalid fields if in fix mode.
      *
      * @param array|null $params An associative array of parameters.
-     *                           'data' or 'show' can be used to check or display field types.
-     *                           'rt' for the record type ID.
-     * @return array Returns an associative array with 'status' and 'message'.
-     *               'status' is true if valid or repairable, false otherwise.
-     *               'message' contains success/error or repair information.
+     *                           'data' (string, JSON) or 'show' (bool) can be used to check or display field types.
+     *                           'rt' (int) for the record type ID.
+     *                           'fix' (int 1) enables auto-fixing.
+     * @return array Returns an associative array with 'status' (bool) and 'message' (string).
      */
     public function check_field_type($params=null){
 
@@ -572,10 +580,15 @@ class DbVerify {
 
 
     /**
-    * Check Db definitions - wrong default valuss
-    *
-    * @param array $params
-    */
+     * Checks default values in record type structures for validity.
+     * Identifies fields using unknown terms as default values. These are automatically removed.
+     *
+     * @param array|null $params Optional parameters.
+     *                           'data' (string, JSON) can contain pre-fetched invalid default value lists.
+     *                           'rt' (int) to filter by record type ID.
+     * @return array An associative array with 'status' (bool, always true as fixes are automatic)
+     *               and 'message' (string describing results).
+     */
     public function check_default_values($params=null){
 
         $resStatus = true;
@@ -620,10 +633,13 @@ class DbVerify {
 
 
     /**
-    * Check that record pointer values point to an existing record
-    *
-    * @param array $params
-    */
+     * Checks that record pointer values (dty_Type = "resource") point to existing records.
+     * Optionally fixes issues by deleting invalid pointers if 'fix' mode is enabled.
+     *
+     * @param array|null $params Optional parameters.
+     *                           'fix' (int 1) enables auto-fixing (deletes faulty pointers).
+     * @return array An associative array with 'status' (bool) and 'message' (string, HTML formatted list of issues).
+     */
     public function check_pointer_targets($params=null){
 
         $resStatus = true;
@@ -688,10 +704,12 @@ class DbVerify {
     }
 
     /**
-    * Check that record pointer values confine to there list of allowed record types
-    *
-    * @param array $params
-    */
+     * Checks that record pointer values conform to their defined list of allowed target record types.
+     * (dty_Type = "resource" AND dty_PtrTargetRectypeIDs > 0).
+     *
+     * @param array|null $params Optional parameters (currently unused).
+     * @return array An associative array with 'status' (bool) and 'message' (string, HTML formatted list of issues).
+     */
     public function check_target_types($params=null){
 
         $resStatus = true;
@@ -739,10 +757,14 @@ class DbVerify {
 
 
     /**
-    * Check that all parent child pointers are valid
-    *
-    * @param array $params
-    */
+     * Checks that parent-child relationships are valid and consistent.
+     * Verifies reciprocal pointers between parent and child records.
+     * Optionally fixes issues if 'fix' mode is enabled (adds missing reverse links or deletes broken links).
+     *
+     * @param array|null $params Optional parameters.
+     *                           'fix' (int 1 or 2) enables different auto-fixing strategies.
+     * @return array An associative array with 'status' (bool) and 'message' (string, HTML formatted list of issues).
+     */
     public function check_target_parent($params=null){
 
         $resStatus = true;
@@ -1034,10 +1056,13 @@ ORDER BY child.dtl_RecID";
     }
 
     /**
-    * Check for recDetail that contain no values
-    *
-    * @param array $params
-    */
+     * Checks for recDetail entries that contain no values (empty or null).
+     * Excludes 'file' type fields. Optionally removes these empty fields if 'fix' mode is enabled.
+     *
+     * @param array|null $params Optional parameters.
+     *                           'fix' (int 1) enables auto-fixing (removes empty fields).
+     * @return array An associative array with 'status' (bool) and 'message' (string, HTML formatted list of issues).
+     */
     public function check_empty_fields($params=null){
 
         $resStatus = true;
@@ -1099,10 +1124,13 @@ ORDER BY child.dtl_RecID";
     }
 
     /**
-    * Check that all term values are pointing to existing terms
-    *
-    * @param array $params
-    */
+     * Checks that all term values in records (dty_Type = "enum" or "relmarker") point to existing terms.
+     * Optionally deletes invalid term values if 'fix' mode is enabled.
+     *
+     * @param array|null $params Optional parameters.
+     *                           'fix' (int 1) enables auto-fixing (deletes faulty term values).
+     * @return array An associative array with 'status' (bool) and 'message' (string, HTML formatted list of issues).
+     */
     public function check_term_values($params=null){
 
         $resStatus = true;
@@ -1169,10 +1197,11 @@ ORDER BY child.dtl_RecID";
     }
 
     /**
-    * Check that single value fields correctly have only a single value
-    *
-    * @param array $params
-    */
+     * Checks that fields defined as single-value (rst_MaxValues=1) correctly have only one value.
+     *
+     * @param array|null $params Optional parameters (currently unused).
+     * @return array An associative array with 'status' (bool) and 'message' (string, HTML formatted list of issues).
+     */
     public function check_single_value($params=null){
 
         $resStatus = true;
@@ -1214,10 +1243,12 @@ ORDER BY child.dtl_RecID";
 
 
     /**
-    * Check that records have all the required fields
-    *
-    * @param array $params
-    */
+     * Checks that records have all their required fields filled (rst_RequirementType='required').
+     * Excludes separator and relmarker type fields.
+     *
+     * @param array|null $params Optional parameters (currently unused).
+     * @return array An associative array with 'status' (bool) and 'message' (string, HTML formatted list of issues).
+     */
     public function check_required_fields($params=null){
 
         $resStatus = true;
@@ -1258,10 +1289,12 @@ ORDER BY child.dtl_RecID";
     }
 
     /**
-    * Check all records for non-standard field values
-    *
-    * @param array $params
-    */
+     * Checks all records for non-standard field values (extraneous fields not defined in the record type's structure).
+     * Excludes certain system-defined fields like DT_PARENT_ENTITY, DT_WORKFLOW_STAGE, DT_ORIGINAL_RECORD_ID.
+     *
+     * @param array|null $params Optional parameters (currently unused).
+     * @return array An associative array with 'status' (bool) and 'message' (string, HTML formatted list of issues).
+     */
     public function check_nonstandard_fields($params=null){
 
         $resStatus = true;
@@ -1318,10 +1351,15 @@ ORDER BY child.dtl_RecID";
     }
 
     /**
-    * Check text fields (freetext and blocktext) for invalid characters
-    *
-    * @param array $params
-    */
+     * Checks text fields (freetext and blocktext) for invalid characters (control characters).
+     * If found, these characters are replaced with '?' and the record is updated.
+     * Supports progress reporting for long operations.
+     *
+     * @param array|null $params Optional parameters.
+     *                           'progress_report_step' (int) can be used for progress tracking.
+     * @return array|false An associative array with 'status' (bool) and 'message' (string, HTML formatted list of issues),
+     *                     or false if terminated by user during progress reporting.
+     */
     public function check_invalid_chars($params=null){
 
         $resStatus = true;
@@ -1463,10 +1501,11 @@ ORDER BY child.dtl_RecID";
     }
 
     /**
-    * Check that all record types have valid title masks
-    *
-    * @param array $params
-    */
+     * Checks that all record types (defRecTypes) have valid title masks.
+     *
+     * @param array|null $params Optional parameters (currently unused).
+     * @return array An associative array with 'status' (bool) and 'message' (string, HTML formatted list of issues).
+     */
     public function check_title_mask($params=null){
 
         $resStatus = true;
@@ -1509,10 +1548,14 @@ ORDER BY child.dtl_RecID";
     }
 
     /**
-    * Check relationship cache (recLinks table)
-    *
-    * @param array $params
-    */
+     * Checks the integrity of the relationship cache (recLinks table).
+     * Compares counts of relationships and links with their cached counterparts.
+     * Optionally recreates the cache if 'fix' mode is enabled.
+     *
+     * @param array|null $params Optional parameters.
+     *                           'fix' (int 1) enables auto-fixing (recreates recLinks).
+     * @return array An associative array with 'status' (bool) and 'message' (string).
+     */
     public function check_relationship_cache($params=null){
 
         $resStatus = true;
@@ -1599,10 +1642,15 @@ ORDER BY child.dtl_RecID";
     }
 
     /**
-    * Check
-    *
-    * @param array $params
-    */
+     * Checks the integrity of the Record Details Date Index (recDetailsDateIndex).
+     * Compares counts of date fields with indexed entries and checks for empty index entries.
+     * Optionally recreates the index if 'fix' mode is enabled.
+     *
+     * @param array|null $params Optional parameters.
+     *                           'fix' (int 1) enables auto-fixing (recreates recDetailsDateIndex).
+     *                           'progress_report_step' (int) for progress tracking during fix.
+     * @return array An associative array with 'status' (bool) and 'message' (string).
+     */
     public function check_dateindex($params=null){
 
         $resStatus = true;
@@ -1694,10 +1742,12 @@ ORDER BY child.dtl_RecID";
     }
 
     /**
-    * Check
-    *
-    * @param array $params
-    */
+     * Checks that all definitions (record types, field types, vocabularies) belong to existing groups.
+     * If definitions are found without a valid group, they are moved to the respective "Trash" group.
+     *
+     * @param array|null $params Optional parameters (currently unused).
+     * @return array An associative array with 'status' (bool) and 'message' (string describing actions taken).
+     */
     public function check_defgroups($params=null){
 
         $resStatus = true;
@@ -1780,10 +1830,16 @@ ORDER BY child.dtl_RecID";
     }
 
     /**
-    * Check that geospatial values are: within bounds, valid coordinates, and that both dtl_Geo and a geoType exist
-    *
-    * @param array $params
-    */
+     * Checks geospatial values (dty_Type = "geo") for various issues:
+     * - Missing dtl_Geo data or missing/invalid geoType prefix in dtl_Value.
+     * - Coordinates out of bounds (latitude > 90, longitude > 180).
+     * - Invalid WKT coordinate data.
+     * Optionally fixes longitude values that are out of bounds due to continuous world wrapping if 'fix' mode is enabled.
+     *
+     * @param array|null $params Optional parameters.
+     *                           'fix' (string "1") enables auto-fixing for out-of-bounds longitudes.
+     * @return array An associative array with 'status' (bool) and 'message' (string, HTML formatted list of issues).
+     */
     public function check_geo_values($params=null){
 
         $resStatus = true;
@@ -1973,10 +2029,17 @@ ORDER BY child.dtl_RecID";
     }
 
     /**
-    * Check text fields for double, leading and trailing spaces
-    *
-    * @param array $params
-    */
+     * Checks text fields (freetext and blocktext) for double, leading, trailing, and multiple consecutive spaces.
+     * Double spaces and leading/trailing spaces are automatically corrected.
+     * Multiple spaces (3 or more) can be fixed if 'fix' mode is enabled with specific record IDs.
+     * Supports progress reporting.
+     *
+     * @param array|null $params Optional parameters.
+     *                           'fix' (int 1) and 'recids' (string, comma-separated) enable fixing multiple spaces for specified records.
+     *                           'progress_report_step' (int) for progress tracking.
+     * @return array|false An associative array with 'status' (bool) and 'message' (string, HTML formatted),
+     *                     or false if terminated by user during progress.
+     */
     public function check_fld_spacing($params=null){
 
         $resStatus = true;
@@ -2148,10 +2211,13 @@ ORDER BY child.dtl_RecID";
     }
 
     /**
-    * Check for records with multiple workflow stages (should be a single value field)
-    *
-    * @param array $params
-    */
+     * Checks for records with multiple workflow stage values (DT_WORKFLOW_STAGE),
+     * where the field is configured as single-value.
+     * Automatically corrects by keeping the newest, non-import stage.
+     *
+     * @param array|null $params Optional parameters (currently unused).
+     * @return array An associative array with 'status' (bool) and 'message' (string, HTML formatted list of corrections).
+     */
     public function check_multi_swf_values($params=null){
 
         $resStatus = true;
@@ -2244,10 +2310,16 @@ ORDER BY child.dtl_RecID";
     }
 
     /**
-    * Check that term values match their field configurations
-    *
-    * @param array $params
-    */
+     * Checks that term values in records match their field configurations (i.e., terms belong to the vocabulary specified for the field).
+     * Optionally fixes terms with the same label that exist in the correct vocabulary if 'fix' mode is enabled.
+     * Supports progress reporting.
+     *
+     * @param array|null $params Optional parameters.
+     *                           'fix' (int 1) enables auto-fixing for terms with the same label in the correct vocabulary.
+     *                           'progress_report_step' (int) for progress tracking.
+     * @return array|false An associative array with 'status' (bool) and 'message' (string, HTML formatted),
+     *                     or false if terminated by user.
+     */
     public function check_expected_terms($params=null){
 
         $this->_outStreamInit();
@@ -2419,10 +2491,18 @@ FIXMSG
 
 
     /**
-    * Check that date values are valid and can be converted into a Temporal object
-    *
-    * @param array $params
-    */
+     * Checks that date values (dty_Type = "date") are valid and can be processed into a standard format.
+     * Attempts to auto-correct common issues (e.g., empty strings, year ranges like YYYY-YYYY).
+     * For ambiguous dates (e.g., d/m/y vs m/d/y), it suggests corrections.
+     * Optionally fixes suggested dates if 'fix' mode is enabled with specific record IDs.
+     * Supports progress reporting.
+     *
+     * @param array|null $params Optional parameters.
+     *                           'fix' (int 1) and 'recids' (string, comma-separated) enable fixing for specified records based on suggestions.
+     *                           'progress_report_step' (int) for progress tracking.
+     * @return array|false An associative array with 'status' (bool) and 'message' (string, HTML formatted),
+     *                     or false if terminated by user.
+     */
     public function check_date_values($params=null){
 
         global $useNewTemporalFormatInRecDetails;

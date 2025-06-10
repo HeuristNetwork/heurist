@@ -1,40 +1,20 @@
 <?php
 /**
-* dbUtils.php : Functions to create, delelet, clean the entire HEURIST database
-*               and other functions to do with database file structure
+* DbRegis.php - Class DbRegis
+*
+* Database registration operations in the Heurist reference index database 
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
-* @subpackage  DataStore
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @since       4.0
 */
 
 /**
-* Static class to perform database registration operation (in heurist_reference_index database)
-*
-* Methods:
-* registrationAdd    - add new registation to HEURIST_INDEX_DATABASE database
-* registrationUpdate - change url and name of registered database in HEURIST_INDEX_DATABASE database
-* registrationDelete - remove registration
-*
-* private
-* registrationRemoteCall - if script is not executed on reference server, it calls indexControleer on reference server
-* addError - add error into global $system
-* registrationValidateValues
-* registrationValidateUser
-*
 */
 namespace hserv\utilities;
 use hserv\System;
@@ -44,6 +24,21 @@ use hserv\structure\ConceptCode;
 
 require_once dirname(__FILE__).'/../records/edit/recordModify.php';
 
+/**
+* Class DbRegis
+* 
+* Static class to perform database registration operations in the Heurist reference index database.
+* It handles adding, updating, deleting, and retrieving database registration information,
+* including interactions with a remote reference server if necessary.
+*
+* Public Static Methods:
+* - initialize(): Initializes the DbRegis class and database connection.
+* - registrationDelete(array $params): Removes a database registration.
+* - registrationUpdate(array $params): Updates an existing database registration.
+* - registrationGet(array $params): Retrieves registration information for a database.
+* - registrationAdd(array $params): Adds a new database registration.
+* 
+*/
 class DbRegis {
 
      /**
@@ -58,6 +53,12 @@ class DbRegis {
 
     private static $isOutSideRequest = false;
 
+    /**
+     * Initializes the DbRegis class.
+     * Sets up the database connection if the request is not an outside request.
+     *
+     * @return bool True if initialization is successful or already initialized, false otherwise.
+     */
     public static function initialize()
     {
         if (self::$initialized){
@@ -252,11 +253,16 @@ class DbRegis {
     }
 
     /**
-    * Removes registration
-    *
-    * @param mixed $params
-    * @return {false|true}
-    */
+     * Removes a database registration.
+     * If the request is from an external server, it makes a remote call.
+     * Otherwise, it validates the user and deletes the registration record.
+     *
+     * @param array $params Parameters for deleting the registration. Expected keys:
+     *                      'dbID' (int) - The ID of the database registration to delete.
+     *                      'usrEmail' (string) - User's email for validation.
+     *                      'usrPassword' (string) - User's password for validation.
+     * @return bool|array False on failure, true on successful local deletion, or an array from remote call.
+     */
     public static function registrationDelete($params){
 
         if(!self::initialize()) {return false;} //can not connect to index database
@@ -307,10 +313,19 @@ class DbRegis {
 
 
     /**
-    * Change existing registration
-    *
-    * @param mixed $params
-    */
+     * Updates an existing database registration.
+     * Handles remote calls if necessary. Validates parameters and user credentials.
+     * Updates record URL, title, and specific fields related to the registration.
+     *
+     * @param array $params Parameters for updating the registration. Expected keys:
+     *                      'dbID' (int) - The ID of the database registration to update.
+     *                      'dbReg' (string, optional) - New database name.
+     *                      'dbTitle' (string, optional) - New database title (description).
+     *                      'serverURL' (string, optional) - New server URL for the database.
+     *                      'usrEmail' (string) - User's email for validation.
+     *                      'usrPassword' (string) - User's password for validation.
+     * @return bool|int|array False on failure, the database ID (int) on successful local update, or an array from remote call.
+     */
     public static function registrationUpdate($params){
 
         if(!self::initialize()) {return false;} //can not connect to index database
@@ -393,11 +408,14 @@ class DbRegis {
     }
 
     /**
-    * Return registration info from Heurist reference index
-    *
-    * @param mixed $params
-    * @return null
-    */
+     * Retrieves registration information for a database from the Heurist reference index.
+     * Handles remote calls if necessary.
+     *
+     * @param array $params Parameters for fetching registration info. Expected key:
+     *                      'dbID' (int) - The ID of the database registration to retrieve.
+     *                      'action' (string, optional) - Set to 'info' for remote calls.
+     * @return string|false|array The database URL (string) on success, false on failure, or an array from remote call.
+     */
     public static function registrationGet($params){
 
         if(!self::initialize()) {return false;} //can not connect to index database
@@ -450,11 +468,25 @@ class DbRegis {
 
 
     /**
-    * Register database in heurist reference index datbase and returns database ID
-    *
-    * @param mixed $params
-    * @return {false|null|true}
-    */
+     * Adds a new database registration to the Heurist reference index.
+     * Handles remote calls, validates parameters, creates or finds the user in the index,
+     * and creates the registration record along with associated details.
+     * Sends an email notification upon successful registration.
+     *
+     * @param array $params Parameters for adding the registration. Expected keys:
+     *                      'db' (string, optional) - Current database name (if calling itself after remote).
+     *                      'dbReg' (string) - Name of the database to register.
+     *                      'dbTitle' (string) - Title/description of the database.
+     *                      'dbVer' (string, optional) - Version of the database.
+     *                      'usrEmail' (string) - Email of the registering user.
+     *                      'usrPassword' (string) - Password of the registering user.
+     *                      'usrName' (string) - Username of the registering user.
+     *                      'usrFirstName' (string) - First name of the user.
+     *                      'usrLastName' (string) - Last name of the user.
+     *                      'serverURL' (string) - URL of the database server.
+     * @return array|false An array containing 'dbID' and 'dbTitle' on successful registration,
+     *                     or false on failure. Remote calls might also return an array.
+     */
     public static function registrationAdd($params){
 
         if(!self::initialize()) {return false;} //can not connect to index database

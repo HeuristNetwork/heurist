@@ -1,22 +1,28 @@
 <?php
-
 /**
-* UMail.php - email sending routines
+* UMail.php - Email sending utilities
+*
+* This file provides a collection of global functions for sending emails.
+* It primarily utilizes the PHPMailer library for robust email functionality,
+* including HTML emails and attachments. It also includes a fallback to PHP's native
+* mail() function and helper functions for SMTP checks and rate-limited admin notifications.
+*
+* Key functions include:
+* - sendEmail: General purpose email sending function (wraps sendPHPMailer).
+* - sendPHPMailer: Core email sending logic using PHPMailer.
+* - sendEmail_native: Sends email using PHP's native mail() function.
+* - checkSmtp: Checks basic SMTP connectivity.
+* - sendEmailToAdmin: Sends a rate-limited notification email to the admin.
+* - endsWith: A string utility function.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 use hserv\utilities\USanitize;
 
@@ -25,23 +31,52 @@ require_once dirname(__FILE__).'/../../vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-//
-// Uses PHPMailer
-//
+/**
+ * Sends an email using PHPMailer. This is a general-purpose wrapper.
+ *
+ * @param string|array $email_to Recipient email address or an array of addresses.
+ *                               Can also be an associative array with 'to', 'cc', 'bcc' keys, each being an array of emails.
+ * @param string $email_title The subject of the email.
+ * @param string $email_text The body of the email. Can be plain text or HTML if $is_html is true.
+ * @param bool $is_html Optional. Whether the email body is HTML. Defaults to false.
+ * @param string|array|null $email_attachment Optional. Path to a file to attach, or an array of paths. Defaults to null.
+ * @return bool True on success, false on failure.
+ */
 function sendEmail($email_to, $email_title, $email_text, $is_html=false, $email_attachment=null)
 {
     return sendPHPMailer(null, null, $email_to, $email_title, $email_text, $email_attachment, $is_html);
 }
 
-// in php v8 use str_ends_with
+/**
+ * Checks if a string ends with a specific substring.
+ * Polyfill for `str_ends_with()` available in PHP 8+.
+ *
+ * @param string $haystack The string to search in.
+ * @param string $needle The substring to search for at the end of $haystack.
+ * @return bool True if $haystack ends with $needle, false otherwise.
+ */
 function endsWith($haystack, $needle) {
     // search forward starting from end minus needle length characters
     return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);
 }
 
-//
-//
-//
+/**
+ * Sends an email using the PHPMailer library with specified sender details.
+ * Handles various configurations like SMTP relay for Gmail, HTML content, and attachments.
+ *
+ * @global \hserv\System|null $system The global Heurist system object, used for error reporting.
+ * @global string|null $mailRelayPwd Password for a mail relay service (used for Gmail relay).
+ *
+ * @param string|null $email_from Sender's email address. Defaults to 'no-reply@[HEURIST_MAIL_DOMAIN|HEURIST_DOMAIN]'.
+ * @param string|null $email_from_name Sender's name. Defaults to 'Heurist system. ([HEURIST_SERVER_NAME])'.
+ * @param string|array $email_to Recipient email address or an array of addresses.
+ *                               Can also be an associative array with 'to', 'cc', 'bcc' keys, each being an array of emails.
+ * @param string $email_title The subject of the email.
+ * @param string $email_text The body of the email. If $is_html is true, HTML will be purified.
+ * @param string|array|null $email_attachment Optional. Path to a file to attach, or an array of paths. Defaults to null.
+ * @param bool $is_html Whether the email body is HTML.
+ * @return bool True on success, false on failure.
+ */
 function sendPHPMailer($email_from, $email_from_name, $email_to, $email_title, $email_text, $email_attachment, $is_html){
 
     global $system, $mailRelayPwd;
@@ -191,9 +226,18 @@ function sendPHPMailer($email_from, $email_from_name, $email_to, $email_title, $
     return true;
 }
 
-//
-// Uses php native mail function (used in send_email.php only)
-//
+/**
+ * Sends an email using PHP's native mail() function.
+ * Used primarily by send_email.php as a fallback or simpler alternative.
+ *
+ * @param string $email_to Recipient's email address.
+ * @param string $email_title Subject of the email. Prefixed with "HEURIST ".
+ * @param string $email_text Body of the email. A standard footer is appended.
+ * @param string|null $email_header Optional. Custom email headers. If null, default "From" header is constructed.
+ * @param bool $is_utf8 Optional. If true, sets Content-Type to UTF-8 and base64 encodes the title. Defaults to false.
+ * @param bool $use_html Optional. If true, sets Content-Type to HTML. Defaults to false.
+ * @return string "ok" on success, or an error message string on failure.
+ */
 function sendEmail_native($email_to, $email_title, $email_text, $email_header, $is_utf8=false, $use_html=false){
 
     $res = "ok";
@@ -262,9 +306,11 @@ function sendEmail_native($email_to, $email_title, $email_text, $email_header, $
     return $res;
 }
 
-//
-//
-//
+/**
+ * Checks basic SMTP connectivity by attempting to open a socket connection to localhost on port 25.
+ *
+ * @return bool True if the SMTP port can be opened, false otherwise.
+ */
 function checkSmtp(){
 
     $smtpHost = '127.0.0.1';//'localhost';
@@ -286,12 +332,17 @@ function checkSmtp(){
 }
 
 
-//
-// Send warning email to admin once per 4 hours
-//
-// $is_global - true - check global lastWarningSent in file upload root
-//              false - check lastWarningSent in database folder
-//
+    /**
+     * Sends a warning email to the administrator, rate-limited to once per 4 hours for a given scope.
+     * The rate limiting is managed by checking a timestamp in a "lastWarningSent.ini" file.
+     *
+     * @global \hserv\System|null $system The global Heurist system object. Used to determine file paths if available.
+     * @param string $title The subject/title of the warning email.
+     * @param string $message The body of the warning email.
+     * @param bool $is_global If true, the rate-limiting timestamp file is checked/stored in the global HEURIST_FILESTORE_ROOT.
+     *                        If false, it's checked/stored within the current database's folder (if $system is available).
+     * @return void
+     */
 function sendEmailToAdmin($title, $message, $is_global){
     global $system;
 

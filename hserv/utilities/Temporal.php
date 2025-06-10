@@ -1,34 +1,30 @@
 <?php
 /**
-* Brief description of file
+* Temporal.php - Class Temporal
+* 
+* Represents and manipulates temporal (date/time) data within Heurist
 *
-* Usage:
-* for export: exportRecordsJSON.php  export/xml/kml.php
-*                   @todo flathml.php  outputTemporalDetail (xml),  recordsExportCSV.php (csv)
-*
-* for import:     importParser.php  prepareDateField   @todo validate real dates only
-*                 syncZotero.php
-* for validation: dbVerify.php
-*                 composeSql.php
-*
-*  - converts temporal string to human readable
-*
+* @package     Heurist academic knowledge management system
+* @subpackage  hserv\utilities
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
 * @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @since       3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       3.1.0 
 */
 namespace hserv\utilities;
 
-
-/*
+/**
+* Class Temporal
+* 
+* Represents and manipulates temporal (date/time) data within Heurist.
+* Handles parsing various date formats, converting between formats (ISO, human-readable, JSON, KML, plain string),
+* calculating date ranges, and validating temporal values.
+* 
 * 1. Public methods
 *       setValue
 *       getValue
@@ -58,6 +54,7 @@ namespace hserv\utilities;
 *       toPlain         - old temporal plain string
 *       toReadable      - human readble
 *       toReadableExt   - human readble extended
+* 
 */
 class Temporal {
 
@@ -77,11 +74,25 @@ class Temporal {
         3=>"Slow Finish"
     );
 
-
+    /**
+     * Constructor for the Temporal class.
+     * Initializes the temporal object by parsing the input date string or array.
+     *
+     * @param string|array $date The date value to parse (can be a string or a pre-parsed array).
+     * @param bool $is_for_search Optional. Indicates if the parsing is for a search context, which might affect interpretation. Defaults to false.
+     */
     public function __construct( $date, $is_for_search=false ) {
         $this->setValue($date, $is_for_search);
     }
 
+    /**
+     * Sets or updates the value of the temporal object.
+     * Parses the input date and calculates min/max decimal representations.
+     *
+     * @param string|array $date The date value to parse (can be a string or a pre-parsed array).
+     * @param bool $is_for_search Optional. Indicates if the parsing is for a search context. Defaults to false.
+     * @return void
+     */
     public function setValue( $date, $is_for_search=false ){
         $this->tDate = Temporal::_parseTemporal( $date, $is_for_search );
 
@@ -94,6 +105,12 @@ class Temporal {
         }
     }
 
+    /**
+     * Gets the internal representation of the temporal object.
+     *
+     * @param bool $is_simple Optional. If true and the date is a simple timestamp, returns only the 'in' value. Defaults to false.
+     * @return array|string|null The parsed temporal data array, or a specific string value if $is_simple is true, or null if not valid.
+     */
     public function getValue($is_simple=false){
         if($is_simple && @$this->tDate['timestamp']['in']){
             return $this->tDate['timestamp']['in'];
@@ -102,9 +119,12 @@ class Temporal {
         }
     }
 
-    //
-    // Simple type, 0<=year<10000, has both day and month
-    //
+    /**
+     * Checks if the current temporal object represents a "simple" valid date.
+     * A simple date has a year between 0-9999, includes month and day, and is not a range or fuzzy date.
+     *
+     * @return bool True if the date is simple and valid, false otherwise.
+     */
     public function isValidSimple(){
 
         if($this->isValid()
@@ -124,9 +144,13 @@ class Temporal {
         return false;
     }
 
-    //
-    // For geojson
-    //
+    /**
+     * Gets a timespan representation suitable for GeoJSON or similar outputs.
+     * Returns an array: [start, latest-start, earliest-end, end, label, profile-start, profile-end, determination].
+     *
+     * @param bool $plain_array Optional. This parameter is currently not used in the method logic. Defaults to false.
+     * @return array|null An array representing the timespan, or null if the date is invalid or out of representable range.
+     */
     public function getTimespan($plain_array=false){
         $res = null;
         if($this->isValid()){
@@ -189,14 +213,23 @@ class Temporal {
         return $res;
     }
 
-    //
-    //
-    //
+    /**
+     * Checks if the current temporal object holds a valid parsed date.
+     *
+     * @return bool True if the date is valid, false otherwise.
+     */
     public function isValid(){
         return $this->tDate!=null;
     }
 
-    //
+    /**
+     * Calculates and returns the minimum and maximum ISO date strings for the temporal object.
+     *
+     * @return array|null An array containing two elements: [min_iso_date, max_iso_date], or null if the date is not valid.
+     */
+    public function calcMinMax(){
+
+        if($this->tDate){
     // parses json or plain string to array of values
     // dates are not validated
     //
@@ -622,9 +655,12 @@ class Temporal {
         }
     }
 
-    //
-    // Returns pair of min max values in decimal format to store in recDetailsDateIndex
-    //
+    /**
+     * Returns a pair of min/max values in decimal format, suitable for storing in recDetailsDateIndex.
+     * These values are pre-calculated and stored in the tDate property.
+     *
+     * @return array|null An array containing [estMinDate, estMaxDate] as decimal values, or null if the date is not valid.
+     */
     public function getMinMax()
     {
         if($this->tDate){
@@ -716,9 +752,13 @@ class Temporal {
         return $res;
     }
 
-    //
-    //
-    //
+    /**
+     * Converts a decimal date representation (YYYY.MMDD) to a YYYY-MM-DD string.
+     *
+     * @param string|float $date The decimal date value.
+     * @param bool $lpad_years Optional. If true, pads years with leading zeros (currently not used in logic). Defaults to false.
+     * @return string The date in YYYY-MM-DD format, or the original year if no decimal part.
+     */
     public static function decimalToYMD($date, $lpad_years=false){
 
         $date = strval($date);
@@ -847,14 +887,21 @@ class Temporal {
     }
 
 
-    //
-    // Converts date array to ISO8601 string
-    // $value - string or date array (date_parse)
-    // $month_day_order for $value   1 - dd/mm,  2 - mm/dd
-    // $today_date - for conversion textual values (today, tomorrow) to date
-    // returns ISO8601 string or "Temporal"
-    // returns null if fails
-    //
+    /**
+     * Converts a date string or a parsed date array to an ISO 8601 formatted string (YYYY-MM-DD HH:MM:SS).
+     * Handles various input formats, textual values like "today", "now", and BCE dates.
+     *
+     * @param string|array $date The date value to convert. Can be a string or a pre-parsed date array (from date_parse).
+     * @param int $month_day_order Optional. Specifies the expected order of month and day if ambiguous and separated by '/' or '.'.
+     *                             1 for DD/MM, 2 for MM/DD. Defaults to 2.
+     * @param bool|string $need_day Optional. If true (default), ensures day is part of the output (e.g., YYYY-MM-01).
+     *                              If a string (e.g., '-01-01'), it's appended if only year is present.
+     *                              If false, day might be omitted if not present in input and no time.
+     * @param string|null $today_date Optional. A reference date string (e.g., 'now') for converting textual values like "today".
+     *                                Defaults to null.
+     * @return string|null The date as an ISO 8601 string, "Temporal" if the input is a complex Heurist temporal string,
+     *                     or null if conversion fails.
+     */
     public static function dateToISO($date, $month_day_order=2, $need_day=true, $today_date=null){
 
         $res = null;
@@ -955,10 +1002,15 @@ class Temporal {
         return $res;
     }
 
-    //
-    // Converts date array to human readable string:  day Month year + suffix (BCE)
-    // $value - string or date array (date_parse)
-    //
+    /**
+     * Converts a date string or parsed date array into a human-readable string (e.g., "DD Mon YYYY BCE").
+     * Handles different calendars and formats years, months, days, and BCE suffix appropriately.
+     *
+     * @param string|array $value The date value to convert. Can be a string or a pre-parsed date array.
+     * @param string|null $calendar Optional. The name of the calendar to consider for formatting (e.g., "Gregorian", "Julian").
+     *                              Defaults to null, implying Gregorian/Julian conventions for month names.
+     * @return string A human-readable representation of the date, or "unknown temporal format" if conversion fails.
+     */
     public static function dateToString($value, $calendar=null){
 
         $res = 'unknown temporal format';
@@ -1053,13 +1105,19 @@ class Temporal {
     }
 
 
-    //
-    // $month_day_order   true or 0 - returns true or false whether date/month are ambiguate, or month=13 or day=32
-    //                    2 - mm/dd (default)
-    //                    1 - dd/mm
-    // Replaces slashes or dots "/." to dashes "-"
-    // Reorders month and day
-    //
+    /**
+     * Corrects date strings by replacing '/' or '.' separators with '-' and reordering day/month parts
+     * based on the specified or detected order. Can also check for date ambiguity.
+     *
+     * @param string $value The date string to correct.
+     * @param int|bool $month_day_order Optional. Defines how to interpret D/M or M/D:
+     *                                  - 2 (default): Assumes MM-DD or MM/DD.
+     *                                  - 1: Assumes DD-MM or DD/MM.
+     *                                  - true or 0: Checks for ambiguity (e.g., 01/02/2023) and returns true if ambiguous,
+     *                                    false otherwise. Does not reformat in this mode.
+     * @return string|bool If $month_day_order is 1 or 2, returns the reformatted date string.
+     *                     If $month_day_order is true or 0, returns true if ambiguous, false otherwise.
+     */
     public static function correctDMYorder($value, $month_day_order=2){
 
         $check_ambiguation = ($month_day_order===0 ||  $month_day_order===true);
@@ -1163,9 +1221,15 @@ class Temporal {
         return $ret;
     }
 
-    //
-    // Finds difference between two dates in years, months, days
-    //
+    /**
+     * Calculates the period (difference) between two dates.
+     * Returns an array with years, months, days, full days difference, and the middle date.
+     *
+     * @param string|array $date1 The first date (string or parsed array).
+     * @param string|array $date2 The second date (string or parsed array).
+     * @return array|false An array with 'years', 'months', 'days', 'fulldays', 'middle' keys on success,
+     *                     or false if date parsing or calculation fails.
+     */
     public static function getPeriod($date1, $date2){
 
         $dt1 = Temporal::_datePrepare($date1);
@@ -1224,9 +1288,15 @@ class Temporal {
 
     }
 
-    //
-    //
-    //
+    /**
+     * Merges two temporal objects to create a new temporal object that encompasses the range of both.
+     * The new temporal object will have the earliest start and latest end of the two inputs.
+     * Note: Loses fields like comment, determination, and calendar from the original objects.
+     *
+     * @param string|array|Temporal $dt1 The first temporal object or its representation.
+     * @param string|array|Temporal $dt2 The second temporal object or its representation.
+     * @return Temporal|null A new Temporal object representing the merged range, or null if either input is invalid.
+     */
     public static function mergeTemporals($dt1, $dt2){
 
         $dt1 = new Temporal($dt1);
@@ -1259,13 +1329,20 @@ class Temporal {
         }
     }
 
-    //
-    // $dt - string
-    // $mode - 0  simple  (native first)
-    //         1  compact (gregorian first)
-    //         2  extended  (list of all fields - pipe (|) separated)
-
-    //
+    /**
+     * Converts a temporal value to a human-readable string with various formatting options.
+     *
+     * @param string|array|Temporal $dt The temporal value (string, array, or Temporal object).
+     * @param bool $print_invalid_str Optional. If true and $dt is an invalid string, includes the original string in the error message. Defaults to false.
+     * @param int $mode Optional. Output mode:
+     *                  0: Simple human-readable (native calendar first if available, then Gregorian).
+     *                  1: Compact human-readable (Gregorian first, then native if different and requested by $calendar).
+     *                  2: Extended human-readable (all fields listed, pipe-separated by default).
+     *                  Defaults to 0.
+     * @param string $sep Optional. Separator for extended mode (mode 2). Defaults to '|'.
+     * @param string $calendar Optional. Calendar preference for output: "both", "native", "gregorian". Defaults to "both".
+     * @return string The human-readable date string, or an error message if invalid.
+     */
     public static function toHumanReadable($dt, $print_invalid_str=false, $mode=0, $sep='|', $calendar="both"){
 
         if($dt){
@@ -1295,9 +1372,11 @@ class Temporal {
     */
 
 
-    //
-    // Encodes temporal object into JSON string
-    //
+    /**
+     * Encodes the current temporal object into a JSON string.
+     *
+     * @return string|null JSON string representation of the temporal object, or null if the date is not valid.
+     */
     public function toJSON(){
         if($this->tDate){
             return json_encode($this->tDate);
@@ -1306,9 +1385,12 @@ class Temporal {
         }
     }
 
-    //
-    // Returns xml string snippet for kml export  temporalToSimple
-    //
+    /**
+     * Returns an XML string snippet suitable for KML (Keyhole Markup Language) export.
+     * Outputs either a `<TimeStamp>` or `<TimeSpan>` element.
+     *
+     * @return string KML XML string for the temporal object, or an empty string if the date is not valid.
+     */
     public function toKML(){
         if($this->tDate){
             $minmax = $this->calcMinMax();//get min max as iso string
@@ -1367,9 +1449,16 @@ class Temporal {
         return $ret;
     }
 
-    //
-    // Outputs human readable representation of temporal object
-    //
+    /**
+     * Outputs a human-readable representation of the temporal object.
+     * Prioritizes native calendar representation if available and $out_calendar allows.
+     *
+     * @param string $out_calendar Optional. Specifies calendar output preference:
+     *                             "both": Show native then Gregorian in parentheses if different (default).
+     *                             "native": Show native calendar representation only.
+     *                             "gregorian": Show Gregorian representation only.
+     * @return string Human-readable date string, or "undefined temporal" if the date is not valid.
+     */
     public function toReadable($out_calendar='both'){
         if($this->tDate){
 
@@ -1450,9 +1539,17 @@ class Temporal {
     }
 
 
-    //
-    // Outputs human readable representation of temporal object
-    //
+    /**
+     * Outputs an extended human-readable representation of the temporal object.
+     * Can be compact or a list of all fields.
+     *
+     * @param string $separator Separator string for non-compact mode (when listing all fields).
+     * @param bool $is_compact Optional. If true, provides a compact single-line representation.
+     *                         If false (default), lists all fields separated by $separator.
+     * @param string|null $out_calendar Optional. Calendar preference for output: "both", "native", "gregorian".
+     *                                  Defaults to null (behaves like "both").
+     * @return string Extended human-readable date string, or "undefined temporal" if the date is not valid.
+     */
     public function toReadableExt($separator, $is_compact=false, $out_calendar=null){
 
         $tSimpleRange = 'Simple Range';
@@ -1648,9 +1745,12 @@ class Temporal {
         }
     }
 
-    //
-    // To old plain string format
-    //
+    /**
+     * Converts the current temporal object to the old Heurist plain string format (pipe-separated key-value pairs).
+     * Example: |VER=1|TYP=s|DAT=YYYY-MM-DD
+     *
+     * @return string The temporal object as a plain string, or an empty string if the date is not valid.
+     */
     public function toPlain(){
 
 
@@ -1759,9 +1859,17 @@ class Temporal {
 
     } //toPlain
 
-    //
-    //
-    //
+    /**
+     * Converts a given date value into the appropriate format for storage in recDetails.dtl_Value.
+     * If the date is simple and valid (YYYY-MM-DD, year 0-9999), it's stored as a plain string.
+     * Otherwise, it's stored as either a JSON string or an old-style plain temporal string,
+     * depending on the $useNewTemporalFormatInRecDetails flag.
+     *
+     * @param string|array $dtl_Value The input date value.
+     * @param bool $useNewTemporalFormatInRecDetails If true, complex dates are stored as JSON.
+     *                                               If false, they are stored as old-style plain strings.
+     * @return string The processed date string ready for database storage.
+     */
     public static function getValueForRecDetails( $dtl_Value, $useNewTemporalFormatInRecDetails ){
 
         $preparedDate = new Temporal( $dtl_Value );

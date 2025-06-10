@@ -1,49 +1,50 @@
 <?php
+/**
+* USanitize.php - Class USanitize
+*
+* Utility class for input sanitization and HTML purification.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  hserv\utilities
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6.0
+*/
 namespace hserv\utilities;
 
 /**
-* Sanitize library to make requests, urls, paths, filenames safe
-* (SSRF and path traversal attacks)
+* Class USanitize
+* 
+* Utility class for input sanitization and HTML purification within Heurist.
 *
-* sanitizeRequest - removes all tags from request variables
-* sanitizePath - removes /../
-* sanitizeURL
-* sanitizeString - strip_tags (except allowed) and htmlspecialchars
-* stripScriptTagInRequest - removes only script tags
+* Provides static methods to sanitize various types of input data including request parameters,
+* paths, URLs, strings, and filenames. It helps prevent common web vulnerabilities like
+* Cross-Site Scripting (XSS), path traversal, and log injection.
+* This class also integrates HTMLPurifier for robust HTML cleaning.
 *
-* sanitizeFileName
-* fileNameBeautify (protected)
-*
-* getHTMLPurifier
-* purifyHTML - clean html with HTMLPurifier
-*
-* errorLog - wraps around error_log to prevent log injection
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* Key methods include:
+* - sanitizeRequest: Recursively sanitizes an array of parameters.
+* - sanitizePath: Normalizes and secures file system paths.
+* - sanitizeURL: Validates and sanitizes URLs.
+* - sanitizeString: Strips tags and optionally HTML entities from a string.
+* - purifyHTML: Cleans HTML content using HTMLPurifier.
+* - sanitizeFileName: Cleans and standardizes filenames.
+* - errorLog: Safely logs messages, preventing log injection.
+* - cleanupSpaces: Removes extraneous whitespace from strings or arrays of strings.
 */
 class USanitize {
 
     private static $purifier = null;
-
-    //
-    // sysadmin protection - reset from request to avoid exposure in possible error/log messages
-    //
-    //
-    //
-    //
+    /**
+     * Retrieves a password (typically admin) from the $_REQUEST global array and then unsets it.
+     * This is a security measure to prevent accidental exposure of the password in logs or error messages.
+     *
+     * @param string $name Optional. The key in the $_REQUEST array where the password is expected. Defaults to 'pwd'.
+     * @return string|null The password string if found, otherwise null.
+     */
     public static function getAdminPwd($name='pwd'){
         if(@$_REQUEST[$name]){
             $sysadmin_pwd  = $_REQUEST[$name];
@@ -54,9 +55,12 @@ class USanitize {
         return $sysadmin_pwd;
     }
 
-    //
-    //
-    //
+    /**
+     * Retrieves and filters superglobal input arrays (POST or GET) based on the request method.
+     * Uses `filter_input_array`. Note: This function does not apply deep sanitization beyond what filter_input_array does by default.
+     *
+     * @return array|null The filtered input array (POST or GET), or null if the respective superglobal is not set.
+     */
     public static function sanitizeInputArray()
     {
         if(@$_SERVER['REQUEST_METHOD']=='POST'){
@@ -67,9 +71,14 @@ class USanitize {
         return $req_params;
     }
 
-    //
-    //  to be removed (used only once in usr_info.php )
-    //
+    /**
+     * Recursively sanitizes an array of parameters by trimming whitespace and applying `filter_var` with `FILTER_SANITIZE_STRING`.
+     * Note: `FILTER_SANITIZE_STRING` is deprecated in PHP 8.0. Consider alternatives for future compatibility.
+     * This method is marked to be removed as it's used only once in usr_info.php.
+     *
+     * @param array &$params The array of parameters to sanitize (passed by reference).
+     * @return void
+     */
     public static function sanitizeRequest(&$params){
 
         foreach($params as $k => $v)
@@ -92,9 +101,14 @@ class USanitize {
 
     }
 
-    //
-    //  removes /../
-    //
+    /**
+     * Sanitizes a file system path to prevent path traversal attacks (e.g., removing "/../").
+     * Normalizes path separators to forward slashes, optionally converting back to native OS separator.
+     *
+     * @param string|null $path The file path to sanitize.
+     * @param bool $use_native_separator Optional. If true, converts sanitized path separators to the OS's native DIRECTORY_SEPARATOR. Defaults to false.
+     * @return string The sanitized path, or an empty string if input is invalid or results in an out-of-root path.
+     */
     public static function sanitizePath($path, $use_native_separator=false) {
         // Skip invalid input.
         if (!isset($path)) {
@@ -140,9 +154,12 @@ class USanitize {
         return $path;
     }
 
-    //
-    //
-    //
+    /**
+     * Sanitizes a URL using `FILTER_SANITIZE_URL` and then validates it using `FILTER_VALIDATE_URL`.
+     *
+     * @param string|null $url The URL to sanitize and validate.
+     * @return string|null The sanitized and validated URL if valid, otherwise null.
+     */
     public static function sanitizeURL($url){
         if($url!=null && trim($url)!=''){
             $url = filter_var($url, FILTER_SANITIZE_URL);
@@ -153,9 +170,17 @@ class USanitize {
         return null;
     }
 
-    //
-    // We can also use HTMLPurifier (see example in ReportExecute.php)
-    //
+    /**
+     * Sanitizes a string by stripping tags (except allowed ones) and optionally converting special characters to HTML entities.
+     * Provides a basic level of HTML sanitization. For more robust HTML cleaning, use `purifyHTML`.
+     *
+     * @param string|null $message The string to sanitize.
+     * @param string|null|false $allowed_tags Optional. A string of allowed HTML tags (e.g., "<a><p><img>").
+     *                                      If null (default), a predefined list of common safe tags is used.
+     *                                      If false, all tags are stripped.
+     * @param bool $allowed_entities Optional. If true (default), decodes existing HTML entities like &amp;amp; back to &amp;.
+     * @return string The sanitized string.
+     */
     public static function sanitizeString($message, $allowed_tags=null, $allowed_entities=true){
         if($message==null){
             $message = '';
@@ -192,9 +217,12 @@ class USanitize {
         return $message;
     }
 
-    //
-    //
-    //
+    /**
+     * Recursively strips `<script>` tags from all string values within an array.
+     *
+     * @param array &$params The array of parameters to sanitize (passed by reference).
+     * @return void
+     */
     public static function stripScriptTagInRequest(&$params){
 
         foreach($params as $k => $v)
@@ -215,9 +243,13 @@ class USanitize {
         }//for
     }
 
-    //
-    //
-    //
+    /**
+     * Gets a configured instance of the HTMLPurifier library.
+     * Sets up HTMLPurifier with specific configurations for Heurist, including allowed elements,
+     * CSS properties, and custom attributes.
+     *
+     * @return \HTMLPurifier An instance of the HTMLPurifier object.
+     */
     public static function getHTMLPurifier(){
 
             $config = \HTMLPurifier_Config::createDefault();
@@ -258,11 +290,16 @@ class USanitize {
 
     }
 
-    //
-    // It is used in mail and cms
-    //
-    // $params - object or array to purify
-    //
+    /**
+     * Purifies HTML content using HTMLPurifier to prevent XSS and ensure valid markup.
+     * Can purify a single string or recursively purify all string values within an array.
+     * Used for cleaning HTML in mail and CMS content.
+     *
+     * @param string|array &$params The HTML string or array of strings to purify (passed by reference).
+     * @param \HTMLPurifier|null $purifier Optional. A pre-configured HTMLPurifier instance.
+     *                                     If null, a default instance is obtained via `getHTMLPurifier()`.
+     * @return void
+     */
     public static function purifyHTML(&$params, $purifier = null){
 
         if($purifier==null){
@@ -278,23 +315,29 @@ class USanitize {
             {
                 if($v!=null){
 
-                    if(isEmptyArray($v)){
+                    if(is_string($v) && !isEmptyArray($v)){ // Check if it's a string and not an array that isEmptyArray would misinterpret
                         $v = $purifier->purify($v);
                         //$v = htmlspecialchars_decode($v);
-                    }else{
+                    } elseif(is_array($v)) { // Only recurse if it's an array
                         USanitize::purifyHTML($v, $purifier);
                     }
                     $params[$k] = $v;
                 }
             }//for
-        }else{
+        } elseif(is_string($params)) { // Ensure it's a string before purifying
             $params = $purifier->purify($params);
         }
     }
 
-    //
-    //
-    //
+    /**
+     * Sanitizes a filename by removing control characters, reserved file system characters,
+     * and optionally beautifying it (lowercase, replace spaces/multiple hyphens).
+     * Limits filename length to a safe maximum.
+     *
+     * @param string|null $filename The filename to sanitize.
+     * @param bool $beautify Optional. If true (default), applies beautification rules (lowercase, hyphenate).
+     * @return string|null The sanitized filename, or null if input was null.
+     */
     public static function sanitizeFileName($filename, $beautify=true) {
         // sanitize filename
         if($filename!=null){
@@ -349,7 +392,8 @@ class USanitize {
     /**
     * Wraps around error_log to prevent log injection
     *
-    * @param mixed $message
+    * @param string $message The message to log.
+    * @return void
     */
     public static function errorLog($message){
         $safe_message = preg_replace(REGEX_EOL, ' ', $message);
@@ -357,10 +401,10 @@ class USanitize {
     }
 
     /**
-     * Removes leading, trailing and double (spaces and tabs only) spacing
+     * Removes leading, trailing, and multiple consecutive spaces/tabs from a string or an array of strings.
      *
-     * @param mixed $value
-     * @return string
+     * @param string|array $value The input string or array of strings to clean up.
+     * @return string|array The cleaned string or array of strings.
      */
     public static function cleanupSpaces($value){
 

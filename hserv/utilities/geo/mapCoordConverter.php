@@ -1,12 +1,13 @@
 <?php
-
 /**
- * PHP class to convert Latitude & Longitude coordinates into UTM & Lambert Conic Conformal Northing/Easting coordinates.
+ * Defines the GpointConverter class for geographic coordinate conversions.
  *
- * This class encapsulates the methods for representing a geographic point on the earth in three different coordinate systema. Lat/Long, UTM and Lambert Conic Conformal.
+ * This file contains the GpointConverter class which is used to convert
+ * Latitude & Longitude coordinates into UTM (Universal Transverse Mercator)
+ * and LCC (Lambert Conformal Conic) Northing/Easting coordinates, and vice-versa.
+ * It supports various geodetic datums.
  *
- * Code for datum and UTM conversion was converted from C++ code written by Chuck Gantz (chuck.gantz@globalstar.com) from http://www.gpsy.com/gpsinfo/geotoutm/
- * This code was converted into PHP by Brenor Brophy (brenor@sbcglobal.net) and later refactored for PHP 5.3 by Hans Duedal (hd@onlinecity.dk).
+ * Original C++ code by Chuck Gantz, PHP conversion by Brenor Brophy, refactored by Hans Duedal.
  *
  * @author chuck.gantz@globalstar.com, brenor@sbcglobal.net, hd@onlinecity.dk
  * @version 1.0
@@ -28,6 +29,14 @@
  */
 define('WGS_84','WGS 84');
 
+/**
+ * PHP class to convert Latitude & Longitude coordinates into UTM & Lambert Conic Conformal Northing/Easting coordinates.
+ *
+ * This class encapsulates the methods for representing a geographic point on the earth in three different coordinate systems:
+ * Lat/Long, UTM and Lambert Conic Conformal. It supports various geodetic datums.
+ *
+ * Code for datum and UTM conversion was converted from C++ code written by Chuck Gantz.
+ */
 class GpointConverter
 {
 
@@ -95,9 +104,10 @@ class GpointConverter
     protected $secondStdParallel;                    // For lambert Projection
 
     /**
-     * Constructs the object and sets the datum
+     * Constructs the GpointConverter object and sets the geodetic datum.
      *
-     * @param string $datum
+     * @param string $datum Optional. The name of the datum to use (e.g., WGS_84). Defaults to WGS_84.
+     *                      Must be a key in the `self::$ellipsoid` array.
      */
     public function __construct($datum=WGS_84)            // Default datum is WGS 84
     {
@@ -107,9 +117,11 @@ class GpointConverter
     }
 
     /**
-     * Set the datum
+     * Sets the geodetic datum for calculations.
      *
-     * @param string $datum
+     * @param string $datum Optional. The name of the datum to use (e.g., WGS_84). Defaults to WGS_84.
+     *                      Must be a key in the `self::$ellipsoid` array.
+     * @return void
      */
     public function setDatum($datum=WGS_84)
     {
@@ -119,10 +131,11 @@ class GpointConverter
     }
 
     /**
-     * Set X & Y pixel of the point (used if it is being drawn on an image)
+     * Sets the X and Y pixel coordinates of the point, typically used if drawing on an image.
      *
-     * @param integer $x
-     * @param integer $y
+     * @param int $x The X pixel coordinate.
+     * @param int $y The Y pixel coordinate.
+     * @return void
      */
     public function setXY($x, $y)
     {
@@ -130,23 +143,29 @@ class GpointConverter
     }
 
     /**
-     * Get X pixel location
+     * Gets the X pixel location.
+     *
+     * @return int|null The X pixel coordinate.
      */
     public function Xp() {
         return $this->Xp;
     }
 
     /**
-     * Get Y pixel location
+     * Gets the Y pixel location.
+     *
+     * @return int|null The Y pixel coordinate.
      */
     public function Yp() {
         return $this->Yp;
     }
 
     /**
-     * Set/Get/Output Longitude & Latitude of the point
-     * @param float $long
-     * @param float $lat
+     * Sets the Longitude and Latitude of the point.
+     *
+     * @param float $long Longitude in decimal degrees.
+     * @param float $lat Latitude in decimal degrees.
+     * @return void
      */
     public function setLongLat($long, $lat)
     {
@@ -155,24 +174,28 @@ class GpointConverter
     }
 
     /**
-     * Get latitude
+     * Gets the latitude in decimal degrees.
      *
+     * @return float|null The latitude.
      */
     public function Lat() {
         return $this->lat;
     }
 
     /**
-     * Get longitude
+     * Gets the longitude in decimal degrees.
      *
+     * @return float|null The longitude.
      */
     public function Long() {
         return $this->long;
     }
 
     /**
-     * Print latitude/longitude
+     * Prints the latitude and longitude to standard output.
+     * Example: "Latitude: 34.12345 Longitude: -118.12345"
      *
+     * @return void
      */
     public function printLatLong() {
         printf("Latitude: %1.5f Longitude: %1.5f",$this->lat, $this->long);
@@ -180,11 +203,12 @@ class GpointConverter
 
 
     /**
-     * Set Universal Transverse Mercator Coordinates
+     * Sets the Universal Transverse Mercator (UTM) Coordinates.
      *
-     * @param integer $easting
-     * @param integer $northing
-     * @param string $zone
+     * @param float $easting The UTM easting value.
+     * @param float $northing The UTM northing value.
+     * @param string $zone Optional. The UTM zone (e.g., "10S"). If empty or not provided, it might be calculated later.
+     * @return void
      */
     public function setUTM($easting, $northing, $zone='')    // Zone is optional
     {
@@ -193,47 +217,60 @@ class GpointConverter
         if($zone!=null && $zone!='') {$this->utmZone = $zone;}
     }
 
+    /**
+     * Sets the UTM zone.
+     *
+     * @param string $zone The UTM zone string (e.g., "10S").
+     * @return void
+     */
     public function setUTMZone($zone){
         $this->utmZone = $zone;
     }
 
 
     /**
-     * Get utm northing
+     * Gets the UTM northing value.
      *
+     * @return float|null The UTM northing.
      */
     public function N() {
         return $this->utmNorthing;
     }
 
     /**
-     * Get utm easting
+     * Gets the UTM easting value.
      *
+     * @return float|null The UTM easting.
      */
     public function E() {
         return $this->utmEasting;
     }
 
     /**
-     * Get utm zone
+     * Gets the UTM zone.
+     *
+     * @return string|null The UTM zone.
      */
     public function Z() {
         return $this->utmZone;
     }
 
     /**
-     * Print UTM coordinates
+     * Prints the UTM coordinates (Northing, Easting, Zone) to standard output.
+     * Example: "Northing: 3777000, Easting: 400000, Zone: 10S"
      *
+     * @return void
      */
     public function printUTM() {
         print "Northing: ".(int)$this->utmNorthing.", Easting: ".(int)$this->utmEasting.", Zone: ".$this->utmZone;
     }
 
     /**
-     * Set the lambert coordinates
+     * Sets the Lambert Conformal Conic (LCC) coordinates.
      *
-     * @param integer $northing
-     * @param integer $easting
+     * @param float $northing The LCC northing value.
+     * @param float $easting The LCC easting value.
+     * @return void
      */
     public function setLambert($northing, $easting)
     {
@@ -242,31 +279,46 @@ class GpointConverter
     }
 
     /**
-     * Get lccNorthing
+     * Gets the Lambert Conformal Conic (LCC) northing value.
+     *
+     * @return float|null The LCC northing.
      */
     public function lccN() {
         return $this->lccNorthing;
     }
 
     /**
-     * Get lccEasting
+     * Gets the Lambert Conformal Conic (LCC) easting value.
+     *
+     * @return float|null The LCC easting.
      */
     public function lccE() {
         return $this->lccEasting;
     }
 
     /**
-     * Print lambert coordinates
+     * Prints the Lambert Conformal Conic (LCC) coordinates (Northing, Easting) to standard output.
+     * Example: "Northing: 1234567, Easting: 7654321"
      *
+     * @return void
      */
     public function printLambert() {
         print  "Northing: ".(int)$this->lccNorthing.", Easting: ".(int)$this->lccEasting;
     }
 
     /**
-     * Convert Longitude/Latitude to UTM
+     * Converts Longitude/Latitude to Transverse Mercator (TM) or UTM coordinates.
+     * If $LongOrigin is null, standard UTM coordinates are calculated, including the UTM zone.
+     * If $LongOrigin is provided, it's used as the central meridian for a local TM projection.
+     * Equations are based on USGS Bulletin 1532.
      *
-     * Equations from USGS Bulletin 1532
+     * @param float|null $LongOrigin Optional. The longitude of the origin for Local TM projection in decimal degrees.
+     *                               If null (default), standard UTM coordinates are calculated.
+     * @return void The results are stored in the object's utmNorthing, utmEasting, and utmZone properties.
+     */
+    public function convertLLtoTM($LongOrigin = null)
+    {
+        // Constants for UTM conversion
      * East Longitudes are positive, West longitudes are negative.
      * North latitudes are positive, South latitudes are negative
      * Lat and Long are in decimal degrees
@@ -392,8 +444,10 @@ class GpointConverter
 
     /**
      * This routine determines the correct UTM letter designator for the given latitude
-     * returns 'Z' if latitude is outside the UTM limits of 84N to 80S
-     * Written by Chuck Gantz- chuck.gantz@globalstar.com, converted to PHP by Brenor Brophy, brenor@sbcglobal.net
+     * Returns 'Z' if latitude is outside the UTM limits of 84N to 80S.
+     * Written by Chuck Gantz, converted to PHP by Brenor Brophy.
+     *
+     * @return string The UTM letter designator for the current latitude.
      */
     public function UTMLetterDesignator()
     {
@@ -442,7 +496,9 @@ class GpointConverter
      * If you live south of the equator there is a note later in the code
      * explaining how to have it just return southern hemesphere lat/longs.
      *
-     * @param float $LongOrigin
+     * @param float|null $LongOrigin Optional. The longitude of the origin for Local TM projection in decimal degrees.
+     *                               If null (default), standard UTM zone's central meridian is used.
+     * @return void The results are stored in the object's lat and long properties.
      */
     public function convertTMtoLL($LongOrigin=null)
     {
@@ -509,8 +565,13 @@ class GpointConverter
      * @param integer $falseNorthing
      * @param float $longOfOrigin
      * @param float $latOfOrigin
-     * @param float $firstStdParallel
-     * @param float $secondStdParallel
+     * @param float $falseEasting The false easting value in meters.
+     * @param float $falseNorthing The false northing value in meters.
+     * @param float $longOfOrigin The longitude of the natural origin in decimal degrees.
+     * @param float $latOfOrigin The latitude of the natural origin in decimal degrees.
+     * @param float $firstStdParallel The latitude of the first standard parallel in decimal degrees.
+     * @param float $secondStdParallel The latitude of the second standard parallel in decimal degrees.
+     * @return void
      */
     public function configLambertProjection ($falseEasting, $falseNorthing, $longOfOrigin, $latOfOrigin, $firstStdParallel, $secondStdParallel)
     {
@@ -533,8 +594,10 @@ class GpointConverter
      * falseNorthing/falseEasting coordinate. Which in turn is relative to the
      * Lat/Long of origin The formula were obtained from URL:
      * http://www.ihsenergy.com/epsg/guid7_2.html.
-     * Code was written by Brenor Brophy, brenor@sbcglobal.net
+     * Code was written by Brenor Brophy.
+     * The `configLambertProjection` method must be called before this method.
      *
+     * @return void The results are stored in the object's lccNorthing and lccEasting properties.
      */
     public function convertLLtoLCC()
     {
@@ -571,13 +634,16 @@ class GpointConverter
      * have been called prior to this one to setup the specific parameters for the
      * projection. The Northing/Easting parameters are in meters (because the datum
      * used is in meters) and are relative to the falseNorthing/falseEasting
-     * coordinate. Which in turn is relative to the Lat/Long of origin The formula
-     * were obtained from URL http://www.ihsenergy.com/epsg/guid7_2.html. Code
-     * was written by Brenor Brophy, brenor@sbcglobal.net
+     * coordinate, which in turn is relative to the Lat/Long of origin.
+     * The formula were obtained from URL http://www.ihsenergy.com/epsg/guid7_2.html.
+     * Code was written by Brenor Brophy.
+     * The `configLambertProjection` method must be called before this method.
+     *
+     * @return void The results are stored in the object's lat and long properties.
      */
     public function convertLCCtoLL()
     {
-        $e = sqrt($e2);
+        $e = sqrt($this->e2); // Corrected: use $this->e2
 
         $phi1    = deg2rad($this->firstStdParallel);// Latitude of 1st std parallel
         $phi2    = deg2rad($this->secondStdParallel);// Latitude of 2nd std parallel
@@ -614,9 +680,11 @@ class GpointConverter
     /**
      * This is a useful function that returns the Great Circle distance from the GpointConverter to another Long/Lat coordinate
      *
-     * Result is returned as meters
-     * @param float $lon1
-     * @param float $lat1
+     * Result is returned in meters.
+     *
+     * @param float $lon1 Longitude of the other point in decimal degrees.
+     * @param float $lat1 Latitude of the other point in decimal degrees.
+     * @return float The Great Circle distance in meters.
      */
     public function distanceFrom($lon1, $lat1)
     {
@@ -633,8 +701,11 @@ class GpointConverter
 
 
     /**
-     * This function also calculates the distance between two points. In this case it just uses Pythagoras's theorm using TM coordinates.
-     * @param GpointConverter $pt
+     * Calculates the distance between this point and another GpointConverter point using their Transverse Mercator (TM) coordinates.
+     * This method uses Pythagoras's theorem on the TM eastings and northings.
+     *
+     * @param GpointConverter $pt The other GpointConverter object (passed by reference, though not modified).
+     * @return float The distance in the same units as the TM coordinates (typically meters).
      */
     public function distanceFromTM(&$pt)
     {
@@ -659,11 +730,13 @@ class GpointConverter
      * coordinates of the point are correctly converted.
      *
      * @param integer $rX
-     * @param integer $rY
-     * @param integer $rE
-     * @param integer $rN
-     * @param integer $Scale
-     * @param float $LongOrigin
+     * @param int $rX The X pixel coordinate of the reference point on the map.
+     * @param int $rY The Y pixel coordinate of the reference point on the map.
+     * @param float $rE The Easting coordinate of the reference point.
+     * @param float $rN The Northing coordinate of the reference point.
+     * @param float $Scale The map scale (meters per pixel).
+     * @param float $LongOrigin The longitude of origin for the Local TM projection used by the map.
+     * @return void The calculated pixel coordinates are stored in the object's Xp and Yp properties.
      */
     public function gRef($rX, $rY, $rE, $rN, $Scale, $LongOrigin)
     {

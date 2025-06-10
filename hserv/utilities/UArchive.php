@@ -1,36 +1,18 @@
 <?php
 /**
-* uArchive.php
+* UArchive.php - Class UArchive
 *
-*   zip
-*   unzip
-*   unzipFlat
-*
-*   createBz2
-*   extractBz2 - if bz2 archive contains the only file
-*
-* At the moment we have 3 places where we use archives
-* DbUtils::databaseDrop  - optionally archive the entire dbfolder+sql dump into single archive
-* Safeguard archive/upload to repository - creates 3 archives a) with individual set of folder (depends on user preferences)+dump b) sql dump c) hml
-* Purge inactive databases.  Uses DbUtils::databaseDrop and optionally creates 2 archives with sysArchive and Import tables
-*
+* Utility class for creating and extracting ZIP and BZ2 archives.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 namespace hserv\utilities;
 use hserv\utilities\USanitize;
 
@@ -40,15 +22,27 @@ define('MAX_RATIO', 90);
 define('READ_LENGTH', 1024);
 define('WRITE_LENGTH', 4096);//16384
 
-
+/**
+* Class UArchive
+* 
+* Utility class for creating and extracting ZIP and BZ2 archives.
+* Provides methods to zip directories/files, unzip archives, and handle BZ2 compression/decompression.
+* Used for database backup, dropping, and other archival purposes within Heurist.
+* 
+*/
 class UArchive {
 
     /**
-    * Zips everything in a directory
-    *
-    * @param mixed $source       Source folder or array of folders
-    * @param mixed $destination  Destination file
-    */
+     * Creates a ZIP archive from a source folder or file.
+     * Can selectively include specific folders within the source.
+     *
+     * @param string $source The path to the source directory or file to archive.
+     * @param array|null $only_these_folders Optional. An array of specific subfolder paths (relative to $source or absolute)
+     *                                       to include. If null or not an array, all contents of $source are considered.
+     * @param string $destination The path to the destination ZIP file to be created.
+     * @param bool $verbose Optional. If true, outputs progress messages. Defaults to true.
+     * @return bool|string True on success, or an error message string on failure if $verbose is true, otherwise false on failure.
+     */
     public static function zip($source, $only_these_folders, $destination, $verbose=true) {
 
         if (!extension_loaded('zip')) {
@@ -179,12 +173,16 @@ class UArchive {
     }
 
     /**
-    * unzip given archive to destination folder
-    *
-    * @param mixed $system
-    * @param mixed $zipfile
-    * @param mixed $destination
-    */
+     * Extracts a ZIP archive to a specified destination folder.
+     * Performs security checks on filenames within the archive.
+     *
+     * @param \hserv\System $system The Heurist system instance.
+     * @param string $zipfile Path to the ZIP archive file.
+     * @param string $destination Path to the destination directory for extraction.
+     * @return int The number of files successfully extracted.
+     * @throws \Exception If the archive file is not found, destination is invalid, archive contains unsecure entries,
+     *                    or other extraction errors occur (e.g., max files/size/ratio exceeded, cannot create subfolder).
+     */
     public static function unzip($system, $zipfile, $destination){
 
         if(!(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination))){
@@ -275,10 +273,16 @@ class UArchive {
         return $fileCount;
 
     }
-    //
-    // flatten zip archive - extract without structures
-    // returns list of files
-    //
+    /**
+     * Extracts files from a ZIP archive into a single destination folder, flattening the directory structure.
+     * All files from the archive will be placed directly into the $destination directory.
+     * File names are sanitized.
+     *
+     * @param string $zipfile Path to the ZIP archive file.
+     * @param string $destination Path to the destination directory.
+     * @return array|false An array of extracted file paths on success, or false if the archive cannot be opened or paths are invalid.
+     * @throws \Exception If unable to extract a file from the archive.
+     */
     public static function unzipFlat($zipfile, $destination){
 
         if(file_exists($zipfile) && filesize($zipfile)>0 &&  file_exists($destination)){
@@ -320,9 +324,17 @@ class UArchive {
         }
     }
 
-    //
-    //
-    //
+    /**
+     * Creates a BZ2 compressed TAR archive (.tar.bz2) from a source folder or file.
+     * First creates a .tar archive, then compresses it using BZ2.
+     * Can selectively include specific folders.
+     *
+     * @param string $source The path to the source directory or file.
+     * @param array|null $only_these_folders Optional. An array of specific subfolder paths to include.
+     * @param string $destination The base path for the destination TAR archive ('.bz2' will be appended).
+     * @param bool $verbose Optional. If true, outputs progress messages. Defaults to true.
+     * @return bool|string True on success, or an error message string on failure if $verbose is true, otherwise false on failure.
+     */
     public static function createBz2($source, $only_these_folders, $destination, $verbose=true) {
 
         if (!extension_loaded('bz2')) {
@@ -519,11 +531,13 @@ class UArchive {
 
 
     /**
-     * @return bool
-     * @param string $in
-     * @param string $out
-     * @desc uncompressing the file with the bzip2-extension
-    */
+     * Decompresses a BZ2 compressed file.
+     *
+     * @param string $in Path to the input BZ2 compressed file.
+     * @param string $out Path to the output decompressed file.
+     * @return bool True on successful decompression.
+     * @throws \Exception If the input file doesn't exist/is not readable, or the output path is not writable.
+     */
     public static function bunzip2($in, $out)
     {
         if (!file_exists ($in) || !is_readable ($in)){

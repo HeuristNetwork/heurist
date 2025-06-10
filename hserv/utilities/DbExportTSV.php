@@ -1,30 +1,28 @@
 <?php
-  
 /**
-* DbExportCSV.php: export entire database to TSV
+* DbExportTSV.php - Class DbExportTSV
+* 
+* Exports entire database to TSV
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
+* @since       6.0
 */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
+  
 namespace hserv\utilities;
 use hserv\records\export\RecordsExportCSV;
 use hserv\structure\ConceptCode;
 
-
+/**
+* Class DbExportTSV
+* 
+* Exports entire database to TSV
+*/
 class DbExportTSV {
     
     private $mysqli = null;
@@ -36,14 +34,21 @@ class DbExportTSV {
     
     private $record_fields;
     
+    /**
+     * Constructor for DbExportTSV.
+     * Initializes the exporter with the given system context.
+     *
+     * @param mixed $system The system instance/context.
+     */
     public function __construct($system) {
         $this->setSession($system);
     }
    
     /**
-     * Sets the session system instance and initializes the database connection.
+     * Sets the session system instance, initializes the database connection, and sets up the backup folder.
      *
-     * @param mixed $system System instance
+     * @param mixed $system System instance.
+     * @param string|null $folder Optional. The specific folder to use for backup. Defaults to a path derived from system settings.
      */
     public function setSession($system, $folder=null) {
         $this->system = $system;
@@ -55,6 +60,13 @@ class DbExportTSV {
         $this->setBackupFolder($folder);
     }   
     
+    /**
+     * Sets the backup folder path for TSV exports and creates it if it doesn't exist.
+     *
+     * @param string|null $folder Optional. The specific folder to use for backup. 
+     *                            If null, a default path is generated based on system settings and database name.
+     * @return bool True on success (folder created or exists), false on failure to create.
+     */
     public function setBackupFolder($folder=null){
         $this->backupFolder = $folder ?? ($this->system->getSysDir(DIR_BACKUP).$this->system->dbname().'/');
         $this->backupFolder .= 'tsv-output/';
@@ -171,7 +183,6 @@ class DbExportTSV {
     
     /**
     * Export Records, recDetails
-    * 
     */
     private function exportRecords(){
 
@@ -224,6 +235,12 @@ class DbExportTSV {
     }
     
 
+    /**
+     * Executes the TSV export process.
+     * It first exports definition tables and then record data.
+     *
+     * @return array An array of warning messages generated during the export process. Empty if no warnings.
+     */
     public function output(){
         
         if(!file_exists("{$this->backupFolder}records")){

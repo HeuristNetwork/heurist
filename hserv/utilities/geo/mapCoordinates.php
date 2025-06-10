@@ -1,16 +1,26 @@
 <?php
-
-    /**
-    * Geo library - working with wkt and geojson coordinates
-    *               it uses Simplify and GpointConverter
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
+/**
+* mapCoordinates.php - GeoJSON coordinate manipulation utilities for Heurist
+*
+* This file provides a collection of global functions designed to process GeoJSON data.
+* Key functionalities include:
+* - Simplification of geometries to reduce point density, often using an external `Simplify` class (not defined in this file).
+* - Conversion of coordinates between UTM (Universal Transverse Mercator) and WGS84 (Latitude/Longitude) systems,
+*   utilizing an external `GpointConverter` class (expected to be `hserv\utilities\GpointConverter`).
+* - Correction of longitude values to ensure they fall within the -180 to 180 degree range.
+* - Recursive processing for complex GeoJSON types like GeometryCollection, MultiPolygon, and MultiLineString.
+*
+* These functions are typically used when handling geographic data for display or storage within Heurist.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  hserv\utilities\geo
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6.0
+*/
 
     /*
     * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
@@ -21,13 +31,16 @@
     */
 
     /**
-     * Simplifies and converts GeoJSON from UTM to WGS84 coordinates.
+     * Simplifies and/or converts coordinates within a GeoJSON object.
+     * If $gPoint is provided, coordinates are assumed to be UTM and are converted to WGS84 (Lat/Lon).
+     * If $need_simplify is true, geometries are simplified.
+     * Handles various GeoJSON types including Point, MultiPoint, LineString, Polygon, MultiPolygon, MultiLineString, and GeometryCollection.
      *
-     * @param array   $json          The GeoJSON to process
-     * @param boolean $need_simplify Flag indicating whether to simplify the geometry
-     * @param object  $gPoint        Reference to the geographic point object for conversion
-     *
-     * @return array                 The processed GeoJSON
+     * @param array $json The input GeoJSON object as an associative array.
+     * @param bool $need_simplify Flag indicating whether to simplify the geometry.
+     * @param \hserv\utilities\GpointConverter|null &$gPoint Optional. A GpointConverter object for UTM to Lat/Lon conversion.
+     *                                                       Passed by reference. If null, no coordinate conversion is performed.
+     * @return array The processed GeoJSON object with simplified and/or converted coordinates, or an empty array if input is invalid.
      */
     function geoSimplifyAndConvertJSON($json, $need_simplify, &$gPoint = null)
     {
@@ -73,13 +86,12 @@
     }
 
     /**
-     * Processes a GeometryCollection recursively.
+     * Processes a GeoJSON GeometryCollection by recursively calling `geoSimplifyAndConvertJSON` on each geometry within it.
      *
-     * @param array $json - The GeoJSON GeometryCollection object.
-     * @param bool $need_simplify - Whether the geometry needs simplification.
-     * @param array|null $gPoint - Reference to a geometry point, if needed (optional).
-     *
-     * @return array - The processed GeometryCollection with simplified geometries.
+     * @param array $json The GeoJSON GeometryCollection object.
+     * @param bool $need_simplify Flag indicating whether simplification is needed.
+     * @param \hserv\utilities\GpointConverter|null &$gPoint Optional. A GpointConverter object for coordinate conversion. Passed by reference.
+     * @return array The processed GeometryCollection.
      */
     function processGeometryCollection($json, $need_simplify, &$gPoint) {
         foreach ($json['geometries'] as $idx => $geometry) {
@@ -89,18 +101,21 @@
     }
 
     /**
-     * Processes multiple shapes for MultiPolygon or MultiLineString geometries.
+     * Processes the coordinates of a multi-part geometry (MultiPolygon or MultiLineString).
+     * For MultiPolygon, each "shape" is a polygon (an array of rings), and each "ring" is an array of points.
+     * For MultiLineString, each "shape" is a line (an array of points).
+     * This function iterates through these structures and applies `geoSimplifyAndConvert` to the point arrays.
      *
-     * @param array $shapes - The shapes of the geometry.
-     * @param bool $need_simplify - Whether the shapes need simplification.
-     * @param array|null $gPoint - Reference to a geometry point, if needed (optional).
-     *
-     * @return array - The processed shapes with simplified coordinates.
+     * @param array $shapes An array of shapes. For MultiPolygon, this is an array of polygons (array of rings of points).
+     *                      For MultiLineString, this is an array of lines (array of points).
+     * @param bool $need_simplify Flag indicating whether simplification is needed.
+     * @param \hserv\utilities\GpointConverter|null &$gPoint Optional. A GpointConverter object for coordinate conversion. Passed by reference.
+     * @return array The processed shapes array with simplified and/or converted coordinates.
      */
     function processMultiShape($shapes, $need_simplify, &$gPoint) {
         foreach ($shapes as $idx => $shape) {
             foreach ($shape as $idx2 => $points) {
-                geoSimplifyAndConvert($points, $need_simplify, $gPoint);
+                geoSimplifyAndConvert($points, $need_simplify, $gPoint); // $points is passed by reference here
                 $shapes[$idx][$idx2] = $points;
             }
         }
@@ -108,15 +123,18 @@
     }
 
     /**
-    * Simplifies a large set of UTM coordinates and convert them to latitude and longitude (WGS84)
-    * using a geographic point object ($gPoint). It simplifies geometries only when needed
-    * (if the points exceed 1000) and converts them to lat/lon when $gPoint is provided.
-    *
-    * @param mixed $orig_points
-    * @param boolean $need_simplify Flag indicating whether to simplify the geometry
-    * @param object  $gPoint        Reference to the geographic point object for conversion
-    * @return mixed
-    */
+     * Simplifies a set of coordinates and/or converts them from UTM to WGS84 (Lat/Lon).
+     * Simplification is applied if `$need_simplify` is true and the number of points exceeds a threshold (1000).
+     * Coordinate conversion from UTM to Lat/Lon is performed if `$gPoint` is provided.
+     * The input array `$orig_points` is modified in place.
+     *
+     * @param array &$orig_points An array of points, where each point is an array [easting, northing] or [longitude, latitude].
+     *                            This array is passed by reference and will be modified.
+     * @param bool $need_simplify Flag indicating whether to simplify the geometry.
+     * @param \hserv\utilities\GpointConverter|null &$gPoint Optional. A GpointConverter object, configured for the correct UTM zone,
+     *                                                       for UTM to Lat/Lon conversion. Passed by reference. If null, no conversion is done.
+     * @return void The `$orig_points` array is modified directly.
+     */
     function geoSimplifyAndConvert(&$orig_points, $need_simplify, &$gPoint = null)
     {
         // Define constants for simplification thresholds and tolerance values
@@ -175,9 +193,8 @@
     /**
      * Corrects longitude values in GeoJSON if abs(lng) > 180.
      *
-     * @param array $json The GeoJSON object to correct
-     *
-     * @return array The corrected GeoJSON
+     * @param array $json The GeoJSON object (as an associative array) to correct.
+     * @return array The GeoJSON object with corrected longitude values, or an empty array if input coordinates are empty.
      */
     function geoCorrectLngJSON($json)
     {
@@ -235,6 +252,14 @@
     }
 
 
+    /**
+     * Corrects longitude values in an array of points to fall within the -180 to 180 degree range.
+     * Modifies the input array in place.
+     *
+     * @param array &$orig_points An array of points, where each point is an array [longitude, latitude].
+     *                            This array is passed by reference and will be modified.
+     * @return void The `$orig_points` array is modified directly.
+     */
     function geoCorrectLng(&$orig_points){
 
         //invert

@@ -1,23 +1,36 @@
 <?php
+/**
+* FilestoreHarvest.php - Class FilestoreHarvest
+* 
+* Searches and indexes (registers in recUploadedFiles) files in specified folders
+*
+* @package     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6.0
+*/
 namespace hserv\filestore;
 use hserv\utilities\USanitize;
 
 /**
-     * Class FilestoreHarvest
-     *
-     * Searches for files within specified directories of the Heurist database filestore.
-     * It can categorize these files as registered (present in `recUploadedFiles`) or
-     * non-registered based on database lookups. This is typically used for media
-     * indexing and management tasks.
-     */
+ * Class FilestoreHarvest
+ *
+ * Searches for files within specified directories of the Heurist database filestore.
+ * It can categorize these files as registered (present in `recUploadedFiles`) or
+ * non-registered based on database lookups. This is typically used for media
+ * indexing and management tasks.
+ */
 class FilestoreHarvest
 {
-        /** @var \hserv\System The main Heurist system object. */
+    /** @var \hserv\System The main Heurist system object. */
     private $system;
     
-        /** @var mixed Stores issues found during reporting (currently not fully utilized in provided code). */
+    /** @var mixed Stores issues found during reporting (currently not fully utilized in provided code). */
     private $rep_issues;
-        /** @var array Stores information about registered and non-registered files.
+    /** @var array Stores information about registered and non-registered files.
          *             Format: `['reg' => [...filenames...], 'nonreg' => [...filenames...]]`
          */
     private $reg_info;
