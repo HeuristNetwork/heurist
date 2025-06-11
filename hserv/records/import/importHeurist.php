@@ -123,51 +123,6 @@ class ImportHeurist {
 
         $data=null;
         try{
-
-getDefintions - returns list of definitions (record types to be imported)
-importDefintions - Imports missed record types from remote database (uses dbsImport)
-importRecords - import records from xml or json file
-
-
-Special case - import from unregistered dastabase
-1) When we import definition with concept code 0000-xxx it is added to target as 9999-xxx
-2) When we import record with concept code 0000-xxx it searches defs in target as 9999-xxx
-
-*/
-class ImportHeurist {
-
-    private static $system = null;
-    private static $mysqli = null;
-    private static $initialized = false;
-
-    private static function initialize($fields_correspondence=null)
-    {
-        if (self::$initialized) {return;}
-
-        global $system;
-        self::$system  = $system;
-        self::$mysqli = $system->getMysqli();
-        self::$initialized = true;
-
-        if(!defined('HEURIST_DBID')){
-            define('HEURIST_DBID', $system->settings->get('sys_dbRegisteredID'));
-        }
-    }
-
-    /**
-    * Reads import file
-    *
-    * detect format
-    * if xml coverts to json
-    *
-    * @param mixed $filename - archive or temp  import file -
-    *               this is either websiteStarterRecords or file in scratch folder
-    * @param mixed $type - type of file manifest of record data
-    */
-    private static function _readDataFile($filename, $type=null, $validate=true){
-
-        $data=null;
-        try{
             // TODO: This special-casing based on a specific file name, which could be changed in an entirely
             // different part of the code, is a pretty horrible way of setting a file path. Should be passed directly
             // and setting default path should only occur where no file path is specified.
@@ -254,7 +209,7 @@ class ImportHeurist {
             $errors = libxml_get_errors();
 
             foreach ($errors as $error) {
-                error_log( display_xml_error($error, null) );
+                //error_log( display_xml_error($error, null) );
             }
 
             libxml_clear_errors();
@@ -496,7 +451,7 @@ class ImportHeurist {
 
             //find local ids
             foreach ($imp_rectypes as $rtid => $rt){
-                $conceptCode = $rt['code']?$rt['code']:rtid;
+                $conceptCode = $rt['code']?$rt['code']:$rtid;
 
                 $local_id = DbsImport::getLocalCode('rectypes', $database_defs, $conceptCode, false);
                 $imp_rectypes[$rtid]['target_RecTypeID'] = $local_id;

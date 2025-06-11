@@ -20,7 +20,7 @@ use hserv\records\import\ImportAnnotations;
 use hserv\System;
 use hserv\utilities\USanitize;
 use hserv\structure\ConceptCode;
-use hserv\web\WebSite;
+//use hserv\web\WebSite;
 
 /**
  * Class FrontController
@@ -89,13 +89,14 @@ class FrontController
             $controller = new ReportController($this->system, $this->req_params);
             $controller->handleRequest(@$this->req_params['action']);
 
-        }elseif(@$this->req_params['website']){
+        }
+        /*elseif(@$this->req_params['website']){
 
             $controller = new WebSite($this->system, $this->req_params);
             $controller->execute();
 
-            
-        }elseif(@$this->req_params['controller'] == 'ImportAnnotations'){
+        }*/
+        elseif(@$this->req_params['controller'] == 'ImportAnnotations'){
             
             $controller = new ImportAnnotations($this->system, $this->req_params);
             $result = $controller->execute();

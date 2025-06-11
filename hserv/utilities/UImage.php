@@ -47,13 +47,8 @@ class UImage {
      * @return \GdImage|false The GD image resource on success (current implementation always returns a resource, never false).
      */
     public static function createFromString($desc) {
-        $desc = preg_replace('/\\s+/', ' ', $desc);
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
+        $desc = preg_replace('/\\s+/', ' ', $desc);
 
         $font = 3; $fw = imagefontwidth($font); $fh = imagefontheight($font);
         $desc_lines = explode("\n", wordwrap($desc, intval(100/$fw)-1, "\n", false));

@@ -1882,7 +1882,7 @@ function recordCanChangeOwnerwhipAndAccess($system, $recID, &$owner_grps, &$acce
                         $system->addError(HEURIST_REQUEST_DENIED,
                             'Cannot change ownership. User does not have ownership rights. '
                             .'User must be either database administrator, record owner or administrator or record\'s ownership group',
-                            'Group#'.grp);
+                            'Group#'.$grp);
                         return false;
                     }
                 }
