@@ -518,231 +518,185 @@ function HLayout(args) {
 
     
     /**
-    * Adds application/widgets to specified pane
+    * Initializes content (applications/widgets) within a specific pane of a layout.
+    * This function is called by both `_initLayoutCardinal` and `_initLayoutFree`.
+    * It handles different types of content:
+    * - Special Heurist widgets like `heurist_Groups` (which can render as tabs, accordion, or divs)
+    *   and `heurist_Cardinals` (for nested cardinal layouts).
+    * - Standard tabbed content where multiple apps are placed in a jQuery UI Tabs container.
+    * - Standalone applications/widgets directly placed in the pane.
     *
-    * @param $container
-    * @param pos - position in cardinal layout (north,eastwest,center,south) - searched by class name in $container
-    *              for "free" layout designer has to specify container div with class ui-layout-NAME
-    * @param bg_color
+    * @private
+    * @param {Object} layout_config - The overall layout configuration object (either the main layout or a nested one).
+    * @param {jQuery} $parent_container - The jQuery object for the parent container of the pane being initialized
+    *                                  (this is the container on which `.layout()` was called for cardinal, or the main `$container` for free).
+    * @param {string} pane_key - The key/identifier of the pane to initialize (e.g., 'north', 'center', or an ID from a free layout).
+    * @param {string|null} background_color - Optional background color to apply to content areas within cardinal panes.
+    * @returns {void}
     */
-    function layoutInitPane(layout, $container, pos, bg_color){
+    function layoutInitPane(layout_config, $parent_container, pane_key, background_color){
 
-            if(layout[pos]){
-                
-                let cardinal_panes = ['north','east','west','center','south'];
-                let $pane_content;
+            if(layout_config[pane_key]){ // Check if pane configuration exists
+                const pane_definition = layout_config[pane_key];
+                // Find the pane element. For cardinal, it's '.ui-layout-<pane_key>'. For free, it's '#<pane_key>'.
+                let $pane_element = $parent_container.find((['north','east','west','center','south'].includes(pane_key)) ? '.ui-layout-' + pane_key : '#' + pane_key);
+                let $actual_content_container = $pane_element; // By default, content goes directly into the pane element
 
-                let lpane = layout[pos];
+                // For cardinal panes, create a specific '.ui-layout-content' div inside the pane if not already there.
+                // This is standard practice for jQuery UI Layout.
+                if (['north','east','west','center','south'].includes(pane_key)) {
+                    if ($pane_element.find('> .ui-layout-content').length === 0) { // Avoid creating if one already exists (e.g. from template)
+                        $actual_content_container = $('<div>')
+                            .attr('id','content_' + pane_key) // Give it a unique ID
+                            .addClass('ui-layout-content')    // Standard class for layout content
+                            .appendTo($pane_element);
+                    } else {
+                        $actual_content_container = $pane_element.find('> .ui-layout-content:first');
+                    }
+                    if(background_color) $actual_content_container.css('background-color', background_color);
+                    if(pane_definition.dropable) $actual_content_container.addClass('pane_dropable'); // Make it a drop target for tabs
+                }
                 
-                let $pane = $container.find('.ui-layout-'+pos);
-                if (lpane.apps && lpane.apps[0].appid == 'heurist_Groups') {
-                    
-                    //$($pane.children()[0]).remove(); //remove div with header
-                    //$($pane.children()[0]).remove(); //remove span with options
-                    $pane.find('div.widget-design-header:first').remove(); //remove configuration div with header
-                    $pane.find('span.widget-options:first').remove(); //remove configuration span with header
-                    
-                    
-                    let mode = lpane.apps[0].options.groups_mode;
-                    
-                    if(mode!='tabs'){
-                        
-                        let pid = $pane.attr('id');
-                        
-                        $pane.children('ul').remove();
-                        $pane.children('.ui-tabs-panel').each(function(idx,item){
-                            
-                            if(idx<lpane.apps[0].options.tabs.length){
-                                if(mode!='divs'){
-                                    $('<h3>').html(lpane.apps[0].options.tabs[idx].title).appendTo($pane);
+                // Handle specific complex widget types first, as they might have unique rendering logic
+                if (pane_definition.apps && pane_definition.apps.length > 0) {
+                    const first_app_config = pane_definition.apps[0];
+                    if (first_app_config.appid === 'heurist_Groups') {
+                        // Special rendering for 'heurist_Groups' widget (can be tabs, accordion, or simple divs)
+                        $pane_element.find('div.widget-design-header:first, span.widget-options:first').remove(); // Clean up design-mode artifacts
+                        const groupWidgetMode = first_app_config.options.groups_mode;
+                        if(groupWidgetMode !== 'tabs'){ // Accordion or divs mode
+                            const paneId = $pane_element.attr('id');
+                            $pane_element.children('ul').remove(); // Remove any pre-existing UL (for tabs)
+                            $pane_element.children('.ui-tabs-panel').each(function(idx,item){ // Repurpose tab panels
+                                if(idx < first_app_config.options.tabs.length){ // Max items from config
+                                    if(groupWidgetMode !== 'divs') $('<h3>').html(first_app_config.options.tabs[idx].title).appendTo($pane_element); // Header for accordion
+                                    $('<div>').html($(item).html()).addClass('group-tab').attr('id',(paneId + '-' + idx)).appendTo($pane_element);
+                                    if(groupWidgetMode === 'divs' && idx > 0) $pane_element.children().last().hide(); // Hide subsequent divs if mode is 'divs'
                                 }
-                                let ele = $('<div>')
-                                        .html($(item).html())
-                                        .appendTo($pane);
-                                ele.addClass('group-tab').attr('id',(pid+'-'+idx));
-                                if(mode=='divs' && idx>0) ele.hide();
-                            }
-                            $(item).remove();    
-                        });
-                        
-                        if(mode=='accordion'){
-                            $pane.accordion();
+                                $(item).remove(); // Remove original panel
+                            });
+                            if(groupWidgetMode === 'accordion') $pane_element.accordion({ heightStyle: "content", collapsible: true, active: false });
+                        } else { // Default to jQuery UI tabs for 'heurist_Groups'
+                            $pane_element.tabs();
                         }
-                    
-                    }else{ //tabs by default
-                        // in design mode - it is called from iframe and baseURL is different 
-                        // to fix this mess
+                        return; // Initialization for heurist_Groups is complete
+                    } else if (first_app_config.appid === 'heurist_Cardinals') {
+                        // Special rendering for nested 'heurist_Cardinals' widget
+                        $pane_element.find('div.widget-design-header:first, span.widget-options:first').remove();
+                        if(!first_app_config.options || !first_app_config.options.tabs){
+                            console.error('Cardinal layout widget is missing "tabs" options defining its panes.'); return;
+                        }
+                        const nested_layout_opts_from_config = { ...first_app_config.options.tabs }; // Copy pane definitions
+                        let $cardinal_widget_container = first_app_config.options.container ? $('#'+first_app_config.options.container) : $pane_element;
                         
-                        let locationUrl = window.hWin.HAPI4.baseURL;
-                        $pane.find('li > a').each(function(idx, item){
-                           let href = $(item).attr('href');
-                           href = href.substr(href.indexOf('#'));           
-                           $(item).attr('href', locationUrl + href);
-                        });
-                        $pane.tabs();    
-                    }
-                    
-                    return;
-                    
-                }
-                else if (lpane.apps && lpane.apps[0].appid == 'heurist_Cardinals') {
-
-                    //outdated - config now in body of widget div
-                    $pane.find('div.widget-design-header:first').remove(); //remove configuration div with header
-                    $pane.find('span.widget-options:first').remove(); //remove configuration span with header
-                    
-                    //{"container":"cont","tabs":{"west":{"id":"west"},"center":{"id":"center"},"east":{"id":"east"}}}
-                    if(!lpane.apps[0].options || !lpane.apps[0].options.tabs){
-console.error('Cardinal layout widget does not have proper options');
-                        return;                        
-                    }
-                    let layout_opts = lpane.apps[0].options.tabs;
-                    let $cardinal_container;
-                    if(lpane.apps[0].options.container){
-                        $cardinal_container = $('#'+lpane.apps[0].options.container);   
-                    }else{
-                        $cardinal_container = $pane;
-                    }
-                     
-                  
-                    // container:'', tabs:{north:{id:"xxx"},center:{id:"xxx",size:300, minsize:150}...}
-                    //
-                    //  
-                    let keys = Object.keys(layout_opts);
-                    
-                    for(let i=0; i<keys.length; i++){
-                        let ele_id = layout_opts[keys[i]].id;
-                        $cardinal_container.children('#'+ele_id).addClass('ui-layout-'+keys[i]);    
-                    }
-                    
-                    layout_opts['applyDefaultStyles'] = true; //remove for last version
-                    layout_opts['applyDemoStyles'] = false;
-                    layout_opts['maskContents']       = true;
-                    layout_opts['togglerAlign_open']  = 'center';
-                    layout_opts['togglerContent_open']   = '&nbsp;';
-                    layout_opts['togglerContent_closed'] = '&nbsp;';
-                    layout_opts['spacing_open'] = 6;
-                    layout_opts['spacing_closed'] = 16;
-                    layout_opts['onresize_end'] = function(){
-                            $(document).trigger(window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE); //global app event
-                    };
-
-
-                    if(!$cardinal_container.is(':visible')){
-                        
-                        $cardinal_container.layout(layout_opts);
-                        $cardinal_container.on("myOnShowEvent", function(event){
-                            
-                            $cardinal_container.off("myOnShowEvent");
-                            __toogleIcons($cardinal_container, 'west', 'e', 'w');
-                            __toogleIcons($cardinal_container, 'east', 'w', 'e');
-                        });
-                        
-                    }else{
-                        $cardinal_container.layout(layout_opts);    
-                        __toogleIcons($cardinal_container, 'west', 'e', 'w');
-                        __toogleIcons($cardinal_container, 'east', 'w', 'e');
-                    }
-                    if($cardinal_container.attr('id') != $pane.attr('id')){
-                        $pane.hide();  //or remove?
-                    }
-                            
-                    
-                    return;
-                    
-                }else{
-                    $pane.empty();    
-                }
-                
-
-                if(cardinal_panes.indexOf(pos)>=0){
-
-                    $pane_content = $(document.createElement('div'));
-                    $pane_content.attr('id','content_'+pos).addClass('ui-layout-content')
-                        .appendTo($pane);
-                        
-                    if(bg_color)    {
-                        $pane_content.css('background-color', bg_color);
-                    }
-
-                    if(lpane.dropable){
-                        $pane_content.addClass('pane_dropable');
-                    }
-                    
-                    //create tabs and their children apps
-                    if(lpane.tabs){
-                        $.each(lpane.tabs, function(idx, tabb){
-                            appCreateTabControl($pane_content, tabb.apps, tabb);
-                        });
-                    }
-
-                    //create standalone apps
-                    if(lpane.apps){
-
-                        $.each(lpane.apps, function(idx, app){
-                            if(app.dockable){
-                                appCreateTabControl($pane_content, app, null);
-                            }else{
-                                appCreatePanel($pane_content, app, true);
+                        // Prepare child elements to be layout panes by adding classes
+                        Object.keys(nested_layout_opts_from_config).forEach(key => {
+                            if (typeof nested_layout_opts_from_config[key] === 'object' && nested_layout_opts_from_config[key].id) {
+                                $cardinal_widget_container.children('#'+nested_layout_opts_from_config[key].id).addClass('ui-layout-'+key);
                             }
                         });
+                        // Standard jQuery UI Layout options for the nested layout
+                        const final_nested_layout_opts = $.extend({}, nested_layout_opts_from_config, {
+                            applyDefaultStyles: true, maskContents: true, togglerAlign_open: 'center',
+                            togglerContent_open: '&nbsp;', togglerContent_closed: '&nbsp;',
+                            spacing_open: 6, spacing_closed: 16,
+                            onresize_end: function(){ $(document).trigger(window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE); }
+                        });
+
+                        $cardinal_widget_container.layout(final_nested_layout_opts);
+                        __toogleIcons($cardinal_widget_container, 'west', 'e', 'w');
+                        __toogleIcons($cardinal_widget_container, 'east', 'w', 'e');
+                        // If the cardinal widget uses a different container than the pane it's in, hide the original pane element.
+                        if($cardinal_widget_container.attr('id') !== $pane_element.attr('id')) $pane_element.hide();
+                        return; // Initialization for heurist_Cardinals is complete
+                    } else {
+                         // If not a special widget, clear the target content area for cardinal panes.
+                         // For free layouts, $actual_content_container is $pane_element, which might already have content from a template.
+                         if (['north','east','west','center','south'].includes(pane_key)) {
+                            $actual_content_container.empty();
+                         }
                     }
+                } else if (['north','east','west','center','south'].includes(pane_key)) {
+                     // If no apps defined for a cardinal pane, ensure its content area is empty.
+                     $actual_content_container.empty();
+                }
 
-                    //init all tabs on current pane
-                    let containment_sel = '.ui-layout-'+pos+' > .ui-layout-content';
-                    let $tabs = $container.find( containment_sel+' > .tab_ctrl' ).tabs({
-                        activate: function(event ,ui){                 
-                            let action_id = $(ui.newTab[0]).attr('data-logaction');
-                            if(action_id && window.hWin && window.hWin.HAPI4){
-                                window.hWin.HAPI4.SystemMgr.user_log(action_id);
-                            }
+                // Initialize tabs if defined for the pane
+                if(pane_definition.tabs){
+                    $.each(pane_definition.tabs, function(idx, tab_config){
+                        appCreateTabControl($actual_content_container, tab_config.apps, tab_config);
+                    });
+                }
 
-                            if($(this).attr('data-keep-width')==1){
-                                let w = $(ui.oldTab[0]).parents('.ui-layout-pane').width();
-                                $(ui.oldTab[0]).attr('data-width', w);
-                                w = $(ui.newTab[0]).attr('data-width');
-                                if(w>0){
-                                   window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', w], $container);
+                // Initialize standalone apps if defined for the pane
+                if(pane_definition.apps){ // Re-check as special widgets above would have returned
+                    $.each(pane_definition.apps, function(idx, app_config){
+                        if(app_config.dockable){ // Dockable apps are rendered in a tab control
+                            appCreateTabControl($actual_content_container, app_config, null);
+                        }else{ // Non-dockable apps are rendered in a simple panel
+                            appCreatePanel($actual_content_container, app_config, true);
+                        }
+                    });
+                }
+
+                // Initialize jQuery UI Tabs for all tab controls within this pane's content area
+                const containment_selector_for_tabs = '#' + $actual_content_container.attr('id');
+                const $tab_widgets = $actual_content_container.find('.tab_ctrl').tabs({
+                    activate: function(event ,ui){
+                        let action_id = $(ui.newTab[0]).attr('data-logaction');
+                        if(action_id && window.hWin && window.hWin.HAPI4){
+                            window.hWin.HAPI4.SystemMgr.user_log(action_id); // Log tab activation
+                        }
+                        // Logic for adjusting pane width based on active tab (data-keep-width)
+                        if($(this).attr('data-keep-width') === "1" && ui.oldTab && ui.newTab){ // Check if attributes exist
+                            let $layoutPane = $(ui.oldTab[0]).closest('.ui-layout-pane');
+                            if ($layoutPane.length) {
+                                $(ui.oldTab[0]).attr('data-width', $layoutPane.width());
+                                let newWidth = $(ui.newTab[0]).attr('data-width');
+                                if(newWidth && parseInt(newWidth) > 0){
+                                   // Assuming HAPI4.LayoutMgr.cardinalPanel can target a specific layout instance if $parent_container is passed
+                                   window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', [$layoutPane.data('layoutEdge'), parseInt(newWidth)], $parent_container);
                                 }
                             }
-                        }}
-                    );
-					
-                    if(pos == 'east'){ 
-                        // Prevent east pane's tabs from navigating with arrow keys
-                        $tabs.find('.ui-tabs-anchor').on('keydown',function(e){
-                            e.stopPropagation();
-                            e.preventDefault();
-
-							return false;
-                        });
+                        }
                     }
-                
-                    appInitFeatures(containment_sel);
-                
-                }else{
-                    $pane_content = $container.find('.ui-layout-'+pos);
-                    appCreatePanel($pane_content, lpane.apps[0], true);
+                });
+                // Special keydown handling for 'east' pane tabs to prevent arrow key navigation conflicts
+                if(pane_key === 'east'){
+                    $tab_widgets.find('.ui-tabs-anchor').on('keydown',function(e){ e.stopPropagation(); e.preventDefault(); return false; });
                 }
-                
-                
-                
+                appInitFeatures(containment_selector_for_tabs); // Initialize drag/drop/resize for elements in these tabs
             }
     } //end layoutInitPane
 
-    //
-    // adjust absolute position of tab pane according to ul height
-    //
-    function onLayoutResize( $container ){
-        let $tabs = $container.find('.tab_ctrl_adjust' );
+    /**
+     * Adjusts the position of tab panels within tab controls that have the class `tab_ctrl_adjust`.
+     * This is typically called on layout resize to ensure tab content fits correctly beneath the tab headers.
+     * @private
+     * @param {jQuery} $layout_container - The main layout container to search within for adjustable tab controls.
+     * @returns {void}
+     */
+    function onLayoutResize( $layout_container ){
+        let $tab_controls_to_adjust = $layout_container.find('.tab_ctrl_adjust' );
         
-        $tabs.each(function(idx, tabctrl){
-            let h = $(tabctrl).find('ul[role="tablist"]').height();
-            $(tabctrl).find('div[role="tabpanel"]').css({'top':h+4,'bottom':0,'position':'absolute',left:'2px',right:'4px'}); 
-            //,'width':'100%'
+        $tab_controls_to_adjust.each(function(idx, tabctrl_element){
+            const $tabctrl = $(tabctrl_element);
+            let $tablist = $tabctrl.find('ul[role="tablist"]:first');
+            let tablist_height = $tablist.length ? $tablist.outerHeight() : 0;
+            // Adjust top position of tab panels based on header height
+            $tabctrl.find('div[role="tabpanel"]').css({
+                'top': (tablist_height + 4) + 'px', // +4 for potential padding/border
+                'bottom':'0px', 'position':'absolute', left:'2px', right:'4px'
+            });
         });
     }
     
+    /**
+     * Initializes drag-and-drop functionality for tabs between different tab controls
+     * within panes marked as `pane_dropable`. Enables interactive rearrangement of tabs.
+     * @private
+     * @returns {void}
+     */
     function initDragDropListener(){
         
         // listener for drag-n-droop
@@ -794,408 +748,340 @@ console.error('Cardinal layout widget does not have proper options');
 
 
     /**
-    * Create simple application panel
-    * it may be dragable and/or resizable
+    * Creates a simple panel for a single application/widget.
+    * The panel can be draggable and/or resizable if specified in the `app_config`.
     *
-    * $container - pane in layout
-    * app - tab or app - entry from layout array - need for ui parameters
-    * needcontent - load and create widget/link at once (for standalone app only)
+    * @private
+    * @param {jQuery} $pane_container - The container element (a layout pane) where this panel will be created.
+    * @param {Object} app_config - Configuration for the app/widget from the layout definition.
+    *                              Properties used: `appid`, `name` (fallback to widget's default), `dragable`, `resizable`, `hasheader`, `css`.
+    * @param {boolean} create_content_now - If true, loads and creates the widget/content immediately.
+    * @returns {jQuery} The jQuery object for the created panel's main div.
     */
-    function appCreatePanel($pane_content, app, needcontent){
-
+    function appCreatePanel($pane_container, app_config, create_content_now){
         app_counter++;
-
-        let $d;
+        let $panel_div;
         
-       
-        
-        if(!_is_container_layout ){
-            $d = $(document.createElement('div'));
-            $d.attr('id', 'pnl_'+app_counter)  //.css('border','solid')
-                .appendTo($pane_content);
+        // If not a container-based layout (i.e., free-form where panel is distinct), create a new div.
+        // Otherwise, the $pane_container itself is treated as the panel div.
+        if(!_is_container_layout){
+            $panel_div = $('<div>')
+                .attr('id', 'pnl_' + app_counter)
+                .appendTo($pane_container);
             
-            if(app.dragable){
-                $d.addClass('dragable');
-            }
-            if(app.resizable){
-                $d.addClass('resizable');
-            }
-        }else{
-            $d = $pane_content;
+            if(app_config.dragable) $panel_div.addClass('dragable');
+            if(app_config.resizable) $panel_div.addClass('resizable');
+        } else {
+            $panel_div = $pane_container;
         }
         
-
-        if(needcontent){ //for standalone application load content at once
-
-            let application = _appGetWidgetById(app.appid); //find in app array
-
-            if(app.hasheader){
-                let $header = $("<div>");
-                $header.append(window.hWin.HR(app.name || application.name))
-                //.addClass('ui-widget-header')
-                .addClass('ui-corner-all')
-                .addClass('header'+app.appid+'_'+app_counter)
-                .appendTo($d);
+        if(create_content_now){
+            const widget_definition = _appGetWidgetById(app_config.appid); // Get base widget definition
+            if (!widget_definition) {
+                console.error("Widget definition not found for appid:", app_config.appid);
+                return $panel_div; // Return potentially empty panel
             }
 
-            appAddContent($d, application, app);
-
-            $d.addClass('ui-widget-content');
-           
-           
+            if(app_config.hasheader){ // Add a header bar to the panel if specified
+                $('<div>')
+                    .append(window.hWin.HR(app_config.name || widget_definition.name)) // Use configured name or widget default name
+                    .addClass('ui-corner-all header' + app_config.appid + '_' + app_counter) // Basic styling
+                    .appendTo($panel_div);
+            }
+            // Add the actual content (widget or URL) to the panel
+            appAddContent($panel_div, widget_definition, app_config);
+            $panel_div.addClass('ui-widget-content'); // Standard jQuery UI class for content areas
         }
 
-        if(app.css){
-            $.each(app.css, function(key, value){
-                $d.css(key, value);
-            });
-        }else if(!_is_container_layout ) 
-        {
-            if(app.resizable) {
-                $d.css('width', '98%');
-                $d.css('height', '98%');
-            }else {
-                $d.css('width', '99.999%');
-                $d.css('height', '99.999%');
+        // Apply custom CSS from layout configuration
+        if(app_config.css){
+            $panel_div.css(app_config.css);
+        } else if(!_is_container_layout) { // Default sizing for non-container layouts if no CSS
+            if(app_config.resizable) {
+                $panel_div.css({'width': '98%', 'height': '98%'});
+            } else {
+                $panel_div.css({'width': '99.999%', 'height': '99.999%'}); // Fill container
             }
         }
-
-        return $d;
+        return $panel_div;
     }
 
     /**
-    * Createas and add div with application content - widget or url
+    * Creates and adds the actual content (a widget instance or loaded URL) to an application container div.
     *
-    * $app_container - pane in layout
-    * app - entry from widgets array
-    * appcfg - application options from layouts array - parameters to init application
+    * @private
+    * @param {jQuery} $app_container_div - The jQuery div element that will host the content.
+    * @param {Object} widget_definition - The base configuration of the widget from `cfg_widgets` (contains `id`, `script`, `widgetname`, `url2`, `content`).
+    * @param {Object} app_instance_config - Instance-specific configuration for this app from the layout definition (contains `options`, `layout_id`, `css`).
+    * @returns {void}
     */
-    function appAddContent($app_container, app, appcfg){
+    function appAddContent($app_container_div, widget_definition, app_instance_config){
+        const options = app_instance_config.options;
+        const layout_id_attr = app_instance_config.layout_id; // Attribute for linking back to layout definition
+        const app_css_styles = app_instance_config.css; // Instance-specific CSS
+
+        // Create the content div that will actually hold the widget or loaded HTML
+        const $content_div = $('<div>')
+            .attr('id', widget_definition.id + '_' + app_counter) // Unique ID for the content holder
+            .attr('widgetid', widget_definition.id) // Store base widget ID
+            .appendTo($app_container_div);
         
-        let options = appcfg.options, 
-            layout_id = appcfg.layout_id;
-        const app_css = appcfg.css;
-
-
-        let $content = $(document.createElement('div'));
-        $content.attr('id', app.id+'_'+app_counter)
-        .attr('widgetid', app.id)
-        .appendTo($app_container);
+        if(layout_id_attr) $content_div.attr('layout_id', layout_id_attr);
         
-        if(layout_id){
-            $content.attr('layout_id', layout_id);
-        }
-        
-
-        if(app.isframe){
-            $content.addClass('frame_container');
-            $content.append('<iframe id="'+app.id+'_'+app_counter+'" src="'+app.url+'"></iframe>');
-        }else if(app.widgetname=='include_layout'){
-            //nested layouts
-
-            let layout = _layoutGetById(options.ref);
-            if(layout){
-
-                if(app_css){
-                    $.each(app_css, function(key, value){
-                        $content.css(key, value);
-                    });
-                }else if(app.resizable) {
-                    $content.css('width', '98%');
-                    $content.css('height', '98%');
-                }else {
-                    $content.css('width', '99%');
-                    $content.css('height', '99%');
-                }
+        if(widget_definition.isframe){ // Content is an iframe
+            $content_div.addClass('frame_container');
+            // Ensure URL is correctly formed if it's relative
+            const frame_url = widget_definition.url.startsWith('http') ? widget_definition.url : window.hWin.HAPI4.baseURL + widget_definition.url;
+            $content_div.append(`<iframe id="${widget_definition.id}_${app_counter}_frame" src="${frame_url}"></iframe>`);
+        } else if(widget_definition.widgetname === 'include_layout'){ // Special widget to include another layout
+            const nested_layout_id = options.ref; // ID of the layout to include
+            const nested_layout_config = _layoutGetById(nested_layout_id);
+            if(nested_layout_config){
+                if(app_css_styles) $content_div.css(app_css_styles);
+                else if(widget_definition.resizable) $content_div.css({'width': '98%', 'height': '98%'});
+                else $content_div.css({'width': '99%', 'height': '99%'});
                 
-                _initLayoutCardinal(layout, $content);
+                _initLayoutCardinal(nested_layout_config, $content_div); // Initialize the nested layout
+            } else {
+                console.error("Nested layout not found:", nested_layout_id);
             }
-            
-        }else if (app.script && app.widgetname) {
-
-            app.widget = $content;
-
-            if(window.hWin.HEURIST4.util.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded
-            
-                $content[app.widgetname]( options );
-            }else{
-                //this is normal way of widget initialization
-                // script is loaded dynamically and init function is widget name
-                $.getScript( window.hWin.HAPI4.baseURL + app.script, function() {  //+'?t='+(new Date().getTime())
-                    if(window.hWin.HEURIST4.util.isFunction($content[app.widgetname])){
-                        $content[app.widgetname]( options );   //call function
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr({
-                            message: `Widget ${app.widgetname} not loaded. Verify your configuration`,
-                            error_title: 'Widget loading failed',
-                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
-                        });
-                    }
-                });
+        } else if (widget_definition.script && widget_definition.widgetname) { // Standard jQuery UI widget pattern
+            // Ensure widget's JS is loaded, then initialize
+            if(window.hWin.HEURIST4.util.isFunction($('body')[widget_definition.widgetname])){ // Check if plugin is loaded
+                $content_div[widget_definition.widgetname](options); // Initialize widget
+            } else { // Script not loaded, load it dynamically
+                $.getScript( window.hWin.HAPI4.baseURL + widget_definition.script)
+                    .done(function() {
+                        if(window.hWin.HEURIST4.util.isFunction($content_div[widget_definition.widgetname])){
+                            $content_div[widget_definition.widgetname](options);
+                        } else {
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: `Widget ${widget_definition.widgetname} function not found after loading script ${widget_definition.script}.`,
+                                error_title: 'Widget Loading Failed',
+                                status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                            });
+                        }
+                    })
+                    .fail(function(jqxhr, settings, exception) {
+                         console.error("Error loading widget script:", widget_definition.script, exception);
+                         window.hWin.HEURIST4.msg.showMsgErr({
+                            message: `Failed to load script for widget ${widget_definition.widgetname} (${widget_definition.script}).`,
+                            error_title: 'Script Loading Failed'
+                         });
+                    });
             }
-
-
-        }else if (app.url2) {
-            $content.load(app.url2);
-        }else{
-            $content.html(app.content?app.content :app.name);
+        } else if (widget_definition.url2) { // Load content from a URL
+            $content_div.load(widget_definition.url2);
+        } else { // Static content defined in widget config
+            $content_div.html(widget_definition.content ? widget_definition.content : widget_definition.name);
         }
-    }//appAddContent
+    }
 
     /**
-    * Creates new tabcontrol - it may contains several applications
+    * Creates a new tab control (jQuery UI Tabs) within a pane.
+    * Each app in the `apps_list` array becomes a tab in this control.
     *
-    * $content - pane in layout
-    * apps - list of application for tab (from layouts array)
-    * tab - entry from layout - need for ui parameters
+    * @private
+    * @param {jQuery} $pane_container - The layout pane where the tab control will be created.
+    * @param {Array<Object>|Object} apps_list - An array of app configurations for the tabs, or a single app config object.
+    *                                         Each app config should have `appid` and optionally `name`, `options`, `content_id`.
+    * @param {Object} [tab_control_config] - Configuration for the tab control itself (from layout definition).
+    *                                   Used for properties like `layout_id`, `keep_width`, `dockable`, `sortable`, `adjust_positions`, `css`.
+    *                                   If null, and `apps_list` is a single app, that app's config is used.
+    * @returns {jQuery|null} The jQuery object for the created tab control div, or null if `apps_list` is empty.
     */
-    function appCreateTabControl($pane_content, apps, tabcfg){
+    function appCreateTabControl($pane_container, apps_list, tab_control_config){
+        if(!apps_list) return null;
 
-        if(!apps) return null;
+        const apps_array = Array.isArray(apps_list) ? apps_list : [apps_list];
+        if(apps_array.length === 0) return null;
 
-        if(! Array.isArray(apps)){
-            apps = [apps];
-        }
-        if(tabcfg==null){
-            tabcfg = apps[0];
-        }
+        const effective_tab_config = tab_control_config || apps_array[0]; // Use first app's config if no specific tab_control_config
 
-        //create
-        let $tab_ctrl = appCreatePanel($pane_content, tabcfg, false);
-        $tab_ctrl.addClass('tab_ctrl').css('border', 'none');
-        let $ul = $(document.createElement('ul')).appendTo($tab_ctrl);
+        // Create the main div for the tab control panel
+        const $tab_control_div = appCreatePanel($pane_container, effective_tab_config, false); // false: don't create content yet
+        $tab_control_div.addClass('tab_ctrl').css('border', 'none'); // Basic tab control styling
+        const $tab_nav_ul = $('<ul>').appendTo($tab_control_div); // UL for tab headers
         
-        
-        if(tabcfg) {
-            if(tabcfg.layout_id){
-                $tab_ctrl.attr('layout_id', tabcfg.layout_id);
-            }
-            if(tabcfg.keep_width){
-                $tab_ctrl.attr('data-keep-width', 1);
-            }
-            if(tabcfg.dockable){
-                $tab_ctrl.addClass('dockable');
-            }
-            if(tabcfg.sortable){
-                $ul.addClass('sortable_tab_ul')  //@todo .css({'border':'none', 'background':'red'})
-            }
-            if(tabcfg.adjust_positions){
-                $tab_ctrl.addClass('tab_ctrl_adjust');
-            }
+        // Apply configurations to the tab control div
+        if(effective_tab_config) {
+            if(effective_tab_config.layout_id) $tab_control_div.attr('layout_id', effective_tab_config.layout_id);
+            if(effective_tab_config.keep_width) $tab_control_div.attr('data-keep-width', 1);
+            if(effective_tab_config.dockable) $tab_control_div.addClass('dockable');
+            if(effective_tab_config.sortable) $tab_nav_ul.addClass('sortable_tab_ul');
+            if(effective_tab_config.adjust_positions) $tab_control_div.addClass('tab_ctrl_adjust');
         }
 
-        
-        /*
-        if(tabcfg.css){
-            $ul.css(tabcfg.css);
-        }
-        */
-
-        //every app is new tab
-        $.each(apps, function(idx, _app){
-            //_app - reference to widget in layout tab list
-
-            let app = _appGetWidgetById(_app.appid);
-
-            if(app){    
-                let content_id;
-                if(_app.content_id){
-                    content_id = _app.content_id; //already exists
-                }else{
+        // Create each tab (header and panel placeholder)
+        $.each(apps_array, function(idx, app_instance_config){
+            const widget_definition = _appGetWidgetById(app_instance_config.appid); // Get base widget config
+            if(widget_definition){
+                let panel_content_id;
+                if(app_instance_config.content_id){ // If content_id is provided (e.g., when moving existing tab)
+                    panel_content_id = app_instance_config.content_id;
+                } else { // Generate new ID for new tab panel
                     app_counter++;
-                    content_id = app.id+'_'+app_counter;
+                    panel_content_id = widget_definition.id + '_' + app_counter;
                 }
                 
-                //to log user activity
-                let action_id = '';
-                if(_app.options && _app.options['data-logaction']){
-                    action_id = ' data-logaction="'+_app.options['data-logaction']+'"';
+                let action_log_attr = ''; // For logging tab activation
+                if(app_instance_config.options && app_instance_config.options['data-logaction']){
+                    action_log_attr = ` data-logaction="${app_instance_config.options['data-logaction']}"`;
                 }
 
-
-                let title_html = '<li'+action_id+'><a class="header'+content_id+'" href="#'+content_id+'">'
-                        + (window.hWin.HR(_app.name || app.name)) +'</a></li>';
-                $ul.append($(title_html));
+                // Tab header (li > a)
+                const tab_title = window.hWin.HR(app_instance_config.name || widget_definition.name);
+                $('<li>').attr('data-logaction', action_log_attr ? app_instance_config.options['data-logaction'] : null) // Store for event handler
+                           .append($('<a>').addClass('header' + panel_content_id).attr('href', '#' + panel_content_id).html(tab_title))
+                           .appendTo($tab_nav_ul);
                 
-                if(!_app.content_id){ //already exists
-                    appAddContent($tab_ctrl, app, _app);
+                // If content_id was not provided, it means this is a new tab, so add its content panel
+                if(!app_instance_config.content_id){
+                    // appAddContent will create a div with id=panel_content_id inside $tab_control_div
+                    appAddContent($tab_control_div, widget_definition, app_instance_config);
                 }
             }
-
         });
         
-        
-        if(tabcfg && tabcfg.style){    //@todo!!!!!
-            if(tabcfg.style['background-header']){
-               
-                //$(tab_ctrl).find('ul').css('background',tabb.style['background-header']+' !important');    
-            }
+        // Apply custom styling to tab header if specified
+        if(effective_tab_config && effective_tab_config.style && effective_tab_config.style['background-header']){
+            // Example: $tab_nav_ul.css('background', effective_tab_config.style['background-header']);
         }
-        
-        return $tab_ctrl;
+        return $tab_control_div;
     }
 
     /**
-    * adjust width and height of container
+    * Adjusts the width and height of a container, possibly to fit its floating tab children.
+    * @private
+    * @description The original implementation is commented out and seems to target a specific class "float_tabs"
+    *              and container "#layout_float", which might be part of a specific layout type not fully detailed here.
+    *              It appears to attempt to make a container large enough to encompass all its absolutely positioned children.
+    *              Currently, this function does nothing as its logic is commented.
     */
     function appAdjustContainer(){
-        /*
+        /* // Original logic:
         var mw = 0, mh = 0;
-
-        $(".float_tabs").each(
-        function(ids, element){
-
-        var $item = $(element);
-        var pos = $item.position();
-
-        mw = Math.max(mw, pos.left+$item.width());
-        mh = Math.max(mh, pos.top+$item.height());
-
+        $(".float_tabs").each(function(ids, element){
+            var $item = $(element); var pos = $item.position();
+            mw = Math.max(mw, pos.left+$item.width());
+            mh = Math.max(mh, pos.top+$item.height());
         });
-
         var $container = $("#layout_float");
-
-        if(mw>$(window).width()){
-        $container.css('width', mw);
-        }else{
-        $container.css('width','100%');
-        }
-        if(mh>$(window).height()){
-        $container.css('height', mh);
-        }else{
-        $container.css('height','100%');
-        }
+        if(mw>$(window).width()){ $container.css('width', mw); } else { $container.css('width','100%'); }
+        if(mh>$(window).height()){ $container.css('height', mh); } else { $container.css('height','100%'); }
         */
     }
 
     /**
-    *  Init listeners for sort, drag-drop, resize
+    * Initializes jQuery UI features (sortable, draggable, resizable) for elements
+    * within a specified containment selector. This enables interactive layout manipulation.
+    * @private
+    * @param {string} containment_selector - A jQuery selector for the container within which these features should be constrained.
+    * @returns {void}
     */
     function appInitFeatures(containment_selector){
-
-        //sort tabs within one tab control
+        // Make tab lists sortable within their tab control
         $( ".tab_ctrl > .sortable_tab_ul" ).sortable({
-            //axis: "x",
             cursor: "move",
-            start: function(event, ui){
-                $('.tab_ctrl').css('z-index', '0');
-                $( this ).parent().css('z-index', '1');
-               
+            start: function(event, ui){ // Bring current tab control to front when sorting starts
+                $(this).closest('.tab_ctrl').css('z-index', '1').siblings('.tab_ctrl').css('z-index', '0');
             }
         });
 
-        //drag tabs between tab controls
-        $( ".tab_ctrl .dragable > .ui-tabs-nav li" ).draggable({
-            revert: "invalid",
-            connectToSortable:'.sortable_tab_ul'
+        // Make individual tabs draggable between sortable tab lists (if they have class .dragable)
+        // Note: '.dragable' class seems to be on the tab_ctrl, not individual li. This might need review.
+        // Assuming it means tabs within a "dragable" tab_ctrl can be moved.
+        $( ".tab_ctrl.dragable > .ui-tabs-nav li" ).draggable({
+            revert: "invalid", // Snap back if not dropped on a valid target
+            connectToSortable:'.sortable_tab_ul' // Allow dropping onto any sortable tab list
         });
 
-        //move tab from one tab control to another
-        $( containment_selector+" > .dockable > .ui-tabs-nav" ).droppable({
-            accept: function(draggable){
-
-
-                if(draggable.parent().hasClass('ui-tabs-nav')){
-                    let src_id = draggable.parent().parent().attr('id');
-                    let trg_id = $( this ).parent().attr('id');
-                    return src_id!=trg_id;
-                }else{
-                    return false;
+        // Make tab navigations (ul) within dockable tab controls droppable targets for tabs from other controls.
+        $( containment_selector + " > .tab_ctrl.dockable > .ui-tabs-nav" ).droppable({
+            accept: function($draggable_li){ // $draggable_li is the <li> being dragged
+                if($draggable_li.parent().hasClass('ui-tabs-nav')){ // Must be a tab
+                    const $source_tab_control = $draggable_li.closest('.tab_ctrl');
+                    const $target_tab_control = $(this).closest('.tab_ctrl');
+                    return $source_tab_control.attr('id') !== $target_tab_control.attr('id'); // Don't drop on self
                 }
+                return false;
             },
-            activeClass: "ui-state-hover",
-            hoverClass: "ui-state-active",
+            activeClass: "ui-state-hover", // Visual feedback when draggable is over
+            hoverClass: "ui-state-active",  // Visual feedback when draggable hovers
             drop: function( event, ui ) {
+                const $target_tab_nav_ul = $(this); // The UL where tab is dropped
+                const $target_tab_control = $target_tab_nav_ul.closest('.tab_ctrl');
+                const $dragged_li = ui.draggable; // The dragged <li>
 
-                let $tab = $( this ).parent(); //parent of ul
+                const content_href = $dragged_li.find('a').attr('href');
+                const tab_title_html = $dragged_li.find('a').html();
+                const $tab_panel_content = $(content_href); // The content panel
+                const $source_tab_control = $tab_panel_content.parent(); // Original tab control of the panel
 
-                let $li = ui.draggable;
-                //find portlet (content of tab) by href
-                let content_id = $li.find('a').attr('href');
-                let app_name = $li.find('a').html();
-                let $app_content = $(content_id);
+                // Append tab header and panel to new tab control
+                $('<li>').append($('<a>').attr('href', content_href).html(tab_title_html)).appendTo($target_tab_nav_ul);
+                $target_tab_control.append($tab_panel_content);
+                $dragged_li.remove(); // Remove from original source
 
-                let $src_tab = $app_content.parent();
-
-                if($src_tab.attr('id')==$tab.attr('id')) return;
-
-                //add new tab and content
-                //$portlet.find(".ui-widget-header").html()
-                $tab.find( ".ui-tabs-nav" ).append("<li><a href='"+content_id+"'>"+app_name+"</a></li>");
-                $tab.append($app_content);
-
-                if($li.parent().children().length==2){
-                    $src_tab.remove();
-                    appAdjustContainer(); //@todo remove?
-                }else{
-                    //remove from source
-                    $li.remove();
-                    $src_tab.tabs( 'refresh' );
+                // If source tab control becomes empty (only placeholder/template tab left), remove it.
+                // This logic assumes a tab control with 1 actual tab + 1 template/hidden tab = 2 children before removal.
+                if($source_tab_control.find('.ui-tabs-nav li').length < 2){
+                    $source_tab_control.remove();
+                    // appAdjustContainer(); // Potentially adjust container if one is removed (original comment: @todo remove?)
+                } else {
+                    $source_tab_control.tabs('refresh');
                 }
+                $target_tab_control.tabs('refresh');
 
-                $tab.tabs( 'refresh' );
-
-                $tab.parent().find('.tab_ctrl').css('z-index', '0');
-                $tab.css('z-index', '1');
-
+                // Z-index management
+                $target_tab_control.siblings('.tab_ctrl').css('z-index', '0');
+                $target_tab_control.css('z-index', '1');
             }
         });
         
-        // drag float tab controls around layout
-        $( containment_selector+' > .dragable' ).draggable({
-            stack: '.tab_ctrl',
-            handle: '.sortable_tab_ul',
-            containment: containment_selector //'.ui-layout-content'
+        // Make "dragable" tab controls (panels) draggable within their containment area
+        $( containment_selector + ' > .tab_ctrl.dragable' ).draggable({ // Ensure selector targets .tab_ctrl directly if it's .dragable
+            stack: '.tab_ctrl',          // Bring to front on drag
+            handle: '.ui-tabs-nav',      // Drag by the tab navigation bar
+            containment: containment_selector
         });
-
-       
         
-        
-        $( '.tab_ctrl ul' ).disableSelection();
+        $( '.tab_ctrl ul' ).disableSelection(); // Prevent text selection in tab headers
 
-        //init resize feature
-        $(containment_selector+' > .resizable').resizable({
-            //grid: [grid_step_size, grid_step_size],
+        // Make "resizable" tab controls (panels) resizable
+        $(containment_selector + ' > .tab_ctrl.resizable').resizable({ // Ensure selector targets .tab_ctrl
             animate: false,
             minWidth: grid_min_size,
             minHeight: grid_min_size,
-            containment: containment_selector, //'.ui-layout-content',
-            autoHide: true
+            containment: containment_selector,
+            autoHide: true // Hide resize handles when not hovering
         });
     }
 
-    //
-    //
-    //
+    /**
+     * Checks if the mouse event occurred over any existing tab control.
+     * @private
+     * @param {MouseEvent} e - The mouse event.
+     * @returns {boolean} True if the mouse is over a tab control, false otherwise.
+     */
     function isMouseoverTabControl(e){
+        let is_over_tab = false;
+        $(".tab_ctrl").each(function(){ // Iterate over all elements with class .tab_ctrl
+            const $item = $(this);
+            const position = $item.offset();
+            const width = $item.width();
+            const height = $item.height();
 
-        let res = false;
-
-        $(".tab_ctrl").each(
-            function(ids, element){
-
-                let $item = $(element);
-
-                //offset -> method allows you to retrieve the current position of an element 'relative' to the document
-                let position = $item.offset();
-
-                if(e.pageX>position.left && e.pageX<position.left+$item.width() &&
-                    e.pageY>position.top && e.pageY<position.top+$item.height()){
-
-                    res = true;
-                    /*$("#lblhover").html($item.attr('id'));
-                    s = s + ' OK';*/
-                    return false;
-
-                }
-               
-
+            if(e.pageX > position.left && e.pageX < (position.left + width) &&
+               e.pageY > position.top && e.pageY < (position.top + height)){
+                is_over_tab = true;
+                return false; // Exit .each loop
+            }
         });
-
-        return res;
+        return is_over_tab;
     }
 
-    //********************************************************** body of _appInitAll
+    //********************************************************** Main body of _appInitAll
     
         let layout = null;
         if($.isPlainObject(layoutid) && layoutid['type'] &&  layoutid['id']){
@@ -1327,119 +1213,173 @@ console.error('Cardinal layout widget does not have proper options');
     }//END _appInitAll   
  
     //public members
+    /**
+     * @lends HLayout.prototype
+     * @description Public interface for the HLayout manager.
+     */
     let that = {
 
+        /**
+         * Gets the class name.
+         * @returns {string} The class name "HLayout".
+         */
         getClass: function () {return _className;},
+        /**
+         * Checks if the provided string matches the class name.
+         * @param {string} strClass - The class name to compare.
+         * @returns {boolean} True if `strClass` is "HLayout", false otherwise.
+         */
         isA: function (strClass) {return (strClass === _className);},
+        /**
+         * Gets the version of this layout manager.
+         * @returns {string} The version number.
+         */
         getVersion: function () {return _version;},
 
-        //returns widget options from cfg_widgets
-        //WRONG USAGE, TO REMOVE: used to obtain instance of widget
+        /**
+         * Retrieves a widget configuration object by its ID.
+         * Note: Original comment mentioned "WRONG USAGE, TO REMOVE: used to obtain instance of widget".
+         * This method returns the configuration, not an instance.
+         * @param {string} id - The ID of the widget to find.
+         * @returns {Object|null} The widget configuration object from `cfg_widgets` or null if not found.
+         */
         appGetWidgetById: function(id){
             return _appGetWidgetById(id);
         },
         
-        //
-        // 
-        //
+        /**
+         * Retrieves a widget configuration by its `widgetname` or a widget instance if already initialized.
+         * Special handling for 'svs_list' to get it from 'slidersMenu' widget.
+         * @param {string} widgetname - The `widgetname` to search for.
+         * @returns {Object|jQuery|null} The widget configuration object, or the jQuery widget instance if `app.widget` is set,
+         *                                 or null if not found.
+         */
         getWidgetByName: function( widgetname ){
-            
-            if(widgetname=='svs_list'){
-                let app2 = _appGetWidgetByName('slidersMenu');
-                if(app2.widget){
-                    return $(app2.widget).slidersMenu('getSvsList');
+            if(widgetname === 'svs_list'){ // Special case for 'svs_list'
+                let slidersMenuApp = _appGetWidgetByName('slidersMenu');
+                if(slidersMenuApp && slidersMenuApp.widget){ // If slidersMenu widget instance exists
+                    // Assuming slidersMenu has a method to get 'svs_list'
+                    return $(slidersMenuApp.widget).slidersMenu('getSvsList');
                 }
             }  
             
-            let app = _appGetWidgetByName( widgetname );
-            if(app && app.widget){
-                return $(app.widget);
-            }else{
-                return null;
+            let app_config = _appGetWidgetByName( widgetname );
+            if(app_config && app_config.widget){ // If widget instance is stored on the config
+                return $(app_config.widget);
+            } else if (app_config) { // Return configuration if instance not found
+                return app_config;
             }
+            return null;
         },
 
-        //
-        // once in map.php
-        //
+        /**
+         * Executes a method on a widget instance identified by its element ID and widget name.
+         * Used, for example, in map.php.
+         * @param {string} element_id - The DOM ID of the element where the widget is initialized.
+         * @param {string} widgetname - The name of the jQuery UI widget (e.g., "heurist_Map").
+         * @param {string} method - The name of the method to call on the widget.
+         * @param {*} [params] - Parameters to pass to the widget method.
+         * @returns {void}
+         */
         executeWidgetMethod: function( element_id, widgetname, method, params ){
-            let app = window.hWin.document.getElementById(element_id);
-            if(app && window.hWin.HEURIST4.util.isFunction($(app)[widgetname]) && $(app)[widgetname]('instance')){
-                $(app)[widgetname](method, params);
-            }else if(!app){
-                console.log('widget '+element_id+' not found');
-            }else if(!window.hWin.HEURIST4.util.isFunction($(app)[widgetname])){
-                console.log('widget '+widgetname+' not loaded');
-            //}else {
-           
+            let app_element = window.hWin.document.getElementById(element_id);
+            if(app_element && typeof $(app_element)[widgetname] === 'function' && $(app_element)[widgetname]('instance')){
+                $(app_element)[widgetname](method, params);
+            }else if(!app_element){
+                console.warn('HLayout.executeWidgetMethod: Element with ID "'+element_id+'" not found.');
+            }else if(typeof $(app_element)[widgetname] !== 'function'){
+                console.warn('HLayout.executeWidgetMethod: Widget "'+widgetname+'" not found on element.');
+            } else {
+                 console.warn('HLayout.executeWidgetMethod: Widget "'+widgetname+'" instance not found on element "'+element_id+'".');
             }
         },
     
-        //
-        // loads cfg from layout_default by layoutid and init layout in element with containerid
-        // see index.php and slidersMenu
-        //
+        /**
+         * Initializes a layout based on a layout ID or configuration object within a specified container.
+         * This is a primary public method for rendering layouts.
+         * (Corresponds to `cfg_layouts` in `layout_default.js` if `layoutid` is a string).
+         * @param {string|Object} layoutid - The ID of the layout to load or a layout configuration object.
+         * @param {string|jQuery} containerid - The ID or jQuery selector for the container element.
+         * @returns {void}
+         */
         appInitAll: function(layoutid, containerid){
-            _containerid = containerid
+            _containerid = containerid; // Set the main container ID for this HLayout instance
             let $container = $(containerid);
-            _appInitAll(layoutid, $container);
+            _appInitAll(layoutid, $container); // Call the internal main initialization function
         },
         
-        //
-        // get layout properties from attributes of elements and init free layout
-        // see init main menu in cms, init layout v1 in HLayoutMgr
-        //
-        appInitFromContainer: function( document, containerid, supp_options, onInitComplete ){
-            
+        /**
+         * Initializes a "free" layout by parsing `data-heurist-app-id` attributes from elements within a given container.
+         * Useful for layouts defined directly in HTML rather than a predefined configuration.
+         * @param {Document} [doc_context=window.document] - The document context in which to find the container. Defaults to current window's document.
+         * @param {string|jQuery} containerid - The ID or jQuery selector for the container element.
+         * @param {Object} [supp_options] - Supplementary options to merge with those parsed from HTML.
+         * @param {function} [onInitComplete] - Callback function to execute if layout parsing/initialization completes (or if no layout elements found).
+         * @returns {void}
+         */
+        appInitFromContainer: function( doc_context, containerid, supp_options, onInitComplete ){
             _containerid = containerid;
-            _is_container_layout = true;
-            let $container;
-            if(document){
-                $container = $(document.body).find(containerid);
+            _is_container_layout = true; // Flag that this is a container-defined layout
+            let $resolved_container;
+            if(doc_context && typeof $(doc_context.body).find === 'function'){ // Ensure doc_context is a document
+                $resolved_container = $(doc_context.body).find(containerid);
             }else{
-                $container = $(containerid);
+                $resolved_container = $(containerid); // Fallback if doc_context is not as expected
             }
-            let layout = _getLayoutParams($container, supp_options); 
+
+            let layout_config = _getLayoutParams($resolved_container, supp_options);
             
-            //init groups/cardinal layouts
-            if(layout){
-                _appInitAll(layout, $container); 
-            }else{
+            if(layout_config){ // If layout elements were found and config generated
+                _appInitAll(layout_config, $resolved_container);
+            }else{ // No dynamic layout elements found
                 if(window.hWin.HEURIST4.util.isFunction(onInitComplete)){
-                        onInitComplete.call();
+                        onInitComplete.call(); // Call completion callback if provided
                 }
             }
-            // define links to media from data-id
-            _defineMediaSource($container); 
+            _defineMediaSource($resolved_container); // Set src for media elements
         },
         
-        //
-        // init layout in popup
-        //
+        /**
+         * Initializes a "free" layout within a given jQuery container, typically for popups or dynamic sections.
+         * Parses `data-heurist-app-id` attributes from elements within the container.
+         * @param {jQuery} $container - The jQuery object for the container.
+         * @param {Object} [supp_options] - Supplementary options to merge.
+         * @returns {void}
+         */
         appInitFromContainer2: function( $container, supp_options ){
-            //create layout based on heurist-app-id and heurist-app-options
-            let layout = _getLayoutParams($container, supp_options); 
-            if(layout){
-                _appInitAll(layout, $container); 
+            // _containerid is not explicitly set here, assuming $container is the direct target
+            _is_container_layout = true; // Or false, depending on if $container itself is the layout root or contains layout parts
+            let layout_config = _getLayoutParams($container, supp_options);
+            if(layout_config){
+                _appInitAll(layout_config, $container);
             }
-            
             _defineMediaSource($container); 
         },
         
-        init: function(cfg_widgets, cfg_layouts){
-            _init(cfg_widgets, cfg_layouts)
+        /**
+         * Public method to explicitly initialize the HLayout manager with widget and layout configurations.
+         * This is typically called by the HLayout constructor itself using global `cfg_widgets` and `cfg_layouts`.
+         * @param {Array<Object>} cfg_widgets_param - Widget configurations.
+         * @param {Array<Object>} cfg_layouts_param - Layout definitions.
+         * @returns {void}
+         */
+        init: function(cfg_widgets_param, cfg_layouts_param){
+            _init(cfg_widgets_param, cfg_layouts_param);
         },
         
-        //
-        // to increase/reduce cardinal panel (for mapping, crosstab)
-        //
-        cardinalPanel:function(pane, action, element){
-            return _cardinalPanel(pane, action, element);
-        },
+        /**
+         * Public method to control jQuery UI Layout cardinal panes.
+         * @param {('open'|'close'|'getSize'|'sizePane')} action - The action for the pane.
+         * @param {string|Array<*>} args - Arguments for the action (pane selector, options).
+         * @param {HTMLElement|jQuery} [element] - Context element to find the layout.
+         * @returns {*|false} Result of the action or false.
+         */
+        cardinalPanel:function(action, args, element){ // Renamed 'pane' to 'action' to match usage
+            return _cardinalPanel(action, args, element);
+        }
+    };
 
-    }
-
-    _init( cfg_widgets, cfg_layouts );
+    _init( typeof cfg_widgets !== 'undefined' ? cfg_widgets : [], typeof cfg_layouts !== 'undefined' ? cfg_layouts : [] );
     return that;  //returns object
 }
 

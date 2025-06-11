@@ -65,25 +65,33 @@
     * @returns {Object}
     */
 class HSystemMgr {
-    
+    /** @private */
   hapi4;
     
+  /**
+   * Creates an instance of HSystemMgr.
+   * @param {HAPI} hapi4 - An instance of the HAPI class.
+   */
   constructor(hapi4) {
     this.hapi4 = hapi4; 
   }
   
   /**
-   * @param {Request} request
-   * @param {string} request.username - user to log in
-   * @param {string} request.password - user's password to verify
-   * @param {string} request.session_type - one of 'public', 'shared' or 'remember'
-   * @param {callserverCallback} callback - callback function with response parameter HUser object
+   * Attempts to log in a user.
+   *
+   * @param {Object} request - The login request object.
+   * @param {string} request.username - The username.
+   * @param {string} request.password - The user's password.
+   * @param {('public'|'shared'|'remember')} [request.session_type] - The type of session requested.
+   * @param {function(Object): void} callback - Callback function that handles the server response.
+   *        The response object typically contains user information (HUser) on success.
+   * @returns {void}
    */
   login(request, callback) {
-    if (request) request.a = 'login';
+    if (request) request.a = 'login'; // Action parameter for the server
     window.hWin.HAPI4.callserver('usr_info', request, response => {
            if (response.status == window.hWin.ResponseStatus.OK) {
-               this.matomoTrackLogin();
+               this.matomoTrackLogin(); // Track successful login
            }
 
            if (window.hWin.HEURIST4.util.isFunction(callback)) {
@@ -93,9 +101,12 @@ class HSystemMgr {
   }  
  
   /**
-   * @param {Request} request
-   * @param {Request} request.username - user whose password to reset
-   * @param {callserverCallback} callback
+   * Initiates a password reset process for a user.
+   *
+   * @param {Object} request - The password reset request object.
+   * @param {string} request.username - The username for whom to reset the password.
+   * @param {function(Object): void} callback - Callback function to handle the server response.
+   * @returns {void}
    */
   reset_password(request, callback) {
        if (request) request.a = 'reset_password';
@@ -103,50 +114,58 @@ class HSystemMgr {
   } 
   
   /**
-   * @param {callserverCallback} callback
+   * Logs out the current user.
+   *
+   * @param {function(Object): void} [callback] - Optional callback function to handle the server response.
+   * @returns {void}
    */
   logout(callback) {
     window.hWin.HAPI4.callserver('usr_info', { a: 'logout' }, response => {
       if (response.status == window.hWin.ResponseStatus.OK) {
-        window.hWin.HAPI4.setCurrentUser(null);
+        window.hWin.HAPI4.setCurrentUser(null); // Clear current user locally
         
-        this.matomoTrackLogout();
+        this.matomoTrackLogout(); // Track logout
         
+        // Trigger a global event indicating credentials have changed (user logged out)
         $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
 
         if (window.hWin.HEURIST4.util.isFunction(callback)) {
           callback(response);
         }
       } else {
-        window.hWin.HEURIST4.msg.showMsgErr(response);
+        window.hWin.HEURIST4.msg.showMsgErr(response); // Show error message on failure
       }
     });
   } 
   
   /**
-  * 
-  *  1) Verify crendentials on server side and checks if they will be upated
-  *  2) In case they are changed, returns up-to-date user and sys info
-  *  3) In case needed level of credentials is defined it verifies the permissions
-  * 
-  *  This method should be called before every major action or open popup dialog.
-  *  For internal actions use client-side methods of hapi.is_admin, is_member, has_access.
-  * 
-  * @param {passwordCallback} callback
-  * @param {(number|string)} requiredLevel - level of verification required
-  *  - `-1`: no verification
-  *  - `0`: logged (DEFAULT)
-  *  - `groupid`: admin of group  
-  *  - `1`: db admin (admin of group #1)
-  *  - `2`: db owner
-  * @param {string} password_protected - name of password
-  * @param {string} password_entered - password entered by the user on the client
-  * @param {string} requiredPermission - required permissions; 'add', 'delete', 'add delete'
-  * 
+  * Verifies user credentials and permissions for an action.
+  * This method performs several checks:
+  * 1. Verifies credentials on the server-side and checks if they need an update.
+  * 2. If credentials have changed (e.g., role update, DB settings change), it returns updated user and system info.
+  * 3. If a specific `requiredLevel` of credentials/permissions is defined, it verifies if the current user meets these requirements.
+  *
+  * This method should be called before every major action or when opening popup dialogs that require specific permissions.
+  * For internal client-side checks, `HAPI.is_admin()`, `HAPI.is_member()`, `HAPI.has_access()` can be used.
+  *
+  * @param {function(string): void} callback - Called with the `password_entered` if verification is successful (especially for password-protected actions).
+  * @param {number|string} [requiredLevel=0] - The level of verification required.
+  *   - `-1`: No verification needed (but password protection still applies if `password_protected` is set).
+  *   - `0`: User must be logged in (default).
+  *   - `groupid` (number): User must be an admin of the specified group ID.
+  *   - `1`: User must be a DB admin (admin of group #1, typically "Database Managers").
+  *   - `2`: User must be the DB owner.
+  *   - String format `adminLevel;memberLevel` (e.g., "1;3"): User must meet `adminLevel` AND be a member of `memberLevel` group.
+  * @param {string} [password_protected] - The name/key of a password-protected action. If set, this action requires an additional password,
+  *                                       potentially a system administrator override password, regardless of `requiredLevel`.
+  * @param {string} [password_entered] - The password entered by the user on the client-side for a password-protected action.
+  * @param {('add'|'delete'|'add delete')} [requiredPermission] - Specific permissions required for the action (e.g., 'add', 'delete').
+  *                                     This is checked server-side.
+  * @returns {void}
   */
   verify_credentials(callback, requiredLevel, password_protected, password_entered, requiredPermission) {
 
-      let requiredMembership = 0; //membership in group
+      let requiredMembership = 0; // Default required membership group ID
 
       if (typeof requiredLevel === 'string' && requiredLevel.indexOf(';') > 0) {
 
@@ -324,13 +343,20 @@ class HSystemMgr {
   * Returns number of records in database, worksets and dashboard info
   * @param {Function} callback
   */
+  /**
+  * Retrieves system information counts, such as total records, dashboard status, and workset count.
+  * Updates `window.hWin.HAPI4.sysinfo` with this data.
+  *
+  * @param {function(): void} [callback] - Optional callback executed after counts are retrieved and processed.
+  * @returns {void}
+  */
   sys_info_count(callback) {
       window.hWin.HAPI4.callserver('usr_info', { a: 'sys_info_count' }, response => {
           if (response.status == window.hWin.ResponseStatus.OK) {
               window.hWin.HAPI4.sysinfo['db_total_records'] = response.data[0];
               window.hWin.HAPI4.sysinfo['db_has_active_dashboard'] = response.data[1];
               window.hWin.HAPI4.sysinfo['db_workset_count'] = response.data[2];
-              if (callback) callback();
+              if (window.hWin.HEURIST4.util.isFunction(callback)) callback();
           } else {
               window.hWin.HEURIST4.msg.showMsgErr(response);
           }
@@ -338,10 +364,12 @@ class HSystemMgr {
   }  
 
   /**
-  * Get current user and global database settings
-  * used in hapi.init and on force_refresh_sys_info
-  * 
-  * @param {sysinfoCallback} callback
+  * Retrieves current user information and global database settings.
+  * This is typically used during HAPI initialization (`hapi.init`) or when a force refresh of system info is needed.
+  * Updates `window.hWin.HAPI4.currentUser` and `window.hWin.HAPI4.sysinfo`.
+  *
+  * @param {function(boolean): void} [callback] - Optional callback that receives a boolean indicating success.
+  * @returns {void}
   */
   sys_info(callback) {
       let request = { a: 'sysinfo' };
@@ -367,9 +395,12 @@ class HSystemMgr {
   }
 
   /**
-  * Save user preferences
-  * @param {Object} request
-  * @param {callserverCallback} callback
+  * Saves user preferences to the server.
+  *
+  * @param {Object} request - The request object containing preferences to save.
+  *                           It should include key-value pairs of preferences.
+  * @param {function(Object): void} [callback] - Optional callback to handle the server response.
+  * @returns {void}
   */
   save_prefs(request, callback) {
       if (request) request.a = 'save_prefs';
@@ -377,9 +408,12 @@ class HSystemMgr {
   }  
   
   /**
-  * Set/Clear work subset
-  * @param {Object} request
-  * @param {callserverCallback} callback
+  * Sets or clears the user's working subset of records.
+  *
+  * @param {Object} request - The request object.
+  *                           Typically contains parameters to define or clear the working subset.
+  * @param {function(Object): void} [callback] - Optional callback to handle the server response.
+  * @returns {void}
   */
   user_wss(request, callback) {
       if (request) request.a = 'user_wss';
@@ -387,9 +421,11 @@ class HSystemMgr {
   }
 
   /**
-  * Save user profile info in the database
-  * @param {Object} request
-  * @param {callserverCallback} callback
+  * Saves user profile information to the database.
+  *
+  * @param {Object} request - The request object containing user profile data to save.
+  * @param {function(Object): void} [callback] - Optional callback to handle the server response.
+  * @returns {void}
   */
   user_save(request, callback) {
       if (request) request.a = 'usr_save';
@@ -397,9 +433,11 @@ class HSystemMgr {
   }
 
   /**
-  * Get user profile info from the database
-  * @param {Object} request
-  * @param {callserverCallback} callback
+  * Retrieves user profile information from the database.
+  *
+  * @param {Object} request - The request object, often specifying the user ID if not the current user.
+  * @param {function(Object): void} callback - Callback to handle the server response containing user profile data.
+  * @returns {void}
   */
   user_get(request, callback) {
       if (request) request.a = 'usr_get';
@@ -407,61 +445,82 @@ class HSystemMgr {
   }
 
   /**
-  * Get user full names for IDs
-  * @param {Object} request
-  * @param {(string|Array)} request.UGrpID - comma-separated list or Array of user ID numbers
-  * @param {callserverCallback} callback
+  * Retrieves full names for a list of user or group IDs.
+  * It first attempts to resolve names from a local cache (`getUserNameLocal`)
+  * and then queries the server for any unresolved IDs.
+  *
+  * @param {Object} request - The request object.
+  * @param {string|Array<number|string>} request.UGrpID - A comma-separated string or an array of user/group IDs.
+  * @param {*} [request.context] - Optional context to be passed back in the callback.
+  * @param {function(Object): void} callback - Callback function. The `data` property of the response
+  *        will contain an object mapping IDs to names: `{ id1: "Name1", id2: "Name2", ... }`.
+  * @returns {void}
   */
   usr_names(request, callback) {
-      let ugrp_ids = request.UGrpID;
-      let sUserNames = {};
-      request.UGrpID = [];
+      let ugrp_ids_input = request.UGrpID;
+      let resolvedNames = {}; // Stores names resolved locally or from server
+      let idsToFetch = [];    // Stores IDs that need to be fetched from server
 
-      if (ugrp_ids >= 0) {
-          ugrp_ids = [ugrp_ids];
-      } else {
-          ugrp_ids = !Array.isArray(ugrp_ids) ? ugrp_ids.split(',') : ugrp_ids;
+      // Normalize ugrp_ids_input to an array
+      if (typeof ugrp_ids_input === 'number' || (typeof ugrp_ids_input === 'string' && !ugrp_ids_input.includes(','))) {
+          ugrp_ids_input = [Number(ugrp_ids_input)];
+      } else if (typeof ugrp_ids_input === 'string') {
+          ugrp_ids_input = ugrp_ids_input.split(',').map(id => Number(id.trim()));
+      } else if (!Array.isArray(ugrp_ids_input)) {
+          ugrp_ids_input = []; // Fallback for invalid input
       }
 
-      for (let idx in ugrp_ids) {
-          let usr_ID = Number(ugrp_ids[idx]);
-          let sUserName = this.getUserNameLocal(usr_ID);
+      for (const id of ugrp_ids_input) {
+          const numId = Number(id);
+          if (isNaN(numId)) continue; // Skip invalid IDs
 
-          if (sUserName) {
-              sUserNames[usr_ID] = sUserName;
+          let localName = this.getUserNameLocal(numId);
+          if (localName) {
+              resolvedNames[numId] = localName;
           } else {
-              request.UGrpID.push(usr_ID);
+              idsToFetch.push(numId);
           }
       }
 
-      if (request.UGrpID.length == 0) {
-          callback.call(this, { status: window.hWin.ResponseStatus.OK, data: sUserNames, context: request.context });
+      if (idsToFetch.length === 0) {
+          // All names resolved locally
+          if (window.hWin.HEURIST4.util.isFunction(callback)) {
+              callback.call(this, { status: window.hWin.ResponseStatus.OK, data: resolvedNames, context: request.context });
+          }
       } else {
-          if (request) request.a = 'usr_names';
-          window.hWin.HAPI4.callserver('usr_info', request, context => {
-              if (context.status == window.hWin.ResponseStatus.OK) {
-                  sUserNames = { ...sUserNames, ...context.data };
-                  callback.call(this, { status: window.hWin.ResponseStatus.OK, data: sUserNames, context: context.context });
+          // Fetch remaining names from server
+          let serverRequest = { ...request, a: 'usr_names', UGrpID: idsToFetch };
+          window.hWin.HAPI4.callserver('usr_info', serverRequest, serverResponse => {
+              if (serverResponse.status == window.hWin.ResponseStatus.OK && serverResponse.data) {
+                  resolvedNames = { ...resolvedNames, ...serverResponse.data }; // Merge server results
+                  if (window.hWin.HEURIST4.util.isFunction(callback)) {
+                      callback.call(this, { status: window.hWin.ResponseStatus.OK, data: resolvedNames, context: serverResponse.context });
+                  }
               } else {
-                  callback.call(this, { status: context.status });
+                  // Handle error or partial success if needed
+                  if (window.hWin.HEURIST4.util.isFunction(callback)) {
+                     callback.call(this, { status: serverResponse.status, data: resolvedNames, message: serverResponse.message, context: serverResponse.context });
+                  }
               }
           });
       }
   }
 
   /**
-  * Returns user or group name from local cache
-  * @param ugrp_id
+  * Retrieves a user or group name from the local cache (HAPI4.currentUser or HAPI4.sysinfo.db_usergroups).
+  *
+  * @param {number|string} ugrp_id - The user or group ID.
+  * @returns {string|null} The name if found in local cache, otherwise null.
   */
   getUserNameLocal(ugrp_id) {
       let usr_ID = Number(ugrp_id);
       let sUserName = null;
 
-      if (usr_ID == 0) {
-          sUserName = window.hWin.HR('Everyone');
-      } else if (usr_ID == window.hWin.HAPI4.currentUser['ugr_ID']) {
+      if (usr_ID === 0) { // ID 0 typically means "Everyone" or public
+          sUserName = window.hWin.HR('Everyone'); // Assuming HR handles localization
+      } else if (window.hWin.HAPI4.currentUser && usr_ID === window.hWin.HAPI4.currentUser['ugr_ID']) {
           sUserName = window.hWin.HAPI4.currentUser['ugr_FullName'];
-      } else if (window.hWin.HAPI4.sysinfo.db_usergroups && window.hWin.HAPI4.sysinfo.db_usergroups[usr_ID]) {
+      } else if (window.hWin.HAPI4.sysinfo && window.hWin.HAPI4.sysinfo.db_usergroups && window.hWin.HAPI4.sysinfo.db_usergroups[usr_ID]) {
           sUserName = window.hWin.HAPI4.sysinfo.db_usergroups[usr_ID];
       }
 
@@ -469,21 +528,31 @@ class HSystemMgr {
   }
 
   /**
-  * Returns detailed description of groups for current user
-  * @param {mygroupsCallback} callback
+  * Retrieves a detailed description of the groups the current user is a member of.
+  *
+  * @param {function(Object): void} callback - Callback to handle the server response.
+  *        The response `data` typically contains an array or object describing the groups.
+  * @returns {void}
   */
   mygroups(callback) {
       window.hWin.HAPI4.callserver('usr_info', { a: 'groups' }, callback);
   }
 
   /**
-  * Log activity of user in the system
-  * @param {string} activity underscore-separated string of actions to log
-  * @param {string} suplementary info
+  * Logs user activity. This can be to Matomo (if configured) or to the Heurist server-side log.
+  *
+  * @param {string} activity - A string describing the activity, often underscore-separated (e.g., "db_create", "rec_edit").
+  *                            Certain prefixes (like 'db', 'st', 'rec') or full action names (like 'VisitPage')
+  *                            determine how the activity is categorized for Matomo.
+  * @param {string|number} [supplementary_info] - Additional information related to the activity.
+  *                                             For 'VisitPage', this might be the page identifier/URL part.
+  *                                             For other actions, it could be a record ID or other relevant value.
+  *                                             If numeric, it might be tracked as a value in Matomo.
+  * @returns {void}
   */
-  user_log(activity, suplementary) {
-      const log_actions = ['VisitPage']; //'editRec', 
-      const log_prefix = ['db', 'st', 'prof', 'cms', 'imp', 'sync', 'exp', 'configure', 'rec', 'hlp', 'search'];
+  user_log(activity, supplementary_info) {
+      const log_actions = ['VisitPage']; // Specific actions with special handling
+      const log_prefix = ['db', 'st', 'prof', 'cms', 'imp', 'sync', 'exp', 'configure', 'rec', 'hlp', 'search']; // Prefixes for categorization
       const action_parts = activity.indexOf('_') > 0 ? activity.split('_') : [];
 
       if (
@@ -505,7 +574,7 @@ class HSystemMgr {
               //matomo
               if(activity=='VisitPage'){
                   
-                    this.matomoTrackNewPage('web', suplementary);
+                    this.matomoTrackNewPage('web', supplementary_info);
                   
               }else if(activity!='editRec'){
                     if(category=='db'){
@@ -527,8 +596,8 @@ class HSystemMgr {
                     category = category.charAt(0).toUpperCase() + category.slice(1);
                     
                     let value;
-                    if(window.hWin.HEURIST4.util.isPositiveInt(suplementary)){
-                        value = suplementary;
+                    if(window.hWin.HEURIST4.util.isPositiveInt(supplementary_info)){
+                        value = supplementary_info;
                     }
                     if(!activity){
                         activity = 'TBD';
@@ -538,142 +607,210 @@ class HSystemMgr {
               }
           
           }else{
-            let request = { a: 'usr_log', activity: (category+activity), suplementary: suplementary, user: this.hapi4.user_id() };
+            let request = { a: 'usr_log', activity: (category+activity), suplementary: supplementary_info, user: this.hapi4.user_id() };
             this.hapi4.callserver('usr_info', request);
           }
       }
   }
+/*
+      const action_parts = typeof activity === 'string' && activity.includes('_') ? activity.split('_') : [];
+      let category_for_matomo = '';
+      let action_for_matomo = activity;
+
+      if (
+          log_actions.includes(activity) ||
+          (action_parts.length > 0 && log_prefix.includes(action_parts[0].toLowerCase()))
+      ) {
+          if (action_parts.length > 0) {
+              category_for_matomo = action_parts[0];
+              action_for_matomo = action_parts.slice(1).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('');
+          }
+
+          if(window._paq){ // Matomo tracking object exists
+              if(activity === 'VisitPage'){
+                  this.matomoTrackNewPage('web', supplementary_info); // Assuming 'web' type for general VisitPage
+              } else if(activity !== 'editRec') { // 'editRec' might be too frequent or handled differently
+                  // Normalize category names for Matomo
+                  const categoryMap = {
+                      'db': 'Database', 'st': 'Structure', 'prof': 'Profile',
+                      'imp': 'Import', 'exp': 'Export', 'rec': 'Record', 'hlp': 'Help'
+                  };
+                  category_for_matomo = categoryMap[category_for_matomo.toLowerCase()] ||
+                                       (category_for_matomo.charAt(0).toUpperCase() + category_for_matomo.slice(1));
+
+                  let value_for_matomo;
+                  if(window.hWin.HEURIST4.util.isPositiveInt(supplementary_info)){
+                      value_for_matomo = Number(supplementary_info);
+                  }
+                  if(!action_for_matomo){ // Ensure action is not empty
+                      action_for_matomo = 'UndefinedAction';
+                  }
+                  this.matomoTrackEventAction(category_for_matomo, action_for_matomo, undefined, value_for_matomo);
+              }
+          } else { // Fallback to server-side logging if Matomo is not available
+            let request = {
+                a: 'usr_log',
+                activity: (category_for_matomo ? category_for_matomo + '_' : '') + action_for_matomo,
+                suplementary: supplementary_info, // Corrected spelling from source
+                user: this.hapi4.user_id()
+            };
+            this.hapi4.callserver('usr_info', request); // Fire-and-forget
+          }
+      }
+  */
 
   /**
-  * 
+  * Initializes Matomo tracking with custom dimensions for the current user and page context.
+  * This should be called once when the main Heurist interface loads or when context significantly changes.
+  *
+  * @param {('web'|'tpl'|'hml'|'view'|'edit'|'adm'|'startup')} pageType - The type of page or context being viewed.
+  *        - `web`: Public website page.
+  *        - `tpl`: Template view.
+  *        - `hml`: Heurist Markup Language page.
+  *        - `view`: Record view page.
+  *        - `edit`: Record edit page.
+  *        - `adm`: Administration interface page.
+  *        - `startup`: Initial startup/login page.
+  * @param {string} [value] - Supplementary value, typically used as a website ID if `pageType` is 'web'.
+  * @returns {void}
   */
   matomoTrackInit(pageType, value){
 
-      if(!window._paq){
+      if(!window._paq || !this.hapi4){ // Ensure Matomo and HAPI are available
           return;
       }
 
-      //?? _paq.push(['setCustomDimension', customDimensionId = 1, customDimensionValue = 'database']);
-      //per page
-      _paq.push(['setCustomDimension', 1, this.hapi4.database ]);  
-      _paq.push(['setCustomDimension', 2, pageType ]); // web|tpl|hml|view|edit|adm
-      _paq.push(['setCustomDimension', 3, this.hapi4.getLocale() ]);  
-      _paq.push(['setCustomDimension', 4, (pageType=='web')?value:'' ]);  //website id
+      // Set custom dimensions for the current page view
+      window._paq.push(['setCustomDimension', 1, this.hapi4.database ]);  // Dimension 1: Database Name
+      window._paq.push(['setCustomDimension', 2, pageType ]);             // Dimension 2: Page Type
+      window._paq.push(['setCustomDimension', 3, this.hapi4.getLocale() ]); // Dimension 3: Current Locale/Language
+      window._paq.push(['setCustomDimension', 4, (pageType === 'web' && value) ? value : '' ]); // Dimension 4: Website ID (if applicable)
 
-      //per visit
-      const usrType = this.hapi4.getUserType()
-      if(usrType=='visitor'){
-        _paq.push(['resetUserId']);
-      }else{  
-        _paq.push(['setUserId', this.hapi4.currentUser['ugr_eMail'] ]); //unique email
+      // Set custom dimensions for the current visit
+      const usrType = this.hapi4.getUserType(); // Retrieves user type (e.g., owner, admin, guest)
+      if(usrType === 'visitor' || !this.hapi4.currentUser){ // If user is a visitor or not logged in
+        window._paq.push(['resetUserId']); // Reset Matomo User ID
+      } else {
+        window._paq.push(['setUserId', this.hapi4.currentUser['ugr_eMail'] ]); // Set Matomo User ID to user's email
       }
-      _paq.push(['setCustomDimension', 5, usrType ]); // owner, admin, manager, user, guest, visitor
+      window._paq.push(['setCustomDimension', 5, usrType ]); // Dimension 5: User Type
 
+      // Example: Configure tracking for downloads or outlinks (if needed)
+      // _paq.push(['setDownloadClasses', "file-download"]);
+      // _paq.push(['trackLink', 'https://example.com/file.pdf', 'download']);
 
-      // define class name and assign it to download links - to be tracked
-      //_paq.push(['setDownloadClasses', "file-download"]); 
-      // or manually
-      //_paq.push(['trackLink', 'https://heuristref.net/file=d2332423c', 'download']);
-
+      // Perform initial page view tracking for this context
       this.matomoTrackNewPage(pageType, value);
-
   }
   
   /**
-  * Track new page view (for smarty, web, recordview, recordedit)
-  * 
-  * @param pageType {string} web|tpl|view|edit|adm (hml) or startup
-  * @param value {string} suplementary info
-  * @param title {string} page title
+  * Tracks a new page view in Matomo.
+  * Use this when navigating to a new logical "page" within the application,
+  * especially in Single Page Applications (SPAs).
+  *
+  * @param {('web'|'tpl'|'hml'|'view'|'edit'|'adm'|'startup')} pageType - The type of page being viewed.
+  * @param {string} [value] - Supplementary information, often an ID or sub-identifier for the page (e.g., record ID for 'view', website ID for 'web').
+  * @param {string} [title] - Optional custom title for the page view. If not provided, Matomo might use the document's current title.
+  * @returns {void}
   */
   matomoTrackNewPage(pageType, value, title){
       
-        if(!window._paq){
+        if(!window._paq || !this.hapi4){
             return;
         }
         
         let pageURL;
-        if(pageType=='adm'){
+        // Construct a logical URL for Matomo based on pageType and value
+        if(pageType === 'adm'){ // Admin interface
             pageURL = '/?db=' + this.hapi4.database;
-        }else if(pageType=='startup'){
+        } else if(pageType === 'startup'){ // Startup/login page
             pageURL = '/startup';
-        }else {
-            pageURL = '/'+this.hapi4.database+'/'+pageType; //this.hapi4.baseURL+
+        } else { // Other page types, construct URL like /databaseName/pageType/value
+            pageURL = '/' + this.hapi4.database + '/' + pageType;
             if(value){
-                pageURL = pageURL+'/'+value;
+                pageURL = pageURL + '/' + value;
             }
         }
       
-        _paq.push(['setCustomUrl', pageURL ]);
+        window._paq.push(['setCustomUrl', pageURL ]); // Set the custom URL for this page view
         if(title){
-            _paq.push(['setDocumentTitle', title]);
+            window._paq.push(['setDocumentTitle', title]); // Set a custom document title if provided
         }
-        _paq.push(['trackPageView']);      
-//  _paq.push(['enableLinkTracking']);  
-
+        window._paq.push(['trackPageView']); // Track the page view now
+        // _paq.push(['enableLinkTracking']); // Optionally enable link tracking if not already globally enabled
   }
 
   /**
-  * Track Event Action
+  * Tracks a custom event in Matomo.
+  *
+  * @param {string} category - The category of the event (e.g., 'Database', 'Record', 'UI Interaction').
+  * @param {string} action - The specific action performed (e.g., 'Create', 'Delete', 'OpenTab').
+  * @param {string} [name] - Optional name for the event (e.g., a label or identifier for the element interacted with).
+  * @param {number} [value] - Optional numeric value associated with the event.
+  * @returns {void}
   */
   matomoTrackEventAction(category, action, name, value){
         if(!window._paq){
             return;
         }
-        //trigger event
-        //Event Category
-        //Event Action
-        //Event Name
-        //Event Value
-        let eventParams = ['trackEvent', category, action, name];
-        if(value>0){
-            eventParams.push(value);
+
+        let eventParams = ['trackEvent', category, action];
+        if(name !== undefined) {
+            eventParams.push(name);
+            if(value !== undefined && typeof value === 'number' && !isNaN(value)){ // Ensure value is numeric if provided
+                eventParams.push(value);
+            }
         }
-        _paq.push(eventParams);      
+        window._paq.push(eventParams);      
   }
 
   /**
-  * ON LOGOUT
+  * Performs Matomo tracking adjustments specifically for user logout.
+  * This includes resetting the User ID and forcing a new visit for subsequent actions.
+  * @returns {void}
   */
   matomoTrackLogout(){
       if(!window._paq){
           return;
       }
 
-      // User has just logged out, we reset the User ID
-      _paq.push(['resetUserId']);
-
-      // we also force a new visit to be created for the pageviews after logout
-      _paq.push(['appendToTrackingUrl', 'new_visit=1']); 
-
-      _paq.push(['trackPageView']);
-
-      // we finally make sure to not again create a new visit afterwards (important for Single Page Applications)
-      _paq.push(['appendToTrackingUrl', '']); 
-
+      window._paq.push(['resetUserId']); // Reset Matomo User ID as the user is now anonymous or different
+      window._paq.push(['appendToTrackingUrl', 'new_visit=1']); // Force Matomo to start a new visit for page views after logout
+      window._paq.push(['trackPageView']); // Track a page view to associate with the new (or anonymous) visit state
+      window._paq.push(['appendToTrackingUrl', '']); // Clear the new_visit parameter for subsequent tracking calls
   }
 
+  /**
+   * Performs Matomo tracking adjustments specifically for user login.
+   * Sets the User ID and relevant custom dimensions.
+   * @returns {void}
+   */
   matomoTrackLogin(){
-        if(!window._paq){
+        if(!window._paq || !this.hapi4 || !this.hapi4.currentUser){ // Ensure Matomo, HAPI, and currentUser are available
             return;
         }
 
-      const usrType = this.hapi4.getUserType()
-      if(usrType=='visitor'){
-        _paq.push(['resetUserId']);
-      }else{  
-        _paq.push(['setUserId', this.hapi4.currentUser['ugr_eMail'] ]); //unique email
+      const usrType = this.hapi4.getUserType();
+      if(usrType === 'visitor' || !this.hapi4.currentUser['ugr_eMail']){ // Should not happen if logged in, but good check
+        window._paq.push(['resetUserId']);
+      } else {
+        window._paq.push(['setUserId', this.hapi4.currentUser['ugr_eMail'] ]); // Set User ID
       }
-      _paq.push(['setCustomDimension', 5, usrType ]); // owner, admin, manager, user, guest, visitor
+      window._paq.push(['setCustomDimension', 5, usrType ]); // Update User Type dimension
 
-      _paq.push(['trackPageView']);
+      window._paq.push(['trackPageView']); // Track a page view to associate with the logged-in user state
   }
   
   
   /**
-  * Verify special system passwords for password-protected actions
-  * @param {Object} request
-  * @param {callserverCallback} callback
+  * Verifies special system passwords for password-protected actions.
+  *
+  * @param {Object} request - The request object.
+  * @param {string} request.action - The name/key of the password-protected action.
+  * @param {string} request.password - The password entered by the user.
+  * @param {function(Object): void} callback - Callback to handle the server response.
+  *        Response `data` is typically 'ok' on success.
+  * @returns {void}
   */
   action_password(request, callback) {
       if (request) request.a = 'action_password';
@@ -681,10 +818,14 @@ class HSystemMgr {
   }
 
   /**
-  * Get saved searches for current user and all user groups where user is a member
-  * @param {Object} [request]
-  * @param {number} [request.UGrpID] - ID of user group
-  * @param {ssearch_getCallback} callback
+  * Retrieves saved searches for the current user and their groups, or by specific IDs.
+  *
+  * @param {Object} [request={}] - The request object.
+  * @param {number} [request.UGrpID] - Optional ID of a user/group to filter searches.
+  *                                   If not provided, searches for the current user and their groups are typically returned.
+  * @param {function(Object): void} callback - Callback to handle the server response.
+  *        Response `data` contains the saved search definitions.
+  * @returns {void}
   */
   ssearch_get(request, callback) {
       if (!request) request = {};
@@ -693,13 +834,15 @@ class HSystemMgr {
   }
 
   /**
-  * Save a Heurist query in the database
-  * @param {Object} request
-  * @param {number} [request.svs_ID] (not specified if ADD new search)
-  * @param {string} request.svs_Name - name of saved search
-  * @param {string} request.svs_Query - Heurist query that defines the saved search
-  * @param {number} request.svs_UGrpID - user/group ID under which search should be saved
-  * @param {callserverCallback} callback
+  * Saves a Heurist query (saved search) to the database.
+  *
+  * @param {Object} request - The request object.
+  * @param {number} [request.svs_ID] - ID of the saved search if updating an existing one. Not specified for new searches.
+  * @param {string} request.svs_Name - The name for the saved search.
+  * @param {string} request.svs_Query - The Heurist query string.
+  * @param {number} request.svs_UGrpID - The user or group ID under which this search should be saved.
+  * @param {function(Object): void} callback - Callback to handle the server response.
+  * @returns {void}
   */
   ssearch_save(request, callback) {
       if (request) request.a = 'svs_save';
@@ -707,10 +850,12 @@ class HSystemMgr {
   }
 
   /**
-  * Duplicate saved search
-  * @param {Request} request
-  * @param {number} request.svs_ID - id of search to duplicate
-  * @param {callserverCallback} callback
+  * Duplicates an existing saved search.
+  *
+  * @param {Object} request - The request object.
+  * @param {number} request.svs_ID - The ID of the saved search to duplicate.
+  * @param {function(Object): void} callback - Callback to handle the server response.
+  * @returns {void}
   */
   ssearch_copy(request, callback) {
       if (request) request.a = 'svs_copy';
@@ -718,9 +863,12 @@ class HSystemMgr {
   }
 
   /**
-  * Delete saved searches by ID
-  * @param {Request} request
-  * @param {string} request.ids - comma-separated list of ids
+  * Deletes one or more saved searches by their IDs.
+  *
+  * @param {Object} request - The request object.
+  * @param {string} request.ids - A comma-separated string of saved search IDs to delete.
+  * @param {function(Object): void} [callback] - Optional callback to handle server response.
+  * @returns {void}
   */
   ssearch_delete(request, callback) {
       if (request) request.a = 'svs_delete';
@@ -728,10 +876,12 @@ class HSystemMgr {
   }
 
   /**
-  * Save nested hierarchy of saved searches
-  * @param {Request} request
-  * @param {Object} request.data - json representation of search tree
-  * @param {callserverCallback} callback
+  * Saves a nested hierarchy (tree structure) of saved searches.
+  *
+  * @param {Object} request - The request object.
+  * @param {Object} request.data - A JSON representation of the search tree structure.
+  * @param {function(Object): void} [callback] - Optional callback to handle server response.
+  * @returns {void}
   */
   ssearch_savetree(request, callback) {
       if (request) request.a = 'svs_savetree';
@@ -739,43 +889,60 @@ class HSystemMgr {
   }
 
   /**
-  * Retrieve nested hierarchy of saved searches.
-  * @param {Request} request
-  * @param {string} [request.UGrpID] - optional: user group ID whose tree you wish to retrieve
-  * @param {callserverCallback} callback
+  * Retrieves a nested hierarchy (tree structure) of saved searches.
+  *
+  * @param {Object} [request={}] - The request object.
+  * @param {number} [request.UGrpID] - Optional: User/group ID whose search tree is to be retrieved.
+  *                                   Defaults to the current user if not specified.
+  * @param {function(Object): void} callback - Callback to handle the server response.
+  *        Response `data` contains the search tree structure.
+  * @returns {void}
   */
   ssearch_gettree(request, callback) {
-      if (request) request.a = 'svs_gettree';
+      if (!request) request = {};
+      request.a = 'svs_gettree';
       window.hWin.HAPI4.callserver('usr_info', request, callback);
   }  
 
   /**
-  * Get the desired database structure definition
-  * @param {Request} request
-  * @param {string} [request.terms] comma-separated list of term ids, or 'all'
-  * @param {string} [request.rectypes] comma-separated list of rectype ids, or 'all'
-  * @param {string} [request.detailtypes] comma-separated list of detailtype ids, or 'all'
-  * @param {number} [mode] applied for rectypes: 0 only names (default), 1 only structure, 2 - both, 3 - all
+  * Retrieves database structure definitions (record types, detail types, terms).
+  *
+  * @param {Object} request - The request object specifying which definitions to retrieve.
+  * @param {string} [request.terms] - Comma-separated list of term IDs, or 'all'.
+  * @param {string} [request.rectypes] - Comma-separated list of record type IDs, or 'all'.
+  * @param {string} [request.detailtypes] - Comma-separated list of detail type IDs, or 'all'.
+  * @param {0|1|2|3} [request.mode] - Mode for retrieving record types:
+  *   - `0`: Only names (default).
+  *   - `1`: Only structure.
+  *   - `2`: Both names and structure.
+  *   - `3`: All details.
+  * @param {function(Object): void} callback - Callback to handle server response containing definitions.
+  * @returns {void}
   */
   get_defs(request, callback) {
       window.hWin.HAPI4.callserver('sys_structure', request, callback);
   }
 
   /**
-  * Wrapper for EntityMgr.refreshEntityData
-  * @param {boolean} is_message - whether to show message to user after refresh
-  * @param {any} document - unused
-  * @param {Function} callback
+  * Refreshes all entity data and database structure definitions from the server.
+  * This is a wrapper for `HAPI.EntityMgr.refreshEntityData('force_all', ...)`.
+  *
+  * @param {boolean} [is_message=false] - Whether to show a success message to the user after refresh.
+  * @param {Document} [document_context] - Unused parameter (kept for legacy compatibility if any).
+  * @param {function(boolean): void} [callback] - Optional callback that receives a boolean indicating success of the refresh.
+  * @returns {void}
   */
-  get_defs_all(is_message, document, callback) {
-      window.hWin.HEURIST4.msg.bringCoverallToFront();
+  get_defs_all(is_message, document_context, callback) {
+      window.hWin.HEURIST4.msg.bringCoverallToFront(); // Show loading overlay
 
       window.hWin.HAPI4.EntityMgr.refreshEntityData('force_all', success => {
-          window.hWin.HEURIST4.msg.sendCoverallToBack();
+          window.hWin.HEURIST4.msg.sendCoverallToBack(); // Hide loading overlay
 
           if (success && is_message === true) {
               let $dlg = window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions refreshed.');
-              $dlg.parent('.ui-dialog').css({ top: 150, left: 150 });
+              if ($dlg && $dlg.parent('.ui-dialog').length) { // Ensure dialog exists before trying to position
+                $dlg.parent('.ui-dialog').css({ top: 150, left: 150 });
+              }
           }
 
           if (window.hWin.HEURIST4.util.isFunction(callback)) callback(success);
@@ -783,9 +950,12 @@ class HSystemMgr {
   }
 
   /**
-  * Resolve mimetype for a given URL
-  * @param {string} url
-  * @param {callserverCallback} callback
+  * Resolves the MIME type for a given URL by querying the server.
+  *
+  * @param {string} url - The URL to check.
+  * @param {function(Object): void} callback - Callback to handle the server response.
+  *        Response `data` typically contains the MIME type string.
+  * @returns {void}
   */
   get_url_content_type(url, callback) {
       let request = { a: 'get_url_content_type', url: url };
@@ -793,9 +963,13 @@ class HSystemMgr {
   }
 
   /**
-  * Returns list of files for given folders
-  * @param {string|Array.<string>} folders single folder or array of folders to search
-  * @param {callserverCallback} callback
+  * Retrieves a list of files from specified server-side folders, filtered by extensions.
+  *
+  * @param {string|Array<string>} source - A single folder path or an array of folder paths to search on the server.
+  * @param {string|Array<string>} exts - A single file extension or an array of extensions to filter by (e.g., "jpg", "pdf").
+  * @param {function(Object): void} callback - Callback to handle the server response.
+  *        Response `data` contains the list of found files.
+  * @returns {void}
   */
   get_foldercontent(source, exts, callback) {
       let request = { a: 'foldercontent', source: source, exts: exts };
@@ -803,77 +977,107 @@ class HSystemMgr {
   }  
 
   /**
-  * Check if current server + db has access to ESTC lookups
-  * @param {Request} [request] - if not provided, current db & server are checked
-  * @param {callserverCallback} callback 
+  * Checks if the current server and database context has access to ESTC (English Short Title Catalogue) lookups.
+  *
+  * @param {Object} [request] - Optional request parameters. If not provided, checks for the current database.
+  * @param {string} [request.db] - Database name to check (if not current).
+  * @param {function(Object): void} callback - Callback to handle the server response.
+  *        Response `data` indicates if access is allowed.
+  * @returns {void}
   */
   check_allow_estc(request, callback) {
       if (!request) {
           request = { a: 'check_allow_estc', db: window.hWin.HAPI4.database };
+      } else if (!request.a) {
+          request.a = 'check_allow_estc';
       }
       window.hWin.HAPI4.callserver('usr_info', request, callback);
   }
 
   /**
-  * Check if current server has an alpha build setup
-  * @param {Request} [request]
-  * @param {callserverCallback} callback 
+  * Checks if the current server has an alpha build setup/configured.
+  *
+  * @param {Object} [request={a: 'check_for_alpha'}] - Request object.
+  * @param {function(Object): void} callback - Callback to handle server response.
+  *        Response `data` indicates if an alpha build is set up.
+  * @returns {void}
   */
   check_for_alpha(request, callback) {
       if (!request) {
           request = { a: 'check_for_alpha' };
+      } else if (!request.a) {
+          request.a = 'check_for_alpha';
       }
       window.hWin.HAPI4.callserver('usr_info', request, callback);
   }
 
   /**
-  * Get user notifications, if any
-  * @param {Request} [request] 
-  * @param {callserverCallback} callback 
+  * Retrieves user notifications, if any.
+  *
+  * @param {Object} [request={a: 'get_user_notifications'}] - Request object.
+  * @param {function(Object): void} callback - Callback to handle server response.
+  *        Response `data` contains user notifications.
+  * @returns {void}
   */
   get_user_notifications(request, callback){
       if(!request){
           request = { a: 'get_user_notifications' };
+      } else if (!request.a) {
+          request.a = 'get_user_notifications';
       }
-
       window.hWin.HAPI4.callserver('usr_info', request, callback);
   }
 
   /**
-  * Get object of custom formats for the TinyMCE editor
-  * @param {Request} request 
-  * @param {callserverCallback} callback 
+  * Retrieves custom formats for the TinyMCE rich text editor, configured for the Heurist instance.
+  *
+  * @param {Object} [request={a: 'get_tinymce_formats'}] - Request object.
+  * @param {function(Object): void} callback - Callback to handle server response.
+  *        Response `data` contains the TinyMCE formats configuration.
+  * @returns {void}
   */
   get_tinymce_formats(request, callback){
       if(!request) request = {a: 'get_tinymce_formats'};
-
+      else if (!request.a) request.a = 'get_tinymce_formats';
       window.hWin.HAPI4.callserver('usr_info', request, callback);
   }
 
   /**
-  * Use Deepl to translate string
-  * @param {Request} request 
-  * @param {callserverCallback} callback 
+  * Uses DeepL (if configured) to translate a given string.
+  *
+  * @param {Object} request - Request object.
+  * @param {string} request.text - The text to translate.
+  * @param {string} request.target_lang - The target language code (e.g., 'EN', 'FR').
+  * @param {string} [request.source_lang] - Optional source language code.
+  * @param {function(Object): void} callback - Callback to handle server response.
+  *        Response `data` contains the translated text.
+  * @returns {void}
   */
   translate_string(request, callback){
-      if(!request.a) request = {a: 'translate_string'};
-
+      if(!request) { // Basic validation, ensure request object exists
+          if(typeof callback === 'function') callback({status: window.hWin.ResponseStatus.INVALID_REQUEST, message: "Request object is missing."});
+          return;
+      }
+      request.a = 'translate_string'; // Ensure action is set
       window.hWin.HAPI4.callserver('usr_info', request, callback);
   }
 
   /**
-  * Check if the provided databases are available on the current server
-  * @param data - array (registred ID => database name)
-  * @param {callserverCallback} callback 
-  * @returns 
+  * Checks if a list of provided databases are available on the current Heurist server.
+  *
+  * @param {Object} data - An object where keys are registered database IDs and values are database names.
+  *                        Example: `{ "regID1": "dbName1", "regID2": "dbName2" }`
+  * @param {function(Object): void} callback - Callback to handle the server response.
+  *        Response `data` indicates availability for each database.
+  * @returns {boolean} Returns `false` and shows an error if `data` is not provided. Otherwise, initiates server call.
   */
   check_for_databases(data, callback){
 
-      if(!data){
+      if(!data || typeof data !== 'object' || Object.keys(data).length === 0){
           window.hWin.HEURIST4.msg.showMsgErr({
-              message: 'The list of databases to be checked is missing<br>'
+              message: 'The list of databases to be checked is missing or invalid.<br>'
               +'Please contact the Heurist team.',
-              error_title: 'Missing database list',
+              error_title: 'Missing or Invalid Database List',
               status: window.hWin.ResponseStatus.INVALID_REQUEST
           });
           return false;
@@ -882,23 +1086,29 @@ class HSystemMgr {
       let request = {
           a: 'check_for_databases', 
           data: JSON.stringify(data), 
-          db: window.hWin.HAPI4.database
+          db: window.hWin.HAPI4.database // Current database context
       };
 
       window.hWin.HAPI4.callserver('usr_info', request, callback);
+      return true; // Indicates request was made
   }
 
   /**
-  * Calculate and return the numbers of days, months, and years between two dates
-  * @param data - object containing earliest and latest dates
-  * @param {callserverCallback} callback
+  * Calculates and returns the difference (in days, months, years) between two dates.
+  *
+  * @param {Object} data - Object containing the dates.
+  * @param {string} data.early_date - The earlier date string (parsable by server).
+  * @param {string} data.latest_date - The later date string (parsable by server).
+  * @param {function(Object): void} callback - Callback to handle the server response.
+  *        Response `data` contains the calculated time differences.
+  * @returns {boolean} Returns `false` and shows error if dates are missing/invalid. Otherwise, initiates server call.
   */
   get_time_diffs(data, callback){
 
       if(!data || !data.early_date || !data.latest_date){
           window.hWin.HEURIST4.msg.showMsgErr({
               message: 'Both an earliest and latest date are required.',
-              error_title: 'Missing dates',
+              error_title: 'Missing Dates',
               status: window.hWin.ResponseStatus.INVALID_REQUEST
           });
           return false;
@@ -906,182 +1116,202 @@ class HSystemMgr {
 
       let request = {
           a: 'get_time_diffs',
-          data: JSON.stringify(data),
-          db: window.hWin.HAPI4.database
+          data: JSON.stringify(data), // Dates are passed as a JSON string
+          db: window.hWin.HAPI4.database // Current database context
       };
 
       window.hWin.HAPI4.callserver('usr_info', request, callback);
+      return true; // Indicates request was made
   }
 
   /**
-  * Manipulate folders within HEURIST_FILESTORE_DIR on the server
-  * @param {Request} [request] 
-  * @param {string} [request.operation] - 'list', 'rename' or 'delete'; defaults to 'list'
-  * @param {string} [request.root_dir] - directory to search; defaults to `HEURIST_FILESTORE_DIR`
-  * @param {callserverCallback} callback 
+  * Lists, renames, or deletes folders within the HEURIST_FILESTORE_DIR on the server.
+  *
+  * @param {Object} [request={}] - Request object.
+  * @param {('list'|'rename'|'delete')} [request.operation='list'] - The operation to perform.
+  * @param {string} [request.root_dir] - The directory to operate on, relative to HEURIST_FILESTORE_DIR.
+  *                                      If not provided, defaults to HEURIST_FILESTORE_DIR itself.
+  * @param {string} [request.old_name] - For 'rename', the current name of the folder.
+  * @param {string} [request.new_name] - For 'rename', the new name for the folder.
+  * @param {string} [request.folder_name] - For 'delete', the name of the folder to delete.
+  * @param {function(Object): void} callback - Callback to handle server response.
+  * @returns {void}
   */
   get_sysfolders(request, callback) {
       if (!request) request = {};
-      if (!request.a) request.a = 'folders';
-      if (!request.operation) request.operation = 'list';
+      if (!request.a) request.a = 'folders'; // Server-side action name
+      if (!request.operation) request.operation = 'list'; // Default operation
       window.hWin.HAPI4.callserver('usr_info', request, callback);
   }
 
   /**
-   * Upload file to Nakala
-   * @param {Request} request 
-   * @param {callserverCallback} callback 
+   * Uploads a file to a Nakala repository (if configured).
+   *
+   * @param {Object} request - The request object, containing file details and Nakala target information.
+   * @param {function(Object): void} callback - Callback to handle the server response.
+   *        The response indicates success or failure of the upload.
+   * @returns {void}
    */
   upload_to_nakala(request, callback){
-      if (!request) callback.call(this, false);
+      if (!request) {
+          if(typeof callback === 'function') callback({status: window.hWin.ResponseStatus.INVALID_REQUEST, message: "Request object is missing."});
+          return;
+      }
       if (!request.a) request.a = 'upload_file_nakala';
       window.hWin.HAPI4.callserver('usr_info', request, callback);
   }
 
   /**
-  * 1. verifies that given rty_IDs (concept codes) exist in this database
-  * 2. If rectype is missed - download from given db_ID (registration ID)
-  * 3. Show warning of info report
-  * 
-  * @param {Array.<string>} rty_IDs - array of concept codes
-  * @param {number} databaseID - registratiion ID of source database. If it is not defined, it takes #2 by default
-  * @param {(string|boolean)} message - additional (context explanatory) message for final report, if false - without message
-  * @param {Function} callback
-  * @param {boolean} force_refresh - treats all concepts as undefined, assigning new codes to all
-  * @returns {boolean|number}
-  *  - `0`: at least one of the passed rty_IDs was not defined and was assigned a concept code
-  *  - `true`: all record types are in this database
-  *  - `false`: parameter `rty_IDs` was missing
+  * Checks for the presence of specified record type IDs (concept codes) in the current database.
+  * If any are missing, it attempts to import them from a source database (defaulting to Heurist_Core_Definitions, ID #2).
+  * Optionally shows a confirmation dialog before importing.
+  *
+  * @param {Array<string|number>} rty_IDs - An array of record type IDs (concept codes) to check.
+  * @param {number} [databaseID=2] - The registration ID of the source database from which to import definitions if missing.
+  *                                  Defaults to 2 (Heurist_Core_Definitions).
+  * @param {string|false} [message] - An additional message to display in the confirmation dialog before import.
+  *                                   If `false`, definitions are imported unconditionally without a dialog.
+  *                                   If a string, it's shown to the user. If undefined/null, a default prompt may appear.
+  * @param {function(): void} [callback] - A callback function executed after the check/import process is complete (regardless of user choice in dialog).
+  * @param {boolean} [force_refresh=false] - If true, treats all provided `rty_IDs` as if they are missing,
+  *                                         forcing an attempt to (re)import them or assign new concept codes.
+  * @returns {boolean|0}
+  *  - `true`: All specified record types are already present in the database.
+  *  - `0`: At least one record type was initially missing. The import process was initiated (either directly or after user confirmation).
+  *         The callback will be invoked after the import attempt.
+  *  - `false`: The `rty_IDs` parameter was missing or invalid.
   */
   checkPresenceOfRectype(rty_IDs, databaseID, message, callback, force_refresh) {
 
-      if (!rty_IDs) {
+      if (!rty_IDs || !Array.isArray(rty_IDs) && rty_IDs.length === 0) { // Ensure rty_IDs is a non-empty array
           if (window.hWin.HEURIST4.util.isFunction(callback)) {
-              callback.call();   
+              callback.call(this); // Call callback even if input is invalid, to maintain flow
           }
           return false;
       }
 
+      // Normalize to array if single ID is passed (though JSDoc says Array)
       if (!Array.isArray(rty_IDs)) {
-          rty_IDs = [rty_IDs];
+          rty_IDs = [String(rty_IDs)];
       }
 
-      //check what rectypes are missed in this database                  
-      let missed = [];
-
+      let missed_rty_IDs = [];
       if (force_refresh) {
-
-          missed = rty_IDs;
-
+          missed_rty_IDs = [...rty_IDs]; // Copy all IDs if forcing refresh
       } else {
-
-          rty_IDs.forEach(function(rty_ID){
-              let local_id = $Db.getLocalID('rty', rty_ID);
-              if (!(local_id > 0)) {
-                  //not found
-                  missed.push(rty_ID);
+          rty_IDs.forEach(rty_ID => {
+              // Assuming $Db.getLocalID is globally available and correctly resolves concept codes to local IDs
+              let local_id = typeof $Db !== 'undefined' ? $Db.getLocalID('rty', String(rty_ID)) : null;
+              if (!(local_id > 0)) { // If not found or local_id is not positive
+                  missed_rty_IDs.push(String(rty_ID));
               }
           });
       }
 
-      //all record types are in this database
-      if (missed.length == 0) {
+      if (missed_rty_IDs.length === 0) { // All record types are present
           if (window.hWin.HEURIST4.util.isFunction(callback)) {
-              callback.call();   
+              callback.call(this);
           }
           return true;
       }
 
-      //by default we take Heurist_Core_Definitions id#2
-      if (!(databaseID > 0)) {
-          databaseID = 2;   
+      // Default source database ID (Heurist_Core_Definitions)
+      const sourceDB_ID = (typeof databaseID === 'number' && databaseID > 0) ? databaseID : 2;
+
+      if (message === false) { // Import unconditionally without dialog
+          window.hWin.HAPI4.SystemMgr.import_definitions(sourceDB_ID, missed_rty_IDs, 'rectype', false, true, callback);
+          return 0; // Indicates missing types and import initiated
       }
 
-      if (message == false) {
-          //downlaod unconditionally
-          window.hWin.HAPI4.SystemMgr.import_definitions(databaseID, missed, 'rectype', false, true, callback);
-          return 0;
-      }
-
-      window.hWin.HEURIST4.msg.showMsgDlg(message
+      // Prepare message for dialog
+      const dialogMessage = (typeof message === 'string' ? message : window.hWin.HR('Some required record type definitions are missing.'))
           + '<br>'
-          + window.hWin.HR('Click "Import" to get these definitions'),
-          {
+          + window.hWin.HR('Click "Import" to get these definitions from the source database.');
+
+      window.hWin.HEURIST4.msg.showMsgDlg(dialogMessage,
+          { // Dialog buttons
               'Import': function () {
-                  let $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
-                  $dlg2.dialog('close');
+                  const $currentDialog = window.hWin.HEURIST4.msg.getMsgDlg();
+                  if ($currentDialog) $currentDialog.dialog('close');
 
                   window.hWin.HEURIST4.msg.bringCoverallToFront();
-                  window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Import definitions'), 10000);
+                  window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('Importing definitions...'), 10000);
 
-                  //import missed record types
-                  window.hWin.HAPI4.SystemMgr.import_definitions(databaseID, missed, 'rectype', false, true,
-                      function (response) {
+                  window.hWin.HAPI4.SystemMgr.import_definitions(sourceDB_ID, missed_rty_IDs, 'rectype', false, true,
+                      function (response) { // Callback for import_definitions
                           window.hWin.HEURIST4.msg.sendCoverallToBack();
-                          let $dlg2 = window.hWin.HEURIST4.msg.getMsgFlashDlg();
-                          if ($dlg2.dialog('instance')) $dlg2.dialog('close');
+                          const $flashDialog = window.hWin.HEURIST4.msg.getMsgFlashDlg();
+                          if ($flashDialog && $flashDialog.dialog('instance')) $flashDialog.dialog('close');
 
-                          if (response.status == window.hWin.ResponseStatus.OK) {
-                              if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
-                          } else {
+                          if (response.status !== window.hWin.ResponseStatus.OK) {
                               window.hWin.HEURIST4.msg.showMsgErr(response);
                           }
-                  });
-
+                          if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this); // Call original callback
+                      });
               },
               'Skip': function () {
-                  let $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
-                  $dlg2.dialog('close');
-                  if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
+                  const $currentDialog = window.hWin.HEURIST4.msg.getMsgDlg();
+                  if ($currentDialog) $currentDialog.dialog('close');
+                  if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
               },
               'Cancel': function () {
-                  let $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
-                  $dlg2.dialog('close');
+                  const $currentDialog = window.hWin.HEURIST4.msg.getMsgDlg();
+                  if ($currentDialog) $currentDialog.dialog('close');
+                  // Optionally, indicate cancellation to callback or handle differently
+                  if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
               }
           },
-          window.hWin.HR('Definitions required'));
+          window.hWin.HR('Required Definitions Missing'));
 
-      return 0;
+      return 0; // Indicates missing types and dialog shown / import process potentially initiated
   }
 
 
   /** 
-  * imports database defintions 
-  * @param {number} databaseID - source database 
-  * @param {Array.<string|number>} definitionID - array of Rectype ids or Concept Codes to be imported
-  * @param {boolean} is_rename_target - should rectype/concept labels be overwritten with labels imported from the source database?
-  * @param {string} entity - what is being imported? {rectype|detailtype|term}
-  * @param {callserverCallback} callback - applied to response after entity definitions are updated
+  * Imports database definitions (record types, detail types, terms) from a source database.
+  * After successful import, it refreshes local definitions and triggers `ON_STRUCTURE_CHANGE` event.
+  *
+  * @param {number} source_databaseID - The registration ID of the source database from which to import.
+  * @param {Array<string|number>} definition_ids - An array of definition IDs (e.g., record type IDs, concept codes, term IDs) to import.
+  * @param {('rectype'|'detailtype'|'term')} entity_type - The type of entity being imported.
+  * @param {boolean} [is_rename_target=false] - If true, existing local definitions with the same ID will have their labels/names
+  *                                             overwritten by those from the source database.
+  * @param {boolean} [is_conservative=true] - If true (conservative mode), the import process might be more cautious about overwriting
+  *                                           or may have specific behavior for handling conflicts (server-side logic).
+  * @param {function(Object): void} [callback] - Optional callback to handle the server response after the import attempt.
+  * @returns {void}
   */
-  import_definitions(databaseID, definitionID, entity, is_rename_target, is_conservative, callback) {
+  import_definitions(source_databaseID, definition_ids, entity_type, is_rename_target, is_conservative, callback) {
 
-      /** @type {Request} */
       let request = {
-          databaseID: databaseID,
-          definitionID: definitionID,
-          conservative: is_conservative ?1 :0,
+          a: 'import', // Server-side action might be different, this seems like a sub-parameter for sys_structure
+          databaseID: source_databaseID,
+          definitionID: definition_ids, // Server expects 'definitionID' for the list of IDs
+          conservative: is_conservative ? 1 : 0,
           is_rename_target: is_rename_target ? 1 : 0,
-          db: window.hWin.HAPI4.database, import: entity
+          db: window.hWin.HAPI4.database, // Current database context
+          import: entity_type // Specifies what kind of entity to import (e.g., 'rectype')
       };
 
       window.hWin.HAPI4.callserver('sys_structure', request, function (response) {
-
           if (response.status == window.hWin.ResponseStatus.OK) {
-
-              //refresh local definitions
+              // Refresh local definitions if import was successful and new definitions were returned
               if (response.defs) {
-                  if (response.defs.sysinfo) window.hWin.HAPI4.sysinfo = response.defs.sysinfo; //constants
+                  if (response.defs.sysinfo) {
+                      window.hWin.HAPI4.sysinfo = { ...window.hWin.HAPI4.sysinfo, ...response.defs.sysinfo }; // Merge sysinfo
+                  }
 
-                  if (response.defs.entities)
-                  for (let entityName in response.defs.entities) {
-                      //refresh local definitions
-                      window.hWin.HAPI4.EntityMgr.setEntityData(entityName,
-                          response.defs.entities);
+                  if (response.defs.entities) {
+                      for (let entityName in response.defs.entities) {
+                          // Assuming setEntityData correctly updates or replaces the specified entity's data
+                          window.hWin.HAPI4.EntityMgr.setEntityData(entityName, response.defs.entities[entityName]);
+                      }
                   }
               }
-
+              // Trigger event to notify other parts of the application about structure change
               window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
           }
+
           if (window.hWin.HEURIST4.util.isFunction(callback)) {
               callback(response);
           }
@@ -1089,87 +1319,115 @@ class HSystemMgr {
   }
 
   /** 
-  * Checks client software version and db version check
-  * @todo move to sys utility (?)
-  * 1. Checks client software version and 
-  * 2. Checks Database version and runs update script
+  * Performs client-side software version checks and database version checks.
+  * 1. Compares cached client software version with server-provided version to detect outdated cache.
+  *    If outdated, shows a message dialog forcing a cache clear (hard reload).
+  * 2. Compares required database version (by client software) with the actual database version.
+  *    If database is outdated, shows a message dialog prompting for database upgrade.
+  * This is typically run in non-publish (development/staging) modes.
+  *
+  * @returns {boolean} `true` if a version mismatch forces an exit/reload (e.g. outdated client cache), `false` otherwise.
+  * @todo Consider moving this to a system utility class or making it part of an initialization sequence.
+  *       The `production=true` check should be more robust, perhaps via a global config.
   */
   versionCheck() {
 
-      //@todo define parameter in layout "production=true"
-      if (!window.hWin.HAPI4.is_publish_mode) {
+      // Only run version checks if not in publish/production mode
+      if (window.hWin.HAPI4.is_publish_mode) {
+          return false;
+      }
 
-          let version_in_cache = window.hWin.HAPI4.get_prefs_def('version_in_cache', null);
-          let need_exit = false;
+      let version_in_cache = window.hWin.HAPI4.get_prefs_def('version_in_cache', null);
+      let current_server_version = window.hWin.HAPI4.sysinfo ? window.hWin.HAPI4.sysinfo['version'] : null;
+      let needs_client_reload = false;
 
-          //
-          // version of code to compare with server provided - to avoid caching issue
-          //
-          if (window.hWin.HAPI4.has_access() && window.hWin.HAPI4.sysinfo['version']) {
-              if (version_in_cache) {
-                  need_exit = (window.hWin.HEURIST4.util.versionCompare(version_in_cache,
-                      window.hWin.HAPI4.sysinfo['version']) < 0);
-                  if (need_exit) { // -1=older code in cache, -2=newer code in cache, +1=same code version in cache
-                      // show lock popup that forces to clear cache
-                      window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL + 'hclient/widgets/cpanel/versionCheckMsg.html',
-                          {}/* no buttons */, null,
-                          {
-                              hideTitle: true, closeOnEscape: false,
-                              open: function (event, ui) {
-                                  let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-                                  $dlg.find('#version_cache').text(version_in_cache);
-                                  $dlg.find('#version_srv').text(window.hWin.HAPI4.sysinfo['version']);
-                              }
-                      });
-                  }
-              }
-              if (version_in_cache!=window.hWin.HAPI4.sysinfo['version']) {
-                  window.hWin.HAPI4.save_pref('version_in_cache', window.hWin.HAPI4.sysinfo['version']);
-              }
-              if (need_exit) return true;
-
-              let res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.db_version_req,
-                  window.hWin.HAPI4.sysinfo.db_version);
-              if (res == -2) { //-2= db_version_req newer
-                  // show lock popup that forces to upgrade database
-                  window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL + 'hclient/widgets/cpanel/versionDbCheckMsg.html',
+      // 1. Check client software version (cache vs server)
+      if (window.hWin.HAPI4.has_access() && current_server_version) {
+          if (version_in_cache) {
+              // versionCompare returns: -1 if v1 < v2, 0 if v1 == v2, 1 if v1 > v2.
+              // -2 if format is different or error.
+              // We are checking if cache (v1) is older than server (v2).
+              if (window.hWin.HEURIST4.util.versionCompare(version_in_cache, current_server_version) < 0) {
+                  needs_client_reload = true;
+                  window.hWin.HEURIST4.msg.showMsgDlgUrl(
+                      window.hWin.HAPI4.baseURL + 'hclient/widgets/cpanel/versionCheckMsg.html',
+                      {} /* no buttons, effectively locks UI */,
+                      'Client Version Mismatch', // Title for clarity
                       {
-                          'Upgrade': function () {
-                              top.location.href = (window.hWin.HAPI4.baseURL + 'admin/setup/dbupgrade/upgradeDatabase.php?db=' + window.hWin.HAPI4.database);
-                          }
-                      }, null,
-                      {                                   
-                          hideTitle: false, closeOnEscape: false,
+                          hideTitle: false, // Show title
+                          closeOnEscape: false,
                           open: function (event, ui) {
                               let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-                              $dlg.find('#version_db').text(window.hWin.HAPI4.sysinfo.db_version);
-                              $dlg.find('#version_min_db').text(window.hWin.HAPI4.sysinfo.db_version_req);
-                              $dlg.find('#version_srv').text(window.hWin.HAPI4.sysinfo['version']);
+                              $dlg.find('#version_cache').text(version_in_cache);
+                              $dlg.find('#version_srv').text(current_server_version);
                           }
-                  });
-
+                      }
+                  );
               }
           }
+          // Update cached version if it's different from server's version
+          if (version_in_cache !== current_server_version) {
+              window.hWin.HAPI4.save_pref('version_in_cache', current_server_version);
+          }
+          if (needs_client_reload) return true; // Exit if client reload is forced
 
+          // 2. Check Database version (required by software vs actual DB version)
+          let required_db_version = window.hWin.HAPI4.sysinfo.db_version_req;
+          let current_db_version = window.hWin.HAPI4.sysinfo.db_version;
+          // Check if current DB version is older than required (-2 if current_db_version < required_db_version in this util's specific logic)
+          if (window.hWin.HEURIST4.util.versionCompare(required_db_version, current_db_version) === -2) {
+              window.hWin.HEURIST4.msg.showMsgDlgUrl(
+                  window.hWin.HAPI4.baseURL + 'hclient/widgets/cpanel/versionDbCheckMsg.html',
+                  {
+                      'Upgrade Database': function () { // Clearer button text
+                          top.location.href = (window.hWin.HAPI4.baseURL + 'admin/setup/dbupgrade/upgradeDatabase.php?db=' + window.hWin.HAPI4.database);
+                      }
+                  },
+                  'Database Upgrade Required', // Title
+                  {
+                      hideTitle: false,
+                      closeOnEscape: false,
+                      open: function (event, ui) {
+                          let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                          $dlg.find('#version_db').text(current_db_version);
+                          $dlg.find('#version_min_db').text(required_db_version);
+                          $dlg.find('#version_srv').text(current_server_version); // Show current software version for context
+                      }
+                  }
+              );
+              return true; // Indicate that a DB upgrade prompt was shown, potentially blocking further action.
+          }
       }
-      return false;
+      return false; // No version issues requiring immediate action were found.
   }
 
-  /*
+  /**
+  * Asynchronously loads HTML content from a specified URL into a target jQuery element.
   *
+  * @async
+  * @param {jQuery} target - The jQuery element where the HTML content will be loaded.
+  * @param {string} url - The URL from which to fetch the HTML content.
+  * @returns {Promise<void>} A promise that resolves when the content is loaded, or rejects on error.
+  * @throws {Error} If the fetch operation fails (e.g., network error, 404).
   */  
   async loadHtmlContent(target, url){
 
-        let that = this;
+        // let that = this; // 'that' is not used in this version of the function
 
         try {
             const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(response.statusText);
+            if (!response.ok) { // Check if response status is not OK (e.g., 404, 500)
+                throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
             }
-            target[0].innerHTML = await response.text();
+            const htmlContent = await response.text();
+            if (target && target.length > 0 && typeof target.html === 'function') { // Ensure target is a valid jQuery object with .html()
+                target.html(htmlContent); // Use .html() to set content, assuming target is jQuery obj
+            } else {
+                console.error("loadHtmlContent: Target element is invalid or not a jQuery object.", target);
+            }
         } catch (error) {
-            window.hWin.HEURIST4.msg.showMsgErr(`Failed to load content from ${url}: {error.message}`);
+            console.error(`Failed to load HTML content from ${url}:`, error); // Log the error for debugging
+            window.hWin.HEURIST4.msg.showMsgErr(`Failed to load content from ${url}: ${error.message}`);
         }
     }
 

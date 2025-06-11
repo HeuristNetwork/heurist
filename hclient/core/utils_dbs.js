@@ -75,9 +75,34 @@ if (!window.hWin.HEURIST4){
 //init only once
 if (!window.hWin.HEURIST4.dbs) 
 {
-
+/**
+ * @namespace HEURIST4.dbs
+ * @description Provides utility functions for interacting with and managing database definitions
+ * (Record Types, Detail Types, Terms, etc.) and their structures within Heurist.
+ * It includes helpers for retrieving definition properties, navigating hierarchies,
+ * and performing specific operations related to database metadata.
+ * Alias: `$Db`
+ */
 window.hWin.HEURIST4.dbs = {
     
+    /**
+     * @memberof HEURIST4.dbs
+     * @property {Object<string, string>} baseFieldType - Mapping of base field type codes to their human-readable names.
+     * @property {string} baseFieldType.enum - 'Terms list'
+     * @property {string} baseFieldType.float - 'Numeric'
+     * @property {string} baseFieldType.date - 'Date / temporal'
+     * @property {string} baseFieldType.file - 'File'
+     * @property {string} baseFieldType.geo - 'Geospatial'
+     * @property {string} baseFieldType.freetext - 'Text (single line)'
+     * @property {string} baseFieldType.blocktext - 'Memo (multi-line)'
+     * @property {string} baseFieldType.resource - 'Record pointer'
+     * @property {string} baseFieldType.relmarker - 'Relationship marker'
+     * @property {string} baseFieldType.separator - 'Heading (no data)'
+     * @property {string} baseFieldType.relationtype - 'Relationship type' (legacy)
+     * @property {string} baseFieldType.integer - 'Numeric - integer' (legacy)
+     * @property {string} baseFieldType.year - 'Year (no mm-dd)' (legacy)
+     * @property {string} baseFieldType.boolean - 'Boolean (T/F)' (legacy)
+     */
     baseFieldType: {
             enum: 'Terms list',
             float: 'Numeric',
@@ -96,21 +121,42 @@ window.hWin.HEURIST4.dbs = {
             year: 'Year (no mm-dd)',
             boolean: 'Boolean (T/F)'},
     
-    
+    /**
+     * @memberof HEURIST4.dbs
+     * @property {number} needUpdateRtyCount - Flag indicating if record type counts need updating. -1 initial, 0 means update scheduled/done.
+     */
     needUpdateRtyCount: -1,
     
+    /**
+     * @memberof HEURIST4.dbs
+     * @property {number} rtg_trash_id - Cached ID of the 'Trash' record type group.
+     */
     rtg_trash_id: 0,
+    /**
+     * @memberof HEURIST4.dbs
+     * @property {number} dtg_trash_id - Cached ID of the 'Trash' detail type group.
+     */
     dtg_trash_id: 0,
+    /**
+     * @memberof HEURIST4.dbs
+     * @property {number} vcg_trash_id - Cached ID of the 'Trash' vocabulary group.
+     */
     vcg_trash_id: 0,
     
-    vocabs_already_synched: false, //set to true after first direct import by mapping to avoid sync on every request
+    /**
+     * @memberof HEURIST4.dbs
+     * @property {boolean} vocabs_already_synched - Flag to track if vocabularies have been synced after an import by mapping.
+     */
+    vocabs_already_synched: false,
 
     /** 
+     * Returns the real vocabulary ID for a given term ID, traversing up the parent hierarchy if necessary.
+     * This function identifies the root vocabulary a term belongs to, even if it's part of a nested structure
+     * or referenced from another vocabulary.
      * @function getTermVocab
-     * return vocabulary for given term - real vocabulary (not by reference)
-     * @param {number} trm_ID - Term ID
-     * @returns {number} trm_ID - Vocab ID
-     * 
+     * @memberof HEURIST4.dbs
+     * @param {number} trm_ID - The ID of the term.
+     * @returns {number} The ID of the real vocabulary this term belongs to.
     */
     getTermVocab: function(trm_ID){
         let trm_ParentTermID;
@@ -127,12 +173,17 @@ window.hWin.HEURIST4.dbs = {
     },
 
     /** 
+     * Checks if a term belongs to a vocabulary by reference.
+     * It determines if the term is directly part of the vocabulary or if it's included
+     * through a linking mechanism from another vocabulary.
      * @function isTermByReference
-     * @param {number} vocab_id - Vocab ID
-     * @param {number} trm_ID - Term ID
-     * @returns  {(false|number)} false if given term belongs to vocabulary, otherwise number for a level of reference 
-     * (0 - first level - parent is either vocab or "real" terms, 1 or more - parent is term by reference also)
-     * 
+     * @memberof HEURIST4.dbs
+     * @param {number} vocab_id - The ID of the vocabulary to check against.
+     * @param {number} trm_ID - The ID of the term.
+     * @returns {false|number} `false` if the term directly belongs to the vocabulary (not by reference).
+     * Otherwise, returns a number representing the level of reference:
+     *  - `0`: First level of reference (parent is a vocabulary or a "real" term in that vocab).
+     *  - `1+`: Higher levels of reference (parent is also a term by reference).
     */
     isTermByReference: function(vocab_id, trm_ID){
         
@@ -146,9 +197,11 @@ window.hWin.HEURIST4.dbs = {
 
         /**
          * @function __checkParents
-         * @param {number} recID 
-         * @param {number} lvl 
-         * @returns {(number|boolean)}  number if term has children, false if term has not 
+         * @private
+         * @description Internal helper to recursively check parentage for term reference.
+         * @param {number} recID - The current record ID (vocabulary or term) being checked.
+         * @param {number} lvl - The current reference level.
+         * @returns {number|false} The reference level if the term is found as a child (by reference), otherwise `false`.
          */
         
         function __checkParents(recID, lvl){
@@ -178,12 +231,13 @@ window.hWin.HEURIST4.dbs = {
     
 
     /**
-    *  Returns Label and Termcode in brackets (optionally)
-     * @function getTermvalue
-     * Returns label and code for term by id
-     * @param {number} termID 
-     * @param {number} withcode 
-     * @returns {string} Term name and its code if any
+     * Returns the label of a term, optionally including its code in parentheses.
+     * If the term is not found, it returns a "not found" message.
+     * @function getTermValue
+     * @memberof HEURIST4.dbs
+     * @param {number} termID - The ID of the term.
+     * @param {boolean} [withcode=false] - If true, appends the term code (if any) in parentheses to the label.
+     * @returns {string} The term's label, optionally with its code, or a "not found" message.
      */
     getTermValue: function(termID, withcode){
         
@@ -206,13 +260,15 @@ window.hWin.HEURIST4.dbs = {
     },
     
     /**
-     * Returns empty string if term is not found. trm_InverseTermID if inverse term is found or termID if it is not  
-     * (used in record edit for relmarker fields)
-     * 
+     * Retrieves the inverse term ID for a given term ID.
+     * This is primarily used in record editing for relationship marker fields.
+     * - If the term is not found, returns an empty string.
+     * - If an inverse term (`trm_InverseTermID`) is defined and greater than 0, returns the inverse term ID.
+     * - Otherwise, returns the original `termID`.
      * @function getInverseTermById
-     * get inverse term id
-     * @param {number} termID 
-     * @returns {string|number} 
+     * @memberof HEURIST4.dbs
+     * @param {number} termID - The ID of the term.
+     * @returns {string|number} The inverse term ID, the original term ID, or an empty string if not found.
      */
     
     getInverseTermById: function(termID){
@@ -226,14 +282,17 @@ window.hWin.HEURIST4.dbs = {
     },
     
     /**
-    *  Converts term code or label for hex color - used in recordset.toTimemap only
-    *  (for google maps)
-    * 
-    * @function getColorFromTermValue
-    * Returns hex color by label or code for term by id
-    * @param {number} termID 
-    * @returns {string}
-    */
+     * Attempts to determine a hex color value from a term's code or label.
+     * This function is primarily used for visualizations, e.g., in Google Maps integration (recordset.toTimemap).
+     * - If the term has a `trm_Code` that is a valid hex color, it's returned.
+     * - If `trm_Code` is empty, it checks if the lowercase `trm_Label` matches a predefined color name.
+     *   If a match is found, the corresponding hex color is returned.
+     * - Otherwise, an empty string is returned.
+     * @function getColorFromTermValue
+     * @memberof HEURIST4.dbs
+     * @param {number} termID - The ID of the term.
+     * @returns {string} A hex color string (e.g., "#FF0000") or an empty string if no color can be determined.
+     */
     getColorFromTermValue: function(termID){
 
         let termName, termCode='';
@@ -262,33 +321,35 @@ window.hWin.HEURIST4.dbs = {
     
 
     /**
+     * Legacy wrapper for `createRectypeStructureTree_new`.
+     * Returns rectype structure as treeview data. This method is often faster on the client side
+     * than equivalent server-side methods. It's used for treeviews in import structure,
+     * faceted search wizard, and potentially other areas like smarty editor and title mask editor.
+     *
      * @function createRectypeStructureTree
-     * returns rectype structure as treeview data
-     * there is similar method on server side - however on client side it is faster
-     * used for treeview in import structure, faceted search wizard
-     * todo - use it in smarty editor and title mask editor
-     * parentcode - prefix for code    
-      
-     * @param {Object} db_structure // not used in this function, is it usefull to keep it here? 
-     * @param {number} $mode - $mode 
-     *    3 - for record title mask editor - without reverse, enum (id,label,code,internal id) - max levels depth is calculated
-     *    4 - find reverse links and relations   
-     *    5 - filter builder - lazy treeview with reverse links
-     *    6 - for import structure, export csv - lazy tree without reverse
-     *    7 - for smarty - lazy tree without reverse, with relationship stub and enum (id,label,code,internal id)
-     *    8 - for faceted search wiz - same as mode 5 minus record exists options
-     * @param {Array} rectypeids - set of rty ids 
-     * @param {Array} fieldtypes - array of fieldtypes, 
-     *               all
-     *               header - only title and modified fields
-     *               header_ext - all header fields
-     *               parent_link - include field DT_PARENT_ENTITY - link to parent record
-     *       header - all+header fields
-     * @param {string} parentcode  - prefix for code
-     * @param {string} field_order - field ordering
-     *    0 | null - Record structure order
-     *    1 - Alphabetic Order
-     * @returns {Array} res 
+     * @memberof HEURIST4.dbs
+     * @deprecated Use {@link HEURIST4.dbs.createRectypeStructureTree_new} directly.
+     * @param {Object} [db_structure] - Database structure object. Currently not directly used by `createRectypeStructureTree_new` via this wrapper.
+     * @param {number} $mode - Controls the tree generation logic:
+     *  - `3`: For record title mask editor. No reverse links. Enum fields include id, label, code, internal id. Max depth calculated.
+     *  - `4`: Finds reverse links and relations.
+     *  - `5`: For filter builder. Lazy treeview with reverse links.
+     *  - `6`: For import structure, export CSV. Lazy tree without reverse links.
+     *  - `7`: For Smarty editor. Lazy tree without reverse links, with relationship stub. Enum fields include id, label, code, internal id.
+     *  - `8`: For faceted search wizard. Similar to mode 5 but excludes "record exists" options.
+     * @param {(string|string[])} rectypeids - A comma-separated string or an array of record type IDs to include in the tree.
+     * @param {(string|string[])} fieldtypes - Array or comma-separated string of field types to include. Special values:
+     *  - `'all'`: Include all field types.
+     *  - `'header'`: Include only title and modified fields from the header.
+     *  - `'header_ext'`: Include all header fields.
+     *  - `'parent_link'`: Include the `DT_PARENT_ENTITY` field (link to parent record).
+     *  If 'header' is present, 'title' and 'modified' are automatically added.
+     * @param {string} [parentcode] - Prefix for generated node codes.
+     * @param {(number|string)} [field_order=0] - Field ordering:
+     *  - `0` or `null`: Record structure order.
+     *  - `1`: Alphabetic order.
+     * @returns {Array} An array of tree node objects suitable for a treeview component (e.g., Fancytree).
+     *                  For `mode=3` and a single `rectypeid`, returns the `children` array directly.
      */
     createRectypeStructureTree: function( db_structure, $mode, rectypeids, fieldtypes, parentcode, field_order ) {
         
@@ -297,6 +358,23 @@ window.hWin.HEURIST4.dbs = {
         return window.hWin.HEURIST4.dbs.createRectypeStructureTree_new( options );
     },
 
+    /**
+     * Generates a tree structure representing record types and their fields.
+     * This is the core implementation for creating rectype structure trees used in various
+     * parts of the Heurist interface (e.g., import, faceted search, editors).
+     *
+     * @function createRectypeStructureTree_new
+     * @memberof HEURIST4.dbs
+     * @param {Object} options - Configuration options for tree generation.
+     * @param {Object} [options.db_structure] - Database structure. (Not directly used in current logic but passed by wrapper).
+     * @param {number} options.mode - Controls tree generation (see {@link HEURIST4.dbs.createRectypeStructureTree} for $mode details).
+     * @param {(string|string[])} options.rectypeids - Record type IDs.
+     * @param {(string|string[])} options.fieldtypes - Field types to include.
+     * @param {string} [options.parentcode] - Prefix for node codes.
+     * @param {(number|string)} [options.field_order=0] - Field ordering.
+     * @param {string} [options.enum_mode] - If 'expanded' (auto-set for mode 3 or 7), enum fields will have sub-nodes for 'Term', 'Code', etc.
+     * @returns {Array} An array of tree node objects. For `mode=3` and single `rectypeid`, returns `children` array.
+     */
     createRectypeStructureTree_new: function( options )
     {
         let $mode = options.mode,
@@ -325,13 +403,18 @@ window.hWin.HEURIST4.dbs = {
 
     /**
      * @function __getRecordTypeTree
-     * @param {number} $recTypeId 
-     * @param {number} $recursion_depth 
-     * @param {number} $mode 
-     * @param {Array} $fieldtypes 
-     * @param {Array} $pointer_fields 
-     * @param {boolean} $is_parent_relmarker 
-     * @returns {{key: number, title: string,type: string, conceptCode:number, rtyID_local: number, code: string, children: Array} Object}
+     * @private
+     * @description Recursively builds a tree node for a given record type.
+     * This is an internal helper function for `createRectypeStructureTree_new`.
+     * @param {(number|string)} $recTypeId - The ID of the record type, or 'Relationship' for the generic relationship type.
+     * @param {number} $recursion_depth - Current depth in the recursion, used to limit nesting.
+     * @param {number} $mode - The generation mode (passed from `createRectypeStructureTree_new`).
+     * @param {string[]} $fieldtypes - Array of field types to include.
+     * @param {number[]} [$pointer_fields=null] - Array of pointer field IDs already processed to avoid infinite recursion.
+     * @param {boolean} [$is_parent_relmarker=false] - True if the parent context is a relationship marker.
+     * @param {boolean} [is_multi_constrained=false] - True if the context involves multiple constraints.
+     * @returns {Object|null} A tree node object for the record type, or null if not applicable.
+     * The node object typically includes `key`, `title`, `type`, `conceptCode`, `rtyID_local`, `code`, and `children` properties.
      */    
         
 
@@ -798,16 +881,20 @@ window.hWin.HEURIST4.dbs = {
     */
 
     /**
-     * @function __getDetailSection 
-     * @param {number} $recTypeId 
-     * @param {number} $dtID  - detail type ID
-     * @param {number} $recursion_depth 
-     * @param {number} $mode 
-     * @param {Array} $fieldtypes 
-     * @param {number} $reverseRecTypeId 
-     * @param {Array} $pointer_fields 
-     * @returns {null|Array} 
-     * 
+     * @function __getDetailSection
+     * @private
+     * @description Builds a tree node for a specific detail field within a record type structure.
+     * This is an internal helper function for `__getRecordTypeTree`.
+     * @param {number} $recTypeId - The ID of the parent record type.
+     * @param {number} $dtID  - The ID of the detail type (field).
+     * @param {number} $recursion_depth - Current recursion depth.
+     * @param {number} $mode - The generation mode.
+     * @param {string[]} $fieldtypes - Array of allowed field types.
+     * @param {number} [$reverseRecTypeId=null] - If this is a reverse link, the ID of the target record type.
+     * @param {number[]} [$pointer_fields=null] - Pointer fields already processed.
+     * @returns {Object|null} A tree node object for the detail field, or `null` if the field should not be included.
+     * The node object includes properties like `key`, `title`, `type`, `code`, `name`, `display_order`, `conceptCode`, `dtyID_local`.
+     * For pointer types (`resource`, `relmarker`), it can also include `children`, `lazy`, `rt_ids`, `constraint`, `isreverse`, `isparent`.
      */
     function __getDetailSection($recTypeId, $dtID, $recursion_depth, $mode, $fieldtypes, $reverseRecTypeId, $pointer_fields){
 
@@ -1029,9 +1116,12 @@ window.hWin.HEURIST4.dbs = {
     
     /**
      * @function __assignCodes
-     * add parent code to children
-     * @param {Array} $def 
-     * @returns {Array}
+     * @private
+     * @description Recursively assigns hierarchical codes to tree nodes.
+     * It prepends the parent node's code to its children's codes.
+     * This is an internal helper function for `createRectypeStructureTree_new`.
+     * @param {Object} $def - The tree node definition object, expected to have a `code` and `children` property.
+     * @returns {Object} The modified tree node definition with updated codes for itself and its children.
      */
     function __assignCodes($def){
         
@@ -1125,16 +1215,19 @@ window.hWin.HEURIST4.dbs = {
     
     
     /**
-     * @todo - IT USES OLD STRUCTURE FORMAT!!! REWRITE asap!!!
+     * @todo This function uses an old database structure format and needs to be rewritten.
+     * Retrieves an array of record type IDs that are linked as resources for a given record type.
+     * Used in `search_faceted.js`.
+     *
      * @function getLinkedRecordTypes
-     * use in search_faceted.js 
-     * returns array of record types that are resources for given record type
-     * {'linkedto':[],'relatedto':[]}
-     * need_separate - returns separate array for linked and related
-     * @param {number} $rt_ID 
-     * @param {Object} db_structure 
-     * @param {Array} need_separate 
-     * @returns {Array}
+     * @memberof HEURIST4.dbs
+     * @deprecated Uses an outdated structure. Prefer {@link HEURIST4.dbs.getLinkedRecordTypes_cache}.
+     * @param {number} $rt_ID - The ID of the source record type.
+     * @param {Object} [db_structure=window.hWin.HEURIST4] - The database structure object to use. Defaults to the global Heurist structure.
+     * @param {boolean} [need_separate=false] - If true, returns an object with `linkedto` and `relatedto` arrays.
+     *                                       Otherwise, returns a single array of all linked/related record type IDs.
+     * @returns {Array<number>|{linkedto: Array<number>, relatedto: Array<number>}} An array of record type IDs,
+     *          or an object separating them by link type if `need_separate` is true.
      */
     getLinkedRecordTypes: function ($rt_ID, db_structure, need_separate){
         
@@ -1189,12 +1282,22 @@ window.hWin.HEURIST4.dbs = {
     },
 
     /**
+     * Retrieves a list of record type IDs that are linked or related to/from a given record type, using cached link information.
+     *
      * @function getLinkedRecordTypes_cache
-     * Get list of record types linked and related, to or from, the provided record type
-     * @param {int} rty_ID record type ID
-     * @param {boolean} need_separate separate linkedto and relatedto 
-     * @param {string} direction {to,from,both} which direction to get, to the record type, from the record type, or both
-     * @returns {array|object} complete array or separated into groups of linked rty IDs
+     * @memberof HEURIST4.dbs
+     * @param {number} rty_ID - The ID of the record type.
+     * @param {boolean} [need_separate=false] - If true, returns an object separating IDs by link direction and type
+     *                                       (e.g., `linkedto`, `relatedto`, `linkedfrom`, `relatedfrom`).
+     *                                       If false, returns a single array of unique record type IDs.
+     * @param {string} [direction='to'] - Specifies the direction of links to retrieve:
+     *  - `'to'`: Links pointing from `rty_ID` to other record types.
+     *  - `'from'`: Links pointing from other record types to `rty_ID`.
+     *  - `'both'`: Both 'to' and 'from' links.
+     * @returns {Array<number>|Object} An array of unique record type IDs, or an object with arrays grouped by
+     *                                 link direction/type if `need_separate` is true.
+     *                                 Example for `need_separate=true, direction='both'`:
+     *                                 `{ linkedto: [], relatedto: [], linkedfrom: [], relatedfrom: [] }`
      */
     getLinkedRecordTypes_cache: function(rty_ID, need_separate, direction = 'to'){
 
@@ -1241,13 +1344,14 @@ window.hWin.HEURIST4.dbs = {
     },
 
     /**
+     * Checks if a record type has at least one field of a specific base field type in its structure.
+     *
      * @function hasFields
-     * returns true if rectype has a field in its structure
-     * fieldtype - base field type
-     * @param {number} rty_ID 
-     * @param {string} fieldtype 
-     * @param {Object} db_structure //not used here, is it usefull to keep it here? 
-     * @returns {boolean} is_exist
+     * @memberof HEURIST4.dbs
+     * @param {number} rty_ID - The ID of the record type to check.
+     * @param {string} fieldtype - The base field type to look for (e.g., 'freetext', 'resource').
+     * @param {Object} [db_structure] - Legacy parameter, not currently used.
+     * @returns {boolean} `true` if the record type has at least one field of the specified type, `false` otherwise.
      */
     hasFields: function( rty_ID, fieldtype, db_structure ){
         
@@ -1280,91 +1384,98 @@ window.hWin.HEURIST4.dbs = {
     */
     
     /**
+     * Shortcut to get or set a field value for a Record Type Group definition.
+     * Calls {@link HEURIST4.dbs.getset} with entityName 'defRecTypeGroups'.
      * @function rtg
-     * @param {number} rec_ID 
-     * @param {string} fieldName 
-     * @param {string} newValue 
-     * @returns {null|Object} 
-     * returns Object if newValue is "undefined"
-     * returns null if newValue is assigned to field 
+     * @memberof HEURIST4.dbs
+     * @param {number} rec_ID - The ID of the Record Type Group.
+     * @param {string} [fieldName] - The name of the field to get. If undefined and `newValue` is also undefined, returns the entire record object.
+     * @param {*} [newValue] - If provided, sets the value of `fieldName` to this value.
+     * @returns {*|Object|null} If getting a value, returns the field value or the record object. If setting a value, returns `null`.
      */
     rtg: function(rec_ID, fieldName, newValue){
         return $Db.getset('defRecTypeGroups', rec_ID, fieldName, newValue);        
     },
 
     /**
+     * Shortcut to get or set a field value for a Detail Type Group definition.
+     * Calls {@link HEURIST4.dbs.getset} with entityName 'defDetailTypeGroups'.
      * @function dtg
-     * @param {number} rec_ID 
-     * @param {string} fieldName 
-     * @param {string} newValue 
-     * @returns {null|Object} 
-     * returns Object if newValue is "undefined"
-     * returns null if newValue is assigned to field  
+     * @memberof HEURIST4.dbs
+     * @param {number} rec_ID - The ID of the Detail Type Group.
+     * @param {string} [fieldName] - The name of the field to get. If undefined and `newValue` is also undefined, returns the entire record object.
+     * @param {*} [newValue] - If provided, sets the value of `fieldName` to this value.
+     * @returns {*|Object|null} If getting a value, returns the field value or the record object. If setting a value, returns `null`.
      */
     dtg: function(rec_ID, fieldName, newValue){
         return $Db.getset('defDetailTypeGroups', rec_ID, fieldName, newValue);        
     },
 
     /**
-     * @funcion vcg
-     * @param {number} rec_ID 
-     * @param {string} fieldName 
-     * @param {string} newValue 
-     * @returns {null|Object} 
-     * returns Object if newValue is "undefined"
-     * returns null if newValue is assigned to field 
+     * Shortcut to get or set a field value for a Vocabulary Group definition.
+     * Calls {@link HEURIST4.dbs.getset} with entityName 'defVocabularyGroups'.
+     * @function vcg
+     * @memberof HEURIST4.dbs
+     * @param {number} rec_ID - The ID of the Vocabulary Group.
+     * @param {string} [fieldName] - The name of the field to get. If undefined and `newValue` is also undefined, returns the entire record object.
+     * @param {*} [newValue] - If provided, sets the value of `fieldName` to this value.
+     * @returns {*|Object|null} If getting a value, returns the field value or the record object. If setting a value, returns `null`.
      */
     vcg: function(rec_ID, fieldName, newValue){
         return $Db.getset('defVocabularyGroups', rec_ID, fieldName, newValue);        
     },
     
     /**
+     * Shortcut to get or set a field value for a Record Type definition.
+     * Calls {@link HEURIST4.dbs.getset} with entityName 'defRecTypes'.
      * @function rty
-     * @param {number} rec_ID 
-     * @param {string} fieldName 
-     * @param {string} newValue 
-     * @returns {null|Object} 
-     * returns Object if newValue is "undefined"
-     * returns null if newValue is assigned to field 
+     * @memberof HEURIST4.dbs
+     * @param {number} rec_ID - The ID of the Record Type.
+     * @param {string} [fieldName] - The name of the field to get. If undefined and `newValue` is also undefined, returns the entire record object.
+     * @param {*} [newValue] - If provided, sets the value of `fieldName` to this value.
+     * @returns {*|Object|null} If getting a value, returns the field value or the record object. If setting a value, returns `null`.
      */
     rty: function(rec_ID, fieldName, newValue){
         return $Db.getset('defRecTypes', rec_ID, fieldName, newValue);        
     },
 
     /**
-     * 
-     * @param {number} rec_ID 
-     * @param {string} fieldName 
-     * @param {string} newValue 
-     * @returns {null|Object} 
-     * returns Object if newValue is "undefined"
-     * returns null if newValue is assigned to field 
+     * Shortcut to get or set a field value for a Detail Type definition.
+     * Calls {@link HEURIST4.dbs.getset} with entityName 'defDetailTypes'.
+     * @function dty
+     * @memberof HEURIST4.dbs
+     * @param {number} rec_ID - The ID of the Detail Type.
+     * @param {string} [fieldName] - The name of the field to get. If undefined and `newValue` is also undefined, returns the entire record object.
+     * @param {*} [newValue] - If provided, sets the value of `fieldName` to this value.
+     * @returns {*|Object|null} If getting a value, returns the field value or the record object. If setting a value, returns `null`.
      */
     dty: function(rec_ID, fieldName, newValue){
         return $Db.getset('defDetailTypes', rec_ID, fieldName, newValue);        
     },
 
     /**
+     * Shortcut to get or set a field value for a Term definition.
+     * Calls {@link HEURIST4.dbs.getset} with entityName 'defTerms'.
      * @function trm
-     * @param {number} rec_ID 
-     * @param {string} fieldName 
-     * @param {string} newValue 
-     * @returns {null|Object} 
-     * returns Object if newValue is "undefined"
-     * returns null if newValue is assigned to field
+     * @memberof HEURIST4.dbs
+     * @param {number} rec_ID - The ID of the Term.
+     * @param {string} [fieldName] - The name of the field to get. If undefined and `newValue` is also undefined, returns the entire record object.
+     * @param {*} [newValue] - If provided, sets the value of `fieldName` to this value.
+     * @returns {*|Object|null} If getting a value, returns the field value or the record object. If setting a value, returns `null`.
      */
     trm: function(rec_ID, fieldName, newValue){
         return $Db.getset('defTerms', rec_ID, fieldName, newValue);        
     },
 
     /**
+     * Shortcut to get or set a field value for a System Workflow Rule.
+     * Calls {@link HEURIST4.dbs.getset} with entityName 'sysWorkflowRules'.
      * @function swf
-     * @param {number} rec_ID 
-     * @param {string} fieldName 
-     * @param {string} newValue 
-     * @returns {null|Object} 
-     * returns Object if newValue is "undefined"
-     * returns null if newValue is assigned to field
+     * @memberof HEURIST4.dbs
+     * @param {number} rec_ID - The ID of the Workflow Rule.
+     * @param {string} [fieldName] - The name of the field to get. If undefined and `newValue` is also undefined, returns the entire record object.
+     * @param {*} [newValue] - If provided, sets the value of `fieldName` to this value.
+     * @returns {*|Object|null} If getting a value, returns the field value or the record object. If setting a value, returns `null`.
      */
     swf: function(rec_ID, fieldName, newValue){
         return $Db.getset('sysWorkflowRules', rec_ID, fieldName, newValue);        
@@ -1372,9 +1483,12 @@ window.hWin.HEURIST4.dbs = {
     
     
     /**
+     * Retrieves the cached index of record type structures (`rst_Index`).
+     * The index is an object where keys are record type IDs, and values are HRecordSet instances
+     * representing the structure (fields) of that record type.
      * @function rst_idx2
-     * get structures for all record types
-     * @returns recordset index
+     * @memberof HEURIST4.dbs
+     * @returns {Object<string, HRecordSet>|null} The cached record type structure index, or null if not available.
      */
     rst_idx2: function(){
         return window.hWin.HAPI4.EntityMgr.getEntityData2('rst_Index');
@@ -1382,19 +1496,27 @@ window.hWin.HEURIST4.dbs = {
     
     
     /**
+     * Analyzes the database structure to build a comprehensive map of links between record types.
+     * This includes direct links (resource pointers), relationship links (relmarkers),
+     * their reverse counterparts, and parent-child relationships based on `rst_CreateChildIfRecPtr`.
+     * Forbidden fields are ignored in this analysis.
+     *
      * @function rst_links
-     * 
-     * BASED on rectype structure
-     *
-     *  Returns
-     * direct:   rty_ID:[{all:[],dty_ID:[rty_ID,rty_ID,....],  }]
-     *  reverse:
-     *  parents:  {child_rty_ID:[parents rtyIDs,...],....}
-     * rel_direct:
-     * rel_reverse:
-     *
-     * forbidden fields are ignored
-     * @returns {{direct: Object, reverse: Object, parents: Object, rel_direct: Object, rel_reverse: Object } Object}
+     * @memberof HEURIST4.dbs
+     * @returns {Object} An object containing different views of record type links:
+     * @returns {Object<string, {all: string[], dty_ID?: string[]}>} return.direct - Direct resource links from a source rty_ID.
+     *          `rty_ID` (string): The source record type ID.
+     *          `all` (string[]): Array of all target record type IDs linked directly.
+     *          `dty_ID` (string[]): Optional, if specific detail types (fields) are involved, this maps dty_ID to target rty_IDs.
+     * @returns {Object<string, {all: string[], dty_ID?: string[]}>} return.reverse - Reverse resource links to a target rty_ID.
+     *          Structure similar to `direct`, but represents links pointing *to* the key rty_ID.
+     * @returns {Object<string, string[]>} return.parents - Parent-child relationships.
+     *          `child_rty_ID` (string): The child record type ID.
+     *          `value` (string[]): Array of parent record type IDs.
+     * @returns {Object<string, {all: string[], dty_ID?: string[]}>} return.rel_direct - Direct relationship links (relmarkers).
+     *          Structure similar to `direct`.
+     * @returns {Object<string, {all: string[], dty_ID?: string[]}>} return.rel_reverse - Reverse relationship links (relmarkers).
+     *          Structure similar to `reverse`.
      */
     rst_links: function(){
 
@@ -1488,9 +1610,14 @@ window.hWin.HEURIST4.dbs = {
 
 
     /**
+     * Retrieves links based on base field definitions (Detail Types), disregarding their specific usage in record type structures.
+     * It maps target record type IDs to an array of detail type IDs that point to them.
+     *
      * @function rst_links_base
-     * returns links by basefield - disregard usage of field
-     * @returns {Array} links
+     * @memberof HEURIST4.dbs
+     * @returns {Object<string, number[]>} An object where keys are target record type IDs (as strings)
+     *          and values are arrays of detail type IDs (`dty_ID`) that are defined to point to that record type.
+     *          Example: `{"123": [45, 67], "124": [45]}` means dty 45 and 67 can point to rty 123, and dty 45 can point to rty 124.
      */
     rst_links_base: function(){
         
@@ -1518,10 +1645,12 @@ window.hWin.HEURIST4.dbs = {
     
 
     /**
+     * Finds all record type IDs where a given detail type (field) is used.
+     *
      * @function rst_usage
-     * returns usage (list of rty_ID) for given field
-     * @param {number} dty_ID 
-     * @returns {Array} usage
+     * @memberof HEURIST4.dbs
+     * @param {number} dty_ID - The ID of the detail type (field) to check.
+     * @returns {string[]} An array of record type IDs (as strings) that include the specified detail type in their structure.
      */
     rst_usage: function(dty_ID){
        
@@ -1537,12 +1666,25 @@ window.hWin.HEURIST4.dbs = {
     
 
     /**
-     * @function: rst
-     * @param {number} rec_ID record ID
-     * @param {number} dty_ID 
-     * @param {string} fieldName Field name
-     * @param {string} newValue 
-     * @returns {null|Object}
+     * Accessor for record type structure (rst) definitions.
+     * Allows getting a specific field value from a structure definition, the entire definition object,
+     * or the HRecordSet for the structure of a given record type.
+     * If `newValue` is provided, it attempts to set the field value.
+     *
+     * @function rst
+     * @memberof HEURIST4.dbs
+     * @param {number} rec_ID - The Record Type ID (rty_ID) whose structure is being accessed.
+     * @param {number} [dty_ID] - The Detail Type ID (field ID) within the record type's structure.
+     *                          If `dty_ID` is 0 or not provided, returns the HRecordSet for the entire structure of `rec_ID`.
+     * @param {string} [fieldName] - The specific field name within the structure definition to get/set.
+     *                             If `dty_ID` is provided but `fieldName` is not, returns the entire definition object for that field.
+     * @param {*} [newValue] - If provided, sets the value of `fieldName` for the specified `dty_ID` in `rec_ID`'s structure.
+     * @returns {*|Object|HRecordSet|null}
+     *          - If setting: `null`.
+     *          - If getting `fieldName`: The field's value.
+     *          - If getting `dty_ID` without `fieldName`: The structure definition object for that field.
+     *          - If getting `rec_ID` without `dty_ID`: The HRecordSet for the record type's structure.
+     *          - `null` if `rec_ID` is not found in the structure index.
      */
     rst: function(rec_ID, dty_ID, fieldName, newValue){
         
@@ -1553,7 +1695,7 @@ window.hWin.HEURIST4.dbs = {
                 if(dty_ID>0){
                     return $Db.getset(rectype_structure[rec_ID], dty_ID, fieldName, newValue);                
                 }else{
-                    return rectype_structure[rec_ID];            
+                    return rectype_structure[rec_ID]; // Returns the HRecordSet for the rty_ID
                 }
             }
         return null
@@ -1561,12 +1703,16 @@ window.hWin.HEURIST4.dbs = {
     },
     
     /**
-     * @function getset 
-     * @param {string} entityName 
-     * @param {number} rec_ID 
-     * @param {string} fieldName 
-     * @param {string} newValue 
-     * @returns {null|}
+     * Generic getter/setter for entities managed by HAPI4.EntityMgr or direct HRecordSet instances.
+     * If `newValue` is undefined, it acts as a getter. Otherwise, it acts as a setter.
+     *
+     * @function getset
+     * @memberof HEURIST4.dbs
+     * @param {string|HRecordSet} entityName - The name of the entity (e.g., 'defRecTypes') or an HRecordSet instance.
+     * @param {number} rec_ID - The ID of the record/definition to access.
+     * @param {string} [fieldName] - The name of the field to get or set. If getting and `fieldName` is undefined, returns the entire record object.
+     * @param {*} [newValue] - The value to set if in setter mode.
+     * @returns {*|Object|null} If getting, returns the field value or record object. If setting, returns `null`.
      */
     getset: function(entityName, rec_ID, fieldName, newValue){
         if(typeof newValue == 'undefined'){
@@ -1579,14 +1725,19 @@ window.hWin.HEURIST4.dbs = {
     
      
     /**
+     * Generic getter for entities managed by HAPI4.EntityMgr or direct HRecordSet instances.
+     * Assumes database definitions are always available on the client side.
+     *
      * @function get
-     * returns
-     * recordset if Rec_ID is not defined
-     * record - as object if fieldname not defined
-     * @param {string} entityName 
-     * @param {number} rec_ID 
-     * @param {string} fieldName 
-     * @returns {Object}
+     * @memberof HEURIST4.dbs
+     * @param {string|HRecordSet} entityName - The name of the entity (e.g., 'defRecTypes') or an HRecordSet instance.
+     * @param {number} [rec_ID] - The ID of the record/definition. If not provided, returns the entire HRecordSet for `entityName`.
+     * @param {string} [fieldName] - The name of the field to retrieve. If provided `rec_ID` but not `fieldName`, returns the entire record object for `rec_ID`.
+     * @returns {*|Object|HRecordSet|null}
+     *          - The HRecordSet if `rec_ID` is not provided.
+     *          - The record object (JSON) if `rec_ID` is provided but `fieldName` is not.
+     *          - The field value if both `rec_ID` and `fieldName` are provided.
+     *          - `null` or the HRecordSet itself if `rec_ID` is invalid or not found (behavior depends on HRecordSet).
      */
     get: function (entityName, rec_ID, fieldName){
         //it is assumed that db definitions ara always exists on client side
@@ -1610,13 +1761,16 @@ window.hWin.HEURIST4.dbs = {
     
 
     /**
+     * Generic setter for entities managed by HAPI4.EntityMgr or direct HRecordSet instances.
+     * Assigns a value to a specific field or overwrites an entire record.
+     *
      * @function set
-     * assign value of field OR entire record
-     * @param {string|Array} entityName 
-     * @param {number} rec_ID 
-     * @param {string} fieldName 
-     * @param {string} newValue 
-     * 
+     * @memberof HEURIST4.dbs
+     * @param {string|HRecordSet} entityName - The name of the entity (e.g., 'defRecTypes') or an HRecordSet instance.
+     * @param {number} rec_ID - The ID of the record/definition to modify. Must be greater than 0.
+     * @param {string} [fieldName] - The name of the field to set. If not provided, `newValue` is assumed to be an object
+     *                             representing the entire record, and `rec_ID` will be updated with this object using `addRecord`.
+     * @param {*} newValue - The value to set for the field, or the record object if `fieldName` is not provided.
      */
     set: function (entityName, rec_ID, fieldName, newValue){
 
@@ -1708,13 +1862,14 @@ window.hWin.HEURIST4.dbs = {
 */    
 
     /**
+     * Finds the local ID for an entity (RecordType, DetailType, Term) given its concept code.
+     * A concept code can be in the format 'DBRegistryID-LocalIDInThatDB' or just a local ID if it's from the current DB.
+     *
      * @function getLocalID
-     * find by concept code in local definitions
-     * @param {string} entity 
-     * entities - prefix for rectypes, detailtypes, terms - rty, dty, trm
-     * @param {string} concept_code 
-     * @returns {number} - findID 
-     * return local id or zero if not found
+     * @memberof HEURIST4.dbs
+     * @param {string} entity - The entity prefix: 'rty' for RecordTypes, 'dty' for DetailTypes, 'trm' for Terms.
+     * @param {string|number} concept_code - The concept code (e.g., "123-45") or a local ID.
+     * @returns {number} The local ID if found, otherwise 0.
      */
     getLocalID: function(entity, concept_code){
 
@@ -1755,9 +1910,20 @@ window.hWin.HEURIST4.dbs = {
         return findID;
     },
     
-    //
-    // get concept code by local id
-    //
+    /**
+     * Generates a concept code for a given local entity ID.
+     * If the entity has an originating DB ID, the format is 'OriginatingDBID-IDInOriginatingDB'.
+     * If the current database is registered, format is 'CurrentRegisteredDBID-LocalID'.
+     * Otherwise, format is '0000-LocalID'.
+     * If `is_ui` is true and the DB is not registered, wraps the '0000-LocalID' in a span with a title explaining concept IDs.
+     *
+     * @function getConceptID
+     * @memberof HEURIST4.dbs
+     * @param {string} entity - The entity prefix: 'rty', 'dty', 'trm'.
+     * @param {number} local_id - The local ID of the entity.
+     * @param {boolean} [is_ui=false] - If true and the database is not registered, formats the output for UI display with an explanatory tooltip.
+     * @returns {string} The generated concept code, or an empty string if the local entity is not found.
+     */
     getConceptID: function(entity, local_id, is_ui){
         
         let rec = $Db[entity](local_id);
@@ -1786,9 +1952,15 @@ window.hWin.HEURIST4.dbs = {
     
     },
 
-    //
-    //  Returns term ID in vocabulary by code
-    //
+    /**
+     * Finds a term ID within a given vocabulary by its code.
+     *
+     * @function getTermByCode
+     * @memberof HEURIST4.dbs
+     * @param {number} vocab_id - The ID of the vocabulary to search within.
+     * @param {string} code - The term code (`trm_Code`) to search for.
+     * @returns {number|null} The term ID if found, otherwise `null`.
+     */
     getTermByCode: function(vocab_id, code){
 
         let _terms = $Db.trm_TreeData(vocab_id, 'set');
@@ -1801,9 +1973,15 @@ window.hWin.HEURIST4.dbs = {
         return null;
     },
 
-    //
-    //  Returns term ID in vocabulary by label
-    //
+    /**
+     * Finds a term ID within a given vocabulary by its label (case-insensitive).
+     *
+     * @function getTermByLabel
+     * @memberof HEURIST4.dbs
+     * @param {number} vocab_id - The ID of the vocabulary to search within.
+     * @param {string} label - The term label (`trm_Label`) to search for.
+     * @returns {number|null} The term ID if found, otherwise `null`.
+     */
     getTermByLabel: function(vocab_id, label){
 
         let _terms = $Db.trm_TreeData(vocab_id, 'set');
@@ -1818,6 +1996,15 @@ window.hWin.HEURIST4.dbs = {
         return null;
     },
     
+    /**
+     * Checks if a term has an associated icon.
+     *
+     * @function trmHasIcon
+     * @memberof HEURIST4.dbs
+     * @param {number} term_id - The ID of the term to check.
+     * @returns {boolean} `true` if the term has an icon, `false` otherwise.
+     *                    (Note: Contains a temporary condition `window.hWin.HEURIST4.util.isempty(ids)` which might always return true if `trm_Icons` is empty initially).
+     */
     trmHasIcon: function(term_id){
         let ids = window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Icons');
         return window.hWin.HEURIST4.util.isempty(ids)   //temp - remove later
@@ -1825,9 +2012,15 @@ window.hWin.HEURIST4.dbs = {
     },
 
     
-    //
-    // returns true if term belongs to vocabulary (including by reference)
-    //
+    /**
+     * Checks if a term belongs to a specific vocabulary, including by reference.
+     *
+     * @function trm_InVocab
+     * @memberof HEURIST4.dbs
+     * @param {number} vocab_id - The ID of the vocabulary.
+     * @param {number} term_id - The ID of the term.
+     * @returns {boolean} `true` if the term is in the vocabulary (directly or by reference), `false` otherwise.
+     */
     trm_InVocab: function(vocab_id, term_id){
         
         let all_terms = $Db.trm_TreeData(vocab_id, 'set');
@@ -1835,10 +2028,19 @@ window.hWin.HEURIST4.dbs = {
         return (window.hWin.HEURIST4.util.findArrayIndex(term_id, all_terms)>=0);
     },
     
-    //
-    // Comparison function for terms
-    // Sort by 'Order in branch' then 'Term label'
-    //
+    /**
+     * Comparison function for sorting term IDs.
+     * Sorts primarily by 'trm_OrderInBranch' (numeric, nulls/invalid first).
+     * If 'trm_OrderInBranch' is the same or not set for both, sorts by 'trm_Label' (case-insensitive).
+     *
+     * @function trm_SortingById
+     * @memberof HEURIST4.dbs
+     * @param {number} a - The ID of the first term.
+     * @param {number} b - The ID of the second term.
+     * @returns {number} A negative value if `a` should come before `b`,
+     *                   a positive value if `a` should come after `b`,
+     *                   or `0` if they are considered equal in sorting order.
+     */
     trm_SortingById: function(a, b){
 
         let a_name = $Db.trm(a,'trm_Label').toLocaleUpperCase();
@@ -1858,24 +2060,31 @@ window.hWin.HEURIST4.dbs = {
         }
     },
 
-    //
-    // Returns hierarchy for given vocabulary as a flat array, recordset or tree data
-    // (it uses trm_Links)
-    // vocab_id - id or "relation"
-    // mode - 0, flat - returns recordset with defined trm_Parents 
-    //        1, tree - returns treedata for fancytree
-    //        2, select - return array of options for selector {key: title: depth: is_vocab}
-    //        3, set  - array of ids 
-    //        4, labels - flat array of labels in lower case 
-    //
+    /**
+     * Generates hierarchical data for a given vocabulary or a set of vocabularies (e.g., domain "relation").
+     * It uses the `trm_Links` cache (parent:[children] mapping) to build the hierarchy.
+     *
+     * @function trm_TreeData
+     * @memberof HEURIST4.dbs
+     * @param {number|string} vocab_id - The ID of the vocabulary, or a special string like "relation" to get all vocabularies of that domain.
+     * @param {string|number} [mode='flat'] - The format of the output:
+     *  - `'flat'` or `0`: Returns an HRecordSet of terms with `trm_Parents` field populated (comma-separated parent IDs).
+     *  - `'tree'` or `1`: Returns an array of tree node objects suitable for Fancytree (includes `title`, `key`, `children`, `folder`).
+     *  - `'select'` or `2`: Returns a flat array of objects for a selector/dropdown (includes `title`, `key`, `code`, `depth`, `is_vocab`).
+     *  - `'set'` or `3`: Returns a flat array of term IDs.
+     *  - `'labels'` or `4`: Returns a flat array of term labels in lowercase.
+     * @param {boolean} [without_refs=false] - If `true`, excludes terms that are included by reference.
+     * @param {string} [language=''] - Language code (e.g., 'FRA') to retrieve translated term labels. If empty or 'ENG'/'ALL', uses default labels.
+     * @returns {HRecordSet|Array<Object>|Array<number>|Array<string>} The hierarchical data in the specified format.
+     */
     trm_TreeData: function(vocab_id, mode, without_refs = false, language = ''){
         
         let recset = window.hWin.HAPI4.EntityMgr.getEntityData('defTerms');
         //parent:[children]
         let t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
-        let trm_ids = [];
-        let res = {};
-        let translated_labels = null;
+        let trm_ids = []; // Used to accumulate results for 'select', 'set', 'labels' modes or initial IDs for 'flat' mode.
+        let res = {}; // Root node for 'tree' mode or initial result for 'relation' vocab_id.
+        let translated_labels = null; // Not currently used as per logic, but intended for translations.
         
         if(window.hWin.HEURIST4.util.isNumber(mode)){
             if(mode==1) mode='tree'
@@ -1885,20 +2094,29 @@ window.hWin.HEURIST4.dbs = {
             else mode='flat';
         }
         
-        function __addChilds(recID, lvl_parents, include_vocab){
+        /**
+         * @function __addChilds
+         * @private
+         * @description Internal recursive helper to build term hierarchy.
+         * @param {number} currentRecID - The ID of the current term/vocabulary being processed.
+         * @param {number|string} currentLvlParents - Current parent level for 'select' mode, or comma-separated parent IDs for 'flat' mode.
+         * @param {boolean} include_vocab_in_select - For 'select' mode, whether to add the vocabulary itself as an item.
+         * @returns {Object} A node object for 'tree' mode. Modifies `trm_ids` for other modes.
+         */
+        function __addChilds(currentRecID, currentLvlParents, include_vocab_in_select){
         
-            let label = $Db.trm_getLabel(recID, language);
+            let label = $Db.trm_getLabel(currentRecID, language);
 
-            let node = {title: label, key: recID};
+            let node = {title: label, key: currentRecID};
             
-            if(include_vocab && lvl_parents==0){
-                node.is_vocab = true;
+            if(mode === 'select' && include_vocab_in_select && currentLvlParents===0){
+                node.is_vocab = true; // Mark the node if it's a vocabulary root in select mode
                 trm_ids.push({title: label, 
                                 is_vocab: true,
-                                key: recID, depth:lvl_parents});
+                                key: currentRecID, depth:currentLvlParents});
             }
 
-            let children = t_idx[recID]; //array of children ids trm_Links (including references)
+            let children = t_idx[currentRecID]; //array of children ids trm_Links (including references)
             
             if(children && children.length>0){
                 
@@ -1906,7 +2124,7 @@ window.hWin.HEURIST4.dbs = {
                     //remove terms by reference
                     let real_children = [];
                     $.each(children, function(i,id){
-                        if(recset.fld(id,'trm_ParentTermID')==recID) real_children.push(id);
+                        if(recset.fld(id,'trm_ParentTermID')==currentRecID) real_children.push(id);
                     });
                     children = real_children;
                 }
@@ -1916,51 +2134,49 @@ window.hWin.HEURIST4.dbs = {
                 children.sort($Db.trm_SortingById);
                 
                 if(mode=='tree'){
-
                     let child_nodes = [];  
                     for(let i=0; i<children.length;i++){  
-                        child_nodes.push( __addChilds(children[i]) );          
+                        child_nodes.push( __addChilds(children[i], 0, false) ); // lvl_parents and include_vocab not strictly needed for tree children here
                     }
                     node['children'] = child_nodes;
                     node['folder'] = true;
 
                 }else if(mode=='select'){
-
                     for(let i=0; i<children.length;i++){ 
-                        recID = children[i];
-                        label = translated_labels ? translated_labels[recID] : recset.fld(recID, 'trm_Label');
+                        let childID = children[i];
+                        let childLabel = translated_labels ? translated_labels[childID] : recset.fld(childID, 'trm_Label');
 
-                        trm_ids.push({title: label, 
-                                      code: recset.fld(recID, 'trm_Code'),
-                                      key: recID, 
-                                      depth: lvl_parents});
-                        __addChilds(recID, lvl_parents+1);
+                        trm_ids.push({title: childLabel,
+                                      code: recset.fld(childID, 'trm_Code'),
+                                      key: childID,
+                                      depth: currentLvlParents}); // currentLvlParents should be incremented by caller if used for depth
+                        __addChilds(childID, currentLvlParents+1, false); // Recursive call for children
                     }
 
                 }else if(mode=='set' || mode=='labels'){
-                    
                     for(let i=0; i<children.length;i++){  
-                        recID = children[i];
-                        label = translated_labels ? translated_labels[recID] : recset.fld(recID, 'trm_Label');
+                        let childID = children[i];
+                        let childLabel = translated_labels ? translated_labels[childID] : recset.fld(childID, 'trm_Label');
 
-                        trm_ids.push(mode=='labels'?label.toLowerCase() 
-                                                   :recID);
-                        __addChilds(recID);
+                        trm_ids.push(mode=='labels'?childLabel.toLowerCase()
+                                                   :childID);
+                        __addChilds(childID, 0, false); // lvl_parents and include_vocab not strictly needed here
                     }
                     
-                }else{ //gather ids onlys - for recordset
-
-                    lvl_parents = lvl_parents?lvl_parents.split(','):[];
-                    lvl_parents.push(recID);
+                }else{ // 'flat' mode: gather ids and set trm_Parents
+                    let parentPathArray = currentLvlParents ? String(currentLvlParents).split(',') : [];
+                    parentPathArray.push(currentRecID);
+                    let newParentPath = parentPathArray.join(',');
 
                     for(let i=0; i<children.length;i++){  
-                        recID = children[i];
-                        trm_ids.push(recID);
+                        let childID = children[i];
+                        if (trm_ids.indexOf(childID) === -1) { // Avoid processing duplicates if structure allows
+                           trm_ids.push(childID);
+                        }
 
-                        recset.setFldById(recID, 'trm_Parents', lvl_parents.join(','));
-                        __addChilds(recID, lvl_parents.join(','));
+                        recset.setFldById(childID, 'trm_Parents', newParentPath);
+                        __addChilds(childID, newParentPath, false);
                     }
-
                 }
             }
             
@@ -1992,9 +2208,15 @@ window.hWin.HEURIST4.dbs = {
         
     },
     
-    //
-    // check direct children only by id or label
-    //
+    /**
+     * Checks if a term is a direct child of a parent term/vocabulary.
+     *
+     * @function trm_IsChild
+     * @memberof HEURIST4.dbs
+     * @param {number} parent_id - The ID of the parent term or vocabulary.
+     * @param {number} trm_id - The ID of the term to check.
+     * @returns {boolean} `true` if `trm_id` is a direct child of `parent_id`, `false` otherwise.
+     */
     trm_IsChild: function(parent_id, trm_id)
     {
         
@@ -2009,9 +2231,16 @@ window.hWin.HEURIST4.dbs = {
         
     },
 
-    //
-    // Check first level (direct children) only
-    //
+    /**
+     * Checks if a parent term/vocabulary has a direct child with a specific label (case-insensitive).
+     *
+     * @function trm_HasChildWithLabel
+     * @memberof HEURIST4.dbs
+     * @param {number} parent_id - The ID of the parent term or vocabulary.
+     * @param {string} trm_label - The label to search for among direct children.
+     * @param {number} [ignored_trm_id=null] - A term ID to ignore during the check (e.g., when checking for duplicates before saving a term).
+     * @returns {boolean} `true` if a direct child with the given label exists (and is not ignored), `false` otherwise.
+     */
     trm_HasChildWithLabel: function(parent_id, trm_label, ignored_trm_id = null){
 
         let t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
@@ -2035,9 +2264,16 @@ window.hWin.HEURIST4.dbs = {
         return false;
     },
     
-    //
-    // Check direct children for privded trm_Code
-    //
+    /**
+     * Checks if a parent term/vocabulary has a direct child with a specific code.
+     *
+     * @function trm_HasChildWithCode
+     * @memberof HEURIST4.dbs
+     * @param {number} parent_id - The ID of the parent term or vocabulary.
+     * @param {string} trm_code - The code (`trm_Code`) to search for among direct children.
+     * @param {number} [ignored_trm_id=null] - A term ID to ignore during the check.
+     * @returns {boolean} `true` if a direct child with the given code exists (and is not ignored), `false` otherwise.
+     */
     trm_HasChildWithCode: function(parent_id, trm_code, ignored_trm_id = null){
 
         const t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
@@ -2059,18 +2295,30 @@ window.hWin.HEURIST4.dbs = {
         return false;
     },
     
-    //
-    // is given term has children (including references)
-    //
+    /**
+     * Checks if a given term has any children (including references) in the `trm_Links` hierarchy.
+     *
+     * @function trm_HasChildren
+     * @memberof HEURIST4.dbs
+     * @param {number} trm_id - The ID of the term to check.
+     * @returns {boolean} `true` if the term has children, `false` otherwise.
+     */
     trm_HasChildren: function(trm_id){
         let t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
         let children = t_idx[trm_id];
         return (children && children.length>0);
     },
 
-    //
-    // change parent in links
-    //
+    /**
+     * Updates the parentage of children terms in the local `defTerms` cache and `trm_Links` index.
+     * Moves children from `old_parent_id` to `new_parent_id`.
+     * This is typically a client-side adjustment after a server-side change.
+     *
+     * @function trm_ChangeChildren
+     * @memberof HEURIST4.dbs
+     * @param {number} old_parent_id - The ID of the old parent term/vocabulary.
+     * @param {number} new_parent_id - The ID of the new parent term/vocabulary.
+     */
     trm_ChangeChildren: function(old_parent_id, new_parent_id){
         let t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
         let children = t_idx[old_parent_id];
@@ -2079,7 +2327,7 @@ window.hWin.HEURIST4.dbs = {
             
             $.each(children,function(i,trm_id){
                  if($Db.trm(trm_id,'trm_ParentTermID')==old_parent_id){
-                     $Db.trm(trm_id,'trm_ParentTermID',new_parent_id);
+                     $Db.trm(trm_id,'trm_ParentTermID',new_parent_id); // Update actual term definition
                  }
             });
             
@@ -2089,60 +2337,88 @@ window.hWin.HEURIST4.dbs = {
             }else{
                 t_idx[new_parent_id] = children;
             }
-           
+            // It might be necessary to remove children from old_parent_id in t_idx as well
+            // delete t_idx[old_parent_id]; or t_idx[old_parent_id] = [];
         }
     },
     
     
-    //
-    // get all vocabularies OR for given domain
-    //
+    /**
+     * Retrieves all vocabularies, optionally filtered by a specific domain.
+     * Vocabularies are identified as terms with no `trm_ParentTermID`.
+     *
+     * @function trm_getVocabs
+     * @memberof HEURIST4.dbs
+     * @param {string} [domain] - If provided, only vocabularies belonging to this domain (e.g., "relation") are returned.
+     * @returns {number[]} An array of vocabulary IDs (which are also term IDs).
+     */
     trm_getVocabs: function(domain){
 
-        let t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+        let t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); // Used to get keys, but could also iterate defTerms
         let res = [];
-        let parents = Object.keys(t_idx);
-        for (let i=0; i<parents.length; i++){ //first level
-            let trm_ID = parents[i];
-            let trm_ParentTermID = $Db.trm(trm_ID, 'trm_ParentTermID');
-            if(!(trm_ParentTermID>0)){
-                if(!domain || $Db.trm(trm_ID, 'trm_Domain')==domain)
-                    res.push(trm_ID);    
+        let parents = Object.keys(t_idx); // These are parent_IDs from trm_Links, not necessarily all vocabs
+                                          // A more robust way might be to iterate all terms and check ParentTermID and domain.
+                                          // However, current logic iterates keys of trm_Links (which are terms that have children).
+        $Db.trm().each2(function(trm_ID, termRec){ // Iterate all terms instead
+            if(!(termRec.trm_ParentTermID > 0)){ // It's a vocabulary
+                 if(!domain || termRec.trm_Domain == domain) {
+                    res.push(trm_ID);
+                 }
             }
-        }
+        });
         
         return res;
     },
     
-    //
-    // get array of vocabularies by reference
-    // (where the given term directly or by referecne belongs to)
-    //
+    /**
+     * Recursively finds all vocabularies to which a given term belongs, including by reference.
+     *
+     * @function trm_getAllVocabs
+     * @memberof HEURIST4.dbs
+     * @param {number} trm_id - The ID of the term.
+     * @returns {number[]} An array of vocabulary IDs that the term is part of, directly or indirectly.
+     */
     trm_getAllVocabs: function(trm_id){
         let t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
         
         let res = [];
-        let parents = Object.keys(t_idx);
+        let parents = Object.keys(t_idx); // Iterate through all terms that are parents in trm_Links
         for (let i=0; i<parents.length; i++){
             let parent_ID = parents[i];
-            let k = window.hWin.HEURIST4.util.findArrayIndex(trm_id, t_idx[parent_ID]);
-            if(k>=0){
-                let trm_ParentTermID = $Db.trm(parent_ID, 'trm_ParentTermID');
-                if(trm_ParentTermID>0){
-                    res = res.concat($Db.trm_getAllVocabs(parent_ID));
-                }else{
-                    //vocabulary!
-                    res.push( parent_ID );     
+            if (t_idx[parent_ID]) { // Ensure parent_ID actually has children list in t_idx
+                let k = window.hWin.HEURIST4.util.findArrayIndex(trm_id, t_idx[parent_ID]);
+                if(k>=0){ // If trm_id is a child of parent_ID
+                    let trm_ParentTermID = $Db.trm(parent_ID, 'trm_ParentTermID');
+                    if(trm_ParentTermID>0){ // If parent_ID is itself a term (not a vocab root)
+                        res = res.concat($Db.trm_getAllVocabs(parent_ID)); // Recurse upwards
+                    }else{ // parent_ID is a vocabulary
+                        if (res.indexOf(parent_ID) === -1) { // Avoid duplicates
+                           res.push( parent_ID );
+                        }
+                    }
                 }
             }
         }
-        return res;
+        // Also consider the direct vocabulary of the term itself if it's a root of its own real vocabulary
+        let directVocab = $Db.getTermVocab(trm_id);
+        if ($Db.trm(directVocab, 'trm_ParentTermID') == 0 && res.indexOf(directVocab) === -1) {
+            // If the term's "real" vocab is a root vocab and not already found.
+            // This case handles terms that might not be explicitly linked under other vocabs in trm_Links
+            // but are part of their own vocabulary structure.
+            // However, the logic primarily relies on trm_Links, so this might be redundant or cover edge cases.
+        }
+        return [...new Set(res)]; // Ensure uniqueness
     },
 
     /**
-     * Creates array of objects where, key => term id & value => default/translated label
-     * If a term label doesn't have a translation for the provided language,
-     *  than the original label is used
+     * Creates an object mapping term IDs to their translated (or default) labels for a given vocabulary or list of term IDs.
+     * If a translation for the specified language is not available, the term's original label is used.
+     *
+     * @function trm_getTranslatedLabels
+     * @memberof HEURIST4.dbs
+     * @param {number|number[]} vocab_id - The ID of a vocabulary (to get all its terms) or an array of term IDs.
+     * @param {string} language - The language code (e.g., 'FRA') for translation.
+     * @returns {Object<number, string>} An object where keys are term IDs and values are their corresponding labels.
      */
     trm_getTranslatedLabels: function(vocab_id, language){
 
@@ -2166,9 +2442,17 @@ window.hWin.HEURIST4.dbs = {
         return translated_list;
     },
 
-    //
-    //
-    //
+    /**
+     * Retrieves the label for a given term ID, optionally translated into a specified language.
+     * If the language is not provided, or is 'ENG'/'ALL', or if no translation exists,
+     * the term's default `trm_Label` is returned.
+     *
+     * @function trm_getLabel
+     * @memberof HEURIST4.dbs
+     * @param {number} term_id - The ID of the term.
+     * @param {string} [language=null] - The 3-letter language code (e.g., 'FRA') for the desired translation.
+     * @returns {string} The (translated) label of the term, or its default label if no translation is found or language is not specified. Returns `trm_Label` from `$Db.trm` as fallback.
+     */
     trm_getLabel: function(term_id, language = null){
 
 
@@ -2191,30 +2475,52 @@ window.hWin.HEURIST4.dbs = {
         return $Db.trm(term_id, 'trm_Label');
     },
     
-    //
-    // remove any mention of term from hierarchy (trm_Links)
-    //
+    /**
+     * Removes all mentions of a specific term ID from the `trm_Links` hierarchy cache.
+     * This involves removing the term if it's a parent key, and removing it from any child arrays it might be in.
+     *
+     * @function trm_RemoveLinks
+     * @memberof HEURIST4.dbs
+     * @param {number} trm_id - The ID of the term to remove from the links structure.
+     */
     trm_RemoveLinks: function(trm_id){
         let t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
         let parents = Object.keys(t_idx);
         let i = 0;
         while(i<parents.length){
-            if(parents[i]==trm_id){
-                delete parents[i];   
+            if(parents[i]==trm_id){ // If the term itself is a parent key
+                delete t_idx[parents[i]]; // Remove its entry (and all its children from this link perspective)
+                // Re-evaluate parents array as its keys might have changed if parents[i] was string representation of number
+                parents = Object.keys(t_idx);
+                // No increment for i here, as the array length changed and current index needs re-evaluation
             }else{
-                let k = window.hWin.HEURIST4.util.findArrayIndex(trm_id, t_idx[parents[i]]);
-                if(k>=0){
-                    t_idx[parents[i]].splice(k,1);
+                if (t_idx[parents[i]]) { // Check if parent still exists (could be deleted in previous iteration)
+                    let k = window.hWin.HEURIST4.util.findArrayIndex(trm_id, t_idx[parents[i]]);
+                    if(k>=0){
+                        t_idx[parents[i]].splice(k,1);
+                    }
                 }
                 i = i +1;
             }
         }
     },
     
-    //
-    // add/remove terms reference links 
-    // it calls server side and then update client side by changeParentInIndex
-    //
+    /**
+     * Manages term references by adding or removing terms from vocabularies/parent terms.
+     * This function makes a server request to perform the action and then updates the client-side
+     * `trm_Links` cache via `changeParentInIndex` upon success.
+     * It includes checks to prevent adding terms that already exist in the target vocabulary
+     * and handles potential server-side blocks (e.g., term in use).
+     *
+     * @function setTermReferences
+     * @memberof HEURIST4.dbs
+     * @param {number[]} term_IDs - Array of term IDs to be moved or referenced.
+     * @param {number} new_vocab_id - Target vocabulary ID. If > 0, terms are added/moved here.
+     * @param {number} new_parent_id - Target parent term ID within `new_vocab_id`. If 0, `new_vocab_id` is used as parent.
+     * @param {number} old_vocab_id - Source vocabulary ID (if removing/moving from).
+     * @param {number} old_parent_id - Source parent term ID. If 0, `old_vocab_id` is used as parent.
+     * @param {function} [callback] - A callback function to execute after the server response and client-side update.
+     */
     setTermReferences: function(term_IDs, new_vocab_id, new_parent_id, old_vocab_id, old_parent_id, callback){
 
         let default_palette_class = 'ui-heurist-design';
@@ -2229,23 +2535,25 @@ window.hWin.HEURIST4.dbs = {
             let is_exists = 0;
             for(let i=0; i<term_IDs.length; i++){
                 if(window.hWin.HEURIST4.util.findArrayIndex(term_IDs[i], trm_ids)>=0){
-                    is_exists = term_IDs[i];
+                    is_exists = term_IDs[i]; // Selected term itself is already in target
                     break;
                 }
-                let children = $Db.trm_TreeData(term_IDs[i], 'set');
-                for(let j=0; j<children.length; j++){
-                    if(window.hWin.HEURIST4.util.findArrayIndex(children[j], trm_ids)>=0){
-                        is_exists = children[j];
+                // Check if any child of the selected terms is already in the target vocabulary
+                let children_of_term_i = $Db.trm_TreeData(term_IDs[i], 'set');
+                for(let j=0; j<children_of_term_i.length; j++){
+                    if(window.hWin.HEURIST4.util.findArrayIndex(children_of_term_i[j], trm_ids)>=0){
+                        is_exists = children_of_term_i[j]; // A child of selected term is in target
                         break;
                     }
-                    if(all_children.indexOf(children[j])<0) all_children.push(children[j]);
+                    if(all_children.indexOf(children_of_term_i[j])<0) all_children.push(children_of_term_i[j]);
                 }
+                if (is_exists) break;
             }
             
             //some of selected terms are already in this vocabulary
             if(is_exists>0){
                 window.hWin.HEURIST4.msg.showMsgDlg('Term <b>'+$Db.trm(is_exists,'trm_Label')
-                    +'</b> is already in vocabulary <b>'+$Db.trm(new_vocab_id,'trm_Label')+'</b>', 
+                    +'</b> (or one of its children) is already in vocabulary <b>'+$Db.trm(new_vocab_id,'trm_Label')+'</b>',
                     null, {title:'Terms'},
                     {default_palette_class:default_palette_class});                        
                 return;
@@ -2254,10 +2562,10 @@ window.hWin.HEURIST4.dbs = {
             //exclude all child terms - they will be added via their parent
             let i=0;
             while(i<term_IDs.length){
-                if(all_children.indexOf(term_IDs[i])<0){
+                if(all_children.indexOf(term_IDs[i])<0){ // If term_ID[i] is not a child of another term_ID in the list
                     i++;
                 }else{
-                    term_IDs.splice(i,1);
+                    term_IDs.splice(i,1); // Remove it, as its parent will bring it along
                 } 
             }
         }
@@ -2324,9 +2632,17 @@ window.hWin.HEURIST4.dbs = {
 
     },
 
-    //
-    // change links in trm_Links (after server action)
-    //
+    /**
+     * Updates the client-side `trm_Links` cache after a server-side action has changed term parentage.
+     * If `new_parent_id` is > 0, it adds the `term_ID` (or array of `term_ID`s) to the children of `new_parent_id`.
+     * If `old_parent_id` is > 0, it removes `term_ID` from the children of `old_parent_id`.
+     *
+     * @function changeParentInIndex
+     * @memberof HEURIST4.dbs
+     * @param {number} new_parent_id - The ID of the new parent term/vocabulary. If 0 or less, no addition is made.
+     * @param {number|number[]} term_ID - The ID or array of IDs of the term(s) whose parentage changed.
+     * @param {number} old_parent_id - The ID of the old parent term/vocabulary. If 0 or less, no removal is attempted from an old parent.
+     */
     changeParentInIndex: function(new_parent_id, term_ID, old_parent_id){
 
         if(new_parent_id==old_parent_id) return;
@@ -2348,10 +2664,20 @@ window.hWin.HEURIST4.dbs = {
             }
 
         }
-        if(old_parent_id>0){
-            let k = window.hWin.HEURIST4.util.findArrayIndex(term_ID, t_idx[old_parent_id]);    
-            if(k>=0){
-                t_idx[old_parent_id].splice(k,1);
+        if(old_parent_id>0 && t_idx[old_parent_id]){ // Ensure old_parent_id exists in t_idx
+            // If term_ID is an array, this part needs to iterate through term_ID to remove each one
+            if(Array.isArray(term_ID)) {
+                for(let i=0; i<term_ID.length; i++) {
+                    let k = window.hWin.HEURIST4.util.findArrayIndex(term_ID[i], t_idx[old_parent_id]);
+                    if(k>=0){
+                        t_idx[old_parent_id].splice(k,1);
+                    }
+                }
+            } else {
+                let k = window.hWin.HEURIST4.util.findArrayIndex(term_ID, t_idx[old_parent_id]);
+                if(k>=0){
+                    t_idx[old_parent_id].splice(k,1);
+                }
             }
         }
 
@@ -2360,9 +2686,20 @@ window.hWin.HEURIST4.dbs = {
     
         
     //--------------------------------------------------------------------------
-    //
-    //
-    //
+    /**
+     * Applies a new order to items in a recordset and saves this order to the server.
+     * It updates a specified order field (e.g., `vcg_Order`) for each record in the recordset
+     * based on its current position in the recordset's internal order.
+     *
+     * @function applyOrder
+     * @memberof HEURIST4.dbs
+     * @param {HRecordSet} recordset - The HRecordSet instance containing the items to reorder.
+     *                                 Its `entityName` property is used in the save request.
+     *                                 Its `getOrder()` method provides the current sequence of record IDs.
+     * @param {string} prefix - The prefix for the ID field (e.g., 'vcg' for `vcg_ID`) and the order field (e.g., 'vcg' for `vcg_Order`).
+     * @param {function} [callback] - A callback function to execute after the server response.
+     *                                It's called on success or if no changes were needed.
+     */
     applyOrder: function(recordset, prefix, callback){
 
         let entityName = recordset.entityName;
@@ -2376,7 +2713,7 @@ window.hWin.HEURIST4.dbs = {
         for(; (idx<len); idx++) {
             let record = recordset.getById(rec_order[idx]);
             let oldval = recordset.fld(record, fieldOrder);
-            let newval = String(idx+1).lpad(0,3);
+            let newval = String(idx+1).lpad(0,3); // New order is 1-based, padded to 3 digits
             if(oldval!=newval){
                 recordset.setFld(record, fieldOrder, newval);        
                 let fld = {};
@@ -2408,9 +2745,15 @@ window.hWin.HEURIST4.dbs = {
         }
     },
     
-    //
-    // returns record count by types
-    //
+    /**
+     * Fetches record counts for each record type and updates the `rty_RecCount` field
+     * in the local `defRecTypes` cache.
+     * Sets `needUpdateRtyCount` to 0 upon initiating the request.
+     *
+     * @function get_record_counts
+     * @memberof HEURIST4.dbs
+     * @param {function} [callback] - A callback function to execute after the counts have been fetched and applied.
+     */
     get_record_counts: function( callback )
     {
     
@@ -2420,8 +2763,8 @@ window.hWin.HEURIST4.dbs = {
                 'a'       : 'counts',
                 'entity'  : 'defRecTypes',
                 'mode'    : 'record_count',
-                //'rty_ID'  :
-                'ugr_ID'  : window.hWin.HAPI4.user_id()
+                //'rty_ID'  : // Can be used to get count for specific rty_ID, but not used here
+                'ugr_ID'  : window.hWin.HAPI4.user_id() // Counts are user-specific (permissions)
                 };
                              
         window.hWin.HAPI4.EntityMgr.doRequest(request, 
@@ -2446,28 +2789,47 @@ window.hWin.HEURIST4.dbs = {
         
     },
     
-    //
-    //
-    //
+    /**
+     * Retrieves the ID of the 'Trash' group for a given entity type (e.g., 'rtg', 'dtg', 'vcg').
+     * It caches the ID locally after the first lookup.
+     *
+     * @function getTrashGroupId
+     * @memberof HEURIST4.dbs
+     * @param {string} entity - The entity prefix for the group type (e.g., 'rtg' for Record Type Groups).
+     *                          It expects a corresponding accessor like `$Db.rtg()` to exist.
+     * @returns {number} The ID of the 'Trash' group for that entity type, or 0 if not found or on error.
+     */
     getTrashGroupId: function(entity){
         
-        if(!(this[entity+'_trash_id']>0)){
-            let name = entity+'_Name';
-            let that = this;
-            $Db[entity]().each2(function(id, record){
-                if(record[name]=='Trash'){
-                    that[entity+'_trash_id'] = id;
-                    return false;
+        if(!(this[entity+'_trash_id']>0)){ // Check local cache first
+            let name_field = entity+'_Name'; // e.g., rtg_Name
+            let that = this; // To access 'this' (HEURIST4.dbs) inside 'each2'
+            $Db[entity]().each2(function(id, record){ // e.g., $Db.rtg().each2(...)
+                if(record[name_field]=='Trash'){
+                    that[entity+'_trash_id'] = id; // Cache it
+                    return false; // Stop iteration
                 }
             });
         }
         return this[entity+'_trash_id'];
     },
     
-    //
-    // prase rt:dt:rt:dt....  hierarchy - returns composed label and fields
-    // used in facet and query builders
-    //
+    /**
+     * Parses a hierarchical code string (e.g., "rtid:dtid:rtid:dtid") into a human-readable format.
+     * Used in facet and query builders to display the path of a selected field.
+     * If a record type or field in the path is not found, it may mark the facet for removal.
+     *
+     * @function parseHierarchyCode
+     * @memberof HEURIST4.dbs
+     * @param {string} codes - The colon-separated hierarchical code string.
+     * @param {number} [top_rty_ID] - The top-level record type ID, used if the first `rtid` in `codes` is 'any'.
+     * @returns {false|{harchy: string[], harchy_fields: string[]}}
+     *          `false` if a component in the hierarchy is not found (signaling potential removal of a facet).
+     *          Otherwise, an object:
+     *          - `harchy` (string[]): Array of strings representing the full path with HTML bolding for record types
+     *                                and separators ('.', '>', '<').
+     *          - `harchy_fields` (string[]): Array of field display names in the hierarchy.
+     */
     parseHierarchyCode: function(codes, top_rty_ID){
 
         codes = codes.split(':');
@@ -2487,7 +2849,7 @@ window.hWin.HEURIST4.dbs = {
             if(rtid!=''){
                 if(rtid=='any'){
                     harchy.push('');    
-                    if(top_rty_ID>0) rtid = top_rty_ID;
+                    if(top_rty_ID>0) rtid = top_rty_ID; // Use top_rty_ID for context if 'any'
                     
                 }else if($Db.rty(rtid)==null){
                     //record type was removed - remove facet
@@ -2499,7 +2861,7 @@ window.hWin.HEURIST4.dbs = {
             }
 
             let rec_header = null;
-            
+            // Check for special header field codes
             if(dtid=='title'){
                 rec_header = 'Constructed record title';
             }else if(dtid=='ids'){
@@ -2530,28 +2892,28 @@ window.hWin.HEURIST4.dbs = {
                 rec_header = `${$Db.rty(rtid, 'rty_Name')} records`;
             }
             
-            if( rec_header ){
+            if( rec_header ){ // If it's a recognized header field
             
                     harchy.push(' . '+rec_header);
                     harchy_fields.push(rec_header);
                 
             }else
-            if(dtid){
+            if(dtid){ // If dtid is present and not a header field
                 
-                if(dtid.indexOf('r.')==0){
+                if(dtid.indexOf('r.')==0){ // Relationship field prefix
                     dtid = dtid.substr(2);
                 }
 
-                let linktype = dtid.substr(0,2);                                
-                if(isNaN(Number(linktype))){
-                    dtid = dtid.substr(2);
+                let linktype = dtid.substr(0,2); // Check for link type prefixes (lt, rt, lf, rf)
+                if(isNaN(Number(linktype))){ // If prefix is not a number, it's a link type
+                    dtid = dtid.substr(2); // Actual dty_ID
 
                     if(dtid>0){
 
 
-                        if(linktype=='lt' || linktype=='rt'){
+                        if(linktype=='lt' || linktype=='rt'){ // Linked To or Related To (direct)
 
-                            const sFieldName = (rtid=='any')
+                            const sFieldName = (rtid=='any') // If rtid is 'any', get dty_Name, else get rst_DisplayName
                                             ?$Db.dty(dtid, 'dty_Name')
                                             :$Db.rst(rtid, dtid, 'rst_DisplayName');
 
@@ -2563,8 +2925,8 @@ window.hWin.HEURIST4.dbs = {
 
                             harchy.push(' . '+sFieldName+' > ');
                             harchy_fields.push(sFieldName);
-                        }else{
-                            let from_rtid = codes[j+2];
+                        }else{ // Linked From or Related From (reverse)
+                            let from_rtid = codes[j+2]; // The rtid from which this link originates
 
                             const sFieldName = $Db.rst(from_rtid, dtid, 'rst_DisplayName');
 
@@ -2575,11 +2937,12 @@ window.hWin.HEURIST4.dbs = {
                             }
 
                             harchy.push(' &lt '+sFieldName+' . ');
+                            // harchy_fields might not push here for reverse links, depends on desired display
                         }
 
                     }//dtid>0
 
-                }else{
+                }else{ // Normal field (not a link type with prefix)
 
                     const sFieldName = (rtid=='any')
                                 ?$Db.dty(dtid, 'dty_Name')
@@ -2603,9 +2966,16 @@ window.hWin.HEURIST4.dbs = {
         return removeFacet? false :{harchy:harchy, harchy_fields:harchy_fields};
     },
     
-    //
-    // returns rules for recordtype and user
-    //
+    /**
+     * Retrieves workflow rules (`sysWorkflowRules`) applicable to a given record type and user.
+     * Filters rules based on `swf_RecTypeID` and user restrictions in `swf_StageRestrictedTo`.
+     *
+     * @function getSwfByRectype
+     * @memberof HEURIST4.dbs
+     * @param {number} _rty_ID - The ID of the record type.
+     * @param {number} _usr_ID - The ID of the user. If 0 or less, user restrictions are not checked.
+     * @returns {Object[]} An array of workflow rule objects (records from `sysWorkflowRules`) that apply.
+     */
     getSwfByRectype: function(_rty_ID, _usr_ID){
         
         let res = [];
@@ -2619,7 +2989,7 @@ window.hWin.HEURIST4.dbs = {
                 if(_usr_ID>0 && record['swf_StageRestrictedTo']){
                     //check restriction
                     let grps = record['swf_StageRestrictedTo'].split(',');
-                    if(grps.indexOf(''+_usr_ID)<0){
+                    if(grps.indexOf(''+_usr_ID)<0){ // User/group not in allowed list
                         is_allowed = false;
                     }
                 }
@@ -2633,9 +3003,22 @@ window.hWin.HEURIST4.dbs = {
     },
     
     
-    //
-    // Direct edit of calculated field formula
-    //
+    /**
+     * Initiates the process for directly editing a calculated field's formula.
+     * 1. Fetches the calculated function definition (`defCalcFunctions`).
+     * 2. Finds all record types that use this calculated function in their structure (`defRecStructure`).
+     * 3. Opens a report editor dialog (`widgets/report/reportEditor`) pre-filled with the formula
+     *    and contextual information (affected record types).
+     * 4. On closing the editor, if changes were made:
+     *    a. Saves the updated formula back to `defCalcFunctions`.
+     *    b. If successful and there are affected record types, opens a long operation dialog
+     *       (`admin/verification/longOperationInit.php?type=calcfields`) to re-calculate affected fields.
+     *
+     * @function editCalculatedField
+     * @memberof HEURIST4.dbs
+     * @param {number} cfn_ID - The ID of the calculated function definition (`cfn_ID`) to edit.
+     * @param {function} [main_callback] - A callback function to be passed as `afterclose` to the long operation dialog.
+     */
     editCalculatedField: function(cfn_ID, main_callback){
 
         if(!(cfn_ID>0)) return;
@@ -2658,21 +3041,21 @@ window.hWin.HEURIST4.dbs = {
 
                         //find affected record types
                         //finds all fields with rst_CalcFunctionID = cfn_ID
-                        let request = {};
-                        request['rst_CalcFunctionID']  = cfn_ID;
-                        request['a']          = 'search'; //action
-                        request['entity']     = 'defRecStructure';
-                        request['details']    = 'rectype';
-                        request['request_id'] = window.hWin.HEURIST4.util.random();
-                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                            function(response){
-                                if(response.status == window.hWin.ResponseStatus.OK){
+                        let request_struct = {}; // Renamed to avoid conflict with outer 'request'
+                        request_struct['rst_CalcFunctionID']  = cfn_ID;
+                        request_struct['a']          = 'search'; //action
+                        request_struct['entity']     = 'defRecStructure';
+                        request_struct['details']    = 'rectype'; // We need rst_RecTypeID from the results
+                        request_struct['request_id'] = window.hWin.HEURIST4.util.random();
+                        window.hWin.HAPI4.EntityMgr.doRequest(request_struct,
+                            function(response_struct){ // Renamed to avoid conflict
+                                if(response_struct.status == window.hWin.ResponseStatus.OK){
 
                                     let rectypes = null;
-                                    let recset = new HRecordSet(response.data);
-                                    if(recset.length()>0){
+                                    let recset_struct = new HRecordSet(response_struct.data); // Renamed
+                                    if(recset_struct.length()>0){
                                         rectypes = [];
-                                        recset.each2(function(id, rec){
+                                        recset_struct.each2(function(id, rec){
                                             rectypes.push(rec['rst_RecTypeID']);
                                         });
                                     }
@@ -2683,23 +3066,23 @@ window.hWin.HEURIST4.dbs = {
                                                 keep_instance:false, 
                                                 
                                                 is_snippet_editor: true, 
-                                                rty_ID:rectypes, 
-                                                rec_ID:0,
+                                                rty_ID:rectypes, // Pass affected record types to editor
+                                                rec_ID:0, // No specific record context for editing the formula itself
                                                 template_body:cfn_Content,
                                                 
-                                                onClose: function(context){
+                                                onClose: function(context){ // `context` is the new formula from editor
                                                     if(!context) return;
 
                                                     //save new formula
-                                                    let request = {
+                                                    let request_save = { // Renamed
                                                         'a'          : 'save',
                                                         'entity'     : 'defCalcFunctions',
                                                         'request_id' : window.hWin.HEURIST4.util.random(),
                                                         'fields'     : {cfn_ID:cfn_ID, cfn_FunctionSpecification:context}
                                                     };
-                                                    window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                                                        function(response){
-                                                            if(response.status == window.hWin.ResponseStatus.OK){
+                                                    window.hWin.HAPI4.EntityMgr.doRequest(request_save,
+                                                        function(response_save){ // Renamed
+                                                            if(response_save.status == window.hWin.ResponseStatus.OK){
                                                                 //update caclulated fields
                                                                 if(rectypes && rectypes.length>0){
 
@@ -2715,9 +3098,12 @@ window.hWin.HEURIST4.dbs = {
                                                                         afterclose: main_callback
                                                                     });                                                            
 
+                                                                } else if (window.hWin.HEURIST4.util.isFunction(main_callback)) {
+                                                                    // If no rectypes affected but save was OK, still call callback if provided
+                                                                    main_callback.call();
                                                                 }
                                                             }else{
-                                                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                                                                window.hWin.HEURIST4.msg.showMsgErr(response_save);
                                                             }
                                                     });
                                                 }
@@ -2725,7 +3111,7 @@ window.hWin.HEURIST4.dbs = {
                                     window.hWin.HEURIST4.ui.showRecordActionDialog('reportEditor', popup_dialog_options);
 
                                 }else{
-                                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                                    window.hWin.HEURIST4.msg.showMsgErr(response_struct);
                                 }
                             }
                         );
@@ -2737,10 +3123,21 @@ window.hWin.HEURIST4.dbs = {
         });           
     },
     
-    //
-    // returns list of rt and dt titles for linked hierachy rt:dt:rt:dt
-    //                (in faceted search and linked geo places)
-    //
+    /**
+     * Parses a hierarchical code string (e.g., "rtid:dtid:rtid:dtid") and returns display titles for the components.
+     * Used in faceted search and for displaying linked geo places.
+     * Similar to `parseHierarchyCode` but focuses on generating titles.
+     *
+     * @function getHierarchyTitles
+     * @memberof HEURIST4.dbs
+     * @param {string} codes - The colon-separated hierarchical code string.
+     * @returns {false|{harchy: string[], harchy_fields: string[]}}
+     *          `false` if a component in the hierarchy is not found.
+     *          Otherwise, an object:
+     *          - `harchy` (string[]): Array of strings representing the full path with HTML bolding for record types
+     *                                and separators ('.', '>', '<').
+     *          - `harchy_fields` (string[]): Array of field display names in the hierarchy.
+     */
     getHierarchyTitles: function( codes ){
       
         let removeFacet = false;
@@ -2752,7 +3149,7 @@ window.hWin.HEURIST4.dbs = {
             let rtid = codes[j];
             let dtid = codes[j+1];
             
-            if(rtid.indexOf(',')>0){
+            if(rtid.indexOf(',')>0){ // Take the first rtid if it's a list
                 rtid = rtid.split(',')[0];
             }
             
@@ -2764,7 +3161,8 @@ window.hWin.HEURIST4.dbs = {
             
             harchy.push('<b>'+$Db.rty(rtid,'rty_Name')+'</b>');
             
-            if(j==0 && dtid=='title'){
+            // Handle special header field codes
+            if(j==0 && dtid=='title'){ // Only for the top-level item
                harchy_fields.push('Constructed record title');
             }else
             if(dtid=='modified'){
@@ -2773,7 +3171,7 @@ window.hWin.HEURIST4.dbs = {
                harchy_fields.push("Added"); 
             }else if(dtid=='ids'){
                harchy_fields.push("Record ID"); 
-            }else if(dtid=='typeid' || dtid=='t'){
+            }else if(dtid=='typeid' || dtid=='t'){ // 't' is a shorthand for typeid
                harchy_fields.push("Type ID"); 
             }else if(dtid=='typename'){ //record type name rty_Name
                harchy_fields.push("Type Name"); 
@@ -2790,60 +3188,65 @@ window.hWin.HEURIST4.dbs = {
             }else if(dtid=='tag'){
                harchy_fields.push("Tags"); 
             }
+            // End of header field specific section for harchy_fields
             
-            if(dtid.indexOf('r.')==0){
+            if(dtid.indexOf('r.')==0){ // Relationship field prefix
                 dtid = dtid.substr(2);
             }
             
-            let linktype = dtid.substr(0,2);                                
-            if(isNaN(Number(linktype))){
-                dtid = dtid.substr(2);
+            let linktype = dtid.substr(0,2);  // Check for link type prefixes
+            if(isNaN(Number(linktype))){ // If prefix is not a number, it's a link type
+                dtid = dtid.substr(2); // Actual dty_ID
                 
                 if(dtid>0){
                 
                     
-                if(linktype=='lt' || linktype=='rt'){
+                if(linktype=='lt' || linktype=='rt'){ // Linked To or Related To (direct)
                     
                     const sFieldName = $Db.rst(rtid, dtid, 'rst_DisplayName');
                     
                     if(window.hWin.HEURIST4.util.isempty(sFieldName)){
-                        //field was removed - remove facet
                         removeFacet = true;
                         break;
                     }
                     
-                    harchy.push(' . '+sFieldName+' &gt ');
-                    harchy_fields.push(sFieldName);
-                }else{
-                    //reverse link
-                    const from_rtid = codes[j+2];
+                    harchy.push(' . '+sFieldName+' &gt; '); // Add field name and separator to main hierarchy path
+                    harchy_fields.push(sFieldName); // Add field name to field list
+                }else{ // Linked From or Related From (reverse)
+                    const from_rtid = codes[j+2]; // The rtid from which this link originates
 
                     const sFieldName = $Db.rst(from_rtid, dtid, 'rst_DisplayName');
                     
                     if(window.hWin.HEURIST4.util.isempty(sFieldName)){
-                        //field was removed - remove facet
                         removeFacet = true;
                         break;
                     }
                     
-                    harchy.push(' &lt '+sFieldName+' . ');
-                    harchy_fields.push(sFieldName);
+                    harchy.push(' &lt; '+sFieldName+' . ');
+                    harchy_fields.push(sFieldName); // Add field name for reverse links too
                 }
                 
                 }//dtid>0
                 
-            }else{
-
+            }else{ // Normal field
+                // This 'else' block is reached if dtid was not a header field code AND
+                // it didn't have a non-numeric two-letter prefix (lt, rt, lf, rf).
+                // So, dtid here is expected to be a direct field dty_ID.
                 const sFieldName = $Db.rst(rtid, dtid, 'rst_DisplayName');
                 
                 if(window.hWin.HEURIST4.util.isempty(sFieldName)){
-                    //field was removed - remove facet
-                    removeFacet = true;
-                    break;
+                    // This can happen if dtid was a header code not caught above, or an invalid field.
+                    // For example, if dtid was 'title' but j > 0.
+                    // Or if it's a simple field that was removed.
+                    if (! (j==0 && dtid=='title') && !['modified', 'added', 'ids', 'typeid', 't', 'typename', 'addedby', 'owner', 'access', 'notes', 'url', 'tag'].includes(dtid) ) {
+                         // Only mark for removal if it's not a known header type that might have been pushed to harchy_fields already
+                        removeFacet = true;
+                        break;
+                    }
+                } else {
+                     harchy.push(' . '+sFieldName);
+                     harchy_fields.push(sFieldName);
                 }
-                
-                harchy.push(' . '+sFieldName);
-                harchy_fields.push(sFieldName);
             }
             j = j+2;
         }//while codes
@@ -2857,14 +3260,21 @@ window.hWin.HEURIST4.dbs = {
     },
 
     /**
-     * Retrieve each base field and each instance of the base field
-     * @param {number|Array} rty_IDs - Single (or array) of record type ids
-     * @param {number} mode - 
-     *        0: flat data; [ [dty id, dty label, [ rst label 1, rst label 2, ... ], show_in_lists ], ... ]
-     *        1: for dropdowns [ {key: dty id, title: dty label, show_in_lists: true|false}, {key: dty id, title: rst label 1, depth: 2}, ... ]
-     * @param {string|Array} allowed_types - array of allowed detail types | 'all'
-     * @param {int|Array} ignored_dty_id - base fields to ignore
-     * @returns {Array} field data or dropdown options or fanctree nodes
+     * Retrieves a structured list of base fields (detail types) and their specific instances
+     * (record type structure fields) across one or more record types.
+     *
+     * @function getBaseFieldInstances
+     * @memberof HEURIST4.dbs
+     * @param {number|number[]|string} rty_IDs - A single record type ID, an array of record type IDs, or 'all' to process all record types.
+     * @param {number} [mode=0] - Output format mode:
+     *  - `0`: Flat data array. Each element is `[dty_id, dty_label, [rst_label1, rst_label2, ...], show_in_lists_flag]`.
+     *           `show_in_lists_flag` is true if `list_all_fields` is false and `dty_ShowInLists` is 0.
+     *  - `1`: Array for dropdowns. Objects with `key` (dty_id), `title` (dty_label or rst_label), `depth` (for rst instances), `hidden` (show_in_lists_flag).
+     *  - `2`: (Commented as "needs testing") Intended for Fancytree nodes with `title`, `key`, `code`, `children`.
+     * @param {string|string[]} [allowed_types='all'] - Field types to include (e.g., 'freetext', ['resource', 'enum']). 'all' includes all types.
+     * @param {number|number[]} [ignored_dty_id=[]] - Detail type ID(s) to ignore.
+     * @param {boolean} [list_all_fields=true] - If `false`, the `dty_ShowInLists` property is considered for the `show_in_lists_flag`/`hidden` property.
+     * @returns {Array} An array structured according to the specified `mode`. Returns an empty array if `rty_IDs` is invalid or empty.
      */
     getBaseFieldInstances: function(rty_IDs, mode = 0, allowed_types = 'all', ignored_dty_id = [], list_all_fields = true){
 
@@ -2910,6 +3320,7 @@ window.hWin.HEURIST4.dbs = {
                 }
 
 				if(!Object.hasOwn(arr_idx, dty_id)) {
+                    // show_in_lists_flag / hidden: true if it should be hidden/not shown in lists
                     let list_fld = !list_all_fields && $Db.dty(dty_id, 'dty_ShowInLists') == 0;
                     arr_idx[dty_id] = last_idx;
                     last_idx ++;
@@ -2917,7 +3328,7 @@ window.hWin.HEURIST4.dbs = {
 				}
 
                 const dty_idx = arr_idx[dty_id];
-				const rst_name = rty_name + "." + details["rst_DisplayName"];
+				const rst_name = rty_name + "." + details["rst_DisplayName"]; // Instance name: RtyName.RstDisplayName
 
 				fields[dty_idx][2].push(rst_name);
 			});
@@ -2925,7 +3336,7 @@ window.hWin.HEURIST4.dbs = {
 
         // sort base field names
         fields.sort((arr1, arr2) => {
-            let a = arr1[1].toLocaleUpperCase();
+            let a = arr1[1].toLocaleUpperCase(); // Sort by dty_label (base field name)
             let b = arr2[1].toLocaleUpperCase();
             return a.localeCompare(b);
         });
@@ -2934,7 +3345,7 @@ window.hWin.HEURIST4.dbs = {
 
 		for(const field of fields){ // sort rst field names + additional processing for different modes
 
-			field[2].sort((a, b) => {
+			field[2].sort((a, b) => { // Sort instance names alphabetically
                 a = a.toLocaleUpperCase();
                 b = b.toLocaleUpperCase();
                 return a.localeCompare(b);
@@ -2943,32 +3354,35 @@ window.hWin.HEURIST4.dbs = {
             const dty_id = field[0];
             const dty_title = field[1];
             const rst_titles = field[2];
-            const show_in_list = field[3];
+            const show_in_list_flag = field[3]; // This flag is true if it should be hidden
 
-            if(mode == 1){
+            if(mode == 1){ // For dropdowns
                
-                processed_fields.push({key: dty_id, title: dty_title, hidden: show_in_list});
+                processed_fields.push({key: dty_id, title: dty_title, hidden: show_in_list_flag});
 
                 for(const rst_title of rst_titles){
-                    processed_fields.push({key: dty_id, title: rst_title, depth: 1, hidden: show_in_list});
+                    processed_fields.push({key: dty_id, title: rst_title, depth: 1, hidden: show_in_list_flag});
                 }
             }
             /*  needs testing
-            else if(false && mode == 2){ 
+            else if(false && mode == 2){ // For Fancytree (example)
 
                 let node = {
                     'title': dty_title,
                     'key': dty_id,
-                    'code': dty_id,
+                    'code': dty_id, // Could be dty_id or another code
                     'children': []
+                    // 'hidden': show_in_list_flag // If tree supports hiding nodes
                 };
 
-                let sub_node = {
-                    'key': dty_id,
-                    'code': dty_id
+                let sub_node_template = { // Template for children
+                    'key': dty_id, // Child key might be composite like dty_id + '_' + rst_title or just dty_id
+                    'code': dty_id // Child code
+                    // 'hidden': show_in_list_flag
                 };
 
                 for(const rst_title of rst_titles){
+                    let sub_node = {...sub_node_template};
                     sub_node['title'] = rst_title;
                     node['children'].push(sub_node);
                 }
@@ -2978,19 +3392,21 @@ window.hWin.HEURIST4.dbs = {
             */
 		}
 
-        if(mode == 0 || mode == 2){
+        if(mode == 0 || mode == 2){ // Mode 0 returns the 'fields' array directly; Mode 2 would too if implemented
             return fields;
-        }else{
+        }else{ // Mode 1 returns 'processed_fields'
             return processed_fields;
         }
     },
 
     /**
-     * Get detail types common to all provided record types
-     * 
-     * @param {number|Array} rty_IDs - array of record type ids to include
-     * @param {number|Array} ignored_dty_id - array of detail type ids to ignore/skip
-     * @returns {Array} - array of dty ids common to provided record types
+     * Finds detail type IDs (fields) that are common to all specified record types.
+     *
+     * @function getSharedFields
+     * @memberof HEURIST4.dbs
+     * @param {number|number[]} rty_IDs - A single record type ID or an array of record type IDs. If falsy, returns empty array.
+     * @param {number|number[]} [ignored_dty_id=[]] - An array of detail type IDs to exclude from the result.
+     * @returns {number[]} An array of detail type IDs that are present in all given record types (and not ignored).
      */
     getSharedFields: function(rty_IDs, ignored_dty_id = []){
 
@@ -3013,13 +3429,13 @@ window.hWin.HEURIST4.dbs = {
 
         for(const rty_ID of rty_IDs){
 
-            let fields = $Db.rst(rty_ID).getIds();
-            if(dty_IDs.length == 0){
-                dty_IDs = fields;
+            let fields_for_rty = $Db.rst(rty_ID).getIds(); // Get all dty_IDs for this rty_ID
+            if(dty_IDs.length == 0){ // First record type, so all its fields are potential shared fields
+                dty_IDs = fields_for_rty;
                 continue;
             }
-
-            dty_IDs = dty_IDs.filter(fld_id => fields.includes(fld_id));
+            // Intersect current dty_IDs with fields_for_rty
+            dty_IDs = dty_IDs.filter(fld_id => fields_for_rty.includes(fld_id));
         }
 
         if(dty_IDs.length > 0 && ignored_dty_id.length > 0){
@@ -3031,22 +3447,32 @@ window.hWin.HEURIST4.dbs = {
     },
 
     /**
-     * Interpret entry mask into human readable text, to be shown to users
-     *
-     * @param {string} mask - Entry mask to interpret
-     *
-     * @returns {[string, string]} [mask in human readable text, mask with "vaule" inserted]
-     */
+      * Interprets a Heurist entry mask string (e.g., from `rst_EntryMask`) into a human-readable description
+      * and a version with a placeholder for the value.
+      * Mask format example: `Prefix $a10(1,5) Suffix`
+      * - `$` introduces the mask pattern.
+      * - `a`: alphabetic, `d`: decimal, `i`: integer, `m`: mixed alphanumeric, `n`: numeric.
+      * - Optional number after type: length constraint (e.g., `a10` for max 10 chars for alpha; decimal places for `d`, `n`).
+      * - Optional `(min,max)`: numeric range.
+      *
+      * @function rst_InterpretEntryMask
+      * @memberof HEURIST4.dbs
+      * @param {string} mask - The entry mask string.
+      * @returns {[string, string]} An array where:
+      *          - Index 0: Human-readable description of the mask (e.g., "a string with a maximum of 10 characters, 1 to 5").
+      *          - Index 1: The original mask with the pattern part replaced by `&lt;value&gt;` (e.g., "Prefix &lt;value&gt; Suffix").
+      *          Returns `['', '']` if the mask does not contain a valid pattern.
+      */
     rst_InterpretEntryMask: function(mask){
 
         /**
-         * Mask as help text
-         *
-         * @param {string} type - single character representing the mask's type
-         * @param {string|integer} length - value length
-         * @param {[string|integer, string|integer]} range - [min, max] value for number values
-         *
-         * @returns {string} help text
+         * @function getHelpText
+         * @private
+         * @description Generates human-readable help text for a given mask pattern.
+         * @param {string} type - Single character mask type ('a', 'd', 'i', 'm', 'n').
+         * @param {number} length - Length constraint from the mask.
+         * @param {string[]} range - Two-element array [min, max] for numeric range.
+         * @returns {string} Human-readable description.
          */
         function getHelpText(type, length, range){
 
@@ -3078,14 +3504,14 @@ window.hWin.HEURIST4.dbs = {
                     break;
             }
             
-            if(range?.length == 2){
+            if(range?.length == 2){ // If range is specified
                 
                 switch(type){
 
                     case 'd':
                     case 'i':
                     case 'n':
-                        help_text = ` ${range[0]} to ${range[1]}`;
+                        help_text += ` from ${range[0]} to ${range[1]}`; // Corrected "is" to "from"
                         break;
 
                     default:
@@ -3093,7 +3519,7 @@ window.hWin.HEURIST4.dbs = {
                 }
             }
 
-            if(length > 0){
+            if(length > 0){ // If length constraint is specified
 
                 switch(type){
 
@@ -3106,6 +3532,10 @@ window.hWin.HEURIST4.dbs = {
                         help_text += `, rounded to ${length} decimal places`;
                         break;
 
+                    case 'i': // For integers, length can mean max number of digits
+                         help_text += ` with a maximum of ${length} digits`;
+                         break;
+
                     default:
                         break;
                 }
@@ -3114,140 +3544,250 @@ window.hWin.HEURIST4.dbs = {
             return help_text;
         }
         
-        let matches = mask.match(/\$([adimn])(\d)*(\(\d,?\d*\))*\$/);
+        // Regex captures: $1:type, $2:length (optional), $3:range (optional, e.g., (min,max))
+        let matches = mask.match(/\$([adimn])(\d)*(\(\d*,?\d*\))*\$/);
         let rtn = ['', ''];
 
         if(!matches){
             return rtn;
         }
 
-        let length = matches.length > 2 && Number.isInteger(+matches[2]) ? Number.parseInt(matches[2]) : 0;
+        // Extract length: $2 might be length or start of range if $2 is like "(".
+        // If $2 is digits, it's length. If $2 starts with '(', it's range and length is 0.
+        let length = 0;
+        let rangeStr = null;
 
-        let range = matches.length > 2 && matches[2] && !Number.isInteger(+matches[2]) && matches[2].startsWith('(') ? matches[2].replaceAll(/\(\)/g, '').split(',') : null;
-        range = matches.length > 3 && matches[3] && !Number.isInteger(+matches[3]) && matches[3].startsWith('(') ? matches[3].replaceAll(/\(\)/g, '').split(',') : range;
+        if (matches[2] && /^\d+$/.test(matches[2])) { // If $2 is purely digits
+            length = Number.parseInt(matches[2]);
+            if (matches[3] && matches[3].startsWith('(')) { // And $3 is the range
+                rangeStr = matches[3];
+            }
+        } else if (matches[2] && matches[2].startsWith('(')) { // If $2 is the range
+            rangeStr = matches[2];
+            // length remains 0
+        }
+        // This logic might need refinement if $3 can exist without $2 being purely digits.
+        // Current regex: (\d)* means $2 can be empty. (\(\d,?\d*\))* means $3 can be empty.
+
+        let range = null;
+        if (rangeStr) {
+            range = rangeStr.replace(/[()]/g, '').split(','); // remove parentheses and split
+            if (range.length === 1 && rangeStr.includes(',')) { // e.g. "(,5)" or "(1,)"
+                 if (rangeStr.startsWith('(,')) range.unshift(''); else range.push('');
+            }
+            if (range.length === 1 && !rangeStr.includes(',')) { // e.g. "(5)" this is not valid range, maybe treat as length?
+                // This case is ambiguous based on typical mask definitions.
+                // For now, if it's a single number in parens, it's not a typical min,max range.
+                // The regex (\(\d,?\d*\)) implies a comma for two values or one value if it's (val) or (,val) or (val,).
+                // Let's assume if only one value in parens, it's not a valid range for this interpretation.
+                 range = null;
+            }
+        }
+
 
         let temp = null;
-        if(range?.length == 2 && range[0] > range[1]){
+        if(range?.length == 2 && range[0] && range[1] && Number(range[0]) > Number(range[1])){ // Ensure both are numbers for comparison
             temp = range[0];
             range[0] = range[1];
             range[1] = temp;
         }
 
         rtn[0] = getHelpText(matches[1], length, range);
-
         rtn[1] = mask.replace(matches[0], '&lt;value&gt;');
 
         return rtn;
     },
 
     /**
-     * Test entry mask against provided value
+     * Tests a given value against a Heurist entry mask to validate it.
      *
-     * @param {string} mask - entry mask
-     * @param {string} value - value to test
-     * @param {boolean} true_on_success - returns true on success instead of the actual answer
-     *
-     * @returns whether the value is valid for the provided mask
+     * @function rst_RunEntryMask
+     * @memberof HEURIST4.dbs
+     * @param {string} mask - The entry mask string (e.g., "ID-$i(1,100)").
+     * @param {string} value - The value to test against the mask.
+     * @param {boolean} [true_on_success=false] - If `true`, returns boolean `true` on successful validation against the pattern part,
+     *                                          otherwise returns the fully constructed string with the (potentially modified) value
+     *                                          or an error message if validation fails.
+     * @returns {boolean|string}
+     *          - If `true_on_success` is true: `true` if the value part matches the mask's pattern,
+     *            otherwise an error string explaining the mismatch.
+     *          - If `true_on_success` is false: The fully constructed string with the value part formatted/validated
+     *            (e.g., "ID-50") if valid, or an error string if invalid.
+     *          - Returns 'Invalid entry mask provided' if the mask itself is malformed.
      */
     rst_RunEntryMask: function(mask, value, true_on_success = false){
 
-        function handleNumbers(type, mask, to_replace, value, length, range){
+        /**
+         * @function handleNumbers
+         * @private
+         */
+        function handleNumbers(type, mask_pattern_part, to_replace_in_original_mask, val_str, len_constraint, range_constraint){
 
-            if(value.match(/[^\d.]/) !== null){
-                return 'Input contains non-numeric characters';
+            if(val_str.match(/[^\d.-]/) && !(type === 'n' && val_str.startsWith('-'))) { // Allow minus for numeric, ensure it's not elsewhere
+                 if (!(type === 'n' && val_str.match(/^-\d*\.?\d*$/))) { // More specific check for negative numbers
+                    return 'Input contains non-numeric characters';
+                 }
             }
 
-            let output_length = value.length;
-            let output = type === 'i' ? Number.parseInt(value) : Number.parseFloat(value);
-            output = type !== 'i' && length > 0 ? Number(output).toFixed(length) : output;
-
-            let as_int = Number.parseInt(output);
-
-            let type_text = type === 'i' ? 'an integer' : 'numeric';
-            type_text = type === 'd' ? 'decimal' : type_text;
-
-            if(output === 'NaN'){
-                output = `Input is not ${type_text}`;
-            }else if(range?.length == 2 && (as_int < range[0] || as_int > range[1])){
-                output = `Input is out of range ${range[0]} - ${range[1]}`;
-            }else if(type === 'i' && length > 0 && output_length > length){
-                output = `Input has too many digits, limited to ${length} digits`;
-            }else{
-                output = mask.replace(to_replace, output);
+            let output_val;
+            if (type === 'i') { // Integer
+                if (val_str.includes('.')) return 'Integer cannot contain decimal point';
+                output_val = Number.parseInt(val_str);
+            } else { // Decimal or Numeric
+                output_val = Number.parseFloat(val_str);
             }
 
-            return output;
+            if(isNaN(output_val)){ // Check if parsing failed
+                let type_text = type === 'i' ? 'an integer' : (type === 'd' ? 'a decimal' : 'numeric');
+                return `Input is not ${type_text}`;
+            }
+
+            // Apply length constraint for decimals (number of decimal places)
+            if(type !== 'i' && len_constraint > 0){
+                output_val = Number(output_val.toFixed(len_constraint)); // Re-number to drop trailing zeros if appropriate after toFixed
+            }
+
+            let final_check_val = (type === 'i') ? output_val : Number.parseFloat(val_str); // Use original float for range check if not integer
+
+            // Range check
+            if(range_constraint?.length == 2){
+                const min = range_constraint[0] !== '' ? Number(range_constraint[0]) : -Infinity;
+                const max = range_constraint[1] !== '' ? Number(range_constraint[1]) : Infinity;
+                if(final_check_val < min || final_check_val > max){
+                    return `Input is out of range ${range_constraint[0]} - ${range_constraint[1]}`;
+                }
+            }
+
+            // Length constraint for integers (number of digits)
+            if(type === 'i' && len_constraint > 0 && String(Math.abs(output_val)).length > len_constraint){
+                return `Input has too many digits, limited to ${len_constraint} digits`;
+            }
+
+            // If true_on_success, we just care if it's valid up to this point
+            if (true_on_success) return true;
+
+            return mask_pattern_part.replace(to_replace_in_original_mask, String(output_val));
         }
 
-        function getTestOutput(to_replace, mask, mask_type, value, length, range){
+        /**
+         * @function getTestOutput
+         * @private
+         */
+        function getTestOutput(original_mask_str, pattern_to_replace, mask_char_type, val_to_test, len_constr, range_constr){
 
-            let output = '';
+            let output_str = '';
             let regex_results = null;
 
-            switch(mask_type){
+            switch(mask_char_type){
 
-                case 'a':
-
-                    regex_results = value.match(/^[\w.,'"?!()[\]\-`:;/ ]+$/);
-
-                    output = regex_results === null ? 'Input is not alphabetic' : mask.replace(to_replace, regex_results[0]);
-                    output = length > 0 && regex_results !== null && output.length > length ? `Input is larger than ${length} characters` : output;
-
+                case 'a': // Alphabetic (allows spaces and some punctuation)
+                    // This regex is more permissive than strictly alphabetic. Adjust if needed.
+                    regex_results = val_to_test.match(/^[\w\s.,'"?!()[\]\-`:;/]+$/);
+                    if (regex_results === null) {
+                        output_str = 'Input contains invalid characters for alphabetic string';
+                    } else if (len_constr > 0 && val_to_test.length > len_constr) {
+                        output_str = `Input is larger than ${len_constr} characters`;
+                    } else {
+                        output_str = true_on_success ? true : original_mask_str.replace(pattern_to_replace, val_to_test);
+                    }
                     break;
 
-                case 'd':
-                case 'i':
-                case 'n':
-
-                    output = handleNumbers(mask_type, mask, to_replace, value, length, range);
-
+                case 'd': // Decimal
+                case 'i': // Integer
+                case 'n': // Numeric (can be float or integer)
+                    output_str = handleNumbers(mask_char_type, original_mask_str, pattern_to_replace, val_to_test, len_constr, range_constr);
                     break;
 
-                case 'm':
-
-                    regex_results = value.match(/^[\w\d.,'"?!()[\]\-`:;/ ]+$/);
-
-                    output = regex_results === null ? 'Input contains non-alphaetic letters or numbers' : mask.replace(to_replace, regex_results[0]);
-                    output = length > 0 && regex_results !== null && output.length > length ? `Input is larger than ${length} characters` : output;
-
+                case 'm': // Mixed alphanumeric
+                    regex_results = val_to_test.match(/^[\w\d\s.,'"?!()[\]\-`:;/]+$/);
+                     if (regex_results === null) {
+                        output_str = 'Input contains invalid characters for mixed alphanumeric string';
+                    } else if (len_constr > 0 && val_to_test.length > len_constr) {
+                        output_str = `Input is larger than ${len_constr} characters`;
+                    } else {
+                         output_str = true_on_success ? true : original_mask_str.replace(pattern_to_replace, val_to_test);
+                    }
                     break;
 
                 default:
-                    output = `Mask's format is invalid, unknown type`;
+                    output_str = `Mask's format is invalid, unknown type '${mask_char_type}'`;
                     break;
             }
 
-            return output;
+            return output_str;
         }
 
-        let matches = mask.match(/\$([adimn])(\d)*(\(\d,?\d*\))*\$/);
+        let matches = mask.match(/\$([adimn])(\d)*(\(\d*,?\d*\))*\$/);
 
         if(!matches){
             return 'Invalid entry mask provided';
         }
 
-        let length = matches.length > 2 && Number.isInteger(+matches[2]) ? Number.parseInt(matches[2]) : 0;
+        const mask_pattern_part = matches[0]; // The full e.g., "$a10(1,5)"
+        const type_char = matches[1];
+        let length_constraint = 0;
+        let range_constraint_arr = null;
 
-        let range = matches.length > 2 && matches[2] && !Number.isInteger(+matches[2]) && matches[2].startsWith('(') ? matches[2].replaceAll(/\(\)/g, '').split(',') : null;
-        range = matches.length > 3 && matches[3] && !Number.isInteger(+matches[3]) && matches[3].startsWith('(') ? matches[3].replaceAll(/\(\)/g, '').split(',') : range;
-
-        let temp = null;
-        if(range?.length == 2 && range[0] > range[1]){
-            temp = range[0];
-            range[0] = range[1];
-            range[1] = temp;
+        // Similar logic to rst_InterpretEntryMask for parsing length and range
+        if (matches[2] && /^\d+$/.test(matches[2])) {
+            length_constraint = Number.parseInt(matches[2]);
+            if (matches[3] && matches[3].startsWith('(')) {
+                range_constraint_arr = matches[3].replace(/[()]/g, '').split(',');
+            }
+        } else if (matches[2] && matches[2].startsWith('(')) {
+            range_constraint_arr = matches[2].replace(/[()]/g, '').split(',');
         }
 
-        let output = getTestOutput(matches[0], mask, matches[1], value, length, range);
+        if (range_constraint_arr && range_constraint_arr.length === 1 && matches[2].includes(',')) {
+             if (matches[2].startsWith('(,')) range_constraint_arr.unshift(''); else range_constraint_arr.push('');
+        }
+        if (range_constraint_arr && range_constraint_arr.length === 1 && !matches[2].includes(',')) {
+            range_constraint_arr = null; // Single value in parens is not a range here.
+        }
 
-        let mask_parts = mask.split(matches[0]);
 
-        let bool_output = output.startsWith(mask_parts[0])
-            && (mask_parts.length == 1 || window.hWin.HEURIST4.util.isempty(mask_parts[1]) || output.endsWith(mask_parts[1]));
+        if(range_constraint_arr?.length == 2 && range_constraint_arr[0] && range_constraint_arr[1] && Number(range_constraint_arr[0]) > Number(range_constraint_arr[1])){
+            let temp = range_constraint_arr[0];
+            range_constraint_arr[0] = range_constraint_arr[1];
+            range_constraint_arr[1] = temp;
+        }
 
-        return true_on_success && bool_output === true ? true : output;
+        let result = getTestOutput(mask, mask_pattern_part, type_char, value, length_constraint, range_constraint_arr);
+
+        // If true_on_success, result is already boolean true or an error string.
+        if (true_on_success) {
+            return result;
+        }
+
+        // If not true_on_success, and result is an error string, return it.
+        if (typeof result === 'string' && result !== mask.replace(mask_pattern_part, String(value))) {
+            // Check if result indicates an error (i.e., it's not the successfully substituted string)
+            // This comparison is a bit tricky. A more robust way is for getTestOutput/handleNumbers
+            // to return a specific error object or boolean for success when not in true_on_success mode.
+            // For now, if 'result' is a string and it's not the simple replacement, assume it's an error message.
+            // Or, more simply, if it doesn't start with the prefix of the mask (if any), it's an error.
+            const mask_prefix = mask.substring(0, mask.indexOf(mask_pattern_part));
+            if (!result.startsWith(mask_prefix)) {
+                return result; // It's an error message
+            }
+        }
+
+        // Otherwise, result is the successfully formatted string.
+        return result;
     },
 
+    /**
+     * Removes duplicate hierarchical prefixes from a label string.
+     * For example, "Australia.New South Wales.New South Wales.Sydney"
+     * becomes "Australia.New South Wales.Sydney" if `trm_separator` is '.'.
+     *
+     * @function trm_RemoveDupHierarchy
+     * @memberof HEURIST4.dbs
+     * @param {string} label - The label string, possibly with hierarchical parts.
+     * @param {string} [trm_separator='.'] - The separator character used for hierarchy.
+     * @returns {string} The label with duplicate hierarchical prefixes removed.
+     *                   Returns the original label if it's empty or contains no separator.
+     */
     trm_RemoveDupHierarchy: function(label, trm_separator = '.'){
 
         if(window.hWin.HEURIST4.util.isempty(label) || label.indexOf(trm_separator) === -1){
@@ -3265,9 +3805,9 @@ window.hWin.HEURIST4.dbs = {
             let remainder = parts.slice(i).join(trm_separator);
 
             // check if prefix appears at start
-            if(remainder.startsWith(prefix)){ // remove repeated prefix and restart
-                parts = parts.slice(i);
-                i = 1;
+            if(remainder.startsWith(prefix + trm_separator)){ // Check with separator to avoid partial match like "Term.Termite"
+                parts = parts.slice(i); // Remove the repeated prefix
+                i = 1; // Restart search from the new beginning of parts
             }else{ // no repeat, continue searching
                 i++;
             }

@@ -21,11 +21,12 @@
 class ActionHandler {
 
     /**
-     * Constructor: Initializes the ActionHandler instance.
-     * 
-     * If `arg` is an array, it sets the `actions` property directly. 
-     * 
-     * @param {Array|String|undefined} arg - Can be an array of actions, a string URL, or undefined (default URL used).
+     * Initializes the ActionHandler instance.
+     * If `arg` is an array, it sets the `actions` property directly.
+     * Otherwise, it initializes `actions` to null, expecting `loadActionsFromFile` to be called.
+     *
+     * @param {(Array<Object>|String|undefined)} arg - Can be an array of action objects,
+     * a string URL to fetch actions from, or undefined (in which case a default URL will be used later or actions loaded manually).
      */
     constructor(arg) {
         if(Array.isArray(arg)){
@@ -36,12 +37,11 @@ class ActionHandler {
     }
     
     /**
-     * Method: loadActionsFromFile
-     * 
-     * Fetches actions from the given URL in JSON format and sets the `actions` property.
-     * 
-     * @param {string} url - The URL to fetch actions from.
-     * @returns {Promise<void>} No return value. Sets `this.actions` internally.
+     * Fetches actions from the given URL (or a default URL if not provided) in JSON format and sets the `actions` property.
+     *
+     * @async
+     * @param {string} [url] - The URL to fetch actions from. Defaults to `hclient/core/actions.json` relative to `window.hWin.HAPI4.baseURL`.
+     * @returns {Promise<void>} A promise that resolves when actions are loaded and set, or rejects on error.
      * @throws {Error} If the fetch operation fails or the response is not OK.
      */
     async loadActionsFromFile(url) {
@@ -58,7 +58,9 @@ class ActionHandler {
     }
     
     /**
-     * Method: getActions
+     * Returns the currently loaded actions.
+     *
+     * @returns {Array<Object>|null} The array of action objects, or null if actions haven't been loaded.
      */
     getActions() {
         return this.actions;
@@ -69,21 +71,25 @@ class ActionHandler {
     }
 
     /**
-     * Method: findActionById
-     * 
      * Finds and returns an action object by its ID.
-     * 
+     *
      * @param {string} id - The ID of the action to find.
-     * @returns {Object|undefined} The action object or `undefined` if not found.
+     * @returns {Object|undefined} The action object if found, otherwise `undefined`.
      */
     findActionById(id) {
         return this.actions.find(action => action.id === id);
     }
 
     /**
-     * Helper Method: #handleVerification
-     * 
-     * Handles the verification process.
+     * Handles the verification process for an action, typically involving password and/or permission checks.
+     * If verification is required and not yet passed, it initiates the verification flow.
+     * Upon successful verification, it re-executes the original action with `verification_passed` set to true.
+     *
+     * @private
+     * @param {Object} action - The action object being executed.
+     * @param {Object} dialog_options - Options for the dialog, potentially modified during verification.
+     * @returns {boolean} Returns `true` if verification was initiated (halting further execution of the current call),
+     * or `false` if no verification was needed or if action data is missing.
      */
     #handleVerification(action, dialog_options) {
         
@@ -95,12 +101,12 @@ class ActionHandler {
         
         // Handle password and permission verification
         let action_passworded = adata.pwd;
-        if (!action_passworded && !window.hWin.HAPI4.has_access(2)) {
+        if (!action_passworded && !window.hWin.HAPI4.has_access(2)) { // TODO: Investigate HAPI4.has_access(2) - what does 2 mean?
             action_passworded = adata['pwd-nonowner'];
         }
         
         let action_admin_level = adata['user-admin-status'];
-        let action_member_level = adata['user-memebr-status'];
+        let action_member_level = adata['user-member-status']; // Corrected typo: memebr -> member
         let action_user_permissions = adata['user-permissions']; 
         let requiredLevel = (action_admin_level == -1 || action_admin_level >= 0) ? action_admin_level : 0;
         
@@ -115,22 +121,22 @@ class ActionHandler {
         window.hWin.HAPI4.SystemMgr.verify_credentials((entered_password) => {
             dialog_options.entered_password = entered_password;
             dialog_options.verification_passed = true;
-            this.executeActionById(action.id, dialog_options);              
+            this.executeActionById(action.id, dialog_options); // Re-execute action after successful verification
         },
         requiredLevel, action_passworded, null, action_user_permissions);
             
-        return true;
+        return true; // Indicates verification was initiated
     }    
     
     /**
-     * Helper Method: #handleHrefAction
-     * 
-     * Handles actions that involve opening a URL or external link.
-     * 
-     * @param {Object} action - The action object.
-     * @param {string} href - The URL to open.
-     * @param {string} target - The target window for the URL.
-     * @param {Object} popup_dialog_options - Additional dialog options.
+     * Handles actions that involve opening a URL (e.g., hyperlink, mailto).
+     * It constructs the final URL, handles special cases like 'menu-help-emailadmin',
+     * and opens the URL in a new window/tab or a dialog.
+     *
+     * @private
+     * @param {Object} action - The action object, containing href, target, id, and text.
+     * @param {Object} popup_dialog_options - Options for displaying the content in a dialog if not opening in a new tab/window.
+     * @returns {boolean} Returns `true` if the href action was handled, `false` otherwise (e.g. empty href).
      */
     #handleHrefAction(action, popup_dialog_options) {
 
@@ -186,9 +192,14 @@ class ActionHandler {
     }
 
     /**
-     * Helper Method: #prepareDialogOptions
-     * 
-     * Prepares the dialog options for the action.
+     * Prepares and standardizes dialog options for an action.
+     * It determines the container for the dialog, sets the title (checking for translations),
+     * and merges action-specific data with provided dialog_options.
+     *
+     * @private
+     * @param {Object} action - The action object, containing id, data, and text.
+     * @param {Object} dialog_options - Initial dialog options provided to `executeActionById`.
+     * @returns {Object} The fully prepared popup dialog options.
      */
     #prepareDialogOptions(action, dialog_options){        
          let actionid = action.id;
@@ -237,16 +248,19 @@ class ActionHandler {
     }
     
     /**
-     * Helper Method: _importUsers
-     * 
-     * Handles the import of users into the system through a series of dialog steps.
-     * 
-     * @param {Object} entity_dialog_options - Configuration options for the dialogs during the import process.
+     * Handles the multi-step process of importing users from another database.
+     * Step 1: Select the source database.
+     * Step 2: Select users from the source database.
+     * Step 3: Allocate selected users to work groups in the current database.
+     *
+     * @param {Object} [entity_dialog_options={}] - Initial configuration options for the entity dialogs used in the import process.
+     * These options can be extended internally for each step.
+     * @returns {void}
      */
     importUsers(entity_dialog_options) {
         if (!entity_dialog_options) entity_dialog_options = {};
         
-        let that = this;
+        let that = this; // Used for maintaining context within callbacks
         let auto_select = '';
         
         let options = $.extend(entity_dialog_options, {
@@ -333,66 +347,80 @@ class ActionHandler {
     }    
     
     /**
-     * Helpr Method: importUsersComplete
-     * 
-     * 
+     * Completes the user import process after users and roles have been selected.
+     * It sends a request to the server to add the selected users from the source database
+     * to the specified roles in the current database.
+     * Displays a success or error message based on the server response.
+     *
+     * @private
+     * @param {Object} data - Data from the role selection dialog, containing `data.selection` (selected roles).
+     * @param {Array<string>} selected_users - An array of user IDs to be imported.
+     * @param {string} selected_database - The name of the database from which users are being imported.
+     * @returns {void}
      */ 
     importUsersComplete(data, selected_users, selected_database){
 
-        if (!data || $.isEmptyObject(data.selection)){
+        if (!data || $.isEmptyObject(data.selection)){ // If no roles selected, or data is invalid
             return;
         }
         //add new user to specified group
         let request = {
-            a: 'action',
-            entity: 'sysUsers',
-            roles: data.selection,
-            userIDs: selected_users,
-            sourceDB: selected_database,
-            request_id: window.hWin.HEURIST4.util.random()
+            a: 'action', // API action type
+            entity: 'sysUsers', // Target entity
+            roles: data.selection, // Selected roles for the users
+            userIDs: selected_users, // IDs of users to import
+            sourceDB: selected_database, // Source database name
+            request_id: window.hWin.HEURIST4.util.random() // Unique request ID
         };
+
         window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
             if (response.status == window.hWin.ResponseStatus.OK) {
-                window.hWin.HEURIST4.msg.showMsgDlg(response.data);      
+                window.hWin.HEURIST4.msg.showMsgDlg(response.data); // Show success message
             } else {
-                window.hWin.HEURIST4.msg.showMsgErr(response);      
+                window.hWin.HEURIST4.msg.showMsgErr(response); // Show error message
             }
         });
         
     }
     
     /**
-     * Method: executeActionById
-     * 
-     * Executes the action with the specified ID. Verifies credentials if required and handles dialogs or popups.
-     * 
+     * Executes an action based on its ID.
+     * This method finds the action, handles any necessary verification (like password prompts),
+     * prepares dialog options, and then delegates to specific handlers or opens URLs
+     * based on the action's configuration.
+     *
      * @param {string} id - The ID of the action to execute.
-     * @param {Object} dialog_options - Optional parameters for dialog customization.
-     * @returns {boolean} True if the action is supported, otherwise false.
+     * @param {Object} [dialog_options={}] - Optional parameters for dialog customization.
+     * These options can include `verification_passed` to bypass verification if already done.
+     * @returns {boolean} Returns `true` if the action was found and an attempt was made to handle it (even if handling later fails or is asynchronous).
+     * Returns `false` if the action with the given ID is not found or if the action is marked as disabled (`ext == 1`).
      */
     executeActionById(id, dialog_options) {
         const action = this.findActionById(id);
         
         if (!action) {
-            console.log(`Action with ID "${id}" not found.`);            
+            console.warn(`Action with ID "${id}" not found.`); // Changed to warn for better visibility
             return false;
         }
         
         let adata = action.data;
     
-        // If action is disabled, return early
+        // If action is disabled (external/extension action not implemented), return early
         if (adata?.ext == 1) {
-            return;
+            console.log(`Action with ID "${id}" is marked as 'ext' and is not handled.`);
+            return false; // Or true depending on desired behavior for 'do nothing' actions
         }
         
         if(!dialog_options){
             dialog_options = {};
         }
 
+        // If verification is required and not already passed, #handleVerification will initiate it and return true.
+        // In that case, current execution should stop, as verification callback will re-trigger executeActionById.
         if(!dialog_options?.verification_passed && 
             this.#handleVerification(action, dialog_options))
         {
-            return;
+            return true; // Indicate that action handling is deferred pending verification
         }
 
         let actionid = action.id;
@@ -435,12 +463,13 @@ class ActionHandler {
             case "menu-database-clone":
             case "menu-database-register":
             case "menu-database-verify":
-            case "menu-database-verifyURLs":
+            case "menu-database-verifyURLs":{
                 //database action name
                 const s = actionid.substr(actionid.lastIndexOf('-') + 1);
                 const actionName = 'db' + s.capitalize();
                 window.hWin.HEURIST4.ui.showRecordActionDialog(actionName, popup_dialog_options);
                 break;
+            }
             case "menu-lookup-config":
                 popup_dialog_options['classes'] = {"ui-dialog": "ui-heurist-design", "ui-dialog-titlebar": "ui-heurist-design"};
                 popup_dialog_options['service_config'] = window.hWin.HAPI4.sysinfo['service_config'];
@@ -458,7 +487,7 @@ class ActionHandler {
                 window.hWin.HEURIST4.ui.showRecordActionDialog('repositoryConfig', popup_dialog_options);
                 break;
                 
-            case "menu-statistics-cms":
+            case "menu-statistics-cms":{
                 //popup_dialog_options['path'] = 'widgets/cms/';
                 //window.hWin.HEURIST4.ui.showRecordActionDialog('cmsStatistics', popup_dialog_options);
                 let d = new Date();
@@ -470,7 +499,7 @@ class ActionHandler {
                 window.open(url, "_blank");
                 
                 break;
-                
+            }
             case "menu-files-index":
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordUploadedFilesIndex', popup_dialog_options);
                 break;
@@ -572,14 +601,14 @@ class ActionHandler {
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Tips', {isPopupDlg:true, width:500, height:500});
                 break;
                 
-            case "menu-subset-set":
+            case "menu-subset-set":{
                 //see menu Explore
                 let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
                 if(widget){
                     widget.resultList('callResultListMenu', 'menu-subset-set'); //call method
                 }
                 break;
-           
+            }
             case "menu-help-acknowledgements":
             
                 contentURL = window.hWin.HRes('acknowledgementsHeurist');

@@ -31,20 +31,59 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-/* global TDate */
+/* global TDate, TDuration */ // Added TDuration to globals
 
+/**
+ * Represents a complex temporal object that can handle various date/time representations,
+ * including simple dates, uncertain dates, date ranges, and durations.
+ * The internal representation is a string, which is parsed on demand or when specific
+ * field values are accessed or manipulated.
+ *
+ * Format of the internal string representation (example):
+ * `|VER=1|TYP=s|DAT=2023-10-26|CIR=1|COM=Approximately this date`
+ * - VER: Version of the temporal object format.
+ * - TYP: Type of temporal (s: simple, c: radiometric, f: fuzzy, p: probability range, d: duration).
+ * - DAT: Date string (for simple, fuzzy types).
+ * - Other fields depend on the TYP.
+ *
+ * @constructor
+ * @param {string} [strInitTemporal] - An optional string to initialize the temporal object.
+ *                                     This string can be in the internal temporal format or a simple date string
+ *                                     that will be parsed. If empty or not provided, an empty Temporal object is created.
+ */
 function Temporal (strInitTemporal) {
     const g_version = 1;
     
     //private members
+    /**
+     * @private
+     * @type {string}
+     * @const
+     */
     const _className = "Temporal";
     let _ver = g_version;				//version number for data representation
     let _type = null;					// type of temporal with the default to be a simple date
     let _strTemporal = strInitTemporal;
+    /**
+     * @private
+     * @type {Object<string, TDate>}
+     */
     let _dates = {};
+    /**
+     * @private
+     * @type {Object<string, TDuration>}
+     */
     let _durations = {};
+     /**
+      * @private
+      * @type {Object<string, string>}
+      */
     let _fields = {};
 
+    /**
+     * Initializes the Temporal object by parsing the initial string if provided.
+     * @private
+     */
     function _init (){	//initailization code
         if (!_strTemporal) { // empty string return basic temporal
             return;
@@ -54,6 +93,13 @@ function Temporal (strInitTemporal) {
 
     //public members
     let that = {
+        /**
+         * Clears the temporal object to a basic, empty state or initializes it with a new string.
+         * Resets version, type, internal string, dates, durations, and fields.
+         *
+         * @param {string} [str] - Optional string to re-initialize the temporal object with.
+         *                         If not provided, the temporal object is reset to an empty state.
+         */
         clear: function (str) {  // clears the temporal to a basic format
             _ver = g_version;
             _type = null;
@@ -63,7 +109,13 @@ function Temporal (strInitTemporal) {
             _fields = {};
         },
 
-        // function toString  returns an encode serialized string representation of the temporal
+        /**
+         * Returns an encoded, serialized string representation of the temporal object.
+         * This string follows the internal Heurist temporal format.
+         * Example: `|VER=1|TYP=s|DAT=2023-10-26T10:00:00Z|COM=My Comment`
+         *
+         * @returns {string} The serialized temporal string.
+         */
         toString: function () {
             let temp = "|VER=" + _ver + "|TYP=" + _type;
             let i;
@@ -94,9 +146,20 @@ function Temporal (strInitTemporal) {
             return res;
         },
 
-        //
-        //
-        //        
+        /**
+         * Converts the temporal object to a JSON structure, typically for use with timelines or other structured data consumers.
+         * The structure of the JSON object varies significantly based on the temporal type (`TYP`).
+         *
+         * - Type 's' (simple): `{"timestamp": {"in": "YYYY-MM-DD", "type": "s", "circa"?: true, "before"?: true, "after"?: true}}`
+         * - Type 'f' (fuzzy): `{"timestamp": {"in": "YYYY-MM-DD", "type": "f", "deviation": "P1Y2M"}}`
+         * - Type 'c' (radiometric/carbon): `{"timestamp": {"in": "YYYY", "type": "c", "bp": true/false, "native": "1000 BP", "deviation"?: "P10Y", "deviation_negative"?: "P5Y", "deviation_positive"?: "P15Y"}}`
+         * - Type 'p' (probability range): `{"start": {"earliest": "YYYY-MM-DD", "latest"?: "YYYY-MM-DD", "profile"?: "profile_code"}, "end": {"latest": "YYYY-MM-DD", "earliest"?: "YYYY-MM-DD", "profile"?: "profile_code"}, "profile"?: "overall_profile_code"}`
+         *
+         * Common properties like `determination`, `calendar`, `comment`, `labcode`, `calibrated`, `native` (non-Gregorian value)
+         * are added to the root of the returned object if present in the temporal data.
+         *
+         * @returns {Object} A JSON object representing the temporal data.
+         */
         toJSON: function () {
 
             let $tDate = that.getAllFields();
@@ -180,9 +243,13 @@ function Temporal (strInitTemporal) {
             return $timespan;
         },
         
-    //
-    // Outputs human readable representation of temporal object
-    //    
+        /**
+         * Converts a duration string (like "P10Y") to a human-readable text (e.g., "±10 years").
+         * @private
+         * @param {string} $value - The duration string (ISO 8601 duration format, expected to be like P...Y).
+         * @param {string} $prefix - The prefix to add to the human-readable string (e.g., " ±", " -", " +").
+         * @returns {string} Human-readable duration, or an empty string if input is invalid.
+         */
         _deviationToText: function ($value, $prefix){
         
             if($value){ 
@@ -210,6 +277,16 @@ function Temporal (strInitTemporal) {
             
         },
     
+        /**
+         * Generates a human-readable string representation of the temporal object.
+         * The output format depends on the temporal type and whether it's compact or not.
+         *
+         * @param {string} [$separator='\n'] - The separator to use between key-value pairs if not in compact mode. Defaults to newline.
+         * @param {boolean} [$is_compact=false] - If true, generates a more compact single-line representation.
+         *                                       If false, generates a multi-line key: value representation.
+         * @returns {string} A human-readable string representation of the temporal object.
+         *                   Returns an error string if parsing fails.
+         */
         toReadableExt: function($separator, $is_compact){
 
             try{
@@ -317,7 +394,7 @@ function Temporal (strInitTemporal) {
                     $to = formatGregJulian($date['end']['latest'], isgj);
                     $res[$is_simple_range?'Latest estimate':'Terminus Ante Quem'] = $to;
 
-                    if($date['start']['profile']){
+                    if($date['start']['profile']){ // Should likely be $date['end']['profile']
                         $res['End Profile'] = Temporal.profiles[parseInt($date['end']['profile'])];
                     }
                 }
@@ -334,9 +411,10 @@ function Temporal (strInitTemporal) {
             if($date['determination']) $res['Determination'] = Temporal.determination[parseInt($date['determination'])];
             //labaratory code for C14
             if($date['labcode']) $res['Labaratory Code'] = $date['labcode'];
-            if($date['calibarated']) $res['Calibarated'] = 'yes';
+            if($date['calibrated']) $res['Calibrated'] = 'yes'; // Corrected typo 'calibarated' to 'calibrated'
 
             let $res2 = '';
+            $separator = $separator || '\n'; // Default separator
             
             if($is_compact){
                 
@@ -350,16 +428,20 @@ function Temporal (strInitTemporal) {
                     
                     $res2 = $res2 + $res['Earliest estimate']+' .. '+$res['Latest estimate'];
                 }else {
-                    
-                    $res2 = $res2 + '>'+$res['Terminus Post Quem']+':'+$res['Probable Begin']
-                                    +' .. '+
-                                    $res['Probable End']+':<'+$res['Terminus Ante Quem'];
+                    // Ensure all parts exist before concatenating for compact view
+                    let tpq = $res['Terminus Post Quem'] || '';
+                    let pdb = $res['Probable Begin'] || '';
+                    let pde = $res['Probable End'] || '';
+                    let taq = $res['Terminus Ante Quem'] || '';
+                    $res2 = $res2 + (tpq ? '>' + tpq : '') + (pdb ? ':' + pdb : '') +
+                                    ' .. ' +
+                                    (pde ? pde : '') + (taq ? ':' + '<'+taq : '');
                 }
                 
                 let supinfo = [];
                 if($res['Determination']) supinfo.push($res['Determination']);
-                if($date['calibrated']) supinfo.push('Calibarated');
-                if(!isgj) {
+                if($date['calibrated']) supinfo.push('Calibrated'); // Corrected typo
+                if(!isgj && $res['Calendar']) { // Check if $res['Calendar'] exists
                     supinfo.push($res['Calendar']);
                 }
                 if(supinfo.length>0){
@@ -368,19 +450,31 @@ function Temporal (strInitTemporal) {
                 
             }else{
                 for(let $key in $res){
-                    let $val = $res[$key];   
-                    $res2 = $res2+$key+': '+$val+$separator;
+                    if (Object.prototype.hasOwnProperty.call($res, $key) && $res[$key]) { // Ensure property exists and is not empty
+                        let $val = $res[$key];
+                        $res2 = $res2+$key+': '+$val+$separator;
+                    }
+                }
+                if ($res2.endsWith($separator)) { // Remove trailing separator
+                    $res2 = $res2.substring(0, $res2.length - $separator.length);
                 }
             }
             
             return $res2;
             
             }catch(e){
-                  return 'Error pasring temporal '+_strTemporal;
+                  return 'Error parsing temporal '+_strTemporal;
             }
 
         },
 
+        /**
+         * Gets the value of a generic field from the temporal object.
+         * Fields are identified by codes (e.g., "COM" for comment, "DET" for determination).
+         *
+         * @param {string} code - The three-letter code for the field.
+         * @returns {string|null} The value of the field, or `null` if the field is not set.
+         */
         getField: function (code) {
             if ( _fields[code] ) {
                 return _fields[code];
@@ -389,6 +483,13 @@ function Temporal (strInitTemporal) {
             }
         },
 
+        /**
+         * Gets a TDuration object for a given duration code.
+         * Duration fields include "DUR" (duration), "DEV" (standard deviation), etc.
+         *
+         * @param {string} code - The three-letter code for the duration field.
+         * @returns {TDuration|null} The TDuration object, or `null` if not set.
+         */
         getTDuration: function (code) {
             if ( _durations[code] ) {
                 return _durations[code];
@@ -397,6 +498,13 @@ function Temporal (strInitTemporal) {
             }
         },
 
+        /**
+         * Gets a TDate object for a given date code.
+         * Date fields include "DAT" (primary date), "TPQ" (Terminus Post Quem), "TAQ" (Terminus Ante Quem), etc.
+         *
+         * @param {string} code - The three-letter code for the date field.
+         * @returns {TDate|null} The TDate object, or `null` if not set.
+         */
         getTDate: function (code) {
             if ( _dates[code] ) {
                 return _dates[code];
@@ -405,18 +513,37 @@ function Temporal (strInitTemporal) {
             }
         },
 
+        /**
+         * Gets the original string used to initialize or most recently set the temporal object.
+         * @returns {string} The original temporal string.
+         */
         getOrigString: function () {
             return _strTemporal;
         },
 
+        /**
+         * Gets the version number of the temporal object's internal data representation.
+         * @returns {number} The version number (typically 1).
+         */
         getVersion: function () {
             return _ver;
         },
 
+        /**
+         * Gets the type code of the temporal object.
+         * e.g., 's' (simple), 'c' (radiometric), 'f' (fuzzy), 'p' (probability range), 'd' (duration).
+         * @returns {string|null} The type code, or `null` if not set.
+         */
         getType: function () {
             return _type;
         },
 
+        /**
+         * Sets the type of the temporal object.
+         *
+         * @param {string} type - The type code to set. Valid codes are 'u', 's', 'c', 'f', 'p', 'd'.
+         * @returns {string|null} The set type code, or `null` if the provided type is invalid.
+         */
         setType: function (type) {
             type = type.toLowerCase();
             if ( type !== "u" && type !== "s" && type !== "c" && type !== "f" && type !== "p" && type !== "d") {
@@ -426,6 +553,13 @@ function Temporal (strInitTemporal) {
             return (_type = type);
         },
 
+        /**
+         * Sets a generic field in the temporal object.
+         *
+         * @param {string} code - The three-letter code of the field to set (must be a valid code in `Temporal.fieldsDict`).
+         * @param {string|number|Object} value - The value to set for the field. Must have a `toString` method.
+         * @returns {boolean} True if the field was successfully set, false otherwise (e.g., invalid code).
+         */
         setField: function (code,value) {
             if ( Temporal.fieldsDict[code] && value && typeof value.toString === "function") {
                 _fields[code] = value;
@@ -434,8 +568,14 @@ function Temporal (strInitTemporal) {
             return false;
         },
 
+        /**
+         * Removes a generic field from the temporal object.
+         *
+         * @param {string} code - The three-letter code of the field to remove.
+         * @returns {string|Object|false} The removed field's value, or `false` if the field was not found or not an object (unexpected).
+         */
         removeField: function (code) {
-            if ( Temporal.fieldsDict[code] && typeof _fields[code] === "object" ) {
+            if ( Temporal.fieldsDict[code] && Object.hasOwn(_fields, code) ) { 
                 let temp = _fields[code];
                 delete _fields[code];
                 return temp;
@@ -443,6 +583,15 @@ function Temporal (strInitTemporal) {
             return false;
         },
 
+        /**
+         * Sets a TDuration object for a specific duration code.
+         *
+         * @param {string} code - The code for the duration field (must be a valid code in `Temporal.tDurationDict`).
+         * @param {TDuration} tDur - The TDuration object to set.
+         * @returns {TDuration|null|false} The previously set TDuration object for this code (if any),
+         *                                 or `null` if none was set. Returns `false` if the code is invalid.
+         * @throws {string} If `tDur` is not a valid TDuration object.
+         */
         setTDuration: function (code, tDur) {
             if ( Temporal.tDurationDict[code] ) {
                 if (typeof tDur === "object" && typeof tDur.getClass === "function" && tDur.getClass() === "TemporalDuration") {
@@ -459,6 +608,12 @@ function Temporal (strInitTemporal) {
             return false;
         },
 
+        /**
+         * Removes a TDuration object for a specific duration code.
+         *
+         * @param {string} code - The code of the TDuration field to remove.
+         * @returns {TDuration|false} The removed TDuration object, or `false` if not found.
+         */
         removeTDuration: function (code) {
             if ( Temporal.tDurationDict[code] && typeof _durations[code] === "object" ) {
                 let temp = _durations[code];
@@ -468,6 +623,15 @@ function Temporal (strInitTemporal) {
             return false;
         },
 
+        /**
+         * Sets a TDate object for a specific date code.
+         *
+         * @param {string} code - The code for the date field (must be a valid code in `Temporal.tDateDict`).
+         * @param {TDate} tDate - The TDate object to set.
+         * @returns {TDate|null|false} The previously set TDate object for this code (if any),
+         *                               or `null` if none was set. Returns `false` if the code is invalid.
+         * @throws {string} If `tDate` is not a valid TDate object.
+         */
         setTDate: function (code,tDate) {
             if ( Temporal.tDateDict[code] ) {
                 if (typeof tDate === "object" && typeof tDate.getClass === "function" && tDate.getClass() === "TemporalDate") {
@@ -484,6 +648,12 @@ function Temporal (strInitTemporal) {
             return false;
         },
 
+        /**
+         * Removes a TDate object for a specific date code.
+         *
+         * @param {string} code - The code of the TDate field to remove.
+         * @returns {TDate|false} The removed TDate object, or `false` if not found.
+         */
         removeTDate: function (code) {
             if ( Temporal.tDateDict[code] && typeof _dates[code] === "object" ) {
                 let temp = _dates[code];
@@ -493,6 +663,12 @@ function Temporal (strInitTemporal) {
             return false;
         },
 
+        /**
+         * Gets the string representation of a TDate, TDuration, or generic field by its code.
+         *
+         * @param {string} code - The three-letter code for the field.
+         * @returns {string} The string representation of the field's value, or an empty string if not found.
+         */
         getStringForCode: function (code) {
             if ( typeof code === "string") {
                 if ( typeof Temporal.tDateDict[code] === "string" && _dates[code]) {
@@ -502,12 +678,21 @@ function Temporal (strInitTemporal) {
                     return _durations[code].toString();
                 }
                 if ( typeof Temporal.fieldsDict[code] === "string" && _fields[code]) {
-                    return _fields[code];
+                    return _fields[code]; // Assumes _fields[code] is already a string or has a toString()
                 }
             }
             return "";
         },
 
+        /**
+         * Adds a TDate, TDuration, or generic field to the temporal object from a string value.
+         * The type of object created (TDate, TDuration, or simple string field) depends on the code.
+         *
+         * @param {string} code - The three-letter code for the field.
+         * @param {string} value - The string value to parse or set.
+         * @returns {TDate|TDuration|string} The created TDate or TDuration object, or the set string value.
+         * @throws {string} If `value` is not a string or if `code` is invalid.
+         */
         addObjForString: function (code, value) {
             if ( typeof code === "string") {
                 if (typeof value !== "string") {
@@ -529,6 +714,10 @@ function Temporal (strInitTemporal) {
             }
         },
 
+        /**
+         * Removes a TDate, TDuration, or generic field by its code.
+         * @param {string} code - The code of the field to remove.
+         */
         removeObjForCode: function (code) {
             if ( typeof code === "string") {
                 if ( typeof Temporal.tDateDict[code] === "string" ) {
@@ -543,10 +732,19 @@ function Temporal (strInitTemporal) {
             }
         },
 
+        /**
+         * Gets the class name of this object.
+         * @returns {string} The class name "Temporal".
+         */
         getClass: function () {
             return _className;
         },
 
+        /**
+         * Checks if this object is an instance of a given class name.
+         * @param {string} strClass - The class name to check against.
+         * @returns {boolean} True if `strClass` is "Temporal", false otherwise.
+         */
         isA: function (strClass) {
             if (strClass === _className) {
                 return true;
@@ -560,7 +758,18 @@ function Temporal (strInitTemporal) {
     return that;	// returning "that"  keeps all variables due to closure
 }
 
-// helper function that takes the current strTemporal representation and sets the members to the contained values
+/**
+ * Parses a temporal string and populates a Temporal object (or creates a new one).
+ * If the string is not in the recognized internal Heurist temporal format, it attempts
+ * to parse it as a simple date. If that fails, the string is stored in the "COM" (comment) field.
+ *
+ * @static
+ * @param {Temporal|string} temporalOrString - Either a Temporal object to populate, or the temporal string to parse.
+ *                                           If a string is provided, a new Temporal object is created.
+ * @param {string} [str] - If `temporalOrString` is a Temporal object, this is the string to parse.
+ * @returns {Temporal|null} The populated or newly created Temporal object, or `null` if no arguments are provided.
+ * @throws {string} If arguments are invalid (e.g., first arg is not Temporal when second is present).
+ */
 Temporal.parse = function () {
     // if there are no arguments nothing to do
     if (!arguments.length) {
@@ -635,7 +844,16 @@ Temporal.parse = function () {
     return temporal;
 };
 
-
+/**
+ * A dictionary mapping temporal type codes to human-readable names.
+ * - s: Simple Date
+ * - c: Radiometric (e.g., C14)
+ * - f: Approximate Date (fuzzy)
+ * - p: Probability Date Range
+ * - d: Duration
+ * @static
+ * @type {Object<string, string>}
+ */
 Temporal.typeDict = {"s" :	"Simple Date",
     "c"	:	"Radiometric",
     "f"	:	"Approximate Date",
@@ -643,6 +861,25 @@ Temporal.typeDict = {"s" :	"Simple Date",
     "d"	:	"Duration"
 };
 
+/**
+ * A dictionary mapping generic field codes used in temporal strings to human-readable descriptions.
+ * - VER: Version Number
+ * - TYP: Temporal Type Code
+ * - PRF: Probability Profile (e.g., flat, central)
+ * - SPF: Start Profile (for ranges)
+ * - EPF: End Profile (for ranges)
+ * - CAL: Calibrated (typically for radiometric dates)
+ * - COD: Laboratory Code (for radiometric dates)
+ * - DET: Determination Type (e.g., attested, conjecture)
+ * - COM: Comment
+ * - EGP: Egyptian Date (specific calendar/format)
+ * - CLD: Calendar (e.g., Gregorian, Julian)
+ * - CL2: Non-Gregorian value (the date string in its native calendar)
+ * - CIR: Circa or approximate (modifier for simple dates; 1: circa, 2: before, 3: after)
+ * @static
+ * @type {Object<string, string>}
+ * @todo Add definitions for PRF, SPF, EPF if they represent specific code values rather than free text.
+ */
 Temporal.fieldsDict = {	"VER"	:	"Version Number",
     "TYP"	:	"Temporal Type Code",
     "PRF"	:	"Probability Profile",					// FIXME: add definitions
@@ -658,18 +895,51 @@ Temporal.fieldsDict = {	"VER"	:	"Version Number",
     "CIR"   :   "Circa or approximate"
 };
 
+/**
+ * A dictionary mapping determination type codes to human-readable names.
+ * Used for the "DET" field.
+ * - 0: Unknown
+ * - 1: Attested
+ * - 2: Conjecture
+ * - 3: Measurement
+ * @static
+ * @type {Object<number, string>}
+ */
 Temporal.determination = {	0	:	"Unknown",
     1	:	    "Attested",
     2	:	"Conjecture",
     3	:	"Measurement"
 };
 
+/**
+ * A dictionary mapping probability profile codes to human-readable names.
+ * Used for "PRF", "SPF", "EPF" fields.
+ * - 0: Flat
+ * - 1: Central
+ * - 2: Slow Start
+ * - 3: Slow Finish
+ * @static
+ * @type {Object<number, string>}
+ */
 Temporal.profiles = {	0	:	"Flat",
     1	:	"Central",
     2	:	"Slow Start",
     3	:	"Slow Finish"
 };
 
+/**
+ * A dictionary mapping TDate field codes (used for specific date points) to human-readable descriptions.
+ * - DAT: ISO DateTime (primary date for simple/fuzzy types)
+ * - BPD: Before Present (1950) Date (for C14 dates)
+ * - BCE: Before Current Era (for C14 dates if not BP)
+ * - TPQ: Terminus Post Quem (earliest possible date for a range)
+ * - TAQ: Terminus Ante Quem (latest possible date for a range)
+ * - PDB: Probable Begin (probable start of a range)
+ * - PDE: Probable End (probable end of a range)
+ * - SRT: Sortby Date (a specific date used for sorting purposes)
+ * @static
+ * @type {Object<string, string>}
+ */
 Temporal.tDateDict = {	"DAT"	:	"ISO DateTime",
     "BPD"	:	"Before Present (1950) Date",
     "BCE"	:	"Before Current Era",
@@ -680,6 +950,18 @@ Temporal.tDateDict = {	"DAT"	:	"ISO DateTime",
     "SRT"	:	"Sortby Date"
 };
 
+/**
+ * A dictionary mapping TDuration field codes to human-readable descriptions.
+ * These represent durations or deviations in ISO 8601 duration format (e.g., P1Y2M10D).
+ * - DUR: Simple Duration
+ * - DEV: Standard Deviation (symmetric)
+ * - DVP: Deviation Positive (asymmetric positive deviation)
+ * - DVN: Deviation Negative (asymmetric negative deviation)
+ * - RNG: Range (often used with fuzzy dates)
+ * - ERR: Error Margin
+ * @static
+ * @type {Object<string, string>}
+ */
 Temporal.tDurationDict = {	"DUR"	:	"Simple Duration",
     "DEV"	:	"Standard Deviation",
     "DVP"	:	"Deviation Positive",
@@ -688,6 +970,15 @@ Temporal.tDurationDict = {	"DUR"	:	"Simple Duration",
     "ERR"	:	"Error Margin"
 };
 
+/**
+ * Internal map defining required and optional fields for each temporal type.
+ * `req` is an array of possible sets of required fields.
+ * `opt` is an array of optional fields.
+ * `hdr` seems to list primary fields for the type.
+ * @private
+ * @static
+ * @type {Object<string, {req: Array<Array<string>>, opt: Array<string>, hdr: Array<string>}>}
+ */
 Temporal._typeFieldMap = {	s : {
         req : [["DAT"]],
         //											[]],		// empty date allows to capture ill-formed date strings
@@ -719,6 +1010,13 @@ Temporal._typeFieldMap = {	s : {
     }
 };
 
+/**
+ * Creates a deep clone of an object or array.
+ * Used internally to duplicate parts of the `_typeFieldMap`.
+ * @static
+ * @param {Object|Array|any} obj - The object or array to clone. If not an object or array, it's returned directly.
+ * @returns {Object|Array|any} A deep clone of the input.
+ */
 Temporal.cloneObj = function(obj) {
 
     function isArray(a)
@@ -742,6 +1040,14 @@ Temporal.cloneObj = function(obj) {
     }
 };
 
+/**
+ * Gets a clone of the field map (required, optional, header fields) for a given temporal type.
+ * Uses `Temporal.cloneObj` to ensure the returned map is a deep copy.
+ * @static
+ * @param {string} type - The temporal type code (e.g., 's', 'p').
+ * @returns {Object<{req: Array<Array<string>>, opt: Array<string>, hdr: Array<string>}>|undefined}
+ *          A deep copy of the field map for the specified type, or undefined if the type is not found in `Temporal._typeFieldMap`.
+ */
 Temporal.typeFieldMap = function (type) {
     return Temporal.cloneObj(Temporal._typeFieldMap[type]);
 };
@@ -799,8 +1105,18 @@ Temporal.isValidFormat = function ( str ) {
 // returns array
 //  0 - valid
 //  1 - missed required fields
-//  2 - optional fields
-//  3 - error message
+//  2 - optional fields (though the code seems to put extra/invalid fields here)
+//  3 - error message string
+/**
+ * Checks the validity of a Temporal object's internal structure based on its type.
+ * Validates required fields and performs type-specific checks (e.g., date order in ranges).
+ *
+ * @static
+ * @param {Temporal} temporal - The Temporal object to validate.
+ * @returns {Array<boolean|Array<string>|string>|false} An array:
+ *          `[isValid (boolean), missingRequiredFields (Array<string>), extraOrInvalidFields (Array<string>), errorMessage (string)]`.
+ *          Returns `false` if the input is not a valid Temporal object or has an unsupported version.
+ */
 Temporal.checkValidity = function ( temporal ) {
     if (!temporal || !temporal.isA || !temporal.isA("Temporal") || temporal.getVersion()>1) { //g_version=1
         return false;
@@ -867,6 +1183,14 @@ Temporal.checkValidity = function ( temporal ) {
     return ret;
 }
 
+/**
+ * Gets the array of required field sets for a given temporal type.
+ * Each element in the returned array is an array of field codes that represents one valid set of required fields.
+ * @static
+ * @param {string} type - The temporal type code (e.g., 's', 'p').
+ * @returns {Array<Array<string>>} An array of arrays, where each inner array lists required field codes.
+ * @throws {string} If the type is invalid.
+ */
 Temporal.getTypeReq = function (type) {
     if ( type && typeof type === "string" && typeof Temporal.typeFieldMap(type) === "object") {
         return Temporal.typeFieldMap(type).req;
@@ -875,6 +1199,13 @@ Temporal.getTypeReq = function (type) {
     }
 }
 
+/**
+ * Gets the array of optional field codes for a given temporal type.
+ * @static
+ * @param {string} type - The temporal type code.
+ * @returns {Array<string>} An array of optional field codes.
+ * @throws {string} If the type is invalid.
+ */
 Temporal.getTypeOpt = function (type) {
     if ( type && typeof type === "string" && typeof Temporal.typeFieldMap(type) === "object") {
         return Temporal.typeFieldMap(type).opt;
@@ -883,6 +1214,13 @@ Temporal.getTypeOpt = function (type) {
     }
 }
 
+/**
+ * Gets a combined list of header (primary) and optional field codes for a given temporal type.
+ * @static
+ * @param {string} type - The temporal type code.
+ * @returns {Array<string>} An array of header and optional field codes.
+ * @throws {string} If the type is invalid.
+ */
 Temporal.getFieldsForType = function (type) {
     if ( type && typeof type === "string" && typeof Temporal.typeFieldMap(type) === "object") {
         return 	Temporal.typeFieldMap(type).hdr.concat(Temporal.typeFieldMap(type).opt);
@@ -891,6 +1229,14 @@ Temporal.getFieldsForType = function (type) {
     }
 }
 
+/**
+ * Gets the human-readable description for a field code (can be from generic fields, TDate fields, or TDuration fields).
+ * Note: This static method has the same name as an instance method `getStringForCode`.
+ * This static version looks up the code in the static dictionaries.
+ * @static
+ * @param {string} code - The field code.
+ * @returns {string} The human-readable description, or "UNKNOWN FIELD CODE" if not found.
+ */
 Temporal.getStringForCode = function (code) {
     if (Temporal.fieldsDict[code]) {
         return Temporal.fieldsDict[code];
@@ -904,6 +1250,16 @@ Temporal.getStringForCode = function (code) {
     return "UNKNOWN FIELD CODE";
 }
 
+/**
+ * Extracts valid field codes from a temporal string based on its type.
+ * It identifies one valid set of required fields and all applicable optional fields present in the string.
+ * @static
+ * @param {string} type - The temporal type code (e.g., 's', 'p').
+ * @param {string} str - The temporal string to extract field codes from.
+ * @returns {Array<string>|string} An array of valid field codes found in the string for the given type,
+ *                                 or an empty string if `str` is null/empty or no valid headers are found.
+ * @throws {string} If the type is invalid or if the string is malformed in a way that a valid set of required fields cannot be identified.
+ */
 Temporal.getFieldsForString = function (type,str) {
     if (!str) {
         return "";
@@ -950,27 +1306,80 @@ Temporal.getFieldsForString = function (type,str) {
     }
 }
 
-// Temporal Date object extend by date.js
+/**
+ * Represents a specific date and time, potentially with timezone information.
+ * This object is designed to parse and store components of a date/time string,
+ * and format them into various string representations.
+ * It handles year, month, day, hours, minutes, seconds, milliseconds, and timezone offset.
+ * The interpretation of ambiguous date formats (e.g., "10/11/12") can be influenced
+ * by the `_dateFormat` property (though its setting mechanism isn't fully exposed publicly).
+ *
+ * Note: The file header mentions "Temporal Date object extend by date.js", implying
+ * that this TDate object might be augmented or rely on features from an external "date.js" library,
+ * which is not included in this file.
+ *
+ * @constructor
+ * @param {string} [strDate] - An optional date/time string to initialize the TDate object.
+ *                             If provided, `TDate.parse` is called internally to populate the fields.
+ *                             If not provided or empty, an empty TDate object is created.
+ */
 window.TDate = function (strDate) {
     //private members
+    /**
+     * @private
+     * @type {string}
+     * @const
+     */
     const _className = "TemporalDate";
     let _origString = strDate && strDate.toString ? strDate.toString() : "";
+    /**
+     * @private
+     * @type {string}
+     * @description Stores the detected or assumed order of year, month, day (e.g., "ymd", "dmy").
+     *              Primarily set by `TDate.parse`.
+     */
     let _dateFormat = "ymd";
+    /** @private @type {string|null} */
     let _year = null;
+    /** @private @type {string|null} */
     let _month = null;
+    /** @private @type {string|null} */
     let _day = null;
+    /** @private @type {string|null} */
     let _hours = null;
+    /** @private @type {string|null} */
     let _minutes = null;
+    /** @private @type {string|null} */
     let _seconds = null;
+    /** @private @type {string|null} */
     let _milliseconds = null;
+    /**
+     * @private
+     * @type {string|null}
+     * @description Separator for milliseconds, e.g., "." or ",".
+     */
     let _milliSep = null;
+    /**
+     * @private
+     * @type {string|null}
+     * @description Timezone offset string, e.g., "+1000" or "-05:00".
+     */
     let _tzOffset = null;
+    /**
+     * @private
+     * @type {string|null}
+     * @description Timezone abbreviation, e.g., "Z" for UTC.
+     */
     let _tz = null;
 
 
     //public members
     let that = {
 
+        /**
+         * Clears all date/time components of the TDate object, resetting it to an empty state.
+         * The original string is set to null, and date format defaults to "ymd".
+         */
         clear: function () {
             _origString = null;
             _dateFormat = "ymd";
@@ -985,46 +1394,108 @@ window.TDate = function (strDate) {
             _tz = null;
         },
 
+        /**
+         * Gets the original string used to create or set this TDate object.
+         * @returns {string|null} The original date string.
+         */
         getOrigString: function () {
             return _origString;
         },
 
+        /**
+         * Gets the year component of the date.
+         * @returns {string|null} The year, or null if not set.
+         */
         getYear: function () {
             return _year;
         },
 
+        /**
+         * Gets the month component of the date (1-12).
+         * @returns {string|null} The month, or null if not set.
+         */
         getMonth: function () {
             return _month;
         },
 
+        /**
+         * Gets the day component of the date (1-31).
+         * @returns {string|null} The day, or null if not set.
+         */
         getDay: function () {
             return _day;
         },
 
+        /**
+         * Gets the hours component of the time (0-23).
+         * @returns {string|null} The hours, or null if not set.
+         */
         getHours: function () {
             return _hours;
         },
 
+        /**
+         * Gets the minutes component of the time (0-59).
+         * @returns {string|null} The minutes, or null if not set.
+         */
         getMinutes: function () {
             return _minutes;
         },
 
+        /**
+         * Gets the seconds component of the time (0-59).
+         * @returns {string|null} The seconds, or null if not set.
+         */
         getSeconds: function () {
             return _seconds;
         },
 
+        /**
+         * Gets the milliseconds component of the time (0-999).
+         * @returns {string|null} The milliseconds, or null if not set.
+         */
         getMilliseconds: function () {
             return _milliseconds;
         },
 
+        /**
+         * Gets the timezone offset as a string (e.g., "+1000", "-05:00").
+         * Returns "null" as a string if not set, which might be unintentional.
+         * @returns {string} The timezone offset string.
+         * @todo Clarify if returning string "null" is intended or if it should be `null`.
+         */
         getTimezoneOffset: function () {
             return "" + _tzOffset ;
         },
 
+        /**
+         * Gets the detected or assumed date format order (e.g., "ymd", "dmy").
+         * @returns {string} The date format string.
+         */
         getDateFormat: function() {
             return _dateFormat;
         },
 
+        /**
+         * Formats the TDate object into a string based on a provided format template.
+         * Supports various format specifiers for year, month, day, hour, minute, second, milliseconds, and timezone.
+         *
+         * Example format specifiers:
+         * - Year: `yyyy` (4-digit), `yy` (2-digit), `y`
+         * - Month: `MMMM` (full name), `MMM` (short name), `MM` (2-digit), `M`
+         * - Day: `dddd` (full name), `ddd` (short name), `dd` (2-digit), `d`
+         * - Hour: `HH` (24h, 2-digit), `H` (24h), `hh` (12h, 2-digit), `h` (12h)
+         * - Minute: `mm` (2-digit), `m`
+         * - Second: `ss` (2-digit), `s`
+         * - Millisecond: `sss`
+         * - AM/PM: `tt`, `t`
+         * - Timezone: `zzz` (abbreviation like Z), `zz` (GMT offset), `z` (offset like +10:00)
+         *
+         * If no format is provided, defaults to "yyyy-MM-dd HH:mm:ssz".
+         *
+         * @param {string} [format="yyyy-MM-dd HH:mm:ssz"] - The format string.
+         * @returns {string} The formatted date/time string.
+         */
         toString : function (format) {
             let frmPart = function (s,fillLength) {
                 if (!s) {
@@ -1174,16 +1645,31 @@ window.TDate = function (strDate) {
             return that;
         },
 
+        /**
+         * Sets the date format string (e.g., "ymd", "dmy").
+         * The format string must be exactly 3 characters long.
+         * @param {string} str - The date format string.
+         */
         setTDateFormat: function (str) {
             if ( str && str.length ===3 ) {
                 _dateFormat = str;
             }
         },
 
+        /**
+         * Sets the original string representation of the date.
+         * @param {string} str - The original date string.
+         */
         setOrigString: function (str) {
             _origString = str;
         },
 
+        /**
+         * Sets the year component of the date.
+         * Validates the year using `TDate.validateYear`.
+         * @param {string|number|null} str - The year to set. If null or empty, the year is cleared.
+         * @throws {string} If the year is invalid.
+         */
         setYear: function (str) {
             if ( str !== null && str !== "" ) {
                 if ( isNaN(str)|| !TDate.validateYear(Number(str))) {
@@ -1193,6 +1679,12 @@ window.TDate = function (strDate) {
             _year = str;
         },
 
+        /**
+         * Sets the month component of the date (1-12).
+         * Validates the month using `TDate.validateMonth`.
+         * @param {string|number|null} str - The month to set. If null or empty, the month is cleared.
+         * @throws {string} If the month is invalid.
+         */
         setMonth: function (str) {
             if ( str !== null && str !== "" ) {
                 if ( isNaN(str) || !TDate.validateMonth(Number(str))) {
@@ -1202,6 +1694,12 @@ window.TDate = function (strDate) {
             _month = str;
         },
 
+        /**
+         * Sets the day component of the date.
+         * Validates the day using `TDate.validateDay`, considering the current year and month for days in month.
+         * @param {string|number|null} str - The day to set. If null or empty, the day is cleared.
+         * @throws {string} If the day is invalid for the current month/year.
+         */
         setDay: function (str) {
             if ( str !== null && str !== "" ) {
                 if ( isNaN(str) || !TDate.validateDay(Number(str),_year ,_month)) {
@@ -1211,6 +1709,12 @@ window.TDate = function (strDate) {
             _day = str;
         },
 
+        /**
+         * Sets the hours component of the time (0-23).
+         * Converts 24 to 0. Validates using `TDate.validateHour`.
+         * @param {string|number|null} str - The hours to set. If null or empty, hours are cleared.
+         * @throws {string} If the hours value is invalid.
+         */
         setHours: function (str) {
             if ( str !== null && str !== "" ) {
 				if(Number(str)==24) { str = '0'; }
@@ -1221,6 +1725,12 @@ window.TDate = function (strDate) {
             _hours = str;
         },
 
+        /**
+         * Sets the minutes component of the time (0-59).
+         * Validates using `TDate.validateMinute`.
+         * @param {string|number|null} str - The minutes to set. If null or empty, minutes are cleared.
+         * @throws {string} If the minutes value is invalid.
+         */
         setMinutes: function (str) {
             if ( str !== null && str !== "" ) {
                 if ( isNaN(str) || !TDate.validateMinute(Number(str))) {
@@ -1230,6 +1740,12 @@ window.TDate = function (strDate) {
             _minutes = str;
         },
 
+        /**
+         * Sets the seconds component of the time (0-59).
+         * Validates using `TDate.validateSecond`.
+         * @param {string|number|null} str - The seconds to set. If null or empty, seconds are cleared.
+         * @throws {string} If the seconds value is invalid.
+         */
         setSeconds: function (str) {
             if ( str !== null && str !== "" ) {
                 if ( isNaN(str) || !TDate.validateSecond(Number(str))) {
@@ -1239,6 +1755,13 @@ window.TDate = function (strDate) {
             _seconds = str;
         },
 
+        /**
+         * Sets the milliseconds component of the time (0-999).
+         * Validates using `TDate.validateMillisecond`.
+         * @param {string|number|null} str - The milliseconds to set. If null or empty, milliseconds are cleared.
+         * @param {string} [sep] - The separator character (e.g., ".", ",") used with milliseconds, if any.
+         * @throws {string} If the milliseconds value is invalid.
+         */
         setMilliseconds: function (str, sep) {
             if ( str !== null && str !== "" ) {
                 if ( isNaN(str) || !TDate.validateMillisecond(Number(str))) {
@@ -1251,19 +1774,29 @@ window.TDate = function (strDate) {
             }
         },
 
+        /**
+         * Sets the timezone offset.
+         * Parses strings like "GMT+1000", "+05:30", "-08", "UTC-0400".
+         * If parsing fails or format is invalid, defaults to "00:00".
+         * @param {string} str - The timezone offset string.
+         */
         setTimezoneOffset: function (str) {
             let h = str.match(/^\s*(?:UTC|GMT)?([\+|\-])(\d\d):?(\d\d)?/);
-            if (!h || !h[0] || !h[2] || h[2] > 23 || h[3] > 59) {
+            if (!h || !h[0] || !h[2] || Number(h[2]) > 23 || (h[3] && Number(h[3]) > 59) ) { // Corrected validation
                 _tzOffset = '00:00';
                
             } else {
-                _tzOffset = ( ( h[1] === "-" ? "-" : "+") + h[2] + (h[3] ? h[3] : "") );
-                if(_tzOffset && _tzOffset.length>0 && _tzOffset.indexOf(":")<0){
-                    _tzOffset = _tzOffset+":00";
-                }
+                _tzOffset = ( ( h[1] === "-" ? "-" : "+") + h[2] + (h[3] ? (':' + h[3]) : ":00") ); // Standardize to HH:MM
             }
         },
 
+        /**
+         * Compares this TDate object with another TDate object.
+         * Comparison is done field by field: year, month, day, hours, minutes, seconds, milliseconds.
+         * Missing fields are treated as 0 for comparison.
+         * @param {TDate} tDate2 - The TDate object to compare against.
+         * @returns {number} -1 if this TDate is earlier, 1 if later, 0 if equal.
+         */
         compare: function (tDate2) {
             let ret;
             function comp (a,b) {
@@ -1299,6 +1832,11 @@ window.TDate = function (strDate) {
             return _className;
         },
 
+        /**
+         * Checks if this object is an instance of a given class name.
+         * @param {string} strClass - The class name to check against.
+         * @returns {boolean} True if `strClass` is "TemporalDate", false otherwise.
+         */
         isA: function (strClass) {
             if (strClass === _className) {
                 return true;
@@ -1316,8 +1854,27 @@ window.TDate = function (strDate) {
     return that;
 }
 
-
-// static function  parse() - parses a string assuming ISO format precision and set Date
+/**
+ * Parses a date/time string and populates a TDate object (or creates a new one).
+ * This function attempts to understand various date/time formats, including:
+ * - ISO 8601-like formats.
+ * - Formats with month names (e.g., "Jan", "February") or Roman numerals for months.
+ * - Common date separators like "/", "-", or space.
+ * - Time components with ":", ".", or "," separators.
+ * - AM/PM and timezone indicators (GMT, UTC, Z, or offsets like +HH:MM).
+ * - Special strings: "now", "today", "tomorrow", "yesterday".
+ * - BCE/CE or BC/AD designators.
+ *
+ * The parsing logic tries to infer the order of year, month, and day if not explicitly coded
+ * (e.g., with 'm' or 'd' suffix like "10m" for October).
+ *
+ * @static
+ * @param {TDate|string} tDateOrString - Either a TDate object to populate, or the date/time string to parse.
+ *                                     If a string is provided, a new TDate object is created.
+ * @param {string} [str] - If `tDateOrString` is a TDate object, this is the string to parse.
+ * @returns {TDate|null} The populated or newly created TDate object, or `null` if no arguments are provided.
+ * @throws {string} If the date string is unrecognized or contains ambiguous/invalid components.
+ */
 TDate.parse = function () {
     // if there are no arguments nothing to do
     if (!arguments.length) {
@@ -1757,6 +2314,13 @@ TDate.parse = function () {
 
 }
 
+/**
+ * Gets the name of the month for a given index.
+ * @static
+ * @param {number|string} index - The month index (1-12).
+ * @param {boolean} [shortName=false] - If true, returns the abbreviated month name (e.g., "Jan").
+ * @returns {string|null} The full or short month name, or `null` if the index is invalid.
+ */
 TDate.getMonthName = function (index,shortName) {
     if (index >0  && index <= 12) {
         let name = ["dummy","January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"][index - 0];
@@ -1765,6 +2329,17 @@ TDate.getMonthName = function (index,shortName) {
     return null;
 }
 
+/**
+ * Gets the name of the day of the week for a given date.
+ * Uses JavaScript's `Date` object internally for calculation.
+ * @static
+ * @param {number|string} y - The year.
+ * @param {number|string} m - The month (1-12).
+ * @param {number|string} d - The day.
+ * @param {boolean} [shortName=false] - If true, returns the abbreviated day name (e.g., "Sun").
+ * @returns {string|null} The full or short day name, or `null` if the JavaScript Date object cannot determine it.
+ * @todo Review reliance on JavaScript's `Date` object, consider cultural/locale implications if this library is used internationally.
+ */
 TDate.getDayName = function (y,m,d,shortName) {
     let index = (new Date(y,m,d)).getDay();  // FIXME : uses Javascript to figure out day of week, should create algorithm and use cultural info.
     if ( index >= 0 && index < 7 ) {
@@ -1774,6 +2349,18 @@ TDate.getDayName = function (y,m,d,shortName) {
     return null;
 }
 
+/**
+ * Validates a numeric value against a minimum and maximum range.
+ * Used by specific date/time component validation methods.
+ * @static
+ * @private
+ * @param {number} value - The value to validate.
+ * @param {number} min - The minimum allowed value.
+ * @param {number} max - The maximum allowed value.
+ * @param {string} name - The name of the component being validated (e.g., "year", "month") for error messages.
+ * @returns {boolean} True if valid.
+ * @throws {string} If the value is out of range, with specific messages for years.
+ */
 TDate.validate = function (value, min, max, name) {
     if (value < min || value > max) {
         if (name === "year") {
@@ -1786,57 +2373,150 @@ TDate.validate = function (value, min, max, name) {
     return true;
 }
 
+/**
+ * Validates milliseconds (0-999).
+ * @static
+ * @param {number} n - The milliseconds value.
+ * @returns {boolean} True if valid.
+ * @throws {string} If invalid.
+ */
 TDate.validateMillisecond = function (n) {
     return TDate.validate(n, 0, 999, "milliseconds");
 
 }
 
+/**
+ * Validates seconds (0-59).
+ * @static
+ * @param {number} n - The seconds value.
+ * @returns {boolean} True if valid.
+ * @throws {string} If invalid.
+ */
 TDate.validateSecond = function (n) {
     return TDate.validate(n, 0, 59, "seconds");
 }
 
+/**
+ * Validates minutes (0-59).
+ * @static
+ * @param {number} n - The minutes value.
+ * @returns {boolean} True if valid.
+ * @throws {string} If invalid.
+ */
 TDate.validateMinute = function (n) {
     return TDate.validate(n, 0, 59, "minutes");
 }
 
+/**
+ * Validates hours (0-23).
+ * @static
+ * @param {number} n - The hours value.
+ * @returns {boolean} True if valid.
+ * @throws {string} If invalid.
+ */
 TDate.validateHour = function (n) {
     return TDate.validate(n, 0, 23, "hours");
 }
 
+/**
+ * Validates the day of the month (1 to days in month).
+ * Considers leap years for February.
+ * @static
+ * @param {number} n - The day value.
+ * @param {number|string} year - The year, used to determine days in February.
+ * @param {number|string} month - The month (1-12), used to determine days in month.
+ * @returns {boolean} True if valid.
+ * @throws {string} If invalid.
+ */
 TDate.validateDay = function (n, year, month) {
     return TDate.validate(n, 1, TDate.getDaysInMonth(year, month), "day");
 }
 
+/**
+ * Validates the month (1-12).
+ * @static
+ * @param {number} n - The month value.
+ * @returns {boolean} True if valid.
+ * @throws {string} If invalid.
+ */
 TDate.validateMonth = function (n) {
     return TDate.validate(n, 1, 12, "month");
 }
 
+/**
+ * Validates the year (between -14,000,000,000 and 14,000,000,000).
+ * @static
+ * @param {number} n - The year value.
+ * @returns {boolean} True if valid.
+ * @throws {string} If invalid, with humorous messages for out-of-bound years.
+ */
 TDate.validateYear = function (n) {
     return TDate.validate(n, -14000000000, 14000000000, "year");
 }
 
+/**
+ * Gets the number of days in a specific month of a specific year.
+ * Accounts for leap years.
+ * @static
+ * @param {number|string} year - The year.
+ * @param {number|string} month - The month (1-12).
+ * @returns {number|null} The number of days in the month, or `null` if month is invalid.
+ */
 TDate.getDaysInMonth = function (year, month) {
     return [null,31, (TDate.isLeapYear(year) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 0];
 }
 
+/**
+ * Checks if a year is a leap year.
+ * A year is a leap year if it is divisible by 4, unless it is divisible by 100 but not by 400.
+ * @static
+ * @param {number|string} year - The year to check.
+ * @returns {boolean} True if it's a leap year, false otherwise.
+ */
 TDate.isLeapYear = function (year) {
     return (((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0));
 }
 
 
-// wrapper for Date object to use it as a duration
+/**
+ * Represents a duration of time, specified in years, months, days, hours, minutes, and seconds.
+ * Parses and stores durations from ISO 8601 duration format strings (e.g., "P1Y2M10DT2H30M").
+ *
+ * @constructor
+ * @param {string} [strDuration] - An optional ISO 8601 duration string (e.g., "P1Y2M10DT2H30M")
+ *                                 to initialize the TDuration object. If not provided or empty,
+ *                                 an empty TDuration object is created.
+ * @throws {string} If the provided `strDuration` has illegal characters or is malformed.
+ */
 function TDuration(strDuration) {
     //private members
+    /**
+     * @private
+     * @type {string}
+     * @const
+     */
     const _className = "TemporalDuration";
     let _origString = strDuration;
+    /** @private @type {number|null} */
     let _year = null;
+    /** @private @type {number|null} */
     let _month = null;
+    /** @private @type {number|null} */
     let _day = null;
+    /** @private @type {number|null} */
     let _hour = null;
+    /** @private @type {number|null} */
     let _minute = null;
+    /** @private @type {number|null} */
     let _second = null;
 
-    // parse the string assuming ISO to get precision and set Duration
+    /**
+     * Parses an ISO 8601 duration string and sets the internal year, month, day, etc., components.
+     * Clears existing values before parsing.
+     * @private
+     * @param {string} str - The ISO 8601 duration string.
+     * @throws {string} If the string contains illegal characters, is malformed, or has a time specifier 'T' without a time period.
+     */
     function _parseStr (str) {
         that.clear();
         _origString = str;
@@ -1855,7 +2535,7 @@ function TDuration(strDuration) {
         }
         let dur = str.match(/^P(?:(\d+)Y)?(?:(\d+)M)?(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?/); //separate date and time values
 
-        if (!dur[0]) {
+        if (!dur || !dur[0]) { // Check if dur itself or dur[0] is null/undefined
             throw "TDuration exception - invalid duration string passed to parseStr - " + str;
         }
 
@@ -1885,6 +2565,10 @@ function TDuration(strDuration) {
 
     };
 
+    /**
+     * Initializes the TDuration object by parsing the initial duration string.
+     * @private
+     */
     function _init () {
         _parseStr(_origString);
     };
@@ -1892,6 +2576,10 @@ function TDuration(strDuration) {
 
     //public members
     let that = {
+        /**
+         * Clears all components of the TDuration object (year, month, day, hour, minute, second)
+         * and resets the original string to null.
+         */
         clear: function () {
             _origString = null;
             _year = null;
@@ -1902,30 +2590,59 @@ function TDuration(strDuration) {
             _second = null;
         },
 
+        /**
+         * Gets the year component of the duration.
+         * @returns {number|null} The number of years, or null if not set.
+         */
         getYear: function () {
             return _year;
         },
 
+        /**
+         * Gets the month component of the duration.
+         * @returns {number|null} The number of months, or null if not set.
+         */
         getMonth: function () {
             return _month;
         },
 
+        /**
+         * Gets the day component of the duration.
+         * @returns {number|null} The number of days, or null if not set.
+         */
         getDay: function () {
             return _day;
         },
 
+        /**
+         * Gets the hour component of the duration.
+         * @returns {number|null} The number of hours, or null if not set.
+         */
         getHour: function () {
             return _hour;
         },
 
+        /**
+         * Gets the minute component of the duration.
+         * @returns {number|null} The number of minutes, or null if not set.
+         */
         getMinute: function () {
             return _minute;
         },
 
+        /**
+         * Gets the second component of the duration.
+         * @returns {number|null} The number of seconds, or null if not set.
+         */
         getSecond: function () {
             return _second;
         },
 
+        /**
+         * Converts the TDuration object back to an ISO 8601 duration string.
+         * Example: "P1Y2M3DT4H5M6S". Returns an empty string if no components are set.
+         * @returns {string} The ISO 8601 duration string.
+         */
         toString: function () {
             let temp = "";
             if (_year || _month || _day || _hour || _minute || _second) {
@@ -1956,6 +2673,11 @@ function TDuration(strDuration) {
             return temp;
         },
 
+        /**
+         * Sets the duration from either an ISO 8601 duration string or another TDuration object.
+         * @param {string|TDuration} duration - The duration string or TDuration object.
+         * @returns {TDuration|null} The current TDuration instance, or `null` if the input is invalid.
+         */
         setTDuration: function (duration) {
             if (typeof duration === "string") {  // should be and encode string
                 _parseStr(duration);
@@ -1967,64 +2689,109 @@ function TDuration(strDuration) {
             return that;
         },
 
+        /**
+         * Sets the year component of the duration.
+         * @param {string|number|null} str - The number of years. Must be non-negative.
+         * @throws {string} If `str` is invalid (NaN or negative).
+         */
         setYear: function (str) {
             if ( str !== null && str !== "" ) {
-                if ( isNaN(str)|| str < 0) {
-                    throw " TDate exception - invalid string supplied to setYear() - " + str;
+                if ( isNaN(str)|| Number(str) < 0) {
+                    throw " TDuration exception - invalid string supplied to setYear() - " + str;
                 }
             }
             _year = Number(str);
         },
 
+        /**
+         * Sets the month component of the duration.
+         * @param {string|number|null} str - The number of months (0-12, though 12 could mean 1 year).
+         *                                   Must be non-negative.
+         * @throws {string} If `str` is invalid (NaN, negative, or > 12).
+         * @todo Clarify if month can exceed 11 (e.g. P13M). ISO 8601 allows this.
+         */
         setMonth: function (str) {
             if ( str !== null && str !== "" ) {
-                if ( isNaN(str) || str < 0 || str > 12) {
-                    throw " TDate exception - invalid string supplied to setMonth() - " + str;
+                if ( isNaN(str) || Number(str) < 0 || Number(str) > 12) {
+                    throw " TDuration exception - invalid string supplied to setMonth() - " + str;
                 }
             }
             _month = Number(str);
         },
 
+        /**
+         * Sets the day component of the duration.
+         * @param {string|number|null} str - The number of days. Must be non-negative.
+         * @throws {string} If `str` is invalid (NaN, negative, or > 31 - though ISO allows more).
+         * @todo Clarify if day can exceed 31 (e.g. P40D). ISO 8601 allows this.
+         */
         setDay: function (str) {
             if ( str !== null && str !== "" ) {
-                if ( isNaN(str) || str < 0 || str > 31) {
-                    throw " TDate exception - invalid string supplied to setDay() - " + str;
+                if ( isNaN(str) || Number(str) < 0 || Number(str) > 31) {
+                    throw " TDuration exception - invalid string supplied to setDay() - " + str;
                 }
             }
             _day = Number(str);
         },
 
+        /**
+         * Sets the hour component of the duration.
+         * @param {string|number|null} str - The number of hours. Must be non-negative.
+         * @throws {string} If `str` is invalid (NaN, negative, or > 24 - though ISO allows more).
+         * @todo Clarify if hour can exceed 24. ISO 8601 allows this for durations.
+         */
         setHour: function (str) {
             if ( str !== null && str !== "" ) {
-                if ( isNaN(str) || str < 0 || str > 24) {
-                    throw " TDate exception - invalid string supplied to setHour() - " + str;
+                if ( isNaN(str) || Number(str) < 0 || Number(str) > 24) {
+                    throw " TDuration exception - invalid string supplied to setHour() - " + str;
                 }
             }
             _hour = Number(str);
         },
 
+        /**
+         * Sets the minute component of the duration.
+         * @param {string|number|null} str - The number of minutes. Must be non-negative.
+         * @throws {string} If `str` is invalid (NaN, negative, or > 60 - though ISO allows more).
+         * @todo Clarify if minute can exceed 60. ISO 8601 allows this for durations.
+         */
         setMinute: function (str) {
             if ( str !== null && str !== "" ) {
-                if ( isNaN(str) || str < 0 || str> 60) {
-                    throw " TDate exception - invalid string supplied to setMinute() - " + str;
+                if ( isNaN(str) || Number(str) < 0 || Number(str)> 60) { 
+                    throw " TDuration exception - invalid string supplied to setMinute() - " + str;
                 }
             }
             _minute = Number(str);
         },
 
+        /**
+         * Sets the second component of the duration.
+         * @param {string|number|null} str - The number of seconds. Must be non-negative.
+         * @throws {string} If `str` is invalid (NaN, negative, or > 60 - though ISO allows more).
+         * @todo Clarify if second can exceed 60. ISO 8601 allows this for durations.
+         */
         setSecond: function (str) {
             if ( str !== null && str !== "" ) {
-                if ( isNaN(str) || str < 0 ||  str > 60) {
-                    throw " TDate exception - invalid string supplied to setSecond() - " + str;
+                if ( isNaN(str) || Number(str) < 0 ||  Number(str) > 60) {
+                    throw " TDuration exception - invalid string supplied to setSecond() - " + str;
                 }
             }
             _second = Number(str);
         },
 
+        /**
+         * Gets the class name of this object.
+         * @returns {string} The class name "TemporalDuration".
+         */
         getClass: function () {
             return _className;
         },
 
+        /**
+         * Checks if this object is an instance of a given class name.
+         * @param {string} strClass - The class name to check against.
+         * @returns {boolean} True if `strClass` is "TemporalDuration", false otherwise.
+         */
         isA: function (strClass) {
             if (strClass === _className) {
                 return true;
@@ -2039,7 +2806,14 @@ function TDuration(strDuration) {
     return that;
 }   //end of TDuration
 
-// is given string is in temporal format
+/**
+ * Checks if a given string is in the Heurist internal temporal format.
+ * It primarily checks for the presence of "|VER=" and also has some logic
+ * to differentiate from simple date strings that might coincidentally contain "|VER=".
+ *
+ * @param {string} str - The string to check.
+ * @returns {boolean} True if the string is likely in the Heurist temporal format, false otherwise.
+ */
 function isTemporal(str) {
 
     let res = false;
@@ -2064,6 +2838,14 @@ function isTemporal(str) {
     return res;
 }
 
+/**
+ * Formats a date string (assumed to be Gregorian/Julian) into a human-readable format.
+ * Example: "-0500-05-15" becomes "15 May 500 BCE". Includes time if present.
+ *
+ * @param {string} val - The date string to format (e.g., "YYYY-MM-DD", "-YYYY-MM-DD HH:mm:ss").
+ * @param {boolean} isneed - If true, formatting is attempted. If false, `val` is returned directly.
+ * @returns {string} The formatted human-readable date string, or the original `val` if `isneed` is false or `val` is empty.
+ */
 function formatGregJulian(val, isneed){
 
         if(isneed && val){
@@ -2093,7 +2875,12 @@ function formatGregJulian(val, isneed){
 }
 
 /**
+ * Converts a Heurist internal temporal string into a more human-readable string.
+ * Handles different temporal types (simple, C14, probability range, fuzzy) and calendars.
  *
+ * @param {string} inputStr - The Heurist internal temporal string (e.g., "|VER=1|TYP=s|DAT=...").
+ * @returns {string} A human-readable representation of the temporal string.
+ *                   Returns the original string if it's not in the Heurist temporal format.
  */
 function temporalToHumanReadableString(inputStr) {
     let str = inputStr;
@@ -2192,6 +2979,16 @@ function temporalToHumanReadableString(inputStr) {
     return str;
 }
 
+/**
+ * Simplifies a date string.
+ * - If the string represents a decimal number (potentially a year with fractional months/days),
+ *   it attempts to convert it to a YYYY, YYYY-MM, or YYYY-MM-DD format.
+ * - Otherwise, it replaces "-00-00" with "-01-01" (treating unknown month/day as the start of the year/month).
+ * - It also removes " 00:00:00" time parts and trims whitespace.
+ *
+ * @param {string} sdate - The date string to simplify.
+ * @returns {string} The simplified date string, or the original if `sdate` is null/empty.
+ */
 function temporalSimplifyDate(sdate) {
     
     if(sdate){
@@ -2211,9 +3008,9 @@ function temporalSimplifyDate(sdate) {
 
                 val = year;
                 if(month>0){
-                    val = val + '-' + month.lpad('0',2);      
+                    val = val + '-' + String(month).lpad('0',2); // Ensure string before lpad
                     if(day>0){
-                        val = val + '-' + day.lpad('0',2);      
+                        val = val + '-' + String(day).lpad('0',2); // Ensure string before lpad
                     }
                 }
             }
@@ -2228,8 +3025,8 @@ function temporalSimplifyDate(sdate) {
                 s = s.replace("-00-00","-01-01");
             }
             if(s.indexOf("00:00:00")>0){
-                s = s.replace("-01-01 00:00:00"," ");
-                s = s.replace("00:00:00"," ");
+                s = s.replace("-01-01 00:00:00"," "); // Only remove if it's start of year/day
+                s = s.replace(" 00:00:00"," "); // More general removal of time part if it's exactly midnight
             }
             s = s.trim();
             
@@ -2241,6 +3038,14 @@ function temporalSimplifyDate(sdate) {
     }
 }
 
+/**
+ * Checks if a given start and end date string (YYYY-MM-DD) represent a full month span.
+ * A full month span starts on the 1st of the month and ends on the last day of the same month.
+ *
+ * @param {string} start - The start date string (e.g., "2023-10-01").
+ * @param {string} end - The end date string (e.g., "2023-10-31").
+ * @returns {boolean} True if the range represents a full month, false otherwise.
+ */
 function isMonthSpan(start, end){
 
     let startDate = new TDate(start);
