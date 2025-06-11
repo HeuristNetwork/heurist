@@ -30,6 +30,8 @@
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @since       4.0
 */
+
+use hserv\utilities\UImage;
 use hserv\utilities\USanitize;
 
 require_once dirname(__FILE__).'/../../autoload.php';

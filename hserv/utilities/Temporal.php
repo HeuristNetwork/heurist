@@ -222,14 +222,7 @@ class Temporal {
         return $this->tDate!=null;
     }
 
-    /**
-     * Calculates and returns the minimum and maximum ISO date strings for the temporal object.
-     *
-     * @return array|null An array containing two elements: [min_iso_date, max_iso_date], or null if the date is not valid.
-     */
-    public function calcMinMax(){
-
-        if($this->tDate){
+    //
     // parses json or plain string to array of values
     // dates are not validated
     //
@@ -597,13 +590,13 @@ class Temporal {
                 try{
                     $tStart = new \DateTime($dt);
                     $tEnd = new \DateTime($dt);
-                } catch (Exception  $e){
+                } catch (\Exception  $e){
                 }
                 $deviation = strtoupper($deviation);
                 $i = null;
                 try{
                     $i = new \DateInterval($deviation);
-                } catch (Exception  $e){
+                } catch (\Exception  $e){
                 }
 
                 if($tStart!=null && $i!=null){
@@ -634,9 +627,11 @@ class Temporal {
 
     }
 
-    //
-    // Calculates and returns min max dates as iso strings
-    //
+    /**
+     * Calculates and returns the minimum and maximum ISO date strings for the temporal object.
+     *
+     * @return array|null An array containing two elements: [min_iso_date, max_iso_date], or null if the date is not valid.
+     */
     public function calcMinMax(){
 
         if($this->tDate){
@@ -696,7 +691,7 @@ class Temporal {
                         }else{
                             $res = str_pad($res,4,'0',STR_PAD_LEFT);
                         }
-                    } catch (Exception  $e){
+                    } catch (\Exception  $e){
                     }
                 }
 
@@ -874,7 +869,7 @@ class Temporal {
                         $date['year'] = -$date['year'];
                     }
 
-                } catch (Exception  $e){
+                } catch (\Exception  $e){
                     $date = null;
                     //print $value.' => NOT SUPPORTED<br>';
                 }
@@ -1260,14 +1255,14 @@ class Temporal {
                 $dt1 = Temporal::dateToISO($dt1);
                 $early = new \DateTime($dt1);
                 $early->setTime(0, 0);
-            }catch(Exception $e){
+            }catch(\Exception $e){
                 //$system->addError(HEURIST_INVALID_REQUEST, "An invalid starting date has been provided, " . $e->errorMessage());
             }
             try{
                 $dt2 = Temporal::dateToISO($dt2);
                 $latest = new \DateTime($dt2);
                 $latest->setTime(0, 0);
-            }catch(Exception $e){
+            }catch(\Exception $e){
                 //$system->addError(HEURIST_INVALID_REQUEST, "An invalid latest date has been provided, " . $e->errorMessage());
             }
 
@@ -1442,7 +1437,7 @@ class Temporal {
                     ($i->m ? ("$prefix{$i->m} months") :
                         ($i->d ? ("$prefix{$i->d} days") :'' )));
             }
-        } catch (Exception  $e){
+        } catch (\Exception  $e){
             $ret = '';
         }
 

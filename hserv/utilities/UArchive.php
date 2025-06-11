@@ -168,7 +168,7 @@ class UArchive {
 
         } catch (\Exception  $e){
             error_log( $e->getMessage() );
-            return $verbose?('Cannot create zip archive '.htmlspecialchars($destination).' '.\Exception::getMessage()):false;
+            return $verbose?('Cannot create zip archive '.htmlspecialchars($destination).' '.$e->getMessage()):false;
         }
     }
 
