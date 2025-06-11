@@ -1870,7 +1870,7 @@ function recordCanChangeOwnerwhipAndAccess($system, $recID, &$owner_grps, &$acce
                 if(array_search($grp, $current_owner_groups)===false){
                     if(!$system->isMember($grp)){
                         $system->addError(HEURIST_REQUEST_DENIED,
-                            'Cannot set ownership of record to the group without membership in this group', 'Group#'.grp);
+                            'Cannot set ownership of record to the group without membership in this group', 'Group#'.$grp);
                         return false;
                     }
                 }
