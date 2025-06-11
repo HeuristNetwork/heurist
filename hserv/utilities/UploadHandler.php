@@ -56,6 +56,7 @@ define('AMP','&amp;');
 class UploadHandler
 {
 
+    protected $response;
     protected $options;
 
     // PHP File Upload error message codes:
@@ -1592,7 +1593,7 @@ class UploadHandler
     }
 
     protected function readfile($file_path) {
-        if(file_exists(file_path)){
+        if(file_exists($file_path)){
             $file_size = $this->get_file_size($file_path);
             $chunk_size = intval($this->options['readfile_chunk_size']);
             if ($chunk_size && $file_size > $chunk_size) {
