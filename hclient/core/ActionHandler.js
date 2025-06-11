@@ -471,12 +471,13 @@ class ActionHandler {
             case "menu-database-clone":
             case "menu-database-register":
             case "menu-database-verify":
-            case "menu-database-verifyURLs":
+            case "menu-database-verifyURLs":{
                 //database action name
                 const s = actionid.substr(actionid.lastIndexOf('-') + 1);
                 const actionName = 'db' + s.capitalize();
                 window.hWin.HEURIST4.ui.showRecordActionDialog(actionName, popup_dialog_options);
                 break;
+            }
             case "menu-lookup-config":
                 popup_dialog_options['classes'] = {"ui-dialog": "ui-heurist-design", "ui-dialog-titlebar": "ui-heurist-design"};
                 popup_dialog_options['service_config'] = window.hWin.HAPI4.sysinfo['service_config'];
@@ -494,7 +495,7 @@ class ActionHandler {
                 window.hWin.HEURIST4.ui.showRecordActionDialog('repositoryConfig', popup_dialog_options);
                 break;
                 
-            case "menu-statistics-cms":
+            case "menu-statistics-cms":{
                 //popup_dialog_options['path'] = 'widgets/cms/';
                 //window.hWin.HEURIST4.ui.showRecordActionDialog('cmsStatistics', popup_dialog_options);
                 let d = new Date();
@@ -506,7 +507,7 @@ class ActionHandler {
                 window.open(url, "_blank");
                 
                 break;
-                
+            }
             case "menu-files-index":
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordUploadedFilesIndex', popup_dialog_options);
                 break;
@@ -608,14 +609,14 @@ class ActionHandler {
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Tips', {isPopupDlg:true, width:500, height:500});
                 break;
                 
-            case "menu-subset-set":
+            case "menu-subset-set":{
                 //see menu Explore
                 let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
                 if(widget){
                     widget.resultList('callResultListMenu', 'menu-subset-set'); //call method
                 }
                 break;
-           
+            }
             case "menu-help-acknowledgements":
             
                 contentURL = window.hWin.HRes('acknowledgementsHeurist');

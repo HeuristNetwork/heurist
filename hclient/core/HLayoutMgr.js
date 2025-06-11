@@ -16,7 +16,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-/* global cfg_widgets, prepareTemplateBlog, layoutMgr */
+/* global prepareTemplateBlog, layoutMgr */
 
 
 /*
@@ -1606,16 +1606,16 @@ class HLayoutMgr {
   * @throws {ReferenceError} If `cfg_layouts` is not defined in the global scope.
   */
   layoutGetById(id){
-        if(typeof cfg_layouts === 'undefined'){
+        if(typeof window.hWin.cfg_layouts === 'undefined'){
             // console.error("cfg_layouts is not defined. Cannot find layout by ID.");
             throw new ReferenceError("cfg_layouts is not defined. Cannot find layout by ID.");
             // return null; // Or throw error
         }
         if(id){
             id = String(id).toLowerCase(); // Ensure id is a string before toLowerCase
-            for(let i=0; i<cfg_layouts.length; i++){
-                if(cfg_layouts[i].id && String(cfg_layouts[i].id).toLowerCase()==id){ // Ensure cfg_layouts[i].id exists
-                    return cfg_layouts[i];
+            for(let i=0; i<window.hWin.cfg_layouts.length; i++){
+                if(window.hWin.cfg_layouts[i].id && String(window.hWin.cfg_layouts[i].id).toLowerCase()==id){ // Ensure cfg_layouts[i].id exists
+                    return window.hWin.cfg_layouts[i];
                 }
             }
         }

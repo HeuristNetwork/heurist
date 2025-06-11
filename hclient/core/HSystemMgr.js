@@ -580,7 +580,7 @@ class HSystemMgr {
               //matomo
               if(activity=='VisitPage'){
                   
-                    this.matomoTrackNewPage('web', suplementary);
+                    this.matomoTrackNewPage('web', supplementary_info);
                   
               }else if(activity!='editRec'){
                     if(category=='db'){
@@ -602,8 +602,8 @@ class HSystemMgr {
                     category = category.charAt(0).toUpperCase() + category.slice(1);
                     
                     let value;
-                    if(window.hWin.HEURIST4.util.isPositiveInt(suplementary)){
-                        value = suplementary;
+                    if(window.hWin.HEURIST4.util.isPositiveInt(supplementary_info)){
+                        value = supplementary_info;
                     }
                     if(!activity){
                         activity = 'TBD';
@@ -613,12 +613,12 @@ class HSystemMgr {
               }
           
           }else{
-            let request = { a: 'usr_log', activity: (category+activity), suplementary: suplementary, user: this.hapi4.user_id() };
+            let request = { a: 'usr_log', activity: (category+activity), suplementary: supplementary_info, user: this.hapi4.user_id() };
             this.hapi4.callserver('usr_info', request);
           }
       }
   }
-
+/*
       const action_parts = typeof activity === 'string' && activity.includes('_') ? activity.split('_') : [];
       let category_for_matomo = '';
       let action_for_matomo = activity;
@@ -663,7 +663,7 @@ class HSystemMgr {
             this.hapi4.callserver('usr_info', request); // Fire-and-forget
           }
       }
-  }
+  */
 
   /**
   * Initializes Matomo tracking with custom dimensions for the current user and page context.
@@ -687,19 +687,19 @@ class HSystemMgr {
       }
 
       // Set custom dimensions for the current page view
-      _paq.push(['setCustomDimension', 1, this.hapi4.database ]);  // Dimension 1: Database Name
-      _paq.push(['setCustomDimension', 2, pageType ]);             // Dimension 2: Page Type
-      _paq.push(['setCustomDimension', 3, this.hapi4.getLocale() ]); // Dimension 3: Current Locale/Language
-      _paq.push(['setCustomDimension', 4, (pageType === 'web' && value) ? value : '' ]); // Dimension 4: Website ID (if applicable)
+      window._paq.push(['setCustomDimension', 1, this.hapi4.database ]);  // Dimension 1: Database Name
+      window._paq.push(['setCustomDimension', 2, pageType ]);             // Dimension 2: Page Type
+      window._paq.push(['setCustomDimension', 3, this.hapi4.getLocale() ]); // Dimension 3: Current Locale/Language
+      window._paq.push(['setCustomDimension', 4, (pageType === 'web' && value) ? value : '' ]); // Dimension 4: Website ID (if applicable)
 
       // Set custom dimensions for the current visit
       const usrType = this.hapi4.getUserType(); // Retrieves user type (e.g., owner, admin, guest)
       if(usrType === 'visitor' || !this.hapi4.currentUser){ // If user is a visitor or not logged in
-        _paq.push(['resetUserId']); // Reset Matomo User ID
+        window._paq.push(['resetUserId']); // Reset Matomo User ID
       } else {
-        _paq.push(['setUserId', this.hapi4.currentUser['ugr_eMail'] ]); // Set Matomo User ID to user's email
+        window._paq.push(['setUserId', this.hapi4.currentUser['ugr_eMail'] ]); // Set Matomo User ID to user's email
       }
-      _paq.push(['setCustomDimension', 5, usrType ]); // Dimension 5: User Type
+      window._paq.push(['setCustomDimension', 5, usrType ]); // Dimension 5: User Type
 
       // Example: Configure tracking for downloads or outlinks (if needed)
       // _paq.push(['setDownloadClasses', "file-download"]);
@@ -738,11 +738,11 @@ class HSystemMgr {
             }
         }
       
-        _paq.push(['setCustomUrl', pageURL ]); // Set the custom URL for this page view
+        window._paq.push(['setCustomUrl', pageURL ]); // Set the custom URL for this page view
         if(title){
-            _paq.push(['setDocumentTitle', title]); // Set a custom document title if provided
+            window._paq.push(['setDocumentTitle', title]); // Set a custom document title if provided
         }
-        _paq.push(['trackPageView']); // Track the page view now
+        window._paq.push(['trackPageView']); // Track the page view now
         // _paq.push(['enableLinkTracking']); // Optionally enable link tracking if not already globally enabled
   }
 
@@ -767,7 +767,7 @@ class HSystemMgr {
                 eventParams.push(value);
             }
         }
-        _paq.push(eventParams);      
+        window._paq.push(eventParams);      
   }
 
   /**
@@ -780,10 +780,10 @@ class HSystemMgr {
           return;
       }
 
-      _paq.push(['resetUserId']); // Reset Matomo User ID as the user is now anonymous or different
-      _paq.push(['appendToTrackingUrl', 'new_visit=1']); // Force Matomo to start a new visit for page views after logout
-      _paq.push(['trackPageView']); // Track a page view to associate with the new (or anonymous) visit state
-      _paq.push(['appendToTrackingUrl', '']); // Clear the new_visit parameter for subsequent tracking calls
+      window._paq.push(['resetUserId']); // Reset Matomo User ID as the user is now anonymous or different
+      window._paq.push(['appendToTrackingUrl', 'new_visit=1']); // Force Matomo to start a new visit for page views after logout
+      window._paq.push(['trackPageView']); // Track a page view to associate with the new (or anonymous) visit state
+      window._paq.push(['appendToTrackingUrl', '']); // Clear the new_visit parameter for subsequent tracking calls
   }
 
   /**
@@ -798,13 +798,13 @@ class HSystemMgr {
 
       const usrType = this.hapi4.getUserType();
       if(usrType === 'visitor' || !this.hapi4.currentUser['ugr_eMail']){ // Should not happen if logged in, but good check
-        _paq.push(['resetUserId']);
+        window._paq.push(['resetUserId']);
       } else {
-        _paq.push(['setUserId', this.hapi4.currentUser['ugr_eMail'] ]); // Set User ID
+        window._paq.push(['setUserId', this.hapi4.currentUser['ugr_eMail'] ]); // Set User ID
       }
-      _paq.push(['setCustomDimension', 5, usrType ]); // Update User Type dimension
+      window._paq.push(['setCustomDimension', 5, usrType ]); // Update User Type dimension
 
-      _paq.push(['trackPageView']); // Track a page view to associate with the logged-in user state
+      window._paq.push(['trackPageView']); // Track a page view to associate with the logged-in user state
   }
   
   

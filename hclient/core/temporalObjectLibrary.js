@@ -575,12 +575,8 @@ function Temporal (strInitTemporal) {
          * @returns {string|Object|false} The removed field's value, or `false` if the field was not found or not an object (unexpected).
          */
         removeField: function (code) {
-            if ( Temporal.fieldsDict[code] && typeof _fields[code] === "object" ) { // Original check was typeof _fields[code] === "object", might need review if fields can be non-objects
+            if ( Temporal.fieldsDict[code] && Object.hasOwn(_fields, code) ) { 
                 let temp = _fields[code];
-                delete _fields[code];
-                return temp;
-            } else if (Temporal.fieldsDict[code] && _fields.hasOwnProperty(code)) { // If it's not an object but exists
-                 let temp = _fields[code];
                 delete _fields[code];
                 return temp;
             }
@@ -1056,7 +1052,6 @@ Temporal.typeFieldMap = function (type) {
     return Temporal.cloneObj(Temporal._typeFieldMap[type]);
 };
 
-// This JSDoc block was already present and seems to accurately describe isValidFormat.
 /**
  *  isValidFormat is a static member function of the Temporal Class which
  *  checks a string to see if it is a validly formatted temporal string.
@@ -2701,7 +2696,7 @@ function TDuration(strDuration) {
          */
         setYear: function (str) {
             if ( str !== null && str !== "" ) {
-                if ( isNaN(str)|| Number(str) < 0) { // Corrected TDate exception to TDuration
+                if ( isNaN(str)|| Number(str) < 0) {
                     throw " TDuration exception - invalid string supplied to setYear() - " + str;
                 }
             }
@@ -2717,7 +2712,7 @@ function TDuration(strDuration) {
          */
         setMonth: function (str) {
             if ( str !== null && str !== "" ) {
-                if ( isNaN(str) || Number(str) < 0 || Number(str) > 12) { // Corrected TDate exception to TDuration
+                if ( isNaN(str) || Number(str) < 0 || Number(str) > 12) {
                     throw " TDuration exception - invalid string supplied to setMonth() - " + str;
                 }
             }
@@ -2732,7 +2727,7 @@ function TDuration(strDuration) {
          */
         setDay: function (str) {
             if ( str !== null && str !== "" ) {
-                if ( isNaN(str) || Number(str) < 0 || Number(str) > 31) { // Corrected TDate exception to TDuration
+                if ( isNaN(str) || Number(str) < 0 || Number(str) > 31) {
                     throw " TDuration exception - invalid string supplied to setDay() - " + str;
                 }
             }
@@ -2747,7 +2742,7 @@ function TDuration(strDuration) {
          */
         setHour: function (str) {
             if ( str !== null && str !== "" ) {
-                if ( isNaN(str) || Number(str) < 0 || Number(str) > 24) { // Corrected TDate exception to TDuration
+                if ( isNaN(str) || Number(str) < 0 || Number(str) > 24) {
                     throw " TDuration exception - invalid string supplied to setHour() - " + str;
                 }
             }
@@ -2762,7 +2757,7 @@ function TDuration(strDuration) {
          */
         setMinute: function (str) {
             if ( str !== null && str !== "" ) {
-                if ( isNaN(str) || Number(str) < 0 || Number(str)> 60) { // Corrected TDate exception to TDuration
+                if ( isNaN(str) || Number(str) < 0 || Number(str)> 60) { 
                     throw " TDuration exception - invalid string supplied to setMinute() - " + str;
                 }
             }
@@ -2777,7 +2772,7 @@ function TDuration(strDuration) {
          */
         setSecond: function (str) {
             if ( str !== null && str !== "" ) {
-                if ( isNaN(str) || Number(str) < 0 ||  Number(str) > 60) { // Corrected TDate exception to TDuration
+                if ( isNaN(str) || Number(str) < 0 ||  Number(str) > 60) {
                     throw " TDuration exception - invalid string supplied to setSecond() - " + str;
                 }
             }
@@ -2960,7 +2955,7 @@ function temporalToHumanReadableString(inputStr) {
             */
             if(isMonthSpan(tpq, taq)){
                 let date = new TDate(tpq);
-                month = TDate.getMonthName(date.getMonth());
+                const month = TDate.getMonthName(date.getMonth());
                 str = `${month} ${date.getYear()}`;
             }else{
                 str = formatGregJulian(tpq, isgj) + " to " + formatGregJulian(taq, isgj);

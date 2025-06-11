@@ -25,7 +25,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/* global ActionHandler, HSystemMgr */
+/* global ActionHandler, HSystemMgr, HLayoutMgr */
 
 /*
 
@@ -253,7 +253,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         }
 
         that.installDir = installDir; //to detect development or production version 
-        if (!_baseURL_param) _baseURL_param = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
+        let _baseURL_param = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
         that.baseURL = _baseURL_param;
         
         // Detect production version; if current installDir is not '/heurist/',
@@ -1013,7 +1013,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             resolveFields: function (entityName) {
                 let entity_cfg = entity_configs[entityName];
                 if (entity_cfg && entity_cfg.fields) { // Ensure config and fields array exist
-                    function __findFieldsRecursive(fields) { // Renamed for clarity
+                    function __findFieldsRecursive(fields) { 
                         for (let field_key in fields) { // Iterate over field properties/indices
                             if (Object.hasOwn(fields, field_key)) {
                                 const field = fields[field_key];
@@ -1076,11 +1076,11 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         let fields_for_rty = rst_index[rty_ID_key];
                         let field_ids_order = Object.keys(fields_for_rty);
                         rst_index[rty_ID_key] = new HRecordSet({
-                            entityName: 'defRecStructure_fieldsForRTY_' + rty_ID_key, // More descriptive name
+                            entityName: 'defRecStructure', //'_fieldsForRTY_' + rty_ID_key, More descriptive name
                             records: fields_for_rty, // Object where keys are dty_IDs
                             order: field_ids_order,  // Array of dty_IDs
-                            count: field_ids_order.length,
-                            keyField: 'dty_ID' // Assuming dty_ID is the key within this subset
+                            count: field_ids_order.length
+                            //keyField: 'dty_ID' Assuming dty_ID is the key within this subset
                         });
                     }
                 }
@@ -1252,8 +1252,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
              * @returns {void}
              */
             setEntityData: function (entityName, data) {
-                if(entityName === 'timestamp' && data && typeof data[entityName] === 'number'){
-                    entity_timestamp = data[entityName]; // Update client's definition timestamp
+                if(entityName === 'timestamp' && data && data[entityName]){
+                    entity_timestamp = Number(data[entityName]); //db structure cache file last update time
                 } else if (window.hWin.HEURIST4.util.isRecordSet(data)) {
                     entity_data[entityName] = data; // Store pre-existing HRecordSet
                 } else if (data && data[entityName]) { // Assume data is a server response structure

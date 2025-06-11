@@ -273,7 +273,7 @@ function HRecordSearch() {
                 rules: rules,
                 rulesonly: rulesonly,
                 search_realm: search_realm,
-                // Preserve 'w' (write context?) from original query if available, default to 'a' (all?)
+                // Preserve 'w' (search domain: all, bookmark, everything) from original query if available, default to 'a' (all?)
                 w: (_query_request && _query_request.w) ? _query_request.w : 'a'
             };
         
