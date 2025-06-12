@@ -1,25 +1,18 @@
 <?php
-/*
-* ReportExecute.php - executes Smarty templates, handles the
-* output of reports in various formats
+/**
+* ReportExecute.php - Class ReportExecute
+*
+* Executes Smarty templates, handles the output of reports in various formats
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\report
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.6
+* @since       6.5
 */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 namespace hserv\report;
 
 use hserv\report\ReportRecord;
@@ -45,8 +38,6 @@ define('HEAD_E','</head>');
  * in the browser, saving to a file, or providing a downloadable file.
  * It also manages different publishing modes that control output limits and behavior,
  * JavaScript inclusion, custom CSS, and error/debug reporting levels.
- *
- * @package hserv\report
  */
 class ReportExecute
 {

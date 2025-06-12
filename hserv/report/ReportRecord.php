@@ -1,14 +1,17 @@
 <?php
-/*
-* ReportReport.php - data provider and formatting helper for Smarty templates
+/**
+* ReportReport.php - Calss ReportRecord
+* 
+* Data provider and formatting helper for Smarty templates
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\report
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.6
+* @since       6.5
 */
 
 namespace hserv\report;
@@ -52,7 +55,6 @@ define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br>');//for recTi
  * like `$heurist` or `$h`, allowing template designers to easily fetch and display Heurist data
  * using syntax like `{$heurist->getRecord($rec_id).f10}` or `{$heurist->rty_Name($record.recTypeID)}`.
  *
- * @package hserv\report
  */
 class ReportRecord
 {
