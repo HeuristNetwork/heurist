@@ -22,7 +22,6 @@
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @since       4.0
 */
-
 use \hserv\utilities\USystem;
 
 /** @const string Current Heurist code version. Value sourced from $version in configIni.php. */

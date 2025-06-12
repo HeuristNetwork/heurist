@@ -20,43 +20,56 @@ use hserv\utilities\Temporal;
 require_once dirname(__FILE__).'/composeSqlOld.php';
 
 /**
- * @var \mysqli|null $mysqli Global mysqli database connection object, used throughout query composition.
+ * Global mysqli database connection object, used throughout query composition.
+ * @var \mysqli|null $mysqli
  */
 global $mysqli;
 /**
- * @var array|null $wg_ids Global array of workgroup IDs the current user is a member of. Used for visibility checks.
+ * Global array of workgroup IDs the current user is a member of. Used for visibility checks.
+ * @var array|null $wg_ids
  */
 global $wg_ids;
 /**
- * @var bool $publicOnly Global flag indicating if only publicly visible records should be searched.
+ * Global flag indicating if only publicly visible records should be searched.
+ * @var bool $publicOnly
  */
 global $publicOnly;
 /**
- * @var int $currUserID Global ID of the current user.
+ * Global ID of the current user.
+ * @var int $currUserID
  */
 global $currUserID;
+
 /**
- * @var bool $is_admin Global flag indicating if the current user has administrative privileges.
+ * Global flag indicating if the current user has administrative privileges.
+ * @var bool $is_admin
  */
 global $is_admin;
 /**
- * @var bool $isFacetCount Global flag, true if the current query is for generating facet counts.
+ * Global flag, true if the current query is for generating facet counts.
+ * @var bool $isFacetCount
  */
 global $isFacetCount;
 /**
- * @var array|null $params_global Stores the global parameters passed to the main query function, for debugging or context.
+ * Stores the global parameters passed to the main query function, for debugging or context.
+ * @var array|null $params_global
  */
 global $params_global;
 /**
- * @var HQuery|null $top_query Stores the top-level HQuery object, for context within nested queries.
+ * Stores the top-level HQuery object, for context within nested queries.
+ * @var HQuery|null $top_query
  */
 global $top_query;
 /**
- * @var int $rty_id_relation Global ID for the 'Relationship' record type. Initialized to 1, then set by `defined('RT_RELATION')`.
+ * Global ID for the 'Relationship' record type.
+ * Initialized to 1, then set by `defined('RT_RELATION') ? RT_RELATION : 1`.
+ * @var int $rty_id_relation
  */
 global $rty_id_relation;
 /**
- * @var int $dty_id_relation_type Global ID for the 'Relation Type' detail type. Initialized to 6, then set by `defined('DT_RELATION_TYPE')`.
+ * Global ID for the 'Relation Type' detail type.
+ * Initialized to 6, then set by `defined('DT_RELATION_TYPE') ? DT_RELATION_TYPE : 6`.
+ * @var int $dty_id_relation_type
  */
 global $dty_id_relation_type;
 
@@ -225,17 +238,6 @@ any(London Paris Berlin)
 To test new format in UI place * in the beginning of search string.
 
 */
-
-
-/*
-
-select
-
-
-*/
-global $mysqli,$wg_ids,$publicOnly,$currUserID,$is_admin,$params_global,$top_query;
-global $rty_id_relation,$dty_id_relation_type;
-
 $mysqli = null;
 $wg_ids = null; //groups current user is member
 $publicOnly = false;
@@ -266,18 +268,23 @@ $dty_id_relation_type = 6; // $system->defineConstant('DT_RELATION_TYPE')
 */
 
 /**
- * Parses a simplified plain text Heurist query string into its JSON query structure.
+ * Parses a simplified plain text Heurist query string into its equivalent JSON query structure.
  *
- * The simplified syntax allows keywords and values to be separated by spaces or colons.
- * Subqueries can be denoted by parentheses. For example:
+ * The function first identifies and recursively parses subqueries enclosed in parentheses.
+ * These subqueries are replaced with a placeholder "[subquery]" in the main query string.
+ * The main query string is then tokenized into words, sequences in double quotes, or colons.
+ * It iterates through these tokens, identifying keyword-value pairs.
+ * Keywords are mapped to their shorter internal JSON equivalents (e.g., 'type' becomes 't', 'field' becomes 'f').
+ * If a dty_ID is part of the keyword (e.g., 'f123'), it's incorporated (e.g., 'f:123').
+ * Unrecognized words are typically treated as values for a 'title' predicate.
+ * The parsed subquery structures are then re-inserted in place of their placeholders.
+ *
+ * Example of simplified syntax:
  * `t 10 f1 Peter` is equivalent to `t:10 f1:Peter` and produces `[{"t":"10"},{"f:1":"Peter"}]`.
  * `t Person linkedto(t Place London)` becomes `[{"t":"Person"},{"lt":[{"t":"Place"},{"title":"London"}]}]`.
  *
- * Keywords are mapped to their shorter internal JSON equivalents (e.g., 'type' -> 't', 'field' -> 'f').
- * Unrecognized keywords are typically treated as values for a 'title' predicate.
- *
  * @param string $query The plain text Heurist query string.
- * @return array|false A PHP array representing the JSON query structure, or `false` if the query is empty or parsing fails.
+ * @return array|false A PHP array representing the JSON query structure. Returns `false` if the input query is empty or if parsing results in an empty structure.
  */
 function parse_query_to_json($query){
 
@@ -463,40 +470,47 @@ function parse_query_to_json($query){
 //
 // @param \mysqli $db The mysqli database connection object.
 // @param array $params An associative array of query parameters. Expected keys:
-//                      'q': The Heurist query, either as a JSON string or a pre-parsed PHP array.
-//                      'w': (Optional) Search domain ('all', 'b' or 'bookmark', 'e' for everything, 'nobookmark'). Default 'all'.
-//                      'limit': (Optional) Integer for SQL LIMIT.
-//                      'offset': (Optional) Integer for SQL OFFSET.
-//                      'publiconly': (Optional) Boolean, if true, search only public records.
-//                      'use_user_wss': (Optional) Boolean, if true and user is logged in, filter by user's working subset.
-//                      'a': (Optional) Action parameter, if 'getfacets', sets $isFacetCount to true.
-// @param array|null $currentUser (Optional) Associative array representing the current user, typically including
-//                                'ugr_ID' (user ID) and 'ugr_Groups' (array of group memberships).
-//                                If null or no ugr_ID, the search is treated as by an anonymous public user.
+//                      'q': (string|array) The Heurist query. Can be a JSON string or a pre-parsed PHP array.
+//                      'w': (string, Optional) Search domain. Default 'all'.
+//                           - 'all': All records accessible to the user.
+//                           - 'b' or 'bookmark': Records bookmarked by the user.
+//                           - 'e': Everything, including temporary records (typically for admins).
+//                           - 'nobookmark': All records accessible to the user, excluding their bookmarks.
+//                      'limit': (int, Optional) Integer for SQL LIMIT clause.
+//                      'offset': (int, Optional) Integer for SQL OFFSET clause.
+//                      'publiconly': (bool, Optional) If true, restricts search to publicly visible records. Defaults to false.
+//                      'use_user_wss': (bool, Optional) If true and user is logged in, filter by user's working subset. Defaults to false.
+//                      'a': (string, Optional) Action parameter. If set to 'getfacets', the global $isFacetCount flag is set to true,
+//                           which may affect query generation for facet counting purposes.
+//                      'nested': (bool, Optional) Passed to HQuery. If true, indicates a nested query context.
+// @param array|null $currentUser (Optional) Associative array representing the current user. Expected keys:
+//                                'ugr_ID': (int) The user's ID.
+//                                'ugr_Groups': (array) An array where keys are group IDs the user is a member of.
+//                                If null, or if 'ugr_ID' is not set or is 0, the search is treated as by an anonymous public user.
 // @return array An associative array containing the generated SQL clauses:
-//               'from'   => SQL FROM clause string
-//               'where'  => SQL WHERE clause string
-//               'sort'   => SQL ORDER BY clause string
-//               'limit'  => SQL LIMIT clause string
-//               'offset' => SQL OFFSET clause string
-//               If an error occurs during query parsing or SQL generation, it returns an array with an 'error' key
-//               containing the error message, e.g., `['error' => 'Some error message']`.
+//               'from'   => (string) SQL FROM clause.
+//               'where'  => (string) SQL WHERE clause.
+//               'sort'   => (string) SQL ORDER BY clause.
+//               'limit'  => (string) SQL LIMIT clause.
+//               'offset' => (string) SQL OFFSET clause.
+//               If an error occurs (e.g., query parsing error, SQL generation error),
+//               it returns an array with an 'error' key containing the error message string (e.g., `['error' => 'Error details']`).
 //
-    /**
-     * Main function to translate a Heurist query (JSON or plain text) into SQL clauses.
-     *
-     * This function initializes the global context for query building (user, database connection, etc.),
-     * parses the input query if it's in plain text format, and then uses the HQuery class
-     * to compile the query into its constituent SQL parts (FROM, WHERE, ORDER BY, LIMIT, OFFSET).
-     * It handles different search domains (all records, bookmarked records, etc.) and applies
-     * visibility and permission checks based on the current user.
-     *
-     * @param \mysqli $db The mysqli database connection.
-     * @param array $params Query parameters, including 'q' for the query string/JSON, 'w' for domain,
-     *                      'limit', 'offset', 'publiconly', 'use_user_wss', 'a'.
-     * @param array|null $currentUser Information about the current user, including 'ugr_ID' and 'ugr_Groups'.
-     * @return array Associative array of SQL clauses or an error array.
-     */
+/**
+ * Main function to translate a Heurist query (JSON or plain text) into SQL clauses.
+ *
+ * This function initializes the global context for query building (user, database connection, etc.),
+ * parses the input query if it's in plain text format, and then uses the HQuery class
+ * to compile the query into its constituent SQL parts (FROM, WHERE, ORDER BY, LIMIT, OFFSET).
+ * It handles different search domains (all records, bookmarked records, etc.) and applies
+ * visibility and permission checks based on the current user.
+ *
+ * @param \mysqli $db The mysqli database connection.
+ * @param array $params Query parameters, including 'q' for the query string/JSON, 'w' for domain,
+ *                      'limit', 'offset', 'publiconly', 'use_user_wss', 'a'.
+ * @param array|null $currentUser Information about the current user, including 'ugr_ID' and 'ugr_Groups'.
+ * @return array Associative array of SQL clauses or an error array.
+ */
 function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
     global $mysqli, $wg_ids, $currUserID, $publicOnly, $params_global, $top_query
@@ -624,38 +638,86 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
  */
 class HQuery {
 
-    /** @var string The generated SQL FROM clause for this query level. */
+    /** 
+     * The generated SQL FROM clause for this query level.
+     * @var string 
+     */
     public $from_clause = '';
-    /** @var string The generated SQL WHERE clause for this query level. */
+    /** 
+     * The generated SQL WHERE clause for this query level.
+     * @var string 
+     */
     public $where_clause = '';
-    /** @var string The generated SQL ORDER BY clause (only for top-level query). */
+    /** 
+     * The generated SQL ORDER BY clause (only for top-level query).
+     * @var string 
+     */
     public $sort_clause = '';
-    /** @var string|null Visibility type to apply (e.g., "public"), used for filtering. */
+    /** 
+     * Visibility type to apply (e.g., "public"), used for filtering.
+     * This is determined based on $publicOnly and $currUserID context.
+     * @var string|null 
+     */
     public $recVisibilityType;
-    /** @var HQuery|null Reference to the parent HQuery object if this is a sub-query. */
-    public $parentquery = null; // Note: Not explicitly set or used in provided code, but typical for query trees.
+    /** 
+     * Reference to the parent HQuery object if this is a sub-query.
+     * Note: Not explicitly set or used in provided code, but typical for query trees.
+     * @var HQuery|null 
+     */
+    public $parentquery = null; 
 
-    /** @var string|null Stores any error message encountered during SQL generation. */
+    /** 
+     * Stores any error message encountered during SQL generation.
+     * @var string|null 
+     */
     public $error_message = null;
 
-    /** @var HLimb The root HLimb object representing the top-level conjunction of this query. */
+    /** 
+     * The root HLimb object representing the top-level conjunction of this query.
+     * @var HLimb 
+     */
     public $top_limb = null;
-    /** @var array Stores parsed sort phrases (e.g., "title", "-f:23"). */
+    /** 
+     * Stores parsed sort phrases (e.g., "title", "-f:23").
+     * Extracted from the query JSON by `extractSortPharses`.
+     * @var array 
+     */
     public $sort_phrases;
-    /** @var array|null Stores tables that need to be added to the FROM clause due to sorting requirements. (Not explicitly used in current sort logic). */
-    public $sort_tables; // sorting may require the introduction of more tables
+    /** 
+     * Stores tables that need to be added to the FROM clause due to sorting requirements.
+     * Note: Not explicitly used in the current sort logic but intended for such cases.
+     * @var array|null 
+     */
+    public $sort_tables; 
 
-    /** @var int The ID of the current user, for permission/visibility checks. */
+    /** 
+     * The ID of the current user, for permission/visibility checks.
+     * @var int 
+     */
     public $currUserID;
-    /** @var string The search domain (e.g., 'all', 'bookmark'). */
+    /** 
+     * The search domain (e.g., 'all', 'bookmark').
+     * @var string 
+     */
     public $search_domain;
 
-    /** @var string A string identifier for the current query level (e.g., "0", "0_1"), used for aliasing tables. */
+    /** 
+     * A string identifier for the current query level (e.g., "0" for top-level, "0_1" for first sub-query), 
+     * used for aliasing tables uniquely.
+     * @var string 
+     */
     public $level = "0";
-    /** @var int Counter for generating unique aliases for sub-queries. */
+    /** 
+     * Counter for generating unique aliases for sub-queries/predicates within this query level.
+     * @var int 
+     */
     public $cnt_child_query = 0;
 
-    /** @var string|null Stores a comma-separated list of record IDs if `sortby:set` or `sortby:fixed` is used. */
+    /** 
+     * Stores a comma-separated list of record IDs if `sortby:set` or `sortby:fixed` is used.
+     * This list is then used by `createSortClause` to generate `FIND_IN_SET` ordering.
+     * @var string|null 
+     */
     public $fixed_sortorder = null;
 
 
@@ -807,15 +869,17 @@ class HQuery {
 
     }
 
-    //
     /**
-     * Extracts sort phrases from the top-level query JSON.
+     * Extracts sort phrases from the raw query JSON.
      *
-     * Sort directives are identified by keys 'sortby', 'sort', or 's'.
-     * The values (sort criteria strings) are collected into `$this->sort_phrases`.
-     * This method is only called for the top-level query (level "0").
+     * This method iterates through the top level of the query_json array.
+     * It looks for associative arrays where the key is a sort directive ('sortby', 'sort', 's')
+     * or sequential arrays containing such an associative array.
+     * The corresponding string values (e.g., "title", "-f:23", "m" for modified date)
+     * are collected into the `$this->sort_phrases` array.
+     * This method is intended to be called only for the top-level query (where `$this->level == 0`).
      *
-     * @param array $query_json The Heurist query definition array.
+     * @param array $query_json The Heurist query definition as a PHP array (decoded from JSON).
      */
     private function extractSortPharses( $query_json ){
 
@@ -1027,22 +1091,46 @@ class HQuery {
  */
 class HLimb {
 
-    /** @var HQuery Reference to the parent HQuery object this limb belongs to. */
+    /** 
+     * Reference to the parent HQuery object this limb belongs to. 
+     * @var HQuery 
+     */
     public $parent;
-    /** @var array Array of child HLimb or HPredicate objects. */
+    /** 
+     * Array of child HLimb or HPredicate objects that constitute this limb.
+     * @var array<HLimb|HPredicate> 
+     */
     public $limbs = array();
-    /** @var string The conjunction type for this limb ('all', 'any', 'not'). Default 'all'. */
+    /** 
+     * The conjunction type for this limb ('all', 'any', 'not'). Default is 'all'.
+     * This determines how the WHERE clauses of its children are combined.
+     * @var string 
+     */
     public $conjunction = "all";
 
     //results
-    /** @var array Accumulates table names/aliases required for the SQL FROM clause by this limb and its children. */
+    /** 
+     * Accumulates table names/aliases required for the SQL FROM clause by this limb and its children.
+     * These are collected during the `makeSQL` process.
+     * @var array<string> 
+     */
     public $tables = array();
-    /** @var string The generated SQL WHERE clause fragment for this limb. */
+    /** 
+     * The generated SQL WHERE clause fragment for this limb, resulting from combining its children's WHERE clauses.
+     * @var string 
+     */
     public $where_clause = "";
-    /** @var string|null Stores any error message encountered during processing this limb. */
+    /** 
+     * Stores any error message encountered during processing this limb or its children.
+     * @var string|null 
+     */
     public $error_message = null;
 
-    /** @var array Maps conjunction keywords to their SQL equivalents (e.g., 'all' => ' AND '). */
+    /** 
+     * Maps conjunction keywords (like 'all', 'any', 'not') to their corresponding SQL operators 
+     * (e.g., ' AND ', ' OR ', 'NOT ').
+     * @var array<string, string> 
+     */
     public $allowed = array('all'=>SQL_AND,'any'=>" OR ",'not'=>SQL_NOT);
 
 
@@ -1093,6 +1181,18 @@ class HLimb {
 
     }
 
+    /**
+     * Creates and adds a new HPredicate to this limb.
+     *
+     * Instantiates an HPredicate object with the given key and value, associating it
+     * with this limb's parent HQuery and assigning it an index based on the current
+     * number of child limbs/predicates. If the created predicate is valid, it's
+     * added to the `$this->limbs` array.
+     *
+     * @param string $key The predicate key (e.g., "t", "f:10").
+     * @param mixed $value The predicate value.
+     * @return void
+     */
     public function addPredicate($key, $value){
         $predicate = new HPredicate($this->parent, $key, $value, count($this->limbs) );
 
@@ -1101,12 +1201,29 @@ class HLimb {
         }
     }
 
+    /**
+     * Sets a relation prefix for all child limbs/predicates.
+     *
+     * This method iterates through each child in `$this->limbs`. If a child
+     * is an HPredicate, it calls the `setRelationPrefix` method on that predicate.
+     * This is used to propagate context, like a table alias for relationship fields,
+     * down the query tree.
+     *
+     * @param string $val The relation prefix string (typically a table alias).
+     * @return void
+     */
     public function setRelationPrefix($val){
         foreach ($this->limbs as $ind=>$limb){
-            $res = $limb->setRelationPrefix($val);
+            // Check if the limb is an HPredicate and has the method,
+            // as HLimb itself does not have setRelationPrefix.
+            if ($limb instanceof HPredicate && method_exists($limb, 'setRelationPrefix')) {
+                $limb->setRelationPrefix($val);
+            } elseif ($limb instanceof HLimb) { // If it's a nested HLimb, recurse
+                $limb->setRelationPrefix($val);
+            }
         }
     }
-    //
+
     /**
      * Generates the SQL WHERE clause fragment for this limb and identifies required tables.
      *
@@ -1181,6 +1298,19 @@ class HLimb {
         return $res;
     }
 
+    /**
+     * Adds a table name or an array of table names to the limb's table list.
+     *
+     * This method is used to accumulate the names of database tables (often with aliases)
+     * that are required for the query conditions generated by this limb and its children.
+     * If `$table` is an array, its elements are merged into `$this->tables`.
+     * If `$table` is a string, it's added only if not already present.
+     * Ensures that `$this->tables` contains unique table names.
+     *
+     * @param string|array<string>|null $table A single table name string or an array of table name strings.
+     *                                         If null, the method does nothing.
+     * @return void
+     */
     public function addTable($table){
         if($table){
             if(is_array($table)){
@@ -1207,61 +1337,149 @@ class HLimb {
  */
 class HPredicate {
 
-    /** @var string The main keyword of the predicate (e.g., 't', 'f', 'title', 'lt'). */
+    /** 
+     * The main keyword of the predicate (e.g., 't', 'f', 'title', 'lt'). 
+     * Parsed from the input key in the constructor.
+     * @var string 
+     */
     public $pred_type;
-    /** @var string|int|null The Detail Type ID (dty_ID) if the predicate refers to a specific field (e.g., for 'f:10', field_id is 10). */
+    /** 
+     * The Detail Type ID (dty_ID) if the predicate refers to a specific field 
+     * (e.g., for 'f:10', field_id is 10; for 'lt:25', field_id is 25).
+     * Parsed from the input key in the constructor.
+     * @var string|int|null 
+     */
     public $field_id = null;
-    /** @var string|null The determined Heurist field type (e.g., 'enum', 'date', 'freetext', 'resource') for `$field_id`. */
+    /** 
+     * The determined Heurist field type (e.g., 'enum', 'date', 'freetext', 'resource') 
+     * for the current `$field_id`. Fetched from `defDetailTypes` table.
+     * @var string|null 
+     */
     public $field_type = null;
-    /** @var string|null If searching within a term field, this specifies the sub-field of the term to search (e.g., 'label', 'code', 'conceptid'). */
+    /** 
+     * If searching within a term field (field_type 'enum'), this specifies the sub-field 
+     * of the term to search (e.g., 'label', 'code', 'conceptid').
+     * Parsed from the input key (e.g., 'f:10:label').
+     * @var string|null 
+     */
     public $field_term = null;
 
-    /** @var mixed The value part of the predicate. Can be a string, number, or a nested array (for sub-queries). */
+    /** 
+     * The value part of the predicate. Can be a string, number, or a nested array (for sub-queries).
+     * @var mixed 
+     */
     public $value;
-    /** @var bool Whether the predicate was successfully parsed and deemed valid. */
+    /** 
+     * Whether the predicate was successfully parsed and deemed valid (i.e., its pred_type is in $allowed).
+     * Set in the constructor.
+     * @var bool 
+     */
     public $valid = false;
-    /** @var HQuery|null If the predicate's value is a sub-query, this holds the HQuery object for that sub-query. */
+    /** 
+     * If the predicate's value is a sub-query (i.e., $value is an array), 
+     * this holds the HQuery object for that sub-query.
+     * @var HQuery|null 
+     */
     public $query = null;
 
-    /** @var bool True if this predicate is part of a relationship query context (e.g. field within a relationship record). */
+    /** 
+     * True if this predicate is part of a relationship query context (e.g., a field within a relationship record).
+     * This is set by HLimb when processing relationship type predicates.
+     * @var bool 
+     */
     public $is_relationship = false;
 
-    /** @var array|null Stores specific relation type IDs (term IDs) to filter by in relationship queries. */
+    /** 
+     * Stores specific relation type IDs (term IDs) to filter by in relationship queries (rt, rf, related).
+     * Extracted from the 'r' or 'relf:DT_RELATION_TYPE' parts of a sub-query value.
+     * @var array<int>|null 
+     */
     public $relation_types = null;
-    /** @var HLimb|null If searching for fields within a relationship record, this holds an HLimb representing those conditions. */
+    /** 
+     * If searching for fields within a relationship record (e.g. using 'relf:FIELD_ID' or 'r:FIELD_ID' in a sub-query), 
+     * this holds an HLimb object representing those field conditions.
+     * @var HLimb|null 
+     */
     public $relation_fields = null;
-    /** @var string Alias prefix for `recLinks` table if this predicate is part of a relationship field search. */
+    /** 
+     * Alias prefix for `recLinks` table (e.g., "rl0x1.") if this predicate is part of a relationship field search.
+     * This is set by `HLimb::setRelationPrefix` and used in `predicateField` for context.
+     * @var string 
+     */
     public $relation_prefix = '';
 
-    /** @var bool True if the predicate's value was parsed into a list of IDs for an IN(...) clause. */
+    /** 
+     * True if the predicate's value was successfully parsed into a list of IDs for an IN(...) clause,
+     * or if it's a numeric value for direct comparison. Set during `getFieldValue`.
+     * @var bool 
+     */
     public $field_list = false;
 
-    /** @var string|null Stores any error message encountered during processing this predicate. */
+    /** 
+     * Stores any error message encountered during processing this predicate (e.g., full-text index creation needed).
+     * @var string|null 
+     */
     public $error_message = null;
 
-    /** @var string The query nesting level identifier, inherited from the parent HQuery. */
+    /** 
+     * The query nesting level identifier (e.g., "0", "0_1"), inherited from the parent HQuery.
+     * @var string 
+     */
     public $qlevel;
-    /** @var int The index of this predicate within its parent HLimb, used for generating unique aliases. */
+    /** 
+     * The index of this predicate within its parent HLimb's `limbs` array. Used for generating unique aliases.
+     * @var int 
+     */
     public $index_of_predicate;
 
     // Operator flags, set by getFieldValue()
-    /** @var bool True if the search condition should be negated (e.g., NOT LIKE, !=). */
+    /** 
+     * True if the search condition should be negated (e.g., NOT LIKE, !=, NOT IN).
+     * Determined by a leading '-' in the value (for non-numeric/date types).
+     * @var bool 
+     */
     public $negate = false;
-    /** @var bool True if an exact match (e.g., =) is required, as opposed to LIKE. */
+    /** 
+     * True if an exact match (e.g., using '=') is required, as opposed to a partial match (LIKE).
+     * Determined by a leading '=' in the value.
+     * @var bool 
+     */
     public $exact = false;
-    /** @var bool True if a full-text search is intended. */
+    /** 
+     * True if a full-text search (MATCH...AGAINST) is intended.
+     * Determined by a leading '@' in the value.
+     * @var bool 
+     */
     public $fulltext = false;
-    /** @var bool True if the string comparison should be case-sensitive. */
+    /** 
+     * True if a string comparison should be case-sensitive.
+     * Determined by a leading '==' in the value.
+     * @var bool 
+     */
     public $case_sensitive = false;
-    /** @var string|false Comparison operator for less than (e.g., '<', '<=') or false if not applicable. */
+    /** 
+     * Comparison operator for less than (e.g., '<', '<=') or false if not applicable.
+     * Determined by a leading '<' or '<=' in the value.
+     * @var string|false 
+     */
     public $lessthan = false;
-    /** @var string|false Comparison operator for greater than (e.g., '>', '>=') or false if not applicable. */
+    /** 
+     * Comparison operator for greater than (e.g., '>', '>=') or false if not applicable.
+     * Determined by a leading '>' or '>=' in the value.
+     * @var string|false 
+     */
     public $greaterthan = false;
 
-    /** @var HQuery Reference to the parent HQuery object. */
+    /** 
+     * Reference to the parent HQuery object this predicate belongs to.
+     * @var HQuery 
+     */
     public $parent = null;
 
-    /** @var array List of allowed predicate keywords. */
+    /** 
+     * List of allowed predicate keywords. Used to validate `pred_type`.
+     * @var array<string> 
+     */
     public $allowed = array('t','type','typeid','typename',
             'ids','id','title','added','modified','url','notes',
             'after','before',
@@ -1274,11 +1492,20 @@ class HPredicate {
             'links','plain',
             'tag','keyword','kwd');
 
-    /** @var array Maps user-friendly term sub-field names to actual `defTerms` column names. */
+    /** 
+     * Maps user-friendly term sub-field names (e.g., 'label', 'conceptid') to actual `defTerms` table column names.
+     * Used when `field_term` is specified for an enum field.
+     * @var array<string, string> 
+     */
     public $allowed_term_fields = array('term'=>'trm_Label', 'label'=>'trm_Label',
         'concept'=>'trm_ConceptId', 'conceptid'=>'trm_ConceptId', 'desc'=>'trm_Description', 'code'=>'trm_Code');
 
-    /** @var array Stores parameters for an "exists" type subquery filter on linked/related records. */
+    /** 
+     * Stores parameters for an "exists" type subquery filter on linked/related records.
+     * This is used when a subquery for lt, lf, rt, rf, related, links includes 't' (type) or 'r' (relation type)
+     * predicates to pre-filter record IDs, potentially short-circuiting a more complex subquery.
+     * @var array{exists: bool, recIDs: string, negate: bool} 
+     */
     private $existsFilter = [
         'exists' => false, // Overall flag if this type of filter is active
         'recIDs' => '',    // Comma-separated string of record IDs resulting from the sub-filter
@@ -1472,37 +1699,44 @@ class HPredicate {
         $this->valid = true; //@todo
     }
 
-    //
-    // not used
-    //
-    private function getTopLevelQuery(){
-        if($this->parent->level==0){
-            return $this->parent;
-        }else{
-            return $this->parent->getTopLevelQuery();
-        }
-    }
-
+    /**
+     * Sets the relation prefix for this predicate.
+     *
+     * The relation prefix is typically a table alias (e.g., "rl0x1.") used when this
+     * predicate is involved in querying fields within a relationship record,
+     * allowing correct aliasing in the SQL query.
+     *
+     * @param string $val The relation prefix string.
+     * @return void
+     */
     public function setRelationPrefix($val){
         $this->relation_prefix = $val;
     }
 
     /**
-     * Generates the SQL WHERE clause fragment for this specific predicate.
+     * Generates the SQL WHERE clause fragment (and potentially FROM additions) for this specific predicate.
      *
-     * This is the primary dispatch method for HPredicate. It uses a switch statement
-     * based on `$this->pred_type` (the predicate keyword) to call the appropriate
-     * private helper method (e.g., `predicateField()`, `predicateLinkedTo()`)
-     * which then constructs the actual SQL condition string.
+     * This method acts as a dispatcher based on the predicate's type (`$this->pred_type`).
+     * It routes to more specialized `predicate<Type>()` methods (e.g., `predicateField()`,
+     * `predicateLinkedTo()`, `predicateSpatial()`) which construct the actual SQL condition string.
      *
-     * @return array|null An associative array `['from' => $from_tables, 'where' => $where_condition]`
-     *                    if SQL is successfully generated, where `$from_tables` might be populated
-     *                    by some predicate types if they require additional table joins not handled
-     *                    at a higher level. Returns `null` if the predicate type is unrecognized or
-     *                    if the specific predicate handler encounters an error or determines no
-     *                    condition is needed (e.g., empty value for a type that requires one).
-     *                    The specific predicate handlers are responsible for setting `$this->error_message`
-     *                    if an error occurs.
+     * For example:
+     * - If `pred_type` is 't' (type), it generates a condition like `rX.rec_RecTypeID = Y`.
+     * - If `pred_type` is 'f' (field), it calls `predicateField()` for detailed field-based conditions.
+     * - If `pred_type` is 'lt' (linked_to), it calls `predicateLinkedTo()` for resource link conditions.
+     *
+     * The returned array typically contains a 'where' key with the SQL condition. Some predicate
+     * types (like those involving links or relations) might also return a 'from' key with table
+     * names/aliases that need to be added to the main query's FROM clause.
+     *
+     * @global \mysqli $mysqli The global database connection object.
+     * @global HQuery $top_query The top-level HQuery object, used for context (e.g., search domain, user ID).
+     *
+     * @return array|null An associative array, typically `['where' => string $sql_condition]`.
+     *                    May also include `['from' => string $table_alias]` if the predicate requires an additional table.
+     *                    Returns `null` if the predicate type is unrecognized, if a required value is missing/invalid,
+     *                    or if a specific predicate handler determines no condition is needed or encounters an error
+     *                    (in which case `$this->error_message` should be set by the handler).
      */
     public function makeSQL(){
 
@@ -1669,14 +1903,22 @@ class HPredicate {
     }
 
     /**
-     * Removes leading/trailing double quotes from a string value and normalizes spaces.
+     * Cleans a string value by removing leading/trailing double quotes and normalizing internal spaces.
      *
-     * If the value starts and ends with a double quote, these are stripped.
-     * If it only starts with a double quote, only that is stripped.
-     * Multiple internal spaces are then collapsed to single spaces.
+     * - If the value starts and ends with a double quote (`"`), these quotes are stripped.
+     * - If the value only starts with a double quote, that quote is stripped.
+     * - After quote stripping (if any), multiple consecutive internal spaces are collapsed into single spaces.
+     * - The string is also trimmed of leading/trailing whitespace that might result from quote stripping.
+     *
+     * Examples:
+     * - `"hello world"` becomes `hello world`
+     * - `" spaced out "` becomes `spaced out`
+     * - `"trailing"` becomes `trailing`
+     * - `no quotes` remains `no quotes`
+     * - `"multi   space"` becomes `multi space`
      *
      * @param string $val The input string value.
-     * @return string The cleaned string value.
+     * @return string The cleaned and normalized string value.
      */
     private function cleanQuotedValue($val) {
         if (strlen($val)>0 && $val[0] == '"') {
@@ -1691,9 +1933,6 @@ class HPredicate {
         return $val;
     }
 
-    //
-    //
-    //
     /**
      * Generates SQL WHERE clause fragment for spatial (geographic) queries.
      *
@@ -1724,9 +1963,6 @@ class HPredicate {
         return array("where"=>$res);
     }
 
-    //
-    //
-    //
     /**
      * Generates SQL WHERE clause fragment for conditions on standard record fields or detail fields.
      *
@@ -2016,9 +2252,6 @@ class HPredicate {
 
     }
 
-    //
-    //
-    //
     /**
      * Generates SQL WHERE clause fragment to search across multiple common fields for a value.
      *
@@ -2116,9 +2349,6 @@ class HPredicate {
         return array("where"=>$res);
     }
 
-    //
-    //
-    //
     /**
      * Generates SQL WHERE clause fragment for filtering by a list of Record IDs.
      *
@@ -2171,10 +2401,6 @@ class HPredicate {
 
     }
 
-
-    //
-    //
-    //
     /**
      * Generates SQL WHERE clause fragment for finding records bookmarked by specific users.
      *
@@ -2218,9 +2444,6 @@ class HPredicate {
 
     }
 
-    //
-    //
-    //
     /**
      * Generates SQL WHERE clause fragment for finding records associated with specific tags/keywords.
      *
@@ -2356,9 +2579,26 @@ class HPredicate {
     links: recordtype
     */
 
-    //
-    //
-    //
+    /**
+     * Executes the sub-query held in `$this->query` and returns a string suitable for an SQL IN clause
+     * containing the distinct record IDs from the sub-query's results.
+     *
+     * If the main query is not nested (determined by `$params_global['nested'] === false`),
+     * it constructs a string that assumes joining with the sub-query's result table (`r<sub_query_level>`).
+     * In this case, it also adds the sub-query's FROM clause to the top-level query's FROM clause.
+     * This mode is less common for IN clauses and seems more geared towards EXISTS or direct join patterns.
+     *
+     * If the main query IS nested, it executes the sub-query, fetches a list of distinct `rec_ID`s,
+     * and formats them as a comma-separated string for an `IN (...)` clause (e.g., " IN (1,2,3)").
+     * If the sub-query yields no results, it returns " =0" to ensure the parent condition appropriately finds nothing.
+     *
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @global array $params_global Global parameters, used here to check for 'nested' flag.
+     * @global HQuery $top_query The top-level HQuery object, used to add tables to its FROM clause in non-nested mode.
+     *
+     * @return string A string part of an SQL condition. Either for direct join/comparison (non-nested mode)
+     *                or an IN clause string (nested mode, e.g., " IN (1,2,3)") or " =0" if no IDs.
+     */
     private function getDistinctRecIds()
     {
         global $mysqli, $params_global, $top_query;
@@ -2699,9 +2939,22 @@ class HPredicate {
     }
 
     /**
-    * Finds relation type for current reltype field
-    *
-    */
+     * Retrieves relation type constraints and target record type constraints for a relation marker field.
+     *
+     * This method is used when a predicate involves a specific "relmarker" field (identified by `$this->field_id`).
+     * It queries the `defDetailTypes` table for the given field ID to get:
+     * 1. `dty_JsonTermIDTree`: The root term ID(s) for the vocabulary defining allowed relation types.
+     *    It then fetches all child term IDs from this vocabulary using `getTermChildrenAll()`.
+     * 2. `dty_PtrTargetRectypeIDs`: A comma-separated string of record type IDs that are permissible targets
+     *    for relations using this relmarker field. This string is exploded into an array.
+     *
+     * If `$this->field_id` is not set or not positive, it returns null for both parts.
+     *
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @return array An array containing two elements:
+     *               - `0`: An array of allowed relation type term IDs (strings/integers). Null if `field_id` is invalid.
+     *               - `1`: An array of allowed target record type IDs (strings). Null if `field_id` is invalid or no constraints.
+     */
     private function _getRelationFieldConstraints(){
 
         global $mysqli;
@@ -2710,7 +2963,7 @@ class HPredicate {
                     'SELECT dty_JsonTermIDTree, dty_PtrTargetRectypeIDs '
                     .'FROM defDetailTypes WHERE dty_ID='.$this->field_id);
             $reltypes = getTermChildrenAll($mysqli, $vocab_id);
-            $rty_constraints = explode(',',$rty_constraints);
+            $rty_constraints = !empty($rty_constraints) ? explode(',',$rty_constraints) : null;
 
             return array($reltypes, $rty_constraints);
         }else{
@@ -2897,7 +3150,16 @@ class HPredicate {
         return array("from"=>"recLinks $rl", "where"=>$where);
     }
 
-    /// not used
+    /**
+     * Checks if the predicate's value represents a date or a date range.
+     * Note: This method is currently NOT USED in the codebase.
+     *
+     * It attempts to parse `$this->value` as a single date or a date range
+     * separated by "<>". It returns true if the value (or both parts of the range)
+     * can be successfully parsed into DateTime objects and are not numeric.
+     *
+     * @return bool True if the value is recognized as a date or date range, false otherwise.
+     */
     private function isDateTime() {
 
         $timestamp0 = null;
@@ -2912,6 +3174,7 @@ class HPredicate {
                 $timestamp0 = new DateTime($vals[0]);
                 $timestamp1 = new DateTime($vals[1]);
              } catch (Exception  $e){
+                 return false; // Parsing failed
              }
         }else{
 
@@ -2919,16 +3182,33 @@ class HPredicate {
 
              try{
                 $timestamp0 = new DateTime($this->value);
-                $timestamp1 = 1;
+                $timestamp1 = 1; // Indicates single date was successfully parsed
              } catch (Exception  $e){
+                 return false; // Parsing failed
              }
         }
-        return $timestamp0 && $timestamp1;
+        return $timestamp0 && $timestamp1; // Both parts must be valid if range, or single date must be valid
     }
 
-    //
-    //
-    //
+    /**
+     * Generates an SQL condition string for date-based header fields (e.g., rec_Added, rec_Modified).
+     *
+     * This method handles several date query formats for header fields:
+     * - Date range: If `$this->value` contains "<>" or "/", it's treated as a range.
+     *   Dates are converted to ISO format. Produces `BETWEEN 'date1' AND 'date2'`.
+     *   Negation (`$this->negate`) results in `NOT BETWEEN`.
+     * - Empty value check: If `isEmptyValue()` is true (e.g. value is "NULL"), returns `IS NULL`.
+     * - Specific date: Parses a single date value to ISO format.
+     *   - Exact match (`$this->exact`): ` = 'date'`. Negated: `!= 'date'`.
+     *   - Less than (`$this->lessthan`): ` {$this->lessthan} 'date'`.
+     *   - Greater than (`$this->greaterthan`): ` {$this->greaterthan} 'date'`.
+     *   - Default (LIKE): `LIKE 'YYYY-MM-DD%'` or `LIKE 'YYYY-MM%'` or `LIKE 'YYYY%'`
+     *     depending on the precision of the input value. Negated: `NOT LIKE ...`.
+     *
+     * Uses `Temporal::dateToISO()` for date conversions.
+     *
+     * @return string|null The SQL condition string, or null if the date value is invalid.
+     */
     private function makeDateClause_ForHeaderField() {
 
         if (strpos($this->value,"<>") || strpos($this->value,"/")) {
@@ -3000,6 +3280,32 @@ class HPredicate {
                 {"f:1113":"=1400,1500"}  start of range in db is 1400 and end of range in db equals to 1500
         FALL IN/OVERLAP is default comparison.
     */
+    /**
+     * Generates an SQL condition string for date detail fields, comparing against the `recDetailsDateIndex` table.
+     *
+     * This method handles complex date queries for detail fields, including ranges and specific comparisons:
+     * - Empty value check: If `isEmptyValue()` is true, returns `IS NULL`.
+     * - Date range operators:
+     *   - `<>` (overlap/falls in - default): `(rdi_estMaxDate >= timespan_min AND rdi_estMinDate <= timespan_max)`
+     *     The date range in the database overlaps with the specified search timespan.
+     *   - `><` (within/between): `(timespan_min <= rdi_estMinDate AND rdi_estMaxDate <= timespan_max)`
+     *     The date range in the database is completely within the specified search timespan.
+     *   The timespan is parsed from `$this->value` using the `Temporal` class.
+     *   The value can be like "1400/1500", "1400<>1500", "<>1400,1500", "P100Y/1500".
+     * - Specific date comparisons (if no range operator is found):
+     *   - Exact (`$this->exact`): `(rdi_estMinDate = timespan_min OR rdi_estMaxDate = timespan_max)`
+     *     Either the start or end of the database date range exactly matches the specified single date's timespan.
+     *   - Less than (`$this->lessthan`): `(rdi_estMaxDate {$this->lessthan} timespan_max)`
+     *     The end of the database date range is before (or equal to) the specified date's end.
+     *   - Greater than (`$this->greaterthan`): `(rdi_estMinDate {$this->greaterthan} timespan_min)`
+     *     The start of the database date range is after (or equal to) the specified date's start.
+     *   - Default (if no other operator, treated as overlap): `(rdi_estMaxDate >= timespan_min AND rdi_estMinDate <= timespan_max)`
+     *
+     * All comparisons are made against `rdi_estMinDate` and `rdi_estMaxDate` from the `recDetailsDateIndex` table.
+     * The `$this->negate` flag will prepend `NOT` to the final condition.
+     *
+     * @return string|null The SQL condition string for the date field, or null if parsing fails or value is invalid.
+     */
     private function makeDateClause() {
 
         if($this->isEmptyValue()){ // {"f:10":"NULL"}
@@ -3075,9 +3381,19 @@ class HPredicate {
     }
 
 
-    /*
-      is search for empty or null value
-    */
+    /**
+     * Checks if the predicate's value represents a search for an empty or non-existent value.
+     *
+     * This is true if `$this->value` is the string "NULL" or "-NULL" (case-insensitive).
+     * It also ensures `$this->value` is not an array, as array values represent sub-queries
+     * or structured values, not direct "empty" checks.
+     *
+     * Example predicate values that would return true:
+     * - `"f:18":"NULL"` (find records where field 18 is not set)
+     * - `"f:18":"-NULL"` (find records where field 18 is set - typically handled by negation of the "IS NULL" SQL)
+     *
+     * @return bool True if the value signifies a search for null/empty, false otherwise.
+     */
     private function isEmptyValue(){
                                             //$this->value=='' ||
         return !is_array($this->value) && ( strtolower($this->value)=='null' || strtolower($this->value)=='-null');// {"f:18":"NULL"}
@@ -3085,10 +3401,19 @@ class HPredicate {
 
 
     /**
-    * Search user ids - prepare list of user ids
-    *
-    * @param mixed $value
-    */
+     * Converts a comma-separated string of usernames or user IDs into a comma-separated string of user IDs.
+     *
+     * It processes each item in the input string:
+     * - If an item is numeric, it's treated as a user ID (`ugr_ID`).
+     * - If an item is 'currentUser' or 'current_user' (case-insensitive), it's replaced with the `$currUserID`.
+     * - Otherwise, the item is treated as a username (`ugr_Name`) and its corresponding `ugr_ID` is fetched from the database.
+     *
+     * @param string $value A comma-separated string of usernames and/or user IDs.
+     * @global \mysqli $mysqli The global mysqli database connection, used to look up usernames.
+     * @global int $currUserID The ID of the currently logged-in user, used for 'currentUser'.
+     * @return string A comma-separated string of resolved user IDs. If an input username is not found, it's omitted.
+     *                Returns an empty string if no valid user IDs are resolved.
+     */
     private function getUserIds($value){
         global $mysqli, $currUserID;
 
@@ -3110,8 +3435,58 @@ class HPredicate {
 
 
     /**
-    * Returns value with compare operator
-    */
+     * Parses the predicate's value (`$this->value`) to determine comparison operators,
+     * handles various field types, and constructs the corresponding SQL condition fragment.
+     *
+     * This complex method is central to translating a predicate's value into SQL. Key actions:
+     * 1.  **Operator Detection**: Checks for leading characters in `$this->value` to set flags:
+     *     - `-` (negation, for non-numeric/date types) sets `$this->negate`.
+     *     - `==` (case-sensitive exact match) sets `$this->case_sensitive` and `$this->exact`.
+     *     - `=` (exact match) sets `$this->exact`.
+     *     - `@` (full-text search) sets `$this->fulltext`.
+     *     - `<=`, `<`, `>=`, `>` (comparison operators) set `$this->lessthan` or `$this->greaterthan`.
+     *     The value is then cleaned of these operator prefixes using `cleanQuotedValue()`.
+     * 2.  **Empty Value Handling**: If `trim($this->value)` is empty, returns `!=''`, effectively searching for any non-empty value.
+     * 3.  **Field Type Specific Logic**:
+     *     - **Enum/RelationType**:
+     *       - If value is numeric or comma-separated numerics (term IDs): Resolves to `IN (id_list)` or `= id`.
+     *         Includes child terms if `$this->exact` is false.
+     *       - If value is text: Searches `defTerms.trm_Label` (and `trm_Code` if `field_term` is null).
+     *         Handles language prefixes (e.g., "en:value") by searching `defTranslations`.
+     *         Uses `LIKE` or `=` based on `$this->exact`.
+     *     - **Tag**: (Accessed via `field_id=='tag'`, though `predicateKeywords` is preferred)
+     *       Constructs subquery against `usrRecTagLinks` and `usrTags`.
+     *     - **File**:
+     *       - `^` prefix: Numeric comparison against `ulf_FileSizeKB`.
+     *       - `@` prefix (handled by `$this->fulltext`): Exact match on `ulf_ObfuscatedFileID`.
+     *       - Default: `LIKE` search on `ulf_OrigFileName`, `ulf_ExternalFileReference`, `ulf_Description`.
+     *       Returns an `IN (select ulf_ID ...)` subquery.
+     *     - **Float/Integer/Link (Numeric)**:
+     *       - If value contains `<>`: `BETWEEN val1 AND val2`.
+     *       - Otherwise: `= value` (no quotes). Sets `$this->field_list = true`.
+     *     - **Date (Header Fields)**: (e.g., 'modified', 'added', or `field_id` mapping to these)
+     *       Calls `makeDateClause_ForHeaderField()`.
+     *     - **Date (Detail Fields)**: Calls `makeDateClause()`.
+     *     - **Freetext/Blocktext/Other Textual Fields**:
+     *       - If value contains `<>` (and not numeric): `BETWEEN 'val1' AND 'val2'`.
+     *       - **Full-text**: If `$this->fulltext` is true, constructs `AGAINST ('value' [IN BOOLEAN MODE])`.
+     *         Checks/creates full-text index via `checkFullTextIndex()`. Handles `++` / `--` word modifiers.
+     *       - **Standard LIKE/Exact**:
+     *         `LIKE '%value%'` (default) or `= 'value'` (if `$this->exact`).
+     *         Handles negation (`NOT LIKE`, `!=`). Handles case sensitivity (`COLLATE utf8_bin`).
+     *         Handles language filtering for freetext/blocktext fields based on `dtl_Value` prefixes (e.g., "en:").
+     * 4.  **User ID Resolution**: For 'addedby'/'owner' predicates, resolves usernames in value to IDs using `getUserIds()`.
+     * 5.  **Comma-Separated IDs**: If value is a list of IDs (after other processing), generates `IN (id_list)`.
+     *
+     * Sets `$this->field_list` to true if the value resolves to a list or a direct numeric comparison.
+     *
+     * @global \mysqli $mysqli Global database connection.
+     * @global array $params_global Global parameters (not directly used, but assumed context for other functions).
+     * @global int $currUserID Current user ID (used by `getUserIds`).
+     *
+     * @return string|null The generated SQL condition string fragment (e.g., "LIKE '%search%'", "= 123", "AGAINST ('text')").
+     *                     Returns null if an error occurs (e.g., full-text index creation needed) or value is invalid for the field type.
+     */
     private function getFieldValue(){
 
         global $mysqli, $params_global, $currUserID;
@@ -3526,10 +3901,24 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
 
     }//getFieldValue
 
-    //
-    // check existanse of full text index and creates it
-    // return true - if index is missed or its creation is in progress
-    //
+    /**
+     * Checks for the existence of a FULLTEXT index on the relevant table and column
+     * (`Records.rec_Title` or `recDetails.dtl_Value`) if a full-text search is intended.
+     * If the index is missing, it attempts to create it.
+     *
+     * This method is called from `getFieldValue()` when `$this->fulltext` is true.
+     * - For `pred_type` or `field_id` 'title', it checks `Records.rec_Title`.
+     * - Otherwise (for detail fields), it checks `recDetails.dtl_Value`.
+     *
+     * If an index is found to be missing:
+     * - An `ALTER TABLE ... ADD FULLTEXT INDEX ...` query is executed.
+     * - `$this->error_message` is set to 'create_fulltext'.
+     * - The method returns `true` to indicate to the caller that index creation was
+     *   attempted and the original query should likely be halted or retried.
+     *
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @return bool True if an index was missing (and creation was attempted), false if the index exists.
+     */
     private function checkFullTextIndex(){
         global $mysqli;
 

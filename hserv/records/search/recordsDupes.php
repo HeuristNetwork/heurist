@@ -20,37 +20,68 @@
 */
 
 /**
-*
-*  setSession - work with different database
-*  findDupes  - main method
-*
-*/
+ * Provides functionality to find and manage duplicate records within a Heurist database.
+ *
+ * This class includes methods to:
+ * - Initialize its database connection and system context.
+ * - Allow setting a specific database session to work with.
+ * - Manage a list of record groups that are known not to be duplicates (ignored groups).
+ * - Find duplicate records based on various criteria:
+ *   - Levenshtein distance or Metaphone comparison (Metaphone part seems less implemented in detail).
+ *   - Specific record type (`rty_ID`).
+ *   - A defined set of header or detail fields.
+ *   - Configurable similarity distance/threshold.
+ * - Export the list of found potential duplicates to a TSV file.
+ *
+ * It uses caching mechanisms for performance when comparing records and supports progress tracking for long operations.
+ */
 class RecordsDupes {
 
+    /** @var \hserv\System|null The Heurist system object. */
     private static $system = null;
+    /** @var \mysqli|null The mysqli database connection object. */
     private static $mysqli = null;
+    /** @var bool Flag indicating if the class has been initialized. */
     private static $initialized = false;
 
+    /** @var array|null Cached array of detail type definitions (not explicitly used in the provided snippet but common for such classes). */
     private static $defDetailtypes = null;
 
+    /** @var array Cache for record IDs during processing. */
     private static $cache_id;
+    /** @var array Cache for string values (potentially for Levenshtein) during processing. */
     private static $cache_str;
+    /** @var array Cache for exact string values during processing. */
     private static $cache_str_exact;
+    /** @var array Accumulates groups of records identified as potential duplicates. Structure: `[['summary'=>...], [group1_recID=>title,...], ...]` */
     private static $all_similar_records;
+    /** @var array A flat list of all record IDs that are part of any potential duplicate group. */
     private static $all_similar_ids;
+    /** @var int The distance parameter for similarity comparison (e.g., Levenshtein distance or percentage for string length). */
     private static $distance;
+    /** @var int Count of all individual record IDs present in the `$all_similar_records` groups. */
     private static $all_similar_ids_cnt;
 
+    /** @var int Number of records processed so far in a findDupes operation. */
     private static $processed;
+    /** @var int Total count of records to be processed in the current findDupes scope. */
     private static $tot_count;
+    /** @var int Limit for the number of similar records to find. */
     private static $limit_cnt;
+    /** @var string|null Session ID for progress tracking of a findDupes operation. */
     private static $progress_session_id;
 
+    /** @var array|null List of record group hashes that are marked as "not duplicates" and should be ignored. */
     private static $dupeIgnoring = null;
 
-//
-//
-//
+    /**
+     * Initializes the class's static properties, primarily setting up the database connection
+     * and system context from global variables. Ensures this runs only once.
+     * Also calls `checkDatabaseFunctionsForDuplications` to ensure necessary DB functions are available.
+     *
+     * @global \hserv\System $system The global Heurist system object.
+     * @return void
+     */
 private static function initialize()
 {
     if (self::$initialized) {return;}
@@ -64,18 +95,33 @@ private static function initialize()
     checkDatabaseFunctionsForDuplications(self::$mysqli);
 }
 
-//
-// set session different that current global one (to work with different database)
-//
+/**
+ * Allows setting a specific Heurist system session (and thus database connection)
+ * for the class to operate on, different from the global `$system` variable.
+ *
+ * @param \hserv\System $system The Heurist system object to use.
+ * @return void
+ */
 public static function setSession($system){
     self::$system  = $system;
     self::$mysqli = $system->getMysqli();
-    self::$initialized = true;
+    self::$initialized = true; // Mark as initialized with this new system context
 }
 
-//
-// add to list of exclusions
-//
+/**
+ * Manages the list of record groups that should be ignored (marked as not duplicates).
+ *
+ * The `$params['ignore']` value determines the action:
+ * - If 'clear': Deletes all entries from the `recSimilarButNotDupes` table.
+ * - If a comma-separated string of record IDs: This string (treated as a unique hash for the group)
+ *   is sorted and added to the `recSimilarButNotDupes` table if not already present.
+ *   These hashes represent groups of records that have been reviewed and deemed not duplicates.
+ *
+ * @param array $params An associative array of parameters.
+ *                      Expected key: 'ignore' (string) - either 'clear' or a comma-separated string of record IDs.
+ * @return int|false Returns 1 on successful addition/check, or if no 'ignore' param.
+ *                   Returns false if a database error occurs during 'clear' or add operation.
+ */
 public static function setIgnoring( $params ){
 
     if(@$params['ignore']){
@@ -121,19 +167,53 @@ public static function setIgnoring( $params ){
     return 1;
 }
 
-//
-// Main method - finds duplications
-//
-// $params:
-//    mode - levenshtein or metaphone
-//    rty_ID
-//    fields - comma separated list or array of dty_IDs and header fields (rec_Title by default)
-//    dista1nce - 0 exact duplication (by default), or percent of strlen.                     1
-//      So 5% for 100 characters distance is 5 chars (strlen*d/100)
-//      for strlen<50  distance = 3 chars
-//      for strlen<10  distance = 1
-//      if defined, min distance is 1, max = 10
-//
+/**
+ * Main method to find potential duplicate records based on specified criteria.
+ *
+ * This function searches for duplicates within a given record type (`rty_ID`).
+ * It can compare records based on a list of fields (header fields like `rec_Title` or specific detail fields).
+ * The comparison can be exact or based on string similarity (Levenshtein distance, controlled by `$params['distance']`).
+ *
+ * The process involves:
+ * 1. Initializing the class and parameters.
+ * 2. Constructing a main SQL query to fetch relevant data (record IDs and fields to compare) for the specified record type.
+ *    - It uses `NEW_LIPOSUCTION_255` SQL function for cleaning text fields if distance-based comparison is used.
+ * 3. Determining the comparison mode:
+ *    - Mode 1 (Levenstein only): Compares one primary text field.
+ *    - Mode 2 (Exact + Levenstein): Compares some fields exactly, and one primary text field with Levenstein.
+ *    - Mode 3 (Exact only): Compares all specified fields for exact matches.
+ * 4. Fetching records:
+ *    - If Levenshtein comparison is involved (modes 1, 2) and the record set is large, it processes records in chunks,
+ *      either based on memory limits or by grouping records by the first few characters of the sort field.
+ *      It uses an in-memory cache (`self::$cache_id`, `self::$cache_str`) and calls `_searchInCache()`.
+ *    - If only exact comparison (mode 3), it iterates through records and executes prepared statements to find matches.
+ * 5. Filtering out ignored groups (from `recSimilarButNotDupes` table).
+ * 6. Tracking progress using session variables if `$params['session']` is provided.
+ * 7. Adhering to limits on the total number of duplicate groups/records found.
+ *
+ * @param array $params An associative array of parameters:
+ *    - 'rty_ID' (int): The Record Type ID to search within. (Required)
+ *    - 'fields' (string|array, Optional): Comma-separated string or array of fields to compare.
+ *      Can include header fields (e.g., "rec_Title") or numeric Detail Type IDs. Defaults to "rec_Title".
+ *    - 'distance' (int, Optional): Similarity distance threshold (percentage). Default 0 (exact match).
+ *      If > 0, enables Levenshtein-based comparison on text fields. Max 60.
+ *      The actual character distance is calculated based on this percentage of string length, with min/max caps.
+ *    - 'startgroup' (int, Optional): For optimizing large datasets with Levenshtein; groups records by the first
+ *      `$startgroup` characters of the sort field for chunked processing. Default 0 (no grouping). Max 5.
+ *    - 'sort_field' (string, Optional): Field name (header or dty_ID) to sort by, influencing chunking if `startgroup` is used.
+ *    - 'limit_cnt' (int, Optional): Maximum number of potential duplicate records (not groups) to return. Default 1000, max 3000.
+ *    - 'limit_pc' (int, Optional): (Misnamed in original comments, likely means max percentage of total records to consider duplicates)
+ *                                 Used to cap `limit_cnt` further. Default 30 (%), max 50 (%).
+ *    - 'session' (string, Optional): A session ID for progress tracking.
+ *
+ * @return array|false An associative array containing the duplicate groups and a summary,
+ *                     or false on error (e.g., missing rty_ID, DB error).
+ *                     The result array structure:
+ *                     `['summary' => ['scope'=>total_recs, 'cnt_groups'=>num_groups, 'cnt_records'=>total_dupes_in_groups, ...],
+ *                       0 => [recID1 => title1, recID2 => title2, ...], // First group
+ *                       1 => [recID3 => title3, recID4 => title4, ...], // Second group
+ *                       ...]`
+ */
 public static function findDupes( $params ){
 
     self::initialize();
@@ -609,9 +689,26 @@ public static function findDupes( $params ){
 
 }//findDupes
 
-//
-//
-//
+/**
+ * Private helper method to search for duplicates within a cached chunk of records.
+ *
+ * This method iterates through records loaded into `self::$cache_id`, `self::$cache_str`
+ * (and `self::$cache_str_exact` if applicable). For each record, it compares its
+ * string value (`$str1`) with subsequent records in the cache using Levenshtein distance.
+ *
+ * - It calculates an allowed Levenshtein distance based on `self::$distance` (percentage) and string length.
+ * - If `self::$cache_str_exact` is used, it only compares records if their exact cache strings match.
+ * - If a pair of records is found to be similar (within the calculated Levenshtein distance),
+ *   they are added to a group.
+ * - Found groups are added to `self::$all_similar_records` after fetching their titles.
+ * - `self::$all_similar_ids` is updated with all IDs part of found duplicate groups.
+ * - Progress is updated via session if `self::$progress_session_id` is set.
+ * - The search stops if the number of found similar records (`self::$all_similar_ids_cnt`)
+ *   exceeds `self::$limit_cnt` or if a termination signal is received via the progress session.
+ *
+ * @return int Returns 0 if processing completed for the cache, 1 if the configured limit
+ *             (`self::$limit_cnt`) was reached, or 2 if the operation was terminated by user via session.
+ */
 private static function _searchInCache(){
 
     foreach (self::$cache_id as $idx=>$curr_recid){
@@ -718,9 +815,29 @@ private static function _searchInCache(){
     return 0;
 }
 
+/**
+ * Exports the list of found duplicate records to a TSV (Tab-Separated Values) file.
+ *
+ * It first calls `findDupes()` with the provided `$params` to get the list of duplicates.
+ * If duplicates are found, it generates a TSV file with the following columns:
+ * - Record ID
+ * - Record title
+ * - View record URL
+ * - Merge group URL
+ * - Search group URL (link to search for this group of IDs)
+ * - Ignore group URL (link to mark this group as not duplicates)
+ * - Instant merge URL (link for instant merge, with placeholder for master record ID)
+ *
+ * The TSV content is output directly for download.
+ *
+ * @param array $params Parameters to pass to `findDupes()` to identify duplicates for export.
+ *                      The key 'export' must be present in `$params`, though its value is not directly used.
+ * @return bool|void False if parameters are invalid, no duplicates found, or an error occurs during TSV generation.
+ *                   Otherwise, outputs TSV content and terminates.
+ */
 public static function exportList($params){
 
-    if(!array_key_exists('export', $params)){
+    if(!array_key_exists('export', $params)){ // Check if 'export' key exists, value doesn't matter
         self::$system->addError(HEURIST_INVALID_REQUEST, 'Invalid request to export duplicates list');
         return false;
     }

@@ -47,12 +47,16 @@ use hserv\utilities\UImage;
 require_once dirname(__FILE__).'/../../structure/dbsUsersGroups.php';
 
 /**
-* @todo - make it as method of DbRecUploadedFiles
-* Register file in recUploadedFiles - used for import CSV, index directory
-*
-* @param mixed $system
-* @param mixed $fullname
-*/
+ * Registers a local file in the `recUploadedFiles` table if it's not already registered.
+ * Used for importing files via CSV or indexing a directory.
+ *
+ * @todo This function could potentially be a method of the DbRecUploadedFiles class.
+ *
+ * @param \hserv\System $system The Heurist system object, providing access to database and file system configurations.
+ * @param string $fullname The full absolute path to the file on the server.
+ * @param string|null $description Optional description for the file.
+ * @return int|false The ulf_ID of the registered file (newly registered or existing), or false on failure.
+ */
 function fileRegister($system, $fullname, $description=null){
 
     $file_id = fileGetByFileName($system, $fullname);//check if it is already registered
@@ -95,12 +99,14 @@ function fileRegister($system, $fullname, $description=null){
     return $file_id;
 }
 
-//NOT USED
 /**
-* Get file IDs by Obfuscated ID
-*
-* @param mixed $ulf_ObfuscatedFileID
-*/
+ * Get file ulf_ID by its Obfuscated ID (ulf_ObfuscatedFileID).
+ * Note: This function is marked as NOT USED
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param string $ulf_ObfuscatedFileID The obfuscated file ID to search for.
+ * @return int|null The ulf_ID if found, otherwise null.
+ */
 function fileGetByObfuscatedId($system, $ulf_ObfuscatedFileID){
 
     if(!$ulf_ObfuscatedFileID || strlen($ulf_ObfuscatedFileID)<1) {return null;}
@@ -112,10 +118,13 @@ function fileGetByObfuscatedId($system, $ulf_ObfuscatedFileID){
 }
 
 /**
-* Get file ID by file $fullname
-*
-* @param mixed $fullname
-*/
+ * Get file ulf_ID by its full path name.
+ * It calculates the relative path to the database's root directory.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param string $fullname The full absolute path to the file.
+ * @return int|null The ulf_ID if the file is found registered with that path and name, otherwise null.
+ */
 function fileGetByFileName($system, $fullname){
 
     $path_parts = pathinfo($fullname);
@@ -146,10 +155,12 @@ function fileGetByFileName($system, $fullname){
 
 
 /**
-* Get file ID by original file name
-*
-* @param mixed $orig_name
-*/
+ * Get file information (as an associative array) from `recUploadedFiles` by its original file name.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param string $orig_name The original name of the file (ulf_OrigFileName).
+ * @return array|null An associative array of the file's record from `recUploadedFiles` if found, otherwise null.
+ */
 function fileGetByOriginalFileName($system, $orig_name){
 
         $mysqli = $system->getMysqli();
@@ -161,9 +172,17 @@ function fileGetByOriginalFileName($system, $orig_name){
 
 }
 
-//
-// Finds registered file by original name, rename ulf_xxx_ to original name and update recUploadedFiles
-//
+/**
+ * Finds a registered file by its original name, renames the actual stored file
+ * (which might have a prefixed name like ulf_xxx_) to the new name (or original name if new_name is null)
+ * within the standard 'file_uploads' directory, and updates its record in `recUploadedFiles`.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param string $orig_name The original filename to search for in `ulf_OrigFileName`.
+ * @param string|null $new_name (Optional) The new filename to use. If null, `$orig_name` is used.
+ * @return string|null The full path to the renamed file if successful, or null if the file
+ *                     was not found, the registered file is missing, or if it already exists at the target path.
+ */
 function fileRenameToOriginal($system, $orig_name, $new_name=null){
 
     if($new_name==null) {$new_name = $orig_name;}
@@ -200,15 +219,25 @@ function fileRenameToOriginal($system, $orig_name, $new_name=null){
 }
 
 /**
-* Get array of local paths, external links, mimetypes and parameters (mediatype and source)
-* for list of file id (may be obsfucated)
-*
-* @param mixed $system
-* @param mixed $file_ids
-*/
+ * Retrieves full information for one or more files from `recUploadedFiles` table.
+ *
+ * Accepts a single file ID, a comma-separated string of file IDs, or an array of file IDs.
+ * IDs can be either standard `ulf_ID` (numeric) or `ulf_ObfuscatedFileID` (string).
+ * The function auto-detects the type of ID based on format.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param int|string|array $file_ids A single file ID (numeric or obfuscated string),
+ *                                   a comma-separated string of IDs, or an array of IDs.
+ * @param bool $all_fields (Currently not fully implemented for specific field selection,
+ *                         though original comment mentioned `ulf_Thumbnail` which is no longer in DB).
+ *                         If true, might imply fetching more fields in future, but currently fetches a fixed set.
+ * @return array|false An array of associative arrays, each representing a file's record,
+ *                     or false if no file IDs provided or a database error occurs.
+ *                     Returns an empty array if no files are found matching the IDs.
+ */
 function fileGetFullInfo($system, $file_ids, $all_fields=false){
 
-    //@todo use prepareIds() and prepareStrIds
+    // @todo Use prepareIds() for numeric IDs and a similar function for string IDs if needed.
     if(is_string($file_ids)){
         $file_ids = explode(',', $file_ids);
     }elseif(!is_array($file_ids)){
@@ -312,11 +341,23 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
 }
 
 /**
-* Return full URL to thumbnail for given record ID
-*
-* @param mixed $system
-* @param mixed $recIDs
-*/
+ * Returns the thumbnail URL and prevailing background color for a media file associated with a record.
+ *
+ * It first attempts to find a specifically designated thumbnail field (DT_THUMBNAIL).
+ * If not found, it searches for other suitable media (images, YouTube/Vimeo videos, IIIF resources)
+ * linked to the record.
+ * If still not found and `$check_linked_media` is true, it recursively checks records of type RT_MEDIA_RECORD
+ * linked from the current record.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param int $recID The ID of the record for which to find the thumbnail.
+ * @param bool $get_bgcolor If true, attempts to calculate the prevailing background color of the thumbnail.
+ * @param bool $check_linked_media If true, recursively checks linked media records (type RT_MEDIA_RECORD)
+ *                                 if no direct thumbnail is found. Defaults to false.
+ * @return array|null An associative array with 'url' (string|null) and 'bg_color' (string|null),
+ *                    or null if `recID` is invalid. 'url' will be the thumbnail URL or null.
+ *                    'bg_color' will be the calculated color string or a default if not calculable/requested.
+ */
 function fileGetThumbnailURL($system, $recID, $get_bgcolor, $check_linked_media = false){
     
     if(!isPositiveInt($recID)){
@@ -325,84 +366,96 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor, $check_linked_media 
 
     $thumb_url = null;
     $bg_color = null;
-    $fileid = null;
+    $fileid = null; // This will store the ulf_ObfuscatedFileID
 
-    $query = "select recUploadedFiles.ulf_ObfuscatedFileID".
-    " from recDetails".
-    " left join recUploadedFiles on ulf_ID = dtl_UploadedFileID".
-    " left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt".
-    " where dtl_RecID = $recID ";
+    $base_query = "select ruf.ulf_ObfuscatedFileID"
+                . " from recDetails rd"
+                . " left join recUploadedFiles ruf on ruf.ulf_ID = rd.dtl_UploadedFileID"
+                . " left join defFileExtToMimetype fxm on fxm.fxm_Extension = ruf.ulf_MimeExt"
+                . " where rd.dtl_RecID = " . intval($recID);
 
-    // at first - try to find image that are marked as thumbnail in dedicated field
-    if($system->defineConstant('DT_THUMBNAIL') & DT_THUMBNAIL>0){
-        $fileid = mysql__select_value($system->getMysqli(), $query
-                .' and dtl_DetailTypeID='.DT_THUMBNAIL.' limit 1');
+    // 1. Try to find a specifically designated thumbnail field
+    if($system->defineConstant('DT_THUMBNAIL') && DT_THUMBNAIL > 0){
+        $fileid = mysql__select_value($system->getMysqli(), $base_query
+                .' and rd.dtl_DetailTypeID = '.DT_THUMBNAIL.' limit 1');
     }
-    // if special thumbnail not found - try to find image or resource with thumbail (youtube ot iiif)
+
+    // 2. If not found, try to find any suitable image or remote resource (YouTube, Vimeo, IIIF)
     if($fileid == null){
-        $query = $query
-            .' and (dtl_UploadedFileID is not null)'    // no dty_ID of zero so undefined are ignored
-            ." and (fxm_MimeType like 'image%' OR fxm_MimeType='video/youtube' OR fxm_MimeType='video/vimeo' OR fxm_MimeType='audio/soundcloud' "
-            ." OR ulf_OrigFileName LIKE '".ULF_IIIF."%' OR ulf_PreferredSource LIKE 'iiif%')" // ORDER BY dtl_DetailTypeID, dtl_ID
-            .' LIMIT 1';
-        $fileid = mysql__select_value($system->getMysqli(), $query);
+        $suitable_media_condition = " and (rd.dtl_UploadedFileID is not null)" // Ensure there's an uploaded file linked
+                                  ." and (fxm.fxm_MimeType like 'image%'"
+                                  ." OR fxm.fxm_MimeType='video/youtube'"
+                                  ." OR fxm.fxm_MimeType='video/vimeo'"
+                                  ." OR fxm.fxm_MimeType='audio/soundcloud'" // Soundcloud also considered for thumb
+                                  ." OR ruf.ulf_OrigFileName LIKE '".ULF_IIIF."%'" // IIIF original filename marker
+                                  ." OR ruf.ulf_PreferredSource LIKE 'iiif%')" // IIIF preferred source marker
+                                  ." LIMIT 1";
+        $fileid = mysql__select_value($system->getMysqli(), $base_query . $suitable_media_condition);
     }
 
-    // Check linked record types
+    // 3. If still not found and allowed, check linked media records
     if(!$fileid && $check_linked_media &&
         $system->defineConstant('RT_MEDIA_RECORD') && RT_MEDIA_RECORD > 0){
 
-        $query = "SELECT rec_ID FROM Records LEFT JOIN recLinks ON rl_TargetID = rec_ID WHERE rl_SourceID = $recID AND rec_RecTypeID = " . RT_MEDIA_RECORD;
-        $linked_rec_ids = mysql__select_list2($system->getMysqli(), $query);
+        $linked_query = "SELECT lr.rec_ID FROM Records lr"
+                      . " LEFT JOIN recLinks rlink ON rlink.rl_TargetID = lr.rec_ID"
+                      . " WHERE rlink.rl_SourceID = " . intval($recID)
+                      . " AND lr.rec_RecTypeID = " . RT_MEDIA_RECORD;
+        $linked_rec_ids = mysql__select_list2($system->getMysqli(), $linked_query);
 
-        while(!empty($linked_rec_ids)){
-
-            $linked_rec_id = array_shift($linked_rec_ids);
-            $file_details = fileGetThumbnailURL($system, $linked_rec_id, $get_bgcolor, false);
-
+        foreach($linked_rec_ids as $linked_rec_id){
+            $file_details = fileGetThumbnailURL($system, $linked_rec_id, $get_bgcolor, false); // Recursion, but ensure $check_linked_media is false
             if(!empty($file_details) && !empty($file_details['url'])){
-                return $file_details;
-                //break;
+                return $file_details; // Return first found thumbnail from linked records
             }
         }
     }
 
+    // 4. If a file ID (obfuscated) was found, construct URL and get background color
     if($fileid){
+        $fileid_clean = preg_replace('/[^a-z0-9]/', "", $fileid); // Sanitize for Snyk/security
+        $thumb_filename_on_server = 'ulf_'.$fileid_clean.'.png';
 
-        $fileid = preg_replace('/[^a-z0-9]/', "", $fileid);//for snyk
-
-        $thumbfile = 'ulf_'.$fileid.'.png';// ulf_[obfuscation].png
-
-        if(defined('HEURIST_THUMB_URL') && file_exists(HEURIST_THUMB_DIR . $thumbfile)){
-            $thumb_url = HEURIST_THUMB_URL.$thumbfile;
+        if(defined('HEURIST_THUMB_URL') && file_exists(HEURIST_THUMB_DIR . $thumb_filename_on_server)){
+            $thumb_url = HEURIST_THUMB_URL . $thumb_filename_on_server;
         }else{
-            //it will be redirected to hserv/controller/fileDownload.php
-            $thumb_url = HEURIST_BASE_URL."?db=".$system->dbname()."&thumb=".$fileid;
+            // Fallback to dynamic generation via fileDownload.php (or similar controller)
+            $thumb_url = HEURIST_BASE_URL."?db=".$system->dbname()."&thumb=".$fileid_clean;
         }
 
         if($get_bgcolor){
-            $background_file  = 'ulf_'.$fileid.'.bg';
-            if(false && file_exists(HEURIST_THUMB_DIR . $background_file)){
-                $bg_color = file_get_contents(HEURIST_THUMB_DIR.$background_file);
-            }elseif(file_exists(HEURIST_THUMB_DIR . $thumbfile)){
-                $bg_color = UImage::getPrevailBackgroundColor( HEURIST_THUMB_DIR . $thumbfile );
-            }else{
-                $bg_color = 'rgb(223, 223, 223)';
+            $bg_color_cache_file  = HEURIST_THUMB_DIR . 'ulf_'.$fileid_clean.'.bg';
+            $actual_thumb_path = HEURIST_THUMB_DIR . $thumb_filename_on_server;
+
+            if(false && file_exists($bg_color_cache_file)){ // BG color caching seems disabled (false && ...)
+                // $bg_color = file_get_contents($bg_color_cache_file);
+            } elseif(file_exists($actual_thumb_path)){
+                $bg_color = UImage::getPrevailBackgroundColor($actual_thumb_path);
+            } else {
+                $bg_color = 'rgb(223, 223, 223)'; // Default BG color
             }
         }
-
     }
 
     return array('url'=>$thumb_url, 'bg_color'=>$bg_color);
 }
 
 /**
-* @TODO there are places with the same code - 1) use this function everywhere 2) move to UFile.php
-*
-* resolve path relatively db root or file_uploads
-*
-* @param mixed $path
-*/
+ * Resolves a potentially relative file path to an absolute path.
+ *
+ * It tries to resolve the path in the following order:
+ * 1. Directly, if it's already an absolute path or relative to the current working directory (if set appropriately).
+ * 2. Relative to the database's root directory (`HEURIST_FILESTORE_ROOT . $db_name . '/'`).
+ * 3. Relative to the database's 'file_uploads' directory (`HEURIST_FILESTORE_ROOT . $db_name . '/file_uploads/'`).
+ * 4. Special cases for known absolute path prefixes on different server setups (e.g., '/srv/HEURIST_FILESTORE/', '/misc/heur-filestore/').
+ *
+ * @todo This function has similarities with other path resolution logic and could potentially be moved to a utility class like UFile.
+ *
+ * @param string $path The file path to resolve. Can be absolute or relative.
+ * @param string|null $db_name (Optional) The name of the database, used to construct paths relative to the DB's storage.
+ *                             If null, uses `HEURIST_FILESTORE_DIR` and `HEURIST_FILES_DIR` as base.
+ * @return string The resolved absolute path if successful and file exists, otherwise the original path.
+ */
 function resolveFilePath($path, $db_name=null){
 
     if( $path ){
@@ -459,22 +512,28 @@ function resolveFilePath($path, $db_name=null){
 }
 
 /**
-* @todo - to be removed
-* Remarked because of possible "Remote file disclosure"
-*
-* Download remote url as file - heurist acts as proxy to download remote resource
-*
-* Usage:
-* 1. proxy http (unsecure) resources (registered in database)
-* 2. proxy for http tiled map image server
-* 3. adelaide web site styles (not used anymore)
-* 4. annotated template (not used anymore)
-*
-* @param mixed $filename
-* @param mixed $mimeType
-* @param mixed $url
-* @param mixed $bypassProxy
-*/
+ * Downloads a remote URL's content and serves it as a file.
+ * Heurist acts as a proxy to download the remote resource.
+ *
+ * Note: This function's core functionality (`loadRemoteURLContent`) is currently blocked
+ * due to potential "Remote file disclosure" security concerns, as indicated in the source code.
+ * The function body is commented out.
+ *
+ * Intended Usages (historical):
+ * 1. Proxy HTTP (unsecure) resources registered in the database.
+ * 2. Proxy for HTTP tiled map image servers.
+ * 3. Adelaide website styles (marked as not used anymore).
+ * 4. Annotated templates (marked as not used anymore).
+ *
+ * @todo This function is marked to be removed.
+ *
+ * @param string $filename The desired local filename for the downloaded content (not directly used as content is echoed).
+ * @param string $mimeType The MIME type of the content to be served.
+ * @param string $url The remote URL to download.
+ * @param bool $bypassProxy (Parameter for `loadRemoteURLContent`) Whether to bypass any configured proxy. Default true.
+ * @param string|null $originalFileName (Optional) The filename to suggest to the user for download.
+ * @return void
+ */
 function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true, $originalFileName=null){
 /*
     $rawdata = loadRemoteURLContent($url, $bypassProxy);//blocked
@@ -492,15 +551,25 @@ function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true, $orig
 }
 
 /**
-* Direct file download - (@todo move to uFile?)
-*
-* Usage in 2 cases only
-* 1) Download database backup (exportMyDataPopup)
-* 2) Download registered file from Heurist storage folder (fileDownload)
-*
-* @param mixed $mimeType
-* @param mixed $filename
-*/
+ * Serves a local file for download to the client.
+ *
+ * This function handles setting appropriate HTTP headers for file download,
+ * including `Content-Type`, `Content-Disposition`, `Content-Length`, etc.
+ * It supports byte range requests (for resumable downloads/streaming).
+ * For certain MIME types (like JSON or generic octet-stream), it applies gzip encoding.
+ *
+ * Usage cases mentioned:
+ * 1. Download database backup (from `exportMyDataPopup`).
+ * 2. Download registered files from Heurist storage folder (via `fileDownload` controller action).
+ *
+ * @todo This function could potentially be moved to a utility class like `UFile`.
+ *
+ * @param string|null $mimeType The MIME type of the file. If null or 'application/octet-stream' or 'application/json', gzip encoding is applied.
+ * @param string $filename The full server path to the file to be downloaded.
+ * @param string|null $originalFileName (Optional) The filename to suggest to the client.
+ *                                      If provided, `Content-Disposition` is set to 'attachment'. Otherwise, 'inline'.
+ * @return void
+ */
 function downloadFile($mimeType, $filename, $originalFileName=null){
 
     if (file_exists($filename)) {
@@ -609,12 +678,12 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
     $record = array("rec_ID"=>$rec_ID);
     $system->defineConstant('DT_NAME');
 
-    recordSearchDetails($system, $record, array(DT_NAME));
-    if(is_array($record['details'][DT_NAME])){
+    recordSearchDetails($system, $record, array(DT_NAME)); // Populate record details
+    if(!empty($record['details'][DT_NAME]) && is_array($record['details'][DT_NAME])){
             $downloadFileName = USanitize::sanitizeFileName(array_values($record['details'][DT_NAME])[0]);
     }
 
-    if(!$downloadFileName) {$downloadFileName = 'Dataset_'.$rec_ID;}
+    if(empty($downloadFileName)) {$downloadFileName = 'Dataset_'.$rec_ID;}
 
 /*
     $finfo = pathinfo($originalFileName);
@@ -674,10 +743,28 @@ function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
 
 }
 
-//
-// output the appropriate html tag to view media content
-// $params - array of special parameters for audio/video playback AND for IIIF (from smarty)
-//
+/**
+ * Generates an HTML tag (e.g., `<img>`, `<video>`, `<audio>`, `<iframe>`) for displaying media content.
+ *
+ * Determines the appropriate HTML based on the MIME type of the file.
+ * Handles local files, external URLs, and special viewers for 3D models, YouTube, Vimeo, SoundCloud, and IIIF.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param string $fileid The obfuscated file ID (ulf_ObfuscatedFileID) of the media file.
+ * @param string $mimeType The MIME type of the media file.
+ * @param array|null $params An associative array of parameters that can affect playback or display.
+ *                           Expected keys:
+ *                           - 'var': Array containing file info (e.g., from `fileGetFullInfo`), used for IIIF and 3D model detection.
+ *                             Example: `['var'][0]['ulf_OrigFileName']`, `['var'][0]['ulf_PreferredSource']`, `['var'][0]['rec_ID']`.
+ *                           - 'auto_play': (bool) For audio/video, if true, adds autoplay attributes.
+ *                           - 'show_artwork': (int) For SoundCloud, 0 to hide artwork.
+ *                           - 'fancybox': (bool) If true, wraps image in a div and adds fancybox-related attributes.
+ * @param string|null $external_url The external URL of the media, if applicable. If provided and not HTTP, it's used as the source.
+ *                                  Otherwise, a local URL using `fileDownload.php` (or similar) is constructed.
+ * @param string|null $size (Optional) HTML size attributes (e.g., 'width="640" height="480"'). Defaults for some types if not set.
+ * @param string|null $style (Optional) HTML style attribute string (e.g., 'border:1px solid red;').
+ * @return string The generated HTML string for embedding the media player/viewer.
+ */
 function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $size=null, $style=null){
 
     $result = '';
@@ -860,10 +947,21 @@ EXP;
     return $result;
 }
 
-//
-// get player url for youtube, vimeo, soundcloud
-// $params - parameters for playback    show_artwork,auto_play
-//
+/**
+ * Generates the appropriate embeddable player URL for YouTube, Vimeo, or SoundCloud.
+ *
+ * For YouTube, it extracts the video ID and constructs an embed URL.
+ * For Vimeo, it uses the oEmbed API to fetch the video ID and then constructs the player URL.
+ * For SoundCloud, it constructs a player URL with options for autoplay and artwork visibility based on `$params`.
+ * If the MIME type or URL doesn't match these services, the original URL is returned.
+ *
+ * @param string $mimeType The MIME type of the media (e.g., 'video/youtube', 'video/vimeo', 'audio/soundcloud').
+ * @param string $url The original URL of the media.
+ * @param array|null $params (Optional) Associative array of parameters, primarily for SoundCloud:
+ *                           - 'auto_play': (bool) If true, enables autoplay for SoundCloud.
+ *                           - 'show_artwork': (int) If 0, hides artwork for SoundCloud.
+ * @return string The embeddable player URL.
+ */
 function getPlayerURL($mimeType, $url, $params=null){
 
     if( $mimeType == MT_YOUTUBE
@@ -902,7 +1000,22 @@ function getPlayerURL($mimeType, $url, $params=null){
     return $url;
 }
 
+/**
+ * Checks if a filename indicates that it is not a locally stored file.
+ *
+ * This is determined by checking if the original filename (`$origName`) starts with
+ * specific prefixes defined as constants:
+ * - `ULF_REMOTE` (e.g., "_REMOTE_") for general remote files.
+ * - `ULF_IIIF` (e.g., "_IIIF_") for IIIF resources.
+ * - `ULF_TILED_IMAGE` (e.g., "_TILED_") for tiled images.
+ *
+ * @param string|null $origName The original filename to check.
+ * @return bool True if the filename suggests a remote or specially handled file, false otherwise.
+ */
 function isNotLocalFile($origName){
+    if ($origName === null) {
+        return false; // Or true, depending on desired behavior for null input
+    }
     return strpos($origName, ULF_REMOTE) === 0 || // skip if not local file
            strpos($origName, ULF_IIIF) === 0 ||
            strpos($origName, ULF_TILED_IMAGE) === 0;
@@ -1081,6 +1194,17 @@ function getBlurredImage($system, $file_info, $return_url = true){
     return $return_url ? $blur_file_url : $blur_file_path;
 }
 
+/**
+ * Extracts the YouTube video ID from various YouTube URL formats.
+ *
+ * Uses a regular expression to match standard watch URLs, shortener URLs (youtu.be),
+ * embed URLs, and others.
+ *
+ * @param string $url The YouTube URL.
+ * @return string|false The extracted YouTube video ID if found, otherwise potentially an empty string or behavior dependent on regex.
+ *                      The current regex `([^\?&\"'>]+)` will capture the ID part.
+ *                      It should ideally return false or null if no match.
+ */
 function youtube_id_from_url($url) {
 /*
     $pattern =
@@ -1113,83 +1237,110 @@ function youtube_id_from_url($url) {
 }
 
 
-//
-// Returns registered media(file) metadata as json
-// Additionally it obtains width and height for images
-//
+/**
+ * Retrieves and outputs metadata for a registered media file as a JSON response.
+ * For image files (excluding tiled images), it attempts to get width and height.
+ *
+ * The output JSON will have a 'status' and 'data' field. 'data' contains:
+ * - 'mimetype': The MIME type of the file.
+ * - 'original_name': The original filename.
+ * - 'size_KB': File size in kilobytes.
+ * - 'description': File description.
+ * - 'width', 'height': (For images) Dimensions of the image.
+ * - 'error': (If image dimensions cannot be obtained) An error message string.
+ *
+ * @param array $fileinfo An associative array containing file information, typically from `fileGetFullInfo()`.
+ *                        Expected keys: 'fullPath', 'ulf_ExternalFileReference', 'fxm_MimeType',
+ *                        'ulf_OrigFileName', 'ulf_PreferredSource', 'ulf_FileSizeKB', 'ulf_Description'.
+ * @return void Outputs JSON directly and terminates script execution.
+ */
 function fileGetMetadata($fileinfo){
 
-
-    $filepath = $fileinfo['fullPath'];//concat(ulf_FilePath,ulf_FileName as fullPath
-    $external_url = $fileinfo['ulf_ExternalFileReference'];//ulf_ExternalFileReference
-    $mimeType = $fileinfo['fxm_MimeType'];//fxm_MimeType
-    $originalFileName = $fileinfo['ulf_OrigFileName'];
-    $sourceType = $fileinfo['ulf_PreferredSource'];
+    $filepath = $fileinfo['fullPath'] ?? null; // Resolved full path for local files
+    $external_url = $fileinfo['ulf_ExternalFileReference'] ?? null;
+    $mimeType = $fileinfo['fxm_MimeType'] ?? null;
+    $originalFileName = $fileinfo['ulf_OrigFileName'] ?? null;
+    $sourceType = $fileinfo['ulf_PreferredSource'] ?? null;
 
     $type_media = null;
-    $ext = null;
-    if($mimeType && strpos($mimeType, '/')!=false){
-        list($type_media, $ext) = explode('/', $mimeType);
+    // $ext = null; // $ext is not used
+    if($mimeType && strpos($mimeType, '/')!==false){
+        list($type_media) = explode('/', $mimeType, 2); // Get only the main type
     }
 
-    $image = null;
-    $alt_image = null;
+    $image_resource = null; // Stores GD image resource or similar from UImage
+    $alt_image_size = null; // Stores array from getimagesize()
 
-    $res = array();
+    $res = array(); // Array to hold metadata, including dimensions or error
 
-    if(strpos($originalFileName,ULF_TILED_IMAGE)!==0 && $sourceType!='tiled' && $type_media=='image'){
-
-        if(file_exists($filepath)){
-
-            $image = UImage::getImageFromFile($filepath);
-            $alt_image = @getimagesize($filepath);
-
-        }elseif($external_url){
-
-            $image = UImage::getRemoteImage( $external_url );
-        }
-
-        if($image){
-
-            try{
-                $imgw = imagesx($image);
-                $imgh = imagesy($image);
-
-                $res = array('width'=>$imgw, 'height'=>$imgh);
-
-            }catch(Exception  $e){
-
-                $res = 'Cannot get image dimensions';
+    // Check if it's an image and not a special tiled image type
+    if($originalFileName !== null && strpos($originalFileName, ULF_TILED_IMAGE) !== 0 && $sourceType !== 'tiled' && $type_media === 'image'){
+        if($filepath && file_exists($filepath)){ // Local file
+            $image_resource = UImage::getImageFromFile($filepath);
+            if (!$image_resource) { // Fallback if getImageFromFile fails but file exists
+                $alt_image_size = @getimagesize($filepath);
             }
-        }elseif(file_exists($filepath) && is_array($alt_image) && !empty($alt_image)){ // [0] => width, [1] => height
-            $res = array('width' => $alt_image[0], 'height' => $alt_image[1]);
-        }else{
-            $res = array('error'=>'Image is not loaded');//Cannot load image file to get dimensions
+        } elseif($external_url){ // Remote file
+            $image_resource = UImage::getRemoteImage($external_url);
         }
 
+        if($image_resource){
+            try{
+                $imgw = imagesx($image_resource);
+                $imgh = imagesy($image_resource);
+                $res['width'] = $imgw;
+                $res['height'] = $imgh;
+                if (is_resource($image_resource) || $image_resource instanceof \GdImage) { // Check if it's a GD resource
+                    imagedestroy($image_resource);
+                }
+            } catch(Exception $e){
+                $res['error'] = 'Cannot get image dimensions from resource.';
+            }
+        } elseif($alt_image_size && is_array($alt_image_size)){ // Dimensions from getimagesize
+            $res['width'] = $alt_image_size[0];
+            $res['height'] = $alt_image_size[1];
+        } else {
+            $res['error'] = 'Image is not loaded or dimensions not retrievable.';
+        }
     }
 
+    // Populate common metadata
     $res['mimetype'] = $mimeType;
     $res['original_name'] = $originalFileName;
-    $res['size_KB'] = $fileinfo['ulf_FileSizeKB'];
-    $res['description'] = $fileinfo['ulf_Description'];
+    $res['size_KB'] = $fileinfo['ulf_FileSizeKB'] ?? null;
+    $res['description'] = $fileinfo['ulf_Description'] ?? null;
 
     header(CTYPE_JSON);
     $response = array('status'=>HEURIST_OK, 'data'=>$res);
-    print json_encode($response);
+    echo json_encode($response); // Changed print to echo for consistency
+    exit; // Terminate script after outputting JSON
 }
 
 /**
-* Recreate thumbnail for record uploaded file
-*
-* @param mixed $system
-* @param mixed $fileid - ulf_ID or obfuscation IF
-* @param mixed $is_download - output thumbnail
-*/
+ * Creates or recreates a thumbnail for a specified uploaded file.
+ *
+ * Handles various file types:
+ * - Local images: Resizes them. Handles EXIF orientation.
+ * - PDFs: Generates a thumbnail using `UImage::getPdfThumbnail()`.
+ * - Remote images: Fetches and resizes.
+ * - YouTube, Vimeo, SoundCloud: Fetches standard thumbnail images from their APIs/URL patterns.
+ * - IIIF: Uses `UImage::getIiifThumbnail()`.
+ * - Tiled Images: Creates a placeholder string image "tiled images stack".
+ * - Other types: Creates a placeholder string image with the file extension.
+ *
+ * If `$is_download` is true, the generated thumbnail is output directly to the browser with an image/png header.
+ * Otherwise, the thumbnail is saved to the `HEURIST_THUMB_DIR`.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param int|string $fileid The `ulf_ID` (numeric) or `ulf_ObfuscatedFileID` (string) of the file.
+ * @param bool $is_download If true, outputs the thumbnail image directly to the browser.
+ *                          Otherwise, saves it to the thumbnail directory.
+ * @return void Outputs image or redirects if `$is_download` is true.
+ */
 function fileCreateThumbnail( $system, $fileid, $is_download ){
 
     $img = null; //image to be resized
-    $file = fileGetFullInfo($system, $fileid, true);
+    $file = fileGetFullInfo($system, $fileid, true); // Request all fields just in case
     $placeholder = '../../hclient/assets/100x100.gif';
     $thumbnail_file = null;
     $orientation = 0;
@@ -1360,10 +1511,15 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
 }
 
 /**
-* returns 3d or 3dhop depends on extension parameter
-*
-* @param mixed $fileExt - file extension
-*/
+ * Detects the appropriate 3D viewer type based on file extension.
+ *
+ * - Returns '3dhop' for 'nxz' or 'nxs' extensions.
+ * - Returns '3d' for a list of common 3D model extensions (obj, 3ds, stl, etc.).
+ * - Returns an empty string if the extension does not match known 3D types.
+ *
+ * @param string|null $fileExt The file extension to check.
+ * @return string The viewer type ('3dhop', '3d') or an empty string.
+ */
 function detect3D_byExt($fileExt){
 
     $mode_3d_viewer = '';
@@ -1382,14 +1538,20 @@ function detect3D_byExt($fileExt){
 
 
 /**
-* Calculates disk usage for file_uploads and uploaded_tilestacks folders
-*
-* @param mixed $system
-*/
+ * Calculates total disk usage by scanning standard file storage directories.
+ *
+ * Specifically, it calculates the size of `HEURIST_FILES_DIR` (typically 'file_uploads')
+ * and `HEURIST_TILESTACKS_DIR` (typically 'uploaded_tilestacks') and returns their sum.
+ *
+ * @param \hserv\System $system The Heurist system object (currently unused in the function body, but kept for signature consistency).
+ * @return int The total disk usage in bytes.
+ */
 function filestoreGetUsageByScan($system){
 
-    //HEURIST_FILESTORE_ROOT.$db_name.'/';
-    //$dir_root = HEURIST_FILESTORE_DIR;
+    // Note: $system parameter is not used in the current implementation of this function.
+    // Original comments about $dir_root were:
+    // HEURIST_FILESTORE_ROOT.$db_name.'/';
+    // $dir_root = HEURIST_FILESTORE_DIR;
     //$dir_files = $dir_root.'file_uploads/';
     //$dir_tiles = $dir_root.'uploaded_tilestacks/';
 
@@ -1399,25 +1561,39 @@ function filestoreGetUsageByScan($system){
     return $sz1+$sz2;
 }
 
+/**
+ * Calculates disk usage for specified media folders, plus standard 'file_uploads' and 'uploaded_tilestacks'.
+ *
+ * It reads folder paths from the system setting 'sys_MediaFolders' (semicolon-separated).
+ * For each valid folder path, it calculates its size using `folderSize2`.
+ * It always includes the sizes of `HEURIST_FILES_DIR` and `HEURIST_TILESTACKS_DIR`.
+ *
+ * @param \hserv\System $system The Heurist system object, used to get settings.
+ * @return array An associative array where keys are folder names (relative to `HEURIST_FILESTORE_DIR`
+ *               or 'file_uploads', 'uploaded_tilestacks') and values are their sizes in bytes.
+ */
 function filestoreGetUsageByFolders($system){
 
-    $mediaFolders = $system->settings->get('sys_MediaFolders');
-    if($mediaFolders==null || $mediaFolders == ''){ //not defined
-        $mediaFolders = 'uploaded_files';
+    $mediaFolders_setting = $system->settings->get('sys_MediaFolders');
+    if($mediaFolders_setting==null || $mediaFolders_setting == ''){ // Default if not defined
+        $mediaFolders_setting = 'uploaded_files'; // This default seems unlikely to be a valid path segment.
+                                             // It might intend to refer to the standard file_uploads,
+                                             // but the logic below adds HEURIST_FILES_DIR separately.
     }
-    $mediaFolders = explode(';', $mediaFolders);// get an array of folders
+    $mediaFolders = explode(';', $mediaFolders_setting);
     $dirs = array();
 
-    foreach ($mediaFolders as $dir){
-        if( $dir && $dir!="*") {
-            $dir2 = $dir;
-            $dir = USanitize::sanitizePath(HEURIST_FILESTORE_DIR.$dir);
-            if($dir){
-                $dirs[$dir2] = folderSize2($dir);
+    foreach ($mediaFolders as $dir_segment){
+        if( $dir_segment && $dir_segment!="*") { // Ignore wildcard or empty segments
+            $full_dir_path = USanitize::sanitizePath(HEURIST_FILESTORE_DIR.$dir_segment);
+            if($full_dir_path){ // If path is valid after sanitization
+                // Use the original segment as key, as it might be more descriptive than the sanitized path part
+                $dirs[$dir_segment] = folderSize2($full_dir_path);
             }
         }
     }
 
+    // Always include standard directories
     $dirs['file_uploads'] = folderSize2(HEURIST_FILES_DIR);
     $dirs['uploaded_tilestacks'] = folderSize2(HEURIST_TILESTACKS_DIR);
 
@@ -1425,25 +1601,42 @@ function filestoreGetUsageByFolders($system){
 }
 
 /**
-* Calculates disk usage for file_uploads and uploaded_tilestacks folders
-* by sum in recUploadedFiles
-*
-* @param mixed $system
-*/
+ * Calculates total disk usage by summing the `ulf_FileSizeKB` column in `recUploadedFiles`.
+ *
+ * Note: This method relies on the accuracy of the stored file sizes in the database.
+ * The result is in Kilobytes (KB).
+ *
+ * @param \hserv\System $system The Heurist system object, used to get the database connection.
+ * @return int|null The total disk usage in KB as per database records, or null if query fails.
+ */
 function filestoreGetUsageByDb($system){
 
     $mysqli = $system->getMysqli();
     $res =  mysql__select_value($mysqli, 'SELECT SUM(ulf_FileSizeKB) FROM recUploadedFiles');
 
-    return $res;
+    return $res ? (int)$res : null; // Cast to int or return null
 }
 
-
+/**
+ * Replaces occurrences of old file IDs (`$ulf_ids_replaced`) with a new file ID (`$ulf_id`)
+ * in the `recDetails.dtl_UploadedFileID` column, and then deletes the records of the old files
+ * from `recUploadedFiles`. This is used for de-duplication.
+ *
+ * @param \mysqli $mysqli The mysqli database connection object.
+ * @param int $ulf_id The `ulf_ID` of the file record to keep (the target of the replacement).
+ * @param array|string $ulf_ids_replaced An array or comma-separated string of `ulf_ID`s to be replaced and deleted.
+ * @return void
+ */
 function filestoreReplaceDuplicatesInDetails($mysqli, $ulf_id, $ulf_ids_replaced){
 
-    $ulf_ids_replaced = prepareIds($ulf_ids_replaced);//for snyk
+    // Ensure $ulf_ids_replaced is an array of sanitized integers
+    $ids_to_replace_sanitized = prepareIds($ulf_ids_replaced);
 
-    $ids = implode(',', $ulf_ids_replaced);
+    if (empty($ids_to_replace_sanitized)) {
+        return; // No valid IDs to replace
+    }
+
+    $ids = implode(',', $ids_to_replace_sanitized);
 
     $upd_query = 'UPDATE recDetails set dtl_UploadedFileID='.intval($ulf_id).' WHERE dtl_UploadedFileID in ('.$ids.')';
     $del_query = 'DELETE FROM recUploadedFiles where ulf_ID in ('.$ids.')';

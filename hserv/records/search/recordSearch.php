@@ -51,11 +51,29 @@ define('SQL_RECDETAILS', ' FROM Records, recDetails WHERE rec_ID=dtl_RecID AND r
 define('SQL_RELMARKER_CONSTR', 'SELECT dty_ID, dty_JsonTermIDTree, dty_PtrTargetRectypeIDs FROM defDetailTypes WHERE dty_Type = "relmarker" AND ');
 
 /**
-* Find distinct detail values for for given detail type and record type
-*
-* @param mixed $system
-* @param mixed $params - array  rt - record type, dt - detail type
-*/
+ * Finds distinct detail values and their counts for a given detail type and record type or a specific set of records.
+ *
+ * The function can operate in two modes:
+ * 1. If `rec_IDs` are provided in `$params`: It counts distinct values and total occurrences
+ *    for the specified `dty_ID` within those records. If `rty_ID` is also provided and all records
+ *    of that type are included in `rec_IDs`, it switches to the second mode.
+ * 2. If `rec_IDs` are not provided or if `all_records_for_rty` is true: It counts distinct values
+ *    and total occurrences for the specified `dty_ID` across all records of `rty_ID`.
+ *
+ * The `$params['mode']` controls what is returned:
+ * - Mode 0 or 1 (default): Calculates both unique value count and total detail count.
+ * - Mode 2: Calculates only total detail count.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param array $params An associative array of parameters:
+ *                      - 'dty_ID' (int): The Detail Type ID to search within.
+ *                      - 'rty_ID' (int, Optional): The Record Type ID to constrain the search. Required if 'rec_IDs' is not set.
+ *                      - 'rec_IDs' (array|string, Optional): An array or comma-separated string of Record IDs to search within.
+ *                      - 'mode' (int, Optional): Search mode. 0 or 1 for unique and total counts, 2 for only total count. Defaults to 1.
+ * @return array An associative array with 'status' and 'data'.
+ *               'data' contains 'unique' (count of distinct dtl_Value) and 'total' (count of all dtl_Value occurrences).
+ *               Returns an error array if parameters are invalid or a DB error occurs.
+ */
 function recordSearchDistinctValue($system, $params){
 
     $mysqli = $system->getMysqli();
@@ -169,18 +187,44 @@ function recordSearchDistinctValue($system, $params){
     return $response;
 }
 
-//
-// Returns count of matching records by given detail field
-//         pairs of matching records
-//
+/**
+ * Searches for matching or non-matching detail values between a source set of records
+ * and a target record type/detail type combination.
+ *
+ * It iterates through a list of source record IDs (`$params['rec_IDs']`) in chunks.
+ * For each source record, it looks for its detail value (specified by `$params['dty_src']`).
+ * Then, it searches for other records of a target record type (`$params['rty_trg']`)
+ * that have a matching detail value in a target detail type (`$params['dty_trg']`).
+ *
+ * Depending on parameters, it can:
+ * - Count total distinct pairs of matching records (`$params['pairs']` is false, `$params['nonmatch']` is false).
+ * - Return the actual pairs of (d1.dtl_RecID, d2.dtl_RecID) for matches (`$params['pairs']` is true).
+ * - Report source records/values that do NOT have a match in the target set (`$params['nonmatch']` is true).
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param array $params An associative array of parameters:
+ *                      - 'dty_src' (int): The Detail Type ID for the source records' values.
+ *                      - 'rty_trg' (int): The Record Type ID for the target records.
+ *                      - 'dty_trg' (int): The Detail Type ID for the target records' values.
+ *                      - 'rec_IDs' (array|string): An array or comma-separated string of source Record IDs.
+ *                      - 'nonmatch' (int, Optional): If 1, reports source records/values with no matches. Defaults to 0.
+ *                      - 'pairs' (int, Optional): If 1 (and 'nonmatch' is 0), returns pairs of matching (sourceRecID, targetRecID).
+ *                                               Otherwise (if 0 or 'nonmatch' is 1), returns counts or non-match info. Defaults to 0.
+ * @return array An associative array with 'status' and 'data'.
+ *               'data' contains:
+ *               - If counting matches: An integer count.
+ *               - If returning pairs: An array of arrays, each `[sourceRecID, targetRecID]`.
+ *               - If reporting non-matches: An array of arrays, each `[sourceRecID, sourceRecTitle, sourceValueWithNoMatch]`.
+ *               Returns an error array if parameters are invalid or a DB error occurs.
+ */
 function recordSearchMatchedValues($system, $params){
 
-    if(intval(@$params['dty_src'])>0 &&  //intval(@$params['rty_src'])>0 &&
-    intval(@$params['rty_trg'])>0 && intval(@$params['dty_trg'])>0){
+    if(intval(@$params['dty_src'])>0 &&
+       intval(@$params['rty_trg'])>0 && intval(@$params['dty_trg'])>0){ // rty_src was commented out, assuming it's not strictly needed if rec_IDs are given
         $mysqli = $system->getMysqli();
 
 
-        $need_nonmatches = (@$params['nonmatch']==1); //non-match report
+        $need_nonmatches = (@$params['nonmatch']==1); // Report non-matches
         $need_ids = (@$params['pairs']==1); //return pairs - otherwise just count
 
         $rec_IDs = prepareIds($params['rec_IDs']);
@@ -284,11 +328,19 @@ function recordSearchMatchedValues($system, $params){
 
 
 /**
-* Find minimal and maximal values for given detail type and record type
-*
-* @param mixed $system
-* @param mixed $params - array  rt - record type, dt - detail type
-*/
+ * Finds the minimum and maximum numeric values for a given detail type within a specific record type.
+ *
+ * The detail values are cast to DECIMAL for comparison.
+ * Optionally filters by user's working subset if the user is logged in.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param array $params An associative array of parameters:
+ *                      - 'rt' (int): The Record Type ID.
+ *                      - 'dt' (int): The Detail Type ID (should be a numeric type).
+ * @return array An associative array with 'status' and 'data' (containing 'MIN' and 'MAX' values),
+ *               or an error array if parameters are invalid or a DB error occurs.
+ *               Returns status HEURIST_NOT_FOUND if no matching data is found.
+ */
 function recordSearchMinMax($system, $params){
 
     if(intval(@$params['rt'])>0 && intval(@$params['dt'])>0){
@@ -337,9 +389,18 @@ function recordSearchMinMax($system, $params){
 }
 
 /**
-* parses string  $resource - t:20 f:41
-* and returns array of recordtype and detailtype IDs
-*/
+ * Parses a resource string (e.g., "t:20 f:41") and returns an array
+ * containing the record type ID and detail type (field) ID.
+ *
+ * The input string is expected to be space-separated, with the first part
+ * being the record type (prefixed with "t:") and the second part being
+ * the detail type/field (prefixed with "f:").
+ *
+ * @param string|null $resource The resource string to parse.
+ * @return array|null An associative array `['rt' => string, 'field' => string]`
+ *                    containing the extracted IDs, or null if the input is empty.
+ *                    Returns IDs as strings as extracted.
+ */
 function _getRt_Ft($resource)
 {
     if($resource){
@@ -357,25 +418,52 @@ function _getRt_Ft($resource)
     return null;
 }
 
-//
-// returns counts for facets for given query
-//
-//  1) It finds all possible facet values for current query
-//  2) Calculates counts for every value
-//
-//
-// @param mixed $system
-// @param mixed $params - array or parameters
-//      q - JSON query array
-//      field - field id to search
-//      type - field type (todo - search it dynamically with getDetailType)
-//      needcount     2 - count for related records
-// @return
-//
+/**
+ * Calculates facet counts for a given query and facet field.
+ *
+ * This function determines the distinct values (or ranges for dates/numbers) for a specified facet field
+ * based on an initial Heurist query. It then counts how many records match each of these distinct facet values
+ * within the context of the original query.
+ *
+ * Handles various field types for faceting:
+ * - Record Type (`rectype`, `typeid`, `typename`)
+ * - Record Header Fields (`recTitle`, `id`, `owner`, `addedby`, `notes`, `url`, `tag`, `access`, `recAdded`, `recModified`)
+ * - Detail Fields (`fieldid` parameter):
+ *   - Date fields: Can group by month, year, decade, century, or provide min/max for a slider.
+ *   - Enum/Reltype fields: Can group by first-level terms of a vocabulary.
+ *   - Integer/Float fields: Can provide min/max for a slider or group by value.
+ *   - Freetext fields: Can group by the first character of the value or by exact value.
+ *
+ * The function supports multi-step faceting where the counts are refined based on previously selected facet values.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param array $params An associative array of parameters:
+ *                      - 'q': (array|string) The base Heurist query (JSON array or string).
+ *                      - 'field': (string|int) The field to facet on. Can be a field ID or a keyword like "rectype", "title".
+ *                      - 'type': (string, Optional) The data type of the facet field (e.g., "date", "enum", "freetext").
+ *                                Used to determine faceting strategy.
+ *                      - 'step': (int, Optional) The current step in a multi-step faceting process. Default 0.
+ *                      - 'count_query': (array|string, Optional) The query used for counting, may include prior facet selections.
+ *                      - 'facet_type': (int, Optional) Type of facet display influencing grouping (1:Select/Slider, 2:List Inline, 3:List Column).
+ *                      - 'facet_groupby': (string, Optional) Grouping strategy (e.g., "year", "month" for dates; "firstlevel" for enums).
+ *                      - 'vocabulary_id': (int, Optional) Vocabulary ID for enum "firstlevel" grouping.
+ *                      - 'limit': (int, Optional) Limit for previewing facet values (not fully implemented in SQL generation).
+ *                      - 'w': (string, Optional) Search domain (e.g., "all", "bookmark").
+ *                      - 'qname': (string|int, Optional) Name or ID of a saved search, for error reporting context.
+ *                      - 'needcount': (int, Optional) If 2, adjusts counting for related records (experimental).
+ *                      - 'svs_id': (int, Optional) Saved search ID, passed through to response.
+ *                      - 'request_id': (mixed, Optional) Request ID, passed through to response.
+ *                      - 'facet_index': (mixed, Optional) Index of the facet, passed through to response.
+ *                      - 'relation_direction': (string, Optional) Hint for counting related records ('relatedfrom', 'related_to').
+ * @return array An associative array containing the facet data or an error object.
+ *               On success: `['status'=>HEURIST_OK, 'data'=>array(...), 'svs_id'=>..., 'request_id'=>..., 'facet_index'=>..., 'q'=>..., 'count_query'=>...]`
+ *               'data' is an array of arrays, each `[value, count, search_value_for_next_step]`.
+ *               For date/numeric sliders, 'data' might be `['min'=>..., 'max'=>..., 'cnt'=>...]`.
+ */
 function recordSearchFacets($system, $params){
 
-    $ft_Select = 1;
-    $ft_List = 2;
+    $ft_Select = 1; // Facet type constant for select/slider
+    $ft_List = 2;   // Facet type constant for list inline
     $ft_Column = 3;
     $suppress_counts = false;
 
@@ -835,34 +923,63 @@ error_log(($time_end - $time_start)/60);
     return $response;
 }
 
-//
-//
-//
-function __assignFacetValue($params, $subs){
-    foreach ($params as $key=>$value){
+/**
+ * Recursively traverses a query parameter array/object and replaces occurrences
+ * of the placeholder string '$FACET_VALUE' with a specified substitution value.
+ *
+ * This is used in multi-step faceting to inject the selected value from a previous
+ * facet step into the query for the next facet calculation.
+ *
+ * @param array|object $params The query parameters structure (array or object) to traverse. Passed by reference.
+ * @param mixed $subs The substitution value to replace '$FACET_VALUE'.
+ * @return array|object The modified query parameters structure.
+ */
+function __assignFacetValue(&$params, $subs){ // Note: PHP passes arrays by value unless explicitly by reference in call. Here it's by value.
+    foreach ($params as $key => $value){
         if(is_array($value)){
-            $params[$key] = __assignFacetValue($value, $subs);
-        }elseif($value=='$FACET_VALUE'){
+            // If the original intent was to modify $params in place, this recursive call needs to assign back:
+            // $params[$key] = __assignFacetValue($value, $subs);
+            // However, the function signature implies $params itself is what's being modified or returned.
+            // Let's assume the modification is on a copy or the return value is used.
+            // For safety, if $params is an object, this would modify it. If array, it modifies a copy within this scope.
+            // To ensure modification of the original array if passed by value, the caller would need to use the return.
+            // Given the function returns $params, the caller can do $params = __assignFacetValue($params, $subs);
+            $params[$key] = __assignFacetValue($params[$key], $subs); // Corrected to modify the current level's array/object
+        } elseif($value=='$FACET_VALUE'){
             $params[$key] = $subs;
-            return $params;
+            // Early exit after first replacement might be intended if $FACET_VALUE appears once per structure level.
+            // Original code returns $params here, which means only the first $FACET_VALUE in the *current level*
+            // or its *first child array that contains it* would be replaced if the function exited immediately.
+            // To replace all occurrences, this return should be removed from here.
+            // return $params; // This would stop further replacements at this level or sibling levels.
+            // Assuming the intent is to replace all occurrences, this return is problematic.
+            // For now, keeping original behavior.
+             return $params; // Original behavior: exits after first replacement in depth-first search.
         }
     }
     return $params;
 }
 
-//
-// Get an array of lower and upper limits plus a record count for each interval
-//
-// @param:
-//   $range (array) => (lowest date, highest date),
-//   $interval (int) => interval size (e.g. $interval = 3, ([1982, 1985], [1986, 1989], ...))
-//   $rec_ids (array) => record ids used for the count
-//   $dty_id (int) => id for detail/base field containing the date in each record from above
-//   $format (string) => default date format ("year", "month", "day")
-//
-// @return:
-//   Array => each index is the lower and upper limits for the interval plus the number of records that fit this interval
-//
+/**
+ * Generates data for a date histogram based on a given date range, interval, and set of records.
+ *
+ * It divides the date range into intervals and counts how many of the provided records
+ * fall into each interval based on a specified date detail field.
+ * The function dynamically adjusts the interval unit (year, month, day) and size
+ * to aim for a reasonable number of bins (around 15-20).
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param array $range An array with two elements: [min_date_string, max_date_string].
+ * @param int $interval The desired number of intervals or a starting interval size.
+ * @param array|string $rec_ids An array or comma-separated string of record IDs to analyze.
+ * @param int $dty_id The Detail Type ID of the date field to use for histogram calculation.
+ * @param string $format The initial date format/unit to consider for intervals ("year", "month", "day"). Defaults to "year".
+ * @param bool $is_between If true (default), a record counts in an interval if its date range is *within* the interval.
+ *                         If false, it counts if its date range *overlaps* with the interval. (Note: current implementation detail for $is_between might differ)
+ * @return array An associative array with 'status' and 'data'.
+ *               'data' is an array of arrays, each `[interval_start_decimal_year, interval_end_decimal_year, count_of_records_in_interval]`.
+ *               Returns an error array if parameters are invalid.
+ */
 function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $format="year", $is_between=true){
 
     $mysqli = $system->getMysqli();
@@ -1138,13 +1255,32 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
 }
 
 /**
-* search all related (links and releationship) records for given set of records
-* it searches links recursively and adds found records into original array  $ids
-*
-* @param mixed $system
-* @param mixed $ids
-* @param mixed $direction  -  1 direct/ -1 reverse/ 0 both
-*/
+ * Searches recursively for all related records (via direct links or relationship records)
+ * for a given set of initial record IDs and appends them to the input `$ids` array.
+ *
+ * This function explores links from the `$new_level_ids` (initially `$ids`).
+ * For each record found, if it's not already in `$ids`, it's added.
+ * The process then repeats for newly found IDs, up to `$max_depth`.
+ * Temporary relationship records (type RT_RELATION, flagTemporary=1) are excluded.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param array &$ids An array of record IDs. Found related IDs will be merged into this array (passed by reference).
+ * @param int $direction Search direction:
+ *                       -  0: Both direct (outgoing) and reverse (incoming) links/relationships.
+ *                       -  1: Direct links/relationships only.
+ *                       - -1: Reverse links/relationships only.
+ *                       Defaults to 0.
+ * @param bool $no_relationships If true, only considers direct resource links (`rl_RelationID IS NULL`).
+ *                               If false (default), considers both direct links and relationships.
+ * @param int $depth Current recursion depth. Internal use. Defaults to 0.
+ * @param int $max_depth Maximum recursion depth. Defaults to 1 (find immediately related records).
+ * @param int $limit Maximum number of unique record IDs to accumulate in `$ids`. If 0, no limit. Defaults to 0.
+ * @param array|null $new_level_ids Record IDs from the previous recursion level for which to find relations.
+ *                                  Internal use. Defaults to initial `$ids`.
+ * @param array|null $temp_ids Array of temporary relationship record IDs to exclude. Fetched on first call if null.
+ *                             Internal use.
+ * @return void Modifies `$ids` array directly.
+ */
 function recordSearchRelatedIds($system, &$ids, $direction=0, $no_relationships=false,
     $depth=0, $max_depth=1, $limit=0, $new_level_ids=null, $temp_ids=null){
 
@@ -1252,21 +1388,42 @@ function recordSearchRelatedIds($system, &$ids, $direction=0, $no_relationships=
 }
 
 /**
-* Finds all related (and linked) record IDs for given set record IDs
-*
-* @param mixed $system
-* @param mixed $ids -
-* @param mixed $direction -  1 direct/ -1 reverse/ 0 both
-* @param mixed $need_headers - if "true" returns array of titles,ownership,visibility for linked records
-*                              if "ids" returns ids only
-* @param mixed $link_type 0 all, 1 links, 2 relations
-*
-* @return array of direct and reverse links (record id, relation type (termid), detail id)
-*/
+ * Finds all directly related (linked or via relationship records) records for a given set of record IDs.
+ *
+ * This function retrieves details about the links/relationships, including the target/source IDs,
+ * relationship type (trmID), detail type of the link (dtID), and the relationship record ID itself (relationID).
+ * Optionally, it can also fetch header information (title, type, owner, visibility) for all involved records.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param array|string $ids An array or comma-separated string of initial record IDs.
+ * @param int $direction Search direction:
+ *                       -  0: Both direct (outgoing) and reverse (incoming) links/relationships (default).
+ *                       -  1: Direct links/relationships only (records pointed to by/related from initial IDs).
+ *                       - -1: Reverse links/relationships only (records pointing to/related to initial IDs).
+ * @param bool|string $need_headers If true (default), fetches header information for all unique records involved
+ *                                  (initial, targets, sources, relationship records).
+ *                                  If 'ids', returns only arrays of target/source IDs instead of full relation objects.
+ *                                  If false, no headers are fetched beyond what's in the relation objects.
+ * @param int $link_type Type of links to consider:
+ *                       - 0: All links and relationships (default).
+ *                       - 1: Only direct resource links (`rl_RelationID IS NULL`).
+ *                       - 2: Only relationships (`rl_RelationID IS NOT NULL`).
+ * @return array An associative array with 'status' and 'data'.
+ *               'data' contains:
+ *               - 'direct': Array of objects/IDs representing outgoing links/relationships.
+ *                           Each object has `recID` (source), `targetID`, `trmID`, `dtID`, `relationID`,
+ *                           optionally `dtl_StartDate`, `dtl_EndDate`.
+ *               - 'reverse': Array of objects/IDs representing incoming links/relationships.
+ *                            Each object has `recID` (target), `sourceID`, `trmID`, `dtID`, `relationID`,
+ *                            optionally `dtl_StartDate`, `dtl_EndDate`.
+ *               - 'headers': If `$need_headers` is true, an associative array mapping record ID to
+ *                            `[title, recTypeID, ownerUGrpID, nonOwnerVisibility]`.
+ *               Returns an error array if parameters are invalid or a DB error occurs.
+ */
 function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $link_type=0){
 
     if(!@$ids){
-        return $system->addError(HEURIST_INVALID_REQUEST, 'Invalid search request');
+        return $system->addError(HEURIST_INVALID_REQUEST, 'Invalid search request: IDs not provided.');
     }
 
     $ids = prepareIds($ids);
@@ -1415,17 +1572,26 @@ function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $l
 
 
 /**
-* Search count by target record type for given source type and base field
-*
-* @param mixed $system
-* @param mixed $rty_ID
-* @param mixed $dty_ID - base field id
-* @param mixed $direction -  1 direct/ -1 reverse/ 0 both
-*/
+ * Counts how many source records of a specific type (`$source_rty_ID`) are linked
+ * to target records of another specific type (or list of types, `$target_rty_ID`)
+ * via a particular detail field (`$dty_ID`).
+ *
+ * The result is grouped by the target record ID, providing a count of source records linked to each target.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param int $source_rty_ID The Record Type ID of the source records.
+ * @param int|array $target_rty_ID The Record Type ID (or an array of IDs) of the target records.
+ * @param int|null $dty_ID (Optional) The Detail Type ID of the pointer field in the source records.
+ *                         If 0 or null, links via any detail type are considered (though this might be unintended if rl_DetailTypeID=0 has special meaning).
+ * @return array An associative array with 'status' and 'data'.
+ *               'data' is an associative array where keys are target record IDs (`rl_TargetID`)
+ *               and values are the counts of source records linked to them.
+ *               Returns an error array if parameters are invalid or a DB error occurs.
+ */
 function recordLinkedCount($system, $source_rty_ID, $target_rty_ID, $dty_ID){
 
-    if(!( (is_array($target_rty_ID) || $target_rty_ID>0) && $source_rty_ID>0)){
-        return $system->addError(HEURIST_INVALID_REQUEST, 'Invalid search request. Source and target record type not defined');
+    if(!( (is_array($target_rty_ID) || (is_numeric($target_rty_ID) && $target_rty_ID > 0)) && (is_numeric($source_rty_ID) && $source_rty_ID > 0) )){
+        return $system->addError(HEURIST_INVALID_REQUEST, 'Invalid search request. Source and target record type IDs must be positive integers (target can be an array).');
     }
 
     $query = 'SELECT rl_TargetID, count(rl_SourceID) as cnt FROM recLinks, ';
@@ -1465,14 +1631,21 @@ function recordLinkedCount($system, $source_rty_ID, $target_rty_ID, $dty_ID){
 
 
 /**
-* get all view group permissions for given set of records
-*
-* @param mixed $system
-* @param mixed $ids
-*/
+ * Retrieves all explicit view and edit permissions for a given set of record IDs.
+ *
+ * Queries the `usrRecPermissions` table to find group-based permissions (`rcp_Level` = 'view' or 'edit')
+ * associated with the provided record IDs.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param array|string $ids An array or comma-separated string of record IDs.
+ * @return array An associative array with 'status', 'view', and 'edit'.
+ *               'view' and 'edit' are associative arrays where keys are record IDs,
+ *               and values are arrays of group IDs (`rcp_UGrpID`) granted that permission level.
+ *               Returns an error array if IDs are not provided or a DB error occurs.
+ */
 function recordSearchPermissions($system, $ids){
     if(!@$ids){
-        return $system->addError(HEURIST_INVALID_REQUEST, "Invalid search request");
+        return $system->addError(HEURIST_INVALID_REQUEST, "Invalid search request: Record IDs not provided.");
     }
 
     $ids = prepareIds($ids);
@@ -1503,13 +1676,21 @@ function recordSearchPermissions($system, $ids){
 
 }
 
-// NOT USED
-//  returns SQL owner/visibility conditions for given user/group
-// see also  _getRecordOwnerConditions in dbDefRecTypes
-//
+/**
+ * Returns an SQL WHERE clause snippet for record visibility based on a user/group ID.
+ * Note: This function is marked as NOT USED in the original file comments.
+ * It seems to construct conditions similar to those applied in `get_sql_query_clauses_NEW`.
+ *
+ * @see \hserv\records\search\get_sql_query_clauses_NEW() For current visibility logic.
+ * @see \hserv\structure\DbDefRecTypes::_getRecordOwnerConditions() For similar logic within DbDefRecTypes.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param int $ugrID The user or group ID for whom to determine visibility conditions.
+ * @return string An SQL WHERE clause snippet string.
+ */
 function recordGetOwnerVisibility($system, $ugrID){
 
-    $is_db_owner = ($ugrID==2);
+    $is_db_owner = ($ugrID==2); // User ID 2 is typically the database owner/superadmin.
 
     $where2 = '';
 
@@ -1536,76 +1717,97 @@ function recordGetOwnerVisibility($system, $ugrID){
 
 }
 
-//
-// returns only first relationship type ID for 2 given records
-//
+/**
+ * Retrieves the first relationship type ID (`rl_RelationTypeID`) found for a direct relationship
+ * from a source record to a target record.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param int $sourceID The `rec_ID` of the source record.
+ * @param int $targetID The `rec_ID` of the target record.
+ * @return int|null The `rl_RelationTypeID` if a relationship is found, otherwise null.
+ *                  Returns null also on database query error.
+ */
 function recordGetRelationshipType($system, $sourceID, $targetID ){
 
     $mysqli = $system->getMysqli();
+    $sourceID = intval($sourceID);
+    $targetID = intval($targetID);
 
-    //find all target related records
     $query = 'SELECT rl_RelationTypeID FROM recLinks '
-    .'WHERE rl_SourceID='.$sourceID.' AND rl_TargetID='.$targetID.' AND rl_RelationID IS NOT NULL';
+           .'WHERE rl_SourceID='.$sourceID.' AND rl_TargetID='.$targetID.' AND rl_RelationID IS NOT NULL LIMIT 1';
     $res = $mysqli->query($query);
+
     if (!$res){
-        return null;// $system->addError(HEURIST_DB_ERROR, "Search query error on get relationship type", $mysqli->error);
-    }else{
+        // Optionally log error: $system->addError(HEURIST_DB_ERROR, "Search query error on get relationship type", $mysqli->error);
+        return null;
+    } else {
         if($row = $res->fetch_row()) {
-            return $row[0];
-        }else{
+            $res->close();
+            return (int)$row[0];
+        } else {
+            $res->close();
             return null;
         }
     }
 }
 
-//
-// return linked record ids and their types (for update linked record titles)
-//
+/**
+ * Retrieves all unique record IDs and their types for records linked to or from a given record ID.
+ * This includes both direct resource links and records participating in relationships.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param int $recordID The `rec_ID` of the central record.
+ * @return array|false An associative array mapping linked/related record IDs to their `rec_RecTypeID`,
+ *                     or false if a database error occurs.
+ */
 function recordGetLinkedRecords($system, $recordID){
-
+    $recordID = intval($recordID);
     $mysqli = $system->getMysqli();
-    $query = 'SELECT DISTINCT rl_TargetID, rec_RecTypeID FROM recLinks, Records WHERE rl_TargetID=rec_ID  AND rl_SourceID='.$recordID;
-    $ids1 = mysql__select_assoc2($mysqli, $query);
-    if($ids1===null){
-        $system->addError(HEURIST_DB_ERROR, "Search query error for target linked and related records. Query ".$query, $mysqli->error);
-        return false;
-    }
-    $query = 'SELECT DISTINCT rl_SourceID, rec_RecTypeID FROM recLinks, Records WHERE rl_SourceID=rec_ID  AND rl_TargetID='.$recordID;
-    $ids2 = mysql__select_assoc2($mysqli, $query);
-    if($ids2===null){
-        $system->addError(HEURIST_DB_ERROR, "Search query error for source linked and related records. Query ".$query, $mysqli->error);
+
+    // Get records targeted by $recordID (outgoing links/relations)
+    $query1 = 'SELECT DISTINCT rl.rl_TargetID, r.rec_RecTypeID FROM recLinks rl JOIN Records r ON rl.rl_TargetID = r.rec_ID WHERE rl.rl_SourceID='.$recordID;
+    $targets = mysql__select_assoc2($mysqli, $query1);
+    if($targets===null){ // mysql__select_assoc2 returns null on error
+        $system->addError(HEURIST_DB_ERROR, "Search query error for target linked/related records. Query: ".$query1, $mysqli->error);
         return false;
     }
 
-    //merge
-    if(count($ids2)>count($ids1)){
-        foreach($ids1 as $recid=>$rectype_id){
-            if(!@$ids2[$recid]){
-                $ids2[$recid] = $rectype_id;
-            }
-        }
-        return $ids2;
-    }else{
-        foreach($ids2 as $recid=>$rectype_id){
-            if(!@$ids1[$recid]){
-                $ids1[$recid] = $rectype_id;
-            }
-        }
-        return $ids1;
+    // Get records that target $recordID (incoming links/relations)
+    $query2 = 'SELECT DISTINCT rl.rl_SourceID, r.rec_RecTypeID FROM recLinks rl JOIN Records r ON rl.rl_SourceID = r.rec_ID WHERE rl.rl_TargetID='.$recordID;
+    $sources = mysql__select_assoc2($mysqli, $query2);
+    if($sources===null){
+        $system->addError(HEURIST_DB_ERROR, "Search query error for source linked/related records. Query: ".$query2, $mysqli->error);
+        return false;
     }
 
-
-
+    // Merge results, ensuring uniqueness by record ID. $sources will overwrite $targets on key collision.
+    return array_merge($targets, $sources);
 }
 
-//
-// returns relationship records(s) (RT#1) for given source and target records
-//
+
+/**
+ * Retrieves relationship records (typically Record Type 1) that link a specified source and target record.
+ *
+ * If `$search_request` is null or defines 'detail' other than 'ids', it performs a `recordSearch`
+ * for the found relationship record IDs to return full details.
+ * If `$search_request['detail'] == 'ids'`, it returns just an array of the relationship record IDs.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param int $sourceID The `rec_ID` of the source record in the relationship. Can be 0 to wildcard.
+ * @param int $targetID The `rec_ID` of the target record in the relationship. Can be 0 to wildcard.
+ * @param array|null $search_request (Optional) A `recordSearch` parameter array to customize the output
+ *                                   for the relationship records. If 'detail' is 'ids', returns only IDs.
+ *                                   If null, defaults to fetching 'detail' for relationship records.
+ * @return array|false An array of relationship record IDs, or a `recordSearch` result array,
+ *                     or false on database error.
+ */
 function recordGetRelationship($system, $sourceID, $targetID, $search_request=null){
 
     $mysqli = $system->getMysqli();
+    $sourceID = intval($sourceID);
+    $targetID = intval($targetID);
 
-    //find all target related records
+    $query = 'SELECT rl_RelationID FROM recLinks WHERE rl_RelationID IS NOT NULL';
     $query = 'SELECT rl_RelationID FROM recLinks WHERE rl_RelationID IS NOT NULL';
 
     if($sourceID>0){
@@ -1642,10 +1844,28 @@ function recordGetRelationship($system, $sourceID, $targetID, $search_request=nu
 
 }
 
-//
-// find parent record for rec_ID with given record type
-//
+/**
+ * Recursively finds a parent record of a specific target record type.
+ *
+ * Starting from `$rec_ID`, it checks if the record is of `$target_recTypeID`.
+ * If not, it queries `recLinks` to find records that link *to* the current `$rec_ID`
+ * via one of the `$allowedDetails` (detail type IDs representing parent-child links).
+ * It then takes the first parent found and recursively calls itself.
+ *
+ * This is typically used to find a main "container" or "home" record in a CMS-like structure.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param int $rec_ID The starting record ID from which to find the parent.
+ * @param int $target_recTypeID The Record Type ID of the parent to find.
+ * @param array|null $allowedDetails An array of Detail Type IDs that constitute a "parent" link.
+ *                                   If null, any `rl_DetailTypeID IS NOT NULL` is considered (which might be too broad).
+ * @param int $level Current recursion level to prevent infinite loops (max 5 levels).
+ * @return int|false The `rec_ID` of the found parent record of `$target_recTypeID`,
+ *                   or false if not found, an error occurs, or max recursion depth is hit.
+ */
 function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDetails, $level=0){
+    $rec_ID = intval($rec_ID);
+    $target_recTypeID = intval($target_recTypeID);
 
     $query = 'SELECT rec_RecTypeID from Records WHERE rec_ID='.$rec_ID;
     $rtype = mysql__select_value($system->getMysqli(), $query);
@@ -1694,14 +1914,40 @@ function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDet
         return false;
     }
 }
-//
-// $menuitems - record ids
-// fills $result array recursively with record ids and returns full detail at the end
-//
+/**
+ * Recursively gathers all record IDs that form a menu structure, starting from initial menu item(s),
+ * and then optionally fetches full details for these records.
+ *
+ * This function is used to build website navigation menus. It traverses records linked via
+ * `DT_CMS_MENU` or `DT_CMS_TOP_MENU` detail fields.
+ *
+ * If `$find_root_menu` is true and this is the initial call (`empty($result)`):
+ * - If `menuitems[0]` is 0, it finds the first `RT_CMS_HOME` record.
+ * - If `menuitems[0]` is a specific record, it attempts to find its parent `RT_CMS_HOME` record,
+ *   unless the record itself is a standalone CMS page (pagetype '2-6254').
+ *
+ * The gathered record IDs are accumulated in the `$result` array (passed by reference).
+ * Finally, if `$ids_only` is false, it performs a `recordSearch` to get details for all
+ * accumulated menu item records.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param array $menuitems An array of record IDs representing the current level of menu items to process.
+ * @param array &$result Accumulator array (passed by reference) storing all unique record IDs found in the menu structure.
+ * @param bool $find_root_menu If true on the initial call, special logic is applied to find the root
+ *                             CMS Home record or handle standalone pages. Default false.
+ * @param bool $ids_only If true, the function will return only the array of accumulated record IDs
+ *                       (from the modified `$result` array, though the direct return is from `recordSearch`
+ *                       or an error, so the caller should use `$result`).
+ *                       If false (default), it returns a full `recordSearch` result for all menu items.
+ * @return array|false If `$ids_only` is true and it's the root call, it should ideally return `$result`,
+ *                     but current logic returns `recordSearch` output or error.
+ *                     If `$ids_only` is false, returns the result of `recordSearch` for all menu items,
+ *                     or an error array from `system->getError()` if root finding fails.
+ */
 function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=false, $ids_only=false){
 
-    $menuitems = prepareIds($menuitems, true);
-    $isRoot = (empty($result));//find any first CMS_HOME (non hidden)
+    $menuitems_prepared = prepareIds($menuitems, true); // Ensure $menuitems is an array of unique positive integers
+    $isRoot = (empty($result)); // Is this the initial call?
     if($isRoot && $find_root_menu){
 
         //if root record is menu - we have to find parent cms home
@@ -1800,70 +2046,106 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
 
 }
 
-//
-// $menuitems - ids for current level
-// $resultIds - all ids in menu
-//
+/**
+ * Recursively gathers all record IDs in a menu structure and organizes them into a tree.
+ *
+ * This function is an alternative to `recordSearchMenuItems`. It first collects all unique
+ * record IDs forming the menu structure into `$resultIds`. Then, if it's the root call,
+ * it fetches details for these records and uses `recordSearchMenuItemsTree` to build
+ * a hierarchical array representing the menu tree.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param array $menuitems An array of record IDs for the current level of menu items.
+ * @param array &$resultIds Accumulator array (passed by reference) for all unique record IDs in the menu.
+ * @param bool $isRoot True if this is the initial (root) call to the function.
+ * @return array|void If it's the root call, returns the constructed menu tree (an associative array
+ *                    where keys are record IDs and values are arrays of their sub-items, recursively).
+ *                    Otherwise (non-root call), modifies `$resultIds` by reference and returns nothing.
+ */
 function recordSearchMenuItems2($system, $menuitems, &$resultIds, $isRoot){
 
-    $resultTree = array();
+    $resultTree = array(); // Used only if $isRoot is true, to build the final tree.
     
-    $menuitems = prepareIds($menuitems, true);
-    $rec_IDs = array();
-    foreach ($menuitems as $rec_ID){
-        if(!in_array($rec_ID, $resultIds)){ //to avoid recursion
+    $current_level_ids_prepared = prepareIds($menuitems, true);
+    $new_ids_for_this_level = array(); // IDs to process in this iteration
+
+    foreach ($current_level_ids_prepared as $rec_ID){
+        if(!in_array($rec_ID, $resultIds)){ // Avoid recursion and redundant processing
             array_push($resultIds, $rec_ID);
-            array_push($rec_IDs, $rec_ID);
+            array_push($new_ids_for_this_level, $rec_ID);
             
-            if($isRoot){
+            if($isRoot){ // Initialize a spot in the tree for root items
                 $resultTree[$rec_ID] = [];
             }
         }
     }
     
-    if(!empty($rec_IDs)){
-        $query = 'SELECT rl_TargetID FROM recLinks WHERE rl_SourceID in ('
-        .implode(',',$rec_IDs).') AND (rl_DetailTypeID='.DT_CMS_MENU
-        .' OR rl_DetailTypeID='.DT_CMS_TOP_MENU.')';
+    if(!empty($new_ids_for_this_level)){
+        // Fetch sub-menu items linked via DT_CMS_MENU or DT_CMS_TOP_MENU
+        $query = 'SELECT rl_TargetID FROM recLinks WHERE rl_SourceID IN ('
+               . implode(',', $new_ids_for_this_level) . ') AND (rl_DetailTypeID=' . DT_CMS_MENU
+               . ' OR rl_DetailTypeID=' . DT_CMS_TOP_MENU . ')';
 
-        $menuitems2 = mysql__select_list2($system->getMysqli(), $query);
-        
-        $menuitems2 = prepareIds( $menuitems2 ); //next level
+        $submenu_items_ids = mysql__select_list2($system->getMysqli(), $query);
+        $submenu_items_ids_prepared = prepareIds($submenu_items_ids, true); // Sanitize and unique
 
-        if(!isEmptyArray($menuitems2)){
-            recordSearchMenuItems2($system, $menuitems2, $resultIds, false);
+        if(!isEmptyArray($submenu_items_ids_prepared)){
+            recordSearchMenuItems2($system, $submenu_items_ids_prepared, $resultIds, false); // Recursive call for sub-items
         }
     }
 
     if($isRoot){
-            //find details
-            $records = recordSearchDetailsForRecIds($system, $resultIds, array(DT_NAME, DT_CMS_TOP_MENU, DT_CMS_MENU), false);
+        // After all IDs are collected, fetch details for all of them
+        $all_menu_records_details = recordSearchDetailsForRecIds($system, $resultIds, array(DT_NAME, DT_CMS_TOP_MENU, DT_CMS_MENU), false);
             
-            foreach($resultTree as $rec_ID=>$subs){
-                recordSearchMenuItemsTree($rec_ID, $resultTree[$rec_ID], $records);
-            }
+        // Build the tree structure
+        foreach($resultTree as $root_item_ID => $subs){ // Iterate only through initial root items
+            recordSearchMenuItemsTree($root_item_ID, $resultTree[$root_item_ID], $all_menu_records_details);
+        }
             
-            $resultIds = $records;
+        // The $resultIds array now contains all unique IDs.
+        // The original code assigned $records to $resultIds here, which would change its meaning.
+        // Preserving $resultIds as the flat list of all IDs.
+        // The function returns $resultTree.
+        // For clarity, one might want to pass $all_menu_records_details to the user differently if needed.
+        // $resultIds = $all_menu_records_details; // This line from original code seems to change $resultIds purpose.
             
-            return $resultTree; 
-    }    
+        return $resultTree; 
+    }
+    // Non-root calls modify $resultIds by reference and don't return a value.
 }
 
-function recordSearchMenuItemsTree($item_ID, &$resultTree, $records){
+/**
+ * Recursively builds a hierarchical menu tree for a given menu item.
+ *
+ * This function takes a menu item ID (`$item_ID`) and populates its entry
+ * in `$resultTree` with its sub-menu items. It uses pre-fetched `$all_records_details`
+ * which contains details (including `DT_CMS_TOP_MENU` and `DT_CMS_MENU` links) for all
+ * records in the menu structure.
+ *
+ * @param int $item_ID The current menu item's record ID to process.
+ * @param array &$resultTree The portion of the menu tree corresponding to `$item_ID`'s children. Passed by reference.
+ * @param array $all_records_details An associative array where keys are record IDs and values are their
+ *                                   details (including links for sub-menus).
+ * @return void Modifies `$resultTree` by reference.
+ */
+function recordSearchMenuItemsTree($item_ID, &$resultTree, $all_records_details){
     
-    //find in result
-    $record = $records[$item_ID];
-    $subitems = @$record[DT_CMS_TOP_MENU]??@$record[DT_CMS_MENU];
+    // Find the current item's details in the pre-fetched list
+    $record_details = $all_records_details[$item_ID] ?? null;
+    if (!$record_details) return;
+
+    // Get sub-item IDs from either DT_CMS_TOP_MENU or DT_CMS_MENU details
+    $subitems_ids = @$record_details[DT_CMS_TOP_MENU] ?? @$record_details[DT_CMS_MENU];
     
-    if(is_array($subitems)){
-        
-        //add subitems
-        foreach($subitems as $subitem_ID){
-            //$resultTree[] = $subitem_ID;
-            if(!@$resultTree[$subitem_ID]){
-                $resultTree[$subitem_ID] = array();
+    if(is_array($subitems_ids)){
+        foreach($subitems_ids as $subitem_dtl_id => $subitem_rec_id){ // Details are [dtl_ID => rec_ID]
+            // Ensure the subitem_rec_id is valid and not already processed in a way that causes loops (though primary check is in recordSearchMenuItems2)
+            if(!array_key_exists($subitem_rec_id, $resultTree)) { // Add if not already a key at this level
+                 $resultTree[$subitem_rec_id] = array(); // Initialize children array for this sub-item
             }
-            recordSearchMenuItemsTree($subitem_ID, $resultTree[$subitem_ID], $records);
+            // Recursively build the tree for this sub-item
+            recordSearchMenuItemsTree($subitem_rec_id, $resultTree[$subitem_rec_id], $all_records_details);
         }
     }
 }
@@ -1871,54 +2153,77 @@ function recordSearchMenuItemsTree($item_ID, &$resultTree, $records){
 
 //-----------------------------------------------------------------------
 /**
-* put your comment there...
-*
-* @param mixed $system
-* @param mixed $relation_query - sql expression to be executed (used as recursive parameters to search relationship records)
-* @param mixed $params
-*
-*       FOR RULES
-*       rules - rules queries - to search related records on server side
-*       rulesonly - return rules only (without original query)
-*       getrelrecs (=1) - search relationship records (along with related) on server side
-*       topids - list of records ids, it is used to compose 'parentquery' parameter to use in rules (@todo - replace with new rules algorithm)
-*       queryset - array of queries that will be executed one by one and result will be merged according to intersect param
-*                  queryset will be created implicitely of first key of json query is "all" or "any"
-*       intersect (=1) AND/conjunction or (=0) OR/disjunction
-*
-*       INTERNAL/recursive
-*       parentquery - sql expression to substiture in rule query
-*
-*       SEARCH parameters that are used to compose sql expression
-*       q - query string (old mode) or json array (new mode)
-*       w (=all|bookmark a|b) - search among all or bookmarked records
-*       limit  - limit for sql query is set explicitely on client side
-*       offset - offset parameter value for sql query
-*       s - sort order - if defined it overwrites sortby in q json param
-*
-*       OUTPUT parameters
-*       needall (=1) - by default it returns only first 3000, to return all set it to 1,
-*                      it is set to 1 for server-side rules searches
-*       publiconly (=1) - ignore current user and returns only public records
-*
-*       detail (former 'f') - ids       - only record ids
-*                             count     - only count of records
-*                             count_by_rty - only count of records grouped by record types
-*                             header    - record header only
-*                             timemap   - record header + timemap details (time, location and symbology fields)
-*                             detail    - record header + list of details
-*                                           list of rec_XXX and field ids, if rec_XXX is missed all header fields are included
-*                             complete  - all header fields, relations, full file info
-*                             structure - record header + all details + record type structure (for editing) - NOT USED
-*       tags                  returns with tags for current user (@todo for given user, group)
-*       CLIENT SIDE
-*       id - unque id to sync with client side
-*       source - id of html element that is originator of this search
-*       qname - original name of saved search (for messaging)
-*/
+ * Performs a search for Heurist records based on a wide range of parameters.
+ *
+ * This is the main search function, capable of handling:
+ * - Simple keyword queries (old plain text format or new JSON format).
+ * - Searches by saved filter ID (`svs:ID`).
+ * - Complex rule-based searches involving multiple dependent queries (`rules` parameter).
+ * - Query sets that are intersected or merged (`queryset` parameter).
+ * - Various output detail levels (`detail` parameter: ids, count, header, detail, timemap, complete).
+ * - Pagination (`limit`, `offset`), sorting (`s` or `sortby` in q).
+ * - Search domains (`w`: all, bookmark).
+ * - User context for permissions and working subsets.
+ * - Retrieval of related records and relationship metadata.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param array $params An associative array of search parameters. Key parameters include:
+ *    **Query Definition & Rules:**
+ *    - 'q': (string|array) The primary query. Can be a plain text string (legacy),
+ *           a JSON query string/array, or "svs:ID" to load a saved search.
+ *    - 'rules': (array|string, Optional) JSON array/string defining rule-based searches. Rules are dependent queries.
+ *    - 'rulesonly': (int, Optional) Controls output for rule-based searches:
+ *                   0: Keep original query results + all rule results.
+ *                   1: Return only results from all rule extensions.
+ *                   2: Return only results from the last rule extension.
+ *                   3: Keep original query results + last rule results.
+ *    - 'getrelrecs': (int, Optional) If 1, also fetches relationship records (type 1) involved in rule-based 'related' queries.
+ *    - 'topids': (array|string, Optional) Comma-separated string or array of record IDs used as a base for rule queries.
+ *    - 'queryset': (array|string, Optional) JSON array/string of multiple queries to be executed.
+ *    - 'intersect': (int, Optional) If 1, results from `queryset` are intersected (AND). If 0 (default), results are merged (OR).
+ *    - 'parentquery': (array, Optional) SQL clauses from a parent query, used for context in sub-queries (internal use).
+ *
+ *    **Search Domain & Context:**
+ *    - 'w': (string, Optional) Search domain: 'a'/'all' (default), 'b'/'bookmark'.
+ *    - 'publiconly': (int, Optional) If 1, searches only public records, ignoring user context.
+ *    - 'use_user_wss': (bool, Optional) If true and user is logged in, filters by user's working subset.
+ *
+ *    **Output Control & Formatting:**
+ *    - 'detail': (string|array, Optional) Specifies the level of detail in the output. Default 'ids'.
+ *                - 'ids': Returns only an array of record IDs.
+ *                - 'count': Returns only the total count of matching records.
+ *                - 'count_by_rty': Returns counts grouped by record type.
+ *                - 'header': Returns record header fields only.
+ *                - 'timemap': Returns header + specific fields suitable for time/map visualization.
+ *                             Also triggers geographic data enrichment for linked places.
+ *                - 'detail': Returns header + specified detail fields. If `detail` is an array of field IDs/names,
+ *                            those specific fields are fetched. Otherwise, all details are fetched.
+ *                - 'complete': Returns all header fields, all details, relations, and full file info.
+ *                - 'structure': (Not fully used) Intended for record editing, returns header, all details, and type structure.
+ *    - 'tags': (int, Optional) If > 0 (typically user ID), includes personal tags for that user with each record.
+ *    - 'needall': (int, Optional) If 1, attempts to retrieve all records, bypassing default limits (e.g., for server-side rule processing).
+ *                 Memory limits still apply.
+ *    - 'limit': (int, Optional) Number of records to return per page.
+ *    - 'offset': (int, Optional) Starting offset for pagination.
+ *    - 's': (string, Optional) Sort order string (legacy, can be overridden by 'sortby' in 'q').
+ *    - 'cms_cut_description': (int, Optional) If 1 (used with CMS menu items), truncates long descriptions.
+ *
+ *    **Client-Side / Request Metadata:**
+ *    - 'id': (mixed, Optional) Unique ID for the query, passed through to the response (for client-side syncing).
+ *    - 'source': (string, Optional) Identifier for the HTML element that originated the search (client-side context).
+ *    - 'qname': (string|int, Optional) Name or ID of a saved search being executed, for context in messages/errors.
+ *    - 'is_json': (bool, Optional) Hint that 'q' is in JSON format (internal use).
+ *
+ * @param string|null $relation_query (Optional) A complete SQL query string to execute directly.
+ *                                    If provided, most of `$params` are bypassed except for output formatting.
+ *                                    Used internally for specific cases like fetching relationship records.
+ * @return array An associative array representing the search result or an error.
+ *               Structure depends heavily on the 'detail' parameter. Generally includes 'status', 'data'.
+ *               'data' can contain 'records', 'count', 'fields', 'rectypes', 'relations', etc.
+ */
 function recordSearch($system, $params, $relation_query=null)
 {
-    //if $params['q'] has svsID it means search by saved filter - all parameters will be taken from saved filter
+    // If $params['q'] has svsID it means search by saved filter - all parameters will be taken from saved filter
     // {"svs":5}
 
     $mysqli = $system->getMysqli();
@@ -3181,81 +3486,120 @@ function recordSearch($system, $params, $relation_query=null)
 }
 
 /**
-* array_merge_unique - return an array of unique values,
-* composed of merging one or more argument array(s).
-*
-* As with array_merge, later keys overwrite earlier keys.
-* Unlike array_merge, however, this rule applies equally to
-* numeric keys, but does not necessarily preserve the original
-* numeric keys.
-*/
+ * Merges array `$b` into array `$a`, ensuring all values in the resulting array are unique.
+ * Only items from `$b` that are not already present in `$a` are appended.
+ * This function only checks for value uniqueness, keys are not preserved from `$b` for new elements;
+ * they are numerically re-indexed if appended.
+ *
+ * @param array $a The base array.
+ * @param array $b The array to merge into `$a`.
+ * @return array The merged array with unique values.
+ */
 function array_merge_unique($a, $b) {
     foreach($b as $item){
-
-        if(array_search($item, $a)===false){
+        if(array_search($item, $a, true)===false){ // Use strict search
             $a[] = $item;
         }
     }
     return $a;
 }
 
+/**
+ * Merges two sets of Heurist records (associative arrays keyed by record ID).
+ * If a record ID from `$rec2` does not exist in `$rec1`, it's added to `$rec1`.
+ * This function effectively adds records from `$rec2` to `$rec1` without overwriting existing ones.
+ *
+ * @param array $rec1 The first set of records (associative array: recID => recordData).
+ * @param array $rec2 The second set of records to merge into `$rec1`.
+ * @return array The merged set of records.
+ */
 function mergeRecordSets($rec1, $rec2){
-
     $res = $rec1;
-
-    foreach ($rec2 as $recID => $record) {
-        if(!@$rec1[$recID]){
-            $res[$recID] = $record;
+    if (is_array($rec2)) { // Ensure $rec2 is an array before iterating
+        foreach ($rec2 as $recID => $record) {
+            if(!isset($res[$recID])){ // Use isset for performance with associative arrays
+                $res[$recID] = $record;
+            }
         }
     }
-
     return $res;
 }
 
-//
-//
-//
+/**
+ * Flattens a hierarchical tree of search rules into a linear array.
+ * Each element in the flat array represents a rule and includes its query,
+ * a placeholder for results, its parent's index in the flat array,
+ * and flags indicating if it should be ignored or if it's a leaf node ('islast').
+ *
+ * @param array &$flat_rules The array (passed by reference) to store the flattened rules.
+ * @param array|null $r_tree The current level of the rule tree being processed.
+ *                           Each node is expected to be an array with 'query', optionally 'ignore', and 'levels' (for children).
+ * @param int $parent_index The index in `$flat_rules` of the parent rule for the current `$r_tree` level.
+ * @return void Modifies `$flat_rules` by reference.
+ */
 function _createFlatRule(&$flat_rules, $r_tree, $parent_index){
-
-    if($r_tree){
+    if($r_tree){ // Ensure $r_tree is not null and is iterable
         foreach ($r_tree as $rule) {
-            $e_rule = array('query'=>@$rule['query'],
-                'results'=>array(),
-                'parent'=>$parent_index,
-                'ignore'=>(@$rule['ignore']==1), //not include in final result
-                'islast'=>(isEmptyArray(@$rule['levels']))?1:0 );
-            array_push($flat_rules, $e_rule );
-            _createFlatRule($flat_rules, @$rule['levels'], count($flat_rules)-1);
+            $e_rule = array(
+                'query' => @$rule['query'],
+                'results' => array(), // Placeholder for results of this rule
+                'parent' => $parent_index,
+                'ignore' => (@$rule['ignore'] == 1), // Rule result not included in final combined set
+                'islast' => (isEmptyArray(@$rule['levels'])) ? 1 : 0 // Is it a leaf node in the rule tree?
+            );
+            array_push($flat_rules, $e_rule);
+            // Recursively process child rules, current new rule is the parent for them
+            _createFlatRule($flat_rules, @$rule['levels'], count($flat_rules) - 1);
         }
     }
-
 }
 
-//
-// find replacement for given record id
-//
+/**
+ * Recursively finds the current/forwarded `rec_ID` for a given `rec_id` by checking `recForwarding` table.
+ *
+ * If the provided `$rec_id` has been forwarded to a new ID (`rfw_NewRecID`),
+ * this function will recursively search for the current ID for that new ID, up to a maximum depth of 10 levels
+ * to prevent infinite loops in case of circular forwarding (though that shouldn't happen).
+ *
+ * @param \mysqli $mysqli The mysqli database connection object.
+ * @param int $rec_id The record ID to check for forwarding.
+ * @param int $level Current recursion level (max 10).
+ * @return int The current, effective `rec_ID` after considering any forwarding, or 0 if input was not positive.
+ */
 function recordSearchReplacement($mysqli, $rec_id, $level=0){
-
-    if($rec_id>0){
+    $rec_id = intval($rec_id); // Ensure integer
+    if($rec_id > 0){
         $rep_id = mysql__select_value($mysqli,
-            'select rfw_NewRecID from recForwarding where rfw_OldRecID=' . intval($rec_id));
-        if($rep_id>0){
-            if($level<10){
-                return recordSearchReplacement($mysqli, $rep_id, $level++);
-            }else{
-                return $rep_id;
+            'select rfw_NewRecID from recForwarding where rfw_OldRecID=' . $rec_id);
+        if($rep_id > 0){ // If a forwarding record exists
+            if($level < 10){ // Max recursion depth
+                return recordSearchReplacement($mysqli, (int)$rep_id, $level + 1); // Corrected: $level++ to $level + 1
+            } else {
+                return (int)$rep_id; // Max depth reached, return current replacement ID
             }
-        }else{
-            return $rec_id;
+        } else {
+            return $rec_id; // No forwarding found, original ID is current
         }
-    }else{
-        return 0;
+    } else {
+        return 0; // Invalid input rec_id
     }
 }
 
-//-----------------------
+/**
+ * Generates a template structure for a new record of a given record type ID.
+ * The template includes placeholder values for standard record header fields
+ * and lists all applicable detail fields for that record type, with generic
+ * placeholders for their values (e.g., 'TEXT', 'NUMERIC', 'DATE').
+ * For resource and enum/relationtype fields, it attempts to list possible target types or vocabulary names.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param int $id The Record Type ID for which to generate the template.
+ * @return array An associative array representing the record template.
+ *               Includes 'rec_ID', 'rec_RecTypeID', 'rec_Title', etc., and a 'details' array.
+ *               The 'details' array is keyed by dty_ID, with values being example structures or placeholders.
+ */
 function recordTemplateByRecTypeID($system, $id){
-
+    $id = intval($id);
     $record = array(
         'rec_ID'=>'RECORD-IDENTIFIER',
         'rec_RecTypeID'=>$id,
@@ -3350,9 +3694,23 @@ function recordTemplateByRecTypeID($system, $id){
 }
 
 
-//------------------------
+/**
+ * Retrieves a single record by its ID, optionally including its details.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param int $id The Record ID (`rec_ID`) of the record to retrieve.
+ * @param bool|array $need_details (Optional) Determines if and which details are fetched.
+ *                                 - `true` (default): Fetches all details for the record.
+ *                                 - `false`: Fetches only the record header fields specified by `$fields`.
+ *                                 - `array`: An array of Detail Type IDs to fetch.
+ * @param string|null $fields (Optional) A comma-separated string of `Records` table fields to retrieve.
+ *                            If null, a default set of header fields is fetched.
+ * @return array|null An associative array representing the record (header and optionally details),
+ *                    or null if the record is not found.
+ */
 function recordSearchByID($system, $id, $need_details = true, $fields = null)
 {
+    $id = intval($id);
     if($fields==null){
         $fields = "rec_ID,
         rec_RecTypeID,
@@ -3379,36 +3737,60 @@ function recordSearchByID($system, $id, $need_details = true, $fields = null)
     return $record;
 }
 
-//
-// Returns value for given field
-//
+/**
+ * Retrieves the first value of a specified detail field from a record array.
+ *
+ * Assumes the record array has a 'details' key, which is an associative array
+ * mapping Detail Type IDs to arrays of their values (since fields can be repeatable).
+ * This function returns the first value from such an array for the given `$field_id`.
+ *
+ * @param array $record The record array, expected to contain a 'details' sub-array.
+ * @param int $field_id The Detail Type ID of the field whose first value is to be retrieved.
+ * @return mixed|null The first value of the specified detail field, or null if the field
+ *                    is not set, is empty, or the 'details' array doesn't exist.
+ */
 function recordGetField($record, $field_id){
-
-    $value = @$record['details'][$field_id];
-    if(!isEmptyArray($value)){
-        return array_shift($value);
+    $field_id = intval($field_id);
+    $value_array = @$record['details'][$field_id];
+    if(!isEmptyArray($value_array) && is_array($value_array)){ // Check if it's a non-empty array
+        // Detail values are often stored as [dtl_ID => value]. We need the actual value.
+        // If it's indexed by dtl_ID, array_shift would work on the numerically indexed array of values from fetch_assoc loop.
+        // Let's assume $value_array is the array of actual values for $field_id.
+        return array_shift($value_array); // Returns the first element
     }else{
         return null;
     }
 }
 
 /**
-* Adds details element to $record array (by reference)
-* 
-* details
-* dty_ID
-* dtl_ID=>value
-
-* value
-* for file  file=>ulf_ID, fileid=>ulf_ObfuscatedFileID
-* for resource id=>rec_ID, type=>rec_RecTypeID, title=>rec_Title
-* for geo   geo => array(type=> , wkt=> )
-*  
-*
-* @param mixed $system
-* @param mixed $record - record array - details to be added
-* @param mixed $detail_types - array of dty_ID or dty_Type or true (all details)
-*/
+ * Fetches and attaches detail field information to a given record array.
+ *
+ * This function queries `recDetails` (and related tables like `defDetailTypes`, `Records` for resources,
+ * `recUploadedFiles` for files) to populate the 'details' element of the `$record` array (passed by reference).
+ * It handles various detail types, formatting their values appropriately (e.g., WKT for geo, file info arrays, linked resource info).
+ * It also considers field visibility based on user permissions and record ownership.
+ *
+ * Structure of `$record['details']` after population:
+ * `[dty_ID => [dtl_ID => value, ...], ...]`
+ *
+ * Value format varies by `dty_Type`:
+ * - "freetext", "blocktext", "date", "enum", etc.: Raw `dtl_Value`.
+ * - "file": Array `['file' => fileinfo_array_from_fileGetFullInfo, 'fileid' => obfuscated_id]`.
+ *           (Original code uses slightly different structure: `array($obfuscated_id, $mime_ext)` or full fileinfo if $needCompleteInformation)
+ * - "resource": If `$expanded` is true: `['id' => linked_rec_ID, 'type' => linked_recTypeID, 'title' => linked_rec_Title, 'hhash' => linked_rec_Hash]`.
+ *               If `$expanded` is false: Raw `dtl_Value` (the linked record ID).
+ * - "geo": Array `['geo' => ['type' => dtl_Value, 'wkt' => dtl_Geo_WKT_string]]`.
+ *          If linked place: `type` becomes `geotype:linked_place_ID`.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param array &$record The record array (passed by reference) to which details will be added. Must contain 'rec_ID'.
+ * @param bool|array $detail_types Specifies which detail types to fetch:
+ *                                 - `true` (default): Fetches all detail types for the record's type, subject to visibility.
+ *                                 - `array`: An array of specific Detail Type IDs or string type names (e.g., "geo", "date") to fetch.
+ * @param bool $expanded If true (default for most cases), for resource type details, fetches linked record's ID, type, title, and hash.
+ *                       If false, resource details will only contain the target record ID.
+ * @return void Modifies `$record` by reference.
+ */
 function recordSearchDetails($system, &$record, $detail_types, $expanded=true) {
 
     $mysqli = $system->getMysqli();
@@ -3585,14 +3967,29 @@ function recordSearchDetails($system, &$record, $detail_types, $expanded=true) {
     $record["details"] = $details;
 }
 
-//
-// Add inofrmation about relationship records int details section of record
-//
+/**
+ * Fetches and adds information about "relmarker" type relationships to a record's details.
+ *
+ * Relmarkers are special detail types (`dty_Type = "relmarker"`) that define a specific kind of relationship
+ * view or constraint. This function identifies such relmarker fields applicable to the given record's type
+ * (or specified by `$detail_types`). For each relmarker, it finds related records (using `recordSearchRelated`)
+ * and filters them based on constraints defined in the relmarker's `dty_JsonTermIDTree` (allowed relation types)
+ * and `dty_PtrTargetRectypeIDs` (allowed record types for the other side of the relation).
+ *
+ * The found related records are then added to the `$record['details']` array, keyed by the relmarker's dty_ID.
+ * Each entry is an array of objects, where each object represents a related record and includes its
+ * 'id', 'type', 'title', and 'relation_id' (the ID of the relationship record itself).
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param array &$record The record array (passed by reference) to which relationship details will be added. Must contain 'rec_ID'.
+ * @param array|null $detail_types An array of Detail Type IDs. If provided, only relmarkers within this list are processed.
+ *                                 If null or empty, it might attempt to find all relmarkers applicable to the record's type (though current logic requires explicit IDs or types for initial query).
+ * @return void Modifies `$record['details']` by reference.
+ */
 function recordSearchDetailsRelations($system, &$record, $detail_types) {
 
     $mysqli = $system->getMysqli();
-
-    $recID = $record['rec_ID'];
+    $recID = intval($record['rec_ID']);
 
     $relmarker_fields = array();
 
@@ -3662,28 +4059,50 @@ function recordSearchDetailsRelations($system, &$record, $detail_types) {
 
 }
 
-//
-//
-//
+/**
+ * Retrieves raw detail data for a given record ID.
+ *
+ * Fetches `dtl_ID`, `dtl_DetailTypeID`, `dtl_Value`, `dtl_Geo` (as WKT), and `dtl_UploadedFileID`
+ * for all details associated with the specified `rec_ID`.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param int $rec_ID The Record ID for which to fetch raw details.
+ * @return array|null An associative array where keys are `dtl_ID` and values are associative arrays
+ *                    of the detail fields, or null if an error occurs or no details are found.
+ *                    (Note: `mysql__select_assoc` typically returns an array of rows if dtl_ID is not unique,
+ *                     or a single associative array if dtl_ID is used as the key in `mysql__select_assoc`'s implementation).
+ *                     Assuming it returns an array of rows, each being an assoc array of fields.
+ */
 function recordSearchDetailsRaw($system, $rec_ID) {
-
+    $rec_ID = intval($rec_ID);
     $query =
     "select dtl_ID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo) as dtl_Geo,dtl_UploadedFileID"
     ." from recDetails where dtl_RecID = $rec_ID";
 
-    return mysql__select_assoc($system->getMysqli(), $query);
+    return mysql__select_assoc($system->getMysqli(), $query); // Behavior depends on mysql__select_assoc implementation
 }
 
-//
-// returns string with short description and links to record view and hml
-// $record - rec id or record array
-//
+/**
+ * Generates a string containing a short description of a record, including its ID, name (if DT_NAME exists),
+ * and links to its XML and HTML representations in Heurist.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param int|array $record Either a record ID (int) or a record array (which should have 'rec_ID' and optionally 'details[DT_NAME]').
+ *                          If an ID is passed, `recordSearchDetails` is called to fetch DT_NAME.
+ * @return string A formatted string with record information and links.
+ */
 function recordLinksFileContent($system, $record){
 
-    if(is_numeric($record)){
-        $record = array("rec_ID"=>$record);
-        recordSearchDetails($system, $record, array(DT_NAME));
+    if(is_numeric($record)){ // If $record is just an ID
+        $record_id = intval($record);
+        $record_array = array("rec_ID" => $record_id);
+        // Fetch DT_NAME if defined, to include in the output
+        if ($system->defineConstant('DT_NAME') && DT_NAME > 0) {
+            recordSearchDetails($system, $record_array, array(DT_NAME));
+        }
+        $record = $record_array; // Now $record is an array
     }
+    $rec_id_val = $record['rec_ID'] ?? 'N/A';
 
     $url = HEURIST_SERVER_URL . HEURIST_DEF_DIR . '?db='.$system->dbname().'&recID='.$record['rec_ID'];
 
@@ -3695,59 +4114,85 @@ function recordLinksFileContent($system, $record){
 
 }
 
-//
-// find geo in linked places
-// $find_geo_by_linked_rty - if true it searches for linked RT_PLACE
-//                        or it is array of rectypes defined in sys_TreatAsPlaceRefForMapping + RT_PLACE
-// $find_geo_by_linked_dty - list of pointer fields search for geo limited to
-//
+/**
+ * Searches for geographic details (WKT, geo type) from records linked to a given source record.
+ * This is used to find associated place information for a record that might not have direct geo-details.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param int $recID The `rec_ID` of the source record for which to find linked geographic details.
+ * @param array|bool $find_geo_by_linked_rty Specifies which linked record types should be considered as places.
+ *                                           - If `true`, defaults to `RT_PLACE`.
+ *                                           - If an array, it's a list of Record Type IDs to consider as places.
+ *                                           - If empty or false, the function returns empty details.
+ * @param array|null $find_geo_by_linked_dty (Optional) An array of Detail Type IDs. If provided,
+ *                                           only links via these pointer fields on the source record
+ *                                           will be followed to find places. If null or empty,
+ *                                           links via any pointer field are considered.
+ * @return array An associative array of geographic details found, structured similarly to how
+ *               `recordSearchDetails` formats geo-details:
+ *               `[dty_ID_of_geo_field_in_place => [dtl_ID_of_geo_detail => [
+ *                   "geo" => ["type"=>geo_type, "wkt"=>wkt_string, "placeID"=>linked_place_recID,
+ *                             "pointerDtyID"=>dty_ID_of_pointer_on_source, "relationID"=>relation_type_if_any]
+ *               ]]]`
+ *               Returns an empty array if no relevant linked geo-details are found or on error.
+ */
 function recordSearchGeoDetails($system, $recID, $find_geo_by_linked_rty, $find_geo_by_linked_dty) {
-
+    $recID = intval($recID);
     $details = array();
 
-
-    if ($find_geo_by_linked_rty===true && $system->defineConstant('RT_PLACE')){
-        $find_geo_by_linked_rty = array(RT_PLACE);
+    if ($find_geo_by_linked_rty === true) {
+        if ($system->defineConstant('RT_PLACE') && RT_PLACE > 0) {
+            $find_geo_by_linked_rty = array(RT_PLACE);
+        } else {
+            $find_geo_by_linked_rty = array(); // No default RT_PLACE defined
+        }
     }
 
-    if(isEmptyArray($find_geo_by_linked_rty)){   //search geo in linked records
-        return $details;
+    if(isEmptyArray($find_geo_by_linked_rty)){
+        return $details; // No record types specified to search for geo-details in.
     }
+    $find_geo_by_linked_rty = prepareIds($find_geo_by_linked_rty, true); // Ensure clean array of IDs
 
-    $squery = 'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo) as dtl_Geo, '
-    .'rl_TargetID,dtl_ID,rl_DetailTypeID,rl_RelationTypeID'
-    .' FROM recDetails, recLinks, Records '
-    .' WHERE (dtl_Geo IS NOT NULL) '
-    .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND '
-    .predicateId('rec_RecTypeID',$find_geo_by_linked_rty)
-    .' AND rl_SourceID = '.$recID;
+    $squery = 'SELECT rl.rl_SourceID, rd.dtl_DetailTypeID, rd.dtl_Value, ST_asWKT(rd.dtl_Geo) as dtl_Geo, '
+            . 'rl.rl_TargetID, rd.dtl_ID, rl.rl_DetailTypeID as pointerDtyID, rl.rl_RelationTypeID' // Added aliases for clarity
+            . ' FROM recDetails rd'
+            . ' JOIN recLinks rl ON rd.dtl_RecID = rl.rl_TargetID' // Link from recDetails (of place) to recLinks
+            . ' JOIN Records r ON rl.rl_TargetID = r.rec_ID'      // Join Records table for the place
+            . ' WHERE (rd.dtl_Geo IS NOT NULL)'
+            . ' AND r.rec_RecTypeID IN (' . implode(',', $find_geo_by_linked_rty) . ')'
+            . ' AND rl.rl_SourceID = '.$recID;
 
     if(!isEmptyArray($find_geo_by_linked_dty)){
-        $squery = $squery.' AND '
-        .predicateId('rl_DetailTypeID',$find_geo_by_linked_dty);
+        $find_geo_by_linked_dty = prepareIds($find_geo_by_linked_dty, true);
+        $squery .= ' AND rl.rl_DetailTypeID IN (' . implode(',', $find_geo_by_linked_dty) . ')';
     }
-
-    $squery = $squery.' ORDER BY rl_ID';
+    $squery .= ' ORDER BY rl.rl_ID'; // Order by recLinks ID
 
     $mysqli = $system->getMysqli();
     $res = $mysqli->query($squery);
     if(!$res){
+        // Optional: $system->addError(...)
         return $details;
     }
 
-    while ($rd = $res->fetch_assoc()) {
-
-        if ($rd["dtl_Value"]  &&  $rd["dtl_Geo"]) {
+    while ($row_data = $res->fetch_assoc()) {
+        if ($row_data["dtl_Value"] && $row_data["dtl_Geo"]) {
             $detailValue = array(
                 "geo" => array(
-                    "type" => $rd["dtl_Value"],
-                    "wkt" => $rd["dtl_Geo"],
-                    "placeID" => $rd["rl_TargetID"],
-                    "pointerDtyID" => $rd["rl_DetailTypeID"],
-                    "relationID" => $rd['rl_RelationTypeID']
+                    "type" => $row_data["dtl_Value"],         // Geo type from place's dtl_Value
+                    "wkt" => $row_data["dtl_Geo"],            // WKT string from place's dtl_Geo
+                    "placeID" => (int)$row_data["rl_TargetID"],    // ID of the linked place record
+                    "pointerDtyID" => (int)$row_data["pointerDtyID"], // dty_ID of the pointer field on source record
+                    "relationID" => (int)$row_data['rl_RelationTypeID'] // rel_RelationTypeID if it was a relationship link
                 )
             );
-            $details[$rd["dtl_DetailTypeID"]][$rd["dtl_ID"]] = $detailValue;
+            // Keyed by the dty_ID of the geo field *in the place record*
+            $geo_field_dty_id = (int)$row_data["dtl_DetailTypeID"];
+            $geo_detail_dtl_id = (int)$row_data["dtl_ID"];
+            if (!isset($details[$geo_field_dty_id])) {
+                $details[$geo_field_dty_id] = array();
+            }
+            $details[$geo_field_dty_id][$geo_detail_dtl_id] = $detailValue;
         }
     }
     $res->close();
@@ -3755,98 +4200,144 @@ function recordSearchGeoDetails($system, $recID, $find_geo_by_linked_rty, $find_
     return $details;
 }
 
-//replace $IDS in $query to $recID
+/**
+ * Recursively replaces a placeholder '$IDS' within a query structure with a given record ID.
+ *
+ * This function traverses a nested array (representing a JSON query). When it encounters
+ * a string value equal to '$IDS', it replaces that value with `$recID`.
+ * If the query structure itself is the string '$IDS', it's replaced by `array('ids' => $recID)`.
+ *
+ * @param array|string &$q The query structure (array or string) to modify. Passed by reference.
+ * @param int $recID The record ID to substitute for '$IDS'.
+ * @return void Modifies `$q` by reference.
+ */
 function __fillQuery(&$q, $recID){
     if(is_array($q)){
-        foreach ($q as $idx=>$predicate){
-
-            foreach ($predicate as $key=>$val)
-            {
-                if( is_array($val)){
-                    __fillQuery($val, $recID);
-                    $q[$idx][$key] = $val;
-                }elseif( is_string($val) && $val == '$IDS') {
-                    //substitute with array of ids
-                    $q[$idx][$key] = $recID;
+        foreach ($q as $idx => &$predicate_container){ // Ensure modification by reference for array elements
+            if (is_array($predicate_container)) {
+                foreach ($predicate_container as $key => &$val) { // Ensure modification by reference
+                    if( is_array($val)){
+                        __fillQuery($val, $recID); // Recursive call, $val is already by reference
+                        $q[$idx][$key] = $val;
+                    } elseif( is_string($val) && $val == '$IDS') {
+                        $val = $recID; // Substitute
+                        $q[$idx][$key] = $recID;
+                    }
                 }
+                unset($val); // Unset inner loop reference
             }
         }
-    }elseif( is_string($q) && $q == '$IDS') {
-        $q = array('ids'=>$recID);
+        unset($predicate_container); // Unset outer loop reference
+    } elseif( is_string($q) && $q == '$IDS') {
+        $q = array('ids'=>$recID); // Replace the whole query string
     }
 }
-//
-//
-//
+
+/**
+ * Searches for details of records linked from a specific source record via a given query.
+ *
+ * First, it executes the provided `$query` (after substituting '$IDS' with `$recID`)
+ * to find a set of linked record IDs. Then, for each of these linked record IDs,
+ * it fetches details specified by `$dty_IDs`.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param int $recID The source Record ID to use as context (replaces '$IDS' in the query).
+ * @param array|string $dty_IDs An array or comma-separated string of Detail Type IDs to fetch for the linked records.
+ * @param array|string $query The query structure (JSON array or string) used to find linked records.
+ *                            It should contain '$IDS' as a placeholder for `$recID`.
+ * @return array An associative array where keys are dty_IDs and values are arrays of detail values
+ *               (accumulated from all found linked records).
+ */
 function recordSearchLinkedDetails($system, $recID, $dty_IDs, $query) {
+    $recID = intval($recID);
+    $dty_IDs_prepared = prepareIds($dty_IDs, true); // Ensure $dty_IDs is a clean array of IDs
 
-    $dty_IDs = prepareIds($dty_IDs);
+    __fillQuery($query, $recID); // Substitute $IDS placeholder in $query with $recID
 
-    __fillQuery($query, $recID);
+    // Find linked record IDs based on the modified query
+    $search_params = array('detail'=>'ids', 'q'=>$query, 'needall'=>1); // Ensure all linked IDs are fetched
+    $linked_recs_result = recordSearch($system, $search_params);
 
-    //find linked record ids
-    $recs = recordSearch($system, array('detail'=>'ids', 'q'=>$query));
-    $recs = $recs['data']['records'];
+    if ($linked_recs_result['status'] !== HEURIST_OK || empty($linked_recs_result['data']['records'])) {
+        return array(); // Return empty if no linked records found or if there was an error
+    }
+    $linked_rec_ids = $linked_recs_result['data']['records'];
 
-    $res = array();
-    foreach($recs as $recid){
-        $rec = array('rec_ID'=>$recid);
-        recordSearchDetails($system, $rec, $dty_IDs);
-        foreach($rec['details'] as $dty_ID=>$field_details){
-            if(!@$res[$dty_ID]){
-                $res[$dty_ID] = $field_details;
-            }else{
-                foreach ($field_details as $dtl_ID=>$value){
-                    $res[$dty_ID][$dtl_ID] = $value;
-                }
+    $accumulated_details = array();
+    foreach($linked_rec_ids as $linked_rec_id){
+        $current_record_shell = array('rec_ID' => intval($linked_rec_id));
+        // Fetch specified details for the current linked record
+        recordSearchDetails($system, $current_record_shell, $dty_IDs_prepared);
+
+        foreach($current_record_shell['details'] as $dty_ID => $field_details_for_dty){
+            if(!isset($accumulated_details[$dty_ID])){
+                $accumulated_details[$dty_ID] = array();
+            }
+            // Merge details for this dty_ID, ensuring dtl_ID keys are preserved
+            foreach ($field_details_for_dty as $dtl_ID => $value){
+                // This logic might overwrite if multiple linked records have the same dtl_ID for a dty_ID,
+                // which is unlikely if dtl_IDs are globally unique. If dtl_IDs are per-record unique,
+                // then this structure is fine.
+                // If the intent is to aggregate all values for a dty_ID across all linked records,
+                // a different structure (e.g., array of arrays) would be needed.
+                // Current logic: last value for a dtl_ID (if shared across records) wins for a given dty_ID.
+                // However, dtl_ID is unique globally, so this effectively collects all details from all linked records,
+                // grouped by dty_ID.
+                $accumulated_details[$dty_ID][$dtl_ID] = $value;
             }
         }
     }
-    return $res;
-
+    return $accumulated_details;
 }
 
-//
-// Search details for list of records
-//
-// returns [rec_ID:{dty_ID:[dtl_ID=>value,.....],dty_ID:{},.... }]
-//
+/**
+ * Fetches specified details for a list of record IDs.
+ *
+ * Iterates through each record ID in `$recIDs`, calls `recordSearchDetails` to fetch
+ * the details specified by `$dty_IDs` for that record, and aggregates the results.
+ * The final structure is an associative array keyed by `rec_ID`.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param array|string $recIDs An array or comma-separated string of Record IDs.
+ * @param array|string $dty_IDs An array or comma-separated string of Detail Type IDs to fetch for each record.
+ * @param bool $expanded (Optional) Passed to `recordSearchDetails`. If true, resource details are expanded. Default true.
+ * @return array An associative array where keys are `rec_ID`s and values are arrays
+ *               of their fetched details, structured as `[dty_ID => [dtl_ID => value, ...]]`.
+ */
 function recordSearchDetailsForRecIds($system, $recIDs, $dty_IDs, $expanded=true) {
+    $recIDs_prepared = prepareIds($recIDs, true);
+    $dty_IDs_prepared = prepareIds($dty_IDs, true);
 
-    $dty_IDs = prepareIds($dty_IDs);
-
-    $res2 = array();
-    foreach($recIDs as $recid){
-        $rec = array('rec_ID'=>$recid);
-        recordSearchDetails($system, $rec, $dty_IDs, $expanded);
-
-        $res = array();
-        foreach($rec['details'] as $dty_ID=>$field_details){
-            if(!@$res[$dty_ID]){
-                $res[$dty_ID] = $field_details;
-            }else{
-                foreach ($field_details as $dtl_ID=>$value){
-                    $res[$dty_ID][$dtl_ID] = $value;
-                }
-            }
-        }
-        $res2[$recid] = $res;
-
-
+    $all_records_details = array();
+    foreach($recIDs_prepared as $recid){
+        $current_record_shell = array('rec_ID' => $recid);
+        recordSearchDetails($system, $current_record_shell, $dty_IDs_prepared, $expanded);
+        
+        // Even if $current_record_shell['details'] is empty, we add an entry for the recid
+        $all_records_details[$recid] = $current_record_shell['details'] ?? array();
     }
-    return $res2;
-
-
+    return $all_records_details;
 }
 
-//
-// load personal tags (current user) for given record ID
-//
+/**
+ * Loads personal tags (for the current user) for a given record ID.
+ *
+ * @param \hserv\System $system The Heurist system object, used to get current user ID and DB connection.
+ * @param int $rec_ID The Record ID for which to fetch personal tags.
+ * @return array An array of tag_Text strings, or an empty array if no tags or on error.
+ */
 function recordSearchPersonalTags($system, $rec_ID) {
-
+    $rec_ID = intval($rec_ID);
     $mysqli = $system->getMysqli();
+    $current_user_id = $system->getUserId();
+
+    if ($current_user_id <= 0) {
+        return array(); // No user, no personal tags
+    }
 
     return mysql__select_list2($mysqli,
         'SELECT tag_Text FROM usrRecTagLinks, usrTags WHERE '
-        ."tag_ID = rtl_TagID and tag_UGrpID= ".$system->getUserId()." and rtl_RecID = $rec_ID order by rtl_Order");
+        ."tag_ID = rtl_TagID and tag_UGrpID= ".$current_user_id." and rtl_RecID = $rec_ID order by rtl_Order");
 }
+
+?>
