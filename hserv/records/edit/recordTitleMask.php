@@ -1,41 +1,27 @@
 <?php
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 /**
-* recordTitleMask.php
+* recordTitleMask.php - Class TitleMask
 *
-* static class with
-* Three MAIN methods
+* static class with Three MAIN methods
 *
 *   check($mask, $rt) => returns an error string if there is a fault in the given mask for the given record type
 *   fill($mask, $rec_id, $rt) => returns the filled-in title mask for this record entry
 *   execute($mask, $rt, $mode, $rec_id=null) => converts titlemask to coded, humanreadable or fill mask with values
 *
+* Fields in Titlemask are stored in internal codes and decoded to human readable for editing.
 *
-* Note that title masks have been updated (Artem Osmakov late 2013) to remove the awkward storage of two versions - 'canonical' and human readable.
-* They are now read and used as internal code values (the old 'canonical' form), decoded to human readable for editing,
-* and then recoded back to internal codes for storage, as per original design.
-*
-*
+* @package     Heurist academic knowledge management system
+* @subpackage  hserv\records\edit
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
 * @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.6
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  CommonPHP
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       3.1.6
 */
-
 use hserv\utilities\USystem;
 use hserv\utilities\Temporal;
 
@@ -51,12 +37,14 @@ define('TITLEMASK_ERROR_MSG2', 'Error in title mask. Please look for syntax erro
 define('TITLEMASK_EMPTY_MSG', '**** No data in title fields for this record ****');
 
 /**
- * Static class for handling Heurist record title masks.
- *
- * Provides methods to check the validity of a title mask, fill a mask with record data
- * to generate a title, and convert masks between internal coded format and human-readable format.
- * Title masks allow dynamic generation of record titles based on field values and static text.
- */
+* Class TitleMask
+* 
+* Static class for handling Heurist record title masks.
+*
+* Provides methods to check the validity of a title mask, fill a mask with record data
+* to generate a title, and convert masks between internal coded format and human-readable format.
+* Title masks allow dynamic generation of record titles based on field values and static text.
+*/
 class TitleMask {
 
     /**

@@ -1,24 +1,17 @@
 <?php
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 /**
-* exportRecordsJSON.php - class to export records as JSON
-*
-* Controller is records_output
+* ExportRecordsJSON.php - Class ExportRecordsJSON
+* 
+* Extends `ExportRecords` to export records as JSON
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\records\export
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       6.0
 */
 
 namespace hserv\records\export;
@@ -27,16 +20,15 @@ use hserv\utilities\Temporal;
 
 
 /**
- * Class ExportRecordsJSON
- *
- * Extends ExportRecords to provide functionality for exporting records in JSON format.
- * This class handles various JSON output requirements, including those for
- * jQuery DataTables, a generic REST API, a media viewer, and a specialized
- * "TLC" (possibly Timemap/Layer Cake) export involving map data.
- * It is typically controlled by the 'records_output' controller.
- *
- * @package hserv\records\export
- */
+* Class ExportRecordsJSON
+*
+* Extends ExportRecords to provide functionality for exporting records in JSON format.
+* This class handles various JSON output requirements, including those for
+* jQuery DataTables, a generic REST API, a media viewer, and a specialized
+* "TLC" (for https://tlcmap.org) export involving map data.
+* It is typically controlled by the 'records_output' controller.
+*
+*/
 class ExportRecordsJSON extends ExportRecords {
 
     /**
@@ -71,9 +63,8 @@ class ExportRecordsJSON extends ExportRecords {
      */
     private $datatable_row_placeholder;
 
-    // Properties related to a specialized export, possibly for Timemap/Layer Cake (TLC)
     /**
-     * @var bool Flag indicating if the export is for the "TLC" format.
+     * @var bool Flag indicating if the export is for the "TLC" format (for https://tlcmap.org).
      * @see \hserv\import\ImportHeurist::importRecordsFromDatabase() for related import logic.
      */
     private $is_tlc_export = false;
@@ -131,15 +122,12 @@ protected function _outputPrepare($data, $params){
     return $res;
 }
 
-//
-//
-//
     /**
      * Prepares fields required for the JSON export based on the output mode.
      *
      * This method configures which record fields (header, detail, relational) need to be
      * retrieved and how they should be structured, depending on whether the output is for
-     * DataTables, a media viewer, a "TLC" (Timemap/Layer Cake) export, or a default JSON structure.
+     * DataTables, a media viewer, a "TLC" (for https://tlcmap.org) export, or a default JSON structure.
      *
      * For DataTables:
      * - Parses 'columns' parameter to determine the fields for each column.

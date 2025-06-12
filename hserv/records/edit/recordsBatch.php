@@ -1,14 +1,6 @@
 <?php
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 /**
-* recordsBatch.php
+* recordsBatch.php - Class RecordsBatch
 *
 * Class to perform actions in batch of records
 *   1) add/replace and delete details
@@ -18,11 +10,13 @@
 * Controller is record_batch.php
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\records\edit
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 use hserv\utilities\USanitize;
 use hserv\utilities\Temporal;
@@ -43,17 +37,19 @@ define('R_ARROW',' &Rightarrow; ');
 define('FILE_NO','File #');
 
 /**
+* Class RecordsBatch
+* 
 * Methods for batch actions for list of records (recIDs) OR by record type rtyID
-*
 *
 * detailsAdd - add details
 * replace
 * detailsReplace - replace + detailsAdd
 * detailsDelete
-* multiAction  - several actions in tuen: add,replace,delete
+* multiAction  - executes several actions in turn: add,replace,delete
 *
 * addRevercePointerForChild - Adds parent pointer field converts - converts existing
 *                             records to child record for given rectype/detailtype
+* 
 * changeRecordTypeInBatch - Changes rec_RecTypeID in batch
 *
 * extractPDF - extracts PDF file content is put it into DT_EXTRACTED_TEXT field

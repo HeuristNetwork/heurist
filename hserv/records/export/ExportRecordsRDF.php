@@ -1,24 +1,17 @@
 <?php
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 /**
-* exportRecordsRDF.php - class to export records as RDF with different serialization (XML, tripple, json)
-*
-* Controller is records_output
+* ExportRecordsRDF.php - Class ExportRecordsRDF
+* 
+* Class to export records as RDF with different serialization (XML, tripple, json)
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\records\export
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       6.0
 */
 
 namespace hserv\records\export;
@@ -38,8 +31,6 @@ define('DC_TITLE', 'dc:title');
  * N-Triples, Turtle, and JSON-LD (if dependencies are met).
  * This class is typically controlled by the 'records_output' controller.
  * It maps Heurist record structures and semantic URLs to RDF resources and predicates.
- *
- * @package hserv\records\export
  */
 class ExportRecordsRDF extends ExportRecords {
 

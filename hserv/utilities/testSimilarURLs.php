@@ -37,7 +37,7 @@ function similarUrlExist($mysqli, $url) {
     /* are there similar URLs to this one already? */
 
     // URL minus the protocol + possibly www.  and minus slash onwards
-    $noproto_url = preg_replace('!^http://(?:www[.])?([^/]*).*!', '\1', $url);
+    $noproto_url = preg_replace('!^http(s)?://(?:www[.])?([^/]*).*!', '\1', $url);
 
     $res = mysql__select_value($mysqli, 'select count(rec_ID) from Records '
         .' where rec_URL like "%'.$mysqli->real_escape_string($noproto_url).'%" '
