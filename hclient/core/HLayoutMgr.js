@@ -461,7 +461,7 @@ class HLayoutMgr {
         $parent.appendTo(container);
         
         
-        let layout_opts = {applyDefaultStyles: true, maskContents: true};
+        let layout_opts = {applyDefaultStyles: true, maskContents: true, enableCursorHotkey: false};
     
         for(let i=0; i<layout.children.length; i++){
             

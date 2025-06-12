@@ -109,6 +109,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                 let layout_opts =  {
                     applyDefaultStyles: true,
                     maskContents: true,
+                    enableCursorHotkey: false,
                     //togglerContent_open:    '&nbsp;',
                     //togglerContent_closed:  '&nbsp;',
                     west:{

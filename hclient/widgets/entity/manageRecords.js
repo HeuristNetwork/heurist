@@ -1200,6 +1200,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             if(this.editFormSummary && this.editFormSummary.length>0){
                 let layout_opts =  {
                     applyDefaultStyles: true,
+                    enableCursorHotkey: false,
                     //togglerContent_open:    '&nbsp;',
                     //togglerContent_closed:  '&nbsp;',
                     north:{
