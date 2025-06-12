@@ -403,9 +403,11 @@ window.hWin.HEURIST4.query = {
         
         let res = {};
         
-        if(window.hWin.HEURIST4.util.isempty(request.q)){
+        if(window.hWin.HEURIST4.util.isPositiveInt(request.svs) && !query_only){
+            res['svs'] = request.svs;
+        }else if(window.hWin.HEURIST4.util.isempty(request.q)){
             return '';
-        }else {
+        }else{
             let r = window.hWin.HEURIST4.util.isJSON(request.q);
             if(r!==false){
                 if(r.facets) return ''; //faceted search not allowed for map queries
@@ -416,7 +418,7 @@ window.hWin.HEURIST4.query = {
         }
         
         if(query_only===true){
-            res = res['q'];  
+            res = res['q'];
         }else{ 
         
             if(!window.hWin.HEURIST4.util.isempty(request.rules)){
@@ -447,7 +449,7 @@ window.hWin.HEURIST4.query = {
             }
         }
         
-        return JSON.stringify(res);;
+        return JSON.stringify(res);
     },
     
     //
@@ -461,17 +463,9 @@ window.hWin.HEURIST4.query = {
         buttons[window.hWin.HR('Copy')]  = function() {
             
             let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
-            let target = $dlg.find('#dlg-prompt-value')[0];
-            target.trigger('focus');
-            target.setSelectionRange(0, target.value.length);
-            let succeed;
-            try {
-                document.execCommand("copy");
-                $dlg.dialog( "close" );
-            } catch(e) {
-               alert('Not supported by browser');
-            }                            
-            
+            let target = $dlg.find('#dlg-prompt-value');
+
+            window.hWin.HEURIST4.util.copyStringToClipboard(target.text());
         }; 
         buttons[window.hWin.HR('Close')]  = function() {
             let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
@@ -724,6 +718,7 @@ window.hWin.HEURIST4.query = {
         }
 
         let multi_rectype = false;
+        let usingSavedSearch = false;
 
         for(const idx in query){
 
@@ -816,6 +811,15 @@ window.hWin.HEURIST4.query = {
                 case 'plain':
                     cond = window.hWin.HEURIST4.query.stringQueryToPlainText(value);
                     break;
+                case 'svs':
+                    cond = `Using saved search #${value}`;
+                    usingSavedSearch = true;
+                    break;
+                case 'db':
+                    cond = `Using the database(s): ${value}`;
+                    break;
+                case 'q':
+                    break;
 
                 default:
 
@@ -838,7 +842,7 @@ window.hWin.HEURIST4.query = {
 
         if(rty_ID){
             plain_text = `${deconstructed.shift()}${deconstructed.length > 0 || sortby.length > 0 ? '<div style="padding: 5px 10px;">' : ''}`;
-        }else if(!is_sub_query){
+        }else if(!is_sub_query && !usingSavedSearch){
             plain_text = `Searching all records${deconstructed.length > 0 || sortby.length > 0 ? '<div style="padding: 5px 10px;">' : ''}`;
         }
 

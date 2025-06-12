@@ -1964,13 +1964,24 @@ function recordSearch($system, $params, $relation_query=null)
                 $query = $vals[1];
                 $params['qname'] = $vals[0];
 
-                if(strpos($query, '?')===0){
+                $query = !is_string($query) || strpos($query, '{') !== 0 ? $query : json_decode($query, true);
+
+                if(is_string($query) && strpos($query, '?')===0){
                     parse_str(substr($query,1), $new_params);
 
                     if(@$new_params['q']) { $params['q'] = @$new_params['q'];}
                     if(@$new_params['rules']) { $params['rules'] = @$new_params['rules'];}
                     if(@$new_params['w']) { $params['w'] = @$new_params['w'];}
                     if(@$new_params['notes']) { $params['notes'] = @$new_params['notes'];}
+
+                    return recordSearch($system, $params);
+
+                }else if(is_array($query) && array_key_exists('q', $query) && !array_key_exists('facets', $query)){
+
+                    $params['q'] = $query['q'];
+                    if(@$query['rules']) { $params['rules'] = $query['rules']; }
+                    if(@$query['w']) { $params['w'] = $query['w']; }
+                    if(@$query['rulesonly']) { $params['rulesonly'] = $query['rulesonly']; }
 
                     return recordSearch($system, $params);
 

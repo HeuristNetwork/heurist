@@ -585,19 +585,10 @@ function HSvsEdit(args) {
                     
                     let filter = $dlg.find('#svs_Query').val();
                     if(filter.trim()!=''){
-                        
-                        let req = {q:filter, rules:$dlg.find('#svs_Rules').val()
-                                                , db:window.hWin.HAPI4.database};
-                        
-                        if($dlg.find('#svs_RulesOnly').is(':checked')){
-                            req['rulesonly'] = 1;
-                        }     
-                        if($dlg.find('#svs_UGrpID')=='bookmark'){
-                            req['w'] = 'b';
-                        }     
 
-                        window.hWin.HEURIST4.query.hQueryCopyPopup(req, 
-                            {my:'center bottom', at:'center bottom', of: $dlg});
+                        let req = {svs: $dlg.find('#svs_ID'), db:window.hWin.HAPI4.database};
+
+                        window.hWin.HEURIST4.query.hQueryCopyPopup(req, {my: 'center bottom', at: 'center bottom', of: $dlg});
                     }
                 }
                 
@@ -626,7 +617,7 @@ function HSvsEdit(args) {
                     title: window.hWin.HR(isRules?'Edit RuleSet':'Save filter criteria'),
                     position: position,
                     buttons: [
-                        {text:window.hWin.HR('Get filter + rules as string'), 
+                        {text:window.hWin.HR('Get filter as string'), 
                             click: __getFilterString, css:{'margin-right':'60px'} },
                         {text:window.hWin.HR('Save'), 
                             id:'btnSave2',
