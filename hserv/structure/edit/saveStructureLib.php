@@ -1,39 +1,36 @@
 <?php
 /**
-* saveStructureLib.php. Functions library to update the system structural definitions -
-* rectypes, detailtypes, terms and constraints.
+* saveStructureLib.php - Functions library to update the system structural definitions
+* 
+* DEPRECATED
+* 
+* This library provides a set of functions for directly manipulating Heurist database
+* structure definitions. These functions are typically used by administrative interfaces
+* to create, update, delete, or otherwise manage core schema elements such as:
+* - Record Types (`defRecTypes`, `defRecStructure`)
+* - Detail Types (Fields) (`defDetailTypes`)
+* - Terms and Vocabularies (`defTerms`, `defTermsLinks`)
+* - Record Type Groups (`defRecTypeGroups`)
+* - Detail Type Groups (`defDetailTypeGroups`)
+* - Relationship Constraints (`defRelationshipConstraints`) - though marked as not used.
 *
+* The functions often interact directly with the database tables storing these definitions.
+* Global arrays like `$rtyColumnNames`, `$dtyColumnNames`, etc., are used within this
+* file to define simple schemas (column name to type mapping) for constructing
+* parameterized SQL queries.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  hserv\structure\edit
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
 * @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
+* @since       3.1.0
 */
-
-/**
- * This library provides a set of functions for directly manipulating Heurist database
- * structure definitions. These functions are typically used by administrative interfaces
- * to create, update, delete, or otherwise manage core schema elements such as:
- * - Record Types (`defRecTypes`, `defRecStructure`)
- * - Detail Types (Fields) (`defDetailTypes`)
- * - Terms and Vocabularies (`defTerms`, `defTermsLinks`)
- * - Record Type Groups (`defRecTypeGroups`)
- * - Detail Type Groups (`defDetailTypeGroups`)
- * - Relationship Constraints (`defRelationshipConstraints`) - though marked as not used.
- *
- * The functions often interact directly with the database tables storing these definitions.
- * Global arrays like `$rtyColumnNames`, `$dtyColumnNames`, etc., are used within this
- * file to define simple schemas (column name to type mapping) for constructing
- * parameterized SQL queries.
- *
- * @package     hserv\structure\edit
- */
 use hserv\structure\ConceptCode;
 
 require_once dirname(__FILE__).'/../../records/edit/recordTitleMask.php';

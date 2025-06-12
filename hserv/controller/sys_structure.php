@@ -4,7 +4,7 @@
 * 
 * It is used for import defintions from different database.
 * 
-* @todo - should be replaced with hserv\entity\entityScridSrv.entityRefreshDefs
+* @todo - DEPRECATED and should be replaced with hserv\entity\entityScridSrv.entityRefreshDefs
 *
 * @package     Heurist academic knowledge management system
 * @subpackage  controller

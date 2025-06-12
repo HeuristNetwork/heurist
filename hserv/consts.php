@@ -1,37 +1,30 @@
 <?php
 /**
- * Defines global constants and utility functions for the Heurist application.
- *
- * This file is responsible for setting up a wide range of constants used throughout the application,
- * including version information, server URLs, database connection parameters, API response codes,
- * email settings, common string/regex/MIME type definitions, and paths for media and icons.
- * It also includes definitions for mapping "magic strings" (like RT_PERSON) to their
- * originating database IDs and concept IDs for record types, detail types, and terms.
- *
- * Additionally, this file provides several global utility functions for common tasks such
- * as error handling, string/array manipulation, date retrieval, and HTML generation for
- * including JQuery and related libraries.
- * Many constants are initialized based on values provided in `configIni.php` (or `../heuristConfigIni.php`).
- *
- * @package     Heurist academic knowledge management system
- * @link        https://HeuristNetwork.org
- * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
- * @author      Artem Osmakov   <osmakov@gmail.com>
- * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
- * @version     4.0
- */
+* const.php - Defines global constants and utility functions for the Heurist application
+*
+* This file is responsible for setting up a wide range of constants used throughout the application,
+* including version information, server URLs, database connection parameters, API response codes,
+* email settings, common string/regex/MIME type definitions, and paths for media and icons.
+* It also includes definitions for mapping "magic strings" (like RT_PERSON) to their
+* originating database IDs and concept IDs for record types, detail types, and terms.
+*
+* Additionally, this file provides several global utility functions for common tasks such
+* as error handling, string/array manipulation, date retrieval, and HTML generation for
+* including JQuery and related libraries.
+* Many constants are initialized based on values provided in `configIni.php` (or `../heuristConfigIni.php`).
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  hserv
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
+*/
 
 use \hserv\utilities\USystem;
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-// Heurist Application Version
 /** @const string Current Heurist code version. Value sourced from $version in configIni.php. */
 define('HEURIST_VERSION', $version);
 /** @const string Minimal database version required for this code version. */
