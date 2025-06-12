@@ -1,17 +1,19 @@
 <?php
-
-    /**
-     * elasticHelper.php: Functions to help interacting with ElasticSearch, mainly used by elasticSearch.php
-     *
-     * @package     Heurist academic knowledge management system
-     * @link        https://HeuristNetwork.org
-     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-     * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-     * @author      Artem Osmakov   <osmakov@gmail.com>
-     * @author      Jan Jaap de Groot    <jjedegroot@gmail.com>
-     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-     * @version     4.0
-     */
+/**
+* elasticHelper.php - functions library for ElasticSearch class
+* 
+* Helper functions to interact with ElasticSearch index server.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  hserv\records]indexing
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Jan Jaap de Groot    <jjedegroot@gmail.com> 
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
+*/
 
     /*
     * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance

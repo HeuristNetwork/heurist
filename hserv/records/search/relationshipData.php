@@ -1,8 +1,21 @@
 <?php
-// db_rel_details_temp.php
-//legacy of h3 - used in reportRecord and renderRecordData
-//@todo ??? 1) use recLinks  2) move to recordSearch use recordGetRelationship?
-
+/**
+* relationshipData.php - Functions library to search records
+*
+* legacy of h3 - used in reportRecord and renderRecordData 
+* 
+* @todo 1) use recLinks  2) move to recordSearch use recordGetRelationship?
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  hserv\records\search
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       3.0
+*/
 global $inverses;
 
 /**

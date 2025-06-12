@@ -13,9 +13,6 @@
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @since       4.0
 */
-
-/**
-*/
 namespace hserv\utilities;
 use hserv\System;
 use hserv\utilities\DbUtils;
