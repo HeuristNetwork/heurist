@@ -2521,7 +2521,7 @@ function TDuration(strDuration) {
         that.clear();
         _origString = str;
 
-        str.replace(/\s+/,"")  // remove all white space
+        str = str.replace(/\s+/,"")  // remove all white space
         // handle the time period case (PT) and then catch any double non digital characters or any non ISO Dur standard characters
         if (str.replace(/[PYMD]T/,"T").match(/((\D\D)|([^PYMDTHS0-9]))/g)) {
             throw "TDuration exception - illegal characters or character squences - " + str;
