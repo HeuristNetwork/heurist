@@ -1,67 +1,49 @@
 <?php
-
-<?php
-
 /**
- * Creates archive packages for one, several, or all databases.
- * This script is designed to be run from the command line (CLI) only.
- *
- * It generates archive packages (ZIP files) containing database dumps (SQL, TSV, HML),
- * uploaded files, and documentation. The output is written to a subdirectory named
- * `_BATCH_PROCESS_ARCHIVE_PACKAGE` within the Heurist filestore root.
- *
- * Usage examples:
- *  sudo php -f /path/to/heurist/export/dbbackup/buildArchivePackagesCMD.php -- -db=database_1,database_2
- *  sudo php -f buildArchivePackagesCMD.php -- -db=all -nofiles -nodocs -nosql -nohml -notsv
- *
- * Arguments:
- *  -db=<dbname_or_all> : Specifies the database(s) to archive. Can be a single database name,
- *                        a comma-separated list of database names, or 'all' for all databases.
- *                        This parameter is effectively required, though the script doesn't exit
- *                        if it's missing, it won't process anything.
- *  -nofiles            : (Optional) Excludes uploaded files from the archive.
- *  -nodocs             : (Optional) Excludes documentation folders from the archive.
- *  -nosql              : (Optional) Excludes the SQL dump from the archive.
- *  -nohml              : (Optional) Excludes the HML export from the archive.
- *  -notsv              : (Optional) Excludes the TSV export from the archive.
- *
- * @package     HeuristWebService
- * @subpackage  Scripts
- * @link        https://HeuristNetwork.org
- * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network Ltd.
- * @author      Artem Osmakov   <osmakov@gmail.com>
- * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
- * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
- * @version     7
- *
- * @global string|null $arg_database Name of the database(s) to process, or 'all'.
- * @global bool $arg_skip_files If true, skips including uploaded files.
- * @global bool $arg_include_docs If true, includes documentation folders.
- * @global bool $arg_skip_hml If true, skips HML export.
- * @global bool $arg_skip_tsv If true, skips TSV export.
- * @global bool $arg_skip_sql If true, skips SQL dump.
- * @global bool $with_triggers If true, includes triggers in SQL dump. REMARK: Currently hardcoded to false.
- * @global string|null $backup_root Path to the root directory for backup packages.
- *
- * @uses isActionInProgress() To prevent multiple simultaneous backup operations.
- * @uses hserv\utilities\DbUtils::databaseDump() To create SQL dumps.
- * @uses hserv\utilities\UArchive::zip() To create ZIP archives.
- * @uses hserv\utilities\DbExportTSV To export data in TSV format.
- * @uses folderCreate() Utility function to create folders.
- * @uses folderDelete2() Utility function to delete folders.
- * @uses folderSubs() Utility function to list subfolders.
- * @uses folderRecurseCopy() Utility function to recursively copy folders.
- * @uses fileCopy() Utility function to copy files.
- * @uses mysql__getdatabases4() Utility function to get a list of databases.
- * @uses mysql__usedatabase() Utility function to select a database.
- */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* buildArchivePackagesCMD.php - command line utilty to build database archive packages
+* 
+* Creates archive packages for one, several, or all databases.
+* This script is designed to be run from the command line (CLI) only.
+*
+* It generates archive packages (ZIP files) containing database dumps (SQL, TSV, HML),
+* uploaded files, and documentation. The output is written to a subdirectory named
+* `_BATCH_PROCESS_ARCHIVE_PACKAGE` within the Heurist filestore root.
+*
+* Usage examples:
+*  sudo php -f /path/to/heurist/export/dbbackup/buildArchivePackagesCMD.php -- -db=database_1,database_2
+*  sudo php -f buildArchivePackagesCMD.php -- -db=all -nofiles -nodocs -nosql -nohml -notsv
+*
+* Arguments:
+*  -db=<dbname_or_all> : Specifies the database(s) to archive. Can be a single database name,
+*                        a comma-separated list of database names, or 'all' for all databases.
+*                        This parameter is effectively required, though the script doesn't exit
+*                        if it's missing, it won't process anything.
+*  -nofiles            : (Optional) Excludes uploaded files from the archive.
+*  -nodocs             : (Optional) Excludes documentation folders from the archive.
+*  -nosql              : (Optional) Excludes the SQL dump from the archive.
+*  -nohml              : (Optional) Excludes the HML export from the archive.
+*  -notsv              : (Optional) Excludes the TSV export from the archive.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  export\dbbackup
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6.0
+*
+* @uses isActionInProgress() To prevent multiple simultaneous backup operations.
+* @uses hserv\utilities\DbUtils::databaseDump() To create SQL dumps.
+* @uses hserv\utilities\UArchive::zip() To create ZIP archives.
+* @uses hserv\utilities\DbExportTSV To export data in TSV format.
+* @uses folderCreate() Utility function to create folders.
+* @uses folderDelete2() Utility function to delete folders.
+* @uses folderSubs() Utility function to list subfolders.
+* @uses folderRecurseCopy() Utility function to recursively copy folders.
+* @uses fileCopy() Utility function to copy files.
+* @uses mysql__getdatabases4() Utility function to get a list of databases.
+* @uses mysql__usedatabase() Utility function to select a database.
 */
 
 // Default values for command-line arguments
@@ -134,18 +116,12 @@ if (@$argv) {
     */
 }
 
-// REMARK: The script proceeds even if $arg_database is null (e.g. -db parameter not provided),
-// but it will not process any databases in such a case. An explicit check and exit was previously commented out.
-if ($arg_database == null) {
-    // exit("Required parameter -db is not defined\n");
-}
-
 use hserv\utilities\DbUtils;
 use hserv\utilities\UArchive;
 use hserv\utilities\DbExportTSV;
 
 require_once dirname(__FILE__).'/../../autoload.php';
-require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php'; // REMARK: Unclear if this specific include is still needed directly. Autoloader might handle it.
+require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
 
 // --- System Initialization ---
 $system = new hserv\System();
@@ -191,7 +167,6 @@ if (!folderCreate($backup_root, true)) {
 // Flag that backup is in progress to prevent concurrent executions.
 $actionName = 'backupDBs';
 if (!isActionInProgress($actionName, 30)) {
-    // REMARK: Corrected message to be more accurate. The original message was slightly misleading.
     exit("Another backup operation is already in progress or recently completed. Please try this function later. If you are sure no other backup is running, you might need to clear the action lock manually.\n");
 }
 
@@ -267,7 +242,7 @@ foreach ($arg_database as $idx => $db_name) {
         $folders_to_copy = folderSubs($database_folder,
             array('backup', 'scratch', 'generated-reports', 'file_uploads', 'filethumbs',
                   'webimagecache', 'blurredimagescache'
-                  // REMARK: Obsolete/old folder names like 'tileserver' are commented out in original code.
+                  // Obsolete/old folder: 'tileserver', 'uploaded_files', 'uploaded_tilestacks', 'rectype-icons','term-images',
             )
         );
     }
@@ -301,36 +276,18 @@ foreach ($arg_database as $idx => $db_name) {
         $system->setDbnameFull($db_name); // Set current database context for the system object
         mysql__usedatabase($mysqli, $db_name); // Select database in mysqli connection
         
-        // REMARK: The setSession method in DbExportTSV was defined as taking only $system.
-        // Assuming it should be re-set for each database or that the second parameter ($folder) was a previous implementation detail.
-        // For now, calling with $system only, as per DbExportTSV definition.
-        // If $folder was intended for output path, DbExportTSV needs adjustment or a different method called.
-        // $dbExportTSV->setSession($system, $folder); // Original line
-        $dbExportTSV->setSession($system); // Corrected based on DbExportTSV's current definition
-        
-        // REMARK: DbExportTSV does not have an `output()` method in the provided snippet.
-        // This suggests `DbExportTSV` class is more complex than initially shown or this is a call to a missing/different method.
-        // For now, this line is kept but might cause an error if `output()` is not defined in the actual DbExportTSV class.
-        // It's possible `output()` is intended to write files into the $folder passed previously to setSession.
-        // $warns = $dbExportTSV->output();
-        // if(!empty($warns)){
-        //     echo (implode("\n", $warns)."\n");
-        // }
-        // Placeholder for actual TSV export logic if `output()` is not the correct method.
-        // This might involve calling specific methods on $dbExportTSV to generate files in $folder.
-        // For example: $dbExportTSV->exportTables($db_name, $folder);
-         echo "(Placeholder for TSV export - check DbExportTSV methods) ";
+        $dbExportTSV->setSession($system, $folder);
+
+        $warns = $dbExportTSV->output();
+        if(!empty($warns)){
+             echo (implode("\n", $warns)."\n");
+        }
     }
 
     // --- HML Export ---
     if (!$arg_skip_hml) {
         echo('hml.. ');
-        // REMARK: The commented-out block for HML generation via HTTP request is obsolete.
-        // The script now uses a CLI command to generate HML.
-       /* it does not work in shell mode
-       ...
-       */
-               
+        
        $hmlscript = realpath(dirname(__FILE__).'/../xml/flathml.php');
        $cmd = escapeshellcmd('php -f '.$hmlscript);
        $cmd = $cmd." -- -db $db_name -backup 1"; // -backup 1 tells flathml to save to standard backup location
@@ -343,8 +300,7 @@ foreach ($arg_database as $idx => $db_name) {
        if ($res2 !== 0) {
             $err = ' failed with a return status: '.($res2 !== null ? intval($res2) : 'unknown')
                     .'. Output: '.(is_array($arr_out) && !empty($arr_out) ? print_r($arr_out, true) : '(no output)');
-            // REMARK: Corrected variable name from $res2!=null to $res2 !== null for strict comparison.
-            // REMARK: Ensured $arr_out is checked before print_r.
+
             isActionInProgress($actionName, -1); // Release lock
             exit("Sorry, unable to generate HML database dump for $db_name_esc. $err \n");
        }
@@ -356,7 +312,6 @@ foreach ($arg_database as $idx => $db_name) {
             fileCopy($output_file_name, $dumpfile);
             unlink($output_file_name); // Remove original from backup dir after copying
        } else {
-            // REMARK: Added a warning if the HML file is not found where expected.
             echo "WARNING: HML output file $output_file_name not found after generation. ";
        }
     }
@@ -370,24 +325,14 @@ foreach ($arg_database as $idx => $db_name) {
         if ($res === false) {
             isActionInProgress($actionName, -1); // Release lock
             $err = $system->getError();
-            // REMARK: Ensure $err is an array and message key exists.
+
             $error_message = (is_array($err) && isset($err['message'])) ? $err['message'] : 'Unknown error';
             error_log('buildArchivePackagesCMD Error: '.$error_message);
             exit("Sorry, unable to generate MySQL database dump for $db_name_esc. ".$error_message."\n");
         }
     }
 
-    // REMARK: Commented out Mysqldump block, as it appears to be an alternative implementation not currently used.
-/*
-    try{
-        $pdo_dsn = 'mysql:host='.HEURIST_DBSERVER_NAME.';dbname=hdb_'.$db_name.';charset=utf8mb4';
-        $dump = new Mysqldump( $pdo_dsn, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, $dump_options);
-        $dump->start($dumpfile);
-    } catch (Exception $e) {
-        isActionInProgress($actionName, -1);
-        exit("Sorry, unable to generate MySQL database dump for $db_name.".$e->getMessage()."\n");
-    }
-*/
+
     // --- ZIP Creation ---
     echo 'zip.. ';
     $destination = $backup_zip;
@@ -400,7 +345,7 @@ foreach ($arg_database as $idx => $db_name) {
 
     if (!$res) {
         isActionInProgress($actionName, -1); // Release lock
-        $destination_esc = htmlentities($destination); // REMARK: Corrected variable name for escaping
+        $destination_esc = htmlentities($destination); 
         exit("Database: $db_name_esc Failed to create zip file at $destination_esc \n");
     }
 
@@ -409,6 +354,5 @@ foreach ($arg_database as $idx => $db_name) {
 
 isActionInProgress($actionName, -1); // Release lock at the end of all operations
 
-// REMARK: The final exit message is commented out in the original script.
 // exit("\nfinished all requested databases, results in HEURIST_FILESTORE/_BATCH_PROCESS_ARCHIVE_PACKAGE/\n\n");
 ?>

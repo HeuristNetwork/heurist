@@ -1,63 +1,53 @@
 <?php
-
-<?php
-
 /**
- * exportMyDataPopup.php: Provides a user interface for exporting database data.
- *
- * This script allows database administrators to set up and initiate the export of
- * some or all data as an HML (Heurist Markup Language) file, SQL dump, TSV files,
- * or a complete ZIP/TAR archive including uploaded files and documentation.
- * It also supports uploading the generated archive to configured repositories (e.g., Nakala).
- *
- * The script operates in different modes:
- * - No mode (initial display): Shows the export options form.
- * - mode=1: Processes the export options submitted from the form.
- * - mode=2: Downloads the complete archived folder (ZIP/TAR).
- * - mode=3: Downloads the SQL dump only (ZIP/TAR).
- * - mode=4: Cleans up the backup folder (called via AJAX on window close).
- * - mode=5: Downloads the HML file only (ZIP/TAR).
- * - mode=6: Downloads the TSV folder only (ZIP/TAR).
- *
- * @package     HeuristWebService
- * @subpackage  Interface
- * @link        https://HeuristNetwork.org
- * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network Ltd.
- * @author      Artem Osmakov   <osmakov@gmail.com>
- * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
- * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
- * @version     5
- *
- * @uses $_REQUEST['mode'] Determines the operation mode (display form, process export, download, cleanup).
- * @uses $_REQUEST['is_zip'] If 1, forces ZIP format (though ZIP is default).
- * @uses $_REQUEST['is_tar'] If 1, forces TAR.BZ2 format. REMARK: UI for this option is currently commented out.
- * @uses $_REQUEST['repository'] Specifies the target repository for upload.
- * @uses $_REQUEST['repo_account'] Specifies the account to use for the repository.
- * @uses $_REQUEST['includeresources'] If 1, includes uploaded files in the archive.
- * @uses $_REQUEST['include_tilestacks'] If 1, includes tiled map images.
- * @uses $_REQUEST['include_hml'] If 1, includes HML export.
- * @uses $_REQUEST['include_tsv'] If 1, includes TSV export.
- * @uses $_REQUEST['include_docs'] If 1, includes background documentation (hidden, checked by default).
- * @uses $_REQUEST['allrecs'] If 1, includes resources from other users (hidden, checked by default).
- * @uses $_REQUEST['license'] Specifies the license for Nakala uploads.
- * @uses $_REQUEST['use_test_url'] For Nakala, if 1, uses the test Nakala instance.
- *
- * @const MANAGER_REQUIRED Indicates that manager-level access is required for this page.
- * @const PDIR Path to the parent directory, used for constructing URLs to JS/CSS assets.
- * @const FOLDER_BACKUP Path to the main backup folder for the current database.
- * @const FOLDER_SQL_BACKUP Path to the folder for storing standalone SQL backups.
- * @const FOLDER_HML_BACKUP Path to the folder for storing standalone HML backups.
- * @const FOLDER_TSV_BACKUP Path to the folder for storing standalone TSV backups.
- */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* exportMyDataPopup.php - Provides a user interface for exporting database data.
+*
+* This script allows database administrators to set up and initiate the export of
+* some or all data as an HML (Heurist Markup Language) file, SQL dump, TSV files,
+* or a complete ZIP/TAR archive including uploaded files and documentation.
+* It also supports uploading the generated archive to configured repositories (e.g., Nakala).
+*
+* The script operates in different modes:
+* - No mode (initial display): Shows the export options form.
+* - mode=1: Processes the export options submitted from the form.
+* - mode=2: Downloads the complete archived folder (ZIP/TAR).
+* - mode=3: Downloads the SQL dump only (ZIP/TAR).
+* - mode=4: Cleans up the backup folder (called via AJAX on window close).
+* - mode=5: Downloads the HML file only (ZIP/TAR).
+* - mode=6: Downloads the TSV folder only (ZIP/TAR).
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  export\dbbackup
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Brandon McKay   <blmckay13@gmail.com>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       5.0
+*
+*
+* @uses $_REQUEST['mode'] Determines the operation mode (display form, process export, download, cleanup).
+* @uses $_REQUEST['is_zip'] If 1, forces ZIP format (though ZIP is default).
+* @uses $_REQUEST['is_tar'] If 1, forces TAR.BZ2 format. REMARK: UI for this option is currently commented out.
+* @uses $_REQUEST['repository'] Specifies the target repository for upload.
+* @uses $_REQUEST['repo_account'] Specifies the account to use for the repository.
+* @uses $_REQUEST['includeresources'] If 1, includes uploaded files in the archive.
+* @uses $_REQUEST['include_tilestacks'] If 1, includes tiled map images.
+* @uses $_REQUEST['include_hml'] If 1, includes HML export.
+* @uses $_REQUEST['include_tsv'] If 1, includes TSV export.
+* @uses $_REQUEST['include_docs'] If 1, includes background documentation (hidden, checked by default).
+* @uses $_REQUEST['allrecs'] If 1, includes resources from other users (hidden, checked by default).
+* @uses $_REQUEST['license'] Specifies the license for Nakala uploads.
+* @uses $_REQUEST['use_test_url'] For Nakala, if 1, uses the test Nakala instance.
+*
+* @const MANAGER_REQUIRED Indicates that manager-level access is required for this page.
+* @const PDIR Path to the parent directory, used for constructing URLs to JS/CSS assets.
+* @const FOLDER_BACKUP Path to the main backup folder for the current database.
+* @const FOLDER_SQL_BACKUP Path to the folder for storing standalone SQL backups.
+* @const FOLDER_HML_BACKUP Path to the folder for storing standalone HML backups.
+* @const FOLDER_TSV_BACKUP Path to the folder for storing standalone TSV backups.
 */
-
 
 /**
  * Indicates that manager-level access is required for this page.
@@ -109,6 +99,7 @@ define('FOLDER_TSV_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME.'_ts
 $mode = @$_REQUEST['mode']; // Current operation mode
 $format = 'zip'; // Default archive format
 // REMARK: is_tar option is present in logic but UI checkbox is commented out.
+// the reason: tar acrchive has limit for full file path length
 if (array_key_exists('is_tar', $_REQUEST) && $_REQUEST['is_tar'] == 1) {
     $format = 'tar';
 }
@@ -150,7 +141,7 @@ if ($mode > 1) {
 ?>
         <!-- Heurist Core JS Utilities -->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
-        <script type="text/text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
 
         <!-- CSS -->
@@ -229,16 +220,17 @@ if ($mode > 1) {
                         let repo_name = repo_details[1]; // Repository name (e.g., "Nakala")
                         repo_name = repo_name.charAt(0).toUpperCase() + repo_name.slice(1);
 
-                        // repo_details[4] = true; // REMARK: Original code, purpose unclear without further context on repo_details structure.
-                                                // This might be a flag or placeholder.
+                        repo_details[4] = true;
 
                         // Group accounts by repository name
                         if (Object.hasOwn(complete_list_repositories, repo_name)) {
                             complete_list_repositories[repo_name].push(repo_details);
-                        } else {
-                            complete_list_repositories[repo_name] = [repo_details];
-                            window.hWin.HEURIST4.ui.addoption($repos[0], repo_name, repo_name); // Add unique repository name to dropdown
+                            return;
                         }
+                        
+                        complete_list_repositories[repo_name] = [repo_details];
+                        window.hWin.HEURIST4.ui.addoption($repos[0], repo_name, repo_name); // Add unique repository name to dropdown
+                        
                     });
 
                     $accounts.parent().hide(); // Hide account dropdown initially
@@ -566,7 +558,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             // Validate repository if specified
             $repo = !empty(@$_REQUEST['repository']) ? htmlspecialchars($_REQUEST['repository']) : null;
             if ($is_repository && (!$repo || $repo != 'Nakala')) { // Currently only Nakala seems fully supported
-                // REMARK: CONTACT_HEURIST_TEAM constant is used here but not defined in this file.
+                // CONTACT_HEURIST_TEAM constant is defined in const.php
                 report_message('The repository ' . $repo . ' is not supported please ' . (defined('CONTACT_HEURIST_TEAM') ? CONTACT_HEURIST_TEAM : 'contact the support team'), true, false);
             }
 
@@ -667,10 +659,8 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
            if (@$_REQUEST['include_tsv'] == '1') {
                 echo_flush2("Exporting database records as TSV<br>(may take several minutes for large databases)<br>");
                 $dbExportTSV = new DbExportTSV($system);
-                // REMARK: The DbExportTSV class from a previous task did not have an `output()` method.
-                // This might be a call to a non-existent method or `DbExportTSV` is more complex than the snippet seen.
-                // Assuming `output()` generates files into FOLDER_BACKUP . '/tsv-output/'.
-                $warns = $dbExportTSV->output(); // This should generate files in FOLDER_BACKUP . '/tsv-output/'
+                // This should generate files in FOLDER_BACKUP . '/tsv-output/'
+                $warns = $dbExportTSV->output(); 
                 if (!empty($warns)) {
                     echo_flush2(implode('<br>', $warns));
                 }
@@ -875,14 +865,8 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                         }
 
                         $params['api_key'] = $repo_details['params']['writeApiKey'];
-                        // REMARK: Original logic `strpos($repo_account,'nakala') === 1` seems potentially fragile.
-                        // A more robust check might be needed if account naming conventions change.
-                        // Assuming test accounts might not have '_' or have a specific prefix.
-                        $params['use_test_url'] = (strpos($repo_account, '_') === false); // Heuristic: if no underscore, it's a test account.
-                        if (isset($_REQUEST['use_test_url'])) { // Allow override from form if provided
-                            $params['use_test_url'] = intval($_REQUEST['use_test_url']);
-                        }
-
+                        $params['use_test_url'] = strpos($repo_account,'nakala') === 1 ? 1 : 0; // use test version
+                        
 
                         $params['status'] = 'pending'; // Keep new record private initially
                         $params['return_type'] = 'editor'; // Return link to the editor interface
@@ -958,7 +942,7 @@ function report_message($message, $is_error = true, $need_cleanup = false)
     }
 ?>
         <!-- Ensure loading overlay is hidden -->
-        <script>if(window.hWin && window.hWin.HEURIST4 && window.hWin.HEURIST4.msg){ window.hWin.HEURIST4.msg.sendCoverallToBack(true);}</script>
+        <script>if(window.hWin?.HEURIST4?.msg){ window.hWin.HEURIST4.msg.sendCoverallToBack(true);}</script>
     </body>
 </html>
 <?php
