@@ -1,29 +1,18 @@
 <?php
-
 /**
-* importAction.php  working with import data in temporary table -
-*  1) matching
-*  2) assign rec ids    assignRecordIds
-*  3) validate          validateImport
-*  4) perform import  - performImport
+* importAction.php  - Class ImportAction
+* 
+* Manages data import process after initial parsing.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\records\import
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       4.0
 */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 use hserv\entity\DbDefTerms;
 use hserv\utilities\USanitize;
 use hserv\entity\DbRecUploadedFiles;
@@ -69,7 +58,6 @@ define('MSG_VALIDATION_2','validation of record pointer fields');
  * All methods are static and this class is typically invoked by `hserv/controller/importController.php`.
  * It operates on data stored in a temporary import table associated with an import session.
  *
- * @package hserv\records\import
  */
 class ImportAction {
 

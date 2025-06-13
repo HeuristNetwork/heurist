@@ -1,35 +1,33 @@
 /**
+* importDefDetailTypes.js - Class HImportDetailTypes
+* 
 * Class to import record fields from CSV, also assign directly to record types
-*
+* 
 * @package     Heurist academic knowledge management system
+* @subpackage  import\delimited
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Brandon McKay   <blmckay13@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Brandon McKay   <blmckay13@gmail.com>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6.0
 */
 
 /**
  * @class HImportDetailTypes
+ * @classdesc Class to import record fields from CSV, also assign directly to record types
+ * 
  * @augments HImportBase
  * @classdesc For handling the bulk importing of new base fields by CSV
  *
- * @function doPrepare - Prepare data for creating new external media
+ * @method doPrepare - Prepare CSV data for creating new detail types (base fields).
  */
-
 class HImportDetailTypes extends HImportBase{
 
     /**
-     * @param {integer} dtg_ID - default detail type group ID, can be changed by the user
+     * @param {number} [dtg_ID=0] - Default detail type group ID, can be changed by the user.
+     * @return {void}
      */
     constructor(dtg_ID = 0){
         let field_selectors = ['#field_name', '#field_desc', '#field_type', '#field_vocab', '#field_target', '#field_uri'];
@@ -37,7 +35,8 @@ class HImportDetailTypes extends HImportBase{
     }
 
     /**
-     * Prepare CSV data for creating new base fields
+     * Prepare CSV data for creating new base fields.
+     * @return {void}
      */
     doPrepare(){
 

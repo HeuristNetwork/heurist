@@ -1,30 +1,23 @@
 <?php
-
 /**
-* getDBStructureAsSQL.php: returns database definitions (rectypes, details etc.)
-* as SQL statements ready for INSERT processing
+* getDBStructureAsSQL.php - Returns database definitions (rectypes, details etc.) as SQL statements ready for INSERT processing
 *
 * @param includeUgrps=1 will output user and group information in addition to definitions
 * @param approvedDefsOnly=1 will only output Reserved and Approved definitions
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\structure\export
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @since       3.2.0
 */
 require_once dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php';
-
 
 global $mysqli, $isHTML, $startToken, $endToken;
 

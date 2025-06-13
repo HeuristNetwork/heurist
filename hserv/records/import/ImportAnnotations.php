@@ -1,28 +1,17 @@
 <?php
-
 /**
-* ImportAnnotations.php
-* 1. Loops a) all external resources with type "_iiif"
-*          b) "_iiif" files linked to the specified set of records
-* 2. Detect that remote url is iiif manifest
-* 3. Downloads manifest, extract annontaion info
-* 4. Add or update heurist record type:Annotation
+* ImportAnnotations.php  - Class ImportAnnotations
+* 
+* Handles the import of IIIF annotations.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\records\import
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.2
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @since       6.0
 */
 namespace hserv\records\import;
 use hserv\utilities\USanitize;
@@ -46,7 +35,6 @@ set_time_limit(0);
  *
  * This class is typically invoked by the `importController.php`.
  *
- * @package hserv\records\import
  */
 class ImportAnnotations{
 

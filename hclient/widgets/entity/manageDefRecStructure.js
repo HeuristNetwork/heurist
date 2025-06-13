@@ -181,6 +181,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 applyDefaultStyles: true,
                 togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-w"></div>',
                 togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-e"></div>',
+                enableCursorHotkey: false,
                 //togglerContent_open:    '&nbsp;',
                 //togglerContent_closed:  '&nbsp;',
                 west:{

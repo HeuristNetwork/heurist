@@ -1,26 +1,23 @@
 <?php
 /**
- * This file defines the SystemSettings class, which is responsible for managing
- * and providing access to various system configurations within the Heurist application.
- * These settings can be stored in the database (sysIdentification table),
- * in JSON files within the database's 'settings' directory (e.g., text_styles.json, webfonts.json),
- * or in files located in the Heurist server's root directory (e.g., for JavaScript allowances, disk quotas).
- *
- * @package     Heurist academic knowledge management system
- * @link        https://HeuristNetwork.org
- * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
- * @author      Artem Osmakov   <osmakov@gmail.com>
- * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
- * @version     4.0
- */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* SystemSettings.php - Class SystemSettings
+* 
+* This file defines the SystemSettings class, which is responsible for managing
+* and providing access to various system configurations within the Heurist application.
+* These settings can be stored in the database (sysIdentification table),
+* in JSON files within the database's 'settings' directory (e.g., text_styles.json, webfonts.json),
+* or in files located in the Heurist server's root directory (e.g., for JavaScript allowances, disk quotas).
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  hserv
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6.0
 */
+
 namespace hserv;
 
 // USystem is used for getConfigBytes, but not explicitly imported if it's in the same namespace or globally available.
@@ -31,17 +28,19 @@ use hserv\utilities\USystem;
 
 
 /**
- * Manages system-wide and database-specific settings for the Heurist application.
- *
- * This class provides methods to:
- * - Retrieve settings stored in the `sysIdentification` database table.
- * - Read and write settings from JSON files located in the database-specific `/settings` directory
- *   (e.g., TinyMCE formats, web fonts, invalid URL patterns, user notifications).
- * - Check server-level configurations like JavaScript execution allowance and disk quotas,
- *   which are typically defined in files in the Heurist application's root directory.
- *
- * An instance of this class is usually accessed via the main `System` object.
- */
+* Class SystemSettings
+* 
+* Manages system-wide and database-specific settings for the Heurist application.
+*
+* This class provides methods to:
+* - Retrieve settings stored in the `sysIdentification` database table.
+* - Read and write settings from JSON files located in the database-specific `/settings` directory
+*   (e.g., TinyMCE formats, web fonts, invalid URL patterns, user notifications).
+* - Check server-level configurations like JavaScript execution allowance and disk quotas,
+*   which are typically defined in files in the Heurist application's root directory.
+*
+* An instance of this class is usually accessed via the main `System` object.
+*/
 class SystemSettings {
 
     /**

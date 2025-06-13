@@ -518,6 +518,7 @@ function HLayout(args) {
 
     
     /**
+    * This function is called by both `_initLayoutCardinal` and `_initLayoutFree`.
     * Adds application/widgets to specified pane
     *
     * @param $container

@@ -1,14 +1,17 @@
 <?php
 /**
-* conceptCode.php - gets local code by concept code and vice versa
+* conceptCode.php - Class ConceptCode
+* 
+* Gets local code by concept code and vice versa
 *
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     4
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage Structure
+* @subpackage  hserv\structure
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 namespace hserv\structure;
 

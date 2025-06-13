@@ -1,5 +1,7 @@
-This directory contains files related to generating and managing reports within the Heurist system
-using Smarty templating engine 
+# Directory: hserv/report
+
+## Overview
+This directory contains files related to generating and managing reports within the Heurist system using Smarty templating engine 
 
 These files handle tasks such as:
 - Initializing the Smarty templating engine for use in report generation.
@@ -7,11 +9,12 @@ These files handle tasks such as:
 - Formatting individual records for inclusion in reports.
 - Managing report templates files.
 
-Key PHP files:
-- `ReportExecute.php`: Responsible for the overall execution of a report.
-- `ReportRecord.php`: Data provider and formatting helper for Smarty templates
-- `ReportTemplateMgr.php`: Manages publisher's templates within HEURIST_SMARTY_TEMPLATES_DIR (subfolder of database storage folder)
-- `smartyInit.php`: Initializes the Smarty templating engine, which is used to render reports based on templates and data.
+## Key files
+- `ReportExecute.php`: Executes reports defined by Smarty templates, fetching data, processing through Smarty, and handling various output modes.
+- `ReportRecord.php`: Serves as a data provider and formatting helper for Smarty templates, providing methods to access Heurist record data.
+- `ReportTemplateMgr.php`: Manages Smarty template files for Heurist reports, including listing, retrieving, saving, deleting, and import/export.
+- `smartyInit.php`: Functions to initialize the Smarty engine and register Heurist-specific Smarty modifiers.
 
-`debug.tpl`, `debug_html.tpl` are Smarty templates used for rendering report outputs or debugging information.
-`template.tpl` - simple sample template
+- `debug.tpl`: Smarty template for rendering debugging information.
+- `debug_html.tpl`: Smarty template for rendering debugging information.
+- `template.tpl`: Smarty template file for report presentation or structure.

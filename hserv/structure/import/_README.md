@@ -1,1 +1,8 @@
-This directory contains files for importing database structure information. These scripts are typically used to process schema definitions from external sources (like SQL or XML files) and apply them to the current Heurist database, facilitating migration or synchronization of database structures.
+# Directory: hserv/structure/import
+
+## Overview
+This directory is responsible for scripts and functionalities related to importing Heurist database structure definitions. This might involve parsing structure files (e.g., XML, SQL) and applying them to the current database.
+
+## Key files
+- `dbsImport.php`: Handles the import of database structure definitions from another Heurist database, managing dependencies and concept code resolution.
+- `importDefintions.php`: Imports a complete set of Heurist database structure definitions from a specially formatted SQL file (e.g., coreDefinitions.txt).

@@ -1654,7 +1654,7 @@ $.widget( "heurist.svs_list", {
             arr_menu.push({title: "Edit", cmd: "rename", uiIcon: "ui-icon-pencil" });
             if(that.options.filter_by_type<2){
                 arr_menu.push({title: "----"});
-                arr_menu.push({title: "Get filter+rules", cmd: "query", uiIcon: "ui-icon-copy" });
+                arr_menu.push({title: "Get filter", cmd: "query", uiIcon: "ui-icon-copy" });
                 arr_menu.push({title: "Embed", cmd: "embed", uiIcon: "ui-icon-globe" }); // displays message about alternatives
             }
             arr_menu.push({title: "----"});
@@ -2462,13 +2462,10 @@ $.widget( "heurist.svs_list", {
         let qsearch = svs[Hul._QUERY];
         let prms = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch); //url to json
         if(prms.type!=3){
-            
-            
-            let crules = window.hWin.HEURIST4.query.cleanRules( prms.rules );                                                      
-            prms.rules = crules==null?'':crules;
-            
+
+            prms.svs = svs_ID;
             prms.db = window.hWin.HAPI4.database;
-            
+
             window.hWin.HEURIST4.query.hQueryCopyPopup(prms, pos_element);
         }
     },

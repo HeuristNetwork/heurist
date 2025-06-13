@@ -1,52 +1,83 @@
 <?php
 /**
-* recordTemplate.php: Exports record structure templates in JSON format,
-* or calls record_output.php to export actual records (if rectype_ids is not provided)
+* recordTemplate.php: Exports record structure templates in JSON format.
+*
+* This script generates a JSON template representing the structure of specified
+* record types from a Heurist database. If the 'rectype_ids' request parameter
+* is not provided, it includes 'record_output.php' to attempt an export of
+* actual records instead.
+*
+* REMARK: A significant behavior of this script is that it first prints a large
+* block of instructional help text directly to the output, followed by the JSON data.
+* This help text is intended for users generating the template and includes a warning
+* "REMOVE THIS HELP WHEN IMPORTING!!". Programmatic consumers of this script's output
+* will need to account for and potentially strip this preamble.
+*
+* The generated JSON includes:
+*  - A "help" section with guidance on placeholder values (TRM_ID, DATE, etc.).
+*  - An array of "records", where each element is a template for a specific record type.
+*  - Placeholders for file fields, geo fields, and record references.
+*  - Database details including its registered ID, name, URL, and a list of the
+*    record types included in the template.
+*
+* The output is served as a downloadable JSON file.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  export\json
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Brandon McKay     <blmckay13@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Brandon McKay   <blmckay13@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6.6
+*
+* @uses $_REQUEST['rectype_ids'] Comma-separated list of record type IDs to include, or 'y'/'all' for all types.
+*                                If not present, script diverts to 'record_output.php'.
+* @uses $_REQUEST['db'] The name of the database to connect to.
 */
 use hserv\structure\ConceptCode;
 
-if(!array_key_exists('rectype_ids', $_REQUEST)){
-    require_once dirname(__FILE__).'/../../hserv/controller/record_output.php';// attempt to export actual records
+// If rectype_ids is not specified, this script's purpose changes to exporting actual records.
+if (!array_key_exists('rectype_ids', $_REQUEST)) {
+    // REMARK: This diverts execution to a different script for actual record export.
+    // The rest of this script (template generation) will not run.
+    require_once dirname(__FILE__).'/../../hserv/controller/record_output.php';
     exit;
 }
 
+// Standard Heurist includes
 require_once dirname(__FILE__).'/../../autoload.php';
-require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
-require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
+require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php'; // For dbs_GetRectypeStructures
+require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php'; // For recordTemplateByRecTypeID
 
-
-if(!defined('PDIR')){
+// Initialize Heurist system if not already done (e.g., if PDIR is not defined)
+if (!defined('PDIR')) {
     $system = new hserv\System();
-    if( !$system->init(filter_var(@$_REQUEST['db'])) ){
-        die("Cannot connect to database");
+    if (!$system->init(filter_var(@$_REQUEST['db']))) {
+        header("HTTP/1.1 404 Not Found");
+        echo "Error: Cannot connect to database specified by 'db' parameter.";
+        exit;
     }
 }
 
-// Record type names
-$rst = dbs_GetRectypeStructures($system, null, 0);//0 - only names and groupnames
+// --- Prepare Record Type Information ---
+// Get record type names and structures
+$rst = dbs_GetRectypeStructures($system, null, 0); // 0 = only names and groupnames
 $rty_names = $rst['names'];
 
-if(@$_REQUEST['rectype_ids']=='y' || @$_REQUEST['rectype_ids']=='all'){ //all
+// Determine which record type IDs to process
+if (@$_REQUEST['rectype_ids'] == 'y' || @$_REQUEST['rectype_ids'] == 'all') { // 'y' or 'all' means all record types
     $rectype_ids = array_keys($rty_names);
-}else{
+} else {
+    // prepareIds function is expected to be globally available or via autoload.
+    // It likely cleans and splits a comma-separated string of IDs.
     $rectype_ids = prepareIds(filter_var(@$_REQUEST['rectype_ids']));
 }
 
+// --- Output Preamble Help Text ---
+// REMARK: This extensive help text is printed directly to the output stream BEFORE the JSON content.
+// This is highly unconventional for a JSON export and means the output is not pure JSON.
+// Consumers of this script must be aware of this preamble.
 print "REMOVE THIS HELP WHEN IMPORTING!!\nFor preparing an JSON file
 with Heurist schema which can be imported into a Heurist database.
 \n
@@ -121,6 +152,7 @@ are imported. Since imported files will normally use a template for
 record types and fields exported from the target database, this is
 only useful for synchronising vocabularies and terms.\n\n";
 
+// This $import_help string is embedded as a JSON object within the main JSON output.
 $import_help = "{"
 . "\n \t\t\"TRM_ID\": \"Specifies any of the following, which are evaluated in order: local ID, concept code, label or standard code. If no match is found, the value will be added as a new term\","
 . "\n \t\t\"DATE\": \"Specify date field values in ISO format (yyyy or yyyy-mm or yyyy-mm-dd)\","
@@ -129,10 +161,8 @@ $import_help = "{"
 . "\n \t\t\"RECORD-IDENTIFIER\": \"Specify the record identifier in the source database (numeric or alphanumeric) if the record could be the target of a record pointer field, including the target record pointer of a relationship record.\""
 . "\n \t}";
 
-// START OUTPUT
-
+// --- Start JSON Output Construction ---
 $json = "{\"heurist\":{\n \t\"help\": ". $import_help .",\n \t\"records\":[";
-//fwrite($fd, "{\"heurist\":{\n \t\"help\": ". $import_help .",\n \t\"records\":[");// starting string
 
 // RECORD STRUCTURES
 $file_field = '{"file": {"ulf_ExternalFileReference": "FILE_OR_URL", "fxm_MimeType": "TEXT", "ulf_Description": "MEMO_TEXT", "ulf_OrigFileName": "TEXT"}}';
@@ -210,9 +240,11 @@ $json .= $db_details;
 // Close off
 $json .= "\n}}";
 
-$filename = 'Template_' . $_REQUEST['db'] . '_' . date("YmdHis") . '.json';
+// Sanitize DB name for filename
+$filename = 'Template_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $_REQUEST['db']) . '_' . date("YmdHis") . '.json'; 
 
-header(CTYPE_JSON);
-header('Content-Disposition: attachment; filename="'.$filename.'";');
+// --- Set Headers and Output JSON ---
+header(CTYPE_JSON); // Specify JSON content type and charset
+header('Content-Disposition: attachment; filename="'.$filename.'";'); // Suggest filename for download
 
-echo $json;
+echo $json; // Output the complete JSON string (which is preceded by the help text)

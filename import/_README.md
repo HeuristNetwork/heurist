@@ -1,18 +1,13 @@
+# Directory: import
 
-Directory:	/import
+## Overview
+This directory contains various modules and utilities for importing data into the Heurist system. This includes functionalities for synchronizing with external bibliographic managers (like Zotero), tools for importing data from delimited files (CSV, TSV), bookmarklet functionality, hyperlink importing, and other general import utilities.
 
-Overview:	Heurist Vsn 3 Functions for importing and disambiguating external data
-            These have not been significantly updated since version 3. They do what they do ...
-
-Notes:	
-
-		The bibliographic synchroniser (Zotero) is an extremely complex bit of imbricated coding developed by Tom Murtagh.
-
-		sucasa (removed to backlog) was an experimental Picasa web album importer developed by Kim Jackson.
- 		Needs a bit more work and is probably no longer relevant at 2023 because Picasa discontinued.
-
-
-Updated: 	16 Nov 2023
-
----------------------------------------------------------------------
+## Key Subdirectories
+- `/import/biblio/`: Contains tools for bibliographic synchronization, notably with Zotero.
+- `/import/bookmarklet/`: Files related to the Heurist browser bookmarklet for quick data capture.
+- `/import/delimited/`: Scripts for importing data from delimited files (e.g., CSV, TSV), covering definitions (record types, fields, terms) and record data.
+- `/import/fieldhelper/`: Functionality to synchronize media files in server folders with Heurist records using XML manifests.
+- `/import/hyperlinks/`: Tools for extracting and importing hyperlinks from web pages or HTML files.
+- `/import/utilities/`: General utilities for import tasks, such as importing from Heurist HML/JSON formats and managing file uploads.
 

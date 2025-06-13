@@ -240,6 +240,7 @@ function editCMS2(website_document){
                         initHidden: false, //!this.options.edit_structure,   //show structure list at once 
                         initClosed: false, //!this.options.edit_structure && (this.usrPreferences.structure_closed!=0),
                         slidable:false,  //otherwise it will be over center and autoclose
+                        enableCursorHotkey: false,
                         contentSelector: '.editStructure',   
                         onopen_start : function( ){ 
                             let tog = _ws_body.find('.ui-layout-toggler-'+options.editor_pos);

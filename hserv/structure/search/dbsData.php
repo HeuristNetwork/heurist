@@ -1,63 +1,57 @@
 <?php
-    /**
-    * dbsData.php - retrieving database definitions
-    *
-    * Library of function that provides database structure information: rectypes, fieldtypes and terms defined in database
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    * @todo convert to class (singleton?)
-    *
-    *
-    *
-    * dbs_ - prefix for functions
-    *
-    * dbs_GetRectypeStructures
-    * dbs_GetRectypeStructure
-    * dbs_GetRectypeGroups
-    * dbs_GetRectypeByID
-    * dbs_GetRectypeNames
-    * dbs_GetRectypeIDs  - returns array of rty_IDs
-    * dbs_GetTerms
-    * dbs_GetDetailTypes
-    * dbs_GetDtLookups
-    *
-    * TERMS RELATED FUNCTION - to be public methods,
-    * they work with global $terms array - need to be defined by dbs_GetTerms before call these methods
-    * getTermOffspringList
-    * getTermTopMostParent
-    * getTermChildren
-    * getTermChildrenAll - get all children including by reference as a flat array
-    * getTermInTree
-    * getTermByLabel
-    * getTermByCode
-    * getTermById
-    * getTermFullLabel
-    * getTermListAll - get tree for domain
-    * getTermLabels
-    * getTermCodes
-    *
-    * INTERNAL FUNCTIONS
-    * __getRectypeColNames
-    * __getColumnNameToIndex
-    * __getRectypeStructureFieldColNames
-    * __getTermTree
-    * __attachChild
-    * __getTermColNames
-    *
-    */
+/**
+* dbsData.php - Library of function to retrieve database definitions
+*
+* Library of function that provides database structure information: rectypes, fieldtypes and terms defined in database
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  hserv\structure\search
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
+* 
+* @todo convert to class (singleton?)
+*
+* dbs_ - prefix for functions
+*
+* dbs_GetRectypeStructures
+* dbs_GetRectypeStructure
+* dbs_GetRectypeGroups
+* dbs_GetRectypeByID
+* dbs_GetRectypeNames
+* dbs_GetRectypeIDs  - returns array of rty_IDs
+* dbs_GetTerms
+* dbs_GetDetailTypes
+* dbs_GetDtLookups
+*
+* TERMS RELATED FUNCTION - to be public methods,
+* they work with global $terms array - need to be defined by dbs_GetTerms before call these methods
+* getTermOffspringList
+* getTermTopMostParent
+* getTermChildren
+* getTermChildrenAll - get all children including by reference as a flat array
+* getTermInTree
+* getTermByLabel
+* getTermByCode
+* getTermById
+* getTermFullLabel
+* getTermListAll - get tree for domain
+* getTermLabels
+* getTermCodes
+*
+* INTERNAL FUNCTIONS
+* __getRectypeColNames
+* __getColumnNameToIndex
+* __getRectypeStructureFieldColNames
+* __getTermTree
+* __attachChild
+* __getTermColNames
+*
+*/
 
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
     use hserv\utilities\USanitize;
     use hserv\report\ReportTemplateMgr;
 
@@ -845,9 +839,6 @@ function dbs_GetRectypeConstraint($system) {
 
     }
 
-    //
-    // get inverse term and all its children terms
-    //
     /**
      * Retrieves the inverse terms (and optionally their children) for a given set of parent terms.
      *
@@ -877,9 +868,6 @@ function dbs_GetRectypeConstraint($system) {
 
     }
 
-    //
-    // get all children including by reference as a flat array
-    //
     /**
      * Retrieves all child term IDs for a given set of parent term IDs, including those linked by reference.
      *
@@ -955,9 +943,6 @@ function dbs_GetRectypeConstraint($system) {
         return $parent_label.$term_label;
     }
 
-    //
-    // get tree for domain
-    //
     /**
      * Retrieves a flat list of all term IDs belonging to a specific domain, including all their descendants.
      *

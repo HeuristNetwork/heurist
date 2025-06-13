@@ -1,37 +1,34 @@
 /**
+* importDefTerms.js - Class HImportTerms
+* 
 * Class to import terms from CSV
-*
+* 
 * @package     Heurist academic knowledge management system
+* @subpackage  import\delimited
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Brandon McKay   <blmckay13@gmail.com>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6.0
 */
 
 /**
  * @class HImportTerms
+ * @classdesc Class to import terms from CSV
  * @augments HImportBase
  * @classdesc For handling the bulk importing of new vocabularies and terms, or new label and description translations, by CSV
  *
- * @property {integer} vcg_ID - the default vocabulary group ID to add the new vocabularies to
- * @property {integer} trm_ParentTermID - the default vpcabulary/parent term to add the new terms to
- * @property {string} trm_Domain - what types of new vocabularies/terms are being created, [enum|relation]
- * @property {boolean} is_Translations - whether the import is for only translating existing term's label and description
+ * @property {number} _vcg_ID - The default vocabulary group ID to add the new vocabularies to.
+ * @property {number} _trm_ParentTermID - The default vocabulary/parent term ID to add the new terms to.
+ * @property {string} _trm_Domain - What types of new vocabularies/terms are being created, [enum|relation].
+ * @property {boolean} _is_Translations - Whether the import is for only translating existing term's label and description.
  *
- * @function doPrepare - Prepare data for creating new vocabularies/terms
- * @function doPrepareTranslation - Prepare data for creating new label and description translations
- * @function doPost - Sends the prepared data server side and either; creates the new vocabularies/terms or adds the new translation values
+ * @method doPrepare - Prepare data for creating new vocabularies/terms.
+ * @method doPrepareTranslation - Prepare data for creating new label and description translations.
+ * @method doPost - Sends the prepared data server side and either; creates the new vocabularies/terms or adds the new translation values.
  */
-
 class HImportTerms extends HImportBase{
 
     _vcg_ID = 0;
@@ -41,9 +38,10 @@ class HImportTerms extends HImportBase{
     _is_Translations = false;
 
     /**
-     * @param {integer} trm_ParentTermID - For importing new terms, the parent term for the to-be created terms
-     * @param {integer} vcg_ID - For importing vocabularies, the vocabulary group for the to-be created vocabularies
-     * @param {boolean} is_Translations - Whether this is to import term label and description translations
+     * @param {number} trm_ParentTermID - For importing new terms, the parent term ID for the to-be created terms.
+     * @param {number} vcg_ID - For importing vocabularies, the vocabulary group ID for the to-be created vocabularies.
+     * @param {boolean} is_Translations - Whether this is to import term label and description translations.
+     * @return {void}
      */
     constructor(trm_ParentTermID, vcg_ID, is_Translations){
 
@@ -105,7 +103,8 @@ class HImportTerms extends HImportBase{
     }
 
     /**
-     * Prepare CSV data for creating new terms/vocabularies
+     * Prepare CSV data for creating new terms/vocabularies.
+     * @return {void}
      */
     doPrepare(){
 
@@ -179,7 +178,8 @@ class HImportTerms extends HImportBase{
     }
 
     /**
-     * Prepare CSV data for creating new label and description translations
+     * Prepare CSV data for creating new label and description translations.
+     * @return {void}
      */
     doPrepareTranslation(){
 
@@ -231,7 +231,8 @@ class HImportTerms extends HImportBase{
     }
 
     /**
-     * Sends prepared data server side to create the new terms/vocabularies/translations
+     * Sends prepared data server side to create the new terms/vocabularies/translations.
+     * @return {void}
      */
     doPost(){
 

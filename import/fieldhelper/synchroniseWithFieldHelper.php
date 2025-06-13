@@ -1,34 +1,25 @@
 <?php
-
 /**
-* synchroniseWithFieldHelper.php
-* Read the FieldHelper XML manifests in directories specified in Advanced Properties,
-* and creates Heurist records for indexed files. If there is no manifest, it creates one.
-* The list of extensions indexed can also be specified in Advanced Properties, otherwise
-* it indexes a range of common file types including most text, image, audio and video formats
-*
-*
+* synchroniseWithFieldHelper.php - Indexes files in given folders and imports, updates Heurist records
+* 
+* It performs the following actions:
+*   - Reads existing manifests and updates or creates Heurist records for the files listed.
+*   - If a manifest doesn't exist, it can create one.
+*   - Indexes new files found in the directories that are not yet in a manifest, creating Heurist records and adding them to the manifest.
+*   - Supports a range of common file types (text, image, audio, video) and allows for custom-defined extensions.
+* 
 * @package     Heurist academic knowledge management system
+* @subpackage  import\fieldhelper
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.2
-* @param       includeUgrps=1 will output user and group information in addition to definitions
-* @param       approvedDefsOnly=1 will only output Reserved and Approved definitions
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @since       3.2
+* 
 * @todo        write Heurist IDs back into FH XML files
 * @todo        update existing records from XML files which have changed
 * @todo        update XML files from Heurist records which have changed
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
 */
 use hserv\utilities\USanitize;
 
@@ -267,6 +258,16 @@ $failed_exts = array();
 
         // ---- HARVESTING AND OTHER FUNCTIONS -----------------------------------------------------------------
 
+        /**
+         * Iterates through a list of directories and processes each for FieldHelper manifest synchronization.
+         * For each valid directory, it calls doHarvestInDir() to process files in that directory
+         * and then recursively calls itself for any subdirectories found.
+         * Special handling for "*" directory to mean the root HEURIST_FILESTORE_DIR.
+         * Outputs errors or progress messages directly.
+         *
+         * @param array $dirs An array of directory paths to process.
+         * @return void
+         */
         function doHarvestFieldHelper($dirs) {
 
             global $rep_counter, $rep_issues, $system_folders;
@@ -366,17 +367,28 @@ $failed_exts = array();
         }
 
         /**
-        * callback from saveRecord
-        *
-        * @param mixed $message
-        */
+         * Error handling callback, likely used for errors encountered during record saving operations.
+         * Appends an error message, including the currently processed file (from global $currfile),
+         * to the global $rep_issues string.
+         *
+         * @param string $message The error message.
+         * @return void
+         */
         function jsonError($message) {
             global $rep_issues, $currfile;
             //mysql_query("rollback");
             $rep_issues = $rep_issues."<br>Error save record for file:".$currfile.". ".$message;
         }
 
-
+        /**
+         * Extends the global $mediaExts array with new file extensions from the provided $versions array.
+         * The new extensions are only added if at least one extension from $versions is already
+         * present in the $mediaExts array. This ensures that related extensions (e.g., 'jpeg' for 'jpg')
+         * are added only if the primary type is already being processed.
+         *
+         * @param string[] $versions An array of file extension strings (e.g., ['jpg', 'jpeg']).
+         * @return void
+         */
         function extendMediaExts($versions){
             global $mediaExts;
 
@@ -391,12 +403,29 @@ $failed_exts = array();
 
 
         /**
-        *
-        * @global type $rep_counter
-        * @global string $rep_issues
-        * @global array $fieldhelper_to_heurist_map
-        * @param type $dir
-        */
+         * Processes a single directory to synchronize media files with a `fieldhelper.xml` manifest
+         * and Heurist records.
+         *
+         * This function performs the following main operations:
+         * 1. Reads an existing `fieldhelper.xml` manifest in the directory or prepares to create one.
+         * 2. Iterates through items in the manifest:
+         *    - If a Heurist record ID is present and valid, it may update the manifest (e.g., MD5).
+         *    - If no valid Heurist record ID is found for an item, it attempts to create a new
+         *      Heurist record for the corresponding file, then updates the manifest item.
+         * 3. Scans the directory for files not listed in the manifest:
+         *    - For each new eligible media file, it creates a Heurist record and adds a new
+         *      item to the manifest.
+         * 4. Saves the updated `fieldhelper.xml` manifest.
+         *
+         * Outputs HTML for progress and errors directly. Uses several global variables for configuration
+         * (e.g., $fieldhelper_to_heurist_map, $mediaExts, various DT constants) and reporting
+         * (e.g., $rep_issues, $progress_divid, $failed_exts).
+         *
+         * @param string $dir The full path to the directory to be processed.
+         * @return int The total number of files processed in this directory (both from existing
+         *             manifest entries that were processed and new files added to the manifest).
+         *             Returns 0 if the directory or manifest is not writable or if manifest is corrupt.
+         */
         function doHarvestInDir($dir) {
 
             global $system, $rep_issues, $fieldhelper_to_heurist_map, $mediaExts, $progress_divid,
@@ -881,10 +910,17 @@ XML;
 
 
         /**
-        * Read EXIF from JPEG files
-        *
-        * @param mixed $filename
-        */
+         * Reads EXIF data from JPEG or TIFF image files.
+         *
+         * Checks if the `exif_read_data` function exists and the file is accessible.
+         * Only processes files with .jpeg, .jfif, .jpg, .tif, or .tiff extensions.
+         *
+         * @param string $filename The full path to the image file.
+         * @return string|null A JSON encoded string of the EXIF data if successful,
+         *                     or null if the `exif_read_data` function is unavailable,
+         *                     the file does not exist, the file type is not supported,
+         *                     or no EXIF data is found.
+         */
         function readEXIF($filename){
 
             if(function_exists('exif_read_data') && file_exists($filename)){

@@ -1,14 +1,6 @@
 <?php
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 /**
-* recordsBatch.php
+* recordsBatch.php - Class RecordsBatch
 *
 * Class to perform actions in batch of records
 *   1) add/replace and delete details
@@ -18,11 +10,14 @@
 * Controller is record_batch.php
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\records\edit
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Brandon McKay   <blmckay13@gmail.com>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 use hserv\utilities\USanitize;
 use hserv\utilities\Temporal;
@@ -43,17 +38,19 @@ define('R_ARROW',' &Rightarrow; ');
 define('FILE_NO','File #');
 
 /**
+* Class RecordsBatch
+* 
 * Methods for batch actions for list of records (recIDs) OR by record type rtyID
-*
 *
 * detailsAdd - add details
 * replace
 * detailsReplace - replace + detailsAdd
 * detailsDelete
-* multiAction  - several actions in tuen: add,replace,delete
+* multiAction  - executes several actions in turn: add,replace,delete
 *
 * addRevercePointerForChild - Adds parent pointer field converts - converts existing
 *                             records to child record for given rectype/detailtype
+* 
 * changeRecordTypeInBatch - Changes rec_RecTypeID in batch
 *
 * extractPDF - extracts PDF file content is put it into DT_EXTRACTED_TEXT field
@@ -117,10 +114,18 @@ class RecordsBatch
        $this->system->getUserGroupIds(null, true);
     }
 
-    //
-    // Fills the list of exclusions for purifier
-    // And inits HTML purifier
-    //
+    /**
+     * Initializes the HTML Purifier instance and sets up a list of detail type IDs
+     * that should not be subjected to HTML purification.
+     *
+     * Currently, only `DT_CMS_EXTFILES` is added to the `not_purify` list.
+     * The HTML Purifier instance itself (`$this->purifier`) is intended to be initialized
+     * via `USanitize::getHTMLPurifier()`, but this line is currently disabled in the code.
+     * This method ensures that initialization happens only once.
+     *
+     * @access private
+     * @return void
+     */
     private function _initPutifier(){
         if($this->purifier==null){
             $not_purify = array();
@@ -131,20 +136,46 @@ class RecordsBatch
         }
     }
 
-    //
-    //
-    //
+    /**
+     * Sets or updates the internal data array for the batch operation.
+     *
+     * This method allows changing the parameters for the batch operation after the object has been instantiated.
+     * The `$data` array typically includes parameters like 'recIDs', 'rtyID', 'dtyID', values for addition/replacement, etc.
+     *
+     * @param array $data An associative array containing the parameters for the batch operation.
+     *                    The specific required and optional keys depend on the batch action to be performed.
+     * @return void
+     */
     public function setData($data){
         $this->data = $data;
     }
 
+    /**
+     * Retrieves the results of the last executed batch operation.
+     *
+     * The structure of the result array (`$this->result_data`) is populated by methods like
+     * `_assignTagsAndReport` and varies depending on the operation performed. It generally includes
+     * counts of processed records, errors, and potentially lists of affected/failed record IDs.
+     *
+     * @return array An associative array containing the report of the last batch operation.
+     *               The array is empty if no operation has been run or if it was reset.
+     */
     public function getReport(){
         return $this->result_data;
     }
 
-    //
-    //
-    //
+    /**
+     * Validates the record type ID (`rtyID`) and detail type ID (`dtyID`) parameters
+     * provided in `$this->data`.
+     *
+     * - `rtyID` (if provided) must be a positive integer or an array of positive integers.
+     * - `dtyID` must be a positive integer.
+     *
+     * Errors are added to the system object if validation fails.
+     *
+     * @access private
+     * @return bool True if the parameters are valid, false otherwise.
+     */
     private function _validateDetailType(){
 
         $rtyID = @$this->data['rtyID'];
@@ -163,9 +194,100 @@ class RecordsBatch
         return true;
     }
 
-    //
-    //
-    //
+    /**
+     * Checks if a target record type (`$rtyID`) includes all specified detail types (`$dtyIDs`).
+     * If `$importFromRty` is provided and greater than 0, and a field is missing in `$rtyID`,
+     * this function will attempt to copy the field definition from `$importFromRty`'s structure
+     * into `$rtyID`'s structure.
+     *
+     * @access private
+     * @param int $rtyID The ID of the target record type whose structure is to be checked (and potentially updated).
+     * @param array $dtyIDs An array of detail type IDs that must exist in the target record type's structure.
+     * @param int $importFromRty Optional. The ID of a source record type from which to copy field definitions
+     *                           if they are missing in `$rtyID`. Defaults to 0 (no import).
+     * @return bool True if all specified `$dtyIDs` exist in `$rtyID`'s structure (either initially or after import),
+     *              false otherwise (e.g., invalid parameters, a field is missing and cannot be imported, DB error).
+     *              Errors are added to the system object on failure.
+     */
+    private function checkRecordStructure($rtyID, $dtyIDs, $importFromRty = 0){
+
+        $dtyIDs = prepareIds($dtyIDs);
+        $rtyID = intval($rtyID);
+        $importFromRty = intval($importFromRty);
+
+        if($rtyID <= 0 || empty($dtyIDs)){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, $rtyID <= 0 ? 'Invalid record type to check has been provided' : 'No fields have been provided to check for');
+            return false;
+        }
+
+        $mysqli = $this->system->getMysqli();
+        $hasAllFields = true;
+
+        foreach($dtyIDs as $dtyID){
+
+            $hasFld = mysql__select_value($mysqli, "SELECT rst_ID FROM defRecStructure WHERE rst_DetailTypeID = ? AND rst_RecTypeID = ?", ['ii', $dtyID, $rtyID]);
+
+            if($hasFld > 0){
+                continue;
+            }
+
+            if($importFromRty <= 0){
+                $hasAllFields = $dtyID;
+                break;
+            }
+
+            $fieldDetails = mysql__select_row_assoc($mysqli, "SELECT * FROM defRecStructure WHERE rst_DetailTypeID = {$dtyID} AND rst_RecTypeID = {$importFromRty}");
+            if(empty($fieldDetails)){
+                $hasAllFields = $dtyID;
+                break;
+            }
+
+            unset($fieldDetails['rst_ID']);
+
+            $fieldDetails['rst_RecTypeID'] = $rtyID;
+
+            $rstID = mysql__insertupdate($mysqli, 'defRecStructure', 'rst', $fieldDetails, true);
+
+            if(!$rstID){
+                $hasAllFields = $dtyID;
+                break;
+            }
+        }
+
+        if(is_int($hasAllFields)){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, "Record structure is missing field type {$hasAllFields}");
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Validates overall parameters for a batch operation and determines the count and
+     * accessibility of records to be processed.
+     *
+     * It performs the following checks and operations:
+     * 1. User Permissions: Checks if the current user has 'edit' permissions using `userCheckPermissions`.
+     * 2. Detail Type Validation: Calls `_validateDetailType` unless the action is 'reset_thumbs'.
+     * 3. Record IDs Presence: Ensures `recIDs` are provided in `$this->data`.
+     * 4. Record Counting and Accessibility:
+     *    - If the user is an admin and `recIDs` is 'ALL', it counts all records, optionally filtered by `rtyID`.
+     *      Sets `$this->recIDs` to `['all']`.
+     *    - Otherwise, it normalizes `recIDs` to an array.
+     *    - Filters these IDs by `rtyID` if provided.
+     *    - Further filters IDs based on user's edit rights (admin sees all, others see owned/group-owned).
+     *    - Populates `$this->recIDs` with the list of accessible record IDs.
+     *    - Populates `$this->rtyIDs` with the distinct record type IDs of the accessible records.
+     *    - Initializes `$this->result_data` with 'passed' and 'noaccess' counts.
+     *
+     * Errors are added to the system object for failed validations.
+     *
+     * @access private
+     * @return bool True if initial validations pass and there are potentially processable records (or 'all' mode),
+     *              false if critical validation fails (e.g., no permission, missing recIDs).
+     *              Note: It can return true even if `$this->recIDs` ends up empty after filtering,
+     *              allowing the calling method to report based on initial 'passed' vs 'noaccess' counts.
+     */
     private function _validateParamsAndCounts()
     {
         // Check that the user is allowed to edit records
@@ -261,18 +383,30 @@ class RecordsBatch
         return true;
     }
 
-    //
-    //
-    //
+    /**
+     * Retrieves the base type of a given detail type ID.
+     *
+     * Queries the `defDetailTypes` table for the `dty_Type` (e.g., 'freetext', 'enum', 'resource').
+     *
+     * @access private
+     * @param int $dty_ID The detail type ID.
+     * @return string|null The `dty_Type` string if found, otherwise null.
+     */
     private function getDetailType($dty_ID){
         return mysql__select_value($this->system->getMysqli(),
-                 'Select dty_Type from defDetailTypes where dty_ID = '.$dty_ID);
+                 'Select dty_Type from defDetailTypes where dty_ID = '.intval($dty_ID));
     }
 
 
-    //
-    //
-    //
+    /**
+     * Removes `<script>` tags and their content from a given string.
+     *
+     * Also trims whitespace from the beginning and end of the string.
+     *
+     * @access private
+     * @param string $value The input string.
+     * @return string The string with script tags removed and trimmed.
+     */
     private function _removeScriptTag($value){
         $value = trim($value);
         return preg_replace('#<script(.*?)>(.*?)</script>#is', '', $value);
@@ -281,11 +415,35 @@ class RecordsBatch
 
     /**
     * Converts existing records to child record for given rectype/detailtype
-    * (adds rever pointer field DT_PARENT_ENTITY)
+    * (adds reverse pointer field DT_PARENT_ENTITY) to child records.
     *
-    * rtyID - record type that is parent
-    * dtyID - pointer detail type
+    * This method identifies parent-child relationships based on a specified pointer field (`dtyID`)
+    * within a given parent record type (`rtyID`). For each such identified child record, it adds
+    * a "Parent Entity" (DT_PARENT_ENTITY) detail pointing back to its parent.
+    * It also updates the child record's title and sets the `rst_CreateChildIfRecPtr` flag
+    * to 1 for the specified parent pointer field in `defRecStructure`.
     *
+    * This operation requires admin privileges.
+    * The constant `DT_PARENT_ENTITY` must be defined.
+    *
+    * Expected parameters in `$this->data`:
+    * - 'rtyID': (int) The record type ID of the parent records.
+    * - 'dtyID': (int) The detail type ID of the pointer field in the parent records that points to the child records.
+    * - 'allow_multi_parent': (bool, optional) If true, allows a child record to have multiple Parent Entity pointers.
+    *                           If false (default), an existing Parent Entity pointer might be updated if one already exists.
+    *
+    * @return array|false Returns an associative array summarizing the operation on success, including counts of:
+    *                     - 'passed': Total potential parent-child links found.
+    *                     - 'noaccess': Child records the current user couldn't access (should be 0 for admin).
+    *                     - 'disambiguation': Child records linked from multiple parents when `allow_multi_parent` is false.
+    *                     - 'processedParents': Array of parent record IDs that were processed.
+    *                     - 'childInserted': Array of child record IDs where a new Parent Entity pointer was inserted.
+    *                     - 'childUpdated': Array of child record IDs where an existing Parent Entity pointer was updated.
+    *                     - 'childAlready': Array of child record IDs that already had the correct Parent Entity pointer.
+    *                     - 'childMiltiplied': Array of child record IDs that received an additional Parent Entity pointer (if `allow_multi_parent` was true).
+    *                     - 'titlesFailed': Array of child record IDs whose titles failed to update.
+    *                     Returns `false` if there's a permission error, critical system error (like DT_PARENT_ENTITY not defined),
+    *                     invalid parameters, or a database error during the process. Errors are added to the system object.
     */
     public function addRevercePointerForChild(){
 
@@ -448,7 +606,41 @@ class RecordsBatch
     }
 
     /**
-    *  parameters of  data: recIDs, dtyID, val (or geo or ulfID)
+    * Adds a new detail value to a batch of records for a specified detail type.
+    *
+    * This method processes a list of record IDs (`$this->recIDs`), adding a new detail value
+    * (`$this->data['val']`, `['geo']`, or `['ulfID']`) for the specified detail type (`$this->data['dtyID']`).
+    *
+    * Key operations:
+    * - Validates that a value to add is provided.
+    * - Decodes URL-encoded values if `details_encoded` is set.
+    * - Validates general parameters and record counts/accessibility using `_validateParamsAndCounts`.
+    * - Checks field limits (`rst_MaxValues`) for each record; skips addition if the limit would be exceeded.
+    * - Prepares the detail value:
+    *   - For geo fields, uses `prepareGeoValue`.
+    *   - For date fields, uses `Temporal::getValueForRecDetails`.
+    *   - For text fields, applies HTML purification (unless field is exempt) via `_initPutifier` and `_removeScriptTag`.
+    * - Inserts the new detail into `recDetails`.
+    * - Updates the `rec_Modified` timestamp for the affected record.
+    * - Updates the record's title using `recordUpdateTitle`.
+    * - Assigns system tags to records based on the outcome (processed, undefined field limit, over limit, SQL errors)
+    *   if tagging is enabled (`$this->data['tag'] == 1`).
+    *
+    * Expected parameters in `$this->data`:
+    * - 'recIDs': (string|array) List of record IDs or 'ALL'.
+    * - 'rtyID': (int|array, optional) Filter by record type(s).
+    * - 'dtyID': (int) The detail type ID for which to add the value.
+    * - 'dtyName': (string, optional) Name of the detail type (for tagging).
+    * - 'val': (string, optional) The textual value to add.
+    * - 'geo': (string, optional) The geographic WKT string to add.
+    * - 'ulfID': (int, optional) The uploaded file ID to link.
+    * - 'details_encoded': (int, optional) 1 or 2 if 'val' is URL-encoded.
+    * - 'tag': (int, optional) 1 to enable system tagging of processed records.
+    *
+    * @return array|false The result array (`$this->result_data`) summarizing the operation (counts for 'passed',
+    *                     'noaccess', 'processed', 'undefined', 'limited', 'errors', and tag info).
+    *                     Returns `false` if critical validation fails (e.g., missing value, invalid params).
+    *                     Errors are added to the system object.
     */
     public function detailsAdd(){
 
@@ -606,9 +798,33 @@ class RecordsBatch
     }
 
     /**
-    * Executes several actions in turn
-    * Queue is defined in "actions" parameter
-    * Supports add,replace,delete
+    * Executes a sequence of batch actions (add, replace, delete) in a single transaction.
+    *
+    * The actions to be performed are defined in the `$this->data['actions']` array.
+    * Each element in this array is an associative array specifying an action ('a') and its parameters.
+    * Supported actions:
+    *  - 'add': Calls `detailsAdd()`.
+    *  - 'replace': Calls `detailsReplace()`.
+    *  - 'addreplace': Calls `detailsReplace()`. If `detailsReplace` indicates the field was undefined (value not found to replace),
+    *                  it then calls `detailsAdd()` to add the value as a new detail.
+    *  - 'delete': Calls `detailsDelete(true)`.
+    *
+    * All database operations are wrapped in a single MySQL transaction. If any action fails,
+    * the transaction is rolled back.
+    * The results of each action (specifically the 'processed' count) are aggregated into `$this->result_data`.
+    *
+    * Expected structure for `$this->data['actions']`:
+    * `[
+    *   ['a' => 'action_name_1', 'param1' => 'value1', ...],
+    *   ['a' => 'action_name_2', 'param1' => 'valueX', ...],
+    *   ...
+    * ]`
+    * Each sub-array's parameters must match what's expected by the corresponding method
+    * (`detailsAdd`, `detailsReplace`, `detailsDelete`).
+    *
+    * @return array|false The aggregated `$this->result_data` array if all actions succeed and the transaction is committed.
+    *                     Returns `false` if any action returns `false` (indicating a critical error),
+    *                     leading to a transaction rollback. System errors are set by the individual action methods.
     */
     public function multiAction(){
 
@@ -665,9 +881,41 @@ class RecordsBatch
     }
 
     /**
-    * Replace detail value for given set of records and detail type and values
-    * sVal - search value to replace otherwise replace all values
-    * rVal - new value
+    * Replaces existing detail values in a batch of records.
+    *
+    * This method allows for replacing detail values based on various criteria:
+    * - Replace all occurrences of a specific detail type (`dtyID`) if search value (`sVal`) is not provided.
+    * - Replace specific values (`sVal`) if provided.
+    * - Partial replacement within a string (`subs` or `substr` flags).
+    * - Whole value exact match (`wholeval` flag).
+    * - Option to insert the new value if the search value is not found (`insert_new_values` flag).
+    *
+    * Key operations:
+    * - Validates parameters: presence of replacement value (`rVal`), general params via `_validateParamsAndCounts`.
+    * - Handles URL decoding of `rVal` if `encoded` flag is set.
+    * - Checks for max length of `rVal` and splits it if it's for `DT_EXTENDED_DESCRIPTION` and `needSplit` is true.
+    * - Constructs a search clause based on `sVal` and field type (`basetype`).
+    * - Iterates through records, finds matching details, and updates them.
+    *   - For text fields, performs string replacement or sets new value. HTML purification is applied.
+    *   - For geo/date fields, prepares value using `prepareGeoValue`/`Temporal::getValueForRecDetails`.
+    * - Updates `rec_Modified` and record title for affected records.
+    * - Assigns system tags if enabled.
+    *
+    * Expected parameters in `$this->data`:
+    * - 'recIDs', 'rtyID', 'dtyID', 'dtyName', 'tag': Common batch parameters.
+    * - 'rVal': (string, required unless 'replace_empty' is 1) The replacement value.
+    * - 'sVal': (string, optional) The value to search for. If null, all values of `dtyID` are targeted.
+    * - 'encoded': (int, optional) 1 or 2 if `rVal` is URL-encoded.
+    * - 'replace_empty': (int, optional) If 1, allows `rVal` to be null/empty.
+    * - 'needSplit': (bool, optional) If true and `dtyID` is `DT_EXTENDED_DESCRIPTION`, splits long `rVal`.
+    * - 'dt_extended_description': (int, optional) Overrides `DT_EXTENDED_DESCRIPTION` constant.
+    * - 'subs'/'substr': (int, optional) If 1, enables partial string replacement.
+    * - 'wholeval': (int, optional) If 1, search for whole value match.
+    * - 'insert_new_values': (int, optional) If 1 and `sVal` is not found (or not provided), insert `rVal` as a new detail.
+    * - 'debug': (bool, optional) If true, skips actual database updates.
+    *
+    * @return array|false The result array (`$this->result_data`) summarizing the operation.
+    *                     Returns `false` on critical validation failure or DB error during main query.
     */
     public function detailsReplace()
     {
@@ -1032,7 +1280,33 @@ class RecordsBatch
     }
 
     /**
-    * Remove detail value for given set of records and detail type and values
+    * Deletes detail values from a batch of records based on specified criteria.
+    *
+    * Key operations:
+    * - Validates parameters and record accessibility using `_validateParamsAndCounts`.
+    * - Constructs a search clause based on `$this->data['sVal']` (search value) and the field's base type.
+    *   - If `sVal` is not provided, all details of the specified `dtyID` are targeted for deletion.
+    *   - For text fields, allows partial (`subs`/`substr`) or whole value (`wholeval`) matching.
+    * - Checks if the detail type is 'required' for any of the record types being processed. If so, and if
+    *   the deletion would remove all instances of this required field for a record, that record is skipped
+    *   (unless `$unconditionally` is true).
+    * - Deletes matching `recDetails` entries.
+    * - If `partialRemove` is true for text fields, it replaces the `sVal` substring with an empty string instead of deleting the whole detail.
+    *   If this results in an empty string, the detail is deleted.
+    * - Updates `rec_Modified` and record title for affected records.
+    * - Assigns system tags if enabled.
+    *
+    * Expected parameters in `$this->data`:
+    * - 'recIDs', 'rtyID', 'dtyID', 'dtyName', 'tag': Common batch parameters.
+    * - 'sVal': (string, optional) The value to search for deletion. If empty or not set, all details of `dtyID` are targeted.
+    * - 'subs'/'substr': (int, optional) If 1, enables partial string match for deletion (effectively a replace-with-empty).
+    * - 'wholeval': (int, optional) If 1, search for whole value exact match for deletion.
+    *
+    * @param bool $unconditionally If true, bypasses checks for 'required' fields and deletes them even if they are mandatory.
+    *                              Also, if `sVal` is not provided, this being true implies deleting all instances of the field.
+    *                              Defaults to false.
+    * @return array|false The result array (`$this->result_data`) summarizing the operation.
+    *                     Returns `false` on critical validation failure or if the field type is unsupported for deletion (e.g., 'relmarker').
     */
     public function detailsDelete($unconditionally=false){
 
@@ -1307,9 +1581,22 @@ class RecordsBatch
 
 
     /**
-    * Changes rec_RecTypeID in batch
+    * Changes the record type (`rec_RecTypeID`) for a batch of records.
     *
-    * rtyID_new - new record type
+    * Key operations:
+    * - Validates parameters and record accessibility using `_validateParamsAndCounts`.
+    *   (A dummy `dtyID` is set to pass this validation as it's not strictly needed here).
+    * - Iterates through the accessible records and updates their `rec_RecTypeID` and `rec_Modified` timestamp.
+    * - Updates the title for each modified record using `TitleMask::fill` (which uses the new record type's mask).
+    * - Assigns system tags if enabled.
+    *
+    * Expected parameters in `$this->data`:
+    * - 'recIDs', 'rtyID' (original type for filtering, optional), 'tag': Common batch parameters.
+    * - 'rtyID_new': (int, required) The ID of the new record type to assign.
+    * - 'rtyName': (string, optional) The name of the new record type (for tagging).
+    *
+    * @return array|false The result array (`$this->result_data`) summarizing the operation.
+    *                     Returns `false` on critical validation failure.
     */
     public function changeRecordTypeInBatch(){
 
@@ -1364,10 +1651,34 @@ class RecordsBatch
 
 
     /**
-    * Extracts text content from PDF file that is defined in dtyID field
-    * and put this content to DT_EXTRACTED_TEXT field
+    * Extracts text content from PDF files associated with records in a batch
+    * and stores the extracted text into a specified detail field (defaulting to `DT_EXTRACTED_TEXT`).
     *
-    * for recIDs
+    * Key operations:
+    * - Validates parameters and record accessibility. Defaults `dtyID` to `DT_EXTRACTED_TEXT` if not provided.
+    * - For each record:
+    *   - Checks if the target text field already has a value; if so, skips (adds to `skippedRecIDs`).
+    *   - Searches for PDF files linked to the record via any file-type field using `recordSearchByID`.
+    *   - For each PDF found:
+    *     - Parses the PDF using `\Smalot\PdfParser\Parser`.
+    *     - Extracts text from pages (up to a limit of 60000 chars or 10 pages).
+    *     - Handles UTF-8 encoding issues.
+    *     - If text is extracted, it's split into chunks of max 20000 chars and new details are created
+    *       for the target `dtyID` with this text.
+    *     - Updates `rec_Modified` for the record.
+    * - Handles progress tracking if `session_id` is set.
+    * - Assigns system tags if enabled and reports various outcomes (processed, skipped, errors, parse exceptions).
+    *
+    * Note: Requires the `smalot/pdfparser` library.
+    * If `DEBUG_RUN` constant is true, actual PDF parsing is skipped.
+    *
+    * Expected parameters in `$this->data`:
+    * - 'recIDs', 'rtyID' (optional), 'tag': Common batch parameters.
+    * - 'dtyID': (int, optional) The detail type ID where extracted text should be stored.
+    *            Defaults to `DT_EXTRACTED_TEXT` (constant `2-652`).
+    *
+    * @return array|false The result array (`$this->result_data`) summarizing the operation.
+    *                     Returns `false` on critical validation failure or if `DT_EXTRACTED_TEXT` is not defined and no `dtyID` is given.
     */
     public function extractPDF(){
 
@@ -1585,10 +1896,33 @@ class RecordsBatch
     }
 
     /**
-    * Converts remote URLs in the specified File field, places them in the database,
-    * and replaces the remote URL with a reference to file in the database
+    * Converts remote file URLs (stored as `_remote` type in `recUploadedFiles`) within a specified
+    * file-type detail field (`dtyID`) into locally stored files for a batch of records.
     *
-    * for recIDs
+    * Key operations:
+    * - Validates parameters and record accessibility.
+    * - Iterates through records and the specified `dtyID`:
+    *   - Finds `recDetails` entries that link to `recUploadedFiles` where `ulf_OrigFileName` is "_remote".
+    *   - Optionally filters by a substring in `ulf_ExternalFileReference` (`$this->data['url_substring']`).
+    *   - For each unique remote URL (`ulf_ExternalFileReference`):
+    *     - Downloads the file and registers it as a new local entry in `recUploadedFiles` using `DbRecUploadedFiles::downloadAndRegisterdURL()`.
+    *       This method can check for existing files by name/checksum to avoid duplicates, based on the `$match_only` parameter.
+    *     - If successful, the new local `ulf_ID` is obtained.
+    *   - Updates all `recDetails` entries that pointed to the old remote `ulf_ID` to now point to the new local `ulf_ID`
+    *     using `_updateUploadedFileIDs()`. This also updates `dtl_Modified`.
+    * - If `$this->data['delete_file']` is 1, and after updating references, if the original remote `ulf_ID`
+    *   is no longer referenced by any details, or if all its references were updated, the original `recUploadedFiles`
+    *   entry for the remote URL is deleted.
+    * - Assigns system tags if enabled and reports outcomes.
+    *
+    * Expected parameters in `$this->data`:
+    * - 'recIDs', 'rtyID' (optional), 'dtyID', 'dtyName' (optional), 'tag': Common batch parameters.
+    * - 'url_substring': (string, optional) Only process URLs containing this substring.
+    * - 'match_only': (int, optional) Matching mode for `downloadAndRegisterdURL`. 1 for name only, 2 for name and checksum.
+    * - 'delete_file': (int, optional) If 1, delete original `_remote` `recUploadedFiles` entry if no longer used or if all references updated.
+    *
+    * @return array|false The result array (`$this->result_data`) summarizing the operation.
+    *                     Returns `false` on critical validation failure.
     */
     public function changeUrlToFileInBatch(){
 
@@ -1697,9 +2031,20 @@ class RecordsBatch
         return $this->result_data;
     }
 
-    //
-    //
-    //
+    /**
+     * Updates the `dtl_UploadedFileID` and `dtl_Modified` timestamp for a given list of detail IDs (`dtl_ID`).
+     *
+     * This is a helper function typically used after a file operation (e.g., downloading an external URL
+     * to create a local file, or uploading a local file to a repository and then linking back to the URL).
+     * It changes which uploaded file (`recUploadedFiles` entry) a set of `recDetails` entries point to.
+     *
+     * @access private
+     * @param int $ulf_ID_new The new `ulf_ID` (ID from `recUploadedFiles`) to assign to the details. Must be > 0.
+     * @param array $dtl_IDs An array of `dtl_ID`s (primary keys from `recDetails`) to update. Must not be empty.
+     * @param string $date_mode The timestamp string (e.g., from `date(DATE_8601)`) to set for `dtl_Modified`.
+     * @return bool True if the update query was successful (or if no update was needed due to invalid params),
+     *              false if a database error occurred during the update.
+     */
     private function _updateUploadedFileIDs($ulf_ID_new, $dtl_IDs, $date_mode){
 
         if($ulf_ID_new>0 && !empty($dtl_IDs)){
@@ -1721,8 +2066,22 @@ class RecordsBatch
 
 
     /**
-    * Deletes thumbnail images for files assosiated with selected records
+    * Deletes thumbnail image files for all files associated with the selected records.
     *
+    * This method identifies all uploaded files (`recUploadedFiles`) linked to the
+    * specified batch of records via `recDetails`. For each such file, it constructs
+    * the path to its thumbnail (e.g., `HEURIST_THUMB_DIR.'ulf_'.$obfuscatedFileID.'.png'`)
+    * and deletes the thumbnail file if it exists.
+    *
+    * Note: This action is identified by `$this->data['a'] == 'reset_thumbs'` within `_validateParamsAndCounts`
+    * to bypass the usual detail type validation, as it operates on all file fields.
+    *
+    * Expected parameters in `$this->data`:
+    * - 'recIDs', 'rtyID' (optional): Common batch parameters to select records.
+    *
+    * @return array|false The result array (`$this->result_data`) with `['processed']` set to the count
+    *                     of successfully deleted thumbnail files.
+    *                     Returns `false` on critical validation failure.
     */
     public function resetThumbnails(){
 
@@ -1757,40 +2116,46 @@ class RecordsBatch
         return $this->result_data;
     }
 
-    //
-    // remove long-time opeartion from session table
-    //
+    /**
+     * Removes the progress tracking session file/entry associated with the current batch operation.
+     *
+     * If a `session_id` was provided during the instantiation or set in the data,
+     * this method calls `mysql__update_progress` with the 'REMOVE' action
+     * to clean up the progress tracking data. This is typically called after a long-running
+     * batch operation is completed or terminated.
+     *
+     * @return void
+     */
     public function removeSession(){
         if($this->session_id!=null){
             mysql__update_progress($this->system->getMysqli(), $this->session_id, false, 'REMOVE');
         }
     }
 
-/*
-public methods
-
-    detailsAdd
-    detailsReplace
-    detailsDelete
-    changeRecordTypeInBatch
-    addRevercePointerForChild
-    setRecordAsChild
-    extractPDF
-    -------------
-*/
-
-// all tags routine must be in dbUsrTags
-    /*
-    * helper method
-    * assign special system tags
-    *       passed - count of given rec ids
-    *       noaccess - no rights to edit
-    *       processed - success
-                _tag   _tag_error
-    *       undefined - value not found
-    *       errors     - sql error on search or updata
-                errors_list
-    */
+    /**
+     * Updates the batch operation report (`$this->result_data`) with counts for a given processing type
+     * and optionally assigns a system tag to the affected records.
+     *
+     * If `$type` indicates an error or specific failure (e.g., 'errors', 'parseexception'),
+     * `$recordIds` is expected to be an associative array [recID => message], and this list is stored
+     * in `$this->result_data[$type.'_list']`. For other types, `$recordIds` is a simple array of record IDs.
+     * The count of records is stored in `$this->result_data[$type]`.
+     *
+     * If `$this->data['tag']` is 1 and a `$baseTag` string is provided, this function
+     * attempts to assign a system tag to the `$recordIds`. The tag name is `$baseTag` or
+     * `$baseTag . ' ' . $type` if `$type` is not 'processed'.
+     * The outcome of tagging (tag name or error) is stored in `$this->result_data[$type.'_tag']`
+     * or `$this->result_data[$type.'_tag_error']`.
+     *
+     * @access private
+     * @param string $type A string key indicating the type of processing outcome for these records
+     *                     (e.g., 'processed', 'undefined', 'limited', 'errors', 'parseexception', 'parseempty', 'fails').
+     * @param array $recordIds An array of record IDs, or an associative array [recID => message] for error types.
+     * @param string|null $baseTag The base name for the system tag to be assigned. If null, no tagging occurs.
+     * @return void
+     * 
+     * @todo all tags routine must be from DbUsrTags
+     */
     private function _assignTagsAndReport($type, $recordIds, $baseTag)
     {
         if (!isEmptyArray($recordIds)) {
@@ -1822,16 +2187,23 @@ public methods
     }
 
     /**
-    * Assign tags to records and bookmark records
+    * Assigns specified tags to a list of records and creates bookmarks for these records for the given user/group.
     *
-    * @param mixed $system
-    * @param mixed $record_ids - array of record ids
-    * @param mixed $tag_ids - array of tag ids
-    * @param mixed $tag_names - if tag ids are not defined, we use $tag_names to get ids
-    * @param mixed $ugrID
+    * - Validates user access rights for the target user/group (`$ugrID`).
+    * - If `$tag_ids` are not provided, it resolves `$tag_names` to tag IDs using `_tagGetByName`, creating new tags if necessary.
+    * - Inserts new tag links into `usrRecTagLinks` (ignoring duplicates).
+    * - If `$ugrID` represents a user (not a group), it creates bookmarks in `usrBookmarks` for records that are not already bookmarked by that user.
     *
-    * returns false if error
-    *     or array ('tags_added'=>$tag_count, 'bookmarks_added'=>$bookmarks_added)
+    * @access private
+    * @param array $record_ids An array of record IDs to which tags/bookmarks will be applied.
+    * @param array|null $tag_ids An array of tag IDs to assign. If null, `$tag_names` must be provided.
+    * @param string|null $tag_names A comma-separated string of tag names. Used if `$tag_ids` is null.
+    *                                New tags will be created if they don't exist for the `$ugrID`.
+    * @param int|null $ugrID The user/group ID for whom the tags are being assigned and bookmarks created.
+    *                        Defaults to the current user ID from `$this->system`.
+    * @return array|false Returns an associative array `['tags_added' => count, 'bookmarks_added' => count]` on success.
+    *                     Returns `false` if there's a permission error, invalid parameters (e.g., no record IDs, no tag IDs/names),
+    *                     or a database error during insertion. Errors are added to the system object.
     */
     private function _tagsAssign($record_ids, $tag_ids, $tag_names=null, $ugrID=null){
 
@@ -1913,10 +2285,19 @@ public methods
     }
 
     /**
-    * Get tag IDs by tag names
+    * Retrieves tag IDs for a given list of tag names, optionally creating them if they don't exist.
     *
-    * @param mixed $tag_names
-    * @param mixed $ugrID
+    * Tags are specific to a user/group (`$ugrID`).
+    * If `$isadd` is true, any tag name not found for the given `$ugrID` will be created using `_tagSave`.
+    *
+    * @access private
+    * @param array|string $tag_names An array of tag name strings, or a single comma-separated string of tag names.
+    * @param bool $isadd If true, new tags will be created if they don't already exist for the specified user/group.
+    * @param int|null $ugrID The user/group ID to which the tags belong or will belong.
+    *                        Defaults to the current user ID from `$this->system`.
+    * @return array|null An array of unique tag IDs (integers) corresponding to the provided names.
+    *                    Returns null if `$ugrID` cannot be determined.
+    *                    Returns an empty array if no tag names are provided or no tags are found/created.
     */
     private function _tagGetByName($tag_names, $isadd, $ugrID=null){
 
@@ -1954,12 +2335,24 @@ public methods
     }
 
     /**
-    * insert/update tag
+    * Inserts or updates a tag in the `usrTags` table.
     *
-    * @param mixed $system
-    * @param mixed $tag  - array [ ID, UGrpID, Text, Description, AddedByImport ]
+    * - Validates that the tag text (`$tag['tag_Text']`) is provided.
+    * - Checks if the current user has access rights for the specified `$tag['tag_UGrpID']`.
+    * - If inserting a new tag (no `tag_ID` provided or `tag_ID` < 1), it first checks if a tag with the
+    *   same text already exists for the `tag_UGrpID` using `_tagGetByName`. If so, it updates that existing tag.
+    * - Uses `mysql__insertupdate` for the actual database operation.
     *
-    * return false or new tag_ID
+    * @access private
+    * @param array $tag An associative array containing tag data. Expected keys:
+    *                   - 'tag_Text': (string, required) The text of the tag.
+    *                   - 'tag_UGrpID': (int, required) The user/group ID to associate with the tag.
+    *                   - 'tag_ID': (int, optional) The ID of the tag to update. If not provided or < 1, an insert is attempted.
+    *                   - 'tag_Description': (string, optional) Description for the tag.
+    *                   - 'tag_AddedByImport': (int, optional) Flag indicating if added by import.
+    * @return int|false The ID of the inserted or updated tag on success.
+    *                   Returns `false` if there's an error (e.g., missing text, permission denied, DB error).
+    *                   Errors are added to the system object.
     */
     private function _tagSave($tag){
 
@@ -1997,9 +2390,26 @@ public methods
     /**
      * Create sub records for the given record type
      *  Selected record fields are transferred to the newly created records of the selected 'sub-record' type
-     *  This new 'sub-record' are set as a child record to the original record, the source of the field values
+     *  Selected record fields are transferred to the newly created records of the selected 'sub-record' type.
+     *  These new 'sub-records' are then set as child records to the original source record by:
+     *  1. Adding a "Parent Entity" (DT_PARENT_ENTITY) pointer in the new sub-record, pointing to the original source record.
+     *  2. Adding a record pointer detail in the original source record (field specified by `trg_dty`), pointing to the new sub-record.
+     *  The original detail values are moved from the source record to the new sub-record(s).
      *
-     * @return false|array - false on error | array with keys count (number of new records) and record_ids (comma list of new record ids)
+     * This operation requires admin privileges and the `DT_PARENT_ENTITY` constant to be defined.
+     *
+     * Expected parameters in `$this->data`:
+     * - 'src_rty': (int) ID of the source record type from which values will be taken.
+     * - 'trg_rty': (int) ID of the target record type for the new sub-records.
+     * - 'src_dtys': (array|string) Detail type ID(s) in the source record type whose values will be moved.
+     * - 'trg_dty': (int) Detail type ID in the source record type that will be used to point to the newly created sub-record(s).
+     *                  This field must be of type 'resource'.
+     * - 'split_values': (int, optional) If 0 (default), all selected details from a source record are moved to one new sub-record.
+     *                     If 1, each individual detail value from the source fields will result in a separate new sub-record.
+     *
+     * @return array|false Returns an associative array `['count' => (int)num_new_records, 'record_ids' => (string)comma_separated_IDs]` on success.
+     *                     Returns `false` on error (e.g., permission denied, parameters missing/invalid, DB error, DT_PARENT_ENTITY not defined).
+     *                     Errors are added to the system object.
      */
     public function createSubRecords(){
 
@@ -2248,6 +2658,13 @@ public methods
         return ['count' => $final_count, 'record_ids' => implode(',', $new_records)];
     }
 
+    /**
+    * 
+    * 
+    * @param mixed $rtyID
+    * @param mixed $dtyIDs
+    * @param mixed $importFromRty
+    */
     private function checkRecordStructure($rtyID, $dtyIDs, $importFromRty = 0){
 
         $dtyIDs = prepareIds($dtyIDs);
@@ -2308,9 +2725,23 @@ public methods
      *  3 - All lowercase
      *  4 - All capital
      * Also changes words/phrases based on list of exceptions (performed last to avoid further editing)
-     * Exceptions can be array or '|' separated list
+     *  1: Lowercase all, then uppercase first letter of string AND first letter following each full stop.
+     *  2: Lowercase all, then uppercase first letter of each word (respects camelCase words).
+     *  3: Convert all to lowercase.
+     *  4: Convert all to uppercase.
+     * After the primary case conversion, a list of exceptions (words/phrases) can be applied to ensure
+     * they are cased exactly as provided in the exceptions list, overriding the general conversion for those specific terms.
+     * This function handles HTML content by processing only text nodes, preserving HTML tags.
      *
-     * @return false|array - false on error | array with keys processed (records with updated vaules), undefined (no values) and errors (encountered an SQL error)
+     * Expected parameters in `$this->data`:
+     * - 'recIDs', 'rtyID' (optional), 'dtyID', 'dtyName' (optional), 'tag': Common batch parameters.
+     * - 'op': (int, required) The operation type (1-4 as described above).
+     * - 'except': (array|string, optional) An array of exception strings, or a pipe ('|') separated string list.
+     *             These strings will be enforced with their exact casing after the main operation.
+     *
+     * @return array|false The result array (`$this->result_data`) summarizing the operation (counts for 'processed',
+     *                     'undefined' (no values in field or no change needed), 'errors', and tag info).
+     *                     Returns `false` on critical validation failure (e.g., invalid field type, invalid operation).
      */
     public function caseConversion(){
 
@@ -2517,9 +2948,34 @@ public methods
 
 
     /**
-     * Translate field value
+     * Translates the content of a specified freetext or blocktext field for a batch of records
+     * to a target language using an external translation service (via `getExternalTranslation`).
      *
-     * @return false|array - false on error | array with keys processed (records with updated vaules), undefined (no values) and errors (encountered an SQL error)
+     * Key operations:
+     * - Validates parameters, record accessibility, and ensures the target field is text-based.
+     * - For each record and its values in the specified field (`dtyID`):
+     *   - Identifies the source text: Prefers text without a language prefix. If multiple values exist,
+     *     the logic for selecting the definitive source value is based on the first value encountered without a prefix,
+     *     or the first value if all have prefixes (source language is then detected from that prefix).
+     *   - Checks if a translation to the target language (`$this->data['lang']`) already exists.
+     *     - If `delete` is true: Deletes the existing translation if found.
+     *     - If `replace` is true or no existing translation: Translates the source text.
+     *     - If already translated and not replacing/deleting: Skips (adds to `already_translated`).
+     *   - If translation occurs:
+     *     - The translated text is prefixed with the target language code (e.g., "en:Translated text").
+     *     - The new or updated translated detail is saved to `recDetails`.
+     *     - `rec_Modified` is updated.
+     * - Assigns system tags if enabled.
+     *
+    * Expected parameters in `$this->data`:
+     * - 'recIDs', 'rtyID' (optional), 'dtyID', 'dtyName' (optional), 'tag': Common batch parameters.
+     * - 'lang': (string, required) The target language code (e.g., 'en', 'fr').
+     * - 'replace': (int, optional) If 1, existing translations for the target language will be replaced.
+     * - 'delete': (int, optional) If 1, existing translations for the target language will be deleted.
+     *
+     * @return array|false The result array (`$this->result_data`) summarizing the operation (counts for 'processed',
+     *                     'undefined' (no source value), 'translated' (already had target translation), 'errors', and tag info).
+     *                     Returns `false` on critical validation/translation failure or if the target language is not defined.
      */
     public function fieldTranslation(){
 
@@ -2682,9 +3138,36 @@ public methods
     }
 
     /**
-     * Upload file to an external repository
-     * 1. Find files linked to given set of records
-     * 2. Create metadata
+     * Uploads locally stored files (associated with a specified detail field in a batch of records)
+     * to an external repository (currently supports Nakala) and updates the record details
+     * to point to the new external URL.
+     *
+     * Key operations:
+     * - Validates parameters and record accessibility.
+     * - Retrieves user credentials for the specified repository using `user_getRepositoryCredentials2`.
+     * - For each record and its values in the specified file field (`dtyID`):
+     *   - Identifies local files (not `_remote`, `__iiif__`, or `__tiled__`).
+     *   - For each unique local file (`ulf_ID`):
+     *     - Gathers metadata for the file (name, path, MIME type, description, uploader, added date).
+     *     - Prepares repository-specific metadata (e.g., for Nakala: title, type, license, creator).
+     *     - Uploads the file to the repository (e.g., `uploadFileToNakala`).
+     *     - If upload is successful, registers the returned URL as a new `_remote` entry in `recUploadedFiles`
+     *       using `DbRecUploadedFiles::registerURL()`, associating repository info in `ulf_Parameters`.
+     *     - Updates all `recDetails` that pointed to the original local `ulf_ID` to now point to the new
+     *       `ulf_ID` for the remote URL, using `_updateUploadedFileIDs()`.
+     * - Optionally deletes the original local file and its `recUploadedFiles` entry if `$this->data['delete_file']` is 1
+     *   and all references to it have been updated or if it's no longer referenced.
+     * - Assigns system tags if enabled and reports outcomes.
+     *
+     * Expected parameters in `$this->data`:
+     * - 'recIDs', 'rtyID' (optional), 'dtyID', 'dtyName' (optional), 'tag': Common batch parameters.
+     * - 'repository': (string, required) Service ID of the target repository (e.g., "nakala.fr", "test.nakala.fr").
+     * - 'license': (string, required for some repositories like Nakala) License for the uploaded file.
+     * - 'use_test_url': (int, optional) If 1, use repository's test URL (e.g., for Nakala).
+     * - 'delete_file': (int, optional) If 1, delete original local file after successful upload and reference update.
+     *
+     * @return array|false The result array (`$this->result_data`) summarizing the operation.
+     *                     Returns `false` on critical validation/upload failure or if repository credentials are not found/valid.
      */
     public function uploadFileToRepository(){
 
@@ -2971,9 +3454,21 @@ public methods
      * $data parameters
      *          dty_ID - resource (record pointer) field id or  trm_ID - relationtype ID
      *          rty_src or recids_src, dty_src, rty_trg, dty_trg - matching conditions
-     *          repalce - 1 replace existing, otherwise add new link
+     *          `replace` - (int, optional) If 1, existing links of the same type on the source record will be replaced. Otherwise, new links are added.
      *
-     * @return false|array - false on error | array with keys count (number of new records) and record_ids (comma list of new record ids)
+     * The method first validates parameters and user permissions (admin only).
+     * It then uses `recordSearchMatchedValues()` to find pairs of source and target record IDs based on matching field values.
+     * For each pair:
+     *  - If `dty_ID` (resource pointer field) is specified, it calls `addPointerField()` to create/update the link.
+     *  - If `trm_ID` (relation type) is specified, it's intended to create a relationship record (currently, this part seems to just set `$res=1` without full implementation for relationship record creation).
+     * It handles progress tracking if a `session_id` is provided.
+     *
+     * @return array|false Returns an associative array `['added' => count, 'exist' => count, 'records_updated' => count]` on success.
+     *                     `added`: New links/relationships created.
+     *                     `exist`: Links/relationships that already existed and were skipped.
+     *                     `records_updated`: Number of unique source records that had links added/updated.
+     *                     Returns `false` on error (e.g., permission denied, invalid parameters, DB error, user termination).
+     *                     Errors are added to the system object.
      */
     public function createRecordLinksByMatching(){
 
@@ -3090,11 +3585,29 @@ public methods
 
     
     /**
-     * Replaces newline to <br> for blocktext fields
+     * Converts newline characters (`\n`, `\r\n`) to HTML line breaks (`<br>`)
+     * and sequences of multiple spaces to non-breaking spaces (`&nbsp;`)
+     * within a specified blocktext field for a batch of records.
      *
-     * @return false|array - false on error | array with keys processed (records with updated vaules), 
-     *                                                        undefined (no values or unchanged) and 
-     *                                                        errors (encountered an SQL error)
+     * Key operations:
+     * - Validates parameters, record accessibility, and ensures the target field (`dtyID`) is of type 'blocktext'.
+     * - For each record and its values in the specified field:
+     *   - Skips if the value already contains HTML tags.
+     *   - Replaces double spaces with a non-breaking space followed by a regular space (`&nbsp; `).
+     *   - Converts newlines to `<br>` using `nl2br()`.
+     *   - If the conversion results in changes:
+     *     - Replaces sequences of two or more `<br>` tags with `</p><p>` and wraps the whole value in `<p>...</p>`.
+     *       Empty paragraphs resulting from this are removed.
+     *     - Updates the `dtl_Value` and `dtl_Modified` for the detail.
+     *     - Updates `rec_Modified` for the record.
+     * - Assigns system tags if enabled and reports outcomes.
+     *
+     * Expected parameters in `$this->data`:
+     * - 'recIDs', 'rtyID' (optional), 'dtyID', 'dtyName' (optional), 'tag': Common batch parameters.
+     *
+     * @return array|false The result array (`$this->result_data`) summarizing the operation (counts for 'processed',
+     *                     'undefined' (no values in field or value unchanged/contained HTML), 'errors', and tag info).
+     *                     Returns `false` on critical validation failure (e.g., invalid field type).
      */
     public function nl2brConversion(){
 

@@ -1,31 +1,76 @@
 /**
- * Find heurist object in parent windows or init new one if current window is a top most
- * 
- * @param {Window} win
+ * @file detectHeurist.js
+ * @description This script is responsible for detecting the main Heurist window (`hWin`)
+ *              across frames and initializing global Heurist-specific configurations
+ *              like `ResponseStatus` and a default `entityRecordCfg` if they are not already defined.
+ *              This ensures that core Heurist objects and configurations are accessible
+ *              consistently, especially in applications that might operate within iframes.
+ */
+
+/**
+ * Recursively searches for the main Heurist application window (`HEURIST4` object)
+ * starting from the given window and traversing up its parent frames.
+ * If the top-most window is reached and `HEURIST4` is not found, the current window
+ * is assumed to be the main Heurist window (relevant for scenarios where a Heurist
+ * component might be loaded standalone or as the top frame).
+ * It handles potential cross-domain errors when accessing parent frames.
+ *
+ * @param {Window} win - The starting window object to check.
+ * @returns {Window} The window object deemed to be the main Heurist window (`hWin`).
+ *                   This is the window where the `HEURIST4` object is found, or the
+ *                   top-most accessible window if `HEURIST4` is not explicitly found higher up.
  */
 function _detectHeurist( win ){
-    if(win.HEURIST4){ //defined
+    if(win.HEURIST4){ // HEURIST4 object is defined in this window
         return win;
     }
 
     try{
+        // Attempt to access parent document to check if it's accessible (same-domain)
+        // This line itself doesn't use 'doc', but accessing win.parent.document can throw a cross-origin error.
+        // eslint-disable-next-line no-unused-vars
         let doc = win.parent.document;
     }catch(e){
-        // not accessible - this is cross domain
+        // Not accessible, likely due to cross-domain restrictions.
+        // In this case, the current 'win' is the highest accessible frame in this lineage.
         return win;
     }
+
     if (win.top == win.self) {
-        //we are in frame and this is top most window and Heurist is not defined
-        //lets current window will be heurist window
-        return window;
+        // Current window is the top-most window of its frame hierarchy,
+        // but HEURIST4 was not found on it in the initial check.
+        // This implies the current 'window' should host HEURIST4 or is the primary window.
+        return window; // Use 'window' (global scope of this script's execution)
     }else{
+        // Not the top-most, and HEURIST4 not found here, so recurse to parent.
         return _detectHeurist( win.parent );
     }
 }
-//detect wether this window is top most or inside frame
+
+/**
+ * @global
+ * @description Detects whether the current window is the top-most window or inside a frame.
+ * Assigns the detected Heurist main window to `window.hWin`.
+ * This ensures `hWin` points to the window instance containing the primary Heurist application objects.
+ */
 if(!window.hWin) window.hWin = _detectHeurist(window);
 
-//create canonical list of possible responses to server calls and append to hWin object
+/**
+ * @global
+ * @description Initializes `window.hWin.ResponseStatus` if it's not already defined.
+ * This object provides a canonical list of status codes used for interpreting responses from server calls.
+ *
+ * @enum {string} ResponseStatus
+ * @property {string} INVALID_REQUEST - The request provided was invalid.
+ * @property {string} NOT_FOUND - The requested object was not found.
+ * @property {string} OK - The response contains a valid result; the operation was successful.
+ * @property {string} REQUEST_DENIED - The user/webpage is not allowed to use the service or perform the action due to permissions.
+ * @property {string} ACTION_BLOCKED - The action cannot be performed due to constraints or insufficient rights.
+ * @property {string} DB_ERROR - A request could not be processed due to a server database error. Likely a bug.
+ * @property {string} UNKNOWN_ERROR - A request could not be processed due to an unspecified server error. Retrying may succeed.
+ * @property {string} SYSTEM_CONFIG - A non-fatal system configuration issue occurred. System admin should be contacted.
+ * @property {string} SYSTEM_FATAL - A fatal system configuration error occurred. System admin must be contacted.
+ */
 if(!window.hWin.ResponseStatus){
     
     window.hWin.ResponseStatus =
@@ -37,12 +82,22 @@ if(!window.hWin.ResponseStatus){
             ACTION_BLOCKED: "blocked",     // No enough rights or action is blocked by constraints
             DB_ERROR: "database",          // A request could not be processed due to a server database error. Most probably this is BUG. Contact developers
             UNKNOWN_ERROR: "unknown",      // A request could not be processed due to a server error. The request may succeed if you try again.
-            SYSTEM_CONFIG: "syscfg", // System NON-fatal configuration. Contact system admin
-            SYSTEM_FATAL: "system"           // System fatal configuration. Contact system admin
+            SYSTEM_CONFIG: "syscfg",       // System NON-fatal configuration. Contact system admin
+            SYSTEM_FATAL: "system"         // System fatal configuration. Contact system admin
     };
     
 }
 
+/**
+ * @global
+ * @description Initializes `window.hWin.entityRecordCfg` if it's not already defined.
+ * This object provides a default base configuration for the "records" entity type.
+ * It defines standard fields like ID, Title, URL, ScratchPad, RecordTypeID,
+ * ownership, and visibility settings, along with their default properties
+ * (data type, role, display name, etc.) for the Heurist system.
+ * This configuration is used by various parts of the UI when dealing with generic record operations
+ * or as a fallback if specific entity configurations are not available.
+ */
 if(!window.hWin.entityRecordCfg){
     window.hWin.entityRecordCfg = {
         "entityName": "records",

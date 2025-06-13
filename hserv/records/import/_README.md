@@ -1,25 +1,11 @@
-This directory contains files related to importing record data.
+# Directory: hserv/records/import
 
-Specifically, this directory includes classes to work with import from CSV, JSON, HML (XML), and KML files.
+## Overview
+This directory contains scripts and classes for importing data into Heurist records from various sources and formats (CSV, JSON, XML and KML). As well as import IIIF annotations.
 
-Key files and their roles:
-- `importParser.php`: Responsible for parsing source files (CSV, JSON, XML, KML) and saving the initial data into a temporary table.
-- `importSession.php`: Manages sessions for imports, likely interacting with a session table like `sysImportFiles`.
+## Key files
+- `ImportAnnotations.php`: Handles the import of IIIF (International Image Interoperability Framework) annotations into the Heurist system.
 - `importAction.php`: Handles the data once it's in a temporary table. This includes matching incoming data with existing records, assigning IDs, validating data, and finally creating or updating records.
-- `ImportHeurist.php`: Facilitates inter-database imports, particularly using JSON or HML formats. This is often used via the `importRecords` user interface.
-- `ImportAnnotations.php`: Likely handles the import of annotation data.
-
-All these import-related classes are typically invoked and controlled by `hserv/controller/importController.php`.
-
-(Content below was from the original _README.md)
-Directory:    /hserv/records/import
-
-Overview: This directory contains classes to work with import from csv, json, hml(xml) and kml files
-
-importParser.php - parsing source file and save data into temp table
-importSession.php - working with session table sysImportFiles
-importAction.php - working with import data in temporary table: matching, assign idx, validation, create records
-
-ImportHeurist.php - inter-database import via json or hml format (see user interface importRecords)
-
-All classes above are called from controller: importController.php
+- `importHeurist.php`: Handles the import of records and definitions directly from Heurist exchange format files (JSON or HML/XML).
+- `importParser.php`: Handles the initial stages of importing data from files, primarily CSV and KML/KMZ.
+- `importSession.php`: Provides static methods to manage import session data.

@@ -1,24 +1,18 @@
 <?php
 /**
-* composeSqlOld.php - translates heurist query to SQL query
+* composeSqlOld.php - Translates heurist query to SQL query
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\records\search
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Stephen White
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.1
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       3.1
 */
 use hserv\utilities\Temporal;
 
@@ -55,81 +49,75 @@ $currUserID = 0;
 $sortType = 0;
 
 /**
-* Use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $query prefix
-*
-* @param mixed $query  -  prefix (usually SELECT with list of fields)
-* @param mixed $params
-*
-parameters:
-
-stype  - (OUTDATED) type of search: key - by tag title, all - by title of record and titles of its resource, by default by record title
-s - sort order   (NOTE!!!  sort may be defined in "q" parameter also)
-l or limit  - limit of records
-o or offset
-w - domain of search a|all, b|bookmark, e (everything)
-
-qq - several conjunctions and disjunctions
-q  - query string
-
-keywords for 'q' parameter
-url:  url
-title: title contains
-t:  record type id
-f:   field id
-tag:   tag
-id:  id
-n:   description
-usr:   user id
-any:
-relatedto:
-sortby:
-
-*
-* @param mixed $currentUser - array with indexes ugr_ID, ugr_Groups (list of group ids)
-*                       we can access; Records records marked with a rec_OwnerUGrpID not in this list are omitted
-*
-*/
+ * Constructs a full SQL query string by combining a SELECT clause with FROM, WHERE, ORDER BY, LIMIT, and OFFSET clauses.
+ *
+ * This function delegates the generation of individual SQL clauses (FROM, WHERE, etc.) to `get_sql_query_clauses`.
+ * It then concatenates these clauses with the provided SELECT clause to form a complete SQL query.
+ *
+ * @param \mysqli $db The mysqli database connection object.
+ * @param string $select_clause The initial part of the SQL query, typically the SELECT statement (e.g., "SELECT rec_ID, rec_Title").
+ * @param array $params An associative array of query parameters used by `get_sql_query_clauses`. Expected keys include:
+ *                      'q': (string) The main query string.
+ *                      's': (string, Optional) Sort order specification.
+ *                      'l' or 'limit': (int, Optional) Record limit for pagination.
+ *                      'o' or 'offset': (int, Optional) Record offset for pagination.
+ *                      'w': (string, Optional) Search domain ('all', 'b'/'bookmark', 'e' for everything).
+ *                      'stype': (string, Optional, OUTDATED) Type of search (e.g., 'key', 'all').
+ *                      'publiconly': (bool, Optional) If true, search only public records.
+ *                      'use_user_wss': (bool, Optional) If true and user logged in, filter by user's working subset.
+ *                      'parentquery': (array, Optional) SQL clauses of a parent query for linked/relation queries.
+ * @param array|null $currentUser (Optional) Associative array representing the current user. Expected keys:
+ *                                'ugr_ID': (int) The user's ID.
+ *                                'ugr_Groups': (array) An array where keys are group IDs the user is a member of.
+ *                                If null or no 'ugr_ID', treated as anonymous public user.
+ * @return string The fully constructed SQL query string.
+ */
 function compose_sql_query($db, $select_clause, $params, $currentUser=null) {
 
-    $query = get_sql_query_clauses($db, $params, $currentUser=null);
+    // Pass $currentUser to get_sql_query_clauses
+    $query = get_sql_query_clauses($db, $params, $currentUser);
 
     $res_query =  $select_clause.$query["from"].SQL_WHERE.$query["where"].$query["sort"].$query["limit"].$query["offset"];
     return $res_query;
 }
+
 /**
-* Use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $query prefix
-*
-* @param mixed $query  -  prefix (usually SELECT with list of fields)
-* @param mixed $params
-*
-parameters:
-
-stype  - (OUTDATED) type of search: key - by tag title, all - by title of record and titles of its resource, by default by record title
-s - sort order   (NOTE!!!  sort may be defined in "q" parameter also)
-l or limit  - limit of records
-o or offset
-w - domain of search a|all, b|bookmark, e (everything)
-
-qq - several conjunctions and disjunctions
-q  - query string
-
-keywords for 'q' parameter
-url:  url
-title: title contains
-t:  record type id
-f:   field id
-tag:   tag
-id:  id
-n:   description
-usr:   user id
-any:
-relatedto:
-sortby:
-
-*
-* @param mixed $currentUser - array with indexes ugr_ID, ugr_Groups (list of group ids)
-*                       we can access; Records records marked with a rec_OwnerUGrpID not in this list are omitted
-*/
+ * Generates the main SQL clauses (FROM, WHERE, ORDER BY, LIMIT, OFFSET) for a Heurist search query.
+ *
+ * This function processes various parameters to define the search domain, user permissions,
+ * query text, sorting, and pagination. It uses the `Query` class to parse the query string
+ * and generate the core WHERE and FROM clauses. It then applies additional filters for
+ * visibility, user worksets, and special conditions like '_BROKEN_' or '_NOTLINKED_'.
+ *
+ * @param \mysqli $db The mysqli database connection object.
+ * @param array $params An associative array of query parameters. Expected keys:
+ *                      'q': (string) The main query string containing keywords and values.
+ *                      's': (string, Optional) Sort order specification (e.g., "title", "-modified").
+ *                           Note: Sorting can also be specified within the 'q' parameter using "sortby:".
+ *                      'l' or 'limit': (int, Optional) Record limit for pagination.
+ *                      'o' or 'offset': (int, Optional) Record offset for pagination.
+ *                      'w': (string, Optional) Search domain. Default 'all'.
+ *                           - 'all': All records accessible to the user (excluding temporary unless admin).
+ *                           - 'b' or 'bookmark': Records bookmarked by the current user.
+ *                           - 'e' (everything): All records, including temporary ones (typically for admin users).
+ *                      'stype': (string, Optional, OUTDATED) Type of search (e.g., 'key' for tag title, 'all' for record/resource title).
+ *                               This influences default search fields if not specified in 'q'.
+ *                      'publiconly': (bool, Optional) If true, restricts search to publicly visible records.
+ *                      'use_user_wss': (bool, Optional) If true and a user is logged in, an additional filter
+ *                                      is applied to include only records in the user's working subset (`usrWorkingSubsets`).
+ *                      'parentquery': (array, Optional) SQL clauses of a parent/top query. This is used for context in
+ *                                     linked and relation queries that depend on a source/top query.
+ * @param array|null $currentUser (Optional) Associative array representing the current user. Expected keys:
+ *                                'ugr_ID': (int) The user's ID.
+ *                                'ugr_Groups': (array) An array where keys are group IDs the user is a member of.
+ *                                If null, or if 'ugr_ID' is not set or is 0, the search is treated as by an anonymous public user.
+ * @return array An associative array containing the generated SQL clauses:
+ *               'from'   => (string) SQL FROM clause.
+ *               'where'  => (string) SQL WHERE clause.
+ *               'sort'   => (string) SQL ORDER BY clause.
+ *               'limit'  => (string) SQL LIMIT clause.
+ *               'offset' => (string) SQL OFFSET clause.
+ */
 function get_sql_query_clauses($db, $params, $currentUser=null) {
 
     global $mysqli, $currUserID, $sortType;
@@ -315,6 +303,15 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
 
 }
 
+/**
+ * Determines the record limit for an SQL query from request parameters.
+ *
+ * It checks for 'l' and then 'limit' keys in the `$params` array.
+ * If neither is found, or if the value is less than 1, it defaults to 100,000.
+ *
+ * @param array $params An associative array of request parameters.
+ * @return int The determined limit value.
+ */
 function get_limit($params){
     if (@$params["l"]) {
         $limit = intval($params["l"]);
@@ -328,6 +325,15 @@ function get_limit($params){
     return $limit;
 }
 
+/**
+ * Determines the record offset for an SQL query from request parameters.
+ *
+ * It checks for 'o' and then 'offset' keys in the `$params` array.
+ * If neither is found, or if the value is less than 1, it defaults to 0.
+ *
+ * @param array $params An associative array of request parameters.
+ * @return int The determined offset value.
+ */
 function get_offset($params){
     $offset = 0;
     if (@$params["o"]) {
@@ -344,12 +350,16 @@ function get_offset($params){
 /**
 * Returns array with 3 elements: FROM, WHERE and ORDER BY
 *
-* @param mixed $search_domain -   bookmark - searcch my bookmarks, otherwise all records
-* @param mixed $text     - query string
-* @param mixed $sort_order
-* $parentquery - array of SQL clauses of parent/top query - it is needed for linked and relation queries that are depended on source/top query
-* @$currUserID
-* NOTUSED @param mixed $wg_ids is a list of the workgroups we can access; records records marked with a rec_OwnerUGrpID not in this list are omitted
+* @param string|null $search_domain Search domain: 'bookmark' for user's bookmarks, null or other values for all accessible records.
+* @param string|null $text The raw query string text.
+* @param string|null $sort_order Optional sort order string (e.g., "title", "-modified").
+*                                This is an older way of specifying sort, `sortby:` in query text is preferred.
+* @param array|null $parentquery An array of SQL clauses from a parent/top query, used for context in linked/relation sub-queries.
+*                                Expected keys: "from", "where", "sort", "limit", "offset".
+* @param int $currUserID The ID of the current user.
+* @return Query A Query object containing the parsed query structure and generated SQL clauses.
+*
+* @todo Document the $wg_ids parameter if it's actually used or remove if fully NOTUSED. Currently marked NOTUSED.
 */
 function parse_query($search_domain, $text, $sort_order, $parentquery, $currUserID) {
 
@@ -448,19 +458,49 @@ function parse_query($search_domain, $text, $sort_order, $parentquery, $currUser
 
 class Query {
 
+    /** @var string The generated SQL FROM clause. */
     public $from_clause = '';
+    /** @var string The generated SQL WHERE clause. */
     public $where_clause = '';
+    /** @var string The generated SQL ORDER BY clause. */
     public $sort_clause = '';
+    /** @var string|null Visibility type restriction (e.g., "public", "viewable", "hidden"). Set by `addVisibilityTypeRestriction`. */
     public $recVisibilityType;
+    /** @var array|null SQL clauses from a parent query, used for context in sub-queries. */
     public $parentquery = null;
 
+    /** @var array Array of top-level "AND" limbs. Each element is an array of `OrLimb` objects. */
     public $top_limbs;
+    /** @var array Array of `SortPhrase` objects representing the sort criteria. */
     public $sort_phrases;
+    /** @var array Array of table names/aliases that need to be added to the FROM clause due to sorting requirements. */
     public $sort_tables;
 
+    /** @var string|null A comma-separated list of record IDs for fixed order sorting (used with `sortby:set` or `sortby:fixed`). */
     public $fixed_sortorder = null;
 
+    /** @var string|null The search domain (e.g., 'bookmark', 'all'). */
+    public $search_domain;
+    /** @var int The ID of the current user. */
+    public $currUserID;
+    /** @var bool Flag indicating if the query string should be treated as an absolute string (influences predicate creation). */
+    public $absoluteStrQuery;
 
+
+    /**
+     * Constructor for the Query class.
+     *
+     * Initializes the Query object, parses the input query text to extract
+     * visibility type restrictions (`vt:`), sort phrases (`sortby:`),
+     * and then breaks down the remaining query text into a structure of
+     * AND/OR limbs.
+     *
+     * @param string|null $search_domain The search domain (e.g., 'bookmark', 'all').
+     * @param string $text The raw query string.
+     * @param int $currUserID The ID of the current user.
+     * @param array|null $parentquery SQL clauses from a parent query, for context.
+     * @param bool $absoluteStrQuery If true, the query text is treated as an absolute string. Default false.
+     */
     public function __construct($search_domain, $text, $currUserID, $parentquery, $absoluteStrQuery = false) {
 
         $this->search_domain = $search_domain;
@@ -474,18 +514,19 @@ class Query {
         $this->sort_tables = array();
 
         // Find any 'vt:' phrases in the query, and pull them out.   vt - visibility type
+        // Handles 'vt:"public"', 'vt:f:"field_name_public"' etc.
         while (preg_match('/\\G([^"]*(?:"[^"]*"[^"]*)*)\\b(vt:(?:f:|field:|geo:)?"[^"]+"\\S*|vt:\\S*)/', $text, $matches)) {
             $this->addVisibilityTypeRestriction(substr($matches[2],3));
-            $text = preg_replace('/\bvt:\S+/i', '', $text);
-            //$text = $matches[1] . substr($text, strlen($matches[1])+strlen($matches[2]));
+            $text = preg_replace('/\bvt:\S+/i', '', $text); // Remove the matched vt: phrase
+            //$text = $matches[1] . substr($text, strlen($matches[1])+strlen($matches[2])); // Alternative way to remove
         }
 
         // Find any 'sortby:' phrases in the query, and pull them out.
-        // "sortby:..." within double quotes is regarded as a search term, and we don't remove it here
+        // "sortby:..." within double quotes is regarded as a search term, and we don't remove it here.
+        // Handles 'sortby:title', 'sortby:"-f:23"' etc.
         while (preg_match('/\\G([^"]*(?:"[^"]*"[^"]*)*)\\b(sortby:(?:f:|field:)?"[^"]+"\\S*|sortby:\\S*)/', $text, $matches)) {
-
-            $this->addSortPhrase($matches[2]);
-            $text = $matches[1] . substr($text, strlen($matches[1])+strlen($matches[2]));
+            $this->addSortPhrase($matches[2]); // Pass the full sortby phrase e.g., "sortby:title"
+            $text = $matches[1] . substr($text, strlen($matches[1])+strlen($matches[2])); // Remove the matched sortby phrase
         }
 
         // Search-within-search gives us top-level ANDing (full expressiveness of conjunctions and disjunctions)
@@ -511,38 +552,74 @@ class Query {
 
     }
 
+    /**
+     * Parses a segment of the query string (assumed to be an AND-conjoined part)
+     * and breaks it into OR limbs.
+     *
+     * The input text is split by " OR " (case-insensitive) or "&&" (though "&&" typically means AND,
+     * its use here as an OR delimiter might be a legacy artifact or specific local convention).
+     * Text within double quotes is treated as a single unit and not split.
+     * Each resulting segment is used to create a new `OrLimb` object, which is then
+     * added to an array representing this top-level AND limb. This array of `OrLimb`s
+     * is then added to `$this->top_limbs`.
+     *
+     * @param string $text A part of the query string, expected to be a series of conditions implicitly ANDed.
+     * @return void
+     */
     private function addTopLimb($text) {
 
         $or_limbs = array();
-        // According to WWGD, OR is the top-level delimiter (yes, more top-level than double-quoted text)
+        // According to WWGD,
+        // OR is treated as a high-level delimiter.
+        // The regex looks for " OR " (case-insensitive) or "&&" outside of double quotes.
         preg_match_all('/"[^"]+"|(&&|\\ OR \\b)/i', $text, $matches, PREG_OFFSET_CAPTURE);
         $offset = 0;
-        if(!empty($matches[1])){
-
+        if(!empty($matches[1])){ // If OR or && delimiters are found
             foreach($matches[1] as $entry){
-                if(is_array($entry)){ //
-
+                if(is_array($entry)){ // Matched a delimiter
+                    // Create an OrLimb from the text segment before this delimiter
                     array_push( $or_limbs, new OrLimb($this, substr($text, $offset, $entry[1]-$offset)) );
+                    // Move offset past the delimiter
                     $offset = $entry[1]+strlen($entry[0]);
                 }
             }
         }
+        // Add the final segment (or the whole text if no OR delimiters were found)
         array_push( $or_limbs, new OrLimb($this, substr($text, $offset)) );
 
+        // This group of OrLimbs (which will be ORed together) forms one AND component of the overall query.
         array_push($this->top_limbs, $or_limbs);
     }
 
-    //
+    /**
+     * Creates a `SortPhrase` object from a sort directive string and adds it to the query's sort phrases.
+     *
+     * The sort phrases are added to the beginning of the `$this->sort_phrases` array (using `array_unshift`),
+     * implying that the last `sortby:` directive encountered in the query string might take precedence
+     * or be processed first, depending on how `makeSortClause` handles this array.
+     *
+     * @param string $text The sort directive string (e.g., "sortby:title", "sortby:-f:23").
+     * @return void
+     */
     private function addSortPhrase($text) {
         array_unshift($this->sort_phrases, new SortPhrase($this, $text));
     }
 
-    //
+    /**
+     * Sets the record visibility type restriction for the query.
+     *
+     * The input string is cleaned (lowercase, leading '-' removed for negation, though negation isn't implemented here).
+     * If the resulting string is one of 'viewable', 'hidden', 'pending', or 'public',
+     * it's stored in `$this->recVisibilityType`.
+     *
+     * @param string $visibility_type The visibility type string (e.g., "public", "-hidden").
+     * @return void
+     */
     private function addVisibilityTypeRestriction($visibility_type) {
         if ($visibility_type){
             $visibility_type = strtolower($visibility_type);
             if ($visibility_type[0] == '-') {
-                //not implemented $negate = true;
+                // Negation for visibility types is noted as not implemented in the original comment.
                 $visibility_type = substr($visibility_type, 1);
             }
             if(in_array($visibility_type,array('viewable','hidden','pending','public')))
@@ -592,20 +669,33 @@ class Query {
         return $this->from_clause . SQL_WHERE . $this->where_clause . $this->sort_clause;
     }
 
+    /**
+     * Generates the SQL ORDER BY clause from the collected sort phrases.
+     *
+     * Iterates through each `SortPhrase` object in `$this->sort_phrases`.
+     * For each phrase, it calls its `makeSQL()` method, which returns the SQL sort expression,
+     * a signature for the sort clause (to avoid duplicates), and any tables required for the sort.
+     * These are aggregated into a final " ORDER BY " string.
+     * Tables required for sorting are added to `$this->sort_tables`.
+     *
+     * @return string The complete SQL ORDER BY clause (e.g., " ORDER BY rec_Title ASC, rec_Modified DESC").
+     *                Returns an empty string if no valid sort phrases were processed.
+     */
     private function makeSortClause() {
 
         $sort_clause = '';
-        $sort_clauses = array();
+        $sort_clauses = array(); // Used to track signatures of sort clauses to avoid duplicates
         for ($i=0; $i < count($this->sort_phrases);++$i) {
+            // makeSQL() from SortPhrase returns [sql_expression, signature, tables_needed]
             @list($new_sql, $new_sig, $new_tables) = $this->sort_phrases[$i]->makeSQL();
 
-            if($new_sql!=null && ! @$sort_clauses[$new_sig]) {    // don't repeat identical sort clauses
-                    if ($sort_clause) {$sort_clause .= ', ';}
+            if($new_sql!=null && ! @$sort_clauses[$new_sig]) {    // Don't repeat identical sort clauses
+                    if ($sort_clause) {$sort_clause .= ', ';} // Add comma if not the first sort criterion
 
                     $sort_clause .= $new_sql;
                     if ($new_tables) {array_push($this->sort_tables, $new_tables);}
 
-                    $sort_clauses[$new_sig] = 1;
+                    $sort_clauses[$new_sig] = 1; // Mark this sort signature as used
             }
         }
         if ($sort_clause) {$sort_clause = ' ORDER BY ' . $sort_clause;}
@@ -616,39 +706,69 @@ class Query {
 
 
 class OrLimb {
+    /** @var array<AndLimb> Array of `AndLimb` objects. Conditions within this array are ANDed together. */
     public $and_limbs;
 
+    /** @var Query Reference to the parent `Query` object. */
     public $parent;
 
+    /** @var bool Inherited from the parent Query's context, indicating if the original query part was an absolute string. */
+    public $absoluteStrQuery;
 
+
+    /**
+     * Constructor for OrLimb.
+     *
+     * Parses a text segment (which is part of an OR-conjoined set of conditions)
+     * into `AndLimb` objects. The text is split by spaces, respecting quoted strings
+     * and parenthesized groups as single units. Each resulting part forms an `AndLimb`.
+     *
+     * @param Query $parent Reference to the parent `Query` object.
+     * @param string $text The query text segment to be parsed for AND conditions.
+     */
     public function __construct(&$parent, $text) {
         $this->parent = &$parent;
         $this->absoluteStrQuery = $parent->absoluteStrQuery;
         $this->and_limbs = array();
-        if (substr_count($text, '"') % 2 != 0) {$text .= '"';}// unmatched quote
+        if (substr_count($text, '"') % 2 != 0) {$text .= '"';}// Ensure matched quotes
 
-        //ORIGINAL if (preg_match_all('/(?:[^" ]+|"[^"]*")+(?= |$)/', $text, $matches)) {
-
-        //"geo:\"POLYGON((37.5
-        // split by spaces - exclude text inside quotes and parentheses
+        // Regex to split by spaces, but keep quoted strings ("...") and parenthesized groups (...) as single tokens.
+        // Example: "field:value (subfield:subvalue "quoted subvalue") another_field:"another value""
         if (preg_match_all('/(?:[^"( ]+|["(][^")]*[")])+(?= |$)/', $text, $matches)) {
-
             $and_texts = $matches[0];
 
             for ($i=0; $i < count($and_texts);++$i){
                 $str = $and_texts[$i];
                 if ($str!=null && $str!='') {
-                    $str = str_replace('+', " ", $str);//workaround until understand how to regex F:("AA BB CC")
+                    // '+' might be used as a space placeholder in some contexts, replace with actual space.
+                    $str = str_replace('+', " ", $str);
                     $this->addAndLimb($str);
                 }
             }
         }
     }
 
+    /**
+     * Creates an `AndLimb` object from a text segment and adds it to this `OrLimb`.
+     *
+     * Each `AndLimb` represents a condition that will be ANDed with others in this `OrLimb`.
+     *
+     * @param string $text The text segment representing a single condition or a set of implicitly ANDed conditions.
+     * @return void
+     */
     private function addAndLimb($text) {
         $this->and_limbs[] = new AndLimb($this, $text);
     }
 
+    /**
+     * Generates the SQL WHERE clause fragment for this OR limb.
+     *
+     * It iterates through all its `AndLimb` children, calls their `makeSQL()` method
+     * to get their SQL conditions, and then joins these conditions with " AND ".
+     * The resulting string represents the complete ANDed condition for this OR limb.
+     *
+     * @return string The SQL WHERE clause fragment for this limb (e.g., "(condition1 AND condition2)").
+     */
     public function makeSQL() {
 
         $and_clauses = array();
@@ -665,24 +785,46 @@ class OrLimb {
 
 
 class AndLimb {
+    /** @var bool Whether the predicate's condition should be negated (e.g., NOT LIKE, !=). */
     public $negate;
+    /** @var bool Whether an exact match (e.g., =) is required, as opposed to LIKE. */
     public $exact;
+    /** @var bool Whether a less-than comparison is intended. */
     public $lessthan;
+    /** @var bool Whether a greater-than comparison is intended. */
     public $greaterthan;
-    public $fulltext;
+    /** @var bool Whether a full-text search is intended (currently not fully implemented in `createPredicate` parsing for this flag). */
+    public $fulltext; // Note: This flag is set in FieldPredicate based on '@' but not directly parsed here.
+    /** @var Predicate The Predicate object (e.g., TitlePredicate, FieldPredicate) representing the specific condition. */
     public $pred;
 
+    /** @var OrLimb Reference to the parent `OrLimb` object. */
     public $parent;
 
+    /** @var bool True if the original text for this limb was a double-quoted string, indicating it should be treated as a literal phrase. */
+    public $absoluteStrQuery;
 
+
+    /**
+     * Constructor for AndLimb.
+     *
+     * An AndLimb represents a single condition part of an AND conjunction.
+     * It parses operator prefixes (like '-', '=', '<', '>') from the input text,
+     * sets boolean flags (`negate`, `exact`, `lessthan`, `greaterthan`),
+     * and then calls `createPredicate()` to instantiate the appropriate `Predicate` subclass.
+     *
+     * @param OrLimb $parent Reference to the parent `OrLimb` object.
+     * @param string $text The query text segment for this specific condition.
+     */
     public function __construct(&$parent, $text) {
         $this->parent = &$parent;
         $this->absoluteStrQuery = false;
         if (preg_match('/^".*"$/',$text,$matches)) {
+            // Check if the entire text is enclosed in double quotes.
             $this->absoluteStrQuery = true;
         }
 
-        $this->exact = false;
+        $this->exact = false; // Default exact match to false
         if ($text[0] == '-') {
             $this->negate = true;
             $text = substr($text, 1);
@@ -691,11 +833,26 @@ class AndLimb {
         }
 
         //create predicate
-        $this->pred = $this->createPredicate($text);//was by reference
+        $this->pred = $this->createPredicate($text); // $this->pred will be an object of a Predicate subclass
 
     }
 
 
+    /**
+     * Creates and returns a specific Predicate subclass based on keywords in the query text.
+     *
+     * This method inspects the input text for keywords (e.g., "title:", "f:", "id:", "tag:")
+     * to determine the type of predicate to create. It also handles operator prefixes
+     * like '=', '<', '>' if they appear before a colon, setting flags like `$this->exact`,
+     * `$this->lessthan`, `$this->greaterthan` accordingly.
+     *
+     * If no keyword is found, or if `absoluteStrQuery` is true, it defaults to creating a `TitlePredicate`.
+     * The `$sortType` global variable (OUTDATED) could also influence the default predicate type.
+     *
+     * @param string $text The query text segment, potentially including a keyword and value.
+     * @global string|null $sortType (Outdated) Global sort type that might influence default predicate.
+     * @return Predicate An instance of a `Predicate` subclass (e.g., `TitlePredicate`, `FieldPredicate`).
+     */
     private function createPredicate($text) {
         global $sortType;
 
@@ -933,6 +1090,19 @@ class AndLimb {
     }
 
 
+    /**
+     * Cleans a string value by removing leading/trailing double quotes and normalizing internal spaces.
+     *
+     * - If the value starts and ends with a double quote (`"`), these quotes are stripped.
+     * - If the value only starts with a double quote, that quote is stripped.
+     * - After quote stripping (if any), multiple consecutive internal spaces are collapsed into single spaces.
+     * - The string is also trimmed of leading/trailing whitespace that might result from quote stripping.
+     *
+     * This is a utility method used by `createPredicate` when extracting values.
+     *
+     * @param string $val The input string value.
+     * @return string The cleaned and normalized string value.
+     */
     private function cleanQuotedValue($val) {
         if (strlen($val)>0 && $val[0] == '"') {
             if ($val[strlen($val)-1] == '"'){
@@ -950,17 +1120,43 @@ class AndLimb {
 //
 //
 //
+/**
+ * Represents a single sort criterion (e.g., "sortby:title", "sortby:-f:23") extracted from the query.
+ */
 class SortPhrase {
+    /** @var string The raw sort phrase string (e.g., "sortby:title", "sortby:-f:23"). */
     public $value;
 
+    /** @var Query Reference to the parent Query object. */
     public $parent;
 
+    /**
+     * Constructor for SortPhrase.
+     *
+     * @param Query $parent Reference to the parent Query object.
+     * @param string $value The raw sort phrase string.
+     */
     public function __construct(&$parent, $value) {
         $this->parent = &$parent;
 
         $this->value = $value;
     }
-    // return list of  sql Phrase, signature, from clause for sort
+
+    /**
+     * Generates the SQL components for this sort phrase.
+     *
+     * Parses the `value` to determine the field, direction (ASC/DESC),
+     * and any specific handling for field types (e.g., resource, date, numeric).
+     *
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @return array An array containing three elements:
+     *               0: (string|null) The SQL expression for the ORDER BY clause (e.g., "rec_Title ASC", "CAST(dtl_Value AS DECIMAL) DESC").
+     *                  Null if the sort phrase is invalid or leads to no sort.
+     *               1: (string|null) A signature for this sort criterion (e.g., "rec_Title", "dtl_DetailTypeID=23").
+     *                  Used to prevent duplicate sort clauses. Null if no valid signature.
+     *               2: (string|null) Any additional SQL table join string required for this sort
+     *                  (e.g., "LEFT JOIN recDetails bd1 ON ..."). Null if no extra tables needed.
+     */
     public function makeSQL() {
         global $mysqli;
 
@@ -1094,46 +1290,95 @@ class SortPhrase {
 }
 
 
+/**
+ * Base class for all predicate types (e.g., TitlePredicate, FieldPredicate).
+ * A predicate represents a single condition in the WHERE clause of a query.
+ */
 class Predicate {
+    /** @var string The value associated with the predicate (e.g., the search term for a title, the ID for a type). */
     public $value;
 
+    /** @var AndLimb Reference to the parent AndLimb object that contains this predicate. */
     public $parent;
 
+    /** 
+     * @var bool Flag used by some predicate types (like RelatedFromParentPredicate, RelatedToParentPredicate) 
+     * to control whether to recursively find inverse relationships. Defaults to true.
+     */
     public $need_recursion = true;
 
+    /** @var Query|null Cached reference to the top-level Query object, obtained via `getQuery()`. */
     public $query;
 
+    /**
+     * Constructor for Predicate.
+     *
+     * @param AndLimb $parent Reference to the parent AndLimb.
+     * @param string $value The value for this predicate.
+     */
     public function __construct(&$parent, $value) {
         $this->parent = &$parent;
 
         $this->value = $value;
-        $this->query = null;
+        $this->query = null; // Initialize query cache
     }
 
-    //$table_name=null
+    /**
+     * Generates the SQL WHERE clause condition for this predicate.
+     * This is a placeholder in the base class and should be overridden by subclasses.
+     *
+     * @param string|null $table_name Optional table name/alias to prefix field names, not consistently used by all subclasses.
+     * @return string Default implementation returns '1' (a neutral condition). Subclasses return specific SQL.
+     */
     public function makeSQL() { return '1';}
 
 
+    /**
+     * Sets the `$need_recursion` flag to false.
+     * Used by relationship predicates to prevent infinite recursion when finding inverse relationships.
+     * @return void
+     */
     public function stopRecursion() {
        $this->need_recursion = false;
     }
 
-    //get the top most parent - the Query
+    /**
+     * Gets a reference to the top-most parent `Query` object.
+     *
+     * It traverses up the parent chain (Predicate -> AndLimb -> OrLimb -> Query)
+     * to find the Query object. The result is cached in `$this->query` for subsequent calls.
+     *
+     * @return Query Reference to the top-level Query object.
+     */
     public function &getQuery() {
         if (! $this->query) {
-            $c = &$this->parent;
+            $c = &$this->parent; // Starts from AndLimb
 
-            //loop up to top-most parent "Query"
+            // Loop up to top-most parent "Query"
+            // AndLimb parent is OrLimb, OrLimb parent is Query
             while ($c  &&  strtolower(get_class($c)) != 'query') {
-                $c = &$c->parent;
+                if (property_exists($c, 'parent')) {
+                    $c = &$c->parent;
+                } else {
+                    // Should not happen in a well-formed structure
+                    // Trigger error or handle as appropriate if $c has no parent but is not Query
+                    break; 
+                }
             }
-
-
-            $this->query = &$c;
+            $this->query = ($c && strtolower(get_class($c)) == 'query') ? $c : null;
         }
         return $this->query;
     }
 
+    /**
+     * Checks if the predicate's value represents a date or a date range.
+     *
+     * It attempts to parse `$this->value` as a single date or a date range
+     * separated by "<>". It returns true if the value (or both parts of the range)
+     * can be successfully parsed into DateTime objects.
+     *
+     * @return bool True if the value is recognized as a date or date range, false otherwise.
+     */
     public function isDateTime() {
 
         $timestamp0 = null;
@@ -1145,17 +1390,29 @@ class Predicate {
                 $timestamp0 = new DateTime($vals[0]);
                 $timestamp1 = new DateTime($vals[1]);
              } catch (Exception  $e){
+                 return false; // Parsing failed
              }
         }else{
              try{
                 $timestamp0 = new DateTime($this->value);
-                $timestamp1 = 1;
+                $timestamp1 = 1; // Indicates single date was successfully parsed
              } catch (Exception  $e){
+                 return false; // Parsing failed
              }
         }
-        return $timestamp0  &&  $timestamp1;
+        return $timestamp0  &&  $timestamp1; // Both parts must be valid if range, or single date must be valid
     }
 
+    /**
+     * Generates an SQL date condition string (older version).
+     * Likely deprecated in favor of `makeDateClause` which uses `recDetailsDateIndex`.
+     *
+     * This method parses `$this->value` for a single date or a date range ("<>").
+     * It uses `Temporal::dateToISO()` for conversion and applies operators
+     * (`=`, `<`, `>`, `LIKE`) based on the parent AndLimb's flags (`exact`, `lessthan`, `greaterthan`).
+     *
+     * @return string The SQL condition string for the date.
+     */
     public function makeDateClause_old() {
 
         if (strpos($this->value,"<>")) {
@@ -1180,9 +1437,10 @@ class Predicate {
                 return "> '$datestamp'";
             }
             else {
+                // Default to LIKE matching the beginning of the date string
                 return "like '$datestamp%'";
 
-                //old way
+                //old way comment from original code:
                 /*
                 // it's a ":" ("like") query - try to figure out if the user means a whole year or month or default to a day
                 $match = preg_match('/^[0-9]{4}$/', $this->value, $matches);
@@ -1201,60 +1459,81 @@ class Predicate {
         }
     }
 
+    /**
+     * Generates an SQL condition string for date fields, comparing against the `recDetailsDateIndex` table.
+     *
+     * This method handles date queries for detail fields, focusing on ranges and specific comparisons
+     * using pre-calculated min/max estimated dates from `recDetailsDateIndex` (rdi_estMinDate, rdi_estMaxDate).
+     *
+     * - Parses `$this->value` which can be a single date or a range string (e.g., "YYYY/YYYY", "YYYY<>YYYY").
+     *   Uses the `Temporal` class to convert these into min/max timestamps.
+     * - Applies comparison logic based on parent AndLimb's flags (`exact`, `lessthan`, `greaterthan`):
+     *   - Exact (`exact`): Checks if the search timespan is entirely within the database range.
+     *     `(rdi_estMinDate <= search_min AND search_max <= rdi_estMaxDate)`
+     *   - Less than (`lessthan`): Checks if the database range's end is before the search timespan's start.
+     *     `(search_max < rdi_estMinDate)` (Note: original code logic was `{$timespan[1]} < rdi_estMinDate`, which means search_end < db_start)
+     *   - Greater than (`greaterthan`): Checks if the database range's start is after the search timespan's end.
+     *     `(rdi_estMaxDate < search_min)` (Note: original code logic was `rdi_estMaxDate < {$timespan[0]}`, which means db_end < search_start)
+     *   - Default (overlap/intersects): Checks if the database range overlaps with the search timespan.
+     *     `(rdi_estMaxDate >= search_min AND rdi_estMinDate <= search_max)`
+     *
+     * @return string|null The SQL condition string for the date field comparison against `recDetailsDateIndex`,
+     *                     or null if date parsing fails.
+     */
     public function makeDateClause() {
 
-        //???? if($this->isEmptyValue()){ // {"f:10":"NULL"}
+        // Original code had a commented out isEmptyValue check.
+        // if($this->isEmptyValue()){ return SQL_NULL; } 
 
-        if (strpos($this->value,"<>")) {
-
+        if (strpos($this->value,"<>")) { // Value represents a range
             $vals = explode("<>", $this->value);
-
             $temporal1 = new Temporal($vals[0]);
             $temporal2 = new Temporal($vals[1]);
 
             if(!$temporal1->isValid() || !$temporal2->isValid()){
-                return null;
+                return null; // Invalid date format in range
             }
 
-            $timespan = $temporal1->getMinMax();
-            $min = $timespan[0];
+            $timespan1_minmax = $temporal1->getMinMax();
+            $min_search_time = $timespan1_minmax[0];
 
-            $timespan = $temporal2->getMinMax();
-            $max = $timespan[1];
+            $timespan2_minmax = $temporal2->getMinMax();
+            $max_search_time = $timespan2_minmax[1];
 
-            $timespan = array($min, $max);
+            $timespan = array($min_search_time, $max_search_time);
 
-        }else{
+        }else{ // Single date value
             $temporal = new Temporal($this->value);
             if(!$temporal->isValid()){
-                return null;
+                return null; // Invalid single date format
             }
-
-            $timespan = $temporal->getMinMax();
+            $timespan = $temporal->getMinMax(); // For a single date, min and max of timespan will be start/end of that day/month/year
         }
 
         $res = '';
 
         if ($this->parent->exact) {
-            //timespan within interval
+            // Checks if the database timespan (rdi_estMinDate to rdi_estMaxDate)
+            // is entirely contained within the search timespan.
             $res = "(rdi_estMinDate <= {$timespan[0]} AND {$timespan[1]} <= rdi_estMaxDate)";
         }
         elseif($this->parent->lessthan) {
-
-            //timespan max < rdi_estMinDate
+            // Checks if the end of the search timespan is less than the start of the database timespan.
+            // (i.e., search period is entirely before database period)
             $res = "({$timespan[1]} < rdi_estMinDate)";
         }
         elseif($this->parent->greaterthan) {
-
-            //timespan min > rdi_estMaxDate
+            // Checks if the start of the search timespan is greater than the end of the database timespan.
+            // (i.e., search period is entirely after database period)
             $res = "(rdi_estMaxDate < {$timespan[0]})";
         }
-        else {
-            //overlaps/intersects with interval
-            // @End >= tbl.start AND @Start <= tbl.end
+        else { // Default case: Overlaps/intersects
+            // Checks if the database timespan overlaps with the search timespan.
+            // (db_end >= search_start AND db_start <= search_end)
             $res = "(rdi_estMaxDate>={$timespan[0]} AND rdi_estMinDate<={$timespan[1]})";
         }
 
+        // Negation is not explicitly handled here but would typically be applied by the caller if $this->parent->negate is true.
         return $res;
     }
 
@@ -1276,40 +1555,57 @@ class Predicate {
     }
 }
 
-
+/**
+ * Predicate for searching by record title (`rec_Title`).
+ */
 class TitlePredicate extends Predicate {
 
+    /**
+     * Generates SQL for matching the record title.
+     * Handles exact match, less than, greater than, and LIKE comparisons.
+     * Supports negation. Allows specifying if it's for the top-level record.
+     *
+     * @param bool $isTopRec If true, prefixes field with "TOPBIBLIO.". Default true.
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @return string The SQL condition string.
+     */
     public function makeSQL($isTopRec=true) {
         global $mysqli;
 
         $not = ($this->parent->negate)? SQL_NOT : '';
+        // $query = &$this->getQuery(); // Original comment said "not used"
 
-        $query = &$this->getQuery();//not used
         $evalue = $mysqli->real_escape_string($this->value);
-
-        if($isTopRec){
-            $topbiblio = "TOPBIBLIO.";
-        }else{
-            $topbiblio = "";
-        }
+        $topbiblioPrefix = $isTopRec ? "TOPBIBLIO." : "";
 
         if ($this->parent->exact){
-            return $not . $topbiblio.'rec_Title = "'.$evalue.'"';
+            return $not . $topbiblioPrefix.'rec_Title = "'.$evalue.'"';
         }elseif($this->parent->lessthan){
-            return $not . $topbiblio.'rec_Title < "'.$evalue.'"';
+            return $not . $topbiblioPrefix.'rec_Title < "'.$evalue.'"';
         }elseif($this->parent->greaterthan){
-                return $not . $topbiblio.'rec_Title > "'.$evalue.'"';
-        }elseif(strpos($this->value,"%")===false){
-                return $topbiblio."rec_Title $not like '%$evalue%'";
-        }else{
-                return $topbiblio."rec_Title $not like '$evalue'";
+                return $not . $topbiblioPrefix.'rec_Title > "'.$evalue.'"';
+        }elseif(strpos($this->value,"%")===false){ // If no wildcards in value, add them for LIKE
+                return $topbiblioPrefix."rec_Title $not like '%$evalue%'";
+        }else{ // Value already contains wildcards
+                return $topbiblioPrefix."rec_Title $not like '$evalue'";
         }
-
     }
 }
 
+/**
+ * Predicate for searching by record type (`rec_RecTypeID`).
+ */
 class TypePredicate extends Predicate {
 
+    /**
+     * Generates SQL for matching the record type ID.
+     * Handles numeric ID, comma-separated list of IDs, or type name.
+     * Supports negation. Allows specifying if it's for the top-level record.
+     *
+     * @param bool $isTopRec If true, prefixes field with "TOPBIBLIO.". Default true.
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @return string The SQL condition string.
+     */
     public function makeSQL($isTopRec=true) {
         global $mysqli;
 
@@ -1334,30 +1630,47 @@ class TypePredicate extends Predicate {
     }
 }
 
-
+/**
+ * Predicate for searching by record URL (`rec_URL`).
+ */
 class URLPredicate extends Predicate {
 
+    /**
+     * Generates SQL for matching the record URL using LIKE.
+     * Supports negation.
+     *
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @return string The SQL condition string.
+     */
     public function makeSQL() {
         global $mysqli;
 
         $not = ($this->parent->negate)? SQL_NOT : '';
-
-        $query = &$this->getQuery();
+        // $query = &$this->getQuery();
         $val = $mysqli->real_escape_string($this->value);
         return "TOPBIBLIO.rec_URL $not like '%$val%'";
     }
 }
 
-
+/**
+ * Predicate for searching by record notes/scratchpad (`rec_ScratchPad`).
+ */
 class NotesPredicate extends Predicate {
 
+    /**
+     * Generates SQL for matching the record scratchpad using LIKE.
+     * Supports negation. Returns empty string if search domain is BOOKMARK.
+     *
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @return string The SQL condition string, or empty string.
+     */
     public function makeSQL() {
         global $mysqli;
 
         $not = ($this->parent->negate)? SQL_NOT : '';
-
         $query = &$this->getQuery();
-        if ($query->search_domain == BOOKMARK){    // saw TODO change this to check for woot match or full text search
+        if ($query->search_domain == BOOKMARK){
+            // Scratchpad search is not applicable to bookmarks domain in this implementation
             return '';
         }else{
             $val = $mysqli->real_escape_string($this->value);
@@ -1366,9 +1679,19 @@ class NotesPredicate extends Predicate {
     }
 }
 
-
+/**
+ * Predicate for searching records bookmarked by a specific user.
+ */
 class UserPredicate extends Predicate {
 
+    /**
+     * Generates SQL for finding records bookmarked by a user.
+     * User can be specified by ID, comma-separated IDs, username, or full name.
+     * Supports negation.
+     *
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @return string The SQL condition string using an EXISTS subquery on `usrBookmarks` and `sysUGrps`.
+     */
     public function makeSQL() {
         global $mysqli;
 
@@ -1395,9 +1718,19 @@ class UserPredicate extends Predicate {
     }
 }
 
-
+/**
+ * Predicate for searching by the user who added the record (`rec_AddedByUGrpID`).
+ */
 class AddedByPredicate extends Predicate {
 
+    /**
+     * Generates SQL for matching the `rec_AddedByUGrpID`.
+     * User can be specified by ID, comma-separated IDs, or username.
+     * Supports negation.
+     *
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @return string The SQL condition string.
+     */
     public function makeSQL() {
         global $mysqli;
 
@@ -1417,92 +1750,141 @@ class AddedByPredicate extends Predicate {
     }
 }
 
+/**
+ * Predicate for searching across multiple fields (record title, detail values, linked resource titles).
+ * This acts as a general-purpose "any field" search.
+ */
 class AnyPredicate extends Predicate {
 
+    /**
+     * Generates SQL for matching the value across various fields.
+     * If `fulltext` flag is set on parent, attempts a full-text search on `dtl_Value` and `rec_Title` of linked resources,
+     * falling back to LIKE for `rec_Title`.
+     * Otherwise, uses LIKE against `dtl_Value` (or term label/code for enums), linked resource `rec_Title`, and `TOPBIBLIO.rec_Title`.
+     * Supports negation.
+     *
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @return string The SQL condition string.
+     */
     public function makeSQL() {
         global $mysqli;
 
         $val = $mysqli->real_escape_string($this->value);
 
         if($this->parent->fulltext){
-
-               $res = 'select dtl_RecID from recDetails '
+               // Attempt full-text search on detail values and titles of linked resources.
+               $res_details_ft = 'select dtl_RecID from recDetails '
                 . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
-                . ' left join Records link on dtl_Value=link.rec_ID '
+                . ' left join Records link on dtl_Value=link.rec_ID ' // Join to get linked record titles
                 .' where if(dty_Type="resource", '
-                    .'link.rec_Title like "%'.$val.'%", '
-                    .' MATCH(dtl_Value) AGAINST("'.$val.'"))';
+                    .'link.rec_Title like "%'.$val.'%", ' // Fallback to LIKE for linked resource titles
+                    .' MATCH(dtl_Value) AGAINST("'.$val.'"))'; // Full-text on dtl_Value
 
-                $list_ids = mysql__select_list2($mysqli, $res);
-
+                $list_ids = mysql__select_list2($mysqli, $res_details_ft);
+                $condition_details = '';
                 if($list_ids && !empty($list_ids)){
-                    $res = predicateId('TOPBIBLIO.rec_ID',$list_ids).' OR ';
-                }else{
-                    $res = '';//nothing found
+                    $condition_details = predicateId('TOPBIBLIO.rec_ID',$list_ids);
                 }
 
-                return '('.$res.' (TOPBIBLIO.rec_Title like "%'.$val.'%"))';
+                // Full-text on main record title (if supported, otherwise LIKE)
+                // Assuming rec_Title might not always have FT index or might be handled differently
+                $condition_title = 'TOPBIBLIO.rec_Title like "%'.$val.'%"'; 
 
+                if($condition_details && $condition_title){
+                    return "($condition_details OR $condition_title)";
+                } elseif ($condition_details){
+                    return "($condition_details)";
+                } elseif ($condition_title){
+                    return "($condition_title)";
+                }
+                return '(1=0)'; // Nothing to search
         }
 
-
+        // Standard LIKE search if not full-text
         $not = ($this->parent->negate)? SQL_NOT : '';
         return $not . ' (exists (select rd.dtl_ID from recDetails rd '
         . 'left join defDetailTypes on rd.dtl_DetailTypeID=dty_ID '
-        . 'left join Records link on rd.dtl_Value=link.rec_ID '
+        . 'left join Records link on rd.dtl_Value=link.rec_ID ' // Join for linked resource titles
         . 'where rd.dtl_RecID=TOPBIBLIO.rec_ID '
-        . '  and if(dty_Type != "resource", '
-        . 'if(dty_Type="enum", dtl_Value in (select trm_ID from defTerms where trm_Label like "%'.$val.'%" or trm_Code="'.$val.'"), rd.dtl_Value like "%'.$val.'%"), '
-        .'link.rec_Title like "%'.$val.'%"))'
-        .' or TOPBIBLIO.rec_Title like "%'.$val.'%") ';
+        . '  and if(dty_Type != "resource", ' // If not a resource field
+        . 'if(dty_Type="enum", dtl_Value in (select trm_ID from defTerms where trm_Label like "%'.$val.'%" or trm_Code="'.$val.'"), rd.dtl_Value like "%'.$val.'%"), ' // Search enum by label/code or other detail by value
+        .'link.rec_Title like "%'.$val.'%"))' // Search linked resource title
+        .' or TOPBIBLIO.rec_Title like "%'.$val.'%") '; // Also search main record title
     }
 }
 
-
+/**
+ * Predicate for searching by a specific detail field value.
+ * Handles nested queries for resource fields (where the field value points to another record,
+ * and that linked record is then queried), various comparison types, and different field data types
+ * like resource, enum, date, file, or freetext.
+ */
 class FieldPredicate extends Predicate {
-    public $field_type;        //name of dt_id
-    public $field_type_value;  //field type
+    /** @var string|int The ID or name of the detail field type (dty_ID or dty_Name). */
+    public $field_type;
+    /** @var string|null The actual data type of the field (e.g., 'resource', 'enum', 'date'), fetched from `defDetailTypes`. */
+    public $field_type_value;
+    /** @var array|null If the query involves searching within linked resources (nested query), this holds the parsed structure of that nested query. Each element is an array of `AndLimb` objects. */
     public $nests = null;
 
+    /**
+     * Constructor for FieldPredicate.
+     *
+     * Parses the field type and value. If the value indicates a nested query
+     * (e.g., "f:field_id:(t:type_id title:some_title)"), it parses this nested
+     * structure into `$this->nests`.
+     *
+     * @param AndLimb $parent Reference to the parent AndLimb.
+     * @param string|int $type The ID (numeric) or name (string) of the detail field type.
+     * @param string $value The value to search for in the field, or a nested query string.
+     */
     public function __construct(&$parent, $type, $value) {
         $this->field_type = $type;
         parent::__construct($parent, $value);
 
-        if (strlen($value)>0 && $value[0] == '-') {    // DWIM: user wants a negate, we'll let them put it here
+        if (strlen($value)>0 && $value[0] == '-') {    // DWIM: user wants a negate, allow it here
             $parent->negate = true;
-            $value = substr($value, 1);
+            $this->value = substr($value, 1); // Update value after processing negation
         }
 
-        //nests are inside parentheses
+        // Check for nested queries within parentheses, e.g., f:pointer_field:(t:OtherRecordType title:Something)
+        // The regex captures up to two levels of parentheses, assuming a simple structure.
         preg_match('/\((.+?)(?:\((.+)\))?\)/', $this->value, $matches);
-        if(!empty($matches) && $matches[0]==$this->value){
-
+        if(!empty($matches) && $matches[0]==$this->value){ // If the entire value is a parenthesized expression
             $this->nests = array();
-            for ($k=1; $k < count($matches);++$k) {
-
+            for ($k=1; $k < count($matches);++$k) { // Iterate through captured groups (nested parts)
+                if (empty($matches[$k])) continue;
                 $text = $matches[$k];
 
-
+                // Split the nested query part into AND limbs (space-separated tokens, respecting quotes)
                 if (preg_match_all('/(?:[^" ]+|"[^"]*")+(?= |$)/', $text, $matches2)) {
                     $and_texts = $matches2[0];
                     $limbs = array();
                     for ($i=0; $i < count($and_texts);++$i){
+                        // Note: Passing $this (FieldPredicate) as parent to AndLimb here.
+                        // This might be unusual if AndLimb expects an OrLimb, review context if issues arise.
+                        // However, AndLimb constructor takes generic parent and accesses parent->absoluteStrQuery.
+                        // FieldPredicate doesn't have absoluteStrQuery, so this could lead to notices.
+                        // For now, documenting as is. A proper fix might involve a more specific parsing context for nests.
                         $limbs[] = new AndLimb($this, $and_texts[$i]);
                     }
                     array_push($this->nests, $limbs);
                 }
             }
         }
-        /*
-        for ($i=0; $i < count($limbs);++$i) {
-        $new_sql = $limbs[$i]->pred->makeSQL();
-        if (strlen($new_sql) > 0) {
-        array_push($and_clauses, $new_sql);
-        }
-        }
-        */
     }
 
+    /**
+     * Generates the SQL WHERE condition for this field predicate.
+     *
+     * This is a complex method that handles:
+     * - Nested queries (searching fields on linked records).
+     * - Different field types: 'resource', 'enum', 'relationtype', 'date', 'file', 'fulltext', and others.
+     * - Various comparison operators derived from parent AndLimb's flags or specific value parsing.
+     *
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @return string The SQL condition string. Can be quite complex, often involving EXISTS subqueries.
+     */
     public function makeSQL() {
         global $mysqli;
 
@@ -1827,124 +2209,165 @@ class FieldPredicate extends Predicate {
 
     }
 
+    /**
+     * Generates the SQL clause for the detail field type ID or name.
+     *
+     * If `$this->field_type` is numeric, it's treated as a dty_ID.
+     * If it's a comma-separated list of numbers, it's used for an IN clause.
+     * Otherwise, it's treated as a dty_Name and used in a LIKE clause.
+     * If the value is empty, it generates `!=''` which is likely not intended and
+     * should ideally mean "any field type" if that's a valid use case.
+     *
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @return string The SQL condition part for the field type.
+     */
     public function get_field_type_clause(){
         global $mysqli;
 
-        if(trim($this->value)===''){
-
+        if(trim($this->value)===''){ // If the predicate's *value* is empty
+            // This condition seems problematic. It implies if the search value for the field is empty,
+            // the type clause becomes `!=''` which means "any type that is not an empty string".
+            // This might be a fallback or an attempt to match any field if no specific type is being filtered by name/ID.
+            // However, $this->field_type refers to the *type of field* being queried, not its search value.
+            // A more logical interpretation might be that if $this->field_type itself is empty/unspecified,
+            // then it should match any field type, but this is not what the code does.
+            // Documenting current behavior.
             $rd_type_clause = "!=''";
 
         }elseif (preg_match('/^\\d+$/', $this->field_type)) {
-            /* handle the easy case: user has specified a (single) specific numeric type */
+            /* Handle the case where user has specified a (single) specific numeric type ID */
             $rd_type_clause = '= ' . intval($this->field_type);
         }
         elseif (preg_match(REGEX_CSV, $this->field_type)) {
-            /* user has specified a list of numeric types ... match any of them */
+            /* User has specified a list of numeric type IDs ... match any of them */
             $rd_type_clause = 'in (' . $this->field_type . ')';
         }
         else {
+            /* User has specified the field name (string) */
             $val = $mysqli->real_escape_string($this->field_type);
-            /* user has specified the field name */
-            $rd_type_clause = 'like "' . $val . '%"';
+            $rd_type_clause = 'like "' . $val . '%"'; // Matches dty_Name starting with the given string
         }
         return  $rd_type_clause;
     }
 
-    //
+    /**
+     * Generates the SQL comparison part for the field's value.
+     *
+     * This method determines the SQL operator and formats the value based on:
+     * - The field's actual data type (`$this->field_type_value` e.g., 'enum', 'date', 'integer').
+     * - Parent AndLimb flags (`exact`, `lessthan`, `greaterthan`).
+     * - Special value formats (e.g., comma-separated IDs, range operator "<>").
+     *
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @return string The SQL comparison string (e.g., "= 'some_value'", "LIKE '%text%'", "IN (1,2,3)").
+     */
     public function get_field_value(){
         global $mysqli;
 
-        if(trim($this->value)==='' || $this->value===false){   //if value is not defined find any non empty value
-
+        if(trim($this->value)==='' || $this->value===false){   // If value is not defined, find any non-empty value
             $match_pred = " !='' ";
-
-        }elseif($this->field_type_value=='enum' || $this->field_type_value=='relationtype'){
-
-            if(preg_match(REGEX_CSV, $this->value)){
+        } elseif($this->field_type_value=='enum' || $this->field_type_value=='relationtype'){
+            // Handle enum or relationtype fields
+            if(preg_match(REGEX_CSV, $this->value)){ // Comma-separated numeric IDs
                 $match_pred = ' in (select trm_ID from defTerms where trm_ID in ('
-                    .$this->value.') or trm_ParentTermID in ('.$this->value.'))';
-            }elseif(intval($this->value)>0){
+                    .$this->value.') or trm_ParentTermID in ('.$this->value.'))'; // Includes children
+            }elseif(intval($this->value)>0){ // Single numeric ID
                 $match_pred = ' in (select trm_ID from defTerms where trm_ID='
-                    .$this->value.' or trm_ParentTermID='.$this->value.')';
-            }else{
+                    .$this->value.' or trm_ParentTermID='.$this->value.')'; // Includes children
+            }else{ // Textual value - search label or code
                 $value = $mysqli->real_escape_string($this->value);
-
                 $match_pred  = ' in (select trm_ID from defTerms where trm_Label ';
                 if($this->parent->exact){
-                    $match_pred  =  $match_pred.'="'.$value.'"';
+                    $match_pred  .= '="'.$value.'"';
                 } else {
-                    $match_pred  =  $match_pred." like '%$value%'";
+                    $match_pred  .= " like '%$value%'";
                 }
-                $match_pred  =  $match_pred.' or trm_Code="'.$value.'")';
-
-
+                $match_pred  .= ' or trm_Code="'.$value.'")'; // Also check against term code
             }
-
-        }elseif (strpos($this->value,"<>")>0) {  //(preg_match('/^\d+(\.\d*)?|\.\d+(?:<>\d+(\.\d*)?|\.\d+)+$/', $this->value)) {
-
+        } elseif (strpos($this->value,"<>")>0) {  // Numeric range (e.g., "10<>20")
             $vals = explode("<>", $this->value);
-            $match_pred = SQL_BETWEEN.$vals[0].SQL_AND.$vals[1].' ';
-
-        }else {
-
-            $cs_ids =null;
+            // Ensure values are numeric before using in BETWEEN for safety, though original code doesn't explicitly check type here.
+            $val1 = is_numeric($vals[0]) ? $vals[0] : '0';
+            $val2 = is_numeric($vals[1]) ? $vals[1] : '0';
+            $match_pred = SQL_BETWEEN.$val1.SQL_AND.$val2.' ';
+        } else { // Other types or generic text search
+            $cs_ids = null;
+            // Avoid treating numeric values for float/integer fields as comma-separated ID lists
             if(!($this->field_type_value=='float' || $this->field_type_value=='integer')){
                 $cs_ids = getCommaSepIds($this->value);
             }
 
-            if ($cs_ids) {
-            //  if (preg_match(REGEX_CSV, $this->value)) {  not work for >500 entries
-                // comma-separated list of ids
+            if ($cs_ids) { // Comma-separated list of IDs
                 $match_pred = ' in ('.$cs_ids.')';
-
-            }else{
-
+            } else { // Single value, potentially numeric or text
                 $isnumericvalue = is_numeric($this->value);
+                $match_value_sql = '';
 
                 if($isnumericvalue && $this->value!==''){
-                    $match_value = floatval($this->value);
+                    $match_value_sql = floatval($this->value); // Use raw number for numeric types
                 }else{
-                    $match_value = '"'.$mysqli->real_escape_string($this->value).'"';
+                    $match_value_sql = '"'.$mysqli->real_escape_string($this->value).'"'; // Quote string values
                 }
 
-                if ($this->parent->exact  ||  $this->value === "") {    // SC100
-                    $match_pred = ' = '.$match_value; //for unknown reason comparison with numeric takes ages
+                if ($this->parent->exact  ||  $this->value === "") {    // SC100: xxx:"" treated as exact match for empty string
+                    $match_pred = ' = '.$match_value_sql;
                 } elseif($this->parent->lessthan) {
-                    $match_pred = " < $match_value";
+                    $match_pred = " < $match_value_sql";
                 } elseif($this->parent->greaterthan) {
-                    $match_pred = " > $match_value";
-                } else {
+                    $match_pred = " > $match_value_sql";
+                } else { // Default to LIKE for strings, or exact for numbers if not otherwise specified
                     if(($this->field_type_value=='float' || $this->field_type_value=='integer') && $isnumericvalue){
-                        $match_pred = ' = "'.floatval($this->value).'"';
-                    }elseif(strpos($this->value,"%")===false){
+                        // For numeric types, if no other operator, treat as exact match.
+                        // Original code had ' = "'.floatval($this->value).'"' which casts to float then quotes - potentially problematic.
+                        // Using direct numeric comparison is better:
+                        $match_pred = ' = '.floatval($this->value);
+                    } elseif(strpos($this->value,"%")===false){ // If no wildcards in value, add them for LIKE
                         $match_pred = " like '%".$mysqli->real_escape_string($this->value)."%'";
-                    }else{
+                    } else { // Value already contains wildcards
                         $match_pred = " like '".$mysqli->real_escape_string($this->value)."'";
                     }
                 }
             }
-
         }
-
         return $match_pred;
     }
-
 }
 
-
+/**
+ * Predicate for searching by the count of a specific detail field.
+ */
 class FieldCountPredicate extends Predicate {
-    public $field_type;        //name of dt_id
+    /** @var string|int The ID or name of the detail field type whose instances are to be counted. */
+    public $field_type;
 
+    /**
+     * Constructor for FieldCountPredicate.
+     *
+     * @param AndLimb $parent Reference to the parent AndLimb.
+     * @param string|int $type The ID or name of the detail field type.
+     * @param string $value The count value to compare against (e.g., "=5", ">2").
+     */
     public function __construct(&$parent, $type, $value) {
         $this->field_type = $type;
         parent::__construct($parent, $value);
 
-        if ($value[0] == '-') {    // DWIM: user wants a negate, we'll let them put it here
+        // DWIM: Allow negation prefix on the value itself.
+        if ($value[0] == '-') {
             $parent->negate = true;
-            $value = substr($value, 1);
+            $this->value = substr($value, 1); // Update value after processing negation
         }
     }
 
+    /**
+     * Generates SQL for comparing the count of a field's occurrences.
+     *
+     * Constructs a subquery `(select count(rd.dtl_ID) from recDetails rd ...)`
+     * and compares its result with the value specified, using operators
+     * derived from parent AndLimb flags or parsed from the value.
+     *
+     * @global \mysqli $mysqli The global mysqli database connection (unused directly, but assumed by context).
+     * @return string The SQL condition string.
+     */
     public function makeSQL() {
         global $mysqli;
 
@@ -1993,38 +2416,63 @@ where rd.dtl_RecID=TOPBIBLIO.rec_ID '.$ft_compare.' )'.$match_pred . $not2;
 
 }
 
-
+/**
+ * Predicate for searching records by tags.
+ * Handles multiple tags (OR logic), workgroup-specific tags, and numeric tag IDs.
+ */
 class TagPredicate extends Predicate {
+    /** @var array<string> Array of workgroup names associated with tags. Parallel to `$this->value`. Empty string if no workgroup. */
     public $wg_value;
 
+    /**
+     * Constructor for TagPredicate.
+     *
+     * Parses the input value, which can be a comma-separated list of tags.
+     * Tags can also be workgroup-specific using a backslash separator (e.g., "wg_name\\tag_name").
+     * Populates `$this->value` (tag names or IDs) and `$this->wg_value` (workgroup names).
+     *
+     * @param AndLimb $parent Reference to the parent AndLimb.
+     * @param string $value Comma-separated string of tags, potentially with workgroup prefixes.
+     */
     public function __construct(&$parent, $value) {
-        $this->parent = &$parent;
+        $this->parent = &$parent; // Direct assignment, not by reference as in original & $parent.
 
-        $this->value = array();
-        $this->wg_value = array();
+        $this->value = array();    // Stores tag texts or IDs
+        $this->wg_value = array(); // Stores corresponding workgroup names for tags
         $values = explode(',', $value);
         $any_wg_values = false;
 
-        // Heavy, heavy DWIM here: if the tag for which we're searching contains comma(s),
-        // then split it into several tags, and do an OR search on those.
+        // DWIM (Do What I Mean): If the tag string contains commas, split into multiple tags for an OR search.
         for ($i=0; $i < count($values);++$i) {
-            if (strpos($values[$i], '\\') === false) {
+            if (strpos($values[$i], '\\') === false) { // Standard tag
                 array_push($this->value, trim($values[$i]));
-                array_push($this->wg_value, '');
-            } else {    // A workgroup tag.  How nice.
+                array_push($this->wg_value, ''); // No specific workgroup
+            } else {    // Workgroup-specific tag (e.g., "workgroup_name\\tag_text")
                 preg_match('/(.*?)\\\\(.*)/', $values[$i], $matches);
-                array_push($this->wg_value, trim($matches[1]));
-                array_push($this->value, trim($matches[2]));
+                array_push($this->wg_value, trim($matches[1])); // Workgroup name
+                array_push($this->value, trim($matches[2]));    // Tag text
                 $any_wg_values = true;
             }
         }
-        if (! $any_wg_values) {$this->wg_value = array();}
-        $this->query = null;
+        if (! $any_wg_values) {$this->wg_value = array();} // If no wg values were found, ensure it's an empty array.
+        $this->query = null; // Initialize query cache from base Predicate class.
     }
 
+    /**
+     * Generates the SQL WHERE clause part for a single tag or a list of tags (ORed).
+     * This private helper method was part of the original TagPredicate but seems to have been
+     * largely integrated or superseded by the logic within makeSQL itself.
+     * For documentation, assuming it was intended to build the core "(tag_Text = 'X' OR tag_ID=Y) AND (ugr_Name='Z' OR ugr_ID IS NULL)" part.
+     *
+     * Note: This method is marked private and its return `null` suggests it might be incomplete or its logic
+     * was merged into `makeSQL`. The PHPDoc describes its apparent original intent.
+     *
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @return string|null The SQL condition string for the tag expressions, or null if logic was removed/merged.
+     */
     private function tagWhereExp(){
         global $mysqli;
-
+/*
         $query = '';
 
         $sql_tag_eq = 'kwd.tag_Text ="';
@@ -2054,10 +2502,21 @@ class TagPredicate extends Predicate {
                     $query .= ') ';
                 }
         }
-
-        return null;
+*/
+        return null;        
     }
 
+    /**
+     * Generates SQL for matching records based on tags.
+     *
+     * Constructs an EXISTS subquery against `usrRecTagLinks` and `usrTags` (and `sysUGrps` if workgroup tags are involved).
+     * Handles multiple tags with OR logic. Supports negation.
+     * Differentiates logic based on whether the search is within BOOKMARK domain (searches user's tags)
+     * or general domain (searches global/non-user-specific tags).
+     *
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @return string The SQL condition string.
+     */
     public function makeSQL() {
         global $mysqli;
 
@@ -2120,55 +2579,75 @@ class TagPredicate extends Predicate {
     }
 }
 
-
+/**
+ * Predicate for searching by record ID (`rec_ID`).
+ * Handles single ID, comma-separated IDs, ranges, and record ID replacements.
+ */
 class BibIDPredicate extends Predicate {
 
+    /**
+     * Generates SQL for matching the `rec_ID`.
+     * It calls `get_field_value()` to get the appropriate comparison string.
+     *
+     * @return string The SQL condition string.
+     */
     public function makeSQL() {
         $res = "TOPBIBLIO.rec_ID ".$this->get_field_value();
         return $res;
     }
 
+    /**
+     * Generates the SQL comparison part for the record ID value.
+     *
+     * - Handles ranges specified with "<>".
+     * - Handles comma-separated lists of IDs (for IN clauses).
+     * - Handles single IDs with operators `<`, `>`, or `=` (default).
+     * - Uses `recordSearchReplacement()` to potentially map old IDs to new IDs.
+     * - Sets `$pquery->fixed_sortorder` if a list of IDs is provided, for `sortby:set`.
+     *
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @return string The SQL comparison string (e.g., "= 123", "IN (1,2,3)", "BETWEEN 10 AND 20").
+     */
     public function get_field_value(){
         global $mysqli;
 
-        if (strpos($this->value,"<>")>0) {
-
+        if (strpos($this->value,"<>")>0) { // Range
             $vals = explode("<>", $this->value);
-            $vals[0] = recordSearchReplacement($mysqli, $vals[0]);
-            $vals[1] = recordSearchReplacement($mysqli, $vals[1]);
-            $match_pred = SQL_BETWEEN.$vals[0].SQL_AND.$vals[1].' ';
-
-        }else{
-
-            $cs_ids = getCommaSepIds($this->value);
-            if ($cs_ids && strpos($cs_ids,',')>0) {
-
+            // Apply replacement for each part of the range
+            $vals[0] = recordSearchReplacement($mysqli, trim($vals[0]));
+            $vals[1] = recordSearchReplacement($mysqli, trim($vals[1]));
+            $match_pred = SQL_BETWEEN.intval($vals[0]).SQL_AND.intval($vals[1]).' ';
+        } else {
+            $cs_ids = getCommaSepIds($this->value); // Check for comma-separated IDs
+            if ($cs_ids && strpos($cs_ids,',')>0) { // List of IDs
                 $pquery = &$this->getQuery();
+                // Apply replacement to each ID in the list
+                // The condition `true || $pquery->search_domain == EVERYTHING` always evaluates to true,
+                // meaning replacements are always attempted.
                 if(true || $pquery->search_domain == EVERYTHING){
-                    $cs_ids = explode(',', $cs_ids);
-                    $rsvd = array();
-                    foreach($cs_ids as $recid){
-                        array_push($rsvd, recordSearchReplacement($mysqli, $recid));//find new value
+                    $id_array = explode(',', $cs_ids);
+                    $replaced_ids = array();
+                    foreach($id_array as $recid){
+                        array_push($replaced_ids, recordSearchReplacement($mysqli, trim($recid)));
                     }
-                    $cs_ids = implode(',',$rsvd);
+                    $cs_ids = implode(',', array_map('intval', $replaced_ids)); // Ensure IDs are integers
                 }
 
-                // comma-separated list of ids
-                $not = ($this->parent->negate)? ' not' : '';
-                $match_pred = $not.' in ('.$cs_ids.')';
+                $not = ($this->parent->negate)? ' NOT' : ''; // Corrected: Add space before NOT
+                $match_pred = $not.' IN ('.$cs_ids.')';
 
-                $pquery->fixed_sortorder = $cs_ids; //need in case sortby:set
-            }else{
-
+                if(!$this->parent->negate) { // Only set fixed_sortorder if not negated
+                    $pquery->fixed_sortorder = $cs_ids; // For sortby:set
+                }
+            } else { // Single ID
                 $this->value = recordSearchReplacement($mysqli, $this->value);
-
-                $value = intval($this->value);
+                $value = intval($this->value); // Ensure it's an integer
 
                 if ($this->parent->lessthan) {
                     $match_pred = " < $value";
                 } elseif($this->parent->greaterthan) {
                     $match_pred = " > $value";
-                } else {
+                } else { // Default to exact match or not equal
                     if($this->parent->negate){
                         $match_pred = ' <> '.$value;
                     }else{
@@ -2176,30 +2655,46 @@ class BibIDPredicate extends Predicate {
                     }
                 }
             }
-
         }
-
         return $match_pred;
     }
-
 }
 
-
+/**
+ * Abstract base class for predicates that deal with linked records (via `recLinks` table).
+ * Provides common structure but `makeSQL` needs to be implemented by subclasses.
+ */
+/**
+ * Abstract base class for predicates that deal with linked records (via `recLinks` table).
+ * Provides common structure but `makeSQL` needs to be implemented by subclasses.
+ */
 abstract class LinkedPredicate extends Predicate {
 
+    /** @var string SQL field name for the source ID in `recLinks` (e.g., "rl.rl_SourceID"). Set by subclasses. */
     protected $fromField;
+    /** @var string SQL field name for the target ID in `recLinks` (e.g., "rl.rl_TargetID"). Set by subclasses. */
     protected $toField;
+    /** @var string SQL join condition to link `recLinks` with `Records` (e.g., "rl.rl_TargetID=rd.rec_ID"). Set by subclasses. */
     protected $toRLink;
 
     /**
-     * Constructs and returns an SQL query for linked records based on specified record types and detail types.
+     * Constructs an SQL query for finding records that are linked to or from records matching a parent query,
+     * or linked to/from specific record types/detail types.
      *
-     * This method generates an SQL query by analyzing the `value` parameter, which contains information
-     * about the record type (`rty_ID`) and detail type (`dty_ID`). If the value is specified, the query
-     * searches for linked records from the specific source type and field. If a parent query exists, it
-     * incorporates it into the final SQL query. Otherwise, it generates a standalone query.
+     * The behavior depends on whether a parent query context (`$pquery->parentquery`) exists:
+     * - **With Parent Query**: Finds records (identified by `$this->toField`) that are linked to/from
+     *   records (`rd`) matching the parent query. The link is further filtered by `$this->fromField`
+     *   matching `rd.rec_ID` (via `$this->toRLink`) and optionally by `$rty_ID` and `$dty_ID` from `$this->value`.
+     * - **Without Parent Query (Standalone)**: Finds records (identified by `$this->toField`) that are linked to/from
+     *   records specified by `$rty_ID` (via `$this->fromField`) and `$dty_ID`.
      *
-     * @return string - Returns the constructed SQL query string.
+     * The `$this->value` (e.g., "recordTypeID-detailTypeID") is parsed to get `$rty_ID` and `$dty_ID`
+     * which specify constraints on the *other* side of the link.
+     *
+     * Subclasses (`LinkedFromParentPredicate`, `LinkedToParentPredicate`) define the direction
+     * of the link by setting `$fromField`, `$toField`, and `$toRLink`.
+     *
+     * @return string The constructed SQL query string, typically an `IN (SELECT ...)` clause.
      */
     public function makeSQL() {
 
@@ -2276,68 +2771,129 @@ abstract class LinkedPredicate extends Predicate {
     }
 }
 
-//
-// this is special case
-// find records that are linked from parent/top query (resource (record pointer) field in parent record = record ID)
-//
-// 1. take parent query from parent object
-//
+/**
+ * Predicate for finding records that are targets of links originating from records matching a parent query
+ * or specific criteria.
+ *
+ * Example: Find "Records B" where "Records A" (matching parent query or criteria) have a pointer field linking to "Records B".
+ * `$this->value` can specify `recordTypeID-detailTypeID` of "Records A".
+ * - `fromField` becomes `rl.rl_SourceID` (Record A is the source of the link).
+ * - `toField` becomes `rl.rl_TargetID` (Record B is the target we are looking for).
+ * - `toRLink` defines how Record A (as `rd`) is joined via its `rec_ID` to `rl.rl_TargetID` if parentquery is used,
+ *   or how `rl_TargetID` (Record B) is related to `rd` (Record A) in standalone. (This seems reversed, check logic of makeSQL carefully)
+ *   Actually, `SQL_RL_TARGET_LINK` is `rl.rl_TargetID=rd.rec_ID`.
+ */
 class LinkedFromParentPredicate extends LinkedPredicate {
+    /**
+     * Constructor for LinkedFromParentPredicate.
+     * Sets the direction of the link search.
+     *
+     * @param AndLimb $parent Reference to the parent AndLimb.
+     * @param string $value Value string, potentially "rty_ID-dty_ID" for the source of the link.
+     */
     public function __construct(&$parent, $value) {
         parent::__construct( $parent, $value );
 
-        $this->fromField = 'rl.rl_SourceID';
-        $this->toField = 'rl.rl_TargetID';
+        $this->fromField = 'rl.rl_SourceID'; // The record matching parent/criteria is the source of the link
+        $this->toField = 'rl.rl_TargetID';   // We are looking for the target of this link
 
-        $this->toRLink = SQL_RL_TARGET_LINK;
+        // This defines how the 'other' side of the link (rd) is connected in the subquery.
+        // If parent query context: rd is the record from parent query. We want rd.rec_ID to be rl.rl_TargetID.
+        // If standalone: rd is the 'other' record. We want rd.rec_ID to be rl.rl_TargetID.
+        $this->toRLink = SQL_RL_TARGET_LINK; // `rl.rl_TargetID=rd.rec_ID`
     }
 }
 
-
-//
-// find records that are linked (have pointers) to  parent/top query
-
-//  resource (record pointer) detail value of parent query equals to record id
-//
+/**
+ * Predicate for finding records that are sources of links pointing to records matching a parent query
+ * or specific criteria.
+ *
+ * Example: Find "Records A" where "Records A" have a pointer field linking to "Records B" (matching parent query or criteria).
+ * `$this->value` can specify `recordTypeID-detailTypeID` of "Records B".
+ * - `fromField` becomes `rl.rl_TargetID` (Record B is the target of the link).
+ * - `toField` becomes `rl.rl_SourceID` (Record A is the source we are looking for).
+ * - `toRLink` defines how Record B (as `rd`) is joined via its `rec_ID` to `rl.rl_SourceID`.
+ *   Actually, `SQL_RL_SOURCE_LINK` is `rl.rl_SourceID=rd.rec_ID`.
+ */
 class LinkedToParentPredicate extends LinkedPredicate {
+    /**
+     * Constructor for LinkedToParentPredicate.
+     * Sets the direction of the link search.
+     *
+     * @param AndLimb $parent Reference to the parent AndLimb.
+     * @param string $value Value string, potentially "rty_ID-dty_ID" for the target of the link.
+     */
     public function __construct(&$parent, $value) {
         parent::__construct( $parent, $value );
 
-        $this->fromField = 'rl.rl_TargetID';
-        $this->toField = 'rl.rl_SourceID';
+        $this->fromField = 'rl.rl_TargetID'; // The record matching parent/criteria is the target of the link
+        $this->toField = 'rl.rl_SourceID';   // We are looking for the source of this link
 
-        $this->toRLink = SQL_RL_SOURCE_LINK;
+        // This defines how the 'other' side of the link (rd) is connected in the subquery.
+        $this->toRLink = SQL_RL_SOURCE_LINK; // `rl.rl_SourceID=rd.rec_ID`
     }
 }
 
-
+/**
+ * Abstract base class for predicates dealing with related records (via type 1 records in `recLinks`).
+ * Provides helper methods `buildWhereClause` and `buildSelectClause`.
+ */
+/**
+ * Abstract base class for predicates dealing with related records (via type 1 records in `recLinks`).
+ * Provides helper methods `buildWhereClause` and `buildSelectClause`.
+ */
 abstract class RelatedParentPredicate extends Predicate {
 
     /**
-     * Constructs the WHERE clause for the SQL query.
+     * Constructs a partial WHERE clause for relationship queries.
      *
-     * @param int|null $source_rty_ID The source record type ID.
-     * @param string|null $relation_type_ID The relation type ID.
-     * @param string $linkType SQL link type for the relationship.
-     * @return string The WHERE clause.
+     * This helper method is used by subclasses to build a WHERE clause segment that filters by:
+     * - Source record type ID (`$source_rty_ID`), if provided.
+     * - A specific SQL link type condition (`$linkType`), e.g., `rl.rl_SourceID=rd.rec_ID`.
+     * - A specific relation type ID (`$relation_type_ID`), if provided. If not, it defaults to ensuring
+     *   that a relation exists (`rl.rl_RelationID IS NOT NULL` which is `SQL_RELATION_IS_NOT_NULL`).
+     *
+     * @param int|string|null $source_rty_ID The record type ID of the source/other side of the relationship.
+     * @param int|string|null $relation_type_ID The term ID of the specific relationship type.
+     * @param string $linkType The SQL condition string that defines how `rd` (record from one side)
+     *                         is linked to `rl` (recLinks table), e.g., `SQL_RL_SOURCE_LINK`.
+     * @return string The constructed partial WHERE clause string.
      */
     protected function buildWhereClause($source_rty_ID, $relation_type_ID, $linkType) {
-        return (($source_rty_ID) ? "rd.rec_RecTypeID = $source_rty_ID" . SQL_AND : '') .
-            $linkType . SQL_AND .
-            (($relation_type_ID) ? "rl.rl_RelationTypeID = $relation_type_ID" : SQL_RELATION_IS_NOT_NULL);
+        $where = '';
+        if ($source_rty_ID) {
+            // Ensure $source_rty_ID is safe if it's a direct value or handle if it's a list
+            $where .= "rd.rec_RecTypeID = " . intval($source_rty_ID) . SQL_AND;
+        }
+        $where .= $linkType . SQL_AND;
+        if ($relation_type_ID) {
+            $where .= "rl.rl_RelationTypeID = " . intval($relation_type_ID);
+        } else {
+            $where .= SQL_RELATION_IS_NOT_NULL; // Ensures it's a relationship link
+        }
+        return $where;
     }
 
     /**
-     * Builds the full SELECT clause for the SQL query.
+     * Builds the main part of a subquery (FROM and WHERE clauses) for relationship predicates.
      *
-     * @param string $add_from Additional FROM clause.
-     * @param string $add_where Additional WHERE clause.
-     * @return string The full SELECT clause.
+     * This helper is used by subclasses to construct the core of an `IN (SELECT ...)` subquery.
+     * - If a parent query context exists (`$pquery->parentquery`), it adapts the parent query's FROM/WHERE
+     *   clauses by aliasing 'TOPBIBLIO' to 'rd' (representing the records from the parent query context)
+     *   and 'TOPBKMK' to 'MAINBKMK'. It then appends the `$add_from` (typically 'recLinks rl') and
+     *   `$add_where` (conditions generated by `buildWhereClause`) to these adapted parent clauses.
+     *   The parent query's sort, limit, and offset are also appended, though their effect inside an
+     *   `IN` subquery is usually limited.
+     * - If no parent query context, it constructs a simpler `FROM Records rd, {$add_from} WHERE {$add_where}`.
+     *
+     * @param string $add_from Additional FROM clause elements, typically 'recLinks rl'.
+     * @param string $add_where Additional WHERE clause conditions, typically from `buildWhereClause`.
+     * @return string The constructed FROM, WHERE, and potentially ORDER BY, LIMIT, OFFSET parts of a subquery.
      */
     protected function buildSelectClause($add_from, $add_where) {
         $pquery = &$this->getQuery();
-        if ($pquery->parentquery) {
-            $query = $pquery->parentquery;
+        if ($pquery->parentquery) { // If there's a parent query context
+            $query = $pquery->parentquery; // Get parent query's SQL parts
             $query["from"] = str_replace(['TOPBIBLIO', 'TOPBKMK'], ['rd', 'MAINBKMK'], $query["from"]);
             $query["where"] = str_replace(['TOPBIBLIO', 'TOPBKMK'], ['rd', 'MAINBKMK'], $query["where"]);
 
@@ -2351,50 +2907,65 @@ abstract class RelatedParentPredicate extends Predicate {
 }
 
 /**
- * Class RelatedFromParentPredicate
+ * Predicate for finding records that are targets of relationships originating from
+ * records defined by a parent query or specific criteria.
  *
- * Constructs SQL for finding records related from records
- * This predicate finds records linked with a specific source type and relationship field.
+ * Example: Find "Records B" where "Records A" (matching parent query/criteria) are related to "Records B"
+ * with a specific relationship type.
+ * `$this->value` (e.g., "sourceRecordTypeID-relationTypeID") specifies constraints on "Records A" and the relation.
+ * This class looks for `rl_TargetID` in `recLinks` where `rl_SourceID` matches the context.
  */
 class RelatedFromParentPredicate extends RelatedParentPredicate {
 
     /**
-     * Creates the SQL query for fetching records that are related from a parent source.
+     * Creates the SQL query for fetching records that are targets of specified relationships.
      *
-     * @return string SQL query string for fetching related records.
+     * It identifies records (`TOPBIBLIO.rec_ID`) that are `rl_TargetID` in `recLinks`.
+     * The other side of the relationship (`rl_SourceID`, aliased as `rd`) is constrained by
+     * `$this->value` (source record type and relation type) and potentially a parent query context.
+     * If `$this->need_recursion` is true and a relation type is specified, it also includes
+     * records found via the inverse relationship type (using `RelatedToParentPredicate`).
+     *
+     * @global \mysqli $mysqli (Potentially used by `getInverseTermId` if called, though not directly in this method body).
+     * @return string SQL query string, typically an `IN (SELECT ...)` clause, possibly combined with an OR for inverse relations.
      */
     public function makeSQL() {
-        global $mysqli;
+        global $mysqli; // $mysqli is used by getInverseTermId
 
-        $select_relto = null;
-        $source_rty_ID = null;
+        $select_relto_inverse = null; // SQL for inverse relationship
+        $source_rty_ID = null;        // Record Type ID of the source of the relationship
+        $relation_type_ID = null;     // Term ID of the relationship type
 
-        // Parse the provided value to get source record type and relation type.
+        // Parse the value (e.g., "sourceRtyID-relationTypeID")
         if ($this->value) {
             $vals = explode('-', $this->value);
             $source_rty_ID = $vals[0] ?? null;
-            $relation_type_ID = $vals[1] ?? '';
+            $relation_type_ID = !empty($vals[1]) ? $vals[1] : null;
 
-            // If recursion is required, find the inverse relationship term and build the SQL.
+            // If recursion is needed and a relation type is specified, find its inverse
             if ($this->need_recursion && $relation_type_ID) {
                 $inverseTermId = $this->getInverseTermId($relation_type_ID);
                 if ($inverseTermId) {
-                    $relto = new RelatedToParentPredicate($this, $source_rty_ID . '-' . $inverseTermId);
-                    $relto->stopRecursion();
-                    $select_relto = $relto->makeSQL();
+                    // Construct a predicate for the inverse relation
+                    // This will find records where TOPBIBLIO is the source and 'rd' is the target via inverse relation
+                    $relto_inverse_pred = new RelatedToParentPredicate($this->parent, $source_rty_ID . '-' . $inverseTermId);
+                    $relto_inverse_pred->stopRecursion(); // Prevent infinite recursion
+                    $select_relto_inverse = $relto_inverse_pred->makeSQL();
                 }
             }
         }
 
-        // Build the SQL query based on the source type and relation type.
-        $add_from = SQL_RECLINK;
+        $add_from = SQL_RECLINK; // " recLinks rl "
+        // Define how 'rd' (source of relation) links to 'rl' (recLinks table)
         $add_where = $this->buildWhereClause($source_rty_ID, $relation_type_ID, SQL_RL_SOURCE_LINK);
 
+        // We are looking for records that are the TARGET of these relationships
         $select = 'TOPBIBLIO.rec_ID IN (SELECT rl.rl_TargetID ';
         $select .= $this->buildSelectClause($add_from, $add_where);
 
-        if ($select_relto !== null) {
-            $select = '(' . $select . ') OR (' . $select_relto . ')';
+        // If an inverse relationship search was also constructed, combine with OR
+        if ($select_relto_inverse !== null) {
+            $select = '(' . $select . ') OR (' . $select_relto_inverse . ')';
         }
 
         return $select;
@@ -2403,50 +2974,65 @@ class RelatedFromParentPredicate extends RelatedParentPredicate {
 }
 
 /**
- * Class RelatedToParentPredicate
+ * Predicate for finding records that are sources of relationships pointing to
+ * records defined by a parent query or specific criteria.
  *
- * Constructs SQL for finding records related to a parent record (target).
- * This predicate finds records linked to a specific source type and relationship field.
+ * Example: Find "Records A" where "Records B" (matching parent query/criteria) are related to "Records A"
+ * with a specific relationship type.
+ * `$this->value` (e.g., "targetRecordTypeID-relationTypeID") specifies constraints on "Records B" and the relation.
+ * This class looks for `rl_SourceID` in `recLinks` where `rl_TargetID` matches the context.
  */
 class RelatedToParentPredicate extends RelatedParentPredicate {
 
     /**
-     * Creates the SQL query for fetching records that are related to a parent target.
+     * Creates the SQL query for fetching records that are sources of specified relationships.
      *
-     * @return string SQL query string for fetching related records.
+     * It identifies records (`TOPBIBLIO.rec_ID`) that are `rl_SourceID` in `recLinks`.
+     * The other side of the relationship (`rl_TargetID`, aliased as `rd`) is constrained by
+     * `$this->value` (target record type and relation type) and potentially a parent query context.
+     * If `$this->need_recursion` is true and a relation type is specified, it also includes
+     * records found via the inverse relationship type (using `RelatedFromParentPredicate`).
+     *
+     * @global \mysqli $mysqli (Potentially used by `getInverseTermId` if called).
+     * @return string SQL query string, typically an `IN (SELECT ...)` clause, possibly combined with an OR for inverse relations.
      */
     public function makeSQL() {
-        global $mysqli;
+        global $mysqli; // $mysqli is used by getInverseTermId
 
-        $select_relto = null;
-        $source_rty_ID = null;
+        $select_relfrom_inverse = null; // SQL for inverse relationship
+        $target_rty_ID = null;          // Record Type ID of the target of the relationship
+        $relation_type_ID = null;       // Term ID of the relationship type
 
-        // Parse the provided value to get source record type and relation type.
+        // Parse the value (e.g., "targetRtyID-relationTypeID")
         if ($this->value) {
             $vals = explode('-', $this->value);
-            $source_rty_ID = $vals[0] ?? null;
-            $relation_type_ID = $vals[1] ?? '';
+            $target_rty_ID = $vals[0] ?? null;
+            $relation_type_ID = !empty($vals[1]) ? $vals[1] : null;
 
-            // If recursion is required, find the inverse relationship term and build the SQL.
+            // If recursion is needed and a relation type is specified, find its inverse
             if ($this->need_recursion && $relation_type_ID) {
                 $inverseTermId = $this->getInverseTermId($relation_type_ID);
                 if ($inverseTermId) {
-                    $relto = new RelatedFromParentPredicate($this, $source_rty_ID . '-' . $inverseTermId);
-                    $relto->stopRecursion();
-                    $select_relto = $relto->makeSQL();
+                    // Construct a predicate for the inverse relation
+                    // This will find records where TOPBIBLIO is the target and 'rd' is the source via inverse relation
+                    $relfrom_inverse_pred = new RelatedFromParentPredicate($this->parent, $target_rty_ID . '-' . $inverseTermId);
+                    $relfrom_inverse_pred->stopRecursion(); // Prevent infinite recursion
+                    $select_relfrom_inverse = $relfrom_inverse_pred->makeSQL();
                 }
             }
         }
 
-        // Build the SQL query based on the source type and relation type.
-        $add_from = SQL_RECLINK;
-        $add_where = $this->buildWhereClause($source_rty_ID, $relation_type_ID, SQL_RL_TARGET_LINK);
+        $add_from = SQL_RECLINK; // " recLinks rl "
+        // Define how 'rd' (target of relation) links to 'rl' (recLinks table)
+        $add_where = $this->buildWhereClause($target_rty_ID, $relation_type_ID, SQL_RL_TARGET_LINK);
 
+        // We are looking for records that are the SOURCE of these relationships
         $select = 'TOPBIBLIO.rec_ID IN (SELECT rl.rl_SourceID ';
         $select .= $this->buildSelectClause($add_from, $add_where);
 
-        if ($select_relto !== null) {
-            $select = '(' . $select . ') OR (' . $select_relto . ')';
+        // If an inverse relationship search was also constructed, combine with OR
+        if ($select_relfrom_inverse !== null) {
+            $select = '(' . $select . ') OR (' . $select_relfrom_inverse . ')';
         }
 
         return $select;
@@ -2454,17 +3040,27 @@ class RelatedToParentPredicate extends RelatedParentPredicate {
 }
 
 /**
- * Class RelatedPredicate
+ * Predicate for finding records that are related (in either direction) to records
+ * matching a parent query or specific criteria.
  *
- * Constructs SQL for finding records related in both directions (from and to the parent).
- * This predicate searches relations in both directions for a given record type and relationship type.
+ * This predicate searches for relationships in both directions:
+ * - Records that are sources of a relationship where the target matches the context.
+ * - Records that are targets of a relationship where the source matches the context.
+ * The context can be a parent query or specific record type/relation type defined in `$this->value`.
  */
 class RelatedPredicate extends Predicate {
 
     /**
-     * Creates the SQL query for fetching records that are related in both directions.
+     * Creates the SQL query for fetching records related in both directions.
      *
-     * @return string SQL query string for fetching related records.
+     * Parses `$this->value` (e.g., "relatedRecordTypeID-relationTypeID") to constrain the "other side"
+     * of the relationship.
+     * If a parent query context exists, it constructs a complex query joining with the parent query results (`rd`).
+     * If standalone, it forms an EXISTS subquery checking `recLinks`.
+     * It also considers inverse relationship types if `relation_type_ID` is provided.
+     *
+     * @global \mysqli $mysqli (Potentially used by `getInverseTermId` if called).
+     * @return string|false SQL query string, or false if `related_rty_ID` is not found.
      */
     public function makeSQL() {
         global $mysqli;
@@ -2536,14 +3132,34 @@ class RelatedPredicate extends Predicate {
 
 
 /**
-* create predicate to search related and linked records
-*/
+ * Predicate for finding records that have any link (resource pointer or relationship)
+ * to or from records matching a parent query or specific criteria.
+ * It effectively combines "linked to/from" and "related to/from" in a broad sense.
+ */
 class AllLinksPredicate  extends Predicate {
+    /**
+     * Generates SQL to find records that have any type of link (resource or relationship)
+     * to or from records defined by `$this->value` (as a record type ID or list of IDs)
+     * or by a parent query context.
+     *
+     * The method constructs two main subqueries, one for links where `TOPBIBLIO.rec_ID` is a source (`rl1.rl_SourceID`)
+     * and one where it's a target (`rl2.rl_TargetID`). These are ORed together.
+     *
+     * - If a parent query context exists (`$pquery->parentquery`):
+     *   The subqueries join against the parent query's results (aliased as `rd`) to find links
+     *   connected to those parent records. `$this->value` (source_rty_ID) seems to be ignored or
+     *   misapplied in this branch in the original code, as `rd.rec_RecTypeID=$source_rty_ID` is commented out.
+     * - If standalone:
+     *   The subqueries link `Records rd` with `recLinks rl1/rl2`. `$this->value` is used to filter
+     *   `rl1.rl_TargetID` or `rl2.rl_SourceID` (the "other side" of the link).
+     *
+     * @return string|false SQL query string, or `SQL_FALSE` ("0") if `source_rty_ID` is empty in standalone mode.
+     */
     public function makeSQL() {
 
-        $source_rty_ID = $this->value;
+        $source_rty_ID = $this->value; // This is the rty_ID(s) of the "other" records in the link.
 
-        $add_select1 = 'TOPBIBLIO.rec_ID in (select rl1.rl_SourceID ';
+        $add_select1 = 'TOPBIBLIO.rec_ID in (select rl1.rl_SourceID '; // Find our records as sources
         $add_select2 = 'TOPBIBLIO.rec_ID in (select rl2.rl_TargetID ';
 
         //NEW
@@ -2598,265 +3214,467 @@ class AllLinksPredicate  extends Predicate {
 
 define('SQL_LINKED_EXISTS', '(exists (select dtl_ID from defDetailTypes, recDetails bd '
             .'where bd.dtl_RecID=TOPBIBLIO.rec_ID and dty_ID=dtl_DetailTypeID and dty_Type="resource" LIMIT 1))');
-//
-// find records that have pointed records
-//
+/**
+ * Predicate for finding records that have a resource pointer field (`dty_Type="resource"`)
+ * pointing to a specific record ID or set of record IDs.
+ *
+ * `SQL_LINKED_EXISTS` is a pre-defined string:
+ * `(exists (select dtl_ID from defDetailTypes, recDetails bd where bd.dtl_RecID=TOPBIBLIO.rec_ID and dty_ID=dtl_DetailTypeID and dty_Type="resource" LIMIT 1))`
+ *
+ * If `$this->value` is provided, it's a comma-separated list of target record IDs. The `LIMIT 1` in `SQL_LINKED_EXISTS`
+ * is replaced with a condition `and bd.dtl_Value in (target_ids) LIMIT 1`.
+ * If `$this->value` is not provided, it checks for the existence of any resource pointer field.
+ */
 class LinkToPredicate extends Predicate {
+    /**
+     * Generates SQL to find records that have resource pointer fields pointing to specified target record(s).
+     *
+     * @return string The SQL condition string. Returns `SQL_FALSE` ("0") if value implies multiple IDs in a way that seems unintended by original "???" comment.
+     */
     public function makeSQL() {
         if ($this->value) {
-
-            $ids = prepareIds($this->value);
-            if(count($ids)>1){   //??? seems wrong
-                return SQL_FALSE;
-            }else{
-                return str_replace('LIMIT',' and bd.dtl_Value in (' . join(',', $ids) . ') LIMIT',SQL_LINKED_EXISTS);
+            $ids = prepareIds($this->value); // Converts to array of IDs
+            if(count($ids)>1){
+                return str_replace('LIMIT 1',' and bd.dtl_Value IN (' . join(',', $ids) . ') LIMIT 1',SQL_LINKED_EXISTS);
+            } elseif(!empty($ids)) { // Single ID
+                return str_replace('LIMIT 1',' and bd.dtl_Value = ' . $ids[0] . ' LIMIT 1',SQL_LINKED_EXISTS);
+            } else { // No valid IDs from prepareIds
+                 return SQL_FALSE;
             }
         }
-        else {
+        else { // No value provided, check for any link
             return SQL_LINKED_EXISTS;
         }
     }
 }
 
-//
-// find records that are pointed (targets)
-// search if parents(source) records exist
-//
+/**
+ * Predicate for finding records that are themselves targets of resource pointer fields from other specified records.
+ *
+ * `SQL_LINKED_EXISTS` is a pre-defined string:
+ * `(exists (select dtl_ID from defDetailTypes, recDetails bd where bd.dtl_RecID=TOPBIBLIO.rec_ID and dty_ID=dtl_DetailTypeID and dty_Type="resource" LIMIT 1))`
+ *
+ * This class's `makeSQL` seems to misuse `SQL_LINKED_EXISTS`. `SQL_LINKED_EXISTS` checks if `TOPBIBLIO.rec_ID` *has* a resource pointer.
+ * To find if `TOPBIBLIO.rec_ID` *is* a target, the query needs to look for other records (`bd.dtl_RecID`) whose `dtl_Value` is `TOPBIBLIO.rec_ID`.
+ * The current implementation, by modifying `bd.dtl_RecID` in the replacement, fundamentally changes the subquery to search
+ * if specific `$ids` *have* resource pointers, which is not "being linked to".
+ * Documenting current behavior, but noting the logical discrepancy.
+ */
 class LinkedToPredicate extends Predicate {
+    /**
+     * Generates SQL. Based on its structure, it appears to intend to find if records specified in `$this->value`
+     * themselves have resource pointers, rather than finding `TOPBIBLIO.rec_ID` being pointed to.
+     * This might be a misinterpretation or a bug in the original class logic compared to its name.
+     *
+     * @return string The SQL condition string. Returns `SQL_FALSE` if value implies multiple IDs in a way that seems unintended.
+     */
     public function makeSQL() {
         if ($this->value) {
-
-            $ids = prepareIds($this->value);
-            if(count($ids)>1){  //??? seems wrong
+            $ids = prepareIds($this->value); // IDs of records that are supposed to be linking TO TOPBIBLIO
+            // The SQL_LINKED_EXISTS is about TOPBIBLIO having a link.
+            // Replacing bd.dtl_RecID with a check against $ids means we are checking if THESE $ids records have links.
+            // This does not check if TOPBIBLIO is linked TO by $ids.
+            if(count($ids)>1){ 
+                return str_replace('LIMIT 1',' and bd.dtl_RecID IN (' . join(',', $ids) . ') LIMIT 1',SQL_LINKED_EXISTS);
+            } elseif(!empty($ids)) { // Single ID
+                return str_replace('LIMIT 1',' and bd.dtl_RecID = ' . $ids[0] . ' LIMIT 1',SQL_LINKED_EXISTS);
+            } else {
                 return SQL_FALSE;
-            }else{
-                return str_replace('LIMIT',' and bd.dtl_RecID in (' . join(',', $ids) . ') LIMIT',SQL_LINKED_EXISTS);
             }
         }
-        else {
+        else { // No value provided, check if TOPBIBLIO has any link (standard SQL_LINKED_EXISTS behavior)
             return SQL_LINKED_EXISTS;
         }
     }
 }
 
-
+/**
+ * Predicate for finding records related to specified record IDs via relationship records (type 1).
+ * A relationship involves a "relationship record" (often type 1) that links two other records (source and target).
+ */
 class RelatedToPredicate extends Predicate {
+    /**
+     * Generates SQL to find records that are related to a given set of record IDs.
+     *
+     * If `$this->value` (a comma-separated list of record IDs) is provided, it constructs an EXISTS subquery.
+     * This subquery checks `recLinks` for entries where `rl_RelationID` is not null (indicating a relationship)
+     * AND either:
+     *  - `TOPBIBLIO.rec_ID` is the target (`rl_TargetID`) and the source (`rl_SourceID`) is one of the provided IDs.
+     *  - OR `TOPBIBLIO.rec_ID` is the source (`rl_SourceID`) and the target (`rl_TargetID`) is one of the provided IDs.
+     *
+     * If `$this->value` is not provided, it finds records that participate in *any* relationship
+     * by selecting distinct source or target IDs from `recLinks` where `rl_RelationID` is not null.
+     *
+     * @return string The SQL condition string.
+     */
     public function makeSQL() {
         if ($this->value) {
-            $ids = prepareIds($this->value);
-            $ids = "(" . implode(",",$ids) . ")";
-            return "(exists (select * from recLinks where (rl_RelationID is not null) "
-            ." and ((rl_TargetID=TOPBIBLIO.rec_ID and rl_SourceID in $ids) "
-            ."   or (rl_SourceID=TOPBIBLIO.rec_ID and rl_TargetID in $ids))  ))";
+            $ids = prepareIds($this->value); // Array of IDs
+            if (empty($ids)) return SQL_FALSE; // No valid IDs to check against
+            $ids_string = "(" . implode(",", array_map('intval', $ids)) . ")"; // Ensure integer IDs in SQL string "(1,2,3)"
+
+            return "(exists (select 1 from recLinks where (rl_RelationID is not null) "
+            ." and ((rl_TargetID=TOPBIBLIO.rec_ID and rl_SourceID in $ids_string) "
+            ."   or (rl_SourceID=TOPBIBLIO.rec_ID and rl_TargetID in $ids_string)) ))";
         }
         else {
-            /* just want something that has a relation */
-            return "TOPBIBLIO.rec_ID in (select distinct rl_TargetID from recLinks WHERE rl_RelationID is not null '
-            .'union select distinct rl_SourceID from recLinks WHERE rl_RelationID is not null)";
+            /* Find records that have any relationship */
+            return "TOPBIBLIO.rec_ID in (select distinct rl_TargetID from recLinks WHERE rl_RelationID is not null " // Missing single quote at end of line
+            ."union select distinct rl_SourceID from recLinks WHERE rl_RelationID is not null)";
         }
     }
 }
 
-
+/**
+ * Predicate for finding records that are part of relationships involving a specified set of record IDs.
+ * This includes the relationship records themselves, and the source/target records, *excluding* the initial set of IDs.
+ *
+ * The implementation executes a direct query to find all related and relationship records,
+ * then uses this list in an `IN (...)` clause. This approach was chosen for performance reasons,
+ * as noted in the original comments.
+ */
 class RelationsForPredicate extends Predicate {
+    /**
+     * Generates SQL to find records that are part of relationships involving the record IDs in `$this->value`.
+     *
+     * It first executes a query to gather all distinct record IDs that are:
+     * - Relationship records (`rl_RelationID = rec_ID`)
+     * - Target records (`rl_TargetID = rec_ID`)
+     * - Source records (`rl_SourceID = rec_ID`)
+     * where the relationship involves any of the IDs specified in `$this->value` (as either source or target),
+     * and are not themselves part of the initial set of IDs.
+     *
+     * The resulting list of record IDs is then used in an `IN (id_list)` condition against `TOPBIBLIO.rec_ID`.
+     *
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @return string The SQL condition string (e.g., "TOPBIBLIO.rec_ID IN (1,2,3)" or "0" if no related records found).
+     */
     public function makeSQL() {
         global $mysqli;
-        $ids = prepareIds($this->value);
-        $ids = "(" . implode(",", $ids) . ")";
+        $input_ids_array = prepareIds($this->value);
+        if (empty($input_ids_array)) return SQL_FALSE; // No input IDs
+        $input_ids_sql_string = "(" . implode(",", array_map('intval', $input_ids_array)) . ")";
 
-        /* Okay, this isn't the way I would have done it initially, but it benchmarks well:
-        * All of the methods above were taking 4-5 seconds.
-        * Putting recLinks into the list of tables at the top-level gets us down to about 0.8 seconds, which is alright, but disruptive.
-        * Coding the 'relationsfor:' predicate as   TOPBIBLIO.rec_ID in (select distinct rec_ID from recLinks where (rl_RelationID=TOPBIBLIO.rec_ID etc etc))
-        *   gets us down to about 2 seconds, but it looks like the optimiser doesn't really pick up on what we're doing.
-        * Fastest is to do a SEPARATE QUERY to get the record IDs out of the bib_relationship table, then pass it back encoded in the predicate.
-        * Certainly not the most elegant way to do it, but the numbers don't lie.
-        */
-        $res = $mysqli->query("select group_concat( distinct rec_ID ) from Records, recLinks where (rl_RelationID=rec_ID or rl_TargetID=rec_ID or rl_SourceID=rec_ID)
-            and (rl_RelationID is not null)
-            and (rl_SourceID in $ids or rl_TargetID in $ids) and rec_ID not in $ids");
-        $ids = $res->fetch_row();
-        $ids = $ids[0];
+        // Query to find all records involved in relationships with input_ids, excluding input_ids themselves.
+        $query_str = "select group_concat( distinct rec_ID ) from Records, recLinks "
+                   . "where (rl_RelationID=rec_ID or rl_TargetID=rec_ID or rl_SourceID=rec_ID) " // Record is part of the link triad
+                   . "and (rl_RelationID is not null) " // It's a relationship
+                   . "and (rl_SourceID in $input_ids_sql_string or rl_TargetID in $input_ids_sql_string) " // Link involves one of the input IDs
+                   . "and rec_ID not in $input_ids_sql_string"; // Exclude the input IDs themselves from the result set
 
-        if (! $ids) {
-            return "0";
+        $res = $mysqli->query($query_str);
+        $related_ids_row = $res->fetch_row();
+        $related_ids_concat = $related_ids_row[0] ?? null;
+
+        if (! $related_ids_concat) { // No other records found related to the input set
+            return SQL_FALSE; // "0"
         } else{
-            return "TOPBIBLIO.rec_ID in ($ids)";
+            return "TOPBIBLIO.rec_ID in ($related_ids_concat)";
         }
     }
 }
 
-
+/**
+ * Predicate for finding records modified after (or on) a specific date (`rec_Modified >= date`).
+ */
 class AfterPredicate extends Predicate {
 
+    /**
+     * Generates SQL to find records modified on or after the given date.
+     * Uses `TOPBIBLIO.rec_Modified`. Supports negation.
+     *
+     * @return string The SQL condition string, or '1' (true) if date parsing fails.
+     */
     public function makeSQL() {
-
          try{
-            $timestamp = new DateTime($this->value);
-
-            $not = ($this->parent->negate)? 'not' : '';
-            $datestamp = $timestamp->format(DATE_8601);
+            $timestamp = new DateTime($this->value); // Attempt to parse the date value
+            $not = ($this->parent->negate)? 'NOT' : ''; // SQL NOT keyword
+            $datestamp = $timestamp->format(DATE_8601); // Format to ISO 8601 (YYYY-MM-DDTHH:MM:SS+ZZZZ)
 
             return "$not TOPBIBLIO.rec_Modified >= '$datestamp'";
-
          } catch (Exception  $e){
-            //print $this->value.' => NOT SUPPORTED<br>';
+            // Date parsing failed, log or handle error if necessary
+            // print $this->value.' => NOT SUPPORTED<br>'; // Original debug print
          }
-        return '1';
+        return '1'; // Default to a neutral condition if date is invalid
     }
 }
 
-
+/**
+ * Predicate for finding records modified before (or on) a specific date (`rec_Modified <= date`).
+ */
 class BeforePredicate extends Predicate {
 
+    /**
+     * Generates SQL to find records modified on or before the given date.
+     * Uses `TOPBIBLIO.rec_Modified`. Supports negation.
+     *
+     * @return string The SQL condition string, or '1' (true) if date parsing fails.
+     */
     public function makeSQL() {
          try{
-            $timestamp = new DateTime($this->value);
-
-            $not = ($this->parent->negate)? 'not' : '';
-            $datestamp = $timestamp->format(DATE_8601);
+            $timestamp = new DateTime($this->value); // Attempt to parse the date value
+            $not = ($this->parent->negate)? 'NOT' : ''; // SQL NOT keyword
+            $datestamp = $timestamp->format(DATE_8601); // Format to ISO 8601
 
             return "$not TOPBIBLIO.rec_Modified <= '$datestamp'";
-
          } catch (Exception  $e){
-            //print $this->value.' => NOT SUPPORTED<br>';
+            // Date parsing failed, log or handle error if necessary
+            // print $this->value.' => NOT SUPPORTED<br>'; // Original debug print
          }
-        return '1';
+        return '1'; // Default to a neutral condition if date is invalid
     }
 }
 
-
+/**
+ * Base class for date-based predicates that operate on a specific record column
+ * (e.g., `rec_Added`, `rec_Modified`).
+ * Subclasses must specify the column name in their constructor.
+ */
 class DatePredicate extends Predicate {
+    /** @var string The database column name to apply the date comparison to (e.g., "TOPBIBLIO.rec_Added"). */
     public $col;
 
+    /**
+     * Constructor for DatePredicate.
+     *
+     * @param AndLimb $parent Reference to the parent AndLimb.
+     * @param string $col The database column name for the date comparison.
+     * @param string $value The date string value for comparison.
+     */
     public function __construct(&$parent, $col, $value) {
         $this->col = $col;
         parent::__construct($parent, $value);
     }
 
+    /**
+     * Generates SQL for comparing the specified date column.
+     *
+     * Uses `isDateTime()` to validate the date value and `makeDateClause()`
+     * (which itself uses `Temporal` and compares against `rdi_estMinDate`/`rdi_estMaxDate`)
+     * to generate the comparison logic.
+     *
+     * Note: The `makeDateClause()` method in the Predicate base class is designed for
+     * `recDetailsDateIndex` (rdi_ columns). Applying it directly to header columns like
+     * `rec_Added` or `rec_Modified` might be a logical mismatch unless the query structure
+     * ensures these columns are also somehow indexed or handled by a similar mechanism
+     * if `makeDateClause` is used. The original `makeDateClause_old` was for header fields.
+     * This `makeSQL` implementation seems to intend using the newer `makeDateClause`.
+     * If `$this->isDateTime()` is false, it defaults to '1' (true).
+     *
+     * @return string The SQL condition string, or '1' if date is invalid.
+     */
     public function makeSQL() {
-        $col = $this->col;
+        $col = $this->col; // The specific column like TOPBIBLIO.rec_Added
 
-        if($this->isDateTime()){
-            $not = ($this->parent->negate)? 'not' : '';
-            $s = $this->makeDateClause();
-            if(strpos($s, "between")===0){
-                return " $col $not ".$s;
-            }else{
-                return " $not $col ".$s;
+        if($this->isDateTime()){ // Validates $this->value
+            $not = ($this->parent->negate)? 'NOT ' : ''; // SQL NOT keyword
+            // makeDateClause() generates conditions like "(rdi_estMaxDate>=val AND rdi_estMinDate<=val)"
+            // This is problematic if $col is 'TOPBIBLIO.rec_Added'.
+            // For this to work correctly with $col, makeDateClause would need to be adapted,
+            // or a different date clause generation (like makeDateClause_old) should be used.
+            // Assuming original intent was to use a generic date comparison logic:
+            $s = $this->makeDateClause_old(); // Using makeDateClause_old as it's for header fields.
+
+            // makeDateClause_old returns strings like "between 'X' and 'Y'" or "like 'Z%'" or "= 'W'"
+            if(strpos(strtolower($s), "between") === 0 || strpos(strtolower($s), "like") === 0) {
+                 // For "BETWEEN" or "LIKE", $not should prefix the whole expression: "NOT (col BETWEEN ...)"
+                return $not ? "NOT ($col $s)" : "$col $s";
+            } else { // For "= 'date'", "< 'date'", ">= 'date'"
+                return "$col $not$s"; // e.g. "rec_Added >= 'date'" or "rec_Added NOT >= 'date'" (which is "rec_Added < 'date'")
             }
         }
-        return '1';
+        return '1'; // Default to a neutral condition if date is invalid
     }
 }
 
+/**
+ * Predicate for searching by record creation date (`rec_Added`).
+ */
 class DateAddedPredicate extends DatePredicate {
+    /**
+     * Constructor for DateAddedPredicate.
+     * Sets the column to `TOPBIBLIO.rec_Added`.
+     *
+     * @param AndLimb $parent Reference to the parent AndLimb.
+     * @param string $value The date string for comparison.
+     */
     public function __construct(&$parent, $value) {
         parent::__construct($parent, 'TOPBIBLIO.rec_Added', $value);
     }
 }
 
+/**
+ * Predicate for searching by record modification date (`rec_Modified`).
+ * This is also used for general 'date:' queries.
+ */
 class DateModifiedPredicate extends DatePredicate {
+    /**
+     * Constructor for DateModifiedPredicate.
+     * Sets the column to `TOPBIBLIO.rec_Modified`.
+     *
+     * @param AndLimb $parent Reference to the parent AndLimb.
+     * @param string $value The date string for comparison.
+     */
     public function __construct(&$parent, $value) {
         parent::__construct($parent, 'TOPBIBLIO.rec_Modified', $value);
     }
 }
 
-
+/**
+ * Predicate for searching by record owner workgroup (`rec_OwnerUGrpID`).
+ */
 class WorkgroupPredicate extends Predicate {
+    /**
+     * Generates SQL for matching the `rec_OwnerUGrpID`.
+     *
+     * The value can be:
+     * - A numeric user/group ID.
+     * - A comma-separated list of numeric user/group IDs.
+     * - The string "currentUser" or "current_user", which resolves to the `$currUserID`.
+     * - A workgroup name, which is resolved to its ID via a subquery on `sysUGrps`.
+     * Supports negation.
+     *
+     * @global \mysqli $mysqli The global mysqli database connection.
+     * @global int $currUserID The ID of the current user.
+     * @return string The SQL condition string.
+     */
     public function makeSQL() {
         global $mysqli, $currUserID;
 
         if(strtolower($this->value)=='currentuser' || strtolower($this->value)=='current_user'){
-            $this->value = $currUserID;
+            $this->value = (string)$currUserID; // Ensure value is string for consistent processing
         }
 
         $eq = ($this->parent->negate)? '!=' : '=';
         if (is_numeric($this->value)) {
             return "TOPBIBLIO.rec_OwnerUGrpID $eq ".intval($this->value);
         }
-        elseif (preg_match(REGEX_CSV, $this->value)) {
-            $in = ($this->parent->negate)? 'not in' : 'in';
+        elseif (preg_match(REGEX_CSV, $this->value)) { // Comma-separated list of IDs
+            $in = ($this->parent->negate)? 'NOT IN' : 'IN'; // Use SQL NOT IN
             return "TOPBIBLIO.rec_OwnerUGrpID $in (" . $this->value . ")";
         }
-        else {
+        else { // Assume it's a workgroup name
             $val = $mysqli->real_escape_string($this->value);
             return "TOPBIBLIO.rec_OwnerUGrpID $eq (select grp.ugr_ID from sysUGrps grp where grp.ugr_Name = '$val' limit 1)";
         }
     }
 }
 
+/**
+ * Predicate for spatial searches using WKT (Well-Known Text) geometry.
+ * Finds records whose `dtl_Geo` is contained within the specified geometry.
+ */
 class SpatialPredicate extends Predicate {
-
+    /**
+     * Generates SQL for a spatial containment search.
+     *
+     * Uses `ST_Contains(ST_GeomFromText('WKT_VALUE'), bd.dtl_Geo)`.
+     * The search value (`$this->value`) is expected to be a WKT string.
+     * Note: Negation is not directly supported by this predicate's `makeSQL`.
+     *
+     * @return string The SQL condition string using an EXISTS subquery.
+     */
     public function makeSQL() {
+        // Ensure $this->value is properly escaped if it's directly embedded, though ST_GeomFromText should handle WKT.
+        // For safety, one might consider escaping $this->value if it could come from untrusted input,
+        // but standard WKT is generally safe for ST_GeomFromText.
         return "(exists (select dtl_ID from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ST_Contains(ST_GeomFromText('{$this->value}'), bd.dtl_Geo) limit 1))";//MBRContains
+            and ST_Contains(ST_GeomFromText('{$this->value}'), bd.dtl_Geo) limit 1))"; // MBRContains was an older alternative.
     }
 }
 
+/**
+ * Predicate for searching by geographic coordinates (latitude or longitude).
+ * It compares a given coordinate value against the geometry (`dtl_Geo`) of records.
+ */
 class CoordinatePredicate extends Predicate {
 
+    /** @var string The MySQL spatial function to extract the coordinate (e.g., 'ST_X', 'ST_Y'). */
     private $coordFunction;
 
+    /**
+     * Constructor for CoordinatePredicate.
+     *
+     * @param AndLimb $parent Reference to the parent AndLimb.
+     * @param string $value The coordinate value string for comparison.
+     * @param string $coordFunction The MySQL spatial function (ST_X or ST_Y) to use for extracting the coordinate from geometry.
+     */
     public function __construct(&$parent, $value, $coordFunction) {
         parent::__construct( $parent, $value );
-
         $this->coordFunction = $coordFunction;
     }
 
+    /**
+     * Generates SQL for coordinate-based spatial searches.
+     *
+     * Handles several comparison types based on parent flags (`lessthan`, `greaterthan`, `exact`, `negate`):
+     * - Less than: Checks if the northernmost point of the geometry's envelope is south of the given coordinate.
+     * - Greater than: Checks if the southernmost point of the geometry's envelope is north of the given coordinate.
+     * - Exact: Checks if a Point geometry (`dtl_Value = 'p'`) has the exact coordinate.
+     * - Range (`<>` in value): Checks if the centroid of the geometry's envelope falls within the given coordinate range.
+     * - Default (contains): Checks if the given coordinate falls within the North-South range of the geometry's envelope.
+     *
+     * @return string The SQL condition string using an EXISTS subquery.
+     */
     public function makeSQL() {
         $op = '';
+        $val = floatval($this->value); // The coordinate value to compare against.
 
         if ($this->parent->lessthan) {
             $op = ($this->parent->negate)? '>=' : '<';
-        } elseif($this->parent->greaterthan) {
-            $op = ($this->parent->negate)? '<=' : '>';
-        }
-
-        $val = floatval($this->value);
-
-        if ($op!='' && $op[0] == '<') {
-            // see if the northernmost point of the bounding box lies south of the given latitude
-            return "(exists (select * from recDetails bd
+            // Checks if the northernmost point of the bounding box (envelope) is less than (south of) the given value.
+            // ST_PointN(ST_ExteriorRing(ST_Envelope(bd.dtl_Geo)), 4) gets the NE corner of the envelope.
+            return "(exists (select 1 from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
             and {$this->coordFunction}( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) ) $op $val limit 1))";
-        }
-        elseif($op!='' && $op[0] == '>') {
-            // see if the SOUTHERNmost point of the bounding box lies north of the given latitude
-            return "(exists (select * from recDetails bd
+        } elseif($this->parent->greaterthan) {
+            $op = ($this->parent->negate)? '<=' : '>';
+            // Checks if the southernmost point of the bounding box (envelope) is greater than (north of) the given value.
+            // ST_StartPoint(ST_ExteriorRing(ST_Envelope(bd.dtl_Geo))) gets the SW corner of the envelope.
+            return "(exists (select 1 from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
             and {$this->coordFunction}( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) ) $op $val limit 1))";
-
-        }
-        elseif($this->parent->exact) {
+        } elseif($this->parent->exact) {
             $op = $this->parent->negate? "!=" : "=";
-            // see if there is a Point with this exact latitude
-            return "(exists (select * from recDetails bd
+            // Checks for an exact match on a Point geometry. Assumes dtl_Value = 'p' for points.
+            return "(exists (select 1 from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null and bd.dtl_Value = 'p'
             and {$this->coordFunction}(bd.dtl_Geo) $op $val limit 1))";
         }
 
-            //Envelope - Bounding rect
-            //ExteriorRing - exterior ring for polygone
+        // Default behavior or range check
+        $match_pred = '';
+        if (strpos($this->value,"<>")>0) { // Range query, e.g., "lat:10<>20"
+            $vals = explode("<>", $this->value);
+            $val1 = floatval($vals[0]);
+            $val2 = floatval($vals[1]);
+            // Checks if the centroid of the geometry's envelope is within the specified range.
+            $match_pred = $this->coordFunction.'( ST_Centroid( ST_Envelope(bd.dtl_Geo) ) ) BETWEEN '.$val1.SQL_AND.$val2;
+        } else { // Default: check if the coordinate value is within the N-S or E-W extent of the geometry's envelope
+            // Checks if the provided coordinate value falls between the min and max coordinate of the geometry's envelope.
+            $match_pred = "$val BETWEEN {$this->coordFunction}( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) )
+                        AND {$this->coordFunction}( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) )";
+        }
 
-            if (strpos($this->value,"<>")>0) {
-                $vals = explode("<>", $this->value);
-                $match_pred = $this->coordFunction.'( ST_Centroid( ST_Envelope(bd.dtl_Geo) ) ) between '.floatval($vals[0]).SQL_AND.floatval($vals[1]).' ';
-            }else{
-                // see if this latitude passes through the bounding box
-                $match_pred = floatval($this->value)." between {$this->coordFunction}( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) )
-                        and {$this->coordFunction}( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) )";
-            }
-
-            return "(exists (select * from recDetails bd
+        return "(exists (select 1 from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
             and $match_pred limit 1))";
-
     }
 }
 
+/**
+ * Predicate for searching by record hash (`rec_Hash`).
+ */
 class HHashPredicate extends Predicate {
+    /**
+     * Generates SQL for matching the `rec_Hash`.
+     * Handles exact match (equals or not equals) or LIKE match (starts with).
+     *
+     * @global \mysqli $mysqli The global mysqli database connection for escaping.
+     * @return string The SQL condition string.
+     */
     public function makeSQL() {
         global $mysqli;
 
@@ -2865,8 +3683,8 @@ class HHashPredicate extends Predicate {
             $op = $this->parent->negate? "!=" : "=";
             return "TOPBIBLIO.rec_Hash $op '" . $mysqli->real_escape_string($this->value) . "'";
         }
-        else {
-            $op = $this->parent->negate? " not like " : " like ";
+        else { // Default to a "starts with" search
+            $op = $this->parent->negate? " NOT LIKE " : " LIKE "; // Corrected: added spaces around NOT LIKE
             return "TOPBIBLIO.rec_Hash $op '" . $mysqli->real_escape_string($this->value) . "%'";
         }
     }

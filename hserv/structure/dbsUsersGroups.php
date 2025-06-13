@@ -1,73 +1,32 @@
 <?php
-
-    /**
-    * Library for  User/Groups (sysUGrps) and User Preferences (from SESSION)
-    *
-    * user_ - prefix for functions
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
-
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
-
 /**
- * This file provides a library of functions for managing Users and Groups within the Heurist system.
- * These functions interact primarily with the `sysUGrps` table (for user and group definitions)
- * and `sysUsrGrpLinks` table (for user-to-group memberships and roles).
- *
- * Functionality includes:
- * - Retrieving user and group information by various criteria (ID, name, email).
- * - Managing user passwords, including reset mechanisms via PIN or random generation.
- * - Handling user preferences, stored in the session and database.
- * - User registration, profile updates, and associated email notifications.
- * - Synchronizing user credentials across linked Heurist databases.
- * - Managing system notifications for users.
- * - Handling credentials for external data repositories.
- * - Helper functions for access control checks.
- *
- * Most functions are prefixed with `user_`.
- *
- * @package     hserv\structure
- */
-
-    /*
-     * Note: The following constants appear to be commented out in the original source
-     * and are likely not in active use. They might represent an older design
-     * or a planned feature for abstracting table/field names.
-     *
-     * define('USERS_TABLE', 'sysUGrps');
-     * define('USERS_ID_FIELD', 'ugr_ID');
-     * // ... and other similar constants ...
-     */
-    /*
-    define('USERS_TABLE', 'sysUGrps');
-    define('USERS_ID_FIELD', 'ugr_ID');
-    define('USERS_USERNAME_FIELD', 'ugr_Name');
-    define('USERS_PASSWORD_FIELD', 'ugr_Password');
-    define('USERS_FIRSTNAME_FIELD', 'ugr_FirstName');
-    define('USERS_LASTNAME_FIELD', 'ugr_LastName');
-    define('USERS_ACTIVE_FIELD', 'ugr_Enabled');
-    define('USERS_EMAIL_FIELD', 'ugr_eMail');
-    define('GROUPS_TABLE', 'sysUGrps');
-    define('GROUPS_ID_FIELD', 'ugr_ID');
-    define('GROUPS_NAME_FIELD', 'ugr_Name');
-    define('GROUPS_TYPE_FIELD', 'ugr_Type');
-    define('USER_GROUPS_TABLE', 'sysUsrGrpLinks');
-    define('USER_GROUPS_USER_ID_FIELD', 'ugl_UserID');
-    define('USER_GROUPS_GROUP_ID_FIELD', 'ugl_GroupID');
-    define('USER_GROUPS_ROLE_FIELD', 'ugl_Role');
-    */
+* dbsUsersGroups.php - Library for  User/Groups (sysUGrps) and User Preferences (from SESSION)
+*
+* This file provides a library of functions for managing Users and Groups within the Heurist system.
+* These functions interact primarily with the `sysUGrps` table (for user and group definitions)
+* and `sysUsrGrpLinks` table (for user-to-group memberships and roles).
+*
+* Functionality includes:
+* - Retrieving user and group information by various criteria (ID, name, email).
+* - Managing user passwords, including reset mechanisms via PIN or random generation.
+* - Handling user preferences, stored in the session and database.
+* - User registration, profile updates, and associated email notifications.
+* - Synchronizing user credentials across linked Heurist databases.
+* - Managing system notifications for users.
+* - Handling credentials for external data repositories.
+* - Helper functions for access control checks.
+*
+* Most functions are prefixed with `user_`.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  hserv\structure
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
+*/
 
     /**
     * user_getByField

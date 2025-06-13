@@ -1,32 +1,6 @@
 <?php
-use hserv\entity\DbRecUploadedFiles;
-use hserv\entity\DbDefRecTypes;
-use hserv\utilities\USanitize;
-use hserv\utilities\UImage;
-use hserv\utilities\Temporal;
-use hserv\structure\ConceptCode;
-use hserv\report\ReportRecord;
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 /**
-* recordModify.php
-*
-* Library to create/update/delete heurist (user data) records
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*
+* recordModify.php - Library to create/update/delete heurist (user data) records
 *
 * recordAdd  - create temporary record for given user
 * recordSave - Save record
@@ -41,7 +15,25 @@ use hserv\report\ReportRecord;
 * recordUpdateOwnerAccess
 * _prepareDetails - validate records detail (need to combine with validators in fileParse)
 *
+* @package     Heurist academic knowledge management system
+* @subpackage  hserv\records\edit
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
+* 
+* @todo convert to Class
 */
+use hserv\entity\DbRecUploadedFiles;
+use hserv\entity\DbDefRecTypes;
+use hserv\utilities\USanitize;
+use hserv\utilities\UImage;
+use hserv\utilities\Temporal;
+use hserv\structure\ConceptCode;
+use hserv\report\ReportRecord;
+
 require_once dirname(__FILE__).'/recordTitleMask.php';
 require_once dirname(__FILE__).'/../search/recordSearch.php';
 require_once dirname(__FILE__).'/../../structure/search/dbsData.php';
@@ -64,8 +56,20 @@ $useNewTemporalFormatInRecDetails = false;
 $block_swf_email = false;
 
 /**
-* Returns default values for rec_NonOwnerVisibility, rec_NonOwnerVisibilityGroups, rec_OwnerUGrpID
+* Returns default values for rec_NonOwnerVisibility, rec_NonOwnerVisibilityGroups, rec_OwnerUGrpID.
+* These defaults are determined by a hierarchy: user preferences, then record values (if provided),
+* then system settings, and finally hardcoded defaults.
 *
+* @param \hserv\System $system The Heurist system object.
+* @param array|null $record Optional. An associative array representing the record.
+*                           May contain keys like 'RecTypeID', 'NonOwnerVisibility',
+*                           'NonOwnerVisibilityGroups', 'OwnerUGrpID'.
+*                           Values can be prefixed with 'rec_'.
+* @return array An associative array with the following keys:
+*               - 'rectype': (int) The determined record type ID.
+*               - 'owner_grps': (array) An array of owner group IDs.
+*               - 'access': (string) The determined non-owner visibility (e.g., 'viewable', 'public').
+*               - 'access_grps': (string|null) Comma-separated string of group IDs if access is 'viewable', otherwise null.
 */
 function recordAddDefaultValues($system, $record=null){
 
@@ -167,7 +171,41 @@ function recordAddDefaultValues($system, $record=null){
 }
 
 /**
-* Creates temporary record for given user
+* Creates a new record in the database.
+*
+* This function handles the creation of a new record based on the provided data.
+* It determines default values for ownership and visibility using `recordAddDefaultValues`.
+* It performs permission checks to ensure the current user is allowed to add records
+* and to own the record with the specified (or defaulted) ownership.
+* For CMS menu record types, it forces public access and ownership by group 1.
+* If a record ID is provided in `$record['ID']` (e.g., during CSV import with predefined IDs),
+* that ID is used; otherwise, a new ID is auto-generated.
+* After inserting the base record into the `Records` table, it updates associated user/group
+* permissions using `updateUsrRecPermissions`.
+*
+* @param \hserv\System $system The Heurist system object.
+* @param array $record An associative array containing the initial data for the new record.
+*                      Expected keys include:
+*                      - 'RecTypeID': (int, required) The ID of the record type.
+*                      - 'OwnerUGrpID': (optional) Desired owner user/group ID(s). Can be 'current_user'.
+*                      - 'NonOwnerVisibility': (optional) Desired visibility (e.g., 'public', 'viewable').
+*                      - 'NonOwnerVisibilityGroups': (optional) Group IDs if visibility is 'viewable'.
+*                      - 'URL': (optional) URL for the record.
+*                      - 'ScratchPad': (optional) Scratchpad text for the record.
+*                      - 'AddedByImport': (optional, bool) Flag if the record is added via import.
+*                      - 'FlagTemporary': (optional, bool) Flag if the record is temporary.
+*                      - 'Title': (optional, string) Initial title for the record.
+*                      - 'ID': (optional, int) Predefined ID for the record (used in specific import scenarios).
+*                      - 'swf': (optional, bool) If true, indicates ownership is set by workflow rules, bypassing some ownership checks.
+*                      Other keys passed to `recordAddDefaultValues` might also influence behavior.
+* @param bool $return_id_only Optional. If true, the function returns an array with only the new record ID
+*                               and status. If false (default), it retrieves and returns the full new record
+*                               data (including structure) via `recordSearch`.
+* @return array|false Returns an associative array on success:
+*                     If `$return_id_only` is true: `['status' => HEURIST_OK, 'data' => newRecordID]`
+*                     If `$return_id_only` is false: The result of `recordSearch` for the new record.
+*                     Returns false if the user is not allowed to add records, or an error array
+*                     from the system object on other failures (e.g., invalid record type, DB error, permission issues).
 */
 function recordAdd($system, $record, $return_id_only=false){
 
@@ -298,35 +336,53 @@ function recordAdd($system, $record, $return_id_only=false){
 *   4) recordUpdateCalcFields
 *   5) recordUpdateTitle
 *
-* @param mixed $system
-* @param mixed $record
-*       [ID:, RecTypeID:, OwnerUGrpID:, NonOwnerVisibility:, AddedByImport:, URL:, FlagTemporary:,
-*               details:
-*            ]
-*    details = array("t:1" => array("bd:234463" => "7th Ave"),
-*                      ,,,
-*                     "t:11" => array("0" => "p POINT (-73.951172 40.805661)"));
+* This function is central to creating and updating records. It handles:
+* - Captcha validation.
+* - User permission checks for editing.
+* - Data preparation: decoding details if needed, normalizing record keys.
+* - Validation of details via `_prepareDetails`.
+* - Special handling for different update modes (`$update_mode`).
+* - Workflow stage processing via `recordWorkFlowStage`, including ownership/visibility changes and email notifications.
+* - Transaction management for database operations.
+* - Insertion of new records (delegating to `recordAdd` if `$recID` < 1) or updating existing record headers.
+* - Deletion of old details and insertion of new/updated details.
+* - Management of parent-child relationships (adding/removing reverse pointers).
+* - Updating calculated fields, title masks, and temporary flags for the record and related/linked records.
+* - Sending bug report update notifications if applicable.
 *
-*
-* @param mixed $update_mode
-*   - 0,1 owerwrite current record completely  (Load new values, replacing all existing values for these records/fields)
-*   - 2 Add new values without deletion of existing values (duplicates are ignored)
-*   - 3 Add new values only if field is empty (new values ignored for non-empty fields)
-*   - 4 Replace existing values with new values, retain existing value if no new value supplied
-*
-* @param int $total_record_count - Count of records to be (or should be) saved, used to avoid sending several emails to users
-*
-*  Add new values without deletion of existing values (duplicates are ignored)
-Load new values, replacing all existing values for these records/fields
-Other options
-Add new values only if field is empty (new values ignored for non-empty fields)
-Replace existing values with new values, retain existing value if no new value supplied
-*
-* returns
-* array("status"=>HEURIST_OK, "data"=> $recID, 'rec_Title'=>$newTitle);
-* or
-* error array
-*
+* @param \hserv\System $system The Heurist system object.
+* @param array $record An associative array containing the record data.
+*                      Key properties:
+*                      - 'ID': (int) The record ID. If 0 or less, a new record is created.
+*                      - 'RecTypeID': (int) The record type ID.
+*                      - 'OwnerUGrpID': (optional) User/group ID(s) for ownership.
+*                      - 'NonOwnerVisibility': (optional) Visibility string (e.g., 'public', 'viewable').
+*                      - 'NonOwnerVisibilityGroups': (optional) Group IDs for 'viewable' access.
+*                      - 'URL': (optional) Record URL.
+*                      - 'ScratchPad': (optional) Scratchpad text.
+*                      - 'FlagTemporary': (optional) Temporary flag (0 or 1).
+*                      - 'Title': (optional) Record title (used if title mask fails or is not present).
+*                      - 'details': (array|string) Associative array or JSON string of record details.
+*                                   Format: `['dty_ID' => [value1, value2...], ...]` or `['t:dty_ID' => [value1, ...], ...]`.
+*                      - 'details_encoded': (optional, int) 1 or 2 if details are URL+JSON encoded, 3 if JSON encoded.
+*                      - 'details_visibility': (optional, array|string) Visibility settings for details, mirrors `details` structure.
+*                      - 'AddedByImport': (optional, int) Import mode (0=normal, 1=import, 2=FAIMS/Zotero import with less validation).
+*                      - 'no_validation': (optional, string|bool) If 'ignore_all', skips all validation. If true, skips resource validation.
+*                      - 'Captcha': (optional) User's captcha response.
+*                      - 'swf': (optional) True if ownership is managed by workflow, bypassing some checks.
+* @param bool $use_transaction Optional. If true (default), database operations are wrapped in a transaction.
+* @param bool $suppress_parent_child Optional. If true, suppresses automatic updates to parent/child reverse pointers. Defaults to false.
+* @param int $update_mode Optional. Defines how to handle existing data when updating a record:
+*                         - 0 or 1: Overwrite completely. All existing details are replaced with new ones. (Default)
+*                         - 2: Add new values, don't delete existing. Duplicates (exact value match for same field) are ignored.
+*                         - 3: Add new values only if the field is currently empty.
+*                         - 4: Replace existing values with new ones; if a new value isn't supplied for a field that had a value, the old value is kept.
+* @param int $total_record_count Optional. The total number of records being saved in a batch operation.
+*                                Used to limit workflow email notifications to only the first record in a batch. Defaults to 1.
+* @return array An associative array indicating success or failure:
+*               On success: `['status' => HEURIST_OK, 'data' => (int)$recID, 'rec_Title' => (string)$newTitle, 'affectedRty' => (int)$rectype, 'issues' => ['parents' => [...], 'entryMask' => [...]]]`
+*                           `issues` contains arrays of parent records that were re-linked or entry mask validation failures.
+*               On failure: An error array from the system object (e.g., `['status' => HEURIST_ACTION_BLOCKED, 'message' => 'Error details']`).
 */
 function recordSave($system, $record, $use_transaction=true, $suppress_parent_child=false, $update_mode=0, $total_record_count=1){
 
@@ -878,12 +934,43 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 
 /**
 * removes heurist record and all dependent entries
-* (note heurist record will be kept in sysArchive)
+* (note: heurist record will be kept in sysArchive, this function performs a "soft delete" from active tables).
 *
-* @param mixed $system
-* @param mixed $recids
-* @param mixed $need_transaction - false when record are removed for user/group/rectype deletion
-* @param mixed $check_source_links - prevents action if there are target records that points to given record
+* This function manages the deletion of one or more records. Key operations include:
+* - Permission checks: Verifies if the user is allowed to delete records in general and the specific records requested.
+* - Filtering: Can filter records to be deleted by a specific record type ID.
+* - Source link checking: Optionally, can prevent deletion if other records link to the target records.
+* - Transaction management: Database operations can be wrapped in a transaction.
+* - Progress tracking: Supports a session ID for tracking progress of batch deletions.
+* - Delegation: Calls `deleteOneRecord` for each individual record to handle the actual deletion logic.
+* - Error handling: Aggregates errors and provides a summary of the operation.
+*
+* @param \hserv\System $system The Heurist system object.
+* @param int|string|array $recids A single record ID, a comma-separated string of record IDs, or an array of record IDs to be deleted.
+* @param bool $need_transaction Optional. If true (default), database operations are wrapped in a transaction.
+*                               Set to false if called from a context where a transaction is already managed (e.g., user/group deletion).
+* @param bool $check_source_links Optional. If true, the function first checks if there are any other records
+*                                 pointing to the records about to be deleted (via resource pointer fields).
+*                                 If such links exist, the deletion is blocked, and information about the
+*                                 linking records is returned. Defaults to false.
+* @param int $filterByRectype Optional. If provided and greater than 0, only records matching this record type ID
+*                             will be considered for deletion from the `$recids` list. Defaults to 0 (no filtering).
+* @param string|null $progress_session_id Optional. A session ID used for tracking the progress of a large batch deletion.
+*                                         Updates are written to a progress tracking mechanism. If the mechanism
+*                                         indicates termination, the process is halted. Defaults to null.
+* @return array|false Returns an associative array summarizing the deletion operation or an error status.
+*               On successful processing (even if some records were not deleted due to permissions):
+*               `['status' => HEURIST_OK, 'affectedRty' => (array)$affected_rectypes, 'data' => [
+*                   'processed' => (int)count_allowed_to_process,
+*                   'deleted' => (int)count_actually_deleted,
+*                   'noaccess' => (int)count_no_access,
+*                   'bkmk_count' => (int)total_bookmarks_deleted,
+*                   'rels_count' => (int)total_relationships_deleted
+*               ]]`
+*               If `$check_source_links` is true and source links are found:
+*               `['status' => HEURIST_OK, 'data' => ['source_links_count' => (int)count, 'source_links' => (string)comma_separated_ids]]`
+*               On failure (e.g., user not allowed to delete, DB error, termination): An error array from the system object
+*               or `false` in some permission scenarios.
 */
 function recordDelete($system, $recids, $need_transaction=true,
     $check_source_links=false, $filterByRectype=0, $progress_session_id=null){
@@ -1168,8 +1255,15 @@ function recordGetAllIncremenetedValues($system, $params){
  *                      - 'NonOwnerVisibilityGroups': (Optional) Group IDs for 'viewable' if $access is 'viewable'.
  *                      - 'rec_RecTypeID': (Optional) Filter records by this record type ID.
  *                      - 'session': (Optional) Progress session ID for large updates.
- * @return array|false An array with counts of processed, updated, and no-access records on success,
- *                     or false on failure. Errors are added to the system object.
+ * @return array|false An associative array on success:
+ *                     `['status' => HEURIST_OK, 'data' => [
+ *                         'processed' => (int)count_allowed_recids,
+ *                         'updated' => (int)updated_record_count,
+ *                         'noaccess' => (int)noaccess_count
+ *                     ]]`
+ *                     Returns false on critical failure (e.g., DB error during update, user termination).
+ *                     Errors (e.g., invalid parameters, no records found, permission issues for all records)
+ *                     are added to the system object and may result in an error array being returned by the calling context.
  */
 function recordUpdateOwnerAccess($system, $params){
 
@@ -1378,15 +1472,22 @@ function recordUpdateOwnerAccess($system, $params){
  * Deletes a single record and all its associated data.
  *
  * This includes details, reminders, permissions, tags, comments, bookmarks,
- * and WOOT entries. It also recursively deletes child records (if `rst_CreateChildIfRecPtr` is set)
- * and related relationship records.
+ * and WOOT entries. It also recursively deletes child records (if `rst_CreateChildIfRecPtr` is set on a field pointing to them)
+ * and related "relationship" type records where this record is a source or target.
+ *
+ * Note: This function performs actual deletions from tables like `Records`, `recDetails`, etc.
+ * It assumes that the record is not archived yet (archiving is a separate process).
+ * Foreign key checks are temporarily disabled during deletions to manage complex dependencies.
  *
  * @param \hserv\System $system The Heurist system object.
  * @param int $id The ID of the record to delete.
- * @param int $rectype The record type ID of the record to delete.
+ * @param int $rectype The record type ID of the record to delete. This is used to identify potential child records.
  * @return array An associative array indicating the outcome:
- *               - `['error' => 'message']` on failure.
- *               - `['deleted' => [deleted_ids...], 'bkmk_count' => count, 'rels_count' => count]` on success.
+ *               - `['error' => string $errorMessage]` if a database error occurred or a parameter was wrong.
+ *               - `['deleted' => array $deleted_ids, 'bkmk_count' => int $bkmk_count, 'rels_count' => int $rels_count]` on success.
+ *                 `$deleted_ids` includes the initially provided `$id` and IDs of any recursively deleted child/relationship records.
+ *                 `$bkmk_count` is the count of bookmarks deleted for this record.
+ *                 `$rels_count` is the count of directly related "relationship" records deleted.
  */
 function deleteOneRecord($system, $id, $rectype){
 
@@ -1535,25 +1636,28 @@ function deleteOneRecord($system, $id, $rectype){
     return $res;
 }
 
-//
-// add/update reverse pointer detail field in child record
-// return -1 - error, 0 - nothing done, 1 - insert, 2 - update(change parent)
-//
-// $allow_multi_parent - if true means that there can be many parents for child, if true - insert only
 /**
  * Adds or updates a "Parent Entity" (reverse pointer) detail in a child record.
  *
  * This function creates or modifies a detail of type DT_PARENT_ENTITY in the child record,
- * making it point to the parent record.
+ * making it point to the parent record. It checks if a similar pointer already exists
+ * and, based on `$allow_multi_parent`, either updates the existing one or adds a new one.
+ * The constant DT_PARENT_ENTITY must be defined for this function to operate.
  *
  * @param \mysqli $mysqli The mysqli connection object.
  * @param int $child_id The ID of the child record.
- * @param int $parent_id The ID of the parent record.
- * @param int $addedByImport Flag indicating if this is part of an import (0 or 1). Defaults to 0.
- * @param bool $allow_multi_parent If true, allows multiple DT_PARENT_ENTITY details in the child.
- *                                 If false (default), updates an existing one if found.
- * @return int -1 on database error, 0 if the exact pointer already exists or DT_PARENT_ENTITY is not defined,
- *             1 if a new pointer was inserted, 2 if an existing pointer was updated.
+ * @param int $parent_id The ID of the parent record to point to.
+ * @param int $addedByImport Optional. Flag indicating if this operation is part of an import process (0 or 1). Defaults to 0.
+ * @param bool $allow_multi_parent Optional. If true, allows multiple DT_PARENT_ENTITY details in the child record.
+ *                                 If false (default), it will update an existing DT_PARENT_ENTITY detail if one is found
+ *                                 (pointing to a different parent) rather than adding a new one. If an exact pointer
+ *                                 (same child, same parent, same type) already exists, it does nothing.
+ * @return int Returns:
+ *             - -1: If a database error occurs during insertion or update.
+ *             -  0: If DT_PARENT_ENTITY is not defined, or if the exact same parent-child pointer already exists.
+ *             -  1: If a new "Parent Entity" detail was successfully inserted.
+ *             -  2: If an existing "Parent Entity" detail was successfully updated to point to the new parent_id
+ *                   (this happens when `$allow_multi_parent` is false and a pointer to a different parent existed).
  */
 function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedByImport=0, $allow_multi_parent=false){
 
@@ -1602,6 +1706,9 @@ function addReverseChildToParentPointer($mysqli, $child_id, $parent_id, $addedBy
  * forward pointer from the parent no longer exists or is not a `rst_CreateChildIfRecPtr` field.
  *
  * This is typically called after a parent record is updated to clean up outdated reverse pointers.
+ * It ensures that child records only point back to parent records that legitimately
+ * link to them via a `rst_CreateChildIfRecPtr` field.
+ * The constant DT_PARENT_ENTITY must be defined for this function to operate.
  *
  * @param \hserv\System $system The Heurist system object.
  * @param int $parent_id The ID of the parent record.
@@ -1630,12 +1737,6 @@ function removeReverseChildToParentPointer($system, $parent_id, $rectype){
     }
 }
 
-
-//
-// add/update pointer detail field TO child record
-// return -1 - error, 0 - nothing done, 1 - insert
-//
-// only ONE parent allowed
 /**
  * Adds a pointer detail from a parent record to a child record.
  *
@@ -1643,16 +1744,22 @@ function removeReverseChildToParentPointer($system, $parent_id, $rectype){
  * points to a child. This function ensures the corresponding forward pointer exists
  * in the parent record. It assumes only one such pointer field should exist from
  * the parent to this child type.
+ * The constant DT_PARENT_ENTITY is checked, but its primary role is to enable the broader parent-child mechanism;
+ * this function specifically deals with the forward pointer from parent to child.
  *
  * @param \mysqli $mysqli The mysqli connection object.
  * @param int $child_id The ID of the child record.
- * @param int $child_rectype The record type ID of the child record.
- * @param int $parent_id The ID of the parent record.
- * @param int|null $detailTypeId (Optional) The specific detail type ID of the pointer field in the parent.
- *                               If null, it attempts to find a suitable `rst_CreateChildIfRecPtr` field.
- * @param int $addedByImport Flag indicating if this is part of an import (0 or 1). Defaults to 0.
- * @return int -1 on database error, 0 if no suitable pointer field is found in parent or if the link already exists,
- *             1 if a new pointer was inserted.
+ * @param int $child_rectype The record type ID of the child record. This is used to find a suitable pointer field in the parent's record type structure if `$detailTypeId` is not provided.
+ * @param int $parent_id The ID of the parent record where the pointer detail will be added.
+ * @param int|null $detailTypeId Optional. The specific detail type ID (field ID) in the parent record that should point to the child.
+ *                               If null, the function searches for a field in the parent's record type definition
+ *                               that is configured with `rst_CreateChildIfRecPtr=1` and whose `dty_PtrTargetRectypeIDs`
+ *                               includes the `$child_rectype`.
+ * @param int $addedByImport Optional. Flag indicating if this operation is part of an import process (0 or 1). Defaults to 0.
+ * @return int Returns:
+ *             - -1: If a database error occurs during insertion.
+ *             -  0: If DT_PARENT_ENTITY is not defined, or if no suitable pointer field (`$detailTypeId`) is found in the parent record type that matches the child's record type, or if the exact same parent-to-child pointer already exists.
+ *             -  1: If a new pointer detail was successfully inserted into the parent record.
  */
 function addParentToChildPointer($mysqli, $child_id, $child_rectype, $parent_id,  $detailTypeId=null, $addedByImport=0){
 
@@ -1718,11 +1825,19 @@ function addParentToChildPointer($mysqli, $child_id, $child_rectype, $parent_id,
  * @param \hserv\System $system The Heurist system object.
  * @param int $source_id The ID of the record where the pointer detail will be added/updated.
  * @param int $target_id The ID of the record to be pointed to.
- * @param int $dty_ID The detail type ID of the resource pointer field.
- * @param bool $to_replace If true and a pointer of this type already exists for the source record,
- *                         it will be replaced. If false and it exists, no change is made.
- * @return int -1 on database error or invalid parameters, 0 if the link already exists and not replacing,
- *             1 if a new pointer was inserted or an existing one was updated.
+ * @param \hserv\System $system The Heurist system object.
+ * @param int $source_id The ID of the source record where the pointer detail will be added or updated.
+ * @param int $target_id The ID of the target record to be pointed to.
+ * @param int $dty_ID The detail type ID (field ID) of the resource pointer field in the source record.
+ * @param bool $to_replace If true, and a pointer of this `$dty_ID` already exists in the `$source_id` record,
+ *                         its `dtl_Value` (target) will be updated to the new `$target_id`.
+ *                         If false, and such a pointer already exists (even if pointing to a different target),
+ *                         no change is made. If multiple pointers of the same `$dty_ID` exist and `$to_replace` is true,
+ *                         all existing ones are deleted before the new one is added.
+ * @return int Returns:
+ *             - -1: If there's a database error during insertion/deletion, or if input parameters (`$source_id`, `$target_id`, `$dty_ID`) are invalid. An error is added to the system object.
+ *             -  0: If the exact `$source_id` -> `$target_id` link via `$dty_ID` already exists, or if a link with `$dty_ID` exists on `$source_id` and `$to_replace` is false.
+ *             -  1: If a new pointer detail was successfully inserted, or if existing pointer(s) were successfully replaced.
  */
 function addPointerField($system, $source_id, $target_id, $dty_ID, $to_replace){
 
@@ -1773,9 +1888,15 @@ function addPointerField($system, $source_id, $target_id, $dty_ID, $to_replace){
 }
 
 
-// verify ACCESS RIGHTS -------------
-//
-//
+/**
+ * Validates if the provided access string is one of the allowed Heurist visibility values.
+ * Allowed values are 'viewable', 'hidden', 'public', 'pending'.
+ * If the value is invalid, an error is added to the system object.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param string $access The access string to validate.
+ * @return bool True if the access string is invalid (wrong), false if it is valid.
+ */
 function isWrongAccessRights($system, $access){
     if ($access=='viewable' || $access=='hidden' || $access=='public' || $access=='pending') {
         return false;
@@ -1788,15 +1909,38 @@ function isWrongAccessRights($system, $access){
 /**
 * Verifies access right value and is the current user able to change ownership for given record
 *
+* This function performs a series of checks to determine if the current user has the authority
+* to modify the ownership and/or non-owner visibility of a given record.
+* It considers:
+* - Current user's administrative status.
+* - Current user's membership in the record's current owner group(s).
+* - Current user's membership in the proposed new owner group(s).
+* - System settings like 'sys_SetPublicToPendingOnEdit'.
+* - Validity of the proposed access string.
+*
+* The `$owner_grps` and `$access` parameters are passed by reference and may be modified
+* by this function (e.g., to set default ownership if none is proposed, or to change
+* 'public' to 'pending' based on system settings).
+*
 * @param \hserv\System $system The Heurist system object.
-* @param int $recID The ID of the record whose ownership/access is being checked/changed.
-* @param array &$owner_grps Passed by reference. On input, proposed new owner group IDs.
-*                           On output, actual owner group IDs (may be defaulted if input was empty).
-* @param string &$access Passed by reference. On input, proposed new access visibility.
-*                       On output, actual access visibility (may be defaulted or adjusted, e.g. 'public' to 'pending').
-* @param array &$rectypes Passed by reference. An array to be populated with `[recID => recTypeID]`.
-* @return bool True if the current user can change ownership/access as specified (or if no change is problematic),
-*              false otherwise. Errors are added to the system object.
+* @param int $recID The ID of the record whose ownership and/or access permissions are being checked or changed.
+* @param array|null &$owner_grps Passed by reference.
+*                                On input: An array of proposed new owner user/group IDs for the record.
+*                                          If empty or null, current ownership is assumed to be retained or defaulted.
+*                                On output: The actual array of owner group IDs that will be applied or checked against.
+*                                           This may be the input array, or the record's current owner(s) if the input was empty.
+*                                           Can also become `[0]` if "everyone" is proposed.
+* @param string|null &$access Passed by reference.
+*                             On input: The proposed new non-owner visibility string (e.g., 'public', 'viewable', 'hidden', 'pending').
+*                                       If empty or null, the current visibility is assumed to be retained.
+*                             On output: The actual access string that will be applied or checked against.
+*                                        This may be the input string, the record's current visibility, or adjusted
+*                                        (e.g., 'public' changed to 'pending' if `sys_SetPublicToPendingOnEdit` is active).
+* @param array &$rectypes Passed by reference. An array that will be populated with `[$recID => $recTypeID]`
+*                         for the given record, if the checks are generally successful up to that point.
+* @return bool True if the current user is authorized to make the proposed (or defaulted) changes to ownership and access,
+*              and the access string is valid.
+*              False otherwise. Specific error messages are added to the system object if checks fail.
 */
 function recordCanChangeOwnerwhipAndAccess($system, $recID, &$owner_grps, &$access, &$rectypes)
 {
@@ -1920,11 +2064,14 @@ function recordCanChangeOwnerwhipAndAccess($system, $recID, &$owner_grps, &$acce
  * Finds and updates calculated fields in records of other types that might be affected
  * by changes in records of the given record type (`$rty_ID`).
  *
- * This is important if records of type `$rty_ID` are used as inputs in calculations
- * for fields in other record types.
+ * This function identifies all calculated fields (`defCalcFunctions`) that list `$rty_ID`
+ * in their `cfn_RecTypeIDs` (meaning they depend on this record type).
+ * It then finds all record types (`defRecStructure.rst_RecTypeID`) that use these
+ * calculation functions and triggers `recordUpdateCalcFields` for those record types.
+ * This ensures that dependent calculations are refreshed when underlying data changes.
  *
  * @param \hserv\System $system The Heurist system object.
- * @param int $rty_ID The record type ID whose changes might affect other calculated fields.
+ * @param int $rty_ID The record type ID that has been modified, potentially affecting other calculated fields.
  * @return void
  */
 function findAndUpdateAffectedCalcFields( $system, $rty_ID ){
@@ -1952,17 +2099,47 @@ function findAndUpdateAffectedCalcFields( $system, $rty_ID ){
  * executes the Smarty template defined in `cfn_FunctionSpecification` for each,
  * and updates the `dtl_Value` of the calculated field in `recDetails`.
  *
+ * This function identifies records and their associated calculated fields (defined by `rst_CalcFunctionID`
+ * in `defRecStructure`) and recomputes their values. The calculation itself is performed by
+ * executing a Smarty template (`cfn_FunctionSpecification` from `defCalcFunctions`) via `executeSmarty`.
+ *
+ * The scope of records to update can be:
+ * - A specific record ID or list of record IDs.
+ * - All records of a specific record type ID or list of record type IDs.
+ * - All records in the database (if both `$recID` and `$rty_ID` are null).
+ *
+ * It handles progress tracking for large operations if a `$progress_session_id` is provided.
+ * It collects statistics on how many fields were updated, cleared (new value is empty), or remained unchanged.
+ * Errors encountered during Smarty execution (e.g., bad template syntax) are collected.
+ *
  * @param \hserv\System $system The Heurist system object.
  * @param int|array|null $recID A single record ID, an array of record IDs, or null.
- *                              If null and $rty_ID is also null, updates for the entire database.
- *                              If null and $rty_ID is provided, updates all records of that type(s).
- * @param int|array|null $rty_ID A single record type ID, an array of record type IDs, or null.
- *                               Used if $recID is null or to filter $recID list.
- * @param int|null $progress_session_id Optional session ID for tracking progress of large updates.
- * @return array|false An array with statistics about the update (counts of changed fields, records processed, errors)
- *                     and queries for updated/cleared records if `$rec_count > 1`.
- *                     Returns an array with only 'errors' if `$rec_count <= 1`.
- *                     Returns false on critical database errors.
+ *                              If null, the function will process records based on `$rty_ID`.
+ * @param int|array|null $rty_ID A single record type ID, or an array of record type IDs.
+ *                               If `$recID` is provided, `$rty_ID` is used to determine the record type(s) of those specific records.
+ *                               If `$recID` is null, all non-temporary records of the specified type(s) in `$rty_ID` are processed.
+ *                               If both `$recID` and `$rty_ID` are null, all record types and all their non-temporary records are processed.
+ * @param string|null $progress_session_id Optional. A session ID for tracking progress of large update operations.
+ *                                         If provided and the operation involves many records, progress updates will be logged.
+ * @return array|false An associative array containing statistics and results of the update.
+ *                     Structure for multi-record updates (`$rec_count > 1`):
+ *                     `[
+ *                         'fld_changed' => (int)count_fields_new_value_different,
+ *                         'fld_same' => (int)count_fields_new_value_same,
+ *                         'fld_cleared' => (int)count_fields_new_value_empty,
+ *                         'rec_updates' => (int)count_records_with_at_least_one_updated_field,
+ *                         'rec_cleared' => (int)count_records_with_at_least_one_cleared_field,
+ *                         'rec_processed' => (int)total_records_processed,
+ *                         'rec_total' => (int)total_records_targeted,
+ *                         'errors' => (array) ['rty_ID.dty_ID' => 'message', ...],
+ *                         'q_updates' => (string) 'ids:xxx,yyy...' (query for updated records, max 1000),
+ *                         'q_cleared' => (string) 'ids:aaa,bbb...' (query for records with cleared fields, max 1000)
+ *                     ]`
+ *                     Structure for single record update (`$rec_count <= 1`):
+ *                     `['errors' => (array) ['rty_ID.dty_ID' => 'message', ...]]`
+ *                     Returns `false` on critical database errors (e.g., cannot fetch record type, cannot save field).
+ *                     Returns `['message' => 'Smarty init error...']` or `['message' => 'Operation terminated...']`
+ *                     in case of Smarty setup failure or user termination via progress session.
  */
 function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session_id=null)
 {
@@ -2233,15 +2410,27 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
  * Assigns a `ReportRecord` object (as `$heurist`) and the target record(s) (as `$results` and `$r`)
  * to the Smarty instance, then fetches the template output.
  *
- * @param \hserv\System $system The Heurist system object.
- * @param \Smarty $smarty A Smarty instance.
- * @param array $params An associative array with:
- *                      - 'template': The Smarty template string/code.
- *                      - 'records': An array of record IDs to be made available to the template.
- * @param string|null $mode The Smarty fetch mode (e.g., 'eval:', 'string:'). Defaults to 'eval:'.
- * @param \hserv\report\ReportRecord|null $heuristRec Optional pre-initialized ReportRecord object.
- * @return string|array The output of the Smarty template, or an error array `['error', 'message']`
- *                      if the template is empty, no records are provided, or a Smarty exception occurs.
+ * The primary use case is to render a calculated field's value. The template (`$params['template']`)
+ * can use the `$heurist` object to fetch data and the `$r` variable (representing the first record
+ * in `$params['records']`) for context-specific calculations.
+ *
+ * @param \hserv\System $system The Heurist system object (used by ReportRecord).
+ * @param \Smarty $smarty A pre-configured Smarty instance.
+ * @param array $params An associative array containing:
+ *                      - 'template': (string, required) The Smarty template string/code to execute.
+ *                      - 'records': (array, required) An array of record IDs. The first ID is used to set
+ *                                   the context for `$r` in Smarty. If empty, the function returns an empty string.
+ * @param string|null $mode Optional. The Smarty fetch mode (e.g., 'eval:', 'string:').
+ *                          'eval:' compiles the template every time.
+ *                          'string:' uses a compiled template if available.
+ *                          Defaults to 'eval:'.
+ * @param \hserv\report\ReportRecord|null $heuristRec Optional. A pre-initialized `ReportRecord` object.
+ *                                                  If null, a new one is instantiated.
+ * @return string|array Returns the string output of the rendered Smarty template on success.
+ *                      Returns an array `['error', string $message]` if:
+ *                      - The 'template' in `$params` is empty or not provided.
+ *                      - A Smarty exception occurs during template fetching.
+ *                      Returns an empty string if `$params['records']` is empty.
  */
 function executeSmarty($system, $smarty, $params, $mode=null, $heuristRec=null){
 
@@ -2286,11 +2475,6 @@ function executeSmarty($system, $smarty, $params, $mode=null, $heuristRec=null){
   //unlink($file);
   return $output; //new value
 }
-/*
-function smarty_remove_temp_template($tpl_source, Smarty_Internal_Template $template){
-
-}
-*/
 
 /**
  * Calculates and updates a record's title based on its title mask.
@@ -2298,16 +2482,26 @@ function smarty_remove_temp_template($tpl_source, Smarty_Internal_Template $temp
  * If a mask string is provided, it's used directly. Otherwise, the mask is fetched
  * from the record type definition. If the generated title is empty or indicates an error,
  * and `$recTitleDefault` is provided, the default title is used.
- * The record's `rec_Title` and `rec_Modified` fields are updated.
+ * The record's `rec_Title` (truncated to 1023 chars if longer) and `rec_Modified` fields are updated in the database.
+ *
+ * The title generation process is as follows:
+ * 1. If `$rectype_or_mask` is a string, it's used directly as the title mask.
+ * 2. If `$rectype_or_mask` is a numeric record type ID, the title mask (`rty_TitleMask`) is fetched from `defRecTypes` for that type.
+ * 3. If no mask is provided or found, and `$recTitleDefault` is also null, an error message is returned.
+ * 4. The `TitleMask::fill()` method is called to generate the title based on the mask and record data.
+ * 5. If `TitleMask::fill()` returns null or an error string, and `$recTitleDefault` is provided, `$recTitleDefault` is used as the title.
+ * 6. If the resulting title is empty, an error message "Can't get title for #..." is returned.
  *
  * @param \hserv\System $system The Heurist system object.
- * @param int $recID The ID of the record to update.
- * @param int|string $rectype_or_mask Either the record type ID (int) to fetch the mask from,
+ * @param int $recID The ID of the record whose title is to be updated. Must be a positive integer.
+ * @param int|string $rectype_or_mask Either the numeric record type ID (to fetch `rty_TitleMask` from `defRecTypes`)
  *                                    or the title mask string itself.
- * @param string|null $recTitleDefault A default title to use if mask generation fails or results in an empty title.
- *                                     If null, the title might not be updated in such cases.
- * @return string|false The new title of the record on success, or false on database error or if the title
- *                      could not be determined and no default was provided.
+ * @param string|null $recTitleDefault A default title to use if the mask generation fails or results in an empty string.
+ *                                     If this is null and mask generation fails, the function may return an error string or false.
+ * @return string|false The new title string that was saved to the record on success.
+ *                      Returns a specific error string (e.g., "Can't get title for #...") if the title could not be generated and no suitable default was available.
+ *                      Returns `false` if there's a database error (e.g., cannot get record type, cannot get mask, cannot save title).
+ *                      Errors are also added to the system object in case of DB issues.
  */
 function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
 {
@@ -2378,18 +2572,32 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
 *   - 3 Add new values only if field is empty (new values ignored for non-empty fields)
 *   - 4 Replace existing values with new values, retain existing value if no new value supplied
 *
-*   It finds original (existing) record in database and either add, replace or retain values
-*   and returns modified  $detailValues
+*   It fetches the existing details of a record from the database using `recordSearchDetailsRaw`.
+*   Then, based on the `$update_mode`, it merges the `$detailValuesNew` with the existing details:
+*   - Mode 2 (Add, no delete, ignore duplicates): Adds new values if they don't already exist (case-insensitive for short strings, exact for geo/long strings).
+*   - Mode 3 (Add if empty): Adds new values only for detail types that have no existing values.
+*   - Mode 4 (Replace, retain if no new): Replaces all existing details of a certain type with the new ones of that type. If a detail type existed before but no new values are provided for it, the old values are effectively removed (as the main `recordSave` logic deletes all old details first).
+*   The function returns a consolidated list of detail values that should be saved to the database.
+*
+*   Note: This function modifies the `$detailValuesNew` array by incorporating existing values based on the update mode.
+*   The actual update of record header fields like URL or ScratchPad is expected to be handled by the calling function (`recordSave`)
+*   which might use the original record's values if new ones are not provided in certain update modes.
 *
 * @param \hserv\System $system The Heurist system object.
-* @param array $record The incoming record data containing the 'ID' of the record to update.
-*                      May also contain 'URL' and 'ScratchPad' to update.
-* @param array $detailValuesNew An array of new detail values to be processed.
-* @param int $update_mode Defines how existing details are handled:
-*                         2: Add new values, ignore duplicates, don't delete existing.
-*                         3: Add new values only if field is currently empty.
-*                         4: Replace existing values with new ones; retain existing if no new value is supplied.
-* @return array The modified array of detail values ready for insertion/update.
+* @param array $record The incoming record data as passed to `recordSave`. Must contain 'ID'.
+*                      This function primarily uses `$record['ID']` to fetch existing details.
+* @param array $detailValuesNew An array of new detail values intended to be saved, formatted as
+*                               `[['dtl_DetailTypeID'=>ID, 'dtl_Value'=>value, ...], ...]`.
+*                               This array will be augmented with existing details based on the `$update_mode`.
+* @param int $update_mode Defines how existing details are merged with new ones:
+*                         - 2: Add new values without deletion of existing values (duplicates are ignored based on value and type).
+*                         - 3: Add new values only if the field (detail type) is currently empty in the database.
+*                         - 4: Replace existing values with new values for a given detail type. If new values are supplied for a type, all old values of that type are discarded.
+*                              (Effectively, this mode means the returned array will contain only `$detailValuesNew` plus any existing details for types *not* present in `$detailValuesNew`).
+*                              The term "retain existing value if no new value supplied" in the original comment refers more to the overall `recordSave` behavior for header fields, not details here.
+* @return array The consolidated array of detail values that reflects the merge of new and existing data
+*               according to the specified `$update_mode`. This array is then used by `recordSave`
+*               to write to the database after deleting all previous details.
 */
 function prepareRecordForUpdate($system, $record, $detailValuesNew, $update_mode){
 
@@ -2495,25 +2703,59 @@ function prepareRecordForUpdate($system, $record, $detailValuesNew, $update_mode
     return $detailValues;
 }
 
-//function doDetailInsertion($recID, $details, $rectype, $wg, &$nonces, &$retitleRecs, $modeImport)
 /**
 * @todo make private
 *
 * uses getHTMLPurifier, checkMaxLength
 *
+* This is a critical internal function responsible for validating and preparing raw detail data
+* before it's saved to the database. It performs a wide range of checks and transformations:
+* - Normalizes input `details` keys (e.g., "t:1" to "1").
+* - Fetches detail type definitions (`defDetailTypes`) and record structure (`defRecStructure`)
+*   including required fields and child pointer configurations.
+* - Iterates through each detail value, applying validation rules based on its `dty_Type`:
+*   - **Text types (freetext, blocktext):** Checks for emptiness, applies HTML purification (unless exempted),
+*     and handles special splitting for large CMS extended descriptions. Validates max length.
+*   - **Date:** Converts various input formats (including 'today', 'now', temporal JSON) to a standard
+*     database format using `Temporal::getValueForRecDetails`.
+*   - **Float, Integer, Boolean, Year:** Validates against expected numeric/boolean formats.
+*   - **Enum, Relationtype:** Validates term IDs against allowed vocabularies and non-selectable terms,
+*     using `isValidTerm`. Converts term labels to IDs if necessary.
+*   - **Resource:** Validates that the target record ID exists and its record type conforms to
+*     any constraints defined for the pointer field, using `isValidRectype`. Marks details
+*     as `dtl_ParentChild` if they correspond to a `rst_CreateChildIfRecPtr` field.
+*   - **File:** Handles file uploads/references. Can generate thumbnails from URLs (`UImage::makeURLScreenshot`),
+*     register base64 encoded images, or link existing `ulf_ID`s.
+*   - **Geo:** Prepares geographic data using `prepareGeoValue` to get WKT and geo type.
+* - Checks for missing required fields (if `$validation_mode > 1`).
+* - Handles different validation levels (`$validation_mode`):
+*   - 0: Minimal validation, mostly skips errors, but still processes values.
+*   - 1: Skips resource pointer validation.
+*   - 2: Full validation.
+* - Collects errors and adds them to the system object. If errors occur, returns false.
+* - If `rst_DefaultValue` is defined for a missing required field, it attempts to add this default value.
+*
+* @internal This function is intended for internal use by `recordSave` and related functions.
+*
 * @param \hserv\System $system The Heurist system object.
-* @param int $rectype The record type ID of the record being processed.
-* @param array $record The input record data, potentially containing 'details_visibility'.
-* @param int $validation_mode Validation level:
-*                             0: No validation.
-*                             1: Don't validate resource pointers.
-*                             2: Full validation (default).
-* @param int $recID The ID of the record being processed (used for error messages).
-* @param int $modeImport Import mode (0 for normal, 1 for import, 2 for Zotero/FAIMS import).
-*                        Affects some validation behaviors.
-* @return array|false An array of prepared detail values suitable for database insertion on success,
-*                     or false on validation failure. Errors are added to the system object.
-*                     Each item in the returned array is `['dtl_DetailTypeID'=>ID, 'dtl_Value'=>value, ...]`.
+* @param int $rectype The record type ID of the record whose details are being prepared.
+* @param array $record The raw record data as passed to `recordSave`. Crucially, this includes
+*                      `$record['details']` (the detail values to process) and potentially
+*                      `$record['details_visibility']`.
+* @param int $validation_mode Controls the level of validation:
+*                             0: No validation (or minimal, skips most errors).
+*                             1: Don't validate resource pointers' existence or type constraints.
+*                             2: Full validation (default behavior in `recordSave`).
+* @param int $recID The ID of the record being processed. Used primarily for error messages and context
+*                   (e.g., naming snapshot images for file details).
+* @param int $modeImport Indicates if operating in an import context, which can alter some validation stringency.
+*                        0: Normal operation.
+*                        1: Standard import mode.
+*                        2: Special import (e.g., Zotero/FAIMS), may have further relaxed validation for some types.
+* @return array|false An array of prepared detail values on success, ready for database insertion. Each element is an
+*                     associative array like `['dtl_DetailTypeID' => ..., 'dtl_Value' => ..., 'dtl_UploadedFileID' => ..., 'dtl_Geo' => ..., 'dtl_HideFromPublic' => ..., 'dtl_ParentChild' => ...]`.
+*                     Returns `false` if any validation errors occur (and errors are added to `$system->addError()`).
+*                     Also returns `false` if required fields are missing (after attempting to apply defaults) or if no valid details are produced.
 */
 function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $modeImport)
 {
@@ -3065,7 +3307,20 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex
  * @param string $dtl_Value The geographic value string.
  * @return array An array `[$geoType, $geoWKT]` on success, where `$geoType` is the shorthand
  *               (p, l, pl, c, r, m) and `$geoWKT` is the WKT string.
- *               Returns `[false, 'Error message']` on failure.
+ *               Returns `[false, 'Error message']` on failure (e.g., invalid WKT or unrecognized shorthand).
+ *
+ * @param \mysqli $mysqli The mysqli connection object, used to validate the WKT via `ST_GeomFromText` and `ST_asWKT`.
+ * @param string $dtl_Value The geographic value string. This can be:
+ *                          - A full WKT string, e.g., "POINT (1 2)", "POLYGON ((0 0, 1 1, 0 1, 0 0))".
+ *                          - A Heurist shorthand, e.g., "p 1 2" (for POINT), "l 1 2, 3 4" (for LINESTRING),
+ *                            "pl 0 0, 1 1, 0 1, 0 0" (for POLYGON), "m ..." (for MULTI* or GEOMETRYCOLLECTION),
+ *                            "c ..." (for CIRCLE - though circle might be handled by specific logic not shown here),
+ *                            "r ..." (for RECTANGLE - though rectangle might be handled by specific logic not shown here).
+ *                          The function attempts to identify the type from the shorthand or the WKT itself.
+ * @return array An array `[$geoType, $geoWKT]` on success:
+ *               - `$geoType`: (string) The Heurist shorthand geo type (e.g., 'p', 'l', 'pl', 'm').
+ *               - `$geoWKT`: (string) The validated Well-Known Text string (e.g., "POINT(1 2)").
+ *               On failure, returns `[false, string $errorMessage]`.
  */
 function prepareGeoValue($mysqli, $dtl_Value){
 
@@ -3512,20 +3767,37 @@ function isValidTerm($system, $term_tocheck, $domain, $dtyID, $rectype)
  * - Checks if the current user is allowed to move the record to the `$new_value` stage based on `swf_StageRestrictedTo`.
  * - If allowed, updates the record's ownership (`OwnerUGrpID`) and visibility (`NonOwnerVisibility`, `NonOwnerVisibilityGroups`)
  *   based on the rules defined in `sysWorkflowRules` for the new stage.
- * - Gathers email addresses for notification (`swf_SendEmail`, `swf_EmailList`, `swf_RecEmailField`).
- * - Prepares the email body (`swf_EmailText`), substituting placeholders like #stage#, #user#, #url#, and field values.
+ * - Gathers email addresses for notification from `swf_SendEmail` (user/group IDs), `swf_EmailList` (literal emails),
+ *   and `swf_RecEmailField` (a detail field in the record containing email addresses).
+ * - Prepares the email body from `swf_EmailText`. It substitutes placeholders:
+ *   - `#stage#`: Name of the new workflow stage.
+ *   - `#user#`: Full name of the current user.
+ *   - `#url#`: URL of the record (from `$record['URL']`).
+ *   - `#link_v#`: URL to view the record (generated by `$system->recordLink()`). (This part seems to be handled in `recordSave` instead).
+ *   - `#link_e#`: URL to edit the record. (This part seems to be handled in `recordSave` instead).
+ *   - `#title#`: Title of the record. (This part seems to be handled in `recordSave` instead).
+ *   - `#(\d+)#`: Placeholder for a field value, where `\d+` is the detail type ID. The function will
+ *                retrieve the name of the field and its value(s) from `$record['details']` and format them.
  *
- * Modifies the `$record` array by reference with new ownership/visibility.
+ * The function modifies the `$record` array by reference, potentially setting 'OwnerUGrpID',
+ * 'NonOwnerVisibility', 'NonOwnerVisibilityGroups', and 'swf' (to true, to bypass some later permission checks).
  *
  * @param \hserv\System $system The Heurist system object.
- * @param array &$record The record data array (passed by reference). Must include 'ID', 'RecTypeID', 'FlagTemporary', 'URL', and 'details'.
- * @param int $new_value The ID of the new workflow stage term.
- * @param bool $is_insert True if this is for a newly inserted record, false for an update.
- * @return array An associative array with:
- *               - 'new_value': The actual new stage ID (0 if change was not allowed, otherwise `$new_value`).
- *               - 'curr_value': The previous stage ID (0 if new record).
- *               - 'emails': An array of email addresses to notify.
- *               - 'body': The prepared email body string.
+ * @param array &$record The record data array, passed by reference. It is read for 'ID', 'RecTypeID',
+ *                       'FlagTemporary', 'URL', and 'details'. It is modified to update ownership/visibility
+ *                       fields if workflow rules dictate, and 'swf' flag is set.
+ * @param int $new_value The term ID of the new workflow stage.
+ * @param bool $is_insert True if the record is being inserted, false if it's an existing record being updated.
+ *                        This influences whether a "current_value" for the stage is sought.
+ * @return array An associative array detailing the outcome and data for potential notifications:
+ *               - 'new_value': (int) The ID of the workflow stage that was actually set. This will be 0 if the
+ *                                user was not allowed to transition to `$new_value`, otherwise it's `$new_value`.
+ *               - 'curr_value': (int) The previous workflow stage ID of the record. 0 if `$is_insert` is true
+ *                                 or if no previous stage was found.
+ *               - 'emails': (array) A list of unique, sanitized email addresses for notification, compiled from
+ *                             workflow rules and potentially the record's own fields.
+ *               - 'body': (string|null) The prepared email body text if `swf_EmailText` was defined for the rule,
+ *                         otherwise null. Placeholders in the text are substituted.
  */
 function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
 
@@ -3699,14 +3971,26 @@ function recordWorkFlowStage($system, &$record, $new_value, $is_insert){
  * `rst_CreateChildIfRecPtr`), and some of these parent links are missing from the
  * incoming `$new_child_details` (e.g., during an update where some parent links were removed by the user),
  * this function identifies such valid, missing parent links and adds them back to `$new_child_details`.
- * This helps maintain data integrity for mandated parent-child relationships.
+ * This helps maintain data integrity for mandated parent-child relationships defined by `rst_CreateChildIfRecPtr`.
+ *
+ * The function checks if the child record type has a "Parent Entity" field defined in its structure.
+ * It then queries `recDetails` to find all records that point to the current child record (`$child_record['ID']`).
+ * For each such potential parent, it verifies if the link from the parent is via a field marked as `rst_CreateChildIfRecPtr = 1`
+ * and that the child's record type is allowed by the parent field's `dty_PtrTargetRectypeIDs` (if specified).
+ * If a valid parent link is found that is *not* already present in the `$new_child_details` (as a DT_PARENT_ENTITY pointer),
+ * a new DT_PARENT_ENTITY detail pointing to this parent is added to `$new_child_details`.
  *
  * @param \hserv\System $system The Heurist system object.
- * @param array $child_record The child record's header data (must include 'ID' and 'RecTypeID').
- * @param array &$new_child_details The array of the child record's new/updated details (passed by reference).
- *                                  This array will be modified to include any re-added parent entity pointers.
- * @return array An associative array of `[parent_rec_ID => ['title'=>..., 'type'=>..., 'field'=>...]]`
- *               for any parent links that were re-added. Empty if no parents were re-added.
+ * @param array $child_record An associative array containing the child record's header data.
+ *                            Must include 'ID' (int, child's record ID) and 'RecTypeID' (int, child's record type ID).
+ * @param array &$new_child_details Passed by reference. An array of the child record's new or updated detail values,
+ *                                  formatted as `[['dtl_DetailTypeID'=>X, 'dtl_Value'=>Y], ...]`.
+ *                                  This array will be modified in place if missing valid parent entity pointers are found and re-added.
+ * @return array An associative array where keys are the `rec_ID`s of parent records whose "Parent Entity" links
+ *               were re-added to `$new_child_details`. Each value is an array:
+ *               `['title' => string $parent_title, 'type' => int $parent_rectype_ID, 'field' => int $parent_dty_ID_pointing_to_child]`
+ *               Returns an empty array if no parent links needed to be re-added, or if DT_PARENT_ENTITY is not defined,
+ *               or if the child record type doesn't have a Parent Entity field in its structure.
  */
 function validateParentRecords($system, $child_record, &$new_child_details){
 
@@ -3773,17 +4057,22 @@ function validateParentRecords($system, $child_record, &$new_child_details){
  * Iterates through fields of a given record that have an entry mask defined.
  * For each such field, it retrieves its current values from `recDetails`.
  * It then applies the entry mask logic (using `updateMaskFields`) to each value.
- * If a value is transformed by the mask, the corresponding `recDetails` entry is updated.
+ * If a value is transformed by the mask (i.e., it didn't already conform to the mask's prefix but is now valid after processing),
+ * the corresponding `recDetails` entry for that specific `dtl_ID` is updated with the newly masked value.
+ *
+ * This function relies on `updateMaskFields()` to perform the actual validation and transformation for each value based on the mask type.
  *
  * @param \hserv\System $system The Heurist system object.
- * @param int $recID The ID of the record whose fields are to be updated.
- * @param int $rtyID The record type ID of the record. If 0 or not provided, it's fetched from the database.
- * @param bool $verbose If true, returns detailed counts of updated, skipped, and invalid values,
- *                      plus a list of invalid masks encountered. Otherwise, returns an array of
- *                      values that failed validation against their masks. Defaults to false.
- * @return array If `$verbose` is true, an associative array with keys 'skipped', 'updated', 'invalid', 'invalid_masks'.
- *               If `$verbose` is false, an associative array `[dty_ID => [['value'=>original_value, 'reason'=>...]]]` for values
- *               that did not conform to their mask. Returns an empty array if all masks applied successfully or no masks were found.
+ * @param int $recID The ID of the record whose detail fields are to be processed against their entry masks.
+ * @param int $rtyID Optional. The record type ID of the record. If 0 or not provided, it's fetched from the database using `$recID`.
+ * @param bool $verbose Optional. If true, the return array includes detailed counts of operations:
+ *                      `['skipped' => int, 'updated' => int, 'invalid' => int, 'invalid_masks' => [dty_ID => mask_string], ...other_results...]`.
+ *                      The `...other_results...` part refers to the standard (non-verbose) return where keys are `dty_ID`s.
+ *                      If false (default), the function returns only an array of values that failed validation.
+ * @return array If `$verbose` is false (default): An associative array where each key is a `dty_ID` (detail type ID)
+ *               and the value is an array of items that failed the mask. Each item is `['value' => original_value, 'reason' => failure_reason_string]`.
+ *               Returns an empty array if all applicable fields already conformed or were successfully updated, or if no fields with entry masks were found.
+ *               If `$verbose` is true: An associative array as described above, augmented with 'skipped', 'updated', 'invalid', and 'invalid_masks' counts/lists.
  */
 function recordUpdateMaskFields($system, $recID, $rtyID = 0, $verbose = false){
 
@@ -3906,13 +4195,20 @@ function recordUpdateMaskFields($system, $recID, $rtyID = 0, $verbose = false){
  * Checks if it falls within an optional min/max range.
  * Formats float values to a specified number of decimal places.
  *
- * @param string $type The specific numeric type: 'i' (integer), 'd' (decimal/float), 'n' (numeric, treated as float if has decimal).
- * @param mixed $value The value to process.
- * @param int $length For 'd' or 'n' (if float), the number of decimal places to format to.
- * @param array|null $range An optional two-element array `[min, max]` for range validation.
- * @return array An array `[$processed_value, $reason_string]`.
- *               `$processed_value` is the validated and formatted number.
- *               `$reason_string` is an error message if validation fails, or an empty string on success.
+ * @param string $type The specific numeric type from the entry mask:
+ *                     'i' for integer,
+ *                     'd' for decimal (float),
+ *                     'n' for generic numeric (will be treated as float if it contains a decimal point, otherwise integer).
+ * @param mixed $value The input value to be processed and validated.
+ * @param int $length If the type is 'd' (decimal) or 'n' (and the value is float), this specifies the number of decimal places
+ *                    to format the number to using `number_format`. For integers, this parameter is not directly used for formatting.
+ * @param array|null $range An optional two-element numeric array `[min, max]` specifying the inclusive valid range for the value.
+ *                          If null, no range check is performed.
+ * @return array An array with two elements:
+ *               - First element (`$processed_value`): The processed numeric value (int or string formatted float).
+ *                 If validation fails (e.g., not numeric, out of range), this will be the original `$value`.
+ *               - Second element (`$reason_string`): An empty string if the value is valid and conforms to the type and range.
+ *                 Otherwise, a string describing the reason for validation failure (e.g., "Not an integer", "Out of range: 0 - 100").
  */
 function updateMaskFieldsNumeric($type, $value, $length, $range) {
 
@@ -3949,13 +4245,33 @@ function updateMaskFieldsNumeric($type, $value, $length, $range) {
  *
  * @param string $type The entry mask type ('a', 'd', 'i', 'n', 'm').
  * @param mixed $value The value to validate.
- * @param int $length For string types ('a', 'm'), the maximum allowed string length.
- *                    For numeric types ('d', 'n'), the number of decimal places for formatting.
- * @param array|null $range An optional two-element array `[min, max]` for range validation (for numeric types).
- * @return array An array `[$processed_value, $reason_string]`.
- *               `$processed_value` is the original or (for numerics) formatted value.
- *               `$reason_string` is an error message if validation fails, an empty string on success,
- *               or `false` if the mask type itself is not handled.
+ *
+ * This function serves as a dispatcher for different mask type validations.
+ * For numeric types ('d', 'i', 'n'), it delegates to `updateMaskFieldsNumeric`.
+ * For string types ('a', 'm'), it performs direct validation for allowed characters and length.
+ *
+ * @param string $type The entry mask type character code. Supported codes:
+ *                     'a': Alphabetic. Allows letters and common punctuation (defined in `$_PUNCTUATION`).
+ *                          Checks against `mb_ereg_match` with `[^\w{$_PUNCTUATION}]`.
+ *                     'd': Decimal. Processed by `updateMaskFieldsNumeric`.
+ *                     'i': Integer. Processed by `updateMaskFieldsNumeric`.
+ *                     'n': Numeric. Processed by `updateMaskFieldsNumeric`.
+ *                     'm': Mixed alphanumeric. Allows letters, numbers, and common punctuation (defined in `$_PUNCTUATION`).
+ *                          Checks against `mb_ereg_match` with `[^\w\d{$_PUNCTUATION}]`.
+ * @param mixed $value The value to be validated and potentially transformed (for numeric types).
+ * @param int $length For string types ('a', 'm'), this is the maximum allowed string length. If 0, no length check.
+ *                    For numeric types ('d', 'n' when float), this is the number of decimal places for formatting.
+ * @param array|null $range An optional two-element numeric array `[min, max]` for range validation,
+ *                          applicable only to numeric types ('d', 'i', 'n').
+ * @return array An array with two elements:
+ *               - First element (`$processed_value`): The original `$value` for string types, or the
+ *                 numerically processed (int or string formatted float) value for numeric types.
+ *                 If validation fails for string types, it remains the original `$value`.
+ *               - Second element (`$reason_string`):
+ *                 - Empty string (''): If the value is valid and conforms to the mask type and constraints.
+ *                 - Non-empty string: A message describing the validation failure (e.g., "Contains non-alphabetic characters",
+ *                   "Size exceeds set length X", "Not an integer", "Out of range: Y - Z").
+ *                 - `false` (boolean): If the provided `$type` is not one of the handled mask types ('a', 'd', 'i', 'n', 'm').
  */
 function updateMaskFields($type, $value, $length, $range){
 
@@ -4005,6 +4321,19 @@ function updateMaskFields($type, $value, $length, $range){
     return [$value, $reason];
 }
 
+/**
+ * Sends an email notification when a bug report record's status is updated to 'DONE' or a child term of 'DONE'.
+ *
+ * This function checks if the updated record is a bug report (identified by `ConceptCode::getRecTypeLocalID('8-23')`).
+ * If the status field (identified by `ConceptCode::getDetailTypeLocalID('2-810')`) is set to a term that is 'DONE'
+ * (identified by `ConceptCode::getTermLocalID('1037-3246')`) or one of its child terms, an email is sent to the
+ * reporter (email from field `ConceptCode::getDetailTypeLocalID('1317-242')`).
+ * The email includes details like the bug title, description, database, and a link to the bug report.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param int $recID The ID of the record that was updated.
+ * @return void This function does not return a value. It sends an email if conditions are met.
+ */
 function bugreportUpdate($system, $recID){
 
     $mysqli = $system->getMysqli();
