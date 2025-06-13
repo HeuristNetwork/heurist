@@ -1,34 +1,20 @@
+# Directory: hserv
 
-Directory:    /hserv
+## Overview
+This directory contains files related to the main functionality of hserv.
 
-Overview:     Server-side functions for Heurist Vsn 4 onwards (late 2015), see also hclient for client-side functions
-                
-                The server side functions are mainly PHP code which communicates with the client-side JS functions.
-                The data-critical, search and visualisation parts of the Heurist infrastructure are handled by hserv and hclient
-                
-                Other directories in the root contain older code (pre 2015) which carries out simple tasks such as database setup
-                and simple listing, or server scripts and configurations. They use a variety of methodologies, but we have not had
-                the resources, or priorities, to rewrite them since they still work quite adequately and are low risk.
+## Key files
+- `System.php`: The System class is the central class in Heurist, responsible for managing the application's state and core functionalities.
+- `SystemSettings.php`: Manages system-wide and database-specific settings for the Heurist application.
+- `consts.php`: Defines global constants and utility functions for the Heurist application.
 
-Notes:    -- controller - services, server side end points
-          -- dbaccess
-          -- entity - CRUD operations for all database entities (tables) except heurist data (Records and recDetails) +filestore 
-	      -- records - CRUD operations heurist data (Records and recDetails)
-                 edit
-                 export
-                 import
-                 indexing
-                 search
-          -- structure
-                 edit
-                 export
-                 import
-                 search
-          -- sync
-          -- utilities
-                 geo
-
-Updated:     18 Oct 2015, updated 3 Jan 2024
-
-----------------------------------------------------------------------------------------------------------------
+## Subfolders
+- `controller/`: Manages application routing, request handling, and control flow.
+- `dbaccess/`: Provides low-level database access utilities and helper functions.
+- `entity/`: Defines data structures, models, and classes representing database entities.
+- `filestore/`: Handles file storage, retrieval, and management operations.
+- `records/`: Contains logic for managing and interacting with primary data records.
+- `report/`: Manages report generation, template processing, and data presentation for reports.
+- `structure/`: Deals with the definition, modification, and export/import of database schema and structure.
+- `utilities/`: Offers common helper functions, tools, and utility classes used across the application.
 

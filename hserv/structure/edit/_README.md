@@ -1,7 +1,8 @@
-This directory contains files specifically for modifying or editing aspects of the Heurist database structure and definitions.
+# Directory: hserv/structure/edit
 
-These scripts are likely used in administrative interfaces for managing the database schema, record types, detail fields, and other structural components.
+## Overview
+This directory contains scripts and libraries focused on modifying or editing the Heurist database structure. This could include tasks like creating, updating, or deleting record types, fields, or other structural elements.
 
-**Key Files:**
-- `duplicateRectype.php`: Contains functionality to duplicate an existing record type, including its associated fields and structure.
-- `saveStructureLib.php`: Likely provides functions for saving changes to various structural elements of the database, such as record types, detail types, terms, or vocabularies. It may handle updates, creations, and deletions of these definition items.
+## Key files
+- `duplicateRectype.php`: Duplicates an existing Record Type, creating a new copy with the same description and fields but a different internal code.
+- `saveStructureLib.php`: DEPRECATED: Functions library to update system structural definitions (Record Types, Detail Types, Terms, Groups).

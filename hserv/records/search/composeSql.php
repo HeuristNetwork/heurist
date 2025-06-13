@@ -1,7 +1,9 @@
 <?php
 /**
-* composeSql.php - Translates heurist query JSON or string to SQL query
-*
+* composeSql.php - Translates heurist query (JSON or string) to SQL query
+* 
+* Implements a query composer that translates JSON (and plain text via JSON) search criteria into SQL queries. This is crucial for dynamic search capabilities.
+* 
 * @package     Heurist academic knowledge management system
 * @subpackage  hserv\records\search
 * @link        https://HeuristNetwork.org

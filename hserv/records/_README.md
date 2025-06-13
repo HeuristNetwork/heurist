@@ -1,13 +1,11 @@
-Directory:    /hserv/records
+# Directory: hserv/records
 
-Overview: This directory contains classes and functions to manipulate Heurist user data (records and record details)
+## Overview
+This directory handles operations related to user's data records. It is organized into subdirectories for specific record management tasks.
 
-edit - CRUD functions for Records
-import - import Heurist records from csv, kml, xml, json
-export - export Heurist records to various formats
-search - general and specific search functions. Query composer (plain text and json to sql)
-
-Updated:     24th October 2023
-
--------------------------------------------------------------------------------------------------------------------------------------
-
+## Key subdirectories
+- `edit/`: Contains scripts for record modification and editing tasks.
+- `export/`: Contains scripts for exporting record data in various formats.
+- `import/`: Contains scripts for importing record data from various sources.
+- `indexing/`: Contains scripts related to record indexing for ElasticSearch server.
+- `search/`: Contains scripts for searching and retrieving records.
