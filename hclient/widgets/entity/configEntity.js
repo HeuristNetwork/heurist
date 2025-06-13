@@ -84,7 +84,7 @@ $.widget( "heurist.configEntity", {
         }else if(this.options.configName == "datatable"){ // TODO - setup for datatable version
 
             $('<div style="display:flex; align-content: center; flex-wrap: wrap; align-items: center;">'
-            + ((this.options.showButtons)?'<div style="flex: 0 0 140px;"><span class="btn-action btn-openedit"></span></div>' : '')
+            + ((this.options.showButtons)?'<div style="flex: 0 0 16em;"><span class="btn-action btn-openedit"></span></div>' : '')
             + '<div style="flex: 0 0 300px;">'
                 + '<label for="sel_saved_settings" style="display:inline-block; margin-right: 10px;">'+loadSettingLabel+'</label><select class="sel_saved_settings text ui-widget-content ui-corner-all"></select>'
             + '</div>'
