@@ -65,6 +65,7 @@
 
             <div id="page-inner">
 
+                <!-- User instructions/help text -->
                 <div><ul>
                         <li>Use this function to set up calls to write a report to file 
                             using the Smarty report formatter (writes HTML and JS files).</li>
@@ -76,34 +77,46 @@
                     </ul>
                 </div>
 
-                <!-- edit contols -->
+                <!-- Top toolbar: Contains pagination (if configured) and Add New button -->
                 <div id="tb_top" style="height:30">
+                    <!-- Placeholder for top pagination, if used by DataTables config -->
                     <div style="display:inline-block; max-width:150;"><div id="dt_pagination_top"></div></div>
                     <div style="float:right; text-align:right;padding-top:5px;">
+                        <!-- Button to add a new report schedule, calls reportManager.editReport(-1) from manageReports.js -->
                         <input type="button" id="btnAdd1" value="Add New Report Schedule" onClick="window.reportManager.editReport(-1);" />
                     </div>
                 </div>
                 
+                <!-- Container for jQuery DataTable, initialized by manageReports.js -->
                 <table role="presentation" style="width:98%" class="div_datatable display">
+                    <!-- DataTable will be built here by JavaScript -->
                 </table>
 
-                <!-- edit contols -->
+                <!-- Bottom toolbar: Contains pagination (if configured) and Add New button -->
                 <div id="tb_bottom" style="height:30">
+                     <!-- Placeholder for bottom pagination, if used by DataTables config -->
                     <div style="display:inline-block; max-width:150;"><div id="dt_pagination_bottom"></div></div>
                     <div style="float:right; text-align:right;padding-top:5px;">
+                        <!-- Button to add a new report schedule, calls reportManager.editReport(-1) from manageReports.js -->
                         <input type="button" id="btnAdd2" value="Add New Report Schedule" onClick="window.reportManager.editReport(-1);" />
                     </div>
                 </div>
-            </div>
-        </div>
+            </div> <!-- End of page-inner -->
+        </div> <!-- End of main unnamed div -->
 
-
+        <!-- JavaScript initialization block -->
         <script  type="text/javascript">
-
-            //  starts initialization on load completion of this window
+            /**
+             * Creates and initializes the ReportManager object when the document is ready.
+             * This function is called by jQuery's $(document).ready().
+             */
             function createManagerObj(){
-                window.reportManager = new  ReportManager(false, true); //nonfilter, in window
+                // Instantiates ReportManager from manageReports.js
+                // false: _isFilterMode (not actively used for filtering reports in the current implementation)
+                // true:  _isWindowMode (indicates this interface is likely running in a popup or main window context)
+                window.reportManager = new  ReportManager(false, true);
             }
+            // Initialize when DOM is fully loaded.
             $(document).ready(createManagerObj);
         </script>
     </body>

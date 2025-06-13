@@ -821,6 +821,26 @@ function buildGraphStructure($rec_ids, &$recSet) {
 //
 // new set of functions to find links and related records dynamically
 //
+/**
+ * Fetches reverse pointer information for a given record ID.
+ * It finds all records that point to the specified record ID via a resource pointer field, using the `recLinks` table.
+ * Filters can be applied based on the record type and detail type of the pointing records/fields.
+ * This is one of the active functions for link traversal, replacing older `findReversePointers`.
+ *
+ * @global hserv\System $system The Heurist system object.
+ * @global mysqli       $mysqli The mysqli database connection object.
+ * @global array        $ACCESSABLE_OWNER_IDS Array of owner IDs the current user can access.
+ * @global bool         $PUBONLY If true, only fetch public records.
+ * @global array        $RECTYPE_FILTERS Filters for record types, indexed by depth.
+ * @global array        $PTRTYPE_FILTERS Filters for pointer detail types, indexed by depth.
+ *
+ * @param int $rec_id The ID of the record for which to find reverse pointers.
+ * @param int $depth  The current traversal depth, used for applying depth-specific filters.
+ * @return array<int, array{'rec_RecTypeID': int, 'dty_IDs': list<int>}>
+ *               An associative array where keys are the IDs of records pointing to $rec_id,
+ *               and values are arrays containing the 'rec_RecTypeID' of the pointing record
+ *               and a list 'dty_IDs' of detail type IDs of the pointer fields.
+ */
 function _getReversePointers($rec_id, $depth){
 
     global $system, $mysqli, $ACCESSABLE_OWNER_IDS, $PUBONLY, $RECTYPE_FILTERS, $PTRTYPE_FILTERS;
@@ -857,6 +877,27 @@ function _getReversePointers($rec_id, $depth){
 //
 // get linked records for relationship record
 //
+/**
+ * Fetches forward pointer information for a relationship type record.
+ * Specifically, this retrieves the source and target records linked by a relationship record.
+ * It uses the `recDetails` table directly as relationship records store pointers in details.
+ *
+ * @global hserv\System $system The Heurist system object.
+ * @global mysqli       $mysqli The mysqli database connection object.
+ * @global int          $relSrcDT DetailTypeID for the source pointer in a relationship.
+ * @global int          $relTrgDT DetailTypeID for the target pointer in a relationship.
+ * @global array        $ACCESSABLE_OWNER_IDS Array of owner IDs the current user can access.
+ * @global bool         $PUBONLY If true, only fetch public records.
+ * @global array        $RECTYPE_FILTERS Filters for record types, indexed by depth.
+ * @global array        $PTRTYPE_FILTERS Filters for pointer detail types, indexed by depth.
+ *
+ * @param int $rec_id The ID of the relationship record (RT_RELATION).
+ * @param int $depth  The current traversal depth, used for applying depth-specific filters.
+ * @return array<int, array{'rec_RecTypeID': int, 'dty_IDs': list<int>}>
+ *               An associative array where keys are the IDs of the source/target records,
+ *               and values are arrays containing their 'rec_RecTypeID' and the 'dty_IDs'
+ *               (DT_PRIMARY_RESOURCE or DT_TARGET_RESOURCE) linking them.
+ */
 function _getForwardPointers_for_relRT($rec_id, $depth){
 
     global $system, $mysqli, $relSrcDT, $relTrgDT, $ACCESSABLE_OWNER_IDS, $PUBONLY, $RECTYPE_FILTERS, $PTRTYPE_FILTERS;
@@ -895,6 +936,25 @@ function _getForwardPointers_for_relRT($rec_id, $depth){
 //
 //
 //
+/**
+ * Fetches forward pointer information for a given record ID (non-relationship records).
+ * It finds all records that are pointed to by the specified record ID via resource pointer fields, using the `recLinks` table.
+ * Filters can be applied based on the record type and detail type of the target records/pointer fields.
+ *
+ * @global hserv\System $system The Heurist system object.
+ * @global mysqli       $mysqli The mysqli database connection object.
+ * @global array        $ACCESSABLE_OWNER_IDS Array of owner IDs the current user can access.
+ * @global bool         $PUBONLY If true, only fetch public records.
+ * @global array        $RECTYPE_FILTERS Filters for record types, indexed by depth.
+ * @global array        $PTRTYPE_FILTERS Filters for pointer detail types, indexed by depth.
+ *
+ * @param int $rec_id The ID of the source record.
+ * @param int $depth  The current traversal depth, used for applying depth-specific filters.
+ * @return array<int, array{'rec_RecTypeID': int, 'dty_IDs': list<int>}>
+ *               An associative array where keys are the IDs of records pointed to by $rec_id,
+ *               and values are arrays containing the 'rec_RecTypeID' of the target record
+ *               and a list 'dty_IDs' of detail type IDs of the pointer fields.
+ */
 function _getForwardPointers($rec_id, $depth){
 
     global $system, $mysqli, $ACCESSABLE_OWNER_IDS, $PUBONLY, $RECTYPE_FILTERS, $PTRTYPE_FILTERS;
@@ -931,6 +991,28 @@ function _getForwardPointers($rec_id, $depth){
 //
 //
 //
+/**
+ * Fetches relationship information for a given record ID.
+ * It finds both direct and (optionally) reverse relationships using the `recLinks` table.
+ * Filters can be applied based on the record type of the related records and the relationship type (term ID).
+ *
+ * @global hserv\System $system The Heurist system object.
+ * @global mysqli       $mysqli The mysqli database connection object.
+ * @global array        $ACCESSABLE_OWNER_IDS Array of owner IDs the current user can access.
+ * @global bool         $PUBONLY If true, only fetch public records.
+ * @global array        $RECTYPE_FILTERS Filters for record types of related records, indexed by depth.
+ * @global array        $RELTYPE_FILTERS Filters for relationship types (term IDs), indexed by depth.
+ * @global bool         $REVERSE If true, also fetch reverse relationships.
+ *
+ * @param int $rec_id The ID of the record for which to find relationships.
+ * @param int $depth  The current traversal depth, used for applying depth-specific filters.
+ * @return array<int, array{'termID': int, 'relatedRecordID': int, 'useInverse'?: bool}>
+ *               An associative array where keys are relationship record IDs (rec_ID of the RT_RELATION record).
+ *               Values are arrays containing:
+ *               - 'termID': The term ID of the relationship type.
+ *               - 'relatedRecordID': The ID of the record on the other side of the relationship.
+ *               - 'useInverse' (optional, only for reverse): True if this is an inverse relationship.
+ */
 function _getRelations($rec_id, $depth){
 
     global $system, $mysqli, $ACCESSABLE_OWNER_IDS, $PUBONLY, $RECTYPE_FILTERS, $RELTYPE_FILTERS, $REVERSE;
@@ -1004,6 +1086,27 @@ function _getRelations($rec_id, $depth){
 *
 * @param mixed $result
 */
+/**
+ * Outputs a list of records in HML format.
+ *
+ * This function iterates through an initial set of record IDs, and for each record,
+ * it calls `outputRecord()` to generate its HML representation. It handles
+ * traversing relationships to a specified depth (`$MAX_DEPTH`), collecting related
+ * records and relationship records to be output in subsequent iterations or phases.
+ * Already outputted records are tracked to avoid redundancy.
+ * In HuNI multi-file mode (`$intofile`), it manages opening and closing individual record files.
+ *
+ * @global bool $OUTPUT_STUBS If true, only record stubs are output.
+ * @global bool $FRESH        Indicates if this is a "fresh" export (purpose not entirely clear, possibly cache-related).
+ * @global int  $MAX_DEPTH    Maximum depth to traverse for related records.
+ * @global bool $intofile     True if exporting in HuNI multi-file mode (one file per record).
+ * @global resource|null $hunifile File handle for the current HuNI record file.
+ * @global int  $relRT        Record Type ID for Relationship records.
+ *
+ * @param array $result An array containing the initial set of record IDs to process.
+ *                      Expected structure: `['records' => list<int>, ...]`
+ * @return array<int, int> An associative array of all records that were output, mapping recID to recTypeID.
+ */
 function outputRecords($result) {
 
     global $OUTPUT_STUBS, $FRESH, $MAX_DEPTH, $intofile, $hunifile, $relRT;
@@ -1157,6 +1260,46 @@ function outputRecords($result) {
 //returns recTypeID and array of related records for given record
 //
 // $parentID - NOT USED
+/**
+ * Outputs a single record in HML format.
+ *
+ * This function retrieves a record's data (or template structure), applies filters,
+ * and generates its HML representation including its fields, relationships, and reverse pointers.
+ * It handles different output modes (full record, stub, XInclude, HuNI file-per-record).
+ *
+ * @global hserv\System $system The Heurist system object.
+ * @global array<int,string> $RTN Record Type Name lookup.
+ * @global array<int,string> $DTN Detail Type Name lookup.
+ * @global array<int,int> $INV Inverse Term lookup.
+ * @global array<int,array<string,mixed>> $TL Term details lookup by ID.
+ * @global array<int,array<int,string>> $RQS Record Type Specific Detail Name lookup.
+ * @global array<int,string> $WGN Workgroup Name lookup.
+ * @global array<int,string> $UGN User Name lookup.
+ * @global int $MAX_DEPTH Max traversal depth.
+ * @global int $WOOT Woot text output flag/level.
+ * @global int $USEXINCLUDELEVEL Depth for switching to XInclude.
+ * @global array $RECTYPE_FILTERS Record type filters.
+ * @global int $relRT Record Type ID for Relationships.
+ * @global int $relTrgDT Detail Type ID for Target Pointer in Relationship.
+ * @global int $relTypDT Detail Type ID for Relationship Type term.
+ * @global int $relSrcDT Detail Type ID for Source Pointer in Relationship.
+ * @global array<int,int> $selectedIDs List of initially selected record IDs.
+ * @global bool $intofile HuNI multi-file mode flag.
+ * @global resource|null $hunifile File handle for current HuNI record file.
+ * @global string|int $dbID Registered Database ID.
+ * @global bool $EXPAND_REV_PTR Flag to expand reverse pointers.
+ * @global bool $REVERSE Flag to include reverse pointers.
+ * @global bool $NO_RELATIONSHIPS Flag to suppress relationship output.
+ * @global bool|list<int> $rectype_templates Flag or list of IDs for template generation mode.
+ * @global bool $human_readable_names Flag for using human-readable names in templates.
+ *
+ * @param int|string $recID The ID of the record to output.
+ * @param string|float $depth The current traversal depth (can be e.g., "0", "1", "0.5" for relationships).
+ * @param bool $outputStub If true, only output a stub of the record. Defaults to false.
+ * @param int|null $parentID (Not actively used in current logic) ID of the parent record in a traversal, if any. Defaults to null.
+ * @return array|false An array `['recTypeID' => id, 'related' => [ids...], 'relationRecs' => [ids...]]` on success,
+ *                     or false if the record is filtered out or an error occurs.
+ */
 function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
 
 
@@ -1367,6 +1510,19 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
 } //outputRecord
 
 
+/**
+ * Outputs an XInclude directive for a record.
+ * Used when the traversal depth exceeds $USEXINCLUDELEVEL, allowing for linking to
+ * the record's full representation in a separate file (in HuNI mode) or potentially elsewhere.
+ * Includes a fallback providing basic record information if the XInclude target is not available.
+ *
+ * @global array<int,string> $RTN  Lookup array for Record Type Names (recTypeID => name).
+ * @global string|int $dbID Registered Database ID, used in constructing the href for HuNI files.
+ *
+ * @param array $record Associative array of the record's data.
+ *                      Must contain 'rec_ID', 'rec_RecTypeID', and 'rec_Title'.
+ * @return void
+ */
 function outputXInclude($record) {
     global $RTN, $dbID;
     $recID = $record['rec_ID'];
@@ -1383,6 +1539,17 @@ function outputXInclude($record) {
     closeTag('xi:include');
 }
 
+/**
+ * Outputs a minimal "stub" representation of a record.
+ * This typically includes the record's ID, type, and title.
+ * Used when full record details are not required, e.g., for pointers at MAX_DEPTH=0.
+ *
+ * @global array<int,string> $RTN Lookup array for Record Type Names (recTypeID => name).
+ *
+ * @param array $recordStub Associative array of the record's basic data.
+ *                          Expected keys: 'rec_ID' (or 'id'), 'rec_RecTypeID' (or 'type'), 'rec_Title' (or 'title').
+ * @return void
+ */
 function outputRecordStub($recordStub) {
     global $RTN;
     openTag('record', array('isStub' => 1));
@@ -1395,6 +1562,26 @@ function outputRecordStub($recordStub) {
 }
 
 
+/**
+ * Creates and outputs a `<content>` node for XML file details if the MIME type is "application/xml".
+ * It attempts to load the XML content from the file path (if local) or URL (if remote).
+ * The XML content is then cleaned of its XML declaration and DOCTYPE to allow embedding,
+ * and a basic well-formedness check is performed before outputting.
+ *
+ * @global string HEURIST_FILESTORE_DIR Base path to the filestore (used by resolveFilePath indirectly).
+ *
+ * @param array $file An associative array representing the file record. Expected keys:
+ *                    'fxm_MimeType' (string): The MIME type of the file.
+ *                    'fullPath' (string, optional): The local full path to the file.
+ *                    'ulf_OrigFileName' (string): Original filename, used to check for ULF_REMOTE or ULF_IIIF.
+ *                    'URL' (string, optional): The URL of the file if it's remote.
+ *
+ * @uses resolveFilePath() Assumed global utility to get an accessible local file path.
+ * @uses loadRemoteURLContent() Assumed global utility to fetch content from a URL.
+ * @uses ULF_REMOTE Assumed constant for remote file type.
+ * @uses ULF_IIIF Assumed constant for IIIF file type.
+ * @return void
+ */
 function makeFileContentNode($file) {
 
     if (@$file['fxm_MimeType'] !== "application/xml") {
