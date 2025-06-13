@@ -23,13 +23,14 @@
  * @augments HImportBase
  * @classdesc For handling the bulk importing of new base fields by CSV
  *
- * @function doPrepare - Prepare data for creating new external media
+ * @method doPrepare - Prepare CSV data for creating new detail types (base fields).
  */
 
 class HImportDetailTypes extends HImportBase{
 
     /**
-     * @param {integer} dtg_ID - default detail type group ID, can be changed by the user
+     * @param {number} [dtg_ID=0] - Default detail type group ID, can be changed by the user.
+     * @return {void}
      */
     constructor(dtg_ID = 0){
         let field_selectors = ['#field_name', '#field_desc', '#field_type', '#field_vocab', '#field_target', '#field_uri'];
@@ -37,7 +38,8 @@ class HImportDetailTypes extends HImportBase{
     }
 
     /**
-     * Prepare CSV data for creating new base fields
+     * Prepare CSV data for creating new base fields.
+     * @return {void}
      */
     doPrepare(){
 

@@ -15,20 +15,19 @@
 */
 
 /**
-* brief description of file
-*
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-*/
+ * Checks if a URL is already bookmarked in Heurist and returns record and bookmark IDs as JavaScript variables.
+ *
+ * @package     Heurist academic knowledge management system
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @author      Tom Murtagh
+ * @author      Kim Jackson
+ * @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
+ * @author      Stephen White
+ * @author      Artem Osmakov   <osmakov@gmail.com>
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @version     3.1.0
+ */
 header(CTYPE_JS);
 
 if (! @$_REQUEST["url"]) {return;}

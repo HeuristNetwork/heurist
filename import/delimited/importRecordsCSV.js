@@ -1,12 +1,9 @@
 /**
-* Class to import records from CSV
-* 
-* @param _imp_ID - id of import session
-* @returns {Object}
-* 
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * Provides the client-side logic for importing records from CSV/TSV/KML files.
+ *
+ * @package     Heurist academic knowledge management system
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -20,6 +17,14 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+ * Main constructor for the CSV/KML record importer UI and logic.
+ *
+ * @param {number} _imp_ID - ID of an existing import session to load, or 0/null for a new session.
+ * @param {number} _max_upload_size - Maximum allowed upload size in bytes.
+ * @param {string} _format - The format of the import (e.g., 'csv', 'kml').
+ * @return {Object} An object with public methods to interact with the importer.
+ */
 function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     const _className = "ImportRecordsCSV",
     _version   = "0.4";
@@ -45,6 +50,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     session_selector;
     
     
+    /**
+     * Initializes the import UI, sets up event handlers for buttons, and manages file uploads.
+     * Loads an existing session if _imp_ID is provided.
+     * @private
+     * @param {number} _imp_ID - ID of an existing import session to load, or 0/null for a new session.
+     * @param {number} _max_upload_size - Maximum allowed upload size in bytes.
+     * @param {string} format - The format of the import (e.g., 'csv', 'kml').
+     * @return {void}
+     */
     function _init(_imp_ID, _max_upload_size, format){
     
         imp_ID = _imp_ID;
@@ -460,6 +474,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // Remove all sessions
     //
+    /**
+     * Clears import sessions from the server.
+     * If is_current is true, clears only the current session; otherwise, clears all sessions for the user.
+     * Requires admin privileges.
+     * @private
+     * @param {boolean} [is_current=false] - If true, clears only the current import session.
+     * @return {void}
+     */
     function _doClearSession(is_current){
         
         if( !window.hWin.HAPI4.is_admin() ){
@@ -502,6 +524,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     //
     //
+    /**
+     * Loads an existing import session by its ID (imp_ID).
+     * Retrieves session processing info and initializes the field mapping table.
+     * If the sequence of record types is not defined in the session, it prompts the user to set the primary record type.
+     * @private
+     * @return {void}
+     */
     function _loadSession(){
         
         if(imp_ID>0){
@@ -558,6 +587,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     //  open dialog to choose primary record type
     //
+    /**
+     * Opens a dialog for the user to select the primary record type and its dependencies.
+     * Handles the logic for loading dependencies, rendering the selection UI, and saving the sequence.
+     * @private
+     * @param {boolean} [is_initial=false] - True if this is the initial setup, affecting dialog closure behavior.
+     * @return {void}
+     */
     function _doSetPrimaryRecType(is_initial){
         
             let $dlg, buttons = {}, _is_CancelClose = true;
@@ -730,6 +766,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // render sequence ribbon
     //
+    /**
+     * Renders the record type sequence ribbon UI based on the current session's sequence.
+     * Sets up click handlers for selecting a record type in the sequence.
+     * Adjusts UI elements and triggers the field mapping table initialization.
+     * @private
+     * @return {boolean} Returns false if the sequence is not defined (triggering primary rectype selection), otherwise true.
+     */
     function _renderRectypeSequence(){
 
         let i, sequence = imp_session['sequence'];
@@ -842,6 +885,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     //  get hierarchy (parents) for given field
     //
+    /**
+     * Recursively gets the hierarchy (parent chain) for a given field key within a fields structure.
+     * The hierarchy is an array of field keys, starting from the given field_key up to its topmost parent.
+     * @private
+     * @param {Object} fields - An object where keys are field_keys and values are objects containing a 'depend' array of child field_keys.
+     * @param {string} field_key - The field key for which to get the hierarchy.
+     * @return {string[]} An array of field keys representing the hierarchy.
+     */
     function _getHierarchy(fields, field_key){
 
         //get parent
@@ -865,6 +916,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     //  selected_fields - fields marked initially
     //
+    /**
+     * Recursively identifies and collects cross-dependencies for a set of selected fields.
+     * A cross-dependency is a required field that is at a deeper level in the hierarchy than the selected field.
+     * @private
+     * @param {Object} rtOrder - An object containing the field structure ('fields') and their levels ('levels').
+     * @param {string[]} selected_fields - An array of field keys that are currently selected.
+     * @param {string[]} result_depend - An array (passed by reference, typically initially empty) to accumulate the identified cross-dependent field keys.
+     * @return {string[]} The `result_depend` array populated with cross-dependent field keys.
+     */
     function _getCrossDependencies(rtOrder, selected_fields, result_depend){
 
         let fields = rtOrder['fields'], levels = rtOrder['levels'];
@@ -912,6 +972,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // show dependecies list in popup dialog where we choose primary rectype
     //
+    /**
+     * Loads and displays the dependency tree for a selected primary record type within a dialog.
+     * It fetches dependency data from the server and then renders it as a selectable list and a tree view.
+     * Handles user interactions for selecting dependencies and renaming identifier fields.
+     * @private
+     * @param {jQuery} $dlg - The jQuery object for the dialog.
+     * @param {jQuery} treeElement - The jQuery object for the container where the dependency tree will be rendered.
+     * @param {number} preview_rty_ID - The ID of the primary record type for which to load dependencies.
+     * @return {void}
+     */
     function _loadRectypeDependencies($dlg, treeElement, preview_rty_ID ){
 
         //request to server to get all dependencies for given primary record type
@@ -1327,12 +1397,24 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     //
     //
+    /**
+     * Extracts the field type ID (ft_ID) from a composite field key (e.g., "ft_ID.rt_ID").
+     * @private
+     * @param {string} field_key - The composite field key.
+     * @return {string} The extracted field type ID.
+     */
     function _getFt_ID(field_key){
         return field_key.substring(0, field_key.indexOf('.'));
     }
     //
     //
     //
+    /**
+     * Extracts the record type ID (rt_ID) from a composite field key (e.g., "ft_ID.rt_ID") or returns the key itself if not composite.
+     * @private
+     * @param {string} field_key - The composite or simple field key.
+     * @return {string} The extracted record type ID or the original field_key.
+     */
     function _getRt_ID(field_key){
         let k = field_key.indexOf('.');
         if(k<0){
@@ -1346,6 +1428,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     //
     //
+    /**
+     * Handles the logic for skipping to the next (or a specific) record type in the import sequence.
+     * It checks if there are unmatched records in previous steps and warns the user if necessary.
+     * Updates the UI to reflect the new current record type in the sequence.
+     * @private
+     * @param {number|string} [seq_index_next] - The index of the next record type in the sequence to move to.
+     *                                           If undefined, moves to the previous or first if at start.
+     * @return {void}
+     */
     function _skipToNextRecordType(seq_index_next){
         
             seq_index_next = Number(seq_index_next);
@@ -1394,6 +1485,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     //
     //
+    /**
+     * Redraws the arrow UI element that points to the currently active record type in the sequence ribbon.
+     * This involves calculating positions and adjusting CSS for several arrow components.
+     * @private
+     * @return {void}
+     */
     function _redrawArrow(){
         if(currentSeqIndex>=0){
                 $('div.select_rectype_seq').removeClass('ui-state-focus');
@@ -1433,16 +1530,30 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     
     //  with level (depth) 
     //    list of resource (record pointer) fields
-    //    list of dependent rectype     
+    //    list of dependent rectype
     //
-    //  rtOrder 
+    //  rtOrder
     //     key is concatenation  field_type.record_type (resource rectype)
     //
     //  levels:{},   key:level - list of rectypes with level value - need for proper order in sequence
     //  fields:{}
-    //        key:{title,rt_title,rt_id,id_field(in import table),required}
+    //        key:{title,rt_title,rt_id,id_field(in import table),required, depend:[]}
     //
     //
+    /**
+     * Recursively processes a record type dependency tree to populate the rtOrder object.
+     * This object stores structured information about record types, their fields, dependencies, and hierarchy levels.
+     * It's used for rendering the dependency selection UI and managing the import sequence.
+     * @private
+     * @param {Object} rectypeTree - A node from the record type dependency tree (typically from server response).
+     *                               Expected to have properties like `key`, `type`, `title`, `rt_ids`, `constraint`, `children`.
+     * @param {Object} rtOrder - The main order object being populated. It has `levels` and `fields` properties.
+     *                           `rtOrder.levels` maps `field_key` to hierarchy depth.
+     *                           `rtOrder.fields` maps `field_key` to an object with details like `title`, `rt_id`, `id_field`, `depend` (array of child field_keys).
+     * @param {number} depth - The current depth in the dependency tree.
+     * @param {string} parent_field_key - The field key of the parent node in the tree.
+     * @return {Object} The populated `rtOrder` object.
+     */
     function _fillDependencyList(rectypeTree, rtOrder, depth, parent_field_key){
 
 
@@ -1573,6 +1684,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // imp_session['indexes'] = {field_1:10}  fieldname:recordtype_id
     //
+    /**
+     * Determines the column name for a Heurist ID (H-ID) field, checking if a preset name exists in the session.
+     * If not preset, it defaults to "[Record Type Name] H-ID".
+     * @private
+     * @param {number|string} recTypeID - The record type ID.
+     * @param {string} [sname] - An optional explicit name to use as a base instead of the record type name.
+     * @return {string} The determined column name for the H-ID field.
+     */
     function _getColumnNameForPresetIndex(recTypeID, sname){
         
         sname = (sname ?sname :$Db.rty(recTypeID,'rty_Name')) +' H-ID'; // this is default name for index field 
@@ -1591,8 +1710,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
     
     //
-    // init field mapping table - main table to work with 
+    // init field mapping table - main table to work with
     //
+    /**
+     * Initializes and renders the main field mapping table (Step 3 UI).
+     * This table lists columns from the imported file and allows users to map them to Heurist fields
+     * for the currently selected record type in the sequence. It also displays unique value counts for columns.
+     * Sets up event handlers for column selection checkboxes and "Add new column" functionality.
+     * @private
+     * @return {void}
+     */
     function _initFieldMapppingTable(){
 
         $('#tblFieldMapping > tbody').empty();
@@ -1896,7 +2023,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
     //
     // _adjustButtonPos
-    //    
+    //
+    /**
+     * Adjusts the position and visibility of UI elements based on the current step and window size.
+     * This includes the help text display, button visibility, and layout of the main content areas.
+     * Ensures the arrow pointing to the current record type in the sequence is correctly drawn.
+     * @private
+     * @return {void}
+     */
     function _adjustTablePosition(){
         
         let headerdiv = $('#helper1').parent();
@@ -1943,8 +2077,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     }
     
     //
-    // by recordtype ID 
+    // by recordtype ID
     //
+    /**
+     * Gets the index of the column that serves as the identifier (H-ID field) for a given record type in the sequence.
+     * @private
+     * @param {number} idx - The index of the record type in the `imp_session.sequence` array.
+     * @return {number} The column index of the identifier field, or -1 if not found or sequence is invalid.
+     */
     function _getFieldIndexForIdentifier(idx){
         
         if(imp_session['sequence'] && idx>=0 && idx<imp_session['sequence'].length && imp_session['sequence'][idx]){
@@ -1959,6 +2099,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // Update detail type dropdown's widget and menu
     //
+    /**
+     * Handles the opening of a detail type dropdown (hSelect widget).
+     * Adjusts the menu's position and max-height to ensure it's visible within the viewport,
+     * flipping it to display above the widget if necessary.
+     * Also applies custom styling to the widget and menu.
+     * @private
+     * @param {string} ele_id - The ID of the hSelect element (without the '-button' or '-menu' suffix).
+     * @return {void}
+     */
     function _onRecordDetailMenuOpen(ele_id){
 
         let $widget = $('span[id="'+ ele_id +'-button"]');
@@ -1990,6 +2139,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }
     }
 
+    /**
+     * Handles the closing of a detail type dropdown (hSelect widget).
+     * Removes custom styling applied during the open event.
+     * @private
+     * @param {string} ele_id - The ID of the hSelect element (without the '-button' or '-menu' suffix).
+     * @return {void}
+     */
     function _onRecordDetailMenuClose(ele_id){
         let $widget = $('span[id="'+ ele_id +'-button"]');
         $widget.removeClass('ui-heurist-populate ui-heurist-header'); // remove highlight dropdown
@@ -1998,6 +2154,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // Attempt to automatically loosely match fields, excat matches happen earlier
     //
+    /**
+     * Attempts to automatically match columns from the imported file (file_fields) to Heurist fields
+     * available in the mapping dropdowns, using partial string matching (Sørensen–Dice coefficient)
+     * if exact matches were not found by `_initFieldMapppingSelectors`.
+     * This is for fields that weren't already mapped by exact name or preset.
+     * @private
+     * @param {string[]} file_fields - An array of column names from the imported file.
+     * @return {void}
+     */
     function _performPartialMatching(file_fields){
 
         if(file_fields.length == 0){
@@ -2183,6 +2348,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // init field mapping selectors after change of rectype
     //
+    /**
+     * Initializes or re-initializes the field mapping dropdown selectors (`<select>`) in the UI.
+     * Populates them with available Heurist fields for the current record type in the sequence.
+     * Applies any preset mappings and attempts exact column name to field name matches.
+     * Sets up event handlers for these selectors.
+     * @private
+     * @param {Object} [preset_mapping] - An optional object mapping column indices to pre-selected dty_IDs.
+     * @return {void}
+     */
     function _initFieldMapppingSelectors( preset_mapping ){
         
         let sels = $("select[id^='sa_dt_']"); //all selectors
@@ -2399,6 +2573,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // Allow users to add/define new fields to record structure
     //
+    /**
+     * Initializes the "Add field" buttons associated with each unmapped column.
+     * Sets up their appearance and click event handlers to open the 'defDetailTypes' dialog
+     * for creating a new field, which then can be mapped to the column.
+     * @private
+     * @return {void}
+     */
     function _initCreateFieldButtons(){
 
         let $btns = $('button[id^="btn_dt_"]');
@@ -2519,6 +2700,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // show insert/update count in sequence of record types
     //
+    /**
+     * Generates an HTML string summarizing the insert/update counts for a specific record type in the sequence.
+     * This summary is displayed in the record type sequence ribbon.
+     * @private
+     * @param {number} idx - The index of the record type in the `imp_session.sequence` array.
+     * @return {string} An HTML string with the counts summary.
+     */
     function _getInsertUpdateCountsForSequence(idx){
     
          let counts = _getInsertUpdateCounts(idx);                                     
@@ -2540,8 +2728,22 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     // 0 records to be updated
     // 1 rows matched
     // 2 records to be inserted
-    // 3 rows source for insert 
+    // 3 rows source for insert
     // 4 rows ignored
+    /**
+     * Retrieves the insert/update counts for a specific record type in the sequence from the session data.
+     * If counts are not yet defined, it initializes them based on whether an H-ID column exists
+     * (implying updates/inserts based on unique H-IDs) or if all records are new.
+     * The counts array structure is:
+     * [0]: Records to be updated
+     * [1]: Rows matched (potential updates)
+     * [2]: Records to be inserted
+     * [3]: Rows source for insert
+     * [4]: Rows ignored (e.g., blank match fields)
+     * @private
+     * @param {number} idx - The index of the record type in the `imp_session.sequence` array.
+     * @return {number[]|null} An array of counts or null if the index is invalid.
+     */
     function _getInsertUpdateCounts(idx){
         
         if(idx>=0 && idx<imp_session['sequence'].length){
@@ -2569,6 +2771,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // Loads values for record from import table (preview values in main table)
     //
+    /**
+     * Loads and displays a preview of a single row from the imported data table.
+     * The row to display is determined by navigation controls (first, last, next, previous).
+     * Fetches the row data from the server and updates the preview cells in the field mapping table.
+     * @private
+     * @param {Event} [event] - The click event from a navigation button, used to determine which row to fetch.
+     *                          If undefined, fetches the current row based on `currentId`.
+     * @return {boolean|void} Returns false if event handling is involved (to prevent default action), otherwise void.
+     */
     function _getValuesFromImportTable(event){
         
         if(!imp_session) return;
@@ -2665,6 +2876,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // upload data that was pasted in textarea
     //
+    /**
+     * Handles the "Upload Data" button click when data is pasted directly into the textarea.
+     * Sends the textarea content to the server to be saved as a temporary file,
+     * then proceeds to Step 2 of the import process.
+     * @private
+     * @return {void}
+     */
     function _uploadData(){
         
         let csvdata = $('#sourceContent').val();
@@ -2715,8 +2933,20 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // parse CSV on server side
     // step1 - encode and get preview
-    // step2 - field roles, prepare and save into file 
+    // step2 - field roles, prepare and save into file
     //
+    /**
+     * Performs server-side parsing of the uploaded file.
+     * Step 1: Sends the uploaded file (or its reference) for initial parsing, encoding detection, and preview generation.
+     *         Updates UI with preview table and column information.
+     * Step 2: Sends column role assignments (which columns are identifiers, dates, etc.) and selected record types
+     *         for final processing of the data into a structured import session file on the server.
+     *         Loads the session and proceeds to the next UI step.
+     * Displays errors or progresses to the next UI step based on server response.
+     * @private
+     * @param {number} step - The parsing step to perform (1 or 2).
+     * @return {void}
+     */
     function _doParse(step){
         /*    
         keyfield
@@ -3119,6 +3349,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // Show remarks/help according to current match mode and mapping in main table
     //
+    /**
+     * Updates UI elements and help text based on the selected record matching mode.
+     * Adjusts visibility of options and button labels for clarity.
+     * For example, if "Use ID column" is selected, it hides other mapping options.
+     * @private
+     * @return {void}
+     */
     function _onMatchModeSet(){
         
         let shelp = '';
@@ -3239,6 +3476,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     //
     //
+    /**
+     * Initializes the record matching process by determining the selected matching mode
+     * (match by mapped fields, use ID column, or skip matching) and then calls `_doMatching`.
+     * @private
+     * @return {void}
+     */
     function _doMatchingInit(){
         
         let matchMode = 0;    
@@ -3258,6 +3501,20 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     // matchMode - 0 - match by mapped fields, 1- match by id column, 2 - skip matching
     // disamb_resolv -  [{recid: heurist record id,key: import_id},....]
     //
+    /**
+     * Performs the core record matching logic against the Heurist database.
+     * Sends mapped fields and matching mode to the server.
+     * Handles server response, including disambiguation prompts if multiple matches are found for a row.
+     * Updates session data with matching results and progresses the UI to the next step (prepare/validate).
+     * @private
+     * @param {number} matchMode - The matching strategy:
+     *                             0: Match by selected mapped fields.
+     *                             1: Use existing H-ID column for matching.
+     *                             2: Skip matching (treat all as new records).
+     * @param {Object[]} [disamb_resolv=null] - An array of objects to resolve ambiguities from a previous matching attempt.
+     *                                          Each object: {recid: chosen_heurist_record_id, key: import_table_row_key_value}.
+     * @return {void}
+     */
     function _doMatching( matchMode, disamb_resolv ){
         
         if(currentSeqIndex>=0){
@@ -3511,6 +3768,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     //
     //
+    /**
+     * Prepares the data for import after matching (or skipping matching).
+     * Validates that an identifier column is selected and that fields are mapped for import.
+     * Sends data to the server (action 'step4') to validate field values against Heurist field definitions
+     * (e.g., date formats, term existence, numeric types).
+     * Updates UI with validation results, including error/warning counts and messages.
+     * Progresses to Step 5 (Import) if validation is successful without critical errors, or if errors are to be ignored.
+     * @private
+     * @return {void}
+     */
     function _doPrepare(){
 
         currentSeqIndex = Number(currentSeqIndex);
@@ -3767,6 +4034,15 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     } 
     
     
+    /**
+     * Executes the final import of records into the Heurist database.
+     * Sends the prepared and validated data, along with field mappings and update/insert settings,
+     * to the server (action 'step5').
+     * Displays a progress bar during the import and then shows a summary report of inserted/updated records.
+     * Handles any errors returned from the server during the import process.
+     * @private
+     * @return {void}
+     */
     function _doImport(){
 
         currentSeqIndex = Number(currentSeqIndex);
@@ -3929,7 +4205,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
     //
     //  Request to server side and get records for insert ot update from import table
-    // 
+    //
+    /**
+     * Displays a paginated preview of records that are marked for insertion or update, or prepares all data for download.
+     * Fetches record data from the server based on the specified mode and displays it in a dialog table.
+     * If `is_download` is true, it constructs a CSV file for download instead of showing a dialog.
+     * @private
+     * @param {string} mode - Specifies which records to show: 'insert', 'update', or 'all' (for download).
+     * @param {boolean} is_download - If true, data is prepared for CSV download; otherwise, it's displayed in a popup.
+     * @return {void}
+     */
     function _showRecords2(mode, is_download){
      
         let s = '';
@@ -4148,7 +4433,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     
     //
     //  Compose table and show it in popup
-    // 
+    //
+    /**
+     * Displays records that have issues (errors, warnings) or require disambiguation in a popup dialog.
+     * Constructs an HTML table to present the relevant records and their problematic data.
+     * For disambiguation, provides options to resolve conflicts.
+     * For errors/warnings, lists issues and, if applicable (e.g., unrecognized terms), provides tools to fix them (like adding terms).
+     * @private
+     * @param {string} mode - The type of records to display: 'disamb' (disambiguation), 'error', or 'warning'.
+     * @return {void}
+     */
     function _showRecords(mode){
         
         let res = imp_session['validation'];
@@ -4574,6 +4868,17 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }
     } 
 
+    /**
+     * Determines the parent term ID for importing new terms related to a specific detail type (dty_ID).
+     * If the dty_ID points to a vocabulary, that vocabulary's ID is used.
+     * Otherwise, it searches for or creates a default 'Auto-added terms' vocabulary to use as the parent.
+     * Calls the provided callback with the determined parent term ID.
+     * @private
+     * @param {number} dty_ID - The detail type ID for which terms are being imported.
+     * @param {number|null} def_ParentTermID - A default parent term ID to use if applicable.
+     * @param {Function} callback - A callback function to be invoked with the resolved parent term ID.
+     * @return {boolean|void} False if callback is not a function, otherwise void.
+     */
     function _importTerms_ParentID(dty_ID, def_ParentTermID, callback){
 
         if(typeof callback !== 'function'){
@@ -4623,6 +4928,17 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         callback.call(this, trm_ParentTermID);
     }
+
+    /**
+     * Prompts the user to decide how to handle periods ('.') found in term labels during import.
+     * Periods can either be treated as hierarchical separators or as literal parts of the term labels.
+     * Based on user choice, proceeds to call `_importTerms_Import` with the appropriate separator.
+     * @private
+     * @param {Array<Array<*>>} fields - Array of field data for term import, each inner array: [field_key, dty_ID, trm_ParentTermID].
+     * @param {jQuery} $dlg - The jQuery object of the parent dialog (used for context/UI interaction).
+     * @param {boolean} is_all - True if processing terms for all fields, false for a single field.
+     * @return {void}
+     */
     function _importTerms_Separator(fields, $dlg, is_all){
 
         let $dlg_term_warning;
@@ -4651,6 +4967,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             {title: 'Presence of periods in terms', yes: 'Periods as separators', no: 'Periods as part of terms'}, {default_palette_class: 'ui-heurist-populate'}
         );
     }
+
+    /**
+     * Performs the actual import of new terms to the server.
+     * Sends a request with term data, chosen separator for hierarchy, and parent label retention flag.
+     * Handles the server response, displaying success or error messages, and refreshes term cache.
+     * @private
+     * @param {Array<Array<*>>} fields - Array of field data for term import, each inner array: [field_key, dty_ID, trm_ParentTermID].
+     * @param {string} separator - The character to use as a hierarchical separator for term labels (e.g., '.', or empty if none).
+     * @param {jQuery} $dlg - The jQuery object of the parent dialog (used for context/UI interaction).
+     * @param {boolean} is_all - True if processing terms for all fields, false for a single field.
+     * @param {number} [retain_parent_label=0] - Flag (0 or 1) whether to retain parent term labels in child term labels.
+     * @return {boolean|void} False if input `fields` are invalid, otherwise void.
+     */
     function _importTerms_Import(fields, separator, $dlg, is_all, retain_parent_label = 0){
 
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(fields) || fields[0].length != 3){
@@ -4732,6 +5061,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // Add new column + default data to each row
     //
+    /**
+     * Adds a new column to the import table on the server-side session data.
+     * The new column is populated with a default value for all existing rows.
+     * After successful addition, it reloads the session or re-initializes matching/preparation steps.
+     * @private
+     * @return {void}
+     */
     function _insertNewColumn(){
 
         let col_name = $('#txtColName').val();
@@ -4778,7 +5114,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // get import line on server and show it on popup
     //
-    function _showImportLineInPopup(imp_ID){
+    /**
+     * Fetches a specific line (by its 1-based index `imp_ID_line`) from the server-side import table
+     * and displays its content in a popup dialog for user review.
+     * @private
+     * @param {number|string} imp_ID_line - The line number of the record in the import table to display.
+     * @return {void}
+     */
+    function _showImportLineInPopup(imp_ID_line){
         
             if(!imp_session) return;
             let currentTable = imp_session['import_table']; 
@@ -4848,6 +5191,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     //
     //
+    /**
+     * Handles UI changes when the record update mode is modified by the user.
+     * This function adjusts visibility of UI sections related to update/insert options
+     * and updates help text and button labels based on the selected mode and current import step.
+     * @private
+     * @return {void}
+     */
     function _onUpdateModeSet(){
         
             $('#divFieldMapping2').show();
@@ -4946,6 +5296,20 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     4 - validate import   
     5 - import
     */
+    /**
+     * Manages the visibility of different UI sections (steps) of the import process.
+     * Updates UI elements like background colors, help text, and button states based on the current step.
+     * Also handles positioning of some elements.
+     * @private
+     * @param {number} page - The step number to display/activate.
+     *                        0: Progress bar/loading.
+     *                        1: Initial file upload/selection.
+     *                        2: Data preview and column role assignment.
+     *                        3: Field mapping and matching options. (Internally uses #divStep3)
+     *                        4: Prepare/Validate import. (Internally uses #divStep3)
+     *                        5: Import execution. (Internally uses #divStep3)
+     * @return {void}
+     */
     function _showStep(page){
         currentStep = page;
 
@@ -5049,6 +5413,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // Disable create new records option while ignoring record type
     //
+    /**
+     * Handles the event when the "Ignore records of this type" checkbox is changed.
+     * It disables or enables the "Skip matching (create all new records)" option
+     * based on whether the current record type is being ignored.
+     * @private
+     * @return {void}
+     */
     function _onIgnoreRectype(){
 
         let $ignore_rectype = $('#ignore_rectype');
@@ -5065,24 +5436,74 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //public members
     let that = {
 
+        /**
+         * Gets the class name.
+         * @return {string} The class name.
+         */
         getClass: function () {return _className;},
+        /**
+         * Checks if the given class name matches this class's name.
+         * @param {string} strClass - The class name to check.
+         * @return {boolean} True if it's a match, false otherwise.
+         */
         isA: function (strClass) {return (strClass === _className);},
+        /**
+         * Gets the version of this module.
+         * @return {string} The version string.
+         */
         getVersion: function () {return _version;},
 
+        /**
+         * Displays records in a popup based on the mode (e.g., disambiguation, errors, warnings).
+         * @param {string} mode - The mode to display ('disamb', 'error', 'warning').
+         * @return {void}
+         */
         showRecords: function (mode) {_showRecords(mode)},
+        /**
+         * Displays records for insert/update or prepares them for download.
+         * @param {string} mode - The mode ('insert', 'update', or 'all' for download).
+         * @param {boolean} is_download - If true, prepares data for CSV download instead of displaying in a popup.
+         * @return {void}
+         */
         showRecords2: function (mode, is_download) {_showRecords2(mode, is_download)},
 
-        showImportLineInPopup: function (imp_ID) {_showImportLineInPopup(imp_ID)},
-        
+        /**
+         * Shows a specific line from the import table in a popup.
+         * @param {number|string} imp_ID_line - The line number (1-based) from the import table to display.
+         * @return {void}
+         */
+        showImportLineInPopup: function (imp_ID_line) {_showImportLineInPopup(imp_ID_line)},
+
+        /**
+         * Handles UI changes when the update mode (e.g., retain existing, replace all) is set.
+         * @param {Event} [event] - The event object from the caller (optional).
+         * @return {void}
+         */
         onUpdateModeSet:function (event){
             _onUpdateModeSet();
         },
+        /**
+         * Handles UI changes and help text updates when the record matching mode is set.
+         * @param {Event} [event] - The event object from the caller (optional).
+         * @return {void}
+         */
         onMatchModeSet:function (event){
             _onMatchModeSet();
         },
+        /**
+         * Initializes the record matching process based on the selected matching mode.
+         * @param {Event} [event] - The event object from the caller (optional).
+         * @return {void}
+         */
         doMatchingInit:function (event){
             _doMatchingInit();
         },
+        /**
+         * Handles UI changes when the "Ignore records of this type" checkbox is toggled.
+         * Specifically, it disables the "Skip matching (create all new)" option.
+         * @param {Event} [event] - The event object from the caller (optional).
+         * @return {void}
+         */
         onIgnoreRectype: function(event){
             _onIgnoreRectype();
         }

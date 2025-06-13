@@ -22,14 +22,14 @@
  * @augments HImportBase
  * @classdesc For handling the bulk importing of new vocabularies and terms, or new label and description translations, by CSV
  *
- * @property {integer} vcg_ID - the default vocabulary group ID to add the new vocabularies to
- * @property {integer} trm_ParentTermID - the default vpcabulary/parent term to add the new terms to
- * @property {string} trm_Domain - what types of new vocabularies/terms are being created, [enum|relation]
- * @property {boolean} is_Translations - whether the import is for only translating existing term's label and description
+ * @property {number} _vcg_ID - The default vocabulary group ID to add the new vocabularies to.
+ * @property {number} _trm_ParentTermID - The default vocabulary/parent term ID to add the new terms to.
+ * @property {string} _trm_Domain - What types of new vocabularies/terms are being created, [enum|relation].
+ * @property {boolean} _is_Translations - Whether the import is for only translating existing term's label and description.
  *
- * @function doPrepare - Prepare data for creating new vocabularies/terms
- * @function doPrepareTranslation - Prepare data for creating new label and description translations
- * @function doPost - Sends the prepared data server side and either; creates the new vocabularies/terms or adds the new translation values
+ * @method doPrepare - Prepare data for creating new vocabularies/terms.
+ * @method doPrepareTranslation - Prepare data for creating new label and description translations.
+ * @method doPost - Sends the prepared data server side and either; creates the new vocabularies/terms or adds the new translation values.
  */
 
 class HImportTerms extends HImportBase{
@@ -41,9 +41,10 @@ class HImportTerms extends HImportBase{
     _is_Translations = false;
 
     /**
-     * @param {integer} trm_ParentTermID - For importing new terms, the parent term for the to-be created terms
-     * @param {integer} vcg_ID - For importing vocabularies, the vocabulary group for the to-be created vocabularies
-     * @param {boolean} is_Translations - Whether this is to import term label and description translations
+     * @param {number} trm_ParentTermID - For importing new terms, the parent term ID for the to-be created terms.
+     * @param {number} vcg_ID - For importing vocabularies, the vocabulary group ID for the to-be created vocabularies.
+     * @param {boolean} is_Translations - Whether this is to import term label and description translations.
+     * @return {void}
      */
     constructor(trm_ParentTermID, vcg_ID, is_Translations){
 
@@ -105,7 +106,8 @@ class HImportTerms extends HImportBase{
     }
 
     /**
-     * Prepare CSV data for creating new terms/vocabularies
+     * Prepare CSV data for creating new terms/vocabularies.
+     * @return {void}
      */
     doPrepare(){
 
@@ -179,7 +181,8 @@ class HImportTerms extends HImportBase{
     }
 
     /**
-     * Prepare CSV data for creating new label and description translations
+     * Prepare CSV data for creating new label and description translations.
+     * @return {void}
      */
     doPrepareTranslation(){
 
@@ -231,7 +234,8 @@ class HImportTerms extends HImportBase{
     }
 
     /**
-     * Sends prepared data server side to create the new terms/vocabularies/translations
+     * Sends prepared data server side to create the new terms/vocabularies/translations.
+     * @return {void}
      */
     doPost(){
 

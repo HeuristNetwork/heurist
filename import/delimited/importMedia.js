@@ -22,20 +22,25 @@
  * @augments HImportBase
  * @classdesc For handling the bulk registeration of new external files by CSV
  *
- * @function doPrepare - Prepare data for registering new external media
- * @function doPost - Sends the prepared data server side to register new external media
- * @function prepareURLs - Process the URL field, which can contain several URLs to handle individually
- * @function prepareDescription - Process the description field, splitting it by the ', Download' separator
+ * @method doPrepare - Prepare data for registering new external media
+ * @method doPost - Sends the prepared data server side to register new external media
+ * @method prepareURLs - Process the URL field, which can contain several URLs to handle individually
+ * @method prepareDescription - Process the description field, splitting it by the ', Download' separator
  */
 class HImportMedia extends HImportBase{
 
+    /**
+     * Sets up the import UI for media files, extending HImportBase.
+     * @return {void}
+     */
     constructor(){
         let field_selectors = ['#field_url', '#field_desc'];
         super(0, 'ulf', field_selectors, false);
     }
 
     /**
-     * Prepare CSV data for registering new external files
+     * Prepare CSV data for registering new external files.
+     * @return {void}
      */
     doPrepare(){
 
@@ -87,7 +92,8 @@ class HImportMedia extends HImportBase{
     }
 
     /**
-     * Sends prepared data server side to register new external files
+     * Sends prepared data server side to register new external files.
+     * @return {void}
      */
     doPost(){
 
@@ -107,10 +113,11 @@ class HImportMedia extends HImportBase{
     }
 
     /**
-     * Process the current record account for potentially several URLs, leading to several records
+     * Process the current record account for potentially several URLs, leading to several records.
      *
-     * @param {array} row - current record row to process, with potentially multiple URLs to import 
-     * @param {array} urls - already handled URLs, to avoid duplication here
+     * @param {string[]} row - Current record row to process, with potentially multiple URLs to import.
+     * @param {string[]} urls - Already handled URLs, to avoid duplication here. Modified by this function.
+     * @return {void}
      */
     prepareURLs(row, urls){
 
@@ -146,11 +153,10 @@ class HImportMedia extends HImportBase{
     }
 
     /**
-     * Prepare the file's description
+     * Prepare the file's description.
      *
-     * @param {array} row - current record row to retrieve the description from
-     *
-     * @returns {array} returns the prepared description value
+     * @param {string[]} row - Current record row to retrieve the description from.
+     * @return {string[]} Returns the prepared description value(s) as an array of strings.
      */
     prepareDescription(row){
 

@@ -21,23 +21,28 @@
 /**
  * @class HImportFileData
  * @augments HImportBase
- * @classdesc 
+ * @classdesc
  *  For handling the bulk addition or replacement of already registered file details by CSV.
  *  For bulk registeration see HImportMedia
  *
- * @function doPrepare - Prepare data for adding/updating file details
- * @function doPost - Send the prepared data server side to add/update file details
+ * @method doPrepare - Prepare data for adding/updating file details
+ * @method doPost - Send the prepared data server side to add/update file details
  */
 
 class HImportFileData extends HImportBase{
 
+    /**
+     * Sets up the import UI for file data, extending HImportBase.
+     * @return {void}
+     */
     constructor(){
         let field_selectors = ['#file_id', '#file_desc', '#file_cap', '#file_rights', '#file_owner', '#file_vis'];
         super(0, 'ulf', field_selectors, false);
     }
 
     /**
-     * Prepare CSV data for adding/replacing already registered file details
+     * Prepare CSV data for adding/replacing already registered file details.
+     * @return {void}
      */
     doPrepare(){
 
@@ -102,7 +107,8 @@ class HImportFileData extends HImportBase{
     }
 
     /**
-     * Sends prepared data server side to add/replace registered file details
+     * Sends prepared data server side to add/replace registered file details.
+     * @return {void}
      */
     doPost(){
 

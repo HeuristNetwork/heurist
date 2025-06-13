@@ -1,11 +1,9 @@
 /**
-* Class to import records from JSON/XML
-* 
-* @returns {Object}
-* 
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * Provides the client-side logic for importing records from Heurist HML (XML) or JSON files.
+ *
+ * @package     Heurist academic knowledge management system
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -28,6 +26,11 @@ hapi.doImportAction -> importController.php -> ImportHeurist::importDefintions -
 
 */
 
+/**
+ * Main constructor for the Heurist HML/JSON record importer UI and logic.
+ * @param {number} _max_upload_size - Maximum allowed upload size in bytes.
+ * @return {Object} An object with public methods to interact with the importer.
+ */
 function hImportRecords(_max_upload_size) {
     const _className = "ImportRecords",
     _version   = "0.4";
@@ -44,6 +47,12 @@ function hImportRecords(_max_upload_size) {
     let targetMissed = 0;
     let targetDtMissed = 0;
     
+    /**
+     * Initializes the import interface, sets up UI elements, and event handlers for file uploads and import actions.
+     * @private
+     * @param {number} _max_upload_size - Maximum allowed upload size in bytes, used for client-side validation.
+     * @return {void}
+     */
     function _init( _max_upload_size){
     
         let uploadWidget = $('#uploadFile');
@@ -227,6 +236,15 @@ function hImportRecords(_max_upload_size) {
     //
     //
     //
+    /**
+     * Displays the list of entity types (record types and detail types) found in the uploaded import file.
+     * It compares these with existing types in the target database and indicates which ones are new or need mapping.
+     * Updates the UI to show this information and relevant action buttons (e.g., "Import Definitions", "Continue").
+     * @private
+     * @param {boolean} afterSync - True if this function is called after a definition synchronization attempt,
+     *                              which affects how missing target IDs are interpreted and displayed.
+     * @return {void}
+     */
     function _showListOfEntityTypes(afterSync){  
 
         let rectypes = rectypesInSource;
@@ -477,6 +495,14 @@ function hImportRecords(_max_upload_size) {
     //
     // import database definitions before import records
     //
+    /**
+     * Initiates the process of importing or synchronizing definitions (record types, detail types)
+     * from the source file/database into the target Heurist database.
+     * It calls a server-side action ('import_definitions') and handles the response,
+     * then refreshes the local schema cache and re-evaluates the list of entity types.
+     * @private
+     * @return {void}
+     */
     function _importDefinitions(){
             
             session_id = Math.round((new Date()).getTime()/1000);
@@ -536,6 +562,14 @@ function hImportRecords(_max_upload_size) {
     //
     //
     //
+    /**
+     * Initiates the actual record import process.
+     * Sends the prepared data (including file reference, unique ID field settings, and update mode)
+     * to the server (action 'import_records').
+     * Displays a progress bar during the import and shows a summary report upon completion.
+     * @private
+     * @return {void}
+     */
     function _importRecords(){
 
             //$('#divStep2').hide();
@@ -642,6 +676,13 @@ function hImportRecords(_max_upload_size) {
     //
     // @todo use msg.showProgress
     //
+    /**
+     * Displays a progress bar and initiates polling for import progress updates from the server.
+     * @private
+     * @param {number} session_id - The server-side session ID for the current import process, used for progress polling.
+     * @param {number} currentStep - The current step in the import process (used for UI state on stop/error).
+     * @return {void}
+     */
     function _showProgress( session_id, currentStep ){
 
         let progressCounter = 0;        
@@ -716,6 +757,13 @@ function hImportRecords(_max_upload_size) {
     //
     // alwasys call _showStep after this method
     //
+    /**
+     * Hides the progress bar and stops the progress polling interval.
+     * Restores the UI to the specified or current step.
+     * @private
+     * @param {number} [currentStep] - The UI step to show after hiding progress. If not provided, defaults to current context.
+     * @return {void}
+     */
     function _hideProgress( currentStep ){
         
         
@@ -746,6 +794,16 @@ function hImportRecords(_max_upload_size) {
     4 - validate import   
     5 - import
     */
+    /**
+     * Manages the visibility of different UI sections (steps) of the import process.
+     * @private
+     * @param {number} page - The step number to display/activate.
+     *                        0: Progress bar/loading.
+     *                        1: Upload/Preview definitions.
+     *                        2: Define import parameters (unique ID, update mode).
+     *                        3: Import results summary.
+     * @return {void}
+     */
     function _showStep(page){
         $("div[id^='divStep']").hide();
         $("#divStep"+(page>3?3:page)).show();
@@ -754,6 +812,12 @@ function hImportRecords(_max_upload_size) {
     //
     //
     //
+    /**
+     * Handles changes to the update mode radio buttons (e.g., "Retain existing", "Replace all").
+     * Adjusts the visibility of related UI elements based on the selected mode.
+     * @private
+     * @return {void}
+     */
     function _onUpdateModeSet(){
       
         if(!$('#sa_insert').prop('checked') && !$('#sa_update').prop('checked'))
@@ -773,8 +837,21 @@ function hImportRecords(_max_upload_size) {
     //public members
     let that = {
 
+        /**
+         * Gets the class name.
+         * @return {string} The class name.
+         */
         getClass: function () {return _className;},
+        /**
+         * Checks if the given class name matches this class's name.
+         * @param {string} strClass - The class name to check.
+         * @return {boolean} True if it's a match, false otherwise.
+         */
         isA: function (strClass) {return (strClass === _className);},
+        /**
+         * Gets the version of this module.
+         * @return {string} The version string.
+         */
         getVersion: function () {return _version;},
     }
 

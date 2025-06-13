@@ -23,13 +23,14 @@
  * @augments HImportBase
  * @classdesc For handling the bulk importing of new record types by CSV
  *
- * @function doPrepare - Prepare data for creating new record types
+ * @method doPrepare - Prepare data for creating new record types
  */
 
 class HImportRecordTypes extends HImportBase{
 
     /**
-     * @param {integer} rtg_ID - default record type group ID, can be changed by the user
+     * @param {number} [rtg_ID=0] - Default record type group ID, can be changed by the user.
+     * @return {void}
      */
     constructor(rtg_ID = 0){
         let field_selectors = ['#field_name', '#field_desc', '#field_uri'];
@@ -37,7 +38,8 @@ class HImportRecordTypes extends HImportBase{
     }
 
     /**
-     * Prepare CSV data for creating new record types
+     * Prepare CSV data for creating new record types.
+     * @return {void}
      */
     doPrepare(){
 

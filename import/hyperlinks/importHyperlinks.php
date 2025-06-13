@@ -15,20 +15,19 @@
 */
 
 /**
-* brief description of file
-*
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-*/
+ * Handles the import of hyperlinks, allowing users to analyze a webpage or file, select links, and bookmark them in Heurist.
+ *
+ * @package     Heurist academic knowledge management system
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @author      Tom Murtagh
+ * @author      Kim Jackson
+ * @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
+ * @author      Stephen White
+ * @author      Artem Osmakov   <osmakov@gmail.com>
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @version     3.1.0
+ */
 
 define('LOGIN_REQUIRED',1);
 define('PDIR','../../');//need for proper path to js and css
@@ -536,7 +535,27 @@ We recommend bookmarking a few links at a time.<br>The list is reloaded after ea
 <?php
 /* ----- END OF OUTPUT ----- */
 
-// search for existing record by id or url. if not found add new one
+/**
+ * Checks for an existing Heurist record matching the given URL or user-specified record ID.
+ * If an exact match for the URL is found, its record ID is returned.
+ * If a positive $user_rec_id is provided and valid, that record ID is returned.
+ * If no exact match and $user_rec_id is not positive, it searches for records with similar URLs;
+ * if found, an array of their record IDs is returned for disambiguation.
+ * If no existing record is identified (or if $user_rec_id indicates a new record should be made),
+ * a new RT_INTERNET_BOOKMARK record is created with the provided URL, title, and notes.
+ *
+ * Uses global $system and $mysqli objects.
+ *
+ * @param string $url The URL of the hyperlink.
+ * @param string $title The title associated with the hyperlink.
+ * @param string|null $notes Optional notes for the record's scratchpad and extended description.
+ * @param int|string|null $user_rec_id A user-selected record ID to check against, or a value
+ *                                     that's not > 0 (e.g., 0, null, -1) to trigger similarity
+ *                                     search or new record creation.
+ * @return int|int[]|0 Returns a single integer record ID if an exact match is found or a new record
+ *                     is successfully created. Returns an array of integer record IDs if multiple
+ *                     records with similar URLs are found. Returns 0 on failure to save a new record.
+ */
 function records_check($url, $title, $notes, $user_rec_id) {
     /*
      * Look for a Records record corresponding to the given record;
@@ -611,15 +630,45 @@ function records_check($url, $title, $notes, $user_rec_id) {
 
 }
 
-
+/**
+ * Decodes a specific set of HTML entities in a string.
+ * Replaces &nbsp;, &amp;, &quot;, &lt;, &gt;, &copy; with their corresponding characters.
+ *
+ * @param string $str The input string with HTML entities.
+ * @return string The string with specified HTML entities decoded.
+ */
 function my_htmlspecialchars_decode($str) {
     return str_replace(array('&nbsp;', '&amp;', '&quot;', '&lt;', '&gt;', '&copy;'), array(' ', '&', '"', '<', '>', '(c)'), $str);
 }
 
+/**
+ * Prints the HTML structure for a single hyperlink item in the import interface.
+ *
+ * This includes:
+ * - A checkbox to select the link for bookmarking.
+ * - An editable input field for the link's title.
+ * - Hidden fields for the original URL and alternative title.
+ * - A "Visit" button to open the link in a new tab.
+ * - A "Lookup Title" button to re-fetch the title from the URL.
+ * - An area to display notes/context of the link, with a checkbox to include them.
+ * - If similar records exist (based on $disambiguate_rec_ids), options for the user
+ *   to choose an existing record or create a new one.
+ *
+ * Uses global variables:
+ * - $linkno (int): Counter for generating unique form element IDs.
+ * - $disambiguate_rec_ids (array): Maps URLs to arrays of similar record IDs.
+ * - $notes (array): Maps URLs to their surrounding text/notes from the source page.
+ * - $mysqli (mysqli): Database connection, used if disambiguation options are shown.
+ *
+ * @param string $url The URL of the hyperlink.
+ * @param string $title The current title of the hyperlink.
+ * @return void
+ */
 function print_link($url, $title) {
     global $linkno;
     global $disambiguate_rec_ids;
     global $notes;
+    global $mysqli; // Added mysqli to globals as it's used in the disambiguation part
 
     $url_visit = (strpos($url,'http://')===false)?'https://'.$url :$url;
 
@@ -709,7 +758,16 @@ function print_link($url, $title) {
 <?php
 }
 
-
+/**
+ * Finds the common prefix of two strings and returns the first string ($url)
+ * with the common prefix highlighted in black using HTML spans.
+ * The non-common part of the $url string is appended after the highlighted common part.
+ * Both parts are HTML-escaped.
+ *
+ * @param string $url The primary string, which will be returned with highlighting.
+ * @param string $base_url The string to compare against to find the common prefix.
+ * @return string An HTML string with the common prefix of $url (if any) highlighted.
+ */
 function common_substring($url, $base_url) {
     for ($i=0; $i < strlen($url) && $i < strlen($base_url);++$i) {
         if ($url[$i] != $base_url[$i]) {break;}
