@@ -1,21 +1,17 @@
 /**
-* Base class for definition importing by CSV, does not include Records
-*
+* importBase.js - Class HImportBase
+* 
+* Base class for importing definitions definitions from CSV
+* 
 * @package     Heurist academic knowledge management system
+* @subpackage  import\delimited
 * @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2024 University of Sydney
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Brandon McKay   <blmckay13@gmail.com>
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Brandon McKay   <blmckay13@gmail.com>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6.0
 */
 
 /**
@@ -30,26 +26,25 @@
  * @property {json} prepared_data - Processed parsed data into 'records' for creating the new definitions server side
  * @property {boolean} return_results - On success, close the window and return the result as context
  *
- * @function doParse - Convert the data from #sourceContent into a 2D array for processing
- * @function cleanupParsedData - Removes any empty rows or rows that contain only empty values
- * @function doPrepare - Processes the parsed data into records for creation, must be expanded by child classes
- * @function createRecord - Creates the record in json format, then adds it to the prepared records
- * @function checkRequiredMapping - Checks whether the required fields have been mapped before preparing
- * @function checkRequiredValues - Checks whether the provided indexes are valid
- * @function doPost - Sends the prepared records server side to create the new definitions
- * @function redrawPreviewTable - Draws the parsed data into a human readable table, including the results when return_results is false
- * @function renderTableHeader - Draws the column headers to the human readable table
- * @function renderTableBody - Draws the field data to the human readable table
- * @function getHeaderCount - Retrieves the maximum number of column headers needs, based on the longest row
- * @function prepareHeaders - Generates an array of headers to fit the maximum number of headers
- * @function matchColumns - Attempts to auto match columns from the CSV data to the mappable fields for the definition
- * @function handleResults - Adds the results from doPost to the human readable table
- * @function setupGroupSelector - Creates the necessary entity group selector, used by record types, base fields and terms
- * @function setupColumnRoles - Populates the column roles dropdowns with the headers, to allow field mapping
- * @function showError - Creates a Heurist error popup
- * @function updatePreparedInfo - Updates the prepared info elements with any error messages and the record count
+ * @method doParse - Convert the data from #sourceContent into a 2D array for processing
+ * @method cleanupParsedData - Removes any empty rows or rows that contain only empty values
+ * @method doPrepare - Processes the parsed data into records for creation, must be expanded by child classes
+ * @method createRecord - Creates the record in json format, then adds it to the prepared records
+ * @method checkRequiredMapping - Checks whether the required fields have been mapped before preparing
+ * @method checkRequiredValues - Checks whether the provided indexes are valid
+ * @method doPost - Sends the prepared records server side to create the new definitions
+ * @method redrawPreviewTable - Draws the parsed data into a human readable table, including the results when return_results is false
+ * @method renderTableHeader - Draws the column headers to the human readable table
+ * @method renderTableBody - Draws the field data to the human readable table
+ * @method getHeaderCount - Retrieves the maximum number of column headers needs, based on the longest row
+ * @method prepareHeaders - Generates an array of headers to fit the maximum number of headers
+ * @method matchColumns - Attempts to auto match columns from the CSV data to the mappable fields for the definition
+ * @method handleResults - Adds the results from doPost to the human readable table
+ * @method setupGroupSelector - Creates the necessary entity group selector, used by record types, base fields and terms
+ * @method setupColumnRoles - Populates the column roles dropdowns with the headers, to allow field mapping
+ * @method showError - Creates a Heurist error popup
+ * @method updatePreparedInfo - Updates the prepared info elements with any error messages and the record count
  */
-
 class HImportBase{
 
     #allowed_entities = ['rty', 'dty', 'trm', 'ulf'];
@@ -80,10 +75,10 @@ class HImportBase{
     /**
      * Initialise UI elements and validate options/settings
      *
-     * @param {integer} group_id - Default entity type group ID, if necessary
+     * @param {number} group_id - Default entity type group ID, if necessary
      * @param {string} entity_type - Entity type, short hand format
-     * @param {string} field_selectors - A selector for field dropdowns to assign columns
-     * @param {boolean} return_results - Whether to close the window and return the immport results ON SUCCESS ONLY
+     * @param {string|string[]} field_selectors - A CSS selector string or an array of selectors for field dropdowns to assign columns.
+     * @param {boolean} [return_results=false] - Whether to close the window and return the import results ON SUCCESS ONLY.
      */
     constructor(group_id, entity_type, field_selectors, return_results = false){
 
@@ -255,9 +250,10 @@ class HImportBase{
     /**
      * Prepares row as a record to be pushed into prepared array
      *
-     * @param {array} row - parsed row of data
-     * @param {json} fields - mapping definition field to parsed column index {field => index}
-     * @param {json} record - default values for the new record
+     * @param {string[]} row - Parsed row of data (array of strings).
+     * @param {Object} fields - Mapping definition field to parsed column index {field_name: columnIndex}.
+     * @param {Object} [record={}] - Default values for the new record.
+     * @return {void}
      */
     createRecord(row, fields, record = {}){
 
@@ -277,12 +273,11 @@ class HImportBase{
     }
 
     /**
-     * Check whether the provided required fields have been mapped with valid indexes, 
-     *  then constructs the message for any invalid field
+     * Check whether the provided required fields have been mapped with valid indexes,
+     * then constructs the message for any invalid field.
      *
-     * @param {json} fields - fields that must have a valid index assigned {field name => field indexes}
-     *
-     * @returns {boolean|string} returns true on no errors, otherwise returns a string with the missing fields
+     * @param {Object} fields - Fields that must have a valid index assigned (e.g., {field_name: [index1, index2]}).
+     * @return {boolean|string} Returns true on no errors, otherwise returns a string with the missing/invalid fields.
      */
     checkRequiredMapping(fields){
 
@@ -311,13 +306,12 @@ class HImportBase{
     }
 
     /**
-     * Check whether the provided fields have values, 
-     *  then constructs the error message for any missing fields
+     * Check whether the provided fields have values,
+     * then constructs the error message for any missing fields.
      *
-     * @param {array} data - row from parsed data, used to check for a value
-     * @param {json} fields - fields to validate {field name => field value}
-     *
-     * @returns {boolean|string} returns true on no errors, otherwise returns a string with the invalid/missing fields
+     * @param {string[]} data - Row from parsed data, used to check for a value.
+     * @param {Object} fields - Fields to validate (e.g., {field_name: [columnIndex1, columnIndex2]}).
+     * @return {boolean|string} Returns true on no errors, otherwise returns a string with the invalid/missing fields.
      */
     checkRequiredValues(data, fields){
 
@@ -346,11 +340,12 @@ class HImportBase{
     }
 
     /**
-     * Sends data to server to create the new definitions/values
+     * Sends data to server to create the new definitions/values.
      *
-     * @param {json} request - Base of request object, is extended to include general properties
-     * @param {function} callback - Handles the server response instead of the default below
-     * @returns {void} Callback function receives the server's response
+     * @param {Object} [request={}] - Base of request object, is extended to include general properties.
+     * @param {Function} [callback=null] - Optional callback to handle the server response instead of the default logic.
+     *                                     If provided, it receives the server's response Object.
+     * @return {void}
      */
     doPost(request = {}, callback = null){
 
@@ -457,10 +452,11 @@ class HImportBase{
     }
 
     /**
-     * Render the table's headings
+     * Render the table's headings.
      *
-     * @param {jQuery} $table - jQuery object selecting the table
-     * @param {array} headers - Array of column headers
+     * @param {jQuery} $table - jQuery object representing the table.
+     * @param {string[]} headers - Array of column header strings.
+     * @return {void}
      */
     renderTableHeader($table, headers){
 
@@ -475,9 +471,10 @@ class HImportBase{
     }
 
     /**
-     * Render the table's data
+     * Render the table's data.
      *
-     * @param {jQuery} $table - jQuery object selecting the table
+     * @param {jQuery} $table - jQuery object representing the table.
+     * @return {void}
      */
     renderTableBody($table){
 
@@ -502,10 +499,10 @@ class HImportBase{
     }
 
     /**
-     * Gets the column count for the parsed CSV data
-     *  This count is based on each row's values, not just the first line
+     * Gets the column count for the parsed CSV data.
+     * This count is based on each row's values, not just the first line.
      *
-     * @returns {integer} The number of columns needed for complete and valid CSV
+     * @return {number} The number of columns needed for complete and valid CSV.
      */
     getHeaderCount(){
         return this.parsed_data.reduce((max_columns, row) => {
@@ -514,9 +511,9 @@ class HImportBase{
     }
 
     /**
-     * Setup the column headers 
+     * Setup the column headers.
      *
-     * @returns {array} The column headers
+     * @return {string[]} The column headers.
      */
     prepareHeaders(){
 
@@ -528,10 +525,11 @@ class HImportBase{
     }
 
     /**
-     * Match the column headers from the CSV data to the mappable columns
-     *  Function should be extended by child classes
+     * Match the column headers from the CSV data to the mappable columns.
+     * Function should be extended by child classes for specific entity mappings.
      *
-     * @param {array} headers - Column headers from data
+     * @param {string[]} [headers=[]] - Column headers from data.
+     * @return {void}
      */
     matchColumns(headers = []){
 
@@ -560,11 +558,11 @@ class HImportBase{
     }
 
     /**
-     * Adds results from success import to data table
+     * Adds results from success import to data table.
      *
-     * @param {json} response - Response from server, includes: 
-     *                          data - details about imported definitions
-     *                          refresh - which entities cache needs to be updated, both server and client side
+     * @param {Object} response - Response from server. Expected to have `response.data` (details about imported definitions)
+     *                            and `response.refresh` (which entities cache needs to be updated).
+     * @return {void}
      */
     handleResults(response){
 
@@ -612,10 +610,11 @@ class HImportBase{
     }
 
     /**
-     * Creates the necessary definition group select, for base fields and record types
-     *  Vocabularies/Terms currently only allow additions to the provided vocabulary group/parent term
+     * Creates the necessary definition group select, for base fields and record types.
+     * Vocabularies/Terms currently only allow additions to the provided vocabulary group/parent term.
      *
-     * @param {integer} def_ID - Default value for group select
+     * @param {number} def_ID - Default value for group select.
+     * @return {void}
      */
     setupGroupSelector(def_ID){
 
@@ -669,9 +668,10 @@ class HImportBase{
     }
 
     /**
-     * Sets up the column roles dropdowns, used to map the CSV columns to imported fields
+     * Sets up the column roles dropdowns, used to map the CSV columns to imported fields.
      *
-     * @param {array} headers - Array of column headers
+     * @param {string[]} headers - Array of column header strings.
+     * @return {void}
      */
     setupColumnRoles(headers){
 
@@ -686,12 +686,12 @@ class HImportBase{
     }
 
     /**
-     * Display Heurist error message popup
+     * Display Heurist error message popup.
      *
-     * @param {string|json} type - Heurist error status, needs to fit window.hWin.ResponseStatus otherwise unknown is used
-     *                              If type is a JSON object, assume it is an error sent from the server
-     * @param {string} message - Error message
-     * @param {string} title - Error title
+     * @param {string|Object} type - Heurist error status string (e.g., 'UNKNOWN_ERROR'), or an error Object from the server.
+     * @param {string} [message] - Error message (used if type is a string).
+     * @param {string} [title] - Error title (used if type is a string).
+     * @return {void}
      */
     showError(type, message, title){
 
@@ -710,10 +710,11 @@ class HImportBase{
     }
 
     /**
-     * Update the prepared info elements with messages and to-be imported record count
+     * Update the prepared info elements with messages and to-be imported record count.
      *
-     * @param {string} primary_msg - content to place in #preparedInfo
-     * @param {string} count - record count to be placed in prepared info 2
+     * @param {string} primary_msg - HTML content to place in the '#preparedInfo' element.
+     * @param {number} [count=0] - Record count to be placed in the '#preparedInfo2' element.
+     * @return {void}
      */
     updatePreparedInfo(primary_msg, count = 0){
 

@@ -1,24 +1,19 @@
 <?php
-
 /**
-*   Sync Heurist database with zotero group or user items
-*   zotero API key in sys_SyncDefsWithDB/HEURIST_ZOTEROSYNC and mapping are specified in zoteroMap.xml
-*
+* syncZotero.php - Handles synchronization with Zotero (zotero.org)
+* 
+* Sync Heurist database with zotero group or user items
+* Set zotero API key in sys_SyncDefsWithDB/HEURIST_ZOTEROSYNC 
+* Mapping is specified in zoteroMap.xml
+* 
 * @package     Heurist academic knowledge management system
+* @subpackage  import\biblio
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.2
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @since       3.2
 */
 use hserv\structure\ConceptCode;
 use hserv\utilities\Temporal;
@@ -899,6 +894,12 @@ if($step=="1"){  //first step - info about current status
 
 }
 
+/**
+ * Compose an HTML link to a Heurist search query for the given IDs.
+ *
+ * @param int[] $ids An array of Heurist record IDs.
+ * @return string An HTML link, or '0' if the array is empty.
+ */
 function composeLinkForAllIds($ids){
     if(empty($ids)){
         return '0';
@@ -911,11 +912,14 @@ function composeLinkForAllIds($ids){
 }
 
 /**
-* add mapping for given zotero type
-*
-* @param mixed $arr - attributes
-* @param mixed $zType - zotero type
-*/
+ * Add mapping for a given Zotero type.
+ *
+ * @param SimpleXMLElement $arr Attributes of the Zotero field.
+ * @param string $zType Zotero type.
+ * @param int $rt_id Heurist record type ID.
+ * @param string $org_rt_id Original Zotero record type ID (code).
+ * @return void
+ */
 function addMapping($arr, $zType, $rt_id, $org_rt_id)
 {
 
@@ -963,6 +967,15 @@ function addMapping($arr, $zType, $rt_id, $org_rt_id)
 //
 //
 //
+/**
+ * Print mapping report for a Zotero record type.
+ * Outputs HTML table rows to global report arrays.
+ *
+ * @param SimpleXMLElement|string $arr Input attributes or code string.
+ *                                     If object, expected to have 'zType' and H_ID attributes.
+ * @param int|null $rt_id Heurist record type ID, or null if not found.
+ * @return void
+ */
 function printMappingReport_rt($arr, $rt_id){
     global $rectypes, $is_verbose, $mapping_errors, $successful_rows, $warning_count;
 
@@ -996,6 +1009,22 @@ function printMappingReport_rt($arr, $rt_id){
 //
 //
 //
+/**
+ * Print mapping report for a Zotero detail type (field).
+ * Outputs HTML table rows to global report arrays.
+ *
+ * @param SimpleXMLElement|array|string $arr Input attributes, array, or code string.
+ *                                           If object, expected to have 'value' and H_ID attributes.
+ *                                           If array, specific indices are used.
+ * @param int $rt_id Heurist record type ID.
+ * @param int|null $dt_id Heurist detail type ID, or null if not found/mapped.
+ * @param array|null $extra_info Additional information for reporting. Expected structure:
+ *                                 [0] => Zotero record type ID (string)
+ *                                 [1] => Zotero record type name (string)
+ *                                 [2] => Zotero field ID (string)
+ *                                 [3] => Zotero field name (string)
+ * @return void
+ */
 function printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info){
     global $rectypes, $is_verbose, $mapping_errors, $transfer_errors, $successful_rows, $warning_count;
 
@@ -1070,9 +1099,24 @@ function printMappingReport_dt($arr, $rt_id, $dt_id, $extra_info){
     }
 }
 
-/*
-* parse resource mapping (recursive)
-*/
+/**
+ * Recursively parse a Zotero resource mapping string (dot-separated codes).
+ * Determines the Heurist detail type ID, resource record type ID, and further nested mappings.
+ *
+ * @param string $dt_code The dot-separated Zotero mapping code string (e.g., "ZA.ZB.ZC").
+ * @param int $rt_id The current Heurist record type ID context.
+ * @param SimpleXMLElement|array|string|null $arr Optional attributes or code string for reporting.
+ *                                              Passed to printMappingReport_dt.
+ * @param array|null $extra_info Optional extra information for reporting. Expected structure:
+ *                                [0] => Zotero record type ID (string)
+ *                                [1] => Zotero record type name (string)
+ *                                [2] => Zotero field ID (string)
+ *                                [3] => Zotero field name (string)
+ *                                Passed to printMappingReport_dt and recursive calls.
+ * @return array|string An array representing the parsed mapping (e.g., [dt_id, res_rt_id, res_dt_id]
+ *                      or [dt_id, res_rt_id, [nested_mapping]]) if successful,
+ *                      or an error message string if parsing fails at any point.
+ */
 function getResourceMapping($dt_code, $rt_id, $arr=null, $extra_info=null){
 
     $arrdt = explode(".",$dt_code);
@@ -1129,12 +1173,19 @@ function getResourceMapping($dt_code, $rt_id, $arr=null, $extra_info=null){
 }
 
 /**
-* add to list of resource record pointers
-*
-* @param mixed $unresolved
-* @param mixed $key
-* @param mixed $value
-*/
+ * Add a value to a multi-dimensional array of unresolved resource record pointers.
+ * This function is called recursively to handle nested pointer structures.
+ * The $unresolved array is modified by reference.
+ *
+ * @param array &$unresolved The array storing unresolved pointers. Modified by reference.
+ *                           Structure: $unresolved[detail_id][resource_rt_id][resource_dt_id] = value
+ *                           or $unresolved[detail_id][resource_rt_id][] = value (for creators)
+ * @param array $key An array defining the path to store the value.
+ *                   Expected structure: [$detail_id, $resource_rt_id, $resource_dt_id_or_nested_key]
+ *                   If $key[2] is an array, it triggers a recursive call.
+ * @param mixed $value The value to assign (e.g., a string, or an array of creator details).
+ * @return void
+ */
 function assignUnresolvedPointer(&$unresolved, $key, $value){
 
     $detail_id      = $key[0];
@@ -1161,14 +1212,21 @@ function assignUnresolvedPointer(&$unresolved, $key, $value){
 }
 
 /**
-* try to find resource record, create it if not found
-*
-* @param mixed $record_type - recordtype for resource
-* @param mixed $recdetails - array of dt_id=>value
-* @param integer $missing_pointers_count - count of unresolved pointers (to avoid spamming emails)
-*
-* returns array of resource record ID
-*/
+ * Try to find an existing resource record based on its details, or create a new one if not found.
+ * This function can be called recursively, especially when $recdetails represents multiple creators
+ * or when a detail itself is a resource requiring its own record.
+ *
+ * @param mysqli $mysqli The mysqli database connection object.
+ * @param int $record_type The Heurist record type ID for the resource record.
+ * @param array $recdetails An array of details for the resource record.
+ *                          Format: [detail_type_id => value, ...].
+ *                          If $recdetails is a numerically indexed array (e.g., for creators),
+ *                          the function calls itself for each item.
+ * @param int $missing_pointers_count Count of unresolved pointers, used to modulate email notifications
+ *                                    in addRecordFromZotero.
+ * @return int|int[] The ID of the found/created resource record. If $recdetails represented
+ *                   multiple creators, an array of their corresponding record IDs is returned.
+ */
 function createResourceRecord($mysqli, $record_type, $recdetails, $missing_pointers_count){
 
     global $alldettypes, $fi_dettype, $report_log;
@@ -1286,12 +1344,14 @@ function createResourceRecord($mysqli, $record_type, $recdetails, $missing_point
 }
 
 /**
-* find xml element
-*
-* @param mixed $xml
-* @param mixed $ns
-* @param mixed $name
-*/
+ * Find a specific XML element within a SimpleXMLElement object, possibly within a given namespace.
+ * This function searches recursively through child elements.
+ *
+ * @param SimpleXMLElement $xml The SimpleXMLElement object to search within.
+ * @param string|null $ns The XML namespace to search in. Null or empty if no namespace.
+ * @param string $name The name of the XML element to find.
+ * @return SimpleXMLElement|null The found SimpleXMLElement object, or null if the element is not found.
+ */
 function findXMLelement($xml, $ns, $name){
 
     if($ns){
@@ -1316,11 +1376,15 @@ function findXMLelement($xml, $ns, $name){
 }
 
 /**
-* term value to id
-*
-* @param mixed $dt_type
-* @param mixed $value
-*/
+ * Resolve a term label to its corresponding term ID based on the detail type.
+ * It performs a case-insensitive 'starts-with' match for the term label.
+ *
+ * @param string $dt_type The detail type context, typically 'enum' or 'relation',
+ *                        to determine the domain of terms to search within.
+ * @param string $value The term label (string value) to resolve.
+ * @return int|string|null The ID of the resolved term if found; otherwise, null.
+ *                         Term IDs can be integers (common) or strings.
+ */
 function resolveTermValue($dt_type, $value)
 {
     global $allterms, $fi_trmlabel;
@@ -1337,10 +1401,12 @@ function resolveTermValue($dt_type, $value)
 }
 
 /**
-* get record type for resource (record pointer) detail type
-*
-* @param mixed $resource_dt_id
-*/
+ * Get the primary constrained record type ID for a resource (record pointer) detail type.
+ * If multiple record types are constrained, it returns the first one.
+ *
+ * @param int|string $resource_dt_id The detail type ID of the resource pointer.
+ * @return string|null The constrained record type ID (as a string), or null if not set or not found.
+ */
 function getConstrainedRecordType($resource_dt_id){
 
     global $alldettypes, $fi_constraint;
@@ -1355,16 +1421,20 @@ function getConstrainedRecordType($resource_dt_id){
 
 
 /**
-* saves record in heurist DB
-*
-* @param mixed $recId
-* @param mixed $recordType
-* @param mixed $rec_URL
-* @param mixed $details
-* @param mixed $zotero_itemid
-* @param mixed $is_echo
-* @param int $record_count - prevent spamming emails about record creation
-*/
+ * Saves a record (creates or updates) in the Heurist database based on Zotero item data.
+ *
+ * @param int|null $recId The Heurist record ID to update. If null or 0, a new record is created.
+ * @param int $recordType The Heurist record type ID for the record.
+ * @param string|null $rec_URL Optional URL to associate with the Heurist record.
+ * @param array $details An array of details for the record, keyed by "t:<detail_type_id>".
+ *                       This array may be modified to include the Zotero item ID.
+ * @param string|null $zotero_itemid The Zotero item ID, to be stored in DT_ORIGINAL_RECORD_ID.
+ * @param bool $is_echo If true, progress messages (Added/Updated ID) are printed.
+ * @param int $record_count The total number of records being processed in the current batch,
+ *                          passed to recordSave to potentially modulate email notifications.
+ * @return int The Heurist record ID of the created or updated record. Returns 0 if the input
+ *             $details array is empty or if $new_recid remains null after save attempt.
+ */
 function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, $is_echo, $record_count){
 
     global $system, $rep_errors_only, $dt_SourceRecordID;
@@ -1414,7 +1484,14 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
     return intval($new_recid);
 }
 
-//isNullOrEmptyString
+/**
+ * Checks if a variable is null or an empty string (after trimming whitespace).
+ * Inspired by a function often named isNullOrEmptyString.
+ *
+ * @param mixed $question The variable to check. Intended primarily for strings or null.
+ *                        Behavior with other types might vary (e.g., trim() warning).
+ * @return bool True if the variable is null, or an empty or whitespace-only string; false otherwise.
+ */
 function is_empty($question){
     $ret = (!isset($question) || trim($question)==='');
     return $ret;

@@ -1,38 +1,17 @@
 <?php
-
-/*
-* Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* https://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
 /**
-*  Load rectype names and groups into object - need for selectors on bookmarklet popup
+* getRectypesAsJSON.php - Loads record type names and groups into a JavaScript object for use in the bookmarklet popup.
 *
+* @package     Heurist academic knowledge management system
+* @subpackage  import\bookmarklet
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       3.1
 */
-
-
-/* load some very basic HEURIST objects into top.HEURIST */
-
 require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/structure/search/dbsData.php';
 
