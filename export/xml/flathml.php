@@ -1,27 +1,22 @@
 <?php
-
 /**
-* flathml.php:  flattened version of HML - records are not generated redundantly but are indicated by references within other records.
-*               $hunifile indicates special one-file-per-record + manifest file for HuNI (huni.net.au)
-*               $output_file - file handler to write output, it allows to avoid memory overflow for large databases
+* flathml.php - Export Heurist records to HML (XML) format
+* 
+* Flattened version of HML - records are not generated redundantly but are indicated by references within other records.
+* $hunifile indicates special one-file-per-record + manifest file for HuNI (huni.net.au)
+* $output_file - file handler to write output, it allows to avoid memory overflow for large databases
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  export\xml
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Kim Jackson
 * @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.1.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @since       3.1.0
+* 
 */
 
 /*

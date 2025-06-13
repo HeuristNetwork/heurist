@@ -1,27 +1,20 @@
 /**
- * editReportSchedule.js
- * Provides client-side logic for a pop-up form to edit or create report schedules.
- * This script interacts with the `loadReports.php` AJAX endpoint to fetch and save schedule data.
- * It is typically utilized as a pop-up from a manage reports interface.
- *
- * Relies on jQuery, jQuery UI, and Heurist specific JavaScript objects (e.g., `window.hWin.HEURIST4`).
- *
- * @package     HeuristWebApp
- * @subpackage  AdminUI
- * @link        https://HeuristNetwork.org
- * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network Ltd.
- * @author      Artem Osmakov   <osmakov@gmail.com>
- * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
- * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
- * @version     5
- */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* editReportSchedule.js - form to edit or create report schedules
+* 
+* Provides client-side logic for a pop-up form to edit or create report schedules.
+* This script interacts with the `loadReports.php` AJAX endpoint to fetch and save schedule data.
+* It is typically utilized as a pop-up from a manage reports interface.
+*
+* Relies on jQuery, jQuery UI, and Heurist specific JavaScript objects (e.g., `window.hWin.HEURIST4`).
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  export\publish
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.26
 */
 
 /**
@@ -30,9 +23,6 @@
  * This is typically instantiated when the pop-up dialog is shown.
  *
  * @constructor
- * @author Artem Osmakov <osmakov@gmail.com>
- * @version 2011.0427 // REMARK: Original version, consider updating if significant changes are made.
- *
  * @returns {object} An object with public methods `save`, `cancel`, `getClass`, and `isA`.
  */
 function ReportScheduleEditor() {
@@ -67,7 +57,7 @@ function ReportScheduleEditor() {
 
         // Get record ID from URL parameters.
         _recID = window.hWin.HEURIST4.util.getUrlParameter('recID', location.search);
-        if (!(Number(_recID) > 0)) { // REMARK: Corrected logic slightly for clarity. Original: !Number(_recID)>0
+        if (!window.hWin.HEURIST4.util.isPositiveInt(_recID)) {
             _recID = 0; // Treat as new if ID is invalid or not provided.
         }
             
@@ -117,9 +107,9 @@ function ReportScheduleEditor() {
         }
 
         // Try to get the entity being edited.
-        _entity = (_recID > 0 && _reports && _reports.records && _reports.records[_recID]) ? _reports.records[_recID] : null;
+        _entity = (_recID > 0 && _reports?.records?._recID) ? _reports.records[_recID] : null;
 
-        if (Number(_recID > 0) && window.hWin.HEURIST4.util.isnull(_entity)) {
+        if (Number(_recID) > 0 && window.hWin.HEURIST4.util.isnull(_entity)) {
             document.getElementById("statusMsg").innerHTML = "<strong>Error: Report Schedule #" + _recID + "  was not found. Clicking 'save' button will create a new Schedule.</strong><br><br>";
         }
         
@@ -133,8 +123,9 @@ function ReportScheduleEditor() {
         // Auto-fill FileName based on Title (cleaned for filenames).
         document.getElementById('rps_Title').onchange = function(event) {
             document.getElementById('rps_FileName').value = window.hWin.HEURIST4.ui.cleanFilename(event.target.value);
+            _updateTemplatesList(); // Populate template dropdown.
         };
-
+        
         _updateTemplatesList(); // Populate template dropdown.
         _fromArrayToUI();     // Populate form fields from _entity data.
     }
@@ -175,7 +166,7 @@ function ReportScheduleEditor() {
             let fname = fnames[i];
             let el = document.getElementById(fname);
             if (!window.hWin.HEURIST4.util.isnull(el)) {
-                el.value = (_entity && _entity[i] !== null && _entity[i] !== undefined) ? _entity[i] : ''; // Ensure null/undefined are empty strings
+                el.value = (_entity && !window.hWin.HEURIST4.util.isnull(_entity[i])) ?_entity[i] :''; // Ensure null/undefined are empty strings
             }
         }
 
@@ -232,7 +223,7 @@ function ReportScheduleEditor() {
             // Check if field value has changed from original _entity value.
             // Handles new records (_recID < 0) by including all fields.
             // Handles null vs empty string comparison.
-            const originalValue = (_entity && _entity[i] !== null && _entity[i] !== undefined) ? String(_entity[i]) : "";
+            const originalValue = (_entity && !window.hWin.HEURIST4.util.isnull(_entity[i])) ? String(_entity[i]) : '';
             const currentValue = el.value;
 
             if (_recID < 0 || (currentValue !== originalValue && !(currentValue === "" && originalValue === ""))) {
@@ -249,7 +240,7 @@ function ReportScheduleEditor() {
                 if (isShowWarn) {
                     alert(fname.substr(4) + " is a mandatory field"); // Show user-friendly field name.
                 }
-                if (el.focus) el.focus(); // el.dispatchEvent(new Event('focus')) might be better for modern usage.
+                el.dispatchEvent(new Event('focus'));
                 _updatedFields = []; // Clear updated fields as validation failed.
                 return "mandatory";
             }
@@ -272,8 +263,7 @@ function ReportScheduleEditor() {
         }
         
         let error = false;
-        // let report = ""; // REMARK: `report` variable was previously assembled but not used. Removed.
-        // let ind; // REMARK: `ind` is not needed if using for...of or forEach. Kept for now to match original structure.
+        // let report = ''; // REMARK: `report` variable was previously assembled but not used. Removed.
 
         for (let ind in response.data) { // Iterate over results for potentially multiple saves (though UI implies one).
             if (!window.hWin.HEURIST4.util.isnull(ind)) {
@@ -303,50 +293,40 @@ function ReportScheduleEditor() {
      * @private
      */
     function _updateOnServer() {
-        // First, gather and validate data from UI.
-        if (_fromUItoArray(true) === "mandatory") { // Show warnings for mandatory fields.
-            return; // Stop if validation fails.
+        //1. gather changed data
+        if(_fromUItoArray(true)==="mandatory"){ //save all changes
+            return;
         }
 
-        // If there are changes or it's a new record, prepare data for server.
-        if (_recID < 0 || (_updatedFields.length > 0)) { // Always send if new, or if fields updated for existing
-            let oDataToServer = {
-                report: {
-                    colNames: [],
-                    defs: {}
-                }
-            };
+        let str = null;
 
-            // If it's a new record and no fields were explicitly changed (e.g., all defaults accepted),
-            // then populate _updatedFields and _updatedDetails with all fields to ensure they are sent.
-            if (_recID < 0 && _updatedFields.length === 0 && _reports && _reports.fieldNames) {
-                 let fnames = _reports.fieldNames;
-                 for(let i = 0, l = fnames.length; i < l; i++) {
-                     let fname = fnames[i];
-                     let el = document.getElementById(fname);
-                     if (window.hWin.HEURIST4.util.isnull(el) || fname === 'rps_ID') continue;
-                     _updatedFields.push(fname);
-                     _updatedDetails.push(el.value);
-                 }
-            }
+        //2. creates object to be sent to server
+        if(_recID !== null && _updatedFields.length > 0){
+            
+            let oDataToServer = {report:{
+                colNames:[],
+                defs: {}
+            }};
 
-            if (_updatedFields.length === 0) { // No actual changes to send for an existing record.
-                 window.close(null); // Just close.
-                 return;
+            let values = [];
+            for(let k = 0; k < _updatedFields.length; k++) {
+                oDataToServer.report.colNames.push(_updatedFields[k]);
+                values.push(_updatedDetails[k]);
             }
 
 
-            oDataToServer.report.colNames = _updatedFields;
-            oDataToServer.report.defs[(_recID < 0) ? -1 : _recID] = _updatedDetails; // Use -1 for new records, actual ID for updates
-
-            // Send AJAX request to save data.
+            oDataToServer.report.defs[_recID] = [];
+            for(let val in values) {
+                oDataToServer.report.defs[_recID].push(values[val]);
+            }
+            // 3. sends data to server
             let baseurl = window.hWin.HAPI4.baseURL + "export/publish/loadReports.php";
-            let request = { method: 'savereport', data: oDataToServer };
-            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, _updateResult);
+            let callback = _updateResult;
+            let request = {method:'savereport', data:oDataToServer};
+            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, callback);
         } else {
-            // No changes were made to an existing record.
-            window.close(null); // Simply close the window.
-        }
+            window.close(null);
+        }        
     }
 
     // --- Public Methods ---

@@ -1,50 +1,41 @@
 <?php
-
-<?php
-
 /**
- * loadReports.php: AJAX endpoint for managing scheduled reports.
- *
- * This script handles CRUD-like operations for records in the `usrReportSchedule` database table.
- * It expects a 'method' parameter in the request to determine the action to perform.
- * Supported methods:
- *  - 'searchreports': Searches for scheduled reports based on provided criteria (name).
- *  - 'getreport': Retrieves a specific scheduled report by its ID.
- *  - 'savereport': Saves (inserts or updates) one or more scheduled report records.
- *  - 'deletereport': Deletes a specific scheduled report by its ID.
- *
- * All responses are in JSON format. Access to this script requires the user to be logged in.
- *
- * @package     HeuristWebService
- * @subpackage  AJAX
- * @link        https://HeuristNetwork.org
- * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards HeuristNetwork Ltd.
- * @author      Artem Osmakov   <osmakov@gmail.com>
- * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
- * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
- * @version     5
- *
- * @global array $sys_usrReportSchedule_ColumnNames Maps column names from `usrReportSchedule` table to their data types (i, s, etc.) for prepared statements.
- *
- * @uses $_REQUEST['db'] Database name for system initialization.
- * @uses $_REQUEST['method'] The operation to perform (e.g., 'searchreports', 'getreport').
- * @uses $_REQUEST['recID'] Record ID, used by 'getreport', 'savereport' (for update), 'deletereport'.
- * @uses $_REQUEST['name'] Name to search for, used by 'searchreports'.
- * @uses $_REQUEST['usrID'] User ID (currently noted as @todo), potentially for 'searchreports'.
- * @uses $_REQUEST['data'] Data payload for 'savereport', expected to be an array with 'report' -> 'colNames' and 'defs'.
- * @uses isEmptyArray() Utility function to check if an array is empty.
- * @uses mysql__select_value() Heurist utility function for selecting a single value.
- * @uses mysql__exec_param_query() Heurist utility function for executing parameterized queries.
- */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* loadReports.php: AJAX endpoint for managing scheduled reports.
+*
+* This script handles CRUD-like operations for records in the `usrReportSchedule` database table.
+* It expects a 'method' parameter in the request to determine the action to perform.
+* 
+* Supported methods:
+*  - 'searchreports': Searches for scheduled reports based on provided criteria (name).
+*  - 'getreport': Retrieves a specific scheduled report by its ID.
+*  - 'savereport': Saves (inserts or updates) one or more scheduled report records.
+*  - 'deletereport': Deletes a specific scheduled report by its ID.
+*
+* All responses are in JSON format. Access to this script requires the user to be logged in.
+* 
+* @todo use entity\DbUsrReportSchedule
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  export\publish
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.27
+*
+* @global array $sys_usrReportSchedule_ColumnNames Maps column names from `usrReportSchedule` table to their data types (i, s, etc.) for prepared statements.
+*
+* @uses $_REQUEST['db'] Database name for system initialization.
+* @uses $_REQUEST['method'] The operation to perform (e.g., 'searchreports', 'getreport').
+* @uses $_REQUEST['recID'] Record ID, used by 'getreport', 'savereport' (for update), 'deletereport'.
+* @uses $_REQUEST['name'] Name to search for, used by 'searchreports'.
+* @uses $_REQUEST['usrID'] User ID (currently noted as @todo), potentially for 'searchreports'.
+* @uses $_REQUEST['data'] Data payload for 'savereport', expected to be an array with 'report' -> 'colNames' and 'defs'.
+* @uses isEmptyArray() Utility function to check if an array is empty.
+* @uses mysql__select_value() Heurist utility function for selecting a single value.
+* @uses mysql__exec_param_query() Heurist utility function for executing parameterized queries.
 */
-
 require_once dirname(__FILE__).'/../../autoload.php';
 
 // Initialize Heurist system
@@ -89,7 +80,7 @@ if ($method == "searchreports") {
     // Expects optional 'name' parameter for filtering by title.
     // $f_id = @$_REQUEST['recID']; // REMARK: $f_id is declared but not used.
     $f_name = $mysqli->real_escape_string(filter_var(@$_REQUEST['name'], FILTER_SANITIZE_STRING));
-    // $f_userid = @$_REQUEST['usrID']; // REMARK: @todo as per original, $f_userid not currently used in query.
+    // $f_userid = @$_REQUEST['usrID']; // not currently used in query.
 
     $records = array();
     // Base query to select all report schedule entries
@@ -127,9 +118,9 @@ if ($method == "searchreports") {
     $records['fieldNames'] = $colNames;
     $records['records'] = array(); // Data will be keyed by rps_ID
 
-    $query = "SELECT ".implode(",", $colNames)." FROM usrReportSchedule "; // REMARK: Corrected join to implode
+    $query = "SELECT ".implode(",", $colNames)." FROM usrReportSchedule ";
 
-    if (intval($recID) > 0) { // Fetch specific record if recID is valid
+    if (isPositiveInt($recID)) { // Fetch specific record if recID is valid
         $query .= " WHERE rps_ID=".intval($recID);
         $res = $mysqli->query($query);
         if ($res) {
@@ -152,8 +143,8 @@ if ($method == "searchreports") {
     $data  = @$_REQUEST['data'];
 
     // Validate incoming data structure
-    if (!is_array($data) || // REMARK: Added is_array check for $data itself
-        !array_key_exists('report', $data) || !is_array($data['report']) || // REMARK: Added is_array for $data['report']
+    if (!is_array($data) ||
+        !array_key_exists('report', $data) || !is_array($data['report']) ||
         !array_key_exists('colNames', $data['report']) ||
         !array_key_exists('defs', $data['report'])) {
           $system->errorExit('Invalid data structure sent with savereport method call to loadReports.php');
@@ -174,12 +165,11 @@ if ($method == "searchreports") {
     // Expects 'recID' parameter.
     $recID  = @$_REQUEST['recID'];
     $result_data = array();
-    if (!(intval($recID) > 0)) { // REMARK: Ensured recID is treated as int for validation
+    if (!isPositiveInt($recID)) {
           $system->errorExit('Invalid or missing recID sent with deletereport method call to loadReports.php');
     } else {
         $result_data = deleteReportSchedule($mysqli, intval($recID));
         if (@$result_data['error']) {
-            // REMARK: Using $system->errorExit for consistency in error reporting
             $system->errorExit($result_data['error'], HEURIST_ERROR);
         } else {
             $response = array("status" => HEURIST_OK, "data" => $result_data['result']);
@@ -251,7 +241,6 @@ exit; // Ensure script terminates after handling the request.
     /**
      * Deletes a report schedule entry from the `usrReportSchedule` table.
      *
-     * @author Artem Osmakov
      * @param mysqli $mysqli The mysqli database connection object.
      * @param int $recID The ID of the report schedule record to delete.
      * @return array An associative array: `['result' => $recID]` on success, or `['error' => 'Error message']` on failure.
@@ -291,7 +280,6 @@ exit; // Ensure script terminates after handling the request.
         global $sys_usrReportSchedule_ColumnNames;
         $ret = null;
 
-        // REMARK: isEmptyArray is used but not defined in this script. Assuming it's a global utility.
         if (!isEmptyArray($colNames) && is_array($values)) {
             $isInsert = ($recID < 0);
             $query_parts = array(); // To build "col = ?" parts for UPDATE or "?" for INSERT
