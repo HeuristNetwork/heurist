@@ -1,11 +1,12 @@
 <?php
 /**
-* synchroniseWithFieldHelper.php - Indexes (imports, updates) files in given folder with Heurist records
+* synchroniseWithFieldHelper.php - Indexes files in given folders and imports, updates Heurist records
 * 
-* Reads the file descriptive XML manifests in directories specified in Advanced Properties,
-* and creates Heurist records for indexed files. If there is no manifest, it creates one.
-* The list of extensions indexed can also be specified in Advanced Properties, otherwise
-* it indexes a range of common file types including most text, image, audio and video formats
+* It performs the following actions:
+*   - Reads existing manifests and updates or creates Heurist records for the files listed.
+*   - If a manifest doesn't exist, it can create one.
+*   - Indexes new files found in the directories that are not yet in a manifest, creating Heurist records and adding them to the manifest.
+*   - Supports a range of common file types (text, image, audio, video) and allows for custom-defined extensions.
 * 
 * @package     Heurist academic knowledge management system
 * @subpackage  import\fieldhelper

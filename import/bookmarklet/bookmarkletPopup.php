@@ -1,6 +1,8 @@
 <?php
 /**
-* bookmarkletPopup.php - Defines the popup which is inserted when the bookmarklet is activated
+* bookmarkletPopup.php - Defines the popup that appears when the bookmarklet is activated
+* 
+*  Defines the HTML and JavaScript for the popup window that appears when the bookmarklet is activated. This script handles user interaction within the popup.
 *
 * @package     Heurist academic knowledge management system
 * @subpackage  import\bookmarklet
