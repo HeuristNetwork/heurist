@@ -1,55 +1,80 @@
 <?php
-
-/*
-* Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* https://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
 /**
+* kml.php  - Export Heurist record to kml
+* 
 * Returns kml for given record id. It searches detail with type 221 or 551
 *
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @package     Heurist academic knowledge management system
-* @subpackage  Export/xml
-* @todo - only one kml per record, perhaps need to return the combination of kml
+* @subpackage  export\xml
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       3.1.0
+* 
+* @todo        Only one KML per record is currently handled; consider returning a combination if multiple KML sources exist for a record.
+* @todo        Review and potentially replace `mysql__select_row` and `mysql__select_value` with more modern equivalents if available in Heurist core.
+*
+* @uses $_REQUEST['db'] Database name for system initialization.
+* @uses $_REQUEST['id'] Record ID for fetching a single KML (either an uploaded KML file or a KML snippet).
+* @uses $_REQUEST['q'] Query string for fetching a list of records to convert to KML placemarks or network links.
+* @uses $_REQUEST['file'] If `1`, sets Content-Disposition to download the KML file.
+* @uses $_REQUEST['limit'] Limits the number of records processed in list mode.
+* @uses geoPHP For converting WKT geometry to KML.
+* @uses hserv\System For Heurist system initialization and database access.
+* @uses hserv\utilities\USanitize For path sanitization.
+* @uses hserv\utilities\Temporal For handling date/time to KML TimeSpan/TimeStamp.
+* @uses recordSearch() For fetching record IDs based on a query.
+*
+* @const KML_CLOSE Defines the closing tags for a KML document.
+* @const XML_HEADER Defines the XML declaration header (expected Heurist constant).
+* @const HEURIST_SCRATCHSPACE_DIR Path to the scratch space for temporary files.
+* @const HEURIST_BASE_URL Base URL of the Heurist instance.
+* @const DT_FILE_RESOURCE Detail Type ID for generic file resources.
+* @const DT_KML_FILE Detail Type ID for uploaded KML files.
+* @const DT_KML Detail Type ID for KML snippets stored directly in details.
+* @const DT_DATE Detail Type ID for simple date fields.
+* @const DT_START_DATE Detail Type ID for start date fields (for time spans).
+* @const DT_END_DATE Detail Type ID for end date fields (for time spans).
 */
 use hserv\utilities\USanitize;
 use hserv\utilities\Temporal;
 
-
+// Required Heurist files
 require_once dirname(__FILE__).'/../../autoload.php';
-require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
-require_once dirname(__FILE__).'/../../vendor/autoload.php';//for geoPHP
+require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php'; // For recordSearch()
+require_once dirname(__FILE__).'/../../vendor/autoload.php'; // For geoPHP library
 
+// Initialize Heurist system
 $system = new hserv\System();
-if( !$system->init(@$_REQUEST['db']) ){
-    die("Cannot connect to database");
+if (!$system->init(@$_REQUEST['db'])) {
+    header("HTTP/1.1 404 Not found");
+    echo "Error: Cannot connect to database.";
+    error_log("kml.php: Cannot connect to database specified by 'db' parameter: " . @$_REQUEST['db']);
+    exit;
 }
 
-define('KML_CLOSE','</Document></kml>');
+/**
+ * Defines the closing tags for a KML document.
+ * @var string
+ */
+define('KML_CLOSE', '</Document></kml>');
 
+// Determine if the script should output a list of placemarks/network links based on a query,
+// or a single KML content.
 $islist = array_key_exists("q", $_REQUEST);
 
-if(@$_REQUEST['file']==1 || @$_REQUEST['file']===true){
-header("Cache-Control: public");
-header("Content-Description: File Transfer");
-header("Content-Disposition: attachment; filename=\"export.kml\"");
+// Set HTTP headers for KML output
+if (@$_REQUEST['file'] == 1 || @$_REQUEST['file'] === true) { // Suggest filename for download if 'file=1'
+    header("Cache-Control: public");
+    header("Content-Description: File Transfer");
+    header("Content-Disposition: attachment; filename=\"heurist_export.kml\""); // Generic filename
 }
-header("Content-Type: text/xml; charset=utf-8");
+header("Content-Type: application/vnd.google-earth.kml+xml; charset=utf-8"); // Correct KML MIME type
 
+// Define Detail Type ID constants for geographic and date fields.
+// These rely on constants being defined in Heurist's core (via $system->defineConstant).
 $dtFile = ($system->defineConstant('DT_FILE_RESOURCE')?DT_FILE_RESOURCE:0);
 $dtKMLfile = ($system->defineConstant('DT_KML_FILE')?DT_KML_FILE:0);
 $dtKML = ($system->defineConstant('DT_KML')?DT_KML:0);
@@ -267,10 +292,15 @@ fwrite($kml_file_stream, KML_CLOSE);
 fclose($kml_file_stream);
 print file_get_contents($kml_file);
 
-
-//
-//
-//
+/**
+ * Composes a SQL query string.
+ *
+ * @param string $select The SELECT part of the query.
+ * @param string $from The FROM part of the query, including initial JOINs.
+ * @param int|list<int> $rec_ids A single record ID or an array of record IDs to filter by `rec_ID`.
+ * @param string $where Additional WHERE clause conditions to append.
+ * @return string The fully composed SQL query string.
+ */
 function _composeQuery($select,$from,$rec_ids,$where){
 
    if(is_array($rec_ids)){
@@ -283,4 +313,3 @@ function _composeQuery($select,$from,$rec_ids,$where){
 
    return $squery;
 }
-?>
