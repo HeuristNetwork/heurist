@@ -1946,8 +1946,9 @@ function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDet
  */
 function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=false, $ids_only=false){
 
-    $menuitems_prepared = prepareIds($menuitems, true); // Ensure $menuitems is an array of unique positive integers
+    $menuitems = prepareIds($menuitems, true); // Ensure $menuitems is an array of unique positive integers
     $isRoot = (empty($result)); // Is this the initial call?
+    
     if($isRoot && $find_root_menu){
 
         //if root record is menu - we have to find parent cms home
