@@ -1,35 +1,21 @@
-/*
-* Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* https://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
+/**
+* importHyperlinks.js
+* 
+* Provides client-side JavaScript functions for the hyperlink import functionality, including UI interactions and data handling.
+* 
+* @package     Heurist academic knowledge management system
+* @subpackage  import\hyperlinks
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Stephen White
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       3.1.0
 */
 
-/**
- * Provides client-side JavaScript functions for the hyperlink import functionality, including UI interactions and data handling.
- *
- * @author      Tom Murtagh
- * @author      Kim Jackson
- * @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
- * @author      Stephen White
- * @author      Artem Osmakov   <osmakov@gmail.com>
- * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
- * @link        https://HeuristNetwork.org
- * @version     3.1.0
- * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
- * @package     Heurist academic knowledge management system
- */
-
-//
-//
-//
 /**
  * Highlights the selected radio button option when disambiguating existing links.
  * @param {number} linkno - The identifier for the link group.
@@ -45,9 +31,6 @@
 	}
 }
 
-//
-//
-//
 /**
  * Checks all "Use Notes" checkboxes on the page.
  * @return {void}
@@ -58,9 +41,6 @@ function selectAllNotes() {
 		if (noteses[i].className == 'use_notes_checkbox') noteses[i].checked = true;
 }
 
-//
-//
-//
 /**
  * Unchecks all "Use Notes" checkboxes on the page.
  * @return {void}
@@ -71,9 +51,6 @@ function deselectAllNotes() {
 		if (noteses[i].className == 'use_notes_checkbox') noteses[i].checked = false;
 }
 
-//
-//
-//
 /**
  * Checks all main link selection checkboxes and their corresponding "Use Notes" if applicable.
  * @return {void}
@@ -95,9 +72,6 @@ function checkAll() {
 	}
 }
 
-//
-//
-//
 /**
  * Unchecks all main link selection checkboxes and their corresponding "Use Notes" checkboxes.
  * @return {void}
@@ -115,9 +89,6 @@ function unCheckAll() {
 	}
 }
 
-//
-//
-//
 /**
  * Handles the click event for a button that can either "Lookup Title" or "Revert" a title.
  * If current value is "Lookup Title", calls `lookupTitle`.
@@ -139,9 +110,7 @@ function lookup_revert(button, linkno){
 	}
 }
 
-//
-//
-//
+
 /**
  * Fetches the title of a webpage based on its URL.
  * Updates the corresponding title input field and changes the button text to "Revert".
@@ -223,9 +192,7 @@ function lookupTitle(button) {
     },'json');
 }
 
-//
-//
-//
+
 /**
  * Initiates the bookmarking process for selected links.
  * If no links are checked, it shows a flash message.

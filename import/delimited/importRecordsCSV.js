@@ -1,20 +1,18 @@
 /**
- * Provides the client-side logic for importing records from CSV/TSV/KML files.
- *
- * @package     Heurist academic knowledge management system
- * @link        https://HeuristNetwork.org
- * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
+* importRecordsCSV.js - Handles UI for CSV import
+* 
+* Provides the client-side logic for importing records from CSV/TSV/KML files.
+* For server side see importController and importAction.
+* 
+* @package     Heurist academic knowledge management system
+* @subpackage  import\delimited
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Brandon McKay   <blmckay13@gmail.com>
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       5.0
 */
 
 /**
@@ -26,8 +24,8 @@
  * @return {Object} An object with public methods to interact with the importer.
  */
 function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
-    const _className = "ImportRecordsCSV",
-    _version   = "0.4";
+    const _className = "ImportRecordsCSV";
+    const _version   = "0.4";
 
     let imp_ID,   //import session
     imp_session,  //json with session parameters
@@ -471,9 +469,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
           //TEST            _doSetPrimaryRecType(); 
     }
 
-    //
-    // Remove all sessions
-    //
     /**
      * Clears import sessions from the server.
      * If is_current is true, clears only the current session; otherwise, clears all sessions for the user.
@@ -521,9 +516,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     });
     }
 
-    //
-    //
-    //
     /**
      * Loads an existing import session by its ID (imp_ID).
      * Retrieves session processing info and initializes the field mapping table.
@@ -584,9 +576,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }
     }
     
-    //
-    //  open dialog to choose primary record type
-    //
     /**
      * Opens a dialog for the user to select the primary record type and its dependencies.
      * Handles the logic for loading dependencies, rendering the selection UI, and saving the sequence.
@@ -763,9 +752,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
     }
 
-    //
-    // render sequence ribbon
-    //
     /**
      * Renders the record type sequence ribbon UI based on the current session's sequence.
      * Sets up click handlers for selecting a record type in the sequence.
@@ -882,9 +868,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         return true;
     }
 
-    //
-    //  get hierarchy (parents) for given field
-    //
     /**
      * Recursively gets the hierarchy (parent chain) for a given field key within a fields structure.
      * The hierarchy is an array of field keys, starting from the given field_key up to its topmost parent.
@@ -913,9 +896,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         return res;
     }
     
-    //
-    //  selected_fields - fields marked initially
-    //
     /**
      * Recursively identifies and collects cross-dependencies for a set of selected fields.
      * A cross-dependency is a required field that is at a deeper level in the hierarchy than the selected field.
@@ -969,9 +949,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     }
     
     
-    //
-    // show dependecies list in popup dialog where we choose primary rectype
-    //
     /**
      * Loads and displays the dependency tree for a selected primary record type within a dialog.
      * It fetches dependency data from the server and then renders it as a selectable list and a tree view.
@@ -1394,9 +1371,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }
     }   
 
-    //
-    //
-    //
+
     /**
      * Extracts the field type ID (ft_ID) from a composite field key (e.g., "ft_ID.rt_ID").
      * @private
@@ -1406,9 +1381,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     function _getFt_ID(field_key){
         return field_key.substring(0, field_key.indexOf('.'));
     }
-    //
-    //
-    //
+
     /**
      * Extracts the record type ID (rt_ID) from a composite field key (e.g., "ft_ID.rt_ID") or returns the key itself if not composite.
      * @private
@@ -1425,9 +1398,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
     }
     
-    //
-    //
-    //
     /**
      * Handles the logic for skipping to the next (or a specific) record type in the import sequence.
      * It checks if there are unmatched records in previous steps and warns the user if necessary.
@@ -1482,9 +1452,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             }        
     } 
     
-    //
-    //
-    //
     /**
      * Redraws the arrow UI element that points to the currently active record type in the sequence ribbon.
      * This involves calculating positions and adjusting CSS for several arrow components.
@@ -1525,25 +1492,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 }
         }
     }
-    //
-    // returns list of field/rectypes 
-    
-    //  with level (depth) 
-    //    list of resource (record pointer) fields
-    //    list of dependent rectype
-    //
-    //  rtOrder
-    //     key is concatenation  field_type.record_type (resource rectype)
-    //
-    //  levels:{},   key:level - list of rectypes with level value - need for proper order in sequence
-    //  fields:{}
-    //        key:{title,rt_title,rt_id,id_field(in import table),required, depend:[]}
-    //
-    //
+
     /**
      * Recursively processes a record type dependency tree to populate the rtOrder object.
      * This object stores structured information about record types, their fields, dependencies, and hierarchy levels.
      * It's used for rendering the dependency selection UI and managing the import sequence.
+     * 
      * @private
      * @param {Object} rectypeTree - A node from the record type dependency tree (typically from server response).
      *                               Expected to have properties like `key`, `type`, `title`, `rt_ids`, `constraint`, `children`.
@@ -1680,10 +1634,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
          return rtOrder;
     }
     
-    //check if index field already defined in preset
-    //
-    // imp_session['indexes'] = {field_1:10}  fieldname:recordtype_id
-    //
     /**
      * Determines the column name for a Heurist ID (H-ID) field, checking if a preset name exists in the session.
      * If not preset, it defaults to "[Record Type Name] H-ID".
@@ -1708,10 +1658,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         return sname;
     }
 
-    
-    //
-    // init field mapping table - main table to work with
-    //
     /**
      * Initializes and renders the main field mapping table (Step 3 UI).
      * This table lists columns from the imported file and allows users to map them to Heurist fields
@@ -2021,9 +1967,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         });
     }
 
-    //
-    // _adjustButtonPos
-    //
     /**
      * Adjusts the position and visibility of UI elements based on the current step and window size.
      * This includes the help text display, button visibility, and layout of the main content areas.
@@ -2076,9 +2019,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         */
     }
     
-    //
-    // by recordtype ID
-    //
     /**
      * Gets the index of the column that serves as the identifier (H-ID field) for a given record type in the sequence.
      * @private
@@ -2096,9 +2036,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }
     }
     
-    //
-    // Update detail type dropdown's widget and menu
-    //
     /**
      * Handles the opening of a detail type dropdown (hSelect widget).
      * Adjusts the menu's position and max-height to ensure it's visible within the viewport,
@@ -2151,9 +2088,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         $widget.removeClass('ui-heurist-populate ui-heurist-header'); // remove highlight dropdown
     }
 
-    //
-    // Attempt to automatically loosely match fields, excat matches happen earlier
-    //
     /**
      * Attempts to automatically match columns from the imported file (file_fields) to Heurist fields
      * available in the mapping dropdowns, using partial string matching (Sørensen–Dice coefficient)
@@ -2345,9 +2279,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         });
     }
     
-    //
-    // init field mapping selectors after change of rectype
-    //
     /**
      * Initializes or re-initializes the field mapping dropdown selectors (`<select>`) in the UI.
      * Populates them with available Heurist fields for the current record type in the sequence.
@@ -2570,9 +2501,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
     }
 
-    //
-    // Allow users to add/define new fields to record structure
-    //
     /**
      * Initializes the "Add field" buttons associated with each unmapped column.
      * Sets up their appearance and click event handlers to open the 'defDetailTypes' dialog
@@ -2697,9 +2625,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         });
     }
     
-    //
-    // show insert/update count in sequence of record types
-    //
     /**
      * Generates an HTML string summarizing the insert/update counts for a specific record type in the sequence.
      * This summary is displayed in the record type sequence ribbon.
@@ -2722,14 +2647,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
          return s_count;
     }
     
-    //
-    // return counts array from imp_session, set it to default values if it is not defined
-    //
-    // 0 records to be updated
-    // 1 rows matched
-    // 2 records to be inserted
-    // 3 rows source for insert
-    // 4 rows ignored
     /**
      * Retrieves the insert/update counts for a specific record type in the sequence from the session data.
      * If counts are not yet defined, it initializes them based on whether an H-ID column exists
@@ -2768,9 +2685,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }
     }
     
-    //
-    // Loads values for record from import table (preview values in main table)
-    //
     /**
      * Loads and displays a preview of a single row from the imported data table.
      * The row to display is determined by navigation controls (first, last, next, previous).
@@ -2873,9 +2787,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         return false;
     }
     
-    //
-    // upload data that was pasted in textarea
-    //
     /**
      * Handles the "Upload Data" button click when data is pasted directly into the textarea.
      * Sends the textarea content to the server to be saved as a temporary file,
@@ -2929,12 +2840,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             });
         }
     }
-    
-    //
-    // parse CSV on server side
-    // step1 - encode and get preview
-    // step2 - field roles, prepare and save into file
-    //
+
     /**
      * Performs server-side parsing of the uploaded file.
      * Step 1: Sends the uploaded file (or its reference) for initial parsing, encoding detection, and preview generation.
@@ -3346,9 +3252,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 });
     }
     
-    //
-    // Show remarks/help according to current match mode and mapping in main table
-    //
     /**
      * Updates UI elements and help text based on the selected record matching mode.
      * Adjusts visibility of options and button labels for clarity.
@@ -3473,9 +3376,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
     }
  
-    //
-    //
-    //
     /**
      * Initializes the record matching process by determining the selected matching mode
      * (match by mapped fields, use ID column, or skip matching) and then calls `_doMatching`.
@@ -3495,12 +3395,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         _doMatching( matchMode, null );
     }
         
-    //
-    // Find records in Heurist database and assign record id to identifier field in import table
-    //
-    // matchMode - 0 - match by mapped fields, 1- match by id column, 2 - skip matching
-    // disamb_resolv -  [{recid: heurist record id,key: import_id},....]
-    //
     /**
      * Performs the core record matching logic against the Heurist database.
      * Sends mapped fields and matching mode to the server.
@@ -3765,9 +3659,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
     }
 
-    //
-    //
-    //
     /**
      * Prepares the data for import after matching (or skipping matching).
      * Validates that an identifier column is selected and that fields are mapped for import.
@@ -5058,9 +4949,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         });
     }
 
-    //
-    // Add new column + default data to each row
-    //
     /**
      * Adds a new column to the import table on the server-side session data.
      * The new column is populated with a default value for all existing rows.
@@ -5111,9 +4999,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         });
     }
 
-    //
-    // get import line on server and show it on popup
-    //
     /**
      * Fetches a specific line (by its 1-based index `imp_ID_line`) from the server-side import table
      * and displays its content in a popup dialog for user review.
@@ -5188,9 +5073,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             });        
     
     }
-    //
-    //
-    //
+
     /**
      * Handles UI changes when the record update mode is modified by the user.
      * This function adjusts visibility of UI sections related to update/insert options
@@ -5286,16 +5169,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             _adjustTablePosition();
     }
     
-    /*
-    navigation steps
-    0 - progress
-    1 - select file to upload
-    2 - preview and field roles as data and id
-    --
-    3 - matching: assign rec ids 
-    4 - validate import   
-    5 - import
-    */
     /**
      * Manages the visibility of different UI sections (steps) of the import process.
      * Updates UI elements like background colors, help text, and button states based on the current step.
@@ -5410,9 +5283,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         _adjustTablePosition();
     }
 
-    //
-    // Disable create new records option while ignoring record type
-    //
     /**
      * Handles the event when the "Ignore records of this type" checkbox is changed.
      * It disables or enables the "Skip matching (create all new records)" option
