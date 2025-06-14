@@ -370,42 +370,8 @@
         }
 
         $is_xml = strpos($string, '<?xml') === 0;
-        $handling_encoding = false;
-        $handling_copyright = false;
 
-        if($is_xml){
-            [$string, $handling_encoding, $handling_copyright] = addNoTranslateTags($string, true);
-        }else{
-
-            $amp = '&amp;';
-            $cleanupQuirks = function($matches) use ($amp){
-                return str_replace($amp, '&', $matches[0]);
-            };
-
-            $string = mb_ereg_replace('&', $amp, $string); // avoid decoding encoded entities
-
-            $doc = new DOMDocument;
-            $doc->loadHTML(mb_encode_numericentity($string, [0x80, 0x10FFFF, 0, ~0], 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD); // load html
-            $xpath = new DOMXPath($doc); // retrieve text only
-            $textNodes = $xpath->query('//text()');
-
-            $string = mb_ereg_replace($amp, '&', $string);
-
-            foreach($textNodes as $node){
-
-                [$node->textContent, $encoded, $copyright] = addNoTranslateTags($node->textContent, false);
-
-                $handling_encoding |= $encoded;
-                $handling_copyright |= $copyright;
-            }
-
-            $string = $handling_encoding || $handling_copyright ? $doc->saveHTML() : $string;
-
-            $string = mb_ereg_replace_callback('&amp;(?:[a-zA-Z]{2,35}|#[0-9]{1,6}|#x[a-fA-F0-9]{1,6});?', $cleanupQuirks, $string);
-
-            $string = mb_ereg_replace('_LT_', '<', $string);
-            $string = mb_ereg_replace('_GT_', '>', $string);
-        }
+        $string = replaceEncodedEntities($string);
 
         /**
          * free => api-free.deepl.com
@@ -424,9 +390,9 @@
         }
 
         if($is_xml){ // possible xml
-            $url .= '&tag_handling=xml&ignore_tags=notranslate&split_sentences=0';
+            $url .= '&tag_handling=xml&ignore_tags=notranslate';
         }else{ // assume html
-            $url .= '&tag_handling=html&split_sentences=0';
+            $url .= '&tag_handling=html';
         }
 
         $additional_headers = array('Authorization: DeepL-Auth-Key ' . $accessToken_DeepLAPI);
@@ -517,9 +483,72 @@
             $res = $translation[0]['text'];
         }
 
-        return removeNoTranslateTags($res, $is_xml, $handling_encoding, $handling_copyright);
+        return $res;
     }
 
+    /**
+     * Replace specific enoded entities that could be translated by Deepl with their HTML code or Hex code counter part
+     *
+     * @param string $string The string potential containing entities that could become translated
+     * @return string The string prepared for translation
+     */
+    function replaceEncodedEntities($string){
+
+        $entities = [
+            'copyright' => [
+                '(?:&copy;|©)',
+                '&#169;'
+            ],
+            'registered' => [
+                '(?:&reg;?|®)',
+                '&#174;'
+            ],
+            'trademark' => [
+                '(?:&trade;?|™)',
+                '&#8482;'
+            ],
+            /*'at' => [
+                '(?:&commat;?|@)',
+                '&#64;'
+            ],*/
+            'euro' => [
+                '(?:&euro;?|€)',
+                '&#8364;'
+            ],
+            'cent' => [
+                '(?:&cent;?|¢)',
+                '&#162;'
+            ],
+            'pound' => [
+                '(?:&pound;?|£)',
+                '&#163;'
+            ],
+            'yen' => [
+                '(?:&yen;?|¥)',
+                '&#165;'
+            ],
+            'section' => [
+                '(?:&sect;?|§)',
+                '&#167;'
+            ]
+        ];
+
+        foreach($entities as $entity){
+
+            $search = $entity[0];
+            $replace = $entity[1];
+
+            $res = mb_ereg_replace($search, $replace, $string);
+
+            if(!empty($res)){
+                $string = $res;
+            }
+        }
+
+        return $string;
+    }
+
+    // @todo - check if replaceEncodedEntities works, if it does then remove this and removeNoTranslateTags
     function addNoTranslateTags($string, $isXML){
 
         $handleEntity = false;
