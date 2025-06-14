@@ -20,12 +20,7 @@
 
 namespace hserv;
 
-// USystem is used for getConfigBytes, but not explicitly imported if it's in the same namespace or globally available.
-// Assuming it's available or this would be a use hserv\utilities\USystem;
-// For now, no explicit 'use hserv\utilities\USystem;' is added as the original file didn't have it for USystem::getConfigBytes.
-// However, it had 'use hserv\utilities\USystem;' at the top, which seems to be unused directly in this file but kept for original structure.
 use hserv\utilities\USystem;
-
 
 /**
 * Class SystemSettings
@@ -126,14 +121,10 @@ class SystemSettings {
     private function readSettings($setting_name){
 
         $setting_file = $this->getSettingsFileName($setting_name);
-        if (empty($setting_file)) {
-            // Error already logged by getSettingsFileName or isValidParam if applicable
-            return false;
-        }
 
         $settings = array();
 
-        if(file_exists($setting_file)){
+        if(!empty($setting_file) && file_exists($setting_file)){
 
             $settings = file_get_contents($setting_file);
             if($settings === false){
@@ -214,7 +205,7 @@ class SystemSettings {
 
 
         $merged_settings = [];
-        if($replace_settings === 0 || isEmptyArray($existing_settings) ){ // isEmptyArray is likely a global helper
+        if($replace_settings === 0 || isEmptyArray($existing_settings) ){
             $merged_settings = $settings;
         }elseif($replace_settings === 1){ // Merge and replace existing keys
             $merged_settings = array_replace_recursive($existing_settings, $settings);
@@ -259,7 +250,7 @@ class SystemSettings {
     public function getWebFontsLinks($default_family=null){
 
         $webfonts = $this->getDatabaseSetting('Webfonts'); // This will be an array or false
-        if ($webfonts === false || isEmptyArray($webfonts)) { // isEmptyArray is likely a global helper
+        if ($webfonts === false || isEmptyArray($webfonts)) {
             return ''; // No webfonts configured or error reading them
         }
 
@@ -424,7 +415,6 @@ class SystemSettings {
         }
 
         // Ensure it's a positive integer, default to 0 if not or if conversion failed.
-        // isPositiveInt is likely a global helper.
         if(!isPositiveInt($quota_bytes)){
             $quota_bytes = 0;
         }

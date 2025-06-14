@@ -762,7 +762,7 @@ function dataOutput($data, $filename=null, $mimeType=null)
     if($mimeType === MIMETYPE_JSON){ // Assumes MIMETYPE_JSON is 'application/json'
         header('X-Content-Type-Options: nosniff');
         header('X-XSS-Protection: 1; mode=block'); // Deprecated by modern browsers but often still set.
-        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; frame-ancestors \'self\';'); // Added semicolon
+        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; frame-ancestors \'self\';');
     }
 
     echo $data;
@@ -791,7 +791,7 @@ function includeJQuery($useVersion3=false){
         <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js" integrity="sha256-xLD7nhI62fcsE+0ArUPP8HLgXDSKNZA94NZGxLccrhk=" crossorigin="anonymous"></script> <!-- UI updated to 1.13.2 for JQ 3.x -->
         <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 
-        <!-- Calendar picker - Assuming jquery.calendars-2.1.1 is compatible with jQuery 3.x -->
+        <!-- Calendar picker  -->
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.plugin.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.plus.js"></script>
