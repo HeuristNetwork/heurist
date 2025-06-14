@@ -2510,8 +2510,11 @@ $.widget( "heurist.editing_input", {
                     popup_options2  = $.extend(popup_options, this.configMode.popup_options);
                 }
 
-                if(this.configMode.entity === 'DefCalcFunctions' && window.hWin.HEURIST4.util.isPositiveInt(this.options.rectypeID)){
+                let entity = this.configMode.entity.toLowerCase();
+                if(entity === 'defcalcfunctions' && window.hWin.HEURIST4.util.isPositiveInt(this.options.rectypeID)){
                     popup_options2['rst_RecTypeID'] = this.options.rectypeID;
+                }else if(entity === 'records' && !window.hWin.HEURIST4.util.isempty(this.options.dtFields.rst_PtrFilteredIDs)){
+                    popup_options2['rectype_set'] = this.options.dtFields.rst_PtrFilteredIDs;
                 }
 
                 //init dialog to select related entities
