@@ -439,8 +439,25 @@ $.widget( "heurist.controlPanel", {
         
         let request = {};
 
+        const svsID = window.hWin.HEURIST4.util.getUrlParameter('svs', window.hWin.location.search);
+
         if(window.hWin.HAPI4.postparams?.q){
             request = window.hWin.HAPI4.postparams;
+        }else if(window.hWin.HEURIST4.util.isPositiveInt(svsID)){
+            attempt = 0;
+            let interval = setInterval((svsID) => {
+                if(attempt === 5){
+                    clearInterval(interval);
+                    return;
+                }
+                try{
+                    let svsWiget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');
+                    svsWiget.svs_list('doSearchByID', svsID);
+                    clearInterval(interval);
+                }catch{
+                    attempt++;
+                }
+            }, 500, svsID);
         }else{
             let init_search = window.hWin.HEURIST4.util.getUrlParameter('q', window.hWin.location.search);
             let qdomain;
