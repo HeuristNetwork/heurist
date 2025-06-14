@@ -1359,7 +1359,7 @@ class System {
             }
 
             $filestoreRoot = $this->getFileStoreRootFolder();
-            if(!empty($filestoreRoot)){
+            if(!empty($filestoreRoot) && !isLocalHost()){
                 $statsFile = rtrim($filestoreRoot, '/') . "/_DB_STATS/db_stats.txt";
                 $lastUpdate = file_exists($statsFile) ? filemtime($statsFile) : false;
                 $res['sysinfo']['refreshStatistics'] = (!$lastUpdate || $lastUpdate < strtotime('-1 month')) ? 1 : 0;
