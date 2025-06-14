@@ -1,29 +1,20 @@
-
 /**
- * emailForm widget - either creates form or uses a given one.
- * Sends email to the address defined in the given record ID. If the record is not defined,
- * it sends email to the database owner.
- *
- * @todo Use baseAction as parent.
- *
- * @package     Heurist academic knowledge management system
- * @link        https://HeuristNetwork.org
- * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
- * @author      Artem Osmakov   <osmakov@gmail.com>
- * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
- * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
- * @version     4
- * @namespace   heurist.emailForm
- */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* emailForm widget - either creates form or uses a given one.
+* 
+* Sends email to the address defined in the given record ID. If the record is not defined,
+* it sends email to the database owner.
+*
+* @todo Use HBaseView as a parent.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\admin
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4
 */
-
 $.widget( "heurist.emailForm", {
     /**
      * @typedef {object} heurist.emailForm.options
@@ -198,10 +189,10 @@ $.widget( "heurist.emailForm", {
     _initControls:function(){
         //verify that form has all required elements
         let missed = [];
-        if(!this._element_form.find('#letter_name').length) missed.push('letter_name'); // Corrected: Added .length to check if element exists
-        if(!this._element_form.find('#letter_email').length) missed.push('letter_email'); // Corrected: Added .length to check if element exists
-        if(!this._element_form.find('#letter_content').length) missed.push('letter_content'); // Corrected: Added .length to check if element exists
-        if(!this._element_form.find('#captcha').length) missed.push('captcha'); // Corrected: Added .length to check if element exists
+        if(!this._element_form.find('#letter_name').length) missed.push('letter_name'); 
+        if(!this._element_form.find('#letter_email').length) missed.push('letter_email');
+        if(!this._element_form.find('#letter_content').length) missed.push('letter_content'); exists
+        if(!this._element_form.find('#captcha').length) missed.push('captcha');
 
         if(missed.length>0){
             window.hWin.HEURIST4.msg.showMsgErr({
@@ -209,7 +200,7 @@ $.widget( "heurist.emailForm", {
                 error_title: 'Missing required fields',
                 status: window.hWin.ResponseStatus.INVALID_REQUEST
             });
-            return false; // Added return statement for clarity
+            return false;
         }
 
         window.hWin.HRA(this._element_form);//this.element
@@ -501,8 +492,8 @@ $.widget( "heurist.emailForm", {
         this._element_form.find('#captcha').val('');
         let $dd = this._element_form.find('#captcha_img');
         let id = window.hWin.HEURIST4.util.random();
-        const is_simle_captcha = true; // REMARK: Typo 'simle' corrected to 'simple'
-        if(is_simle_captcha){  //simple captcha
+        const is_simple_captcha = true;
+        if(is_simple_captcha){  //simple captcha
             let that = this;
 
             const url = window.hWin.HAPI4.baseURL+'hserv/utilities/captcha.php?json&id='+id;
