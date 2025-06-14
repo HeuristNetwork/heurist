@@ -206,6 +206,7 @@ $stmt->close();
         <script type="text/javascript" src="../../hclient/core/utils.js"></script>
         <script type="text/javascript" src="../../hclient/core/utils_ui.js"></script>
         <script type="text/javascript" src="../../hclient/core/utils_msg.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
 
         <!-- Inner Styling and Script -->
         <style type="text/css">
@@ -959,19 +960,24 @@ $stmt->close();
 
                         if(response.status == "ok"){
                             $("#emailTitle").val(response.data[0]);
-                            $("#emailBody").text(response.data[1]);
-                        } else {
-
-                            if(window.hWin.HEURIST4.util.isempty(response.message)){
-                                window.hWin.HEURIST4.msg.showMsgErr({
-                                    message: "An unknown error has occurred with retrieving email record details, please contact the Heurist team.",
-                                    error_title: 'Unable to retrieve email details',
-                                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR
-                                });
-                            } else {
-                                var msg = response.message + '<br>' + (!window.hWin.HEURIST4.util.isempty(response.error_msg) ? response.error_msg : '');
-                                window.hWin.HEURIST4.msg.showMsgErr({message: msg, error_title: 'Failed to retrieve email details'});
+                            if(tinyMCE.activeEditor){
+                                tinyMCE.activeEditor.setContent(response.data[1]);
+                            }else{
+                                $("#emailBody").text(response.data[1]);
                             }
+
+                            return;
+                        }
+
+                        if(window.hWin.HEURIST4.util.isempty(response.message)){
+                            window.hWin.HEURIST4.msg.showMsgErr({
+                                message: "An unknown error has occurred with retrieving email record details, please contact the Heurist team.",
+                                error_title: 'Unable to retrieve email details',
+                                status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                            });
+                        } else {
+                            var msg = response.message + '<br>' + (!window.hWin.HEURIST4.util.isempty(response.error_msg) ? response.error_msg : '');
+                            window.hWin.HEURIST4.msg.showMsgErr({message: msg, error_title: 'Failed to retrieve email details'});
                         }
                     }
                 });
@@ -1177,6 +1183,83 @@ $stmt->close();
                     });
             }
 
+            function initEditorButton(){
+
+                let currentMode = 'Plain Text';
+
+                $('#btnSwitchEditor').on('click', () => {
+
+                    $('#btnSwitchEditor').text(`View ${currentMode}`);
+
+                    if(currentMode === 'Plain Text'){
+                        initTinyMCE();
+                        currentMode = 'WYSIWYG';
+                    }else{
+                        tinyMCE.remove();
+                        currentMode = 'Plain Text';
+                    }
+                });
+            }
+
+            function initTinyMCE(){
+
+                if(typeof tinyMCE === 'undefined'){
+                    return;
+                }
+
+                let tinyMCEOptions = {
+                    selector: '#emailBody',
+                    menubar: false,
+                    inline: false,
+                    branding: false,
+                    elementpath: false,
+                    statusbar: true,
+                    resize: 'both', 
+
+                    remove_script_host: false,
+                    forced_root_block: false,
+
+                    entity_encoding:'raw',
+                    inline_styles: true,
+
+                    autoresize_bottom_margin: 15,
+                    autoresize_on_init: false,
+
+                    setup: function(editor){
+
+                        // Insert horizontal rule
+                        editor.ui.registry.addButton('customHRtag', {
+                            text: '&lt;hr&gt;',
+                            onAction: function (_) {
+                                tinyMCE.activeEditor.insertContent( '<hr>' );
+                            }
+                        });
+                        // Clear text formatting - to replace the original icon
+                        editor.ui.registry.addIcon('clear-formatting', `<img style="padding-left: 5px;" src="${BASE_URL}hclient/assets/clear_formatting.svg" />`)
+                        editor.ui.registry.addButton('customClear', {
+                            text: '',
+                            icon: 'clear-formatting',
+                            tooltip: 'Clear formatting',
+                            onAction: function (_) {
+                                tinyMCE.activeEditor.execCommand('RemoveFormat');
+                            }
+                        });
+                    },
+
+                    plugins: [
+                        'advlist autolink lists link preview ', //anchor charmap print 
+                        'searchreplace visualblocks code fullscreen',
+                        'media table paste help autoresize'  //insertdatetime  wordcount
+                    ],
+
+                    toolbar: ['styleselect | fontselect fontsizeselect | bold italic forecolor backcolor customClear customHRtag | link | align | bullist numlist outdent indent | table | help'],
+
+                    content_css: [ '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i' ]
+                };
+
+                tinyMCE.init(tinyMCEOptions);
+            }
+
             $(document).ready(function() {
 
                 setupUserSelection();
@@ -1192,6 +1275,8 @@ $stmt->close();
                 $("#btnCalRecCount").on('click',getRecordCount);
 
                 getInitDbList();
+
+                initEditorButton();
             });
 
         </script>
@@ -1208,7 +1293,7 @@ $stmt->close();
                 The email to be sent should be created as a <strong>Email</strong> record in the current database, including subject line, body text and fields to be substituted using ##....## notation. <br><br>
             </span>
 
-            <form id="emailOptions" action="bulkEmailMain.php" method="POST" target="_blank">
+            <form id="emailOptions">
 
                 <div class="t-row">
 
@@ -1300,7 +1385,7 @@ $stmt->close();
                             Email Subject: <input type="text" id="emailTitle" name="emailTitle" style="margin-left: 5px;width: 86.6%;">
                         </div>
 
-                        <div class="non-selectable" style="margin-bottom: 10px;">Email Body (use html tags):</div>
+                        <div class="non-selectable" style="margin-bottom: 10px;">Email Body (use html tags): <span id="btnSwitchEditor">View WYSIWYG</span></div>
                         <textarea id="emailBody" rows="20" cols="90" name="emailBody"></textarea>
                     </div>
 
@@ -1342,6 +1427,8 @@ $stmt->close();
 
                         <button style="margin-left: 5px;" type="button" id="btnEmail">Send Emails</button>
 
+                        <input type="button" id="btnCsvExport" value="Export CSV" onclick="doExportCSV(event)"/>
+
                     </div>
 
                 </div>
@@ -1351,12 +1438,7 @@ $stmt->close();
                 <input id="db_list" name="databases" type="hidden" />
                 <input name="exportCSV" value="0" type="hidden"/>
             </form>
-            <input type="button" id="btnCsvExport" value="Export CSV" onclick="doExportCSV(event)"/>
-<!--
-            <form id="csvExportForm" action="#" onsubmit="validateForm(event);return false;" style="display: inline-block;">
-                <input type="hidden" name="exportdata" id="exportData" />
-            </form>
--->
+
         </div>
 
     </body>
