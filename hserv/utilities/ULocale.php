@@ -372,6 +372,7 @@
         $is_xml = strpos($string, '<?xml') === 0;
 
         $string = replaceEncodedEntities($string);
+        $string = replacePunctuation($string);
 
         /**
          * free => api-free.deepl.com
@@ -481,9 +482,40 @@
         $translation = $data['translations'];
         if(is_array($translation) && !empty($translation)){
             $res = $translation[0]['text'];
+            $res = replacePunctuation($res, true);
         }
 
         return $res;
+    }
+
+    /**
+     * Replace specific punctuation that Deepl has issues with translating with a place holder
+     *
+     * @param string $string The string potential containing the specific punctuation
+     * @return string The string prepared for translation
+     */
+    function replacePunctuation($string, $reverse = false){
+
+        $punc = [ [';', '__SC__'], [':', '__CL__'], ['&', '__AMP__'] ];
+
+        foreach($punc as $punctuation){
+
+            $search = $punctuation[0];
+            $replace = $punctuation[1];
+
+            if($reverse){
+                $search = $punctuation[1];
+                $replace = $punctuation[0];
+            }
+
+            $res = mb_ereg_replace($search, $replace, $string);
+
+            if($res && !empty($res)){
+                $string = $res;
+            }
+        }
+
+        return $string;
     }
 
     /**
@@ -530,6 +562,10 @@
             'section' => [
                 '(?:&sect;?|§)',
                 '&#167;'
+            ],
+            'ampersand' => [
+                '(?:&amp;?)',
+                '&#38;'
             ]
         ];
 
@@ -543,109 +579,6 @@
             if(!empty($res)){
                 $string = $res;
             }
-        }
-
-        return $string;
-    }
-
-    // @todo - check if replaceEncodedEntities works, if it does then remove this and removeNoTranslateTags
-    function addNoTranslateTags($string, $isXML){
-
-        $handleEntity = false;
-        $handleCopyRight = false;
-
-        // Add no translate flags where necessary
-        // Use _LT_ and _GT_ to avoid issues replacing the text via DOMDoc node
-        /**
-         * &[a-zA-Z]; html entity
-         * &#[0-9]; html code
-         * &#x[a-fA-F0-9]; hex code
-         */
-        $regex_entities = '&(?:[a-zA-Z]{2,35}|#[0-9]{1,6}|#x[a-fA-F0-9]{1,6});?';
-
-        $add_tags = function($matches) use ($isXML) {
-            return $isXML ? "<notranslate>{$matches[0]}</notranslate>" : "_LT_span translate='no'_GT_{$matches[0]}_LT_/span_GT_";
-        };
-
-        $original = $string; // backup string before processing
-
-        if(mb_eregi($regex_entities, $string)){ // html encoded entities
-
-            $string = mb_ereg_replace_callback($regex_entities, $add_tags, $string);
-
-            $handleEntity = $string !== false;
-
-            $string = $string ?? $original;
-
-            $original = $string; // update backup string
-        }
-
-        if(mb_eregi("[^\w]©|©[^\w]", $string)){ // copyright symbol, sometimes gets removed by Deepl during translation
-
-            $replacement = $isXML ? '<notranslate>©</notranslate>' : '_LT_span translate="no"_GT_©_LT_/span_GT_';
-            $string = mb_ereg_replace("[^\w]©|©[^\w]", $replacement, $string);
-
-            $handleCopyRight = $string !== false;
-
-            $string = $string ?? $original;
-        }
-
-        return [$string, $handleEntity, $handleCopyRight];
-    }
-
-    /**
-     * Removes <notranslate> or <span translate='no'> tags from a string that were added by addNoTranslateTags.
-     *
-     * @param string $string The string potentially containing "no translate" tags.
-     * @param bool $isXML True if the original string was XML, false if HTML. This determines the tag format to remove.
-     * @param bool $handlEntity Indicates if entity-specific "no translate" tags were added.
-     * @param bool $handleCopyRight Indicates if copyright-specific "no translate" tags were added.
-     * @return string The string with "no translate" tags removed.
-     */
-    function removeNoTranslateTags($string, $isXML, $handlEntity, $handleCopyRight){
-
-        // Remove notranslate tags
-        /**
-         * &[a-zA-Z]; html entity
-         * &#[0-9]; html code
-         * &#x[a-fA-F0-9]; hex code
-         */
-        $regex_entities = '&(?:[a-zA-Z]{2,35}|#[0-9]{1,6}|#x[a-fA-F0-9]{1,6});?';
-        $regex_less_than = '(?:<|&lt;)';
-        $regex_great_than = '(?:>|&gt;)';
-        $regex_quotes = '(?:\'|"|&quot;|&apos;)';
-
-        $remove_tags = function($matches){
-
-            if(count($matches) == 1){
-                return $matches[0];
-            }
-
-            return $matches[1];
-        };
-
-        $original = $string; // backup original result
-        if($handlEntity && !empty($string)){
-
-            $match = $isXML
-                    ? "{$regex_less_than}notranslate{$regex_great_than}($regex_entities){$regex_less_than}\/notranslate{$regex_great_than}"
-                    : "{$regex_less_than}span translate={$regex_quotes}no{$regex_quotes}{$regex_great_than}($regex_entities){$regex_less_than}\/span{$regex_great_than}";
-
-            $string = mb_ereg_replace_callback($match, $remove_tags, $string);
-
-            $string = $string ?? $original;
-            $original = $string; // update backup string
-        }
-
-        if($handleCopyRight && !empty($string)){
-
-            $match = $isXML
-                    ? "{$regex_less_than}notranslate{$regex_great_than}©{$regex_less_than}\/notranslate{$regex_great_than}"
-                    : "{$regex_less_than}span translate={$regex_quotes}no{$regex_quotes}{$regex_great_than}©{$regex_less_than}\/span{$regex_great_than}";
-
-            mb_ereg_replace($match, "©", $string);
-
-            $string = $string ?? $original;
         }
 
         return $string;
