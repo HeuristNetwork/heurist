@@ -17,47 +17,64 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+ * jQuery UI Widget: heurist.dbVerifyURLs
+ *
+ * This widget handles the verification of URLs within database records (both in record headers and specific fields).
+ * It allows users to start a new verification process, continue a previous one, or resume an interrupted session.
+ * Results, including problematic URLs, can be displayed and exported.
+ * It extends `$.heurist.dbAction`.
+ *
+ * @namespace heurist.dbVerifyURLs
+ * @augments $.heurist.dbAction
+ *
+ * @property {boolean} prevSessionExists - Flag indicating if a previous, potentially incomplete,
+ *                                         URL verification session exists for the current database.
+ */
 $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
-    
+
+    /**
+     * @property {boolean} [prevSessionExists=false] - True if a previous verification session's data is found.
+     */
     prevSessionExists: false,
 
-    //  
-    // invoked from _init after loading of html content
-    //
+    /**
+     * Initializes controls for the URL verification widget.
+     * Checks for a previous verification session and then calls the superclass's `_initControls`.
+     * This method is called by `_init` (via `_super()`) after HTML content is loaded.
+     * @memberof heurist.dbVerifyURLs
+     * @private
+     */
     _initControls:function(){
-        // init controls
-        
-        //check that there is previous session
         this._checkPreviousSession();
-        
         return this._super();
     },
-    
-    //
-    //
-    //
+
+    /**
+     * Checks with the server if a previous URL verification session exists for the current database.
+     * Updates the UI to show options for continuing, restarting, or viewing previous results based on the server response.
+     * If a session is currently in progress, it will resume showing progress for that session.
+     * @memberof heurist.dbVerifyURLs
+     * @private
+     */
     _checkPreviousSession: function(){
-        
-        this._hideProgress();
-        
-        let request = {};
-        request['action'] = this.options.actionName;       
-        request['db'] = window.hWin.HAPI4.database;
-        request['checksession'] = 1;       
+        this._hideProgress(); // Ensure any previous progress display is hidden
 
+        let request = {
+            action: this.options.actionName, // Should resolve to 'verifyurls'
+            db: window.hWin.HAPI4.database,
+            checksession: 1 // Flag to tell server to check for existing session
+        };
         let that = this;
-        
-        window.hWin.HAPI4.SystemMgr.databaseAction( request,  function(response){
 
+        window.hWin.HAPI4.SystemMgr.databaseAction( request,  function(response){
                 if (response.status == window.hWin.ResponseStatus.OK) {
-                    //returns either info about previous session or session id of current operation 
-                    if(response.data.session_id>0){
-                        //action in progress
+                    if(response.data.session_id > 0){ // A session is currently in progress
                         that._session_id = response.data.session_id;
-                        that._showProgress( that._session_id, false, 1000, that._checkPreviousSession );
-                        
-                    }else if(response.data.total_checked>0){
-                        
+                        // Resume showing progress for the ongoing session.
+                        // The onComplete callback is set to _checkPreviousSession to re-evaluate after this progress display finishes or is interrupted.
+                        that._showProgress( that._session_id, false, 1000, function() { that._checkPreviousSession(); } );
+                    }else if(response.data.total_checked > 0){ // A previous session exists and is complete or was interrupted
                         that._$('#prevSessionExist').show();
                         that._$('#prevSessionNotExist').hide();
                         that._$('span.total_checked').text(response.data.total_checked);
@@ -65,150 +82,153 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
 
                         let btnCSV = that._$('.btnCSV').button();
                         that._on(btnCSV, {click:that._getPreviousSessionAsCSV});
-                        
-                        if(response.data.total_bad==0){
-                            btnCSV.hide();
-                        }else{
-                            btnCSV.show();
-                        }
-                        
 
-                        that._prevSessionExists = true;
-                    }else{
+                        if(response.data.total_bad==0){ btnCSV.hide(); }
+                        else{ btnCSV.show(); }
+
+                        that.prevSessionExists = true;
+                    }else{ // No previous session data found
                         that._$('#prevSessionExist').hide();
                         that._$('#prevSessionNotExist').show();
-                        that._prevSessionExists = false;
+                        that.prevSessionExists = false;
                     }
-                    
                 } else {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
-              
         });
     },
-    
-    //
-    //
-    //    
-    _getPreviousSessionAsCSV: function(){
 
+    /**
+     * Initiates a download of the previous URL verification session's results as a CSV file.
+     * Opens a new window/tab pointing to the server-side script that generates the CSV.
+     * @memberof heurist.dbVerifyURLs
+     * @private
+     */
+    _getPreviousSessionAsCSV: function(){
         let req = {
-            'action' : this.options.actionName,
-            'getsession': 1,
+            'action' : this.options.actionName, // 'verifyurls'
+            'getsession': 1, // Flag to get session data
             'db': window.hWin.HAPI4.database
         };
-        
         let url = window.hWin.HAPI4.baseURL + 'hserv/controller/databaseController.php?';
-        window.open(url+$.param(req), '_blank');
-
+        window.open(url+$.param(req), '_blank'); // Open in new tab
     },
 
-    //
-    //
-    //
+    /**
+     * Gathers parameters (limit, mode) and starts the URL verification process by calling `_sendRequest`.
+     * The 'mode' determines if it's a new scan, a continuation, or a re-check of bad URLs.
+     * @memberof heurist.dbVerifyURLs
+     */
     doAction: function(){
-                                                
         let limit = this._$('#selCheckURLsLimit').val();
-        
-        const mode = this._prevSessionExists?this._$('input[name="mode"]:checked').val():0;
-        
+        // Mode: 0 = New/Restart, 1 = Continue, 2 = Recheck Bad (if prevSessionExists is true)
+        const mode = this.prevSessionExists ? this._$('input[name="mode"]:checked').val() : 0;
         let request = {limit: limit, verbose:0, mode:mode};
-
-        this._sendRequest(request);        
+        this._sendRequest(request);
     },
-    
+
+    /**
+     * Overrides the baseAction `_showProgress` to use a more specific progress display method
+     * from `window.hWin.HEURIST4.msg.showProgress`.
+     * @memberof heurist.dbVerifyURLs
+     * @private
+     * @param {number} session_id - The session ID for the current action.
+     * @param {boolean} is_autohide - Whether the progress should hide automatically on completion (not directly used by `msg.showProgress`).
+     * @param {number} t_interval - Polling interval (passed to `msg.showProgress`).
+     * @param {Function} [onComplete] - Callback function when progress display completes or is stopped.
+     */
     _showProgress: function ( session_id, is_autohide, t_interval, onComplete ){
-      
         this._$('.ent_wrapper').hide();
         let progress_div = this._$('.progressbar_div').show();
-        
+        // Uses a global/centralized progress display mechanism
         window.hWin.HEURIST4.msg.showProgress({container: progress_div,
-                        session_id: session_id, t_interval:2000, onComplete:onComplete});  
-        
+                        session_id: session_id, t_interval:t_interval || 2000, onComplete:onComplete});
     },
-    
-    
-    _hideProgress: function (){
-        
-        window.hWin.HEURIST4.msg.hideProgress();
-        
-        this._$('.ent_wrapper').hide();
-        this._$('#div_header').show();
-        
-    },
-    
 
-    
-    //  -----------------------------------------------------
-    //
-    //  after save event handler
-    //
-    _afterActionEvenHandler: function( response, terminatation_message ){
-        
+
+    /**
+     * Hides the progress indicator and restores the main form/header view.
+     * Uses `window.hWin.HEURIST4.msg.hideProgress`.
+     * @memberof heurist.dbVerifyURLs
+     * @private
+     */
+    _hideProgress: function (){
+        window.hWin.HEURIST4.msg.hideProgress(); // Uses global mechanism
         this._$('.ent_wrapper').hide();
-        let div_res = this._$("#div_result").show();
-        
-        if(response.output){
-            div_res.find('#session_summary').html(response.output);
+        this._$('#div_header').show(); // Show initial configuration part of the dialog
+    },
+
+
+
+    /**
+     * Handles the server response after a URL verification action (or part of it) is completed.
+     * Updates the UI with statistics (total checked, bad URLs, processed counts per type)
+     * and provides links to view problematic records. Manages UI state based on whether
+     * the verification process is fully finished.
+     * Remark: Method name has a typo "EvenHandler", should be "EventHandler". The actual method name in code is `_afterActionEvenHandler`.
+     * @memberof heurist.dbVerifyURLs
+     * @private
+     * @param {object} response_data - The `data` part of the server response.
+     * @param {string|object} termination_message - Message or error object if the process was terminated or encountered an issue.
+     */
+    _afterActionEvenHandler: function( response_data, termination_message ){
+        this._$('.ent_wrapper').hide();
+        let div_res = this._$("#div_result").show(); // Show the results display area
+
+        if(response_data.output){ // Server might send a summary HTML block
+            div_res.find('#session_summary').html(response_data.output);
         }
-        
-        const isFinished = response.session_checked==0;
+
+        const isFinished = response_data.session_checked == 0; // Server indicates 0 when fully complete
         let that = this;
-        
-        const types = ['record','text','file'];
+
+        const types = ['record','text','file']; // URL types to report on
         types.forEach(function(key) {
-            
-            that._$(`span.session_processed_${key}`).text(response[`session_processed_${key}`]);
-            //that._$('span.session_bad_text').text(response.session_bad_text);
-            const total_bad = response[`${key}_bad`];
+            that._$(`span.session_processed_${key}`).text(response_data[`session_processed_${key}`] || 0);
+            const total_bad = response_data[`${key}_bad`] || 0;
             let ele_total_bad = that._$(`span.${key}_bad`);
             ele_total_bad.text(total_bad);
             ele_total_bad.css('color','red');
-            if(total_bad>0){
-               const ids = Object.keys(response[key]).join(',')
-               const url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&q=ids:'+ids;
-               that._$(`span.links_${key}`).html('<a href="'+url+'" target="_blank" style="padding-left:10px;font-size:0.8em">show records as search  <span class="ui-icon ui-icon-linkext"></span></a>');
-            }else if(isFinished){
+            if(total_bad > 0 && response_data[key]){ // If bad URLs of this type exist and IDs are provided
+               const ids = Object.keys(response_data[key]).join(',');
+               const url = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&q=ids:${ids}`;
+               that._$(`span.links_${key}`).html(`<a href="${url}" target="_blank" style="padding-left:10px;font-size:0.8em">show records as search  <span class="ui-icon ui-icon-linkext"></span></a>`);
+            }else if(isFinished && total_bad === 0){
                 ele_total_bad.text('OK').css('color','green');
-            } 
-            
-        });  
-
-        this._$('span.total_checked').text(response.total_checked);
-        this._$('span.total_bad').text(isFinished && response.total_bad==0?'OK':response.total_bad);
-        this._$('span.total_bad').css('color',isFinished && response.total_bad==0?'green':'red');
-        
-        if(isFinished){ //check has been completed
-            this._$('#all_urls_verified').show();
-            if(response.total_bad==0){
-                this._$('#all_urls_ok').show();
-            }else{
-                this._$('#all_urls_ok').hide();
+                that._$(`span.links_${key}`).empty(); // Clear any previous link
+            } else {
+                 that._$(`span.links_${key}`).empty(); // Clear link if no bad URLs or not finished
             }
-            this._$('button.ui-button-action').hide();
+        });
+
+        this._$('span.total_checked').text(response_data.total_checked || 0);
+        this._$('span.total_bad').text(isFinished && response_data.total_bad==0 ? 'OK' : (response_data.total_bad || 0));
+        this._$('span.total_bad').css('color',isFinished && response_data.total_bad==0 ? 'green':'red');
+
+        if(isFinished){
+            this._$('#all_urls_verified').show();
+            if(response_data.total_bad==0){ this._$('#all_urls_ok').show(); }
+            else { this._$('#all_urls_ok').hide(); }
+            this._$('button.ui-button-action').hide(); // Hide "Start/Continue" button
         }else{
             this._$('#all_urls_verified').hide();
-            this._$('button.ui-button-action').show();
+            this._$('button.ui-button-action').show(); // Show "Start/Continue" button
         }
-        
-        if(response.total_bad==0){
+
+        if(response_data.total_bad==0){
             div_res.find('button.btnCSV').hide();
         }else{
-            div_res.find('button.btnCSV').show();
-            this._on(div_res.find('.btnCSV').button(), {click:this._getPreviousSessionAsCSV});
+            div_res.find('button.btnCSV').button().show(); // Ensure button() is called if it was hidden
+            this._on(div_res.find('.btnCSV'), {click:this._getPreviousSessionAsCSV}); // Rebind, or ensure it's bound once
         }
-        
-        this._prevSessionExists = false; //to active mode "continue"
-        
-        if(terminatation_message){
 
-            terminatation_message = window.hWin.HEURIST4.util.isObject(terminatation_message)
-                        ? terminatation_message.message
-                        : terminatation_message;
-            //error['error_title'] = window.hWin.HEURIST4.util.isempty(error['error_title']) ? 'Verification terminated' : error['error_title'];
-            //window.hWin.HEURIST4.msg.showMsgErr(error)
-            
-            $(`<h3>${terminatation_message}</h3>`).appendTo(div_res.find('#session_summary'));
+        this.prevSessionExists = false; // Reset flag, next action will be "mode 0" unless _checkPreviousSession finds data
+
+        if(termination_message){
+            let message_text = window.hWin.HEURIST4.util.isObject(termination_message)
+                        ? termination_message.message
+                        : termination_message;
+            $(`<h3>`).text(message_text).appendTo(div_res.find('#session_summary'));
         }
     }
 });
