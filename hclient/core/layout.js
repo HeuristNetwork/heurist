@@ -356,6 +356,8 @@ function HLayout(args) {
         __layoutAddPane('east');
         __layoutAddPane('south');
 
+        layout_opts['enableCursorHotkey'] = false;
+
         // 2) init layout container
         $container.layout( layout_opts );
 
@@ -627,6 +629,7 @@ console.error('Cardinal layout widget does not have proper options');
                     layout_opts['onresize_end'] = function(){
                             $(document).trigger(window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE); //global app event
                     };
+                    layout_opts['enableCursorHotkey'] = false;
 
 
                     if(!$cardinal_container.is(':visible')){
