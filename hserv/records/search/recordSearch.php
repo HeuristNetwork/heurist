@@ -1808,7 +1808,6 @@ function recordGetRelationship($system, $sourceID, $targetID, $search_request=nu
     $targetID = intval($targetID);
 
     $query = 'SELECT rl_RelationID FROM recLinks WHERE rl_RelationID IS NOT NULL';
-    $query = 'SELECT rl_RelationID FROM recLinks WHERE rl_RelationID IS NOT NULL';
 
     if($sourceID>0){
         $query = $query.' AND rl_SourceID='.$sourceID;
@@ -1946,8 +1945,9 @@ function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDet
  */
 function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=false, $ids_only=false){
 
-    $menuitems_prepared = prepareIds($menuitems, true); // Ensure $menuitems is an array of unique positive integers
+    $menuitems = prepareIds($menuitems, true); // Ensure $menuitems is an array of unique positive integers
     $isRoot = (empty($result)); // Is this the initial call?
+    
     if($isRoot && $find_root_menu){
 
         //if root record is menu - we have to find parent cms home
@@ -4280,14 +4280,7 @@ function recordSearchLinkedDetails($system, $recID, $dty_IDs, $query) {
             }
             // Merge details for this dty_ID, ensuring dtl_ID keys are preserved
             foreach ($field_details_for_dty as $dtl_ID => $value){
-                // This logic might overwrite if multiple linked records have the same dtl_ID for a dty_ID,
-                // which is unlikely if dtl_IDs are globally unique. If dtl_IDs are per-record unique,
-                // then this structure is fine.
-                // If the intent is to aggregate all values for a dty_ID across all linked records,
-                // a different structure (e.g., array of arrays) would be needed.
-                // Current logic: last value for a dtl_ID (if shared across records) wins for a given dty_ID.
-                // However, dtl_ID is unique globally, so this effectively collects all details from all linked records,
-                // grouped by dty_ID.
+
                 $accumulated_details[$dty_ID][$dtl_ID] = $value;
             }
         }

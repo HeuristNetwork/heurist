@@ -767,7 +767,7 @@ function dataOutput($data, $filename=null, $mimeType=null)
     if($mimeType === MIMETYPE_JSON){ // Assumes MIMETYPE_JSON is 'application/json'
         header('X-Content-Type-Options: nosniff');
         header('X-XSS-Protection: 1; mode=block'); // Deprecated by modern browsers but often still set.
-        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; frame-ancestors \'self\';'); // Added semicolon
+        header('Content-Security-Policy: default-src \'self\'; script-src \'self\'; frame-ancestors \'self\';');
     }
 
     echo $data;

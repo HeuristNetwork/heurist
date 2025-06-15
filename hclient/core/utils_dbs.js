@@ -3546,7 +3546,7 @@ window.hWin.HEURIST4.dbs = {
         }
         
         // Regex captures: $1:type, $2:length (optional), $3:range (optional, e.g., (min,max))
-        let matches = mask.match(/\$([adimn])(\d)*(\(\d*,?\d*\))*\$/);
+        let matches = mask.match(/\$([adimn])(\d+)?(\(\d+,\d+\))\$/);
         let rtn = ['', ''];
 
         if(!matches){
@@ -3718,7 +3718,7 @@ window.hWin.HEURIST4.dbs = {
             return output_str;
         }
 
-        let matches = mask.match(/\$([adimn])(\d)*(\(\d*,?\d*\))*\$/);
+        let matches = mask.match(/\$([adimn])(\d+)?(\(\d+,\d+\))\$/);
 
         if(!matches){
             return 'Invalid entry mask provided';

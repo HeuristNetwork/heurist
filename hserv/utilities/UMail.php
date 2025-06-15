@@ -228,7 +228,7 @@ function sendPHPMailer($email_from, $email_from_name, $email_to, $email_title, $
 
 /**
  * Sends an email using PHP's native mail() function.
- * Used primarily by send_email.php as a fallback or simpler alternative.
+ * Used primarily by sendBulkEmail.php as a fallback or simpler alternative.
  *
  * @param string $email_to Recipient's email address.
  * @param string $email_title Subject of the email. Prefixed with "HEURIST ".

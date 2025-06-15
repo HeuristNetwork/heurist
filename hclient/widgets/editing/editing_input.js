@@ -2510,8 +2510,11 @@ $.widget( "heurist.editing_input", {
                     popup_options2  = $.extend(popup_options, this.configMode.popup_options);
                 }
 
-                if(this.configMode.entity === 'DefCalcFunctions' && window.hWin.HEURIST4.util.isPositiveInt(this.options.rectypeID)){
+                let entity = this.configMode.entity.toLowerCase();
+                if(entity === 'defcalcfunctions' && window.hWin.HEURIST4.util.isPositiveInt(this.options.rectypeID)){
                     popup_options2['rst_RecTypeID'] = this.options.rectypeID;
+                }else if(entity === 'records' && !window.hWin.HEURIST4.util.isempty(this.options.dtFields.rst_PtrFilteredIDs)){
+                    popup_options2['rectype_set'] = this.options.dtFields.rst_PtrFilteredIDs;
                 }
 
                 //init dialog to select related entities
@@ -4097,7 +4100,7 @@ $.widget( "heurist.editing_input", {
 
             if(!window.hWin.HEURIST4.util.isempty(mask) && !window.hWin.HEURIST4.util.isempty(val)){
 
-                let mask_parts = mask.split(/\$[adimn]\d*(?:\(\d,?\d*\))*\$/);
+                let mask_parts = mask.split(/\$([adimn])(?:\d+)?(\(\d+,\d+\))\$/);
 
                 this._entryMaskedValue = val.startsWith(mask_parts[0]) && val.endsWith(mask_parts[1])
                     ? val.substring(mask_parts[0].length, val.length - mask_parts[1].length)
@@ -7248,7 +7251,7 @@ $.widget( "heurist.editing_input", {
                 let test_value = $dlg.find('#inp_TestInput').val();
                 let $output = $dlg.find('#txt_TestOutput').empty();
 
-                let matches = mask.match(/\$([adimn])(\d)*(\(\d,?\d*\))*\$/);
+                let matches = mask.match(/\$([adimn])(\d+)?(\(\d+,\d+\))\$/);
 
                 if(window.hWin.HEURIST4.util.isempty(mask) || !matches){
                     $output.text(window.hWin.HEURIST4.util.isempty(mask) ? 'Please enter a mask to test.' : 'Invalid mask provided');

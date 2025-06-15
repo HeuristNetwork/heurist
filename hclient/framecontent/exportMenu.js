@@ -1,30 +1,26 @@
 /**
+* exportMenu.js 
+* 
+* Initializes and manages the export menu functionality.
+* This includes setting up UI elements, handling user interactions for various export formats,
+* and constructing URLs for data export.
+* 
+* @todo - convert to widget based on HBaseView
+*
+* @param {jQuery} container - The jQuery object representing the container for the export menu.
+*                             This could be the main body for a dedicated export page or a specific
+*                             menu container element.
+* @returns {object} An object with public methods to interact with the export menu instance.
+*
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\framecontent
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
-* @version     4.0
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-/**
- * Initializes and manages the export menu functionality.
- * This includes setting up UI elements, handling user interactions for various export formats,
- * and constructing URLs for data export.
- *
- * @param {jQuery} container - The jQuery object representing the container for the export menu.
- *                             This could be the main body for a dedicated export page or a specific
- *                             menu container element.
- * @returns {object} An object with public methods to interact with the export menu instance.
- */
 function hexportMenu( container ) {
     /** @const {string} _className - The name of this class module. */
     const _className = "exportMenu";

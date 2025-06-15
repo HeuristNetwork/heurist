@@ -1,80 +1,120 @@
 /**
-* navigation.js : menu based on RT_CMS_MENU records
-* it is used for CMS
+* navigation.js - Menu widget
+* 
+* Menu based on RT_CMS_MENU records it is used for CMS.
 *
+* @todo - replace with HMenu
+* 
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\cpanel
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6.0
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
+/**
+ * jQuery UI Widget: heurist.navigation
+ *
+ * This widget creates a navigation menu based on Heurist RT_CMS_MENU records.
+ * It is primarily used for Content Management System (CMS) navigation.
+ * The menu can be horizontal, vertical, or a tree view.
+ * It handles fetching menu data, rendering the menu, and actions upon menu item selection.
+ *
+ * @namespace heurist.navigation
+ * @property {object} options - Configuration options for the widget.
+ * @property {Array<number|string>} options.menu_recIDs - Array of record IDs for the top-level menu items.
+ * @property {boolean} options.main_menu - If true, searches for RT_CMS_HOME as the root of the menu (default: false).
+ * @property {string} options.orientation - Orientation of the menu: 'horizontal', 'vertical', or 'treeview' (default: 'horizontal').
+ * @property {string} options.target - Target for menu actions: 'inline' (loads content into '#page-content' or '#main-content'),
+ *                                     'popup', or a specific element ID (default: 'inline').
+ * @property {boolean} options.use_next_level - If true and the top level consists of a single entry, uses the next level of menus as the top (default: false).
+ * @property {?Function} options.onmenuselect - Callback function triggered when a menu item is selected.
+ *                                            Primarily for CMS edit mode. Passes `page_id` as an argument. (default: null).
+ * @property {boolean} options.selectable_if_submenu - If true, a menu item with a submenu is still selectable by default (default: true).
+ * @property {?Function} options.aftermenuselect - Callback function triggered after a menu item action (like loading content) is completed.
+ *                                               Passes `document` and `page_id` as arguments. (default: null).
+ * @property {?object} options.toplevel_css - CSS object to apply to top-level menu items (default: null).
+ * @property {number} options.expand_levels - Number of levels to initially expand in 'treeview' orientation (default: 0).
+ * @property {?Function} options.onInitComplete - Callback function triggered after the menu is fully initialized.
+ *                                                Passes `first_not_empty_page_id` as an argument. (default: null).
+ * @property {string} options.language - Language code for menu item text (e.g., 'en', 'fr'). 'def' uses the default language (default: 'def').
+ * @property {?object} options.supp_options - Supplementary options to pass when initializing page content after load (default: null).
+ *
+ * @property {?HRecordSet} menuData - Stores the Heurist record set containing the menu data once fetched.
+ * @property {object} pageStyles - Stores CSS styles associated with menu page IDs. `{[page_id]: cssObject}`.
+ * @property {object} pageStyles_original - Stores original jQuery cloned elements to restore styles when navigating away. `{[target_selector]: jQueryElement}`.
+ * @property {object} ids_cached_entries - Caches generated HTML or tree node data for menu items to avoid redundant processing. `{[page_id]: htmlStringOrNodeObject}`.
+ * @property {object} ids_menu_entries - Stores an object mapping parent page IDs to an array of their child menu item IDs. Used for recursion detection. `{[page_id]: [child_page_id, ...]}`.
+ * @property {Array<number|string>} ids_recurred - Stores page IDs that were detected as part of a recursive menu structure.
+ * @property {object} menu_item_urls - Stores external URLs associated with menu items. `{[page_id]: urlString}`.
+ * @property {number|string} first_not_empty_page_id - The ID of the first menu item encountered that has content.
+ * @property {string} _current_query_string - Internal property, seems unused. TODO: Verify and remove if unused.
+ * @property {?jQuery} divMainMenu - jQuery object for the main menu container div, if not treeview.
+ * @property {?jQuery} divMainMenuItems - jQuery object for the `<ul>` element containing main menu items, if not treeview.
+ */
 $.widget( "heurist.navigation", {
 
     options: {
-       menu_recIDs:[],  //top level menu records
-       main_menu: false, //search for RT_CMS_HOME as root
-       orientation: 'horizontal', //vertical or treeview
-       target: 'inline', // inline (#page-content) or poup or target element id
-       use_next_level: false,  //if top level consists of the single entry use next level of menues
-       onmenuselect: null,   //for cms edit mode it performs special behavior
-       selectable_if_submenu: true, //if item has submenu it is selectable by default
+       menu_recIDs:[],
+       main_menu: false,
+       orientation: 'horizontal',
+       target: 'inline',
+       use_next_level: false,
+       onmenuselect: null,
+       selectable_if_submenu: true,
        aftermenuselect: null,
-       toplevel_css:null,  //css for top level items
-       expand_levels:0,  //expand levels for treeview
+       toplevel_css:null,
+       expand_levels:0,
        onInitComplete: null,
-       language: 'def',   //"xx" means take default - without code: prefix
-       supp_options: null  //options to init page after load
+       language: 'def',
+       supp_options: null
     },
-    
-    menuData: null, //HRecordSet
 
-    pageStyles:{},  //menu_id=>styles
-    pageStyles_original:{}, //keep to restore  element_id=>css
+    menuData: null,
 
-    //to avoid recusion
-    ids_cached_entries: {}, 
+    pageStyles:{},
+    pageStyles_original:{},
+
+    ids_cached_entries: {},
     ids_menu_entries: {},
     ids_recurred: [],
 
-    //menu external urls
     menu_item_urls: {},
-    
+
     first_not_empty_page_id:0,
 
-    _current_query_string:'',
-
-    // the widget's constructor
+    /**
+     * The widget's constructor. Initializes the menu element, sets up styles,
+     * and prepares for either Fancytree (for 'treeview' orientation) or jQuery UI Menu.
+     * Calls `reloadMenuData` to fetch and build the menu.
+     * This method is called by jQuery UI when the widget is created.
+     * @memberof heurist.navigation
+     * @private
+     */
     _create: function() {
 
         let that = this;
-        
-        if(!this.options.language) this.options.language = 'def'; //"xx" means use current language
+
+        if(!this.options.language) this.options.language = 'def'; // "xx" means use current language
 
         if(this.element.parent().attr('data-heurist-app-id') || this.element.attr('data-heurist-app-id')){
             //this is CMS publication - take bg from parent
             if(this.element.parent().attr('data-heurist-app-id')){
                 this.element.parent().css({'background':'none','border':'none'});
             }
-           
+
         }else{
             this.element.css('height','100%');
             if(this.element.parents('.main-header').length>0){
                 this.element.addClass('ui-heurist-header2');
             }
         }
-        
+
         this.element.disableSelection();// prevent double click to select text
-      
+
         if(this.options.orientation=='treeview'){
 
             let fancytree_options =
@@ -113,54 +153,53 @@ $.widget( "heurist.navigation", {
         this.reloadMenuData();
 
     },
-    
-    //
-    //find menu contents by top level ids    
-    //
+
+    /**
+     * Reloads the menu data from the server based on `this.options.menu_recIDs` or `this.options.main_menu`.
+     * It makes an AJAX request to fetch CMS menu records.
+     * On success, it populates `this.menuData` with an `HRecordSet` and calls `_onGetMenuData` to render the menu.
+     * On failure, it displays an error message.
+     * @memberof heurist.navigation
+     */
     reloadMenuData:function(){
-        
-        //find menu contents by top level ids    
+
+        //find menu contents by top level ids
         let ids = this.options.menu_recIDs;
         if(ids==null){
             this.options.menu_recIDs = [];
-            ids = '';    
+            ids = '';
         } else {
             if(Array.isArray(ids)) {ids = ids.join(',');}
             else if(window.hWin.HEURIST4.util.isNumber(ids)){
                 this.options.menu_recIDs = [ids];
             }else{
-                this.options.menu_recIDs = ids.split(',')  
-            } 
+                this.options.menu_recIDs = ids.split(',');
+            }
         }
 
         //retrieve menu content from server side
-        /*let request = { q: 'ids:'+ids,
-            detail: //'detail'
-               [window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], 
-                window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'], 
-                window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'],
-                window.hWin.HAPI4.sysinfo['dbconst']['DT_TARGET_ELEMENT']],
-            id: window.hWin.HEURIST4.util.random(),
-            source:this.element.attr('id') };
-            */
         let request = {ids:ids, a:'cms_menu', main_menu: this.options.main_menu?1:0 };
         let that = this;
-            
-            
+
+
         window.hWin.HAPI4.RecordMgr.search(request, function(response){
             if(response.status == window.hWin.ResponseStatus.OK){
                 that.menuData = new HRecordSet(response.data);
-                that._onGetMenuData();   
+                that._onGetMenuData();
             }else{
-                $('<p class="ui-state-error">Can\'t init menu: '+response.message+'</p>').appendTo(that.divMainMenu);
-                
+                let errorTarget = that.divMainMenu ? that.divMainMenu : that.element;
+                $('<p class="ui-state-error">Can\'t init menu: '+response.message+'</p>').appendTo(errorTarget);
+
             }
         });
     },
-    
-    //
-    //
-    //
+
+    /**
+     * Checks if a given record ID corresponds to a valid menu item in the current `menuData`.
+     * @memberof heurist.navigation
+     * @param {number|string} rec_id - The record ID to check.
+     * @returns {boolean} True if it's a valid menu item, false otherwise.
+     */
     isMenuItem: function(rec_id){
 
         if(this.menuData && rec_id){
@@ -168,30 +207,41 @@ $.widget( "heurist.navigation", {
         }else{
             return false;
         }
-        
+
     },
-    
-    // recursive function
-    // resdata - result of request to server side
-    // orientation - treeview, horizontal, vertical, list
-    //
+
+    /**
+     * Recursively generates the menu structure (HTML string or Fancytree node list).
+     * It processes `menuitems` (an array of record IDs) for a given `parent_id` and `lvl` (level).
+     * It uses `this.menuData` as the source of information.
+     * Handles different orientations ('treeview', 'horizontal', 'vertical', 'list').
+     * Detects and flags recursive menu structures.
+     * Caches generated menu items in `this.ids_cached_entries`.
+     * Remark: The condition `if(!lvl>0)` might be confusing; `if(lvl === undefined || lvl === null || lvl <= 0)` or `if(!lvl || lvl <= 0)` would be clearer.
+     * @memberof heurist.navigation
+     * @param {?string} orientation - The desired orientation ('treeview', 'horizontal', 'vertical', 'list'). Defaults to `this.options.orientation`.
+     * @param {string|number} parent_id - The ID of the parent menu item. '0' for top level.
+     * @param {Array<number|string>} menuitems - Array of record IDs for the current level of menu items. Defaults to `this.options.menu_recIDs`.
+     * @param {?number} lvl - The current nesting level of the menu. Defaults to 0.
+     * @returns {string|Array<object>} HTML string for jQuery menu, or an array of Fancytree node objects for 'treeview'/'list'.
+     */
     getMenuContent: function(orientation, parent_id, menuitems, lvl){
-        
+
         if(window.hWin.HEURIST4.util.isnull(parent_id)) parent_id = '0';
         if(window.hWin.HEURIST4.util.isnull(orientation)) orientation = this.options.orientation;
         if(window.hWin.HEURIST4.util.isnull(menuitems)) menuitems = this.options.menu_recIDs; //top menu items
-        if(!lvl>0){
+        if(!lvl || lvl == 0){
             lvl = 0;
             //to avoid recursion
             this.ids_menu_entries = {};
             this.ids_cached_entries = {};
             this.ids_recurred = [];
-        } 
-        
+        }
+
         let resdata = this.menuData;
         parent_id = ''+parent_id;
-        
-        
+
+
         let DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
             DT_SHORT_SUMMARY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'],
             DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
@@ -455,22 +505,30 @@ $.widget( "heurist.navigation", {
         
     },
     
-    //
-    // callback function on getting menu records
-    // resdata - recordset with menu records (full data)
-    //
+    /**
+     * Callback function executed after menu data is successfully fetched by `reloadMenuData`.
+     * It resets internal caches related to menu structure and recursion detection.
+     * Calls `getMenuContent` to generate the menu structure.
+     * If recursion is detected, it shows an error message.
+     * Initializes either Fancytree (for 'treeview') or jQuery UI Menu with the generated content.
+     * Applies custom CSS and event handlers for jQuery UI Menu.
+     * Calls `options.onInitComplete` callback if provided.
+     * Remark: The dialogId 'dialog-common-messages222' in the recursion error message seems specific and might be a leftover.
+     * @memberof heurist.navigation
+     * @private
+     */
     _onGetMenuData:function(){
-            
+
         //reset
-        this.ids_menu_entries = {}; 
+        this.ids_menu_entries = {};
         this.ids_cached_entries = {};
         this.ids_recurred = [];
         this.first_not_empty_page_id = 0;
-        
+
         //get either treedata or html for jquery menu
-        let menu_content = this.getMenuContent(null, 0, this.options.menu_recIDs, 0);     
+        let menu_content = this.getMenuContent(null, 0, this.options.menu_recIDs, 0);
         let DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
-        
+
         if(this.ids_recurred.length>0 && window.hWin.HAPI4.has_access()){
             let s = [];
             for(let i=0;i<this.ids_recurred.length;i++){
@@ -482,91 +540,70 @@ $.widget( "heurist.navigation", {
             +(s.join('<br>'))
             +'</div>If you are the author, simply edit the CMS Home record through the website editor (Site tab, then the Edit website layout/properties button), and delete duplicates (this will not delete the page content, only the extra reference to the menu entry)'
             +'<p>If you can\'t fix this problem yourself, please send a bug report and we will take care of it.</p>'
-            ,null,null,{dialogId:'dialog-common-messages222',removeOnClose:true});
-            
-            /*+'<p>How to fix:<ul><li>Open in record editor</li>'
-            +'<li>Find parent menu(s) in "Linked From" section</li>'
-            +'<li>Open parent menu record and remove link to this record</li></ul>');*/
-            /*window.hWin.HEURIST4.msg.showMsgDlg('Some menu items are recurred.<p>'
-            +(s.join('<br>'))
-            +'</p>Ask website author to fix this issue');*/            
+            ,null,null,{dialogId:'dialog-common-messages222',removeOnClose:true}); // Remark: dialogId is specific.
+
         }
-        
-        //
-        //
-        //
+
+
         if(this.options.orientation=='treeview'){
-            
+
             let tree = $.ui.fancytree.getTree( this.element );
-            tree.reload( menu_content );
+            if (tree) { // Ensure tree instance exists
+                tree.reload( menu_content );
+            }
             this.element.find('.ui-fancytree').show();
-            
+
         }else{
 
-            $(menu_content).appendTo(this.divMainMenuItems);
+            // Ensure divMainMenuItems exists before appending
+            if (!this.divMainMenuItems) {
+                this.divMainMenu = $("<div>").appendTo(this.element);
+                this.divMainMenuItems = $('<ul>').attr('data-level',0).appendTo( this.divMainMenu );
+                if(this.options.orientation=='horizontal'){
+                    this.divMainMenuItems.addClass('horizontalmenu');
+                }
+            }
+            this.divMainMenuItems.empty().append(menu_content);
+
 
             let opts = {};
             if(this.options.orientation=='horizontal'){
-                //opts = {position:{ my: "left top", at: "left bottom" }}; //+20
-                
                 opts = { position:{ my: "left top", at: "left bottom" },
                         focus: function( event, ui ){
-                            
+
                    if(!$(ui.item).parent().hasClass('horizontalmenu')){
                         //indent for submenu
                         let ele = $(ui.item).children('ul.ui-menu');
                         if(ele.length>0){
-                            setTimeout(function() { ele.css({top:'0px',  left:'200px'}); }, 300);      
+                            setTimeout(function() { ele.css({top:'0px',  left:'200px'}); }, 300);
                         }
                    }else {
                         //show below
                         let ele = $(ui.item).children('ul.ui-menu');
                         if(ele.length>0){
-                            setTimeout(function() { ele.css({top:'29px',  left:'0px'}); }, 500);      
+                            setTimeout(function() { ele.css({top:'29px',  left:'0px'}); }, 500);
                         }
-                   } 
+                   }
                 }};
-                
+
             }
 
-            
-            opts['icons'] = {submenu: "ui-icon-carat-1-e" }; 
+
+            opts['icons'] = {submenu: "ui-icon-carat-1-e" };
             //init jquery menu widget
             this.divMainMenuItems.menu( opts );
 
-/*            
-            let myTimeoutId = 0;
-            //show hide function
-            let _hide = function(ele) {
-                myTimeoutId = setTimeout(function() {
-                    $( ele ).hide();
-                    }, 800);
-            };
-            
-            let _show = function(ele, parent) {
-                clearTimeout(myTimeoutId);
-                return false;
-            };
-
-            let all_menues = this.divMainMenuItems.find('ul.ui-menu');
-            this._on( all_menues, {
-                mouseenter : function(){ _show(); },
-                mouseleave : function(){ 
-                    _hide(all_menues) 
-                }
-            });
-*/
-          //prevents default jquery delay         
+          //prevents default jquery delay
           this.divMainMenuItems.children('li.ui-menu-item')
             .on( "mouseenter", function(event) {
                     event.preventDefault();
-                    $(this).children('.ui-menu').show();  
+                    $(this).children('.ui-menu').show();
                 } )
             .on( "mouseleave", function(event) {
                     event.preventDefault();
                     $(this).find('.ui-menu').hide();
                 } );
- 
+
             if(this.options.toplevel_css!==null){
                 this.divMainMenuItems.children('li.ui-menu-item').children('a').css(this.options.toplevel_css);
             }
@@ -574,7 +611,7 @@ $.widget( "heurist.navigation", {
             if(this.options.orientation=='horizontal'){
                 this.divMainMenuItems.children('li.ui-menu-item').children('a').find('span.ui-menu-icon').hide();
             }
-                        
+
             //
             // if onmenuselect function define it is used for action
             // otherwise it loads content to page_target (#main-content by default)
@@ -582,23 +619,30 @@ $.widget( "heurist.navigation", {
             this._on(this.divMainMenuItems.find('a').addClass('truncate'),{click:this._onMenuClickEvent});
         }
 
-        
+
         if(window.hWin.HEURIST4.util.isFunction(this.options.onInitComplete)){
             this.options.onInitComplete.call(this, this.first_not_empty_page_id);
         }
 
-        
-        
-       
+
+
     }, //end _onGetMenuData
 
-    //
-    //
-    //
+    /**
+     * Handles click events on menu items (for non-treeview orientations).
+     * It extracts page ID and target information from the clicked anchor's data attributes.
+     * Determines if the item is selectable based on content presence and submenu status.
+     * If an external URL is associated with the item, it opens it in a new tab.
+     * Otherwise, if selectable and has content (or an `onmenuselect` callback is defined),
+     * it calls `highlightTopItem` and `_onMenuItemAction`.
+     * @memberof heurist.navigation
+     * @private
+     * @param {Event} event - The jQuery click event object.
+     */
     _onMenuClickEvent: function(event){
 
         let $target = $(event.target);
-        
+
         window.hWin.HEURIST4.util.stopEvent(event);
 
         if($target.is('span') || $target.is('img')){
@@ -606,7 +650,7 @@ $.widget( "heurist.navigation", {
         }
 
         let data = {
-            page_id: $target.attr('data-pageid'), 
+            page_id: $target.attr('data-pageid'),
             page_target: $target.attr('data-target')
         };
 
@@ -627,11 +671,11 @@ $.widget( "heurist.navigation", {
 
         // menu is selectable
         let is_selectable = this.menuData.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOPMENUSELECTABLE']);
-        is_selectable = data.hasContent && 
-                        is_selectable !== TERM_NO && is_selectable !== TERM_NO_old && 
+        is_selectable = data.hasContent &&
+                        is_selectable !== TERM_NO && is_selectable !== TERM_NO_old &&
                         this.options.selectable_if_submenu;
 
-        if(Object.hasOwn(this.menu_item_urls, data.page_id) && 
+        if(Object.hasOwn(this.menu_item_urls, data.page_id) &&
             !window.hWin.HEURIST4.util.isempty(this.menu_item_urls[data.page_id])){ // open url in new window
 
             window.open(this.menu_item_urls[data.page_id], '_blank', 'noopener');
@@ -641,58 +685,80 @@ $.widget( "heurist.navigation", {
         }
         if(!data.hasContent && !window.hWin.HEURIST4.util.isFunction(this.options.onmenuselect)){
             //no action if content is not defined
-            
+
         }else if(data.page_id>0){
 
-            let page_id = data.page_id;
+            let page_id_path = data.page_id; // Use a different variable name for the path
             if($target.attr('data-parentid')){
-                page_id = $target.attr('data-parentid') + ',' + page_id;
+                page_id_path = $target.attr('data-parentid') + ',' + page_id_path;
             }
 
             //highlight top most menu
-            this.highlightTopItem(page_id);
+            this.highlightTopItem(page_id_path);
 
-            this._onMenuItemAction(data);                
+            this._onMenuItemAction(data);
 
         }
 
     },
-    
-    //
-    // highlight top most menu
-    //
-    highlightTopItem: function(page_id){
+
+    /**
+     * Highlights the top-most parent menu item for a given page ID path.
+     * It removes the 'selected' class from all menu items and adds it to the
+     * appropriate top-level item. Also collapses other menu branches.
+     * @memberof heurist.navigation
+     * @param {string} page_id_path - A comma-separated string representing the path of page IDs from parent to child.
+     */
+    highlightTopItem: function(page_id_path){
+
+        if (!this.divMainMenuItems) return; // Guard against missing menu items container
 
         //dim all
         this.divMainMenuItems.find('a').trigger('mouseout').removeClass('selected');
 
         // find item
         let $ele = null;
-        if(typeof page_id === 'string' && page_id.indexOf(',') > 0){
+        if(typeof page_id_path === 'string' && page_id_path.indexOf(',') > 0){
 
-            let page_ids = page_id.split(',');
-            page_id = page_ids.pop();
-            let parent_id = page_ids.join(',');
+            let page_ids = page_id_path.split(',');
+            let target_page_id = page_ids.pop(); // The actual page ID
+            let parent_id_path = page_ids.join(','); // The parent path for specificity
 
-            $ele = this.element.find(`a[data-pageid="${page_id}"][data-parentid="${parent_id}"]`).parents('.ui-menu-item');
-        }else if(page_id>0){
+            $ele = this.element.find(`a[data-pageid="${target_page_id}"][data-parentid="${parent_id_path}"]`).parents('.ui-menu-item');
+        }else if(page_id_path && page_id_path > 0){ // Should be a string if it contains ',', otherwise a number/string page_id
 
-            $ele = this.element.find('a[data-pageid="'+page_id+'"]');
+            $ele = this.element.find('a[data-pageid="'+page_id_path+'"]');
             $ele = $ele.parents('.ui-menu-item');
         }
 
         if($ele && $ele.length>0){
+            // The last element in $ele is the top-most li.ui-menu-item in its branch.
+            // We want to highlight its child 'a' tag.
             $($ele[$ele.length-1].firstChild).addClass('selected');
             setTimeout(() => {
-                    if(this.divMainMenuItems.menu('instance'))
+                    if(this.divMainMenuItems.menu('instance')) // Check if menu instance exists
                         this.divMainMenuItems.menu('collapseAll');
             }, 1000);
         }
     },
-    
-    //
-    //
-    //
+
+    /**
+     * Performs the action associated with a selected menu item.
+     * If `options.onmenuselect` is defined, it calls it with the `page_id`.
+     * Otherwise, it loads the content of the selected page.
+     * Content can be loaded into a popup dialog or an inline target element
+     * (e.g., '#main-content', '#page-content', or a custom target from `data.page_target`).
+     * Handles applying page-specific CSS and restoring original styles.
+     * Triggers `onexitpage` event on the target element before loading new content if the event is bound.
+     * After content is loaded, it initializes layout and calls `options.aftermenuselect`.
+     * @memberof heurist.navigation
+     * @private
+     * @param {object} data - An object containing details about the selected menu item.
+     * @param {string|number} data.page_id - The ID of the selected page/menu item.
+     * @param {?string} data.page_target - The target element or 'popup' for content loading.
+     * @param {boolean} data.page_showtitle - Whether to show the page title.
+     * @param {boolean} data.hasContent - Whether the page has content.
+     */
     _onMenuItemAction: function(data){
 
         let that = this;
@@ -703,7 +769,7 @@ $.widget( "heurist.navigation", {
 
         }else{
 
-            // redirected to websiteRecord.php 
+            // redirected to websiteRecord.php
             // with field=1 it loads DT_EXTENDED_DESCRIPTION
             let page_url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
             +'&field=1&recid='+data.page_id;
@@ -715,14 +781,16 @@ $.widget( "heurist.navigation", {
 
                 let opts =  {  container:'cms-popup-'+window.hWin.HEURIST4.util.random(),
                     close: function(){
-                        $dlg.dialog('destroy');       
-                        $dlg.remove();
+                        if ($dlg && $dlg.dialog('instance')) { // Check if dialog exists and is initialized
+                            $dlg.dialog('destroy');
+                        }
+                        if ($dlg) $dlg.remove();
                     },
                     open: function(){
 
                         let pagetitle = $dlg.find('h2.webpageheading');
                         if(pagetitle.length>0){ //find title - this is first children
-                           
+
                             if(!data.page_showtitle){
                                 pagetitle.hide();
                             }
@@ -742,7 +810,7 @@ $.widget( "heurist.navigation", {
                         }else{
                             pageCss['position'] = val;
                         }
-                    }  
+                    }
                     opts = $.extend(opts, pageCss);
 
                     dlg_css = window.hWin.HEURIST4.util.cloneJSON(pageCss);
@@ -750,14 +818,14 @@ $.widget( "heurist.navigation", {
                     if(dlg_css['height']) delete dlg_css['height'];
 
                 }else{
-                    opts['width']= 750;                            
-                }                                
+                    opts['width']= 750;
+                }
 
 
-                let $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(page_url, null, 
+                let $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(page_url, null,
                     'Heurist', opts, dlg_css);
 
-                if(dlg_css){
+                if(dlg_css && $dlg){ // Ensure $dlg exists
                     $dlg.css(dlg_css);
                 }
 
@@ -765,49 +833,55 @@ $.widget( "heurist.navigation", {
             }
             else{
 
-                let page_target = '#main-content';   
-                
+                let page_target_selector = '#main-content'; // Renamed to avoid confusion
+
                 if(this.options.target=='inline_page_content'){
-                    page_target = '#page-content';
+                    page_target_selector = '#page-content';
                 }else if(!window.hWin.HEURIST4.util.isempty(data.page_target)) {
-                    page_target = data.page_target;
+                    page_target_selector = data.page_target;
                 }
 
-                //load page content to page_target element 
-                if(page_target[0]!='#') page_target = '#'+page_target;
+                //load page content to page_target element
+                if(page_target_selector[0]!='#') page_target_selector = '#'+page_target_selector;
 
-                
+
                 let continue_load_page = function() {
-                    
+                    let $page_target_element = $(page_target_selector); // Get jQuery object once
+
                     if(pageCss && Object.keys(pageCss).length>0){
-                        if(!that.pageStyles_original[page_target]){ //keep to restore
-                            that.pageStyles_original[page_target] = $(page_target).clone();
-                           
+                        if(!that.pageStyles_original[page_target_selector]){ //keep to restore
+                            that.pageStyles_original[page_target_selector] = $page_target_element.clone();
+
                         }
-                        $(page_target).css(pageCss);
-                    }else if(that.pageStyles_original[page_target]){ //restore
-                       
-                        $(page_target).replaceWith(that.pageStyles_original[page_target]);                            
+                        $page_target_element.css(pageCss);
+                    }else if(that.pageStyles_original[page_target_selector]){ //restore
+
+                        $page_target_element.replaceWith(that.pageStyles_original[page_target_selector]);
+                        // After replacing, the original $page_target_element reference is stale.
+                        // Re-select it if needed for further operations within this function,
+                        // or ensure operations happen on the new element from pageStyles_original.
+                        // For now, subsequent operations are on the potentially new element.
+                        $page_target_element = $(page_target_selector); // Re-query if necessary for footer logic
                     }
-                    
-                    let page_footer = $(page_target).find('#page-footer');
+
+                    let page_footer = $page_target_element.find('#page-footer');
                     if(page_footer.length>0) page_footer.detach();
-                
+
                     const DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
                     DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
-        
+
                     const server_request = {
                         q: 'ids:'+data.page_id,
                         restapi: 1,
-                        columns: 
+                        columns:
                         ['rec_ID', DT_NAME, DT_EXTENDED_DESCRIPTION],
                         zip: 1,
                         format:'json'};
-                    
-                    //perform search see record_output.php       
+
+                    //perform search see record_output.php
                     window.hWin.HAPI4.RecordMgr.search_new(server_request,
                         function(response){
-                          
+
                             if(window.hWin.HEURIST4.util.isJSON(response)) {
                                 if(response['records'] && response['records'].length>0){
                                     let res = response['records'][0]['details'];
@@ -816,23 +890,16 @@ $.widget( "heurist.navigation", {
                                         let key = keys[idx];
                                         res[key] = res[key][ Object.keys(res[key])[0] ];
                                     }
-                                    //res[DT_NAME] = res[DT_NAME]
-                                    //res[DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_SCRIPT, DT_CMS_CSS, DT_CMS_PAGETITLE]
-                                    
+
                                     if(page_footer.length>0){
-                                        page_footer.appendTo( $(page_target) );
-                                        $(page_target).css({'min-height':$(page_target).parent().height()-page_footer.height()-10 });
-                                    } 
-                                    
-                                    window.hWin.HAPI4.layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], 
-                                                $(page_target), 
-                                                that.options.supp_options ); 
+                                        page_footer.appendTo( $page_target_element ); // Use the potentially updated reference
+                                        $page_target_element.css({'min-height':$page_target_element.parent().height()-page_footer.height()-10 });
+                                    }
+
+                                    window.hWin.HAPI4.layoutMgr.layoutInit( res[DT_EXTENDED_DESCRIPTION], $page_target_element, that.options.supp_options );
 
                                     if(window.hWin.HEURIST4.util.isFunction(that.options.aftermenuselect)){
                                         that.options.aftermenuselect( document, data.page_id );
-                                        /*setTimeout(function(){
-                                        that.options.aftermenuselect( data.page_id );
-                                        },2000);*/
                                     }
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr({
@@ -843,79 +910,98 @@ $.widget( "heurist.navigation", {
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
-                        });                
-                
+                        });
 
-                    /*
-                    $(page_target).empty().load(page_url,
-                        function(){
 
-                            if(page_footer.length>0){
-                                page_footer.appendTo( $(page_target) );
-                                $(page_target).css({'min-height':$(page_target).parent().height()-page_footer.height()-10 });
-                            } 
-                            
-
-                            layoutMgr.layoutInit( null, $(page_target) );
-                            
-                           
-                            
-                            if(window.hWin.HEURIST4.util.isFunction(that.options.aftermenuselect)){
-                                that.options.aftermenuselect( document, data.page_id );
-                            }
-                    });*/
                 };
 
-                //before load we trigger  function
-
+                //before load we trigger function
+                let $page_target_element_for_event = $(page_target_selector);
                 let event_assigned = false;
 
-                $.each($._data( $( page_target )[0], "events"), function(eventname, event) {
-                    if(eventname=='onexitpage'){
-                        event_assigned = true;
-                        return false;
-                    }
-                });                        
+                if ($page_target_element_for_event.length > 0) { // Check if target element exists
+                    $.each($._data( $page_target_element_for_event[0], "events"), function(eventname, event) {
+                        if(eventname=='onexitpage'){
+                            event_assigned = true;
+                            return false; // break the loop
+                        }
+                    });
+                }
 
                 if(event_assigned){
-                    $( page_target ).trigger( "onexitpage", continue_load_page );
+                    $page_target_element_for_event.trigger( "onexitpage", continue_load_page );
                 }else{
                     continue_load_page();
                 }
-            }                
+            }
         }
     },
 
 
-    // Any time the widget is called with no arguments or with only an option hash,
-    // the widget is initialized; this includes when the widget is created.
+    /**
+     * Placeholder for the _init method.
+     * Remark: In jQuery UI widgets, `_create` is the main initialization method.
+     * This `_init` method is part of the widget factory's lifecycle but typically not overridden
+     * unless there's a specific need to hook into re-initialization calls.
+     * Currently, it's empty and doesn't perform any operations.
+     * @memberof heurist.navigation
+     * @private
+     */
     _init: function() {
+        // This is called on widget creation and on subsequent calls without arguments.
+        // _create() is the primary constructor.
     },
 
-   //Called whenever the option() method is called
-    //Overriding this is useful if you can defer processor-intensive changes for multiple option change
+   /**
+    * Handles option changes for the widget.
+    * This method is called by jQuery UI when `option()` is called on the widget.
+    * It calls `_superApply` to apply the changed options.
+    * @memberof heurist.navigation
+    * @private
+    */
    _setOptions: function( ) {
         this._superApply( arguments );
+        // Potentially call _refresh() or other methods if options change requires UI update.
    },
 
 
-
-   /*
-    * private function
-    * show/hide buttons depends on current login status
+   /**
+    * Placeholder for a refresh method.
+    * Remark: This method is currently empty and does not perform any actions.
+    * It could be implemented to update the widget based on external changes or option modifications.
+    * @memberof heurist.navigation
+    * @private
     */
    _refresh: function(){
-
+        // This method could be used to redraw or update the menu if needed.
+        // For example, if menuData could change dynamically after initialization.
    },
 
-   //
-   // custom, widget-specific, cleanup.
+   /**
+    * Cleans up the widget when it is destroyed.
+    * Removes the main menu container (`divMainMenu`) if it exists.
+    * This method is called by jQuery UI when the widget is destroyed.
+    * @memberof heurist.navigation
+    * @private
+    */
    _destroy: function() {
-        if(this.divMainMenu) this.divMainMenu.remove();
+        if(this.divMainMenu) {
+            this.divMainMenu.remove();
+            this.divMainMenu = null; // Clear reference
+        }
+        if (this.element.data('fancytree')) { // Destroy Fancytree instance if it exists
+            this.element.fancytree('destroy');
+        }
    },
-    
+
+   /**
+    * Retrieves the ID of the first menu item found that has content.
+    * This value is populated during the menu generation process.
+    * @memberof heurist.navigation
+    * @returns {number|string} The record ID of the first contentful page, or 0 if none found.
+    */
    getFirstPageWithContent: function(){
         return this.first_not_empty_page_id;
    }
-    
+
 });

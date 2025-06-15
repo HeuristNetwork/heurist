@@ -1498,8 +1498,8 @@ $.widget( "heurist.svs_list", {
                         case "query":
                             that._getFilterString(node.key, $(node.li));
                             break;    
-                        case "embed":   //EMBED - IJ 2022-10-04 Block use here, Publish alternative are to be used instead
-                            that._showEmbedDialog(node.key); // show message about alternatives
+                        case "url": // replaced EMBED - IJ 2022-10-04 Block use here, Publish alternative are to be used instead
+                            that._showURLDialog(node.key); // show message about alternatives
                             break;
                         case "copy":   //duplicate saved search
                         
@@ -1655,7 +1655,7 @@ $.widget( "heurist.svs_list", {
             if(that.options.filter_by_type<2){
                 arr_menu.push({title: "----"});
                 arr_menu.push({title: "Get filter", cmd: "query", uiIcon: "ui-icon-copy" });
-                arr_menu.push({title: "Embed", cmd: "embed", uiIcon: "ui-icon-globe" }); // displays message about alternatives
+                arr_menu.push({title: "Get URL", cmd: "url", uiIcon: "ui-icon-globe" }); // displays message about alternatives
             }
             arr_menu.push({title: "----"});
             arr_menu.push({title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" });
@@ -1696,7 +1696,7 @@ $.widget( "heurist.svs_list", {
                         if(cur_fav[0] != '' && cur_fav.findIndex(filter => filter[0] == node.key) != -1){
                             tree.contextmenu('updateEntry', 'favourite', {title: 'Unfavourite', uiIcon: 'ui-icon-star'});
                         }else{
-                            tree.contextmenu('updateEntry', 'favourite', {title: 'Faviourite', uiIcon: 'ui-icon-star-b'});
+                            tree.contextmenu('updateEntry', 'favourite', {title: 'Favourite', uiIcon: 'ui-icon-star-b'});
                         }
                     }
 
@@ -2472,14 +2472,28 @@ $.widget( "heurist.svs_list", {
 
     
     //
-    // IJ 2022-10-04 Block use here, Publish alternative are to be used instead
+    // Displays URL to run saved search to user
     //
-    _showEmbedDialog: function(svs_ID){
-        window.hWin.HEURIST4.msg.showMsgErr({
-            message: 'Embed is no longer supported. Please use the much more flexible standalone web page builder or the website builder, which are located under the Publish menu.',
-            error_title: 'Function no longer supported',
-            status: window.hWin.ResponseStatus.ACTION_BLOCKED
-        });
+    _showURLDialog: function(svs_ID){
+        
+        const URL = `${window.hWin.HAPI4.baseURL_pro}?db=${window.hWin.HAPI4.database}&svs=${svs_ID}`;
+
+        let $dlg;
+        let content = `<div>
+            <textarea cols=60 rows=3>${URL}</textarea>
+        </div>`;
+
+        let btns = {};
+        btns[window.hWin.HR('Copy')] = () => {
+            window.hWin.HEURIST4.util.copyStringToClipboard(URL);
+        };
+        btns[window.hWin.HR('Close')] = () => {
+            $dlg.dialog('close');
+        };
+
+        let labels = {title: window.hWin.HR('URL for saved search')};
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, labels, {default_palette_class: 'ui-heurist-explore'});
     },
 
     //--------------------------------------------------------------------------------------

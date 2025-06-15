@@ -1,21 +1,20 @@
 <?php
 /**
-* Loads Heurist user custom theme from usr_Preferences
+* initPageTheme.php - Generates CSS rules for Heurist user custom themes.
+*
+* This script retrieves theme settings from user preferences (usr_Preferences) or falls back to
+* predefined default color values. It then outputs CSS rules that apply these theme colors
+* to various UI elements across the Heurist interface. The output of this script is intended
+* to be included within a <style> tag in the HTML head.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\framecontent
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*
@@ -32,7 +31,6 @@ Optgroup (group header in dropdown)  bg: #ECF1FB - can be changed to #95A7B7 (he
 Resource selector (in edit form)  bg: #F4F2F4 - can be changed to button light gray or pressed button (light blue)
 Select linked record button   bg:#f0ecf0 - can be changed to button light gray or pressed button (light blue)
 Scrollbar tracks and thumbs  rgba(0,0,0,0.3)/#bac4cb
-
 */
 require_once dirname(__FILE__).'/../../autoload.php';
 

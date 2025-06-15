@@ -1044,7 +1044,7 @@ class System {
      */
     private function treatSeriousError($status, $message, $sysmsg, $title) {
 
-        $now = getNow(); // Assumes getNow() is a globally available function
+        $now = getNow(); // global function
         $curr_logfile = 'errors_'.$now->format('Y-m-d').'.log';
 
         //3. write error into current error log
@@ -1282,7 +1282,7 @@ class System {
             // Reload current user info from database
             $this->loginVerify( true, $is_guest_allowed );
 
-            // Get database owner info (user_getDbOwner is likely a global or static function)
+            // Get database owner info
             $dbowner = user_getDbOwner($this->mysqli);
 
             // Get list of recently logged-in databases (USystem::sessionRecentDatabases might be static or global)
@@ -1300,14 +1300,14 @@ class System {
                     "help" => HEURIST_HELP,
                     "version" => HEURIST_VERSION,
                     "version_new" => $lastCode_VersionOnServer,
-                    "db_version" => getDbVersion($this->getMysqli()), // getDbVersion is likely global
+                    "db_version" => getDbVersion($this->getMysqli()),
                     "db_version_req" => HEURIST_MIN_DBVERSION,
                     "dbowner_name" => ($dbowner['ugr_FirstName'] ?? '') . ' ' . ($dbowner['ugr_LastName'] ?? ''),
                     "dbowner_org" => $dbowner['ugr_Organisation'] ?? '',
                     "dbowner_email" => $dbowner['ugr_eMail'] ?? '',
                     "sysadmin_email" => HEURIST_MAIL_TO_ADMIN,
                     "db_total_records" => $this->settings->get('sys_RecordCount'),
-                    "db_usergroups" => user_getAllWorkgroups($this->mysqli), // user_getAllWorkgroups is likely global
+                    "db_usergroups" => user_getAllWorkgroups($this->mysqli),
                     "baseURL" => HEURIST_BASE_URL,
                     'baseURL_pro' => HEURIST_BASE_URL_PRO,
                     'database_prefix' => HEURIST_DB_PREFIX,
@@ -1365,7 +1365,7 @@ class System {
                 $res['sysinfo']['refreshStatistics'] = (!$lastUpdate || $lastUpdate < strtotime('-1 month')) ? 1 : 0;
             }
 
-            recreateRecLinks( $this, false ); // recreateRecLinks is likely global or static
+            recreateRecLinks( $this, false );
 
         } catch( \Exception $e ){
             $this->addError(HEURIST_ERROR, 'Unable to retrieve Heurist system information', $e->getMessage());
@@ -1463,7 +1463,7 @@ class System {
      */
     public function isMember($ugs){
 
-        if($ugs == 0 || isEmptyArray($ugs)){ // isEmptyArray is likely a global helper
+        if($ugs == 0 || isEmptyArray($ugs)){
             return true;
         }
 
@@ -1472,7 +1472,7 @@ class System {
              return false;
         }
 
-        $ugs_to_check = prepareIds($ugs, true); // prepareIds is likely a global helper, true might mean include zero
+        $ugs_to_check = prepareIds($ugs, true);
 
         foreach ($ugs_to_check as $ug_id_to_check){
             if ($ug_id_to_check == 0) { // Explicitly checking for 'public' or 'any'
@@ -1541,7 +1541,7 @@ class System {
             // It's usually better to rely on $this->currentUser['ugr_eMail'] if loginVerify populates it correctly
             // than to do another DB lookup with user_getById.
             // However, sticking to original logic:
-            $user = user_getById($this->mysqli, $this->getUserId()); // user_getById is likely global
+            $user = user_getById($this->mysqli, $this->getUserId());
             return defined('HEURIST_MAIL_TO_ADMIN') && isset($user['ugr_eMail']) && ($user['ugr_eMail'] == HEURIST_MAIL_TO_ADMIN);
         } else {
             return false;
@@ -1740,7 +1740,7 @@ class System {
             // Always reload preferences from DB when user data is reloaded from DB
             // Set a temporary currentUser with ID to ensure user_getPreferences has the correct context
             $this->currentUser = ['ugr_ID' => $userID];
-            $_SESSION[$this->dbnameFull]['ugr_Preferences'] = user_getPreferences( $this ); // user_getPreferences likely global
+            $_SESSION[$this->dbnameFull]['ugr_Preferences'] = user_getPreferences( $this );
         }
 
         // Populate $this->currentUser from session (which is now up-to-date if reloaded)
@@ -1778,7 +1778,7 @@ class System {
      */
     public function updateSessionForUser( $userID ){
 
-        $user = user_getById($this->mysqli, $userID); // user_getById is likely global
+        $user = user_getById($this->mysqli, $userID);
 
         //user can be removed - check presence
         if($user==null){
@@ -1871,7 +1871,7 @@ class System {
                     $user_in_current_db = user_getByField($this->getMysqli(), 'ugr_eMail', $userEmail_in_linkedDB); // user_getByField is global
                     if(null != $user_in_current_db && ($user_in_current_db['ugr_Type'] ?? '') =='user' && ($user_in_current_db['ugr_Enabled'] ?? 'n') !='n') {
                         // 6. Success - establish new session in current DB
-                        $this->doLoginSession($user_in_current_db['ugr_ID'], 'public'); // 'public' likely means short-lived session
+                        $this->doLoginSession($user_in_current_db['ugr_ID'], 'public');
                         return (int)$user_in_current_db['ugr_ID'];
                     }
                 }
@@ -1964,12 +1964,12 @@ class System {
             $_SESSION[$this->dbnameFull]['keepalive'] = true; // Flag to refresh cookie on subsequent visits
         }
 
-        USystem::sessionUpdateCookies($lifetime); // USystem::sessionUpdateCookies is likely static or global
+        USystem::sessionUpdateCookies($lifetime);
 
         $_SESSION[$this->dbnameFull]['ugr_ID'] = (int)$userID;
 
         // Update last login time in the database
-        user_updateLoginTime($this->mysqli, $userID); // user_updateLoginTime is likely global
+        user_updateLoginTime($this->mysqli, $userID);
     }
 
 
@@ -2059,8 +2059,8 @@ class System {
         }
 
         $now = new \DateTime();
-        $user_agent = USystem::getUserAgent(); // USystem::getUserAgent is likely static or global
-        $addr_IPv4 = USystem::getUserIP();     // USystem::getUserIP is likely static or global
+        $user_agent = USystem::getUserAgent();
+        $addr_IPv4 = USystem::getUserIP();
 
         $info = [
             $user_id,
@@ -2188,7 +2188,7 @@ class System {
     {
         $is_NOT_allowed = true; // Assume not allowed by default
 
-        if(isEmptyStr($password_entered)) { // isEmptyStr is likely a global helper
+        if(isEmptyStr($password_entered)) {
             $this->addError(HEURIST_ACTION_BLOCKED, 'Password is missing');
             return $is_NOT_allowed;
         }
@@ -2224,7 +2224,7 @@ class System {
      */
     public function setResponseHeader($content_type=null){
 
-        /*  Commented out CORS headers section from original code:
+        /*  Commented out CORS headers section
         $allowed = array(HEURIST_MAIN_SERVER, 'https://epigraphia.efeo.fr', 'https://november1918.adelaide.edu.au');//disabled
         if(isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowed, true) === true){
             header('Access-Control-Allow-Origin: '.$_SERVER['HTTP_ORIGIN']);
@@ -2264,12 +2264,4 @@ class System {
             error_log("cleanDefCache: Could not determine 'entity' system directory for database " . ($this->dbname() ?? 'unknown'));
         }
     }
-
-    // The checkDefCache method was commented out in the original file, so it's omitted here.
-    /*
-    public function checkDefCache($timestamp){
-        // ... implementation ...
-    }
-    */
-
 }

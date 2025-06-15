@@ -195,74 +195,6 @@ class RecordsBatch
     }
 
     /**
-     * Checks if a target record type (`$rtyID`) includes all specified detail types (`$dtyIDs`).
-     * If `$importFromRty` is provided and greater than 0, and a field is missing in `$rtyID`,
-     * this function will attempt to copy the field definition from `$importFromRty`'s structure
-     * into `$rtyID`'s structure.
-     *
-     * @access private
-     * @param int $rtyID The ID of the target record type whose structure is to be checked (and potentially updated).
-     * @param array $dtyIDs An array of detail type IDs that must exist in the target record type's structure.
-     * @param int $importFromRty Optional. The ID of a source record type from which to copy field definitions
-     *                           if they are missing in `$rtyID`. Defaults to 0 (no import).
-     * @return bool True if all specified `$dtyIDs` exist in `$rtyID`'s structure (either initially or after import),
-     *              false otherwise (e.g., invalid parameters, a field is missing and cannot be imported, DB error).
-     *              Errors are added to the system object on failure.
-     */
-    private function checkRecordStructure($rtyID, $dtyIDs, $importFromRty = 0){
-
-        $dtyIDs = prepareIds($dtyIDs);
-        $rtyID = intval($rtyID);
-        $importFromRty = intval($importFromRty);
-
-        if($rtyID <= 0 || empty($dtyIDs)){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, $rtyID <= 0 ? 'Invalid record type to check has been provided' : 'No fields have been provided to check for');
-            return false;
-        }
-
-        $mysqli = $this->system->getMysqli();
-        $hasAllFields = true;
-
-        foreach($dtyIDs as $dtyID){
-
-            $hasFld = mysql__select_value($mysqli, "SELECT rst_ID FROM defRecStructure WHERE rst_DetailTypeID = ? AND rst_RecTypeID = ?", ['ii', $dtyID, $rtyID]);
-
-            if($hasFld > 0){
-                continue;
-            }
-
-            if($importFromRty <= 0){
-                $hasAllFields = $dtyID;
-                break;
-            }
-
-            $fieldDetails = mysql__select_row_assoc($mysqli, "SELECT * FROM defRecStructure WHERE rst_DetailTypeID = {$dtyID} AND rst_RecTypeID = {$importFromRty}");
-            if(empty($fieldDetails)){
-                $hasAllFields = $dtyID;
-                break;
-            }
-
-            unset($fieldDetails['rst_ID']);
-
-            $fieldDetails['rst_RecTypeID'] = $rtyID;
-
-            $rstID = mysql__insertupdate($mysqli, 'defRecStructure', 'rst', $fieldDetails, true);
-
-            if(!$rstID){
-                $hasAllFields = $dtyID;
-                break;
-            }
-        }
-
-        if(is_int($hasAllFields)){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, "Record structure is missing field type {$hasAllFields}");
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * Validates overall parameters for a batch operation and determines the count and
      * accessibility of records to be processed.
      *
@@ -2659,12 +2591,20 @@ class RecordsBatch
     }
 
     /**
-    * 
-    * 
-    * @param mixed $rtyID
-    * @param mixed $dtyIDs
-    * @param mixed $importFromRty
-    */
+     * Checks if a target record type (`$rtyID`) includes all specified detail types (`$dtyIDs`).
+     * If `$importFromRty` is provided and greater than 0, and a field is missing in `$rtyID`,
+     * this function will attempt to copy the field definition from `$importFromRty`'s structure
+     * into `$rtyID`'s structure.
+     *
+     * @access private
+     * @param int $rtyID The ID of the target record type whose structure is to be checked (and potentially updated).
+     * @param array $dtyIDs An array of detail type IDs that must exist in the target record type's structure.
+     * @param int $importFromRty Optional. The ID of a source record type from which to copy field definitions
+     *                           if they are missing in `$rtyID`. Defaults to 0 (no import).
+     * @return bool True if all specified `$dtyIDs` exist in `$rtyID`'s structure (either initially or after import),
+     *              false otherwise (e.g., invalid parameters, a field is missing and cannot be imported, DB error).
+     *              Errors are added to the system object on failure.
+     */
     private function checkRecordStructure($rtyID, $dtyIDs, $importFromRty = 0){
 
         $dtyIDs = prepareIds($dtyIDs);

@@ -16,9 +16,10 @@
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Brandon McKay   <blmckay13@gmail.com>
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @since       4.0
+* @since       6.0
 */
 
     /**
@@ -370,42 +371,9 @@
         }
 
         $is_xml = strpos($string, '<?xml') === 0;
-        $handling_encoding = false;
-        $handling_copyright = false;
 
-        if($is_xml){
-            [$string, $handling_encoding, $handling_copyright] = addNoTranslateTags($string, true);
-        }else{
-
-            $amp = '&amp;';
-            $cleanupQuirks = function($matches) use ($amp){
-                return str_replace($amp, '&', $matches[0]);
-            };
-
-            $string = mb_ereg_replace('&', $amp, $string); // avoid decoding encoded entities
-
-            $doc = new DOMDocument;
-            $doc->loadHTML(mb_encode_numericentity($string, [0x80, 0x10FFFF, 0, ~0], 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD); // load html
-            $xpath = new DOMXPath($doc); // retrieve text only
-            $textNodes = $xpath->query('//text()');
-
-            $string = mb_ereg_replace($amp, '&', $string);
-
-            foreach($textNodes as $node){
-
-                [$node->textContent, $encoded, $copyright] = addNoTranslateTags($node->textContent, false);
-
-                $handling_encoding |= $encoded;
-                $handling_copyright |= $copyright;
-            }
-
-            $string = $handling_encoding || $handling_copyright ? $doc->saveHTML() : $string;
-
-            $string = mb_ereg_replace_callback('&amp;(?:[a-zA-Z]{2,35}|#[0-9]{1,6}|#x[a-fA-F0-9]{1,6});?', $cleanupQuirks, $string);
-
-            $string = mb_ereg_replace('_LT_', '<', $string);
-            $string = mb_ereg_replace('_GT_', '>', $string);
-        }
+        $string = replaceEncodedEntities($string);
+        $string = replacePunctuation($string);
 
         /**
          * free => api-free.deepl.com
@@ -424,9 +392,9 @@
         }
 
         if($is_xml){ // possible xml
-            $url .= '&tag_handling=xml&ignore_tags=notranslate&split_sentences=0';
+            $url .= '&tag_handling=xml&ignore_tags=notranslate';
         }else{ // assume html
-            $url .= '&tag_handling=html&split_sentences=0';
+            $url .= '&tag_handling=html';
         }
 
         $additional_headers = array('Authorization: DeepL-Auth-Key ' . $accessToken_DeepLAPI);
@@ -472,8 +440,7 @@
                 case 529:
                     $herror = HEURIST_ACTION_BLOCKED;
                     $hmsg = 'Deepl is currently busy processing other requests.<br>'
-                           .'Please re-try your request in a few minutes.<br>'
-                           .'If this persists, please make a bug report.';
+                           .'Please re-try your request in a few minutes.';
                     $error = '';
                     break;
 
@@ -488,8 +455,14 @@
                     $herror = HEURIST_ACTION_BLOCKED;
                     $hmsg = 'The request to Deepl\'s services was too large to process.<br>'
                            .'Please either:<br>'
-                           .'Split the value into smaller parts and then re-combine then when you are finished, or '
+                           .'Split the value into smaller parts and then re-combine them once finished, or '
                            .'Make a bug report including which record and field you were attempting to translate and into which language.';
+                    break;
+
+                case 503:
+                    $herror = HEURIST_ACTION_BLOCKED;
+                    $hmsg = 'Deepl encountered an unknown error.<br>'
+                           .'Please re-try your request in a few minutes.';
                     break;
 
                 default: // unknown error or no additional handling
@@ -515,108 +488,103 @@
         $translation = $data['translations'];
         if(is_array($translation) && !empty($translation)){
             $res = $translation[0]['text'];
+            $res = replacePunctuation($res, true);
         }
 
-        return removeNoTranslateTags($res, $is_xml, $handling_encoding, $handling_copyright);
-    }
-
-    function addNoTranslateTags($string, $isXML){
-
-        $handleEntity = false;
-        $handleCopyRight = false;
-
-        // Add no translate flags where necessary
-        // Use _LT_ and _GT_ to avoid issues replacing the text via DOMDoc node
-        /**
-         * &[a-zA-Z]; html entity
-         * &#[0-9]; html code
-         * &#x[a-fA-F0-9]; hex code
-         */
-        $regex_entities = '&(?:[a-zA-Z]{2,35}|#[0-9]{1,6}|#x[a-fA-F0-9]{1,6});?';
-
-        $add_tags = function($matches) use ($isXML) {
-            return $isXML ? "<notranslate>{$matches[0]}</notranslate>" : "_LT_span translate='no'_GT_{$matches[0]}_LT_/span_GT_";
-        };
-
-        $original = $string; // backup string before processing
-
-        if(mb_eregi($regex_entities, $string)){ // html encoded entities
-
-            $string = mb_ereg_replace_callback($regex_entities, $add_tags, $string);
-
-            $handleEntity = $string !== false;
-
-            $string = $string ?? $original;
-
-            $original = $string; // update backup string
-        }
-
-        if(mb_eregi("[^\w]©|©[^\w]", $string)){ // copyright symbol, sometimes gets removed by Deepl during translation
-
-            $replacement = $isXML ? '<notranslate>©</notranslate>' : '_LT_span translate="no"_GT_©_LT_/span_GT_';
-            $string = mb_ereg_replace("[^\w]©|©[^\w]", $replacement, $string);
-
-            $handleCopyRight = $string !== false;
-
-            $string = $string ?? $original;
-        }
-
-        return [$string, $handleEntity, $handleCopyRight];
+        return $res;
     }
 
     /**
-     * Removes <notranslate> or <span translate='no'> tags from a string that were added by addNoTranslateTags.
+     * Replace specific punctuation that Deepl has issues with translating with a place holder
      *
-     * @param string $string The string potentially containing "no translate" tags.
-     * @param bool $isXML True if the original string was XML, false if HTML. This determines the tag format to remove.
-     * @param bool $handlEntity Indicates if entity-specific "no translate" tags were added.
-     * @param bool $handleCopyRight Indicates if copyright-specific "no translate" tags were added.
-     * @return string The string with "no translate" tags removed.
+     * @param string $string The string potential containing the specific punctuation
+     * @return string The string prepared for translation
      */
-    function removeNoTranslateTags($string, $isXML, $handlEntity, $handleCopyRight){
+    function replacePunctuation($string, $reverse = false){
 
-        // Remove notranslate tags
-        /**
-         * &[a-zA-Z]; html entity
-         * &#[0-9]; html code
-         * &#x[a-fA-F0-9]; hex code
-         */
-        $regex_entities = '&(?:[a-zA-Z]{2,35}|#[0-9]{1,6}|#x[a-fA-F0-9]{1,6});?';
-        $regex_less_than = '(?:<|&lt;)';
-        $regex_great_than = '(?:>|&gt;)';
-        $regex_quotes = '(?:\'|"|&quot;|&apos;)';
+        $punc = [ [';', '__SC__'], [':', '__CL__'], ['&', '__AMP__'] ];
 
-        $remove_tags = function($matches){
+        foreach($punc as $punctuation){
 
-            if(count($matches) == 1){
-                return $matches[0];
+            $search = $punctuation[0];
+            $replace = $punctuation[1];
+
+            if($reverse){
+                $search = $punctuation[1];
+                $replace = $punctuation[0];
             }
 
-            return $matches[1];
-        };
+            $res = mb_ereg_replace($search, $replace, $string);
 
-        $original = $string; // backup original result
-        if($handlEntity && !empty($string)){
-
-            $match = $isXML
-                    ? "{$regex_less_than}notranslate{$regex_great_than}($regex_entities){$regex_less_than}\/notranslate{$regex_great_than}"
-                    : "{$regex_less_than}span translate={$regex_quotes}no{$regex_quotes}{$regex_great_than}($regex_entities){$regex_less_than}\/span{$regex_great_than}";
-
-            $string = mb_ereg_replace_callback($match, $remove_tags, $string);
-
-            $string = $string ?? $original;
-            $original = $string; // update backup string
+            if($res && !empty($res)){
+                $string = $res;
+            }
         }
 
-        if($handleCopyRight && !empty($string)){
+        return $string;
+    }
 
-            $match = $isXML
-                    ? "{$regex_less_than}notranslate{$regex_great_than}©{$regex_less_than}\/notranslate{$regex_great_than}"
-                    : "{$regex_less_than}span translate={$regex_quotes}no{$regex_quotes}{$regex_great_than}©{$regex_less_than}\/span{$regex_great_than}";
+    /**
+     * Replace specific enoded entities that could be translated by Deepl with their HTML code or Hex code counter part
+     *
+     * @param string $string The string potential containing entities that could become translated
+     * @return string The string prepared for translation
+     */
+    function replaceEncodedEntities($string){
 
-            mb_ereg_replace($match, "©", $string);
+        $entities = [
+            'copyright' => [
+                '(?:&copy;|©)',
+                '&#169;'
+            ],
+            'registered' => [
+                '(?:&reg;?|®)',
+                '&#174;'
+            ],
+            'trademark' => [
+                '(?:&trade;?|™)',
+                '&#8482;'
+            ],
+            /*'at' => [
+                '(?:&commat;?|@)',
+                '&#64;'
+            ],*/
+            'euro' => [
+                '(?:&euro;?|€)',
+                '&#8364;'
+            ],
+            'cent' => [
+                '(?:&cent;?|¢)',
+                '&#162;'
+            ],
+            'pound' => [
+                '(?:&pound;?|£)',
+                '&#163;'
+            ],
+            'yen' => [
+                '(?:&yen;?|¥)',
+                '&#165;'
+            ],
+            'section' => [
+                '(?:&sect;?|§)',
+                '&#167;'
+            ],
+            'ampersand' => [
+                '(?:&amp;?)',
+                '&#38;'
+            ]
+        ];
 
-            $string = $string ?? $original;
+        foreach($entities as $entity){
+
+            $search = $entity[0];
+            $replace = $entity[1];
+
+            $res = mb_ereg_replace($search, $replace, $string);
+
+            if(!empty($res)){
+                $string = $res;
+            }
         }
 
         return $string;

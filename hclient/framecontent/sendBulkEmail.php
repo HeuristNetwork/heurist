@@ -1,22 +1,17 @@
 <?php
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 /**
-* Shows an email form
-*
-* @author      Jan Jaap de Groot <jjedegroot@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     4.0.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* sendBulkEmail.php - Bulk email form
+* 
+* Generates emails based on record's values.
+* 
 * @package     Heurist academic knowledge management system
-* @subpackage  UserInterface
+* @subpackage  hclient\framecontent
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Jan Jaap de Groot <jjedegroot@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 use hserv\utilities\USanitize;
 
@@ -423,7 +418,7 @@ if(isset($_POST['data'])) {
          *  - It constructs a data object containing the subject and an array of email objects
          *    (each with recipients and a personalized message for each record).
          *  - It includes an email to the database owner.
-         *  - It POSTs this data to `send_email.php` for actual sending.
+         *  - It POSTs this data to `sendBulkEmail.php` for actual sending.
          *  - It displays the server's response in a dialog.
          */
         function prepare() {
@@ -495,7 +490,7 @@ if(isset($_POST['data'])) {
                 data.emails.push(owner);
 
                 // Send data to PHP file, everything is checked server-sided
-                $.post("send_email.php", {
+                $.post("sendBulkEmail.php", {
                     db: window.hWin.HAPI4.database,
                     data: JSON.stringify(data)}, function(response) {
                     window.hWin.HEURIST4.msg.showMsgDlg(response);

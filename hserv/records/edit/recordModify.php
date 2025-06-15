@@ -4101,7 +4101,7 @@ function recordUpdateMaskFields($system, $recID, $rtyID = 0, $verbose = false){
 
         $cur_vals = mysql__select_assoc2($mysqli, "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID = {$recID} AND dtl_DetailTypeID = {$dtyID}");
 
-        preg_match('~\$([adimn])(\d)*(\(\d,?\d*\))*\$~', $mask, $matches);
+        preg_match('~\$([adimn])(\d+)?(\(\d+,\d+\))\$~', $mask, $matches);
 
         if(count($matches) < 2){ // invalid mask
 
