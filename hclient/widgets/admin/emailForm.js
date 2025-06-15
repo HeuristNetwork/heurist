@@ -191,7 +191,7 @@ $.widget( "heurist.emailForm", {
         let missed = [];
         if(!this._element_form.find('#letter_name').length) missed.push('letter_name'); 
         if(!this._element_form.find('#letter_email').length) missed.push('letter_email');
-        if(!this._element_form.find('#letter_content').length) missed.push('letter_content'); exists
+        if(!this._element_form.find('#letter_content').length) missed.push('letter_content');
         if(!this._element_form.find('#captcha').length) missed.push('captcha');
 
         if(missed.length>0){

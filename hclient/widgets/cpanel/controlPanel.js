@@ -444,7 +444,7 @@ $.widget( "heurist.controlPanel", {
         if(window.hWin.HAPI4.postparams?.q){
             request = window.hWin.HAPI4.postparams;
         }else if(window.hWin.HEURIST4.util.isPositiveInt(svsID)){
-            attempt = 0;
+            let attempt = 0;
             let interval = setInterval((svsID) => {
                 if(attempt === 5){
                     clearInterval(interval);
