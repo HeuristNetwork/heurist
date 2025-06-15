@@ -119,7 +119,7 @@ $.widget( "heurist.cmsStatistics", $.heurist.baseAction, {
 
         let that = this;
         window.hWin.HEURIST4.util.sendRequest('https://'+window.hWin.HAPI4.sysinfo.matomo_url+'/index.php',
-                    request, null, function(response){that._afterActionEvenHandler(response)});
+                    request, null, function(response){that._afterActionEventHandler(response)});
     },
 
     //  -----------------------------------------------------
@@ -142,7 +142,7 @@ $.widget( "heurist.cmsStatistics", $.heurist.baseAction, {
     //
     //  after save event handler
     //
-    _afterActionEvenHandler: function( response ){
+    _afterActionEventHandler: function( response ){
 
         this.element.css('cursor','auto');
         window.hWin.HEURIST4.msg.sendCoverallToBack(true);

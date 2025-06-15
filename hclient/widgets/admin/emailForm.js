@@ -1,4 +1,3 @@
-
 /**
 * emailForm widget - either creates form or use given one
 * send email to address defined in given record id, if record not define 

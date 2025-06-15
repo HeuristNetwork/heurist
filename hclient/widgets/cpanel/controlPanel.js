@@ -1,25 +1,32 @@
 /**
-* controlPanel.js : Header panel with logo, main menu and dashboard (optionally)
-*                   It inits actionHandler object
+* controlPanel.js - UI Widget: heurist.controlPanel - main UI widget for admin interface
+* 
+* This widget creates a control panel for the Heurist application. It handles menu creation, login actions,
+* version checks, and user notifications. It also initializes the main `actionHandler` object for the application.
 *
+* @namespace heurist.controlPanel
+* @property {object} options - Configuration options for the widget.
+* @property {?string} options.host_logo - Path to the host logo (default: null). Not currently used.
+* @property {boolean} options.login_inforced - If true, forces the user to log in (default: true).
+*
+* @property {object} menues - Stores references to various menu instances created within the control panel.
+* @property {?object} actionHandler - Reference to `window.hWin.HAPI4.actionHandler`. Handles actions related to menu items and user actions.
+* @property {boolean} _initial_search_already_executed - Tracks whether the initial search (e.g., from URL parameters) has been performed.
+* @property {boolean} _retrieved_notifications - Tracks whether user notifications have been retrieved.
+* @property {?(jQuery|boolean)} version_message - Stores the jQuery element for the version message or `true` if initialized.
+* 
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\cpanel
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6.0
 */
+$.widget( "heurist.controlPanel", {
 
 /*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-/*
-
     Main menu is list of Heurist operations. They are grouped in several sections:
     Admin, Database, Export, Import, Help, Profile, Management etc. 
     
@@ -41,25 +48,6 @@
     menu-database-clone-hint#
     menu-database-clone-header#
 */
-
-/**
- * jQuery UI Widget: heurist.controlPanel
- *
- * This widget creates a control panel for the Heurist application. It handles menu creation, login actions,
- * version checks, and user notifications. It also initializes the main `actionHandler` object for the application.
- *
- * @namespace heurist.controlPanel
- * @property {object} options - Configuration options for the widget.
- * @property {?string} options.host_logo - Path to the host logo (default: null). Not currently used.
- * @property {boolean} options.login_inforced - If true, forces the user to log in (default: true).
- *
- * @property {object} menues - Stores references to various menu instances created within the control panel.
- * @property {?object} actionHandler - Reference to `window.hWin.HAPI4.actionHandler`. Handles actions related to menu items and user actions.
- * @property {boolean} _initial_search_already_executed - Tracks whether the initial search (e.g., from URL parameters) has been performed.
- * @property {boolean} _retrieved_notifications - Tracks whether user notifications have been retrieved.
- * @property {?(jQuery|boolean)} version_message - Stores the jQuery element for the version message or `true` if initialized.
- */
-$.widget( "heurist.controlPanel", {
 
     // default options
     options: {
@@ -379,7 +367,6 @@ $.widget( "heurist.controlPanel", {
      */
     _destroy: function() {
 
-        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART); // TODO: This event listener is not set in this widget. Review if needed.
         $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS+' '+window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
 
         this.div_logo.remove();
@@ -409,9 +396,9 @@ $.widget( "heurist.controlPanel", {
         window.hWin.HEURIST4.ui.checkAndLogin( isforced, function(is_logged)
             {
                 if(is_logged) {
-                    // $(that.element).find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName); // This element .usrFullName does not seem to exist in controlPanel.html
-                    // The user name in the menu is updated by _refresh -> this.divProfileMenu.find...
+                    $(that.element).find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
 
+                    // The user name in the menu is updated by _refresh -> this.divProfileMenu.find...
                     that._showVersionMessage();
                     that._performInitialSearch();
                     that._getUserNotifications();
@@ -628,7 +615,7 @@ $.widget( "heurist.controlPanel", {
         });
 
         let $bug_icon = $bug_msg.find('span.ui-icon');
-        const bugSpinInterval = setInterval(() => { // Renamed to avoid conflict if another INTERVAL is introduced
+        const bugSpinInterval = setInterval(() => {
             $({deg: 0}).animate({deg: 360}, {
                 duration: SPIN_DURATION,
                 step: (rotation) => {
@@ -672,7 +659,7 @@ $.widget( "heurist.controlPanel", {
                 .insertAfter($bug_msg)
                 .html(suggestion_txt);
 
-            this._on(that.version_message.find('#lnk_change'), { // Ensure to use that.version_message
+            this._on(that.version_message.find('#lnk_change'), {
                 click: () => {
 
                     let $dlg;

@@ -1,21 +1,14 @@
 /**
-* dbAction.js - popup dialog or widget to define action parameters, 
-*               send request to server, show progress and final report
+* dbAction.js - Dialog for performing various database-level actions
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\database
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6.0 
 */
 
 /**
@@ -142,7 +135,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                 this._$('#serverURL').val(window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database);
                 this._$('#dbTitle').val('');
 
-                if(window.hWin.HAPI4.user_id()!=2){ // User ID 2 is typically superadmin
+                if(window.hWin.HAPI4.user_id()!=2){ // User ID 2 is dbowner
                     this._$('#div_need_password').show();
                 }else{
                     this._$('#div_need_password').hide();
@@ -304,7 +297,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         this._session_id = window.hWin.HEURIST4.util.random(); // Unique ID for this action attempt
 
         request['action'] = this.options.actionName;
-        request['db'] = window.hWin.HAPI4.database; // Current database context
+        request['db'] = window.hWin.HAPI4.database;
         request['locale'] = window.hWin.HAPI4.getLocale();
         request['session'] = this._session_id;
 
@@ -460,7 +453,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
      * @param {Function} [onComplete] - Optional callback when progress is hidden (not currently used).
      */
     _showProgress: function ( session_id, is_autohide, t_interval, onComplete ){
-        if(!(session_id>0)) { // Validate session_id
+        if(window.hWin.HEURIST4.util.isPositiveInt(session_id)) { // Validate session_id
              this._hideProgress();
              return;
         }

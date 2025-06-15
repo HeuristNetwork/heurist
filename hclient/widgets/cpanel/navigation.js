@@ -1,24 +1,19 @@
 /**
-* navigation.js : menu based on RT_CMS_MENU records
-* it is used for CMS
+* navigation.js - Menu widget
+* 
+* Menu based on RT_CMS_MENU records it is used for CMS.
 *
+* @todo - replace with HMenu
+* 
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\cpanel
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6.0
 */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-/* global layoutMgr */ // Keep this if layoutMgr is indeed a global variable used here, otherwise remove. It is used in _onMenuItemAction.
 
 /**
  * jQuery UI Widget: heurist.navigation
@@ -90,8 +85,6 @@ $.widget( "heurist.navigation", {
     menu_item_urls: {},
 
     first_not_empty_page_id:0,
-
-    _current_query_string:'', // TODO: This property is declared but appears to be unused. Consider removing if confirmed.
 
     /**
      * The widget's constructor. Initializes the menu element, sets up styles,
@@ -238,7 +231,7 @@ $.widget( "heurist.navigation", {
         if(window.hWin.HEURIST4.util.isnull(parent_id)) parent_id = '0';
         if(window.hWin.HEURIST4.util.isnull(orientation)) orientation = this.options.orientation;
         if(window.hWin.HEURIST4.util.isnull(menuitems)) menuitems = this.options.menu_recIDs; //top menu items
-        if(!lvl || lvl <= 0){ // Corrected condition for clarity
+        if(!lvl || lvl == 0){
             lvl = 0;
             //to avoid recursion
             this.ids_menu_entries = {};
@@ -1000,7 +993,6 @@ $.widget( "heurist.navigation", {
         if (this.element.data('fancytree')) { // Destroy Fancytree instance if it exists
             this.element.fancytree('destroy');
         }
-        // TODO: Consider removing other dynamically added elements or event listeners if not handled by jQuery UI/Fancytree.
    },
 
    /**

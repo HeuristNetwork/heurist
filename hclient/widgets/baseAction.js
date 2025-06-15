@@ -388,7 +388,7 @@ $.widget( "heurist.baseAction", {
     //
     //  after action event handler
     //
-    _afterActionEvenHandler: function( response ){
+    _afterActionEventHandler: function( response ){
        return; 
     },
 

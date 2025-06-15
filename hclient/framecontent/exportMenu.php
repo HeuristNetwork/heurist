@@ -1,7 +1,7 @@
 <?php
 
 /**
-* exportMenu,php: Export tab containing menu of export formats
+* exportMenu.php: Export tab containing menu of export formats
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
