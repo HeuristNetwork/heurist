@@ -1,9 +1,15 @@
 <?php
 /**
-* recordAction.php - Content for record batch actions dialogue 
+* recordAction.php - Provides the HTML structure and client-side script initialization for the record batch actions dialogue.
+*
+* This file defines the user interface for performing batch operations on records,
+* such as changing record types, or adding, replacing, or deleting field values.
+* It includes the `recordAction.js` script which handles the dialog's logic and interactions,
+* and other necessary JavaScript components for editing inputs. The specific action to be
+* performed is typically passed as a URL parameter.
 * 
 * @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\admin
+* @subpackage  hclient\framecontent
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
