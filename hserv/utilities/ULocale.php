@@ -439,8 +439,7 @@
                 case 529:
                     $herror = HEURIST_ACTION_BLOCKED;
                     $hmsg = 'Deepl is currently busy processing other requests.<br>'
-                           .'Please re-try your request in a few minutes.<br>'
-                           .'If this persists, please make a bug report.';
+                           .'Please re-try your request in a few minutes.';
                     $error = '';
                     break;
 
@@ -455,8 +454,14 @@
                     $herror = HEURIST_ACTION_BLOCKED;
                     $hmsg = 'The request to Deepl\'s services was too large to process.<br>'
                            .'Please either:<br>'
-                           .'Split the value into smaller parts and then re-combine then when you are finished, or '
+                           .'Split the value into smaller parts and then re-combine them once finished, or '
                            .'Make a bug report including which record and field you were attempting to translate and into which language.';
+                    break;
+
+                case 503:
+                    $herror = HEURIST_ACTION_BLOCKED;
+                    $hmsg = 'Deepl encountered an unknown error.<br>'
+                           .'Please re-try your request in a few minutes.';
                     break;
 
                 default: // unknown error or no additional handling
