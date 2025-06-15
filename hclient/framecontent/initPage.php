@@ -1,6 +1,6 @@
 <?php
 /**
-* initPage.php - Generates header for all heurist pages
+* initPage.php - Standard initialization script for Heurist pages
 * 
 * It
 * 1) initializes System.php

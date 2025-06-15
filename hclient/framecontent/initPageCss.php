@@ -1,6 +1,6 @@
 <?php
 /**
-* initPageCss.php - Includes styles and themes
+* initPageCss.php - Generates and outputs CSS styles for Heurist pages
 * 
 * Includes the minimum set of CSS for Heurist pages.
 * This file links base jQuery UI CSS, core Heurist styles (h4styles.css),

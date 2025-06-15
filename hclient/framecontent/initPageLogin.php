@@ -1,6 +1,6 @@
 <?php
 /**
-* initPageLogin.php - Initializes a page that requires user authentication.
+* initPageLogin.php - Handles the initialization of page that require user login
 *
 * This script sets up a minimal HTML page, includes core JavaScript libraries for HAPI (Heurist API)
 * and login functionalities, and then initiates a forceful login prompt if the user is not already authenticated

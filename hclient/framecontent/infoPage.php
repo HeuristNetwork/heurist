@@ -1,8 +1,8 @@
 <?php
 /**
-* infoPage.php - script with minimal system initialization
+* infoPage.php - Displays system or error messages
 * 
-* Used to show system or error messages. Allows login if required.
+* Displays system or error messages within a minimal Heurist page structure, with an option for user login if required.
 *
 * @package     Heurist academic knowledge management system
 * @subpackage  hclient\framecontent
