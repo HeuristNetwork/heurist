@@ -1,11 +1,14 @@
 <?php
 /**
-* exportMenu.php - Content for exportMenu
+* exportMenu.php - Provides the HTML structure and client-side script initialization for the data export menu.
+*
+* This file defines the user interface for selecting various export formats (CSV, XML, JSON, RDF, GeoJSON, KML, GEPHI, IIIF)
+* and includes the necessary JavaScript (`exportMenu.js`) to handle the export logic.
 * 
 * @todo - convert to widget based on HBaseView
 *
 * @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\admin
+* @subpackage  hclient\framecontent
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

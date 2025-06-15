@@ -1,9 +1,14 @@
 <?php
 /**
-* initPageLogin.php - Inits page with minimal client (HAPI) and forceful login
+* initPageLogin.php - Initializes a page that requires user authentication.
+*
+* This script sets up a minimal HTML page, includes core JavaScript libraries for HAPI (Heurist API)
+* and login functionalities, and then initiates a forceful login prompt if the user is not already authenticated
+* or does not meet the required access level for the page. It's typically used for pages that
+* should not be accessed by unauthenticated users.
 *
 * @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\admin
+* @subpackage  hclient\framecontent
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
