@@ -668,7 +668,7 @@ $.widget( "heurist.resultListMenu", {
         }
 
         // Open URL
-        let url = window.hWin.HAPI4.baseURL+ "hclient/framecontent/send_email.php?db=" + window.hWin.HAPI4.database;
+        let url = window.hWin.HAPI4.baseURL+ "hclient/framecontent/sendBulkEmail.php?db=" + window.hWin.HAPI4.database;
         window.hWin.HAPI4.selectedRecordIds = ids;  //the only place it is assigned
         window.hWin.HEURIST4.msg.showDialog(url, { width:500, height:600, title: window.hWin.HR('Email information') });
 

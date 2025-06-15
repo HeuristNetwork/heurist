@@ -1,24 +1,18 @@
 /**
-* Class to perform action on set of records in popup dialog
-*
-* @param action_type - name of action - used to access help, widget name and method on server side
-* @returns {Object}
-* @see  hclient/framecontent/record for widgets
-* @see  migrated/search/actions
-* @see  record_action_help_xxxx in localization.txt for description and help
-
-IT USES
-    window.hWin.HAPI4.currentRecordset
-    window.hWin.HAPI4.currentRecordsetSelection
-
-
-*
+* recordAction.js - record batch actions dialogue 
+* 
+* Handles batch actions on records: change record type, add,update or delete details
+* 
+* @todo - converts to widget based on HBaseView
+* 
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\admin
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       5.0
 */
 
 /**
