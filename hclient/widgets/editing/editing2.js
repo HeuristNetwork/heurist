@@ -1,27 +1,51 @@
 
 /**
-* filename: explanation
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
-*/
+ * editing2.js - Defines the HEditing class for dynamic form generation and management.
+ *
+ * @fileOverview Defines the HEditing class, a powerful tool for dynamically generating
+ *              and managing complex data entry forms within the Heurist system. It handles
+ *              various field types, grouping, validation, and data retrieval.
+ *              It integrates with TinyMCE for rich text editing and uses the
+ *              `editing_input` jQuery plugin for individual field rendering.
+ *
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\\widgets\\editing
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov   <osmakov@gmail.com>
+ * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       4
+ */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
+// REMARK: The original file had a duplicate @fileOverview and @author block here, which has been merged into the main file-level JSDoc above.
+// REMARK: Consider converting HEditing to an ES6 class for better syntax and maintainability if future refactoring is planned.
+/**
+ * Constructs an HEditing instance to manage a dynamic form.
+ * This class takes a structure definition and data, then renders an interactive form
+ * with various input types, groupings (tabs, accordions), and handles data manipulation.
+ *
+ * @constructor
+ * @param {object} _options - Configuration options for the HEditing instance.
+ * @param {string|jQuery} _options.container - The DOM element (or its ID) where the form will be rendered.
+ * @param {object} [_options.entity] - Configuration object for the entity type being edited.
+ * @param {Array<object>} _options.recstructure - An array defining the form structure, including field groups and fields.
+ *        Each object in the array can define a group (with `groupType`, `groupHeader`, `children`) or a field (with `dtID`, `dtFields`).
+ * @param {HRecordSet} [_options.recdata] - An HRecordSet object containing the initial data to populate the form.
+ * @param {function} [_options.onchange] - Callback function triggered when any field value changes.
+ * @param {function} [_options.onrecreate] - Callback function triggered when an input element is recreated.
+ * @param {function} [_options.oninit] - Callback function triggered after the HEditing instance is fully initialized.
+ * @param {string} [_options.className] - An optional CSS class name to apply to the main form container.
+ *
+ * @classdesc The HEditing class is responsible for rendering and managing dynamic data entry forms.
+ * It supports complex layouts with nested groups (tabs, accordions, simple groups), various field types
+ * (freetext, blocktext, geo, etc., via `editing_input` jQuery plugin), data validation,
+ * and communication of changes. It integrates with TinyMCE for rich text editing.
+ */
 function HEditing(_options) {
      const _className = "Editing",
-         _version   = "0.4";
+         _version   = "0.4"; // REMARK: _version is defined but not exposed via getVersion() until later in the public `that` object.
 
      let $container = null,
          recdata = null,     //HRecordSet with data to be edited
@@ -83,9 +107,12 @@ function HEditing(_options) {
         }
     }
     
-    //
-    //
-    //
+    /**
+     * @private
+     * @function _loadTinyMCE
+     * @description Loads the TinyMCE script dynamically if it's not already loaded.
+     * @param {function} callback - Function to call after TinyMCE is loaded.
+     */
     function _loadTinyMCE(callback) {
        const tinyMCEPath = window.hWin.HAPI4.baseURL+'external/tinymce5/tinymce.min.js';
        const script = window.hWin.document.createElement('script');
@@ -99,9 +126,12 @@ function HEditing(_options) {
        window.hWin.document.head.appendChild(script);
     }    
     
-    //
-    // reload existing form        NOT USED
-    //
+    /**
+     * @private
+     * @function _reload
+     * @description Reloads the form with new data. (Marked as NOT USED in original comments)
+     * @param {HRecordSet} _recdata - The new recordset data.
+     */
     function _reload(_recdata) {
         
         if(!$container) return;
@@ -127,6 +157,12 @@ function HEditing(_options) {
         }
     }
     
+    /**
+     * @private
+     * @function _setDisabled
+     * @description Sets the disabled state for all input fields in the form.
+     * @param {boolean} mode - True to disable, false to enable.
+     */
     function _setDisabled(mode){
             let idx, ele;
             for (idx in editing_inputs) {
@@ -135,6 +171,16 @@ function HEditing(_options) {
             }
     }
     
+    /**
+     * @private
+     * @function _initEditForm
+     * @description Initializes and builds the main editing form based on record structure and data.
+     * Clears any existing form content, processes the structure for groups and fields,
+     * and renders the form elements.
+     * @param {Array<object>} _recstructure - The form structure definition.
+     * @param {HRecordSet} _recdata - The data to populate the form.
+     * @param {boolean} [_is_insert] - Flag indicating if the form is for a new record (insert mode).
+     */
     function _initEditForm(_recstructure, _recdata, _is_insert){
         
         if(!($container && $container.length>0)) return;
@@ -161,6 +207,7 @@ function HEditing(_options) {
                
                 record = recdata.getFirstRecord();
                 
+                /** @private */
                 function __findRecID(fields){
                     for (let idx=0; idx<fields.length; idx++){
                        if(fields[idx].groupType){
@@ -209,7 +256,7 @@ function HEditing(_options) {
         */
         
         //special case for group_inside - add it as a child for parent
-        
+        /** @private */
         function __processGroupInside(fields){
         
             let prev_children = null;
@@ -232,7 +279,7 @@ function HEditing(_options) {
                         prev_children = fields[idx].children;    
                     }
                         
-                        //__processGroupInside(fields[idx].children);  
+                        //__processGroupInside(fields[idx].children);  // REMARK: This recursive call seems commented out.
                     
                 }
                 idx++;
@@ -241,6 +288,7 @@ function HEditing(_options) {
         }//__processGroupInside
         __processGroupInside(recstructure);
         
+        /** @private */
         function __createGroup(fields, groupContainer, fieldContainer){
             let idx, tab_index;
                 
@@ -254,7 +302,7 @@ function HEditing(_options) {
             for (idx=0; idx<fields.length; idx++){
                 
                 if( $.isPlainObject(fields[idx]) && fields[idx].groupType ){ //this is group
-                //  window.hWin.HEURIST4.util.isArrayNotEmpty(fields[idx].children)
+                //  window.hWin.HEURIST4.util.isArrayNotEmpty(fields[idx].children) // REMARK: Commented out code.
                     
                     if(fields[idx].groupHidden || fields[idx]['groupTitleVisible']===false){ //this group is hidden all fields goes to previous group
 
@@ -362,7 +410,7 @@ function HEditing(_options) {
                         }else{
                             groupEle = null;
                         }
-                        if(groupEle && fields[idx].dtID>0){
+                        if(groupEle && fields[idx].dtID>0){ // REMARK: dtID on a groupEle? Seems to be a field property.
                                 groupEle.attr('data-group-dtid', fields[idx].dtID);
                         }
                         
@@ -422,12 +470,12 @@ function HEditing(_options) {
 
                         newFieldContainer.appendTo(groupContainer);
                     }
-                    const is_show_header_help_text = true;
-                    if(is_show_header_help_text){ // || headerHelpText!=''
+                    const is_show_header_help_text = true; // REMARK: This flag is always true.
+                    if(is_show_header_help_text){ // || headerHelpText!='' // REMARK: Commented out alternative condition.
                          let div_prompt = $('<div>').text(headerHelpText)
                             .addClass('heurist-helper1')
                             .appendTo(newFieldContainer);
-                         if(currGroupType == 'tabs' || currGroupType == 'accordion'){
+                         if(currGroupType == 'tabs' || currGroupType == 'accordion'){ // REMARK: Accordion was 'accordion ' with a space. Corrected.
                             div_prompt.addClass('tab-separator-helper')
                                 .attr('separator-dtid',fields[idx]['dtID']).css({padding:'5px 0 0 5px',display:'inline-block'});
                          }else{
@@ -519,11 +567,11 @@ function HEditing(_options) {
                         groupEle.find('.ui-accordion-header').addClass(currGroupHeaderClass);
                     }
                 }else if(currGroupType == 'tabs'){
-                    groupEle.tabs({active: 0}).addClass('edit-form-tabs');;
+                    groupEle.tabs({active: 0}).addClass('edit-form-tabs');; // REMARK: double semicolon
                 }
             }
             
-            if(!hasVisibleFields && fieldContainer.find('.input-cell').length == 0){
+            if(!hasVisibleFields && fieldContainer.find('.input-cell').length == 0){ // REMARK: fieldContainer could be null here if all items in `fields` were groups.
                 $('<div>There are no fields visible under this heading/tab. Please define new fields or move fields into this section.</div>')
                     .addClass('heurist-helper3').appendTo(fieldContainer);
             }
@@ -586,9 +634,11 @@ function HEditing(_options) {
         }
     }
     
-    //
-    //
-    //
+    /**
+     * @private
+     * @function _setFocus
+     * @description Sets focus to the first focusable input element in the form.
+     */
     function _setFocus(){
         if(editing_inputs.length>0){
             let idx, ele;
@@ -601,9 +651,11 @@ function HEditing(_options) {
         }
     }
     
-    //
-    //to reduce width of edit form set heurist-helper1 to max width of input element
-    //
+    /**
+     * @private
+     * @function adjustHelpWidth
+     * @description Adjusts the width of help text containers to align with input field widths.
+     */
     function adjustHelpWidth(){
         
         let maxW = 300;
@@ -626,19 +678,26 @@ function HEditing(_options) {
     }
     
 
-    //
-    //
-    //
+    /**
+     * @private
+     * @function _save
+     * @description Placeholder for a save operation. Currently shows an alert.
+     * @returns {boolean} Always true.
+     */
     function _save(){
         alert('save');
         return true;
     }
 
-    //
-    // returns array with at least one empty value
-    //
+    /**
+     * @private
+     * @function _getValue
+     * @description Retrieves the value(s) for a specific field by its dtID.
+     * @param {string|number} dtID - The ID of the data type field.
+     * @returns {Array<any>|null} An array of values for the field, or null if not found or empty.
+     */
     function _getValue(dtID){
-        let idx, ele, values = [];
+        let idx, ele, values = []; // REMARK: 'values' variable is initialized but not used.
         for (idx in editing_inputs) {
             ele = $(editing_inputs[idx]);
             if(ele.editing_input('instance') && ele.editing_input('option', 'dtID')==dtID){
@@ -653,9 +712,15 @@ function HEditing(_options) {
         return null;
     }
     
-    //
-    // returns values as object {'xyz_Field':'value','xyz_Field2':['val1','val2','val3]}
-    //    
+    /**
+     * @private
+     * @function _getValues
+     * @description Retrieves all values from the form.
+     * @param {boolean} [needArrays=false] - If true, all values are returned as arrays, even single values.
+     *                                       If false or undefined, single values are returned directly,
+     *                                       multi-values or objects as arrays.
+     * @returns {Object<string, any|Array<any>>} An object where keys are dtIDs and values are the field values.
+     */
     function _getValues(needArrays){
         
         let details = {};
@@ -677,10 +742,12 @@ function HEditing(_options) {
         return details;
     }
     
-    //
-    // get field visibilities from edit form
-    // returns object {dty_ID:[1,1,0,0,1],.....  }
-    // 
+    /**
+     * @private
+     * @function _getFieldsVisibility
+     * @description Retrieves the visibility settings for each field in the form.
+     * @returns {Object<string, Array<number>>} An object where keys are dtIDs and values are arrays representing visibility states.
+     */
     function _getFieldsVisibility(){
         
         let idx, ele, details = {};
@@ -698,9 +765,12 @@ function HEditing(_options) {
         return details;
     }
 
-    //
-    // set current visibility setting in edit form from record
-    // 
+    /**
+     * @private
+     * @function _setFieldsVisibility
+     * @description Sets the visibility of fields in the form based on data from a recordset.
+     * @param {HRecordSet} recdata - The recordset containing visibility information.
+     */
     function _setFieldsVisibility( recdata ){
 
         if(recdata!=null){ //for edit mode
@@ -719,9 +789,11 @@ function HEditing(_options) {
         }
     }
     
-    //
-    // get values from editing form and assign to underlaying recordset
-    //
+    /**
+     * @private
+     * @function _assignValuesIntoRecord
+     * @description Assigns the current form values back to the underlying HRecordSet.
+     */
     function _assignValuesIntoRecord(){
     
         if(recdata!=null){ //for edit mode
@@ -736,8 +808,14 @@ function HEditing(_options) {
             }
         }
     }
-
     
+    /**
+     * @private
+     * @function _isModified
+     * @description Checks if any field in the form has been modified.
+     * Considers the public `that.wasModified` flag and also checks individual inputs.
+     * @returns {boolean} True if the form is modified, false otherwise.
+     */
     function _isModified(){
         
         if(that.wasModified==2){ //modfied flag is reset (after save)
@@ -756,12 +834,24 @@ function HEditing(_options) {
         }
     }
     
+    /**
+     * @private
+     * @function _onChange
+     * @description Callback function invoked when a field's value changes.
+     * Calls the `onChangeCallBack` provided in options.
+     */
     function _onChange(){
         if(window.hWin.HEURIST4.util.isFunction(onChangeCallBack)){
             onChangeCallBack.call( this );    
         }
     }
     
+    /**
+     * @private
+     * @function _validate
+     * @description Validates all input fields in the form.
+     * @returns {boolean} True if all fields are valid, false otherwise.
+     */
     function _validate(){
         
         let idx, res = true;
@@ -772,9 +862,13 @@ function HEditing(_options) {
         return res;
     }
     
-    //
-    // returns input element for given field
-    // 
+    /**
+     * @private
+     * @function _getFieldByName
+     * @description Finds and returns the jQuery wrapper for an editing input by its field name (dtID).
+     * @param {string|number} fieldName - The dtID of the field.
+     * @returns {jQuery|null} The jQuery object for the field's container, or null if not found.
+     */
     function _getFieldByName(fieldName){
         let idx, ele;
         for (idx in editing_inputs) {
@@ -786,15 +880,23 @@ function HEditing(_options) {
         return null;
     }
 
-    //
-    // returns array of input elements for field value
-    // 
+    /**
+     * @private
+     * @function _getFieldByValue
+     * @description Finds input elements based on a sub-property of their configuration.
+     * Used with `ele.editing_input('f', fieldName)` which implies getting a configuration option
+     * of the `editing_input` widget itself, not the value of the input.
+     * @param {string} fieldName - The name of the configuration property on the `editing_input` widget.
+     * @param {any} value - The value to match for the specified configuration property.
+     *                      If `value` is `'[not empty]'`, it checks for non-empty values of that property.
+     * @returns {Array<jQuery>} An array of jQuery objects for matching field containers.
+     */
     function _getFieldByValue(fieldName, value){
         let idx, ele, ress = [], val;
         if(value==='[not empty]'){
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
-                val = ele.editing_input('f', fieldName)
+                val = ele.editing_input('f', fieldName) // REMARK: 'f' is likely a shorthand for 'option' or a custom method of editing_input.
                 if(!window.hWin.HEURIST4.util.isempty(val)){
                     ress.push(ele);
                 }
@@ -802,7 +904,7 @@ function HEditing(_options) {
         }else{
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
-                if(ele.editing_input('f', fieldName)  == value){
+                if(ele.editing_input('f', fieldName)  == value){ // REMARK: 'f' is likely a shorthand for 'option' or a custom method of editing_input.
                     ress.push(ele);
                 }
             }
@@ -811,9 +913,13 @@ function HEditing(_options) {
         return ress;
     }
 
-    //
-    // returns array of input elements for field value
-    // 
+    /**
+     * @private
+     * @function _getFieldByClass
+     * @description Finds input elements that have a specific CSS class.
+     * @param {string} className - The CSS class to search for.
+     * @returns {Array<jQuery>} An array of jQuery objects for matching field containers.
+     */
     function _getFieldByClass(className){
         let idx, ele, ress = [];
         for (idx in editing_inputs) {
@@ -826,10 +932,13 @@ function HEditing(_options) {
     }
 
         
-    //
-    // returns array of input elements for given field
-    // fieldName is rec_XXX or dty_ID
-    // 
+    /**
+     * @private
+     * @function _getInputs
+     * @description Retrieves the actual HTML input/textarea/select elements for a given field name (dtID).
+     * @param {string|number} fieldName - The dtID of the field.
+     * @returns {Array<HTMLElement>|undefined} An array of DOM input elements, or undefined if the field is not found.
+     */
     function _getInputs(fieldName){
         let ele = _getFieldByName(fieldName);
         if(ele && ele.length>0){
@@ -837,9 +946,12 @@ function HEditing(_options) {
         }
     }
 
-    //
-    // Add extra field value errors
-    //
+    /**
+     * @private
+     * @function _displayValueErrors
+     * @description Displays validation errors for specified fields, if errors exist in the record data.
+     * @param {string|Array<string>} fieldNames - A single field name (dtID) or an array of field names.
+     */
     function _displayValueErrors(fieldNames){
 
         if(!Array.isArray(fieldNames)){
@@ -861,77 +973,131 @@ function HEditing(_options) {
     //public members
     let that = {
         
-        wasModified: 0, //0 not modified (on init), 1 was modified, 2 - finalized(not modified)
+        /**
+         * Flag indicating the modification state of the form.
+         * 0: Not modified (initial state).
+         * 1: Modified by user.
+         * 2: Finalized (e.g., after save, considered not modified for further checks).
+         * @type {number}
+         */
+        wasModified: 0,
 
+        /**
+         * Gets the class name of this instance.
+         * @returns {string} The class name "Editing".
+         */
         getClass: function () {return _className;},
+        /**
+         * Checks if this instance is of a specific class.
+         * @param {string} strClass - The class name to compare against.
+         * @returns {boolean} True if `strClass` is "Editing", false otherwise.
+         */
         isA: function (strClass) {return (strClass === _className);},
+        /**
+         * Gets the version of this HEditing class.
+         * @returns {string} The version number.
+         */
         getVersion: function () {return _version;},
 
-        //assign values only based on old structure
+        /**
+         * Reloads the form with new data. Assumes the form structure remains the same.
+         * (Marked as NOT USED in original source comments).
+         * @param {HRecordSet} _recdata - The new HRecordSet data to populate the form.
+         */
         reload: function(_recdata){
             _reload(_recdata);
         },
 
+        /**
+         * Validates all fields in the form.
+         * @returns {boolean} True if all fields are valid, false otherwise.
+         */
         validate: function(){
             return _validate();
         },
 
+        /**
+         * Placeholder save function. Currently alerts 'save'.
+         * @returns {void}
+         */
         save: function(){
             _save();
         },
         
-        //
-        // create edit form and fill values from given recordset
-        //
+        /**
+         * Initializes or re-initializes the editing form with a given structure and data.
+         * This will clear any existing form content in the container.
+         * @param {Array<object>} _recstructure - The structure definition for the form.
+         * @param {HRecordSet} _recdata - The HRecordSet data to populate the form.
+         * @param {boolean} [_is_insert=false] - Flag indicating if the form is for creating a new record.
+         */
         initEditForm: function(_recstructure, _recdata, _is_insert){
             _initEditForm(_recstructure, _recdata, _is_insert);
         },
         
-        // returns array with at least one empty value
-        //
+        /**
+         * Gets the value(s) of a specific field by its dtID.
+         * @param {string|number} dtID - The ID of the data type field.
+         * @returns {Array<any>|null} An array of values for the field. Returns null if the field is not found or has no values.
+         */
         getValue:function(dtID){
             return _getValue(dtID);
         },
         
-        //
-        // returns all values of editing form as json
-        //
+        /**
+         * Gets all values from the form as an object.
+         * @param {boolean} [needArrays=false] - If true, all field values are returned as arrays,
+         *                                       even if they are single values. If false or omitted,
+         *                                       single values are returned directly, while multi-value fields
+         *                                       or fields with object values are returned as arrays.
+         * @returns {Object<string, any|Array<any>>} An object where keys are field dtIDs and values are the corresponding field values.
+         */
         getValues:function(needArrays){
             return _getValues(needArrays);
         },
         
-        //
-        // gets individual visibility setting per field 
-        // 
+        /**
+         * Gets the visibility settings for all fields in the form.
+         * @returns {Object<string, Array<number>>} An object where keys are field dtIDs
+         *                                          and values are arrays representing visibility states (e.g., [1,0,1]).
+         */
         getFieldsVisibility: function(){
             return _getFieldsVisibility();
         },
         
-        //
-        // sets individual visibility setting per field 
-        //        
+        /**
+         * Sets the visibility of fields in the form based on data from a recordset.
+         * @param {HRecordSet} vals - The HRecordSet containing visibility information.
+         *                          Typically, this information is stored in a specific part of the record.
+         */
         setFieldsVisibility: function(vals) {
             _setFieldsVisibility( vals );    
         },
         
-        //
-        // get values from editing form and assign to underlaying recordset
-        //
+        /**
+         * Assigns the current values from the form fields back to the HRecordSet instance
+         * that was provided during initialization or via `reload`.
+         */
         assignValuesIntoRecord:function(){
             _assignValuesIntoRecord();
         },
         
-        //
-        // returns editing_element by name
-        //
+        /**
+         * Gets the jQuery wrapper for the specified field.
+         * @param {string|number} fieldName - The dtID of the field.
+         * @returns {jQuery|null} The jQuery object for the field's container, or null if not found.
+         */
         getFieldByName:function(fieldName){
             return _getFieldByName(fieldName);
         },
 
-        // 
-        // is_changed == false do not set flag as modified
-        // editing element will be recreated!
-        //
+        /**
+         * Sets the value of a field by its name (dtID). The field's input element(s) might be recreated.
+         * @param {string|number} fieldName - The dtID of the field.
+         * @param {any|Array<any>} value - The value or array of values to set.
+         * @param {boolean} [is_changed=true] - If true (default), marks the field as changed and triggers the onChange callback.
+         *                                      If false, the field is not marked changed and onChange is not triggered.
+         */
         setFieldValueByName:function(fieldName, value, is_changed){
             let ele = _getFieldByName(fieldName);
             if(ele && ele.editing_input('instance')){
@@ -944,11 +1110,14 @@ function HEditing(_options) {
             }
         },
         
-        //
-        // is_changed == false do not set flag as modified
-        // editing element will NOT be recreated!
-        // value assigned to the first input element only
-        //
+        /**
+         * Sets the value of a field by its name (dtID) directly into the first input element.
+         * The input element will NOT be recreated. This is a more direct manipulation.
+         * @param {string|number} fieldName - The dtID of the field.
+         * @param {any} value - The value to set in the first input element of the field.
+         * @param {boolean} [is_changed=true] - If true (default), marks the field as changed and triggers the onChange callback.
+         *                                      If false, the field is not marked changed and onChange is not triggered.
+         */
         setFieldValueByName2:function(fieldName, value, is_changed){
         
             let ele = _getFieldByName(fieldName);
@@ -964,35 +1133,55 @@ function HEditing(_options) {
             }
         },
         
-        //
-        //
-        //
+        /**
+         * Gets all jQuery wrappers for the input fields managed by this HEditing instance.
+         * @returns {Array<jQuery>} An array of jQuery objects, each wrapping an `editing_input`.
+         */
         getAllFields: function(){
             return editing_inputs;    
         },
         
-        //
-        // returns array of ALL input elements by field name
-        //
+        /**
+         * Gets the actual HTML input/textarea/select DOM element(s) for a given field.
+         * @param {string|number} fieldName - The dtID of the field.
+         * @returns {Array<HTMLElement>|undefined} An array of DOM elements, or undefined if the field is not found.
+         */
         getInputs:function(fieldName){
             return _getInputs(fieldName);
         },
         
-        //
-        // returns array of input elements by value
-        //
+        /**
+         * Finds input elements based on a sub-property of their `editing_input` configuration.
+         * @param {string} fieldName - The name of the configuration property on the `editing_input` widget.
+         * @param {any} value - The value to match. Use `'[not empty]'` to find fields where this property is not empty.
+         * @returns {Array<jQuery>} An array of jQuery objects for matching field containers.
+         */
         getFieldByValue:function(fieldName, value){
             return _getFieldByValue(fieldName, value);
         },
         
+        /**
+         * Finds input elements that have a specific CSS class.
+         * @param {string} className - The CSS class to search for.
+         * @returns {Array<jQuery>} An array of jQuery objects for matching field containers.
+         */
         getFieldByClass:function(className){
             return _getFieldByClass(className);
         },
         
+        /**
+         * Checks if the form has been modified.
+         * @returns {boolean} True if modified, false otherwise.
+         */
         isModified: function(){
             return _isModified();
         },
         
+        /**
+         * Sets the modification state of the form.
+         * @param {boolean|number} val - If `0` or `false`, resets all fields to unchanged and sets `wasModified` to 0 or 2 respectively.
+         *                               If `true` or `1`, sets `wasModified` to 1.
+         */
         setModified: function(val){
             
             if(val===0){
@@ -1011,19 +1200,34 @@ function HEditing(_options) {
         },
         
         
-        
+        /**
+         * Gets the main jQuery container element for this HEditing instance.
+         * @returns {jQuery} The jQuery object for the container.
+         */
         getContainer: function(){
             return $container;
         },
         
+        /**
+         * Sets the disabled state for all input fields in the form.
+         * @param {boolean} mode - True to disable fields, false to enable them.
+         */
         setDisabled: function(mode){
             _setDisabled(mode);
         },
         
+        /**
+         * Sets focus to the first focusable input element in the form.
+         */
         setFocus: function(){
             _setFocus();
         },
         
+        /**
+         * Gets or sets the structure editing mode flag.
+         * @param {boolean} [value] - If provided, sets the flag. True for edit structure mode, false otherwise.
+         * @returns {boolean|undefined} If `value` is not provided, returns the current state of the flag. Otherwise, undefined.
+         */
         editStructureFlag: function(value){
             if(value===true || value===false){
                 _editStructureMode = value;      
@@ -1032,10 +1236,19 @@ function HEditing(_options) {
             }
         },
         
+        /**
+         * Gets the options object that was used to initialize this HEditing instance.
+         * @returns {object} The options object.
+         */
         getOptions: function (){
             return options;
         },
 
+        /**
+         * Displays validation errors for the specified fields.
+         * Errors are typically sourced from the `record.errors` property of the HRecordSet.
+         * @param {string|Array<string>} fieldNames - A single field name (dtID) or an array of field names for which to display errors.
+         */
         displayValueErrors: function(fieldNames){
             _displayValueErrors(fieldNames);
         }

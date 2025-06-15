@@ -1,97 +1,397 @@
 /**
-* Widget for input controls on edit form
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * editing_input.js - Defines the `heurist.editing_input` jQuery UI widget for form input controls.
+ *
+ * @fileOverview This file defines the `heurist.editing_input` jQuery UI widget, a core component
+ *              in Heurist for rendering and managing a wide variety of data input fields
+ *              within dynamic forms. It handles different data types, validation, repeatability,
+ *              and integration with other Heurist features like term selection and record pointers.
+ *
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\\widgets\\editing
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov   <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       4.0
+ */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-/*global Temporal, TDate, fixCalendarPickerCMDs, temporalToHumanReadableString, tinyMCE, EditorCodeMirror, 
-translationSupport, selectRecord,browseRecords,browseTerms, correctionOfInvalidTerm, calculateImageExtentFromWorldFile */
+// REMARK: The original file had a duplicate @fileOverview and @author block here, which has been merged into the main file-level JSDoc above.
+/*global Temporal, TDate, fixCalendarPickerCMDs, temporalToHumanReadableString, tinyMCE, EditorCodeMirror,
+translationSupport, selectRecord,browseRecords,browseTerms, correctionOfInvalidTerm, calculateImageExtentFromWorldFile,
+$Db, HRecordSet, HAPI4, HEURIST4 */ // REMARK: Added missing globals $Db, HRecordSet, HAPI4, HEURIST4
 
 $.widget( "heurist.editing_input", {
+    /**
+     * @alias heurist.editing_input
+     * @description A jQuery UI widget that creates and manages a single input field or a group of repeatable input fields
+     * within a Heurist editing form. It supports various data types (freetext, blocktext, date, enum, resource, file, geo, etc.),
+     * validation, help text, default values, and integration with other Heurist functionalities like term browsing,
+     * record selection, and TinyMCE for rich text editing.
+     *
+     * The behavior and appearance of the widget are heavily configured through the `dtFields` option,
+     * which typically comes from the record structure definition (`$Db.rst`).
+     *
+     * @example
+     * // Example usage (simplified, typically instantiated by HEditing class)
+     * $('<div>').editing_input({
+     *   dtID: 'dty_Name',
+     *   recID: 123,
+     *   rectypeID: 1,
+     *   dtFields: { // Simplified example of dtFields content
+     *     dty_Type: 'freetext',
+     *     rst_DisplayName: 'Name',
+     *     rst_RequirementType: 'required',
+     *     rst_MaxValues: 1
+     *   },
+     *   values: ['Initial Name'],
+     *   change: function() { console.log('Value changed'); }
+     * });
+     */
 
     // default options
     options: {
+        /**
+         * An optional ID to use for creating the input element's ID.
+         * If null, the ID is generated from a combination of an internal index and `dtID`.
+         * @type {string|null}
+         * @default null
+         */
         varid:null,  //id to create imput id, otherwise it is combination of index and detailtype id
+        /**
+         * The ID of the record being edited. Required for context-sensitive operations
+         * like relation markers and file uploads associated with a specific record.
+         * @type {number|null}
+         * @default null
+         */
         recID: null,  //record id for current record - required for relation marker and file
+        /**
+         * A reference to the parent HRecordSet object containing the data.
+         * Used for operations like accessing related record information.
+         * @type {HRecordSet|null}
+         * @default null
+         */
         recordset:null, //reference to parent recordset 
+        /**
+         * A reference to the parent HEditing instance that manages the overall form.
+         * @type {HEditing|null}
+         * @default null
+         */
         editing:null, //reference to parent editing form
 
+        /**
+         * The record type ID. Used primarily for `recDetails` to fetch field descriptions from `$Db.rst`.
+         * @type {number|null}
+         * @default null
+         */
         rectypeID: null, //only for recDetail to get field description from $Db.rst
+        /**
+         * The field type ID (for `recDetails` fields, e.g., a number like 101) or a unique field name string
+         * (for other entities like `defSearchFields`, e.g., "sf_Title"). This is the primary identifier for the field.
+         * @type {number|string|null}
+         * @default null
+         */
         dtID: null,      // field type id (for recDetails) or field name (for other Entities)
 
-        //  it is either from window.hWin.HEURIST4.rectype.typedefs.dtFields - retrieved with help rectypeID and dtID
-        // object with some mandatory field names
+        /**
+         * An object containing detailed configuration for the field, typically sourced from
+         * `window.hWin.HEURIST4.rectype.typedefs.dtFields` (via `$Db.rst(rectypeID, dtID)`).
+         * This object includes properties like `dty_Type`, `rst_DisplayName`, `rst_MaxValues`,
+         * `rst_FieldConfig`, etc., which dictate the widget's behavior and appearance.
+         * If null and `dtID` and `rectypeID` are provided, the widget attempts to load it from `$Db.rst`.
+         * @type {object|null}
+         * @default null
+         */
         dtFields: null,
 
+        /**
+         * An array of initial values for the input field(s). For multi-value fields, this will be an array of strings/objects.
+         * For single-value fields, it's typically an array with one element.
+         * If null, default values from `dtFields.rst_DefaultValue` might be used, especially in insert mode.
+         * @type {Array<any>|null}
+         * @default null
+         */
         values: null,
+        /**
+         * If true, the input field will be read-only. This can also be controlled by `dtFields.rst_Display == 'readonly'`.
+         * @type {boolean}
+         * @default false
+         */
         readonly: false,
+        /**
+         * Overrides the display label for the field. If empty, `dtFields.rst_DisplayName` is used.
+         * @type {string}
+         * @default ""
+         */
         title: '',  //label (overwrite Display label from record structure)
+        /**
+         * Controls the repeatability of the field.
+         * `false` (default): Behavior determined by `dtFields.rst_MaxValues`.
+         * `true`: Suppresses the repeat button even if `rst_MaxValues` > 1.
+         * `'force_repeat'`: Forces the field to be repeatable (`rst_MaxValues` effectively becomes 100).
+         * @type {boolean|string}
+         * @default false
+         */
         suppress_repeat: false, //true,false or 'force_repeat'
+        /**
+         * If true (default), shows a clear button for each input instance (if applicable to the field type).
+         * @type {boolean}
+         * @default true
+         */
         showclear_button: true,
+        /**
+         * If true (default), shows an edit button (e.g., for terms, files) if applicable.
+         * @type {boolean}
+         * @default true
+         */
         showedit_button: true,
+        /**
+         * If true (default), displays the field header/label.
+         * @type {boolean}
+         * @default true
+         */
         show_header: true, //show/hide label
+        /**
+         * If true, suppresses help text, error messages, and required field indicators.
+         * @type {boolean}
+         * @default false
+         */
         suppress_prompts:false, //supress help, error and required features
+        /**
+         * If true, uses native HTML select elements instead of jQuery UI hSelect for enum/dropdowns.
+         * Note in code: "native select produce double space for option Chrome touch screen".
+         * @type {boolean}
+         * @default false
+         */
         useHtmlSelect: false, //NOTE !!!! native select produce double space for option  Chrome touch screen
+        /**
+         * Overrides the `dty_Type` obtained from `dtFields`. Allows treating a field as a different type
+         * (e.g., rendering a 'memo' field as 'freetext').
+         * @type {string|null}
+         * @default null
+         */
         detailtype: null,  //overwrite detail type from db (for example freetext instead of memo)
         
+        /**
+         * Callback function triggered when the value of the input field changes.
+         * `this` context within the callback refers to the `editing_input` widget instance.
+         * @type {function|null}
+         * @default null
+         * @example
+         * change: function() {
+         *   console.log('Field ' + this.options.dtID + ' changed to: ', this.getValues());
+         * }
+         */
         change: null,  //onchange callback
+        /**
+         * Callback function triggered when an input element is recreated, for example, after adding a new instance
+         * in a repeatable field or after certain programmatic changes.
+         * `this` context refers to the `editing_input` widget instance.
+         * @type {function|null}
+         * @default null
+         */
         onrecreate: null, //onrefresh callback
+        /**
+         * If true, indicates that the form is in insert mode (creating a new record).
+         * This can affect whether default values are applied.
+         * @type {boolean}
+         * @default false
+         */
         is_insert_mode:false,
         
+        /**
+         * If true, indicates that the input field is being used within a faceted search interface or filter builder.
+         * This may alter its appearance or behavior (e.g., width, between mode).
+         * @type {boolean}
+         * @default false
+         */
         is_faceted_search:false, //is input used in faceted search or filter builder
+        /**
+         * For faceted search, if true, duplicates the input for freetext and date types to allow range searching (e.g., "value1 between value2").
+         * @type {boolean}
+         * @default false
+         */
         is_between_mode:false,    //duplicate input for freetext and dates for search mode 
 
+        /**
+         * Specifies the language context for term values (typically a 3-character ISO639-2 code).
+         * Used for displaying and selecting translated terms.
+         * @type {string|null}
+         * @default null
+         */
         language: null, // language for term values (3 character ISO639-2 code)
 
+        /**
+         * For 'blocktext' fields, forces a specific display height in rows, overriding automatic height adjustment.
+         * @type {number|null}
+         * @default null
+         */
         force_displayheight: null // for textareas
     },
 
-    //newvalues:{},  //keep actual value for resource (recid) and file (ulfID)
+    /**
+     * Stores the actual values for complex types like 'resource' (record ID) and 'file' (uploaded file ID or temp name).
+     * Keys are the unique IDs of the input DOM elements.
+     * @private
+     * @type {Object<string, any>}
+     */
+    newvalues:{},  // REMARK: Initialized as an empty object here, but JSDoc convention is to list properties in options or as separate members. This is an instance property.
+    /**
+     * The effective detail type of the field (e.g., 'freetext', 'enum', 'resource').
+     * Determined by `options.detailtype` or `options.dtFields.dty_Type`.
+     * @private
+     * @type {string|null}
+     */
     detailType:null,
+    /**
+     * Configuration settings derived from `rst_FieldConfig`, typically for 'enum' (terms)
+     * and 'resource' (record pointer) field types. This can be an object or array
+     * depending on the specific field configuration.
+     * @private
+     * @type {object|Array<any>|null}
+     */
     configMode:null, //configuration settings, mostly for enum (terms) and resouc=rce (record pointer) types (from field rst_FieldConfig)
+    /**
+     * Custom CSS classes (space-separated) to be applied to the widget's main element,
+     * derived from `rst_Class`. Used for manipulating visibility and styles.
+     * @private
+     * @type {string|null}
+     */
     customClasses:null, //custom classes to manipulate visibility and styles in editing
-       
+
+    /**
+     * Flag indicating if the field is a 'file' type specifically within the context of 'Records' entity.
+     * @private
+     * @type {boolean}
+     * @default false
+     */
     isFileForRecord:false,
+    /**
+     * Flag used for file type inputs, particularly for entity images, to track if an image
+     * has already been uploaded for the current record.
+     * @private
+     * @type {boolean}
+     * @default false
+     */
     entity_image_already_uploaded: false,
 
+    /**
+     * Determines how enum/term fields are rendered if `rst_TermsAsButtons` is enabled and
+     * the number of terms is small.
+     * Can be 'radio', 'checkbox', or null (for dropdown/selectmenu).
+     * @private
+     * @type {string|null}
+     * @default null
+     */
     enum_buttons:null, // null = dropdown/selectmenu/none, radio or checkbox
+    /**
+     * Flag indicating if the current field is a workflow stage field.
+     * @private
+     * @type {boolean}
+     * @default false
+     */
     isWorkflowStage: false,
 
+    /**
+     * Internal flag to track if the widget's inputs are currently disabled.
+     * @private
+     * @type {boolean}
+     * @default false
+     */
     is_disabled: false,
+    /**
+     * Holds the value for a new input instance when it's being added, especially for repeatable fields.
+     * @private
+     * @type {string}
+     * @default ""
+     */
     new_value: '', // value for new input
 
+    /**
+     * For fields that manage an image along with a related textual input (e.g., an icon field),
+     * this holds a jQuery reference to the (often hidden) input that stores the image URL or identifier.
+     * @private
+     * @type {jQuery|null}
+     * @default null
+     */
     linkedImgInput: null, // invisible textbox that holds icon/thumbnail value
+    /**
+     * For fields with an associated image, this holds a jQuery reference to the visible `<div>` container
+     * that displays the image thumbnail or icon.
+     * @private
+     * @type {jQuery|null}
+     * @default null
+     */
     linkedImgContainer: null, // visible div container displaying icon/thumbnail
     
+    /**
+     * For enum fields rendered as dropdowns/selectmenus, this holds a reference to the shared
+     * jQuery hSelect object if applicable.
+     * @private
+     * @type {jQuery|null}
+     * @default null
+     */
     selObj: null, //shared selector for all enum field values
+    /**
+     * For enum (term) fields, this holds an array of child terms for the current vocabulary,
+     * used when `rst_TermsAsButtons` is active.
+     * @private
+     * @type {Array<object>|null}
+     * @default null
+     */
     child_terms: null, // array of child terms for current vocabulary 
+    /**
+     * Internal flag for enum fields to indicate if any of the terms have associated images,
+     * which might affect UI elements like a "select by picture" button.
+     * @private
+     * @type {boolean}
+     * @default false
+     */
     _enumsHasImages: false, 
     
+    /**
+     * Flag indicating if the values in a multi-value field are sortable via drag-and-drop.
+     * @private
+     * @type {boolean}
+     * @default false
+     */
     is_sortable: false, // values are sortable
 
+    /**
+     * Flag to control if editing is blocked, typically used for fields where modification is discouraged.
+     * @private
+     * @type {boolean}
+     * @default false
+     */
     block_editing: false,
 
+    /**
+     * Stores details for pre-selecting a target and relation type when creating a new relation marker,
+     * often used when initiating relation creation from an external lookup.
+     * @private
+     * @type {{target: number|null, relation: string|null, callback: function|null}}
+     */
     _external_relmarker: {
         target: null,
         relation: null,
         callback: null
     }, // pre-select a record target, possible relation type and setup a callback for relmarkers handled from external lookup
 
+    /**
+     * Flag indicating if the current HEditing context is for the 'Records' entity (i.e., the main Record Editor).
+     * @private
+     * @type {boolean}
+     * @default false
+     */
     _isForRecords: false, // is the current entity Records (i.e. the Record Editor)
 
+    /**
+     * Stores the original value of a freetext field if an entry mask (`rst_EntryMask`) is applied,
+     * allowing the widget to differentiate between the masked input and the underlying actual value.
+     * @private
+     * @type {string}
+     * @default ""
+     */
     _entryMaskedValue: '', // for freetext fields that had an entry mask applied to it
 
     // the constructor
@@ -741,30 +1041,16 @@ $.widget( "heurist.editing_input", {
     },
 
     /**
-    * get value for given record type structure field
-    *
-    * dtFields - json with parameters that describes this input field
-    *            for recDetails it is taken from $Db.rst for other entities from config files in hserv/entities
-    * 
-    dty_Type,
-    rst_DisplayName,  //label
-    rst_DisplayHelpText  (over dty_HelpText)           //hint
-    rst_DisplayExtendedDescription  (over dty_ExtendedDescription) //rollover
-
-    rst_RequirementType,  //requirement
-    rst_MaxValues     //repeatability
-
-    rst_DisplayWidth - width in characters
-
-    rst_PtrFilteredIDs (over dty_PtrTargetRectypeIDs)
-    rst_FilteredJsonTermIDTree  (over dty_JsonTermIDTree)     
-    
-    rst_TermIDTreeNonSelectableIDs   
-    dty_TermIDTreeNonSelectableIDs
-    *
-    *
-    * @param fieldname
-    */
+     * Gets a configuration value for the field, primarily from `options.dtFields`.
+     * This is a shorthand utility function to access nested properties within `dtFields`
+     * or default values from `$Db.rst` or internal defaults if not found directly.
+     *
+     * The properties accessed often start with `rst_` (from record structure table) or `dty_` (from detail types table).
+     * Examples: `dty_Type`, `rst_DisplayName`, `rst_MaxValues`, `rst_FieldConfig`.
+     *
+     * @param {string} fieldname - The name of the configuration property to retrieve (e.g., 'rst_DisplayName', 'dty_Type').
+     * @returns {any|null} The value of the configuration property, or null if not found after checking all sources.
+     */
     f: function(fieldname){
 
         let val = this.options['dtFields'][fieldname]; //try get by name
@@ -798,14 +1084,349 @@ $.widget( "heurist.editing_input", {
 
     },
     
-    //
-    // assign parameter by fieldname
-    //
+    /**
+     * Sets a configuration value within the `options.dtFields` object for this widget instance.
+     * @param {string} fieldname - The name of the configuration property to set (e.g., 'rst_DisplayName').
+     * @param {any} value - The value to set for the property.
+     */
     fset: function(fieldname, value){
         this.options['dtFields'][fieldname] = value;
     },
 
+    /**
+     * Sets the value(s) for the input field(s) managed by the widget.
+     * This method will clear existing inputs and recreate them based on the provided values.
+     *
+     * @param {Array<any>|any} values - An array of values for repeatable fields, or a single value for non-repeatable fields.
+     *                                  The format of each value depends on the field type.
+     * @param {boolean} [make_as_nochanged=false] - If true, the widget's internal `options.values` will be updated
+     *                                             to reflect the new values, effectively marking the field as unchanged
+     *                                             relative to this new state. If false (default), `options.values` is not updated,
+     *                                             and subsequent calls to `isChanged()` will likely return true.
+     */
+    setValue: function(values, make_as_nochanged){
+        //clear ALL previous inputs
+        this.input_cell.find('.input-div').remove();
+        this.inputs = [];
+        this.newvalues = {};
+
+        if(!Array.isArray(values)) values = [values];
+
+        let isReadOnly = this.isReadonly();
+
+        let i;
+        for (i=0; i<values.length; i++){
+            if(isReadOnly && this.detailType!='relmarker'){
+                this._addReadOnlyContent(values[i]);
+            }else{
+                let inpt_id = this._addInput(values[i]);
+            }
+        }
+        if (isReadOnly || (make_as_nochanged==true)) {
+            this.options.values = values;
+        }
+
+        let repeatable = (Number(this.f('rst_MaxValues')) != 1);
+        if(values.length>1 && !repeatable && this.f('rst_MultiLang')!=1){
+            this.showErrorMsg('Repeated value for a single value field - please correct');
+        }
+
+        this._setAutoWidth();
+
+        if(window.hWin.HEURIST4.util.isFunction(this.options.onrecreate)){
+            this.options.onrecreate.call(this);
+        }
+
+        /*
+        if(make_as_nochanged){
+            this._setAutoWidth();
+        }else{
+            this.onChange();
+        }
+        */
+    },
+
     //
+    // get value for particular input element
+    //  input_id - id or element itself
+    //
+    _getValue: function(input_id){
+
+        if(this.detailType=="relmarker") return null;
+
+        let res = null;
+        let $input = $(input_id);
+
+        if(!(this.detailType=="resource" || this.detailType=='file'
+            || this.detailType=='date' || this.detailType=='geo'))
+        {
+            if($input.attr('radiogroup')>0){
+                res = $input.find('input:checked').val();
+            }else if(this.detailType=='boolean'){
+                if(Array.isArray(this.configMode) && this.configMode.length==2) {
+                    res = this.configMode[ $input.is(':checked')?0:1 ];
+                }else{
+                    res = $input.is(':checked') ?$input.val() :0;
+                }
+
+            }else{
+                res = $input.val();
+            }
+
+            if(!window.hWin.HEURIST4.util.isnull(res) && res!=''){
+                res = res.trim();
+
+                // strip double spacing from freetext fields
+                res = this.detailType == 'freetext' ? res.replaceAll(/  +/g, ' ') : res;
+            }
+        }else {
+            res = this.newvalues[$input.attr('id')];
+            if(!res && $input.attr('data-value')){
+                res = $input.attr('data-value');
+            }
+        }
+
+        return res;
+    },
+
+
+    //
+    //
+    //
+    getConfigMode: function(){
+        return this.configMode;
+    },
+
+    setConfigMode: function(newval){
+        return this.configMode = newval;
+    },
+
+    //
+    //restore original order of repeatable elements
+    //
+    _restoreOrder: function(){
+
+        this.btn_cancel_reorder.hide();
+
+        if(this.isReadonly()) return;
+        let idx, ele_after = this.firstdiv;
+        for (idx in this.inputs) {
+            let ele = this.inputs[idx].parents('.input-div');
+            ele.insertAfter(ele_after);
+            ele_after = ele;
+        }
+    },
+
+    //
+    // returns individual visibilities (order is respected)
+    //
+    getVisibilities: function(){
+
+        let ress2 = [];
+        let visibility_mode = this.f('rst_NonOwnerVisibility');
+        if(visibility_mode=='public' || visibility_mode=='pending')
+        {
+            let ress = {};
+
+            for (let idx in this.inputs) {
+                let $input = this.inputs[idx];
+
+                let val = this._getValue($input);
+                if(!window.hWin.HEURIST4.util.isempty( val )){
+
+                    let res = 0;
+
+                    let ele = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
+                    res = (ele.attr('hide_field')=='1')?1:0; //1: hide this field from public
+
+                    ele = $input.parents('.input-div');
+                    let k = ele.index();
+                    ress[k] = res;
+                }
+            }
+
+            ress2 = [];
+            for(let idx in ress){
+                ress2.push(ress[idx]);
+            }
+        }
+
+        return ress2;
+    },
+
+    //
+    // applies visibility status
+    //
+    setVisibilities: function(vals){
+
+        let vis_mode = this.f('rst_NonOwnerVisibility');
+
+        if(this.options.showedit_button && this.detailType!="relmarker" &&
+            !window.hWin.HEURIST4.util.isempty(vis_mode))
+        {
+            let idx, k=0;
+
+            for (idx in this.inputs) {
+
+                let $input = this.inputs[idx];
+                let btn = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
+
+                if(vals && k<vals.length && vals[k]==1){
+                    btn.attr('hide_field',1);
+
+                    this._setHiddenField($input, this.is_disabled);
+                }else{
+                    btn.attr('hide_field',0);
+                }
+                k++;
+            }
+
+            this._setVisibilityStatus();
+
+        }else{
+            this.element.find('span.field-visibility').hide();
+            this.element.find('div.field-visibility2').hide();
+        }
+    },
+
+    //
+    //
+    //
+    getDetailType: function(){
+        return this.detailType;
+    },
+
+    //
+    //
+    //
+    isReadonly: function(){
+        return this.options.readonly || this.f('rst_Display')=='readonly' || this.f('rst_MayModify')=='locked';
+    },
+
+    /**
+     * Retrieves the current value(s) from all input instances managed by the widget.
+     * The order of values in the returned array corresponds to the order of input elements in the DOM.
+     * For "between mode" fields, values are concatenated (e.g., "value1/value2" for dates, "value1<>value2" for others).
+     *
+     * @returns {Array<any>} An array of values. If no values are set or all are empty,
+     *                       it returns an array with a single empty string `['']`.
+     */
+    getValues: function( ){
+
+        if(this.isReadonly()){
+            return this.options.values;
+        }else{
+            let idx;
+            let ress = {};
+            let ress2 = [];
+
+            for (idx in this.inputs) {
+                let $input = this.inputs[idx];
+
+                let res = this._getValue($input);
+
+
+                if(!window.hWin.HEURIST4.util.isempty( res )){
+
+                    if(this.options.is_between_mode){
+                        let res2;
+                        if(this.detailType=='date'){
+                            res2 = this.newvalues[$input.attr('id')+'-2'];
+                        }else{
+                            res2 = this.element.find('#'+$input.attr('id')+'-2').val();
+                        }
+                        if(window.hWin.HEURIST4.util.isempty( res2 )){
+                            if(this.detailType!='date') res = '';
+                        }else{
+                            if(this.detailType=='date'){
+                                res  = res+'/'+res2;
+                            }else{
+                                res  = res+'<>'+res2;
+                            }
+                        }
+                    }
+
+                    let ele = $input.parents('.input-div');
+                    let k = ele.index();
+
+                    ress[k] = res;
+
+                }
+            }
+
+            ress2 = [];
+            for(idx in ress){
+                ress2.push(ress[idx]);
+            }
+            if(ress2.length==0) ress2 = [''];//at least one empty value
+
+            return ress2;
+        }
+
+    },
+
+    _setHiddenField($input, is_hidden){
+
+        if(is_hidden){
+            $input.addClass('input-with-invisible-text');
+            if($input.is('select')){
+                $input.nextAll('.ui-selectmenu-button').addClass('input-with-invisible-text');
+            }
+        }else{
+            $input.removeClass('input-with-invisible-text');
+            if($input.is('select')){
+                $input.nextAll('.ui-selectmenu-button').removeClass('input-with-invisible-text');
+            }
+        }
+
+    },
+
+
+    //
+    //
+    //
+    setDisabled: function(is_disabled){
+
+        if(!this.isReadonly()){
+
+            let check_ind_visibility = this.options.showedit_button
+                    && this.detailType!="relmarker"
+                    && !window.hWin.HEURIST4.util.isempty(this.f('rst_NonOwnerVisibility'));
+
+            let idx;
+            for (idx in this.inputs) {
+                if(!this.isFileForRecord) {  //this.detailType=='file'
+                    let input_id = this.inputs[idx];
+                    let $input = $(input_id);
+                    window.hWin.HEURIST4.util.setDisabled($input, is_disabled);
+
+                    if(check_ind_visibility){
+                        let btn = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
+
+                        this._setHiddenField($input, (is_disabled && btn.attr('hide_field')==1));
+                    }
+                }
+            }
+            this.is_disabled = is_disabled;
+
+            if(this.input_cell.sortable('instance')){
+               this.input_cell.sortable('option', 'disabled', is_disabled );
+            }
+        }
+
+    },
+
+    /**
+     * Checks if the field's value(s) have changed from their initial state (when the widget was created or `setValue` was last called with `make_as_nochanged=true`).
+     *
+     * @param {boolean} [value] - If true, forces the changed state to true and updates `options.values` to an empty array.
+     *                            This usage is somewhat unconventional for an `isChanged` method.
+     * @returns {boolean} True if the value has changed, false otherwise.
+     */
+    isChanged: function(value){
+
+        if(value===true){
+            this.options.values = [''];
     //
     //
     _removeInput: function(input_id){

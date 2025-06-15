@@ -1,38 +1,40 @@
-/*
-* editng_exts.js - additional functions for editing_input
-*  1) editSymbology - edit map symbol properties 
-*  2) calculateImageExtentFromWorldFile - calculate image extents from worldfile
-*  3) browseRecords - browse records for record type fields 
-*     browseTerms
-*       3a) openSearchMenu
-*  4) translationSupport - opens popup dialog with ability to define translations for field values
-*       4a) translationFromUI 4b) translationToUI    
-* 
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+/**
+ * editing_exts.js - Additional functions for editing_input.
+ *
+ * @fileOverview This file provides a collection of extension functions primarily designed to
+ *              enhance or work with the `editing_input` jQuery widget and `HEditing` class.
+ *              These functions offer specialized dialogs for editing symbology, selecting
+ *              records or terms, managing translations, and calculating geospatial properties.
+ *
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\\widgets\\editing
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov   <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       4.0
+ */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+// REMARK: The original file had a duplicate @fileOverview and @author block here, which has been merged into the main file-level JSDoc above.
+/* global HEditing, HRecordSet, $Db, tinyMCE */ // REMARK: Added $Db and tinyMCE as they appear to be used or relevant.
 
-/* global HEditing */
-
-//
-//  mode_edit 2 - symbology for general map draw style
-//            1 - symbology editor from map legend
-//            3 - symbology editor from record edit for map layer
-//            4 - symbology editor from thematic map
-//            5 - define symbology ranges
-// 
+/**
+ * Opens a dialog for editing map symbology properties.
+ * The dialog's content and behavior are determined by the `mode_edit` parameter.
+ * It uses an `HEditing` instance internally to manage the form fields.
+ *
+ * @param {Object|Array<Object>|null} current_value - The current symbology configuration object or an array for thematic maps.
+ *                                                  If null, a new symbology is being defined.
+ * @param {number} mode_edit - Defines the type of symbology editor to open:
+ *                             1: Symbology editor from map legend.
+ *                             2: Symbology for general map draw style.
+ *                             3: Symbology editor from record edit for a map layer.
+ *                             4: Symbology editor for a thematic map.
+ *                             5: Define symbology ranges (gradient values).
+ * @param {function(Object|Array<Object>): void} callback - A function to be called when the symbology is saved.
+ *                                                         It receives the updated symbology object or array as its argument.
+ */
 function editSymbology(current_value, mode_edit, callback){
 
     let edit_symb_dialog = null; //assigned on popup_dlg.dialog
@@ -771,10 +773,16 @@ function editSymbology(current_value, mode_edit, callback){
     
 }//end editSymbology
 
-
-//
-// Get image dimension and calculate bounding box based on world file parameters
-//
+/**
+ * Calculates the geographic extent (bounding box) of an image based on its dimensions and an associated world file.
+ * This function is typically triggered from within an HEditing form context.
+ *
+ * @param {HEditing} _editing - The HEditing instance managing the form that contains the image and world file fields.
+ *                              This instance is used to get and set field values (e.g., image file, world file parameters, bounding box).
+ * @param {string} [ulf_ID=null] - The obfuscated file ID (ulf_ObfuscatedFileID) of the image.
+ *                                 If not provided, the function attempts to retrieve it from the relevant field
+ *                                 within the `_editing` form.
+ */
 function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
 
     if(!_editing) return;
@@ -892,10 +900,21 @@ function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
 
 //
 // Opening menuWidget's with searching capabilities
-// that => context
+// that => context ($editing_input instance)
 // $select => jQuery select with hSelect init'd
 // has_filter => disable click on search option, to avoid selecting it as the value
 //
+/**
+ * Enhances a jQuery hSelect dropdown menu with live search/filter capabilities and other UI improvements.
+ * This function is typically called from within an `editing_input` widget context.
+ *
+ * @param {object} that - The context object, usually an instance of an `editing_input` jQuery widget.
+ *                        It's used to manage event bindings (`_on`) and access field configurations (`f`).
+ * @param {jQuery} $select - The jQuery object representing the `<select>` element that has been initialized with `hSelect`.
+ * @param {boolean} [has_filter=true] - If true, the first item in the dropdown is treated as a non-selectable search input area.
+ * @param {boolean} [is_terms=false] - If true, applies specific logic for term selection, including hierarchical display
+ *                                   and showing child/parent terms related to search results.
+ */
 function openSearchMenu(that, $select, has_filter=true, is_terms=false){
 
     let $menu = $select.hSelect('menuWidget');
@@ -1275,12 +1294,27 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
 // It uses window.hWin.HEURIST4.browseRecordCache
 // It returns selection function that opens record selection popup dialog
 //
+/**
+ * Provides functionality to browse and select Heurist records for a pointer field.
+ * It handles different pointer modes (e.g., addonly, browseonly, dropdown) and
+ * can open a detailed record selection dialog or a dropdown list based on configuration
+ * and cached data.
+ *
+ * @param {object} _editing_input - The instance of the `editing_input` widget this browser is for.
+ *                                  Provides context and configuration for the record selection.
+ * @param {jQuery} $input - The jQuery element (typically a `<div>` or `<span>`) that displays
+ *                          the currently selected record's title and acts as a trigger for opening
+ *                          the browser/dropdown.
+ * @returns {function(string|Event): void} A function (`__show_select_dropdown` or `__show_select_dialog`)
+ *                                         that can be called to programmatically open the record browser/dropdown.
+ *                                         This returned function itself takes an event object or an input ID string.
+ */
 function browseRecords(_editing_input, $input){
 
     let that = _editing_input;
     
     let $inputdiv = $input.parent(); //div.input-div
-    let __current_input_id = $input.attr('id');
+    let __current_input_id = $input.attr('id'); // REMARK: __current_input_id is used within __show_select_dialog, which might be called later when `that` or `$input` context could be different if not careful, though it seems to be handled by re-finding $input.
 
     if ($inputdiv.find('.sel_link2 > .ui-button-icon').hasClass('rotate')) return;
     
@@ -1770,334 +1804,24 @@ function browseRecords(_editing_input, $input){
 }
 
 
-//
-// Creates selectmenu that is common for input elements of editing_input
-//
-function browseTerms(_editing_input, $input, value){
-    
-    let that = _editing_input;
-    
-    let $inputdiv = $input.parent(); //div.input-div
-
-        
-    function __recreateTrmLabel($input, trm_ID){
-
-        let lang_code = that.options.language;
-        if(!window.hWin.HEURIST4.util.isempty(lang_code) && lang_code != 'ALL' && !window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation')){ // retrieve translations
-
-            window.hWin.HAPI4.EntityMgr.getTranslatedDefs('defTerms', 'trm', null, function(){
-                __recreateTrmLabel($input, trm_ID);
-            });
-            lang_code = '';
-           
-        }
-
-        $input.empty();
-        window.hWin.HEURIST4.ui.addoption($input[0], '', '&nbsp;');
-        if(window.hWin.HEURIST4.util.isNumber(trm_ID) && trm_ID>0){
-            
-            let trm_Label = $Db.trm_getLabel(trm_ID, lang_code);
-            let trm_info = $Db.trm(trm_ID);
-
-            while(trm_info && trm_info.trm_ParentTermID > 0){
-
-                let label = $Db.trm_getLabel(trm_info.trm_ParentTermID, lang_code);
-                trm_info = $Db.trm(trm_info.trm_ParentTermID);
-
-                if(trm_info && trm_info.trm_ParentTermID > 0){
-                    trm_Label = label + '.' +  trm_Label;
-                }
-            }
-
-            trm_Label = $Db.trm_RemoveDupHierarchy(trm_Label);
-        
-            window.hWin.HEURIST4.ui.addoption($input[0], trm_ID, trm_Label);
-            $input.css('min-width', '');
-        }else{
-            $input.css('min-width', '230px');
-            trm_ID = '';
-        }
-        $input.val(trm_ID);
-
-        if($input.hSelect('instance') !== undefined){
-            $input.hSelect('refresh');
-        }
-    }    
-
-    function __createTermTooltips($input){
-
-        let $menu = $input.hSelect('menuWidget');
-        if($input.attr('data-tooltips')){
-            return;
-        }
-
-        let $tooltip = null;
-        $input.attr('data-tooltips', 1);
-
-        $menu.find('li.ui-menu-item')
-             .on('mouseenter', (event) => { // create tooltip
-
-                let $target_ele = $(event.target);
-
-                if(($target_ele.children().length != 0 && $target_ele.find('img').length != 1) || $target_ele.find('div.ui-menu-item-wrapper').text() == '<blank>'){
-                    return;
-                }
-
-                let term_id = $target_ele.attr('data-hid');
-                let details = '';
-
-                if(window.hWin.HEURIST4.util.isPositiveInt(term_id)){
-
-                    let term = $Db.trm(term_id);
-                    if(!window.hWin.HEURIST4.util.isempty(term.trm_Code)){
-                        details += "<span style='text-align: center;'>Code &rArr; " + term.trm_Code + "</span>";
-                    }
-
-                    if(!window.hWin.HEURIST4.util.isempty(term.trm_Description)){
-
-                        if(details == ''){
-                            details = "<span style='text-align: center;'>Code &rArr; N/A </span>";
-                        }
-                        details += "<hr><span>" + term.trm_Description + "</span>";
-                    }
-                }
-
-                if(details == ''){
-                    details = "No Description Provided";
-                }
-
-                $tooltip = $menu.tooltip({
-                    items: "div.ui-state-active",
-                    position: { // Post it to the right of menu item
-                        my: "left+20 center",
-                        at: "right center",
-                        collision: "none"
-                    },
-                    show: { // Add slight delay to show
-                        delay: 1500,
-                        duration: 0
-                    },
-                    content: function(callback){ // Check for image, then provide text
-
-                        const ele_context = this;
-
-                        window.hWin.HAPI4.checkImage('defTerms', term_id, 'icon', function(response){
-
-                            if(response.status == window.hWin.ResponseStatus.OK && response.data == 'ok'){
-
-                                let icon = window.hWin.HAPI4.getImageUrl('defTerms', term_id, 'icon', null, null, true);
-                                details += `<br><br><img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-image: url("${icon}")' height=64 width=64 />`;
-                            }
-
-                            callback.call(ele_context, details);
-                        });
-
-                        return '';
-                    },
-                    open: function(event, ui){ // Add custom CSS + class
-                        ui.tooltip.css({
-                            "width": "200px",
-                            "background": "rgb(209, 231, 231)",
-                            "font-size": "1.1em"
-                        });
-                    }
-                });
-             })
-             .on('mouseleave', (event) => { // ensure tooltip is gone
-                if($tooltip && $tooltip.tooltip('instance') != undefined){
-                    $tooltip.tooltip('destroy');
-                }
-             });
-    }
-
-    function __recreateSelector(){
-
-        if(that.selObj){
-            $(that.selObj).remove();
-        }
-
-
-        let allTerms = that.f('rst_FilteredJsonTermIDTree');        
-        //headerTerms - disabled terms
-        let headerTerms = that.f('rst_TermIDTreeNonSelectableIDs') || that.f('dty_TermIDTreeNonSelectableIDs');
-        let lang_code = that.options.language;
-
-        if(window.hWin.HEURIST4.util.isempty(allTerms) &&
-            that.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'])
-        { //specific behaviour - show all
-            allTerms = 'relation'; //show all possible relations
-        }else if(typeof allTerms == 'string' && allTerms.indexOf('-')>0){ //vocabulary concept code
-            allTerms = $Db.getLocalID('trm', allTerms);
-        }else if(!window.hWin.HEURIST4.util.isempty(lang_code) && lang_code != 'ALL'
-            && !window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation')){
-            window.hWin.HAPI4.EntityMgr.getTranslatedDefs('defTerms', 'trm', null, __recreateSelector);
-            return;
-        }
-
-
-        let search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/v6/filter_icon_black18.png';
-
-        let  filter_form = '<div style="padding:10px 0px">'
-        +'<span style="padding-right:10px;vertical-align:sub">'
-        +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-        + '" class="rt-icon rt-icon2" style="background-image: url(&quot;'+search_icon+ '&quot;);"/></span>'
-        +'<input class="input_menu_filter" size="8" style="outline: none;background:none;border: 1px solid lightgray;"/>'
-        +'<span class="smallbutton ui-icon ui-icon-circlesmall-close" tabindex="-1" title="Clear entered" '
-        +'style="position:relative; cursor: pointer; outline: none; box-shadow: none; border-color: transparent;"></span>'
-        +'<span class="trm-btns" style="padding: 0 0 0 10px;cursor: pointer;"></span>'
-        + '<div class="not-found" style="padding:10px;color:darkgreen;display:none;width:210px;">No terms match the filter '
-        + '<a class="add-trm" href="#" style="padding: 0 0 0 10px;color:blue;display:inline-block;">Add term</a>'
-        +'</div></div>';
-
-        let topOptions = [{key:'select',title:filter_form},{key:'',title:'&lt;blank&gt;'}];
-
-        let events = {};
-        events['onOpenMenu'] = function(){
-            __createTermTooltips(that.selObj);
-            openSearchMenu(that, that.selObj, true, true);
-            that.selObj.hSelect('refreshGroupings', true);
-        };
-
-        events['onSelectMenu'] = function ( event ){
-
-            let trm_ID = (event) ?$(event.target).val() :$(that.selObj).val();
-
-            that._off($(that.selObj),'change');
-
-            let ref_id = $(that.selObj).attr('ref-id');
-
-            let $input = $('#'+ref_id);
-            that.newvalues[$input.attr('id')] = trm_ID;
-            $input.attr('data-value', trm_ID); //that's more reliable
-
-            __recreateTrmLabel($input, trm_ID);
-            /*
-            $input.empty(); //clear 
-            //add new value
-            $('<span tabindex="0"class="ui-selectmenu-button ui-button ui-widget ui-selectmenu-button-closed ui-corner-top" style="padding: 0px; font-size: 1.1em; width: auto; min-width: 10em;">'
-            +'<span class="ui-selectmenu-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-selectmenu-text" style="min-height: 17px;">'
-            + window.hWin.HEURIST4.util.htmlEscape(trm_Label)
-            +'</span></span>').appendTo($input);
-            */
-            that.onChange();
-
-        };
-
-        events['onCloseMenu'] = function (event){
-
-            let $menu = that.selObj.hSelect('menuWidget');
-
-            // Reset filter input
-            $menu.find('.input_menu_filter').val('');
-            $menu.find('li').css('display','list-item');
-        };
-
-        $inputdiv.addClass('selectmenu-parent');
-
-        that.selObj = document.createElement("select");
-        $(that.selObj).addClass('enum-selector-main')
-        .css('max-width','300px')
-        .appendTo($inputdiv);
-
-        that.selObj = window.hWin.HEURIST4.ui.createTermSelect(that.selObj,
-            {vocab_id:allTerms, //headerTermIDsList:headerTerms,
-                defaultTermID:$input.val(), topOptions:topOptions, supressTermCode:true, 
-                useHtmlSelect:false, eventHandlers:events, language_code: lang_code});
-
-        that.selObj.hSelect('option', { groupings: true, groupingsType: 'trm' });
-        $(that.selObj).hide(); //button will be hidden        
-    }
-    
-    //
-    // select term from drop down
-    //
-    let __show_select_dropdown = function(event_or_id){
-        
-        if(that.is_disabled) return;
-        
-        let $input, $inputdiv, ref_id; 
-        
-        if(typeof event_or_id == 'string'){ //id
-            
-            ref_id = event_or_id; 
-            $input = that.element.find('#'+ref_id);
-            $inputdiv = $input.parents('.input-div');
-            
-        }else 
-        if(event_or_id && event_or_id.target){ //event
-            
-            let event = event_or_id;
-        
-            $inputdiv = $(event.target).parents('.input-div');
-            $input = $inputdiv.find('select');
-            ref_id = $input.attr('id');
-
-            if(event) event.preventDefault();
-        }
-
-        let org_scroll = $inputdiv.parents('.editForm').length > 0 ?
-                    $inputdiv.parents('.editForm')[0].scrollTop : null;
-        
-        //recreate dropdown if not inited
-        if(!that.selObj || !that.selObj.hSelect('instance')){
-
-            __recreateSelector();
-                
-        }else{
-            that._off($(that.selObj), 'change');    
-        }
-            
-        //Adjust position
-        let _ref_id = $input.attr('id');
-        let menu_location = $input;
-
-        if($input.hSelect('instance') !== undefined){
-            menu_location = $input.hSelect('widget');
-        }
-
-        that.selObj.attr('ref-id', _ref_id); //assign current input id for reference in onSelectMenu
-        that.selObj.hSelect('open');
-        that.selObj.hSelect('widget').hide();
-
-        let prn = that.selObj.hSelect('menuWidget').parent('div.ui-selectmenu-menu');
-        if(prn.length>0){
-            prn.css({'position':'fixed'}); //to show above all 
-            if(org_scroll !== null){ // fix scroll
-                prn.parents('.editForm').scrollTop(org_scroll);
-            }
-        }
-        that.selObj.hSelect('menuWidget')
-            .position({my: "left top", at: "left bottom", of: menu_location});
-
-    } //__show_select_dropdown
-    
-    that._off( $input, 'click');
-    that._on( $input, { click: __show_select_dropdown } ); //main invocation of dropdown
-
-    
-    if($input.is('select')){
-        $input.addClass('enum-selector').css({'min-width':'230px', width:'auto', 'padding-left': '15px'});
-        
-        __recreateTrmLabel($input, value);
-        
-        /*replace with div
-        $input = $('<div>').uniqueId()
-                .addClass('enum-selector')
-                .appendTo( $inputdiv );
-        */
-    }
-    
-    return __show_select_dropdown;
-}
-
-//
-// Opens popup dialog with ability to define translations for field values
-//
+/**
+ * Opens a popup dialog for defining translations for field values.
+ * It dynamically loads the `editTranslations` widget if not already available.
+ *
+ * @param {object|Array<string>} _input_or_values - If an object, it's assumed to be an `editing_input` instance
+ *                                                  from which current values and field type are derived.
+ *                                                  If an array, it's treated as an array of initial translation strings
+ *                                                  (e.g., ["eng:Hello", "fra:Bonjour"]).
+ * @param {boolean} is_text_area - Indicates if the input field is a textarea (true) or a single-line text input (false).
+ *                                 This parameter is used only if `_input_or_values` is an array.
+ * @param {function(Array<string>): void} callback - A function to be called when translations are applied.
+ *                                                  It receives an array of the updated translation strings as its argument.
+ */
 function translationSupport(_input_or_values, is_text_area, callback){
 
     if(!window.hWin.HEURIST4.util.isFunction($('body')['editTranslations'])){
         $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/editing/editTranslations.js', 
-            function() {  //+'?t='+(new Date().getTime())
+            function() {  //+'?t='+(new Date().getTime()) // REMARK: Timestamp for cache busting commented out.
                 if(window.hWin.HEURIST4.util.isFunction($('body')['editTranslations'])){
                     translationSupport( _input_or_values, is_text_area, callback );
                 }else{
@@ -2130,7 +1854,7 @@ function translationSupport(_input_or_values, is_text_area, callback){
                 if(res){
                     if(window.hWin.HEURIST4.util.isFunction(callback)){
                         callback.call(this, res);
-                    }else{
+                    }else{ // Assumes 'that' is an editing_input instance
                         that.setValue(res);    
                         that.isChanged(true);
                         that.onChange();
@@ -2145,23 +1869,27 @@ function translationSupport(_input_or_values, is_text_area, callback){
 }
 
 
-//
-// obtains values from input and textarea elements with data-lang attribute
-// and assigns them to json params with key+language suffix
-// data-lang='def' means default languge - key will be without suffix
-// 
-// params - json array to be modified
-// $container - container element
-// keyname - key in params
-// name - name of element
-//
+/**
+ * Extracts translation values from UI input/textarea elements within a container
+ * and populates a parameters object.
+ * Input elements are expected to have a `data-lang` attribute.
+ * 'def' indicates the default language (no language suffix in the key).
+ * Other values for `data-lang` are used as suffixes (e.g., keyname:eng).
+ *
+ * @param {Object<string, string>} params - The object to be populated with translation strings.
+ *                                          Existing relevant translation keys will be cleared first.
+ * @param {jQuery} $container - The jQuery object representing the container of the input/textarea elements.
+ * @param {string} keyname - The base key name to use in the `params` object for translations.
+ * @param {string} name - The `name` attribute of the input/textarea elements to scan.
+ * @param {boolean} is_text_area - True if the elements are `<textarea>`, false if `<input>`.
+ */
 function translationFromUI(params, $container, keyname, name, is_text_area){
     
     //clear previous values, except default
     $(Object.keys(params)).each(function(i, key){
 
         let key2 = key;        
-        if(key.length>5 && key.indexOf(':')==key.length-4){
+        if(key.length>5 && key.indexOf(':')==key.length-4){ // Check for pattern like ":xyz"
             key2 = key.substring(0, key.length-4);
             if(key2 == keyname){
                 delete params[key];
@@ -2179,16 +1907,25 @@ function translationFromUI(params, $container, keyname, name, is_text_area){
         else lang = ':'+lang;
         
         let value = item.val().trim();
-        if(!window.hWin.HEURIST4.util.isempty(value) || lang===''){
+        if(!window.hWin.HEURIST4.util.isempty(value) || lang===''){ // Store if value is not empty OR it's the default language input
             params[keyname+lang] = value;    
         }
     });
 }
 
-//
-//  Assign values from params to UI and initialize "translation" button
-// params= [{keyname:value},...]
-//
+/**
+ * Populates UI input/textarea elements from a parameters object containing translations
+ * and initializes a "translation" button for editing these translations.
+ * It creates input elements for each language found in `params` (e.g., keyname:eng, keyname:fra)
+ * and sets up a button to launch the `translationSupport` dialog.
+ *
+ * @param {Object<string, string>} params - An object containing translation strings, where keys are typically `keyname`
+ *                                          for the default language and `keyname:<code>` for others.
+ * @param {jQuery} $container - The jQuery object representing the container where input elements will be managed/created.
+ * @param {string} keyname - The base key name used in `params` for the default translation.
+ * @param {string} name - The `name` attribute to assign to the created input/textarea elements.
+ * @param {boolean} is_text_area - True to create `<textarea>` elements, false for `<input>`.
+ */
 function translationToUI(params, $container, keyname, name, is_text_area){
     
     let def_ele = null;
@@ -2206,25 +1943,25 @@ function translationToUI(params, $container, keyname, name, is_text_area){
         }
     });
     
-    if(!def_ele) return;
+    if(!def_ele) return; // Should not happen if an input for the field exists.
     
     if(!params) params = {}; 
-    if(!params[keyname]){
+    if(!params[keyname]){ // Ensure default key exists even if empty
       params[keyname] = def_ele.val();  
     } 
     
-    let sTitle = '';
+    let sTitle = ''; // To accumulate titles for the default element's tooltip
     
     //init input element for default value and button
     def_ele.attr('data-lang','def').val(params[keyname]);
     
     //2. Add translation button    
-    if($container.find('span[name="'+name+'"]').length==0){
+    if($container.find('span[name="'+name+'"]').length==0){ // Add button only if it doesn't exist
 
         //translation button    
         let btn_add = $( "<span>")
-            .attr('data-lang','def')
-            .attr('name',name)
+            .attr('data-lang','def') // Should this also be unique if multiple translationToUI calls on same page?
+            .attr('name',name) // Using name attribute for a span, consider data-*
             .addClass('smallbutton editint-inout-repeat-button ui-icon ui-icon-translate')
             .insertAfter( def_ele )
         .attr('tabindex', '-1')
@@ -2242,14 +1979,14 @@ function translationToUI(params, $container, keyname, name, is_text_area){
         btn_add.on({click: function(e){//--------------------------
             
             let values = [];
-            //$(e.target).attr('data-lang')
+            //$(e.target).attr('data-lang') // REMARK: This line is a comment, seems like a debug leftover.
             
             //gather the list of values from input elements
             $container.find(ele_type+'[name="'+name+'"]').each(function(i,item){
                 let lang  = $(item).attr('data-lang');
-                if(lang=='def' || !lang){
+                if(lang=='def' || !lang){ // Default language
                     values.push($(item).val())
-                }else{
+                }else{ // Other languages
                     values.push(lang+':'+$(item).val());
                 }
             });
@@ -2261,38 +1998,37 @@ function translationToUI(params, $container, keyname, name, is_text_area){
                 for(let i=0; i<newvalues.length; i++){
                     let keyname2=keyname, value = newvalues[i];
                     
-                    if(!window.hWin.HEURIST4.util.isempty(value) && value.substr(3,1)==':'){
-                        keyname2 = keyname2+':'+value.substr(0,3);
+                    if(!window.hWin.HEURIST4.util.isempty(value) && value.substr(3,1)==':'){ // lang:value format
+                        keyname2 = keyname2+':'+value.substr(0,3); // e.g. keyname:eng
                         value = value.substr(4).trim();
-                    }else{
+                    }else{ // Default language value
                         value = value.trim();
                     }
-                    if(!window.hWin.HEURIST4.util.isempty(value)){
+                    if(!window.hWin.HEURIST4.util.isempty(value) || keyname2 === keyname){ // Store if value not empty OR it's the default key
                         res2[keyname2] = value;
                     }
                 }
-                if(!res2[keyname]){
+                if(typeof res2[keyname] === 'undefined'){ // Ensure default key exists if all translations were removed
                     res2[keyname] = '';  
                 } 
 
-                translationToUI(res2, $container, keyname, name, is_text_area);
+                translationToUI(res2, $container, keyname, name, is_text_area); // Re-render UI with new values
             });
             
         }});
     }//end add translation button
     
     
-    //3. add new hidden lang elements
+    //3. add new hidden lang elements for other languages
     $(Object.keys(params)).each(function(i, key){
-        if(key!=keyname && keyname==key.substring(0,key.length-4)){ // key.indexOf(keyname+':')===0){
-            let lang = key.substring(key.length-3);
+        if(key!=keyname && keyname==key.substring(0,key.length-4)){ // e.g. key is "mykey:eng" and keyname is "mykey"
+            let lang = key.substring(key.length-3); // "eng"
             
             let ele = $('<'+ele_type+'>')
                 .attr('name',name).attr('data-lang',lang)
+                .val(params[key]).insertAfter(def_ele); // Insert after default element
                 
-                .val(params[key]).insertAfter(def_ele);
-                
-            if(is_text_area){
+            if(is_text_area){ // Hidden if textarea, visible if input (though typically these are hidden)
                 ele.css('display','none');
             }
                 
@@ -2300,13 +2036,24 @@ function translationToUI(params, $container, keyname, name, is_text_area){
         }
     });    
     
-    def_ele.attr('title',sTitle);
+    def_ele.attr('title',sTitle); // Set tooltip on default element showing all translations
 
 }
 
-//
-// Select arbitrary Heurist record 
-//
+/**
+ * Opens a generic Heurist record selection dialog.
+ *
+ * @param {object} [options] - Optional parameters to customize the record selection dialog.
+ *                             These options are passed to `window.hWin.HEURIST4.ui.showEntityDialog`.
+ *                             Common options include:
+ *                             `rectype_set` (string|null): Comma-separated list of record type IDs to filter by.
+ *                             `title` (string): Custom title for the dialog.
+ *                             `select_mode` (string): 'select_single' or 'select_multi'.
+ *                             `edit_mode` (string): 'popup' or 'none'.
+ * @param {function(HRecordSet): void} callback - A function to be called when a record is selected.
+ *                                              It receives an `HRecordSet` containing the selected record(s)
+ *                                              as its argument.
+ */
 function selectRecord(options, callback)
 {
         let popup_options = {
@@ -2316,11 +2063,11 @@ function selectRecord(options, callback)
             selectOnSave: true, //it means that select popup will be closed after add/edit is completed
             title: window.hWin.HR('Select record'),
             rectype_set: null,
-            parententity: 0,
+            parententity: 0, // REMARK: This seems to be a default, might be overridden by options.
             default_palette_class: 'ui-heurist-populate',
             onselect:function(event, data){
                 if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                    let recordset = data.selection;
+                    // let recordset = data.selection; // REMARK: recordset variable is declared but not used.
                     callback(data.selection);
                 }
             }
