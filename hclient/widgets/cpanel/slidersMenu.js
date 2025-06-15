@@ -1,28 +1,60 @@
 /**
-* slidersMenu.js : side menu with sections as popup sliders
-* 
-* It loads slidersMenuXxx.html for every section
-* They took icons, titles and rollovers in core/actions.json via window.hWin.HAPI4.actionHandler
-* This object handles all actions via executeActionById method
+* slidersMenu.js - Menu for Heurist admin interface with sections as popup sliders
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\cpanel
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6.0 
 */
 
 /* global HSvsEdit */
 
+/**
+* jQuery UI Widget: heurist.slidersMenu
+*
+* This widget creates a side menu with sections that expand as popup sliders.
+* It loads HTML content for each section (e.g., design, populate, explore) and initializes actions
+* based on `core/actions.json` via `window.hWin.HAPI4.actionHandler`.
+* The menu handles user interactions, manages different states (expanded, collapsed, locked),
+* and integrates with other Heurist components like saved searches (SVS) and faceted search.
+*
+* @namespace heurist.slidersMenu
+* @property {object} options - Configuration options for the widget. Currently empty.
+*
+* @property {Array<string>} sections - Defines the names of the menu sections (e.g., 'design', 'populate').
+* @property {object} menues - Stores jQuery objects for each section's menu panel. `{[sectionName]: jQueryElement}`.
+* @property {object} containers - Stores jQuery objects for each section's main content container. `{[sectionName]: jQueryElement}`.
+* @property {object} introductions - Stores jQuery objects for each section's introductory/help panel. `{[sectionName]: jQueryElement}`.
+* @property {number} _myTimeoutId - Timeout ID for delaying main menu panel collapse.
+* @property {number} _myTimeoutId2 - Timeout ID for delaying explore popup menu close.
+* @property {number} _myTimeoutId3 - Timeout ID for delaying explore popup menu show.
+* @property {number} _myTimeoutId5 - Timeout ID for preventing main menu expansion (e.g., after search).
+* @property {number} _delayOnCollapseMainMenu - Delay in ms for collapsing the main menu.
+* @property {number} _delayOnCollapse_ExploreMenu - Delay in ms for collapsing the explore menu popup.
+* @property {number} _delayOnShow_ExploreMenu - Delay in ms for showing the explore menu popup.
+* @property {number} _delayOnShow_AddRecordMenu - Delay in ms for showing the 'Add Record' related popup.
+* @property {number} _widthMenu - Width in pixels of the expanded main menu.
+* @property {boolean} _is_prevent_expand_mainmenu - Flag to temporarily prevent main menu expansion.
+* @property {boolean} _explorer_menu_locked - Flag indicating if the explore menu popup is locked open (e.g., due to an open selectmenu).
+* @property {?string} _active_section - Name of the currently active/visible main section.
+* @property {?string} _current_explore_action - Name of the currently active action within the explore popup (e.g., 'searchBuilder').
+* @property {?jQuery} divMainMenu - jQuery object for the main collapsible side menu container.
+* @property {?object} currentSearch - Stores the last search query object, used for "Save Filter".
+* @property {boolean} reset_svs_edit - Flag to indicate if the saved search edit dialog should be reset.
+* @property {?jQuery} svs_list - jQuery object for the saved searches list widget instance.
+* @property {?jQuery} coverAll - jQuery object for an overlay div used to cover the page content when menus are active.
+* @property {?jQuery} menues_explore_popup - jQuery object for the popup panel associated with the explore menu.
+* @property {?jQuery} menues_explore_gap - jQuery object for a small gap element, possibly for styling or event handling.
+* @property {?jQuery} search_faceted - jQuery object for the faceted search container.
+* @property {?HSvsEdit} edit_svs_dialog - Instance of the HSvsEdit class for managing saved search editing.
+* @property {number} _left_position - Base left position for the main menu (collapsed state), adjusted for language (e.g., German).
+* @property {boolean} _show_quick_tips - Flag to control showing quick tips on first interaction with explore menu.
+* @property {object} _menu_colours - Defines background colors for different sections. `{[sectionName]: colorString}`.
+*/
 $.widget( "heurist.slidersMenu", {
 
     // default options
@@ -2265,7 +2297,7 @@ $.widget( "heurist.slidersMenu", {
 
                     that.introductions[section].find('div.gs-box.ui-heurist-'+section)
                     .prepend( '<span class="ui-heurist-title header" id="start-hints" style="padding-top:57px;font-weight:normal;padding-left:20px;cursor:pointer">'
-                                +'<span class="ui-icon ui-icon-help"></span>&nbsp;Startup hints</span>' ).on('click', function(){ that._loadStartHints(null); });					
+                                +'<span class="ui-icon ui-icon-help"></span>&nbsp;Startup hints</span>' ).on('click', function(){ that._loadStartHints(null); });                    
 
                     that.introductions[section].find('.gs-box')
                         .css({position:'absolute', left:'10px', right:'10px', top:'10px', 'min-width':'700px', margin:0}) //,'padding-left':20
@@ -2299,35 +2331,35 @@ $.widget( "heurist.slidersMenu", {
                 function(){
                     // Display Section Img, hide link to YouTube video
                     that.introductions[section].find('img').each(function(i,img){
-						img = $(img);
-						img.attr('src',window.hWin.HAPI4.baseURL+'hclient/assets/v6/'+img.attr('data-src'));
+                        img = $(img);
+                        img.attr('src',window.hWin.HAPI4.baseURL+'hclient/assets/v6/'+img.attr('data-src'));
                     });
 
                     // Display Content
                     that.introductions[section].find('.gs-box')
-							.css({position:'absolute', left:10, right:10, top:10, 'min-width':700, margin:0}) //,'padding-left':20
-							.show();
+                            .css({position:'absolute', left:10, right:10, top:10, 'min-width':700, margin:0}) //,'padding-left':20
+                            .show();
                     that.introductions[section].find('.gs-box > div:first').css('margin','23px 0');
 
                     that.introductions[section].find('.gs-box .ui-heurist-title.header')
-							.css({position:'absolute', left:160, top:40, right:400, 'max-width':'540px'});
+                            .css({position:'absolute', left:160, top:40, right:400, 'max-width':'540px'});
 
                     // Load Welcome Content
                     $('<div class="gs-box">')
-						.css({position:'absolute', left:10, right:10, top:180, bottom:10, 'min-width':400, overflow: 'auto'})
-						.load(window.hWin.HAPI4.baseURL+'hclient/widgets/cpanel/welcome.html', function(){
-							
-							// Bookmark Link
-							let url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database;
-							$('.bookmark-url').html('<a href="#">'+url+'</a>').on('click', function(e){
-								window.hWin.HEURIST4.util.stopEvent(e);
-								window.hWin.HEURIST4.msg.showMsgFlash('Press Ctrl+D to bookmark this page',1000);
-								return false;
-							});
+                        .css({position:'absolute', left:10, right:10, top:180, bottom:10, 'min-width':400, overflow: 'auto'})
+                        .load(window.hWin.HAPI4.baseURL+'hclient/widgets/cpanel/welcome.html', function(){
+                            
+                            // Bookmark Link
+                            let url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database;
+                            $('.bookmark-url').html('<a href="#">'+url+'</a>').on('click', function(e){
+                                window.hWin.HEURIST4.util.stopEvent(e);
+                                window.hWin.HEURIST4.msg.showMsgFlash('Press Ctrl+D to bookmark this page',1000);
+                                return false;
+                            });
 
                             $('.ui-icon-bookmark').css('color', that._menu_colours[section]);
-						})
-						.appendTo( that.introductions[section] );
+                        })
+                        .appendTo( that.introductions[section] );
                 })
                 .css({left: ((that._left_position+211)+'px'),
                       right: '4px',top:'2px',bottom:'4px',width:'auto',height:'auto'})  //,'z-index':104
