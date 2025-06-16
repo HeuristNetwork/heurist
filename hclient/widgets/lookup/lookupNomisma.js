@@ -1,36 +1,64 @@
 /**
-* lookupNomisma.js - Searching the Nomisma's records (Under Development)
-* 
-* This file:
-*   1) Loads the content of the corresponding html file (lookupNomisma.html), and
-*   2) Performs an api call to Nomisma's Search API using the User's input, displaying the results within a Heurist result list
-* 
-* Current Nomisma services supported:
-*    - getMints
-*    - getHoards
-*    - getFindspots
-*    - getRdf (currently unavailable)
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Brandon McKay   <blmckay13@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.0
-*/
+ * lookupNomisma.js - Search Nomisma.org records for numismatic concepts.
+ *
+ * @fileOverview
+ * This file defines the `heurist.lookupNomisma` jQuery UI widget.
+ * This widget provides an interface for searching records from Nomisma.org,
+ * a collaborative project to provide stable digital representations of numismatic concepts.
+ * It allows users to search across different Nomisma API endpoints:
+ * `getMints`, `getHoards`, and `getFindspots`.
+ *
+ * The widget:
+ *  1. Loads its UI from `lookupNomisma.html`.
+ *  2. Constructs API requests to the selected Nomisma endpoint based on user input.
+ *  3. Processes the GeoJSON responses from Nomisma.
+ *  4. Displays results in a list, converting GeoJSON geometry to WKT (Well-Known Text)
+ *     for Heurist geospatial fields if mapped.
+ *  5. Allows users to select records for data mapping.
+ *
+ * Note: The `getRdf` service is mentioned as currently unavailable in the original comments.
+ *
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\lookup
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Brandon McKay   <blmckay13@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       6.0
+ */
 
-/*  
+/*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
 * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
 * Unless required by applicable law or agreed to in writing, software distributed under the License is
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-/* global stringifyMultiWKT */
+/* global stringifyMultiWKT */ // Indicates stringifyMultiWKT is a global function used for WKT conversion.
 
+/**
+ * Widget for searching records from Nomisma.org.
+ * It supports querying different Nomisma API endpoints like getMints, getHoards, and getFindspots.
+ * Results, often in GeoJSON format, are processed and displayed, with an option to convert
+ * geometries to WKT for Heurist mapping.
+ *
+ * @widget heurist.lookupNomisma
+ * @extends heurist.lookupBase
+ * @memberof heurist
+ */
 $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
 
-    // default options
+    /**
+     * Default options for the Nomisma lookup widget.
+     * @memberof heurist.lookupNomisma
+     * @instance
+     * @property {Object} options
+     * @property {number} [options.height=720] - The height of the dialog.
+     * @property {number} [options.width=510] - The width of the dialog.
+     * @property {string} [options.title='Search Nomisma database of coins and currency via several options'] - The title of the dialog.
+     * @property {string} [options.htmlContent='lookupNomisma.html'] - The HTML content file for the dialog.
+     */
     options: {
 
         height: 720,
@@ -41,11 +69,46 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
         htmlContent: 'lookupNomisma.html'
     },
 
-    baseURL: '', // external url base
-    serviceName: 'nomisma', // service name
+    /**
+     * The base URL for the Nomisma API. This is dynamically set in `_doSearch`
+     * based on the type of search (Mints, Hoards, Findspots).
+     * @memberof heurist.lookupNomisma
+     * @instance
+     * @type {string}
+     */
+    baseURL: '',
 
+    /**
+     * The service name identifier for this lookup type.
+     * @memberof heurist.lookupNomisma
+     * @instance
+     * @type {string}
+     */
+    serviceName: 'nomisma',
+
+    /**
+     * jQuery selector for identifying the search buttons.
+     * Used to attach click handlers in the parent `lookupBase`.
+     * This widget has multiple search buttons for different Nomisma endpoints.
+     * @memberof heurist.lookupNomisma
+     * @instance
+     * @type {string}
+     */
     search_button_selector: '#btnMintSearch, #btnHoardsSearch, #btnFindspotsSearch',
 
+    /**
+     * Initializes UI controls for the Nomisma lookup widget.
+     * - Applies specific CSS styling to header elements.
+     * - Hides the RDF search button (`#btnRdfSearch`) as it's marked unavailable.
+     * - Sets a custom `empty_remark` for the result list, providing more context for Nomisma searches.
+     * - Calls the parent widget's `_initControls` method.
+     *
+     * @memberof heurist.lookupNomisma
+     * @instance
+     * @private
+     * @override
+     * @returns {void|*} The result of `this._super()`.
+     */
     _initControls: function(){
 
         // Extra field styling
@@ -64,36 +127,42 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
     },
 
     /**
-     * Result list rendering function called for each record
+     * Renders a single record in the result list for Nomisma search results.
+     * This method overrides the parent's `_rendererResultList`.
+     * It constructs a display string (`recTitle`) by concatenating several fields from the Nomisma record,
+     * with different fields used depending on whether the record type is 'hoard' or something else (e.g., mint, findspot).
      *
-     * @param {HRecordSet} recordset - complete record set, to retrieve fields
-     * @param {Array} record - record being rendered
-     * 
-     * @returns {String} formatted html string
+     * @memberof heurist.lookupNomisma
+     * @instance
+     * @private
+     * @override
+     * @param {HRecordSet} recordset - The complete HRecordSet object.
+     * @param {Array} record - The individual record (row) from the recordset.
+     * @returns {string} The HTML string for the rendered record, generated by the parent's `_rendererResultList`.
      */
     _rendererResultList: function(recordset, record){
 
         /**
-         * Get field details for displaying
-         * 
-         * @param {String} fldname - mapping field name
-         * @param {Number} width - width for field
-         * 
-         * @returns {String} sized and formatted html string
+         * Inner helper function to format a field's value for display.
+         * - For 'dates', constructs a composite date range string.
+         * - For 'properties.gazetteer_uri', creates a hyperlink.
+         * - For 'properties.count', formats it as "(count: N)".
+         * - HTML escapes the value and wraps it in a div with a specified width for truncation.
+         * @param {string} fldname - The name of the field (can be dot-separated for nested properties).
+         * @param {number} width - The display width for the field in 'ex' units. If 0, no div wrapper.
+         * @returns {string} HTML string for the formatted field.
          */
         function fld(fldname, width){
-
-            let s
-
-            if(fldname == 'dates'){
-                s = `${recordset.fld(record, 'when.timespans.start')} to ${recordset.fld(record, 'when.timespans.end')}` 
-                        + ` (end date: ${recordset.fld(record, 'properties.closing_date')})`;
+            let s;
+            if(fldname == 'dates'){ // Construct date range string
+                s = `${recordset.fld(record, 'when.timespans.start') || ''} to ${recordset.fld(record, 'when.timespans.end') || ''}`
+                        + ` (end date: ${recordset.fld(record, 'properties.closing_date') || ''})`;
             }else{
                 s = recordset.fld(record, fldname);
             }
 
-            s = s || '';
-            let title = s;
+            s = s || ''; // Default to empty string if null/undefined
+            let title = s; // Tooltip defaults to the raw (or constructed) value
 
             if(fldname == 'properties.gazetteer_uri'){
                 s = `<a href="${s}" target="_blank" rel="noopener"> view here </a>`;
@@ -106,18 +175,29 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
         }
         
         let recTitle = '';
+        // Different display format based on the type of Nomisma record
         if(fld('properties.type') == 'hoard'){
             recTitle = fld('properties.type', 10) + fld('label', 30) + fld('dates', 35) + fld('properties.gazetteer_uri', 10);
-        }else{
+        }else{ // For mints, findspots, etc.
             recTitle = fld('properties.type', 10) + fld('properties.gazetteer_label', 30) + fld('properties.count', 15) + fld('properties.gazetteer_uri', 10); 
         }
-        recordset.setFld(record, 'rec_Title', recTitle);
+        recordset.setFld(record, 'rec_Title', recTitle); // Set the formatted title
 
-        return this._super(recordset, record);
+        return this._super(recordset, record); // Call parent's renderer
     },
 
     /**
-     * Either perform search or select entry in resultList and triggers addition of new record
+     * Processes the user's selection from the Nomisma result list.
+     * This method is called when the main action button (e.g., "Select") is clicked.
+     * It retrieves the selected record set and passes it directly to `this.closingAction`.
+     * Unlike other lookups, it doesn't seem to perform detailed field-by-field mapping here;
+     * it implies that the entire selected record's data (as processed by `_onSearchResult`)
+     * might be returned, or further processing is expected by the calling context.
+     *
+     * @memberof heurist.lookupNomisma
+     * @instance
+     * @override
+     * @returns {void}
      */
     doAction: function(){
 
@@ -130,13 +210,26 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
     },
 
     /**
-     * Create search URL and perform search
+     * Constructs the Nomisma API search URL based on the clicked search button
+     * and executes the search by calling the parent's `_doSearch` method.
      *
-     * @param {MouseEvent} event - OnClick event to retrieve the lookup type
+     * - Determines the `search_type` (e.g., 'mint', 'hoard', 'findspots') from the clicked button's value.
+     * - If the main search input (`#inpt_any`) is empty, shows a flash message and returns.
+     * - Sets `this.baseURL` to the appropriate Nomisma API endpoint based on `search_type`.
+     * - Calls `this._super({id: this.element.find('#inpt_any').val()})`. The parent `_doSearch`
+     *   (from `lookupBase`) will then construct the full URL using `this.baseURL` and the provided parameters.
+     *
+     * @memberof heurist.lookupNomisma
+     * @instance
+     * @private
+     * @override
+     * @param {jQuery.Event} event - The click event object from the search button.
+     *                               The button's value indicates the search type.
+     * @returns {void}
      */
     _doSearch: function(event){
 
-        let search_type = $(event.target).val();
+        let search_type = $(event.target).val(); // Get search type from button value (e.g., 'mint', 'hoard')
 
         if(this.element.find('#inpt_any').val()==''){
             window.hWin.HEURIST4.msg.showMsgFlash('Enter value to search...', 500);
@@ -161,59 +254,89 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
     },
     
     /**
-     * Prepare json for displaying via the Heuirst resultList widget
+     * Processes the GeoJSON search results received from the Nomisma API.
+     * This method overrides the parent `_onSearchResult`.
      *
-     * @param {Object} json_data - search response
+     * - Validates if `geojson_data` is valid GeoJSON. If not, calls `this._super(false)`.
+     * - Prepares field list for HRecordSet: 'rec_ID', 'rec_RecTypeID', and fields from `this.options.mapping.fields`.
+     *   Mapped field names can be dot-separated to access nested properties in the GeoJSON features.
+     * - Normalizes input: if `geojson_data.features` doesn't exist, assumes `geojson_data` itself is the features array/object.
+     * - Iterates through each `feature` in `geojson_data.features`:
+     *   - Assigns a local sequential `recID`.
+     *   - Creates a `values` array for the HRecordSet row.
+     *   - For each mapped field:
+     *     - Extracts the value from the feature, handling nested properties using `getValueByParts`.
+     *     - Handles temporal data extraction using `getTimespan`.
+     *     - If the target Heurist field is a geospatial type (matches `DT_GEO_OBJECT`) and the value is not empty,
+     *       it converts the GeoJSON geometry to WKT format using `createGeoFeature`.
+     *     - If WKT conversion results in an empty string, the `hasGeo` flag is set to false, and this feature might be skipped.
+     *   - If `hasGeo` is true (or if geospatial mapping wasn't primary), adds the record to `res_records` and `res_orders`.
+     * - Constructs the final result object or `false`.
+     * - Calls `this._super(res)` to display results.
+     *
+     * @memberof heurist.lookupNomisma
+     * @instance
+     * @private
+     * @override
+     * @param {Object} geojson_data - The GeoJSON response from the Nomisma API.
+     * @returns {void}
      */
     _onSearchResult: function(geojson_data){
 
-        if(!window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true)){
-            this._super(false);
+        if(!window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true)){ // Validate GeoJSON
+            this._super(false); // Show error/clear if not valid
+            return;
         }
 
         let res_records = {}, res_orders = [];
+        const DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']; // Heurist ID for geospatial field type
 
-        let DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+        // Prepare fields for HRecordSet
+        let fields = ['rec_ID','rec_RecTypeID']; // Base fields
+        let map_flds_orig = Object.keys(this.options.mapping.fields); // Mapped fields from config
+        fields = fields.concat(map_flds_orig);
 
-        let fields = ['rec_ID','rec_RecTypeID'];
-        let map_flds = Object.keys(this.options.mapping.fields);
-        fields = fields.concat(map_flds);
+        // Split dot-separated mapped field names for nested property access
+        let map_flds_processed = map_flds_orig.map((prop) => prop.split('.'));
 
-        map_flds = map_flds.map((prop) => prop.split('.'));
+        // Normalize: Nomisma API returns features in geojson_data.features
+        let features_array = geojson_data.features || geojson_data; // Fallback if structure is flatter
+        features_array = Array.isArray(features_array) ? features_array : [features_array];
 
-        if(!geojson_data.features) geojson_data.features = geojson_data;
 
-        //parse json
-        let i = 0;
-        for(const feature of geojson_data.features){
-
+        let i = 0; // Local record ID counter
+        for(const feature of features_array){
             let recID = i++;
-            
-            let hasGeo = true;
-            let values = [recID, this.options.mapping.rty_ID];
-            for(const fld_Names of map_flds){
+            let hasGeo = true; // Flag to track if essential geo data is present if mapped
+            let values = [recID, this.options.mapping.rty_ID]; // Start with local ID and target rty_ID
 
-                let val = feature[fld_Names[0]];
+            for(let j = 0; j < map_flds_processed.length; j++){
+                const fld_Name_parts = map_flds_processed[j]; // Array of parts for nested access
+                const original_fld_Name = map_flds_orig[j]; // Original dot-separated name from mapping config
 
-                val = this.getTimespan(fld_Names, val);
+                let val = feature; // Start with the whole feature object
 
-                val = this.getValueByParts(fld_Names, val);
+                // Handle temporal data extraction first if field name suggests it (e.g., "when.timespans.start")
+                val = this.getTimespan(fld_Name_parts, val);
 
-                if(DT_GEO_OBJECT == this.options.mapping.fields[fld_Names] && !window.hWin.HEURIST4.util.isempty(val)){ // looking for geospatial values
-                    val = this.createGeoFeature(val);
-                    hasGeo = !window.hWin.HEURIST4.util.isempty(val);
-                } // else not looking for geospatial values
+                // Then extract potentially nested value
+                val = this.getValueByParts(fld_Name_parts, val);
 
+                // If the target Heurist field is geospatial, convert GeoJSON geometry to WKT
+                if(DT_GEO_OBJECT == this.options.mapping.fields[original_fld_Name] && !window.hWin.HEURIST4.util.isempty(val)){
+                    val = this.createGeoFeature(val); // val here is expected to be a GeoJSON geometry object
+                    hasGeo = !window.hWin.HEURIST4.util.isempty(val); // Update hasGeo based on WKT result
+                }
                 values.push(val);    
             }
 
-            if(hasGeo){
+            if(hasGeo){ // Add record only if essential geo data (if mapped to geo field) is valid
                 res_orders.push(recID);
                 res_records[recID] = values;    
             }
         }
 
         let res = res_orders.length > 0 ? {fields: fields, order: res_orders, records: res_records} : false;
-        this._super(res);
+        this._super(res); // Pass to parent for display
     }
 });

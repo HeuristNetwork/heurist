@@ -1,26 +1,43 @@
 /**
- * lookupMPCE.js
+ * lookupMPCE.js - MPCE Super Book (Work) Classification Toolkit.
  *
- *  1) This file loads html content from lookupMPCE.html
- *  2) This file outlines the functionality of the MPCE toolkit, including:
- *      - Assigning New Keywords to a Super Book (Work) record
- *      - Looking up a list of keywords that have been assigned with a selected keyword in other works
- *      - Display a list of keywords assigned to previously viewed works
+ * @fileOverview
+ * This file defines the `heurist.lookupMPCE` jQuery UI widget, a specialized tool
+ * for the "Mapping Print, Charting Enlightenment" (MPCE) project. It provides an
+ * interface for classifying "Super Book (Work)" records within a Heurist database.
  *
+ * The widget facilitates:
+ *  1. Loading its UI from `lookupMPCE.html`.
+ *  2. Assigning new keywords to a Super Book (Work) record.
+ *  3. Displaying and allowing assignment of keywords associated with a selected keyword
+ *     from other Work records (Associated Keywords).
+ *  4. Displaying and allowing assignment of keywords from recently viewed/classified
+ *     Work records (Previously Assigned Keywords).
+ *  5. Setting Parisian Category and Basis for Classification terms for the Work.
+ *  6. Adding classification notes.
+ *  7. Linking to external search services (Google Books, WorldCat, HathiTrust, Karlsruhe Portal)
+ *     for the current Work's title.
+ *  8. Viewing associated Edition records.
  *
+ * It relies heavily on specific Heurist Record Type IDs (RT), Detail Type IDs (DT),
+ * and Vocabulary Item IDs (VI) which are mapped in the `id_map` property, often
+ * configured via the `options.mapping.fields` passed from a lookup configuration.
+ * User preferences for dialog size are also respected.
  *
  * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\lookup
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @author      Artem Osmakov   <osmakov@gmail.com>
  * @author      Brandon McKay   <blmckay13@gmail.com>
  * @author      Martin Yldh   <martinsami@yahoo.com>
  * @author      Staphanson Hudson   <staphanson98@hotmail.com>
- * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
- * @version     5.0
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       5.0
  */
 
-/*  
+/*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
 * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
 * Unless required by applicable law or agreed to in writing, software distributed under the License is
@@ -28,9 +45,35 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+ * Widget for the MPCE (Mapping Print, Charting Enlightenment) Project's
+ * Super Book (Work) Classification Tool. It provides a specialized interface
+ * for assigning keywords and classification terms to Work records.
+ *
+ * @widget heurist.lookupMPCE
+ * @extends heurist.lookupBase
+ * @memberof heurist
+ */
 $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
 
-    // default options
+    /**
+     * Default options for the MPCE lookup widget.
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @property {Object} options
+     * @property {number} options.height - The height of the dialog. Defaults to user preference
+     *                                     `pref_lookupMPCE_h` or 780.
+     * @property {number} options.width - The width of the dialog. Defaults to user preference
+     *                                    `pref_lookupMPCE_w` or 1200.
+     * @property {string} [options.title="Super Book (Work) Classification Tool for MPCE Project"]
+     *           - The title of the dialog.
+     * @property {string} [options.htmlContent="lookupMPCE.html"] - The HTML content file for the dialog.
+     * @property {Object} options.mapping - Configuration from `record_lookup_config.json`,
+     *                                    used by `mapIds` to set up `id_map`.
+     *   @property {Object} options.mapping.fields - Field mappings from the service configuration.
+     *   @property {number} options.mapping.rty_ID - The Record Type ID of the main Work record being classified.
+     * @property {Object} options.edit_fields - Realtime values from the edit form fields of the Work record being classified.
+     */
     options: {
         // Setting popup size, based on user preference
         height: (window.hWin.HAPI4.get_prefs_def('pref_lookupMPCE_h', 780)),
@@ -41,9 +84,35 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         htmlContent: "lookupMPCE.html"
     },
 
+    /**
+     * Label for the main action button (e.g., "Update Record").
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @type {string}
+     */
     action_button_label: 'Update Record',
 
-    id_map: {   // ID Map for Record Types, Detail Types, and Vocabulary. Assigned in mapIds
+    /**
+     * Maps logical names to specific Heurist Record Type IDs (RT), Detail Type IDs (DT),
+     * and Vocabulary Item IDs (VI) relevant to the MPCE classification task.
+     * This map is populated by the `mapIds` method during `_initControls` using
+     * values from `this.options.mapping.fields` and system defaults.
+     *
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @type {Object}
+     * @property {?number} RT_Editions - Record Type ID for Edition records.
+     * @property {?number} RT_Work - Record Type ID for Work records (the record being classified).
+     * @property {?number} RT_Keyword - Record Type ID for Keyword records.
+     * @property {?number} DT_MPCEId - Detail Type ID for the MPCE ID field on a Work record.
+     * @property {?number} DT_Category - Detail Type ID for the Parisian Category field (term pointer) on a Work record.
+     * @property {?number} DT_Keywords - Detail Type ID for the Project Keywords field (record pointer) on a Work record.
+     * @property {?number} DT_Basis - Detail Type ID for the Basis for Classification field (term pointer) on a Work record.
+     * @property {?number} DT_Notes - Detail Type ID for the Classification Notes field on a Work record.
+     * @property {?number} VI_Category - Vocabulary ID for Parisian Category terms.
+     * @property {?number} VI_Basis - Vocabulary ID for Basis for Classification terms.
+     */
+    id_map: {
         RT_Editions: null,
         RT_Work: null,
         RT_Keyword: null,
@@ -58,16 +127,61 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         VI_Basis: null
     },
 
-    // Main Variables
-    project_keywords: null, // array of keyword ids
-    parisian_category: null,    // id of selected parisian category
-    basis_for_classification: null, // id of selected basis for classification
-    classification_notes: null, // entry for classification notes
+    /**
+     * Array of Keyword record IDs currently assigned to the Work record being classified.
+     * Initialized from `this.options.edit_fields`.
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @type {?Array<number>}
+     */
+    project_keywords: null,
 
-    full_keywords_list: null, // object of all keywords
+    /**
+     * The Term ID of the selected Parisian Category for the Work record.
+     * Initialized from `this.options.edit_fields`.
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @type {?number}
+     */
+    parisian_category: null,
 
-    // Associated Keyword Variables
-    assoc_search_id: null,  // current keyword of interest
+    /**
+     * The Term ID of the selected Basis for Classification for the Work record.
+     * Initialized from `this.options.edit_fields`.
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @type {?number}
+     */
+    basis_for_classification: null,
+
+    /**
+     * Text content of the Classification Notes for the Work record.
+     * Initialized from `this.options.edit_fields`.
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @type {?string}
+     */
+    classification_notes: null,
+
+    /**
+     * An object caching all available Keyword records, mapping their ID to their title.
+     * Populated by `getKeywords`.
+     * E.g., `{keyword_id_1: "Keyword Title 1", keyword_id_2: "Keyword Title 2"}`.
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @type {?Object<number, string>}
+     */
+    full_keywords_list: null,
+
+    // == Associated Keyword Variables ==
+    /**
+     * The Record ID of the keyword currently selected for finding associated keywords.
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @private
+     * @type {?number}
+     */
+    assoc_search_id: null,
     assoc_keywords: null,   // the keywords in association with the selected keyword
     assoc_work_count: null, // the number of works that contain the selected keyword
     assoc_startindex: null, // the index of the current start of list 
