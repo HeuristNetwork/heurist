@@ -11,7 +11,7 @@
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @since       6.0
+* @since       5.0
 */
 
 /* global HEditing, HRecordSet */

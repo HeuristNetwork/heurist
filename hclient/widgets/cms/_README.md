@@ -1,109 +1,25 @@
+# Directory: /hclient/widgets/cms
 
-Directory:    /hclient/widgets/cms
+## Overview
 
-Overview:   Functions to manage a CMS-based website within a Heurist database. Developed late 2019.
-            
-            To configure a default look for all websites created on a particular server, 
-            eg. adding institutional headers, copy /hclient/widgets/cms/cmsTemplate.php to the parent 
-            of the Heurist code (normally /HEURIST/)
-            
-            You may use several templates per server (for specific websites).
-            We encourage the following of naming convention cmsTemplate_OrganisationName.php
-            Copy to /HEURIST root folder and specify this name in the field "Website Template" (field 2-922) 
-            in the Advanced tab of the CMS home page record.
-            
-            The template can also be specified as a relative path hclient/widgets/cms/<template name> but this
-            should ONLY be used for development as it uses a path which might change and local changes could
-            get overwritten by code updates.
+This directory contains widgets related to the Content Management System (CMS) features. These widgets are used for managing website content, structure and templates.
 
-Notes:
-
-Updated:     06 Nov 2024
-
-----------------------------------------------------------------------------------------------------------------
-
-
-Development plan for CMS and CEO
-
-
-ISSUES:
-Relative path to images becomes wrong if it uses short url like https://heurist.huma-num.fr/Corpus_Sathma/web/
-It is finally corrected (for user), but for googlebot it is wrong: https://heurist.huma-num.fr/Corpus_Sathma/web/?db=Corpus_Sathma&file=f43e9333434b584bdb463b63a1444b8560909c0d&fancybox=1 
-Solution. Replace links to absolute on time of page generation on server
-Set correct lang in <html lang=”en”> on page generation
-Prevent name database with reserver words:  heurist*, h6-*, startup, databases, help, documentation,website|web|tpl|hml|view|edit|adm,api
-Add rewrite rule: MyDatabase/file/[ulf_ObfuscationID]
-
-
-CMS
-1. editCMS2.js - to CmsEditor class (last turn)
-
-
-2. hLayoutMgr.js - to core/HLayoutMgr class (replace old layout.js)
-        save cms content in new format: json configuration in header + html content (to avoid encoding/escaping issues)
-        on init it a) loads html b) applies styles c) inits widgets
-        
-3. websiteRecord.php  to CmsExectue.php  (invocation via FrontController.php?)
-        a) finds home page
-        b) loads values from home record: for header and footer elements (title, logos, banner, languages)
-        c) includes custom css and scripts
-        d) main menu content, generates as ul/li, all links are explicit/crawlable 
-        e) loads/includes template file
-                     f)    loads content of particular page
-        g) outputs either to client or into html file (to /generated-web)
-        h) generates sitemap
-        
-4. websiteScriptAndStyles.php  split to CmsScripts.php - include required scripts and styles and  CmsScripts.js  - class to manage/interact page (load pages, init widgets, fix relative links) 
-                                  
-5. ~10~20 sample templates
-                                  
- CEO
-
-
-1) +Sitemap for heurist (main) and published websites        
-    a) use Google API to submit
-    +b) include into robots:    Sitemap: https://heurist.huma-num.fr/main_sitemap.xml
-2) +META noindex, nofollow for admin ui
-3) +Disallow in robots.txt all folders except  /(root), /startup, /databases
-4) +Does not include to index recordView for particular records
-
-
-5) Create published/generated version of websites. Use name of page instead of record id. Use dashes for spaces and utf8 encoding
-
-
-    https://heurist.huma-num.fr/MyDatabase/web/92/page-name.html - generated version form HEURIST_FILESTORE/MyDatabase/generated-web
-    https://heurist.huma-num.fr/MyDatabase/web/92/342 - dynamic version
-
-
-6) OPTIONAL: Country-specific subdirectory with gTLD (instead of param) 
-
-
-   https://heurist.huma-num.fr/MyDatabase/web/92/342/fre
-        
-7) !!!! Make all links crawlable
-
-        
---------
-
-
-1. startup/ Menu in header: about, startup, databases, websites
-2. database index (standard header and css)  with search and featured/selected
-3. database pages (standard header and css)
-4. minified core scripts (modules)
-5. loads widgets code on demand
-      
-        
-        
-
-// refer CMS: WordPress, Wix, Blogger        
-        
-// Turn on output buffering
-ob_start();
-echo "Foo";                          
-//  Return the contents of the output buffer
-$htmlStr = ob_get_contents();
-// Clean (erase) the output buffer and turn off output buffering
-ob_end_clean(); 
-// Write final string to file
-file_put_contents($fileName, $htmlStr);
-
+## Key files
+- `CmsManager.js`: CmsManager - select CMS to view and edit, addition new website or page
+- `cmsStatistics.html`: HTML structure for CMS statistics widget.
+- `cmsStatistics.js`: cmsStatistics.js
+- `cmsTemplate.php`: CMS website template
+- `editCMS2.js`: editCMS2.js - CMS editor
+- `editCMS_AddPage.html`: Content for popup form to define new web page
+- `editCMS_ElementCfg.html`: Content Element configuration form
+- `editCMS_ElementCfg.js`: Configuration dialog for css and cardinal properties, for widgets it uses editCMS_WidgetCfg.js
+- `editCMS_NewSiteMsg.html`: HTML content for new website message dialog.
+- `editCMS_SelectElement.html`: Content for popup form to select element to be inserted into CMS page
+- `editCMS_SelectElement.js`: Select element to be inserted into CMS page - opens popup
+- `editCMS_SiteMenu.js`: Website structure/menu configuration
+- `editCMS_WidgetCfg.html`: Content for configuration Heuist widget onto CMS page
+- `editCMS_WidgetCfg.js`: Configuration dialog for widget properties - this is either popup or use provided container
+- `webpageStarterRecords.xml`: XML defining starter records for a new webpage.
+- `websiteRecord.php`: Website generator based on CMS records (Home and menu/page record types: 99-51,99-52)
+- `websiteScriptAndStyles.php`: Injection of Heuirst core scripts, styles and scripts to init CMS website template
+- `websiteStarterRecords.xml`: XML defining starter records for a new website.
