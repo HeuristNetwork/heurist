@@ -14,7 +14,7 @@
  * @author      Brandon McKay   <blmckay13@gmail.com>
  * @author      Artem Osmakov   <osmakov@gmail.com>
  * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
- * @since       5.0
+ * @since       4.0
  */
 
 /* global HEditing, HRecordSet, $Db, tinyMCE */

@@ -14,7 +14,7 @@
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @author      Artem Osmakov   <osmakov@gmail.com>
  * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
- * @since       5.0
+ * @since       4.0
  *
  * @todo Consider converting HEditing to an ES6 class for better syntax and maintainability if future refactoring is planned.
  */
