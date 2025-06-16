@@ -1,12 +1,16 @@
 /**
 * profilePreferences.js - edit user preferences
 *
+* @fileOverview Detailed description of editing user preferences.
+*
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\profile
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*  
@@ -18,9 +22,22 @@
 */
 /* global cfg_layouts */
 
+/**
+ * @widget heurist.profilePreferences
+ * @extends $.heurist.baseAction
+ * @description Widget for managing user preferences.
+ */
 $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
 
-    // default options
+    /**
+     * @member {Object} options - Default options for the widget.
+     * @property {number} options.height - The height of the dialog.
+     * @property {number} options.width - The width of the dialog.
+     * @property {string} options.title - The title of the dialog.
+     * @property {string} options.default_palette_class - The default palette class for the dialog.
+     * @property {string} options.actionName - The name of the action.
+     * @property {string} options.path - The path to the widget's HTML file.
+     */
     options: {
         height: 520,
         width:  400,
@@ -30,9 +47,14 @@ $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
         path: 'widgets/profile/'
     },
     
-    //  
-    // invoked from _init after loading of html content
-    //
+    /**
+     * @function _initControls
+     * @description Initializes the controls in the dialog.
+     *              This function is invoked from `_init` after loading the HTML content.
+     *              It handles localization, fills lists for languages and layouts,
+     *              assigns preference values to form fields, and sets up event handlers.
+     * @returns {void}
+     */
     _initControls: function(){
             let that = this;
              
@@ -158,6 +180,13 @@ $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
     },
     
     
+    /**
+     * @function initProfilePreferences
+     * @description Initializes profile preferences specific settings.
+     *              This includes setting the layout language, populating layout options,
+     *              and initializing the bookmarklet link.
+     * @returns {void}
+     */
     initProfilePreferences: function(){
 
         let sel = this._$("#layout_language");
@@ -211,9 +240,12 @@ $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
         }
     },
 
-    //    
-    //
-    //
+    /**
+     * @function _getActionButtons
+     * @description Gets the action buttons for the dialog.
+     *              It overrides the base class method to customize the "Apply" button.
+     * @returns {Array<Object>} An array of button definitions.
+     */
     _getActionButtons: function(){
         let res = this._super();
         res[1].text = window.hWin.HR('Apply');
@@ -221,9 +253,14 @@ $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
         return res;
     },
 
-    //
-    //
-    //
+    /**
+     * @function doAction
+     * @description Performs the action of saving user preferences.
+     *              It collects data from the form fields, saves preferences using `HAPI4.SystemMgr.save_prefs`,
+     *              and handles UI updates based on the changed preferences, potentially reloading the page
+     *              or specific components like the map or color theme.
+     * @returns {void}
+     */
     doAction: function(){
             
         let request = {};

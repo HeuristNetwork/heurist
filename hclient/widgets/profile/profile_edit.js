@@ -1,13 +1,18 @@
 /**
-* Dialog to register new user (not logged in)
-* @todo replace with entity.manageSysUsers
+* profile_edit.js - Dialog to register new user or edit existing profile
+*
+* @fileOverview Provides functionality for user registration and profile editing.
+*               Includes captcha verification for new registrations.
+*               This is planned to be replaced by entity.manageSysUsers.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\profile
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*
@@ -18,10 +23,26 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
+/**
+ * @widget heurist.profile_edit
+ * @description Widget for editing user profiles and registering new users.
+ *              It handles different modes for registration and editing existing profiles.
+ *              Displays a dialog with a form for user details, including captcha for registration.
+ */
 $.widget( "heurist.profile_edit", {
 
-    // default options
+    /**
+     * @member {Object} options - Default options for the widget.
+     * @property {boolean} options.isdialog - Whether the widget is displayed as a dialog.
+     * @property {number} options.ugr_ID - The ID of the user group to edit. 0 for new user registration.
+     * @property {Object} options.edit_data - Data for the user being edited.
+     * @property {boolean} options.isregistration - True if the widget is in registration mode.
+     * @property {Object} options.parentwin - The parent window object.
+     * @property {boolean} options.needclear - True to clear input fields every time for registration.
+     * @property {boolean} options.is_guest - True if registering a guest user.
+     * @property {?function} options.callback - Callback function to be executed after saving.
+     * @property {?function} options.afterRegistration - Callback function to be executed after successful registration.
+     */
     options: {
         isdialog: true,
 
@@ -39,7 +60,13 @@ $.widget( "heurist.profile_edit", {
         afterRegistration: null
     },
 
-    // the widget's constructor
+    /**
+     * @function _create
+     * @description The widget's constructor. Called when the widget is created.
+     *              Initializes the basic structure of the widget, creating divs for the form and messages.
+     *              Prevents text selection on double-click.
+     * @returns {void}
+     */
     _create: function() {
 
         if(!this.options.parentwin){
@@ -62,8 +89,14 @@ $.widget( "heurist.profile_edit", {
 
     }, //end _create
 
-    // Any time the widget is called with no arguments or with only an option hash,
-    // the widget is initialized; this includes when the widget is created.
+    /**
+     * @function _init
+     * @description Initializes the widget. Called when the widget is called with no arguments or with only an option hash.
+     *              Loads the HTML for the form if it's not already loaded.
+     *              Sets up the dialog, accordion, localization, and event handlers.
+     *              Determines if the widget is in registration or edit mode.
+     * @returns {void}
+     */
     _init: function() {
 
         if(this.edit_form.is(':empty') ){
@@ -142,6 +175,13 @@ $.widget( "heurist.profile_edit", {
 
     },
 
+    /**
+     * @function _setOption
+     * @description Sets an option for the widget.
+     * @param {string} key - The option key to set.
+     * @param {*} value - The value to set for the option.
+     * @returns {void}
+     */
     _setOption: function( key, value ){
         if(key==='ugr_ID'){
             this.options.ugr_ID = value;
@@ -156,21 +196,37 @@ $.widget( "heurist.profile_edit", {
         }
     },
 
-    /*
-    * private function
-    * show/hide buttons depends on current login status
-    */
+    /**
+     * @function _refresh
+     * @description Refreshes the widget. Placeholder for showing/hiding buttons based on login status.
+     *              Currently, this function is empty.
+     * @returns {void}
+     */
     _refresh: function(){
 
     },
-    //
-    // custom, widget-specific, cleanup.
+    /**
+     * @function _destroy
+     * @description Custom cleanup for the widget. Called when the widget is destroyed.
+     *              Currently, this function is empty.
+     * @returns {void}
+     */
     _destroy: function() {
         // remove generated elements
        
     },
 
-    //----
+    /**
+     * @function _fromDataToUI
+     * @description Populates the form fields with user data.
+     *              Clears existing values and error states.
+     *              Fetches user data if `ugr_ID` is provided and data is not already loaded.
+     *              Sets visibility of form sections based on mode (edit, registration, admin).
+     *              Initializes captcha for registration mode.
+     *              Sets up event handlers for email blur and agreement checkbox.
+     *              Opens the dialog if `isdialog` is true.
+     * @returns {void}
+     */
     _fromDataToUI: function(){
 
         let allFields = this.edit_form.find('input, textarea');
@@ -272,6 +328,13 @@ $.widget( "heurist.profile_edit", {
         }
     },
 
+    /**
+     * @function _refreshCaptcha
+     * @description Refreshes the captcha image or simple captcha text.
+     *              Clears the existing captcha input field.
+     *              Loads a new captcha from the server.
+     * @returns {void}
+     */
     _refreshCaptcha: function(){
         let that = this;
         that.edit_form.find('#ugr_Captcha').val('');
@@ -286,6 +349,16 @@ $.widget( "heurist.profile_edit", {
         }
     },
 
+    /**
+     * @function _doSave
+     * @description Handles the save/register action.
+     *              Validates mandatory fields, email format, login name, and passwords.
+     *              If validation passes, collects data from form fields.
+     *              Calls `HAPI4.SystemMgr.user_save` to save the user data.
+     *              Handles success and error responses, showing appropriate messages.
+     *              Closes the dialog on success or calls the callback if provided.
+     * @returns {void}
+     */
     _doSave: function(){
         
         let parentWin = this.options.parentwin;
@@ -434,11 +507,22 @@ $.widget( "heurist.profile_edit", {
 
     },
 
+    /**
+     * @function open
+     * @description Opens the profile edit dialog.
+     * @returns {void}
+     */
     open:function(){
         this.edit_form.dialog("open");
     },
 
-    //these functions is used in edit_profile.html
+    /**
+     * @function autofill_login
+     * @description Autofills the login name field if it is empty.
+     *              This function is used in `profile_edit.html`.
+     * @param {string} value - The value to fill in the login name field (typically the email address).
+     * @returns {void}
+     */
     autofill_login: function (value){
         let ele = this.edit_form.find('#ugr_Name');
         if(ele && ele.val()==''){
@@ -446,6 +530,13 @@ $.widget( "heurist.profile_edit", {
         }
     },
     
+    /**
+     * @function enable_register
+     * @description Enables or disables the save/register button.
+     *              This function is used in `profile_edit.html`.
+     * @param {boolean} is_enabled - True to enable the button, false to disable.
+     * @returns {void}
+     */
     enable_register: function (is_enabled){
         let ele = this.edit_form.parent().find('#btn_save');
         window.hWin.HEURIST4.util.setDisabled(ele, !is_enabled);
