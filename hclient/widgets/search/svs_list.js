@@ -2388,7 +2388,7 @@ $.widget( "heurist.svs_list", {
                 this.options.is_h6style );
 
         }else{
-            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/svs_edit.js',
+            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/svsEdit.js',
                 function(){ that.hSvsEdit = HSvsEdit; that.editSavedSearch(mode, groupID, svsID, squery); } );
         }
 

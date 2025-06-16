@@ -1,5 +1,5 @@
 /**
-* profile_login.js - Login dialogue
+* profileLogin.js - Login dialogue
 *
 * @fileOverview Provides the login dialog functionality for the Heurist system.
 *               Handles standard username/password login, SAML authentication,
@@ -201,7 +201,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
         let $dlg = login_dialog;
 
         //load login dialogue
-        $dlg.load(window.hWin.HAPI4.baseURL + "hclient/widgets/profile/profile_login.html?t="
+        $dlg.load(window.hWin.HAPI4.baseURL + "hclient/widgets/profile/profileLogin.html?t="
                             +window.hWin.HEURIST4.util.random(), 
             function(){ 
 
@@ -679,7 +679,7 @@ function setupCaptcha($dlg){
 /**
  * @function doRegister
  * @description Initiates the user registration process by showing the profile edit dialog.
- *              Loads `profile_edit.js` if not already loaded.
+ *              Loads `profileEdit.js` if not already loaded.
  * @param {?Window} [parentwin=window.hWin] - The parent window object.
  * @param {boolean} [is_guest=false] - True if registering a guest user.
  * @returns {void}
@@ -694,19 +694,19 @@ function doRegister( parentwin, is_guest=false ){
     } 
     let $doc = $(parentwin.document['body']);
 
-    if(window.hWin.HEURIST4.util.isFunction($doc.profile_edit)){
+    if(window.hWin.HEURIST4.util.isFunction($doc.profileEdit)){
 
         let profile_edit_dialog = $('#heurist-profile-dialog');
         if(profile_edit_dialog.length<1){
             profile_edit_dialog = $( '<div id="heurist-profile-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $doc );
         }
         
-        profile_edit_dialog.profile_edit({'ugr_ID': window.hWin.HAPI4.currentUser.ugr_ID, 'parentwin': parentwin,
+        profile_edit_dialog.profileEdit({'ugr_ID': window.hWin.HAPI4.currentUser.ugr_ID, 'parentwin': parentwin,
                  'is_guest':is_guest, 'afterRegistration': onAuthentication});
         
     }else{
-        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_edit.js', function() {
-            if(window.hWin.HEURIST4.util.isFunction($doc.profile_edit)){
+        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profileEdit.js', function() {
+            if(window.hWin.HEURIST4.util.isFunction($doc.profileEdit)){
                 doRegister( parentwin, is_guest );
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr({

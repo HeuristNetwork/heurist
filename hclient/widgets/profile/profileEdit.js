@@ -1,5 +1,5 @@
 /**
-* profile_edit.js - Dialog to register new user or edit existing profile
+* profileEdit.js - Dialog to register new user or edit existing profile
 *
 * @fileOverview Provides functionality for user registration and profile editing.
 *               Includes captcha verification for new registrations.
@@ -16,12 +16,12 @@
 */
 
 /**
- * @widget heurist.profile_edit
+ * @widget heurist.profileEdit
  * @description Widget for editing user profiles and registering new users.
  *              It handles different modes for registration and editing existing profiles.
  *              Displays a dialog with a form for user details, including captcha for registration.
  */
-$.widget( "heurist.profile_edit", {
+$.widget( "heurist.profileEdit", {
 
     /**
      * @member {Object} options - Default options for the widget.
@@ -95,7 +95,7 @@ $.widget( "heurist.profile_edit", {
 
             let that = this;
 
-            this.edit_form.load(window.hWin.HAPI4.baseURL+"hclient/widgets/profile/profile_edit.html?t="+(new Date().getTime()),
+            this.edit_form.load(window.hWin.HAPI4.baseURL+"hclient/widgets/profile/profileEdit.html?t="+(new Date().getTime()),
                 function(){
                     
                     $('#divConditions').load(`${window.hWin.HAPI4.baseURL}?disclaimer=terms_and_conditions.html #content`);
@@ -465,7 +465,7 @@ $.widget( "heurist.profile_edit", {
                                     if(that.options.is_guest && window.hWin.HEURIST4.util.isFunction(that.options.afterRegistration)){
                                         that.options.afterRegistration.call(that, response);
                                     }else{
-                                        parentWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+"hclient/widgets/profile/profile_regmsg.html?t="+(new Date().getTime()),null,'Confirmation');
+                                        parentWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+"hclient/widgets/profile/profileRegMsg.html?t="+(new Date().getTime()),null,'Confirmation');
                                     }
                                 }else{
                                     parentWin.HEURIST4.msg.showMsgDlg("User information saved");
@@ -511,7 +511,7 @@ $.widget( "heurist.profile_edit", {
     /**
      * @function autofill_login
      * @description Autofills the login name field if it is empty.
-     *              This function is used in `profile_edit.html`.
+     *              This function is used in `profileEdit.html`.
      * @param {string} value - The value to fill in the login name field (typically the email address).
      * @returns {void}
      */
@@ -525,7 +525,7 @@ $.widget( "heurist.profile_edit", {
     /**
      * @function enable_register
      * @description Enables or disables the save/register button.
-     *              This function is used in `profile_edit.html`.
+     *              This function is used in `profileEdit.html`.
      * @param {boolean} is_enabled - True to enable the button, false to disable.
      * @returns {void}
      */

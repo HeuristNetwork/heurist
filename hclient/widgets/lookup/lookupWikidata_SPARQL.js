@@ -36,7 +36,6 @@
  *
  * @widget heurist.lookupWikidata_SPARQL
  * @extends heurist.lookupBase
- * @memberof heurist
  */
 $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
 
