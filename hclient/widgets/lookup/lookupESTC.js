@@ -1,13 +1,30 @@
 /**
-* lookupESTC.js - Base widgt for ESTC lookups
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Brandon McKay   <blmckay13@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.0
-*/
+ * lookupESTC.js - Base widget for ESTC (English Short Title Catalogue) lookups.
+ *
+ * @fileOverview
+ * This file defines the `heurist.lookupESTC` jQuery UI widget.
+ * This widget serves as a base for looking up records from an ESTC
+ * (English Short Title Catalogue) database, specifically targeting the
+ * "ESTC Helsinki Bibliographic Metadata" database instance within Heurist.
+ * It can be configured to search for "Works" (if `options.mapping.service` is 'ESTC_works')
+ * or "Editions" (otherwise, typically 'ESTC' or 'ESTC_editions', historically also 'LRC18C').
+ *
+ * The widget handles:
+ * - Dynamically loading different HTML content based on whether it's for works or editions.
+ * - Constructing search queries for the Heurist HAPI based on user input and predefined mappings.
+ * - Displaying search results.
+ * - Importing selected ESTC records into the current Heurist database, including handling
+ *   linked records (record pointers) and terms.
+ *
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\lookup
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Brandon McKay <blmckay13@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       6.0
+ */
 
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
@@ -17,8 +34,44 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+ * @namespace heurist
+ */
+
+/**
+ * Base widget for ESTC (English Short Title Catalogue) lookups.
+ * Inherits from `$.heurist.lookupBase`.
+ *
+ * This widget provides functionality to search and import records from a
+ * Heurist-hosted ESTC database (specifically 'ESTC_Helsinki_Bibliographic_Metadata').
+ * It adapts its behavior and UI based on whether it's configured for searching
+ * "Works" (`options.mapping.service == 'ESTC_works'`) or "Editions".
+ *
+ * Key features include dynamic HTML loading, construction of search queries
+ * using `search_mapping`, result rendering, and a multi-step import process
+ * (`_getRecordDetails`, `_importRecords`, `_getRecPointers`, `_getTerms`)
+ * to handle data mapping and creation of linked entities.
+ *
+ * @class heurist.lookupESTC
+ * @memberof heurist
+ * @augments heurist.lookupBase
+ */
 $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
 
+    /**
+     * Default options for the ESTC lookup widget.
+     * @memberof heurist.lookupESTC
+     * @instance
+     * @property {Object} options
+     * @property {number} [options.height=540] - The height of the dialog.
+     * @property {number} [options.width=880] - The width of the dialog.
+     * @property {string} [options.title='Lookup ESTC Helsinki Bibliographic Metadata values for Heurist record'] - The title of the dialog.
+     * @property {string} options.htmlContent - The name of the HTML file for the dialog's content.
+     *                                        This is dynamically set in `_init` to 'lookupLRC18C.html' (for editions)
+     *                                        or 'lookupESTC_works.html' (for works).
+     * @property {Object} options.mapping - Configuration from `record_lookup_config.json`.
+     *   @property {string} options.mapping.service - The specific ESTC service type (e.g., 'ESTC_works', 'ESTC').
+     */
     options: {
 
         height: 540,
@@ -29,11 +82,53 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
         htmlContent: ''
     },
 
+    /**
+     * Flag indicating whether the current lookup is for ESTC "Works".
+     * `true` if `this.options.mapping.service` is 'ESTC_works', `false` otherwise (for "Editions").
+     * This flag controls which HTML content is loaded and influences other behaviors.
+     * @memberof heurist.lookupESTC
+     * @instance
+     * @private
+     * @type {boolean}
+     */
     _is_works: false,
 
+    /**
+     * Defines how UI input field placeholders map to query parameters for the ESTC search.
+     * Keys are target query parameter names, values are either direct strings or objects
+     * specifying the placeholder pattern.
+     * Example: `{'search_term': 'FIELDNAME:__placeholder__ OR OTHERFIELD:__placeholder__*'}`
+     * This property should be defined by specific widgets inheriting from `lookupESTC`
+     * (e.g., `lookupESTC_works`, `lookupLRC18C`).
+     * @memberof heurist.lookupESTC
+     * @instance
+     * @type {Object}
+     */
     search_mapping: {},
+
+    /**
+     * Defines how fields from the ESTC search result map to display or data extraction.
+     * Each element is an object like `{field_name: 'targetName', index: 'sourceFieldName'}`.
+     * This property should be defined by specific widgets inheriting from `lookupESTC`.
+     * @memberof heurist.lookupESTC
+     * @instance
+     * @type {Array<Object>}
+     */
     return_mapping: [],
 
+    /**
+     * Initializes the ESTC lookup widget.
+     * - Sets `this._is_works` based on `this.options.mapping.service`.
+     * - Dynamically sets `this.options.htmlContent` to 'lookupLRC18C.html' (for editions/default)
+     *   or 'lookupESTC_works.html' (for works).
+     * - Calls the parent widget's `_init` method.
+     *
+     * @memberof heurist.lookupESTC
+     * @instance
+     * @private
+     * @override
+     * @returns {void|*} The result of `this._super()`.
+     */
     _init: function(){
 
         this._is_works = this.options.mapping.service == 'ESTC_works';
@@ -43,9 +138,22 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
         return this._super();
     },
 
+    /**
+     * Initializes UI controls specific to the ESTC lookup widget.
+     * - Adjusts the width of header elements within fieldsets based on `this._is_works`.
+     * - Extends `this.options.resultList` to set a custom `empty_remark`.
+     * - Calls `_populateBookFormats` to fill the book format dropdown if present.
+     * - Calls the parent widget's `_initControls` method.
+     *
+     * @memberof heurist.lookupESTC
+     * @instance
+     * @private
+     * @override
+     * @returns {void|*} The result of `this._super()`.
+     */
     _initControls: function(){
 
-        let px = this._is_works ? 100 : 80;
+        let px = this._is_works ? 100 : 80; // Adjust styling based on work/edition mode
         this.element.find('fieldset > div > .header').css({width: `${px}px`, 'min-width': `${px}px`});
 
         this.options.resultList = $.extend(this.options.resultList, {
@@ -58,29 +166,48 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
     },
 
     /**
-     * Setting record type and title fields before formatting HTML
+     * Renders a single record in the result list for ESTC lookups.
+     * This method overrides the parent's `_rendererResultList`.
+     * - Sets a default `rec_RecTypeID` to 1 for the displayed record (likely a generic type for display purposes).
+     * - Wraps the existing `rec_Title` in a `div` with specific styling to adjust its positioning.
+     * - Calls the parent widget's `_rendererResultList` method with the modified record.
      *
-     * @param {HRecordSet} recordset - complete record set
-     * @param {Array} record - current record being rendered
-     *
-     * @returns {String} formatted html string
+     * @memberof heurist.lookupESTC
+     * @instance
+     * @private
+     * @override
+     * @param {HRecordSet} recordset - The complete record set.
+     * @param {Array} record - The individual record (row) to be rendered.
+     * @returns {string} The HTML string for the rendered record, generated by the parent's `_rendererResultList`.
      */
     _rendererResultList: function (recordset, record) {
 
-        recordset.setFld(record, 'rec_RecTypeID', 1);
+        recordset.setFld(record, 'rec_RecTypeID', 1); // Set a default display record type
 
         const rec_Title = recordset.fld(record, 'rec_Title');
+        // Wrap title for custom styling in the result list
         recordset.setFld(record, 'rec_Title', `<div class="recordTitle" style="left:30px;right:2px">${rec_Title}</div>`);
 
-        return this._super(recordset, record);
+        return this._super(recordset, record); // Call parent renderer
     },
 
     /**
-     * Retrieve and add options to the book format dropdown, formats are retrieve from ESTC database
+     * Populates the "Book Format" dropdown (`#select_bf`) with terms retrieved
+     * from the ESTC Helsinki Bibliographic Metadata database.
+     * This is typically called during `_initControls`.
+     *
+     * It makes a HAPI call to `lookup_external_service` with parameters to fetch
+     * terms that are children of term ID 5430 (assumed to be the parent term for book formats).
+     * The retrieved terms (ID and Label) are then used to populate the dropdown.
+     *
+     * @memberof heurist.lookupESTC
+     * @instance
+     * @private
+     * @returns {void}
      */
     _populateBookFormats: function(){
 
-        if(this.element.find('#select_bf').length == 0){
+        if(this.element.find('#select_bf').length == 0){ // Check if the dropdown exists
             return;
         }
 
@@ -114,12 +241,30 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
     },
 
     /**
-     * Retrieve the detail fields for the suppied record from the ESTC database
-     *  These are not retrieved early due to how large and un-necessary 
-     *  it would be to retrieve ALL details for ALL results
+     * Retrieves detailed information for a specific ESTC record.
+     * This is called when full details are needed for a record that was initially
+     * loaded with only header/summary information. This is an optimization to avoid
+     * fetching all details for all records in a large result set.
      *
-     * @param {HRecordSet} recset - complete record set
-     * @param {Array} record - the relevent record missing record details
+     * It makes a HAPI call to `lookup_external_service` targeting the
+     * 'ESTC_Helsinki_Bibliographic_Metadata' database, requesting 'detail' for the given `sel_Rec_ID`.
+     *
+     * On successful response:
+     * - Parses the response and creates an `HRecordSet`.
+     * - Retrieves the first (and expected only) record from the set.
+     * - If the record data is missing, an error is shown.
+     * - Otherwise, the detailed record data is added/updated in the main result list's
+     *   recordset (`this.recordList.resultList('getRecordSet')`).
+     * - Calls `this.doAction()` to proceed with processing the now fully detailed record.
+     *
+     * @memberof heurist.lookupESTC
+     * @instance
+     * @private
+     * @param {HRecordSet} recset - The current (potentially partial) recordset from the result list.
+     *                            (Note: This parameter seems unused in the current implementation in favor of `that.recordList.resultList('getRecordSet')`).
+     * @param {Array} record - The specific record (row from `recset`) for which to fetch details.
+     *                       `recset.fld(record, 'rec_ID')` is used to get the ID.
+     * @returns {void}
      */
     _getRecordDetails: function(recset, record){
 
@@ -168,9 +313,29 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
     },
 
     /**
-     * Import selected records from ESTC database
+     * Imports selected records from the ESTC database into the current Heurist database.
+     * This method orchestrates the import process using a specific HAPI action.
      *
-     * @param {Array|String} rec_IDs - the records selectd by the user to be imported from the ESTC database
+     * - Sets `this.mapping_defs['import_vocabularies']` based on whether vocabularies have been previously synced.
+     * - Converts `rec_IDs` (can be an array or comma-separated string) to a comma-separated string.
+     * - Constructs a request object for `HAPI4.RecordMgr.lookup_external_service`:
+     *   - `serviceType: 'ESTC'`
+     *   - `action: 'import_records'`
+     *   - `source_db: 'ESTC_Helsinki_Bibliographic_Metadata'`
+     *   - `org_db` and `db`: Current Heurist database.
+     *   - `q`: Query string like `ids:REC_IDS`.
+     *   - `rules`: Predefined rules for linking (e.g., for specific record types).
+     *   - `mapping`: `this.mapping_defs` (should be defined by the inheriting widget).
+     * - On successful response:
+     *   - Calls `_reportResults` to display a summary of the import.
+     *   - Sets `window.hWin.HEURIST4.dbs.vocabs_already_synched = true`.
+     *   - Calls `closingAction` to pass back the ID of the first imported record (mapped to `target_dty_ID`) and close the dialog.
+     *
+     * @memberof heurist.lookupESTC
+     * @instance
+     * @private
+     * @param {Array<string|number>|string} rec_IDs - An array or comma-separated string of ESTC record IDs to import.
+     * @returns {void}
      */
     _importRecords: function(rec_IDs){
 
@@ -215,12 +380,31 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
     },
 
     /**
-     * Get additional record(s) from the ESTC database,
-     *  these records belong to record pointer fields
+     * Fetches header information for specified ESTC records, typically to populate record pointer fields.
+     * This is part of the data preparation process when a user selects an ESTC record,
+     * and that record has fields that point to other ESTC records.
      *
-     * @param {Object} dlg_response - alreay mapped field results, new record ids to be added
-     * @param {Array|String} rec_IDs - record ID(s) to import from ESTC database
-     * @param {Number|Array} term_ID - term ID(s) to import from ESTC database, after the records
+     * - If `rec_IDs` is empty, it proceeds directly to `_getTerms`.
+     * - Makes a HAPI call to `lookup_external_service` to get 'header' details for the given `rec_IDs`
+     *   from 'ESTC_Helsinki_Bibliographic_Metadata'.
+     * - On success:
+     *   - Iterates through the `dlg_response` (the object being prepared for the main form).
+     *   - For each property in `dlg_response`, if its value (which might be an array) contains a placeholder ID
+     *     that matches one of the fetched `rec_IDs`, it replaces that placeholder ID with the `rec_Title`
+     *     of the fetched ESTC record using `assignValue`. This prepares the value for Heurist's
+     *     record pointer selection/creation popup.
+     *   - Adds a `heurist_url` to `dlg_response` pointing to a Heurist search for the fetched `rec_IDs`.
+     * - If `term_ID` is provided, calls `_getTerms` to fetch term details.
+     * - Otherwise, calls `closingAction` to finalize and close the dialog.
+     *
+     * @memberof heurist.lookupESTC
+     * @instance
+     * @private
+     * @param {Object} dlg_response - The response object being built to pass back to the main form.
+     *                              Its properties may contain placeholder IDs for linked records.
+     * @param {Array<string|number>|string} rec_IDs - ESTC record IDs to fetch header information for.
+     * @param {number|Array<number>|string} term_ID - Term ID(s) to fetch next, or empty if none.
+     * @returns {void}
      */
     _getRecPointers: function(dlg_response, rec_IDs, term_ID){
 
@@ -277,10 +461,27 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
     },
 
     /**
-     * Gets the missing terms from the ESTC database, for user to define matching value / create new term
+     * Fetches details for specified ESTC terms (from 'defTerms' entity).
+     * This is part of the data preparation process, similar to `_getRecPointers`,
+     * but for vocabulary terms.
      *
-     * @param {Object} dlg_response - alreay mapped field results, new term IDs to be added
-     * @param {Number|Array} term_ID - term ID(s) to import from ESTC database
+     * - If `term_ID` is empty, it calls `closingAction` to finalize.
+     * - Makes a HAPI call to `lookup_external_service` to get 'list' details (name, etc.)
+     *   for the given `term_ID`(s) from the 'defTerms' entity in 'ESTC_Helsinki_Bibliographic_Metadata'.
+     * - On success:
+     *   - Iterates through `dlg_response`.
+     *   - If a property in `dlg_response` contains a placeholder ID matching one of the fetched `term_ID`s,
+     *     it replaces that placeholder with an object containing `label`, `desc`, `code`, and `uri`
+     *     of the fetched term, using `assignValue`. This prepares the value for Heurist's
+     *     term selection/creation popup.
+     * - Calls `closingAction` to finalize and close the dialog.
+     *
+     * @memberof heurist.lookupESTC
+     * @instance
+     * @private
+     * @param {Object} dlg_response - The response object being built. Its properties may contain placeholder term IDs.
+     * @param {number|Array<number>|string} term_ID - Term ID(s) to fetch details for.
+     * @returns {void}
      */
     _getTerms: function(dlg_response, term_ID){
 
@@ -337,15 +538,23 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
     },
 
     /**
-     * Replaces placeholder term and record IDs with values that will allow the user to either:
-     *  select an existing term/record, or 
-     *  create a new term/record
+     * Replaces a placeholder ID within an array of values with actual data (name or object).
+     * This is a utility function used by `_getRecPointers` and `_getTerms` to update
+     * arrays in `dlg_response` that hold placeholder IDs for linked records or terms.
+     * When a placeholder ID matches `to_replace`, it's substituted with `replace_value`.
      *
-     * @param {Array} values - array of values to check
-     * @param {Number} to_replace - the id value to replace
-     * @param {String|Array} replace_value - what to replace the id value with
+     * Example: If `values = [123, 456]`, `to_replace = 123`, `replace_value = "Record Title"`,
+     * then `values` becomes `["Record Title", 456]`.
      *
-     * @returns {Boolean} whether the value was replaced
+     * The `values` array is modified in place.
+     *
+     * @memberof heurist.lookupESTC
+     * @instance
+     * @param {Array<*>} values - An array of values, potentially containing placeholder IDs.
+     * @param {string|number} to_replace - The placeholder ID to find and replace.
+     * @param {string|Object} replace_value - The actual value (e.g., a record title or a term object)
+     *                                      to substitute for the placeholder ID.
+     * @returns {boolean} `true` if a replacement was made, `false` otherwise.
      */
     assignValue: function(values, to_replace, replace_value){
 
@@ -365,10 +574,27 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
     },
 
     /**
-     * Report results from importing ESTC records
+     * Displays a report dialog summarizing the results of an ESTC record import operation.
      *
-     * @param {Array|String} rec_IDs - array or comma list of record IDs
-     * @param {Object} data - counts and new record IDs to display in report
+     * - Gathers counts of imported, existing, and ignored records from the `data` object.
+     * - Constructs an HTML message detailing these counts.
+     * - Fetches header information (titles) for all involved record IDs (newly imported and existing)
+     *   from the 'ESTC_Helsinki_Bibliographic_Metadata' database to make the report more readable.
+     * - Appends lists of imported records and already existing records (with their titles) to the message.
+     * - Shows the complete report using `window.hWin.HEURIST4.msg.showMsgDlg`.
+     *
+     * @memberof heurist.lookupESTC
+     * @instance
+     * @private
+     * @param {Array<string|number>|string} rec_IDs - An array or comma-separated string of all record IDs
+     *                                             initially selected or attempted for import.
+     * @param {Object} data - An object containing import statistics from the HAPI response:
+     *   @param {number} data.count_imported - Number of records successfully imported.
+     *   @param {number} data.cnt_exist - Number of records that already existed.
+     *   @param {number} data.count_ignored - Number of records ignored (e.g., due to mapping issues).
+     *   @param {Array<string|number>} data.ids - IDs of all records processed (including newly created).
+     *   @param {Array<string|number>} data.exists - IDs of records that already existed.
+     * @returns {void}
      */
     _reportResults: function(rec_IDs, data){
 
@@ -433,7 +659,30 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
     },
 
     /**
-     * Construct and send query search to Heurist ESTC database
+     * Constructs and executes a search query against the ESTC Helsinki Bibliographic Metadata database.
+     * It uses `this.search_mapping` (which should be defined by the inheriting widget,
+     * e.g., `lookupESTC_works` or `lookupLRC18C`) to build the query object.
+     * Placeholders in `this.search_mapping` (e.g., `__placeholder__`) are replaced with
+     * values from corresponding input fields in the widget's form.
+     *
+     * - If the constructed query object has too few criteria (<= 2, specific to ESTC logic),
+     *   a flash message prompts the user for more criteria.
+     * - A HAPI call (`HAPI4.RecordMgr.lookup_external_service`) is made with:
+     *   - `serviceType: 'ESTC'`
+     *   - `db: 'ESTC_Helsinki_Bibliographic_Metadata'`
+     *   - `q: query` (the constructed query object)
+     *   - `limit: 1000`
+     *   - `detail: 'header'` (to fetch summary information initially)
+     * - On success:
+     *   - If the number of results (`response.data.count`) exceeds the number retrieved (`response.data.reccount`),
+     *     a dialog informs the user.
+     *   - Calls `this._onSearchResult(response)` to process and display results.
+     * - Shows/hides a loading coverall during the operation.
+     *
+     * @memberof heurist.lookupESTC
+     * @instance
+     * @private
+     * @returns {void}
      */
     _doSearch: function(){
 
@@ -503,27 +752,52 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
     },
 
     /**
-     * Build each Book(Edition) [LRC18C|ESTC_editions] or Works [ESTC_works]
-     *  as a record to display list of records that can be selected by the user
+     * Handles the search results received from the ESTC database (`_doSearch`).
+     * This method overrides the parent `_onSearchResult`.
      *
-     * @param {Object} response - JSON response from local/remote Heurist server
+     * It ensures that `response.data` exists (if not, assumes `response` itself is the data).
+     * Then, it calls the parent widget's `_onSearchResult` method, passing `response.data`
+     * and `true` for `is_record_set` (indicating the data is already in a format
+     * suitable for `HRecordSet` or will be directly processed by the parent's list rendering).
+     *
+     * @memberof heurist.lookupESTC
+     * @instance
+     * @private
+     * @override
+     * @param {Object} response - The JSON response object from the HAPI call made in `_doSearch`.
+     *                          Expected to contain a `data` property with the actual search results.
+     * @returns {void}
      */
     _onSearchResult: function (response) {
-        if(!response.data){
+        if(!response.data){ // Ensure data property exists, otherwise use the response itself
             response.data = response;
         }
+        // Call parent's _onSearchResult, indicating data is a ready-to-use record set
         this._super(response.data, true);
     },
 
     /**
-     * Retrieves the value from the record via the mapping provided
-     *  defintions mapping can be found in the original version => lookupLRC18C.js
+     * Retrieves a specific value from a record based on a predefined mapping.
+     * This method uses `this.return_mapping` (which should be defined by the inheriting widget)
+     * to find the source field name (`index`) corresponding to the requested `field_name`.
+     * It then fetches the value of that source field from the provided `record` within the `recordset`.
      *
-     * @param {String} field_name - field to be mapped
-     * @param {HRecordSet} recordset - current record set
-     * @param {Array} record - current record from record set
+     * `this.return_mapping` is expected to be an array of objects, where each object has:
+     *  - `field_name`: The target logical field name requested.
+     *  - `index`: The actual field name (key) in the source ESTC record data.
      *
-     * @returns {String} final value
+     * Example: If `this.return_mapping = [{field_name: 'title', index: 'TitleField_ESTC'}]`,
+     * calling `_mapValues('title', recordset, record)` would return the value of `recordset.fld(record, 'TitleField_ESTC')`.
+     *
+     * @memberof heurist.lookupESTC
+     * @instance
+     * @private
+     * @param {string} field_name - The logical name of the field whose value is to be retrieved.
+     * @param {HRecordSet} recordset - The HRecordSet containing the record.
+     * @param {Array} record - The specific record (row) from which to extract the value.
+     * @returns {string|*} The value of the mapped field from the record. Returns an empty string
+     *                     if the `field_name` is not found in `this.return_mapping` or if the
+     *                     retrieved value is empty. Otherwise, returns the field's value.
      */
     _mapValues: function(field_name, recordset, record){
 
