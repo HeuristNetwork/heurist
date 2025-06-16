@@ -1,3 +1,22 @@
+<?php
+/**
+* editTemporalObject.php - Provides the HTML structure and client-side script initialization for the Edit Temporal dialogue.
+*
+* This file defines the user interface for editing complex temporal value.
+* 
+* @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\editing
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Stephen White
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       3.1.0
+*/    
+?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
