@@ -2151,6 +2151,7 @@ $.widget( "heurist.svs_list", {
                     request.qname = qname;
                     request.search_realm = this.options.search_realm;
                     request.search_page = this.options.search_page;
+                    request.search_ID = svs_ID;
                     
                     window.hWin.HAPI4.SystemMgr.user_log('search_Record_savedfilter');
                     
