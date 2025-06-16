@@ -427,7 +427,9 @@ $rtDefines = array(
     'RT_WEB_CONTENT' => array(1147, 25),
 
     'RT_CMS_HOME' => array(99, 51),
-    'RT_CMS_MENU' => array(99, 52)
+    'RT_CMS_MENU' => array(99, 52),
+
+    'RT_BUG_REPORT' => array(8, 23)
 );
 
 /** DETAIL TYPE DEFINITIONS */

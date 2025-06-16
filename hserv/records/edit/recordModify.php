@@ -4340,7 +4340,7 @@ function bugreportUpdate($system, $recID){
     $recRecTypeID = mysql__select_value($mysqli, 'SELECT rec_RecTypeID FROM Records WHERE rec_ID = ?', ['i', $recID]);
 
     // Get local IDs for bug report fields
-    $bugreportRecType = ConceptCode::getRecTypeLocalID('8-23');
+    $system->defineConstant('RT_BUG_REPORT');
     $doneTrmID = ConceptCode::getTermLocalID('1037-3246');
     $statusDtyID = ConceptCode::getDetailTypeLocalID('2-810');
     $titleDtyID = ConceptCode::getDetailTypeLocalID('2-1');
@@ -4350,22 +4350,27 @@ function bugreportUpdate($system, $recID){
     $databaseDtyID = ConceptCode::getDetailTypeLocalID('1623-993');
 
     // Get bug report details
-    $details = recordSearchDetailsRaw($system, $recID);
+    $record = ['rec_ID' => $recID];
+    recordSearchDetails($system, $record, ['freetext', 'blocktext', 'enum']);
 
-    if(!isset($recRecTypeID, $bugreportRecType, $doneTrmID, $statusDtyID, $titleDtyID, $descDtyID, $reporterEmailDtyID, $reporterNameDtyID, $databaseDtyID) || empty($details) || $bugreportRecType != $recRecTypeID){
+    if(!RT_BUG_REPORT || !isset($recRecTypeID, $doneTrmID, $statusDtyID, $titleDtyID, $descDtyID, $reporterEmailDtyID, $reporterNameDtyID, $databaseDtyID) || empty($record['details']) || RT_BUG_REPORT != $recRecTypeID){
         return;
     }
 
+    $details = $record['details'];
+
     // Get child terms of status DONE, to check against
     $terms = getTermChildrenAll($mysqli, $doneTrmID);
+    array_unshift($terms, $doneTrmID);
+
     $status = array_key_exists($statusDtyID, $details) ? $details[$statusDtyID] : null;
-    $status = is_array($status) ? $status[0] : $status;
+    $status = is_array($status) ? array_pop($status) : $status;
 
     $reportersEmail = array_key_exists($reporterEmailDtyID, $details) ? $details[$reporterEmailDtyID] : null;
-    $reportersEmail = is_array($reportersEmail) ? $reportersEmail[0] : $reportersEmail;
+    $reportersEmail = is_array($reportersEmail) ? array_pop($reportersEmail) : $reportersEmail;
 
     $reportersName = array_key_exists($reporterEmailDtyID, $details) ? $details[$reporterEmailDtyID] : null;
-    $reportersName = is_array($reportersEmail) ? $reportersEmail[0] : $reportersName;
+    $reportersName = is_array($reportersEmail) ? array_pop($reportersEmail) : $reportersName;
     $reportersName = empty($reportersName) ? $reportersEmail : $reportersName;
 
     if(!$status || !$reportersEmail || !in_array($status, $terms)){
@@ -4376,15 +4381,15 @@ function bugreportUpdate($system, $recID){
     $status = mysql__select_value($mysqli, "SELECT trm_Label FROM defTerms WHERE trm_ID = ?", ['i', $status]);
 
     $database = array_key_exists($databaseDtyID, $details) ? $details[$databaseDtyID] : null;
-    $database = is_array($database) ? $database[0] : $database;
+    $database = is_array($database) ? array_pop($database) : $database;
     $database = !empty($database) ? "Database: {$database}<br>" : '';
 
     $title = array_key_exists($titleDtyID, $details) ? $details[$titleDtyID] : null;
-    $title = is_array($title) ? $title[0] : $title;
+    $title = is_array($title) ? array_pop($title) : $title;
     $title = !empty($title) ? $title : "Bug report #{$recID}";
 
     $desc = array_key_exists($descDtyID, $details) ? $details[$descDtyID] : null;
-    $desc = is_array($desc) ? $desc[0] : $desc;
+    $desc = is_array($desc) ? array_pop($desc) : $desc;
     $desc = !empty($desc) ? $desc : "Description is missing";
 
     $url = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$recID";
