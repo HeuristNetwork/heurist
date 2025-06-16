@@ -28,18 +28,6 @@
  * @since       6.0
  */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-/**
- * @namespace heurist
- */
-
 /**
  * Widget for searching BnF (Bibliothèque nationale de France) authoritative records.
  * Inherits from `$.heurist.lookupBnF`.
@@ -48,9 +36,8 @@
  * set of UI elements defined in `lookupBnFLibrary_aut.html`. It constructs
  * complex SRU queries based on user input and processes the XML results.
  *
- * @class heurist.lookupBnFLibrary_aut
- * @memberof heurist
- * @augments heurist.lookupBnF
+ * @widget heurist.lookupBnFLibrary_aut
+ * @extends heurist.lookupBnF
  */
 $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
 
@@ -362,6 +349,15 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
         // Construct query portion of url (CQL query)
         let query = '(';
         let last_logic = ''; // Stores the last boolean operator used
+        
+        /* 
+         * Additional search fields can be found here [catalogue.bnf.fr/api/test.do], note: ONLY the authoritative fields can be added here (fields starting with 'aut.')
+         * if you wish to query bibliographic records (fields starting with 'bib.'), we suggest the alternative BnF lookup available (lookupBnFLibrary_bib)
+         * 
+         * each field name and search value are separated by a relationship, common ones are: [all, any, adj]
+         * 
+         * also separating each field query is a boolean logic [and, or, not]
+         */        
 
         // Build query from each input field that has a value
         // Each field has a value input, a link type selector (all, any, adj), and a logic operator selector (AND, OR, NOT)

@@ -25,16 +25,8 @@
  * @author      Artem Osmakov   <osmakov@gmail.com>
  * @author      Darshan Nagavara   <darshan@intersect.org.au>
  * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
- * @since       4.0
+ * @since       6.0
  */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
 // The global mapDict is declared here but not directly used within this widget's own methods.
 // It might be used by methods in the parent class (lookupESTC) or was intended for other purposes.
@@ -46,7 +38,6 @@ let mapDict = {}
  *
  * @widget heurist.lookupLRC18C
  * @extends heurist.lookupESTC
- * @memberof heurist
  */
 $.widget("heurist.lookupLRC18C", $.heurist.lookupESTC, {
 
@@ -101,6 +92,9 @@ $.widget("heurist.lookupLRC18C", $.heurist.lookupESTC, {
                 271: 1092, // Project Record ID -> Project Record ID (also key)
                 273: 1093  // Helsinki Work Name -> Helsinki Work Name
                 // Other fields like Helsinki Work ID, Assignation, Raw Data are noted but not directly mapped here.
+                //272 => Helsinki Work ID
+                //298 => Helsinki Work ID assignation
+                //236 => Helsinki raw data                
             }
         },    
 

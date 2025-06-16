@@ -1,6 +1,7 @@
 /**
- * lookup_Template.js - Template for creating new Heurist lookup widgets.
- *
+ * @file lookup_Template.js
+ * @brief Template for creating new Heurist lookup widgets.
+ * 
  * @fileOverview
  * This file serves as a template and example for developers looking to create
  * new lookup widgets that integrate external services with Heurist. It demonstrates
@@ -30,14 +31,6 @@
  * @since       6.0
  */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 /**
  * Template widget for creating new lookup services.
  * This widget demonstrates the common structure and methods to override when
@@ -46,7 +39,6 @@
  *
  * @widget heurist.lookup_Template
  * @extends heurist.lookupBase
- * @memberof heurist
  */
 $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
 
