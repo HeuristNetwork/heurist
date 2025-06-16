@@ -1,33 +1,56 @@
 /**
-* lookupBnFLibrary_aut.js - Searching the BnF Library's authoritative records (Under Development)
-* 
-* This file:
-*   1) Loads the content of the corresponding html file (lookupBnFLibrary_aut.html), and
-*   2) Performs an api call to the BnF Library's Search API using the User's input, displaying the results within a Heurist result list
-* 
-* After record selection, the user:
-*   Is required to select or create a record for each record pointer field, with a value
-*   Is required to enter or correct any terms for each enumerated field, with a value 
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Brandon McKay   <blmckay13@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.0
-*/
+ * lookupBnFLibrary_aut.js - Search BnF authoritative records.
+ *
+ * @fileOverview
+ * This file defines the `heurist.lookupBnFLibrary_aut` jQuery UI widget.
+ * This widget specializes `heurist.lookupBnF` for searching authoritative
+ * records from the Bibliothèque nationale de France (BnF) SRU API.
+ *
+ * It configures the specific HTML content (`lookupBnFLibrary_aut.html`),
+ * sets the BnF SRU API base URL, and provides the logic for constructing
+ * search queries based on user input from the form fields defined in the HTML.
+ * It also customizes the rendering of results and the handling of selected data.
+ *
+ * Key functionalities include:
+ * - Loading the content of `lookupBnFLibrary_aut.html`.
+ * - Performing an API call to the BnF SRU API using user input.
+ * - Displaying results within a Heurist result list.
+ * - Handling record selection and preparing data for Heurist mapping,
+ *   including prompting for record pointer creation/selection and term correction.
+ *
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\lookup
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Brandon McKay <blmckay13@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       6.0
+ */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
+/**
+ * Widget for searching BnF (Bibliothèque nationale de France) authoritative records.
+ * Inherits from `$.heurist.lookupBnF`.
+ *
+ * This widget targets the BnF SRU API for authoritative records, using a specific
+ * set of UI elements defined in `lookupBnFLibrary_aut.html`. It constructs
+ * complex SRU queries based on user input and processes the XML results.
+ *
+ * @widget heurist.lookupBnFLibrary_aut
+ * @extends heurist.lookupBnF
+ */
 $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
 
-    // default options
+    /**
+     * Default options for the widget.
+     * @memberof heurist.lookupBnFLibrary_aut
+     * @instance
+     * @property {Object} options
+     * @property {number} [options.height=750] - The height of the dialog.
+     * @property {number} [options.width=530] - The width of the dialog.
+     * @property {string} [options.title="Search the Bibliothèque nationale de France's authoritative records"] - The title of the dialog.
+     * @property {string} [options.htmlContent='lookupBnFLibrary_aut.html'] - The HTML content file for the dialog.
+     */
     options: {
     
         height: 750,
@@ -38,9 +61,33 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
         htmlContent: 'lookupBnFLibrary_aut.html'
     },
 
-    baseURL: 'https://catalogue.bnf.fr/api/SRU?', // external url base
-    serviceName: 'bnflibrary_aut', // service name
+    /**
+     * The base URL for the BnF SRU API.
+     * @memberof heurist.lookupBnFLibrary_aut
+     * @instance
+     * @type {string}
+     */
+    baseURL: 'https://catalogue.bnf.fr/api/SRU?',
 
+    /**
+     * The service name identifier for this lookup type.
+     * @memberof heurist.lookupBnFLibrary_aut
+     * @instance
+     * @type {string}
+     */
+    serviceName: 'bnflibrary_aut',
+
+    /**
+     * Initializes UI controls.
+     * Applies specific CSS styling to header and form field elements within the widget.
+     * Calls the parent widget's `_initControls` method.
+     *
+     * @memberof heurist.lookupBnFLibrary_aut
+     * @instance
+     * @private
+     * @override
+     * @returns {void} Calls `this._super()`.
+     */
     _initControls: function(){
 
         // Extra field styling
@@ -51,7 +98,16 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
     },
 
     /**
-     * Set up additional settings tab
+     * Sets up the "Additional Settings" tab with default values specific to BnF authoritative lookups.
+     * It calls the parent's `_setupSettings` method, providing default options
+     * to enable record dumping (`dump_record: true`) and set the default dump field
+     * to ScratchPad (`dump_field: 'rec_ScratchPad'`).
+     *
+     * @memberof heurist.lookupBnFLibrary_aut
+     * @instance
+     * @private
+     * @override
+     * @returns {void}
      */
     _setupSettings: function(){
 
@@ -62,10 +118,22 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
     },
 
     /**
-     * Save extra settings
+     * Saves extra settings, typically related to record dumping.
+     * It retrieves the current record dump settings using `_getRecDumpSetting`.
+     * If `settings` parameter is not `false` (meaning settings should be actively gathered),
+     * it constructs a settings object with `dump_record` and `dump_field` values.
+     * Then, it calls the parent's `_saveExtraSettings` method with the gathered
+     * or passed-through settings and the `close_dlg` flag.
      *
-     * @param {Boolean} settings - whether to get settings for saving 
-     * @param {Boolean} close_dlg - whether to close the dialog after saving 
+     * @memberof heurist.lookupBnFLibrary_aut
+     * @instance
+     * @private
+     * @override
+     * @param {Object|boolean} [settings=false] - If `true`, settings are gathered from UI.
+     *                                           If an object, these settings are used.
+     *                                           If `false`, existing/default settings might be saved by parent or dialog might just close.
+     * @param {boolean} [close_dlg=false] - Whether to close the dialog after saving.
+     * @returns {void}
      */
     _saveExtraSettings: function(settings = false, close_dlg = false){
 
@@ -82,23 +150,34 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
     },
 
     /**
-     * Result list rendering function called for each record
+     * Renders a single record in the result list for BnF authoritative records.
+     * This method overrides the parent's `_rendererResultList` to provide custom formatting.
+     * It constructs a display string (`recTitle`) by concatenating several fields from the record,
+     * each formatted by the inner `fld` function. The `fld` function, in turn, uses `getFieldWidth`
+     * to dynamically adjust column widths based on the `authority_type` and field name.
      *
-     * @param {HRecordSet} recordset - complete record set, to retrieve fields
-     * @param {Array} record - record being rendered
-     * 
-     * @returns {String} formatted html string
+     * The displayed fields typically include 'name', 'location', 'years_active', 'role', and 'auturl'.
+     * The 'auturl' field is rendered as a hyperlink.
+     * The concatenated string is then set as the 'rec_Title' for the record before calling
+     * the parent's `_rendererResultList`.
+     *
+     * @memberof heurist.lookupBnFLibrary_aut
+     * @instance
+     * @private
+     * @override
+     * @param {HRecordSet} recordset - The complete record set.
+     * @param {Array} record - The individual record (row) to be rendered.
+     * @returns {string} The HTML string for the rendered record, generated by the parent's `_rendererResultList`.
      */
     _rendererResultList: function(recordset, record){
 
         /**
-         * Retrieve specific field width
-         *
-         * @param {Number} def_width - default width
-         * @param {Number} type - field code
-         * @param {String} fld_name - field name
-         *
-         * @returns {Number} field width
+         * Calculates the display width (in 'ex' units) for a field based on authority type and field name.
+         * This is an inner helper function for `_rendererResultList`.
+         * @param {number} def_width - Default width.
+         * @param {string|number} type - The authority type code (e.g., '200', '210').
+         * @param {string} fld_name - The name of the field (e.g., 'name', 'location').
+         * @returns {number} The calculated width for the field.
          */
         function getFieldWidth(def_width, type, fld_name){
 
@@ -133,12 +212,14 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
         }
 
         /**
-         * Get field details for displaying
-         * 
-         * @param {String} fldname - mapping field name
-         * @param {Number} width - width for field
-         * 
-         * @returns {String} sized and formatted html string
+         * Formats a field's value for display in the result list.
+         * It retrieves the field value, HTML escapes it, and wraps it in a div with a specific width.
+         * Special formatting is applied for 'auturl' (link), 'years_active'/'location' (parentheses),
+         * and 'role' (square brackets).
+         * This is an inner helper function for `_rendererResultList`.
+         * @param {string} fldname - The name of the field in the recordset.
+         * @param {number} width - The default width for the field.
+         * @returns {string} HTML string for the formatted field.
          */
         function fld(fldname, width){
 
@@ -170,8 +251,16 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
     },
 
     /**
-     * Return record field values in the form of a json array mapped as [dty_ID: value, ...]
-     * For multi-values, [dty_ID: [value1, value2, ...], ...]
+     * Processes the user's selection from the result list.
+     * This method overrides the parent `doAction` method.
+     * It retrieves the selected record, extracts the 'BnF_ID' and 'auturl' (external URL),
+     * prepares other values using `prepareValues` (with `check_term_codes: true`),
+     * and then calls `closingAction` to pass the data back.
+     *
+     * @memberof heurist.lookupBnFLibrary_aut
+     * @instance
+     * @override
+     * @returns {void}
      */
     doAction: function(){
 
@@ -192,26 +281,53 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
     },
 
     /**
-     * Create search URL using user input within form
-     * Perform server call and handle response
+     * Constructs and performs the search query for BnF authoritative records.
+     * This method overrides the parent `_doSearch` method.
+     *
+     * It gathers values from various input fields in the form (defined in `lookupBnFLibrary_aut.html`),
+     * including general search terms, access point, type, ISNI, ISNI date, domain, and record ID.
+     *
+     * The core logic involves:
+     * 1. Setting up base SRU parameters: `version`, `operation`, `recordSchema`, `maximumRecords`, `startRecord`.
+     *    - `maximumRecords` is taken from the `#rec_limit` input or defaults to 20.
+     * 2. Checking if any search fields have values. If not, a message is shown, and the function returns.
+     * 3. Constructing the `query` parameter for the SRU request. This is a CQL (Contextual Query Language) string.
+     *    - Each populated search field contributes a clause to the query (e.g., `aut.anywhere all "search term"`).
+     *    - Clauses are combined using boolean operators (AND, OR, NOT) selected by the user via corresponding dropdowns (e.g., `#inpt_any_logic`).
+     *    - The search index (e.g., `aut.anywhere`, `aut.accesspoint`) and relation (e.g., `all`, `any`, `adj` selected via `#inpt_any_link`) are included.
+     * 4. The constructed CQL query string is enclosed in parentheses.
+     * 5. The `query` is added to the `params` object.
+     * 6. Finally, `this._super(params)` is called to execute the search using the base widget's search mechanism.
+     *
+     * Example query part: `(aut.anywhere all "term1" and aut.type all "Personne physique")`
+     *
+     * Available search fields and their corresponding SRU indexes (prefixed with `aut.` for authoritative):
+     * - Any field: `aut.anywhere`
+     * - Access point: `aut.accesspoint`
+     * - Type: `aut.type`
+     * - ISNI: `aut.isni`
+     * - ISNI Date: `aut.isnidate`
+     * - Domain: `aut.domain`
+     * - Record ID: `aut.recordid`
+     *
+     * @memberof heurist.lookupBnFLibrary_aut
+     * @instance
+     * @private
+     * @override
+     * @returns {void}
      */
     _doSearch: function(){
 
-        /**
-         * recordSchema: XML structure for record details (changing this will require changes to the php code in record_lookup.php)
-         * maximumRecords: maximum number of records returned from the search (api default: 100)
-         * startRecord: starting point, complete searches in batches (api default: 1)
-         * query: encoded string enclosed in brackets (at minimum, the spaces MUST be encoded)
-         */
         const maxRecords = $('#rec_limit').val(); // limit number of returned records
         let params = {
             version: '1.2',
             operation: 'searchRetrieve',
-            recordSchema: 'unimarcxchange',
-            maximumRecords: !maxRecords || maxRecords <= 0 ? 20 : maxRecords,
-            startRecord: 1
+            recordSchema: 'unimarcxchange', // XML structure for record details
+            maximumRecords: !maxRecords || maxRecords <= 0 ? 20 : maxRecords, // Max records from API (default: 100)
+            startRecord: 1 // Starting point for batch searches (API default: 1)
         };
 
+        // Check if input fields have values
         let accesspointHasValue = this.element.find('#inpt_accesspoint').val() != '';
         let typeHasValue = this.element.find('#inpt_type').val() != '';
         let isniHasValue = this.element.find('#inpt_isni').val() != '';
@@ -219,6 +335,7 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
         let domainHasValue = this.element.find('#inpt_domain').val() != '';
         let recidHasValue = this.element.find('#inpt_recordid').val() != '';
 
+        // Filter for any text input fields (excluding type inputs) that have a value
         let has_filter = this.element.find('input.text:not(type)').filter((idx, input) => {
             return !window.hWin.HEURIST4.util.isempty($(input).val());
         });
@@ -229,71 +346,73 @@ $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
             return;
         }
         
-        // Construct query portion of url
+        // Construct query portion of url (CQL query)
         let query = '(';
-        let last_logic = '';
-
-        /** 
+        let last_logic = ''; // Stores the last boolean operator used
+        
+        /* 
          * Additional search fields can be found here [catalogue.bnf.fr/api/test.do], note: ONLY the authoritative fields can be added here (fields starting with 'aut.')
          * if you wish to query bibliographic records (fields starting with 'bib.'), we suggest the alternative BnF lookup available (lookupBnFLibrary_bib)
          * 
          * each field name and search value are separated by a relationship, common ones are: [all, any, adj]
          * 
          * also separating each field query is a boolean logic [and, or, not]
-         */
+         */        
 
-        // any field
+        // Build query from each input field that has a value
+        // Each field has a value input, a link type selector (all, any, adj), and a logic operator selector (AND, OR, NOT)
+
+        // Any field (aut.anywhere)
         if(this.element.find('#inpt_any').val()!=''){
             last_logic = ` ${this.element.find('#inpt_any_logic').val()} `;
             query += `aut.anywhere ${this.element.find('#inpt_any_link').val()} "${this.element.find('#inpt_any').val()}"${last_logic}`;
         }
 
-        // access point field
+        // Access point field (aut.accesspoint)
         if(accesspointHasValue){
             last_logic = ` ${this.element.find('#inpt_accesspoint_logic').val()} `;
             query += `aut.accesspoint ${this.element.find('#inpt_accesspoint_link').val()} "${this.element.find('#inpt_accesspoint').val()}"${last_logic}`;
         }
 
-        // type field
+        // Type field (aut.type)
         if(typeHasValue){
             last_logic = ` ${this.element.find('#inpt_type_logic').val()} `;
             query += `aut.type ${this.element.find('#inpt_type_link').val()} "${this.element.find('#inpt_type').val()}"${last_logic}`;
         }
 
-        // isni field
+        // ISNI field (aut.isni)
         if(isniHasValue){
             last_logic = ` ${this.element.find('#inpt_isni_logic').val()} `;
             query += `aut.isni ${this.element.find('#inpt_isni_link').val()} "${this.element.find('#inpt_isni').val()}"${last_logic}`;
         }
 
-        // isni date field
+        // ISNI date field (aut.isnidate)
         if(isnidateHasValue){
             last_logic = ` ${this.element.find('#inpt_isnidate_logic').val()} `;
             query += `aut.isnidate ${this.element.find('#inpt_isnidate_link').val()} "${this.element.find('#inpt_isnidate').val()}"${last_logic}`;
         }
 
-        // domain field
+        // Domain field (aut.domain)
         if(domainHasValue){
             last_logic = ` ${this.element.find('#inpt_domain_logic').val()} `;
             query += `aut.domain ${this.element.find('#inpt_domain_link').val()} "${this.element.find('#inpt_domain').val()}"${last_logic}`;
         }
 
-        // record id field
+        // Record ID field (aut.recordid) - this is typically the last field, so no logic operator follows
         if(recidHasValue){
-            last_logic = '';
+            last_logic = ''; // No boolean operator after the last term
             query += `aut.recordid ${this.element.find('#inpt_recordid_link').val()} "${this.element.find('#inpt_recordid').val()}"`;
         }
 
-        // Remove last logic connection
+        // Remove last trailing logic operator if it exists
         if(!window.hWin.HEURIST4.util.isempty(last_logic)){
             let regex = new RegExp(`${last_logic}$`);
             query = query.replace(regex, '');
         }
 
-        // Close off and encode query portion, then add to request url
-        query += ')';
-        params['query'] = query;
+        query += ')'; // Close the CQL query parenthesis
+        params['query'] = query; // Add the constructed query to SRU parameters
 
-        this._super(params);
+        this._super(params); // Call the parent's _doSearch method with the prepared parameters
     }
 });
