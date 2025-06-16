@@ -9,33 +9,13 @@
  *               like creating and deleting folders if `options.allowEdit` is true.
  *
  * @package     Heurist academic knowledge management system
- * @subpackage  hclient\\widgets\\editing
+ * @subpackage  hclient\widgets\editing
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @author      Artem Osmakov   <osmakov@gmail.com>
- * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
- * @since       4.0
- */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-// REMARK: The original file had a duplicate @fileOverview block here, which has been merged into the main file-level JSDoc above.
-/**
- * @widget heurist.selectFolders
- * @alias selectFolders
- * @extends $.heurist.selectMultiValues
- * @description A jQuery UI widget for selecting one or more folders from a hierarchical tree,
- * It extends the `$.heurist.selectMultiValues` widget, inheriting its core functionality
- * for managing selections and dialog behavior, and specializes it for folder selection
- * using the `fancytree` plugin for tree display. It also adds folder management features
- * like creating and deleting folders if `options.allowEdit` is true.
+ * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+ * @since       6.0
  */
 
 /**
@@ -109,6 +89,7 @@ $.widget( "heurist.selectFolders", $.heurist.selectMultiValues, {
      * Internal flag related to showing system folders in the Fancytree.
      * REMARK: The UI element (a checkbox) and the Fancytree filtering logic that would use this flag
      * are currently commented out in the `_init` method of the source code.
+     * 
      * If it were active, it would be used to filter branches in the Fancytree to show or hide system folders.
      * @private
      * @type {boolean}
@@ -134,7 +115,7 @@ $.widget( "heurist.selectFolders", $.heurist.selectMultiValues, {
      * If `allowEdit` is true, the header containing these buttons is shown.
      *
      * REMARK: A section of code for a "Show system folders" checkbox and its associated filtering logic
-     * is commented out in the original source code of this method.
+     * is commented out.
      * @private
      * @override
      */
@@ -198,7 +179,8 @@ $.widget( "heurist.selectFolders", $.heurist.selectMultiValues, {
             }
         ).appendTo(ent_header);
 
-        /* // REMARK: This section for "Show system folders" is commented out in the original code.
+        /* 
+        // REMARK: This section for "Show system folders" is commented out
         $('<label><input type="checkbox">Show system folders</label>').css({'margin-left':'20px'}).appendTo(ent_header);
         ent_header.find('input').on('click',
         function(event){

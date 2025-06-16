@@ -9,32 +9,13 @@
  *               like `heurist.selectFolders`.
  *
  * @package     Heurist academic knowledge management system
- * @subpackage  hclient\\widgets\\editing
+ * @subpackage  hclient\widgets\editing
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @author      Artem Osmakov   <osmakov@gmail.com>
- * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
- * @since       4.0
- */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-// REMARK: The original file had a duplicate @fileOverview block here, which has been merged into the main file-level JSDoc above.
-/**
- * @widget heurist.selectMultiValues
- * @alias selectMultiValues
- * @description A base jQuery UI widget for selecting multiple hierarchical values using a tree view,
- * multiple values from a hierarchical tree structure, typically rendered using the
- * Fancytree plugin. It provides core functionality for dialog display, tree initialization,
- * and handling selections. It is intended to be extended by more specialized widgets
- * like `heurist.selectFolders`.
+ * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+ * @since       6.0
  */
 
 /**
@@ -91,8 +72,6 @@ $.widget( "heurist.selectMultiValues", {
          */
         multiselect: true, 
         
-        // @option {boolean} [allowEdit=true] - REMARK: This option is commented out in the default options block. It is used by extending widgets like selectFolders. If intended for this base widget, it should be defined and its effect clarified here.
-        
         /**
          * Callback function executed when the user confirms their selection (e.g., by clicking "Select" in dialog mode).
          * The function is called with the widget instance as `this` and one argument:
@@ -102,8 +81,6 @@ $.widget( "heurist.selectMultiValues", {
          */
         onselect: null,
         
-        // @option {string|null} [root_dir=null] - REMARK: This option is commented out in the default options block. It is used by selectFolders._initList when fetching data. If intended for broader use by this base widget or other extenders, it should be defined here.
-
         /**
          * An array of data objects used to populate the tree view (Fancytree).
          * Each object should conform to Fancytree's node data format
@@ -134,8 +111,6 @@ $.widget( "heurist.selectMultiValues", {
      */
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
     
-    // _show_system_folders:false, // REMARK: This property is commented out in the source. It is used by the extending widget selectFolders. If relevant to this base class's logic (even if conditionally), it could be documented.
-
     /**
      * Initializes the selectMultiValues widget.
      * This is the constructor for the widget, part of the jQuery UI widget lifecycle.
@@ -253,7 +228,7 @@ $.widget( "heurist.selectMultiValues", {
                 let snodes = wtrr.getSelectedNodes(true);
                 // Convert to an array of key paths
                 let res = [];
-                $.map(snodes, function(node){ // Using $.map but not assigning its result to selRootKeys, res is populated instead
+                $.map(snodes, function(node){
                     let currname = node.getKeyPath();
                     if(currname[0]=='/') currname = currname.substring(1); // Remove leading slash if present
                     res.push(currname);

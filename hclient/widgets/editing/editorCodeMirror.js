@@ -6,24 +6,17 @@
  *               It supports lazy loading of CodeMirror assets and various configuration options.
  *
  * @package     Heurist academic knowledge management system
- * @subpackage  hclient\\widgets\\editing
+ * @subpackage  hclient\widgets\editing
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @author      Artem Osmakov   <osmakov@gmail.com>
- * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
- * @since       4.0
+ * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+ * @since       6.0
  */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
-/* global CodeMirror, $ */ // Assuming $ is jQuery and globally available.
+/* global CodeMirror */
       
 /**
  * @class EditorCodeMirror
@@ -130,18 +123,18 @@ class EditorCodeMirror {
     #getCodeMirror(){
 
         let path = window.hWin.HAPI4.baseURL + 'external/codemirror-5.61.0/';
-        let scripts = [ //'lib/codemirror.css', // REMARK: CSS is mentioned as included in index.php
+        let scripts = [ //'lib/codemirror.css', CSS is included in index.php
                         'lib/codemirror.js',
                         'lib/util/formatting.js', // For autoFormatRange
                         'mode/xml/xml.js',        // Dependency for htmlmixed
                         'mode/htmlmixed/htmlmixed.js' // Default mode
                         ];
         let that = this;
-        // Assumes $.getMultiScripts2 is available globally or via hWin
+        // See getMultiScripts2 in utils.js
         $.getMultiScripts2(scripts, path)
         .then(function() {  //OK! widget script js has been loaded
             that.showEditor(); // Retry showing editor now that scripts are loaded
-        }).catch(function(error) { // REMARK: The 'error' parameter is not used in the catch block.
+        }).catch(function() {
             window.hWin.HEURIST4.msg.showMsg_ScriptFail(); // Show generic script failure message.
         });
     }

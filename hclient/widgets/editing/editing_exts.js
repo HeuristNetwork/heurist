@@ -7,17 +7,17 @@
  *              records or terms, managing translations, and calculating geospatial properties.
  *
  * @package     Heurist academic knowledge management system
- * @subpackage  hclient\\widgets\\editing
+ * @subpackage  hclient\widgets\editing
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Brandon McKay   <blmckay13@gmail.com>
  * @author      Artem Osmakov   <osmakov@gmail.com>
- * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
- * @since       4.0
+ * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+ * @since       5.0
  */
 
-// REMARK: The original file had a duplicate @fileOverview and @author block here, which has been merged into the main file-level JSDoc above.
-/* global HEditing, HRecordSet, $Db, tinyMCE */ // REMARK: Added $Db and tinyMCE as they appear to be used or relevant.
+/* global HEditing, HRecordSet, $Db, tinyMCE */
 
 /**
  * Opens a dialog for editing map symbology properties.
@@ -898,12 +898,6 @@ function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
 
 }
 
-//
-// Opening menuWidget's with searching capabilities
-// that => context ($editing_input instance)
-// $select => jQuery select with hSelect init'd
-// has_filter => disable click on search option, to avoid selecting it as the value
-//
 /**
  * Enhances a jQuery hSelect dropdown menu with live search/filter capabilities and other UI improvements.
  * This function is typically called from within an `editing_input` widget context.
@@ -1290,16 +1284,14 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
     $inpt.trigger('focus');
 }
 
-//
-// It uses window.hWin.HEURIST4.browseRecordCache
-// It returns selection function that opens record selection popup dialog
-//
 /**
  * Provides functionality to browse and select Heurist records for a pointer field.
  * It handles different pointer modes (e.g., addonly, browseonly, dropdown) and
  * can open a detailed record selection dialog or a dropdown list based on configuration
  * and cached data.
- *
+ * 
+ * @uses window.hWin.HEURIST4.browseRecordCache
+ *  
  * @param {object} _editing_input - The instance of the `editing_input` widget this browser is for.
  *                                  Provides context and configuration for the record selection.
  * @param {jQuery} $input - The jQuery element (typically a `<div>` or `<span>`) that displays
@@ -1314,7 +1306,7 @@ function browseRecords(_editing_input, $input){
     let that = _editing_input;
     
     let $inputdiv = $input.parent(); //div.input-div
-    let __current_input_id = $input.attr('id'); // REMARK: __current_input_id is used within __show_select_dialog, which might be called later when `that` or `$input` context could be different if not careful, though it seems to be handled by re-finding $input.
+    let __current_input_id = $input.attr('id'); //__current_input_id is used within __show_select_dialog, which might be called later when `that` or `$input` context could be different if not careful
 
     if ($inputdiv.find('.sel_link2 > .ui-button-icon').hasClass('rotate')) return;
     
@@ -1803,6 +1795,325 @@ function browseRecords(_editing_input, $input){
     }
 }
 
+//
+// Creates selectmenu that is common for input elements of editing_input
+//
+function browseTerms(_editing_input, $input, value){
+    
+    let that = _editing_input;
+    
+    let $inputdiv = $input.parent(); //div.input-div
+
+        
+    function __recreateTrmLabel($input, trm_ID){
+
+        let lang_code = that.options.language;
+        if(!window.hWin.HEURIST4.util.isempty(lang_code) && lang_code != 'ALL' && !window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation')){ // retrieve translations
+
+            window.hWin.HAPI4.EntityMgr.getTranslatedDefs('defTerms', 'trm', null, function(){
+                __recreateTrmLabel($input, trm_ID);
+            });
+            lang_code = '';
+           
+        }
+
+        $input.empty();
+        window.hWin.HEURIST4.ui.addoption($input[0], '', '&nbsp;');
+        if(window.hWin.HEURIST4.util.isNumber(trm_ID) && trm_ID>0){
+            
+            let trm_Label = $Db.trm_getLabel(trm_ID, lang_code);
+            let trm_info = $Db.trm(trm_ID);
+
+            while(trm_info && trm_info.trm_ParentTermID > 0){
+
+                let label = $Db.trm_getLabel(trm_info.trm_ParentTermID, lang_code);
+                trm_info = $Db.trm(trm_info.trm_ParentTermID);
+
+                if(trm_info && trm_info.trm_ParentTermID > 0){
+                    trm_Label = label + '.' +  trm_Label;
+                }
+            }
+
+            trm_Label = $Db.trm_RemoveDupHierarchy(trm_Label);
+        
+            window.hWin.HEURIST4.ui.addoption($input[0], trm_ID, trm_Label);
+            $input.css('min-width', '');
+        }else{
+            $input.css('min-width', '230px');
+            trm_ID = '';
+        }
+        $input.val(trm_ID);
+
+        if($input.hSelect('instance') !== undefined){
+            $input.hSelect('refresh');
+        }
+    }    
+
+    function __createTermTooltips($input){
+
+        let $menu = $input.hSelect('menuWidget');
+        if($input.attr('data-tooltips')){
+            return;
+        }
+
+        let $tooltip = null;
+        $input.attr('data-tooltips', 1);
+
+        $menu.find('li.ui-menu-item')
+             .on('mouseenter', (event) => { // create tooltip
+
+                let $target_ele = $(event.target);
+
+                if(($target_ele.children().length != 0 && $target_ele.find('img').length != 1) || $target_ele.find('div.ui-menu-item-wrapper').text() == '<blank>'){
+                    return;
+                }
+
+                let term_id = $target_ele.attr('data-hid');
+                let details = '';
+
+                if(window.hWin.HEURIST4.util.isPositiveInt(term_id)){
+
+                    let term = $Db.trm(term_id);
+                    if(!window.hWin.HEURIST4.util.isempty(term.trm_Code)){
+                        details += "<span style='text-align: center;'>Code &rArr; " + term.trm_Code + "</span>";
+                    }
+
+                    if(!window.hWin.HEURIST4.util.isempty(term.trm_Description)){
+
+                        if(details == ''){
+                            details = "<span style='text-align: center;'>Code &rArr; N/A </span>";
+                        }
+                        details += "<hr><span>" + term.trm_Description + "</span>";
+                    }
+                }
+
+                if(details == ''){
+                    details = "No Description Provided";
+                }
+
+                $tooltip = $menu.tooltip({
+                    items: "div.ui-state-active",
+                    position: { // Post it to the right of menu item
+                        my: "left+20 center",
+                        at: "right center",
+                        collision: "none"
+                    },
+                    show: { // Add slight delay to show
+                        delay: 1500,
+                        duration: 0
+                    },
+                    content: function(callback){ // Check for image, then provide text
+
+                        const ele_context = this;
+
+                        window.hWin.HAPI4.checkImage('defTerms', term_id, 'icon', function(response){
+
+                            if(response.status == window.hWin.ResponseStatus.OK && response.data == 'ok'){
+
+                                let icon = window.hWin.HAPI4.getImageUrl('defTerms', term_id, 'icon', null, null, true);
+                                details += `<br><br><img src='${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif' style='background-image: url("${icon}")' height=64 width=64 />`;
+                            }
+
+                            callback.call(ele_context, details);
+                        });
+
+                        return '';
+                    },
+                    open: function(event, ui){ // Add custom CSS + class
+                        ui.tooltip.css({
+                            "width": "200px",
+                            "background": "rgb(209, 231, 231)",
+                            "font-size": "1.1em"
+                        });
+                    }
+                });
+             })
+             .on('mouseleave', (event) => { // ensure tooltip is gone
+                if($tooltip && $tooltip.tooltip('instance') != undefined){
+                    $tooltip.tooltip('destroy');
+                }
+             });
+    }
+
+    function __recreateSelector(){
+
+        if(that.selObj){
+            $(that.selObj).remove();
+        }
+
+
+        let allTerms = that.f('rst_FilteredJsonTermIDTree');        
+        //headerTerms - disabled terms
+        let headerTerms = that.f('rst_TermIDTreeNonSelectableIDs') || that.f('dty_TermIDTreeNonSelectableIDs');
+        let lang_code = that.options.language;
+
+        if(window.hWin.HEURIST4.util.isempty(allTerms) &&
+            that.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'])
+        { //specific behaviour - show all
+            allTerms = 'relation'; //show all possible relations
+        }else if(typeof allTerms == 'string' && allTerms.indexOf('-')>0){ //vocabulary concept code
+            allTerms = $Db.getLocalID('trm', allTerms);
+        }else if(!window.hWin.HEURIST4.util.isempty(lang_code) && lang_code != 'ALL'
+            && !window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation')){
+            window.hWin.HAPI4.EntityMgr.getTranslatedDefs('defTerms', 'trm', null, __recreateSelector);
+            return;
+        }
+
+
+        let search_icon = window.hWin.HAPI4.baseURL+'hclient/assets/v6/filter_icon_black18.png';
+
+        let  filter_form = '<div style="padding:10px 0px">'
+        +'<span style="padding-right:10px;vertical-align:sub">'
+        +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+        + '" class="rt-icon rt-icon2" style="background-image: url(&quot;'+search_icon+ '&quot;);"/></span>'
+        +'<input class="input_menu_filter" size="8" style="outline: none;background:none;border: 1px solid lightgray;"/>'
+        +'<span class="smallbutton ui-icon ui-icon-circlesmall-close" tabindex="-1" title="Clear entered" '
+        +'style="position:relative; cursor: pointer; outline: none; box-shadow: none; border-color: transparent;"></span>'
+        +'<span class="trm-btns" style="padding: 0 0 0 10px;cursor: pointer;"></span>'
+        + '<div class="not-found" style="padding:10px;color:darkgreen;display:none;width:210px;">No terms match the filter '
+        + '<a class="add-trm" href="#" style="padding: 0 0 0 10px;color:blue;display:inline-block;">Add term</a>'
+        +'</div></div>';
+
+        let topOptions = [{key:'select',title:filter_form},{key:'',title:'&lt;blank&gt;'}];
+
+        let events = {};
+        events['onOpenMenu'] = function(){
+            __createTermTooltips(that.selObj);
+            openSearchMenu(that, that.selObj, true, true);
+            that.selObj.hSelect('refreshGroupings', true);
+        };
+
+        events['onSelectMenu'] = function ( event ){
+
+            let trm_ID = (event) ?$(event.target).val() :$(that.selObj).val();
+
+            that._off($(that.selObj),'change');
+
+            let ref_id = $(that.selObj).attr('ref-id');
+
+            let $input = $('#'+ref_id);
+            that.newvalues[$input.attr('id')] = trm_ID;
+            $input.attr('data-value', trm_ID); //that's more reliable
+
+            __recreateTrmLabel($input, trm_ID);
+            /*
+            $input.empty(); //clear 
+            //add new value
+            $('<span tabindex="0"class="ui-selectmenu-button ui-button ui-widget ui-selectmenu-button-closed ui-corner-top" style="padding: 0px; font-size: 1.1em; width: auto; min-width: 10em;">'
+            +'<span class="ui-selectmenu-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-selectmenu-text" style="min-height: 17px;">'
+            + window.hWin.HEURIST4.util.htmlEscape(trm_Label)
+            +'</span></span>').appendTo($input);
+            */
+            that.onChange();
+
+        };
+
+        events['onCloseMenu'] = function (event){
+
+            let $menu = that.selObj.hSelect('menuWidget');
+
+            // Reset filter input
+            $menu.find('.input_menu_filter').val('');
+            $menu.find('li').css('display','list-item');
+        };
+
+        $inputdiv.addClass('selectmenu-parent');
+
+        that.selObj = document.createElement("select");
+        $(that.selObj).addClass('enum-selector-main')
+        .css('max-width','300px')
+        .appendTo($inputdiv);
+
+        that.selObj = window.hWin.HEURIST4.ui.createTermSelect(that.selObj,
+            {vocab_id:allTerms, //headerTermIDsList:headerTerms,
+                defaultTermID:$input.val(), topOptions:topOptions, supressTermCode:true, 
+                useHtmlSelect:false, eventHandlers:events, language_code: lang_code});
+
+        that.selObj.hSelect('option', { groupings: true, groupingsType: 'trm' });
+        $(that.selObj).hide(); //button will be hidden        
+    }
+    
+    //
+    // select term from drop down
+    //
+    let __show_select_dropdown = function(event_or_id){
+        
+        if(that.is_disabled) return;
+        
+        let $input, $inputdiv, ref_id; 
+        
+        if(typeof event_or_id == 'string'){ //id
+            
+            ref_id = event_or_id; 
+            $input = that.element.find('#'+ref_id);
+            $inputdiv = $input.parents('.input-div');
+            
+        }else 
+        if(event_or_id && event_or_id.target){ //event
+            
+            let event = event_or_id;
+        
+            $inputdiv = $(event.target).parents('.input-div');
+            $input = $inputdiv.find('select');
+            ref_id = $input.attr('id');
+
+            if(event) event.preventDefault();
+        }
+
+        let org_scroll = $inputdiv.parents('.editForm').length > 0 ?
+                    $inputdiv.parents('.editForm')[0].scrollTop : null;
+        
+        //recreate dropdown if not inited
+        if(!that.selObj || !that.selObj.hSelect('instance')){
+
+            __recreateSelector();
+                
+        }else{
+            that._off($(that.selObj), 'change');    
+        }
+            
+        //Adjust position
+        let _ref_id = $input.attr('id');
+        let menu_location = $input;
+
+        if($input.hSelect('instance') !== undefined){
+            menu_location = $input.hSelect('widget');
+        }
+
+        that.selObj.attr('ref-id', _ref_id); //assign current input id for reference in onSelectMenu
+        that.selObj.hSelect('open');
+        that.selObj.hSelect('widget').hide();
+
+        let prn = that.selObj.hSelect('menuWidget').parent('div.ui-selectmenu-menu');
+        if(prn.length>0){
+            prn.css({'position':'fixed'}); //to show above all 
+            if(org_scroll !== null){ // fix scroll
+                prn.parents('.editForm').scrollTop(org_scroll);
+            }
+        }
+        that.selObj.hSelect('menuWidget')
+            .position({my: "left top", at: "left bottom", of: menu_location});
+
+    } //__show_select_dropdown
+    
+    that._off( $input, 'click');
+    that._on( $input, { click: __show_select_dropdown } ); //main invocation of dropdown
+
+    
+    if($input.is('select')){
+        $input.addClass('enum-selector').css({'min-width':'230px', width:'auto', 'padding-left': '15px'});
+        
+        __recreateTrmLabel($input, value);
+        
+        /*replace with div
+        $input = $('<div>').uniqueId()
+                .addClass('enum-selector')
+                .appendTo( $inputdiv );
+        */
+    }
+    
+    return __show_select_dropdown;
+}
 
 /**
  * Opens a popup dialog for defining translations for field values.
@@ -1821,7 +2132,7 @@ function translationSupport(_input_or_values, is_text_area, callback){
 
     if(!window.hWin.HEURIST4.util.isFunction($('body')['editTranslations'])){
         $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/editing/editTranslations.js', 
-            function() {  //+'?t='+(new Date().getTime()) // REMARK: Timestamp for cache busting commented out.
+            function() {  //+'?t='+(new Date().getTime()) // Timestamp for cache busting commented out.
                 if(window.hWin.HEURIST4.util.isFunction($('body')['editTranslations'])){
                     translationSupport( _input_or_values, is_text_area, callback );
                 }else{
@@ -1854,7 +2165,7 @@ function translationSupport(_input_or_values, is_text_area, callback){
                 if(res){
                     if(window.hWin.HEURIST4.util.isFunction(callback)){
                         callback.call(this, res);
-                    }else{ // Assumes 'that' is an editing_input instance
+                    }else{ // 'that' is an editing_input instance
                         that.setValue(res);    
                         that.isChanged(true);
                         that.onChange();
@@ -1960,7 +2271,7 @@ function translationToUI(params, $container, keyname, name, is_text_area){
 
         //translation button    
         let btn_add = $( "<span>")
-            .attr('data-lang','def') // Should this also be unique if multiple translationToUI calls on same page?
+            .attr('data-lang','def')
             .attr('name',name) // Using name attribute for a span, consider data-*
             .addClass('smallbutton editint-inout-repeat-button ui-icon ui-icon-translate')
             .insertAfter( def_ele )
@@ -1979,7 +2290,6 @@ function translationToUI(params, $container, keyname, name, is_text_area){
         btn_add.on({click: function(e){//--------------------------
             
             let values = [];
-            //$(e.target).attr('data-lang') // REMARK: This line is a comment, seems like a debug leftover.
             
             //gather the list of values from input elements
             $container.find(ele_type+'[name="'+name+'"]').each(function(i,item){
@@ -2063,11 +2373,10 @@ function selectRecord(options, callback)
             selectOnSave: true, //it means that select popup will be closed after add/edit is completed
             title: window.hWin.HR('Select record'),
             rectype_set: null,
-            parententity: 0, // REMARK: This seems to be a default, might be overridden by options.
+            parententity: 0, //a default value, might be overridden by options.
             default_palette_class: 'ui-heurist-populate',
             onselect:function(event, data){
                 if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                    // let recordset = data.selection; // REMARK: recordset variable is declared but not used.
                     callback(data.selection);
                 }
             }

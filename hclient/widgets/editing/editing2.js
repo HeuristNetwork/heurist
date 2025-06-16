@@ -1,4 +1,3 @@
-
 /**
  * editing2.js - Defines the HEditing class for dynamic form generation and management.
  *
@@ -9,18 +8,17 @@
  *              `editing_input` jQuery plugin for individual field rendering.
  *
  * @package     Heurist academic knowledge management system
- * @subpackage  hclient\\widgets\\editing
+ * @subpackage  hclient\widgets\editing
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @author      Artem Osmakov   <osmakov@gmail.com>
  * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
- * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
- * @since       4
+ * @since       5.0
+ *
+ * @todo Consider converting HEditing to an ES6 class for better syntax and maintainability if future refactoring is planned.
  */
 
-// REMARK: The original file had a duplicate @fileOverview and @author block here, which has been merged into the main file-level JSDoc above.
-// REMARK: Consider converting HEditing to an ES6 class for better syntax and maintainability if future refactoring is planned.
 /**
  * Constructs an HEditing instance to manage a dynamic form.
  * This class takes a structure definition and data, then renders an interactive form
@@ -44,8 +42,7 @@
  * and communication of changes. It integrates with TinyMCE for rich text editing.
  */
 function HEditing(_options) {
-     const _className = "Editing",
-         _version   = "0.4"; // REMARK: _version is defined but not exposed via getVersion() until later in the public `that` object.
+     const _className = "Editing";
 
      let $container = null,
          recdata = null,     //HRecordSet with data to be edited
@@ -127,9 +124,10 @@ function HEditing(_options) {
     }    
     
     /**
+     * NOT USED
      * @private
      * @function _reload
-     * @description Reloads the form with new data. (Marked as NOT USED in original comments)
+     * @description Reloads the form with new data.
      * @param {HRecordSet} _recdata - The new recordset data.
      */
     function _reload(_recdata) {
@@ -279,7 +277,8 @@ function HEditing(_options) {
                         prev_children = fields[idx].children;    
                     }
                         
-                        //__processGroupInside(fields[idx].children);  // REMARK: This recursive call seems commented out.
+                        // At the moment subgroups are not supported
+                        //__processGroupInside(fields[idx].children);  
                     
                 }
                 idx++;
@@ -302,7 +301,6 @@ function HEditing(_options) {
             for (idx=0; idx<fields.length; idx++){
                 
                 if( $.isPlainObject(fields[idx]) && fields[idx].groupType ){ //this is group
-                //  window.hWin.HEURIST4.util.isArrayNotEmpty(fields[idx].children) // REMARK: Commented out code.
                     
                     if(fields[idx].groupHidden || fields[idx]['groupTitleVisible']===false){ //this group is hidden all fields goes to previous group
 
@@ -410,7 +408,7 @@ function HEditing(_options) {
                         }else{
                             groupEle = null;
                         }
-                        if(groupEle && fields[idx].dtID>0){ // REMARK: dtID on a groupEle? Seems to be a field property.
+                        if(groupEle && fields[idx].dtID>0){
                                 groupEle.attr('data-group-dtid', fields[idx].dtID);
                         }
                         
@@ -470,12 +468,12 @@ function HEditing(_options) {
 
                         newFieldContainer.appendTo(groupContainer);
                     }
-                    const is_show_header_help_text = true; // REMARK: This flag is always true.
-                    if(is_show_header_help_text){ // || headerHelpText!='' // REMARK: Commented out alternative condition.
+                    const is_show_header_help_text = true; //This flag is always true.
+                    if(is_show_header_help_text){
                          let div_prompt = $('<div>').text(headerHelpText)
                             .addClass('heurist-helper1')
                             .appendTo(newFieldContainer);
-                         if(currGroupType == 'tabs' || currGroupType == 'accordion'){ // REMARK: Accordion was 'accordion ' with a space. Corrected.
+                         if(currGroupType == 'tabs' || currGroupType == 'accordion'){
                             div_prompt.addClass('tab-separator-helper')
                                 .attr('separator-dtid',fields[idx]['dtID']).css({padding:'5px 0 0 5px',display:'inline-block'});
                          }else{
@@ -567,11 +565,12 @@ function HEditing(_options) {
                         groupEle.find('.ui-accordion-header').addClass(currGroupHeaderClass);
                     }
                 }else if(currGroupType == 'tabs'){
-                    groupEle.tabs({active: 0}).addClass('edit-form-tabs');; // REMARK: double semicolon
+                    groupEle.tabs({active: 0}).addClass('edit-form-tabs');
                 }
             }
             
-            if(!hasVisibleFields && fieldContainer.find('.input-cell').length == 0){ // REMARK: fieldContainer could be null here if all items in `fields` were groups.
+            if(!hasVisibleFields && 
+                (fieldContainer==null || fieldContainer.find('.input-cell').length == 0)){ //fieldContainer could be null here if all items in `fields` were groups.
                 $('<div>There are no fields visible under this heading/tab. Please define new fields or move fields into this section.</div>')
                     .addClass('heurist-helper3').appendTo(fieldContainer);
             }
@@ -697,9 +696,8 @@ function HEditing(_options) {
      * @returns {Array<any>|null} An array of values for the field, or null if not found or empty.
      */
     function _getValue(dtID){
-        let idx, ele, values = []; // REMARK: 'values' variable is initialized but not used.
-        for (idx in editing_inputs) {
-            ele = $(editing_inputs[idx]);
+        for (let idx in editing_inputs) {
+            let ele = $(editing_inputs[idx]);
             if(ele.editing_input('instance') && ele.editing_input('option', 'dtID')==dtID){
                 let vals = ele.editing_input('getValues');
                 if(vals && vals.length>0){
@@ -896,7 +894,7 @@ function HEditing(_options) {
         if(value==='[not empty]'){
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
-                val = ele.editing_input('f', fieldName) // REMARK: 'f' is likely a shorthand for 'option' or a custom method of editing_input.
+                val = ele.editing_input('f', fieldName) // get options.dtFields[fieldName]
                 if(!window.hWin.HEURIST4.util.isempty(val)){
                     ress.push(ele);
                 }
@@ -904,7 +902,7 @@ function HEditing(_options) {
         }else{
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
-                if(ele.editing_input('f', fieldName)  == value){ // REMARK: 'f' is likely a shorthand for 'option' or a custom method of editing_input.
+                if(ele.editing_input('f', fieldName)  == value){ // get options.dtFields[fieldName]
                     ress.push(ele);
                 }
             }
@@ -993,11 +991,6 @@ function HEditing(_options) {
          * @returns {boolean} True if `strClass` is "Editing", false otherwise.
          */
         isA: function (strClass) {return (strClass === _className);},
-        /**
-         * Gets the version of this HEditing class.
-         * @returns {string} The version number.
-         */
-        getVersion: function () {return _version;},
 
         /**
          * Reloads the form with new data. Assumes the form structure remains the same.

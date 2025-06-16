@@ -1,15 +1,17 @@
 /*
-* editTheme.js - define Heurist color theme
-* refer initPageTheme.php for documentaton about heurist color themes
+* editTheme.js - Defines Heurist color theme
+*
+* @description This file provides functionality to define and edit a Heurist color theme using a dialog.
+* @see initPageTheme.php for the underlying theme structure and documentation.
 * 
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\editing
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-* @description This file provides functionality to define and edit a Heurist color theme using a dialog.
-*              It relies on `initPageTheme.php` for the underlying theme structure and documentation.
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6.0
 */
 
 /* global HEditing, HRecordSet */
@@ -88,7 +90,6 @@ function editTheme(current_value, callback){
     let recdata = current_value ? new HRecordSet({count:1, order:[1], 
         records:{1:current_value}, 
         fields: {'stub':0}}) :null;
-        //Object.getOwnPropertyNames(current_value) // REMARK: This commented-out line seems like a leftover from debugging.
     
     _theme_editing_symbology.initEditForm( editFields, recdata, true );
 

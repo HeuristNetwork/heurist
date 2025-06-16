@@ -8,36 +8,18 @@
  *               It uses an internal `resultList` widget to display selectable files.
  *
  * @package     Heurist academic knowledge management system
- * @subpackage  hclient\\widgets\\editing
+ * @subpackage  hclient\widgets\editing
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @author      Artem Osmakov   <osmakov@gmail.com>
- * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
- * @since       4.0
- */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-// REMARK: The original file had a duplicate @fileOverview block here, which has been merged into the main file-level JSDoc above.
-/**
- * @widget heurist.selectFile
- * @alias selectFile
- * @description A jQuery UI widget for selecting files (images, mbtiles) from different sources.
- * or tiled image mbtiles from various sources like the image library, uploaded tile stacks,
- * or specific archive folders. It can be displayed as a dialog or embedded in a page element.
- * It uses an internal `resultList` widget to display selectable files.
+ * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+ * @since       6.0
  */
 
 /**
  * @widget heurist.selectFile
- * @alias selectFile
+ * @namespace heurist.selectFile
  * @description A jQuery UI widget for selecting files (images, mbtiles) from different sources.
  * It can operate as a dialog or be embedded. It features filtering and uses a `resultList`
  * for displaying files.
@@ -369,7 +351,7 @@ $.widget( "heurist.selectFile", {
         if(val==''){ // If search term is empty, show all cached records
             subset = this._cachedRecordset;
         }else{ // Otherwise, filter the cached recordset
-            subset = this._cachedRecordset.getSubSetByRequest({'file_name':val}, null); // Assuming getSubSetByRequest performs case-insensitive 'contains'
+            subset = this._cachedRecordset.getSubSetByRequest({'file_name':val}, null);
         }
             
         this.recordList.resultList('updateResultSet', subset); // Update the resultList display

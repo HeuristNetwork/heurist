@@ -1,49 +1,47 @@
 /**
-* Widget to define translations 
+* editTranslations.js - Widget for editing multi-language translations
 * 
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
 * @description A jQuery UI widget for editing translations of a text field into multiple languages.
 *              It supports manual entry and an optional automatic translation feature if configured.
 *              The widget can be displayed as a dialog or embedded directly.
+* 
+* @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\editing
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6.0
 */
 
 /**
- * @fileOverview jQuery UI widget for editing multi-language translations.
- * @author Artem Osmakov <osmakov@gmail.com>
+ * @namespace heurist.editTranslations
+ * @description Creates an editor for managing text translations in multiple languages.
+ * The editor allows adding new language entries, inputting translations,
+ * and optionally using an automatic translation service.
+ *
+ * @example
+ * // Initialize with default options in a dialog
+ * $('<div>').editTranslations({
+ *   values: ['eng:Hello', 'fra:Bonjour'],
+ *   onclose: function(translations) {
+ *     console.log('Saved translations:', translations);
+ *   }
+ * });
+ *
+ * @example
+ * // Initialize embedded in an existing element
+ * $('#myTranslationsEditor').editTranslations({
+ *   is_dialog: false,
+ *   values: ['Default text'],
+ *   fieldtype: 'blocktext',
+ *   onclose: function(translations) {
+ *     // Handle updated translations
+ *   }
+ * });
  */
-
 $.widget( "heurist.editTranslations", {
-    /**
-     * @alias heurist.editTranslations
-     * @description Creates an editor for managing text translations in multiple languages.
-     * The editor allows adding new language entries, inputting translations,
-     * and optionally using an automatic translation service.
-     *
-     * @example
-     * // Initialize with default options in a dialog
-     * $('<div>').editTranslations({
-     *   values: ['eng:Hello', 'fra:Bonjour'],
-     *   onclose: function(translations) {
-     *     console.log('Saved translations:', translations);
-     *   }
-     * });
-     *
-     * @example
-     * // Initialize embedded in an existing element
-     * $('#myTranslationsEditor').editTranslations({
-     *   is_dialog: false,
-     *   values: ['Default text'],
-     *   fieldtype: 'blocktext',
-     *   onclose: function(translations) {
-     *     // Handle updated translations
-     *   }
-     * });
-     */
 
     // default options
     options: {
@@ -127,9 +125,6 @@ $.widget( "heurist.editTranslations", {
      */
     _init: function() {
 
-        let that = this; // REMARK: 'that' is declared but not used in this function. It is used in _createForm, _createEntry, _onCloseDialog.
-
-        
         this._container = $('<div class="ent_content_full" style="top:0;padding:10px"></div>')
                     .appendTo( $('<div class="ent_wrapper">').appendTo(this.element) );
 
@@ -285,9 +280,6 @@ $.widget( "heurist.editTranslations", {
         })
     },        
     
-    //
-    ///
-    //
     /**
      * Adjusts the height of the widget or its containing dialog based on content.
      * @private
@@ -336,12 +328,13 @@ $.widget( "heurist.editTranslations", {
      */
     _createEntry: function(value, check_default){
 
-        let sel_container, values_container, input_ele, that = this; // REMARK: sel_container, values_container, input_ele are declared but also assigned to this.sel_container. This might be confusing.
+        let sel_container, values_container, input_ele;
+        let that = this; 
         
         let cont = $('<div>').css({margin:'5px'}).insertBefore(this._btn_add);
         
         // selector container - to select language
-        this.sel_container = $('<div>') // REMARK: Assigning to this.sel_container means it's overwritten for each entry. This might be a bug if it's intended to be a single container for all selectors.
+        sel_container = $('<div>') 
             .css({'display':'inline-block','vertical-align':'top','padding-top':'3px','min-width':'100px'})
             .appendTo(cont);
         // values container
@@ -419,7 +412,7 @@ $.widget( "heurist.editTranslations", {
             $('<div class="header_narrow field_header" '
             +'style="min-width:90px;display:inline-block;text-align:right;padding-right: 9px;">'
             +'<label>Default language</label></div>')
-                .appendTo( this.sel_container );
+                .appendTo( sel_container );
         }else{
             let ind = -1;
 
@@ -439,7 +432,7 @@ $.widget( "heurist.editTranslations", {
                 .addClass('text ui-corner-all')
                 .css({'margin-left':'2em','min-width':'70px','max-width':'70px'})
                 .hide()
-                .appendTo( this.sel_container );
+                .appendTo( sel_container );
                 
                 
             window.hWin.HEURIST4.ui.createLanguageSelect(sel, null, lang, false);
@@ -516,10 +509,9 @@ $.widget( "heurist.editTranslations", {
      */
     _destroy: function() {
         // remove generated elements
-        // this._container.remove(); // Example: if _container was not part of this.element
-        // this._btn_add.remove(); // Example: if not within _container
-        // this._btn_translate.remove(); // Example: if not within _container
-        // If _as_dialog is managed, ensure it's cleaned up, though dialog('destroy') or remove() is typical.
+        this._container.remove();
+        this._btn_add.remove();
+        this._btn_translate.remove();
     },
 
 

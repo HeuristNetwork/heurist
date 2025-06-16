@@ -7,47 +7,46 @@
  *              and integration with other Heurist features like term selection and record pointers.
  *
  * @package     Heurist academic knowledge management system
- * @subpackage  hclient\\widgets\\editing
+ * @subpackage  hclient\widgets\editing
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @author      Artem Osmakov   <osmakov@gmail.com>
- * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
- * @since       4.0
+ * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+ * @since       5.0
  */
 
-// REMARK: The original file had a duplicate @fileOverview and @author block here, which has been merged into the main file-level JSDoc above.
 /*global Temporal, TDate, fixCalendarPickerCMDs, temporalToHumanReadableString, tinyMCE, EditorCodeMirror,
 translationSupport, selectRecord,browseRecords,browseTerms, correctionOfInvalidTerm, calculateImageExtentFromWorldFile,
-$Db, HRecordSet, HAPI4, HEURIST4 */ // REMARK: Added missing globals $Db, HRecordSet, HAPI4, HEURIST4
+$Db */
 
+/**
+ * @namespace heurist.editing_input
+ * @description A jQuery UI widget that creates and manages a single input field or a group of repeatable input fields
+ * within a Heurist editing form. It supports various data types (freetext, blocktext, date, enum, resource, file, geo, etc.),
+ * validation, help text, default values, and integration with other Heurist functionalities like term browsing,
+ * record selection, and TinyMCE for rich text editing.
+ *
+ * The behavior and appearance of the widget are heavily configured through the `dtFields` option,
+ * which typically comes from the record structure definition (`$Db.rst`).
+ *
+ * @example
+ * // Example usage (simplified, typically instantiated by HEditing class)
+ * $('<div>').editing_input({
+ *   dtID: 'dty_Name',
+ *   recID: 123,
+ *   rectypeID: 1,
+ *   dtFields: { // Simplified example of dtFields content
+ *     dty_Type: 'freetext',
+ *     rst_DisplayName: 'Name',
+ *     rst_RequirementType: 'required',
+ *     rst_MaxValues: 1
+ *   },
+ *   values: ['Initial Name'],
+ *   change: function() { console.log('Value changed'); }
+ * });
+ */
 $.widget( "heurist.editing_input", {
-    /**
-     * @alias heurist.editing_input
-     * @description A jQuery UI widget that creates and manages a single input field or a group of repeatable input fields
-     * within a Heurist editing form. It supports various data types (freetext, blocktext, date, enum, resource, file, geo, etc.),
-     * validation, help text, default values, and integration with other Heurist functionalities like term browsing,
-     * record selection, and TinyMCE for rich text editing.
-     *
-     * The behavior and appearance of the widget are heavily configured through the `dtFields` option,
-     * which typically comes from the record structure definition (`$Db.rst`).
-     *
-     * @example
-     * // Example usage (simplified, typically instantiated by HEditing class)
-     * $('<div>').editing_input({
-     *   dtID: 'dty_Name',
-     *   recID: 123,
-     *   rectypeID: 1,
-     *   dtFields: { // Simplified example of dtFields content
-     *     dty_Type: 'freetext',
-     *     rst_DisplayName: 'Name',
-     *     rst_RequirementType: 'required',
-     *     rst_MaxValues: 1
-     *   },
-     *   values: ['Initial Name'],
-     *   change: function() { console.log('Value changed'); }
-     * });
-     */
 
     // default options
     options: {
@@ -235,7 +234,7 @@ $.widget( "heurist.editing_input", {
      * @private
      * @type {Object<string, any>}
      */
-    newvalues:{},  // REMARK: Initialized as an empty object here, but JSDoc convention is to list properties in options or as separate members. This is an instance property.
+    newvalues:{},
     /**
      * The effective detail type of the field (e.g., 'freetext', 'enum', 'resource').
      * Determined by `options.detailtype` or `options.dtFields.dty_Type`.
@@ -1093,340 +1092,7 @@ $.widget( "heurist.editing_input", {
         this.options['dtFields'][fieldname] = value;
     },
 
-    /**
-     * Sets the value(s) for the input field(s) managed by the widget.
-     * This method will clear existing inputs and recreate them based on the provided values.
-     *
-     * @param {Array<any>|any} values - An array of values for repeatable fields, or a single value for non-repeatable fields.
-     *                                  The format of each value depends on the field type.
-     * @param {boolean} [make_as_nochanged=false] - If true, the widget's internal `options.values` will be updated
-     *                                             to reflect the new values, effectively marking the field as unchanged
-     *                                             relative to this new state. If false (default), `options.values` is not updated,
-     *                                             and subsequent calls to `isChanged()` will likely return true.
-     */
-    setValue: function(values, make_as_nochanged){
-        //clear ALL previous inputs
-        this.input_cell.find('.input-div').remove();
-        this.inputs = [];
-        this.newvalues = {};
-
-        if(!Array.isArray(values)) values = [values];
-
-        let isReadOnly = this.isReadonly();
-
-        let i;
-        for (i=0; i<values.length; i++){
-            if(isReadOnly && this.detailType!='relmarker'){
-                this._addReadOnlyContent(values[i]);
-            }else{
-                let inpt_id = this._addInput(values[i]);
-            }
-        }
-        if (isReadOnly || (make_as_nochanged==true)) {
-            this.options.values = values;
-        }
-
-        let repeatable = (Number(this.f('rst_MaxValues')) != 1);
-        if(values.length>1 && !repeatable && this.f('rst_MultiLang')!=1){
-            this.showErrorMsg('Repeated value for a single value field - please correct');
-        }
-
-        this._setAutoWidth();
-
-        if(window.hWin.HEURIST4.util.isFunction(this.options.onrecreate)){
-            this.options.onrecreate.call(this);
-        }
-
-        /*
-        if(make_as_nochanged){
-            this._setAutoWidth();
-        }else{
-            this.onChange();
-        }
-        */
-    },
-
     //
-    // get value for particular input element
-    //  input_id - id or element itself
-    //
-    _getValue: function(input_id){
-
-        if(this.detailType=="relmarker") return null;
-
-        let res = null;
-        let $input = $(input_id);
-
-        if(!(this.detailType=="resource" || this.detailType=='file'
-            || this.detailType=='date' || this.detailType=='geo'))
-        {
-            if($input.attr('radiogroup')>0){
-                res = $input.find('input:checked').val();
-            }else if(this.detailType=='boolean'){
-                if(Array.isArray(this.configMode) && this.configMode.length==2) {
-                    res = this.configMode[ $input.is(':checked')?0:1 ];
-                }else{
-                    res = $input.is(':checked') ?$input.val() :0;
-                }
-
-            }else{
-                res = $input.val();
-            }
-
-            if(!window.hWin.HEURIST4.util.isnull(res) && res!=''){
-                res = res.trim();
-
-                // strip double spacing from freetext fields
-                res = this.detailType == 'freetext' ? res.replaceAll(/  +/g, ' ') : res;
-            }
-        }else {
-            res = this.newvalues[$input.attr('id')];
-            if(!res && $input.attr('data-value')){
-                res = $input.attr('data-value');
-            }
-        }
-
-        return res;
-    },
-
-
-    //
-    //
-    //
-    getConfigMode: function(){
-        return this.configMode;
-    },
-
-    setConfigMode: function(newval){
-        return this.configMode = newval;
-    },
-
-    //
-    //restore original order of repeatable elements
-    //
-    _restoreOrder: function(){
-
-        this.btn_cancel_reorder.hide();
-
-        if(this.isReadonly()) return;
-        let idx, ele_after = this.firstdiv;
-        for (idx in this.inputs) {
-            let ele = this.inputs[idx].parents('.input-div');
-            ele.insertAfter(ele_after);
-            ele_after = ele;
-        }
-    },
-
-    //
-    // returns individual visibilities (order is respected)
-    //
-    getVisibilities: function(){
-
-        let ress2 = [];
-        let visibility_mode = this.f('rst_NonOwnerVisibility');
-        if(visibility_mode=='public' || visibility_mode=='pending')
-        {
-            let ress = {};
-
-            for (let idx in this.inputs) {
-                let $input = this.inputs[idx];
-
-                let val = this._getValue($input);
-                if(!window.hWin.HEURIST4.util.isempty( val )){
-
-                    let res = 0;
-
-                    let ele = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
-                    res = (ele.attr('hide_field')=='1')?1:0; //1: hide this field from public
-
-                    ele = $input.parents('.input-div');
-                    let k = ele.index();
-                    ress[k] = res;
-                }
-            }
-
-            ress2 = [];
-            for(let idx in ress){
-                ress2.push(ress[idx]);
-            }
-        }
-
-        return ress2;
-    },
-
-    //
-    // applies visibility status
-    //
-    setVisibilities: function(vals){
-
-        let vis_mode = this.f('rst_NonOwnerVisibility');
-
-        if(this.options.showedit_button && this.detailType!="relmarker" &&
-            !window.hWin.HEURIST4.util.isempty(vis_mode))
-        {
-            let idx, k=0;
-
-            for (idx in this.inputs) {
-
-                let $input = this.inputs[idx];
-                let btn = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
-
-                if(vals && k<vals.length && vals[k]==1){
-                    btn.attr('hide_field',1);
-
-                    this._setHiddenField($input, this.is_disabled);
-                }else{
-                    btn.attr('hide_field',0);
-                }
-                k++;
-            }
-
-            this._setVisibilityStatus();
-
-        }else{
-            this.element.find('span.field-visibility').hide();
-            this.element.find('div.field-visibility2').hide();
-        }
-    },
-
-    //
-    //
-    //
-    getDetailType: function(){
-        return this.detailType;
-    },
-
-    //
-    //
-    //
-    isReadonly: function(){
-        return this.options.readonly || this.f('rst_Display')=='readonly' || this.f('rst_MayModify')=='locked';
-    },
-
-    /**
-     * Retrieves the current value(s) from all input instances managed by the widget.
-     * The order of values in the returned array corresponds to the order of input elements in the DOM.
-     * For "between mode" fields, values are concatenated (e.g., "value1/value2" for dates, "value1<>value2" for others).
-     *
-     * @returns {Array<any>} An array of values. If no values are set or all are empty,
-     *                       it returns an array with a single empty string `['']`.
-     */
-    getValues: function( ){
-
-        if(this.isReadonly()){
-            return this.options.values;
-        }else{
-            let idx;
-            let ress = {};
-            let ress2 = [];
-
-            for (idx in this.inputs) {
-                let $input = this.inputs[idx];
-
-                let res = this._getValue($input);
-
-
-                if(!window.hWin.HEURIST4.util.isempty( res )){
-
-                    if(this.options.is_between_mode){
-                        let res2;
-                        if(this.detailType=='date'){
-                            res2 = this.newvalues[$input.attr('id')+'-2'];
-                        }else{
-                            res2 = this.element.find('#'+$input.attr('id')+'-2').val();
-                        }
-                        if(window.hWin.HEURIST4.util.isempty( res2 )){
-                            if(this.detailType!='date') res = '';
-                        }else{
-                            if(this.detailType=='date'){
-                                res  = res+'/'+res2;
-                            }else{
-                                res  = res+'<>'+res2;
-                            }
-                        }
-                    }
-
-                    let ele = $input.parents('.input-div');
-                    let k = ele.index();
-
-                    ress[k] = res;
-
-                }
-            }
-
-            ress2 = [];
-            for(idx in ress){
-                ress2.push(ress[idx]);
-            }
-            if(ress2.length==0) ress2 = [''];//at least one empty value
-
-            return ress2;
-        }
-
-    },
-
-    _setHiddenField($input, is_hidden){
-
-        if(is_hidden){
-            $input.addClass('input-with-invisible-text');
-            if($input.is('select')){
-                $input.nextAll('.ui-selectmenu-button').addClass('input-with-invisible-text');
-            }
-        }else{
-            $input.removeClass('input-with-invisible-text');
-            if($input.is('select')){
-                $input.nextAll('.ui-selectmenu-button').removeClass('input-with-invisible-text');
-            }
-        }
-
-    },
-
-
-    //
-    //
-    //
-    setDisabled: function(is_disabled){
-
-        if(!this.isReadonly()){
-
-            let check_ind_visibility = this.options.showedit_button
-                    && this.detailType!="relmarker"
-                    && !window.hWin.HEURIST4.util.isempty(this.f('rst_NonOwnerVisibility'));
-
-            let idx;
-            for (idx in this.inputs) {
-                if(!this.isFileForRecord) {  //this.detailType=='file'
-                    let input_id = this.inputs[idx];
-                    let $input = $(input_id);
-                    window.hWin.HEURIST4.util.setDisabled($input, is_disabled);
-
-                    if(check_ind_visibility){
-                        let btn = this.element.find('span.field-visibility[data-input-id="'+$input.attr('id')+'"]');
-
-                        this._setHiddenField($input, (is_disabled && btn.attr('hide_field')==1));
-                    }
-                }
-            }
-            this.is_disabled = is_disabled;
-
-            if(this.input_cell.sortable('instance')){
-               this.input_cell.sortable('option', 'disabled', is_disabled );
-            }
-        }
-
-    },
-
-    /**
-     * Checks if the field's value(s) have changed from their initial state (when the widget was created or `setValue` was last called with `make_as_nochanged=true`).
-     *
-     * @param {boolean} [value] - If true, forces the changed state to true and updates `options.values` to an empty array.
-     *                            This usage is somewhat unconventional for an `isChanged` method.
-     * @returns {boolean} True if the value has changed, false otherwise.
-     */
-    isChanged: function(value){
-
-        if(value===true){
-            this.options.values = [''];
     //
     //
     _removeInput: function(input_id){
@@ -3357,7 +3023,7 @@ $.widget( "heurist.editing_input", {
             else 
             if(this.isFileForRecord){ //----------------------------------------------------
                 
-				let $input_img;
+                let $input_img;
                 
                 let select_return_mode = 'recordset';
 
@@ -3381,8 +3047,8 @@ $.widget( "heurist.editing_input", {
                 .appendTo( $inputdiv )
                 .hide();
 
-				/* Record Type help text for Record Editor */
-				$('<br><div class="smallText" style="display:block;color:gray;font-size:smaller;">'
+                /* Record Type help text for Record Editor */
+                $('<br><div class="smallText" style="display:block;color:gray;font-size:smaller;">'
                     + 'Click image to freeze in place</div>')
                 .clone()
                 .insertAfter( $clear_container )
@@ -3479,7 +3145,7 @@ $.widget( "heurist.editing_input", {
                 /* Change Handler */
                 this._on($input,{change: 
                 function(event){
-					
+                    
                     /* new file values */
                     let val = that.newvalues[$input.attr('id')];
 
@@ -3659,7 +3325,7 @@ $.widget( "heurist.editing_input", {
                     }
                 }}); 
 
-				// for closing inline image when 'frozen'
+                // for closing inline image when 'frozen'
                 let $hide_thumb = $('<span class="hideTumbnail" style="padding-right:10px;color:gray;cursor:pointer;" title="Hide image thumbnail">'
                                 + 'close</span>').prependTo( $($dwnld_anchor[1]) ).show();
                 // Alternative button for closing inline image
@@ -3685,12 +3351,12 @@ $.widget( "heurist.editing_input", {
                     }
                 });
 
-				/* Show Thumbnail handler */
+                /* Show Thumbnail handler */
                 $('#lnk'+f_id).on("click", function(event){
                     window.hWin.HEURIST4.ui.hidePlayer(f_id, event.target.parentNode.parentNode.parentNode);
-					
+                    
                     $(event.target.parentNode.parentNode).find('.hideTumbnail').show();
-				});
+                });
                 
                 let $mirador_link = $('<a href="#" data-id="'+f_nonce+'" class="miradorViewer_link" style="color: blue;" title="Open in Mirador">'
                     +'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
@@ -4805,10 +4471,10 @@ $.widget( "heurist.editing_input", {
     //outline_suppress does not work - so list all these props here explicitely                
                         outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'
                 });
-    			
+                
                 if($inputdiv.find('#btn_clear_container').length > 0){ // Check if button needs to be placed within a container, or appended to input
                     $inputdiv.find('#btn_clear_container').replaceWith( $btn_clear );
-                }			
+                }            
                 
                 // bind click events
                 this._on( $btn_clear, {
@@ -4839,7 +4505,7 @@ $.widget( "heurist.editing_input", {
 
                         let input_id = $(e.target).attr('data-input-id');  //parent(). need if button
                         
-    					if (this.isFileForRecord) /* Need to hide the player and image containers, and the download link for images */
+                        if (this.isFileForRecord) /* Need to hide the player and image containers, and the download link for images */
                         {
                             let $parentNode = $(e.target.parentNode);
                             $parentNode.find('.thumb_image').hide();
@@ -4852,10 +4518,10 @@ $.widget( "heurist.editing_input", {
                                 "color": "grey", 
                                 "position": "", 
                                 "bottom": ""
-                            });						
-    						
+                            });                        
+                            
                         }
-    					
+                        
                         if(that.detailType=="resource" && that._isForRecords
                                 && that.f('rst_CreateChildIfRecPtr')==1){
                             that._clearChildRecordPointer( input_id );
@@ -5336,8 +5002,8 @@ $.widget( "heurist.editing_input", {
                                 || isMiradorManifest)
                             {
                                 ele.parent().find('.image_input > img').attr('src',
-								    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
-									    value.ulf_ObfuscatedFileID);
+                                    window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
+                                        value.ulf_ObfuscatedFileID);
                                         
                                 if((response.data.width > 0 && response.data.height > 0) || isMiradorManifest) {
 
@@ -6013,9 +5679,17 @@ $.widget( "heurist.editing_input", {
 
     },
 
-    //
-    // recreate input elements and assign values
-    //
+    /**
+     * Sets the value(s) for the input field(s) managed by the widget.
+     * This method will clear existing inputs and recreate them based on the provided values.
+     *
+     * @param {Array<any>|any} values - An array of values for repeatable fields, or a single value for non-repeatable fields.
+     *                                  The format of each value depends on the field type.
+     * @param {boolean} [make_as_nochanged=false] - If true, the widget's internal `options.values` will be updated
+     *                                             to reflect the new values, effectively marking the field as unchanged
+     *                                             relative to this new state. If false (default), `options.values` is not updated,
+     *                                             and subsequent calls to `isChanged()` will likely return true.
+     */
     setValue: function(values, make_as_nochanged){
         //clear ALL previous inputs
         this.input_cell.find('.input-div').remove();
@@ -7266,12 +6940,12 @@ $.widget( "heurist.editing_input", {
         });
         
     },
-	
     
-	//
-	// Recreate dropdown or checkboxes|radio buttons, called by adding new term and manage terms onClose
-	//
-	_recreateEnumField: function(vocab_id){
+    
+    //
+    // Recreate dropdown or checkboxes|radio buttons, called by adding new term and manage terms onClose
+    //
+    _recreateEnumField: function(vocab_id){
 
         let that = this;
 
@@ -7429,10 +7103,10 @@ $.widget( "heurist.editing_input", {
     //
     // Set up checkboxes/radio buttons for enum field w/ rst_TermsAsButtons set to 1
     // Params:
-    //	isRefresh (bool): whether to clear $inputdiv first
-    //	terms_list (array): array of term ids
-    //	$inputdiv (jQuery Obj): element where inputs will be placed
-    //	values (array): array of existing values to check by default
+    //    isRefresh (bool): whether to clear $inputdiv first
+    //    terms_list (array): array of term ids
+    //    $inputdiv (jQuery Obj): element where inputs will be placed
+    //    values (array): array of existing values to check by default
     //
     _createEnumButtons: function(isRefresh, $inputdiv, values){
 
