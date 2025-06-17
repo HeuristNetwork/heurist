@@ -1,26 +1,54 @@
 /**
-* recordFindDuplicates.js - Find duplicates by record type and selected fields
-*                           It uses levenshtein function on server side
+* @file recordFindDuplicates.js
+* @brief Find duplicates by record type and selected fields using Levenshtein distance.
+* @fileOverview This file defines the `recordFindDuplicates` widget. It provides functionality to
+* identify potential duplicate records within a specified record type by comparing selected field
+* values using a Levenshtein distance algorithm on the server side. Users can select fields for
+* comparison, set matching parameters (like distance), and view grouped potential duplicates.
+* Actions include merging records (via a separate dialog or an instant merge option) or ignoring
+* specific groups in future searches.
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
+
+/**
+ * @widget heurist.recordFindDuplicates
+ * @extends $.heurist.recordAction
+ * @description jQuery widget for finding duplicate records based on selected fields and Levenshtein distance.
+ * Users can select a record type and fields to compare. The widget then queries the server,
+ * which uses a Levenshtein distance algorithm to find potential duplicates. Results are grouped,
+ * and users can choose to merge them (either through a detailed merge dialog or an instant merge)
+ * or ignore specific groups.
+ *
+ * @param {object} options - Configuration options for the widget.
+ * @param {number} [options.height=780] - The height of the dialog/widget area.
+ * @param {number} [options.width=800] - The width of the dialog/widget area.
+ * @param {boolean} [options.modal=true] - Whether the dialog is modal.
+ * @param {string} [options.title='Find duplicate records'] - Title for the dialog.
+ * @param {string} [options.htmlContent='recordFindDuplicates.html'] - The HTML file for the widget's content.
+ * @param {boolean} [options.isdialog=true] - Indicates if the widget is presented as a dialog.
+ */
 $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
 
-    // default options
+    /**
+     * @namespace options
+     * @memberof heurist.recordFindDuplicates
+     * @type {object}
+     * @property {number} [height=780] - Widget/dialog height.
+     * @property {number} [width=800] - Widget/dialog width.
+     * @property {boolean} [modal=true] - Is dialog modal.
+     * @property {string} [title='Find duplicate records'] - Dialog title.
+     * @property {string} [htmlContent='recordFindDuplicates.html'] - HTML content file.
+     * @property {boolean} [isdialog=true] - True if displayed as a dialog.
+     */
     options: {
     
         height: 780,
@@ -31,12 +59,47 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         htmlContent: 'recordFindDuplicates.html'
     },
     
-    //results
+    /**
+     * @member {?object} dupes
+     * @memberof heurist.recordFindDuplicates
+     * @description Stores the duplicate groups data received from the server.
+     *              Keyed by group index, with each value being an object of record IDs and their titles/values.
+     */
     dupes:null,
+    /**
+     * @member {?object} summary
+     * @memberof heurist.recordFindDuplicates
+     * @description Stores summary information about the duplicate search (e.g., total records checked, groups found).
+     */
     summary:null,
 
+    /**
+     * @member {?Array<string>} selectedFields
+     * @memberof heurist.recordFindDuplicates
+     * @description An array of codes for fields selected in the Fancytree for comparison. (Seems to be locally scoped within getSettings in this version).
+     */
     selectedFields:null,
+    /**
+     * @member {?jQuery} toolbar
+     * @memberof heurist.recordFindDuplicates
+     * @description jQuery object for the dynamically created toolbar when `options.isdialog` is false.
+     */
+    toolbar: null,
+    /**
+     * @member {?number} _selectedRtyID
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Stores the currently selected Record Type ID for which duplicates are being found.
+     */
+    _selectedRtyID: null,
     
+    /**
+     * @function _destroy
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Cleans up the widget. Destroys the Fancytree instance and removes associated elements.
+     * Removes the toolbar if created. Calls parent's _destroy.
+     */
     _destroy: function() {
         this._super(); 
         
@@ -49,6 +112,14 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         if(this.toolbar)this.toolbar.remove();
     },
         
+    /**
+     * @function _initControls
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Initializes controls. If not in dialog mode, creates a toolbar and action buttons.
+     * Calls parent's _initControls.
+     * @returns {boolean} True.
+     */
     _initControls: function() {
 
         this._super();    
@@ -73,9 +144,13 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         return true;
     },
 
-    //    
-    //
-    //
+    /**
+     * @function _getActionButtons
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Gets action buttons. Sets 'Find Duplications' and 'Clear ignoring list' buttons.
+     * @returns {Array<object>} Array of button definition objects.
+     */
     _getActionButtons: function(){
         let res = this._super();
         let that = this;
@@ -93,9 +168,12 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         return res;
     },    
         
-    //
-    // Fills record type selector. Parent method is overwritten
-    //
+    /**
+     * @function _fillSelectRecordScope
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Populates the record type selector using `createRectypeSelectNew`. Overrides parent's method.
+     */
     _fillSelectRecordScope: function (){
 
         this.selectRecordScope.empty();
@@ -120,9 +198,15 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         window.hWin.HEURIST4.ui.initHSelect(selScope);
     },
             
-    //
-    // 
-    //
+    /**
+     * @function doAction
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Performs the duplicate finding operation. Gathers selected record type and fields (using `getSettings`).
+     * Sends a request to the `recordVerify.php` controller with action 'dupes'.
+     * Handles the response by calling `_renderDuplicates` or showing an error.
+     * Shows progress during the server call.
+     */
     doAction: function(){
 
             let rty_ID = this.selectRecordScope.val();
@@ -194,17 +278,26 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
 
     },
     
-    //
-    //
-    //
+    /**
+     * @function _hideProgress
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Hides the progress indicator and shows the search parameters section. Overrides parent's method.
+     */
     _hideProgress: function (){
         this._super(); 
         this._$('#div_search').show();  
     },
     
-    //
-    // mode_action true - returns fields to compare
-    //
+    /**
+     * @function getSettings
+     * @memberof heurist.recordFindDuplicates
+     * @description Retrieves settings for the duplicate search from UI controls.
+     * Collects selected fields from Fancytree, Levenshtein distance, start group character, and sort field.
+     * @param {boolean} mode_action - If true, structures `selectedFields` as an object keyed by record type ID.
+     *                              If false, `selectedFields` is an array of field codes.
+     * @returns {object|false} Object with settings (`fields`, `distance`, `startgroup`, `sort_field`), or false if no fields selected.
+     */
     getSettings: function( mode_action ){
         
             let header_fields = {id:'rec_ID',title:'rec_Title',url:'rec_URL',addedby:'rec_AddedBy',notes:'rec_ScratchPad'};
@@ -278,9 +371,13 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         
     },
 
-    //
-    // overwritten - reload treeview
-    //
+    /**
+     * @function _onRecordScopeChange
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Handles record type selector changes. Reloads Fancytree if type changes. Overrides parent's method.
+     * @returns {boolean} Disabled state from parent's `_onRecordScopeChange`.
+     */
     _onRecordScopeChange: function() 
     {
         let isdisabled = this._super();
@@ -303,9 +400,15 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         return isdisabled;
     },
     
-    //
-    // show treeview with record type structure
-    //
+    /**
+     * @function _loadRecordTypesTreeView
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Loads/reloads Fancytree with field structure for `rtyID`.
+     * Filters fields to allowed types for duplicate checking. Configures Fancytree.
+     * Calls `_fillSortField` after tree selection changes.
+     * @param {number|string} rtyID - Record Type ID.
+     */
     _loadRecordTypesTreeView: function(rtyID){
         
         let that = this;
@@ -416,9 +519,15 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         }   
     },
     
-    //
-    //
-    //
+    /**
+     * @function _fixDuplicatesPopup
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Handles the 'merge this group' action. Opens the `combineDuplicateRecords.php`
+     * admin page in a dialog for the selected group of duplicates.
+     * @param {Event} event - The click event object.
+     * @returns {false} To prevent default link behavior.
+     */
     _fixDuplicatesPopup: function(event){
         
         let sGroupID = $(event.target).attr('data-action-merge');
@@ -453,9 +562,15 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         return false;
     },
     
-    //
-    //
-    //
+    /**
+     * @function _ignoreGroup
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Handles the 'ignore in future' action for a duplicate group.
+     * Sends a request to `recordVerify.php` to mark the group's records as to be ignored.
+     * @param {Event} event - The click event object.
+     * @returns {false} To prevent default link behavior.
+     */
     _ignoreGroup: function(event){
 
         let sGroupID = $(event.target).attr('data-action-ignore');
@@ -480,9 +595,14 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         return false;
     },
 
-    //
-    //
-    //
+    /**
+     * @function _ignoreClear
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Handles the 'Clear ignoring list' action. Sends a request to `recordVerify.php`
+     * to clear all previously ignored duplicate pairs for the current database.
+     * @returns {false} To prevent default link behavior.
+     */
     _ignoreClear: function(){
 
         let request = {
@@ -505,9 +625,14 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
     },
 
     
-    //
-    //
-    //
+    /**
+     * @function _renderDuplicates
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Renders the list of found duplicate groups in the `#div_result` element.
+     * Displays summary information and, for each group, links to merge, view, or ignore the group,
+     * and an option for "instant merge".
+     */
     _renderDuplicates: function(){
         
         let dupes = this.dupes;
@@ -598,6 +723,13 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         });
     },
 
+    /**
+     * @function _fillSortField
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Populates the 'Sort by field' dropdown (`#sort_field`) with text fields
+     * currently selected in the Fancytree. This is used as an optimization for large datasets.
+     */
     _fillSortField: function(){
         
         let tree = $.ui.fancytree.getTree( this._$('.rtt-tree') );
@@ -623,6 +755,15 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
 
     },
 
+    /**
+     * @function _instantMergeRecords
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Handles the "instant merge" functionality. When a master record is chosen from a group,
+     * this function calls the `combineDuplicateRecords.php` script with parameters to perform
+     * a quick merge, redirecting pointers from other records in the group to the selected master.
+     * @param {Event} event - The click event object from the "instant merge" link.
+     */
     _instantMergeRecords: function(event){
 
         let that = this;
@@ -668,6 +809,13 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
 
     },
 
+    /**
+     * @function _downloadList
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Handles the "Download list as spreadsheet (TSV) file" action.
+     * Constructs a URL to `recordVerify.php` with parameters to export the current duplicate findings as a TSV file.
+     */
     _downloadList: function(){
 
         let rty_ID = this.selectRecordScope.val();
@@ -695,4 +843,3 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         window.open(url, '_blank');
     }
 });
-

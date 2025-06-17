@@ -1,25 +1,58 @@
 /**
-* recordDelete.js - delete selected records
+* @file recordDelete.js
+* @brief Deletes selected records.
+* @fileOverview This file defines the `recordDelete` widget, which provides functionality for deleting
+* records from the Heurist system. It allows users to select a scope of records and initiates a
+* deletion process. The widget includes confirmations, especially when deleting CMS records or records
+* that are targets of links from other records. It also handles the deletion of associated data like
+* bookmarks and relationships.
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
+
+/**
+ * @widget heurist.recordDelete
+ * @extends $.heurist.recordAction
+ * @description jQuery widget for deleting records.
+ * This widget manages the process of deleting a selected scope of records.
+ * It provides UI confirmations, especially for potentially harmful deletions
+ * (e.g., CMS records, records linked by others). It uses the `resultList`
+ * widget to display records selected for deletion and handles API calls
+ * for the deletion process, including progress display.
+ *
+ * @param {object} options - Configuration options for the widget.
+ * @param {?number} options.map_document_id - Special case: if provided, the widget will also find and list content related to this map document for deletion.
+ * @param {number} [options.height=340] - The height of the dialog.
+ * @param {number} [options.width=640] - The width of the dialog.
+ * @param {boolean} [options.modal=true] - Whether the dialog is modal.
+ * @param {string} [options.init_scope='selected'] - Initial scope for record selection.
+ * @param {boolean} [options.hide_scope=true] - If true, hides the standard record scope selector.
+ * @param {string} [options.title='Delete Records'] - Title of the dialog.
+ * @param {string} [options.htmlContent='recordDelete.html'] - The HTML file for the widget's content.
+ */
 $.widget( "heurist.recordDelete", $.heurist.recordAction, {
 
-    // default options
+    /**
+     * @namespace options
+     * @memberof heurist.recordDelete
+     * @type {object}
+     * @property {?number} map_document_id - If set, lists content of this map document for deletion.
+     * @property {number} [height=340] - Dialog height.
+     * @property {number} [width=640] - Dialog width.
+     * @property {boolean} [modal=true] - Is dialog modal.
+     * @property {string} [init_scope='selected'] - Initial record scope.
+     * @property {boolean} [hide_scope=true] - Hide scope selector.
+     * @property {string} [title='Delete Records'] - Dialog title.
+     * @property {string} [htmlContent='recordDelete.html'] - HTML content file.
+     */
     options: {
         map_document_id: null, //special case - remove mapdocument and all its dependencies
     
@@ -32,12 +65,31 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
         htmlContent: 'recordDelete.html'
     },
     
+    /**
+     * @member {?jQuery} header_div
+     * @memberof heurist.recordDelete
+     * @description jQuery object for the header `div` element which displays informational messages.
+     */
     header_div:null,
+    /**
+     * @member {?jQuery} recordList
+     * @memberof heurist.recordDelete
+     * @description jQuery object for the `div` that hosts the `resultList` widget, used to display records selected for deletion.
+     */
     recordList:null,
 
-    //
-    //
-    //
+    /**
+     * @function _initControls
+     * @memberof heurist.recordDelete
+     * @private
+     * @description Initializes controls after HTML content is loaded.
+     * Displays informational messages based on the number of selected records and admin status.
+     * Hides the scope selector if `options.hide_scope` is true or `options.map_document_id` is set.
+     * Initializes the `resultList` widget to display records slated for deletion.
+     * If `options.map_document_id` is provided, calls `_findMapDocumentContent` to populate the list.
+     * Adjusts dialog height based on header content.
+     * @returns {boolean} True.
+     */
     _initControls:function(){
         
         this._super();
@@ -125,9 +177,14 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
         return true;
     },
     
-    //
-    //
-    //
+    /**
+     * @function _findMapDocumentContent
+     * @memberof heurist.recordDelete
+     * @private
+     * @description If `options.map_document_id` is provided, this function searches for records
+     * linked to the specified map document (layers, datasets) and updates the `recordList`
+     * to display these records for potential deletion.
+     */
     _findMapDocumentContent: function(){
         
         let mapdoc_id = this.options.map_document_id;
@@ -219,6 +276,15 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     },
     */
     
+    /**
+     * @function _onLinkedCount
+     * @memberof heurist.recordDelete
+     * @private
+     * @description (Currently not implemented/commented out)
+     * Intended to calculate and display information about how many other records
+     * link to the records selected for deletion. This would warn the user about
+     * creating orphaned links.
+     */
     _destroy: function() {
         // remove generated elements
         if(this.selectRecordScope) this.selectRecordScope.remove();
@@ -226,15 +292,32 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     },
     
     
+    /**
+     * @function _getActionButtons
+     * @memberof heurist.recordDelete
+     * @private
+     * @description Gets action buttons for the dialog, setting the main action button text to 'Delete Records'.
+     * @returns {Array<object>} Array of button definition objects.
+     */
     _getActionButtons: function(){
         let res = this._super();
         res[1].text = window.hWin.HR('Delete Records');
         return res;
     },    
     
-    //
-    //
-    //
+    /**
+     * @function doAction
+     * @memberof heurist.recordDelete
+     * @private
+     * @description Performs the record deletion process.
+     * It first checks if a confirmation is needed (e.g., if deleting CMS records or if it's the first attempt).
+     * If confirmation is required and not yet given, it shows a confirmation dialog.
+     * Once confirmed, it determines the scope of records, shows a progress indicator, and calls the
+     * `HAPI4.RecordMgr.remove` API. It handles responses, including cases where records are targets of links,
+     * prompting for further confirmation if necessary. Displays results (processed, deleted counts, etc.).
+     * @param {boolean} [isconfirm=false] - True if the user has already confirmed a previous warning dialog.
+     * @param {boolean} [check_source=false] - True if the user has confirmed deleting records that are source link targets.
+     */
     doAction: function( isconfirm, check_source ){
 
         let scope_val = this.selectRecordScope.val();

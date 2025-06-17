@@ -1,25 +1,51 @@
 /**
-* recordImportAnnotations.js - import annotations from registered IIIF manifests
+* @file recordImportAnnotations.js
+* @brief Import annotations from registered IIIF manifests.
+* @fileOverview This file defines the `recordImportAnnotations` widget. It provides functionality to
+* import annotations from IIIF (International Image Interoperability Framework) manifests that have
+* been registered within the Heurist system. The widget typically interacts with a server-side
+* controller to process these manifests, create or update annotation records, and report on the
+* import process (e.g., total processed, added, updated, missed, issues).
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
+
+/**
+ * @widget heurist.recordImportAnnotations
+ * @extends $.heurist.recordAction
+ * @description jQuery widget for importing annotations from registered IIIF manifests.
+ * This widget provides a user interface to trigger the import process for annotations
+ * associated with IIIF manifests stored in the system. It communicates with a server-side
+ * controller to fetch and process these annotations, and then displays a report
+ * summarizing the import results.
+ *
+ * @param {object} options - Configuration options for the widget.
+ * @param {number} [options.height=780] - The height of the dialog.
+ * @param {number} [options.width=800] - The width of the dialog.
+ * @param {boolean} [options.modal=true] - Whether the dialog is modal.
+ * @param {string} [options.title='Import annotations from registered IIIF manifests'] - Title for the dialog.
+ * @param {string} [options.htmlContent='recordImportAnnotations'] - Base name for the HTML file ('.html' will be appended).
+ */
 $.widget( "heurist.recordImportAnnotations", $.heurist.recordAction, {
 
-    // default options
+    /**
+     * @namespace options
+     * @memberof heurist.recordImportAnnotations
+     * @type {object}
+     * @property {number} [height=780] - Dialog height.
+     * @property {number} [width=800] - Dialog width.
+     * @property {boolean} [modal=true] - Is dialog modal.
+     * @property {string} [title='Import annotations from registered IIIF manifests'] - Dialog title.
+     * @property {string} [htmlContent='recordImportAnnotations'] - Base name for HTML content file.
+     */
     options: {
     
         height: 780,
@@ -30,12 +56,28 @@ $.widget( "heurist.recordImportAnnotations", $.heurist.recordAction, {
         htmlContent: 'recordImportAnnotations'
     },
     
+    /**
+     * @function _init
+     * @memberof heurist.recordImportAnnotations
+     * @private
+     * @description Initializes the widget. Appends '.html' to `options.htmlContent`.
+     * Calls the parent widget's `_init` method.
+     */
     _init: function() {
         this.options.htmlContent = this.options.htmlContent+'.html';
                     //+(window.hWin.HAPI4.getLocale()=='FRE'?'_fre':'')
         this._super();    
     },
     
+    /**
+     * @function _initControls
+     * @memberof heurist.recordImportAnnotations
+     * @private
+     * @description Initializes controls after HTML content is loaded.
+     * Makes action buttons jQuery UI buttons and attaches click handlers.
+     * Calls the parent widget's `_initControls` method.
+     * @returns {boolean|undefined} Value returned by parent's `_initControls`.
+     */
     _initControls:function(){
         
         this._$('.btnAction').button();
@@ -46,9 +88,13 @@ $.widget( "heurist.recordImportAnnotations", $.heurist.recordAction, {
     },
     
     
-    //    
-    //
-    //
+    /**
+     * @function _getActionButtons
+     * @memberof heurist.recordImportAnnotations
+     * @private
+     * @description Gets action buttons for the dialog, setting labels to 'Proceed' and 'Close'.
+     * @returns {Array<object>} Array of button definition objects.
+     */
     _getActionButtons: function(){
         let res = this._super();
         res[1].text = window.hWin.HR('Proceed');
@@ -56,9 +102,17 @@ $.widget( "heurist.recordImportAnnotations", $.heurist.recordAction, {
         return res;
     },    
     
-    //
-    //
-    //
+    /**
+     * @function _renderReport
+     * @memberof heurist.recordImportAnnotations
+     * @private
+     * @description Renders the import report in the UI using data received from the server.
+     * Displays counts for total, processed, missed, added, updated, and retained annotations,
+     * as well as a list of any issues encountered, with links to relevant records.
+     * @param {object} data - The report data from the server. Expected to contain keys like
+     *                        'total', 'processed', 'missed', 'without_annotations', 'added',
+     *                        'updated', 'retained', and 'issues'.
+     */
     _renderReport: function(data)
     {
         this._$('#div_header').hide();
@@ -114,9 +168,15 @@ $.widget( "heurist.recordImportAnnotations", $.heurist.recordAction, {
         
     },
         
-    //
-    // 
-    //
+    /**
+     * @function doAction
+     * @memberof heurist.recordImportAnnotations
+     * @private
+     * @description Performs the annotation import action.
+     * Constructs a request to a server-side controller ('ImportAnnotations').
+     * Includes options like whether to create direct links or thumbnails.
+     * Shows progress and calls `_renderReport` with the server response.
+     */
     doAction: function(){
 
             let request = {

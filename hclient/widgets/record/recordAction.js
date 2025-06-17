@@ -1,25 +1,54 @@
 /**
-* recordAction.js - BASE widget for actions for scope of records
+* @file recordAction.js
+* @brief Provides a base jQuery widget for actions performed on a scope of records.
+* @fileOverview This file defines the `recordAction` widget, a base class for various record-specific
+* actions within the Heurist system. It handles common functionalities like record scope selection
+* (e.g., all, selected, current) and progress display for long-running actions. Widgets extending
+* `recordAction` can implement specific operations on records.
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
+
+/**
+ * @widget heurist.recordAction
+ * @extends $.heurist.baseAction
+ * @description Base jQuery widget for actions that operate on a scope of records.
+ * This widget provides common infrastructure for selecting a set of records (e.g., selected, current search results)
+ * and displaying progress for actions performed on these records.
+ *
+ * @param {object} options - Configuration options for the widget.
+ * @param {string} [options.default_palette_class='ui-heurist-explore'] - Default CSS class for the widget palette.
+ * @param {string} [options.path='widgets/record/'] - Path to the widget's HTML and other resources.
+ * @param {?Array<string>|string} options.scope_types - Defines the available scope selection options.
+ *        Can be an array of strings (e.g., ['all', 'selected', 'current', 'rectype_id']) or 'none'.
+ *        If null or empty, defaults may include 'all', 'selected', 'current', and available record types.
+ * @param {string} [options.init_scope=''] - The initially selected scope.
+ * @param {?HRecordSet} options.currentRecordset - The current recordset object to operate on. If not provided, it may use the global current recordset.
+ * @param {string} [options.htmlContent='recordAction.html'] - The HTML file to load for the widget's content.
+ */
 $.widget( "heurist.recordAction", $.heurist.baseAction, {
 
-    // default options
+    /**
+     * @namespace options
+     * @memberof heurist.recordAction
+     * @type {object}
+     * @property {string} [default_palette_class='ui-heurist-explore'] - Default CSS class for the widget palette.
+     * @property {string} [path='widgets/record/'] - Path to the widget's HTML and other resources.
+     * @property {?Array<string>|string} scope_types - Defines the available scope selection options.
+     *           Can be an array of strings (e.g., ['all', 'selected', 'current', 'rectype_id']) or 'none'.
+     *           If null or empty, defaults may include 'all', 'selected', 'current', and available record types.
+     * @property {string} [init_scope=''] - The initially selected scope.
+     * @property {?HRecordSet} currentRecordset - The current recordset object to operate on. If not provided, it may use the global current recordset.
+     * @property {string} [htmlContent='recordAction.html'] - The HTML file to load for the widget's content.
+     */
     options: {
         default_palette_class: 'ui-heurist-explore', 
         path: 'widgets/record/',
@@ -31,18 +60,50 @@ $.widget( "heurist.recordAction", $.heurist.baseAction, {
         htmlContent: 'recordAction.html'
     },  
       
+    /**
+     * @member {?HRecordSet} _currentRecordset
+     * @memberof heurist.recordAction
+     * @private
+     * @description The Heurist recordset that the action will be performed on.
+     */
     _currentRecordset:null,
+    /**
+     * @member {?Array<number>} _currentRecordsetSelIds
+     * @memberof heurist.recordAction
+     * @private
+     * @description Array of IDs of selected records in the `_currentRecordset`.
+     */
     _currentRecordsetSelIds:null,
+    /**
+     * @member {?Array<number>} _currentRecordsetColIds
+     * @memberof heurist.recordAction
+     * @private
+     * @description Array of IDs of collected records in the `_currentRecordset`. (Note: Usage of 'collected' needs clarification from code context, might be similar to selected or a distinct set).
+     */
     _currentRecordsetColIds: null,
     
+    /**
+     * @member {?number} _progressInterval
+     * @memberof heurist.recordAction
+     * @private
+     * @description Interval ID for the progress update mechanism. Used by `_showProgress` and `_hideProgress`.
+     */
     _progressInterval:null,
     
-    //selector control for scope of records to be treated
+    /**
+     * @member {?jQuery} selectRecordScope
+     * @memberof heurist.recordAction
+     * @description jQuery object representing the dropdown/select element used for choosing the record scope.
+     */
     selectRecordScope:null,
     
-    //
-    //  load configuration and call _initControls
-    //
+    /**
+     * @function _init
+     * @memberof heurist.recordAction
+     * @private
+     * @description Initializes the widget. Determines the `_currentRecordset` based on options or global HAPI4 state.
+     * Calls the parent widget's `_init` method.
+     */
     _init: function() {
         
         if(this.options.currentRecordset){  //take recordset from options
@@ -64,9 +125,15 @@ $.widget( "heurist.recordAction", $.heurist.baseAction, {
     },
     
      
-    //  
-    // invoked from _init after loading of html content
-    //
+    /**
+     * @function _initControls
+     * @memberof heurist.recordAction
+     * @private
+     * @description Initializes the controls for the widget after HTML content is loaded.
+     * Sets up the record scope selector (`selectRecordScope`). Closes the dialog if scope setup fails.
+     * Calls the parent widget's `_initControls` method.
+     * @returns {boolean|undefined} Returns `false` and closes dialog if scope selection setup fails.
+     */
     _initControls:function(){
         
         this._$('label[for="sel_record_scope"]').text(window.hWin.HR('recordAction_select_lbl'));
@@ -80,18 +147,28 @@ $.widget( "heurist.recordAction", $.heurist.baseAction, {
         return this._super();
     },
 
-    // 
-    // custom, widget-specific, cleanup.
+    /**
+     * @function _destroy
+     * @memberof heurist.recordAction
+     * @private
+     * @description Cleans up the widget before it is removed. Removes the `selectRecordScope` element.
+     */
     _destroy: function() {
         // remove generated elements
         if(this.selectRecordScope) this.selectRecordScope.remove();
     },
 
 
-    //  -----------------------------------------------------
-    //
-    //
-    //
+    /**
+     * @function _fillSelectRecordScope
+     * @memberof heurist.recordAction
+     * @private
+     * @description Populates the record scope selector dropdown (`selectRecordScope`) with available options
+     * such as 'All records', 'Selected results set', 'Current results set', and specific record types.
+     * The available options are determined by `this.options.scope_types` and the state of `_currentRecordset`.
+     * Attaches a change event listener to the selector.
+     * @returns {undefined|false} Returns `false` if the dialog should be closed (e.g. error condition, though not explicitly shown in current snippet).
+     */
     _fillSelectRecordScope: function (){
 
         let scope_types = this.options.scope_types;
@@ -158,9 +235,14 @@ $.widget( "heurist.recordAction", $.heurist.baseAction, {
         this._onRecordScopeChange();
     },
 
-    //
-    //
-    //    
+    /**
+     * @function _onRecordScopeChange
+     * @memberof heurist.recordAction
+     * @private
+     * @description Event handler for when the record scope selection changes.
+     * Disables or enables the main action button based on whether a valid scope is selected.
+     * @returns {boolean} True if the action button is disabled, false otherwise.
+     */
     _onRecordScopeChange: function () 
     {
         let isdisabled = (this.selectRecordScope.val()=='');
@@ -172,12 +254,18 @@ $.widget( "heurist.recordAction", $.heurist.baseAction, {
     
     //   @todo use msg.showProgress
     //
-    // Requests reportProgress every t_interval ms 
-    // is_autohide 
-    //    true  - stops progress check if it returns null/empty value
-    //    false - it shows rotating(loading) image for null values and progress bar for n,count values
-    //                  in latter case _hideProgress should be called explicitely
-    //
+    /**
+     * @function _showProgress
+     * @memberof heurist.recordAction
+     * @private
+     * @description Displays a progress indicator for long-running actions.
+     * It hides the main content and shows a progress bar, periodically updating it by polling a progress URL.
+     * Provides an 'Abort' button to terminate the operation.
+     * @param {number} session_id - A unique session ID for tracking the progress on the server.
+     * @param {boolean} is_autohide - If true, the progress indicator hides automatically when the server reports completion or no data.
+     *                               If false, `_hideProgress` must be called explicitly.
+     * @param {number} t_interval - The interval in milliseconds at which to poll for progress updates.
+     */
     _showProgress: function ( session_id, is_autohide, t_interval ){
 
         if(!(session_id>0)) {
@@ -246,6 +334,13 @@ $.widget( "heurist.recordAction", $.heurist.baseAction, {
         
     },
     
+    /**
+     * @function _hideProgress
+     * @memberof heurist.recordAction
+     * @private
+     * @description Hides the progress indicator and restores the main widget content.
+     * Clears any active progress polling interval.
+     */
     _hideProgress: function (){
         
         $('body').css('cursor','auto');

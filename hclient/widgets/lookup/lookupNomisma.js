@@ -198,7 +198,7 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
             return;
         }
 
-        this.closingAction(recset);
+        this._super(record[6]);
     },
 
     /**
@@ -285,40 +285,37 @@ $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
 
         // Prepare fields for HRecordSet
         let fields = ['rec_ID','rec_RecTypeID']; // Base fields
-        let map_flds_orig = Object.keys(this.options.mapping.fields); // Mapped fields from config
-        fields = fields.concat(map_flds_orig);
+        let map_flds = Object.keys(this.options.mapping.fields); // Mapped fields from config
+        fields = fields.concat(map_flds);
 
         // Split dot-separated mapped field names for nested property access
-        let map_flds_processed = map_flds_orig.map((prop) => prop.split('.'));
+        map_flds = map_flds.map((prop) => prop.split('.'));
 
         // Normalize: Nomisma API returns features in geojson_data.features
         let features_array = geojson_data.features || geojson_data; // Fallback if structure is flatter
         features_array = Array.isArray(features_array) ? features_array : [features_array];
 
-
         let i = 0; // Local record ID counter
         for(const feature of features_array){
             let recID = i++;
+
             let hasGeo = true; // Flag to track if essential geo data is present if mapped
             let values = [recID, this.options.mapping.rty_ID]; // Start with local ID and target rty_ID
+            for(const fld_Names of map_flds){
 
-            for(let j = 0; j < map_flds_processed.length; j++){
-                const fld_Name_parts = map_flds_processed[j]; // Array of parts for nested access
-                const original_fld_Name = map_flds_orig[j]; // Original dot-separated name from mapping config
-
-                let val = feature; // Start with the whole feature object
+                let val = feature[fld_Names[0]]; // Start with the whole feature object
 
                 // Handle temporal data extraction first if field name suggests it (e.g., "when.timespans.start")
-                val = this.getTimespan(fld_Name_parts, val);
+                val = this.getTimespan(fld_Names, val);
 
                 // Then extract potentially nested value
-                val = this.getValueByParts(fld_Name_parts, val);
+                val = this.getValueByParts(fld_Names, val);
 
-                // If the target Heurist field is geospatial, convert GeoJSON geometry to WKT
-                if(DT_GEO_OBJECT == this.options.mapping.fields[original_fld_Name] && !window.hWin.HEURIST4.util.isempty(val)){
-                    val = this.createGeoFeature(val); // val here is expected to be a GeoJSON geometry object
-                    hasGeo = !window.hWin.HEURIST4.util.isempty(val); // Update hasGeo based on WKT result
-                }
+                if(DT_GEO_OBJECT == this.options.mapping.fields[fld_Names] && !window.hWin.HEURIST4.util.isempty(val)){ // looking for geospatial values
+                    val = this.createGeoFeature(val);
+                    hasGeo = !window.hWin.HEURIST4.util.isempty(val);
+                } // else not looking for geospatial values
+
                 values.push(val);    
             }
 

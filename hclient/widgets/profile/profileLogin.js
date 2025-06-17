@@ -696,12 +696,12 @@ function doRegister( parentwin, is_guest=false ){
 
     if(window.hWin.HEURIST4.util.isFunction($doc.profileEdit)){
 
-        let profile_edit_dialog = $('#heurist-profile-dialog');
-        if(profile_edit_dialog.length<1){
-            profile_edit_dialog = $( '<div id="heurist-profile-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $doc );
+        let profileEditDialog = $('#heurist-profile-dialog');
+        if(profileEditDialog.length<1){
+            profileEditDialog = $( '<div id="heurist-profile-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $doc );
         }
         
-        profile_edit_dialog.profileEdit({'ugr_ID': window.hWin.HAPI4.currentUser.ugr_ID, 'parentwin': parentwin,
+        profileEditDialog.profileEdit({'ugr_ID': window.hWin.HAPI4.currentUser.ugr_ID, 'parentwin': parentwin,
                  'is_guest':is_guest, 'afterRegistration': onAuthentication});
         
     }else{

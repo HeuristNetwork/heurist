@@ -20,16 +20,16 @@ use hserv\structure\ConceptCode;
     /**
     *  Database utilities :   mysql_ - prefix for function
     *
-    *  mysql__connection - establish connection
-    *  mysql__usedatabase
-    *  mysql__create_database
-    *  mysql__drop_database
-    *  mysql__foreign_check
-    *  mysql__supress_trigger
-    *  mysql__safe_updatess
-    *  mysql__found_rows
+    *  mysql__connection - establish connection to db server
+    *  mysql__usedatabase - USE DATABASE switch the database
+    *  mysql__create_database - create new database
+    *  mysql__drop_database - delete the database
+    *  mysql__foreign_check - SET FOREIGN_KEY_CHECKS
+    *  mysql__supress_trigger - SUPPRESS_UPDATE_TRIGGER
+    *  mysql__safe_updatess  - SET SQL_SAFE_UPDATES
+    *  mysql__found_rows - total rows in databaase
     *
-    *  mysql__getdatabases4 - get list of databases
+    *  mysql__getdatabases4 - get list of databases on the server
     *  mysql__check_dbname
     *  mysql__get_names - get database name with and without hdb prefix
     *

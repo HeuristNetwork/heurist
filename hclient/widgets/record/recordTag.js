@@ -1,25 +1,58 @@
 /**
-* recordTag.js - assign, detach tags
+* @file recordTag.js
+* @brief Assigns or detaches tags from records.
+* @fileOverview This file defines the `recordTag` widget. It allows users to assign tags to, or
+* remove tags from, a selected scope of records. It can also be used in a mode to simply select
+* tags (e.g., for bookmarking with specific tags). The widget embeds the `usrTags` entity
+* dialog/widget for tag selection and management.
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
+
+/**
+ * @widget heurist.recordTag
+ * @extends $.heurist.recordAction
+ * @description jQuery widget for assigning or removing tags from records, or selecting tags.
+ * This widget provides UI for users to select tags (using an embedded `usrTags` dialog)
+ * and then either assign these tags to a scope of records, remove them, or simply
+ * return the selected tags (e.g., for bookmarking operations).
+ *
+ * @param {object} options - Configuration options for the widget.
+ * @param {number} [options.height=500] - The height of the dialog.
+ * @param {number} [options.width=700] - The width of the dialog.
+ * @param {boolean} [options.modal=true] - Whether the dialog is modal.
+ * @param {string} [options.init_scope='selected'] - Initial scope for record selection.
+ * @param {string} [options.title='Add or Remove Tags for Records'] - Title for the dialog.
+ * @param {string|boolean} [options.helpContent='recordTags'] - Help content identifier or URL.
+ * @param {Array<string>} [options.scope_types=['selected', 'collected', 'current']] - Available record scope types.
+ * @param {string} [options.groups='all'] - Tag groups to display (e.g., 'all', 'personal', 'grouponly', or list of IDs). Passed to the embedded tag selection widget.
+ * @param {Array<string>|string} [options.modes=['assign','remove']] - Operation modes. Can be 'assign', 'remove', 'bookmark', or 'bookmark_url'.
+ *        'bookmark_url' implies only tag selection without direct action. 'bookmark' implies assigning tags and bookmarking.
+ */
 $.widget( "heurist.recordTag", $.heurist.recordAction, {
 
-    // default options
+    /**
+     * @namespace options
+     * @memberof heurist.recordTag
+     * @type {object}
+     * @property {number} [height=500] - Dialog height.
+     * @property {number} [width=700] - Dialog width.
+     * @property {boolean} [modal=true] - Is dialog modal.
+     * @property {string} [init_scope='selected'] - Initial record scope.
+     * @property {string} [title='Add or Remove Tags for Records'] - Dialog title.
+     * @property {string|boolean} [helpContent='recordTags'] - Help content identifier.
+     * @property {Array<string>} [scope_types=['selected', 'collected', 'current']] - Available record scopes.
+     * @property {string} [groups='all'] - Tag groups for selection.
+     * @property {Array<string>|string} [modes=['assign','remove']] - Operation modes: 'assign', 'remove', 'bookmark', 'bookmark_url'.
+     */
     options: {
     
         height: 500,
@@ -33,9 +66,30 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         modes: ['assign','remove']       //bookmark=assign bookmark_url - just selection of tags - no real action
     },
     
+    /**
+     * @member {Array<string|number>} _tags_selection
+     * @memberof heurist.recordTag
+     * @private
+     * @description Array of selected tag IDs or a recordset of tags, depending on `select_return_mode` of the embedded tag widget.
+     */
     _tags_selection:[], //selected tags
+    /**
+     * @member {?jQuery} _tagSelectionWidget
+     * @memberof heurist.recordTag
+     * @private
+     * @description jQuery object for the div that contains the embedded `usrTags` selection widget.
+     */
     _tagSelectionWidget:null, 
 
+    /**
+     * @function _initControls
+     * @memberof heurist.recordTag
+     * @private
+     * @description Initializes controls. Sets a header message based on `options.modes`.
+     * Embeds and initializes the `usrTags` entity dialog for tag selection.
+     * Calls parent's `_initControls`.
+     * @returns {boolean|undefined} Value returned by parent's `_initControls`.
+     */
     _initControls:function(){
         
         this.options.helpContent = 'recordTags';
@@ -88,11 +142,26 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         return res;
     },
     
+    /**
+     * @function _destroy
+     * @memberof heurist.recordTag
+     * @private
+     * @description Cleans up the widget. Removes the embedded `_tagSelectionWidget`.
+     * Calls parent's `_destroy`.
+     */
     _destroy: function() {
         this._super();
         if(this._tagSelectionWidget) this._tagSelectionWidget.remove();
     },
     
+    /**
+     * @function _getActionButtons
+     * @memberof heurist.recordTag
+     * @private
+     * @description Gets action buttons for the dialog, configured based on `options.modes`.
+     * May include 'Add tags', 'Remove tags', or 'Bookmark' buttons.
+     * @returns {Array<object>} Array of button definition objects.
+     */
     _getActionButtons: function(){
         let res = this._super();
         
@@ -129,16 +198,28 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         return res;
     },
 
-    //
-    // ony tag selection for bookmark_url (see importHyperlinks)
-    //
+    /**
+     * @function doTagSelection
+     * @memberof heurist.recordTag
+     * @private
+     * @description Handles the action for 'bookmark_url' mode. Sets `_context_on_close`
+     * with the `_tags_selection` and closes the dialog. This is for returning selected tags
+     * to a calling context.
+     */
     doTagSelection: function(){
         this._context_on_close = this._tags_selection;
         this.closeDialog();
     },
-    //
-    //
-    //
+    /**
+     * @function doAction
+     * @memberof heurist.recordTag
+     * @private
+     * @description Performs tag assignment or removal.
+     * Determines record scope and selected tags. Validates that tags are selected.
+     * Constructs a batch request to `EntityMgr` for the `usrTags` entity with the specified `mode` ('assign' or 'remove').
+     * Displays results (processed records, tags added/removed, bookmarks added).
+     * @param {string} mode - The action mode, either 'assign' or 'remove'.
+     */
     doAction: function(mode){
         
             let scope_val = this.selectRecordScope.val();
@@ -220,6 +301,14 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
         
     },
 
+    /**
+     * @function _onRecordScopeChange
+     * @memberof heurist.recordTag
+     * @private
+     * @description Handles changes in record scope or tag selection.
+     * Enables/disables action buttons based on whether a valid scope and tags are selected.
+     * Overrides parent's method.
+     */
     _onRecordScopeChange: function () 
     {
         let isdisabled = (this.options.modes.indexOf('bookmark_url')<0 && this.selectRecordScope.val()=='') 

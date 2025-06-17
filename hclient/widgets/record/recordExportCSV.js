@@ -1,25 +1,57 @@
 /**
-* recordExportCSV.js - select fields to be exported to CSV for current recordset
+* @file recordExportCSV.js
+* @brief Select fields to be exported to CSV for current recordset.
+* @fileOverview This file defines the `recordExportCSV` widget, a comprehensive tool for exporting
+* record data to CSV (or other delimited text) files. It allows users to select specific fields from
+* a record type's structure, including fields from linked records up to multiple levels. Users can
+* configure CSV format options (delimiter, enclosure, header row), inclusion of term IDs/codes,
+* resource titles, and URLs. Advanced options per field include aggregation (group by, count, sum)
+* and sorting. These export configurations can be saved and loaded.
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
+
+/**
+ * @widget heurist.recordExportCSV
+ * @extends $.heurist.recordAction
+ * @description jQuery widget for exporting records to CSV or other delimited text files.
+ * Provides a UI for selecting fields (including from related records via a Fancytree),
+ * configuring CSV format options, and setting advanced per-field options like
+ * aggregation and sorting. Export configurations can be saved and loaded.
+ *
+ * @param {object} options - Configuration options for the widget.
+ * @param {number} [options.height=780] - The height of the dialog/widget area.
+ * @param {number} [options.width=800] - The width of the dialog/widget area.
+ * @param {boolean} [options.modal=true] - Whether the dialog is modal (if applicable).
+ * @param {string} [options.title='Export records to comma or tab separated text files'] - Title for the dialog.
+ * @param {string} [options.default_palette_class='ui-heurist-publish'] - Default CSS class for the widget palette.
+ * @param {string} [options.htmlContent='recordExportCSV.html'] - The HTML file for the widget's content.
+ * @param {boolean} [options.isdialog=true] - Indicates if the widget is presented as a dialog.
+ * @param {function} [options.onInitFinished] - Callback function executed after asynchronous initialization (like script loading) is complete.
+ */
 $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
-    // default options
+    /**
+     * @namespace options
+     * @memberof heurist.recordExportCSV
+     * @type {object}
+     * @property {number} [height=780] - Widget/dialog height.
+     * @property {number} [width=800] - Widget/dialog width.
+     * @property {boolean} [modal=true] - Is dialog modal.
+     * @property {string} [title='Export records to comma or tab separated text files'] - Dialog title.
+     * @property {string} [default_palette_class='ui-heurist-publish'] - Default palette CSS class.
+     * @property {string} [htmlContent='recordExportCSV.html'] - HTML content file.
+     * @property {boolean} [isdialog=true] - True if displayed as a dialog.
+     * @property {function} [onInitFinished] - Callback after async init.
+     */
     options: {
     
         height: 780,
@@ -31,13 +63,50 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         htmlContent: 'recordExportCSV.html'
     },
 
+    /**
+     * @member {?Array<string>} selectedFields
+     * @memberof heurist.recordExportCSV
+     * @description An array of codes for fields selected in the Fancytree, used when saving/loading configurations.
+     */
     selectedFields:null,
     
+    /**
+     * @member {?number} _collected_rtyid
+     * @memberof heurist.recordExportCSV
+     * @private
+     * @description Stores the common record type ID if all collected records share the same type. Null otherwise.
+     */
     _collected_rtyid: null,
+    /**
+     * @member {?number} _selected_rtyid
+     * @memberof heurist.recordExportCSV
+     * @private
+     * @description Stores the common record type ID if all selected records share the same type. Null otherwise.
+     */
     _selected_rtyid: null,
     
+    /**
+     * @member {number} MAX_LEVEL
+     * @memberof heurist.recordExportCSV
+     * @description The maximum depth level for traversing related records in the Fancytree field selector.
+     * @default 3
+     */
     MAX_LEVEL:3,
     
+    /**
+     * @member {?jQuery} toolbar
+     * @memberof heurist.recordExportCSV
+     * @description jQuery object for the dynamically created toolbar when `options.isdialog` is false.
+     */
+    toolbar: null,
+
+    /**
+     * @function _destroy
+     * @memberof heurist.recordExportCSV
+     * @private
+     * @description Cleans up the widget. Destroys the Fancytree instance and removes associated elements.
+     * Removes the toolbar if it was created. Calls parent's _destroy.
+     */
     _destroy: function() {
         this._super(); 
         
@@ -50,6 +119,15 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         if(this.toolbar)this.toolbar.remove();
     },
         
+    /**
+     * @function _initControls
+     * @memberof heurist.recordExportCSV
+     * @private
+     * @description Initializes controls. Ensures `configEntity.js` is loaded. Sets up `configEntity` for saving/loading CSV export configurations.
+     * Initializes advanced field options pane and UI elements for CSV format settings. Creates a toolbar if not in dialog mode.
+     * Sets up event handlers for reordering tree nodes.
+     * @returns {boolean|undefined} False if waiting for script load, true otherwise.
+     */
     _initControls: function() {
 
 
@@ -134,9 +212,13 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         return true;
     },
 
-    //
-    //
-    //
+    /**
+     * @function setSettings
+     * @memberof heurist.recordExportCSV
+     * @description Applies a given CSV export configuration. Populates `this.selectedFields`, updates the Fancytree selection,
+     * sets advanced field options, and configures CSV format controls (delimiter, quote, headers, etc.).
+     * @param {?object} settings - The configuration object, expected to have `fields`, `advanced_options`, and CSV format properties.
+     */
     setSettings: function(settings){
         
         this.selectedFields = [];
@@ -171,9 +253,15 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     },
 
     
-    //
-    // assign selected fields in tree
-    //
+    /**
+     * @function _assignSelectedFields
+     * @memberof heurist.recordExportCSV
+     * @private
+     * @description Updates the Fancytree selection based on `this.selectedFields`.
+     * Iterates through the tree and marks nodes as selected if their codes are in `this.selectedFields`.
+     * Handles lazy loading of nodes if necessary.
+     * @param {?FancytreeNode} rnode - The starting node for visiting (usually root or a lazy-loaded parent).
+     */
     _assignSelectedFields: function(rnode){
         
             let that = this;
@@ -207,9 +295,13 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
     },
     
-    //    
-    //
-    //
+    /**
+     * @function _getActionButtons
+     * @memberof heurist.recordExportCSV
+     * @private
+     * @description Gets action buttons, setting labels to 'Download' and 'Close'.
+     * @returns {Array<object>} Array of button definition objects.
+     */
     _getActionButtons: function(){
         let res = this._super();
         res[1].text = window.hWin.HR('Download');
@@ -217,9 +309,14 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         return res;
     },    
         
-    //
-    // overwrite parent's method
-    //
+    /**
+     * @function _fillSelectRecordScope
+     * @memberof heurist.recordExportCSV
+     * @private
+     * @description Populates the record type selector dropdown (`selectRecordScope`).
+     * Offers options based on current/selected/collected records and their types.
+     * Overrides parent's method.
+     */
     _fillSelectRecordScope: function (){
 
         const that = this;
@@ -326,9 +423,14 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         
     },
             
-    //
-    // 0 - download, 1 - open in new window
-    //
+    /**
+     * @function doAction
+     * @memberof heurist.recordExportCSV
+     * @private
+     * @description Performs the CSV export. Gathers the scope of records and current settings (using `getSettings`).
+     * Constructs a request object and submits it via a hidden form to the server-side export controller.
+     * @param {any} [mode] - (Unused in this implementation).
+     */
     doAction: function(mode){
 
         let scope_val = this.selectRecordScope.val();
@@ -374,9 +476,15 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             
     },
     
-    //
-    // mode_action true - returns fields for csv export, false - returns codes of selected nodes
-    //
+    /**
+     * @function getSettings
+     * @memberof heurist.recordExportCSV
+     * @description Retrieves current export settings from UI controls.
+     * Collects selected fields from Fancytree, advanced field options, and CSV format preferences.
+     * @param {boolean} mode_action - If true, structures `selectedFields` as an object keyed by record type ID,
+     *                              suitable for the export API. If false, `selectedFields` is an array of codes for saving config.
+     * @returns {object|false} An object containing all export settings, or false if no fields are selected.
+     */
     getSettings: function( mode_action ){
 
         let header_fields = {ids:'rec_ID', title:'rec_Title', url:'rec_URL', modified:'rec_Modified', tag:'rec_Tags', 
@@ -494,9 +602,14 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         
     },
 
-    //
-    // overwritten
-    //
+    /**
+     * @function _onRecordScopeChange
+     * @memberof heurist.recordExportCSV
+     * @private
+     * @description Handles changes in the record type selector. Reloads the Fancytree for the new type,
+     * updates `configEntity` list, and resets advanced controls. Overrides parent's method.
+     * @returns {boolean} Disabled state from parent's `_onRecordScopeChange`.
+     */
     _onRecordScopeChange: function() 
     {
         let isdisabled = this._super();
@@ -533,9 +646,16 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         return isdisabled;
     },
     
-    //
-    // show treeview with record type structure
-    //
+    /**
+     * @function _loadRecordTypesTreeView
+     * @memberof heurist.recordExportCSV
+     * @private
+     * @description Loads/reloads the Fancytree with field structure for `rtyID`.
+     * Uses `createRectypeStructureTree` and configures Fancytree for selection, rendering,
+     * lazy loading, and events (select, click, expand, collapse, dblclick, keydown).
+     * Handles adding/removing advanced field options when nodes are selected/deselected.
+     * @param {number|string} rtyID - Record Type ID.
+     */
     _loadRecordTypesTreeView: function(rtyID){
         
         let that = this;
@@ -744,15 +864,14 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         }   
     },
     
-   /**
-     * Get the content of a specified HTML template.
-     *
-     * @param {string} templateName The 'id' of the template HTML element.
-     * @param {Object} variables The passed-in variables for the template. The variable
-     *   placeholders in the template will be replaced to the value of the same
-     *   property name.
-     * @return {string}
+    /**
+     * @function _getTemplateContent
+     * @memberof heurist.recordExportCSV
      * @private
+     * @description Retrieves HTML content from a template element and replaces placeholders with provided variables.
+     * @param {string} templateName - The ID of the HTML template element.
+     * @param {object} [variables] - Key-value pairs for placeholder replacement.
+     * @returns {string} The processed HTML content.
      */
     _getTemplateContent: function (templateName, variables) {
         let content = this._$('#' + templateName).html();
@@ -767,8 +886,10 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     },
 
     /**
-     * Reset the advanced pane to its initial state.
+     * @function _resetAdvancedControls
+     * @memberof heurist.recordExportCSV
      * @private
+     * @description Clears and hides the advanced field options pane.
      */
     _resetAdvancedControls: function () {
         this._$('.export-advanced-list').html('');
@@ -776,11 +897,13 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     },
 
     /**
-     * Populate the options for the total select control.
-     *
-     * @param {Object} totalSelectElement The DOM element of the total select control.
-     * @param {bool} isNumeric Whether the field type is numeric.
+     * @function _populateFieldAdvancedTotalSelectOptions
+     * @memberof heurist.recordExportCSV
      * @private
+     * @description Populates the 'total' (aggregation) dropdown for an advanced field option.
+     * Includes 'Group By', 'Count', and 'Sum' (if numeric).
+     * @param {HTMLElement} totalSelectElement - The `<select>` DOM element.
+     * @param {boolean} isNumeric - True if the field is numeric, enabling 'Sum'.
      */
     _populateFieldAdvancedTotalSelectOptions: function (totalSelectElement, isNumeric) {
         $(totalSelectElement).html('');
@@ -792,6 +915,15 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         }
     },
 
+    /**
+     * @function _displayAdvOption
+     * @memberof heurist.recordExportCSV
+     * @private
+     * @description Shows or hides an advanced field option UI element and positions it next to its Fancytree node.
+     * @param {string} fieldCode - The code of the field.
+     * @param {boolean} showField - True to show, false to hide.
+     * @param {HTMLElement} [item] - The Fancytree node's `<li>` element for positioning.
+     */
     _displayAdvOption: function(fieldCode, showField, item){
         let $ele = this._$('div[data-field-code="'+ fieldCode +'"]');
         if($ele.length == 0){
@@ -815,14 +947,16 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     },
 
     /**
-     * Add the advanced options for a field in the UI.
-     *
-     * @param {string} fieldName The field label to display.
-     * @param {string} fieldType The type of the field.
-     * @param {string} fieldCode The code of the field.
-     * @param {Object} item The selected node
-     * @param {string} rectypeId The record type of the field
+     * @function _addFieldAdvancedOptions
+     * @memberof heurist.recordExportCSV
      * @private
+     * @description Adds UI controls for advanced options (total, sort, percentage) for a newly selected field.
+     * Uses `_getTemplateContent` to create the UI.
+     * @param {string} fieldName - Display name of the field.
+     * @param {string} fieldType - Data type of the field.
+     * @param {string} fieldCode - Unique code of the field.
+     * @param {HTMLElement} item - The Fancytree node's `<li>` element.
+     * @param {string|number} rectypeId - The record type ID of the field.
      */
     _addFieldAdvancedOptions: function (fieldName, fieldType, fieldCode, item, rectypeId) {
 
@@ -878,10 +1012,11 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     },
 
     /**
-     * Remove the options for a field in the UI by field code.
-     *
-     * @param {string} fieldCode The code of the field.
+     * @function _removeFieldAdvancedOptionsByCode
+     * @memberof heurist.recordExportCSV
      * @private
+     * @description Removes the advanced options UI for a field when it's deselected.
+     * @param {string} fieldCode - Code of the field to remove options for.
      */
     _removeFieldAdvancedOptionsByCode: function (fieldCode) {
         this._$('.export-advanced-list-item').each(function () {
@@ -891,6 +1026,17 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         });
     },
 
+    /**
+     * @function _handleSortByField
+     * @memberof heurist.recordExportCSV
+     * @private
+     * @description Manages the sort state (asc, desc, none) for a field in the advanced options UI.
+     * Updates UI icon and data attribute.
+     * @param {string} code - Field code.
+     * @param {boolean} isGet - If true, returns the current sort value. If false, sets new_value.
+     * @param {string} [new_value=''] - The new sort value ('asc', 'desc', or '').
+     * @returns {?string} Current or new sort value.
+     */
     _handleSortByField: function(code, isGet, new_value=''){
 
         let iconSet = $('div[data-code="'+code+'"]');
@@ -943,16 +1089,12 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     },
 
     /**
-     * Get the advanced options from the UI controls.
-     *
-     * @param {bool} for_export - whether to return values for CSV export, or saving settings
-     * 
-     * @return {Object} The object is keyed by the field code. Each element is an object which
-     *   contains the following possible keys:
-     *   - total: The total functions applied to the field: 'group', 'sum' or 'count'.
-     *   - sort: The sorting option for the field: 'asc' or 'des'.
-     *   - use_percentage: boolean value when the total is 'sum' or 'count'.
+     * @function _getFieldAdvancedOptions
+     * @memberof heurist.recordExportCSV
      * @private
+     * @description Retrieves all configured advanced options (total, sort, percentage) from the UI.
+     * @param {boolean} for_export - If true, adapts field codes for export API (e.g., adds specific title/id fields for linked resources).
+     * @returns {?object} An object keyed by field code, each value being an object of its advanced settings. Null if no advanced options.
      */
     _getFieldAdvancedOptions: function (for_export) {
 
@@ -997,10 +1139,11 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     },
 
     /**
-     * Set the advanced option UI controls by the options object.
-     *
-     * @param {Object} options
+     * @function _setFieldAdvancedOptions
+     * @memberof heurist.recordExportCSV
      * @private
+     * @description Applies a saved advanced options configuration to the UI controls.
+     * @param {?object} options - The advanced options object to apply.
      */
     _setFieldAdvancedOptions: function (options) {
         let that = this;

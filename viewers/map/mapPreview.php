@@ -44,7 +44,7 @@ if(isLocalHost()){
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapManager.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapDocument.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapLayer.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_login.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profileLogin.js"></script>
 
 <script type="text/javascript">
 

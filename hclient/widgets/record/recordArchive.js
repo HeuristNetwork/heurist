@@ -1,25 +1,54 @@
 /**
-* recordArchive.js - Lookup and restore archive records
+* @file recordArchive.js
+* @brief Provides a widget to look up and restore records from the system archive.
+* @fileOverview This file defines the `recordArchive` widget. It allows users with appropriate
+* permissions to search for records that have been previously deleted or archived within the Heurist
+* system. Users can specify search criteria such as record ID, user who made the change, date of
+* change, and state (deleted/updated). The widget displays search results in a list, and users can
+* select a record version to restore. The restoration process itself is typically a confirmation dialog.
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
+/**
+ * @widget heurist.recordArchive
+ * @extends $.heurist.recordAction
+ * @description jQuery widget for looking up and restoring records from the system archive.
+ * This widget provides a UI to search the `sysArchive` entity based on criteria like
+ * record ID, user, date, and content type (deleted/updated). Search results are displayed,
+ * and users can select an archived record version to potentially restore.
+ *
+ * @param {object} options - Configuration options for the widget.
+ * @param {number} [options.height=520] - The height of the dialog.
+ * @param {number} [options.width=800] - The width of the dialog.
+ * @param {boolean} [options.modal=true] - Whether the dialog is modal.
+ * @param {string} [options.title='Lookup and restore archive records'] - Title of the dialog.
+ * @param {string} [options.htmlContent='recordArchive.html'] - The HTML file for the widget's content.
+ * @param {?object} options.mapping - (Seems unused in the provided snippet) Potentially for mapping external fields if restoring into a new record with transformation.
+ * @param {boolean} [options.add_new_record=false] - (Seems unused in the provided snippet) If true, implies creating a new record on selection/restore rather than overwriting.
+ * @param {object} [options.resultList={}] - Options to be passed to the `resultList` widget used for displaying search results.
+ */
 $.widget( "heurist.recordArchive", $.heurist.recordAction, {
 
-    // default options
+    /**
+     * @namespace options
+     * @memberof heurist.recordArchive
+     * @type {object}
+     * @property {number} [height=520] - Dialog height.
+     * @property {number} [width=800] - Dialog width.
+     * @property {boolean} [modal=true] - Is dialog modal.
+     * @property {string} [title='Lookup and restore archive records'] - Dialog title.
+     * @property {string} [htmlContent='recordArchive.html'] - HTML content file.
+     * @property {?object} mapping - Potential for field mapping on restore (unused in snippet).
+     * @property {boolean} [add_new_record=false] - Create new record on restore (unused in snippet).
+     * @property {object} [resultList={}] - Configuration for the inner `resultList` widget.
+     */
     options: {
     
         height: 520,
@@ -35,11 +64,21 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         //define onClose to get selected values
     },
     
+    /**
+     * @member {?jQuery} recordList
+     * @memberof heurist.recordArchive
+     * @description jQuery object for the `div` element that hosts the `resultList` widget, used to display archive search results.
+     */
     recordList:null,
 
-    //  
-    // invoked from _init after loading of html content
-    //
+    /**
+     * @function _initControls
+     * @memberof heurist.recordArchive
+     * @private
+     * @description Initializes controls after HTML content is loaded. Sets up search input fields (record ID, user, date, state),
+     * the datepicker for the date field, the search button, and the `resultList` widget for displaying results.
+     * Attaches event handlers for search actions and result list interactions.
+     */
     _initControls: function(){
 
         let that = this;
@@ -110,9 +149,14 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         return this._super();
     },
     
-    //
-    //
-    //
+    /**
+     * @function startSearchOnEnterPress
+     * @memberof heurist.recordArchive
+     * @private
+     * @description Event handler for keypress events on input fields. If the Enter key is pressed,
+     * it triggers the `_doSearch` method.
+     * @param {Event} e - The keypress event object.
+     */
     startSearchOnEnterPress: function(e){
         
         let code = (e.keyCode ? e.keyCode : e.which);
@@ -124,8 +168,16 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
 
     },
     
+    /**
+     * @function _recordListHeaderRenderer
+     * @memberof heurist.recordArchive
+     * @private
+     * @description Renderer function for the header of the `resultList` widget.
+     * Defines the column headers for the archive search results.
+     * @returns {string} HTML string for the header row.
+     */
     _recordListHeaderRenderer: function(){
-/*    
+/*
         return '<div style="width:40px;font-size:0.9em"></div><div style="width:4ex">ID</div>'
                 +'<div style="width:80ex;font-size:0.9em">Record</div>'
                 +'<div style="width:60px;font-size:0.9em">was (action)</div>'
@@ -137,12 +189,19 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
                 +'<div style="width:66px">was (action)</div>'
                 +'<div style="width:44px">by user</div>'
                 +'<div style="width:120px">On (datetime)</div>';
-                
+
     },
-    
-    //
-    //
-    //
+
+    /**
+     * @function _rendererResultList
+     * @memberof heurist.recordArchive
+     * @private
+     * @description Renderer function for each item/row in the `resultList` widget.
+     * Formats and displays the details of an archived record entry.
+     * @param {HRecordSet} recordset - The full recordset being displayed.
+     * @param {object} record - The individual record object (from recordset.records) to render.
+     * @returns {string} HTML string for a single row in the result list.
+     */
     _rendererResultList: function(recordset, record){
         
         function fld(fldname, width){
@@ -187,9 +246,13 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         return html;
     },
 
-    //    
-    //
-    //
+    /**
+     * @function _getActionButtons
+     * @memberof heurist.recordArchive
+     * @private
+     * @description Gets action buttons for the dialog, setting the main action button text to 'Restore'.
+     * @returns {Array<object>} Array of button definition objects.
+     */
     _getActionButtons: function(){
         let res = this._super(); //dialog buttons
         res[1].text = window.hWin.HR('Restore');
@@ -197,9 +260,15 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         return res;
     },
 
-    //
-    // Either perform search or select entry in resultList and triggers addition of new record
-    //
+    /**
+     * @function doAction
+     * @memberof heurist.recordArchive
+     * @private
+     * @description Handles the action when the 'Restore' button is clicked.
+     * It checks if a single record is selected in the `resultList`.
+     * If so, it currently shows a confirmation dialog "Are you sure?".
+     * (The actual restore logic is not implemented in this snippet).
+     */
     doAction: function(){
 
             //detect selection
@@ -225,10 +294,15 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         
     },
     
-    //
-    // create search url
-    // perform search
-    //
+    /**
+     * @function _doSearch
+     * @memberof heurist.recordArchive
+     * @private
+     * @description Performs the search for archived records based on the criteria entered in the input fields.
+     * Validates that either record ID or user, and either record ID or date are provided.
+     * Constructs a request object for the `HAPI4.EntityMgr.doRequest` API to search the `sysArchive` entity.
+     * Calls `_onSearchResult` with the response.
+     */
     _doSearch: function(){
         
         if(this._$('#inpt_recid').val()=='' && this._$('#inpt_user').val()==''){
@@ -277,7 +351,16 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
                         }
                     });
     },
-    
+
+    /**
+     * @function _onSearchResult
+     * @memberof heurist.recordArchive
+     * @private
+     * @description Callback function to handle the results of an archive search.
+     * Updates the `resultList` widget with the received `recordset`.
+     * (Contains commented-out code that seems related to a different mapping/geojson context, likely not relevant here).
+     * @param {HRecordSet} recordset - The recordset of archived records returned by the search.
+     */    
     _onSearchResult: function(recordset){
         
         this.recordList.show();
@@ -359,10 +442,15 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
        }
     },
 
-    
-    //
-    // 
-    //
+    /**
+     * @function _addNewRecord
+     * @memberof heurist.recordArchive
+     * @private
+     * @description Placeholder function, intended to handle creating a new record from an archived entry.
+     * (Currently not implemented in the provided snippet).
+     * @param {any} record_type - The record type for the new record.
+     * @param {any} field_values - The values to populate in the new record.
+     */
     _addNewRecord: function (record_type, field_values){
         
         window.hWin.HEURIST4.msg.sendCoverallToBack();

@@ -1,25 +1,56 @@
 /**
-* recordAddLinkMatch.js - create links by matching selected fields
+* @file recordAddLinkMatch.js
+* @brief Provides a widget to create links between records by matching values in specified fields (Foreign Key matching).
+* @fileOverview This file defines the `recordAddLinkMatch` widget. It allows users to establish links
+* (record pointers) from a set of source records to target records by matching the content of a
+* specified text field in the source records with a text field in the target records. This is useful
+* for automating the creation of links based on existing data that acts like a foreign key. The
+* widget provides UI to select source scope, source and target record types, the fields to match,
+* and the pointer field in the source to update.
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
+
+/**
+ * @widget heurist.recordAddLinkMatch
+ * @extends $.heurist.recordAction
+ * @description jQuery widget for creating links between records by matching field values.
+ * This widget facilitates a "foreign key" style linking mechanism. It matches values
+ * from a specified text field in source records against values in a text field of
+ * target records (of a selected type). If a match is found, it updates a specified
+ * record pointer field in the source record to link to the matched target record.
+ *
+ * @param {object} options - Configuration options for the widget.
+ * @param {number} [options.height=520] - The height of the dialog.
+ * @param {number} [options.width=800] - The width of the dialog.
+ * @param {boolean} [options.modal=true] - Whether the dialog is modal.
+ * @param {string} [options.init_scope='selected'] - Initial scope for source record selection.
+ * @param {string} [options.title='Foreign Key matching. Add links between records by matching field values'] - Title of the dialog.
+ * @param {string} [options.htmlContent='recordAddLinkMatch.html'] - The HTML file for the widget's content.
+ * @param {?any} options.relationtype - (Inherited but seems unused in this widget's core logic, could be for future extension or specific configurations not shown).
+ */
 $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
 
-    // default options
+    /**
+     * @namespace options
+     * @memberof heurist.recordAddLinkMatch
+     * @type {object}
+     * @property {number} [height=520] - Dialog height.
+     * @property {number} [width=800] - Dialog width.
+     * @property {boolean} [modal=true] - Is dialog modal.
+     * @property {string} [init_scope='selected'] - Initial source scope.
+     * @property {string} [title='Foreign Key matching. Add links between records by matching field values'] - Dialog title.
+     * @property {string} [htmlContent='recordAddLinkMatch.html'] - HTML content file.
+     * @property {?any} relationtype - Inherited option, potential for future use.
+     */
     options: {
     
         height: 520,
@@ -34,23 +65,58 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         
     },
 
+    /**
+     * @member {?number} source_RecTypeID
+     * @memberof heurist.recordAddLinkMatch
+     * @description The record type ID of the source records.
+     */
     source_RecTypeID:null, 
+    /**
+     * @member {?number} target_RecTypeID
+     * @memberof heurist.recordAddLinkMatch
+     * @description The record type ID of the target records to match against.
+     */
     target_RecTypeID:null,
+    /**
+     * @member {string} sSourceName
+     * @memberof heurist.recordAddLinkMatch
+     * @description Placeholder for source name (seems unused in this file).
+     */
     sSourceName:'',
+    /**
+     * @member {string} sTargetName
+     * @memberof heurist.recordAddLinkMatch
+     * @description Placeholder for target name (seems unused in this file).
+     */
     sTargetName:'',
+    /**
+     * @member {?jQuery} targetRtySelect
+     * @memberof heurist.recordAddLinkMatch
+     * @description jQuery object for the target record type selector dropdown.
+     */
+    targetRtySelect: null,
     
-    //    
-    //
-    //
+    /**
+     * @function _getActionButtons
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Gets action buttons for the dialog, setting the main action button text to 'Create links'.
+     * @returns {Array<object>} Array of button definition objects.
+     */
     _getActionButtons: function(){
         let res = this._super();
         res[1].text = window.hWin.HR('Create links');
         return res;
     },
 
-    //
-    // select option by rectypes
-    //
+    /**
+     * @function _fillSelectRecordScope
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Populates the source record scope selector. Enforces that the current query or selection
+     * contains only a single record type to avoid accidental errors.
+     * @returns {boolean|undefined} True if successful, false if mixed record types prevent operation.
+     */
     _fillSelectRecordScope: function (){
         
         this._$('select').css({width:'30em','max-width':'35em'});
@@ -105,19 +171,31 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         return true;
     },
 
-    //
-    // overwritten
-    //
+    /**
+     * @function _onRecordScopeChange
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Handles changes in the source record scope. Calls `_fillSelectFieldTypes` for the source.
+     * This is an override of the parent widget's method.
+     */
     _onRecordScopeChange: function () 
     {
         this._fillSelectFieldTypes('source', this.source_RecTypeID);
     },
  
-    //
-    // find pointer and relationships for selected record type 
-    // party - source or target                                            
-    // rty_ID - selected record type
-    // 
+    /**
+     * @function _fillSelectFieldTypes
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Populates dropdowns for selecting fields.
+     * For the 'source' party: populates a dropdown (`#sel_pointer_field`) with available record pointer fields
+     * (resource type fields) that can be updated with matched record IDs. Also populates a dropdown
+     * (`#sel_fieldtype_source`) with text fields from the source record type to be used for matching.
+     * For the 'target' party: populates a dropdown (`#sel_fieldtype_target`) with text fields from the target
+     * record type to be used for matching.
+     * @param {string} party - 'source' or 'target'.
+     * @param {number} recRecTypeID - The record type ID for which to list fields.
+     */
     _fillSelectFieldTypes: function (party, recRecTypeID) {
 
         // create matching field
@@ -187,9 +265,17 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         }
     },  
 
-    //
-    //
-    //    
+    /**
+     * @function _findMatchesCount
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Event handler typically triggered when a source or target matching field is selected.
+     * If the source field changes, it fetches and displays the total and unique value counts for that field
+     * within the current source scope.
+     * If both source and target matching fields are selected, it fetches and displays the number of potential
+     * matches between the source and target records based on these fields. Enables the action button if matches are found.
+     * @param {Event} event - The change event object from the field selector.
+     */
     _findMatchesCount: function(event){
         
         let fieldSelect = $(event.target);
@@ -252,11 +338,15 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         
     },
     
-    //
-    // source field has been selectd
-    // 1) fill target record selector
-    // 2) find unique values for selected field 
-    //
+    /**
+     * @function _fillTargetRecordTypes
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Event handler triggered when a source pointer field (`#sel_pointer_field`) is selected.
+     * It populates the target record type selector (`#target_record_type`) with record types that are valid
+     * targets for the selected pointer field (based on its constraints).
+     * @param {Event} event - The change event object from the source pointer field selector.
+     */
     _fillTargetRecordTypes: function(event){
 
         let dtID = $(event.target).val();
@@ -286,27 +376,43 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         
     },
     
+    /**
+     * @function _onTargetRtySelectChange
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Event handler for when the target record type selector (`#target_record_type`) changes.
+     * Updates `this.target_RecTypeID`, displays the count of records for the selected target type,
+     * and calls `_fillSelectFieldTypes` to populate the target matching field selector.
+     * Clears target field selectors if no records exist for the selected type.
+     */
     _onTargetRtySelectChange: function(){
         this._$('#count_target_rty').text('');
-        this.target_RecTypeID = this.targetRtySelect.val(); 
+        this.target_RecTypeID = this.targetRtySelect.val();
         if(this.target_RecTypeID>0){
             let rty_usage_cnt = $Db.rty(this.target_RecTypeID,'rty_RecCount');
             if(rty_usage_cnt>0){
                 this._$('#count_target_rty').text( rty_usage_cnt + ' records' );
             }
-        }     
+        }
         this._fillSelectFieldTypes('target', this.target_RecTypeID);
         if(this._$('#count_target_rty').text()==''){
             this._$('#sel_fieldtype_target').empty();
             this._$('#count_target_matches').empty();
             this._enableActionButton();
         }
-        
+
     },
-  
-    //
-    //
-    //
+
+    /**
+     * @function getFieldValue
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Retrieves the value from an `editing_input` widget by its ID.
+     * (Note: This function appears to be a copy from another widget and is not used in this file,
+     * as `editing_input` is not the primary mechanism for field selection here. Standard jQuery `val()` is used on `<select>`s.)
+     * @param {string} input_id - The ID of the `editing_input` container.
+     * @returns {?any} The first value from the `editing_input`, or null if not found or no value.
+     */
     getFieldValue: function (input_id) {
         let ele =  this._$('#'+input_id);
         if(ele.length>0){
@@ -319,9 +425,15 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
     },
 
     
-    //
-    // enable add link button
-    //
+    /**
+     * @function _enableActionButton
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Enables or disables the main 'Create links' action button.
+     * The button is enabled if the number of target matches found (displayed in `#count_target_matches`) is greater than 0.
+     * It also checks (though the logic for `sel_field` seems incomplete/vestigial here) if a relation type is selected for relmarkers,
+     * but this widget primarily deals with direct resource pointers.
+     */
     _enableActionButton: function (){
         
         let isEnabled = (parseInt($('#count_target_matches').text())>0);
@@ -339,17 +451,33 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('.btnDoAction'), !isEnabled );
     }, 
     
+    /**
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Determines the array of source record IDs to be processed based on the
+     * selection in the `selectRecordScope` dropdown ('selected' or 'all' within the current recordset).
+     * @returns {Array<number>} An array of source record IDs.
+     */
     _getRecordsScope: function()
     {
         let isSelection = (this.selectRecordScope.val()=='selected');
         let currentScope = isSelection?this._currentRecordsetSelIds:this._currentRecordset.getIds();
         return currentScope;
-        
+
     },
-    
-    //
-    //
-    //
+
+    /**
+     * @function doAction
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Performs the action of creating links by matching or displays unmatched values.
+     * If the 'Show unmatched values' option is selected, it fetches and displays records from the source scope
+     * that do not have a match in the target records.
+     * Otherwise, it initiates the batch process to add links:
+     * It gathers parameters (source/target record types, source/target matching fields, pointer field to update, scope of records).
+     * It then calls the `HAPI4.RecordMgr.batch_details` API with `a: 'add_links_by_matching'`.
+     * Shows progress and displays results (records updated, links added/existing).
+     */
     doAction: function(){
         
         if(this._$('#div_result').is(':visible')){
@@ -445,6 +573,15 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         }
     },
     
+    /**
+     * @function _setBtnLabels
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Sets the labels of the main action button and the cancel button
+     * depending on whether the action is done or pending.
+     * @param {boolean} is_done - If true, sets labels to 'New Action' and 'Done'.
+     *                           If false, sets labels to 'Create links' and 'Cancel'.
+     */
     _setBtnLabels: function(is_done){
         let lab1, lab2;
         if(is_done){
@@ -457,7 +594,6 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         this.element.parents('.ui-dialog').find('.btnDoAction').button({label:window.hWin.HR(lab1)});
         this.element.parents('.ui-dialog').find('.btnCancel').button({label:window.hWin.HR(lab2)});
     }
-    
         
 });
 

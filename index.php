@@ -286,7 +286,7 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/navigation.js"></script>
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/svsEdit.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/svsList.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/svs_list.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultListMenu.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultListCollection.js"></script>
@@ -294,7 +294,7 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/staticPage.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/connections.js"></script>
-<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_login.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profileLogin.js"></script>
 
 <!-- edit entity -->
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/selectFile.js"></script>
