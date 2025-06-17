@@ -282,7 +282,7 @@ $.widget( "heurist.resultList", {
                 }else 
                 if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART)
                 {
-                    
+
                     //accept events from the same realm only
                     if(!that._isSameRealm(data)) return;
 
@@ -315,17 +315,21 @@ $.widget( "heurist.resultList", {
                     }else{
                         
                         if(that._query_request==null || data.id!=that._query_request.id) {  //data.source!=that.element.attr('id') ||
+
                             //new search from outside
                             let new_title = null;
-                            if(data.qname>0 && window.hWin.HAPI4.currentUser.usr_SavedSearch && 
-                                window.hWin.HAPI4.currentUser.usr_SavedSearch[data.qname])
-                            {
-                                that._currentSavedFilterID = data.qname;
+
+                            let svs_ID = window.hWin.HEURIST4.util.isPositiveInt(data.qname) ? data.qname : 0;
+                            svs_ID = window.hWin.HEURIST4.util.isPositiveInt(data.search_ID) ? data.search_ID : svs_ID;
+
+                            if(window.hWin.HEURIST4.util.isPositiveInt(svs_ID) && window.hWin.HAPI4.currentUser?.usr_SavedSearch?.[svs_ID]){
+
+                                that._currentSavedFilterID = svs_ID;
                                 new_title = window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][0];
                             }else{
-                                if(data.qname>0 && that.div_header!=null){
+                                if(window.hWin.HEURIST4.util.isPositiveInt(svs_ID) && that.div_header!=null){
                                     
-                                    window.hWin.HAPI4.SystemMgr.ssearch_get( {svsIDs:[data.qname]},
+                                    window.hWin.HAPI4.SystemMgr.ssearch_get( {svsIDs:[svs_ID]},
                                         function(response){
                                             if(response.status == window.hWin.ResponseStatus.OK){
                                                 that._currentSavedFilterID = data.qname;
@@ -350,7 +354,7 @@ $.widget( "heurist.resultList", {
                                     new_title = window.hWin.HR(data.qname);
                                 }
                             }
-                            
+
                             that.clearAllRecordDivs(new_title);
                             
                             if(that.search_save_hint){
@@ -3933,8 +3937,7 @@ $.widget( "heurist.resultList", {
                     if(that._sortResult_svsID>0){
                         svsID = that._sortResult_svsID;
                     }else
-                    if(that._currentSavedFilterID>0 && window.hWin.HAPI4.currentUser.usr_SavedSearch && 
-                        window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID]){
+                    if(that._currentSavedFilterID>0 && window.hWin.HAPI4.currentUser?.usr_SavedSearch?.[that._currentSavedFilterID]){
 
                         //if current saved search has sortby:set - just edit with new query
                         let squery = window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][Hul._QUERY];
@@ -3948,7 +3951,7 @@ $.widget( "heurist.resultList", {
 
                     //call for saved searches dialog
                     let squery = 'ids:'+new_rec_order.join(',')+' sortby:set';
-                    let  widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');
+                    let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');
                     if(widget){
                         widget.svs_list('editSavedSearch', 'saved', null, svsID, squery, null, true, 
                         function(new_svs_id){

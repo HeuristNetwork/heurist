@@ -1,27 +1,67 @@
 /**
-* lookupBase.js - Base widgt for all lookup widgets
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Brandon McKay   <blmckay13@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+ * @file lookupBase.js
+ * @brief Base widget for all lookup widgets in Heurist.
+ *
+ * @fileOverview
+ * This file defines the `heurist.lookupBase` jQuery UI widget.
+ * This widget provides a base for all lookup widgets in the Heurist system.
+ * It handles the common functionality for searching external services,
+ * displaying results, and mapping selected data to Heurist record fields.
+ *
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\lookup
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Brandon McKay <blmckay13@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       6.0
+ */
 
 /* global stringifyMultiWKT */
 
+/**
+ * Base widget for all lookup widgets.
+ * Inherits from `$.heurist.recordAction`.
+ *
+ * @widget heurist.lookupBase
+ * @extends $.heurist.recordAction
+ */
 $.widget( "heurist.lookupBase", $.heurist.recordAction, {
 
-    // dialog options, the default values and other available options can be found in hclient/widget/record/recordAction.js
+    /**
+     * Default options for the widget.
+     * These options can be overridden during widget initialization.
+     * Options from `$.heurist.recordAction` are also available.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @property {Object} options
+     * @property {number} [options.height=700] - The height of the dialog.
+     * @property {number} [options.width=800] - The width of the dialog.
+     * @property {boolean} [options.modal=true] - Whether the dialog is modal.
+     * @property {string} [options.title="External lookup"] - The title of the dialog.
+     * @property {string} [options.htmlContent='lookupBase.html'] - The HTML content file for the dialog, located in `hclient/widgets/lookup`.
+     * @property {?string} [options.helpContent=null] - The help content file for the dialog, located in `documentation/context_help`.
+     * @property {?Object} options.mapping - Configuration from `record_lookup_config.json`. Defines how external data fields map to Heurist fields.
+     *   @property {number} options.mapping.rty_ID - The Heurist record type ID for the mapping.
+     *   @property {string} options.mapping.service_id - The ID of the external service.
+     *   @property {Object} options.mapping.fields - An object mapping external field names to Heurist data type IDs (dty_ID).
+     * @property {?Object} options.edit_fields - Realtime values from the edit form fields.
+     * @property {boolean|HRecordSet} [options.edit_record=false] - The recordset of the current record being edited, or `false` if not applicable.
+     * @property {boolean} [options.add_new_record=false] - If `true`, creates a new record upon selection.
+     * @property {Object} options.resultList - Options for the result list widget.
+     *   @property {string} [options.resultList.recordDivEvenClass='recordDiv_blue'] - CSS class for even record divs.
+     *   @property {boolean} [options.resultList.eventbased=false] - If `false`, the result list will not listen to global events.
+     *   @property {boolean} [options.resultList.multiselect=false] - If `false`, allows only one record to be selected.
+     *   @property {string} [options.resultList.select_mode='select_single'] - Selection mode. Typically 'select_single'.
+     *   @property {string} [options.resultList.selectbutton_label='select!!'] - Label for the select button (not currently used).
+     *   @property {string} [options.resultList.view_mode='list'] - Default view mode for the result list (e.g., 'list', 'icon', 'thumb').
+     *   @property {boolean} [options.resultList.show_viewmode=false] - Whether to show view mode selection controls.
+     *   @property {number} [options.resultList.pagesize=20] - Number of records to display per page.
+     *   @property {string} [options.resultList.entityName='Lookups'] - Name of the entity being listed (e.g., "Lookups", "Records").
+     *   @property {string} [options.resultList.empty_remark='<div style="padding:1em 0 1em 0">No records match the search</div>'] - HTML displayed when no results are found.
+     *   @property {?Array<Object>} [options.resultList.action_buttons] - Additional action buttons to display within each record row. Handler is `resultlistonaction`.
+     */
     options: {
 
         height: 700,
@@ -60,38 +100,123 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         }
     },
 
-    baseURL: '', // external url base
-    serviceName: '', // service name
+    /**
+     * The base URL for the external lookup service.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {string}
+     */
+    baseURL: '',
 
-    recordList: null, // Result list
+    /**
+     * The name of the external service.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {string}
+     */
+    serviceName: '',
 
-    action_button_label: 'Select', // dialog action button label
+    /**
+     * Reference to the jQuery UI resultList widget instance.
+     * Used for displaying search results.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {?jQuery}
+     */
+    recordList: null,
 
-    search_buttons: null, // search button(s)
-    search_button_selector: '#btnStartSearch', // selector to retrieve the search button(s) that calls doSearch
+    /**
+     * Label for the main action button in the dialog (e.g., "Select").
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {string}
+     */
+    action_button_label: 'Select',
 
-    save_settings: null, // save extra settings/options button
+    /**
+     * jQuery object representing the search button(s).
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {?jQuery}
+     */
+    search_buttons: null,
 
-    _forceClose: true, // skip saving additional mapping and close dialog
+    /**
+     * Selector used to find the search button(s) in the dialog.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {string}
+     */
+    search_button_selector: '#btnStartSearch',
 
-    tabs_container: null, // jQuery tabs container, separates query and results
-    results_tab: 1, // Tab that displays the result list
+    /**
+     * jQuery object representing the button for saving extra settings/options.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {?jQuery}
+     */
+    save_settings: null,
 
+    /**
+     * Flag to control dialog closing behavior. If true, skips saving additional mapping and closes the dialog.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @type {boolean}
+     */
+    _forceClose: true,
+
+    /**
+     * jQuery object representing the tabs container, used to separate query and results sections.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {?jQuery}
+     */
+    tabs_container: null,
+
+    /**
+     * Index of the tab that displays the result list.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {number}
+     */
+    results_tab: 1,
+
+    /**
+     * Object to manage timeouts for certain actions.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @property {?number} timeout.action_timeout - Timeout ID for actions like mapping values.
+     * @property {string} timeout.field_name - Name of the field associated with the timeout.
+     * @property {string|Object|Array} timeout.value - Value associated with the timeout.
+     * @type {Object}
+     */
     timeout: {
         action_timeout: null, // Timeout for certain actions
         field_name: '',
         value: ''
     },
 
-    //element => dialog inner content
-    //_as_dialog => dialog container
-
+    /**
+     * Initializes the widget. Calls the parent's `_init` method.
+     * Note: HTML and dialog are not yet loaded at this stage.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     */
     _init: function(){
         this._super(); // whatever you do before this bare in mind that the html and dialog haven't been loaded yet
     },
 
     /**
-     * Initialises various UI elements; buttons, selects, result list, etc...
+     * Initialises various UI elements; buttons, selects, result list, etc.
+     * This method is called after the dialog HTML is loaded.
+     * It sets up the result list, tabs, search buttons, save settings button,
+     * and event handlers for user interactions.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @returns {void} Calls `this._super()`.
      */
     _initControls: function(){
 
@@ -201,9 +326,14 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Function handler for pressing the enter button while focused on input element
+     * Handles the 'Enter' key press event on input fields with the class `search_on_enter`.
+     * If 'Enter' is pressed, it prevents the default action, stops event propagation,
+     * and triggers the `_doSearch` method.
      *
-     * @param {KeyboardEvent} e - keypress event
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {jQuery.Event} e - The keypress event object.
      */
     startSearchOnEnterPress: function(e){
         if(e.key === 'Enter' || e.key === 'NumpadEnter'){
@@ -214,14 +344,20 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Initial dialog buttons on bottom bar, _getActionButtons() under recordAction.js
-     * Get and customise dialog buttons
-     * By default there are two 'Go' and 'Cancel', these can be edited or more buttons can be added
-     * 
-     * buttons[0] => Cancel/Close: Closes dialog
-     * buttons[1] => Go/Select: Calls doAction
-     * 
-     * @returns {Array} array of dialog buttons
+     * Gets and customizes the dialog buttons for the bottom bar.
+     * This method overrides the `_getActionButtons` from `$.heurist.recordAction`.
+     * It retrieves the default buttons (typically "Cancel" and "Go") and
+     * customizes the "Go" button's text using `this.action_button_label`.
+     *
+     * The button array structure is typically:
+     * - `buttons[0]`: Cancel/Close button (closes the dialog).
+     * - `buttons[1]`: Go/Select button (calls `doAction`).
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @returns {Array<Object>} An array of dialog button objects, each with properties like `text` and `click`.
+     * @see $.heurist.recordAction#_getActionButtons
      */
     _getActionButtons: function(){
 
@@ -233,13 +369,17 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Constructs the html for each record to be listed, uses the fields:
-     * rec_ID, rec_Title and rec_RecTypeID
+     * Renders the HTML representation for a single record in the result list.
+     * This function is typically passed as a callback to the `resultList` widget.
+     * It constructs HTML displaying the record's icon, title, and ID.
      *
-     * @param {HRecordSet} recordset - complete record set, to retrieve fields
-     * @param {Array} record - record being rendered
-     *
-     * @returns {String} formatted html string
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {HRecordSet} recordset - The complete record set containing the record.
+     * @param {Array} record - The individual record object (row) from the recordset to be rendered.
+     *                         This is an array where indices correspond to field positions.
+     * @returns {string} HTML string representing the formatted record for display.
      */
     _rendererResultList: function(recordset, record){
 
@@ -263,9 +403,17 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Begins steps to processing the user's selection
+     * Processes the user's selection from the result list.
+     * This method is typically called when the main action button (e.g., "Select") is clicked.
+     * It retrieves the selected record, prepares the values for Heurist mapping using `prepareValues`,
+     * and then calls `closingAction` to pass the data back and close the dialog.
      *
-     * @param {String} url_fld - field key containing the record's URL, if applicable
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {string} [url_fld=''] - The field key from the selected record that contains an external URL, if applicable.
+     *                                If provided and the field exists, its value will be added to the `ext_url` property
+     *                                of the response object.
+     * @returns {void}
      */
     doAction: function(url_fld = ''){
 
@@ -288,21 +436,30 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Return record field values in the form of a json array mapped as [dty_ID: value, ...]
-     * For multi-values, [dty_ID: [value1, value2, ...], ...]
+     * Prepares the selected record's field values for Heurist mapping.
+     * It iterates over the fields defined in `this.options.mapping.fields`,
+     * retrieves the corresponding values from the selected record,
+     * processes them using `prepareValue`, and organizes them into a
+     * response object. The response object maps Heurist data type IDs (dty_ID)
+     * to their respective values.
      *
-     * To trigger record pointer selection/creation popup, value must equal [dty_ID, default_searching_value]
+     * For multi-value fields, the dty_ID will map to an array of values.
      *
-     * Include a url to an external record that will appear in the record pointer guiding popup, add 'ext_url' to res
-     *  the value must be the complete html (i.e. anchor tag with href and target attributes set)
-     *  e.g. res['ext_url'] = '<a href="www.example.com" target="_blank">Link to Example</a>'
-     * 
-     * @param {HRecordSet} recordset - overall record set
-     * @param {Object} record - current record
-     * @param {Object} dlg_response - results to return
-     * @param {Object} extra_settings - extra settings
+     * To trigger a record pointer selection/creation popup in Heurist,
+     * a value for a record pointer field should be an array `[dty_ID, default_searching_value]`.
      *
-     * @returns {Object} mapped return values from selection
+     * An external URL can be included in the response by adding an `ext_url` property
+     * to `dlg_response`. This URL will be displayed in the record pointer guiding popup.
+     * Example: `dlg_response['ext_url'] = '<a href="www.example.com" target="_blank">Link to Example</a>';`
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {HRecordSet} recordset - The HRecordSet containing the selected record.
+     * @param {Array} record - The selected record object (row) from the recordset.
+     * @param {Object} [dlg_response={}] - An initial response object to which mapped values will be added.
+     * @param {Object} [extra_settings={}] - Additional settings that might be used by `prepareValue` (e.g., for term code checking).
+     * @returns {Object} An object containing the mapped field values, where keys are dty_IDs and
+     *                   values are the corresponding processed data.
      */
     prepareValues: function(recordset, record, dlg_response = {}, extra_settings = {}){
 
@@ -338,11 +495,23 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Process the value(s) for the provided field, based on the field's type
+     * Processes a single field's value(s) based on its Heurist field type (dty_Type).
+     * This method is called by `prepareValues` for each mapped field.
+     * It converts the input `values` to an array, and then, based on the `dty_Type`
+     * (e.g., 'enum', 'resource', 'relmarker'), it may perform specific processing:
+     * - For 'enum' (vocabulary/term) fields: It can check term codes using `_getTermByCode` if `extra_settings.check_term_codes` is provided.
+     * - For 'resource' (record pointer) or 'relmarker' (relationship marker) fields: It processes values using `_processRecordFields`.
+     * - For other field types: It processes values using `_processValues` (typically trimming strings).
      *
-     * @param {String|Object|Array} values - value/values to be processed, will be converted into an array
-     * @param {Number} dty_ID - field's ID, to retrieve field type
-     * @param {Object} extra_settings - additional settings
+     * The `values` parameter is modified in place by the processing methods.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {string|Object|Array<*>} values - The value or values to be processed for the field.
+     *                                        This will be converted into an array.
+     * @param {number} dty_ID - The Heurist data type ID of the field. Used to determine the field type.
+     * @param {Object} extra_settings - Additional settings that may influence processing (e.g., `check_term_codes` for 'enum' fields).
+     * @returns {void}
      */
     prepareValue: function(values, dty_ID, extra_settings){
 
@@ -374,11 +543,20 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Perform final actions before exiting popup
-     * Clear timeout before returning result
+     * Performs final actions before closing the lookup dialog.
+     * This includes clearing any active timeout (`this.timeout.action_timeout`),
+     * ensuring the `dlg_response` is an object, optionally filtering out empty
+     * values from the response, hiding the loading coverall, and finally,
+     * setting `this._context_on_close` to the `dlg_response` and closing the dialog.
      *
-     * @param {Object|Boolean} dlg_response - mapped values to fields, or false to return nothing
-     * @param {Boolean} check_for_empty - check the response values for empty values, multi-value only
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {Object|boolean} dlg_response - The object containing mapped values to be returned to the calling context.
+     *                                      If `false`, an empty object is typically returned.
+     * @param {boolean} [check_for_empty=true] - If `true`, iterates through the `dlg_response` properties.
+     *                                         If a property's value is an array, it filters out empty values from that array.
+     *                                         It also ensures all property values are arrays.
+     * @returns {void}
      */
     closingAction: function(dlg_response, check_for_empty = true){
 
@@ -411,10 +589,24 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Display result via the Heurist resultList widget
+     * Displays the search results using the Heurist `resultList` widget.
+     * It handles different states of the `data` received:
+     * - If `data` is invalid or indicates an error, it clears the result list and shows an error message.
+     * - If `data` is `null` (e.g. no results from a non-erroring query), it clears the result list.
+     * - If `data` is valid, it creates an `HRecordSet` (either from raw data or if `is_record_set` is true)
+     *   and updates the `resultList` widget with this recordset.
+     * It also ensures the results tab is active if tabs are used.
      *
-     * @param {Object|Boolean|Null} data - data to display
-     * @param {Boolean} is_record_set - whether the data is ready for HRecordSet, usually a response from Heurist
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {Object|boolean|null} data - The data to display.
+     *                                   - If `is_record_set` is `false`, `data` should be an object with `fields`, `order`, and `records` properties.
+     *                                   - If `is_record_set` is `true`, `data` should be an object suitable for `new HRecordSet(data)`.
+     *                                   - Can be `false` or `null` to indicate errors or no data.
+     * @param {boolean} [is_record_set=false] - Whether the provided `data` is already in `HRecordSet` constructor format
+     *                                          (typically a response from a Heurist API endpoint).
+     * @returns {void}
      */
     _onSearchResult: function(data, is_record_set=false){
 
@@ -466,17 +658,41 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Loads extra settings/options
+     * Placeholder method for loading extra settings or options.
+     * This method is intended to be overridden by specific lookup widgets
+     * if they need to load or initialize any specific settings in the UI,
+     * particularly within a settings tab.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @returns {void}
      */
     _setupSettings: function(){
         return;
     },
 
     /**
-     * Save extra settings
+     * Saves extra settings for the lookup service.
+     * These settings are typically specific to the external service being used
+     * and are stored in the `sysIdentification` record's `sys_ExternalReferenceLookups` field
+     * as a JSON string.
      *
-     * @param {Object} [settings] - service extra settings to be saved
-     * @param {Boolean} [close_dlg] - whether to close the dialog after saving
+     * If `settings` is provided and is an object, it updates the service configuration
+     * for the current `service_id` (from `this.options.mapping.service_id`) and saves it.
+     * After a successful save, it updates `window.hWin.HAPI4.sysinfo['service_config']`
+     * and `this.options.mapping` with the new configuration.
+     *
+     * If `close_dlg` is true, the dialog will be closed after the operation,
+     * regardless of whether settings were actually saved (e.g., if `settings` was not provided).
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {Object|boolean} [settings] - An object containing the extra settings to be saved for the service.
+     *                                   If `false` or not an object, no settings are saved, but the dialog might still close if `close_dlg` is true.
+     * @param {boolean} [close_dlg=false] - Whether to close the dialog after attempting to save settings (or if no settings were provided to save).
+     * @returns {void}
      */
     _saveExtraSettings: function(settings, close_dlg = false){
 
@@ -531,10 +747,20 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Creates a new record of the provided type, and includes the provided details by default
+     * Creates a new Heurist record.
+     * This method is typically used when `this.options.add_new_record` is true and a selection
+     * from the lookup should result in a new record being created in Heurist.
+     * It sends a 'save' request to `HAPI4.RecordMgr.saveRecord` with the provided
+     * record type ID and details.
+     * After a successful save, it closes the lookup dialog.
      *
-     * @param {Number} rec_RecTypeID - record type id for the new record
-     * @param {Object} details - mapped fields of record details for the new record
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {number} rec_RecTypeID - The Heurist record type ID (rty_ID) for the new record.
+     * @param {Object} details - An object containing the field details for the new record.
+     *                           The keys should be dty_IDs and values the data to be saved.
+     * @returns {void}
      */
     _addNewRecord: function(rec_RecTypeID, details){
 
@@ -564,11 +790,18 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Retrieves the user's selection from the result list
+     * Retrieves the user's selection(s) from the `resultList` widget.
      *
-     * @param {Boolean} get_first - whether to retrieve the first record separately
-     *
-     * @returns {HRecordSet|Object} record set or record
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {boolean} [get_first=true] - If `true`, the method will return both the full selected recordset
+     *                                     and the first record from that set. If `false`, it will only return
+     *                                     the full selected recordset (the second element in the returned array will be `null`).
+     * @returns {Array<HRecordSet|Array|null>} An array containing two elements:
+     *                                       - `[0]`: The `HRecordSet` of selected records. `null` if no selection or error.
+     *                                       - `[1]`: The first record (as an array/object) from the selected set if `get_first` is true. `null` otherwise or if no selection.
+     *                                       If no records are selected, it shows a flash message and returns `[null, null]`.
      */
     _getSelection: function(get_first = true){
 
@@ -589,13 +822,26 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Checks the array of values as term codes from within the provided vocabulary
+     * Converts term codes (numbers) in an array of values to their corresponding term IDs.
+     * This method is used for 'enum' (vocabulary/term) fields to ensure that
+     * numeric codes from an external source are mapped to the correct Heurist term IDs.
      *
-     * @param {Number} vocab_ID - vocabulary to check for term code
-     * @param {Number} dty_ID - field ID for new value, used to get backup vocab ID if needed
-     * @param {Array} values - array of values to check
+     * It iterates through the `values` array. If a value is a number (or a string representing a number),
+     * it attempts to find an existing term in the specified vocabulary (`vocab_ID`) that has this number as its code.
+     * If a matching term is found, the value in the array is replaced with the term's ID.
      *
-     * @returns {Array} processed term values, from strings to integers
+     * If `vocab_ID` is not provided or invalid, it tries to get a backup vocabulary ID
+     * from the field's definition (`$Db.dty(dty_ID, 'dty_JsonTermIDTree')`).
+     *
+     * The `values` array is modified in place.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {number} vocab_ID - The ID of the vocabulary to check against.
+     * @param {number} dty_ID - The data type ID of the field; used to get a backup vocabulary ID if `vocab_ID` is invalid.
+     * @param {Array<string|number>} values - An array of values to process. Numeric values or numeric strings are checked as term codes.
+     * @returns {Array<string|number>} The modified `values` array, where term codes may have been replaced by term IDs.
      */
     _getTermByCode: function(vocab_ID, dty_ID, values){
 
@@ -623,12 +869,19 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Checks the array of values for record pointer and relationship marker fields
-     *  if the value is a number greater than zero it is assumed to be a record ID
+     * Processes values intended for record pointer ('resource') or relationship marker ('relmarker') fields.
+     * It iterates through the input `values` array and prepares them for Heurist:
+     * - If a value is not a number, it's wrapped in an object: `{value: originalValue, search: originalValue, relation: null}`.
+     *   This structure is suitable for triggering a search popup in Heurist if the record pointer doesn't exist.
+     * - If a value is a number and greater than zero, it's assumed to be a direct Heurist record ID and is kept as is.
+     * - Other numeric values (e.g., 0 or negative) are effectively filtered out as they don't result in a push to `new_values`.
      *
-     * @param {Array} values - array of values
-     *
-     * @returns {Array} array of converted values
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {Array<*>} values - An array of values to be processed.
+     * @returns {Array<number|Object>} A new array containing processed values suitable for record pointer or relationship marker fields.
+     *                                 Record IDs are numbers, and values that need to trigger a search are objects.
      */
     _processRecordFields: function(values){
 
@@ -650,9 +903,18 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Trims leading and trailing spaces from values and removes empty values from array of values
+     * Performs generic processing on an array of values.
+     * It iterates through the `values` array:
+     * - Trims leading and trailing whitespace if the value is a string.
+     * - Removes the value from the array if it becomes empty after trimming (or was initially empty).
      *
-     * @param {Array} values - array of values
+     * The `values` array is modified in place.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {Array<*>} values - An array of values to process.
+     * @returns {void}
      */
     _processValues: function(values){
 
@@ -666,7 +928,26 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Setting up timeout for mapping values, currently used only by BnF Bib lookup
+     * Sets up a timeout to handle potential issues during the value mapping process.
+     * If the mapping process (which might involve asynchronous operations or complex transformations
+     * for certain lookup types, e.g., BnF Bib lookup) takes too long, this timeout
+     * will trigger an error message.
+     *
+     * The timeout is set to 20 seconds. If it elapses, it:
+     * - Hides the loading coverall.
+     * - Constructs an error message detailing the problematic field and value.
+     * - Displays the error message using `window.hWin.HEURIST4.msg.showMsgErr`.
+     *
+     * The timeout ID is stored in `this.timeout.action_timeout`.
+     * `this.timeout.field_name` and `this.timeout.value` should be set before or when
+     * this function is called to provide context in the error message.
+     * This function is typically called before a potentially long mapping operation.
+     * The timeout should be cleared using `clearTimeout(this.timeout.action_timeout)`
+     * if the operation completes successfully within the time limit (see `closingAction`).
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @returns {void}
      */
     setupTimeout: function(){
 
@@ -699,10 +980,15 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Check the size of the results against the current max, showing a error message if results are larger
+     * Checks if the number of results (`result_size`) exceeds a specified maximum (`max_size`).
+     * If it does, a dialog message is displayed to the user, informing them that
+     * only the first `max_size` records are shown and advising them to narrow their search.
      *
-     * @param {Number} result_size - current result size
-     * @param {Number} max_size - maximum requested result size
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {number} result_size - The total number of results obtained from the search.
+     * @param {number} max_size - The maximum number of results that are displayed or processed.
+     * @returns {void}
      */
     checkResultSize: function(result_size, max_size){
 
@@ -714,12 +1000,31 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Converts the provided country name into it's country code, 
-     *  this is just for the few missed/incorrect with default Heurist
+     * Converts a given country name or existing code to a standardized two-letter country code.
+     * This method primarily handles specific cases where country names or codes might be
+     * inconsistent or require mapping to a standard ISO 3166-1 alpha-2 code.
      *
-     * @param {String|Number} country_code - country's code/label to be mapped
+     * It first checks if the input `country_code` is empty and returns an empty string if so.
+     * It then attempts to retrieve term information (label and code) if the input is a term ID.
      *
-     * @returns {String} the country in code format
+     * A switch statement handles known special cases:
+     * - 'Iran' -> 'IR'
+     * - 'Kyrgistan' (misspelling of Kyrgyzstan) -> 'KG'
+     * - 'Syria' -> 'SY'
+     * - 'Taiwan' -> 'TW'
+     * - 'UAE' (United Arab Emirates) -> 'AE'
+     * - 'UK' (United Kingdom) -> 'GB'
+     * - 'USA' (United States of America) -> 'US'
+     * - 'Vietnam' -> 'VN'
+     *
+     * If no special case matches, the original (potentially term-derived) code is returned.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {string|number} country_code - The country name, existing code, or term ID to be converted.
+     * @returns {string} The standardized two-letter country code, or the original code if no mapping is applied,
+     *                   or an empty string if the input is empty.
      */
     _getCountryCode: function(country_code){
 
@@ -767,12 +1072,26 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Retrieve nested values from JSON
+     * Retrieves a value from a nested object structure using an array of keys (path parts).
+     * This function traverses the `value` object according to the sequence of keys in `fld_Names`.
      *
-     * @param {Array} fld_Names - Nested field names, that have been pre-split
-     * @param {Object} value - Values to retrieve the field values from
+     * Example:
+     * `fld_Names = ['location', 'address', 'street']`
+     * `value = { location: { address: { street: 'Main St' } } }`
+     * Result: `'Main St'`
      *
-     * @returns {Object} updated values removing necessary nested values
+     * If at any point a key does not exist or the current `value` becomes undefined,
+     * the traversal stops.
+     * There's a special case: if a part is 'count' and the path up to that point is invalid,
+     * it returns 0 (intended for getting counts of potentially non-existent arrays).
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {Array<string>} fld_Names - An array of strings representing the path (sequence of keys) to the desired value.
+     * @param {Object|Array<*>} value - The object or array from which to retrieve the nested value.
+     * @returns {*} The retrieved nested value. If the path is invalid or any intermediate key
+     *              is not found, it returns the value at the point of failure (which might be `undefined`).
+     *              Returns `0` if 'count' is accessed on an invalid path. Returns the original `value` if it's initially empty.
      */
     getValueByParts: function(fld_Names, value){
 
@@ -792,11 +1111,26 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Translate geospatial value into WKT
+     * Translates a GeoJSON geometry object into a Well-Known Text (WKT) string,
+     * prefixed with a Heurist geometry type code.
      *
-     * @param {String} value - Geospatial value to translate
+     * The input `value` is expected to be a GeoJSON geometry object (e.g., Point, Polygon).
+     * It's first wrapped into a GeoJSON Feature object: `{type: 'Feature', geometry: value}`.
+     * Then, `stringifyMultiWKT` (a global function) is used to convert this Feature to a WKT string.
      *
-     * @returns {String} WKT value
+     * Based on the WKT string content, a Heurist-specific type code is prepended:
+     * - 'm ' (multi): If WKT contains 'GEOMETRYCOLLECTION' or 'MULTI'.
+     * - 'l ' (line): If WKT contains 'LINESTRING' (and not multi).
+     * - 'pl' (polygon): If WKT contains 'POLYGON' (and not multi or line).
+     * - 'p ' (point): Default for other geometry types (e.g., Point).
+     *
+     * If the resulting WKT string is empty, an empty string is returned.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {Object} value - A GeoJSON geometry object (e.g., `{ type: "Point", coordinates: [lon, lat] }`).
+     * @returns {string} The WKT string representation of the geometry, prefixed with a Heurist type code (e.g., "p POINT(10 20)").
+     *                   Returns an empty string if the WKT conversion results in an empty string.
      */
     createGeoFeature: function(value){
 
@@ -823,12 +1157,18 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Convert lat and long points into a WKT Point
+     * Constructs a WKT POINT string from longitude and latitude values,
+     * prefixed with the Heurist point type code 'p '.
      *
-     * @param {Number} long - longitude
-     * @param {Number} lat - latitude
+     * If either `long` or `lat` is empty (as determined by `window.hWin.HEURIST4.util.isempty`),
+     * an empty string is returned.
      *
-     * @returns {String} formatted WKT Point string
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {number|string} long - The longitude value.
+     * @param {number|string} lat - The latitude value.
+     * @returns {string} A WKT POINT string formatted as "p POINT(longitude latitude)" (e.g., "p POINT(151.2093 -33.8688)"),
+     *                   or an empty string if either longitude or latitude is empty.
      */
     constructLocation: function(long, lat){
 
@@ -838,12 +1178,27 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Extract the start or end time from temporal geojson
+     * Extracts a start or end time from a GeoJSON-T `when` object's `timespans` array.
      *
-     * @param {Array<String>} fld_Names - array of split up field names [when, _, start|end]
-     * @param {Object} value - GeoJSON-T original value to extract the timespan from
+     * The `fld_Names` array is expected to indicate the desired part of the timespan.
+     * Specifically, `fld_Names[0]` should start with 'when' (e.g., 'when', 'when.start', 'when.end'),
+     * and `fld_Names[2]` should indicate 'start' or 'end'.
      *
-     * @returns {String} timespan value
+     * If these conditions are met and the `value` object has a `timespans` array,
+     * it attempts to extract:
+     * - `value.timespans[0].start` if `fld_Names[2]` starts with 'start'.
+     * - `value.timespans[0].end` if `fld_Names[2]` starts with 'end'.
+     *
+     * If the conditions are not met or the structure is not as expected, the original `value` is returned.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {Array<string>} fld_Names - An array of field name parts, typically derived from splitting a complex field name.
+     *                                  Expected structure: `['when', <anything>, 'start'|'end', ...]`
+     * @param {Object} value - The GeoJSON-T `when` object, expected to have a `timespans` property
+     *                         if start/end times are to be extracted.
+     *                         Example: `{ timespans: [{ start: "2023-01-01", end: "2023-12-31" }] }`
+     * @returns {string|Object} The extracted start or end time string if successful, otherwise the original `value` object.
      */
     getTimespan: function(fld_Names, value){
 
@@ -861,10 +1216,29 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Send request server side, sending the valid response _handleSearchResult
+     * Performs the search operation by sending a request to the Heurist server-side lookup handler.
+     * It constructs the full URL for the external service using `this.baseURL` and the provided `parameters`.
+     * If `parameters` are empty or result in an empty query string, it shows an error and returns.
      *
-     * @param {Object} parameters - url parameters to process
-     * @param {Object} request - extra request parameters, to be extended with basic request parameters
+     * The actual request to the external service is proxied through a Heurist PHP script
+     * (`/heurist/hserv/controller/record_lookup.php`) via `window.hWin.HAPI4.RecordMgr.lookup_external_service`.
+     *
+     * Before sending the request, it shows a loading coverall.
+     * On receiving a response:
+     * - It hides the loading coverall.
+     * - Parses the response as JSON.
+     * - If the response indicates an error (e.g., `response.status != window.hWin.ResponseStatus.OK`), it shows an error message.
+     * - If the response is not valid JSON or an unexpected format, it shows an error message.
+     * - On a successful and valid response, it calls `this._handleSearchResult(response)` to process and display the results.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {Object} parameters - An object containing key-value pairs to be converted into URL query parameters for the external service.
+     * @param {Object} [request={}] - Additional parameters to be passed to the `lookup_external_service` HAPI call.
+     *                                This can be used to customize the request to the Heurist proxy.
+     *                                It's extended with `service` (the full external URL) and `serviceType` (`this.serviceName`).
+     * @returns {void}
      */
     _doSearch: function(parameters, request = {}){
 
@@ -928,21 +1302,39 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
-     * Handles search results, generally goes straigth to _onSearchResult
+     * Handles the response from the server-side search (`_doSearch`).
+     * In this base implementation, it directly calls `this._onSearchResult(response)`
+     * to process and display the results.
      *
-     * @param {Object} response - response from server side for search
+     * This method can be overridden by specific lookup widgets if they need
+     * to perform intermediate processing on the response before displaying it.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {Object} response - The JSON response object received from the Heurist server-side lookup handler.
+     * @returns {void}
      */
     _handleSearchResult: function(response){
         this._onSearchResult(response);
     },
 
     /**
-     * Transform values into array, so multi-value fields can be handled correctly by the record editor
-     *  Also removes any empty values
+     * Transforms a given input value into an array and filters out any empty values.
+     * This utility method is used to ensure that values being prepared for Heurist fields,
+     * especially multi-value fields, are consistently in array format.
      *
-     * @param {String|Object|Array} values - value to transform into array for multi-value fields
+     * - If `values` is an object, it's converted to an array of its values (`Object.values(values)`).
+     * - If `values` is not an array (e.g., a string or number), it's wrapped in a single-element array.
+     *   Empty initial values (as per `window.hWin.HEURIST4.util.isempty`) result in an array with an empty string `['']`,
+     *   which is then filtered.
+     * - Finally, it filters the resulting array to remove any values that are considered empty
+     *   by `window.hWin.HEURIST4.util.isempty`.
      *
-     * @returns {Array} array of values, to be sent to the record editor
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {string|Object|Array<*>} values - The input value(s) to be transformed.
+     * @returns {Array<*>} An array of values, with empty values removed.
      */
     valueToArray: function(values){
 

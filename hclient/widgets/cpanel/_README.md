@@ -1,39 +1,22 @@
+# Directory: /hclient/widgets/cpanel
 
-Directory:	/hclient/widgets/cpanel
+## Overview
 
-Overview:   Control panel (header), Dropdown and Slider menus for major functions,
+This directory contains widgets for the control panel interface of the Heurist admin. These widgets provide users with navigation, database overview, and various menu options for managing different aspects of the application.
 
-Updated: 	17 Sep 2024
-
-------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-MainMenu is a list of Heurist operations. They are grouped in several sections:
-    
-    Admin, Database, Export, Import, Help, Profile, Management etc. Each menu entry defined as <li> element
-    with the following attributes:
-        data-user-admin-status - accessibility according to user level 
-            (2 db owner, 1 - db admin, 0 - logged in, -1 - all)
-        data-logaction  - log tag 
-        data-icon - icon in menu
-        data-container - target element where to load dialog/form
-        Action is defined by "id" attribute (like id="menu-database-clone")
-        Menu Title and Hint are taken from localization files via id 
-        (dashes are replaced with underscores: eg. menu_database_clone)
-        Note: this seems like a quite unecessary complication and source of confusion
-
-    If there is no localised version it takes title and hint from <li><a>
-    Note: it is bad practice to have a localised version in English 
-    which is the prime language of the interface, as the strings are redundant
-    and cause problems for anyone not intimately familiar with the code.
-        
-    Main menu can be visible as standard horizontal menu (as in previous layout) or can be hidden. 
-    
-    Even if it is hidden, this widget is main handler for execution of operation via methods: 
-        menuActionById or menuActionHandler.
-    
-    Other widgets, dialogs and functions (for example: menu v6, dashboard, export menu) 
-    call Heurist actions via this widget.
-    
-    For example new menu groups actions in different groups and in different order, 
-    however it uses menu actions id and calls this widget method to execute an operation.
+## Key files
+- `buttonsMenu.js`: UI Widget: heurist.buttonsMenu
+- `controlPanel.html`: Content for main control panel layout
+- `controlPanel.js`: UI Widget: heurist.controlPanel - main UI widget for admin interface
+- `databaseOverview.html`: Overview of database statistics and information
+- `navigation.js`: Menu widget
+- `slidersMenu.html`: Content for sliderMenu widget
+- `slidersMenu.js`: Menu for Heurist admin interface with sections as popup sliders
+- `slidersMenuAdmin.html`: Slider menu for administration tasks
+- `slidersMenuDesign.html`: Slider menu for design tasks
+- `slidersMenuExplore.html`: Slider menu for exploration tasks
+- `slidersMenuPopulate.html`: Slider menu for data population tasks
+- `slidersMenuPublish.html`: Slider menu for publishing tasks
+- `versionCheckMsg.html`: Message display for software version check
+- `versionDbCheckMsg.html`: Message display for database version check
+- `welcome.html`: Welcome message or initial screen for the control panel

@@ -416,42 +416,44 @@
 
             switch ($code) {
 
-                case 400:
+                // Deepl error codes: https://support.deepl.com/hc/en-us/articles/9773964275868-DeepL-API-error-messages
+                //
+                case 400: // Missing parameter
                     $herror = HEURIST_INVALID_REQUEST;
                     $hmsg = 'Deepl was unable to complete this request.<br>'
                            .'Please make a bug report if this persists.';
                     break;
 
-                case 403:
+                case 403: // Invalid API key
                     $herror = HEURIST_REQUEST_DENIED;
                     $hmsg = 'Heurist was unable to access Deepl.<br>'
                            .'This may be due to an error in handling or the necessary API key is missing.<br>'
                            .'Please contact your system administrator and ask them if the API key has been configured.';
                     break;
 
-                case 404:
+                case 404: // Wrong URL, e.g. using the free version URL for paid access
                 case 504:
                     $herror = HEURIST_INVALID_REQUEST; //HEURIST_NOT_FOUND
                     $hmsg = 'Deepl encountered an error with locating the desired function.<br>'
                            .'Please make a bug report.';
                     break;
 
-                case 429:
-                case 529:
+                case 429: // Too many requests
+                case 529: // Deepl is busy
                     $herror = HEURIST_ACTION_BLOCKED;
                     $hmsg = 'Deepl is currently busy processing other requests.<br>'
                            .'Please re-try your request in a few minutes.';
                     $error = '';
                     break;
 
-                case 456:
+                case 456: // [Free] Reached 500,000 character limit, [Paid] Reached cost control limit
                     $herror = HEURIST_ACTION_BLOCKED;
                     $hmsg = 'Heurist has exceeded it\'s quota with Deepl and will be unable to attempt automatic translations of your texts.<br>'
                            .'We apologise for the inconvenience.';
                     break;
 
-                case 413:
-                case 414:
+                case 413: // Request Too Large from Deepl
+                case 414: // HTTP Reuest Too Large
                     $herror = HEURIST_ACTION_BLOCKED;
                     $hmsg = 'The request to Deepl\'s services was too large to process.<br>'
                            .'Please either:<br>'
@@ -459,7 +461,7 @@
                            .'Make a bug report including which record and field you were attempting to translate and into which language.';
                     break;
 
-                case 503:
+                case 503: // Unknown Deepl error
                     $herror = HEURIST_ACTION_BLOCKED;
                     $hmsg = 'Deepl encountered an unknown error.<br>'
                            .'Please re-try your request in a few minutes.';
@@ -495,9 +497,12 @@
     }
 
     /**
-     * Replace specific punctuation that Deepl has issues with translating with a place holder
+     * Replace specific punctuation that Deepl has issues translating with a place holder
+     * Deepl seems to consider any semicolon, even those within HTML attributes, invalid punctuation and cuts off the translation
+     * Also replaces ampersands as Deepl encodes the ampersand
      *
      * @param string $string The string potential containing the specific punctuation
+     * @param bool $reverse Whether to reverse the process, done after Deepl has translated the text
      * @return string The string prepared for translation
      */
     function replacePunctuation($string, $reverse = false){
@@ -525,7 +530,9 @@
     }
 
     /**
-     * Replace specific enoded entities that could be translated by Deepl with their HTML code or Hex code counter part
+     * Replace specific HTML entities that could be translated by Deepl with their HTML code counter part
+     * Deepl will translate simple words like 'copy' breaking the entities and displaying all the related ampersands and semicolons
+     * HTML codes will work just as well and, realistically, shouldn't be translated by Deepl
      *
      * @param string $string The string potential containing entities that could become translated
      * @return string The string prepared for translation
@@ -552,6 +559,10 @@
             'euro' => [
                 '(?:&euro;?|€)',
                 '&#8364;'
+            ],
+            'dollar' => [
+                '(?:&dollar;?|\$)',
+                '&#36;'
             ],
             'cent' => [
                 '(?:&cent;?|¢)',

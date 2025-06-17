@@ -211,7 +211,7 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
             /** @type {jQuery} A jQuery object representing the main container for the record editing UI. */
             var $container;
             /** @type {object} An object populated by PHP, containing pre-processed parameters for record editing or creation. */
-            // var prepared_params; // Initialized by PHP: print '<script>var prepared_params = '.json_encode($params).';</script>';
+            // var prepared_params; // Initialized by PHP: print '<script>var prepared_params = '.json_encode($params).';
 
             /**
              * Callback function executed when the main page initialization (from initPage.php) is complete.

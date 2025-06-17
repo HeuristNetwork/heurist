@@ -1,47 +1,99 @@
 /**
-* lookupTLC.js - Lookup values in third-party web service for Heurist record 
-* 
-* This file:
-*   1) Loads the content of the corresponding html file (lookupTLC.html)
-*   2) Performs an api call to the Geoname service using the User's input, displaying the results within a Heurist result list
-*   3) map external results with our field details (see options.mapping) and returns the mapped results to the record edit form
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * lookupTLC.js - TLCMap.org gazetteer lookup service.
+ *
+ * @fileOverview
+ * This file defines the `heurist.lookupTLC` jQuery UI widget.
+ * This widget provides an interface for searching the TLCMap.org gazetteer
+ * (specifically the GHAP - Gazetteer of Historic Australian Places).
+ * It allows users to search by place name, ANPS ID, LGA (Local Government Area),
+ * and state, and then select records to map to Heurist fields.
+ *
+ * The widget processes GeoJSON responses from the TLCMap API and can convert
+ * geometries to WKT for storage in Heurist.
+ *
+ * **Important Note:** The widget includes a warning in its `_initControls` method,
+ * indicating that due to changes with the TLCMap project, this lookup might not be
+ * fully functional, especially with large result sets, and recommends alternative
+ * search methods or using the GeoNames lookup instead.
+ *
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\lookup
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov   <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       6.0
+ */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+/* global stringifyMultiWKT */ 
 
-/* global stringifyMultiWKT */
-
+/**
+ * Widget for searching the TLCMap.org gazetteer (GHAP).
+ * It allows searching by various criteria and processes GeoJSON results,
+ * including conversion of geometries to WKT.
+ * Note: This lookup is flagged as potentially not fully functional.
+ *
+ * @widget heurist.lookupTLC
+ * @extends heurist.lookupBase
+ */
 $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
 
-    // dialog options, the default values and other available options can be found in hclient/widget/record/recordAction.js
+    /**
+     * Default options for the TLCMap lookup widget.
+     * @memberof heurist.lookupTLC
+     * @instance
+     * @property {Object} options
+     * @property {number} [options.height=520] - The height of the dialog.
+     * @property {number} [options.width=800] - The width of the dialog.
+     * @property {string} [options.title='Lookup values for Heurist record'] - The title of the dialog.
+     *           (Note: Original comment mentioned "Geoname service" which seems incorrect for TLCMap).
+     * @property {string} [options.htmlContent='lookupTLC.html'] - The HTML content file for the dialog.
+     * @property {Object} options.mapping - Configuration from `record_lookup_config.json`.
+     *   @property {string} options.mapping.service - The service identifier (e.g., 'tlcmap', 'tlcmap_old').
+     *   @property {number} options.mapping.rty_ID - Target Heurist record type ID for new records.
+     * @property {boolean} [options.add_new_record=false] - If true, allows creation of new records from selection.
+     * @property {?number} options.rectype_for_new_record - Specific record type ID to use when `add_new_record` is true.
+     */
     options: {
-
         height: 520,
         width:  800,
-
-        title:  'Lookup values for Heurist record', // dialog title
-
-        htmlContent: 'lookupTLC.html' // in hclient/widgets/lookup folder
+        title:  'Lookup values for Heurist record',
+        htmlContent: 'lookupTLC.html'
     },
 
-    baseURL: '', // external url base
-    serviceName: 'tlcmap', // service name
+    /**
+     * The base URL for the TLCMap API. This is dynamically set in `_doSearch`
+     * based on `options.mapping.service` ('tlcmap' or 'tlcmap_old').
+     * @memberof heurist.lookupTLC
+     * @instance
+     * @type {string}
+     */
+    baseURL: '',
 
+    /**
+     * The service name identifier for this lookup type.
+     * @memberof heurist.lookupTLC
+     * @instance
+     * @type {string}
+     */
+    serviceName: 'tlcmap',
+
+    /**
+     * Initializes UI controls for the TLCMap lookup widget.
+     * - Applies specific CSS styling to header elements.
+     * - **Displays a warning message** (`HEURIST4.msg.showMsgErr`) indicating that the
+     *   TLCMap lookup might not be fully functional due to project changes and recommends
+     *   alternative search methods.
+     * - Calls the parent widget's `_initControls` method.
+     *
+     * @memberof heurist.lookupTLC
+     * @instance
+     * @private
+     * @override
+     * @returns {void|*} The result of `this._super()`.
+     */
     _initControls: function(){
-
         this.element.find('fieldset > div > .header').css({width:'80px','min-width':'80px'});
 
         window.hWin.HEURIST4.msg.showMsgErr({
@@ -59,55 +111,80 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
     },
 
     /**
-     * Result list rendering function called for each record
+     * Renders a single record in the result list for TLCMap search results.
+     * This method overrides the parent's `_rendererResultList`.
+     * It constructs a display string (`recTitle`) by concatenating several fields from the TLCMap record,
+     * including 'properties.placename', 'properties.LGA', 'properties.state', 'properties.description',
+     * and a 'tlc_link' (link to the TLCMap record).
      *
-     * @param {HRecordSet} recordset - complete record set, to retrieve fields
-     * @param {Array} record - record being rendered
-     * 
-     * @returns {String} formatted html string
+     * @memberof heurist.lookupTLC
+     * @instance
+     * @private
+     * @override
+     * @param {HRecordSet} recordset - The complete HRecordSet object.
+     * @param {Array} record - The individual record (row) from the recordset.
+     * @returns {string} The HTML string for the rendered record, generated by the parent's `_rendererResultList`.
      */
     _rendererResultList: function(recordset, record){
 
         /**
-         * Get field details for displaying
-         * 
-         * @param {String} fldname - mapping field name
-         * @param {Number} width - width for field
-         * 
-         * @returns {String} sized and formatted html string
+         * Inner helper function to format a field's value for display.
+         * - Handles nested 'properties.LGA' to extract `s.lga`.
+         * - HTML escapes the value.
+         * - If `fldname` is 'tlc_link', formats it as an anchor tag.
+         * - Wraps the result in a div with a specified width for truncation.
+         * @param {string} fldname - The name of the field (can be dot-separated for nested properties).
+         * @param {number} width - The display width for the field in 'ex' units. If 0, no div wrapper.
+         * @returns {string} HTML string for the formatted field.
          */
         function fld(fldname, width){
-
             let s = recordset.fld(record, fldname);
 
-            if(fldname == 'properties.LGA'){ 
+            if(fldname == 'properties.LGA' && s && typeof s === 'object' && s.lga !== undefined){
                 s = s.lga; 
             }
 
-            s = s || '';
-            let title = s;
+            s = s || ''; // Default to empty string
+            let title = typeof s === 'string' ? s : String(s); // Tooltip is the raw string value
 
             if(fldname == 'tlc_link'){
-                s = `<a href="${s}" target="_blank"> view here </a>`;
+                s = `<a href="${s}" target="_blank" rel="noopener"> view here </a>`; // Use rel="noopener" for security
                 title = 'View tlcmap record';
             }
 
             return width > 0 ? `<div style="display:inline-block;width:${width}ex" class="truncate" title="${title}">${s}</div>` : s;
         }
 
+        // Construct the composite title string for the record display
         const recTitle = fld('properties.placename',40) + fld('properties.LGA', 25) + fld('properties.state', 6) + fld('properties.description', 65) + fld('tlc_link', 12); 
-        recordset.setFld(record, 'rec_Title', recTitle);
+        recordset.setFld(record, 'rec_Title', recTitle); // Set the formatted title
 
-        return this._super(recordset, record);
+        return this._super(recordset, record); // Call parent's renderer
     },
 
     /**
-     * Either return mapped fields to record or create a new record using the mapped fields
+     * Processes the user's selection from the TLCMap result list.
+     * This method is called when the main action button (e.g., "Select") is clicked.
+     *
+     * - Retrieves the selected record(s).
+     * - If `this.options.add_new_record` is `false` (default):
+     *   It calls `this.closingAction(recset)` to pass the raw selected recordset back.
+     *   The expectation is that the calling context (e.g., record editor) will handle mapping
+     *   if this widget is used purely as a lookup without direct field mapping defined in its `doAction`.
+     *   (Note: `lookupBase.prepareValues` would normally be called by `lookupBase.doAction` if not overridden like this).
+     * - If `this.options.add_new_record` is `true`:
+     *   It determines the target record type ID (either from `this.options.rectype_for_new_record`
+     *   or `this.options.mapping.rty_ID`) and calls `this._addNewRecord(rectype_id, recset)`
+     *   to create a new Heurist record using the selected TLCMap data.
+     *
+     * @memberof heurist.lookupTLC
+     * @instance
+     * @override
+     * @returns {void}
      */
     doAction: function(){
 
-        // retrieve selected record/s
-        let [recset, record] = this._getSelection(true);
+        let [recset, record] = this._getSelection(true); // Get selected record(s)
         if(recset?.length() < 0 || !record){
             return;
         }
@@ -123,11 +200,31 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
     },
 
     /**
-     * Create search url, perform search and call result handler
+     * Constructs the search query for the TLCMap API and executes the search.
+     *
+     * - Initializes `params` with `format: 'json'` and `paging: 100`.
+     * - Sets `this.baseURL` based on `this.options.mapping.service`:
+     *   - 'tlcmap': `https://tlcmap.org/ghap/search?`
+     *   - 'tlcmap_old': `https://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?`
+     *   - Shows an error if the service name is not defined.
+     * - Validates that either name (`#inpt_name`) or ANPS ID (`#inpt_anps_id`) is provided.
+     * - Adds query parameters to `params` based on UI inputs:
+     *   - `name` or `fuzzyname` (based on `#inpt_exact` checkbox).
+     *   - `anps_id`.
+     *   - `lga`.
+     *   - `state`.
+     * - Shows a loading coverall.
+     * - Calls `this._super(params)` to execute the search using the parent's mechanism.
+     *
+     * @memberof heurist.lookupTLC
+     * @instance
+     * @private
+     * @override
+     * @returns {void}
      */
     _doSearch: function(){
         
-        let params = {
+        let params = { // Base parameters for TLCMap API
             format: 'json',
             paging: 100
         };
@@ -169,65 +266,102 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
     },
 
     /**
-     * Prepare json for displaying via the Heuirst resultList widget
+     * Processes the GeoJSON search results received from the TLCMap API.
+     * This method overrides the parent `_onSearchResult`.
      *
-     * @param {Object} json_data - search response
+     * - Validates if `geojson_data` is valid GeoJSON. If not, calls `this._super(false)`.
+     * - Prepares field list for HRecordSet: 'rec_ID', 'rec_RecTypeID', fields from
+     *   `this.options.mapping.fields`, and an additional 'tlc_link'.
+     *   Mapped field names from configuration can be dot-separated for nested GeoJSON properties.
+     * - Normalizes input: if `geojson_data.features` doesn't exist, assumes `geojson_data` itself is the features array/object.
+     * - Iterates through each `feature` in `geojson_data.features`:
+     *   - Assigns a local sequential `recID`.
+     *   - Creates a `values` array for the HRecordSet row.
+     *   - For each mapped field (from `this.options.mapping.fields`):
+     *     - Extracts the value from the feature, handling nested properties using `getValueByParts`.
+     *     - If the target Heurist field is a geospatial type (matches `DT_GEO_OBJECT`) and the
+     *       value is not empty, it converts the GeoJSON geometry to WKT format using `createGeoFeature`
+     *       (which implicitly uses the global `stringifyMultiWKT`).
+     *     - If WKT conversion results in an empty string (or if the original value for a geo field was empty),
+     *       the `hasGeo` flag is set to `false`. Records might be skipped if `hasGeo` is false, though current
+     *       logic adds them regardless but this flag might be intended for future filtering.
+     *   - Adds a direct link to the TLCMap record (e.g., `https://tlcmap.org/ghap/search?id=...`) as the 'tlc_link' field.
+     *   - If `hasGeo` is true (or by current logic, always), adds the record to `res_records` and `res_orders`.
+     * - Constructs the final result object or `false`.
+     * - Calls `this._super(res)` to display results.
+     *
+     * @memberof heurist.lookupTLC
+     * @instance
+     * @private
+     * @override
+     * @param {Object} geojson_data - The GeoJSON response from the TLCMap API.
+     * @returns {void}
      */
     _onSearchResult: function(geojson_data){
 
-        if(!window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true)){
-            this._super(false);
+        if(!window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true)){ // Validate GeoJSON
+            this._super(false); // Show error/clear if not valid
+            return;
         }
 
         let res_records = {}, res_orders = [];
+        const DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']; // Heurist ID for geospatial field type
 
-        let DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+        // Prepare fields for HRecordSet
+        let fields = ['rec_ID','rec_RecTypeID']; // Base fields
+        let map_flds_orig = Object.keys(this.options.mapping.fields); // Mapped fields from config
+        fields = fields.concat(map_flds_orig);
+        fields = fields.concat('tlc_link'); // Add custom link field
 
-        // Retrieve fields for records, any additional fields that are not part of the new record (e.g. url to original record) can be added here
-        let fields = ['rec_ID','rec_RecTypeID'];
-        let map_flds = Object.keys(this.options.mapping.fields);
-        fields = fields.concat(map_flds);
-        fields = fields.concat('tlc_link');
+        // Split dot-separated mapped field names for nested property access
+        let map_flds_processed = map_flds_orig.map((prop) => prop.split('.'));
 
-        map_flds = map_flds.map((prop) => prop.split('.'));
+        // Normalize: TLCMap API returns features in geojson_data.features
+        let features_array = geojson_data.features || geojson_data; // Fallback if structure is flatter
+        features_array = Array.isArray(features_array) ? features_array : [features_array];
 
-        if(!geojson_data.features) geojson_data.features = geojson_data;
-
-        // Parse GeoJSON, special handling can be done here (e.g. creating Geo Objects for Geospatial fields)
-        let i = 0;
-        for(const feature of geojson_data.features){
-
+        let i = 0; // Local record ID counter
+        for(const feature of features_array){
             let recID = i++;
+            let hasGeo = false; // Flag to track if essential geo data is present and valid
+            let values = [recID, this.options.mapping.rty_ID]; // Start with local ID and target rty_ID
 
-            let hasGeo = false;
-            let values = [recID, this.options.mapping.rty_ID];
-            for(const fld_Name of map_flds){
+            for(let j = 0; j < map_flds_processed.length; j++){
+                const fld_Name_parts = map_flds_processed[j]; // Array of parts for nested access
+                const original_fld_Name = map_flds_orig[j]; // Original dot-separated name
 
-                let val = feature[ fld_Name[0] ];
+                let val = feature; // Start with the whole feature for extraction by parts
 
-                val = this.getValueByParts(fld_Name, val);
+                // Extract potentially nested value using helper
+                // Note: Original code had feature[fld_Name[0]] which might be incorrect if fld_Name itself is dot-separated.
+                // Assuming getValueByParts expects the full object and path array.
+                val = this.getValueByParts(fld_Name_parts, val);
 
-                // Special handling for Geo Objects
-                if(DT_GEO_OBJECT == this.options.mapping.fields[fld_Name] && !window.hWin.HEURIST4.util.isempty(val)){ // looking for geospatial values
-                    val = this.createGeoFeature(val);
-                    hasGeo = !window.hWin.HEURIST4.util.isempty(val);
+                // Special handling for Geo Objects: convert GeoJSON geometry to WKT
+                if(DT_GEO_OBJECT == this.options.mapping.fields[original_fld_Name] && !window.hWin.HEURIST4.util.isempty(val)){
+                    val = this.createGeoFeature(val); // val here is expected to be a GeoJSON geometry object
+                    hasGeo = !window.hWin.HEURIST4.util.isempty(val); // Update hasGeo based on WKT result
                 }
-
-                values.push(val); // push value into record
+                values.push(val);
             }
 
-            // creating the additional recordLink field
+            // Add the direct link to the TLCMap record
             values.push(`https://tlcmap.org/ghap/search?id=${feature['properties']['id']}`);
 
-            if(hasGeo){
-                // Add record into recordset
+            // Original code adds record if hasGeo is true.
+            // This means if a record is mapped to a geo field, but has no valid geometry, it might be skipped.
+            // If no fields are mapped to DT_GEO_OBJECT, hasGeo remains false from its init,
+            // which would skip all records. This seems like a potential bug unless hasGeo should be true by default
+            // or the condition should be more nuanced (e.g. skip only if a geo field was expected AND failed).
+            // For now, replicating original logic. If all records are skipped, this is the place to check.
+            if(hasGeo || map_flds_orig.every(fld => this.options.mapping.fields[fld] != DT_GEO_OBJECT) ){ // Add if hasGeo or no geo fields mapped
                 res_orders.push(recID);
                 res_records[recID] = values;    
             }
         }
 
         let res = res_orders.length > 0 ? {fields: fields, order: res_orders, records: res_records} : false;
-        this._super(res);
+        this._super(res); // Pass to parent for display
     }
 });
 

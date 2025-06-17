@@ -481,9 +481,7 @@ $.widget( "heurist.search_faceted", {
                 let svsID = this.options.query_name;
                 if(svsID > 0){
                     
-                    if (window.hWin.HAPI4.currentUser.usr_SavedSearch && 
-                                window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID])
-                    {
+                    if(window.hWin.HAPI4.currentUser?.usr_SavedSearch?.[svsID]){
                          new_title = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][0];//Hul._NAME];                
                     }else if(window.hWin.HAPI4.has_access()){
                         let that = this;

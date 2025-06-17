@@ -1,28 +1,41 @@
 /**
-* Login dialogue
+* profileLogin.js - Login dialogue
+*
+* @fileOverview Provides the login dialog functionality for the Heurist system.
+*               Handles standard username/password login, SAML authentication,
+*               guest login, password reset, and registration initiation.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\profile
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 /* global prepared_params */
 
+/**
+ * @member {?jQuery} login_dialog - Holds the jQuery object for the login dialog.
+ *                                  Initialized to null and set when `showLoginDialog` is called.
+ */
 let login_dialog = null;
 
-//
-//isforsed - if true - it is not possible to get out from login other than switch database
-//
+/**
+ * @function showLoginDialog
+ * @description Displays the Heurist login dialog.
+ *              Handles existing dialog instances, loads HTML content if needed,
+ *              sets up SAML login options if configured, guest login,
+ *              and password reset functionality.
+ * @param {boolean} isforsed - If true, the user cannot close the dialog without logging in or changing the database.
+ * @param {?function} callback - Callback function executed after the dialog is closed.
+ *                               It receives a boolean indicating if the user has access.
+ * @param {?Window} [parentwin=window.hWin] - The parent window object.
+ * @param {string} [dialog_id='heurist-login-dialog'] - The ID for the dialog element.
+ * @returns {void}
+ */
 function showLoginDialog(isforsed, callback, parentwin, dialog_id){
     
     let is_secondary_parent = false;
@@ -188,7 +201,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
         let $dlg = login_dialog;
 
         //load login dialogue
-        $dlg.load(window.hWin.HAPI4.baseURL + "hclient/widgets/profile/profile_login.html?t="
+        $dlg.load(window.hWin.HAPI4.baseURL + "hclient/widgets/profile/profileLogin.html?t="
                             +window.hWin.HEURIST4.util.random(), 
             function(){ 
 
@@ -397,10 +410,14 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
 }
 
 /**
- * 
- * @param {jQuery} $dlg - login popup/element
- * @param {int} new_mode - current mode, passed to changeDisplay, false will only update error message
- * @param {string} error - error message to display, empty to remove error message 
+ * @function updateStatus
+ * @description Updates the status message and display mode of the login dialog.
+ * @param {jQuery} $dlg - jQuery object of the login dialog.
+ * @param {(boolean|number)} [new_mode=false] - The new display mode for the dialog.
+ *                                              See `changeDisplay` for mode details.
+ *                                              If false, only the error message is updated.
+ * @param {string} [error=''] - The error message to display. If empty, clears the error message.
+ * @returns {void}
  */
 function updateStatus($dlg, new_mode = false, error = ''){
 
@@ -437,8 +454,9 @@ function updateStatus($dlg, new_mode = false, error = ''){
  *  1 - Request reset pin
  *  2 - Validate reset pin
  *  3 - Change password
- * 
- * @param {int} mode - controls what is displayed
+ * @param {number} mode - Controls what is displayed.
+ * @param {jQuery} $dlg - jQuery object of the login dialog.
+ * @returns {void}
  */
 function changeDisplay(mode, $dlg){
 
@@ -518,8 +536,12 @@ function changeDisplay(mode, $dlg){
 }
 
 /**
- * Requests the creation of a reset pin
- * @param {jQuery} $dlg - login dialog
+ * @function setupResetPin
+ * @description Requests the creation of a password reset pin.
+ *              Validates username and captcha input.
+ *              Calls `HAPI4.SystemMgr.reset_password` to request the pin.
+ * @param {jQuery} $dlg - jQuery object of the login dialog.
+ * @returns {void}
  */
 function setupResetPin($dlg){
 
@@ -556,8 +578,11 @@ function setupResetPin($dlg){
 }
 
 /**
- * 
- * @param {jQuery} $dlg - login dialog 
+ * @function validateResetPin
+ * @description Validates the entered password reset pin.
+ *              Calls `HAPI4.SystemMgr.reset_password` to validate the pin.
+ * @param {jQuery} $dlg - jQuery object of the login dialog.
+ * @returns {void}
  */
 function validateResetPin($dlg){
 
@@ -586,8 +611,12 @@ function validateResetPin($dlg){
 }
 
 /**
- * 
- * @param {jQuery} $dlg - login dialog 
+ * @function resetPassword
+ * @description Resets the user's password using the validated pin.
+ *              Validates that the new password and its confirmation match.
+ *              Calls `HAPI4.SystemMgr.reset_password` to set the new password.
+ * @param {jQuery} $dlg - jQuery object of the login dialog.
+ * @returns {void}
  */
 function resetPassword($dlg){
 
@@ -622,6 +651,13 @@ function resetPassword($dlg){
     });
 }
 
+/**
+ * @function setupCaptcha
+ * @description Sets up the captcha in the login dialog for password reset.
+ *              Loads the captcha image/text from the server.
+ * @param {jQuery} $dlg - jQuery object of the login dialog.
+ * @returns {void}
+ */
 function setupCaptcha($dlg){
 
     let $ele = $dlg.find('#captcha_code');
@@ -640,9 +676,14 @@ function setupCaptcha($dlg){
     });
 }
 
-//
-//
-//
+/**
+ * @function doRegister
+ * @description Initiates the user registration process by showing the profile edit dialog.
+ *              Loads `profileEdit.js` if not already loaded.
+ * @param {?Window} [parentwin=window.hWin] - The parent window object.
+ * @param {boolean} [is_guest=false] - True if registering a guest user.
+ * @returns {void}
+ */
 function doRegister( parentwin, is_guest=false ){
 
     let is_secondary_parent = false;
@@ -653,19 +694,19 @@ function doRegister( parentwin, is_guest=false ){
     } 
     let $doc = $(parentwin.document['body']);
 
-    if(window.hWin.HEURIST4.util.isFunction($doc.profile_edit)){
+    if(window.hWin.HEURIST4.util.isFunction($doc.profileEdit)){
 
         let profile_edit_dialog = $('#heurist-profile-dialog');
         if(profile_edit_dialog.length<1){
             profile_edit_dialog = $( '<div id="heurist-profile-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $doc );
         }
         
-        profile_edit_dialog.profile_edit({'ugr_ID': window.hWin.HAPI4.currentUser.ugr_ID, 'parentwin': parentwin,
+        profile_edit_dialog.profileEdit({'ugr_ID': window.hWin.HAPI4.currentUser.ugr_ID, 'parentwin': parentwin,
                  'is_guest':is_guest, 'afterRegistration': onAuthentication});
         
     }else{
-        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_edit.js', function() {
-            if(window.hWin.HEURIST4.util.isFunction($doc.profile_edit)){
+        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profileEdit.js', function() {
+            if(window.hWin.HEURIST4.util.isFunction($doc.profileEdit)){
                 doRegister( parentwin, is_guest );
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr({
@@ -679,6 +720,13 @@ function doRegister( parentwin, is_guest=false ){
 
 }
 
+/**
+ * @function doImport
+ * @description Handles the process of importing a user profile from another database.
+ *              Guides the user through selecting a database and then an account to import.
+ *              Requires password confirmation for the selected account.
+ * @returns {void}
+ */
 function doImport(){
 
     let reg_status = window.hWin.HAPI4.sysinfo.registration_allowed;
@@ -824,9 +872,15 @@ function doImport(){
 
 }
 
-//
-//
-//
+/**
+ * @function doAuthentication
+ * @description Performs user authentication using the provided login data.
+ *              Calls `HAPI4.SystemMgr.login` to attempt login.
+ *              Handles success and error responses.
+ * @param {Object} login_data - An object containing login credentials (username, password, session_type, saml_entity, is_guest).
+ * @param {?jQuery} login_dialog - jQuery object of the login dialog, used to display error messages.
+ * @returns {void}
+ */
 function doAuthentication(login_data, login_dialog)
 {
     //allow guest login
@@ -865,6 +919,15 @@ function doAuthentication(login_data, login_dialog)
     );
 }
 
+/**
+ * @function onAuthentication
+ * @description Handles successful authentication.
+ *              Sets the current user and system info in HAPI4.
+ *              Triggers the `ON_CREDENTIALS` event.
+ *              Closes the login dialog if it's open.
+ * @param {Object} response - The response object from a successful `HAPI4.SystemMgr.login` call.
+ * @returns {void}
+ */
 function onAuthentication(response){
 
     if(response.status == window.hWin.ResponseStatus.OK){
@@ -878,9 +941,17 @@ function onAuthentication(response){
     }
 }
 
-//
-// remove
-//
+/**
+ * @function doSamlLogin
+ * @description Initiates SAML login by showing a dialog with the SAML provider's login page.
+ *              Handles the callback after the SAML dialog is closed.
+ * @deprecated This function appears to be older and might be superseded by inline SAML logic in `showLoginDialog`.
+ * @param {?function} callback - Callback function.
+ * @param {?Window} parentwin - The parent window object.
+ * @param {string} sp_entity - The SAML service provider entity ID.
+ * @param {?jQuery} login_dialog - jQuery object of the main login dialog.
+ * @returns {void}
+ */
 function doSamlLogin(callback, parentwin, sp_entity, login_dialog){
     
     //loads saml dialog into iframe

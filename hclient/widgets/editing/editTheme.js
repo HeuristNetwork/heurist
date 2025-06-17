@@ -1,26 +1,40 @@
 /*
-* editTheme.js - define Heurist color theme
-* refer initPageTheme.php for documentaton about heurist color themes
+* editTheme.js - Defines Heurist color theme
+*
+* @description This file provides functionality to define and edit a Heurist color theme using a dialog.
+* @see initPageTheme.php for the underlying theme structure and documentation.
 * 
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\editing
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       5.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-/* global HEditing */
+/* global HEditing, HRecordSet */
 
+/**
+ * @global
+ * @type {HEditing|undefined}
+ * @description Instance of the HEditing class, used to manage the theme editing form.
+ *              It is initialized when the editTheme function is called and its configuration is loaded.
+ */
 let _theme_editing_symbology;
 
+/**
+ * Opens a dialog to edit or define a Heurist color theme.
+ * The theme properties are loaded from `editTheme.json` and presented in a form
+ * managed by the HEditing class.
+ *
+ * @param {Object<string, any>|null|undefined} current_value - An object containing the current theme properties.
+ *                                                            If null or undefined, a new theme is being defined.
+ *                                                            Expected properties are keys like 'cd_bk_col', 'cd_corner', etc.
+ * @param {function(Object<string, any>): void} callback - A function to be called when the theme is saved.
+ *                                                        It receives an object with the saved theme properties as its argument.
+ */
 function editTheme(current_value, callback){
 
     let edit_dialog = null; //assigned on popup_dlg.dialog
@@ -64,14 +78,18 @@ function editTheme(current_value, callback){
             });
     });
     
-
-
-function __editTheme_continue(){
+    /**
+     * @private
+     * @function __editTheme_continue
+     * @description This function is called after the theme editing form configuration (editTheme.json) has been loaded.
+     *              It initializes the HEditing form with the current theme values (if any) and sets up the dialog
+     *              with 'Save' and 'Cancel' buttons.
+     */
+    function __editTheme_continue(){
     
     let recdata = current_value ? new HRecordSet({count:1, order:[1], 
         records:{1:current_value}, 
         fields: {'stub':0}}) :null;
-        //Object.getOwnPropertyNames(current_value)
     
     _theme_editing_symbology.initEditForm( editFields, recdata, true );
 

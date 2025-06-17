@@ -1,6 +1,6 @@
 
 /**
-* svs_edit.js : functions to edit and save saved searches (filters)
+* svsEdit.js : functions to edit and save saved searches (filters)
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
@@ -375,7 +375,7 @@ function HSvsEdit(args) {
             let $dlg = edit_dialog = $( "<div>" ).addClass('save-filter-dialog ui-heurist-bg-light').appendTo(  $('body') );
 
             //load edit dialogue
-            $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/svs_edit.html?t="+(new Date().time), function(){
+            $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/svsEdit.html?t="+(new Date().time), function(){
 
                 //find all labels and apply localization
                 $dlg.find('label').each(function(){

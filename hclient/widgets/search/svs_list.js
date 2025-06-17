@@ -1323,10 +1323,8 @@ $.widget( "heurist.svs_list", {
                         qsearch = data.node.data.url;
                         qname   = (data.node.key>0)?data.node.key:data.node.title; //qname replaced with svs_ID
                     }else{
-                        if (data.node.key && 
-                            window.hWin.HAPI4.currentUser.usr_SavedSearch && 
-                            window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key]){
-                                
+                        if (data.node.key && window.hWin.HAPI4.currentUser?.usr_SavedSearch?.[data.node.key]){
+
                             svs_ID = data.node.key; 
                             qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key][Hul._QUERY];
                             qname   = data.node.key; 
@@ -1975,9 +1973,8 @@ $.widget( "heurist.svs_list", {
     //
     doSearchByID: function(svs_ID, query_name){
     
-        if(window.hWin.HAPI4.currentUser.usr_SavedSearch && 
-            window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID]){
-                                
+        if(window.hWin.HAPI4.currentUser?.usr_SavedSearch?.[svs_ID]){
+
             let qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID][Hul._QUERY];
             let qname   = query_name || svs_ID; 
             
@@ -2151,6 +2148,7 @@ $.widget( "heurist.svs_list", {
                     request.qname = qname;
                     request.search_realm = this.options.search_realm;
                     request.search_page = this.options.search_page;
+                    request.search_ID = svs_ID;
                     
                     window.hWin.HAPI4.SystemMgr.user_log('search_Record_savedfilter');
                     
@@ -2387,7 +2385,7 @@ $.widget( "heurist.svs_list", {
                 this.options.is_h6style );
 
         }else{
-            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/svs_edit.js',
+            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/svsEdit.js',
                 function(){ that.hSvsEdit = HSvsEdit; that.editSavedSearch(mode, groupID, svsID, squery); } );
         }
 
