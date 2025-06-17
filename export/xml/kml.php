@@ -48,10 +48,11 @@ require_once dirname(__FILE__).'/../../vendor/autoload.php'; // For geoPHP libra
 
 // Initialize Heurist system
 $system = new hserv\System();
-if (!$system->init(@$_REQUEST['db'])) {
+$dbname = @$_REQUEST['db'];
+if (!$system->init($dbname)) {
     header("HTTP/1.1 404 Not found");
     echo "Error: Cannot connect to database.";
-    error_log("kml.php: Cannot connect to database specified by 'db' parameter: " . @$_REQUEST['db']);
+    error_log("kml.php: Cannot connect to database specified by 'db' parameter: " . base64_encode($dbname));
     exit;
 }
 
