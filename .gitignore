@@ -219,8 +219,8 @@ ext/
 vendor/
 help/
 external/
-documentation/api/
 node_modules/
+tests/
 
 *.mjs
 package.json
