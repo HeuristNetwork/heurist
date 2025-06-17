@@ -65,7 +65,7 @@ if(!defined('PDIR')){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/HSystemMgr.js"></script>
 
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_login.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profileLogin.js"></script>
         <script>
             $(document).ready(function() {
 

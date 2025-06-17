@@ -1656,7 +1656,7 @@ window.hWin.HEURIST4.ui = {
                 
                 showLoginDialog(isforsed, callback);
             }else{
-                $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_login.js', function(){
+                $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profileLogin.js', function(){
                     window.hWin.HEURIST4.ui.checkAndLogin(isforsed, callback);
                 }); 
             }
