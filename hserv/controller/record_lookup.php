@@ -1034,7 +1034,7 @@ if(@$params['serviceType'] == 'geonames' || @$params['serviceType'] == 'tlcmap')
 
     $is_error = strpos($remote_data, 'Une erreur est survenue') !== false ? 'database' : false;
     $is_error = $is_error && strpos($remote_data, 'Connexion à la base donnée : OK! Connected') ? 'request' : $is_error;
-    $remote_data = !$is_error ? $remote_data : json_decode($remote_data, true);
+    $remote_data = !$is_error ? json_decode($remote_data, true) : $remote_data;
 
     $type_idx = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
     $trm_uri = 'http://www.w3.org/2004/02/skos/core#Concept';
@@ -1051,6 +1051,7 @@ if(@$params['serviceType'] == 'geonames' || @$params['serviceType'] == 'tlcmap')
     if(!$is_error && json_last_error() === JSON_ERROR_NONE){
 
         foreach ($remote_data as $uri => $details) {
+
             if($details[$type_idx][0]['value'] != $trm_uri){ // not a term
                 continue;
             }

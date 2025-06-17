@@ -3623,10 +3623,8 @@ window.hWin.HEURIST4.dbs = {
          */
         function handleNumbers(type, mask_pattern_part, to_replace_in_original_mask, val_str, len_constraint, range_constraint){
 
-            if(val_str.match(/[^\d.-]/) && !(type === 'n' && val_str.startsWith('-'))) { // Allow minus for numeric, ensure it's not elsewhere
-                 if (!(type === 'n' && val_str.match(/^-\d*\.?\d*$/))) { // More specific check for negative numbers
-                    return 'Input contains non-numeric characters';
-                 }
+            if(value.match(/[^\d.]/) !== null){ // Check for non-digit or decimal point
+                return 'Input contains non-numeric characters';
             }
 
             let output_val;
