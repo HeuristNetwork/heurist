@@ -319,8 +319,6 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
      *   gets focus, a dropdown list of unmapped variables from `this.result_fields` appears.
      * - **Saving Mappings**: On "Update mapping", `this._fields` is updated with the UI values,
      *   and the `#label_mapping` textarea is updated with the JSON string of these mappings.
-     * - **Optional Chaining to `doAction`**: If `closingAction` is true, `doAction(true)` is called
-     *   after successfully updating the mappings, to proceed with processing the selected record.
      *
      * @memberof heurist.lookupWikidata_SPARQL
      * @instance
@@ -462,7 +460,7 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
             $dlg.dialog('close');
 
             if(closingAction){
-                this.doAction(true);
+                this.doAction();
             }
         };
         btns[window.hWin.HR('Cancel')] = () => {
@@ -506,7 +504,7 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
      *   and `this._fields` (the SPARQL variable to Heurist field map) is empty,
      *   it shows a message and calls `this._getFieldMapping(true)` to force the user
      *   to define mappings. `doAction` will be re-called by `_getFieldMapping` upon completion.
-     * - If field mapping is present or `skipFieldMapping` is `false` (called from `_getFieldMapping`):
+     * - If field mapping is present:
      *   - Retrieves the selected record from the result list.
      *   - Initializes a response object `res`.
      *   - If `this.url_field` (auto-detected URI field from SPARQL results) is set and exists
@@ -525,19 +523,16 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
      * @memberof heurist.lookupWikidata_SPARQL
      * @instance
      * @override
-     * @param {boolean} [skipFieldMapping=true] - If `true`, checks if field mapping is needed.
-     *                                           Set to `false` when called from `_getFieldMapping`
-     *                                           to bypass the check.
      * @returns {void}
      */
-    doAction: function(skipFieldMapping = true){
+    doAction: function(){
         
         this.$Hmsg.bringCoverallToFront(this._as_dialog.parent()); // Show loading indicator
 
         // If called directly and no fields are mapped, force user to map fields first.
-        if(skipFieldMapping && typeof this._fields === 'object' && Object.keys(this._fields).length === 0){
+        if(typeof this._fields === 'object' && Object.keys(this._fields).length === 0){
             this.$Hmsg.showMsgFlash('Please map at least one field to return...', 3000);
-            this._getFieldMapping(true); // Open mapping dialog, then call doAction(false)
+            this._getFieldMapping(true); // Open mapping dialog, then call doAction()
             return;
         }
 
