@@ -1,13 +1,18 @@
 /**
-* searchBuilderSort.js - element in filter builder - to define query element
+* @file searchBuilderSort.js
+* @brief UI element for defining a sort criterion in the advanced search builder.
+* @fileOverview This file defines the `heurist.searchBuilderSort` jQuery UI widget.
+* This widget is a component of the main `searchBuilder` and allows users to specify
+* a field by which to sort the search results, along with the sort direction (ascending/descending).
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\search
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @designer    Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       6.0
 */
 
 /*
@@ -18,6 +23,12 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+ * @widget heurist.searchBuilderSort
+ * @description
+ * jQuery UI widget representing a single sort criterion item in the `searchBuilder`.
+ * It allows users to select a field to sort by and the sort direction (ascending/descending).
+ */
 $.widget( "heurist.searchBuilderSort", {
 
     //{ conjunction: [ {predicate} , {predicate}, .... ] }
@@ -46,7 +57,14 @@ $.widget( "heurist.searchBuilderSort", {
      linked_to,linkedfrom,related_to,relatedfrom,links: various link predicates 
 */    
     
-    // default options
+    /**
+     * @memberof heurist.searchBuilderSort
+     * @instance
+     * @property {Object} options - Default options for the widget.
+     * @property {number} options.rty_ID - The record type ID to filter fields for sorting.
+     * @property {?function} options.onremove - Callback function triggered when the sort item is removed.
+     * @property {?function} options.onchange - Callback function triggered when the sort field or order changes.
+     */
     options: {
         rty_ID: 0,
         
@@ -55,7 +73,12 @@ $.widget( "heurist.searchBuilderSort", {
         onchange: null
     },
 
-    // the widget's constructor
+    /**
+     * @memberof heurist.searchBuilderSort
+     * @instance
+     * @private
+     * @description Widget creation method. Initializes the UI elements for the sort item.
+     */
     _create: function() {
 
         let that = this;
@@ -131,10 +154,13 @@ $.widget( "heurist.searchBuilderSort", {
         
     }, //end _create
     
-    /*
-    * private function
-    * show/hide buttons depends on current login status
-    */
+    /**
+     * @memberof heurist.searchBuilderSort
+     * @instance
+     * @private
+     * @description Refreshes the field selector dropdown with appropriate fields for sorting,
+     *              based on the `options.rty_ID`.
+     */
     _refresh: function(){
         
             let topOptions2 = [
@@ -164,15 +190,23 @@ $.widget( "heurist.searchBuilderSort", {
             
             
     },
-    //
-    // custom, widget-specific, cleanup.
+    /**
+     * @memberof heurist.searchBuilderSort
+     * @instance
+     * @private
+     * @description Widget destruction method. (Currently empty).
+     */
     _destroy: function() {
 
     },
     
-    //
-    //
-    //
+    /**
+     * @memberof heurist.searchBuilderSort
+     * @instance
+     * @description Gets the current sort value, formatted for a Heurist query.
+     *              Prepends '-' for descending order. Prepends 'f:' for field-based sorting.
+     * @returns {string} The sort value string (e.g., "t", "-f:123").
+     */
     getValue: function(){
         
         let key = this.select_fields.val();
@@ -186,7 +220,12 @@ $.widget( "heurist.searchBuilderSort", {
         return key;
     },
 
-    // Get label of selected value
+    /**
+     * @memberof heurist.searchBuilderSort
+     * @instance
+     * @description Gets the display label of the currently selected sort field.
+     * @returns {string} The label of the selected field, or an empty string if no field is selected or "select..." is chosen.
+     */
     getLabel: function(){
 
         let label 

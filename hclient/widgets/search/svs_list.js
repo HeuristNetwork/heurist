@@ -1,12 +1,21 @@
 /**
-* Accordeon/treeview in navigation panel: saved, faceted and tag searches
+* @file svs_list.js
+* @brief Manages and displays lists of saved searches, faceted searches, and tag searches.
+* @fileOverview This file defines the 'heurist.svs_list' jQuery UI widget. This widget is
+* responsible for rendering an accordion or button-style list of saved searches,
+* faceted search configurations, and potentially tag searches within the Heurist
+* navigation panel or other designated areas. It handles loading search
+* configurations, displaying them in tree views or as buttons, initiating
+* searches, and managing edit/delete operations via the HSvsEdit module.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\search
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*
@@ -18,9 +27,51 @@
 */
 /* global HSvsEdit */
 
+/**
+ * @widget heurist.svs_list
+ * @description Manages and displays lists of saved searches, faceted searches, and tag searches.
+ * This widget can render items as an accordion with tree views or as a list of buttons.
+ * It interacts with HSvsEdit for editing and creating saved searches.
+ */
 $.widget( "heurist.svs_list", {
 
-    // default options
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @property {Object} options - Default options for the widget.
+     * @property {boolean} [options.is_h6style=false] - If true, applies H6 styling (typically for embedded scenarios).
+     * @property {boolean} [options.btn_visible_filter=false] - If true, shows a filter input for the tree view.
+     * @property {boolean} [options.btn_visible_save=false] - If true, shows a button to save the current filter.
+     * @property {boolean} [options.buttons_mode=false] - If true, displays saved searches as a list of buttons instead of a tree/accordion.
+     * @property {number} [options.searchTreeMode=-1] - Defines the mode for displaying the search tree:
+     *                                                 -1: Default behavior (depends on other settings like `isPublished`).
+     *                                                  0: Buttons mode.
+     *                                                  1: Tree mode, showing only allowed groups/searches.
+     *                                                  2: Full tree mode, showing all accessible groups (admin/logged-in users).
+     * @property {Array<string|number>} [options.allowed_UGrpID=[]] - Array of user group IDs whose saved searches are allowed to be displayed.
+     * @property {Array<string|number>} [options.allowed_svsIDs=[]] - Array of specific saved search IDs allowed to be displayed (primarily for buttons mode).
+     * @property {?number} options.init_svsID - If set, this saved search ID will be executed automatically on widget initialization.
+     * @property {?function} options.onclose_search - Callback function executed when a faceted search initiated by this widget is closed.
+     * @property {?string} options.sup_filter - Supplementary filter string to be applied to faceted searches.
+     * @property {?function} options.menu_locked - Callback function for menu locking interactions.
+     * @property {boolean} [options.hide_header=false] - If true, hides the main header of the widget (e.g., when inline in a menu).
+     * @property {number} [options.container_width=0] - Explicit width for the container; if 0, it's auto-detected.
+     * @property {number} [options.filter_by_type=1] - Filters the displayed items by type:
+     *                                                0: All types (filters and rulesets).
+     *                                                1: Filters only.
+     *                                                2: RuleSets only.
+     * @property {?function} options.handle_favourites - Callback function to handle adding/removing favourite filters.
+     *                                                 Receives `(svs_ID, name, is_add_action)`.
+     * @property {number} [options.simple_search_allowed=0] - If 1, enables a 'search everything' input field.
+     * @property {string} [options.simple_search_header='Simple search'] - Header text for the simple search section.
+     * @property {string} [options.simple_search_text='Search everything:'] - Label for the simple search input field.
+     * @property {string} [options.language='def'] - Language code for UI elements (e.g., 'en', 'def' for default).
+     * @property {boolean} [options.suppress_default_search=false] - If true, prevents the execution of `init_svsID` on load.
+     * @property {boolean} [options.hide_no_value_facets=true] - For faceted searches, if true, hides facets that have no available values.
+     * @property {?string} options.search_page - Target page URL for navigating after a search (primarily for CMS integration).
+     * @property {?string} options.search_realm - A realm name to scope search events, ensuring this widget only reacts to
+     *                                          events from elements within the same realm.
+     */
     options: {
         is_h6style: false,
 
@@ -59,26 +110,161 @@ $.widget( "heurist.svs_list", {
         
     },
 
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @property {boolean} isPublished - True if the widget is likely in a "published" or embedded mode (less admin UI).
+     */
     isPublished: false,
-    loaded_saved_searches: null,   //loaded searches for button mode - based on options.allowed_XXX
-    missed_saved_searches: null,   //empty groups and missed filters for button mode
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @property {?Object} loaded_saved_searches - Cached saved searches when in buttons_mode. Keyed by svsID.
+     */
+    loaded_saved_searches: null,
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @property {?Array<string|number>} missed_saved_searches - Stores IDs of searches that were specified but not found.
+     */
+    missed_saved_searches: null,
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @property {?Array<string|number>} svs_order - Order of saved search IDs for button mode.
+     */
     svs_order: null,
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @property {?jQuery} search_faceted - jQuery element for the faceted search interface if active.
+     */
     search_faceted: null,
     
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @property {boolean} showclosebutton - Whether to show a close button on an activated faceted search.
+     */
     showclosebutton: true, //for faceted search
     
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @property {Object<string, string>} groups_desc - Cache for user group descriptions. Keyed by groupID.
+     */
     groups_desc:{}, //cache for groups descriptions
 
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @property {?Object} currentSearch - Stores the parameters of the last executed search.
+     */
     currentSearch: null,
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @property {?HSvsEdit} hSvsEdit - Instance of the HSvsEdit controller for editing saved searches.
+     */
     hSvsEdit: null,
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @property {Object<string, Fancytree.Fancytree>} treeviews - Cache of Fancytree instances, keyed by groupID.
+     */
     treeviews:{},
 
+    /** @const @private {string} _HINT_RULESET - Tooltip text for ruleset-only searches. */
     _HINT_RULESET:'It does not perform the search. However it applies rules to current result set and  expand the initial search to a larger set of records by following a set of rules specifying which pointers and relationships to follow (including relationship type and target record types)',
+    /** @const @private {string} _HINT_WITHRULES - Tooltip text for searches that include rules. */
     _HINT_WITHRULES:'Searches with addition of a RuleSet automatically expand the initial search to a larger set of records by following a set of rules specifying which pointers and relationships to follow (including relationship type and target record types)',
+    /** @const @private {string} _HINT_FACETED - Tooltip text for faceted searches. */
     _HINT_FACETED:'Faceted searches allow the user to drill-down into the database on a set of pre-selected database fields',
-
-    // the constructor
-    // create filter+button and div for tree
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @property {?jQuery} div_header - Main header div for the widget.
+     */
+    div_header: null,
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @property {?jQuery} div_header_sub - Sub-header div, often for group descriptions.
+     */
+    div_header_sub: null,
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @property {?jQuery} accordeon - The main container for accordion/tree views or button lists.
+     */
+    accordeon: null,
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @property {?jQuery} search_tree - Container for the saved search tree displays.
+     */
+    search_tree: null,
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @property {?jQuery} filter_div - Container for the tree filter input and buttons.
+     */
+    filter_div: null,
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @property {?jQuery} filter_input - The input field for filtering tree views.
+     */
+    filter_input: null,
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @property {?jQuery} btn_reset - Button to reset the tree filter.
+     */
+    btn_reset: null,
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @property {?jQuery} btn_save - Button to save tree data (Not standard save search).
+     */
+    btn_save: null,
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @property {?HSvsEdit} edit_dialog - Instance of HSvsEdit used for dialog operations. Renamed from hSvsEdit to avoid confusion with HSvsEdit class.
+     */
+    edit_dialog: null, // Was hSvsEdit, renamed to avoid confusion with the class name
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @property {?jQuery} helper_btm - Helper element displayed at the bottom of the accordion.
+     */
+    helper_btm: null,
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @property {?jQuery} direct_search_div - Container for the 'search everything' input field.
+     */
+    direct_search_div: null,
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Widget constructor. Initializes options, sets up main elements (search tree, faceted search panel),
+     * and binds global event listeners.
+     */
     _create: function() {
 
         let tab_td = this.element.parents('td');
@@ -324,9 +510,12 @@ $.widget( "heurist.svs_list", {
         this._refresh();
     }, //end _create
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Adjusts the top position of the accordion/content area, typically after header visibility changes.
+     */
     _adjustAccordionTop: function(){
         
         if(!this.accordeon) return;
@@ -364,11 +553,9 @@ $.widget( "heurist.svs_list", {
     },
 
     _setOption: function( key, value ) {
+    _setOption: function( key, value ) {
         this._super( key, value );
-        /*
-        if(key=='rectype_set'){
-        this._refresh();
-        }*/
+
         if(key=='onclose_search' && this.search_faceted && 
             window.hWin.HEURIST4.util.isFunction(this.search_faceted.search_faceted) && this.search_faceted.search_faceted('instance'))
         {
@@ -376,9 +563,11 @@ $.widget( "heurist.svs_list", {
         }else if(key=='allowed_UGrpID' || key=='hide_header'){
             this._refresh();
         }else if(key=='filter_by_type'){
-            this.div_header.text(window.hWin.HR(value=='2'?'RuleSets':'Saved Filters'));
+            if (this.div_header) { // Ensure div_header exists
+                this.div_header.text(window.hWin.HR(value=='2'?'RuleSets':'Saved Filters'));
+            }
             let that = this;            
-            $(this.treeviews, function(groupID, tree){
+            $.each(this.treeviews, function(groupID, tree){ // Changed from $(this.treeviews) to $.each
                 that._applyTreeViewFilter(groupID, value);            
             });
             if(this.helper_btm){
@@ -389,9 +578,17 @@ $.widget( "heurist.svs_list", {
                 }
             }
         }
-
     },
 
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Sets a widget option from a URL parameter if the option is not already set.
+     * @param {string} key - The widget option key (e.g., 'allowed_UGrpID').
+     * @param {string} param_name - The URL parameter name (e.g., 'groupID').
+     * @param {string} [dtype] - The data type of the parameter ('bool' for boolean, otherwise assumes string/array).
+     */
     _setOptionFromUrlParam: function( key, param_name, dtype ){
 
         let param_value = window.hWin.HEURIST4.util.getUrlParameter(param_name);
@@ -411,7 +608,12 @@ $.widget( "heurist.svs_list", {
 
     },
 
-    /* private function */
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Refreshes the widget's display, primarily by re-evaluating group memberships and updating the accordion.
+     */
     _refresh: function(){
 
         
@@ -441,9 +643,16 @@ $.widget( "heurist.svs_list", {
 
     },
 
-    //
-    // save current treeview layout
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Saves the current layout/structure of a Fancytree (for a specific group) to user preferences on the server.
+     * Does not save if in published mode or if the user is not logged in.
+     * @param {string|number} groupToSave - The ID of the group whose tree data is to be saved ('all' or 'bookmark' for personal trees).
+     * @param {?Object} treeData - The tree data object (usually from `tree.toDict(true)`). If null, it constructs data for `groupToSave`.
+     * @param {?function} callback - Optional callback function to execute after a successful save.
+     */
     _saveTreeData: function( groupToSave, treeData, callback ){
         
         if(this.isPublished || !window.hWin.HAPI4.has_access()) return; //do not save for not logged and publish mode
@@ -484,9 +693,13 @@ $.widget( "heurist.svs_list", {
         } );
     },
     
-    //
-    //
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @description Reloads the list of saved searches from the server and updates the widget display.
+     * This is typically called when there's a need to refresh the data, e.g., after login or external changes.
+     * @param {?function} callback - Optional callback function executed after searches are loaded and the UI is updated.
+     */
     reloadSavedSearches: function( callback ){
         
         let that = this;
@@ -529,9 +742,13 @@ $.widget( "heurist.svs_list", {
         
     },
 
-    //
-    // redraw accordeon - list of workgroups, all, bookmarked
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Updates the main accordion display, populating it with groups and their respective saved search trees or buttons.
+     * Fetches data if not already loaded.
+     */
     _updateAccordeon: function(){
 
         // show saved searches as a list of buttons
@@ -745,9 +962,13 @@ $.widget( "heurist.svs_list", {
         }
     },
     
-    //
-    //  
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Updates the tree view specifically for a single group mode (often used in H6Style).
+     * It clears the existing tree and rebuilds it for the primary allowed group.
+     */
     _updateTreeViewByGroup: function(){
         
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.allowed_UGrpID)) return;
@@ -831,9 +1052,11 @@ $.widget( "heurist.svs_list", {
         this.search_tree.find('.ui-fancytree').css('padding',0);
     },
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @description Refreshes the "SUBSET ACTIVE" indicator in the widget's header if a workset is active.
+     */
     refreshSubsetSign: function(){
         
         if(this.div_header && !this.options.is_h6style){
@@ -855,9 +1078,14 @@ $.widget( "heurist.svs_list", {
         }
     },
     
-    //
-    // draw list of buttons (for publish mode)
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Updates the accordion display to show saved searches as a list of buttons.
+     * This mode is typically used for simplified interfaces or when `options.buttons_mode` is true.
+     * Fetches saved search data if not already loaded.
+     */
     _updateAccordeonAsListOfButtons: function(){
         
         let that = this;
@@ -1033,9 +1261,15 @@ $.widget( "heurist.svs_list", {
 
     },
 
-    //
-    //it adds context menu for evey group header 
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Generates the context menu options for a group header in the accordion.
+     * The menu allows adding new searches, rulesets, or folders.
+     * @param {string|number} groupID - The ID of the group for which to generate the context menu.
+     * @returns {Object} The options object for `jquery.contextmenu`.
+     */
     _getAddContextMenu: function(groupID){
         
         let arr_menu = [];
@@ -1083,9 +1317,13 @@ $.widget( "heurist.svs_list", {
         return context_opts;
     },
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Adds a new folder to the specified group's tree view.
+     * @param {string|number} groupID - The ID of the group where the folder will be added.
+     */
     _addNewFolder: function(groupID){
         let tree = this.treeviews[groupID];
         let node = tree.rootNode;
@@ -1099,9 +1337,15 @@ $.widget( "heurist.svs_list", {
         $("#addlink"+groupID).css('display', 'none');
     },
     
-    //
-    //
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Creates the jQuery header element for an accordion section (group).
+     * @param {string} name - The display name of the group.
+     * @param {string|number} domain - The group ID or domain identifier (e.g., 'all', 'bookmark').
+     * @returns {jQuery} The jQuery object for the header element.
+     */
     _defineHeader: function(name, domain){
         
         let sColor='', sIcon;
@@ -1138,10 +1382,17 @@ $.widget( "heurist.svs_list", {
         return $header
     },
 
-    //
-    // it invokes before each attempt of group tree modification (delete, drag, add, rename)
-    // it verifies date of last modification on server and compare with date stored in treedata
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Verifies if the tree data for a group has been modified on the server
+     * since it was last loaded by the client. If modified, it reloads the tree and
+     * shows a message, preventing the intended operation. Otherwise, it executes `continueFunc`.
+     * This is used to prevent conflicts when multiple users might be editing the same tree.
+     * @param {string|number} groupID - The ID of the group to check. If not a number (e.g., 'all', 'bookmark'), `continueFunc` is called directly.
+     * @param {function} continueFunc - The function to call if no conflict is detected or if `groupID` is not a server-managed group.
+     */
     _avoidConflictForGroup: function(groupID, continueFunc){
 
 
@@ -1189,9 +1440,13 @@ $.widget( "heurist.svs_list", {
 
     },
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Redefines the content (tree view) for a specific group after its data has been reloaded due to a conflict.
+     * @param {string|number} groupID - The ID of the group whose content needs to be redefined.
+     */
     _redefineContent: function(groupID){
         //find group div
         let grp_div = this.accordeon.find('.svs-acordeon[grpid="'+groupID+'"]');
@@ -1200,11 +1455,17 @@ $.widget( "heurist.svs_list", {
     },
 
 
-    //
-    // main method to draw content for particular group
-    // redraw treeview with the list of saved searches for given groupID and domain
-    // add tree as a accordeon content
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Defines and renders the Fancytree content for a specific group within the accordion.
+     * Sets up tree options, including drag-and-drop, editing, filtering, and context menus if applicable.
+     * @param {string|number} groupID - The ID of the group or domain (e.g., 'all', 'bookmark') for which to define content.
+     * @param {number} container_width - The width of the container, used for truncating titles.
+     * @param {jQuery} [container] - Optional jQuery element to append the tree to. If null, a new div is created.
+     * @returns {jQuery} The jQuery object representing the tree container or the provided container.
+     */
     _defineContent: function(groupID, container_width, container){
         //
         let res;
@@ -1829,9 +2090,16 @@ $.widget( "heurist.svs_list", {
     },
     
             
-    //
-    //
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Activates context menus and applies truncation to titles for nodes in a Fancytree.
+     * This is typically called after a tree is rendered or updated.
+     * @param {?(string|number)} groupID - The ID of the group whose tree needs processing. If null, `tree` parameter must be provided.
+     * @param {jQuery} [tree] - The jQuery object for the Fancytree container. Used if `groupID` is null.
+     * @param {number} [container_width] - The width of the container, used for calculating truncation. Defaults to `this.options.container_width`.
+     */
     _activateMenuAndTruncate: function(groupID, tree, container_width)
     {            
             if(!(container_width>0)) container_width = this.options.container_width;
@@ -1884,9 +2152,16 @@ $.widget( "heurist.svs_list", {
             });
     },
     
-    //
-    //
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Applies a filter to a specific group's Fancytree based on the widget's `filter_by_type` option.
+     * This is primarily used in H6Style where visibility might be controlled by this filter.
+     * @param {string|number} groupID - The ID of the group whose tree needs filtering.
+     * @param {number} [value] - The filter type value. If not provided, `this.options.filter_by_type` is used.
+     *                           0: All, 1: Filters only, 2: Rulesets only.
+     */
     _applyTreeViewFilter: function(groupID, value){
         if(this.options.is_h6style){
             
@@ -1927,9 +2202,14 @@ $.widget( "heurist.svs_list", {
         }  
     },
 
-    //
-    // NOT USED
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Saves a new search. (Currently marked as NOT USED, consider for removal or review).
+     * @param {Object} request - The request object for saving the search.
+     * @param {Fancytree.FancytreeNode} node - The Fancytree node relative to which the new search node should be added.
+     */
     _saveSearch: function(request, node){
 
         let that = this;
@@ -1968,9 +2248,13 @@ $.widget( "heurist.svs_list", {
 
 
     },
-    //
-    //
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @description Executes a search given a saved search ID. Fetches search parameters if not already loaded.
+     * @param {number|string} svs_ID - The ID of the saved search to execute.
+     * @param {string} [query_name] - Optional name for the query, defaults to `svs_ID`.
+     */
     doSearchByID: function(svs_ID, query_name){
     
         if(window.hWin.HAPI4.currentUser?.usr_SavedSearch?.[svs_ID]){
@@ -1998,9 +2282,16 @@ $.widget( "heurist.svs_list", {
         
     },
     
-    //
-    //
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @description Executes a search based on provided parameters.
+     * Handles different search types (standard, faceted, rules-only).
+     * @param {number|string} svs_ID - The ID of the saved search, or 0/string for ad-hoc searches.
+     * @param {string} qname - The name/label for the query.
+     * @param {string|Object} qsearch - The query string or a parsed query object.
+     * @param {Element} [ele] - The UI element that triggered the search (for context/feedback).
+     */
     doSearch: function(svs_ID, qname, qsearch, ele){
 
         if ( qsearch ) {
@@ -2165,9 +2456,14 @@ $.widget( "heurist.svs_list", {
 
     },
     
-    //
-    //
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Handles the deletion of a saved search. Prompts for confirmation before deleting.
+     * @param {Fancytree.FancytreeNode} node - The Fancytree node representing the saved search to delete.
+     * @param {function} callback - Callback function to execute after successful deletion (usually to update the UI).
+     */
     _deleteSavedSearch: function(node, callback){
 
         let svsID = node.key;
@@ -2201,9 +2497,14 @@ $.widget( "heurist.svs_list", {
 
     }
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @description Duplicates an existing saved search.
+     * @param {string|number} groupID - The group ID where the duplicated search will be placed.
+     * @param {number|string} svsID - The ID of the saved search to duplicate.
+     * @param {Fancytree.FancytreeNode} node - The Fancytree node of the original search, used as a reference for placing the new node.
+     */
     , duplicateSavedSearch: function(groupID, svsID, node){
         
         let svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
@@ -2235,11 +2536,19 @@ $.widget( "heurist.svs_list", {
         
     }
     
-    // open edit dialog
-    // mode: saved, rules, faceted
-    // groupID - current user or workgroup
-    // svsID - saved search id
-    // squery
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @description Opens the dialog for editing an existing saved search or creating a new one.
+     * Uses the HSvsEdit module to handle the editing UI.
+     * @param {?string} mode - The mode for editing ('saved', 'rules', 'faceted'). If null, it's inferred.
+     * @param {string|number} groupID - The group ID for the search.
+     * @param {?number|string} svsID - The ID of the saved search to edit. Null for a new search.
+     * @param {string|Object} [squery] - Initial query string or object, used if creating a new search or overriding existing.
+     * @param {Fancytree.FancytreeNode} [node] - The Fancytree node associated with the search (if applicable).
+     * @param {boolean} [is_short] - If true, shows a compact version of the edit dialog.
+     * @param {?function} [after_save_callback] - Callback function executed after a successful save.
+     */
     , editSavedSearch: function(mode, groupID, svsID, squery, node, is_short, after_save_callback){
 
         let that = this;
@@ -2393,11 +2702,20 @@ $.widget( "heurist.svs_list", {
 
 
     // events bound via _on are removed automatically
-    // revert other modifications here
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Widget destructor. Cleans up generated elements and event bindings.
+     * Note: Global event listeners bound with `$(window.hWin.document).on(...)` are not automatically removed by jQuery UI widget destruction.
+     * Consider manual removal if this widget instance can be destroyed and recreated multiple times causing duplicate bindings.
+     */
     _destroy: function() {
         // remove generated elements
-        if(this.edit_dialog) {
+        // remove generated elements
+        if(this.edit_dialog && typeof this.edit_dialog.remove === 'function') { // Check if edit_dialog has remove method
             this.edit_dialog.remove();
+            this.edit_dialog = null; // Clear reference
         }
 
         if(this.filter_div){
@@ -2414,9 +2732,14 @@ $.widget( "heurist.svs_list", {
         this.search_faceted.remove();
     }
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @deprecated Potentially old method to copy filter string to clipboard. Consider using `_getFilterString`.
+     * @description Copies the string representation of a saved search to the clipboard. (Marked as OLD, likely superseded by _getFilterString).
+     * @param {number|string} svs_ID - The ID of the saved search.
+     */
     , _getFilterStrin_OLD: function( svs_ID ){
         
         let svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID];
@@ -2449,9 +2772,14 @@ $.widget( "heurist.svs_list", {
         
     },
     
-    //
-    //  open dialog to copy filter+rules as json query
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Opens a popup dialog to display and allow copying of the filter string (JSON query).
+     * @param {number|string} svs_ID - The ID of the saved search.
+     * @param {jQuery} pos_element - The element to position the popup relative to.
+     */
     _getFilterString: function(svs_ID, pos_element){
 
         let svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID];
@@ -2469,9 +2797,13 @@ $.widget( "heurist.svs_list", {
     },
 
     
-    //
-    // Displays URL to run saved search to user
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Displays a dialog showing the direct URL to run a specific saved search.
+     * @param {number|string} svs_ID - The ID of the saved search.
+     */
     _showURLDialog: function(svs_ID){
         
         const URL = `${window.hWin.HAPI4.baseURL_pro}?db=${window.hWin.HAPI4.database}&svs=${svs_ID}`;
@@ -2496,9 +2828,13 @@ $.widget( "heurist.svs_list", {
 
     //--------------------------------------------------------------------------------------
     
-    //
-    //
-    //    
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @description Retrieves the tree data for saved filters, either for specific allowed groups or all accessible groups.
+     * @param {?Array<string|number>} allowed_groups - Array of group IDs to fetch tree data for. If null/empty, fetches for all accessible groups.
+     * @param {function} callback - Function to call after fetching and processing the tree data. Receives the processed tree data object as an argument.
+     */
     getFiltersTreeData: function( allowed_groups, callback ){
         
             let that = this;
@@ -2546,9 +2882,13 @@ $.widget( "heurist.svs_list", {
             } );  //ssearch_gettree
     },
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Generates a default tree structure for saved searches based on current user's groups and permissions.
+     * @returns {Object} The default tree data object, keyed by group ID or domain ('all', 'bookmark').
+     */
     __default_TreeData: function(){
         
         let treeData;
@@ -2590,10 +2930,18 @@ $.widget( "heurist.svs_list", {
     },
     
         
-    //
-    // remove nodes that refers to missed search
-    //it returns null if leaf is not found
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Cleans the raw tree data received from the server by removing nodes that refer to
+     * saved searches not found in the current user's `usr_SavedSearch` cache or not belonging to the specified group.
+     * Recursively processes children. If modifications are made, `data.was_cleaned` is set to true.
+     * @param {Object} data - The tree node data to clean.
+     * @param {number} level - The current recursion level (0 for top level).
+     * @param {string|number} groupID - The group ID context for validation.
+     * @returns {?Object} The cleaned tree node data, or null if the node itself should be removed.
+     */
     __clean_TreeData: function (data, level, groupID){
 
             if(level==0){ //this is top level  data['all'] && data['bookmark'] && data['entity']
@@ -2638,9 +2986,15 @@ $.widget( "heurist.svs_list", {
             }
     },//end __clean_TreeData
     
-    //
-    // add missed groups and saved searches to treeview (to the end of tree)
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Validates the loaded tree data against a default structure, adding any missing groups or saved searches
+     * from the default structure to the loaded data. This ensures that newly available searches or groups are displayed.
+     * @param {Object} treeDataF - The tree data loaded from user preferences or server.
+     * @returns {Object} The validated and potentially augmented tree data.
+     */
     __validate_TreeData: function( treeDataF ){
 
         let treeData = this.__default_TreeData();
@@ -2694,11 +3048,16 @@ $.widget( "heurist.svs_list", {
         return treeDataF;
     },
 
-    //
-    // for default tree data
-    // create list of saved searches for given user/group
-    // domain - all or bookmark
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Creates a default list of saved search nodes for a given user/group ID and domain.
+     * Includes predefined searches like 'Recent changes' and 'All (date order)' for the current user.
+     * @param {number|string} ugr_ID - The user or group ID.
+     * @param {string} domain - The domain ('all' or 'bookmark') for personal searches.
+     * @returns {Array<Object>} An array of Fancytree node configuration objects.
+     */
     __define_SVSlist: function(ugr_ID, domain){
 
         let ssearches = window.hWin.HAPI4.currentUser.usr_SavedSearch;
@@ -2734,9 +3093,17 @@ $.widget( "heurist.svs_list", {
 
     },
 
-    //
-    // on drag drop listener - move folder or filter to another workgroup
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Handles moving a saved search (or folder of searches) to a different group.
+     * Updates server-side data and then refreshes the relevant tree views.
+     * @param {Fancytree.FancytreeNode} mod_node - The Fancytree node being moved.
+     * @param {string|number} newGroupID - The ID of the target group.
+     * @param {Fancytree.FancytreeNode} [node] - The target node in the destination tree (if dropping onto a specific node).
+     * @param {Object} [data] - The drag-and-drop data object from Fancytree (contains `hitMode`).
+     */
     _moveSavedSearch: function(mod_node, newGroupID, node, data)                                                             
     {
         let oldGroupID = mod_node.tree.options.groupID;
@@ -2792,9 +3159,15 @@ $.widget( "heurist.svs_list", {
         });
     },
     
-    //
-    // no filters defined message (for publish node)
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @private
+     * @description Generates a user-friendly message when specified groups or saved searches are not found or accessible.
+     * @param {?Array<string|number>} groupIDs - Array of group IDs that were not found or are empty.
+     * @param {?Array<string|number>} svsIDs - Array of saved search IDs that were not found.
+     * @returns {string} The HTML string for the message.
+     */
     _getNotFoundMessage: function(groupIDs, svsIDs){
         let is_logged = window.hWin.HAPI4.has_access();
         
@@ -2857,9 +3230,15 @@ $.widget( "heurist.svs_list", {
         return sMsg;
     },
 
-    //
-    // Add 'search everything' container
-    //
+    /**
+     * @memberof heurist.svs_list
+     * @instance
+     * @description Adds a "Search everything" input field and button to the widget, allowing for simple, direct searches.
+     * This is typically used in published/CMS scenarios.
+     * @param {boolean} [is_buttons=false] - If true, positions the search input after the accordion (button list).
+     *                                      Otherwise, positions it before the accordion.
+     * @returns {jQuery} The jQuery object for the created direct search div.
+     */
     addSearchEverything: function(is_buttons=false){
 
         let that = this;

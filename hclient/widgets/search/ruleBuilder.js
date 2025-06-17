@@ -1,12 +1,21 @@
 /**
-* ruleBuilder.js  - dialog to define rules to search related records
+* @file ruleBuilder.js
+* @brief Dialog to define rules to search related records.
+* @fileOverview This file defines the `ruleBuilder` jQuery UI widget.
+* This widget provides an interface for users to construct rules for finding
+* records related to a current search result set. It allows specifying
+* source record types, relationship/pointer fields, target record types,
+* and additional filters to refine the search for related records.
+* Rules can be nested to create multi-step relationship searches.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\search
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*
@@ -18,9 +27,28 @@
 */
 /* global showSearchBuilder */
 
+/**
+ * @widget heurist.ruleBuilder
+ * @description
+ * jQuery UI widget for defining rules to search for related records.
+ * It allows users to build complex, multi-level queries by specifying
+ * relationships and filters between record types.
+ */
 $.widget( "heurist.ruleBuilder", {
 
-    // default options
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @property {Object} options - Default options for the widget.
+     * @property {number} options.level - The nesting level of the current rule.
+     * @property {Object} options.rules - JSON object representing the initial rules to load.
+     *                                    Example: `{query:String , codes:[], levels:[]}`.
+     *                                    `codes` is an array: `[source_rt, dt_id, term_id, target_rt, filter, linktype]`.
+     * @property {?string[]|string} options.recordtypes - Array or comma-separated string of source record type IDs
+     *                                                    to limit the initial selection. If null, all record types are shown.
+     * @property {?number} options.init_source_rt - The initial source record type ID to select.
+     * @property {?function} options.onremove - Callback function triggered when a rule is removed.
+     */
     options: {
         level: 0,
         rules: {}, // JSON: {query:String , codes:[], levels:[]}
@@ -32,14 +60,35 @@ $.widget( "heurist.ruleBuilder", {
         onremove: null
     },
 
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @private
+     * @property {?Object} _selection - Current set of selected records (not actively used in current code).
+     */
     _selection: null,     // current set of selected records
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @private
+     * @property {Array<Object>} _arr_fields - Stores information about direct and reverse resource/relation fields.
+     */
     _arr_fields:[],       // all direct and reverse resource (record pointer) and relation fields
     
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @private
+     * @property {Array<string>} _arr_rectypes - List of all target record type IDs for the currently selected source record type.
+     */
     _arr_rectypes:[],          //list of all target rectypes for current selected source rt
 
-    //
-    // the widget's constructor
-    //
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @private
+     * @description Widget creation method. Initializes the UI elements for rule building.
+     */
     _create: function() {
 
        let that = this;
@@ -134,9 +183,13 @@ $.widget( "heurist.ruleBuilder", {
         this._initRules();
     }, //end _create
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @private
+     * @description Opens the search builder dialog to edit the additional filter for the current rule.
+     *              The target record type of the current rule is passed to the search builder.
+     */
     _editFilter: function(){
             
             showSearchBuilder({is_for_rules: true, 
@@ -144,9 +197,13 @@ $.widget( "heurist.ruleBuilder", {
                               input_element: this.additional_filter});
     },
     
-    //
-    //
-    //
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @private
+     * @description Removes the current rule element from the DOM.
+     *              If it's the last child of a parent rule, re-enables the parent's select elements.
+     */
     _removeRule: function(){
         //$('#'+this.element.attr('id')).remove();    //remove itself
 
@@ -161,9 +218,14 @@ $.widget( "heurist.ruleBuilder", {
 
     },
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @private
+     * @description Adds a new child rule builder instance to the current rule.
+     *              Disables the select elements of the current rule.
+     * @param {?Object} rules - The initial rules to load into the new child rule builder.
+     */
     _addChildRule: function(rules){
 
         let new_level = this.options.level + 1;
@@ -186,8 +248,12 @@ $.widget( "heurist.ruleBuilder", {
 
     },
 
-    //
-    // custom, widget-specific, cleanup.
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @private
+     * @description Widget destruction method. Removes generated UI elements.
+     */
     _destroy: function() {
 
         // remove generated elements
@@ -202,7 +268,14 @@ $.widget( "heurist.ruleBuilder", {
     },
 
 
-    //update relation and target selectors
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @private
+     * @description Event handler for when the source record type selection changes.
+     *              Updates the available fields and target record types based on the new selection.
+     * @param {Event} event - The change event.
+     */
     _onSelectRectype: function(event){
 
         let rt_ID = this.select_source_rectype.val();
@@ -378,16 +451,26 @@ $.widget( "heurist.ruleBuilder", {
         
     },
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @private
+     * @description Finds field information from the internal `_arr_fields` array by its ID.
+     * @param {string|number} dt_ID - The ID of the field to find.
+     * @returns {?Object} The field object if found, otherwise undefined.
+     */
     _findField: function(dt_ID){
         return this._arr_fields[dt_ID];
     },
 
-    //
-    // load relation types
-    //
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @private
+     * @description Event handler for when the selected field (pointer/relationship) changes.
+     *              Updates the relationship type selector and target record type selector based on the selected field.
+     * @param {Event} [event] - The change event (optional).
+     */
     _onSelectFieldtype: function(event){
 
         let dt_ID_key = this.select_fields.val(), //event?event.target.value:''
@@ -446,6 +529,14 @@ $.widget( "heurist.ruleBuilder", {
 
     },
 
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @private
+     * @description Gets the currently selected target record type ID.
+     *              If "Any record type" is selected, it attempts to determine a single target if only one is available.
+     * @returns {string} The target record type ID, or an empty string.
+     */
     _getTargetRt: function(){
         let rt_target = '';
         if(!window.hWin.HEURIST4.util.isempty(this.select_target_rectype.val())){
@@ -459,9 +550,14 @@ $.widget( "heurist.ruleBuilder", {
         return rt_target;
     },
 
-    //
-    //
-    //   
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @private
+     * @description Retrieves the current rule definition as an array of codes.
+     *              Format: `[source_rt, dt_id, rel_term_id, target_rt, filter, linktype]`
+     * @returns {?Array<string|number>} An array representing the rule codes, or null if the source record type is not selected.
+     */
     _getCodes: function(){
 
         let rt_source   = this.select_source_rectype.val();
@@ -503,6 +599,14 @@ $.widget( "heurist.ruleBuilder", {
         
     },
 
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @private
+     * @description Generates a Heurist query string based on the provided rule codes.
+     * @param {Array<string|number>} codes - An array of rule codes: `[source_rt, dt_ID, rel_type, target_rt, filter, linktype]`.
+     * @returns {string} The generated Heurist query string.
+     */
     _getQuery: function(codes){
 
         let query = '';
@@ -539,7 +643,15 @@ $.widget( "heurist.ruleBuilder", {
         return query;
     },
 
-    //select recordtype, field, reltype and ta
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @private
+     * @description Initializes the rule builder UI based on the `options.rules`.
+     *              Parses the rule definition (either from `codes` or `query` object)
+     *              and sets the values of the select elements and filter input.
+     *              Recursively initializes child rules if present.
+     */
     _initRules: function(){
 
         if(this.options.rules){
@@ -689,11 +801,14 @@ $.widget( "heurist.ruleBuilder", {
 
     },
 
-    //
-    // fill options.rules
-    // 1. generate current query string and codes array
-    // 2. recursion for all dependent rules
-    //
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @description Gets the current rule definition, including sub-rules, in an older format.
+     *              The rule is represented as an object: `{query:String , codes:Array, levels:Array<Object>}`.
+     * @returns {?Object} The rule object, or null if the current rule is incomplete.
+     * @deprecated Use `getRules` for the current JSON format.
+     */
     getRulesOld: function(){
 
         // original rule array
@@ -721,9 +836,14 @@ $.widget( "heurist.ruleBuilder", {
         }
     },
 
-    //
-    // get rules in json format
-    //     
+    /**
+     * @memberof heurist.ruleBuilder
+     * @instance
+     * @description Gets the current rule definition, including sub-rules, in a JSON format.
+     *              The rule is represented as an object: `{query:Object, levels:Array<Object>}`.
+     *              The `query` object follows the Heurist JSON query structure.
+     * @returns {?Object} The rule object in JSON format, or null if the current rule is incomplete.
+     */
     getRules: function(){
 
         // original rule array

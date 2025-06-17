@@ -1,16 +1,26 @@
 /**
-* Media Viewer. It accept list of media in rec_Files or fills it with search_initial
-* It may work in 3 modes
-* 1) creates thumbnails and opens fancybox on click
-* 2) use existing thumbnails with attributes data-id or data-recid 
-* 3) opens fancybox on method show
-*
+* @file        mediaViewer.js
+* @brief       Viewer for various media types with thumbnail display and FancyBox integration.
+* @fileOverview This file provides the `heurist.mediaViewer` jQuery UI widget. It is
+*              designed to display various media types (images, PDFs, audio, video,
+*              IIIF, 3D models). The widget can operate in several modes:
+*              1. Generate thumbnails for a provided list of media files
+*                 (`options.rec_Files`) and open them in a FancyBox lightbox on click.
+*              2. Utilize existing thumbnail elements in the DOM (specified by
+*                 `options.selector`) and attach FancyBox functionality to them.
+*              3. Programmatically open media in FancyBox using the `show()` method.
+*              It handles different media sources, including direct file URLs, external
+*              URLs, and special Heurist internal formats like IIIF manifests or
+*              tiled images. It can also display links to open media in new tabs or
+*              download them.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\viewers
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*
@@ -21,10 +31,36 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
+/**
+ * @widget heurist.mediaViewer
+ * @description A jQuery UI widget for displaying various media types.
+ * It supports thumbnail generation, FancyBox integration for lightbox viewing,
+ * and handling of diverse media sources including IIIF and 3D models.
+ */
 $.widget( "heurist.mediaViewer", {
 
-    // default options
+    /**
+     * @memberof heurist.mediaViewer
+     * @instance
+     * @property {Object} options - Default options for the widget.
+     * @property {?Array<Object>} options.rec_Files - An array of file objects to display. Each object should
+     *           typically have properties like `rec_ID`, `id` (obfuscated file ID), `mimeType`,
+     *           `filename`, `title`, `external` (URL for external content), and `mode_3d_viewer`.
+     *           If null, `search_initial` might be used.
+     * @property {?string|Object} options.search_initial - A search query or parameters to fetch media files
+     *           if `rec_Files` is not provided directly.
+     * @property {?string} options.selector - A jQuery selector for existing thumbnail elements. If provided,
+     *           the widget will not render its own thumbnails but will attach FancyBox behavior
+     *           to the elements matching this selector.
+     * @property {boolean} [options.openInPopup=true] - If true, attempts to open media like videos or PDFs
+     *           in a FancyBox popup. For audio, it might still render inline.
+     * @property {boolean} [options.showLink=false] - If true, displays an "OPEN IN NEW TAB" or "DOWNLOAD" link
+     *           (or "open in Mirador/3D viewer") below each thumbnail.
+     * @property {?string} options.baseURL - The base URL for constructing Heurist file links. If null,
+     *           it attempts to use `window.hWin.HAPI4.baseURL`.
+     * @property {?string} options.database - The Heurist database name. If null, it attempts to use
+     *           `window.hWin.HAPI4.database`.
+     */
     options: {
         rec_Files: null, //array of objects {rec_ID, (obfuscation_file_)id, mimeType, filename, extrernal}
         search_initial:null, //if rec_Files are not defined - use this search query to retrieve rec_Files
@@ -38,7 +74,14 @@ $.widget( "heurist.mediaViewer", {
         database: null
     },
 
-    // the constructor
+    /**
+     * @memberof heurist.mediaViewer
+     * @instance
+     * @private
+     * @description Widget constructor. Initializes `mediacontent` to the widget's element,
+     * sets default `baseURL` and `database` from global Heurist context if available,
+     * and calls `_refresh()` to process initial media.
+     */
     _create: function() {
         this.mediacontent = this.element;
         
@@ -55,11 +98,27 @@ $.widget( "heurist.mediaViewer", {
         
     }, //end _create
     
+    /**
+     * @memberof heurist.mediaViewer
+     * @instance
+     * @private
+     * @description Handles setting options for the widget. It calls the superclass's
+     * method and then triggers a refresh to apply any changes.
+     */
     _setOptions: function() {
         this._superApply( arguments );
         this._refresh();
     },
     
+    /**
+     * @memberof heurist.mediaViewer
+     * @instance
+     * @private
+     * @description Refreshes the media display. If `options.search_initial` is set,
+     * it fetches media files via `RecordMgr.search_new`. Once media files are available
+     * (either from search or directly from `options.rec_Files`), it calls `_initControls`
+     * to render or initialize them.
+     */
     _refresh: function(){
         
         if(this.options.search_initial)
@@ -91,16 +150,25 @@ $.widget( "heurist.mediaViewer", {
         }
     },
 
-    // events bound via _on are removed automatically
-    // revert other modifications here
+    /**
+     * @memberof heurist.mediaViewer
+     * @instance
+     * @private
+     * @description Cleans up the widget before it's removed. Empties the media content area.
+     */
     _destroy: function() {
         this.mediacontent.empty();
-    }
+    },
 
-    //
-    // init controls
-    //    
-    ,_initControls: function(){
+    /**
+     * @memberof heurist.mediaViewer
+     * @instance
+     * @private
+     * @description Initializes the controls for displaying media.
+     * If `options.selector` is provided, it calls `_initThumbnails` to use existing elements.
+     * Otherwise, it calls `_renderThumbnails` to create new thumbnail elements.
+     */
+    _initControls: function(){
         
         if(this.options.selector){
            //thumbnails already exist
@@ -109,9 +177,17 @@ $.widget( "heurist.mediaViewer", {
             this._renderThumbnails();
         }
         
-    }
+    },
     
-    , _htmlUnescape:function(text) {
+    /**
+     * @memberof heurist.mediaViewer
+     * @instance
+     * @private
+     * @description Unescapes HTML entities in a given text string.
+     * @param {?string} text - The text containing HTML entities to unescape.
+     * @returns {?string} The unescaped text, or null if the input was null.
+     */
+    _htmlUnescape:function(text) {
         if(text){
             let e = document.createElement("textarea");
             e.innerHTML = text;
@@ -120,12 +196,19 @@ $.widget( "heurist.mediaViewer", {
         }else{
             return null;
         }
-    }
+    },
 
-    //
-    //
-    //    
-    ,_renderThumbnails: function(title){
+    /**
+     * @memberof heurist.mediaViewer
+     * @instance
+     * @private
+     * @description Renders thumbnail previews for the media files specified in `options.rec_Files`.
+     * It clears existing content, then iterates through the files, creating thumbnail images
+     * and associated links. If `options.showLink` is true, it also adds download/external links.
+     * Finally, it calls `_initThumbnails` to attach FancyBox functionality.
+     * @param {string} [title] - A default title to use for thumbnails if a file object doesn't have one.
+     */
+    _renderThumbnails: function(title){
 
         this.mediacontent.empty();
         
@@ -230,12 +313,21 @@ $.widget( "heurist.mediaViewer", {
             
             this._initThumbnails('a[data-id]');
         }
-    }
+    },
     
-    //
-    //
-    //
-    ,_initThumbnails: function(selector){
+    /**
+     * @memberof heurist.mediaViewer
+     * @instance
+     * @private
+     * @description Initializes FancyBox functionality for thumbnail elements matching the given selector.
+     * It iterates through the matched elements, determines the media type and appropriate URL
+     * (for direct viewing, IIIF, 3D, PDF, audio/video), and configures FancyBox attributes
+     * (like `data-src`, `data-type`, `data-href`). It also attaches click handlers for special
+     * cases like IIIF and 3D viewers that open in custom dialogs or new tabs.
+     * @param {string} selector - A jQuery selector for the thumbnail elements (typically `<a>` tags)
+     *                          that should trigger FancyBox or custom viewers.
+     */
+    _initThumbnails: function(selector){
         
         let eles = this.mediacontent.find(selector);
         let that = this;
@@ -453,16 +545,24 @@ $.widget( "heurist.mediaViewer", {
         
     },
 
-    //
-    // opens explicitely
-    //    
+    /**
+     * @memberof heurist.mediaViewer
+     * @instance
+     * @description Programmatically triggers a click on the first thumbnail matching `options.selector`.
+     * This is used to open the FancyBox gallery if `options.selector` is defined and thumbnails
+     * are managed externally.
+     */
     show: function (){
         this.mediacontent.find(this.options.selector+':first').trigger('click');
     },
     
-    //
-    // removes of event handlers 
-    //
+    /**
+     * @memberof heurist.mediaViewer
+     * @instance
+     * @description Clears all event handlers, specifically the FancyBox click handler,
+     * from the media content area. This is useful when the widget is being destroyed or refreshed
+     * to prevent multiple handlers from being attached.
+     */
     clearAll: function (){
 
         if(this.options.selector){

@@ -1,13 +1,23 @@
 /**
-*  Apply faceted search
-* TODO: Check that this is what it does and that it is not jsut an old version
+* @file search_faceted.js
+* @brief Applies faceted search functionality.
+* @fileOverview This file defines the `heurist.search_faceted` jQuery UI widget,
+* which provides a faceted search interface. It allows users to refine search
+* results by selecting values from various facets. The widget handles the
+* creation of facet queries, retrieval of facet values and counts, and
+* redrawing the facet display based on user selections and search results.
+* It supports different display modes for facets (list, dropdown, columns)
+* and can integrate with spatial and temporal filters.
+* TODO: Check that this is what it does and that it is not just an old version
 * 
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\search
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*
@@ -138,6 +148,13 @@ rectypes[0]
 requires:
 editing_input
 */
+
+/**
+ * @widget heurist.search_faceted
+ * @description
+ * jQuery UI widget for applying faceted search.
+ * It allows users to refine search results by selecting values from various facets.
+ */
 $.widget( "heurist.search_faceted", {
 
     _MIN_DROPDOWN_CONTENT: 50,//0, //min number in dropdown selector, otherwise facet values are displayed in explicit list
@@ -147,7 +164,24 @@ $.widget( "heurist.search_faceted", {
     _FT_COLUMN: 3,  //wrapped list view mode
 
     
-    // default options
+    /**
+     * @memberof heurist.search_faceted
+     * @instance
+     * @property {Object} options - Default options for the widget.
+     * @property {boolean} options.is_h6style - If true, applies H6 styling.
+     * @property {Object} options.params - Parameters for configuring the faceted search, including facet definitions.
+     * @property {boolean} options.ispreview - If true, runs in preview mode (e.g., limiting results).
+     * @property {boolean} options.showclosebutton - Whether to show the close button.
+     * @property {boolean} options.showresetbutton - Whether to show the reset button.
+     * @property {?number} options.svs_ID - ID of a saved search view.
+     * @property {?function} options.onclose - Callback function triggered when the widget is closed.
+     * @property {boolean} options.is_publication - If true, adapts styling for publication mode.
+     * @property {boolean} options.respect_relation_direction - Global flag for respecting relation direction, or use facet.relation.
+     * @property {string} options.language - Language code for multilingual support.
+     * @property {boolean} options.hide_no_value_facets - If true, hides facets that currently have no selectable values.
+     * @property {?string} options.search_page - Target page for search results (used in CMS).
+     * @property {?string} options.search_realm - Search realm for event scoping.
+     */
     options: {
         is_h6style: true,
         params: {},
@@ -203,7 +237,12 @@ $.widget( "heurist.search_faceted", {
     _expanded_count_order: [], // order of retrieval for above
     _expanded_count_cancel: false,
     
-    // the widget's constructor
+    /**
+     * @memberof heurist.search_faceted
+     * @instance
+     * @private
+     * @description Widget creation method. Initializes the UI, loads HTML for facets, and sets up event handlers.
+     */
     _create: function() {
         
         if(!this.options.language) this.options.language = 'def'; //"xx" means use current language

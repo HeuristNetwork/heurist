@@ -1,13 +1,22 @@
 /**
-*  Wizard to define advanced search
+* @file searchBuilder.js
+* @brief Wizard to define advanced search queries.
+* @fileOverview This file defines the `heurist.searchBuilder` jQuery UI widget.
+* This widget provides a comprehensive interface for users to construct
+* complex search queries. It allows selecting main and additional record types,
+* adding multiple field-based criteria with various operators, defining sort orders,
+* and incorporating rule-based searches for related records. The resulting query
+* can be applied directly, saved, or used to populate an input element.
 *
 * @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @designer    Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @designer    Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @subpackage  hclient\widgets\search
+* @since       6.0
+* @link        https://HeuristNetwork.org
 */
 
 /*
@@ -18,9 +27,33 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.searchBuilder", {
+/**
+ * @widget heurist.searchBuilder
+ * @extends $.heurist.baseDialog
+ * @description
+ * jQuery UI widget that provides a wizard-like interface for constructing advanced search queries.
+ * It allows users to define criteria based on record types, fields, relationships, and sorting.
+ */
+$.widget( "heurist.searchBuilder", $.heurist.baseDialog, {
 
-    // default options
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @property {Object} options - Default options for the widget.
+     * @property {boolean} options.is_dialog - If true, the widget is rendered as a dialog.
+     * @property {string} options.default_palette_class - Default CSS class for the dialog palette.
+     * @property {boolean} options.is_h6style - If true, applies H6 styling.
+     * @property {?number} options.svsID - ID of a saved search to load (not fully implemented).
+     * @property {?string} options.domain - Search domain (e.g., 'bookmark', 'all', or usergroup ID).
+     * @property {boolean} options.is_modal - If true and `is_dialog` is true, the dialog is modal.
+     * @property {?function} options.menu_locked - Callback for menu locking state.
+     * @property {?function} options.onsave - Callback triggered when saving a search.
+     * @property {?function} options.onClose - Callback triggered when the dialog is closed.
+     * @property {?function} options.beforeClose - Callback triggered before the dialog closes.
+     * @property {?number} options.rty_ID - Initial record type ID to select.
+     * @property {?jQuery} options.input_element - jQuery element to populate with the generated query string.
+     * @property {boolean} options.is_for_rules - If true, adapts the builder for defining rule-based search parts.
+     */
     options: {
         is_dialog: false,
         default_palette_class: 'ui-heurist-explore', 
@@ -38,33 +71,134 @@ $.widget( "heurist.searchBuilder", {
         is_for_rules: false
     },
 
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @property {boolean} is_advanced - Flag indicating if advanced mode is active (not fully implemented).
+     */
     is_advanced: false,
     
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @property {?jQuery} _dialog - jQuery UI dialog instance if `options.is_dialog` is true.
+     */
     _dialog: null,
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @property {boolean} is_edit_continuing - Flag related to edit state (purpose unclear).
+     */
     is_edit_continuing: false, //???
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @property {boolean} _lock_mouseleave - Flag to lock mouseleave events, likely for menu interactions.
+     */
     _lock_mouseleave: false,
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @property {boolean} _save_in_porgress - Flag indicating if a save operation is in progress.
+     */
     _save_in_porgress: false,
 
     //controls
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @property {?jQuery} select_main_rectype - Select element for the main record type.
+     */
     select_main_rectype: null,
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @property {?jQuery} select_additional_rectypes - Input element for selecting additional record types.
+     */
     select_additional_rectypes: null,
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @property {?jQuery} svs_MultiRtSearch - Checkbox for enabling multi-record type search.
+     */
     svs_MultiRtSearch: null,
-    //field_selector: null,
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @property {?jQuery} select_language - Select element for language filtering.
+     */
     select_language: null,
 
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @property {?string} current_tree_rectype_ids - Comma-separated string of current record type IDs for the field tree.
+     */
     current_tree_rectype_ids:null, //to avoid reload
     
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @property {Object} group_items - Object to store group items (not fully implemented).
+     */
     group_items:{}, //groups - to be implemented
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @property {Array<jQuery>} field_array - Array of jQuery elements representing the added field criteria items.
+     */
     field_array:[], //defined fields for current groups
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @property {Array<jQuery>} sort_array - Array of jQuery elements representing the added sort criteria items.
+     */
     sort_array:[],
     
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @property {?string} select_field_for_id - ID of the `searchBuilderItem` for which a field is being selected.
+     */
     select_field_for_id: null,
 
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @property {Array<string>} enum_fields - List of field names that represent parts of an enumeration/term.
+     */
     enum_fields: ['term','code','conceptid','desc','internalid'],
     
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @property {boolean} running_filter - Flag indicating if a filter operation is currently running.
+     */
     running_filter: false,
     
-    // the widget's constructor
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @description Widget creation method. Initializes the UI, loads HTML content, and sets up event handlers.
+     *              If `options.is_dialog` is true, it creates a jQuery UI dialog.
+     */
     _create: function() {
 
         // prevent double click to select text
@@ -142,8 +276,12 @@ $.widget( "heurist.searchBuilder", {
 
     }, //end _create
 
-    // Any time the widget is called with no arguments or with only an option hash,
-    // the widget is initialized; this includes when the widget is created.
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @description Widget initialization method.
+     */
     _init: function() {
     },
 
@@ -153,15 +291,22 @@ $.widget( "heurist.searchBuilder", {
     _setOptions: function( options ) {
     },*/
 
-    /*
-    * private function
-    * show/hide buttons depends on current login status
-    */
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @description Refreshes the widget display, typically based on current login status or other state changes.
+     *              (Currently empty in the provided code).
+     */
     _refresh: function(){
 
     },
-    //
-    // custom, widget-specific, cleanup.
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @description Widget destruction method. Cleans up generated UI elements and event listeners.
+     */
     _destroy: function() {
         
         if(this.select_main_rectype){
@@ -187,9 +332,13 @@ $.widget( "heurist.searchBuilder", {
         // remove generated elements
     }
     
-    //
-    //
-    //
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @description Adjusts the dimensions of the widget, particularly the height of the dialog or container,
+     *              based on the number of field and sort criteria items.
+     *              Also ensures that at least one field item and one sort item (if not for rules) are present.
+     */
     , adjustDimension: function(){
         
         if(this.field_array.length==0){
@@ -248,9 +397,13 @@ $.widget( "heurist.searchBuilder", {
                 
     }
     
-    //
-    //  show either treeview or menuWidget field selector
-    //
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @description Shows the field selector tree (Fancytree instance) for the specified `searchBuilderItem`.
+     *              If no main record type is selected, the tree is hidden.
+     * @param {string} ele_id - The ID of the `searchBuilderItem` element that requires field selection.
+     */
     ,showFieldSelector: function( ele_id ){
         
         if(!(this.select_main_rectype.val()>0)){
@@ -271,9 +424,13 @@ $.widget( "heurist.searchBuilder", {
         }        
     }
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @description Shows the searchBuilder dialog if `options.is_dialog` is true.
+     *              Handles modal and non-modal states, positioning, and H6 styling.
+     *              Also manages menu locking callbacks if provided.
+     */
     ,show: function( )
     {
         this.current_tree_rectype_ids = null;
@@ -315,9 +472,12 @@ $.widget( "heurist.searchBuilder", {
         //window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, $dlg); 
     }
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @description Adds a new sort criteria item to the search builder.
+     *              Initializes a `searchBuilderSort` widget for the new item.
+     */
     , addSortItem: function(){
         
         let rty_ID = this.select_main_rectype.val();
@@ -355,9 +515,16 @@ $.widget( "heurist.searchBuilder", {
         
     } 
     
-    //
-    // add or change selected field
-    //    
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @description Adds a new field criteria item or updates an existing one.
+     *              Initializes a `searchBuilderItem` widget for the new/updated item.
+     * @param {string} code - The field code string (e.g., "rectype_id:field_id" or "rectype_id:field_id:enum_part").
+     * @param {Array<string>} [codes] - Optional pre-split array of the code string.
+     * @param {?string} [ele_id] - If provided, updates the `searchBuilderItem` with this ID instead of creating a new one.
+     * @param {?number} [reverse_RtyID] - Record type ID for reverse relationships.
+     */
     , addFieldItem: function( code, codes, ele_id, reverse_RtyID  ){
 
         if(!codes) codes = code.split(':');
@@ -462,9 +629,14 @@ $.widget( "heurist.searchBuilder", {
         this.adjustDimension();
     }
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @description Refreshes the main record type selector menu.
+     *              It preserves the currently selected record type if possible.
+     *              Triggers an update of the field tree and clears existing criteria.
+     */
     , refreshRectypeMenu: function(){
         let that = this;
 
@@ -535,9 +707,14 @@ $.widget( "heurist.searchBuilder", {
         }
     }
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @description Initializes the UI controls within the search builder, such as record type selectors,
+     *              field and sort item add buttons, conjunction selector, and accordion sections for
+     *              sorting and rulesets. Also sets up language selection if available.
+     */
     , _initControls: function(){
         
             let that = this;
@@ -732,7 +909,12 @@ $.widget( "heurist.searchBuilder", {
         
     },
 
-    
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @description Clears all defined field criteria, sort orders, and ruleset information from the builder.
+     *              Resets the UI to its initial state for adding new criteria.
+     */
     clearAll: function()
     {
         this._doCompose();        
@@ -746,9 +928,14 @@ $.widget( "heurist.searchBuilder", {
         
     },
     
-    //
-    // nulti record type selector
-    //
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @description Creates and initializes the input element for selecting additional record types
+     *              when multi-record type search is enabled.
+     * @returns {jQuery} The jQuery object for the initialized record type selector input.
+     */
     _createInputElement_RecordTypeSelector: function(){
         
         let that = this;
@@ -773,8 +960,16 @@ $.widget( "heurist.searchBuilder", {
     }
   
 
-    // init fieldtreeview
-    , _initTreeView: function(rectypeIds){
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @description Initializes the Fancytree for field selection based on the provided record type IDs.
+     *              It populates the tree with fields relevant to the selected record types and handles
+     *              user interactions for selecting fields.
+     * @param {Array<string|number>} rectypeIds - An array of record type IDs to populate the tree with.
+     */
+    _initTreeView: function(rectypeIds){
         
         
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeIds) && this.current_tree_rectype_ids != rectypeIds.join(',') ){
@@ -1073,6 +1268,14 @@ $.widget( "heurist.searchBuilder", {
         }
     }
     
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @description Shows or hides reverse relationship fields in the Fancytree based on the
+     *              "Show reverse relationships" checkbox. Also updates generic field display.
+     * @param {Object} [data] - Optional Fancytree data object, typically passed from expand/load events.
+     */
     , showHideReverse: function(data){
         
         let showrev = $('#fsw_showreverse').is(":checked");
@@ -1097,6 +1300,14 @@ $.widget( "heurist.searchBuilder", {
        
     }
     
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @description Updates the display of a generic field node in the Fancytree,
+     *              typically to change its expander icon based on its expanded state.
+     * @param {FancytreeNode} node - The Fancytree node to update.
+     */
     ,_update_GenericField: function(node){
         
             if(!node) return;
@@ -1113,9 +1324,14 @@ $.widget( "heurist.searchBuilder", {
         
     }
     
-     //
-    // close dialog
-    //
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @description Closes the search builder dialog.
+     *              If `is_force` is true, it bypasses the `beforeClose` callback.
+     *              Triggers `onClose` callback if defined.
+     * @param {boolean} [is_force=false] - If true, forces the dialog to close without calling `beforeClose`.
+     */
     , closeDialog: function(is_force){
         if(this.options.is_dialog){
             
@@ -1138,9 +1354,14 @@ $.widget( "heurist.searchBuilder", {
         }
     }
 
-    //
-    // popup save filter dialog for current query
-    //
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @description Initiates the process of saving the current search filter.
+     *              If not preventing real save, it triggers the `slidersMenu` to show the "Save Search" (svsAdd) interface.
+     * @param {boolean} [prevent_real_save=false] - If true, only checks the save filter checkbox state without actually saving.
+     */
     ,_doSaveSearch: function(prevent_real_save=false){
 
         const widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
@@ -1156,6 +1377,13 @@ $.widget( "heurist.searchBuilder", {
         this.element.find('.save-filter').prop('checked', false);
     }
 
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @description Composes the final search query based on the user's selections and criteria,
+     *              then either executes the search, populates an input element, or closes the dialog.
+     */
     ,_doSearch: function(){
         
         this._doCompose();
@@ -1217,6 +1445,14 @@ $.widget( "heurist.searchBuilder", {
 
     }
     
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @description Composes the Heurist JSON query string based on the current state of the
+     *              field criteria, sort orders, and record type selections.
+     *              The composed query is displayed in the result panel.
+     */
     ,_doCompose: function(){
         
         this.pnl_Result.empty()
@@ -1487,9 +1723,13 @@ $.widget( "heurist.searchBuilder", {
         this.sortbySection.find('#sortby_header #sortby_values').text(sortby_header);
     }
 
-    //
-    // Show ruleset editor popup
-    //
+    /**
+     * @memberof heurist.searchBuilder
+     * @instance
+     * @private
+     * @description Shows the RuleSet editor dialog, allowing the user to define or edit
+     *              rules for finding related records. The current ruleset is passed to the dialog.
+     */
     ,_editRules: function() {
 
         let that = this;
@@ -1524,9 +1764,13 @@ $.widget( "heurist.searchBuilder", {
     }
 });
 
-//
-//
-//
+/**
+ * @function showSearchBuilder
+ * @description Global function to show or create and show the searchBuilder dialog.
+ *              It ensures that only one instance of the dialog is created and reuses it if it already exists.
+ * @param {Object} [params] - Parameters to pass to the searchBuilder widget options.
+ *                            If `is_dialog` is not set, it defaults to true.
+ */
 function showSearchBuilder( params ){
     
         let manage_dlg = $('#heurist-searchBuilder');

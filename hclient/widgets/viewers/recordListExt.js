@@ -1,14 +1,24 @@
 /**
-* Integration with existing vsn 3 applications - mapping and smarty reports
-* Working with current result set and selection
-* External application are loaded in iframe
-*
+* @file        recordListExt.js
+* @brief       Extended record list for iframe-based content display and integrations.
+* @fileOverview This file provides the `heurist.recordListExt` jQuery UI widget.
+*              It is designed to display Heurist record sets or selections within
+*              an iframe or directly in a div. It supports loading content from a
+*              specified URL, which can be a Smarty template, a record viewer, or
+*              other Heurist applications. The widget can operate with single record
+*              selections, multiple selections, or entire record sets. It handles
+*              events for search results and selections to refresh its content, and
+*              provides options for initial data loading, placeholder text, and
+*              custom styling. It also includes functionality for print and export
+*              of the displayed content.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\viewers
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*
@@ -20,9 +30,54 @@
 */
 /* global initLinksAndImages */
 
+/**
+ * @widget heurist.recordListExt
+ * @description An extended record list viewer that displays Heurist record data,
+ * often by loading content (like Smarty reports or other views) into an iframe
+ * or directly into its element. It reacts to search and selection events to update
+ * the displayed content and supports various configurations for single/multiple
+ * record display, initial data loading, and UI customizations like print/export buttons.
+ */
 $.widget( "heurist.recordListExt", {
 
-    // default options
+    /**
+     * @memberof heurist.recordListExt
+     * @instance
+     * @property {Object} options - Default options for the widget.
+     * @property {?string} options.widget_id - Outdated: User identifier for custom JS script on web/CMS page.
+     * @property {string} [options.title=''] - Title for the viewer (not actively used to set header).
+     * @property {boolean} [options.is_single_selection=false] - If true, works with a single selected record,
+     *           reloading content on every selection change.
+     * @property {boolean} [options.is_multi_selection=false] - If true, works with all selected records.
+     * @property {boolean} [options.init_show_all=false] - If true, shows the complete recordset on initialization.
+     * @property {?HRecordSet} options.recordset - The Heurist record set to be displayed or used as context.
+     * @property {?Array<number>} options.selection - An array of selected record IDs.
+     * @property {?string} options.url - The URL to load content from. Can contain placeholders like `[recID]`,
+     *           `[query]`, `[dbname]`, `[lang]`.
+     * @property {boolean} [options.is_frame_based=true] - If true, loads content into an iframe. Otherwise,
+     *           loads directly into the widget's element.
+     * @property {boolean} [options.is_popup=false] - If true, displays the content in a popup dialog on every refresh.
+     * @property {?Object|string} options.popup_position - Position for the popup dialog if `is_popup` is true.
+     *           (e.g., 'center', 'left', jQuery UI position object).
+     * @property {boolean} [options.reload_for_recordset=false] - If true, refreshes content every time the
+     *           recordset changes (e.g., for Smarty reports from CMS).
+     * @property {?string} options.search_page - Target page for search links, primarily for CMS integration.
+     * @property {?string} options.search_realm - A string identifier to scope event listening.
+     * @property {?string|Object} options.search_initial - A query string or SVS_ID for an initial search on load.
+     * @property {?string} options.custom_css_for_frame - Custom CSS to be injected into the iframe if `is_frame_based`.
+     * @property {number} [options.record_with_custom_styles=0] - Record ID from which to load custom CSS
+     *           (DT_CMS_CSS) and external files (DT_CMS_EXTFILES) for iframe content.
+     * @property {?function} options.onLoadComplete - Callback function executed after content is loaded.
+     * @property {?string} options.empty_remark - HTML content to display when a search returns no results.
+     *           'def' uses a default localized string.
+     * @property {?string} options.placeholder_text - Text to display when no record/recordset is loaded initially.
+     *           'def' uses a default localized string.
+     * @property {boolean} [options.show_export_button=false] - If true, shows an export button for the current record set.
+     * @property {boolean} [options.show_print_button=false] - If true, shows a print button for the current content.
+     * @property {string} [options.export_options='all'] - Specifies allowed export formats (e.g., 'csv,json', or 'all').
+     * @property {number} [options.fontsize=0] - Base font size for rendered content. If 0, attempts to inherit.
+     * @property {string} [options.language='def'] - Language code for content (e.g., 'en', 'fr', 'def' for default).
+     */
     options: {
         widget_id: null, //outdated: user identificator to find this widget custom js script on web/CMS page
         title: '',
@@ -61,21 +116,38 @@ $.widget( "heurist.recordListExt", {
         language: 'def'
     },
 
+    /** @memberof heurist.recordListExt @instance @private @property {?string} _current_url - Stores the currently loaded URL for the iframe or content area. */
     _current_url: null, //keeps current url - see loadURL 
+    /** @memberof heurist.recordListExt @instance @private @property {?Object} _query_request - Stores the last query request object that populated the recordset. */
     _query_request: null, //keeps current query request
+    /** @memberof heurist.recordListExt @instance @private @property {?string} _events - Concatenated string of Heurist event names the widget listens to. */
     _events: null,
+    /** @memberof heurist.recordListExt @instance @private @property {?Object} _dataTable - Reference to a DataTable instance if used (currently null, seems unused). */
     _dataTable: null,
     
+    /** @memberof heurist.recordListExt @instance @private @property {boolean} _is_publication - Flag indicating if running in CMS publication mode. */
     _is_publication:false, //this is CMS publication - take css from parent
 
+    /** @memberof heurist.recordListExt @instance @private @property {?jQuery} placeholder_ele - jQuery element holding the placeholder or empty message text. */
     placeholder_ele: null, //element holding the placeholder text
     
+    /** @memberof heurist.recordListExt @instance @private @property {?jQuery} export_button - jQuery object for the export button. */
     export_button: null, // export button
+    /** @memberof heurist.recordListExt @instance @private @property {?jQuery} print_button - jQuery object for the print button. */
     print_button: null, // print button
 
+    /** @memberof heurist.recordListExt @instance @private @property {?jQuery} _print_frame - Hidden iframe used for printing content. */
     _print_frame: null, // for printing
     
-    // the constructor
+    /**
+     * @memberof heurist.recordListExt
+     * @instance
+     * @private
+     * @description Widget constructor. Sets up the initial DOM structure (iframe or direct content div),
+     * initializes event listeners for Heurist system events (search, selection, login),
+     * and handles initial data loading if `options.search_initial` is provided.
+     * Also sets up placeholder text and print/export buttons if configured.
+     */
     _create: function() {
 
         if(this.options.widget_id){ //outdated
@@ -382,10 +454,14 @@ $.widget( "heurist.recordListExt", {
         
     }, //end _create
 
-    //
-    // Used when it reloads contents for every selection or for every update of recordset
-    // see reload_for_recordset and is_single_selection
-    //
+    /**
+     * @memberof heurist.recordListExt
+     * @instance
+     * @description Loads content from the specified URL into the iframe or div.
+     * This is used when `options.is_single_selection` or `options.reload_for_recordset`
+     * triggers a content reload based on selection or recordset changes.
+     * @param {string} newurl - The URL to load.
+     */
     loadURL: function( newurl ){
         
         let that = this;
@@ -405,9 +481,14 @@ $.widget( "heurist.recordListExt", {
         
     },
     
-    //
-    // Callback event listener on load of content into div_content or iframe
-    //
+    /**
+     * @memberof heurist.recordListExt
+     * @instance
+     * @description Callback function executed after content is loaded into the iframe or div.
+     * It hides the loading animation, calls the user-defined `options.onLoadComplete` callback,
+     * injects custom CSS into the iframe if specified, and initializes links for CMS/publication mode.
+     * It also manages the visibility and layout of print/export buttons.
+     */
     onLoadComplete: function(){
         this.loadanimation(false);
         if(!this.options.reload_for_recordset && this.options.is_frame_based && !this.options.is_single_selection && !this.options.is_multi_selection){
@@ -517,18 +598,27 @@ $.widget( "heurist.recordListExt", {
         
     },
     
-    // 
-    // Execute search and update dataset independently
-    //
+    /**
+     * @memberof heurist.recordListExt
+     * @instance
+     * @description Initiates a Heurist search with the given query.
+     * The search results will be handled by the global event listeners.
+     * @param {string|Object} query - The search query string or query object.
+     */
     doSearch: function(query){
         let request = {q:query, w: 'a', detail: 'ids', 
                         source: 'init', search_realm: this.options.search_realm };
         window.hWin.HAPI4.RecordSearch.doSearch(this.document, request);
     },
     
-    //
-    // refresh 
-    //
+    /**
+     * @memberof heurist.recordListExt
+     * @instance
+     * @description Updates the widget's dataset based on a new search request.
+     * Stores the request, clears current selection and recordset, shows loading animation,
+     * and triggers a refresh.
+     * @param {Object} request - The new search request object.
+     */
     updateDataset: function(request){
         this._query_request = request;
         this.options.selection = null;
@@ -539,22 +629,43 @@ $.widget( "heurist.recordListExt", {
         this._refresh();
     },
     
-    //
-    //
-    //
+    /**
+     * @memberof heurist.recordListExt
+     * @instance
+     * @private
+     * @description Checks if the provided event data belongs to the same search realm as this widget.
+     * @param {Object} data - The event data object, expected to have a `search_realm` property.
+     * @returns {boolean} True if realms match or if realms are not defined for comparison, false otherwise.
+     */
     _isSameRealm: function(data){
         return (!this.options.search_realm && (!data || window.hWin.HEURIST4.util.isempty(data.search_realm)))
         ||
         (this.options.search_realm && (data && this.options.search_realm==data.search_realm));
     },
 
-
+    /**
+     * @memberof heurist.recordListExt
+     * @instance
+     * @private
+     * @description Handles setting multiple options for the widget. Calls the superclass's method.
+     * Note: Does not automatically trigger a refresh here; individual option changes might.
+     */
     _setOptions: function() {
         // _super and _superApply handle keeping the right this-context
         this._superApply( arguments );
        
     },
     
+    /**
+     * @memberof heurist.recordListExt
+     * @instance
+     * @private
+     * @description Handles setting a single option for the widget.
+     * If the `selection` option is changed, it updates `options.selection` and triggers a `_refresh`.
+     * Otherwise, it calls the superclass's method.
+     * @param {string} key - The option key to set.
+     * @param {*} value - The value to set for the option.
+     */
     _setOption:function(key, value){
         if(key == 'selection'){
             this.options.selection = value;
@@ -564,7 +675,24 @@ $.widget( "heurist.recordListExt", {
         }
     },
 
-    /* private function */
+    /**
+     * @memberof heurist.recordListExt
+     * @instance
+     * @private
+     * @description Refreshes the content displayed by the widget. This is the core logic for updating
+     * the view based on the current options (recordset, selection, URL, etc.).
+     * It handles various scenarios:
+     *  - If the widget is not visible or the URL is not set, it does nothing.
+     *  - If `is_single_selection` or `is_multi_selection` is true, it constructs a new URL based on
+     *    the current selection and `options.url` template, then loads it using `loadURL()`.
+     *    Handles placeholder display if no selection.
+     *  - If `reload_for_recordset` is true, it constructs a URL based on the current recordset and loads it.
+     *  - If content needs to be loaded initially or the URL has changed, it loads `options.url`.
+     *  - If the recordset is empty, it displays `options.empty_remark`.
+     *  - If content is already loaded and `is_frame_based`, it might interact with content inside the
+     *    iframe (e.g., for crosstabs or rule builder).
+     *  - Manages the display of a popup if `options.is_popup` is true.
+     */
     _refresh: function(){
 
         if(this.options.title!=''){
@@ -791,8 +919,13 @@ $.widget( "heurist.recordListExt", {
 
     },
 
-    // events bound via _on are removed automatically
-    // revert other modifications here
+    /**
+     * @memberof heurist.recordListExt
+     * @instance
+     * @private
+     * @description Cleans up the widget before it's removed. Unbinds global event listeners,
+     * closes any popup dialog, and removes generated iframe/div content.
+     */
     _destroy: function() {
 
         this.element.off("myOnShowEvent");
@@ -812,9 +945,15 @@ $.widget( "heurist.recordListExt", {
         if(this.div_content) this.div_content.empty();
     },
     
-    //
-    //
-    //
+    /**
+     * @memberof heurist.recordListExt
+     * @instance
+     * @private
+     * @description Appends language parameter to a URL if specified and not already present.
+     * @param {string} newurl - The URL to modify.
+     * @param {string} lang - The language code (e.g., 'en', 'fr'). 'def' is ignored.
+     * @returns {string} The modified URL with the language parameter.
+     */
     _assignLang: function (newurl, lang){
         if(lang && lang!='def'){
             if(newurl.indexOf('[lang]')>0){
@@ -826,6 +965,12 @@ $.widget( "heurist.recordListExt", {
         return newurl;
     },
 
+    /**
+     * @memberof heurist.recordListExt
+     * @instance
+     * @description Shows or hides a loading animation overlay on the main content div.
+     * @param {boolean} show - True to show the loading animation, false to hide it.
+     */
     loadanimation: function(show){
 
         if(show){
@@ -835,9 +980,18 @@ $.widget( "heurist.recordListExt", {
         }
     },
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.recordListExt
+     * @instance
+     * @private
+     * @description Checks and runs crosstabs analysis if the content loaded in the iframe
+     * is the crosstabs tool. It prepares the recordset data and passes it to the
+     * `assignRecordset` function within the iframe's `crosstabsAnalysis` object.
+     * @param {number} limit - The record limit (seems unused in current implementation of this method,
+     *                         as `getIds()` is called without it).
+     * @param {string} query_string_main - The main query string representing the current recordset.
+     * @todo Review the `limit` parameter usage.
+     */
     _checkRecordsetLengthAndRunCrosstabsAnalysis: function(limit, query_string_main){
 /* @todo */
         if(!this.options.is_frame_based) return;

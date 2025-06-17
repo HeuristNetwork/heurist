@@ -1,16 +1,24 @@
 /**
-* Builds and manages display of the main Heurist page - search and visualisation
+* @file search.js
+* @brief Builds and manages display of the main Heurist page - search and visualisation.
+* @fileOverview This file defines the `heurist.search` jQuery UI widget,
+* which is responsible for the primary search interface on the main Heurist page.
+* It handles user input for search queries, interacts with different search domains
+* (all records, bookmarks, etc.), and manages the display of search-related UI elements
+* such as filter by entity buttons, search input field, search execution buttons,
+* and links to saved filters and search builders.
 *
 * Before this widget was generic, however search on main page became very distinctive and got lot of additional ui comonents.
 * Thus, we have the specific search widget and this one remains for main ui
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\search
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @note        Completely revised for Heurist version 4
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*
@@ -22,9 +30,33 @@
 */
 /* global showSearchBuilder */
 
+/**
+ * @widget heurist.search
+ * @description
+ * jQuery UI widget for the main search interface in Heurist.
+ * It handles search input, domain selection, and interaction with other search tools.
+ */
 $.widget( "heurist.search", {
 
-    // default options
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @property {Object} options - Default options for the widget.
+     * @property {boolean} options.is_h6style - Flag for H6 styling.
+     * @property {string} options.search_domain - Current search domain ('a': all, 'b': bookmark, 'r': recently added, 's': recently selected).
+     * @property {?string} options.search_domain_set - Comma-separated list of allowed search domains (e.g., "a,b,c,r,s").
+     * @property {boolean} options.btn_visible_newrecord - Whether the "Add Record" button is visible.
+     * @property {boolean} options.btn_visible_save - Whether the "Save Search" button is visible (NOT USED).
+     * @property {boolean} options.btn_entity_filter - Whether to show entity filter buttons.
+     * @property {string} options.search_button_label - Custom label for the main search button.
+     * @property {string} options.search_input_label - Custom label for the search input field.
+     * @property {string} options.button_class - CSS class for buttons.
+     * @property {string} options.language - Language code.
+     * @property {?function} options.onsearch - Callback function triggered on search start.
+     * @property {?function} options.onresult - Callback function triggered on search result.
+     * @property {?string} options.search_page - Target page for search (for CMS).
+     * @property {?string} options.search_realm - Search realm for event scoping.
+     */
     options: {
         is_h6style: false,
 
@@ -49,19 +81,58 @@ $.widget( "heurist.search", {
         search_realm:  null  //accepts search/selection events from elements of the same realm only
     },
 
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @private
+     * @property {number} _total_count_of_curr_request - Total count for current request (NOT USED).
+     */
     _total_count_of_curr_request: 0, //total count for current request (main and rules) - NOT USED
 
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @property {?Object} query_request - Stores the current query request object.
+     */
     query_request:null,
 
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @property {Array} buttons_by_entity - Array to store entity filter buttons (not actively used in current code).
+     */
     buttons_by_entity:[], //
 
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @private
+     * @property {boolean} _is_publication - True if in CMS publication mode.
+     */
     _is_publication:false, //this is CMS publication - take css from parent
 
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @private
+     * @property {boolean} _use_global_query - Flag to indicate if the global query should be applied on filter click.
+     */
     _use_global_query: false, // when on clicking 'filter', apply the global query instead
 
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @private
+     * @property {string} _query_as_plain - Stores the current query in plain text format.
+     */
     _query_as_plain: '', // current query in plain text
 
-    // the constructor
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @private
+     * @description Widget creation method. Initializes UI elements and event handlers.
+     */
     _create: function() {
 
         let that = this;
@@ -668,9 +739,13 @@ $.widget( "heurist.search", {
 
     }, //end _create
 
-    //
-    // set label for default ownership/access button
-    //   
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @private
+     * @description Sets the label for the default ownership/access button based on provided preferences.
+     * @param {Array} add_rec_prefs - Array of preferences for adding records: `[rt_id, owner_ugr_id, access_level, tags, visibility_groups]`.
+     */
     setOwnerAccessButtonLabel: function( add_rec_prefs ){
 
         let that = this;
@@ -709,9 +784,14 @@ $.widget( "heurist.search", {
 
     },
 
-    //
-    // help text inside input field
-    //
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @private
+     * @description Shows or hides the input prompt text and plain text query icon based on the input field's content.
+     *              Also handles reverting the search button label if `_use_global_query` was true.
+     * @param {Event} [event] - The event that triggered the function (e.g., keyup, change).
+     */
     _showhide_input_prompt:function(event) {
 
         if(this.input_search.val()==''){
@@ -748,6 +828,14 @@ $.widget( "heurist.search", {
     },
     */
 
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @private
+     * @description Sets an option for the widget and refreshes if the `search_domain` changes.
+     * @param {string} key - The option key.
+     * @param {any} value - The option value.
+     */
     _setOption: function( key, value ) {
         this._super( key, value );
 
@@ -756,7 +844,14 @@ $.widget( "heurist.search", {
         }
     },
 
-    /* private function */
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @private
+     * @description Refreshes the UI elements of the search widget,
+     *              including visibility of elements based on login status,
+     *              button labels, and layout adjustments.
+     */
     _refresh: function(){
 
         if(window.hWin.HAPI4.has_access()){
@@ -898,16 +993,29 @@ $.widget( "heurist.search", {
 
     },
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @private
+     * @description Checks if the provided data's search realm matches the widget's search realm.
+     * @param {Object} data - The data object, typically from a search event, containing a `search_realm`.
+     * @returns {boolean} True if the realms match or if no realm is set for either, false otherwise.
+     */
     _isSameRealm: function(data){
         return (!this.options.search_realm && (!data || window.hWin.HEURIST4.util.isempty(data.search_realm)))
         ||
         (this.options.search_realm && (data && this.options.search_realm==data.search_realm));
     },
 
-
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @private
+     * @description Global event listener for search-related events (search start, finish, structure change).
+     *              Updates the search input and UI based on these events, especially when initiated from other widgets.
+     * @param {Event} e - The event object.
+     * @param {Object} data - The data associated with the event.
+     */
     _onSearchGlobalListener: function(e, data){
 
         let that = this;
@@ -1021,6 +1129,12 @@ $.widget( "heurist.search", {
 
     },
 
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @private
+     * @description Sets focus to the search input field if it's visible.
+     */
     _setFocus: function(){
 
         if(this.input_search.is(':visible')) {
@@ -1038,6 +1152,14 @@ $.widget( "heurist.search", {
     }
     },
     */
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @private
+     * @description Gets the display label for a given search domain value.
+     * @param {string} value - The search domain value (e.g., 'a', 'b', 'bookmark').
+     * @returns {?string} The display label, or null if the value is not recognized.
+     */
     _getSearchDomainLabel: function(value){
         let lbl = null;
         if(value=='b' || value=='bookmark') { lbl = 'Bookmarks'; }
@@ -1048,9 +1170,13 @@ $.widget( "heurist.search", {
         return lbl;
     },
 
-    //
-    // search from input - query is defined manually
-    //
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @private
+     * @description Executes a search based on the content of the input field and the selected search domain.
+     * @param {boolean} fl_btn - Flag indicating if the search was triggered by a button click (not actively used).
+     */
     _doSearch: function(fl_btn){
 
         let qsearch = this.input_search.val();
@@ -1083,9 +1209,12 @@ $.widget( "heurist.search", {
 
 
     /**
-    *  public method
-    *
-    * @returns {Boolean}
+    * @memberof heurist.search
+    * @instance
+    * @description Shows the search assistant/builder interface.
+    *              For H6 style, it interacts with the `slidersMenu` widget.
+    *              Otherwise, it loads and shows the `searchBuilder` dialog.
+    * @returns {undefined}
     */
     , showSearchAssistant: function() {
 
@@ -1129,8 +1258,12 @@ $.widget( "heurist.search", {
         }
     }
 
-    // events bound via _on are removed automatically
-    // revert other modifications here
+    /**
+     * @memberof heurist.search
+     * @instance
+     * @private
+     * @description Widget destruction method. Removes event listeners and generated UI elements.
+     */
     ,_destroy: function() {
 
         $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS
