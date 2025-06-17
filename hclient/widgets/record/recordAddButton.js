@@ -1,14 +1,19 @@
 /**
-/**
-* recordAddButton.js - button to add new record
-* used in CMS 
+* @file recordAddButton.js
+* @brief Provides a button widget for adding new records, typically used within CMS contexts.
+* @fileOverview This file defines the `recordAddButton` widget. It creates a simple button that, when
+* clicked, opens the record editing interface to add a new record. The widget can be configured with
+* default parameters for the new record, such as record type, owner, visibility, and tags. This is
+* often used to embed 'Add Record' functionality directly into specific parts of a Heurist-driven
+* website or application.
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       4.0
 */
 
 /*  
@@ -19,9 +24,38 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+ * @class heurist.recordAddButton
+ * @description jQuery widget that creates a button to add a new record.
+ * This widget is typically used to embed a button in a page (e.g., CMS)
+ * that allows users to quickly add a new Heurist record.
+ * Default parameters for the new record can be pre-configured.
+ *
+ * @param {object} options - Configuration options for the widget.
+ * @param {?string} options.add_record_label - The label for the button. If not provided, it defaults to "Add [Record Type Name]" or "Add Record".
+ * @param {number} [options.RecTypeID=0] - The ID of the record type for the new record.
+ * @param {number} [options.OwnerUGrpID=0] - The ID of the user or group to own the new record. Defaults to current user if 0.
+ * @param {?string} options.NonOwnerVisibility - The visibility setting for non-owners (e.g., 'public', 'viewable', 'hidden').
+ * @param {?string} options.RecTags - Comma-separated string of tags to be applied to the new record.
+ * @param {?string} options.NonOwnerVisibilityGroups - Comma-separated string of group IDs for 'hidden' visibility.
+ * @param {?string} options.search_realm - An identifier for a search realm, used to trigger a search refresh after adding a record.
+ */
 $.widget( "heurist.recordAddButton",{
 
-    // default options
+    /**
+     * @namespace options
+     * @memberof heurist.recordAddButton
+     * @type {object}
+     * @property {?string} add_record_label - The label for the button. If not provided, it defaults to "Add [Record Type Name]" or "Add Record".
+     * @property {number} [RecTypeID=0] - The ID of the record type for the new record.
+     * @property {number} [OwnerUGrpID=0] - The ID of the user or group to own the new record. Defaults to current user if 0.
+     * @property {?string} NonOwnerVisibility - The visibility setting for non-owners (e.g., 'public', 'viewable', 'hidden').
+     * @property {?string} RecTags - Comma-separated string of tags to be applied to the new record.
+     * @property {?string} NonOwnerVisibilityGroups - Comma-separated string of group IDs for 'hidden' visibility if `NonOwnerVisibility` is 'hidden'.
+     * @property {?string} search_realm - An identifier for a search realm. If provided, an event `ON_CUSTOM_EVENT` with `restartSearch:true`
+     *                                    and this `search_realm` is triggered after a record is successfully added and selected,
+     *                                    presumably to refresh a search result list related to this button.
+     */
     options: {
         add_record_label: null,
         
@@ -32,6 +66,16 @@ $.widget( "heurist.recordAddButton",{
         NonOwnerVisibilityGroups: null
     },
     
+    /**
+     * @function _init
+     * @memberof heurist.recordAddButton
+     * @private
+     * @description Initializes the recordAddButton widget.
+     * Creates a button element, sets its label based on options or record type,
+     * and attaches a click event handler to open the record edit dialog for a new record
+     * with the pre-configured options. It also sets up a trigger to refresh a search
+     * if `options.search_realm` is defined.
+     */
     _init:function(){
         
         let ele = $('<button>').appendTo(this.element);
