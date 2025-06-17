@@ -17,17 +17,11 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 /**
- * @class heurist.recordFindDuplicates
- * @augments $.heurist.recordAction
+ * @widget heurist.recordFindDuplicates
+ * @extends $.heurist.recordAction
  * @description jQuery widget for finding duplicate records based on selected fields and Levenshtein distance.
  * Users can select a record type and fields to compare. The widget then queries the server,
  * which uses a Levenshtein distance algorithm to find potential duplicates. Results are grouped,
@@ -729,6 +723,13 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         });
     },
 
+    /**
+     * @function _fillSortField
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Populates the 'Sort by field' dropdown (`#sort_field`) with text fields
+     * currently selected in the Fancytree. This is used as an optimization for large datasets.
+     */
     _fillSortField: function(){
         
         let tree = $.ui.fancytree.getTree( this._$('.rtt-tree') );
@@ -808,6 +809,13 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
 
     },
 
+    /**
+     * @function _downloadList
+     * @memberof heurist.recordFindDuplicates
+     * @private
+     * @description Handles the "Download list as spreadsheet (TSV) file" action.
+     * Constructs a URL to `recordVerify.php` with parameters to export the current duplicate findings as a TSV file.
+     */
     _downloadList: function(){
 
         let rty_ID = this.selectRecordScope.val();
@@ -835,18 +843,3 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         window.open(url, '_blank');
     }
 });
-/**
- * @function _fillSortField
- * @memberof heurist.recordFindDuplicates
- * @private
- * @description Populates the 'Sort by field' dropdown (`#sort_field`) with text fields
- * currently selected in the Fancytree. This is used as an optimization for large datasets.
- */
-/**
- * @function _downloadList
- * @memberof heurist.recordFindDuplicates
- * @private
- * @description Handles the "Download list as spreadsheet (TSV) file" action.
- * Constructs a URL to `recordVerify.php` with parameters to export the current duplicate findings as a TSV file.
- */
-

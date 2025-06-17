@@ -17,17 +17,11 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 /**
- * @class heurist.recordAddLinkMatch
- * @augments $.heurist.recordAction
+ * @widget heurist.recordAddLinkMatch
+ * @extends $.heurist.recordAction
  * @description jQuery widget for creating links between records by matching field values.
  * This widget facilitates a "foreign key" style linking mechanism. It matches values
  * from a specified text field in source records against values in a text field of
@@ -382,24 +376,6 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         
     },
     
-    _onTargetRtySelectChange: function(){
-        this._$('#count_target_rty').text('');
-        this.target_RecTypeID = this.targetRtySelect.val(); 
-        if(this.target_RecTypeID>0){
-            let rty_usage_cnt = $Db.rty(this.target_RecTypeID,'rty_RecCount');
-            if(rty_usage_cnt>0){
-                this._$('#count_target_rty').text( rty_usage_cnt + ' records' );
-            }
-        }     
-        this._fillSelectFieldTypes('target', this.target_RecTypeID);
-        if(this._$('#count_target_rty').text()==''){
-            this._$('#sel_fieldtype_target').empty();
-            this._$('#count_target_matches').empty();
-            this._enableActionButton();
-        }
-        
-    },
-  
     /**
      * @function _onTargetRtySelectChange
      * @memberof heurist.recordAddLinkMatch
@@ -474,14 +450,6 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         }  
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('.btnDoAction'), !isEnabled );
     }, 
-    
-    _getRecordsScope: function()
-    {
-        let isSelection = (this.selectRecordScope.val()=='selected');
-        let currentScope = isSelection?this._currentRecordsetSelIds:this._currentRecordset.getIds();
-        return currentScope;
-        
-    },
     
     /**
      * @memberof heurist.recordAddLinkMatch
@@ -605,6 +573,15 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         }
     },
     
+    /**
+     * @function _setBtnLabels
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Sets the labels of the main action button and the cancel button
+     * depending on whether the action is done or pending.
+     * @param {boolean} is_done - If true, sets labels to 'New Action' and 'Done'.
+     *                           If false, sets labels to 'Create links' and 'Cancel'.
+     */
     _setBtnLabels: function(is_done){
         let lab1, lab2;
         if(is_done){
@@ -617,16 +594,6 @@ $.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
         this.element.parents('.ui-dialog').find('.btnDoAction').button({label:window.hWin.HR(lab1)});
         this.element.parents('.ui-dialog').find('.btnCancel').button({label:window.hWin.HR(lab2)});
     }
-    
         
 });
-/**
- * @function _setBtnLabels
- * @memberof heurist.recordAddLinkMatch
- * @private
- * @description Sets the labels of the main action button and the cancel button
- * depending on whether the action is done or pending.
- * @param {boolean} is_done - If true, sets labels to 'New Action' and 'Done'.
- *                           If false, sets labels to 'Create links' and 'Cancel'.
- */
 

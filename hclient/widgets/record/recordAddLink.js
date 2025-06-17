@@ -17,17 +17,9 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 /**
- * @class heurist.recordAddLink
- * @augments $.heurist.recordAction
+ * @widget heurist.recordAddLink
+ * @extends $.heurist.recordAction
  * @description jQuery widget for creating links or relationships between records.
  * It supports linking a single source record to a target, or a scope of source records to a single target.
  * It can also create new relationship records.
@@ -770,6 +762,15 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         return null;
     },
 
+    /**
+     * @function getRecordValue
+     * @memberof heurist.recordAddLink
+     * @description Fetches and displays details (title, record type) for a given record ID.
+     * Updates UI elements for the specified `party` ('source' or 'target').
+     * Calls `_fillSelectFieldTypes` to populate compatible fields based on the fetched record type.
+     * @param {number} rec_id - The ID of the record to fetch.
+     * @param {string} party - 'source' or 'target', indicating which UI elements to update.
+     */
     getRecordValue: function (rec_id, party) {
         
         let request = {q:'ids:'+rec_id, w:'e',f:'detail'};  //w=e everything including temporary
@@ -842,88 +843,6 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             
         });
     }, 
-
-    /**
-     * @function getRecordValue
-     * @memberof heurist.recordAddLink
-     * @description Fetches and displays details (title, record type) for a given record ID.
-     * Updates UI elements for the specified `party` ('source' or 'target').
-     * Calls `_fillSelectFieldTypes` to populate compatible fields based on the fetched record type.
-     * @param {number} rec_id - The ID of the record to fetch.
-     * @param {string} party - 'source' or 'target', indicating which UI elements to update.
-     */
-    getRecordValue: function (rec_id, party) {
-
-        let request = {q:'ids:'+rec_id, w:'e',f:'detail'};  //w=e everything including temporary
-
-        let that = this;
-
-        window.hWin.HAPI4.RecordMgr.search(request, function(response){
-            if(response.status == window.hWin.ResponseStatus.OK){
-                let resdata = new HRecordSet(response.data);
-
-                //add SELECT and fill it with values
-                let rec_titles = [];
-
-                let record = resdata.getById(rec_id);
-                let rec_title = window.hWin.HEURIST4.util.stripTags(resdata.fld(record, 'rec_Title'));
-                if(!rec_title) rec_title = 'Record title is not defined yet';
-
-                let recRecTypeID = resdata.fld(record, 'rec_RecTypeID');
-
-                if(party=='source'){
-                    that.sSourceName = rec_title;
-                    that.source_RecTypeID = recRecTypeID;
-                }else{
-                    that.sTargetName = rec_title;
-                    that.target_RecTypeID = recRecTypeID;
-                }
-
-                let rty_Name = window.hWin.HEURIST4.util.stripTags($Db.rty(recRecTypeID,'rty_Name'));
-
-                rec_titles.push('<b>'+rty_Name+'</b>');
-                $('#'+party+'_title').text(rec_title);
-                $('#'+party+'_rectype').text(rty_Name);
-                $('#'+party+'_rectype_img').css('background-image', 'url("'+top.HAPI4.iconBaseURL+recRecTypeID+'")');
-
-                //find fields
-                let oppositeRecTypeID = (party=='target')?that.source_RecTypeID:null;
-
-                if(!(that.options.relmarker_dty_ID>0))
-                    that._fillSelectFieldTypes(party, recRecTypeID, oppositeRecTypeID);
-
-                $('#div_'+party+'1').css('display','inline-block');
-                if(party=='target'){
-                    if(that.options.target_ID>0){
-                        that.target_RecTypeID = recRecTypeID;
-                        $('#target_title').show();
-                    }else{
-                        $('#target_title').hide();
-                        $('#target_rectype_img').hide();
-                        //DO NOT SHOW
-                        $('#target_rectype').hide(); //css({'margin-top':0,'margin-left':'5px'});
-
-                        $('#div_target1').css({'display':'block','padding-left':'120px'});
-                        $('#div_target2 ').find('.link-div').css({'background':'none'}); //,'border':'none'
-                        $('#div_target2').find('a').css({'font-weight':'bold','font-size':'1.05em'});
-                    }
-                }else{
-                    if(that.options.source_ID>0){
-                        that.source_RecTypeID = recRecTypeID;
-                        that._fillSelectFieldTypes('source', that.source_RecTypeID);
-                        if(that.options.target_ID>0){
-                            that.getRecordValue(that.options.target_ID, 'target');
-                        }
-                    }
-                }
-
-            }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response);
-            }
-
-
-        });
-    },
 
     /**
      * @function doAction

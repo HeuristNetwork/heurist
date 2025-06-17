@@ -16,17 +16,9 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 /**
- * @class heurist.recordArchive
- * @augments $.heurist.recordAction
+ * @widget heurist.recordArchive
+ * @extends $.heurist.recordAction
  * @description jQuery widget for looking up and restoring records from the system archive.
  * This widget provides a UI to search the `sysArchive` entity based on criteria like
  * record ID, user, date, and content type (deleted/updated). Search results are displayed,
@@ -174,22 +166,6 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
             this._doSearch();
         }
 
-    },
-    
-    _recordListHeaderRenderer: function(){
-/*    
-        return '<div style="width:40px;font-size:0.9em"></div><div style="width:4ex">ID</div>'
-                +'<div style="width:80ex;font-size:0.9em">Record</div>'
-                +'<div style="width:60px;font-size:0.9em">was (action)</div>'
-                +'<div style="width:6ex;font-size:0.9em">by user</div>'
-                +'<div style="width:16ex;font-size:0.9em">On (datetime)</div>';
-*/
-        return '<div style="width:20px;"></div><div style="width:25px;">ID</div>'
-                +'<div style="width:390px">Record</div>'
-                +'<div style="width:66px">was (action)</div>'
-                +'<div style="width:44px">by user</div>'
-                +'<div style="width:120px">On (datetime)</div>';
-                
     },
     
     /**
@@ -375,7 +351,16 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
                         }
                     });
     },
-    
+
+    /**
+     * @function _onSearchResult
+     * @memberof heurist.recordArchive
+     * @private
+     * @description Callback function to handle the results of an archive search.
+     * Updates the `resultList` widget with the received `recordset`.
+     * (Contains commented-out code that seems related to a different mapping/geojson context, likely not relevant here).
+     * @param {HRecordSet} recordset - The recordset of archived records returned by the search.
+     */    
     _onSearchResult: function(recordset){
         
         this.recordList.show();
@@ -456,98 +441,6 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
             this.recordList.resultList('updateResultSet', null);            
        }
     },
-
-    
-    /**
-     * @function _onSearchResult
-     * @memberof heurist.recordArchive
-     * @private
-     * @description Callback function to handle the results of an archive search.
-     * Updates the `resultList` widget with the received `recordset`.
-     * (Contains commented-out code that seems related to a different mapping/geojson context, likely not relevant here).
-     * @param {HRecordSet} recordset - The recordset of archived records returned by the search.
-     */
-    _onSearchResult: function(recordset){
-
-        this.recordList.show();
-
-       if (recordset && recordset.length()>0){
-/*
-            var res_records = {}, res_orders = [];
-            var DT_GEO_OBJECT = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
-
-            var fields = ['rec_ID','rec_RecTypeID'];
-            var map_flds = Object.keys(this.options.mapping.fields);
-            fields = fields.concat(map_flds);
-
-            for(var k=0; k<map_flds.length; k++){
-                map_flds[k] = map_flds[k].split('.');
-            }
-
-            //parse json
-            var i=0;
-            for(;i<geojson_data.features.length;i++){
-                var feature = geojson_data.features[i];
-
-                var recID = i+1;
-                res_orders.push(recID);
-
-                var values = [recID, this.options.mapping.rty_ID];
-                for(var k=0; k<map_flds.length; k++){
-
-                    var val = feature[ map_flds[k][0] ];
-
-                    for(var m=1; m<map_flds[k].length; m++){
-                        if(val && val[ map_flds[k][m] ]){
-                            val = val[ map_flds[k][m] ];
-                        }
-                    }
-
-                    if(DT_GEO_OBJECT == this.options.mapping.fields[map_flds[k]]){
-                        if(!window.hWin.HEURIST4.util.isempty(val)){
-                            val = {"type": "Feature", "geometry": val};
-                            var wkt = stringifyMultiWKT(val);
-                            if(window.hWin.HEURIST4.util.isempty(wkt)){
-                                val = '';
-                            }else{
-                                //@todo the same code mapDraw.php:134
-                                var typeCode = 'm';
-                                if(wkt.indexOf('GEOMETRYCOLLECTION')<0 && wkt.indexOf('MULTI')<0){
-                                    if(wkt.indexOf('LINESTRING')>=0){
-                                        typeCode = 'l';
-                                    }else if(wkt.indexOf('POLYGON')>=0){
-                                        typeCode = 'pl';
-                                    }else {
-                                        typeCode = 'p';
-                                    }
-                                }
-                                val = typeCode+' '+wkt;
-                            }
-                        }
-                    }
-
-                    values.push(val);
-                }
-                res_records[recID] = values;
-            }
-
-            var res_recordset = new HRecordSet({
-                count: res_orders.length,
-                offset: 0,
-                fields: fields,
-                rectypes: [this.options.mapping.rty_ID],
-                records: res_records,
-                order: res_orders,
-                mapenabled: true //???
-            });
-*/
-            this.recordList.resultList('updateResultSet', recordset);
-       }else{
-            //ele.text('ERROR '+geojson_data);
-            this.recordList.resultList('updateResultSet', null);
-       }
-    },
-
 
     /**
      * @function _addNewRecord

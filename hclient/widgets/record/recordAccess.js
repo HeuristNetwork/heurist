@@ -6,25 +6,18 @@
 * the Heurist API and provides a user interface for these operations.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\record
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 /**
- * @class heurist.recordAccess
- * @augments $.heurist.recordAction
+ * @widget heurist.recordAccess
+ * @extends $.heurist.recordAction
  * @description jQuery widget for managing record access and ownership.
  * Provides functionality to change who owns a record and what level of access
  * (e.g., public, viewable, hidden) other users or groups have.
