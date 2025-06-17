@@ -1,12 +1,18 @@
 /**
-* recordRate.js - assign rate for scope of records
+* @file recordRate.js
+* @brief Assigns a star rating to a scope of records.
+* @fileOverview This file defines the `recordRate` widget. It provides a user interface for assigning
+* a star rating (from 0 to 5 stars) to a selected scope of records. The rating is associated with the
+* user's bookmark of the record and is managed through the `usrBookmarks` entity. The widget displays
+* radio buttons for selecting the rating and then applies it to the chosen records.
 *
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       4.0
 */
 
 /*  
@@ -17,9 +23,35 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+ * @class heurist.recordRate
+ * @augments $.heurist.recordAction
+ * @description jQuery widget for assigning a star rating to a scope of records.
+ * This widget allows users to select a rating (0-5 stars) and apply it
+ * to records within a specified scope (e.g., selected records). The rating
+ * is stored via the `usrBookmarks` entity.
+ *
+ * @param {object} options - Configuration options for the widget.
+ * @param {number} [options.height=300] - The height of the dialog.
+ * @param {number} [options.width=540] - The width of the dialog.
+ * @param {boolean} [options.modal=true] - Whether the dialog is modal.
+ * @param {string} [options.init_scope='selected'] - Initial scope for record selection.
+ * @param {string} [options.title='Set Record Rating'] - Title for the dialog.
+ * @param {string|boolean} [options.helpContent='recordBookmark'] - Help content identifier or URL.
+ */
 $.widget( "heurist.recordRate", $.heurist.recordAction, {
 
-    // default options
+    /**
+     * @namespace options
+     * @memberof heurist.recordRate
+     * @type {object}
+     * @property {number} [height=300] - Dialog height.
+     * @property {number} [width=540] - Dialog width.
+     * @property {boolean} [modal=true] - Is dialog modal.
+     * @property {string} [init_scope='selected'] - Initial record scope.
+     * @property {string} [title='Set Record Rating'] - Dialog title.
+     * @property {string|boolean} [helpContent='recordBookmark'] - Help content identifier.
+     */
     options: {
     
         height: 300,
@@ -30,6 +62,16 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
         helpContent: 'recordBookmark'
     },
 
+    /**
+     * @function _initControls
+     * @memberof heurist.recordRate
+     * @private
+     * @description Initializes controls after HTML content is loaded.
+     * Dynamically creates radio buttons for selecting a rating (0-5 stars)
+     * and appends them to the widget's fieldset.
+     * Calls the parent widget's `_initControls` method.
+     * @returns {boolean|undefined} Value returned by parent's `_initControls`.
+     */
     _initControls:function(){
         
         $('<table style="margin:auto;padding-top: 14px;font-size:1em">'
@@ -45,15 +87,30 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
         return this._super();
     },
     
+    /**
+     * @function _getActionButtons
+     * @memberof heurist.recordRate
+     * @private
+     * @description Gets action buttons for the dialog, setting the main action button text to 'Set Rating'.
+     * @returns {Array<object>} Array of button definition objects.
+     */
     _getActionButtons: function(){
         let res = this._super();
         res[1].text = window.hWin.HR('Set Rating');
         return res;
     },    
     
-    //
-    //
-    //
+    /**
+     * @function doAction
+     * @memberof heurist.recordRate
+     * @private
+     * @description Performs the action of setting the record rating.
+     * Retrieves the selected rating value and the scope of records.
+     * Validates that a rating is selected.
+     * Constructs a batch request to the `EntityMgr` for the `usrBookmarks` entity to update/set the rating.
+     * Displays a success message with processed/updated counts or an error message.
+     * Sets `_context_on_close` based on whether any ratings were updated.
+     */
     doAction: function(){
 
             let scope_val = this.selectRecordScope.val();
