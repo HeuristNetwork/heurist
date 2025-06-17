@@ -1323,10 +1323,8 @@ $.widget( "heurist.svs_list", {
                         qsearch = data.node.data.url;
                         qname   = (data.node.key>0)?data.node.key:data.node.title; //qname replaced with svs_ID
                     }else{
-                        if (data.node.key && 
-                            window.hWin.HAPI4.currentUser.usr_SavedSearch && 
-                            window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key]){
-                                
+                        if (data.node.key && window.hWin.HAPI4.currentUser?.usr_SavedSearch?.[data.node.key]){
+
                             svs_ID = data.node.key; 
                             qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[data.node.key][Hul._QUERY];
                             qname   = data.node.key; 
@@ -1975,9 +1973,8 @@ $.widget( "heurist.svs_list", {
     //
     doSearchByID: function(svs_ID, query_name){
     
-        if(window.hWin.HAPI4.currentUser.usr_SavedSearch && 
-            window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID]){
-                                
+        if(window.hWin.HAPI4.currentUser?.usr_SavedSearch?.[svs_ID]){
+
             let qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID][Hul._QUERY];
             let qname   = query_name || svs_ID; 
             

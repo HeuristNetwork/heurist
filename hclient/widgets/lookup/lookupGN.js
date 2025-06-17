@@ -194,8 +194,7 @@ $.widget("heurist.lookupGN", $.heurist.lookupGeonames, {
         if(!json_data.geonames) json_data.geonames = json_data;
         
         let i = 1; // Counter for local record IDs
-        let data = json_data.geonames; // The array of GeoNames features
-        data = !Array.isArray(data) ? [data] : data; // Ensure data is an array
+        let data = this.valueToArray(json_data.geonames); // The array of GeoNames features
 
         for(const idx in data){
             let feature = data[idx];

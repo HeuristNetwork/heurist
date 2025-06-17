@@ -310,7 +310,7 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
 
         // Example: Set external URL if available in the result.
         // Replace 'biburl' with the actual field name from your service that contains the URL.
-        if (recordset.getFields().includes('biburl')) {
+        if (recset.getFields().includes('biburl')) {
              res['ext_url'] = recset.fld(record, 'biburl');
         }
 
@@ -336,12 +336,13 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
             if (val == null) continue; // Skip if no value
 
             let field_type = $Db.dty(dty_ID, 'dty_Type');
-            let current_vals_for_dty = res[dty_ID] || []; // Values already processed by prepareValues
 
             // Ensure val is an array for consistent processing
             if (!Array.isArray(val)) {
                 val = [val];
             }
+
+            val = this.valueToArray(val);
 
             let processed_vals = [];
 
@@ -446,7 +447,6 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
      * @returns {void}
      */
     _doSearch: function(){
-        let that = this;
 
         // Example: Set the specific API endpoint for this lookup
         this.baseURL = 'https://catalogue.bnf.fr/api/SRU?';
@@ -506,9 +506,9 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
     _onSearchResult: function(json_data){
         this.recordList.show(); // Ensure result list is visible
 
-        json_data = this.$H.util.isJSON(json_data); // Parse if it's a string
+        json_data = this.$H.isJSON(json_data); // Parse if it's a string
 
-        if (!json_data || !json_data.result) { // Check for valid data structure
+        if (!json_data?.result) { // Check for valid data structure
             this.$Hmsg.showMsgErr({
                 message: 'Service did not return data in an appropriate format or no results found.',
                 status: window.hWin.ResponseStatus.UNKNOWN_ERROR
@@ -573,7 +573,7 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
      * @returns {Object} The processed records object.
      */
     removeDupAuthors: function(author_key_index, records){
-        if(records == null || !this.$H.util.isObject(records) || this.$H.util.isempty(author_key_index)){
+        if(records == null || !this.$H.isObject(records) || this.$H.isempty(author_key_index)){
             return records;
         }
 

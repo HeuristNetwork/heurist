@@ -289,7 +289,7 @@ $.widget( "heurist.navigation", {
                 /*if(parent_ids.length > 0){
                     parent_ids.filter((id) => this.ids_menu_entries[page_id].indexOf(id));
                 }*/
-                if(parent_ids.indexOf(page_id) > 0){
+                if(parent_ids.includes(page_id)){
                     this.ids_recurred.push(page_id);
                     continue;
                 }
@@ -843,7 +843,7 @@ $.widget( "heurist.navigation", {
                 }
 
                 //load page content to page_target element
-                if(page_target_selector[0]!='#') page_target_selector = '#'+page_target_selector;
+                if(page_target_selector.startsWith('#')) page_target_selector = '#'+page_target_selector;
 
 
                 let continue_load_page = function() {

@@ -188,8 +188,7 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupGeonames, {
         if(!json_data.postalcodes) json_data.postalcodes = json_data; // Fallback if structure is unexpected
 
         let i = 1; // Local record ID counter
-        let data = json_data.postalcodes; // Array of postal code features
-        data = !Array.isArray(data) ? [data] : data; // Ensure data is an array
+        let data = this.valueToArray(json_data.postalcodes); // Array of postal code features
 
         for(const idx in data){
             let feature = data[idx];

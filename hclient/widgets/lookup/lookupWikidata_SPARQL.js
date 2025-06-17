@@ -568,22 +568,13 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
 
             if(dump_field === 'rec_ScratchPad'){
                 res['rec_ScratchPad'] = sparql_result_values; // Dump array of values
-            }else if(dump_field && Object.hasOwn(this.options.mapping.fields, dump_field)){
-                // This condition checks if dump_field is one of the SPARQL mapped fields,
-                // which might not be the intent if dump_field is a separate Heurist dty_ID.
-                // Assuming dump_field is a dty_ID:
+            }else if(this.$H.isPositiveInt(dump_field)){
+                // Dump field is a detail type
                 if(Object.hasOwn(res, dump_field)){
-                    if (!Array.isArray(res[dump_field])) res[dump_field] = [res[dump_field]]; // Ensure array
+                    res[dump_field] = this.valueToArray(res[dump_field]);
                     res[dump_field].push(sparql_result_values.join(' | '));
                 }else{
-                     res[dump_field] = [sparql_result_values.join(' | ')];
-                }
-            } else if (dump_field) { // If dump_field is a dty_ID not in _fields (e.g. direct mapping)
-                 if(Object.hasOwn(res, dump_field)){
-                    if (!Array.isArray(res[dump_field])) res[dump_field] = [res[dump_field]];
-                    res[dump_field].push(sparql_result_values.join(' | '));
-                }else{
-                     res[dump_field] = [sparql_result_values.join(' | ')];
+                    res[dump_field] = [sparql_result_values.join(' | ')];
                 }
             }
         }

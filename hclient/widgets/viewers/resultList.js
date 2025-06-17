@@ -322,9 +322,8 @@ $.widget( "heurist.resultList", {
                             let svs_ID = window.hWin.HEURIST4.util.isPositiveInt(data.qname) ? data.qname : 0;
                             svs_ID = window.hWin.HEURIST4.util.isPositiveInt(data.search_ID) ? data.search_ID : svs_ID;
 
-                            if(window.hWin.HEURIST4.util.isPositiveInt(svs_ID) && window.hWin.HAPI4.currentUser.usr_SavedSearch && 
-                                window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID])
-                            {
+                            if(window.hWin.HEURIST4.util.isPositiveInt(svs_ID) && window.hWin.HAPI4.currentUser?.usr_SavedSearch?.[svs_ID]){
+
                                 that._currentSavedFilterID = svs_ID;
                                 new_title = window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][0];
                             }else{
@@ -3938,8 +3937,7 @@ $.widget( "heurist.resultList", {
                     if(that._sortResult_svsID>0){
                         svsID = that._sortResult_svsID;
                     }else
-                    if(that._currentSavedFilterID>0 && window.hWin.HAPI4.currentUser.usr_SavedSearch && 
-                        window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID]){
+                    if(that._currentSavedFilterID>0 && window.hWin.HAPI4.currentUser?.usr_SavedSearch?.[that._currentSavedFilterID]){
 
                         //if current saved search has sortby:set - just edit with new query
                         let squery = window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID][Hul._QUERY];
