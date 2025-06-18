@@ -1,32 +1,27 @@
 <?php
+/**
+*  Injection of Heuirst core scripts, styles and scripts to init CMS website template
+*
+*  It should be included in CMS template php sript in html header section
+*
+*  include_once 'websiteScriptAndStyles.php';
+*
+* if home page has defined as template file it is loaded as body, otherwise default template
+* that includes header with main-logo, main-title, main-menu and
+* main-content where content of particular page will be loaded
+* 
+* @package Heurist academic knowledge management system
+* @subpackage hclient\widgets\cms
+* @link https://HeuristNetwork.org
+* @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author Artem Osmakov <osmakov@gmail.com>
+* @author Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since 6.0
+*/
 use hserv\utilities\USystem;
 
  $_is_new_cms_editor = true;
-
-    /**
-    *  Injection of Heuirst core scripts, styles and scripts to init CMS website template
-    *
-    *  It should be included in CMS template php sript in html header section
-    *
-    *  include_once 'websiteScriptAndStyles.php';
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
-
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
-
-
 
     /*
     Workflow on initialization:

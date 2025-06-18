@@ -2,6 +2,7 @@
  * @file editCMS2.js
  * @brief Provides the core functionality for the Heurist CMS editor interface.
  * @fileOverview This file initializes and manages the CMS editing environment. It handles the layout of the editor, including the page structure tree, website menu tree, and property viewers. It integrates with TinyMCE for rich text editing and manages element configurations, creation, and modification within a CMS page or website structure. It also includes functionality for saving changes, handling navigation warnings, and switching between page and website editing modes.
+ * 
  * @package Heurist academic knowledge management system
  * @subpackage hclient\widgets\cms
  * @link https://HeuristNetwork.org
@@ -9,36 +10,14 @@
  * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
  * @author Artem Osmakov <osmakov@gmail.com>
  * @author Ian Johnson <ian.johnson.heurist@gmail.com>
- * @since 4.0
+ * @since 6.0
  */
-
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
 // global variables defined in websiteScriptAndStyles
 
 /* global tinymce, isCMS_InHeuristUI, isWebPage, current_page_id, home_page_record_id, page_cache, 
     editCMS_instance2, editCMS_SiteMenu, editCMS_ElementCfg, editCMS_SelectElement, 
     website_languages, default_language,current_language*/
-
-/*
-
-group:
-
-    if parent root, tab or pane - group is ent_wrapper
-
-widget:
-    has predefined min-height,min-width
-    if parent tab, flex or pane - has class ent_wrapper (absolute 100%)
-
-
-*/
-
 
 /**
  * Initializes and manages the CMS editor interface within a given website document.
