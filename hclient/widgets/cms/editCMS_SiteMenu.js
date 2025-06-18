@@ -1,26 +1,40 @@
 /**
-* editCMS_SiteMenu.js - website structure/menu configuration
-* for widgets it uses editCMS_WidgetCfg.js 
-* 
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file editCMS_SiteMenu.js
+ * @brief Manages the website structure and navigation menu configuration within the CMS editor.
+ * @fileOverview This file defines the 'editCMS_SiteMenu' function, which is responsible for
+ *               rendering and managing the website's navigation menu tree in the CMS editor. It allows
+ *               users to view the site structure, add new menu items (pages), edit existing ones (rename, change record properties),
+ *               reorder menu items via drag-and-drop, and delete menu entries. It interacts with the main
+ *               CMS editor (editCMS2) for page loading and refreshing the main menu display.
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\widgets\cms
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 6.0
+ */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-//
-//
-//
+/**
+ * Initializes and manages the website structure/menu editor within the provided container.
+ * It uses Fancytree to display and interact with the website's menu hierarchy.
+ *
+ * @param {jQuery} $container - The jQuery object representing the container element where the site menu tree will be rendered.
+ * @param {Object} editCMS2 - An instance of the main CMS editor (editCMS2.js), used for callbacks and accessing shared data.
+ * @returns {Object} An object with public methods for controlling the site menu editor.
+ *
+ * @property {string} _className - Internal class name identifier.
+ * @property {number} RT_CMS_MENU - Record Type ID for CMS Menu.
+ * @property {number} DT_NAME - Detail Type ID for Name.
+ * @property {number} DT_EXTENDED_DESCRIPTION - Detail Type ID for Extended Description.
+ * @property {number} DT_CMS_TOP_MENU - Detail Type ID for CMS Top Menu (links from CMS Home to menu items).
+ * @property {number} DT_CMS_MENU - Detail Type ID for CMS Menu (links from menu items to sub-menu items).
+ * @property {number} DT_CMS_PAGETITLE - Detail Type ID for CMS Page Title visibility.
+ * @property {number} DT_CMS_PAGETYPE - Detail Type ID for CMS Page Type.
+ * @property {boolean} isVersion3 - Flag to indicate if it's operating in a Heurist v3 like environment (based on editCMS2 properties).
+ * @property {number} home_page_record_id - The record ID of the website's home page.
+ */
 function editCMS_SiteMenu( $container, editCMS2 ){
 
     const _className = 'editCMS_SiteMenu';
@@ -36,6 +50,10 @@ function editCMS_SiteMenu( $container, editCMS2 ){
     let isVersion3 = false;
     let home_page_record_id;
 
+    /**
+     * Initializes the site menu editor by calling _initControls.
+     * @private
+     */
     function _init(){
 
         /*not used as dialog 
@@ -67,6 +85,11 @@ function editCMS_SiteMenu( $container, editCMS2 ){
         _initControls();
     }
     
+    /**
+     * Gets the current page ID from the main editCMS2 instance or the global window object.
+     * @private
+     * @returns {number|undefined} The ID of the current page being edited.
+     */
     function _currentPageId(){
         if(isVersion3){
             return editCMS2.page_id;
@@ -75,9 +98,11 @@ function editCMS_SiteMenu( $container, editCMS2 ){
         }
     }
     
-    //
-    // Init/reload treeview
-    //
+    /**
+     * Initializes or reloads the Fancytree instance for the website menu.
+     * Sets up tree options, including drag-and-drop for reordering, and node rendering.
+     * @private
+     */
     function _initControls(){
 
         let tree_element = $container;        
@@ -267,9 +292,11 @@ title: "Overview"
     }  
    
    
-    //
-    //
-    //
+    /**
+     * Defines and attaches action icons (add, edit, delete) to a menu item in the Fancytree.
+     * @private
+     * @param {Fancytree.FancytreeNode} item - The Fancytree node representing a menu item.
+     */
     function _defineActionIcons(item)
     {
         
@@ -477,9 +504,14 @@ title: "Overview"
     } //end _defineActionIcons
 
     
-    //
-    //
-    //
+    /**
+     * Renames a menu entry (CMS Menu record) by updating its DT_NAME detail.
+     * Refreshes the tree and main menu upon success.
+     * @private
+     * @param {number} rec_id - The record ID of the menu item to rename.
+     * @param {string} newvalue - The new name for the menu item.
+     * @param {function} [callback] - Optional callback function to execute after renaming.
+     */
     function _renameMenuEntry(rec_id, newvalue, callback){
 
         let request = {a: 'replace',
@@ -510,9 +542,10 @@ title: "Overview"
 
     }
     
-    //
-    //
-    //
+    /**
+     * Highlights the currently active page in the site menu tree.
+     * @private
+     */
     function _highlightCurrentPage(){
         
         if(_currentPageId()==home_page_record_id){
@@ -533,9 +566,15 @@ title: "Overview"
         }
     }
 
-    //
-    // Create new cms menu record 
-    //
+    /**
+     * Creates a new CMS Menu record, typically based on a template, and then adds it to the menu structure.
+     * @private
+     * @param {number} parent_id - The record ID of the parent menu item (or home page ID for top-level items).
+     * @param {string} page_name - The name for the new page/menu item.
+     * @param {string} template_name - The name of the template to use for the page content (e.g., 'default', 'blog').
+     * @param {function(number):void} [callback] - Optional callback function, receives the new page ID. Defaults to refreshing the main menu.
+     * @param {jQuery} [$dlg_element] - Optional jQuery dialog element to close after creation.
+     */
     function _createMenuRecord(parent_id, page_name, template_name, callback, $dlg_element){
         
         let details = {};
@@ -590,9 +629,13 @@ title: "Overview"
         });
     }
 
-    //
-    // define title and content only
-    //
+    /**
+     * Opens a simple dialog to get a name and select a content template for a new page.
+     * Calls _createMenuRecord upon submission.
+     * @private
+     * @param {number} parent_id - The parent menu item ID.
+     * @param {function(number):void} callback - Callback for _createMenuRecord.
+     */
     function _defineMenuRecordSimple(parent_id, callback){
         
         let $dlg;
@@ -642,9 +685,13 @@ title: "Overview"
         
     }
     
-    //
-    // select among existing or define new record in full edit form
-    //
+    /**
+     * Opens a record selector dialog to allow the user to select an existing CMS Menu record
+     * or create a new one to be added to the site menu.
+     * @private
+     * @param {number} parent_id - The record ID of the parent menu item.
+     * @param {function(number):void} callback - Callback function passed to _addMenuEntry, receiving the new page ID.
+     */
     function _defineMenuRecord(parent_id, callback)
     {
         let popup_options = {
@@ -680,11 +727,13 @@ title: "Overview"
 
     
     
-    //
-    // Select or create new menu item for website
-    //
-    // Opens record selector popup and adds selected menu given mapdoc or other menu
-    //
+    /**
+     * Initiates the process of adding a new menu item. It first checks for unsaved changes
+     * in the main editor and then calls _defineMenuRecordSimple to show the selection/creation dialog.
+     * @private
+     * @param {number} parent_id - The record ID of the parent menu item under which the new item will be added.
+     * @param {function(number):void} [callback] - Optional callback function, ultimately for _addMenuEntry.
+     */
     function _selectMenuRecord(parent_id, callback){
         
         if(editCMS2.warningOnExit(function(){ _selectMenuRecord(parent_id, callback) })) return;
@@ -699,9 +748,15 @@ title: "Overview"
         
     }
         
-    //
-    // Add new menu(page) menu_id to  parent_id
-    //
+    /**
+     * Adds an existing CMS Menu record (`menu_id`) as a child to another menu item (`parent_id`)
+     * or as a top-level item if `parent_id` is the home page ID.
+     * Updates the database by adding a detail to the parent record.
+     * @private
+     * @param {number} parent_id - The record ID of the parent menu item or home page.
+     * @param {number} menu_id - The record ID of the menu item to add.
+     * @param {function(number):void} [callback] - Optional callback, receives `menu_id`.
+     */
     function _addMenuEntry(parent_id, menu_id, callback){
 
         let request = {a: 'add',
@@ -720,9 +775,14 @@ title: "Overview"
 
     }
 
-    //
-    // Update database
-    //
+    /**
+     * Removes a menu entry from its parent. Optionally deletes the menu record and its children.
+     * @private
+     * @param {number} parent_id - The record ID of the parent menu item.
+     * @param {number} menu_id - The record ID of the menu item to remove.
+     * @param {Array<number>|null} records_to_del - An array of record IDs to delete (menu item and its descendants). If null, only removes from menu.
+     * @param {function} [callback] - Optional callback function after removal.
+     */
     function _removeMenuEntry(parent_id, menu_id, records_to_del, callback){
 
         //delete detail from parent menu
@@ -758,9 +818,13 @@ title: "Overview"
 
     }
     
-    //
-    // refresh main menu and reload current page
-    //
+    /**
+     * Refreshes the main navigation menu display in the CMS.
+     * For Heurist v3, it calls `editCMS2.loadWebSite`. Otherwise, it calls the global `window.hWin.initMainMenu`.
+     * @private
+     * @param {boolean} [need_refresh_tree=false] - If true, also re-initializes the site menu tree control.
+     * @param {number} [new_page_id] - Optional page ID to focus or load after refreshing.
+     */
     function _refreshMainMenu( need_refresh_tree, new_page_id ){
         
         if(isVersion3){
@@ -783,9 +847,11 @@ title: "Overview"
     }
 
     
-    //
-    // reload current (or given page)
-    //
+    /**
+     * Reloads the content for the current page or a specified page ID in the main CMS editor.
+     * @private
+     * @param {number} [page_id] - The ID of the page to refresh. Defaults to the current page.
+     */
     function _refreshCurrentPage(page_id){
 
         if(!window.hWin.HEURIST4.util.isPositiveInt(page_id)) page_id = _currentPageId();
@@ -800,9 +866,11 @@ title: "Overview"
     
     }
 
-    //
-    // reload entire website 
-    //
+    /**
+     * Reloads the entire website editor interface.
+     * For Heurist v3, calls `editCMS2.loadWebSite`. Otherwise, reloads the window.
+     * @private
+     */
     function _refreshWebsite(){
         if(isVersion3){
             editCMS2.loadWebSite();
@@ -811,9 +879,12 @@ title: "Overview"
         }
     }
 
-    //
-    // Get parent page id for provided page id
-    //
+    /**
+     * Gets the parent page ID for a given page ID from the Fancytree data.
+     * @private
+     * @param {number|string} page_id - The ID of the page whose parent is sought.
+     * @returns {number|string} The parent page ID, or the home page ID if it's a top-level item or not found.
+     */
     function _getParentPage(page_id){
 
         if(window.hWin.HEURIST4.util.isempty(page_id) || page_id <= 0 || home_page_record_id == page_id){
@@ -842,40 +913,88 @@ title: "Overview"
     //public members
     let that = {
 
+        /**
+         * Gets the class name of this editor instance.
+         * @returns {string} The class name.
+         * @public
+         */
         getClass: function () {
             return _className;
         },
 
+        /**
+         * Checks if the instance is of a given class name.
+         * @param {string} strClass - The class name to check against.
+         * @returns {boolean} True if it is an instance of the class, false otherwise.
+         * @public
+         */
         isA: function (strClass) {
             return (strClass === _className);
         },
         
+        /**
+         * Public method to highlight the current page in the menu tree.
+         * @public
+         */
         highlightCurrentPage: function(){
             _highlightCurrentPage();
         },
         
-        // add new menu
+        /**
+         * Public method to initiate adding a new menu record.
+         * @param {number} parent_id - The parent menu item ID.
+         * @param {function(number):void} [callback] - Optional callback.
+         * @public
+         */
         selectMenuRecord: function(parent_id, callback){
             _selectMenuRecord(parent_id, callback);
         },
         
+        /**
+         * Public method to rename a menu entry.
+         * @param {number} rec_id - Record ID of the menu item.
+         * @param {string} newvalue - New name for the menu item.
+         * @param {function} [callback] - Optional callback.
+         * @public
+         */
         renameMenuEntry: function (rec_id, newvalue, callback){
             _renameMenuEntry(rec_id, newvalue, callback);
         },
         
+        /**
+         * Public method to refresh the entire website editor.
+         * @public
+         */
         refreshWebsite: function(){
             _refreshWebsite();
         },
 
+        /**
+         * Public method to initialize/re-initialize the menu tree controls.
+         * @public
+         */
         initControls: function(){
             _initControls();
         },
 
-        // create new menu
+        /**
+         * Public method to create a new menu record.
+         * @param {number} parent_id - Parent menu item ID.
+         * @param {string} page_name - Name for the new page.
+         * @param {string} template_name - Template to use for the page content.
+         * @param {function(number):void} [callback] - Optional callback.
+         * @public
+         */
         createMenuRecord: function(parent_id, page_name, template_name, callback){
             _createMenuRecord(parent_id, page_name, template_name, callback);
         },
 
+        /**
+         * Public method to get the parent page ID.
+         * @param {number|string} page_id - The ID of the page.
+         * @returns {number|string} The parent page ID.
+         * @public
+         */
         getParentPage: function(page_id){
             return _getParentPage(page_id);
         }

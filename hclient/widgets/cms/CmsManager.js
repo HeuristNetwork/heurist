@@ -1,29 +1,31 @@
 /**
-*  CmsManager - select CMS to view and edit, addition new website or page
-*
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+ * @file CmsManager.js
+ * @brief Manages CMS websites and pages, including creation, selection, and editing.
+ * @fileOverview This file contains the CmsManager class, which is responsible for all CMS-related actions within the Heurist client. It handles the lifecycle of websites and standalone pages, from creation through to loading and displaying them.
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\widgets\cms
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 6.0
+ */
 
 /**
- * Class: CmsManager
- * 
+ * @class CmsManager
  * The CmsManager class is responsible for managing the CMS (Content Management System) 
  * functionalities such as selecting, viewing, and editing websites or pages.
  * It also provides methods for creating new websites or pages.
+ * @property {object|null} cms_home_counts Stores counts related to CMS home pages.
+ * @property {number} RT_CMS_HOME Record Type ID for CMS Home.
+ * @property {number} RT_CMS_MENU Record Type ID for CMS Menu.
+ * @property {number} DT_CMS_TOP_MENU Detail Type ID for CMS Top Menu.
+ * @property {number} DT_CMS_MENU Detail Type ID for CMS Menu field.
+ * @property {number} DT_NAME Detail Type ID for Name.
+ * @property {number} DT_CMS_HEADER Detail Type ID for CMS Header.
+ * @property {number} DT_LANGUAGES Detail Type ID for Languages.
+ * @property {number} DT_CMS_PAGETYPE Detail Type ID for CMS Page Type.
  */
 class CmsManager {
 
@@ -40,15 +42,14 @@ class CmsManager {
     DT_CMS_PAGETYPE;
     
     /**
-     * Constructor: Initializes the CmsManager instance.
-     * It does not take any parameters, but loads the CMS-specific constants later when needed.
+     * Initializes the CmsManager instance.
+     * CMS-specific constants are loaded later when specific methods requiring them are called.
+     * @constructor
      */
     constructor() {
     }
 
     /**
-     * Private Method: #initDefCodes
-     * 
      * Initializes CMS-specific codes from system constants. These include record types and field definitions related to CMS.
      * This method is called internally to load necessary definitions.
      * 
@@ -67,11 +68,17 @@ class CmsManager {
     }
 
     /**
-     * Method: executeAction
-     * 
-     * Executes a CMS action based on the given action ID. Depending on the action type, it may create a website, create a page, or edit/view an existing page or website.
-     * 
-     * @param {string} actionid - The ID of the action to execute.
+     * Executes a CMS action based on the given action ID.
+     * Depending on the action type, it may create a website, create a page,
+     * or trigger the editing/viewing of an existing page or website.
+     * Also handles loading a specific webpage if `actionid` is 'data-heurist-pageid'.
+     * @param {string} actionid - The ID of the action to execute (e.g., 'menu-cms-create', 'data-heurist-pageid').
+     * @param {object} [options] - Optional parameters. Used when actionid is 'data-heurist-pageid'.
+     * @param {string} [options.container] - The jQuery selector for the container to load the page into.
+     * @param {string} [options.page_id] - The ID of the page to load.
+     * @param {object} [options.supp_options] - Supplementary options passed to layoutManager.
+     * @param {function} [options.callback] - Callback function after page load.
+     * @returns {void}
      */
     executeAction(actionid, options) {
         if (!this.isCmsAllowedOnThisServer()) {
@@ -397,12 +404,11 @@ class CmsManager {
     }
 
     /**
-     * Private Method: #getCountWebPageRecords
-     * 
      * Retrieves the count of CMS page records with the type "page".
      * 
      * @private
-     * @param {function} callback - A callback function that is executed after the count is retrieved.
+     * @param {function(number):void} callback - A callback function that is executed after the count is retrieved.
+     *                                          The count of webpage records is passed as an argument.
      */
     #getCountWebPageRecords(callback) {
         let DT_CMS_PAGETYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETYPE'];
@@ -421,12 +427,12 @@ class CmsManager {
     }
 
     /**
-     * Private Method: #getCountWebSiteRecords
-     * 
-     * Retrieves the count of CMS website (RT_CMS_HOME) records and the number of private records among them.
+     * Retrieves the count of CMS website (RT_CMS_HOME) records and details about private records.
+     * Updates `this.cms_home_counts` with the retrieved data.
      * 
      * @private
-     * @param {function} callback - A callback function that is executed after the count is retrieved.
+     * @param {function(CmsManager):void} callback - A callback function that is executed after the counts are retrieved.
+     *                                              The CmsManager instance (`this`) is passed as an argument.
      */
     #getCountWebSiteRecords(callback) {
         let request = {
@@ -607,8 +613,18 @@ class CmsManager {
     }
     
     /**
-    * Loads given RT_CMS_MENU into container (by default main (v3) or #main-content (v2) )
-    */
+     * Loads a specific CMS page (RT_CMS_MENU record) into a specified container.
+     * Fetches page details (name, content) and initializes the layout.
+     *
+     * @private
+     * @param {object} options - Parameters for loading the webpage.
+     * @param {string} options.page_id - The record ID of the CMS page to load.
+     * @param {string} [options.container='main'] - jQuery selector for the target container element. Falls back to '#main-content'.
+     * @param {object} [options.supp_options] - Supplementary options passed to the layout manager during initialization.
+     * @param {function(object):void} [options.callback] - Optional callback function executed after the page is loaded.
+     *                                                 Receives an object containing page data (rec_ID, name, content, pageTreeData).
+     * @returns {void}
+     */
     #loadWebPage(options){
         
         let page_target = $(options.container??'main');

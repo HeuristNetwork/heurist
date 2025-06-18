@@ -1,73 +1,66 @@
 <?php
-
-    /**
-    *  CMS website template
-    *
-    *  You may use several templates per server (for specific websites).
-    *  We encourage the following of naming convention cmsTemplate_OrganisationName.php
-    *  Copy to /HEURIST root folder and specify this name in the field "Website Template" (field 2-922)
-    *  in the Advanced tab of the CMS home page record.
-    *
-    *  The template can also be specified as a relative path hclient/widgets/cms/<template name> but this
-    *  should ONLY be used for development as it uses a path which might change and local changes could
-    *  get overwritten by code updates.
-    *
-    *  The template must contain at least two html elements main-header with main-menu and
-    *  main-content
-    *
-                <div id="main-header" style="width:100%;min-height:40px;">
-                    <div id="main-menu" class="mceNonEditable header-element"
-                        style="width:100%;min-height:40px;color:black;font-size:1.1em;"
-                        data-heurist-app-id="heurist_Navigation" data-generated="1">
-                    </div>
+/**
+*  CMS website template
+*
+*  You may use several templates per server (for specific websites).
+*  We encourage the following of naming convention cmsTemplate_OrganisationName.php
+*  Copy to /HEURIST root folder and specify this name in the field "Website Template" (field 2-922)
+*  in the Advanced tab of the CMS home page record.
+*
+*  The template can also be specified as a relative path hclient/widgets/cms/<template name> but this
+*  should ONLY be used for development as it uses a path which might change and local changes could
+*  get overwritten by code updates.
+*
+*  The template must contain at least two html elements main-header with main-menu and
+*  main-content
+*
+            <div id="main-header" style="width:100%;min-height:40px;">
+                <div id="main-menu" class="mceNonEditable header-element"
+                    style="width:100%;min-height:40px;color:black;font-size:1.1em;"
+                    data-heurist-app-id="heurist_Navigation" data-generated="1">
                 </div>
-                <div id="main-content"
-                    data-homepageid="<?php print $home_page_record_id;?>"
-                    <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':'';?>
-                    data-viewonly="<?php print ($hasAccess)?0:1;?>">
-                </div>
-    *
-    * besides it may have main-menu main-header may have main-logo, main-logo-alt, main-host, main-pagetitle, main-recordview divs
-    * These divs will be filled with images and text defined in website home record.
-    *
-    * main-content - is the target div for content of particular page to be loaded
-    *
-    * main-recordview - is the target div for record view. It will be filled with link if target is _recordview
-    *                   if this div is not found in the template, content will be opened in popup
-    *
-    * The top most div/container must have class heurist-website. It is required for proper work of CMS editor
-    *
-    * There are following variables (their values are defined in website home record) that can be used in html header
-    * $website_title
-    * $meta_keywords
-    * $meta_description
-    * $image_icon
-    *
-    * Other variables are
-    * $home_page_record_id  - record id of website home page
-    * $open_page_or_record_on_init - record id for cms menu/page to be loaded on init
-    *
-    * $image_banner - header background banner image
-    * $page_header - custom content for main-header defined in website home page record
-    * $page_footer - custom content for footer
-    *
-    * $show_pagetitle - true|false to show curent page title in #main-pagetitle
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
-
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
+            </div>
+            <div id="main-content"
+                data-homepageid="<?php print $home_page_record_id;?>"
+                <?php print ($open_page_or_record_on_init>0)?' data-initid="'.$open_page_or_record_on_init.'"':'';?>
+                data-viewonly="<?php print ($hasAccess)?0:1;?>">
+            </div>
+*
+* besides it may have main-menu main-header may have main-logo, main-logo-alt, main-host, main-pagetitle, main-recordview divs
+* These divs will be filled with images and text defined in website home record.
+*
+* main-content - is the target div for content of particular page to be loaded
+*
+* main-recordview - is the target div for record view. It will be filled with link if target is _recordview
+*                   if this div is not found in the template, content will be opened in popup
+*
+* The top most div/container must have class heurist-website. It is required for proper work of CMS editor
+*
+* There are following variables (their values are defined in website home record) that can be used in html header
+* $website_title
+* $meta_keywords
+* $meta_description
+* $image_icon
+*
+* Other variables are
+* $home_page_record_id  - record id of website home page
+* $open_page_or_record_on_init - record id for cms menu/page to be loaded on init
+*
+* $image_banner - header background banner image
+* $page_header - custom content for main-header defined in website home page record
+* $page_footer - custom content for footer
+*
+* $show_pagetitle - true|false to show curent page title in #main-pagetitle
+*
+* @package Heurist academic knowledge management system
+* @subpackage hclient\widgets\cms
+* @link https://HeuristNetwork.org
+* @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author Artem Osmakov <osmakov@gmail.com>
+* @author Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since 6.0
+*/
 ?>
 <!DOCTYPE html>
 <html lang="en">
