@@ -631,7 +631,7 @@ class DbDefRecTypes extends DbEntityBase
             }
         }
 
-        mysql__end_transaction($mysqli, $res, $keep_autocommit);
+        mysql__end_transaction($mysqli, $ret, $keep_autocommit);
 
         return $ret;
     }

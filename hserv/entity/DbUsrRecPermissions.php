@@ -106,26 +106,6 @@ class DbUsrRecPermissions extends DbEntityBase
     public function search(){
 
         if(parent::search()===false){
-    *  sysUGrps.ugr_Type
-    *  sysUGrps.ugr_Name
-    *  sysUGrps.ugr_Enabled
-    *  sysUGrps.ugr_Modified
-    *  sysUsrGrpLinks.ugl_UserID
-    *  sysUsrGrpLinks.ugl_GroupID
-    *  sysUsrGrpLinks.ugl_Role
-    *  (omit table name)
-    *
-    *  other parameters :
-    *  details - id|name|list|all or list of table fields
-    *  offset
-    *  limit
-    *  request_id
-    *
-    *  @todo overwrite
-    */
-    public function search(){
-
-        if(parent::search()===false){
               return false;
         }
 
@@ -314,7 +294,7 @@ class DbUsrRecPermissions extends DbEntityBase
             }
         }
 
-        mysql__end_transaction($mysql, $res, $keep_autocommit);
+        mysql__end_transaction($mysqli, $res, $keep_autocommit);
 
         return $res;
 
