@@ -1,13 +1,16 @@
-/*
-* editCMS2.js - CMS editor
-* 
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+/**
+ * @file editCMS2.js
+ * @brief Provides the core functionality for the Heurist CMS editor interface.
+ * @fileOverview This file initializes and manages the CMS editing environment. It handles the layout of the editor, including the page structure tree, website menu tree, and property viewers. It integrates with TinyMCE for rich text editing and manages element configurations, creation, and modification within a CMS page or website structure. It also includes functionality for saving changes, handling navigation warnings, and switching between page and website editing modes.
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\widgets\cms
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 4.0
+ */
 
 /*  
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
@@ -37,9 +40,46 @@ widget:
 */
 
 
-//
-// options: record_id, content, container
-//
+/**
+ * Initializes and manages the CMS editor interface within a given website document.
+ * This function sets up the editing panels, toolbars, and event handlers necessary
+ * for modifying CMS pages and website structures.
+ *
+ * @param {HTMLDocument} website_document - The document object of the website being edited.
+ * @returns {Object} An object with public methods for controlling the editor (e.g., startCMS, closeCMS).
+ *
+ * @property {string} _className - Internal class name identifier.
+ * @property {boolean} _lockDefaultEdit - Flag to lock default editing actions.
+ * @property {jQuery|null} _panel_treePage - jQuery object for the page structure tree panel.
+ * @property {jQuery|null} _panel_treeWebSite - jQuery object for the website structure/menu tree panel.
+ * @property {jQuery|null} _panel_propertyView - jQuery object for the element property view panel.
+ * @property {Object|null} _edit_Element - Instance of editCMS_ElementCfg for the currently edited element.
+ * @property {jQuery|null} _toolbar_WebSite - jQuery object for the website editing toolbar.
+ * @property {jQuery|null} _toolbar_Page - jQuery object for the page editing toolbar.
+ * @property {jQuery|null} _tabControl - jQuery object for the main tabs (Site/Page).
+ * @property {Array|Object|string|null} _layout_content - JSON configuration of the current page's layout.
+ * @property {jQuery|null} _layout_container - jQuery object for the main content area where CMS content is rendered.
+ * @property {string} default_palette_class - Default CSS class for Heurist palettes.
+ * @property {boolean} page_was_modified - Flag indicating if the current page has unsaved changes.
+ * @property {number} delay_onmove - Delay timer for mouse move events.
+ * @property {number} __timeout - General purpose timeout ID.
+ * @property {string} current_edit_mode - Current editing mode ('page' or 'website').
+ * @property {Object|null} _editCMS_SiteMenu - Instance of editCMS_SiteMenu.
+ * @property {number} _keep_EditPanelWidth - Stores the width of the edit panel before resizing.
+ * @property {jQuery|null} _editor_panel - jQuery object for the main editor panel.
+ * @property {HTMLDocument} _ws_doc - Reference to the website document.
+ * @property {jQuery} _ws_body - jQuery object for the body of the website document.
+ * @property {number} RT_CMS_HOME - Record Type ID for CMS Home.
+ * @property {number} DT_NAME - Detail Type ID for Name.
+ * @property {number} DT_CMS_HEADER - Detail Type ID for CMS Header.
+ * @property {number} DT_EXTENDED_DESCRIPTION - Detail Type ID for Extended Description (page content).
+ * @property {number} DT_CMS_LANGUAGES - Detail Type ID for CMS Languages.
+ * @property {number} DT_CMS_PAGETITLE - Detail Type ID for CMS Page Title.
+ * @property {number} TRM_NO - Term ID for 'No'.
+ * @property {Object} dim - Dimensions of the website body.
+ * @property {Object} options - Options passed to the editor, including record_id, content, container.
+ * @property {boolean} isCMS_NewWebsiteWarning - Flag to control display of new website warning.
+ */
 function editCMS2(website_document){
 
     const _className = "EditCMS2";
@@ -88,6 +128,11 @@ function editCMS2(website_document){
     
     let isCMS_NewWebsiteWarning = true;
     
+    /**
+     * Loads the TinyMCE editor script into the website document.
+     * @private
+     * @param {function} callback - Function to execute once TinyMCE is loaded.
+     */
     function _loadTinyMCE(callback) {
        const tinyMCEPath = window.hWin.HAPI4.baseURL+'external/tinymce5/tinymce.min.js';
        const script = _ws_doc.createElement('script');
@@ -100,9 +145,19 @@ function editCMS2(website_document){
        script.src = tinyMCEPath;
        _ws_doc.head.appendChild(script);
     }    
-    //
-    // returns false if new page is not loaded (previous page has been modified and not saved
-    //
+    /**
+     * Starts or restarts the CMS editor with the given options.
+     * Initializes the editor panel, layout, and loads page content.
+     * Handles warnings for unsaved changes if a page is already loaded.
+     * @private
+     * @param {Object} _options - Configuration options for the CMS session.
+     * @param {number} _options.record_id - The ID of the page/website record to load.
+     * @param {string} _options.container - jQuery selector for the content container.
+     * @param {Object} [_options.content] - Preloaded content data for the page.
+     * @param {string} [_options.editor_pos='west'] - Position of the editor panel ('west' or 'east').
+     * @param {boolean} [_options.isCMS_NewWebsite] - Flag indicating if this is a newly created website.
+     * @returns {void|boolean} Returns `undefined` or `true` if it exits due to a warning.
+     */
     function _startCMS(_options){
         
         if (_warningOnExit(function(){_startCMS(_options);} )) return;                           
@@ -320,9 +375,13 @@ function editCMS2(website_document){
         
     }    
 
-    //
-    // Edit home page content
-    //
+    /**
+     * Initializes the main editing controls in the editor panel.
+     * Sets up buttons for home page editing, website properties, adding pages,
+     * viewing website URL, and hiding the panel.
+     * @private
+     * @param {boolean} need_callback - If true, calls _startCMS(options) after initializing controls.
+     */
     function _initEditControls(need_callback){
 
         _editor_panel.find('.btn-website-homepage').on('click',_editHomePage);
@@ -389,9 +448,11 @@ function editCMS2(website_document){
         if(need_callback!==false) _startCMS(options);
     }
     
-    //
-    // Edit home page content
-    //
+    /**
+     * Loads the content of the website's home page for editing.
+     * Handles unsaved changes warning.
+     * @private
+     */
     function _editHomePage(){
 
         if(_warningOnExit( _editHomePage )) return;                           
@@ -402,9 +463,11 @@ function editCMS2(website_document){
     }
     
     
-    //
-    // Edit home page record
-    //
+    /**
+     * Opens the record editor for the website's home page record (RT_CMS_HOME).
+     * Handles unsaved changes warning.
+     * @private
+     */
     function _editHomePageRecord(){
 
         if(_warningOnExit( _editHomePageRecord )) return;
@@ -427,16 +490,21 @@ function editCMS2(website_document){
         }});
     }
     
-    //
-    //
-    //
+    /**
+     * Triggers the process to add a new root menu item via the _editCMS_SiteMenu instance.
+     * @private
+     */
     function _addNewRootMenu(){
         if(_editCMS_SiteMenu) {
             _editCMS_SiteMenu.selectMenuRecord(home_page_record_id);
         }
     }
 
-    // global listener on window close/exit
+    /**
+     * Handles the window's beforeunload event to warn about unsaved changes.
+     * @private
+     * @returns {string|void} A warning message if there are unsaved changes, otherwise undefined.
+     */
     function _onbeforeunload() {
 
         if(page_was_modified || (_edit_Element && _edit_Element.isModified())){
@@ -444,9 +512,13 @@ function editCMS2(website_document){
         }
     }
     
-    //
-    //
-    //
+    /**
+     * Checks for unsaved changes (either in page layout or active element editor)
+     * and prompts the user to save or discard them before proceeding.
+     * @private
+     * @param {function} callback - The function to call if the user decides to proceed (after saving or discarding).
+     * @returns {boolean} True if a warning was shown and execution should pause, false otherwise.
+     */
     function _warningOnExit(callback){
         
         //at first check if element editor is active
@@ -487,10 +559,11 @@ function editCMS2(website_document){
         
     }
     
-    //
-    // 1. close control panel
-    // 2. reload content
-    //
+    /**
+     * Closes the CMS editor interface.
+     * Handles unsaved changes warning, hides the editor panel, and restores normal page view.
+     * @private
+     */
     function _closeCMS(){
 
         if(_warningOnExit( _closeCMS )) return;
@@ -510,9 +583,12 @@ function editCMS2(website_document){
         }
     }
     
-    //
-    // load page structure into tree and init layout
-    //
+    /**
+     * Initializes the page display and editing tree for the current page.
+     * Loads page content, converts old formats if necessary, and sets up the layout manager.
+     * @private
+     * @param {boolean} [supress_conversion=false] - If true, suppresses conversion of old CMS format.
+     */
     function _initPage( supress_conversion ){
         
         if(tinymce) tinymce.remove('.tinymce-body'); //detach
@@ -574,10 +650,13 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
         }
     }
 
-    //
-    // 1) init editor
-    // 2) init hover toolbar - DnD,Edit Properties,Insert Sibling
-    //
+    /**
+     * Initializes or re-initializes TinyMCE instances for editable text areas on the page.
+     * Configures TinyMCE with custom formats, plugins, and event handlers.
+     * @private
+     * @param {string|number} [key] - Optional key to target a specific TinyMCE instance by its `data-hid` attribute.
+     *                                If not provided, initializes all elements with class '.tinymce-body'.
+     */
     function _initTinyMCE( key ){
 
         if(!Object.hasOwn(window.hWin.HAPI4.dbSettings, 'TinyMCE_formats')){ // retrieve custom formatting
@@ -813,9 +892,11 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
         _layout_container.find('img, embed').each(function(i,ele){window.hWin.HEURIST4.util.restoreRelativeURL(ele);});
     }
     
-    //
-    //
-    //
+    /**
+     * Handles changes made to the page content or layout.
+     * Shows or hides the save/discard toolbar based on modification state.
+     * @private
+     */
     function _onPageChange(){
             
         if(page_was_modified){
@@ -834,9 +915,11 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
 
     }     
     
-    //
-    //
-    //
+    /**
+     * Opens a dialog to configure and insert a link that allows adding a new Heurist record.
+     * Integrates with TinyMCE to insert the generated link.
+     * @private
+     */
     function __addHeuristRecordAddLink(){
 
         window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd',{
@@ -865,9 +948,12 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
         
     }
     
-    //
-    // browse for heurist uploaded/registered files/resources and add player link
-    //         
+    /**
+     * Opens a dialog to browse and select Heurist uploaded files/resources.
+     * Inserts the selected media (image, etc.) into the active TinyMCE editor,
+     * optionally with a caption.
+     * @private
+     */
     function __addHeuristMedia(){
 
         let popup_options = {
@@ -927,9 +1013,12 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
     }
     
     
-    //
-    // converts layout JSON content to treeview data
-    //
+    /**
+     * Initializes or reloads the Fancytree instance for displaying the page structure.
+     * Sets up tree options, including drag-and-drop functionality for reordering elements.
+     * @private
+     * @param {Array<Object>} treeData - The hierarchical data for the page structure.
+     */
     function _initTreePage( treeData ){
         
         if(_panel_treePage){
@@ -1028,18 +1117,21 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
         
     }
 
-    //
-    //
-    //
+    /**
+     * Hides the action menu (context menu) within the page structure tree.
+     * @private
+     */
     function _hideMenuInTree(){
         let ele = _panel_treePage.find('.lid-actionmenu');
         ele.hide(); //menu icon
         ele.find('span[data-action]').hide(); //popup menu
     }        
     
-    //
-    //
-    //
+    /**
+     * Hides the element property view panel and restores the tree view to its normal state.
+     * Resets any active element editing states.
+     * @private
+     */
     function _hidePropertyView(){
         
         _edit_Element = null;
@@ -1069,9 +1161,13 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
         __restoreTree();
     }
 
-    //
-    // mode - website or page
-    //
+    /**
+     * Switches the editor between 'page' editing mode and 'website' (menu) editing mode.
+     * Updates UI elements, toolbars, and initializes/detaches TinyMCE as needed.
+     * @private
+     * @param {string} [mode] - The mode to switch to ('page' or 'website'). If not provided, determined by active tab.
+     * @param {boolean} [init_tinymce=true] - Whether to initialize TinyMCE when switching to 'page' mode.
+     */
     function _switchMode( mode, init_tinymce )
     {
 
@@ -1138,9 +1234,13 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
         
     }
 
-    //
-    // add and init action icons for page structure treeview
-    //
+    /**
+     * Adds or updates action icons (edit, delete, drag, insert) for elements in the
+     * page structure tree and directly on the page layout elements.
+     * Initializes TinyMCE after a delay.
+     * @private
+     * @param {number} [delay=1] - Delay in milliseconds before executing.
+     */
     function _updateActionIcons(delay){ 
 
         if(!(delay>0)) delay = 1;
@@ -1165,11 +1265,13 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
             }, delay);
     }
 
-    //
-    // for treeview on mouse over toolbar
-    // item - either fancytree node or div.editable in container
-    // ele_ID - element key 
-    //
+    /**
+     * Defines and attaches action icons/menus to a specific page element or tree node.
+     * @private
+     * @param {HTMLElement|jQuery} item - The DOM element (tree node or page element) to attach icons to.
+     * @param {string|number} ele_ID - The unique key/ID of the element.
+     * @param {string} style_pos - CSS styling for the icon container's position.
+     */
     function _defineActionIcons(item, ele_ID, style_pos){ 
         if($(item).find('.lid-actionmenu').length==0){ //no one defined
 
@@ -1522,9 +1624,12 @@ function(value){
         }
     }
 
-    //
-    //
-    //
+    /**
+     * Shows a visual overlay on a page element, typically used when interacting
+     * with the element via the tree view.
+     * @private
+     * @param {string|number} ele_ID - The key/ID of the element to overlay.
+     */
     function _showOverlayForElement( ele_ID ){
         if(ele_ID>0){
             let cms_ele = _layout_container.find('div[data-hid='+ele_ID+']');
@@ -1547,10 +1652,12 @@ function(value){
     }
 
 
-    //
-    // remove element
-    // it prevents deletion of non-empty group
-    //
+    /**
+     * Removes an element from the page layout and its corresponding node from the tree.
+     * Updates the internal layout configuration (_layout_content).
+     * @private
+     * @param {string|number} ele_id - The key/ID of the element to remove.
+     */
     function _layoutRemoveElement(ele_id){
 
         let tree = $.ui.fancytree.getTree( _panel_treePage );
@@ -1607,9 +1714,12 @@ function(value){
         
     }
     
-    //
-    // Reflects changes in tree
-    //
+    /**
+     * Handles changes to an element's parent due to drag-and-drop in the tree.
+     * Updates the internal layout configuration and redraws the page.
+     * @private
+     * @param {string|number} ele_id - The key/ID of the element whose parent changed.
+     */
     function _layoutChangeParent(ele_id){
 
         tinymce.remove('.tinymce-body'); //detach
@@ -1668,9 +1778,13 @@ function(value){
         _onPageChange();
     }
 
-    //
-    // switch to different language version or create new one
-    //
+    /**
+     * Switches the content of a text element to a specified language version or
+     * prepares it for new translation.
+     * @private
+     * @param {string|number} ele_id - The key/ID of the text element.
+     * @param {string} lang_id - The language code (e.g., 'en', 'fr') to switch to or create.
+     */
     function _layoutTranslateElement(ele_id, lang_id){
         
         let affected_ele = _layout_container.find('div[data-hid="'+ele_id+'"]');
@@ -1698,12 +1812,12 @@ function(value){
     }
 
     
-    //
-    // Opens element/widget property editor  (editCMS_ElementCfg/WidgetCfg)
-    // 1. css properties
-    // 2  flexbox properties
-    // 3. widget properties
-    //
+    /**
+     * Opens the property editor (editCMS_ElementCfg) for a given page element.
+     * Handles saving of previously edited element if any. Manages UI state for editing.
+     * @private
+     * @param {string|number} ele_id - The key/ID of the element to edit.
+     */
     function _layoutEditElement(ele_id){
 
         if(_edit_Element){ //already opened - save previous
@@ -1816,14 +1930,14 @@ function(value){
     }
     
     
-    //
-    // Add text element or widget
-    // 1. Find parent element for "ele_id"
-    // 2. Add json to _layout_content
-    // 3. Add element to _layout_container
-    // 4. Update treeview
-    //
-    // @todo - store templates as json text 
+    /**
+     * Inserts a new element (text, group, widget, or template) into the page layout.
+     * Handles creation of different element types and templates.
+     * @private
+     * @param {string|number} ele_id - The key/ID of the element relative to which the new element is inserted (parent or sibling).
+     * @param {string} widget_type - The type of the element/widget to insert (e.g., 'text', 'group', 'heurist_SearchInput', 'tpl_default').
+     * @param {string} widget_name - The display name for the new element/widget.
+     */
     function _layoutInsertElement(ele_id, widget_type, widget_name){
         
        
@@ -1959,9 +2073,13 @@ function(value){
         _layoutInsertElement_continue(ele_id, new_ele);
     }       
     
-    //
-    //
-    //    
+    /**
+     * Continues the element insertion process after the new element's JSON configuration is prepared.
+     * Updates the layout configuration, tree view, and redraws relevant parts of the page.
+     * @private
+     * @param {string|number} ele_id - The key/ID of the element relative to which insertion occurs.
+     * @param {Object|Array<Object>} new_element_json - The JSON configuration for the new element(s).
+     */
     function _layoutInsertElement_continue(ele_id, new_element_json){
 
         let tree = $.ui.fancytree.getTree( _panel_treePage );
@@ -2038,9 +2156,12 @@ function(value){
         */        
     }
 
-    //
-    //
-    //
+    /**
+     * Loads a predefined template JSON and inserts it into the page.
+     * @private
+     * @param {string|number} ele_id - The key/ID of the element to insert the template relative to.
+     * @param {string} template_name - The name of the template to load (e.g., 'tpl_default', 'tpl_blog').
+     */
     function _prepareTemplate(ele_id, template_name){
     
         if(template_name.indexOf('tpl_')==0){
@@ -2069,9 +2190,12 @@ function(value){
     }
     
     
-    //
-    //  Save page configuration (_layout_content) into RT_CMS_MENU record 
-    //
+    /**
+     * Saves the current page layout configuration (_layout_content) to the database.
+     * Cleans the layout JSON before saving.
+     * @private
+     * @param {function} [callback] - Optional function to call after saving is complete.
+     */
     function _saveLayoutCfg( callback ){
         
         if(!(options.record_id>0)) return;
@@ -2157,9 +2281,10 @@ function(value){
         });         
     }
     
-    //
-    //
-    //
+    /**
+     * Switches the editor to 'website' mode to show the website menu/structure editor.
+     * @private
+     */
     function _showWebSiteMenu(){
         _switchMode('website');
     }
@@ -2167,34 +2292,76 @@ function(value){
     //public members
     let that = {
 
+        /**
+         * Gets the class name of the editor instance.
+         * @returns {string} The class name.
+         * @public
+         */
         getClass: function () {
             return _className;
         },
 
+        /**
+         * Checks if the instance is of a given class name.
+         * @param {string} strClass - The class name to check against.
+         * @returns {boolean} True if it is an instance of the class, false otherwise.
+         * @public
+         */
         isA: function (strClass) {
             return (strClass === _className);
         },
         
+        /**
+         * Public method to insert an element into the layout. Delegates to _layoutInsertElement.
+         * @param {string|number} insert_ele_id - The ID of the element to insert relative to.
+         * @param {string} selected_element - The type of element to insert.
+         * @public
+         */
         layoutInsertElement: function(insert_ele_id, selected_element){
             _layoutInsertElement(insert_ele_id, selected_element);
         },
         
+        /**
+         * Public method to start the CMS editor. Delegates to _startCMS.
+         * @param {Object} _options - Configuration options for the CMS session. See _startCMS for details.
+         * @returns {void|boolean} See _startCMS return value.
+         * @public
+         */
         startCMS: function(_options){
             return _startCMS( _options );    
         },
         
+        /**
+         * Public method to close the CMS editor. Delegates to _closeCMS.
+         * @public
+         */
         closeCMS: function(){
             _closeCMS();            
         },
         
+        /**
+         * Public method to switch the editor mode. Delegates to _switchMode.
+         * @param {string} mode - The mode to switch to ('page' or 'website').
+         * @public
+         */
         switchMode: function(mode){
             _switchMode(mode);            
         },
         
+        /**
+         * Public method to handle warnings on exit. Delegates to _warningOnExit.
+         * @param {function} callback - The function to call if the user proceeds.
+         * @returns {boolean} See _warningOnExit return value.
+         * @public
+         */
         warningOnExit: function(callback){
             return _warningOnExit(callback)
         },
         
+        /**
+         * Public method to reset the modified state of the page.
+         * @public
+         */
         resetModified: function(){
             page_was_modified = false;    
         }
