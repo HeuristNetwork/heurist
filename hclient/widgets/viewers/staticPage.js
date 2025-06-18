@@ -19,18 +19,8 @@
  * @since 4.0
  */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 /**
  * @widget heurist.staticPage
- * @memberof heurist
- * @augments jQuery.Widget
  * @description A widget for displaying static HTML content from a URL.
  * The content can be loaded directly into the widget or within an iframe.
  * URL placeholders `[dbname]` and `[layout]` are supported.
@@ -194,16 +184,16 @@ $.widget( "heurist.staticPage", {
             
             if(this.options.isframe){
 
-                if(!this.dosframe){ // dosframe seems to be a typo for iframe or a specific variable name
+                if(!this.pageframe){ 
                     let that = this;
                     this.element.css({overflow: 'hidden'});
-                    this.dosframe = $( "<iframe>" ).css({overflow:'hidden !important', width:'100% !important'}).appendTo( this.div_content );
-                    this.dosframe.on('load', function(){
+                    this.pageframe = $( "<iframe>" ).css({overflow:'hidden !important', width:'100% !important'}).appendTo( this.div_content );
+                    this.pageframe.on('load', function(){
                         that.loadanimation(false);
                     })
                 }
                 this.loadanimation(true);
-                this.dosframe.attr('src', this.options.url); // Uses the potentially modified this.options.url
+                this.pageframe.attr('src', this.options.url); // Uses the potentially modified this.options.url
             }else{
                 $(this.div_content).load(this.options.url); // Uses the potentially modified this.options.url
             }

@@ -22,14 +22,6 @@
 * @since       4.0
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 /**
  * @widget heurist.connections
  * @description Displays a network graph of connections between records in a result set.
@@ -339,11 +331,7 @@ $.widget( "heurist.connections", {
                 
             });
         }
-    }
-    
-
-    //@todo - move inside widget
-
+    },
 
     /**
     * @memberof heurist.connections
@@ -490,9 +478,8 @@ $.widget( "heurist.connections", {
         if(iframe != null && iframe !== undefined && iframe.length >= 1) {
             iframe[0].contentWindow.showData(data);
         }*/
-    }    
+    },    
 
-    ,
     /**
      * @memberof heurist.connections
      * @instance

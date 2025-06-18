@@ -24,76 +24,8 @@
 * @since       4.0
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 /* global translationFromUI, translationToUI */
-
-/* Explanation of faceted search - @todo OUTDATED - NEED TO REWRITE
-
-There are two types of queries: 1) to search facet values 2) to search results
-
-Examples
-1) No levels:
-
-search results: t:10 f:1:"XXX" - search persons by name
-facet search:   f:1  where t:10 + other current queries
-
-2) One level:
-
-search results: t:10 linked_to:5-61 [t:5 f:1:"XXX"] - search persons where multimedia name is XXX
-facet search:   f:1  where t:5 linkedfrom:10-61 [other current queries(parent query)]
-
-3) Two levels
-
-search results: t:10 linked_to:5-61 [t:5 linked_to:4-15 [t:4 f:1:"XXX"]] - search persons where multimedia has copyright of organization with name is XXX
-facet search:   f:1 where t:4 linkedfrom:5-15 [t:5 linkedfrom:10-61 [other current queries for person]]   - find organization who is copyright of multimedia that belong to person
-
-
-Thus, our definition has the followig structure
-rectype - main record type to search
-domain
-facets:[ [
-code:  10:61:5:15:4:1  to easy init and edit    rt:ft:rt:ft:rt:ft  if link is unconstrained it will be empty  61::15
-title: "Author Name < Multimedia"
-id:  1  - field type id
-type:  "freetext"  - field type
-levels: [t:4 linkedfrom:5-15, t:5 linkedfrom:10-61]   (the last query in this array is ommitted - it will be current query)
-
-search - main query to search results
-[linked_to:5-61, t:5 linked_to:4-15, t:4 f:1]    (the last query in the top most parent )
-
-currentvalue:
-history:  - to keep facet values (to avoid redundat search)
-
-],
-the simple (no level) facet
-[
-code: 10:1
-title: "Family Name"
-type:  "freetext"
-id: 1
-levels: []
-search: [t:10 f:1]
-]
-
-]
-
-NOTE - to make search fo facet value faster we may try to omit current search in query and search for entire database
-
-*/
                      
-/*
-step1 - selection of rectype, sup filter, rules
-step2 - select fields in treeview
-step3 - define label, help prompt and filter type (by first letter, by full name, directly) + preview
-*/
-
 /**
  * @widget heurist.search_faceted_wiz
  * @description A wizard for defining and configuring faceted search interfaces.
@@ -451,8 +383,6 @@ $.widget( "heurist.search_faceted_wiz", {
 
     }, //end _create
 
-    // Any time the widget is called with no arguments or with only an option hash,
-    // the widget is initialized; this includes when the widget is created.
     /**
      * @memberof heurist.search_faceted_wiz
      * @instance
@@ -462,12 +392,6 @@ $.widget( "heurist.search_faceted_wiz", {
      */
     _init: function() {
     },
-
-    //Called whenever the option() method is called
-    //Overriding this is useful if you can defer processor-intensive changes for multiple option change
-    /*
-    _setOptions: function( options ) {
-    },*/
 
     /*
     * private function
@@ -1720,7 +1644,6 @@ $.widget( "heurist.search_faceted_wiz", {
         return 1;
     }
     
-    //restore selection in treeview
     /**
      * @memberof heurist.search_faceted_wiz
      * @instance
@@ -2396,13 +2319,12 @@ $.widget( "heurist.search_faceted_wiz", {
         return null;
     }
     
-    //
-    // old version it updates params only (from UI to options.params)
     /**
      * @memberof heurist.search_faceted_wiz
      * @instance
      * @private
      * @description Refreshes the facet preview. If the record count is high, it might defer to a manual update.
+     * This is old version. It updates params only (from UI to options.params)
      */
     ,_refresh_FacetsPreview: function(){
 

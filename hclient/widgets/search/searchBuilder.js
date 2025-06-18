@@ -9,32 +9,22 @@
 * can be applied directly, saved, or used to populate an input element.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\search
+* @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
-* @designer    Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @subpackage  hclient\widgets\search
 * @since       6.0
-* @link        https://HeuristNetwork.org
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
 */
 
 /**
  * @widget heurist.searchBuilder
- * @extends $.heurist.baseDialog
  * @description
  * jQuery UI widget that provides a wizard-like interface for constructing advanced search queries.
  * It allows users to define criteria based on record types, fields, relationships, and sorting.
  */
-$.widget( "heurist.searchBuilder", $.heurist.baseDialog, {
+$.widget( "heurist.searchBuilder", {
 
     /**
      * @memberof heurist.searchBuilder
@@ -957,7 +947,7 @@ $.widget( "heurist.searchBuilder", $.heurist.baseDialog, {
         };
 
         return $("<div>").editing_input(ed_options).insertAfter( this.element.find('.main-rectype') );
-    }
+    },
   
 
     /**
