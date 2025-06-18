@@ -1,35 +1,35 @@
+# Directory
 
-Directory:    /hclient
+`hclient`
 
-Overview:       Client-side functions, H4 onwards (late 2015). See also hserv for server-side functions
-                The client side functions are html and javascript which communicate with the server-side php functions.
-                The data-critical, search and visualisation parts of the Heurist infrastructure are handled by hserv and hclient
-                
-                Other directories in the root contain older code (pre 2015) which carries out simple tasks such as database setup
-                and simple listing, or server scripts and configurations. They use a variety of methodologies, but we have not had
-                the resources, or priorities, to retwrite them sicne they still work quite adequately and are low risk.
+## Overview
 
-Notes:    -- assets
-                branding
-                css
-                localization
-                v6
-          -- core
-          -- framecontent 
-          -- widgets
-                 admin
-                 cms
-                 cpanel
-                 editing
-                 entity
-                 lookup
-                 profile
-                 record
-                 search
-                 viewers
+This directory contains the client-side functionalities for the Heurist application (H4 and onwards, from late 2015). It comprises HTML, JavaScript, and CSS assets that communicate with server-side PHP functions located in the `hserv` directory. These components are responsible for the data-critical aspects, search capabilities, and visualization features of the Heurist infrastructure.
 
+## Key files
 
-Updated:     18 Oct 2015, updated 3 Jan 2024
+(This directory primarily serves as a container for subdirectories and doesn't have key operational files at its immediate level beyond this README.)
 
-----------------------------------------------------------------------------------------------------------------
+## Subdirectories
+
+-   `assets/`: Contains static resources like images (icons, logos, backgrounds), CSS stylesheets, localization files, and other visual or data assets used by the client.
+    -   `branding/`: Specific branding assets like logos.
+    -   `css/`: Stylesheets for the application.
+    -   `localization/`: Files for internationalization and localization.
+-   `core/`: Contains core JavaScript modules and PHP scripts that form the building blocks of the hclient application, including system management, layout control, API interactions, and various utility functions.
+-   `framecontent/`: Manages content displayed within frames or specific sections of the UI, such as export menus, information pages, and initialization scripts for different page contexts.
+-   `widgets/`: A collection of UI components (widgets) that provide specific functionalities and user interactions. Each subdirectory within `widgets` typically represents a distinct UI module or feature set.
+    -   `admin/`: Widgets for administrative tasks.
+    -   `cms/`: Widgets related to the Content Management System.
+    -   `cpanel/`: Widgets for the control panel or dashboard.
+    -   `database/`: Widgets for database management operations.
+    -   `editing/`: Widgets for various editing functionalities.
+    -   `entity/`: Widgets for managing and searching different types of entities (records, terms, users, etc.).
+    -   `lookup/`: Widgets for external lookup services.
+    -   `profile/`: Widgets for user profile management and login.
+    -   `record/`: Widgets for record-specific actions like adding, deleting, exporting, and tagging.
+    -   `report/`: Widgets for creating and viewing reports.
+    -   `search/`: Widgets for building and executing search queries.
+    -   `viewers/`: Widgets for displaying data in various formats, such as maps, timelines, and media viewers.
+    
 

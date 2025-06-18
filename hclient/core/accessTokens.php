@@ -1,7 +1,9 @@
 <?php
 /**
 * Access tokens for basemaps. They are defined as global vars in heuristConfigIni.php
-*
+* 
+* It keeps tokens for authentication for third-party applications and APIs
+* 
 * @package     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
