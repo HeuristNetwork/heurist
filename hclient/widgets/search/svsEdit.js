@@ -1,38 +1,83 @@
-
 /**
-* svsEdit.js : functions to edit and save saved searches (filters)
+* @file svsEdit.js
+* @brief Provides functions to edit and save saved searches/filters and visualizations.
+* @fileOverview This file defines the HSvsEdit factory function, which creates an object
+* responsible for managing the dialog and logic for creating, editing, and
+* saving user-defined searches (filters) and visualizations. It handles
+* different modes of operation, including standard saved searches, rule-based
+* searches, and faceted search configurations (by invoking the
+* search_faceted_wiz widget).
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\search
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4
 */
 
 /* global translationToUI, translationFromUI, showSearchFacetedWizard */
 
+/**
+ * Factory function to create an SvsEdit instance.
+ * This instance provides methods to manage the dialog for editing and saving
+ * various types of saved searches and visualizations.
+ *
+ * @function HSvsEdit
+ * @param {Object} [args] - Arguments for the SvsEdit instance (currently not used, but reserved for future extension).
+ * @returns {Object} An object with methods to manage saved search editing.
+ * @property {function} getClass Returns the class name.
+ * @property {function} isA Checks if the instance is of a given class.
+ * @property {function} getVersion Returns the version of the SvsEdit module.
+ * @property {function} remove Removes the edit dialog from the DOM.
+ * @property {function} isModified Checks if the content of the edit dialog has been modified.
+ * @property {function} closeEditDialog Closes the edit dialog.
+ * @property {function} showSavedFilterEditDialog Shows the dialog for editing/creating a saved filter or visualization.
+ */
 function HSvsEdit(args) {
+    /** @const {string} _className - Internal class name identifier. */
     const _className = "SvsEdit",
+    /** @const {string} _version - Internal version number. */
     _version   = "0.4";
+    /**
+     * @private
+     * @type {?jQuery}
+     * @description jQuery object representing the main edit dialog. Null if not initialized.
+     */
     let edit_dialog = null,
+    /**
+     * @private
+     * @type {Object<string, (string|boolean)>}
+     * @description Stores the initial values of the dialog fields to check for modifications.
+     */
     keep_values = {'svs_Name':'','svs_Query':'','svs_UGrpID':'','svs_Rules':'','svs_RulesOnly':false,'svs_Notes':'','svs_ViewMode':''},
+    /**
+     * @private
+     * @type {boolean}
+     * @description Flag to prevent concurrent save operations.
+     */
     _save_in_porgress = false,
+    /**
+     * @private
+     * @type {?function}
+     * @description Callback function to be executed after a successful save operation.
+     */
     callback_method,
+    /**
+     * @private
+     * @type {?function}
+     * @description Callback function related to menu locking behavior when the dialog is open.
+     */
     _menu_locked;
 
-    //
-    //
-    //
+    /**
+     * Checks if the data in the edit dialog has been modified compared to its initial state.
+     * @private
+     * @function _isModified
+     * @returns {boolean} True if modified, false otherwise.
+     */
     function _isModified(){
 
         let $dlg = edit_dialog;
@@ -50,12 +95,18 @@ function HSvsEdit(args) {
     }
     
     /**
-    * Assign values to UI input controls
+    * Assigns values from data to the UI input controls in the edit dialog.
+    * This function populates the form fields based on whether it's an existing
+    * saved search (svsID) or a new one (squery, groupID).
     *
-    * squery - need for new - otherwise it takes currentSearch
-    * domain need for new
-    *
-    * return false if saved search and true if rules
+    * @private
+    * @function _fromDataToUI
+    * @param {?number} svsID - The ID of the saved search if editing an existing one, otherwise null or undefined.
+    * @param {string|Object} [squery] - The search query string or query object for a new search.
+    *                                 If an object, it can contain `q` (query string) and `rules`.
+    * @param {string|number} [groupID] - The group ID for the saved search.
+    * @param {boolean} [allowChangeGroupID=false] - Whether the group ID selection should be enabled.
+    * @returns {boolean} True if the form is configured for a rules-only search, false otherwise (i.e., it's a standard filter or includes a query string).
     */
     function _fromDataToUI(svsID, squery, groupID, allowChangeGroupID){
 
@@ -195,9 +246,14 @@ function HSvsEdit(args) {
     }
 
     /**
-    * Show faceted search wizard
+    * Shows the faceted search wizard.
+    * Dynamically loads `search_faceted_wiz.js` if it's not already available.
     *
-    * @param params
+    * @private
+    * @function _showSearchFacetedWizard
+    * @param {Object} params - Parameters to pass to the `showSearchFacetedWizard` global function.
+    *                          See `hclient/widgets/search/search_faceted_wiz.js` for details on these parameters.
+    * @returns {jQuery|undefined} The jQuery object for the faceted search wizard dialog, or undefined if loading failed.
     */
     function _showSearchFacetedWizard ( params ){
 
@@ -210,9 +266,17 @@ function HSvsEdit(args) {
 
     }
 
-    //
-    //
-    //
+    /**
+     * Opens the rule builder dialog for editing search rules.
+     *
+     * @private
+     * @function _editRules
+     * @param {jQuery} ele_rules - jQuery object for the input field storing the cleaned/simplified rules JSON string.
+     * @param {jQuery} ele_rules_full - jQuery object for the hidden input field storing the full rules JSON string.
+     * @param {string|Object} squery - The current search query, used if creating new rules in context.
+     * @param {string|number} groupID - The current group ID.
+     * @param {Object} [dlg_options={}] - Additional options for the rule builder dialog.
+     */
     function _editRules(ele_rules, ele_rules_full, squery, groupID, dlg_options) {
 
        let that = this;
@@ -259,7 +323,18 @@ function HSvsEdit(args) {
 
     }
 
-    
+    /**
+     * Checks if a given query string contains rules and/or a query part.
+     *
+     * @private
+     * @function _hasRules
+     * @param {string} query - The Heurist query string to parse.
+     * @returns {number}
+     *         - -1: If both query and rules are empty.
+     *         -  0: If query is present but rules are empty.
+     *         -  1: If both query and rules are present.
+     *         -  2: If rules are present but query is empty (rules-only).
+     */
     function  _hasRules (query){
         let prms = window.hWin.HEURIST4.query.parseHeuristQuery(query);
         if( window.hWin.HEURIST4.util.isempty(prms.q)){
@@ -270,13 +345,24 @@ function HSvsEdit(args) {
     }
     
     /**
-    * put your comment there...
+    * Shows the main dialog for editing or creating a saved search/filter or visualization.
+    * This function determines which specialized UI to show (standard form, faceted wizard, or rule editor)
+    * based on the `mode` and existing `svsID` or `squery` content.
     *
-    * @param svsID
-    * @param squery
-    * @param mode - faceted, rules or saved
-    * @param is_short - works only for addition (from save fixed order)
-    * @param callback
+    * @private
+    * @function _showDialog
+    * @param {string} mode - The mode of operation: 'faceted', 'rules', or 'saved'.
+    * @param {string|number} groupID - The target group ID for saving.
+    * @param {?number} svsID - The ID of the saved search if editing an existing one.
+    * @param {string|Object} [squery] - The search query string or object for a new item or when editing rules.
+    * @param {boolean} [is_short=false] - If true, shows a compact version of the dialog (applies only when adding).
+    * @param {Object|string|jQuery|Element|Event} [position] - Position for the dialog, as per jQuery UI dialog `position` option.
+    * @param {?function} [callback] - Callback function to execute after a successful save.
+    * @param {boolean} [is_modal=true] - Whether the dialog should be modal.
+    * @param {boolean} [is_h6style=false] - Whether to apply H6 styling.
+    * @param {?function} [menu_locked] - Callback function for menu locking.
+    * @param {boolean} [reset_svs_edit=true] - If true, forces re-initialization of UI from data.
+    * @returns {jQuery|undefined} The jQuery object for the dialog, or undefined if a specialized wizard is invoked.
     */
     function _showDialog( mode, groupID, svsID, squery, is_short, position, callback, is_modal, is_h6style, menu_locked, reset_svs_edit){
         
@@ -693,21 +779,54 @@ function HSvsEdit(args) {
     //public members
     let that = {
 
+        /**
+         * Gets the class name of the SvsEdit instance.
+         * @memberof HSvsEdit
+         * @instance
+         * @function getClass
+         * @returns {string} The class name "SvsEdit".
+         */
         getClass: function () {return _className;},
+        /**
+         * Checks if the instance is of a specific class type.
+         * @memberof HSvsEdit
+         * @instance
+         * @function isA
+         * @param {string} strClass - The class name to compare against.
+         * @returns {boolean} True if `strClass` is "SvsEdit", false otherwise.
+         */
         isA: function (strClass) {return (strClass === _className);},
+        /**
+         * Gets the version of the SvsEdit module.
+         * @memberof HSvsEdit
+         * @instance
+         * @function getVersion
+         * @returns {string} The version number.
+         */
         getVersion: function () {return _version;},
 
+        /**
+         * Removes the edit dialog from the DOM and performs necessary cleanup.
+         * @memberof HSvsEdit
+         * @instance
+         * @function remove
+         */
         remove: function () {
             //remove edit dialog from body
-            edit_dialog.parent('.ui-dialog').off('mouseover mouseleave');
-            
-            edit_dialog.remove();
-            edit_dialog = null;
+            if (edit_dialog) {
+                edit_dialog.parent('.ui-dialog').off('mouseover mouseleave');
+                edit_dialog.remove();
+                edit_dialog = null;
+            }
         },
         
-        //
-        // is opened and modified
-        //
+        /**
+         * Checks if the currently open edit dialog has been modified since it was loaded.
+         * @memberof HSvsEdit
+         * @instance
+         * @function isModified
+         * @returns {boolean} True if the dialog is open and modified, false otherwise.
+         */
         isModified: function(){
             if(edit_dialog && edit_dialog.dialog('instance') && edit_dialog.dialog('isOpen')){
 
@@ -718,12 +837,46 @@ function HSvsEdit(args) {
             }
         },
 
+        /**
+         * Closes the edit dialog if it is currently open.
+         * @memberof HSvsEdit
+         * @instance
+         * @function closeEditDialog
+         */
         closeEditDialog: function () {
             if(edit_dialog && edit_dialog.dialog('instance')){  
                 edit_dialog.dialog("close");    
             }
         },
         
+        /**
+         * Shows the dialog for creating or editing a saved filter, rule set, or faceted search.
+         * This is the main public method to display and interact with the SvsEdit functionality.
+         *
+         * @memberof HSvsEdit
+         * @instance
+         * @function showSavedFilterEditDialog
+         * @param {string} mode - The mode of operation:
+         *                        'faceted' for faceted search configuration,
+         *                        'rules' for rule-based search,
+         *                        'saved' for standard saved search/filter.
+         * @param {string|number} groupID - The group ID where the item will be saved or which it belongs to.
+         * @param {?number} svsID - The ID of the saved search/visualization if editing an existing one; null for new.
+         * @param {string|Object} [squery] - The search query string or query object for a new item,
+         *                                 or when initially populating the editor.
+         * @param {boolean} [is_short=false] - If true, displays a compact version of the dialog (applies mainly when adding).
+         * @param {Object|string|jQuery|Element|Event} [position] - Position for the dialog, as per jQuery UI dialog `position` option.
+         * @param {?function} [callback] - A callback function to be executed after a successful save operation.
+         *                               The callback will receive `null` as the first argument (error) and the
+         *                               `request` object (containing saved data) as the second argument.
+         * @param {boolean} [is_modal=true] - Specifies whether the dialog should be modal.
+         * @param {boolean} [is_h6style=false] - If true, applies H6 styling to the dialog.
+         * @param {?function} [menu_locked] - A callback function for managing menu locking behavior when the dialog is open.
+         * @param {boolean} [reset_svs_edit=true] - If true (default), forces re-initialization of the dialog's UI elements
+         *                                       from the provided data. If false, may retain existing UI state if dialog is reused.
+         * @returns {jQuery|undefined} The jQuery object representing the dialog element, or undefined if a
+         *                             specialized wizard (like faceted search) is invoked directly.
+         */
         showSavedFilterEditDialog: function( mode, groupID, svsID, squery, is_short, 
                     position, callback, is_modal, is_h6style, menu_locked, reset_svs_edit ) 
         {

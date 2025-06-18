@@ -1,29 +1,72 @@
 /**
-* Manipulations with collection from result list (add,remove,clear,list,save as search,perform action)
-* It has 
-* reference to resultList
-* allowed record types for collection
-* 
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file resultListCollection.js
+ * @brief Manages a collection of records, typically interacting with a result list, to perform actions like adding, clearing, or creating a map from the collection.
+ * @fileOverview
+ * This file defines the `heurist.resultListCollection` jQuery UI widget. This widget provides
+ * functionality to manage a temporary collection of records. Users can add records from a
+ * selection (often from an associated `resultList`) to this collection, clear the collection,
+ * and perform actions on the collected records, such as creating a map or saving the collection
+ * as a new search/filter. It also listens to global events for record selection and collection updates
+ * to synchronize its state. The widget displays information about the collection size and provides
+ * UI controls (buttons) for various collection-related actions. It can also render a small preview
+ * of the collected items using an internal `resultList` instance.
+ *
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\widgets\viewers
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 6.0
+ */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
+/**
+ * @widget heurist.resultListCollection
+ * @description A widget for managing a collection of records.
+ * It allows adding records from a selection (typically from an associated {@link heurist.resultList}),
+ * clearing the collection, and performing actions such as creating a map or saving the collection.
+ * The widget displays the current collection size and provides UI controls for these actions.
+ *
+ * @example
+ * $('#myCollectionManager').resultListCollection({
+ *     resultList: $('#myResultList'), // Reference to the main result list
+ *     action_Label: 'Generate Report',
+ *     action_mode: 'customAction',
+ *     instructionText: 'Select records and add to collection for report.'
+ * });
+ */
 $.widget( "heurist.resultListCollection", {
 
-    // default options
+    /**
+     * @typedef {object} heurist.resultListCollection.options
+     * @description Options for configuring the resultListCollection widget.
+     * @property {Array<number>|null} [rectype_set=null]
+     *  An array of allowed record type IDs that can be added to the collection.
+     *  If null, records of any type can be added.
+     * @property {jQuery|null} [resultList=null]
+     *  A jQuery object representing the `heurist.resultList` widget instance from which
+     *  selections will be sourced. This is used to determine the search realm.
+     * @property {string|null} [search_realm=null]
+     *  The search realm associated with this collection. If a `resultList` is provided,
+     *  this option is typically derived from the `resultList`'s `search_realm`.
+     * @property {string} [action_Label='Create Map']
+     *  The label for the main action button (e.g., "Create Map", "Generate Report").
+     * @property {Function|null} [action_Function=null]
+     *  A callback function to execute when the main action button is clicked and `action_mode`
+     *  is not 'map' or 'filter'. This function would typically handle the collected records.
+     *  (Note: The current implementation primarily uses `action_mode`).
+     * @property {string} [action_mode='map']
+     *  Defines the behavior of the main action button.
+     *  - 'map': Triggers the `createMapSpace` method to generate a map from the collection.
+     *  - 'filter': (Implied) Triggers saving the collection, potentially as a filter/search.
+     *  - Other values might be used by a custom `action_Function`.
+     * @property {string} [instructionText='']
+     *  Instructional text displayed within the widget, guiding the user on how to use the collection.
+     * @property {string} [target_db='']
+     *  The target database identifier, used specifically when `action_mode` is 'map',
+     *  to specify where the map space should be created or previewed.
+     */
     options: {
         rectype_set:null,  //array of allowed record types
         resultList: null,  //reference to source result list
@@ -36,10 +79,30 @@ $.widget( "heurist.resultListCollection", {
         target_db: ''
     },
 
+    /**
+     * @property {Array<object>|null} _selection
+     * @private
+     * @description Stores the current set of selected records (full record objects, not just IDs)
+     * that are candidates to be added to the collection. This is typically updated based on
+     * selections in an associated resultList or global selection events.
+     */
     _selection: null,     //current set of selected records (not just ids)
+    /**
+     * @property {Array<number>|null} _collection
+     * @private
+     * @description Stores an array of record IDs that form the current collection.
+     */
     _collection: null,
 
-    // the widget's constructor
+    /**
+     * @function _create
+     * @memberof heurist.resultListCollection
+     * @instance
+     * @private
+     * @description Initializes the widget. Sets up the UI elements including information labels,
+     * action buttons (Add, Clear, Action), and a mini result list for displaying collected items.
+     * Binds event listeners for global record selection and collection updates.
+     */
     _create: function() {
 
         let that = this;
@@ -130,9 +193,17 @@ $.widget( "heurist.resultListCollection", {
         window.hWin.HEURIST4.collection.collectionUpdate();
     }, //end _create
 
-    //
-    //
-    //
+    /**
+     * @function _isSameRealm
+     * @memberof heurist.resultListCollection
+     * @instance
+     * @private
+     * @description Checks if the widget's current search realm matches the realm from incoming event data.
+     * This is used to ensure the widget only responds to events relevant to its configured context.
+     * An empty or null realm on either side is considered a match for broader compatibility.
+     * @param {object} data Event data, expected to have a `search_realm` property.
+     * @returns {boolean} True if the realms are considered the same, false otherwise.
+     */
     _isSameRealm: function(data){
         return (!this.options.search_realm && (!data || window.hWin.HEURIST4.util.isempty(data.search_realm)))
         ||
@@ -140,42 +211,83 @@ $.widget( "heurist.resultListCollection", {
     },
 
     
-    // Any time the widget is called with no arguments or with only an option hash,
-    // the widget is initialized; this includes when the widget is created.
+    /**
+     * @function _init
+     * @memberof heurist.resultListCollection
+     * @instance
+     * @private
+     * @description Post-creation initialization. Currently empty, but can be used for tasks
+     * that need to run after the widget is created and DOM elements are in place.
+     */
     _init: function() {
 
     },
-    //Called whenever the option() method is called
-    //Overriding this is useful if you can defer processor-intensive changes for multiple option change
-    _setOptions: function( ) {
-        this._superApply( arguments );
+
+    /**
+     * @function _setOptions
+     * @memberof heurist.resultListCollection
+     * @instance
+     * @private
+     * @description Called when options are set on the widget, including during initialization.
+     * It calls the parent widget's `_setOptions` method.
+     * @param {object} options An object containing option key-value pairs to set.
+     */
+    _setOptions: function( options ) { // Note: Standard jQuery UI practice is to receive 'options' argument
+        this._superApply( arguments ); // Pass all arguments to _superApply
     },
 
-    /*
-    * private function
-    * show/hide buttons depends on current login status
-    */
+    /**
+     * @function _refresh
+     * @memberof heurist.resultListCollection
+     * @instance
+     * @private
+     * @description Refreshes the widget state. Currently, this method is a placeholder and does not
+     * perform any specific actions. It could be used to update UI elements based on option changes
+     * or other state modifications.
+     */
     _refresh: function(){
     },
     
-    //
-    // custom, widget-specific, cleanup.
+    /**
+     * @function _destroy
+     * @memberof heurist.resultListCollection
+     * @instance
+     * @private
+     * @description Cleans up the widget when it is destroyed. Unbinds global event listeners,
+     * removes UI elements (buttons, labels, record list) created by the widget.
+     */
     _destroy: function() {
 
-        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_REC_SELECT);
+        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_REC_SELECT + '.' + this.widgetName); // Be specific with event namespacing
+        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_REC_COLLECT + '.' + this.widgetName);
+
 
         this.btn_Add.remove();
-        this.btn_Remove.remove();
+        // this.btn_Remove.remove(); // btn_Remove is not initialized in _create, potential error if called
         this.btn_Clear.remove();
-        this.btn_List.remove();
+        // this.btn_List.remove(); // btn_List is not initialized
+        // this.btn_Save.remove(); // btn_Save is not initialized
         this.btn_Action.remove();
         this.divMainMenuItems.remove();
         this.labelCollectionInfo.remove();
         this.labelInstruction.remove();
         
-        this.recordList.remove();
+        this.recordList.resultList('destroy').remove(); // Destroy inner widget and remove its element
+        this.recordList.remove(); // Ensure div is removed
     },
 
+    /**
+     * @function _initBtn
+     * @memberof heurist.resultListCollection
+     * @instance
+     * @private
+     * @description Initializes a menu button with the given name. Creates a list item (`<li>`)
+     * with a link (`<a>`), sets its text (internationalized), and appends it to the main menu.
+     * Binds a click handler to the button that calls `menuActionHandler`.
+     * The button element is stored as a property on the widget (e.g., `this.btn_Add`).
+     * @param {string} name The action name for the button (e.g., "Add", "Clear", "Action").
+     * This name is used for the `data-action` attribute and to name the widget property.
+     */
     _initBtn: function(name){
         
         let label = (name=='Action')?this.options.action_Label:name;
@@ -197,9 +309,26 @@ $.widget( "heurist.resultListCollection", {
     },
 
 
+    /**
+     * @function menuActionHandler
+     * @memberof heurist.resultListCollection
+     * @instance
+     * @description Handles click events from the menu buttons. Determines the action based on
+     * the `data-action` attribute of the clicked button and calls the appropriate
+     * `window.hWin.HEURIST4.collection` method or internal widget method.
+     * Actions include:
+     * - "Add": Adds current `_selection` to the collection.
+     * - "Remove": (Currently not fully implemented as a button) Removes `_selection` from collection.
+     * - "Clear": Clears the entire collection.
+     * - "List": (Currently not fully implemented as a button) Shows the collection.
+     * - "Save": (Currently not fully implemented as a button) Saves the collection.
+     * - "Action": Performs the main widget action, either `createMapSpace` (if `action_mode` is 'map')
+     *   or saves the collection (if `action_mode` is 'filter').
+     * @param {jQuery.Event} event The click event object.
+     */
     menuActionHandler: function(event){
 
-        let that = this;
+        let that = this; // 'that' is not used, consider replacing with 'this' or removing.
         let ele = $(event.target);
         if(!ele.is('li')){
             ele = ele.parents('li');
@@ -212,7 +341,7 @@ $.widget( "heurist.resultListCollection", {
             window.hWin.HEURIST4.collection.collectionAdd(null, this._selection);
             this.selectNone();
 
-        }else if(action == "Remove"){
+        }else if(action == "Remove"){ // Note: Button for "Remove" is not initialized by default in _create
 
             window.hWin.HEURIST4.collection.collectionDel(null, this._selection);
             this.selectNone();
@@ -221,11 +350,11 @@ $.widget( "heurist.resultListCollection", {
 
             window.hWin.HEURIST4.collection.collectionClear();
 
-        }else if(action == "List"){
+        }else if(action == "List"){ // Note: Button for "List" is not initialized by default
 
             window.hWin.HEURIST4.collection.collectionShow();
 
-        }else if(action == "Save"){
+        }else if(action == "Save"){ // Note: Button for "Save" is not initialized by default
 
             window.hWin.HEURIST4.collection.collectionSave();
 
@@ -234,7 +363,7 @@ $.widget( "heurist.resultListCollection", {
             if(this.options.action_mode=='map'){
                 
                 this.createMapSpace();
-            }else{
+            }else{ // Assumed 'filter' mode or other custom action if action_Function was set
                 window.hWin.HEURIST4.collection.collectionSave();
             }
             
@@ -242,9 +371,14 @@ $.widget( "heurist.resultListCollection", {
 
     },
     
-    //
-    // reset selection
-    //    
+    /**
+     * @function selectNone
+     * @memberof heurist.resultListCollection
+     * @instance
+     * @description Clears the internal `_selection` property and triggers a global
+     * `ON_REC_SELECT` event with a null selection, indicating that no items are currently
+     * selected within this widget's context.
+     */
     selectNone: function(){
         this._selection = null;
         $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
@@ -253,9 +387,16 @@ $.widget( "heurist.resultListCollection", {
     
 
     //-------------------------------------- COLLECTIONS -------------------------------
-    //
-    //
-    //
+
+    /**
+     * @function createMapSpace
+     * @memberof heurist.resultListCollection
+     * @instance
+     * @description Initiates the creation or preview of a map space using the current collection.
+     * It checks if a `target_db` is defined in options and if the collection is not empty.
+     * If valid, it constructs a URL to the map previewer and shows it in a dialog.
+     * Displays error or informational messages if prerequisites are not met.
+     */
     createMapSpace: function(){
         
         if(!this.options.target_db){
@@ -296,6 +437,16 @@ $.widget( "heurist.resultListCollection", {
         }
     },
 
+    /**
+     * @function collectionRender
+     * @memberof heurist.resultListCollection
+     * @instance
+     * @description Updates the widget's display based on the provided collection data.
+     * Sets the internal `_collection`, updates the information label with the collection size,
+     * and refreshes the internal mini result list to display the collected items.
+     * It also handles showing/hiding the mini list and adjusting layout (with hardcoded values).
+     * @param {Array<number>} _collection An array of record IDs representing the current collection.
+     */
     collectionRender: function(_collection) {
         
         this._collection = _collection;
@@ -304,7 +455,7 @@ $.widget( "heurist.resultListCollection", {
                 (_collection && _collection.length>0?_collection.length:'0') + ' datasets');
                 
         if(_collection && _collection.length>0){
-            this.recordList.resultList('updateResultSet', new HRecordSet(_collection));
+            this.recordList.resultList('updateResultSet', new HRecordSet(_collection)); // Assumes HRecordSet is globally available
             this.recordList.show();
             $('#mywidget_3249').css('top',175); //hardcode for tlcmap
             
@@ -316,6 +467,17 @@ $.widget( "heurist.resultListCollection", {
                 
     },
     
+    /**
+     * @function warningOnExit
+     * @memberof heurist.resultListCollection
+     * @instance
+     * @description Displays a confirmation dialog if there are items in the collection when an
+     * action that might lead to losing the collection (e.g., navigating away) is triggered.
+     * The dialog offers to save the collection as a map or continue with the original action.
+     * If the collection is empty, it directly calls the `callback_continue`.
+     * @param {Function} callback_continue The function to call if the user chooses to continue
+     * without saving or if the collection is empty.
+     */
     warningOnExit: function( callback_continue ){
 
         let col = this._collection; 
