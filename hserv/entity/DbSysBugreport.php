@@ -414,6 +414,10 @@ class DbSysBugreport extends DbEntityBase
 
                 $record['details']['38'][$idx] = $rec_uploads->downloadAndRegisterdURL($file_url, ['ulf_NewName' => $file_name], 2);
 
+                if(!$record['details']['38'][$idx]){ // backup: register as external image
+                    $record['details']['38'][$idx] = $rec_uploads->registerURL($file_url, false, 0);
+                }
+
                 if(!$record['details']['38'][$idx]){
                     continue;
                 }

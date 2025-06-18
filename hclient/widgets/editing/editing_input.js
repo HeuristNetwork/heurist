@@ -3775,6 +3775,8 @@ $.widget( "heurist.editing_input", {
                     $input_img.find('img').prop('src', urlThumb);
                     if(that.configMode.entity=='recUploadedFiles'){
                         that.newvalues[$input.attr('id')] = file;
+                    }else if(that.configMode.entity == 'sysBugreport'){
+                        that.newvalues[$input.attr('id')] = urlThumb; // to ensure the thumbnails appear
                     }else{
                         //unique temp name to store uploaded file before record's save - then it will be renamed to recId.ext
                         that.newvalues[$input.attr('id')] = file.tempname;  //it will be renamed on save
@@ -3782,16 +3784,16 @@ $.widget( "heurist.editing_input", {
                 }
                 $input.attr('title', file.name);
                 that.onChange();//need call it manually since onchange event is redifined by fileupload widget
-                });
-            }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response);// .message
-            }
+            });
+        }else{
+            window.hWin.HEURIST4.msg.showMsgErr(response);// .message
+        }
 
-            let inpt = this;
-            $input_img.off('click');
-            $input_img.on({click: function(){
-                $(inpt).trigger('click');
-            }});
+        let inpt = this;
+        $input_img.off('click');
+        $input_img.on({click: function(){
+            $(inpt).trigger('click');
+        }});
     },
     fail: function(e, data){
 
