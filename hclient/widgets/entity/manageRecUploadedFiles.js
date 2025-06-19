@@ -1112,7 +1112,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                     }], null);
                 that._editing_uploadfile.getContainer().hide(); //this form is hidden
                 let ele = that._editing_uploadfile.getFieldByName('ulf_FileUpload');    
-                ele.find('.fileupload').trigger('click'); //open file select dialog
+                ele.find('.fileupload')[0].click(); //trigger('click'); //open file select dialog
         }        
         
         if(!this._editing_uploadfile){ //form is not yet defined
