@@ -69,7 +69,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         _use_debug = true,
         
-        
        
         actionHandler = null;
                 

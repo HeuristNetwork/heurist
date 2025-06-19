@@ -444,7 +444,7 @@ $.widget( "heurist.editing_input", {
         }
         
         this.detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
-        this._isForRecords = this.options?.recordset?.entityName == 'Records' || this.configMode?.entity == 'records';
+        this._isForRecords = this.options?.recordset?.entityName == 'Records' || !this.configMode || this.configMode?.entity == 'records';
 
         if(!window.hWin.HEURIST4.util.isPositiveInt(this.options.rectypeID) && this.options.recordset){ // detect rectype for (heurist data) Records/recDetails
             this.options.rectypeID = this.options.recordset.fld(this.options.recID, 'rec_RecTypeID'); // this.options.recordset.getFirstRecord()
