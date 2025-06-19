@@ -80,10 +80,6 @@ function Temporal (strInitTemporal) {
       */
     let _fields = {};
 
-    /**
-     * Initializes the Temporal object by parsing the initial string if provided.
-     * @private
-     */
     function _init (){	//initailization code
         if (!_strTemporal) { // empty string return basic temporal
             return;
@@ -243,13 +239,6 @@ function Temporal (strInitTemporal) {
             return $timespan;
         },
         
-        /**
-         * Converts a duration string (like "P10Y") to a human-readable text (e.g., "±10 years").
-         * @private
-         * @param {string} $value - The duration string (ISO 8601 duration format, expected to be like P...Y).
-         * @param {string} $prefix - The prefix to add to the human-readable string (e.g., " ±", " -", " +").
-         * @returns {string} Human-readable duration, or an empty string if input is invalid.
-         */
         _deviationToText: function ($value, $prefix){
         
             if($value){ 
@@ -2349,18 +2338,6 @@ TDate.getDayName = function (y,m,d,shortName) {
     return null;
 }
 
-/**
- * Validates a numeric value against a minimum and maximum range.
- * Used by specific date/time component validation methods.
- * @static
- * @private
- * @param {number} value - The value to validate.
- * @param {number} min - The minimum allowed value.
- * @param {number} max - The maximum allowed value.
- * @param {string} name - The name of the component being validated (e.g., "year", "month") for error messages.
- * @returns {boolean} True if valid.
- * @throws {string} If the value is out of range, with specific messages for years.
- */
 TDate.validate = function (value, min, max, name) {
     if (value < min || value > max) {
         if (name === "year") {
@@ -2565,10 +2542,6 @@ function TDuration(strDuration) {
 
     };
 
-    /**
-     * Initializes the TDuration object by parsing the initial duration string.
-     * @private
-     */
     function _init () {
         _parseStr(_origString);
     };

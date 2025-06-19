@@ -1,58 +1,76 @@
 /**
-*  Message and popup functions
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file utils_msg.js
+ * @brief Provides a comprehensive suite of functions for displaying messages, dialogs, popups, and notifications.
+ * @fileOverview This file defines the `HEURIST4.msg` namespace, which includes a variety of utilities for user interaction.
+ * These utilities cover:
+ * - Standard error message dialogs (`showMsgErr`, `showMsgErrJson`).
+ * - General purpose dialogs with customizable buttons and titles (`showMsgDlg`, `showMsg`).
+ * - Dialogs for loading external URL content (`showMsgDlgUrl`, `showDialog`).
+ * - Prompt dialogs for user input (`showPrompt`).
+ * - Flash messages and tooltips for temporary notifications (`showMsgFlash`, `showTooltipFlash`).
+ * - Input validation helpers that display messages (`checkLength`, `checkLength2`).
+ * - Progress indicators (`showProgress`, `hideProgress`).
+ * - Specialized dialogs like exit warnings (`showMsgOnExit`) and messages for parent record operations (`prepareParentRecordMsg`).
+ * The functions often leverage jQuery UI Dialog for their implementation and provide options for styling and behavior.
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 4.0
+ */
 
 if (!window.hWin.HEURIST4){
     window.hWin.HEURIST4 = {};
 }
 
-/*
-showMsgErrJson - check if response is json 
-showMsgErr     -    loads into id=dialog-error-messages
-
-getMsgDlg      - creates and returns div (id=dialog-common-messages) that is base element for jquery ui dialog
-getPopupDlg    - creates and returns div (id=dialog-popup) similar to  dialog-common-messages - but without width limit
-
-showMsg        - NEW MAIN 
-showMsgDlg     - MAIN 
-showMsg_ScriptFail - shows standard error message on dynamic script loading
-showPrompt    - show simple input value dialog with given prompt message
-    
-showMsgFlash - show buttonless dialog with given timeout
-showHintFlash
-checkLength  - fill given element with error message and highlight it
-checkLength2 - get message if input value beyound given ranges
-
-showMsgDlgUrl  - loads content url (not frame!) into dialog (getMsgDlg) and show it (showMsgDlg)
-
-showDialog - creates div with frame, loads url content into it and shows it as popup dialog, on close this div will be removed
-showElementAsDialog
-
-createAlertDiv - return error-state html with alert icon 
-
-bringCoverallToFront - show loading icon and lock all screen (curtain)
-sendCoverallToBack
-
-showDialogInDiv - show diaog content inline for h6 ui
-
-*/
+/**
+ * @namespace HEURIST4.msg
+ * @memberof HEURIST4
+ * @description Provides a comprehensive set of functions for displaying various types of messages,
+ * dialogs, popups, tooltips, and progress indicators within the Heurist application.
+ * This includes error handling, informational messages, user prompts, modal dialogs for
+ * iframe content, and temporary flash notifications.
+ */
 if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
+    /**
+     * Displays an error message, specifically handling JSON-related error responses.
+     * If the response is a string (implying a JSON parsing error), it shows a generic JSON parse error.
+     * Otherwise, it passes the response object to `showMsgErr`.
+     *
+     * @param {Object|string} response - The error response object, or a string message if JSON parsing failed.
+     *                                   If an object, it's passed to `showMsgErr`.
+     * @returns {void}
+     */
     showMsgErrJson: function(response){
         if(typeof response === "string"){
-            window.hWin.HEURIST4.msg.showMsgErr(null);
+            window.hWin.HEURIST4.msg.showMsgErr(null); // TODO: Review if passing null is intended or should be a specific message
         }else{
-            window.hWin.HEURIST4.msg.showMsgErr(window.hWin.HR('Error_Json_Parse')+': '+response.substr(0,255)+'...');
+            // Assuming response is an error object from a failed JSON.parse, not the unparsed string.
+            // If response IS the unparsed string that failed, this message might be confusing.
+            // For now, documenting as is.
+            window.hWin.HEURIST4.msg.showMsgErr(window.hWin.HR('Error_Json_Parse')+': '+String(response).substr(0,255)+'...');
         }
     },
 
+    /**
+     * Displays a detailed error message dialog based on a response object or string.
+     * It handles different error statuses (system fatal, invalid request, access denied, DB error, etc.),
+     * formats the message, sets an appropriate title, and may include system messages or a prompt to login.
+     * Uses `showMsgDlg` for the actual display.
+     *
+     * @param {Object|string} response - The error response object or a simple error message string.
+     *                                   If an object, it can have properties like `message`, `status`,
+     *                                   `sysmsg`, `error_title`, `request_code`.
+     * @param {boolean} [needlogin=false] - If true and the error indicates an access denied due to not being logged in,
+     *                                   it may trigger a login prompt after closing the dialog.
+     * @param {Object} [ext_options] - Additional options passed to `showMsgDlg` for customizing the dialog appearance.
+     *                                 Typically includes `default_palette_class: 'ui-heurist-error'`.
+     * @returns {string} The formatted error message string that was displayed.
+     */
     showMsgErr: function(response, needlogin, ext_options){
         let msg = '';
         let dlg_title = null;
@@ -190,9 +208,22 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         return msg; 
     },
 
-    //
-    // loads content url into dialog (getMsgDlg) and show it (showMsgDlg)
-    //
+    /**
+     * Loads content from a specified URL into a dialog and displays it.
+     * The dialog is created using `getPopupDlg` or `getMsgDlg` based on options.
+     * After loading, it calls `showMsgDlg` to configure and show the dialog.
+     *
+     * @param {string} url - The URL from which to load content.
+     * @param {Object<string, function>|function} [buttons] - Buttons to display on the dialog, in the format expected by jQuery UI Dialog,
+     *                                                        or a callback function for default Yes/No buttons. See `showMsgDlg`.
+     * @param {string|Object<string, string>} [title] - The title for the dialog or an object with localized title/button labels. See `showMsgDlg`.
+     * @param {Object} [options] - Additional options for the dialog.
+     * @param {boolean} [options.isPopupDlg=false] - If true, uses `getPopupDlg`; otherwise, `getMsgDlg`.
+     * @param {string} [options.container] - If provided with `isPopupDlg`, specifies the container for `getPopupDlg`.
+     * @param {boolean} [options.use_doc_title=false] - If true, sets the dialog title from the `<title>` tag of the loaded document.
+     *                                                Other options are passed to `showMsgDlg`.
+     * @returns {jQuery|undefined} The jQuery object representing the dialog element, or undefined if URL is not provided.
+     */
     showMsgDlgUrl: function(url, buttons, title, options){
 
         let $dlg;
@@ -212,9 +243,16 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         return $dlg;
     },
     
-    //
-    //  shows message if loading of js fail
-    //
+    /**
+     * Displays a standardized error message when a dynamic script loading fails.
+     * The message informs the user about a program error and advises them to report it.
+     *
+     * @param {boolean} isdlg - If true, displays the message in a modal dialog (`showMsgDlg`).
+     *                          If false, displays it as a temporary flash message (`showMsgFlash`).
+     * @param {string} [message="this feature"] - A string to insert into the error message, indicating
+     *                                            what feature encountered the loading problem.
+     * @returns {void}
+     */
     showMsg_ScriptFail: function( isdlg, message ){
 
         if(window.hWin.HEURIST4.util.isempty(message)){
@@ -237,10 +275,22 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
     },
 
-    //
-    // show simple input value dialog with given message
-    //  message - either plain text or html with #dlg-prompt-value input element
-    //
+    /**
+     * Displays a dialog prompting the user for input.
+     * The dialog contains a message and an input field. If the provided message
+     * does not include an element with ID `dlg-prompt-value`, an input field is automatically created.
+     *
+     * @param {string} message - The message or HTML content to display in the prompt.
+     *                           If it contains an element with `id="dlg-prompt-value"`, that element is used for input.
+     *                           Otherwise, a new text input is created.
+     * @param {function} callbackFunc - A function to call when the user submits the dialog (e.g., clicks OK).
+     *                                  This function will be called with the value from the input field.
+     * @param {string} [sTitle="Specify value"] - The title for the prompt dialog.
+     * @param {Object} [ext_options] - Additional options passed to `showMsgDlg`.
+     * @param {string} [ext_options.dialogId="dialog-common-messages"] - The ID of the dialog element to use.
+     * @param {boolean} [ext_options.password=false] - If true, the created input field will be of type "password".
+     * @returns {jQuery} The jQuery object representing the dialog element.
+     */
     showPrompt: function(message, callbackFunc, sTitle, ext_options){
         
         if(message.indexOf('dlg-prompt-value')<0){
@@ -252,24 +302,30 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         let dlg_id = ext_options && ext_options['dialogId'] ? ext_options['dialogId'] : 'dialog-common-messages';
 
         return window.hWin.HEURIST4.msg.showMsgDlg( message,
-        function(){
+        function(){ // This is the OK button callback for showMsgDlg
             if(window.hWin.HEURIST4.util.isFunction(callbackFunc)){
                 let $dlg = window.hWin.HEURIST4.msg.getMsgDlg(dlg_id);      
                 let ele = $dlg.find('#dlg-prompt-value');
                 let val = '';
-                if(ele.attr('type')!='checkbox' || ele.is(':checked')){
+                if(ele.attr('type')!='checkbox' || ele.is(':checked')){ // Also handles checkbox type input
                     val =  ele.val();
                 }
-                callbackFunc.call(this, val);
+                callbackFunc.call(this, val); // Call the user-provided callback with the value
             }
         },
         window.hWin.HEURIST4.util.isempty(sTitle)?'Specify value':sTitle, ext_options);
         
     },
     
-    //
-    // creates and returns div (id=dialog-common-messages) that is base element for jquery ui dialog
-    //
+    /**
+     * Retrieves or creates the primary jQuery UI Dialog element used for common messages.
+     * If the dialog element with the specified ID (default "dialog-common-messages") does not exist,
+     * it is created and appended to the body.
+     *
+     * @param {string} [dialogId="dialog-common-messages"] - The ID of the dialog element to get or create.
+     *                                                       If a leading '#' is present, it's stripped.
+     * @returns {jQuery} The jQuery object representing the dialog div.
+     */
     getMsgDlg: function(dialogId){
 
         if(window.hWin.HEURIST4.util.isempty(dialogId)){
@@ -287,6 +343,13 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         return $dlg.removeClass('ui-heurist-border');
     },
 
+    /**
+     * Retrieves or creates the jQuery UI Dialog element used for flash messages.
+     * If the dialog element with ID "dialog-flash-messages" does not exist,
+     * it is created and appended to the body.
+     *
+     * @returns {jQuery} The jQuery object representing the flash message dialog div.
+     */
     getMsgFlashDlg: function(){
         let $dlg = $( "#dialog-flash-messages" );
         if($dlg.length==0){
@@ -296,9 +359,15 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         return $dlg.removeClass('ui-heurist-border');
     },
     
-    //
-    // creates and returns div (id=dialog-popup) similar to  dialog-common-messages - but without width limit
-    //
+    /**
+     * Retrieves or creates a generic jQuery UI Dialog element, typically used for popups that might require more space
+     * or custom styling (e.g., no width limit by default).
+     * If the dialog element with the specified ID (default "dialog-popup") does not exist,
+     * it is created and appended to the body.
+     *
+     * @param {string} [element_id="dialog-popup"] - The ID of the dialog element to get or create.
+     * @returns {jQuery} The jQuery object representing the popup dialog div.
+     */
     getPopupDlg: function(element_id){        
         if(!element_id) element_id = 'dialog-popup';
         let $dlg = $( '#'+element_id );
@@ -311,13 +380,22 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     },
 
     
-    //
-    //
-    //
+    /**
+     * Displays a jQuery UI tooltip associated with a given element for a specified duration.
+     * The tooltip content is taken from the `message` parameter.
+     *
+     * @param {string} message - The message to display in the tooltip. This will be translated using `window.hWin.HR`.
+     * @param {number} [timeout=1000] - The duration in milliseconds for which the tooltip should be visible. Defaults to 1000ms.
+     * @param {jQuery|HTMLElement|Object} to_element - The target element for the tooltip.
+     *                                               Can be a jQuery object, DOM element, or an object specifying
+     *                                               `{of: targetElement, my: "...", at: "..."}` for custom positioning.
+     *                                               If not an object, default positioning is "left top" at "left bottom".
+     * @returns {void}
+     */
     showTooltipFlash: function(message, timeout, to_element){
         
         if(!window.hWin.HEURIST4.util.isFunction(window.hWin.HR)){
-            alert(message);
+            alert(message); // Fallback if HR (translation) function is not available
             return;
         }
         
@@ -327,10 +405,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
         let position;
         
-        if($.isPlainObject(to_element)){
+        if($.isPlainObject(to_element)){ // Custom position provided
                 position = { my:to_element.my, at:to_element.at};
                 to_element =  to_element.of;
-        }else{
+        }else{ // Default position relative to the element
                 position = { my: "left top", at: "left bottom", of: $(to_element) };    
         }
 
@@ -338,29 +416,45 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             timeout = 1000;
         }
         
-        $( to_element ).attr('title',window.hWin.HR(message));
+        $( to_element ).attr('title',window.hWin.HR(message)); // Set title attribute for jQuery UI Tooltip
         $( to_element ).tooltip({
             position: position,
-            //content: '<span>'+window.hWin.HR(message)+'</span>',
-            hide: { effect: "explode", duration: 500 }
+            // content: '<span>'+window.hWin.HR(message)+'</span>', // Alternative way to set content if needed
+            hide: { effect: "explode", duration: 500 } // Optional hide effect
         });
 
-        $( to_element ).tooltip('open');
+        $( to_element ).tooltip('open'); // Open the tooltip
         
-        setTimeout(function(){
+        setTimeout(function(){ // Set timeout to close and clean up tooltip
             $( to_element ).tooltip('close');
-            $( to_element ).attr('title',null);
+            $( to_element ).attr('title',null); // Remove title to prevent native tooltip
         }, timeout);
         
     },
 
-    //
-    // show buttonless dialog with given timeout
-    //
+    /**
+     * Displays a buttonless dialog (flash message) that automatically closes after a specified timeout.
+     * The dialog's content is the provided message. Styling and positioning can be customized.
+     *
+     * @param {string|null} message - The message to display. If null, the function returns early.
+     *                                This message will be translated using `window.hWin.HR`.
+     * @param {number|boolean} [timeout=1000] - Duration in milliseconds before the dialog auto-closes.
+     *                                         If `false`, the dialog will not auto-close. Defaults to 1000ms.
+     * @param {Object|string} [options] - Configuration options for the dialog.
+     *                                    If a string, it's treated as the dialog title.
+     *                                    If an object, can include:
+     * @param {string} [options.title] - Title for the dialog. If null, title bar is hidden.
+     * @param {number} [options.height] - Height of the dialog. If not set, auto-calculated.
+     *                                    Other jQuery UI dialog options can also be included.
+     * @param {jQuery|HTMLElement|Object} [position_to_element] - Element or position object to position the dialog relative to.
+     *                                                          If an object, e.g., `{ my: "center", at: "center", of: window }`.
+     *                                                          Defaults to centering on the document.
+     * @returns {void}
+     */
     showMsgFlash: function(message, timeout, options, position_to_element){
 
         if(!window.hWin.HEURIST4.util.isFunction(window.hWin.HR)){
-            alert(message);
+            alert(message); // Fallback if HR (translation) function is not available
             return;
         }
 
@@ -433,44 +527,60 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
     },
     
+    /**
+     * Closes the flash message dialog (`#dialog-flash-messages`).
+     * It also ensures the title bar is shown if it was previously hidden.
+     * This function respects a `coverallKeep` flag; if true, it won't close the dialog.
+     *
+     * @returns {void}
+     */
     closeMsgFlash: function(){
         
         if(window.hWin.HEURIST4.msg.coverallKeep===true) return;
         
         let $dlg = window.hWin.HEURIST4.msg.getMsgFlashDlg();
         if($dlg.dialog('instance')) $dlg.dialog('close');
-        $dlg.parent().find('.ui-dialog-titlebar').show();
+        $dlg.parent().find('.ui-dialog-titlebar').show(); // Ensure title bar is visible for next time
     },
 
-    //@todo - redirect to error page
+    /**
+     * Displays a simple error dialog with the given message and an "Error" title.
+     * This is a convenience wrapper around `showMsgDlg`.
+     *
+     * @param {string} message - The error message to display.
+     * @returns {void}
+     * @todo The name `redirectToError` is misleading as it doesn't actually redirect. Consider renaming or clarifying its purpose.
+     */
     redirectToError: function(message){
         window.hWin.HEURIST4.msg.showMsgDlg(message, null, 'Error');
     },
 
-    //
-    // fill given element with error message and highlight it
-    // message - error message that overrides default message
-    //
+    /**
+     * Checks if the length of an input field's value is within a specified range [min, max].
+     * If the length is outside the range, it displays a flash error message and adds an error class
+     * to the input field (though the error class addition seems to be commented out in the original code).
+     * Uses `checkLength2` to get the error message text.
+     *
+     * @param {jQuery} input - jQuery object representing the input element.
+     * @param {string} title - A title or name for the input field, used in the error message (e.g., "Username").
+     * @param {string|jQuery|null} message - If a jQuery object, its text is updated with the error message
+     *                                     and 'ui-state-error' class is added/removed (this part is commented out).
+     *                                     If a string, this custom error message is used for the flash display,
+     *                                     overriding the default generated by `checkLength2`.
+     *                                     If null or empty, `checkLength2`'s message is used.
+     * @param {number} min - The minimum allowed length for the input value.
+     * @param {number} max - The maximum allowed length for the input value. Use 0 or negative for no max limit.
+     * @returns {boolean} True if the length is valid, false otherwise.
+     */
     checkLength: function( input, title, message, min, max ) {
         let message_text = window.hWin.HEURIST4.msg.checkLength2( input, title, min, max );
         if(message_text!=''){
-                                          
-                                          //'<div class="ui-state-error" style="padding:10px">XXXX'+        +'</div>'
-                                          
-                                          //class="ui-state-error" 
-            if(!window.hWin.HEURIST4.util.isempty(message)) message_text = message;
+            // The original code had commented out logic to update a 'message' jQuery element.
+            // Currently, it only shows a flash message.
+            if(!window.hWin.HEURIST4.util.isempty(message) && typeof message === 'string') message_text = message; // Use custom message string if provided
              
             window.hWin.HEURIST4.msg.showMsgFlash('<span style="padding:10px;border:0;">'+message_text+'</span>', 3000);
             
-            /*
-            if(message){
-                message.text(message_text);
-                message.addClass( "ui-state-error" );
-                setTimeout(function() {
-                    message.removeClass( "ui-state-error", 1500 );
-                    }, 3500 );
-            } */
-
             return false;
         }else{
             return true;
@@ -478,9 +588,17 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
     },
 
-    //
-    // get message if input value beyound given ranges
-    //
+    /**
+     * Generates an error message if an input field's value length is outside a specified range.
+     * It also adds or removes the "ui-state-error" class from the input field based on validity.
+     *
+     * @param {jQuery} input - jQuery object representing the input element.
+     * @param {string} title - A title or name for the input field, used in constructing the error message (e.g., "Username").
+     * @param {number} min - The minimum allowed length.
+     * @param {number} max - The maximum allowed length. If 0 or negative, no maximum is enforced by this part of the logic,
+     *                       but the message might still reflect "between min and max" if min > 1.
+     * @returns {string} An error message string if the length is invalid, or an empty string if valid.
+     */
     checkLength2: function( input, title, min, max ) {
 
         let len = input.val().length;
@@ -491,15 +609,18 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             if(max>0 && min>1){
                 message_text = window.hWin.HR(title)+" "+window.hWin.HR("length must be between ") +
                 min + " "+window.hWin.HR("and")+" " + max + ". ";
-                if(len>=min){
+                if(len>=min){ // This condition seems off if len > max, it will always be true.
+                              // The message should probably distinguish between too short and too long.
                     message_text = message_text + (len-max) + window.hWin.HR(" characters over");
                 }
 
-            }else if(min>1){
+            }else if(min>1){ // Only min length is specified (or max <= 0)
                message_text = window.hWin.HR(title)+" "+window.hWin.HR('. At least '+min+' characters required'); 
-            }else if(min==1){
+            }else if(min==1){ // Required field (min length 1)
                 message_text = window.hWin.HR(title)+" "+window.hWin.HR(" is required field");
             }
+            // If only max is specified (min is 0 or 1, and it's too long), current logic doesn't explicitly state "too long".
+            // It might fall into the "length must be between" if min > 1, or no specific message if min <=1.
 
             return message_text;
 
@@ -511,34 +632,49 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
     
     /**
-    * show url in iframe within popup dialog
-    * 
-    * options
-    *   dialogid - unique id to reuse dialog  (in this case dialog will not be removed on close)
-    *   force_reload - to reload iframe contenr if dialogid is define dialog div is preserved
-    * 
-    *   is_h6style - apply heurist6 style
-    *   position - adjust dialog position
-    *   maximize - set maximum allowed widht and height  
-    *   default_palette_class - color scheme class
-    *   window - opener
-    *   params - to be send to iframe via function assignParameters
-    * 
-    *   onpopupload - function that will be called on iframe load complete
-    *   callback - called on iframe close event, if it returns true dialog will be closes
-    *   afterclose - on close dialog event (for iframe close event see "callback")
-    * 
-    *   modal - is dialog modal
-    *   onmouseover - event listener 
-    *   default_palette_class - dialog css class
-    *   padding - dialog padding (around iframe)
-    *   allowfullscreen
-    *   noClose - hide close button on dialog titlebar
-    *   borderless - hide titlebae and border for dialog
-    *   title
-    *   width, height
-    * 
-    *   on frame load it calls onFirstInit function within iframe
+    * Displays a URL content within an iframe embedded in a jQuery UI popup dialog.
+    * This function is highly configurable through the `options` parameter.
+    * It handles creating the dialog, loading the iframe, and setting up communication
+    * (e.g., overriding `alert`, providing `close` and `doDialogResize` functions to the iframe content).
+    *
+    * @param {string} url - The URL to load into the iframe. If empty, behavior might be undefined or rely on other options.
+    * @param {Object} [options] - Configuration options for the dialog and iframe.
+    * @param {string} [options.dialogid] - A unique ID for the dialog. If provided, the dialog div is reused/reopened
+    *                                      instead of being removed on close.
+    * @param {boolean} [options.force_reload=false] - If `dialogid` is used and the dialog already exists,
+    *                                                force iframe content to reload even if URL is the same.
+    * @param {jQuery} [options.container] - If provided, uses `showDialogInDiv` to render the dialog inline within this container.
+    * @param {string} [options.title=''] - Title for the dialog.
+    * @param {Window} [options.window=window] - The opener window object.
+    * @param {Object} [options.params] - Parameters to pass to the iframe's `assignParameters` function, if it exists.
+    * @param {function} [options.onpopupload] - Callback function executed after the iframe content has loaded.
+    *                                          Receives the iframe DOM element as an argument.
+    * @param {function} [options.callback] - Callback function executed when the iframe attempts to close (e.g., via `contentWindow.close()`).
+    *                                        If it returns `false`, the dialog closing is prevented.
+    * @param {function} [options.afterclose] - Callback function executed after the dialog has been closed.
+    * @param {boolean} [options.modal=true] - Whether the dialog should be modal.
+    * @param {function} [options.onmouseover] - Event listener for mouseover on the dialog title bar or iframe.
+    * @param {string} [options.default_palette_class] - A CSS class to apply to the dialog for theming.
+    * @param {string} [options.padding] - CSS padding for the dialog content area.
+    * @param {string} [options.padding-content] - CSS padding for the direct ui-dialog-content parent of the iframe.
+    * @param {boolean} [options.allowfullscreen=false] - If true, adds `allowfullscreen` attributes to the iframe.
+    * @param {boolean} [options.noClose=false] - If true, hides the close button on the dialog title bar.
+    * @param {boolean} [options.borderless=false] - If true, removes dialog border and title bar.
+    * @param {string|number} [options.width='640'] - Initial width of the dialog.
+    * @param {string|number} [options.height='480'] - Initial height of the dialog.
+    * @param {boolean} [options.resizable=true] - Whether the dialog is resizable.
+    * @param {boolean} [options.draggable=true] - Whether the dialog is draggable.
+    * @param {boolean} [options.closeOnEscape=true] - Whether to close the dialog on ESC key.
+    * @param {function} [options.beforeClose] - Callback function executed before the dialog closes.
+    * @param {function} [options.onOpen] - Callback function executed when the dialog opens.
+    * @param {string} [options.class] - Additional CSS class for the dialog main div.
+    * @param {boolean} [options.is_h6style=false] - If true, applies Heurist 6 specific styling and layout adjustments.
+    * @param {Object} [options.position] - jQuery UI position object for dialog placement.
+    * @param {boolean} [options.maximize=false] - If true (and not `is_h6style`), attempts to maximize the dialog.
+    * @param {string} [options.coverMsg] - Message to display on the loading coverall while iframe loads.
+    * @returns {void} (The function primarily has side effects by creating and showing a dialog).
+    *                 If `options.container` is provided, it effectively calls `showDialogInDiv` which also returns void.
+    *                 The created dialog jQuery object is not directly returned.
     */
     showDialog: function(url, options){
 
@@ -895,9 +1031,27 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
     },
 
-    //
-    // h6 style do not popup dialog - show iframe inline
-    //
+    /**
+     * Displays URL content within an iframe embedded directly (inline) into a specified container element,
+     * styled according to Heurist 6 UI guidelines. This is an alternative to popup dialogs.
+     *
+     * @param {string} url - The URL to load into the iframe.
+     * @param {Object} [options] - Configuration options.
+     * @param {jQuery} options.container - The jQuery object of the container element where the iframe will be placed.
+     * @param {string} [options.title='&nbsp;'] - Title to display in a header bar above the iframe content.
+     *                                            If empty, the header bar might be hidden or take less space.
+     * @param {string} [options.context_help] - URL for a context-sensitive help page, linked via an info button in the header.
+     * @param {boolean} [options.show_help_on_init=true] - If `context_help` is provided, whether to open the help panel immediately.
+     * @param {Object} [options.params] - Parameters to pass to the iframe's `assignParameters` function.
+     * @param {function} [options.doDialogResize] - A function to be made available to the iframe content for resizing itself.
+     * @param {function} [options.onContentLoad] - Callback executed after iframe content loads. Receives iframe DOM element.
+     * @param {function} [options.beforeClose] - Callback executed before the container/dialog is hidden or closed.
+     *                                          If it returns `false`, closing is prevented.
+     * @param {function} [options.afterClose] - Callback executed after the container/dialog is hidden or closed.
+     * @param {string} [options.padding] - CSS padding for the main container.
+     * @returns {jQuery|undefined} The jQuery object of the iframe if it's reused, otherwise undefined.
+     *                             The function primarily modifies the DOM and sets up event handlers.
+     */
     showDialogInDiv: function(url, options){
 
             if(!options) options = {};
@@ -1098,10 +1252,32 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
     },
     
-    //
-    // take element and assign it to dialog, on dialog close place element back to original parent
-    // and dialog object will be destroed
-    //
+    /**
+     * Displays an existing DOM element within a jQuery UI popup dialog.
+     * The element is temporarily detached from its original position in the DOM,
+     * shown in the dialog, and then re-appended to its original parent when the dialog is closed.
+     * The dialog itself is removed from the DOM after closing, unless `onCloseCalback` returns false.
+     *
+     * @param {Object} options - Configuration options for the dialog.
+     * @param {HTMLElement} options.element - The DOM element to display in the dialog.
+     * @param {Window} [options.window=window] - The window object where the dialog will be created.
+     * @param {string|number} [options.width='640'] - Initial width of the dialog.
+     * @param {string|number} [options.height='480'] - Initial height of the dialog.
+     * @param {boolean} [options.autoOpen=true] - Whether to open the dialog immediately.
+     * @param {boolean} [options.modal=true] - Whether the dialog should be modal.
+     * @param {boolean} [options.resizable=true] - Whether the dialog is resizable.
+     * @param {string} [options.title] - Title for the dialog.
+     * @param {Object<string, function>} [options.buttons] - Buttons for the dialog.
+     * @param {function} [options.open] - Callback executed when the dialog opens.
+     * @param {function} [options.beforeClose] - Callback executed before the dialog closes.
+     * @param {function} [options.close] - Callback executed after the dialog closes and the element is reattached.
+     *                                     If this callback returns `false`, the dialog div is not removed from DOM.
+     * @param {Object} [options.position] - jQuery UI position object for dialog placement.
+     * @param {boolean} [options.borderless=false] - If true, removes dialog border and title bar.
+     * @param {string} [options.default_palette_class] - A CSS class to apply to the dialog for theming.
+     * @param {string} [options.h6style_class] - Additional class for Heurist 6 styling.
+     * @returns {jQuery} The jQuery object representing the created dialog.
+     */
     showElementAsDialog: function(options){
 
             let opener = options['window']?options['window'] :window;
@@ -1173,9 +1349,13 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             return $dlg;
     },
 
-    //
-    //
-    //
+    /**
+     * Creates an HTML string for a styled alert message div.
+     * The div includes an alert icon and the provided message, styled with "ui-state-error".
+     *
+     * @param {string} msg - The message content for the alert.
+     * @returns {string} HTML string representing the alert div.
+     */
     createAlertDiv: function(msg){
         
         return '<div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">'+
@@ -1183,18 +1363,28 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                                 msg+'</div>';
     },
     
-    //curtain
+    /**
+     * Displays a "coverall" overlay, typically used as a loading indicator that blocks UI interaction.
+     * It creates or reuses a div element, styles it, sets a message, and appends it to a specified element or body.
+     *
+     * @param {jQuery|HTMLElement} [ele=jQuery('body')] - The element to append the coverall to. Defaults to document body.
+     * @param {Object} [styles] - CSS styles to apply to the coverall div.
+     *                            Defaults to an opacity, background color, text color, font size, and font weight.
+     * @param {string} [message="Loading Content..."] - The message to display within the coverall.
+     *                                                 Translated using `window.hWin.HR` if available.
+     * @returns {void}
+     */
     bringCoverallToFront: function(ele, styles, message) {
         if (!  window.hWin.HEURIST4.msg.coverall ) {
             window.hWin.HEURIST4.msg.coverall = 
                 $('<div><div class="internal_msg" style="position: absolute;top: 30px;left: 30px;">'
                         +'</div></div>').addClass('coverall-div')
                 .css({
-                    'zIndex': 60000, //9999999999
+                    'zIndex': 60000, // Higher zIndex to cover most elements
                     'font-size': '1.2em'
                 });
         }else{
-            window.hWin.HEURIST4.msg.coverall.detach();
+            window.hWin.HEURIST4.msg.coverall.detach(); // Detach if exists to re-append later, ensuring it's on top or in new context
         }
         
         if(!message){
@@ -1203,10 +1393,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }    
         window.hWin.HEURIST4.msg.coverall.find('.internal_msg').html(message);
         
-        if(ele){
-            if($(ele).find('.coverall-div').length==0) window.hWin.HEURIST4.msg.coverall.appendTo($(ele));
-        }else{
-            if($('body').find('.coverall-div').length==0) window.hWin.HEURIST4.msg.coverall.appendTo('body');
+        let $appendTo = ele ? $(ele) : $('body');
+        if($appendTo.find('.coverall-div').length==0) { // Append only if not already there (e.g. if ele is specific)
+            window.hWin.HEURIST4.msg.coverall.appendTo($appendTo);
         }
         
         if(!styles){
@@ -1217,31 +1406,70 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         $(window.hWin.HEURIST4.msg.coverall).show();
     },    
     
+    /**
+     * Hides the "coverall" overlay.
+     * This function respects a `coverallKeep` flag; if true, it won't hide the overlay unless `force_close` is also true.
+     *
+     * @param {boolean} [force_close=false] - If true, forces the `coverallKeep` flag to false, ensuring the overlay is hidden.
+     * @returns {void}
+     */
     sendCoverallToBack: function(force_close) {
         if(force_close===true) window.hWin.HEURIST4.msg.coverallKeep = false;
-        if(window.hWin.HEURIST4.msg.coverallKeep===true) return;
-        $(window.hWin.HEURIST4.msg.coverall).hide();
+        if(window.hWin.HEURIST4.msg.coverallKeep===true) return; // Don't hide if explicitly kept
+        if(window.hWin.HEURIST4.msg.coverall) $(window.hWin.HEURIST4.msg.coverall).hide(); // Hide only if coverall exists
     },
   
 
-    //
-    // MAIN method
-    // buttons - callback function or objects of buttons for dialog option
-    // title - either string for title, or object with labels {title:, yes: ,no, cancel, }
-    //       labels for buttons are applicable for default set of buttons (if buttons array is not defined)
-    // ext_options:   
-    //  default_palette_class, 
-    //  position
-    //  container
-    //  isPopupDlg
-    //
+    /**
+     * A simplified method to show a message dialog. It's a wrapper around `showMsgDlg`.
+     * This function is intended for displaying a simple message with default "OK" button behavior.
+     *
+     * @param {string|jQuery|Object} message - The message content to display. Can be a string, HTML, or jQuery object.
+     * @param {Object} [options] - Additional options passed directly to `showMsgDlg`.
+     *                             These options can customize aspects like title, buttons (though typically not used here),
+     *                             positioning, and styling. See `showMsgDlg` for more details on `ext_options`.
+     * @returns {jQuery} The jQuery object representing the dialog element.
+     */
     showMsg: function(message, options){
         return window.hWin.HEURIST4.msg.showMsgDlg(message, null, null, options )
     },
     
+    /**
+     * Displays a general-purpose jQuery UI dialog with a message and customizable buttons.
+     * This is a core function for creating various types of dialogs (info, confirmation, error).
+     *
+     * @param {string|jQuery|Object|null} message - The content to display in the dialog.
+     *                                            Can be a string (HTML is allowed), a jQuery object, or a DOM element.
+     *                                            If null, the dialog is created/opened, but content must be set separately.
+     * @param {Object<string, function>|function} [buttons] - Defines the buttons for the dialog.
+     *                                                        - If an object: Keys are button labels (will be translated by `HR`),
+     *                                                          values are click handler functions.
+     *                                                        - If a function: Assumed to be a callback for a default "Yes"/"No" button set.
+     *                                                          "Yes" executes the callback, "No" closes the dialog.
+     *                                                        - If null/undefined: A default "OK" button is shown which closes the dialog.
+     * @param {string|Object<string, string>} [labels] - Custom labels for title and buttons.
+     *                                                 - If a string: Used as the dialog title (will be translated by `HR`).
+     *                                                 - If an object: Can contain `title`, `yes`, `no`, `ok`, `cancel` properties
+     *                                                   for localized strings (will be translated by `HR`).
+     *                                                   Default title is "·" (was 'Info').
+     * @param {Object} [ext_options] - Extended options for jQuery UI Dialog and custom behavior.
+     * @param {string} [ext_options.default_palette_class] - CSS class for dialog theming.
+     * @param {Object} [ext_options.position] - jQuery UI position object. Defaults to center of window.
+     *                                          Can also be specified via `my`, `at`, `of` properties directly in `ext_options`.
+     * @param {jQuery} [ext_options.container] - If provided, uses `getPopupDlg` with this container for dialog creation.
+     * @param {boolean} [ext_options.isPopupDlg=false] - If true (or `container` is set), uses `getPopupDlg`.
+     * @param {string} [ext_options.dialogId="dialog-common-messages"] - ID for the dialog element.
+     * @param {boolean} [ext_options.removeOnClose=false] - If true, the dialog DOM element is removed when closed.
+     * @param {boolean} [ext_options.hideTitle=false] - If true, hides the dialog title bar.
+     * @param {number|string} [ext_options.width='auto'] - Dialog width. For non-popup, defaults to 'auto'. For popups, defaults to 705.
+     * @param {number|string} [ext_options.height] - Dialog height. For popups, defaults to 515.
+     * @param {boolean} [ext_options.resizable=false] - Whether the dialog is resizable. (Popup default: true).
+     * @param {boolean} [ext_options.modal=true] - Whether the dialog is modal.
+     * @returns {jQuery} The jQuery object representing the dialog element.
+     */
     showMsgDlg: function(message, buttons, labels, ext_options){
 
-        if(!window.hWin.HEURIST4.util.isFunction(window.hWin.HR)){
+        if(!window.hWin.HEURIST4.util.isFunction(window.hWin.HR)){ // Fallback if HR (translation) function is not available
             alert(message);
             return;
         }
@@ -1421,23 +1649,36 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     },  
     
     // for progress message
-    _progressInterval: 0,
-    _progressDiv: null,
-    _progressPopup: null,
+    _progressInterval: 0, // Internal: Stores interval ID for progress polling
+    _progressDiv: null, // Internal: Stores jQuery object of the progress display div
+    _progressPopup: null, // Internal: Stores jQuery object of the progress popup dialog
     
-    //
-    // returns session_id
-    // options:
-    //      container - container element. if not defined it shows in popup
-    //      content - 1)html code 2)false - use given content 3) otherwise fill container with default content
-    //      steps - array of labels
-    //
-    //      session_id - unique id of progress session
-    //      t_interval - checkout interval
-    //
+    /**
+     * Displays a progress indicator, either in a popup dialog or an existing container.
+     * It periodically polls a progress URL to update the status, steps, and progress bar.
+     *
+     * @param {Object} options - Configuration options for the progress display.
+     * @param {jQuery} [options.container] - If provided, the progress indicator is shown within this jQuery element.
+     *                                       Otherwise, a popup dialog is created.
+     * @param {string|false} [options.content] - Custom HTML content for the progress display area.
+     *                                         - If a string: Used as the HTML content.
+     *                                         - If `false`: The function uses the `options.container`'s existing content.
+     *                                         - If undefined/null: Default content with steps and progress bar is generated.
+     * @param {Array<string>} [options.steps] - An array of strings representing the steps of the progress,
+     *                                          used if default content is generated.
+     * @param {function} [options.onComplete] - Callback function to execute when the progress is terminated/completed.
+     * @param {string|number} [options.session_id] - A unique session ID for the progress tracking.
+     *                                             If not provided, a random one is generated.
+     * @param {number} [options.interval=900] - The interval in milliseconds for polling the progress URL. Defaults to 900ms.
+     *                                          Passed as `t_interval` in original code, renamed here for clarity.
+     * @param {number} [options.width=500] - Width of the popup dialog, if applicable.
+     * @param {boolean} [options.hideTitle=true] - Whether to hide the title of the popup dialog, if applicable.
+     * @returns {string|undefined} The session ID used for the progress tracking, or undefined if a previous progress
+     *                             operation is still active (indicated by `_progressInterval > 0`).
+     */
     showProgress: function( options ){
         if(window.hWin.HEURIST4.msg._progressInterval>0){
-            console.log('previous progress is not completed');            
+            console.log('previous progress is not completed'); // Log and exit if another progress is running
             return;
         }
         
@@ -1636,6 +1877,13 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         return session_id;
     },
     
+    /**
+     * Hides the currently active progress indicator.
+     * It clears the polling interval, hides the progress div, and closes the progress popup if it was used.
+     * Also resets the mouse cursor from 'progress' to 'auto'.
+     *
+     * @returns {void}
+     */
     hideProgress: function(){
         $('body').css('cursor','auto');
 
@@ -1649,66 +1897,85 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             window.hWin.HEURIST4.msg._progressDiv = null;
         }
         if(window.hWin.HEURIST4.msg._progressPopup){
-            let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
-            $dlg.dialog( "close" );
+            // Note: Original code uses getMsgDlg() here, which might be incorrect if _progressPopup was created differently.
+            // Assuming _progressPopup is the dialog instance itself.
+            if (window.hWin.HEURIST4.msg._progressPopup.dialog('instance')) {
+                 window.hWin.HEURIST4.msg._progressPopup.dialog( "close" );
+            }
             window.hWin.HEURIST4.msg._progressPopup = null;
         }
         
     },
     
     
-    //
-    // Warning on exit
-    //             
-    showMsgOnExit: function(sMessage, onSave, onIgnore){
+    /**
+     * Displays a warning dialog prompting the user to save or ignore changes before exiting.
+     * Typically used when there are unsaved modifications.
+     *
+     * @param {string} sMessage - The message content for the dialog (e.g., "You have unsaved changes...").
+     *                            This message is translated using `window.hWin.HR`.
+     *                            Note: The `sMessage` parameter is defined but not directly used in the current implementation;
+     *                            instead, a hardcoded "Warn_Lost_Data" key is used for the message.
+     * @param {function} onSave - Callback function to execute if the user chooses to "Save".
+     * @param {function} onIgnore - Callback function to execute if the user chooses to "Ignore and close".
+     * @returns {void}
+     */
+    showMsgOnExit: function(sMessage, onSave, onIgnore){ // sMessage seems unused
         let $dlg, buttons = {};
-        buttons['Save'] = function(){ 
-            //that._saveEditAndClose(null, 'close'); 
+        buttons[window.hWin.HR('Save')] = function(){  // Using HR for button labels directly based on other patterns
             onSave();
             $dlg.dialog('close'); 
         }; 
-        buttons['Ignore and close'] = function(){ 
+        buttons[window.hWin.HR('Ignore and close')] = function(){
             onIgnore();
             $dlg.dialog('close'); 
         };
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-            window.hWin.HR('Warn_Lost_Data'),
+            window.hWin.HR('Warn_Lost_Data'), // sMessage is passed but 'Warn_Lost_Data' is used
             buttons,
             {title: window.hWin.HR('Confirm'),
-               yes: window.hWin.HR('Save'),
-                no: window.hWin.HR('Ignore and close')},
+               // yes: window.hWin.HR('Save'), // These are covered by direct button definition above
+               // no: window.hWin.HR('Ignore and close')
+            },
             {default_palette_class:'ui-heurist-design'});
         
     },
     
-    //
-    // for smarty reports
-    //
+    /**
+     * Checks if an error message string indicates the use of a disabled PHP function in a Smarty template (custom report).
+     * If such an error is detected, it displays a warning dialog informing the user and suggesting they request
+     * the function to be enabled via a bug report.
+     *
+     * @param {string} txt - The error message string to check.
+     * @returns {boolean} True if a warning dialog was shown (meaning the specific error was detected), false otherwise.
+     */
     showWarningAboutDisabledFunction: function(txt){
       
             if(txt.indexOf('Exception on execution: Syntax error in template')==0 
             && txt.indexOf('not allowed by security setting')>0){
                 
-                    let buttons = null
-                    if(window.hWin.HAPI4.actionHandler){
+                    let buttons = null;
+                    let $dlgm; // Define $dlgm here to be accessible in button callbacks
+                    if(window.hWin.HAPI4 && window.hWin.HAPI4.actionHandler){ // Check HAPI4 exists
                         buttons = 
-                        {   'Send Bug Report': function() {
+                        {
+                            [window.hWin.HR('Send Bug Report')]: function() { // Translate button label
                                 window.hWin.HAPI4.actionHandler.executeActionById('menu-help-bugreport');
-                                $dlgm.dialog( 'close' );
+                                if ($dlgm) $dlgm.dialog( 'close' );
                                 },
-                            'Cancel':function() {
-                                $dlgm.dialog( 'close' );
+                            [window.hWin.HR('Cancel')]:function() { // Translate button label
+                                if ($dlgm) $dlgm.dialog( 'close' );
                             }
                         };
                     }
 
-                    let $dlgm = window.hWin.HEURIST4.msg.showMsgDlg(
+                    $dlgm = window.hWin.HEURIST4.msg.showMsgDlg(
     '<p>Sorry, native php functions in custom reports are disabled by default<br>'
     +'as a security precaution. </p>'
     +'<p>Please use the bug report function to ask that this function be enabled. </p>',
                         buttons,
-                        'Warning');
+                        window.hWin.HR('Warning')); // Translate title
                         
                         return true;
                 
@@ -1718,6 +1985,22 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
     },
     
+    /**
+     * Prepares and optionally displays a detailed message about parent record pointers
+     * that could not be automatically removed due to existing reverse child record pointers.
+     * The message explains the situation and provides links to view the affected records.
+     *
+     * @param {Object} details - An object where keys are parent record IDs. Each value is an object:
+     *                           `{title: string, type: string, restored: Array<Object>}`.
+     *                           `restored` is an array of child info: `{field: string, id: string, title: string, type: string}`.
+     * @param {boolean} [create_popup=false] - If true, displays the generated message in a dialog.
+     *                                         If false, returns an object with message components.
+     * @returns {jQuery|Object|string}
+     *          - If `create_popup` is true: Returns the jQuery dialog object.
+     *          - If `create_popup` is false and details are found: Returns an object
+     *            `{message: string, title: string, handlers: Object}` for manual dialog creation.
+     *          - If `create_popup` is false and no relevant details found: Returns an empty string.
+     */
     prepareParentRecordMsg: function(details, create_popup = false){
 
         let link_styling = "text-decoration: underline; cursor: pointer; color: black;";

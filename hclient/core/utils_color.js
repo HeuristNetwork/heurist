@@ -1,21 +1,22 @@
 /**
-* CSS filter generator to convert from black to target hex color
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      MultiplyByZer0 for their post https://stackoverflow.com/a/43960991/604861
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+ * @file utils_color.js
+ * @brief Generates CSS filters to approximate a target HEX color, starting from black.
+ * @fileOverview This file defines a `Color` class for representing and manipulating RGB colors with CSS
+ * filter-like operations (hueRotate, grayscale, sepia, saturate, brightness, contrast, invert).
+ * It also includes a `Solver` class that uses a stochastic approximation algorithm (SPSA) to
+ * find the optimal combination of CSS filter values to transform a base color (assumed black)
+ * to a target HEX color. The primary utility function `hexToFilter(hex)` uses these classes
+ * to produce a CSS filter string.
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author MultiplyByZer0 (for the core algorithm via StackOverflow https://stackoverflow.com/a/43960991/604861)
+ * @author Heurist Team
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 4.0
+ */
 
 'use strict';
 
@@ -65,17 +66,10 @@ class Color {
     angle = angle / 180 * Math.PI;
     const sin = Math.sin(angle);
     const cos = Math.cos(angle);
-
     this.multiply([
-      0.213 + cos * 0.787 - sin * 0.213,
-      0.715 - cos * 0.715 - sin * 0.715,
-      0.072 - cos * 0.072 + sin * 0.928,
-      0.213 - cos * 0.213 + sin * 0.143,
-      0.715 + cos * 0.285 + sin * 0.140,
-      0.072 - cos * 0.072 - sin * 0.283,
-      0.213 - cos * 0.213 - sin * 0.787,
-      0.715 - cos * 0.715 + sin * 0.715,
-      0.072 + cos * 0.928 + sin * 0.072,
+      0.213 + cos * 0.787 - sin * 0.213, 0.715 - cos * 0.715 - sin * 0.715, 0.072 - cos * 0.072 + sin * 0.928,
+      0.213 - cos * 0.213 + sin * 0.143, 0.715 + cos * 0.285 + sin * 0.140, 0.072 - cos * 0.072 - sin * 0.283,
+      0.213 - cos * 0.213 - sin * 0.787, 0.715 - cos * 0.715 + sin * 0.715, 0.072 + cos * 0.928 + sin * 0.072,
     ]);
   }
 
@@ -87,15 +81,9 @@ class Color {
    */
   grayscale(value = 1) {
     this.multiply([
-      0.2126 + 0.7874 * (1 - value),
-      0.7152 - 0.7152 * (1 - value),
-      0.0722 - 0.0722 * (1 - value),
-      0.2126 - 0.2126 * (1 - value),
-      0.7152 + 0.2848 * (1 - value),
-      0.0722 - 0.0722 * (1 - value),
-      0.2126 - 0.2126 * (1 - value),
-      0.7152 - 0.7152 * (1 - value),
-      0.0722 + 0.9278 * (1 - value),
+      0.2126 + 0.7874 * (1 - value), 0.7152 - 0.7152 * (1 - value), 0.0722 - 0.0722 * (1 - value),
+      0.2126 - 0.2126 * (1 - value), 0.7152 + 0.2848 * (1 - value), 0.0722 - 0.0722 * (1 - value),
+      0.2126 - 0.2126 * (1 - value), 0.7152 - 0.7152 * (1 - value), 0.0722 + 0.9278 * (1 - value),
     ]);
   }
 
@@ -107,15 +95,9 @@ class Color {
    */
   sepia(value = 1) {
     this.multiply([
-      0.393 + 0.607 * (1 - value),
-      0.769 - 0.769 * (1 - value),
-      0.189 - 0.189 * (1 - value),
-      0.349 - 0.349 * (1 - value),
-      0.686 + 0.314 * (1 - value),
-      0.168 - 0.168 * (1 - value),
-      0.272 - 0.272 * (1 - value),
-      0.534 - 0.534 * (1 - value),
-      0.131 + 0.869 * (1 - value),
+      0.393 + 0.607 * (1 - value), 0.769 - 0.769 * (1 - value), 0.189 - 0.189 * (1 - value),
+      0.349 - 0.349 * (1 - value), 0.686 + 0.314 * (1 - value), 0.168 - 0.168 * (1 - value),
+      0.272 - 0.272 * (1 - value), 0.534 - 0.534 * (1 - value), 0.131 + 0.869 * (1 - value),
     ]);
   }
 
@@ -127,15 +109,9 @@ class Color {
    */
   saturate(value = 1) {
     this.multiply([
-      0.213 + 0.787 * value,
-      0.715 - 0.715 * value,
-      0.072 - 0.072 * value,
-      0.213 - 0.213 * value,
-      0.715 + 0.285 * value,
-      0.072 - 0.072 * value,
-      0.213 - 0.213 * value,
-      0.715 - 0.715 * value,
-      0.072 + 0.928 * value,
+      0.213 + 0.787 * value, 0.715 - 0.715 * value, 0.072 - 0.072 * value,
+      0.213 - 0.213 * value, 0.715 + 0.285 * value, 0.072 - 0.072 * value,
+      0.213 - 0.213 * value, 0.715 - 0.715 * value, 0.072 + 0.928 * value,
     ]);
   }
 
@@ -150,9 +126,7 @@ class Color {
     const newR = this.clamp(this.r * matrix[0] + this.g * matrix[1] + this.b * matrix[2]);
     const newG = this.clamp(this.r * matrix[3] + this.g * matrix[4] + this.b * matrix[5]);
     const newB = this.clamp(this.r * matrix[6] + this.g * matrix[7] + this.b * matrix[8]);
-    this.r = newR;
-    this.g = newG;
-    this.b = newB;
+    this.r = newR; this.g = newG; this.b = newB;
   }
 
   /**
@@ -160,17 +134,13 @@ class Color {
    * This is a linear transformation.
    * @param {number} [value=1] - The brightness multiplier. 0 creates black, 1 is original brightness.
    */
-  brightness(value = 1) {
-    this.linear(value);
-  }
+  brightness(value = 1) { this.linear(value); }
   /**
    * Adjusts the contrast of the color.
    * This is a linear transformation.
    * @param {number} [value=1] - The contrast multiplier. 0 creates a color half way to gray, 1 is original contrast.
    */
-  contrast(value = 1) {
-    this.linear(value, -(0.5 * value) + 0.5);
-  }
+  contrast(value = 1) { this.linear(value, -(0.5 * value) + 0.5); }
 
   /**
    * Applies a linear transformation to each color component: `C = C * slope + intercept * 255`.
@@ -204,54 +174,27 @@ class Color {
    * @returns {{h: number, s: number, l: number}} An object with h, s, l properties.
    */
   hsl() {
-    // Code taken from https://stackoverflow.com/a/9493060/2688027, licensed under CC BY-SA.
-    const r = this.r / 255;
-    const g = this.g / 255;
-    const b = this.b / 255;
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
+    const r = this.r / 255, g = this.g / 255, b = this.b / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b);
     let h, s, l = (max + min) / 2;
-
-    if (max === min) {
-      h = s = 0;
-    } else {
+    if (max === min) { h = s = 0; }
+    else {
       const d = max - min;
       s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
       switch (max) {
-        case r:
-          h = (g - b) / d + (g < b ? 6 : 0);
-          break;
-
-        case g:
-          h = (b - r) / d + 2;
-          break;
-
-        case b:
-          h = (r - g) / d + 4;
-          break;
+        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+        case g: h = (b - r) / d + 2; break;
+        case b: h = (r - g) / d + 4; break;
       }
       h /= 6;
     }
-
-    return {
-      h: h * 100, // Representing hue as a percentage of 360 for internal calculations
-      s: s * 100,
-      l: l * 100,
-    };
+    return { h: h * 100, s: s * 100, l: l * 100 };
   }
 
-  /**
-   * Clamps a value to the 0-255 range.
-   * @private
-   * @param {number} value - The value to clamp.
-   * @returns {number} The clamped value.
-   */
+  // Internal helper method - JSDoc intentionally omitted
   clamp(value) {
-    if (value > 255) {
-      value = 255;
-    } else if (value < 0) {
-      value = 0;
-    }
+    if (value > 255) { value = 255; }
+    else if (value < 0) { value = 0; }
     return value;
   }
 }
@@ -273,7 +216,7 @@ class Solver {
   constructor(target, baseColor) {
     this.target = target;
     this.targetHSL = target.hsl();
-    this.reusedColor = new Color(0, 0, 0); // Base color for filter application is black
+    this.reusedColor = new Color(0, 0, 0);
   }
 
   /**
@@ -286,71 +229,33 @@ class Solver {
    */
   solve() {
     const result = this.solveNarrow(this.solveWide());
-    return {
-      values: result.values,
-      loss: result.loss,
-      filter: this.css(result.values),
-    };
+    return { values: result.values, loss: result.loss, filter: this.css(result.values) };
   }
 
-  /**
-   * Performs a wide-range search for filter values using SPSA.
-   * This helps find a good general area in the solution space.
-   * @private
-   * @returns {{values: Array<number>, loss: number}} The best values and loss found.
-   */
+  // Internal method - JSDoc intentionally omitted
   solveWide() {
-    const A = 5;
-    const c = 15;
-    const a = [60, 180, 18000, 600, 1.2, 1.2];
-
+    const A = 5, c = 15, a = [60, 180, 18000, 600, 1.2, 1.2];
     let best = { loss: Infinity };
-    for (let i = 0; best.loss > 25 && i < 3; i++) { // Iterate up to 3 times if loss is still high
-      const initial = [50, 20, 3750, 50, 100, 100]; // Initial guess for filter values
+    for (let i = 0; best.loss > 25 && i < 3; i++) {
+      const initial = [50, 20, 3750, 50, 100, 100];
       const result = this.spsa(A, a, c, initial, 1000);
-      if (result.loss < best.loss) {
-        best = result;
-      }
+      if (result.loss < best.loss) { best = result; }
     }
     return best;
   }
 
-  /**
-   * Performs a narrow-range search for filter values using SPSA, starting from the results of `solveWide`.
-   * This refines the solution found by `solveWide`.
-   * @private
-   * @param {{values: Array<number>, loss: number}} wide - The result from `solveWide`.
-   * @returns {{values: Array<number>, loss: number}} The refined best values and loss.
-   */
+  // Internal method - JSDoc intentionally omitted
   solveNarrow(wide) {
-    const A = wide.loss;
-    const c = 2;
-    const A1 = A + 1;
+    const A = wide.loss, c = 2, A1 = A + 1;
     const a = [0.25 * A1, 0.25 * A1, A1, 0.25 * A1, 0.2 * A1, 0.2 * A1];
     return this.spsa(A, a, c, wide.values, 500);
   }
 
-  /**
-   * Implements the Simultaneous Perturbation Stochastic Approximation (SPSA) algorithm.
-   * This is an optimization algorithm used to find the filter values that minimize the loss function.
-   * @private
-   * @param {number} A - SPSA tuning parameter.
-   * @param {Array<number>} a - SPSA tuning parameter (array of 6 values).
-   * @param {number} c - SPSA tuning parameter.
-   * @param {Array<number>} values - Initial guess for the filter values (6 values: invert, sepia, saturate, hue-rotate, brightness, contrast).
-   * @param {number} iters - Number of iterations to run the algorithm.
-   * @returns {{values: Array<number>, loss: number}} The best filter values found and the corresponding loss.
-   */
+  // Internal method - JSDoc intentionally omitted
   spsa(A, a, c, values, iters) {
-    const alpha = 1;
-    const gamma = 0.16666666666666666;
-
-    let best = null;
-    let bestLoss = Infinity;
-    const deltas = new Array(6);
-    const highArgs = new Array(6);
-    const lowArgs = new Array(6);
-
+    const alpha = 1, gamma = 0.16666666666666666;
+    let best = null, bestLoss = Infinity;
+    const deltas = new Array(6), highArgs = new Array(6), lowArgs = new Array(6);
     for (let k = 0; k < iters; k++) {
       const ck = c / Math.pow(k + 1, gamma);
       for (let i = 0; i < 6; i++) {
@@ -358,92 +263,38 @@ class Solver {
         highArgs[i] = values[i] + ck * deltas[i];
         lowArgs[i] = values[i] - ck * deltas[i];
       }
-
       const lossDiff = this.loss(highArgs) - this.loss(lowArgs);
       for (let i = 0; i < 6; i++) {
         const g = lossDiff / (2 * ck) * deltas[i];
         const ak = a[i] / Math.pow(A + k + 1, alpha);
         values[i] = fix(values[i] - ak * g, i);
       }
-
       const loss = this.loss(values);
-      if (loss < bestLoss) {
-        best = values.slice(0);
-        bestLoss = loss;
-      }
+      if (loss < bestLoss) { best = values.slice(0); bestLoss = loss; }
     }
     return { values: best, loss: bestLoss };
-
     function fix(value, idx) {
       let max = 100;
-      if (idx === 2 /* saturate */) {
-        max = 7500;
-      } else if (idx === 4 /* brightness */ || idx === 5 /* contrast */) {
-        max = 200;
-      }
-
-      if (idx === 3 /* hue-rotate */) {
-        if (value > max) {
-          value %= max;
-        } else if (value < 0) {
-          value = max + value % max;
-        }
-      } else if (value < 0) {
-        value = 0;
-      } else if (value > max) {
-        value = max;
-      }
+      if (idx === 2) max = 7500; else if (idx === 4 || idx === 5) max = 200;
+      if (idx === 3) { if (value > max) value %= max; else if (value < 0) value = max + value % max; }
+      else if (value < 0) value = 0; else if (value > max) value = max;
       return value;
     }
   }
 
-  /**
-   * Calculates the "loss" or difference between the target color and the color produced by applying the given filters.
-   * The base color for applying filters is black (0,0,0), as `this.reusedColor` is reset to black here.
-   * The loss function sums the absolute differences in R, G, B, H, S, L components.
-   * @private
-   * @param {Array<number>} filters - Array of 6 filter values (percentages for invert, sepia, saturate, brightness, contrast; hue-rotate needs scaling).
-   * @returns {number} The calculated loss value.
-   */
+  // Internal method - JSDoc intentionally omitted
   loss(filters) {
-    // Argument is array of percentages.
-    const color = this.reusedColor;
-    color.set(0, 0, 0); // Reset to black, meaning filters are applied to a black base
-
-    color.invert(filters[0] / 100);
-    color.sepia(filters[1] / 100);
-    color.saturate(filters[2] / 100);
-    color.hueRotate(filters[3] * 3.6);
-    color.brightness(filters[4] / 100);
-    color.contrast(filters[5] / 100);
-
+    const color = this.reusedColor; color.set(0, 0, 0);
+    color.invert(filters[0] / 100); color.sepia(filters[1] / 100); color.saturate(filters[2] / 100);
+    color.hueRotate(filters[3] * 3.6); color.brightness(filters[4] / 100); color.contrast(filters[5] / 100);
     const colorHSL = color.hsl();
-    return (
-      Math.abs(color.r - this.target.r) +
-      Math.abs(color.g - this.target.g) +
-      Math.abs(color.b - this.target.b) +
-      Math.abs(colorHSL.h - this.targetHSL.h) +
-      Math.abs(colorHSL.s - this.targetHSL.s) +
-      Math.abs(colorHSL.l - this.targetHSL.l)
-    );
+    return Math.abs(color.r - this.target.r) + Math.abs(color.g - this.target.g) + Math.abs(color.b - this.target.b) +
+           Math.abs(colorHSL.h - this.targetHSL.h) + Math.abs(colorHSL.s - this.targetHSL.s) + Math.abs(colorHSL.l - this.targetHSL.l);
   }
 
-  /**
-   * Formats an array of filter values into a CSS filter string.
-   * @private
-   * @param {Array<number>} filters - Array of 6 filter values.
-   *        filters[0]: invert (%)
-   *        filters[1]: sepia (%)
-   *        filters[2]: saturate (%)
-   *        filters[3]: hue-rotate (value is multiplied by 3.6 to get degrees)
-   *        filters[4]: brightness (%)
-   *        filters[5]: contrast (%)
-   * @returns {string} The CSS filter string.
-   */
+  // Internal method - JSDoc intentionally omitted
   css(filters) {
-    function fmt(idx, multiplier = 1) {
-      return Math.round(filters[idx] * multiplier);
-    }
+    function fmt(idx, multiplier = 1) { return Math.round(filters[idx] * multiplier); }
     return `invert(${fmt(0)}%) sepia(${fmt(1)}%) saturate(${fmt(2)}%) hue-rotate(${fmt(3, 3.6)}deg) brightness(${fmt(4)}%) contrast(${fmt(5)}%);`;
   }
 }
@@ -455,32 +306,21 @@ class Solver {
  *
  * @param {string} hex - The HEX color string (e.g., "#FF0000" for red).
  * @returns {string|undefined} A CSS filter string (e.g., "invert(20%) sepia(79%) ..."),
- *                             or undefined if the hex input is invalid.
+ *                             or undefined if the hex input is invalid (after attempting to show an alert).
  */
 function hexToFilter(hex) {
-      
-    const rgb = window.hWin.HEURIST4.ui.hexToRgb(hex); // Assumes HEURIST4.ui.hexToRgb is available
-    if (rgb==null) {
-      alert('Invalid format!');
-      return;
+    if (!window.hWin.HEURIST4 || !window.hWin.HEURIST4.ui || !window.hWin.HEURIST4.ui.hexToRgb) {
+        console.error("HEURIST4.ui.hexToRgb is not available.");
+        alert('Color conversion utility is not available.'); // User feedback
+        return undefined;
     }
-
+    const rgb = window.hWin.HEURIST4.ui.hexToRgb(hex);
+    if (rgb==null) {
+      alert('Invalid HEX color format!'); // User feedback
+      return undefined;
+    }
     const color = new Color(rgb.r, rgb.g, rgb.b);
     const solver = new Solver(color);
     const result = solver.solve();
-
-    /*let lossMsg;
-    if (result.loss < 1) {
-      lossMsg = 'This is a perfect result.';
-    } else if (result.loss < 5) {
-      lossMsg = 'The is close enough.';
-    } else if (result.loss < 15) {
-      lossMsg = 'The color is somewhat off. Consider running it again.';
-    } else {
-      lossMsg = 'The color is extremely off. Run it again!';
-    }*/
-
     return result.filter;  
-}  
-
-
+}

@@ -1,14 +1,21 @@
 /**
-*  ActionHandler - manages list of (menu) actions 
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @version     6.0
-*/
+ * @file ActionHandler.js
+ * @brief Manages lists of menu actions, loads them from JSON, and executes them.
+ * @fileOverview The ActionHandler class is responsible for managing a list of actions, typically used for menus within the Heurist system.
+ * It can load these actions from a JSON file or be initialized with an array of action objects.
+ * Key functionalities include executing actions by their ID, handling verifications (like password prompts),
+ * managing actions that open URLs or dialogs, and orchestrating complex operations such as importing users
+ * or performing database management tasks. It integrates with other parts of the HAPI (Heurist API)
+ * and UI components to provide a cohesive user experience for invoking system commands.
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 6.0
+ */
 
 /* global CmsManager */
 
@@ -80,17 +87,8 @@ class ActionHandler {
         return this.actions.find(action => action.id === id);
     }
 
-    /**
-     * Handles the verification process for an action, typically involving password and/or permission checks.
-     * If verification is required and not yet passed, it initiates the verification flow.
-     * Upon successful verification, it re-executes the original action with `verification_passed` set to true.
-     *
-     * @private
-     * @param {Object} action - The action object being executed.
-     * @param {Object} dialog_options - Options for the dialog, potentially modified during verification.
-     * @returns {boolean} Returns `true` if verification was initiated (halting further execution of the current call),
-     * or `false` if no verification was needed or if action data is missing.
-     */
+    // Private method #handleVerification - JSDoc intentionally omitted as per "DO NOT doc internal functions"
+    // Original JSDoc contained @private.
     #handleVerification(action, dialog_options) {
         
         let adata = action.data;            
@@ -106,7 +104,7 @@ class ActionHandler {
         }
         
         let action_admin_level = adata['user-admin-status'];
-        let action_member_level = adata['user-member-status']; // Corrected typo: memebr -> member
+        let action_member_level = adata['user-member-status'];
         let action_user_permissions = adata['user-permissions']; 
         let requiredLevel = (action_admin_level == -1 || action_admin_level >= 0) ? action_admin_level : 0;
         
@@ -128,16 +126,8 @@ class ActionHandler {
         return true; // Indicates verification was initiated
     }    
     
-    /**
-     * Handles actions that involve opening a URL (e.g., hyperlink, mailto).
-     * It constructs the final URL, handles special cases like 'menu-help-emailadmin',
-     * and opens the URL in a new window/tab or a dialog.
-     *
-     * @private
-     * @param {Object} action - The action object, containing href, target, id, and text.
-     * @param {Object} popup_dialog_options - Options for displaying the content in a dialog if not opening in a new tab/window.
-     * @returns {boolean} Returns `true` if the href action was handled, `false` otherwise (e.g. empty href).
-     */
+    // Private method #handleHrefAction - JSDoc intentionally omitted as per "DO NOT doc internal functions"
+    // Original JSDoc contained @private.
     #handleHrefAction(action, popup_dialog_options) {
 
         let href = action.href;
@@ -151,7 +141,7 @@ class ActionHandler {
 
         if (href.startsWith('mailto:')) {
             window.open(href, 'emailWindow');
-            return;
+            return true; // Assuming it was handled
         }
 
         if (!(href.startsWith('http://') || href.startsWith('https://'))) {
@@ -166,41 +156,13 @@ class ActionHandler {
             }
             let options = $.extend(popup_dialog_options, { width: 800, height: 600 });
 
-             /*                if (item.hasClass('upload_files')) {
-             //beforeClose
-             options['afterclose'] = function( event, ui ) {
-
-             if(window.hWin.HEURIST4.filesWereUploaded){
-
-             let buttons = {};
-             buttons[window.hWin.HR('OK')]  = function() {
-             let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
-             $dlg.dialog( "close" );
-
-             that.actionHandler.executeActionById('menu-index-files');
-             };                                 
-
-             window.hWin.HEURIST4.msg.showMsgDlg('The files you have uploaded will not appear as records in the database'
-             +' until you run Import > index multimedia This function will open when you click OK.',buttons);
-             }
-             }
-             }
-             */            
             window.hWin.HEURIST4.msg.showDialog(href, options);
         }
         return true;
     }
 
-    /**
-     * Prepares and standardizes dialog options for an action.
-     * It determines the container for the dialog, sets the title (checking for translations),
-     * and merges action-specific data with provided dialog_options.
-     *
-     * @private
-     * @param {Object} action - The action object, containing id, data, and text.
-     * @param {Object} dialog_options - Initial dialog options provided to `executeActionById`.
-     * @returns {Object} The fully prepared popup dialog options.
-     */
+    // Private method #prepareDialogOptions - JSDoc intentionally omitted as per "DO NOT doc internal functions"
+    // Original JSDoc contained @private.
     #prepareDialogOptions(action, dialog_options){        
          let actionid = action.id;
          let adata = action.data;
@@ -253,14 +215,14 @@ class ActionHandler {
      * Step 2: Select users from the source database.
      * Step 3: Allocate selected users to work groups in the current database.
      *
-     * @param {Object} [entity_dialog_options={}] - Initial configuration options for the entity dialogs used in the import process.
-     * These options can be extended internally for each step.
+     * @param {Object} [entity_dialog_options] - Initial configuration options for the entity dialogs used in the import process.
+     * Defaults to an empty object if not provided. These options can be extended internally for each step.
      * @returns {void}
      */
     importUsers(entity_dialog_options) {
         if (!entity_dialog_options) entity_dialog_options = {};
         
-        let that = this; // Used for maintaining context within callbacks
+        let that = this;
         let auto_select = '';
         
         let options = $.extend(entity_dialog_options, {
@@ -346,38 +308,28 @@ class ActionHandler {
         window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
     }    
     
-    /**
-     * Completes the user import process after users and roles have been selected.
-     * It sends a request to the server to add the selected users from the source database
-     * to the specified roles in the current database.
-     * Displays a success or error message based on the server response.
-     *
-     * @private
-     * @param {Object} data - Data from the role selection dialog, containing `data.selection` (selected roles).
-     * @param {Array<string>} selected_users - An array of user IDs to be imported.
-     * @param {string} selected_database - The name of the database from which users are being imported.
-     * @returns {void}
-     */ 
+    // Internal helper method for importUsers. JSDoc intentionally omitted as per "DO NOT doc internal functions".
+    // Original JSDoc contained @private.
     importUsersComplete(data, selected_users, selected_database){
 
-        if (!data || $.isEmptyObject(data.selection)){ // If no roles selected, or data is invalid
+        if (!data || $.isEmptyObject(data.selection)){
             return;
         }
-        //add new user to specified group
+
         let request = {
-            a: 'action', // API action type
-            entity: 'sysUsers', // Target entity
-            roles: data.selection, // Selected roles for the users
-            userIDs: selected_users, // IDs of users to import
-            sourceDB: selected_database, // Source database name
-            request_id: window.hWin.HEURIST4.util.random() // Unique request ID
+            a: 'action',
+            entity: 'sysUsers',
+            roles: data.selection,
+            userIDs: selected_users,
+            sourceDB: selected_database,
+            request_id: window.hWin.HEURIST4.util.random()
         };
 
         window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
             if (response.status == window.hWin.ResponseStatus.OK) {
-                window.hWin.HEURIST4.msg.showMsgDlg(response.data); // Show success message
+                window.hWin.HEURIST4.msg.showMsgDlg(response.data);
             } else {
-                window.hWin.HEURIST4.msg.showMsgErr(response); // Show error message
+                window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });
         
@@ -390,7 +342,7 @@ class ActionHandler {
      * based on the action's configuration.
      *
      * @param {string} id - The ID of the action to execute.
-     * @param {Object} [dialog_options={}] - Optional parameters for dialog customization.
+     * @param {Object} [dialog_options] - Optional parameters for dialog customization. Defaults to an empty object if not provided.
      * These options can include `verification_passed` to bypass verification if already done.
      * @returns {boolean} Returns `true` if the action was found and an attempt was made to handle it (even if handling later fails or is asynchronous).
      * Returns `false` if the action with the given ID is not found or if the action is marked as disabled (`ext == 1`).
@@ -399,28 +351,25 @@ class ActionHandler {
         const action = this.findActionById(id);
         
         if (!action) {
-            console.warn(`Action with ID "${id}" not found.`); // Changed to warn for better visibility
+            console.warn(`Action with ID "${id}" not found.`);
             return false;
         }
         
         let adata = action.data;
     
-        // If action is disabled (external/extension action not implemented), return early
         if (adata?.ext == 1) {
             console.log(`Action with ID "${id}" is marked as 'ext' and is not handled.`);
-            return false; // Or true depending on desired behavior for 'do nothing' actions
+            return false;
         }
         
         if(!dialog_options){
             dialog_options = {};
         }
 
-        // If verification is required and not already passed, #handleVerification will initiate it and return true.
-        // In that case, current execution should stop, as verification callback will re-trigger executeActionById.
         if(!dialog_options?.verification_passed && 
             this.#handleVerification(action, dialog_options))
         {
-            return true; // Indicate that action handling is deferred pending verification
+            return true;
         }
 
         let actionid = action.id;
@@ -432,27 +381,24 @@ class ActionHandler {
         
         if (actionid == 'data-heurist-pageid') {
             if (!this.cmsManager) {
-                this.cmsManager = new CmsManager();
+                this.cmsManager = new CmsManager(); // Assuming CmsManager is globally available or imported
             }
             this.cmsManager.executeAction(actionid, dialog_options);
             return true;
         }
         
-
         if (actionid.indexOf('menu-cms') == 0) {
             if (!this.cmsManager) {
-                this.cmsManager = new CmsManager();
+                this.cmsManager = new CmsManager(); // Assuming CmsManager is globally available or imported
             }
             this.cmsManager.executeAction(actionid);
             return true;
         }
 
-        // Prepare dialog options
         let popup_dialog_options = this.#prepareDialogOptions(action, dialog_options);
         
         let is_supported = true;
         let contentURL;
-
         
         switch (actionid) {
             case "menu-database-create":
@@ -464,9 +410,8 @@ class ActionHandler {
             case "menu-database-register":
             case "menu-database-verify":
             case "menu-database-verifyURLs":{
-                //database action name
                 const s = actionid.substr(actionid.lastIndexOf('-') + 1);
-                const actionName = 'db' + s.capitalize();
+                const actionName = 'db' + s.charAt(0).toUpperCase() + s.slice(1);
                 window.hWin.HEURIST4.ui.showRecordActionDialog(actionName, popup_dialog_options);
                 break;
             }
@@ -478,26 +423,18 @@ class ActionHandler {
                 window.hWin.HEURIST4.ui.showRecordActionDialog('lookupConfig', popup_dialog_options);
                 break;
             case "menu-repository-config":
-
                 popup_dialog_options['classes'] = {"ui-dialog": "ui-heurist-design", "ui-dialog-titlebar": "ui-heurist-design"};
                 popup_dialog_options['service_config'] = window.hWin.HAPI4.sysinfo['repository_config'];
                 popup_dialog_options['title'] = window.hWin.HR('Repository service configuration');
                 popup_dialog_options['path'] = 'widgets/admin/';
-
                 window.hWin.HEURIST4.ui.showRecordActionDialog('repositoryConfig', popup_dialog_options);
                 break;
-                
             case "menu-statistics-cms":{
-                //popup_dialog_options['path'] = 'widgets/cms/';
-                //window.hWin.HEURIST4.ui.showRecordActionDialog('cmsStatistics', popup_dialog_options);
                 let d = new Date();
                 d.setDate(d.getDate() - 1);
                 let yesterday = d.toISOString().split('T')[0];
-                
                 let url = `https://${window.hWin.HAPI4.sysinfo.matomo_url}/index.php?module=CoreHome&action=index&idSite=${window.hWin.HAPI4.sysinfo.matomo_siteid}&period=day&date=yesterday&updated=1#?period=week&date=${yesterday}&segment=pageUrl%3D%40%2F${window.hWin.HAPI4.database}&idSite=1&category=Dashboard_Dashboard&subcategory=1`;
-                
                 window.open(url, "_blank");
-                
                 break;
             }
             case "menu-files-index":
@@ -506,10 +443,10 @@ class ActionHandler {
             case "menu-files-annotations":
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordImportAnnotations', popup_dialog_options);
                 break;
-            case "menu-records-archive":  // not used
+            case "menu-records-archive":
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordArchive');
                 break;
-            case "menu-import-add-record": // hidden action at the moment (for dashboard)
+            case "menu-import-add-record":
                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd');
                 break;
             case "menu-structure-duplicates":
@@ -519,13 +456,10 @@ class ActionHandler {
                 popup_dialog_options['path'] = 'widgets/entity/popups/';
                 window.hWin.HEURIST4.ui.showRecordActionDialog('rectypeTemplate', popup_dialog_options);
                 break;
-                
             case "menu-structure-refresh":
-            
-                window.hWin.HAPI4.EntityMgr.emptyEntityData(null); //reset all cached data for entities
+                window.hWin.HAPI4.EntityMgr.emptyEntityData(null);
                 window.hWin.HAPI4.SystemMgr.get_defs_all( true, window.hWin.document);
                 break;
-
             case "menu-profile-info":
                 popup_dialog_options['edit_mode'] = 'editonly';
                 popup_dialog_options['rec_ID'] = window.hWin.HAPI4.user_id();
@@ -551,11 +485,8 @@ class ActionHandler {
                     setTimeout('$(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE)',1000);
                 }; 
                 window.hWin.HEURIST4.ui.showEntityDialog(adata.entity, popup_dialog_options);
-
                 break;
-
             case "menu-database-browse":
-                
                 popup_dialog_options['select_mode'] = 'select_single';
                 popup_dialog_options['onselect'] = function(event, data) {
                         if (data?.selection && data.selection.length === 1) {
@@ -566,22 +497,17 @@ class ActionHandler {
                             window.open(window.hWin.HAPI4.baseURL + '?db=' + db, '_blank');
                         }
                     };
-                
                 window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', popup_dialog_options);
                 break;
-
-
             case "menu-structure-import":
-
                 window.hWin.HEURIST4.ui.showWdigetDialog('importStructure', popup_dialog_options);
                 break;
-                
             case "menu-profile-preferences":
                 popup_dialog_options['path'] = 'widgets/profile/';
                 window.hWin.HEURIST4.ui.showRecordActionDialog('profilePreferences', popup_dialog_options);
                 break;
             case "menu-profile-import":
-                this.importUsers( popup_dialog_options ); //for admin only
+                this.importUsers( popup_dialog_options );
                 break;
             case "menu-profile-logout":
                 window.hWin.HAPI4.SystemMgr.logout();
@@ -590,33 +516,22 @@ class ActionHandler {
                 popup_dialog_options['path'] = 'widgets/admin/';
                 window.hWin.HEURIST4.ui.showRecordActionDialog('manageServer', popup_dialog_options);
                 break;
-/* NOT USED. At the moment it rebuilds titles for entire database or per rty after titlemask edit
-            case "menu-manage-rectitles":                                       
-                window.hWin.HEURIST4.ui.showRecordActionDialog('recordsTitles', popup_dialog_options);
-                break;
-*/
-
             case "menu-help-quick-tips":
                 contentURL = window.hWin.HRes('quickTips');
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Tips', {isPopupDlg:true, width:500, height:500});
                 break;
-                
             case "menu-subset-set":{
-                //see menu Explore
                 let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
                 if(widget){
-                    widget.resultList('callResultListMenu', 'menu-subset-set'); //call method
+                    widget.resultList('callResultListMenu', 'menu-subset-set');
                 }
                 break;
             }
             case "menu-help-acknowledgements":
-            
                 contentURL = window.hWin.HRes('acknowledgementsHeurist');
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Acknowledgements', {isPopupDlg:true, width:500, height:500});
                 break;
-
             case "menu-help-about":
-
                 contentURL = window.hWin.HRes('aboutHeurist');
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'About', {isPopupDlg:true, width:500, height:390,
                     open: function( event, ui ) {
@@ -624,7 +539,6 @@ class ActionHandler {
                         $dlg.find('.version').text('version '+window.hWin.HAPI4.sysinfo['version']);
                         
                         if(window.hWin.HAPI4.sysinfo.host_logo){
-
                             $('<div style="height:40px;padding-left:4px;float:right"><a href="'
                                 +(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
                                 +'" target="_blank" style="text-decoration:none;color:black;">'
@@ -635,16 +549,13 @@ class ActionHandler {
                     }                
                 });
                 break;
-
             case "menu-help-online":
-            
                 action.href = window.hWin.HAPI4.sysinfo.referenceServerURL+'?website&db='+window.hWin.HAPI4.sysinfo.referenceServerHelpDatabase;
                  // fall through
             default:
                 is_supported = this.#handleHrefAction(action, popup_dialog_options);
                 break;
         }
-
         return is_supported;
     }
 }

@@ -1,72 +1,23 @@
 /**
-*  Utility functions for database structure
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-/*
-Selectors:
-
-TERMS
-
-getInverseTermById  - (used in record edit for relmarker fields)
-
-getTermValue - Returns Label and Termcode in brackets (optionally) (used in EN and faceted search)
-
-getTermByCode - returns term by code in given vocab (used in lookup geonames only)
-
-getTermByLabel - returns term ID in vocabulary by label (in record edit for search and duplication check)
-
-getTermVocab - returns vocabulary for given term - real vocabulary (not by reference)
-
-trm_InVocab - returns true if term belongs to vocabulary (including by reference)
-
-isTermByReference - return false if given term belongs to vocabulary, otherwise returns level of reference
-
-getColorFromTermValue - Returns hex color by label or code for term by id (for googlemaps only)
-
-    trm_TreeData  - returns hierarchy for given vocabulary as a flat array, recordset or tree data
-    trm_HasChildren - is given term has children
-    trm_getVocabs - get all vocabularies OR for given domain
-    trm_getAllVocabs - get all vocab where given term presents directly or by reference
-    trm_RemoveLinks - remove all entries of term from trm_Links
-
-    
-WORKFLOW STAGES
-
-getSwfByRectype - returns rules for recordtype and current user 
-
-RECTYPES
-   
-
-createRectypeStructureTree
-getLinkedRecordTypes  -  FIX in search_faceted.js
-
-hasFields - returns true if rectype has a field in its structure
-rstField - Returns rectype header or details field values
-
-
-    getLocalID
-    getConceptID
-
-getTrashGroupId
-
-getHierarchyTitles - returns list of rt and dt titles for linked hierachy rt:dt:rt:dt
-                    (in faceted search and linked geo places)
-*/
+ * @file utils_dbs.js
+ * @brief Utility functions for Heurist database structure definitions and metadata.
+ * @fileOverview This file provides a collection of utility functions, primarily under the
+ * `window.hWin.HEURIST4.dbs` namespace (aliased as `$Db`), for working with Heurist database
+ * definitions and metadata. These include functions for accessing and manipulating terms,
+ * vocabularies, record types, detail types, record type structures (fields), and workflow rules.
+ * Key functionalities involve retrieving definition properties, resolving local and concept IDs,
+ * navigating term hierarchies, managing term references, interpreting entry masks, and handling
+ * record type links. It also includes helpers for fetching record counts and managing 'Trash' group IDs.
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 4.0
+ */
+/* global ActiveXObject,Temporal,TDate */ // Retained original globals. $Db is aliased at the end.
 
 if (!window.hWin.HEURIST4){
     window.hWin.HEURIST4 = {};
@@ -195,15 +146,7 @@ window.hWin.HEURIST4.dbs = {
         
         let t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
 
-        /**
-         * @function __checkParents
-         * @private
-         * @description Internal helper to recursively check parentage for term reference.
-         * @param {number} recID - The current record ID (vocabulary or term) being checked.
-         * @param {number} lvl - The current reference level.
-         * @returns {number|false} The reference level if the term is found as a child (by reference), otherwise `false`.
-         */
-        
+        // Internal helper to recursively check parentage for term reference.
         function __checkParents(recID, lvl){
             
             let children = t_idx[recID]; //array of children ids trm_Links (including references)    
@@ -401,23 +344,7 @@ window.hWin.HEURIST4.dbs = {
         
         //-------------------- internal functions    
 
-    /**
-     * @function __getRecordTypeTree
-     * @private
-     * @description Recursively builds a tree node for a given record type.
-     * This is an internal helper function for `createRectypeStructureTree_new`.
-     * @param {(number|string)} $recTypeId - The ID of the record type, or 'Relationship' for the generic relationship type.
-     * @param {number} $recursion_depth - Current depth in the recursion, used to limit nesting.
-     * @param {number} $mode - The generation mode (passed from `createRectypeStructureTree_new`).
-     * @param {string[]} $fieldtypes - Array of field types to include.
-     * @param {number[]} [$pointer_fields=null] - Array of pointer field IDs already processed to avoid infinite recursion.
-     * @param {boolean} [$is_parent_relmarker=false] - True if the parent context is a relationship marker.
-     * @param {boolean} [is_multi_constrained=false] - True if the context involves multiple constraints.
-     * @returns {Object|null} A tree node object for the record type, or null if not applicable.
-     * The node object typically includes `key`, `title`, `type`, `conceptCode`, `rtyID_local`, `code`, and `children` properties.
-     */    
-        
-
+        // Internal helper: Recursively builds a tree node for a given record type.
     function __getRecordTypeTree($recTypeId, $recursion_depth, $mode, $fieldtypes, $pointer_fields, $is_parent_relmarker, is_multi_constrained){
             
             let $res = {};
@@ -880,22 +807,7 @@ window.hWin.HEURIST4.dbs = {
     $mode - 3 all, 4, 5 for treeview (5 lazy) , 6 - for import csv(dependencies)
     */
 
-    /**
-     * @function __getDetailSection
-     * @private
-     * @description Builds a tree node for a specific detail field within a record type structure.
-     * This is an internal helper function for `__getRecordTypeTree`.
-     * @param {number} $recTypeId - The ID of the parent record type.
-     * @param {number} $dtID  - The ID of the detail type (field).
-     * @param {number} $recursion_depth - Current recursion depth.
-     * @param {number} $mode - The generation mode.
-     * @param {string[]} $fieldtypes - Array of allowed field types.
-     * @param {number} [$reverseRecTypeId=null] - If this is a reverse link, the ID of the target record type.
-     * @param {number[]} [$pointer_fields=null] - Pointer fields already processed.
-     * @returns {Object|null} A tree node object for the detail field, or `null` if the field should not be included.
-     * The node object includes properties like `key`, `title`, `type`, `code`, `name`, `display_order`, `conceptCode`, `dtyID_local`.
-     * For pointer types (`resource`, `relmarker`), it can also include `children`, `lazy`, `rt_ids`, `constraint`, `isreverse`, `isparent`.
-     */
+    // Internal helper: Builds a tree node for a specific detail field.
     function __getDetailSection($recTypeId, $dtID, $recursion_depth, $mode, $fieldtypes, $reverseRecTypeId, $pointer_fields){
 
         let $res = null;

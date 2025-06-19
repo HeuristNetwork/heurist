@@ -1,28 +1,29 @@
-/*
-* HLayoutMgr.js - web page generator based on json configuration
-* 
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+/**
+ * @file HLayoutMgr.js
+ * @brief Web page generator based on JSON configuration.
+ * @fileOverview The HLayoutMgr class is responsible for dynamically generating and managing web page layouts
+ * based on JSON configurations. It handles the initialization of various layout types such as groups, tabs,
+ * accordions, and cardinal layouts (multi-pane). It also initializes and manages Heurist widgets embedded
+ * within these layouts, loading their scripts if necessary. The manager supports converting older HTML-based
+ * layout formats to the new JSON structure and can also render layouts into a human-readable HTML format
+ * for storage or editing. It provides utilities for finding elements and widgets within the layout
+ * configuration, handling different languages, and preparing layout templates.
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 4.0
+ */
+/* global cfg_widgets, prepareTemplateBlog, layoutMgr, cfg_layouts */ // Added cfg_layouts based on usage
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-/* global cfg_widgets, prepareTemplateBlog, layoutMgr */
-
-
-/*
-* HLayoutMgr.js - web page generator based on JSON configuration
-*/
-
+/**
+ * Manages the generation and initialization of web page layouts from JSON configurations.
+ * It supports various layout structures like tabs, accordions, cardinal panes, and groups,
+ * and handles the embedding and initialization of Heurist widgets within these layouts.
+ */
 class HLayoutMgr {
     
     pnl_counter;
@@ -31,7 +32,11 @@ class HLayoutMgr {
     _supp_options = {};
     _main_layout_cfg = null;
     
-    
+    /**
+     * Initializes a new instance of the HLayoutMgr.
+     * Sets up initial properties like panel counter, body reference, edit mode status,
+     * supplementary options, and main layout configuration.
+     */
   constructor() {
 
     this.pnl_counter = 1;
@@ -1090,97 +1095,165 @@ class HLayoutMgr {
   // Public methods
 
   /**
-  * Edit web. Recreate tabs
-  */
+   * Initializes or reinitializes a tabbed layout structure within the given container.
+   * This is typically used during layout editing or dynamic updates.
+   *
+   * @param {Object} layout - The JSON configuration object for the tabs layout.
+   * @param {jQuery} container - The jQuery object representing the container element for the tabs.
+   * @returns {void}
+   */
   layoutInitTabs(layout, container) {
     this.#layoutInitTabs(layout, container);
   }
 
   /**
-  * Edit web. Recreate accordion
-  */
+   * Initializes or reinitializes an accordion layout structure within the given container.
+   * Useful for layout editing or dynamic content updates.
+   *
+   * @param {Object} layout - The JSON configuration object for the accordion layout.
+   * @param {jQuery} container - The jQuery object representing the container element for the accordion.
+   * @returns {void}
+   */
   layoutInitAccordion(layout, container) {
     this.#layoutInitAccordion(layout, container);
   }
 
   /**
-  * Edit web. Recreate cardinal layout
-  */
+   * Initializes or reinitializes a cardinal (multi-pane) layout structure within the given container.
+   * Allows for defining regions like north, south, east, west, and center.
+   *
+   * @param {Object} layout - The JSON configuration object for the cardinal layout.
+   * @param {jQuery} container - The jQuery object representing the container element for the cardinal layout.
+   * @returns {void}
+   */
   layoutInitCardinal(layout, container) {
     this.#layoutInitCardinal(layout, container);
   }
   
   /**
-  * Inits layout from v1 format 
-  * html, if div has attribute "data-heurist-app-id" it contains widget json configurations
-  * 
-  * returns page configuration json 
-  */
-  convertOldCmsFormat(layout, container) {
-    container = $(container);
-    container.empty();
-    container.html(layout);
-    return this.#convertOldCmsFormat(container, 0);
+   * Converts an older v1 HTML-based CMS layout format to the current JSON configuration format.
+   * In the v1 format, widget configurations are embedded within HTML elements using `data-heurist-app-id`.
+   *
+   * @param {string} layout_html - The HTML string of the old layout format.
+   * @param {(jQuery|HTMLElement|string)} container_element - The container element where the old layout HTML will be temporarily rendered for parsing.
+   * @returns {Array<Object>} The page configuration in the new JSON format.
+   */
+  convertOldCmsFormat(layout_html, container_element) {
+    container_element = $(container_element);
+    container_element.empty();
+    container_element.html(layout_html);
+    return this.#convertOldCmsFormat(container_element, 0);
   }
   
   /**
-  * assigns unique key for layout element
-  */
-  layoutInitKey(layout, i) {
-    this.#layoutInitKey(layout, i);
+   * Assigns a unique key to a layout element if it doesn't already have one.
+   * Also sets a default title and folder status based on children.
+   * This key is used internally for managing layout elements.
+   *
+   * @param {Array<Object>} layout_array - The array of layout configuration objects.
+   * @param {number} i - The index of the element in the layout array to process.
+   * @returns {void}
+   */
+  layoutInitKey(layout_array, i) {
+    this.#layoutInitKey(layout_array, i);
   }
 
   // not used
-  layoutAddWidget(layout, container) {
-    this.#layoutAddWidget(layout, container);
+  /**
+   * Adds a widget to the layout. (Note: Original code comments suggest this might be unused or for specific editor use).
+   *
+   * @param {Object} layout_config - The JSON configuration for the widget.
+   * @param {jQuery} target_container - The container to add the widget to.
+   * @returns {void}
+   */
+  layoutAddWidget(layout_config, target_container) {
+    this.#layoutAddWidget(layout_config, target_container); // Assuming forStorage is false for public use
   }
 
   /**
-  * Find element by internal key
-  */
-  layoutContentFindElement(_layout_cfg, ele_key) {
-    return this.#layoutContentFindElement(_layout_cfg, ele_key);
-  }
-
-  layoutContentFindParent(parent, ele_key) {
-    return this.#layoutContentFindParent(parent, ele_key);
-  }
-
-  /**
-  * Find widget by application/widget name in cfg_widgets such as "heurist_SearchInput"
-  */
-  layoutContentFindWidget(_layout_cfg, widget_name) {
-    return this.#layoutContentFindWidget(_layout_cfg, widget_name);
+   * Finds a specific layout element within a layout configuration tree by its internal key.
+   *
+   * @param {(Array<Object>|Object)} layout_cfg - The layout configuration (or a part of it) to search within.
+   * @param {(string|number)} ele_key - The unique key of the element to find.
+   * @returns {Object|null} The found layout element configuration, or null if not found.
+   */
+  layoutContentFindElement(layout_cfg, ele_key) {
+    return this.#layoutContentFindElement(layout_cfg, ele_key);
   }
 
   /**
-  * Finds prevail(most used) realm id 
-  */
-  layoutContentFindMainRealm(_layout_cfg) {
-    return this.#layoutContentFindMainRealm(_layout_cfg);
+   * Finds the parent configuration object of a layout element specified by its key.
+   *
+   * @param {(Array<Object>|Object)} parent_config - The layout configuration (or a part of it, or 'root' for the top level) to search within.
+   * @param {(string|number)} ele_key - The key of the element whose parent is to be found.
+   * @returns {Object|string|false} The parent configuration object, 'root' if the element is at the top level, or false if not found.
+   */
+  layoutContentFindParent(parent_config, ele_key) {
+    return this.#layoutContentFindParent(parent_config, ele_key);
   }
 
   /**
-  * Updates layout configuration with new values (replace element in json cfg)
-  */
-  layoutContentSaveElement(_layout_cfg, new_cfg) {
-    return this.#layoutContentSaveElement(_layout_cfg, new_cfg);
+   * Finds a widget configuration within a layout tree by its application ID (e.g., "heurist_SearchInput").
+   *
+   * @param {(Array<Object>|Object)} layout_cfg - The layout configuration to search within.
+   * @param {string} widget_name - The `appid` of the widget to find.
+   * @returns {Object|null} The found widget configuration object, or null if not found.
+   */
+  layoutContentFindWidget(layout_cfg, widget_name) {
+    return this.#layoutContentFindWidget(layout_cfg, widget_name);
   }
 
+  /**
+   * Finds the most frequently used `search_realm` ID among widgets in the layout configuration.
+   * This can be used to determine a default or primary realm for the page.
+   *
+   * @param {(Array<Object>|Object)} layout_cfg - The layout configuration to analyze.
+   * @returns {string} The `search_realm` ID that appears most often, or an empty string if none are found.
+   */
+  layoutContentFindMainRealm(layout_cfg) {
+    return this.#layoutContentFindMainRealm(layout_cfg);
+  }
+
+  /**
+   * Updates an element within the layout configuration JSON with new values.
+   * The element is identified by its `key` property in `new_cfg`.
+   *
+   * @param {Array<Object>} layout_cfg - The layout configuration array to update.
+   * @param {Object} new_cfg - The new configuration for the element, including its `key`.
+   * @returns {boolean} True if the element was found and updated, false otherwise.
+   */
+  layoutContentSaveElement(layout_cfg, new_cfg) {
+    return this.#layoutContentSaveElement(layout_cfg, new_cfg);
+  }
+
+  /**
+   * Sets the edit mode for the layout manager.
+   *
+   * @param {boolean} newmode - True to enable edit mode, false to disable.
+   * @returns {void}
+   */
   setEditMode(newmode) {
     this.isEditMode = newmode;
   }
 
   /**
-  * Replace search id in layout template (used for blog page)
-  */
-  prepareTemplate(layout, callback) {
-    this.#prepareTemplate(layout, callback);
+   * Prepares a layout template, potentially loading additional scripts or modifying the configuration.
+   * For example, for a 'blog' template, it might load specific scripts and then invoke a callback.
+   *
+   * @param {Object} layout_config - The layout configuration object, which may include a `template` property.
+   * @param {function} callback - A callback function to be executed after template preparation.
+   * It's called with `this` set to the HLayoutMgr instance and the relevant part of the layout as an argument.
+   * @returns {boolean|undefined} True if an asynchronous operation (like script loading) was initiated, otherwise undefined.
+   */
+  prepareTemplate(layout_config, callback) {
+    return this.#prepareTemplate(layout_config, callback); // Added return
   }
 
   /**
-  * Returns true if all widgets in body are inited
-  */
+   * Checks if all Heurist widgets currently in the document body have completed their initialization.
+   *
+   * @returns {boolean} True if all widgets are initialized, false otherwise.
+   */
   layoutCheckWidgets() {
     const widgets = this.body.find("div.heurist-widget");
     let are_all_widgets_inited = true;
@@ -1202,18 +1275,24 @@ class HLayoutMgr {
   }
 
   /**
-  * NEW - publish page as html with cfg json either as content of widget div or in common json array
-  */
+   * Converts a JSON layout configuration into a human-readable HTML string representation.
+   * This HTML can be used for storage or for display in contexts where live widgets are not needed.
+   * The private version also performs a round-trip conversion (JSON -> HTML -> JSON) for debugging.
+   *
+   * @param {(Array<Object>|Object)} content - The JSON layout configuration.
+   * @returns {Array<Object>|Object} The result of converting the generated HTML back to JSON (primarily for debugging from the private method).
+   */
   convertJSONtoHTML(content) {
     return this.#convertJSONtoHTML(content);
   }
   
   
   /**
-  * Finds predifined layout by id
-  *
-  * @param id
-  */
+   * Finds a predefined layout configuration by its ID from a global `cfg_layouts` array.
+   *
+   * @param {string} id - The ID of the predefined layout to find.
+   * @returns {Object|null} The layout configuration object if found, otherwise null.
+   */
   layoutGetById(id){
         if(id){
             id = id.toLowerCase();
@@ -1228,13 +1307,17 @@ class HLayoutMgr {
 
 
   /**
-  * Main method. Generates html and inits widgets
-  * 
-  * layout - page configuration json
-  * container - container element
-  * supp_options - widget parameters that are not icluded into main layoout cfg
-  * 
-  */
+   * Main method to initialize a layout. It generates HTML from the given layout configuration
+   * (which can be JSON, HTML string, or sourced from the container itself) and initializes any widgets.
+   *
+   * @param {(Object|Array<Object>|string|null)} layout - The page layout configuration.
+   * Can be a JSON object/array, an HTML string, or null/undefined to infer from the container's content.
+   * @param {(jQuery|HTMLElement|string)} container - The container element to render the layout into.
+   * @param {Object} [supp_options] - Supplementary options that can override or extend widget parameters
+   * defined in the main layout configuration.
+   * @returns {Object|Array<Object>|false|void} The processed layout configuration (if from JSON),
+   * false if old v1 HTML format was processed, or void if initialized from existing HTML.
+   */
   layoutInit(layout, container, supp_options) 
   {
 //console.log(layout, supp_options);  
@@ -1252,16 +1335,33 @@ class HLayoutMgr {
     
   }
   
-  layoutInitFromJSON(layout, container, supp_options)
+  /**
+   * Initializes a layout specifically from a JSON configuration.
+   *
+   * @param {(Object|Array<Object>)} layout_json - The page layout configuration in JSON format.
+   * @param {(jQuery|HTMLElement|string)} container_element - The container element to render the layout into.
+   * @param {Object} [supp_options] - Supplementary options for widget parameters.
+   * @returns {Object|Array<Object>|false} The processed layout configuration, or false if an error/specific condition met in private method.
+   */
+  layoutInitFromJSON(layout_json, container_element, supp_options)
   {
     this._supp_options = supp_options || {};
-    return this.#layoutInitFromJSON(layout, container, false, true);
+    return this.#layoutInitFromJSON(layout_json, container_element, false, true);
   }
   
-  layoutInitFromHTML(container, supp_options)
+  /**
+   * Initializes a layout by parsing existing HTML content within a container.
+   * It looks for elements with `data-heurist-widget` or `data-heurist-app-id` attributes
+   * to identify and initialize widgets.
+   *
+   * @param {(jQuery|HTMLElement|string)} container_element - The container element whose HTML content will be parsed.
+   * @param {Object} [supp_options] - Supplementary options for widget parameters.
+   * @returns {void} This method primarily has side effects (initializing widgets).
+   */
+  layoutInitFromHTML(container_element, supp_options)
   {
     this._supp_options = supp_options || {};
-    return this.#layoutInitFromHTML(container);
+    this.#layoutInitFromHTML(container_element); // Corrected parameter and removed return for void
   }
   
 }

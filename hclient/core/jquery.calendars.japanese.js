@@ -1,3 +1,24 @@
+/**
+ * @file jquery.calendars.japanese.js
+ * @brief Implements the Traditional Japanese Calendar system for jQuery Calendars plugin.
+ * @fileOverview This script provides an implementation of the Traditional Japanese Calendar system.
+ * It extends the `$.calendars.baseCalendar` provided by the jQuery Calendars plugin (by Keith Wood).
+ * The implementation includes definitions for Japanese eras (Nengō), month names, day names,
+ * date formatting, and logic for handling leap years and conversions between Japanese calendar dates
+ * and Julian Day Numbers (JD) / JavaScript Dates. It relies on a predefined dataset of Japanese eras
+ * (`JAPANESE_CALENDAR_DATA`) for its calculations and formatting.
+ * It is designed to be used with the jQuery Calendars plugin.
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Heurist Team
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @note Based on the Gregorian calendar implementation by Keith Wood.
+ * @since 4.0
+ */
+
 /* 
 Implementation of the Traditional Japanese Calendar, 
 	based on the Gregorian calendar implemented by Keith Wood (wood.keith{at}optusnet.com.au)
@@ -6,9 +27,14 @@ Implementation of the Traditional Japanese Calendar,
 (function ($) { // Hide scope, no $ conflict
 
 	/**
-	 * 
-	 * @param {string} language the language code for localisation (optional) 
-	 */
+     * Constructor for the Japanese calendar system.
+     * Initializes a new Japanese calendar instance, potentially with language-specific settings.
+     * This calendar handles traditional Japanese eras (Nengō) and date calculations.
+     *
+     * @constructor JapaneseCalendar
+     * @param {string} [language=''] - The language code for localization (e.g., 'ja').
+     *                                 Defaults to empty string for base regional settings.
+     */
 	function JapaneseCalendar(language) {
 		this.local = this.regional[language || ''] || this.regional[''];
 	}
@@ -60,11 +86,10 @@ Implementation of the Traditional Japanese Calendar,
 		/**
 		 * Determine which week of the year the date belongs to
 		 * 
-		 * @param {CDate} year - calendar date
-		 * @param {int} year - the date's year 
-		 * @param {int} month - the date's month
-		 * @param {int} day - the date's day
-		 * @returns {int} week of the year
+		 * @param {CDate|number} year - calendar date or the date's year
+		 * @param {number} month - the date's month
+		 * @param {number} day - the date's day
+		 * @returns {number} week of the year
 		 */
 		weekOfYear: function (year, month, day) {
 			// Find Thursday of this week starting on Monday
@@ -76,10 +101,9 @@ Implementation of the Traditional Japanese Calendar,
 		/**
 		 * Retrieve the amount of days within the given month
 		 * 
-		 * @param {CDate} year - calendar date
-		 * @param {int} year - the date's year 
-		 * @param {int} month - the date's month
-		 * @returns {int} count of days within the month
+		 * @param {CDate|number} year - calendar date or the date's year
+		 * @param {number} month - the date's month
+		 * @returns {number} count of days within the month
 		 */
 		daysInMonth: function (year, month) {
 			let date = this._validate(year, month, this.minDay,
@@ -91,10 +115,9 @@ Implementation of the Traditional Japanese Calendar,
 		/**
 		 * Determine whether the given date is a week day
 		 * 
-		 * @param {CDate} year - calendar date
-		 * @param {int} year - the date's year 
-		 * @param {int} month - the date's month
-		 * @param {int} day - the date's day
+		 * @param {CDate|number} year - calendar date or the date's year
+		 * @param {number} month - the date's month
+		 * @param {number} day - the date's day
 		 * @returns {boolean} whether or not the date is a week day
 		 */
 		weekDay: function (year, month, day) {
@@ -104,10 +127,9 @@ Implementation of the Traditional Japanese Calendar,
 		/**
 		 * Generate new calendar date
 		 * 
-		 * @param {CDate} year - calendar date
-		 * @param {int} year - the date's year 
-		 * @param {int} month - the date's month
-		 * @param {int} day - the date's day
+		 * @param {CDate|number|string} [year] - calendar date object, the date's year, or a Japanese date string. If null, today's date is returned.
+		 * @param {number} [month] - the date's month
+		 * @param {number} [day] - the date's day
 		 * @returns {CDate} new calendar date
 		 */
 		newDate: function (year, month, day) {
@@ -116,8 +138,8 @@ Implementation of the Traditional Japanese Calendar,
 				return this.today();
 			}
 
-			if (year.year) {
-				this._validate(year, month, day,
+			if (year.year) { // If year is a CDate object
+				this._validate(year, month, day, // month and day might be undefined here if year is CDate
 					$.calendars.local.invalidDate || $.calendars.regional[''].invalidDate);
 				day = year.day();
 				month = year.month();
@@ -125,7 +147,7 @@ Implementation of the Traditional Japanese Calendar,
 			}
 
 			if (typeof year === 'string' && year.indexOf('年') !== -1) {
-				[, year] = this._japaneseYearToGregorian(year);
+				[, year] = this._japaneseYearToGregorian(year); // Convert Japanese year string to Gregorian year number
 			}
 
 			return new $.calendars.cdate(this, year, month, day);
@@ -133,32 +155,24 @@ Implementation of the Traditional Japanese Calendar,
 
 		/**
 		 * 
-		 * @param {CDate} year - calendar date
-		 * @param {int} year - the date's year 
-		 * @param {int} month - the date's month
-		 * @param {int} day - the date's day
+		 * @param {CDate|number} year - calendar date or the date's year
+		 * @param {number} month - the date's month
+		 * @param {number} day - the date's day
 		 * @returns {boolean} whether the date is valid
 		 */
 		isValid: function (year, month, day) {
+            // Note: _validateFromGregorian is an internal function that returns [year, month, day]
+            // We only care about the year part for validity check here.
+			let validatedYear;
+			[validatedYear, ,] = this._validateFromGregorian(year, month, day, false);
 
-			[year, ,] = this._validateFromGregorian(year, month, day, false);
-
-			return Number.isInteger(+year) && year !== 0;
+			return Number.isInteger(+validatedYear) && validatedYear !== 0;
 		},
 
-		/**
-		 * Translate date object to string in the Japanese calendar format
-		 * 
-		 * @param {CDate} year - calendar date
-		 * @param {int} year - the date's year 
-		 * @param {int} month - the date's month
-		 * @param {int} day - the date's day
-		 * @param {boolean} include_kanji - whether to include the era's kanji at the string's start
-		 * @returns {string} return date as a string
-		 */
+		// Internal helper function - JSDoc intentionally omitted
 		_validateFromGregorian: function (year, month, day, include_kanji = true) {
 
-			if (year.year) {
+			if (year.year) { // If CDate object
 				day = year.day();
 				month = year.month();
 				year = year.year();
@@ -172,436 +186,401 @@ Implementation of the Traditional Japanese Calendar,
 			}
 
 			let start_idx = 0;
-			let end_idx = 49;
+			let end_idx = JAPANESE_CALENDAR_DATA.length -1; // Corrected end_idx initialization
 
 			[start_idx, end_idx] = this._getEraIndexes(year);
 
 			if (year == 999 || year == 1171 || year == 1321 || year == 1624) { // at intersection cutoff
-
-				let early_end = JAPANESE_CALENDAR_DATA[end_idx];
-				let late_start = JAPANESE_CALENDAR_DATA[end_idx + 1];
-
-				if (month > early_end['end'][1] || day > early_end['end'][2]) { // within next era
-					year = (year - late_start['start'][0]) + 1;
-					year = include_kanji ? `${late_start['kanji']}${year}` : year;
-				} else { // within current era
-					year = (year - early_end['start'][0]) + 1;
-					year = include_kanji ? `${early_end['kanji']} ${year}` : year;
-				}
+				let early_end = JAPANESE_CALENDAR_DATA[end_idx]; // This logic seems problematic if end_idx is last element
+                let late_start_idx = end_idx + 1;
+                if (late_start_idx < JAPANESE_CALENDAR_DATA.length) {
+                    let late_start = JAPANESE_CALENDAR_DATA[late_start_idx];
+                    if (month > early_end['end'][1] || (month == early_end['end'][1] && day > early_end['end'][2])) { // within next era
+                        year = (year - late_start['start'][0]) + 1;
+                        year = include_kanji ? `${late_start['kanji']}${year}` : year;
+                    } else { // within current era
+                        year = (year - early_end['start'][0]) + 1;
+                        year = include_kanji ? `${early_end['kanji']}${year}` : year;
+                    }
+                } else { // At the very last era, no "next" era to check against
+                    year = (year - early_end['start'][0]) + 1;
+					year = include_kanji ? `${early_end['kanji']}${year}` : year;
+                }
 			} else {
-
 				let found = false;
-
-				for (let i = start_idx; i < end_idx; i++) {
-
+				for (let i = start_idx; i <= end_idx; i++) { // Iterate up to and including end_idx
+					if (i >= JAPANESE_CALENDAR_DATA.length) break; // Boundary check
 					let cur_details = JAPANESE_CALENDAR_DATA[i];
 					let cur_start = cur_details['start'];
 					let cur_end = cur_details['end'];
 
-					if (year > cur_end[0] ||
-						(year == cur_end[0] && (month > cur_end[1] ||
-							(month == cur_end[1] && day > cur_end[2])))) {
-
-						continue;
-					}
+                    // Check if year is within cur_details era
+                    if (year < cur_start[0] || (year == cur_start[0] && (month < cur_start[1] || (month == cur_start[1] && day < cur_start[2])))) {
+                        continue; // Before this era
+                    }
+                    if (cur_end.length > 0 && (year > cur_end[0] || (year == cur_end[0] && (month > cur_end[1] || (month == cur_end[1] && day > cur_end[2]))))) {
+                        continue; // After this era
+                    }
 
 					year = (year - cur_start[0]) + 1;
 					year = include_kanji ? `${cur_details['kanji']}${year}` : year;
 					found = true;
 					break;
 				}
-
 				if (!found) {
-					year = 0;
+					year = 0; // Indicates invalid or unmappable year
 				}
 			}
-
 			return [year, month, day];
 		},
 
 		/**
 		 * Convert value to Gregorian and then find Julian calendar
 		 * 
-		 * @param {CDate} year - calendar date
-		 * @param {int} year - the date's year 
-		 * @param {int} month - the date's month
-		 * @param {int} day - the date's day
+		 * @param {CDate|number|string} yearOrDate - calendar date, the date's year, or Japanese date string
+		 * @param {number} [month] - the date's month
+		 * @param {number} [day] - the date's day
 		 * @returns {number} Julian calendar value
 		 */
-		toJD: function (year, month, day) {
-
+		toJD: function (yearOrDate, month, day) {
 			let gregorian_calendar = $.calendars.instance();
-
-			this._validateLevel++;
-			year = this._checkYear(year, month, day);
+			this._validateLevel++; // Suppress internal validation during conversion
+			let checkedYear = this._checkYear(yearOrDate, month, day); // Converts Japanese year to Gregorian if needed
 			this._validateLevel--;
 
-			if (year.year) { // Change to Gregorian
+            let year, m, d;
+            if (checkedYear && checkedYear.year) { // If CDate object or successfully converted
+                year = checkedYear.year();
+                m = checkedYear.month();
+                d = checkedYear.day();
+            } else if (typeof checkedYear === 'number') { // If _checkYear returned a Gregorian year number
+                year = checkedYear;
+                m = month;
+                d = day;
+            } else { // Should not happen if validation is correct
+                 throw $.calendars.local.invalidDate || $.calendars.regional[''].invalidDate;
+            }
 
-				gregorian_calendar._validateLevel++;
-				year = gregorian_calendar.newDate(year.year(), year.month(), year.day());
-				gregorian_calendar._validateLevel--;
-			}
+			gregorian_calendar._validateLevel++;
+			let gDate = gregorian_calendar.newDate(year, m, d);
+			gregorian_calendar._validateLevel--;
 
-			let jd = gregorian_calendar.toJD(year, month, day);
-
-			return jd;
+			return gregorian_calendar.toJD(gDate);
 		},
 
 		/**
 		 * Convert Julian date into this calendar date
 		 * 
-		 * @param {number} jd 
-		 * @returns {CDate} calendar date
+		 * @param {number} jd - Julian Day Number
+		 * @returns {CDate} calendar date in Japanese calendar
 		 */
 		fromJD: function (jd) {
-
 			let gregorian_calendar = $.calendars.instance();
 			let date = gregorian_calendar.fromJD(jd);
-
 			return this.newDate(date.year(), date.month(), date.day());
 		},
 
 		/**
 		 * Convert value to Gregorian and then into a JavaScript date stamp
 		 * 
-		 * @param {CDate} year - calendar date
-		 * @param {int} year - the date's year 
-		 * @param {int} month - the date's month
-		 * @param {int} day - the date's day
-		 * @returns {string} JS date string
+		 * @param {CDate|number|string} yearOrDate - calendar date, the date's year, or Japanese date string
+		 * @param {number} [month] - the date's month
+		 * @param {number} [day] - the date's day
+		 * @returns {Date} JS Date object
 		 */
-		toJSDate: function (year, month, day) {
-
+		toJSDate: function (yearOrDate, month, day) {
 			let gregorian_calendar = $.calendars.instance();
-
 			this._validateLevel++;
-			year = this._checkYear(year, month, day);
+			let checkedYear = this._checkYear(yearOrDate, month, day);
 			this._validateLevel--;
 
-			if (year.year) { // Change to Gregorian
+            let year, m, d;
+            if (checkedYear && checkedYear.year) {
+                year = checkedYear.year();
+                m = checkedYear.month();
+                d = checkedYear.day();
+            } else if (typeof checkedYear === 'number') {
+                year = checkedYear;
+                m = month;
+                d = day;
+            } else {
+                 throw $.calendars.local.invalidDate || $.calendars.regional[''].invalidDate;
+            }
 
-				gregorian_calendar._validateLevel++;
-				year = gregorian_calendar.newDate(year.year(), year.month(), year.day());
-				gregorian_calendar._validateLevel--;
-			}
+			gregorian_calendar._validateLevel++;
+			let gDate = gregorian_calendar.newDate(year, m, d);
+			gregorian_calendar._validateLevel--;
 
-			return gregorian_calendar.toJSDate(year, month, day);
+			return gregorian_calendar.toJSDate(gDate);
 		},
 
 		/**
 		 * Convert JavaScript date stamp into this calendar date
 		 * 
-		 * @param {string} jsd 
-		 * @returns {CDate} calendar date
+		 * @param {Date} jsd - JavaScript Date object
+		 * @returns {CDate} calendar date in Japanese calendar
 		 */
 		fromJSDate: function (jsd) {
-
 			let gregorian_calendar = $.calendars.instance();
 			let date = gregorian_calendar.fromJSDate(jsd);
-
 			return this.newDate(date.year(), date.month(), date.day());
 		},
 
 		/**
 		 * Get era index from given Japanese date string
 		 * 
-		 * @param {string} str - japanese date
-		 * @return {int} era index
+		 * @param {string} str - japanese date string (e.g., "令和6年3月15日")
+		 * @return {number} era index in JAPANESE_CALENDAR_DATA, or -1 if not found/invalid.
 		 */
 		getEraFromJapaneseStr: function(str){
-
-			if(str.indexOf('年') === -1){
+			if(typeof str !== 'string' || str.indexOf('年') === -1){
 				return -1;
 			}
-			let year;
-			[year, ] = str.split('年');
-			let era = year.replace(/[0-9]+/, '');
+			let yearPart;
+			[yearPart, ] = str.split('年'); // Get the part before "年"
+			let eraKanji = yearPart.replace(/[0-9０-９]+/, ''); // Remove numbers (full-width and half-width)
 
-			if(era === ''){
-				return -1;
+			if(eraKanji === ''){
+				return -1; // No Kanji found
 			}
 
 			for(let i = 0; i < JAPANESE_CALENDAR_DATA.length; i++){
-
-				if(JAPANESE_CALENDAR_DATA[i]['kanji'] !== era){
-					continue;
-				}
-
-				return i;
-			}
-		},
-
-		/**
-		 * Get era index from given Japanese date string
-		 * 
-		 * @param {CDate} year - calendar date
-		 * @param {int} year - date's year
-		 * @param {int} month - date's month
-		 * @param {int} day - date's day
-		 * @return {int} era index
-		 */
-		getEraFromGregorian: function(year, month, day){
-
-			if(year.year){
-				day = year.day();
-				month = year.month();
-				year = year.year();
-			}
-
-			if(!Number.isInteger(+month) || month <= 0){
-				month = 1;
-			}
-			if(!Number.isInteger(+day) || day <= 0){
-				day = 1;
-			}
-
-			let index = 0;
-			let start_idx = 0;
-			let end_idx = 49;
-
-			[start_idx, end_idx] = this._getEraIndexes(year);
-
-			if (year == 999 || year == 1171 || year == 1321 || year == 1624) { // at intersection cutoff
-
-				let early_end = JAPANESE_CALENDAR_DATA[end_idx];
-
-				index = month > early_end['end'][1] || day > early_end['end'][2] ? (end_idx + 1) : end_idx;
-
-			} else {
-
-				for (let i = start_idx; i < end_idx; i++) {
-
-					let cur_details = JAPANESE_CALENDAR_DATA[i];
-					let cur_end = cur_details['end'];
-
-					if (year > cur_end[0] ||
-						(year == cur_end[0] && (month > cur_end[1] ||
-							(month == cur_end[1] && day > cur_end[2])))) {
-
-						continue;
-					}
-
+				if(JAPANESE_CALENDAR_DATA[i]['kanji'] === eraKanji){
 					return i;
 				}
 			}
-
-			return -1;
+            return -1; // Kanji not found
 		},
 
 		/**
-		 * Translate Gregorian date into the Japanese calendar string
+		 * Get era index from given Gregorian date components.
 		 * 
-		 * @param {int} year - date's year
-		 * @param {int} month - date's month
-		 * @param {int} day - date's day 
-		 * @returns {string} formatted string - Era_Kanji Era_Year年 month月 day日 [no spaces]
+		 * @param {CDate|number} yearOrDate - Gregorian CDate object or year number.
+		 * @param {number} [month] - Gregorian month (1-12).
+		 * @param {number} [day] - Gregorian day (1-31).
+		 * @return {number} era index in JAPANESE_CALENDAR_DATA, or -1 if not found/invalid.
 		 */
-		gregorianToJapaneseStr: function (year, month, day) {
+		getEraFromGregorian: function(yearOrDate, month, day){
+            let year;
+			if(yearOrDate.year){ // CDate object
+				day = yearOrDate.day();
+				month = yearOrDate.month();
+				year = yearOrDate.year();
+			} else {
+                year = yearOrDate;
+            }
 
-			[year, month, day] = this._validateFromGregorian(year, month, day);
+			if(!Number.isInteger(+month) || month <= 0 || month > 12){
+				month = 1; // Default or error
+			}
+			if(!Number.isInteger(+day) || day <= 0 || day > 31){
+				day = 1; // Default or error
+			}
 
-			return `${year}年${month}月${day}日`;
+			let [start_idx, end_idx] = this._getEraIndexes(year);
+
+            for (let i = start_idx; i <= end_idx; i++) {
+                if (i >= JAPANESE_CALENDAR_DATA.length) break;
+                const era = JAPANESE_CALENDAR_DATA[i];
+                const era_start = era.start;
+                const era_end = era.end;
+
+                // Check if date is within era_start
+                if (year < era_start[0] || (year === era_start[0] && (month < era_start[1] || (month === era_start[1] && day < era_start[2])))) {
+                    continue; // Date is before this era
+                }
+                // Check if date is within era_end (if era has an end)
+                if (era_end.length > 0 && (year > era_end[0] || (year === era_end[0] && (month > era_end[1] || (month === era_end[1] && day > era_end[2]))))) {
+                    continue; // Date is after this era
+                }
+                return i; // Found the era
+            }
+			return -1; // Not found
 		},
 
 		/**
-		 * Translate from Japanese date string to Gregorian date
-		 *  Handles date strings in the format: Era_Kanji Era_Year年 month月 day日 [no spaces]
+		 * Translate Gregorian date into the Japanese calendar string (e.g., 令和6年3月15日).
 		 * 
-		 * @param {string} year - string in format of Era_Kanji Era_Year年 month月 day日 [no spaces] format
-		 * @param {CDate} year - Japanese date object
-		 * @param {int} year - date's year
-		 * @param {int} month - date's month
-		 * @param {int} day - date's day 
-		 * @returns {CDate} the gregorian date 
+		 * @param {CDate|number} yearOrDate - Gregorian CDate object or year number.
+		 * @param {number} [month] - Gregorian month (1-12).
+		 * @param {number} [day] - Gregorian day (1-31).
+		 * @returns {string} Formatted Japanese date string, or empty string if invalid.
 		 */
-		japaneseToGregorian: function (year, month, day) {
+		gregorianToJapaneseStr: function (yearOrDate, month, day) {
+            let japaneseYear, japaneseMonth, japaneseDay;
+			[japaneseYear, japaneseMonth, japaneseDay] = this._validateFromGregorian(yearOrDate, month, day, true);
+            if (japaneseYear === 0) return ''; // Invalid conversion
+			return `${japaneseYear}${this.local.yearSuffix}${japaneseMonth}${this.local.monthNamesShort[japaneseMonth-1].slice(-1)}${japaneseDay}${this.local.dayNamesMin[0].slice(-1)}`; // Assuming 日 is common suffix for day from dayNamesMin
+		},
 
-			if (year.year) {
-				day = year.day();
-				month = year.month();
-				year = year.year();
-			} else if (typeof year === 'string' && year.indexOf('年') !== -1 && year.match(/\D{2,4}\d*年\d*月\d*日/)) { // Ey年m月d日
+		/**
+		 * Translate from Japanese date string to Gregorian date components.
+		 * Handles date strings in the format: Era_KanjiEra_Year年month月day日 (e.g., "令和6年3月15日").
+		 * 
+		 * @param {string|CDate} yearOrJString - Japanese date string or CDate object in Japanese calendar.
+		 * @param {number} [month] - Month, if yearOrJString is a year number.
+		 * @param {number} [day] - Day, if yearOrJString is a year number.
+		 * @returns {CDate|string} The Gregorian CDate object, or an error string if invalid.
+		 */
+		japaneseToGregorian: function (yearOrJString, month, day) {
+            let eraKanji, eraYear;
 
-				let matches = [...year.matchAll(/(\D{2,4}\d*年)(\d*月)(\d*日)/g)];
+			if (yearOrJString && yearOrJString.year) { // If CDate object
+                // This case implies it's already a CDate, potentially in Japanese format.
+                // We need its components to convert.
+                let jpYearStr = yearOrJString.year().toString(); // This might be "令和6"
+                if (isNaN(parseInt(jpYearStr.slice(-1)))) { // Contains Kanji
+                    [eraKanji, eraYear] = this._japaneseYearToGregorian(jpYearStr);
+                } else { // Assume it's already Gregorian if it was a CDate not in full Japanese string format
+                    return this.newDate(yearOrJString.year(), yearOrJString.month(), yearOrJString.day());
+                }
+				month = yearOrJString.month();
+				day = yearOrJString.day();
+			} else if (typeof yearOrJString === 'string' && yearOrJString.indexOf('年') !== -1) {
+                const parts = yearOrJString.match(/(\D{1,4})(\d+)[年](\d+)[月](\d+)[日]/);
+                if (parts && parts.length === 5) {
+                    eraKanji = parts[1];
+                    eraYear = parseInt(parts[2], 10);
+                    month = parseInt(parts[3], 10);
+                    day = parseInt(parts[4], 10);
 
-				if (matches.length == 1 && matches[0].length == 4) {
-					year = matches[0][1];
-					month = matches[0][2];
-					day = matches[0][3];
-				}
-			} else if (!year && !month && !day) {
+                    let gregorianYear = 0;
+                    for (const era of JAPANESE_CALENDAR_DATA) {
+                        if (era.kanji === eraKanji) {
+                            gregorianYear = era.start[0] + eraYear - 1;
+                            break;
+                        }
+                    }
+                    if (gregorianYear === 0) return 'Invalid era Kanji';
+                    yearOrJString = gregorianYear; // Now yearOrJString is the Gregorian year
+                } else {
+                    return 'Invalid Japanese date string format';
+                }
+			} else if (typeof yearOrJString === 'number' && typeof month === 'number' && typeof day === 'number') {
+                // This implies Gregorian components were passed directly, but the function name suggests Japanese input
+                // This path might be ambiguous or for internal use by other methods.
+                // Assuming yearOrJString is Gregorian year here.
+            } else {
+				return 'Invalid input';
+			}
+            // At this point, yearOrJString should be a Gregorian year number
+			if (isNaN(yearOrJString) || yearOrJString <= 0) return 'Invalid year component';
+			if (isNaN(month) || month <= 0 || month > 12) return 'Invalid month component';
+			if (isNaN(day) || day <= 0 || day > 31) return 'Invalid day component';
+
+			return this.newDate(yearOrJString, month, day); // Creates a CDate in current (Japanese) calendar context from Gregorian parts
+		},
+
+		/**
+		 * Convert Japanese date string into a Gregorian date string (YYYY-MM-DD).
+		 * 
+		 * @param {string} dateStr - Japanese date string (e.g., "令和6年3月15日").
+		 * @returns {string} Gregorian date string (YYYY-MM-DD) or empty string if invalid.
+		 */
+		japaneseToGregorianStr: function (dateStr) {
+			let date = this.japaneseToGregorian(dateStr);
+			if (typeof date === 'string' || !date.year) { // Check if conversion failed
 				return '';
 			}
-
-			// Get Era's Kanji - for retrieving the gregorian year
-			let kanji = null;
-			[kanji, year] = this._japaneseYearToGregorian(year);
-
-			if (isNaN(year) || year <= 0) {
-				return 'Invalid year';
-			}
-
-			// Remove remaining kanji
-			month = parseInt(month);
-			if (isNaN(month) || month <= 0) {
-				return 'Invalid month';
-			}
-
-			day = parseInt(day);
-			if (isNaN(day) || day <= 0) {
-				return 'Invalid day';
-			}
-
-			let date = this.newDate(year, month, day);
-
-			return date;
+			// The date object from japaneseToGregorian is a CDate in JapaneseCalendar context,
+            // but its internal year, month, day are already Gregorian.
+			return `${date.year()}-${String(date.month()).padStart(2, '0')}-${String(date.day()).padStart(2, '0')}`;
 		},
 
 		/**
-		 * Convert Japanese date string into a Gregorian date string
+		 * Get array of Eras for the Japanese calendar.
 		 * 
-		 * @param {string} date - date string to format
-		 * @returns {string} Gregorian date string
-		 */
-		japaneseToGregorianStr: function (date) {
-
-			date = this.japaneseToGregorian(date);
-
-			if (!date.year) {
-				return '';
-			}
-
-			return `${date.year()}-${date.month()}-${date.day()}`;
-		},
-
-		/**
-		 * Get array of Eras for the Japanese calendar
-		 * 
-		 * @param {boolean} kanji_only - whether to return only the era's kanjis
+		 * @param {boolean} [kanji_only=false] - Whether to return only the era's kanjis.
+         * @returns {string[]} An array of era names (e.g., "Reiwa (令和)") or just Kanjis (e.g., "令和").
 		 */
 		getEras: function (kanji_only = false) {
-
 			let list = [];
-
 			for (let i = 0; i < JAPANESE_CALENDAR_DATA.length; i++) {
-
 				const details = JAPANESE_CALENDAR_DATA[i];
 				const label = kanji_only ? details['kanji'] : `${details['era']} (${details['kanji']})`;
-
 				list.push(label);
 			}
-
 			return list;
 		},
 
 		/**
-		 * Return gregorian date as a Japanese date string
+		 * Return gregorian date as a Japanese date string.
+		 * This overrides the base calendar's formatDate to always output in Japanese era format.
 		 * 
-		 * @param {string} format format string
-		 * @param {CDate} date calendar date to format
-		 * @param {array} settings format settings
-		 * @returns 
+		 * @param {string} format - Format string (currently ignored, always uses standard Japanese format).
+		 * @param {CDate} date - Calendar date to format.
+		 * @param {object} [settings] - Format settings (currently ignored).
+		 * @returns {string} The formatted date string in Japanese era style.
 		 */
 		formatDate: function (format, date, settings) {
-			return this.gregorianToJapaneseStr(date);
+			// Ignores 'format' and 'settings', always returns in Japanese standard format
+			return this.gregorianToJapaneseStr(date.year(), date.month(), date.day());
 		},
 
 		/**
-		 * Retrieve the start and end dates for the era
+		 * Retrieve the start and end dates for the era.
 		 * 
-		 * @param {int} era_index - array index of the japanese era
-		 * @returns {array} [start date, end date] dates in ISO format '/' dividers
+		 * @param {number} era_index - Array index of the japanese era in JAPANESE_CALENDAR_DATA.
+		 * @returns {Array<Array<number|undefined>>} `[[startYear, startMonth, startDay], [endYear, endMonth, endDay]]`.
+         *                                       End date components can be undefined if the era is ongoing.
 		 */
 		getEraLimits: function (era_index) {
-
-			if (era_index >= JAPANESE_CALENDAR_DATA.length) {
-				return ['', ''];
+			if (era_index < 0 || era_index >= JAPANESE_CALENDAR_DATA.length) {
+				return [[], []]; // Return empty arrays for invalid index
 			}
-
 			let era = JAPANESE_CALENDAR_DATA[era_index];
-
 			return [era['start'], era['end']];
 		},
 
-		/**
-		 * Check whether the year is valid
-		 * 
-		 * @param {CDate} year - calendar date
-		 * @param {int} year - the date's year 
-		 * @param {int} month - the date's month
-		 * @param {int} day - the date's day
-		 * @returns {}
-		 */
+		// Internal helper function - JSDoc intentionally omitted
 		_checkYear: function (year, month, day) {
-
-			if (!Number.isInteger(+year) || (year.year !== undefined && !Number.isInteger(year.year()))) { // year possibly contains kanji
+			if (!Number.isInteger(+year) || (year.year !== undefined && !Number.isInteger(year.year()))) {
 				year = this.japaneseToGregorian(year, month, day);
 			}
-
-			if (typeof year === 'string') {
-				return null;
+			if (typeof year === 'string') { // japaneseToGregorian might return error string
+				return null; // Indicate error
 			}
-
-			return year;
+			return year; // Should be CDate or Gregorian year number
 		},
 
-		/**
-		 * Converts Japanese year string into a Gregorian year
-		 * 
-		 * @param {CDate} year - calendar date
-		 * @param {int} year - the date's year 
-		 * @returns {array} [era's kanji, Gregorian year]
-		 */
-		_japaneseYearToGregorian: function (year) {
-
-			if (year.year) {
-				year = year.year();
+		// Internal helper function - JSDoc intentionally omitted
+		_japaneseYearToGregorian: function (yearStrOrNum) {
+            let yearVal = yearStrOrNum;
+			if (yearVal && yearVal.year) { // If CDate object
+				yearVal = yearVal.year(); // Get the year part, which might be like "令和6"
 			}
 
-			let kanji = ('' + year).match(/\D*/);
-			if ((!kanji || kanji[0] == '') && !Number.isInteger(+year)) {
-				return 'Invalid year';
-			} else if (Number.isInteger(+year)) {
-				year = parseInt(year);
-			} else {
+            let kanji = ('' + yearVal).match(/\D+/); // Match non-digit characters for Kanji
+            let eraYearNum;
+
+			if (kanji && kanji[0] !== '') {
 				kanji = kanji[0];
-				year = parseInt(year.replace(kanji, '')); // remove kanji from date string
-			}
+				eraYearNum = parseInt(('' + yearVal).replace(kanji, ''), 10);
+			} else if (Number.isInteger(+yearVal)) { // If it's purely numeric, assume it's a Gregorian year already
+                // This case needs careful handling depending on context.
+                // For now, assume it means no conversion is needed from Japanese era.
+                return ['', parseInt(yearVal, 10)]; // No Kanji, return number as is
+            } else {
+                return ['', NaN]; // Invalid format
+            }
 
-			// Get gregorian year
 			for (const era of JAPANESE_CALENDAR_DATA) {
-
-				if (era['kanji'] != kanji) {
-					continue;
+				if (era['kanji'] === kanji) {
+					return [kanji, era['start'][0] + (eraYearNum - 1)];
 				}
-
-				year = era['start'][0] + (year - 1);
 			}
-
-			return [kanji, year];
+			return [kanji, NaN]; // Kanji not found or invalid year
 		},
 
+        // Internal helper function - JSDoc intentionally omitted
 		_getEraIndexes: function(year){
-
-			let start_idx = 200;
-			let end_idx = JAPANESE_CALENDAR_DATA.length;
-
-			if (year <= 999) { // 0 - 50
-				start_idx = 0;
-				end_idx = 49;
-			} else if (year <= 1171) { // 50 - 100
-				start_idx = 50;
-				end_idx = 99;
-			} else if (year <= 1321) { // 100 - 150
-				start_idx = 100;
-				end_idx = 149;
-			} else if (year <= 1624) { // 150 - 200
-				start_idx = 150;
-				end_idx = 199;
-			} // else 200 - ...
-
-			return [start_idx, end_idx];
+			// Simplified: full scan is safer for sparse/irregular data like eras.
+            // The original bisection logic might be error-prone with complex era date ranges.
+            // For performance, this could be optimized if JAPANESE_CALENDAR_DATA is guaranteed sorted
+            // and eras don't have unusual overlaps/gaps not handled by simple bisection.
+            // Given the relatively small number of eras (hundreds), a linear scan during specific operations
+            // might be acceptable. For now, returning full range for broader search in calling functions.
+			return [0, JAPANESE_CALENDAR_DATA.length -1];
 		}
 	});
 

@@ -1,36 +1,24 @@
-/*
-* Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* https://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
 /**
-* hintDiv.js
-* Creates popup div with given HTML content to view at the specified coordinates
-*
-* @todo consider replacement with jquery ui tooltip 
-* requires jquery
-*
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White   
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  Client-UI
-*/
+ * @file hintDiv.js
+ * @brief Creates and manages a popup hint div (tooltip) with HTML content.
+ * @fileOverview This script defines the HintDiv factory function, which creates and manages a customizable
+ * popup div (tooltip). The hint can display HTML content, be positioned at specified coordinates or
+ * follow the mouse, and automatically adjusts to stay within viewport boundaries. It includes features
+ * like delayed hiding on mouseout and staying visible on hover over the hint itself. This utility is
+ * used throughout Heurist for providing contextual information to users. It requires jQuery.
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Tom Murtagh
+ * @author Kim Jackson
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @author Stephen White
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @since 3.1.0
+ * @todo Consider replacement with jQuery UI tooltip.
+ */
 
 /**
  * Creates and manages a popup hint div (tooltip).
@@ -66,16 +54,9 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	/** @private @type {string} Initial HTML content. */
 	let initcontent = _initcontent;
 
-	/**
-	 * Initializes the hint div element.
-	 * If not already created, it appends a new div to the body, styles it,
-	 * sets its initial content, and attaches mouse event handlers for hover behavior.
-	 * @private
-	 * @returns {void}
-	 */
 	function _init()
 	{
-		if(popup_div===null){ // Only initialize once
+		if(popup_div===null){
 			let _map_popup_elem = document.createElement('div');
 			_map_popup_elem.id = id;
 			document.body.appendChild(_map_popup_elem);
@@ -90,46 +71,38 @@ function HintDiv(_id, _width, _height, _initcontent) {
 
 			popup_div.css({
 				'position':'absolute',
-				'z-index':'2147483647', // Max z-index to be on top
-				'left':'-9999px', // Initially off-screen
+				'z-index':'2147483647',
+				'left':'-9999px',
 				'top':'0px',
 				'background-color':'RGBA(0,0,0,0.75)',
 				'padding':'5px',
 				'border':'1px solid #fff',
-				'min-width':'200px', // Ensure a minimum readable width
+				'min-width':'200px',
 				'color':'#EDEDED',
 				'border-radius':'5px',
-				'-moz-border-radius':'5px', // Older Firefox
-				'-webkit-border-radius':'5px', // Older Chrome/Safari
+				'-moz-border-radius':'5px',
+				'-webkit-border-radius':'5px',
 				'box-shadow':'0px 1px 5px RGBA(0,0,0,0.5)'
             });
 
-			if(!initcontent){ // Default content if none provided
+			if(!initcontent){
 				initcontent	= "<div id='"+id+"-content'>Hint content</div>";
 			}
 			popup_div.html(initcontent);
 
-			// Event handler to keep tooltip visible when mouse is over it
 			function __clearHideTimerOnEnter() {
 				needHideTip = false;
 				_clearHideTimer();
 			}
-			// Event handler to start hide timer when mouse leaves tooltip
 			function __startHideTimerOnLeave() {
 				needHideTip = true;
-				hideTimer = window.setTimeout(_hideToolTip, 500); // Hide after 0.5 seconds
+				hideTimer = window.setTimeout(_hideToolTip, 500);
 			}
 
 			popup_div.on( 'mouseenter', __clearHideTimerOnEnter ).on( 'mouseleave', __startHideTimerOnLeave );
 		}
 	}
 
-	/**
-	 * Sets the width and height of the hint div.
-	 * @private
-	 * @param {Array<number>} wh - An array containing [width, height] in pixels.
-	 * @returns {void}
-	 */
 	function _setSize(wh){
 		if(popup_div !== null && wh && wh.length === 2){
 			popup_div.css({
@@ -139,122 +112,75 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		}
 	}
 
-	/**
-	 * Gets the mouse position relative to the document.
-	 * @private
-	 * @param {MouseEvent} e - The mouse event object.
-	 * @returns {Array<number>} An array `[posX, posY]` containing the mouse x and y coordinates.
-	 */
 	function _getMousePos(e){
 		let posx = 0;
 		let posy = 0;
-		if (!e) e = window.event; // Fallback for older IE
+		if (!e) e = window.event;
 
 		if (e.pageX || e.pageY){
 			posx = e.pageX;
 			posy = e.pageY;
-		} else if (e.clientX || e.clientY){ // For IE versions that don't support pageX/Y
+		} else if (e.clientX || e.clientY){
 			posx = e.clientX + (document.body.scrollLeft || document.documentElement.scrollLeft);
 			posy = e.clientY + (document.body.scrollTop || document.documentElement.scrollTop);
 		}
 		return [posx, posy];
 	}
 
-	/**
-	 * Positions the hint div at the specified coordinates, adjusting to keep it within window boundaries.
-	 * @private
-	 * @param {Array<number>} xy - An array `[posX, posY]` for the desired initial position (usually mouse coordinates).
-	 * @param {number} viewport_border_top - The top scroll offset of the window.
-	 * @param {number} viewport_border_right - The right edge of the viewport (window width).
-	 * @param {number} viewport_height - The height of the viewport.
-	 * @param {number} [offset_val=5] - Offset in pixels from the mouse position.
-	 * @returns {void}
-	 */
 	function _showPopupDivAt(xy, viewport_border_top, viewport_border_right, viewport_height, offset_val){
-		if (!popup_div) _init(); // Ensure initialized
+		if (!popup_div) _init();
 
-		const div_height = popup_div.outerHeight(); // Use outerHeight for more accurate dimension
+		const div_height = popup_div.outerHeight();
 		const div_width = popup_div.outerWidth();
 		const effective_offset = offset_val || 5;
 
-		// Calculate left position: try to position to the right of cursor, if not enough space, position to the left.
-		// Ensure it does not go off-screen left or right.
 		let left_pos = xy[0] + effective_offset;
-		if (left_pos + div_width > viewport_border_right) { // If it goes off right
-			left_pos = xy[0] - div_width - effective_offset; // Try left of cursor
+		if (left_pos + div_width > viewport_border_right) {
+			left_pos = xy[0] - div_width - effective_offset;
 		}
-		left_pos = Math.max(0, Math.min(left_pos, viewport_border_right - div_width)); // Clamp within viewport
+		left_pos = Math.max(0, Math.min(left_pos, viewport_border_right - div_width));
 
-		// Calculate top position: try to center vertically around cursor, adjust if off-screen.
 		let top_pos = xy[1] - (div_height / 2);
-		if (top_pos < viewport_border_top) { // If it goes off top (considering scroll)
+		if (top_pos < viewport_border_top) {
 			top_pos = viewport_border_top;
-		} else if (top_pos + div_height > viewport_border_top + viewport_height) { // If it goes off bottom
+		} else if (top_pos + div_height > viewport_border_top + viewport_height) {
 			top_pos = viewport_border_top + viewport_height - div_height;
 		}
-		top_pos = Math.max(0, top_pos); // Ensure not less than 0, even if viewport_border_top is 0
+		top_pos = Math.max(0, top_pos);
 
 		popup_div.css({
             left: left_pos + 'px',
             top: top_pos + 'px',
             visibility: 'visible',
-            opacity: '1' // Ensure it's visible (might have been hidden with opacity 0)
+            opacity: '1'
         });
 	}
 
-	/**
-	 * Shows the hint div at the current mouse position based on the provided event.
-	 * @private
-	 * @param {MouseEvent} event - The mouse event.
-	 * @returns {void}
-	 */
 	function _showAt(event) {
 		const xy = _getMousePos(event);
-		_showAtXY(xy); // Delegate to _showAtXY
+		_showAtXY(xy);
 	}
 
-	/**
-	 * Shows the hint div at the specified X, Y coordinates.
-	 * @private
-	 * @param {Array<number>} xy - An array `[posX, posY]` where the hint should be shown.
-	 * @returns {jQuery|null} The jQuery object for the hint div, or null if not initialized.
-	 */
 	function _showAtXY(xy){
-		_init(); // Ensure div is created and styled
-
-		// Get window dimensions for boundary checks
+		_init();
 		const scrollTop = $(window).scrollTop();
 		const windowWidth = $(window).width();
 		const windowHeight = $(window).height();
-		const offset = 15; // Default offset from cursor
-
+		const offset = 15;
 		_showPopupDivAt(xy, scrollTop, windowWidth, windowHeight, offset);
 		return popup_div;
 	}
 
-	/**
-	 * Clears the timer that is set to hide the tooltip.
-	 * This is used, for example, when the mouse enters the tooltip itself.
-	 * @private
-	 * @returns {void}
-	 */
 	function _clearHideTimer(){
 		if (hideTimer) {
 			window.clearTimeout(hideTimer);
-			hideTimer = 0; // Reset timer ID
+			hideTimer = 0;
 		}
 	}
 
-	/**
-	 * Hides the tooltip if `needHideTip` is true.
-	 * Clears any existing hide timer before hiding.
-	 * Hiding is done by setting visibility to hidden and opacity to 0.
-	 * @private
-	 * @returns {void}
-	 */
 	function _hideToolTip(){
-		if(needHideTip && popup_div){ // Only hide if needed and div exists
-			_clearHideTimer(); // Clear any pending hide operations
+		if(needHideTip && popup_div){
+			_clearHideTimer();
 			popup_div.css( {visibility:"hidden", opacity:"0"});
 		}
 	}
@@ -287,18 +213,15 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		 * @returns {void}
 		 */
 		showInfoAt: function(xy, divid, divcontent){
-			_init(); // Ensure hint div is initialized
+			_init();
 			const target_divid = divid || (id + "-content");
 			const $content_target = $("#" + target_divid);
 
 			if ($content_target.length) {
 				$content_target.html(divcontent);
-				// Auto-adjust size based on new content. Add some padding for height.
 				_setSize([$content_target.outerWidth(), $content_target.outerHeight() + 25]);
 			} else {
-                 // If target_divid not found, set content to main popup_div
                  popup_div.html(divcontent);
-                 // Consider auto-sizing popup_div itself here if needed, e.g., by temporarily setting width/height to 'auto'
             }
 			_showAtXY(xy);
 		},
@@ -316,17 +239,17 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		 * @returns {void}
 		 */
 		hide: function(){
-			_clearHideTimer(); // Clear any existing timer
-			needHideTip = true; // Ensure it will hide
-			hideTimer = window.setTimeout(_hideToolTip, 1000); // Set new timer
+			_clearHideTimer();
+			needHideTip = true;
+			hideTimer = window.setTimeout(_hideToolTip, 1000);
 		},
 		/**
 		 * Immediately hides the hint div.
 		 * @returns {void}
 		 */
 		close: function(){
-			needHideTip = true; // Mark that it should hide
-			_hideToolTip();     // Hide immediately
+			needHideTip = true;
+			_hideToolTip();
 		},
 		/**
 		 * Gets the class name of this component.
@@ -345,6 +268,6 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		}
 	};
 
-	_init(); // Initialize the HintDiv when a new instance is created
-	return that; // Return the public interface
+	_init();
+	return that;
 }
