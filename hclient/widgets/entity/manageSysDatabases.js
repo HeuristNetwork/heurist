@@ -1,12 +1,15 @@
 /**
-* manageSysDatabases.js - work with list of all databases on current server
-*
+* @file manageSysDatabases.js
+* @brief Manages System Database registrations and configurations.
+* @fileOverview Provides a UI for administrators to register, configure, and manage databases accessible by the Heurist instance. This includes settings related to database connections, aliases, and status.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*  
@@ -17,12 +20,32 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
+/**
+ * @class heurist.manageSysDatabases
+ * @brief Widget for managing System Database registrations.
+ * @augments $.heurist.manageEntity
+ * @description This widget provides an interface for administrators to view and manage
+ * the list of databases registered with the Heurist instance.
+ * It is primarily used for listing databases; direct editing capabilities via the
+ * standard `manageEntity` form are disabled (`edit_mode: 'none'`).
+ *
+ * @property {string} default_palette_class Default CSS class for theming, set to 'ui-heurist-design'.
+ * @property {number} width Default width of the widget, set to 800 pixels.
+ * @property {number} height Default height of the widget, set to 600 pixels.
+ * @property {string} edit_mode Set to 'none', indicating that the standard inline/popup editing form of `manageEntity` is not used. Management actions might be handled through custom actions or list item interactions.
+ */
 $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
     
     
     _entityName:'sysDatabases',
     
+    /**
+     * @brief Initializes the widget.
+     * @override
+     * @memberof heurist.manageSysDatabases
+     * Sets default options for palette class, dimensions, and importantly,
+     * sets `edit_mode` to 'none' as this widget is primarily for listing.
+     */
     _init: function() {
   
         this.options.default_palette_class = 'ui-heurist-design';
@@ -38,8 +61,15 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
     _email_filter: false, // using user email to filter
     
     //  
-    // invoked from _init after load entity config    
-    //
+    /**
+     * @brief Initializes the controls for the widget.
+     * @override
+     * @memberof heurist.manageSysDatabases
+     * @returns {boolean} False if the parent `_initControls` fails, otherwise true.
+     * Sets `use_cache` to true. Initializes the search form (`searchSysDatabases`)
+     * and customizes the record list header. It also fetches and caches the full list
+     * of databases on initialization since filtering is done client-side.
+     */
     _initControls: function() {
         
         this.options.use_cache = true;
@@ -133,8 +163,16 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
     
     //----------------------
     //
-    // customized item renderer for search result list
-    //
+    /**
+     * @brief Renders a single database item in the list.
+     * @override
+     * @memberof heurist.manageSysDatabases
+     * @param {HRecordSet} recordset The recordset containing the item.
+     * @param {object} record The specific record object for the item to render.
+     * @returns {string} HTML string representing the database item.
+     * Formats the display of a database, showing its name (`sys_Database`, with prefix removed)
+     * and an icon.
+     */
     _recordListItemRenderer: function(recordset, record){
         
         function fld(fldname){
@@ -184,6 +222,15 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         
     },
 
+    /**
+     * @brief Updates the record list with new data.
+     * @override
+     * @memberof heurist.manageSysDatabases
+     * @param {Event} event The event object.
+     * @param {object} data Data containing the recordset and request.
+     * If `options.use_cache` is true, it updates `_cachedRecordset`.
+     * Then calls the parent `resultList('updateResultSet')`.
+     */
     updateRecordList: function( event, data ){
        
         if (data){
@@ -195,6 +242,17 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         }
     },
     
+    /**
+     * @brief Filters the displayed list of databases based on the request.
+     * @override
+     * @memberof heurist.manageSysDatabases
+     * @param {Event} event The event object.
+     * @param {object} request The filter request object, may contain `ugr_eMail`.
+     * If the `ugr_eMail` filter has changed, it calls `filterByEmail`.
+     * Otherwise, it applies other filters from the request to the `_cachedRecordset`
+     * (or `_fullRecordset` if email filter was just cleared) and updates the list.
+     * It can also exclude the current database if `options.except_current` is true.
+     */
     filterRecordList: function(event, request){
 
         let filter_email = this._email_filter != request.ugr_eMail;
@@ -217,6 +275,14 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         }
     },
 
+    /**
+     * @brief Filters the database list by user email.
+     * @memberof heurist.manageSysDatabases
+     * @param {object} filter The filter object, expected to contain `ugr_eMail`.
+     * If `ugr_eMail` is empty, it resets the cache to the full list of databases and re-filters.
+     * If `ugr_eMail` is provided, it makes a server request to fetch databases associated
+     * with that email, updates `_cachedRecordset` with the response, and then re-filters the list.
+     */
     filterByEmail: function(filter){
 
         let that = this;
@@ -253,6 +319,14 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         })
     },
 
+    /**
+     * @brief Handles selection and closing of the dialog.
+     * @override
+     * @memberof heurist.manageSysDatabases
+     * Stores the current email filter (`this._email_filter`) in `this._resultOnSelection`
+     * before calling the parent's `_selectAndClose` method. This might be used by consuming
+     * widgets to know the context of the selection.
+     */
     _selectAndClose: function(){
 
         if(!this._resultOnSelection){

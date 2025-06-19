@@ -1,12 +1,15 @@
 /**
-* manageSysGroups.js - main widget to manage sysUGrps workgroups
-*
+* @file manageSysGroups.js
+* @brief Manages System User Group entities.
+* @fileOverview Provides a UI for administrators to manage system user groups. This includes creating groups, assigning users, and setting group permissions or roles.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*  
@@ -17,7 +20,26 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
+/**
+ * @class heurist.manageSysGroups
+ * @brief Widget for managing System User Groups.
+ * @augments $.heurist.manageEntity
+ * @description This widget provides an interface for administrators and group members
+ * to manage system user groups (workgroups). It allows for viewing groups,
+ * creating new groups, editing group details, and managing user membership and roles within groups.
+ *
+ * @property {string} default_palette_class Default CSS class for theming, set to 'ui-heurist-admin'.
+ * @property {string} layout_mode Defines the overall layout structure, set to 'short'.
+ * @property {boolean} use_cache If true, client-side caching might be used for data; set to false.
+ * @property {number} width Default width of the widget. Set to 960 in 'manager' mode,
+ *                          or 900 if `select_mode` is not 'manager' and calculated width is less than 815.
+ * @property {boolean} edit_need_load_fullrecord If true, a full record load is required for editing; set to false.
+ * @property {number} edit_height Default height for the edit dialog of a group, set to 572.
+ * @property {number} height Default height of the widget, set to 740.
+ * @property {?number} ugl_UserID If provided, the widget customizes its title and potentially its behavior
+ *                               to manage groups for a specific user. For example, "Manage Workgroups for User #X".
+ *                               If negative, it might indicate a mode for defining roles for that user.
+ */
 $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
     _entityName: 'sysGroups',
@@ -25,8 +47,13 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
     _select_roles: {},
 
     //
-    //
-    //    
+    /**
+     * @brief Initializes the widget.
+     * @override
+     * @memberof heurist.manageSysGroups
+     * Sets default options for palette class, layout mode, dimensions, and other
+     * configurations specific to managing system user groups.
+     */
     _init: function() {
 
         this.options.default_palette_class = 'ui-heurist-admin';
@@ -50,8 +77,16 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
     },
 
     //  
-    // invoked from _init after load entity config    
-    //
+    /**
+     * @brief Initializes the controls for the widget.
+     * @override
+     * @memberof heurist.manageSysGroups
+     * @returns {boolean} False if the parent `_initControls` fails, otherwise true.
+     * Sets up the widget title based on context (e.g., managing groups for a specific user
+     * or general group administration). Initializes the search form (`searchSysGroups`)
+     * and configures the record list, including a custom header renderer and event listeners
+     * for managing group memberships and roles directly from the list.
+     */
     _initControls: function() {
 
         if(!this._super()){
@@ -323,8 +358,17 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
     //----------------------
     //
-    //  custom renderer for recordList
-    //
+    /**
+     * @brief Renders a single system group item in the list.
+     * @override
+     * @memberof heurist.manageSysGroups
+     * @param {HRecordSet} recordset The recordset containing the item.
+     * @param {object} record The specific record object for the item to render.
+     * @returns {string} HTML string representing the group item.
+     * Formats the display of a group, including its ID, name, description,
+     * and icons/buttons for actions like editing members, changing roles (admin/member),
+     * editing group details, and deleting the group, depending on user permissions and context.
+     */
     _recordListItemRenderer:function(recordset, record){
 
         function fld(fldname){
@@ -472,7 +516,17 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
     },
 
-    //overwritten    
+    /**
+     * @brief Fetches full data for specified record IDs, potentially including user role information.
+     * @override
+     * @memberof heurist.manageSysGroups
+     * @param {string[]} arr_ids An array of record IDs (group IDs) to fetch.
+     * @param {number} pageno The page number for pagination (if applicable).
+     * @param {function} callback The function to call with the server response.
+     * Constructs a request to search for 'sysGroups' entities. If `options.ugl_UserID` is set
+     * (i.e., viewing groups for a specific user) or if the search type indicates roles are relevant,
+     * it includes parameters to join user group linkage information to get the user's role in each group.
+     */
     _recordListGetFullData:function(arr_ids, pageno, callback){
 
         let request = {
@@ -495,6 +549,17 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
     },
 
+    /**
+     * @brief Handles events after a group record is saved.
+     * @override
+     * @memberof heurist.manageSysGroups
+     * @param {number} recID The ID of the saved group.
+     * @param {object} fieldvalues The saved field values.
+     * If a new group was added in 'select_single' mode, it selects the new group and closes.
+     * If a new group was added, it updates the current user's credentials if they are an admin
+     * of the new group and refreshes system group information.
+     * Updates the local recordset and refreshes the list.
+     */
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
         // close on addition of new record in select_single mode    
@@ -520,7 +585,15 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         
     },
     
-    _afterDeleteEvenHandler: function( recID )   {
+    /**
+     * @brief Handles events after a group record is deleted.
+     * @override
+     * @memberof heurist.manageSysGroups
+     * @param {number} recID The ID of the deleted group.
+     * Removes the group from the current user's credentials if they were a member,
+     * calls the parent's delete handler, and triggers an ON_CREDENTIALS event.
+     */
+    _afterDeleteEventHandler: function( recID )   { // Note: Original name `_afterDeleteEvenHandler` had a typo.
         window.hWin.HAPI4.currentUserRemoveGroup(recID, true);
         
         this._super( recID );
@@ -528,6 +601,14 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
     },
 
+    /**
+     * @brief Performs actions after the edit form for a group is initialized.
+     * @override
+     * @memberof heurist.manageSysGroups
+     * Calls the parent's `_afterInitEditForm`.
+     * It specifically hides the "Remove" button if the group being edited is the
+     * system's database managers group (ID 1), as this group cannot be deleted.
+     */
     _afterInitEditForm: function(){
         this._super();
         //hide after edit init btnRecRemove for group=1
@@ -538,7 +619,16 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
     },
 
-
+    /**
+     * @brief Changes the role of specified users within a given group.
+     * @memberof heurist.manageSysGroups
+     * @param {number|string} group_id The ID of the group.
+     * @param {number|string|number[]|string[]} user_ids A single user ID or an array/comma-separated string of user IDs.
+     * @param {string} new_role The new role to assign (e.g., 'admin', 'member', 'remove').
+     * Sends a request to the server (action 'action' on 'sysGroups' entity) to update the user(s)' role(s)
+     * in the group. On success, it calls `_afterSaveEventHandler` to refresh the UI.
+     * On failure, it displays an error message.
+     */
     _changeUserRole: function(group_id, user_ids, new_role){
 
         let request = {
@@ -577,10 +667,15 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
     },
 
     //
-    // event handler for select-and-close (select_multi)
-    // or for any selection event for select_single
-    // triger onselect event
-    //
+    /**
+     * @brief Handles the selection and closing of the dialog, especially in 'select_roles' mode.
+     * @override
+     * @memberof heurist.manageSysGroups
+     * If `options.select_mode` is 'select_roles', it checks if any roles have been selected
+     * in `this._select_roles`. If not, it shows an error. Otherwise, it triggers the
+     * `onselect` event with the selected roles and closes the dialog.
+     * For other select modes, it calls the parent's `_selectAndClose`.
+     */
     _selectAndClose: function(){
 
         if(this.options.select_mode=='select_roles'){ //special case - select roles for any set of users
@@ -600,6 +695,15 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
     }
     
+    /**
+     * @brief Handles the deletion of a group, with a confirmation prompt.
+     * @override
+     * @memberof heurist.manageSysGroups
+     * @param {boolean} [unconditionally=false] If true, deletes without confirmation.
+     * If `unconditionally` is false (the default), it shows a confirmation dialog
+     * asking "Are you sure you wish to delete this group?". If confirmed, or if
+     * `unconditionally` is true, it calls the parent's `_deleteAndClose` method.
+     */
     ,_deleteAndClose: function(unconditionally){
     
         if(unconditionally===true){

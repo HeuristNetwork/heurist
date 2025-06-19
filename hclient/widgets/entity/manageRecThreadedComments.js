@@ -1,12 +1,15 @@
 /**
-* manageRecThreadedComments.js - main widget to manage records comments
-*
+* @file manageRecThreadedComments.js
+* @brief Manages threaded comments for records.
+* @fileOverview Provides a UI for displaying, adding, and managing threaded comments associated with a Heurist record. It typically integrates with the record viewing or editing interface.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*  
@@ -20,6 +23,26 @@
 //
 // there is no search, select mode for reminders - only edit
 //
+/**
+ * @class heurist.manageRecThreadedComments
+ * @brief Widget for managing threaded comments.
+ * @augments $.heurist.manageEntity
+ * @property {boolean} [use_cache=false] Whether to use client-side caching. Set to false by default.
+ * @property {string} [edit_mode='popup'] Editing mode. Can be 'editonly' or 'popup'.
+ * @property {string} [select_mode='manager'] Selection mode. If 'editonly', this is set to 'manager'.
+ * @property {string} [layout_mode='editonly'] Layout mode. If 'editonly', this is set.
+ * @property {number} [width=790] Width of the widget, especially in 'editonly' mode.
+ * @property {number} [height=600] Height of the widget, especially in 'editonly' mode.
+ * @property {boolean} [list_header=true] Whether to show the header for the comments list.
+ * @property {?number} rec_ID The ID of the record these comments are associated with. (Implicitly used via cmt_RecID)
+ * @property {?number} cmt_ID The ID of a specific comment, used when `edit_mode` is 'editonly' to load that comment.
+ * @property {?number} cmt_RecID The ID of the record these comments belong to. Used when adding a new comment in 'editonly' mode.
+ * @property {?number} cmt_ParentCmtID The ID of the parent comment if this is a reply. Used when adding a new comment in 'editonly' mode.
+ * @property {?string} cmt_Type The type of comment (though not explicitly used in provided code, it's a common pattern).
+ * @property {boolean} [allow_add=true] Whether to allow adding new comments. (Implicit, UI for adding is present)
+ * @property {boolean} [allow_edit=true] Whether to allow editing existing comments. (Implicit, edit actions are present)
+ * @property {boolean} [allow_delete=true] Whether to allow deleting comments. (Implicit, delete actions are present)
+ */
 $.widget( "heurist.manageRecThreadedComments", $.heurist.manageEntity, {
    
     _entityName:'recThreadedComments',
@@ -27,6 +50,13 @@ $.widget( "heurist.manageRecThreadedComments", $.heurist.manageEntity, {
     //keep to refresh after modifications
     _keepRequest:null,
     
+    /**
+     * @brief Initializes the widget.
+     * @memberof heurist.manageRecThreadedComments
+     * @override
+     * @description Sets `use_cache` to false. Adjusts `edit_mode`, `select_mode`, `layout_mode`,
+     * `width`, and `height` based on the initial `edit_mode`. Calls parent's `_init`.
+     */
     _init: function() {
         
         this.options.use_cache = false;
@@ -45,9 +75,18 @@ $.widget( "heurist.manageRecThreadedComments", $.heurist.manageEntity, {
         this._super();
     },
     
-    //  
-    // invoked from _init after load entity config    
-    //
+    /**
+     * @brief Initializes the controls for the widget.
+     * @memberof heurist.manageRecThreadedComments
+     * @override
+     * @description Calls parent's `_initControls`.
+     * If `edit_mode` is 'editonly':
+     *  - Loads a specific comment for editing if `options.cmt_ID` is provided.
+     *  - Otherwise, prepares to add a new comment (using `options.cmt_RecID` and `options.cmt_ParentCmtID`).
+     * If not 'editonly':
+     *  - Initializes the search form and result list for comments.
+     * @returns {boolean} False if the parent's `_initControls` fails, otherwise true.
+     */
     _initControls: function() {
         
         if(!this._super()){
@@ -102,9 +141,15 @@ $.widget( "heurist.manageRecThreadedComments", $.heurist.manageEntity, {
     
 //----------------------------------------------------------------------------------    
 
-    //
-    //
-    //
+    /**
+     * @brief Saves the comment and closes the edit form/dialog.
+     * @memberof heurist.manageRecThreadedComments
+     * @override
+     * @param {?object} fields Field values to save. If null, values are retrieved from the edit form.
+     * @param {?string} afteraction Action to perform after saving (not explicitly used in this override).
+     * @description Ensures `cmt_RecID` is set if in 'editonly' mode and a `cmt_RecID` was provided in options.
+     * Calls the parent's `_saveEditAndClose`.
+     */
     _saveEditAndClose: function( fields, afteraction ){
 
         //assign record id    
@@ -117,9 +162,14 @@ $.widget( "heurist.manageRecThreadedComments", $.heurist.manageEntity, {
         this._super();
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Handles events after a comment is saved.
+     * @memberof heurist.manageRecThreadedComments
+     * @override
+     * @param {number} recID The ID of the saved comment.
+     * @param {object} fields The saved field values.
+     * @description Calls parent's handler. If in 'editonly' mode, closes the dialog.
+     */
     _afterSaveEventHandler: function( recID, fields ){
         this._super( recID, fields );
         if(this.options.edit_mode=='editonly'){
@@ -127,9 +177,12 @@ $.widget( "heurist.manageRecThreadedComments", $.heurist.manageEntity, {
         }
     },
 
-    //
-    // header for resultList
-    //     
+    /**
+     * @brief Renders the header for the comments list.
+     * @memberof heurist.manageRecThreadedComments
+     * @override
+     * @returns {string} HTML string for the list header.
+     */
     _recordListHeaderRenderer:function(){
         
         function __cell(colname, width){
@@ -141,10 +194,16 @@ $.widget( "heurist.manageRecThreadedComments", $.heurist.manageEntity, {
                     +__cell('Modiied',8)+__cell('Text',40)+__cell('',12);
     },
     
-    //----------------------
-    //
-    //  overwrite standard render for resultList
-    //
+    /**
+     * @brief Renders a single comment item in the list.
+     * @memberof heurist.manageRecThreadedComments
+     * @override
+     * @param {HRecordSet} recordset The recordset containing the comment data.
+     * @param {object} record The comment record object to render.
+     * @returns {string} HTML string representing the list item.
+     * @description Displays comment record title, modified date, and text.
+     * Includes edit, view thread, and delete buttons if in manager/popup mode.
+     */
     _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){

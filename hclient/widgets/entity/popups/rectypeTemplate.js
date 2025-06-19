@@ -1,12 +1,15 @@
 /**
-* rectypeTemplate.js - download xml or json record type template
-*
+* @file rectypeTemplate.js
+* @brief Provides a popup UI for downloading Record Type templates (XML/JSON).
+* @fileOverview This widget allows users to select record types and download their structure as either an XML or JSON template. This is useful for import/export and for understanding record type definitions.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity\popups
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*  
@@ -17,6 +20,20 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+ * @class heurist.rectypeTemplate
+ * @brief Popup widget for downloading Record Type templates.
+ * @augments $.heurist.baseAction
+ * @description This widget provides a dialog interface for users to select one or more
+ * record types and choose a format (XML or JSON) to download their definitions as a template file.
+ *
+ * @property {number} [height=520] The default height of the popup dialog.
+ * @property {number} [width=400] The default width of the popup dialog.
+ * @property {string} [title='Download XML or JSON template'] The title displayed in the dialog's title bar.
+ * @property {string} [default_palette_class='ui-heurist-populate'] The default CSS class for theming the dialog.
+ * @property {string} [path='widgets/entity/popups/'] The path to the widget's HTML template file.
+ * @property {string} [actionName='rectypeTemplate'] The name of the action, used internally.
+ */
 $.widget( "heurist.rectypeTemplate", $.heurist.baseAction, {
 
     // default options
@@ -30,8 +47,15 @@ $.widget( "heurist.rectypeTemplate", $.heurist.baseAction, {
     },
     
     //  
-    // invoked from _init after loading of html content
-    //
+    /**
+     * @brief Initializes the controls within the popup dialog.
+     * @override
+     * @memberof heurist.rectypeTemplate
+     * Sets up the "Select record types" button, which opens a `defRecTypes` dialog
+     * for multi-selecting record types. Manages the display of selected record types
+     * and the "All record types" checkbox.
+     * @returns {boolean} Result of the superclass's `_initControls` method.
+     */
     _initControls: function(){
         
         this._$('button#rectypes-select').button();
@@ -90,8 +114,13 @@ $.widget( "heurist.rectypeTemplate", $.heurist.baseAction, {
 
 
     //    
-    //
-    //
+    /**
+     * @brief Gets the action buttons for the dialog.
+     * @override
+     * @memberof heurist.rectypeTemplate
+     * @returns {object[]} An array of button definition objects for the dialog.
+     * Modifies the default "OK" button text to "Download".
+     */
     _getActionButtons: function(){
         let res = this._super();
         res[1].text = window.hWin.HR('Download');
@@ -100,8 +129,14 @@ $.widget( "heurist.rectypeTemplate", $.heurist.baseAction, {
     },
 
     //
-    //
-    //
+    /**
+     * @brief Performs the download action.
+     * @override
+     * @memberof heurist.rectypeTemplate
+     * Retrieves the selected template type (XML or JSON) and the list of selected record type IDs
+     * (or 'y' for all). Constructs the appropriate download URL and initiates the download.
+     * Shows a flash message and closes the dialog upon completion.
+     */
     doAction: function(){
 
             let template_type = this._$('input[name="template-type"]:checked').attr('id');

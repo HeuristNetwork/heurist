@@ -1,12 +1,15 @@
 /**
-* manageSysDashboard.js - main widget to manage sysDashboard
-*
+* @file manageSysDashboard.js
+* @brief Manages System Dashboard configurations.
+* @fileOverview Provides a UI for administrators to configure and manage system dashboards, including adding, removing, and arranging dashboard widgets or components.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*  
@@ -17,7 +20,27 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
+/**
+ * @class heurist.manageSysDashboard
+ * @brief Widget for managing System Dashboards.
+ * @augments $.heurist.manageEntity
+ * @description This widget allows users, typically administrators, to configure the system dashboard,
+ * which often consists of shortcuts or quick access panels to various Heurist functions.
+ * It supports both a view mode (production) and an edit mode for arranging and defining dashboard items.
+ *
+ * @property {boolean} [is_iconlist_mode=true] If true, displays dashboard items in a compact, icon-list format.
+ * @property {boolean} [isViewMode=true] If true, the dashboard is in production/view mode. If false, it's in edit mode, allowing rearrangement and modification of dashboard items.
+ * @property {string} default_palette_class Default CSS class for theming, set to 'ui-heurist-design'.
+ * @property {boolean} coverall_on_save If true, a loading overlay is shown during save operations.
+ * @property {string} layout_mode Defines the overall layout structure, set to 'short'.
+ * @property {boolean} use_cache If true, client-side caching might be used for data; set to false.
+ * @property {boolean} edit_need_load_fullrecord If true, a full record load is required for editing items.
+ * @property {number} edit_height Default height for the edit dialog of a dashboard item, set to 600.
+ * @property {number} width Default width of the widget, set to 1200.
+ * @property {number} height Default height of the widget, typically 900, can be adjusted based on content.
+ * @property {string} title The title displayed for the widget, set to 'Shortcuts'.
+ * @property {boolean} no_bottom_button_bar If true, the standard bottom button bar (Save, Close, etc.) in the edit dialog is suppressed or handled differently.
+ */
 $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     
     options: {
@@ -29,8 +52,13 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     defaultPrefs: {viewmode:'thumbs3', show_on_startup:1, show_as_ribbon:1},
     
     //
-    //
-    //
+    /**
+     * @brief Initializes the widget.
+     * @override
+     * @memberof heurist.manageSysDashboard
+     * Sets various default options for the widget, such as palette class, layout mode,
+     * dimensions, and title. It configures the widget for managing dashboard shortcuts.
+     */
     _init: function() {
         
         this.options.default_palette_class = 'ui-heurist-design';
@@ -63,8 +91,16 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             window.hWin.HR("marked")+"</option></select>", {'width':'80px'} )
 */    
     //  
-    // invoked from _init after load entity config    
-    //
+    /**
+     * @brief Initializes the controls for the widget.
+     * @override
+     * @memberof heurist.manageSysDashboard
+     * @returns {boolean} False if the parent `_initControls` fails, otherwise true.
+     * Sets up the search form (`searchSysDashboard`) and its event listeners for actions like
+     * switching view mode, adding items, reordering, and closing. It also configures the
+     * record list for displaying dashboard items and populates dropdowns for command selection
+     * (e.g., menu actions, saved searches) within the edit form for a dashboard item.
+     */
     _initControls: function() {
         
         if(!this._super()){
@@ -182,25 +218,39 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     },
 
     //
-    // start/refresh search
-    //
+    /**
+     * @brief Starts or refreshes the search for dashboard items.
+     * @memberof heurist.manageSysDashboard
+     * If the search form widget (`searchSysDashboard`) is instantiated, this method
+     * calls its `startSearch` method to load or reload the list of dashboard items.
+     */
     startSearch: function(){
         if(this.searchForm.searchSysDashboard('instance')){
             this.searchForm.searchSysDashboard('startSearch');
         }
     },
         
-    //
-    //
-    //    
+    /**
+     * @brief Updates the record list when search results are received.
+     * @override
+     * @memberof heurist.manageSysDashboard
+     * @param {Event} event The event object.
+     * @param {object} data The data containing search results.
+     * Calls the parent's `updateRecordList` and then adjusts the widget's height
+     * using `_adjustHeight`.
+     */
     updateRecordList: function( event, data ){    
         this._super(event, data);
         this._adjustHeight();
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Adjusts the height of the widget, particularly the dialog height.
+     * @memberof heurist.manageSysDashboard
+     * Calculates a suitable height based on the number of dashboard items if in view mode.
+     * The height is constrained between 300 and 600 pixels.
+     * If the widget is displayed in a dialog, it updates the dialog's height.
+     */
     _adjustHeight: function(){
         
 
@@ -222,9 +272,16 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     },
     
     //
-    //  set view or edit mode
-    // newmode = true - view mode
-    //
+    /**
+     * @brief Sets the widget's mode to either view mode or edit mode.
+     * @memberof heurist.manageSysDashboard
+     * @param {boolean} newmode True for view mode, false for edit mode.
+     * This function reconfigures the UI elements based on the selected mode:
+     * - **View Mode**: Hides edit controls, shows view controls, enables/disables sortability of the list,
+     *   adjusts list appearance (e.g., icon list vs. thumbs), and potentially shows a "Customize" gear icon.
+     * - **Edit Mode**: Shows edit controls, hides view controls, enables list sorting for reordering items.
+     * It also triggers a search refresh if the mode actually changes.
+     */
     _setMode: function(newmode){
         
         if(newmode){
@@ -347,9 +404,16 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     },
     
     
-    //-----
-    // change parameter entry according to specified command
-    //
+    /**
+     * @brief Performs actions after the edit form for a dashboard item is initialized.
+     * @override
+     * @memberof heurist.manageSysDashboard
+     * Calls the parent `_afterInitEditForm`. It then sets up logic to show/hide parameter
+     * input fields (`dsh_Parameters`, `dsh_ParameterAddRecord`, `dsh_ParameterSavedSearch`)
+     * based on the selected `dsh_CommandToRun`. For example, if "action-AddRecord" is chosen,
+     * the field for specifying record type for addition becomes visible.
+     * It also handles special input formatting for `dsh_ParameterAddRecord`.
+     */
     _afterInitEditForm: function(){
 
         this._super();
@@ -405,8 +469,17 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         }
     },
     //
-    // force refresh after save (note: in case cached entity it auto happens in parent - manageEntity)
-    //
+    /**
+     * @brief Handles events after a dashboard item is saved.
+     * @override
+     * @memberof heurist.manageSysDashboard
+     * @param {number} recID The ID of the saved record.
+     * @param {object} fieldvalues The saved field values.
+     * Calls the parent's `_afterSaveEventHandler`. Updates the local record set,
+     * refreshes the record list page, and triggers a system info count update.
+     * If dashboard preferences indicate "show_on_startup", it triggers an event
+     * to refresh the main shortcut bar.
+     */
     _afterSaveEventHandler: function( recID, fieldvalues ){
         this._super( recID, fieldvalues );
         
@@ -422,7 +495,15 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         }
     },
     
-    _afterDeleteEvenHandler: function( recID ){
+    /**
+     * @brief Handles events after a dashboard item is deleted.
+     * @override
+     * @memberof heurist.manageSysDashboard
+     * @param {number} recID The ID of the deleted record.
+     * Calls the parent's `_afterDeleteEventHandler` (assuming typo `Even` -> `Event`).
+     * Triggers a system info count update to reflect changes in active dashboards.
+     */
+    _afterDeleteEventHandler: function( recID ){ // Note: Original name `_afterDeleteEvenHandler` had a typo.
         this._super( recID );
         
         //refresh count of active dashboards
@@ -431,8 +512,18 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
     //----------------------
     //
-    //  overwrite standard render for resultList
-    //
+    /**
+     * @brief Renders a single dashboard item in the list.
+     * @override
+     * @memberof heurist.manageSysDashboard
+     * @param {HRecordSet} recordset The recordset containing the item.
+     * @param {object} record The specific record object for the item to render.
+     * @returns {string} HTML string representing the dashboard item.
+     * Formats the display of a dashboard item, including its icon/thumbnail (`dsh_Image` or default),
+     * label (`dsh_Label`), and description (`dsh_Description`).
+     * The appearance can vary based on `options.isViewMode` and `options.is_iconlist_mode`.
+     * In edit mode, it may include delete buttons.
+     */
     _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){
@@ -525,8 +616,17 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     },
 
     //
-    // get and set selected records - RecordSet
-    //    
+    /**
+     * @brief Handles the selection of a dashboard item.
+     * @override
+     * @memberof heurist.manageSysDashboard
+     * @param {HRecordSet|null} value The selected recordset or null if deselected.
+     * Calls the parent `selectedRecords`. If a record is selected:
+     * - In view mode (`options.isViewMode` is true): Executes the command associated with the
+     *   dashboard item (`dsh_CommandToRun` and `dsh_Parameters`). This can involve triggering
+     *   main menu actions, opening specific "add record" forms, or running saved searches.
+     * - In edit mode: Opens the selected dashboard item for editing using `addEditRecord`.
+     */
     selectedRecords: function(value){
         
         this._super( value );
@@ -608,8 +708,14 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     },
     
     //
-    // apply new order
-    //
+    /**
+     * @brief Saves the new order of dashboard items after drag-and-drop reordering.
+     * @memberof heurist.manageSysDashboard
+     * This method is called when items in the list have been reordered by the user (in edit mode).
+     * It iterates through the current order of items in the `recordList`, updates their
+     * `dsh_Order` field value, and sends a batch save request to the server to persist
+     * the new order.
+     */
     saveNewOrder: function(){
         
             this.searchForm.find('#btn_apply_order').hide();    

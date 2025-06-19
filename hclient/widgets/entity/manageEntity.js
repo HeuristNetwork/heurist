@@ -1,12 +1,15 @@
 /**
-* manageEntity.js - BASE widget
-*
+* @file manageEntity.js
+* @brief Base widget for managing entities.
+* @fileOverview This file defines the base jQuery UI widget 'manageEntity', which provides core functionalities for managing various types of entities within the Heurist system. It includes features for listing, searching, selecting, editing, and managing records, and is intended to be extended by specific entity management widgets.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*  
@@ -57,6 +60,60 @@
 // _afterDeleteEvenHandler
 //  _deleteAndClose
 
+/**
+ * @class heurist.manageEntity
+ * @brief Base jQuery UI widget providing core functionalities for entity management.
+ * @property {object} options The configuration options for the widget.
+ * @property {boolean} [options.isdialog=false] If true, the widget is rendered as a jQuery UI dialog.
+ * @property {number} [options.height=400] Default height for the widget or dialog.
+ * @property {number} [options.width=760] Default width for the widget or dialog.
+ * @property {boolean} [options.modal=true] If `isdialog` is true, determines if the dialog is modal.
+ * @property {string} [options.title=''] Title for the widget or dialog.
+ * @property {boolean} [options.isFrontUI=false] If true, applies specific styling/behavior for front-end interfaces.
+ * @property {boolean|jQuery} [options.innerTitle=false] If true, displays `options.title` as a header within the widget. Can also be a jQuery element to use as the title container.
+ * @property {number} [options.pagesize=200] Default page size for the result list.
+ * @property {boolean} [options.list_header=false] Whether to show a header row in the result list (if applicable to list_mode).
+ * @property {string} [options.list_mode='default'] Mode for the result list. 'default' uses `$.heurist.resultList`. Other values might be handled by subclasses.
+ * @property {object} [options.resultList={}] Configuration options to pass directly to the `resultList` widget.
+ * @property {boolean} [options.use_cache=false] If true, search results are cached client-side, and subsequent filtering is done locally.
+ * @property {?string} [options.filter_title=null] Initial value for a title-based filter.
+ * @property {?any} [options.filter_group_selected=null] Initial value for a group-based filter.
+ * @property {?Array} [options.filter_groups=null] Configuration for group filters.
+ * @property {boolean} [options.in_popup_dialog=false] True if the widget is hosted within a popup iframe (rare).
+ * @property {boolean} [options.coverall_on_save=true] If true, displays a loading overlay during save operations.
+ * @property {string} [options.edit_mode='popup'] Defines how editing occurs:
+ * - `'none'`: Editing is disabled.
+ * - `'popup'`: Edit form appears in a separate modal dialog.
+ * - `'inline'`: Edit form appears next to the list within the same widget area.
+ * - `'editonly'`: Only the edit form is shown; the list is hidden.
+ * @property {?number} [options.edit_height=null] Specific height for the edit form/dialog.
+ * @property {?number} [options.edit_width=null] Specific width for the edit form/dialog.
+ * @property {?string} [options.edit_title=null] Specific title for the edit dialog.
+ * @property {boolean} [options.edit_need_load_fullrecord=false] If true, a full record load is forced before opening the edit form.
+ * @property {boolean} [options.edit_addrecordfirst=false] If true, when adding a new record, the editor is shown immediately without list interaction.
+ * @property {string} [options.layout_mode='short'] Defines the widget's internal layout structure.
+ *    Can be 'short', 'basic', 'listonly', 'editonly', 'tabbed', or a custom HTML string.
+ * @property {string} [options.select_mode='manager'] Defines item selection behavior:
+ * - `'manager'`: Standard management interface; selection is for actions like edit/delete.
+ * - `'select_single'`: Allows single item selection; typically triggers `onSelect` and closes if a dialog.
+ * - `'select_multi'`: Allows multiple item selection with checkboxes; `onSelect` triggered by a "Select" button.
+ * @property {string} [options.selectbutton_label='Select'] Label for the main selection button in 'select_multi' mode.
+ * @property {string} [options.select_return_mode='ids'] Format for returning selected items in `onSelect`: 'ids' (array of IDs) or 'recordset' (HRecordSet object).
+ * @property {?Array<number|string>} [options.selection_on_init=null] Array of record IDs to pre-select upon initialization.
+ * @property {boolean} [options.selectOnSave=false] If true, saving a record in edit mode also triggers the `onSelect` event (relevant in selection modes).
+ * @property {object} [options.entity={}] Configuration object for the entity being managed (name, fields, titles, etc.). Loaded from server if `_entityName` is set.
+ * @property {?function} [options.onInitFinished=null] Callback executed after the widget and its controls are fully initialized.
+ * @property {?function} [options.onInitEditForm=null] Callback executed after the edit form (`HEditing` instance) is initialized.
+ * @property {?function} [options.onSelect=null] Callback executed when item(s) are selected (behavior depends on `select_mode`). Receives selection data.
+ * @property {?function} [options.beforeClose=null] Callback executed before the widget/dialog closes. Return false to prevent closing.
+ * @property {?function} [options.onClose=null] Callback executed after the widget/dialog has closed.
+ * @property {boolean} [options.keep_visible_on_selection=false] If true and `select_mode` is 'select_single', prevents the dialog from closing automatically on selection.
+ * @property {boolean} [options.no_bottom_button_bar=false] If true, suppresses the default bottom button bar in dialog mode.
+ * @property {?Array<object>} [options.btn_array=null] Custom array of button definitions for the dialog's button pane.
+ * @property {boolean} [options.add_to_begin=false] If true, new items added to lists/caches are prepended instead of appended.
+ * @property {?string} [options.default_palette_class=null] CSS class to apply for theming, typically a palette class like 'ui-heurist-admin'.
+ * @property {?jQuery} [options.parent_dialog=null] Reference to a parent jQuery UI dialog, used for positioning new dialogs relative to it.
+ */
 $.widget( "heurist.manageEntity", {
 
     // default options
@@ -140,7 +197,7 @@ $.widget( "heurist.manageEntity", {
     },
     
     //system name of entity  - define it to load entity config from server
-    _entityName: '', 
+    _entityName: '', // System name of the entity, to be overridden by child widgets. Used to load entity configuration from the server.
     
     //selected records HRecordSet
     _selection:null,
@@ -160,15 +217,26 @@ $.widget( "heurist.manageEntity", {
     
     _innerTitle: null,
     
-    // the widget's constructor
+    /**
+     * @brief Widget constructor.
+     * @memberof heurist.manageEntity
+     * @protected
+     * @description Placeholder for constructor logic. Currently empty.
+     */
     _create: function() {
         // prevent double click to select text
        
     }, //end _create
     
-    //
-    //  load configuration and call _initControls
-    //
+    /**
+     * @brief Initializes the widget, including its layout and loading entity configuration.
+     * @memberof heurist.manageEntity
+     * @protected
+     * @description Sets up the basic HTML structure based on `options.layout_mode`.
+     * Initializes dialog if `options.isdialog` is true.
+     * Loads entity configuration via `HAPI4.EntityMgr.getEntityConfig` if `_entityName` is set,
+     * then calls `_initControls` and `onInitFinished` callback.
+     */
     _init: function() {
 
             
@@ -352,9 +420,11 @@ $.widget( "heurist.manageEntity", {
         }
     },
 
-    //
-    //
-    //    
+    /**
+     * @brief Sets the title of the widget or its containing dialog.
+     * @memberof heurist.manageEntity
+     * @param {string} title The new title.
+     */
     setTitle: function(title){
         
         this.options['title'] = title;
@@ -366,11 +436,16 @@ $.widget( "heurist.manageEntity", {
         }
     },
       
-    //  
-    // invoked from _init after loading of entity configuration    
-    // in base widget: init resultList, adds search and edit panels
-    // in descendat: init ui listeners and init searchEntity
-    //
+    /**
+     * @brief Initializes the main controls of the widget after entity configuration is loaded.
+     * @memberof heurist.manageEntity
+     * @protected
+     * @description Sets the widget title. Initializes the result list (`$.heurist.resultList`)
+     * with configurations for selection mode, pagination, renderers, and event handlers.
+     * Initializes the edit panel. If `options.isdialog` and not `edit_addrecordfirst`, opens the dialog.
+     * Applies competency level styling.
+     * @returns {boolean} Returns false if entity configuration is missing, otherwise true.
+     */
     _initControls:function(){
         
         if(!this._entityName || $.isEmptyObject(this.options.entity)){
@@ -468,21 +543,33 @@ $.widget( "heurist.manageEntity", {
         //extend ===========    
     },
 
-    //Called whenever the option() method is called
-    //Overriding this is useful if you can defer processor-intensive changes for multiple option change
+    /**
+     * @brief Called when options are changed after widget initialization.
+     * @memberof heurist.manageEntity
+     * @protected
+     * @description Applies the new options using `_superApply`.
+     */
     _setOptions: function( ) {
         this._superApply( arguments );
     },
 
-    /* 
-    * private function 
-    * show/hide buttons depends on current login status
-    */
+    /**
+     * @brief Placeholder for refresh logic.
+     * @memberof heurist.manageEntity
+     * @protected
+     * @description Intended to show/hide buttons based on login status, but currently empty.
+     */
     _refresh: function(){
 
     },
-    // 
-    // custom, widget-specific, cleanup.
+
+    /**
+     * @brief Cleans up the widget upon destruction.
+     * @memberof heurist.manageEntity
+     * @protected
+     * @description Removes generated elements (search form, list, edit form, toolbar)
+     * and unbinds document click listeners. Resets selection.
+     */
     _destroy: function() {
         // remove generated elements
         if(this.searchForm) this.searchForm.remove();
@@ -2064,3 +2151,4 @@ $.widget( "heurist.manageEntity", {
     }
 });
 
+[end of hclient/widgets/entity/manageEntity.js]

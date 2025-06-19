@@ -1,12 +1,15 @@
 /**
-* manageUsrSavedSearches.js - main widget to manage usrSavedSearches
-*
+* @file manageUsrSavedSearches.js
+* @brief Manages User Saved Search entities.
+* @fileOverview Provides a UI for users to manage their saved searches. This includes listing, (re)naming, updating, and deleting saved search configurations.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*  
@@ -17,14 +20,34 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
+/**
+ * @class heurist.manageUsrSavedSearches
+ * @brief Widget for managing User Saved Searches.
+ * @augments $.heurist.manageEntity
+ * @description This widget allows users to manage their saved search configurations.
+ * It supports listing saved searches, creating new ones (implicitly by saving a current search elsewhere),
+ * editing their names and notes, and deleting them.
+ *
+ * @property {string} layout_mode Defines the overall layout structure, set to 'short'.
+ * @property {boolean} use_cache If true, client-side caching might be used for data; set to false.
+ * @property {boolean} edit_need_load_fullrecord If true, a full record load is required for editing saved search details; set to true.
+ * @property {number} edit_height Default height for the edit dialog of a saved search, set to 640.
+ * @property {number} height Default height of the widget, set to 640.
+ * @property {number} width Default width of the widget. Adjusted based on `options.edit_mode` and `options.select_mode` (e.g., 790 in 'editonly', ~750 in selection modes).
+ * @property {?number} svs_UGrpID If provided, the widget contextually manages saved searches for a specific user group. This can affect the title and filtering.
+ */
 $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
    
     _entityName:'usrSavedSearches',
 
-    //
-    //
-    //    
+    /**
+     * @brief Initializes the widget.
+     * @override
+     * @memberof heurist.manageUsrSavedSearches
+     * Sets default options for layout mode, caching, dimensions, and other
+     * configurations specific to managing user saved searches. It adjusts the width
+     * based on `edit_mode` and `select_mode`.
+     */
     _init: function() {
         
         this.options.layout_mode = 'short';
@@ -52,9 +75,16 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         this._super();
     },
     
-    //  
-    // invoked from _init after load entity config    
-    //
+    /**
+     * @brief Initializes the controls for the widget.
+     * @override
+     * @memberof heurist.manageUsrSavedSearches
+     * @returns {boolean} False if the parent `_initControls` fails, otherwise true.
+     * Configures `options.resultList` with a custom header renderer.
+     * Calls the parent `_initControls`. If in 'editonly' mode, it calls `_initEditorOnly` (assumed to be inherited).
+     * Sets the widget title based on context (e.g., `options.svs_UGrpID`).
+     * Initializes the search form (`searchUsrSavedSearches`) and sets up event listeners.
+     */
     _initControls: function() {
         
         this.options.resultList = {
@@ -67,7 +97,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
             +'<div style="width:12em;border-right:none;border-left:1px solid gray;">Notes</div>'
             +'<div style="position:absolute;width:7em;right:270px;border-right:none;border-left:1px solid gray">Group</div>'
                     
-                    if (this.options.select_mode=='manager'){
+                    if (this.options.select_mode=='manager'){ // this.options refers to resultList options here
                         s = s+'<div style="position:absolute;right:4px;width:60px">Edit</div>';
                     }
                     
@@ -81,7 +111,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         }
 
         if(this.options.edit_mode=='editonly'){
-            this._initEditorOnly();
+            this._initEditorOnly(); // Assumed to be inherited or mixed in
             return;
         }
 
@@ -90,7 +120,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         //update dialog title
         if(this.options.isdialog){ // &&  !this.options.title
             let title = null;
-            let usr_ID = 0;
+            let usr_ID = 0; // Corresponds to svs_UGrpID for context
             
             
             if(this.options.title){
@@ -105,8 +135,8 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
             }else
             if(this.options.svs_UGrpID>0){
                 usr_ID = this.options.svs_UGrpID;
-                title = 'Manage Users of Workgroup #'+this.options.svs_UGrpID+': ';
-            }else /*if(this.options.ugl_GroupID<0){
+                title = 'Manage Users of Workgroup #'+this.options.svs_UGrpID+': '; // Title seems incorrect here, likely should be 'Manage Saved Searches for Group'
+            }else /*if(this.options.ugl_GroupID<0){ // This condition seems to be from another widget
                 usr_ID = Math.abs(this.options.ugl_GroupID);
                 title = 'Select Users to add to Workgroup #'+usr_ID+': ';
             }else*/
@@ -161,9 +191,17 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
     
 
     //----------------------
-    //
-    //
-    //
+    /**
+     * @brief Renders a single saved search item in the list.
+     * @override
+     * @memberof heurist.manageUsrSavedSearches
+     * @param {HRecordSet} recordset The recordset containing the item.
+     * @param {object} record The specific record object for the item to render.
+     * @returns {string} HTML string representing the saved search item.
+     * Formats the display of a saved search, including its name, an icon indicating
+     * search type (e.g., simple, with rules), the group it belongs to, and notes.
+     * Includes edit/delete buttons if in 'manager' select mode and 'popup' edit mode.
+     */
     , _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){
@@ -189,7 +227,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         let params = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
         
         let iconBtn = 'ui-icon-search';
-        if(params.type==3){
+        if(params.type==3){ // Assuming type 3 is box query
             iconBtn = 'ui-icon-box';
         }else {
             if(params.type==1){ //withrules
@@ -221,10 +259,10 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
             html = html 
                 + '<div class="rec_view_link logged-in-only" style="width:60px">'
-                + '<div title="Click to edit reminder" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit"  style="height:16px">'
+                + '<div title="Click to edit reminder" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit"  style="height:16px">' // Title seems incorrect, should be "edit filter/search"
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
                 + '</div>'
-                +'<div title="Click to delete reminder" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete"  style="height:16px">'
+                +'<div title="Click to delete reminder" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete"  style="height:16px">' // Title seems incorrect
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
                 + '</div></div>';
         }
@@ -236,7 +274,17 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         
     },
     
-    //overwritten    
+    /**
+     * @brief Fetches full data for specified saved search record IDs.
+     * @override
+     * @memberof heurist.manageUsrSavedSearches
+     * @param {string[]} arr_ids An array of saved search record IDs to fetch.
+     * @param {number} pageno The page number for pagination.
+     * @param {function} callback The function to call with the server response.
+     * Constructs a request to search for 'usrSavedSearches' entities.
+     * If `svs_UGrpID` is specified in the search form (context of a specific group),
+     * it includes this group ID in the request.
+     */
     _recordListGetFullData:function(arr_ids, pageno, callback){
 
         let request = {
@@ -259,8 +307,14 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
     
     
     //-----
-    // adding group ID value for new user
-    //
+    /**
+     * @brief Performs actions after the edit form for a saved search is initialized.
+     * @override
+     * @memberof heurist.manageUsrSavedSearches
+     * Calls the parent's `_afterInitEditForm`.
+     * The commented-out code suggests potential past functionality related to setting
+     * group ID or hiding controls based on admin status/user ID, but it's currently inactive.
+     */
     _afterInitEditForm: function(){
 
         this._super();
@@ -289,8 +343,18 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         */
     },    
     
-    // update list after save (refresh)
-    //
+    /**
+     * @brief Handles events after a saved search record is saved.
+     * @override
+     * @memberof heurist.manageUsrSavedSearches
+     * @param {number} recID The ID of the saved search.
+     * @param {object} fieldvalues The saved field values.
+     * If a new search was saved in 'select_single' mode, it selects it and closes.
+     * If a new search was saved, it defaults `ugl_Role` to 'member' (though this seems like a leftover, as saved searches don't have user roles).
+     * Calls the parent `_afterSaveEventHandler`.
+     * If not in 'editonly' mode, updates the local recordset and refreshes the list.
+     * Otherwise (in 'editonly' mode), closes the dialog.
+     */
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
         // close on addition of new record in select_single mode    
@@ -304,7 +368,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         }
         
         if (this._currentEditID<0) {
-            fieldvalues['ugl_Role'] = 'member';    
+            fieldvalues['ugl_Role'] = 'member';    // This seems like a copy-paste artifact, usrSavedSearches don't have ugl_Role
         }
         
         this._super( recID, fieldvalues );
@@ -317,6 +381,15 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         }
     },
     
+    /**
+     * @brief Handles the deletion of a saved search, with a confirmation prompt.
+     * @override
+     * @memberof heurist.manageUsrSavedSearches
+     * @param {boolean} [unconditionally=false] If true, deletes without confirmation.
+     * If `unconditionally` is false (the default), it shows a confirmation dialog
+     * asking "Are you sure you wish to delete this filter?". If confirmed, or if
+     * `unconditionally` is true, it calls the parent's `_deleteAndClose` method.
+     */
     _deleteAndClose: function(unconditionally){
     
         if(unconditionally===true){
@@ -324,7 +397,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         }else{
             let that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this filter?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this filter?', function(){ that._deleteAndClose(true); },
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     },

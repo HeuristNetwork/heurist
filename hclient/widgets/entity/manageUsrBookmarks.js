@@ -1,12 +1,15 @@
 /**
-* manageUsrBookmarks.js - main widget to manage users bookmarks
-*
+* @file manageUsrBookmarks.js
+* @brief Manages User Bookmark entities.
+* @fileOverview Provides a UI for users to manage their personal bookmarks of records or other items within Heurist. This includes creating, listing, editing (e.g., notes), and deleting bookmarks.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*  
@@ -20,6 +23,21 @@
 //
 // there is no search, select mode for bookmarks - only edit
 //
+/**
+ * @class heurist.manageUsrBookmarks
+ * @brief Widget for managing User Bookmarks.
+ * @augments $.heurist.manageEntity
+ * @description This widget provides an interface for users to manage their personal bookmarks.
+ * It typically operates in 'editonly' mode to directly edit a bookmark associated with a specific record.
+ *
+ * @property {string} default_palette_class Default CSS class for theming, typically 'ui-heurist-admin'.
+ * @property {string} edit_mode Set to 'editonly', as the widget is designed to edit a specific bookmark.
+ * @property {string} select_mode Set to 'manager'. In conjunction with 'editonly', this means no list selection is presented.
+ * @property {string} layout_mode Set to 'editonly', reinforcing that only the editing interface is shown.
+ * @property {number} width Default width of the widget, set to 620 pixels.
+ * @property {number} height Default height of the widget, typically 410 pixels if not otherwise specified.
+ * @property {?number} bkm_RecID The ID of the Heurist record that this bookmark pertains to. This is a key option used to load or create the correct bookmark.
+ */
 $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
    
     _entityName:'usrBookmarks',
@@ -27,6 +45,13 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
     //keep to refresh after modifications
     _keepRequest:null,
     
+    /**
+     * @brief Initializes the widget.
+     * @override
+     * @memberof heurist.manageUsrBookmarks
+     * Sets default options for palette class, edit mode (to 'editonly'), dimensions,
+     * and other configurations specific to managing a single user bookmark.
+     */
     _init: function() {
         
         if(!this.options.default_palette_class){
@@ -44,8 +69,15 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
     },
     
     //  
-    // invoked from _init after load entity config    
-    //
+    /**
+     * @brief Initializes the controls for the widget.
+     * @override
+     * @memberof heurist.manageUsrBookmarks
+     * @returns {boolean} False if the parent `_initControls` fails, otherwise true.
+     * Since the widget is 'editonly', this method directly attempts to load an existing
+     * bookmark for the given `options.bkm_RecID`. If found, it opens the edit form for that
+     * bookmark. If not found, it opens a new bookmark form.
+     */
     _initControls: function() {
         
         if(!this._super()){
@@ -88,7 +120,14 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
         return true;
     },
     
-    // change label for remove
+    /**
+     * @brief Customizes the buttons for the edit dialog.
+     * @override
+     * @memberof heurist.manageUsrBookmarks
+     * @returns {Array<object>} An array of button definition objects.
+     * Retrieves the default buttons from the parent widget and then modifies the "Remove"
+     * button's text to "Delete bookmark".
+     */
     _getEditDialogButtons: function(){
         let btns = this._super();
         
@@ -109,6 +148,15 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
     },
     
 //----------------------------------------------------------------------------------    
+    /**
+     * @brief Handles the deletion of a bookmark, with a confirmation prompt.
+     * @override
+     * @memberof heurist.manageUsrBookmarks
+     * @param {boolean} [unconditionally=false] If true, deletes without confirmation.
+     * If `unconditionally` is false (the default), it shows a confirmation dialog
+     * asking "Are you sure you wish to delete this bookmark?". If confirmed, or if
+     * `unconditionally` is true, it calls the parent's `_deleteAndClose` method.
+     */
     _deleteAndClose: function(unconditionally){
     
         if(unconditionally===true){
@@ -116,20 +164,38 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
         }else{
             let that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this bookmark?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this bookmark?', function(){ that._deleteAndClose(true); },
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     },
 
+    /**
+     * @brief Saves the bookmark.
+     * @override
+     * @memberof heurist.manageUsrBookmarks
+     * @param {?object} fields Field values to save. If null, values are retrieved from the form.
+     * @param {string|function} afteraction Action to perform after saving.
+     * Ensures that `bkm_RecID` (the ID of the record being bookmarked) is set from
+     * `this.options.bkm_RecID` before calling the parent's `_saveEditAndClose` method.
+     */
     _saveEditAndClose: function( fields, afteraction ){
         
         let ele2 = this._editing.getFieldByName('bkm_RecID');
         ele2.editing_input('setValue', this.options.bkm_RecID );
         
-        this._super();
+        this._super(); // Calls parent _saveEditAndClose, which will handle fields and afteraction
     },
     
     
+    /**
+     * @brief Handles events after a bookmark is saved.
+     * @override
+     * @memberof heurist.manageUsrBookmarks
+     * @param {number} recID The ID of the saved bookmark.
+     * @param {object} fields The saved field values.
+     * Calls the parent's `_afterSaveEventHandler`.
+     * Closes the dialog forcefully (to avoid warnings, as it's 'editonly').
+     */
     _afterSaveEventHandler: function( recID, fields ){
         this._super( recID, fields );
         this.closeDialog(true); //force to avoid warning

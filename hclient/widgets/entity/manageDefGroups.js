@@ -1,12 +1,15 @@
 /**
-* manageDefGroups.js - abstract base widget for manageDefRecTypeGroups and manageDefDetailTypeGroups
-*
+* @file manageDefGroups.js
+* @brief Manages generic group entities.
+* @fileOverview Provides a base UI widget for managing generic group structures within Heurist. This widget is typically extended by more specific group management widgets (e.g., for Detail Type Groups, Record Type Groups). It handles common functionalities like listing, creating, editing, deleting, and reordering groups.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*  
@@ -17,13 +20,34 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
+/**
+ * @class heurist.manageDefGroups
+ * @brief Base widget for managing generic group entities.
+ * @augments $.heurist.manageEntity
+ * @property {string} [default_palette_class='ui-heurist-design'] Default palette class for the widget.
+ * @property {boolean} [innerTitle=false] Whether to display an inner title within the widget.
+ * @property {string} [layout_mode='short'] The layout mode for the widget.
+ * @property {boolean} [use_cache=true] Whether to use caching for entity data.
+ * @property {string} select_mode Determines selection behavior. If not 'manager', edit_mode is set to 'none' and width is adjusted.
+ * @property {string} edit_mode Determines editing behavior. Can be 'inline' or 'popup'. If select_mode is not 'manager', this is set to 'none'.
+ * @property {number} width Default width of the widget, adjusted based on select_mode and edit_mode.
+ * @property {boolean} isFrontUI If true, adapts UI for front-end display, adjusting layout and adding specific controls.
+ * @property {?function} onSelect Callback function executed when a group is selected, particularly relevant when select_mode is not 'manager'.
+ * @property {?Array<number|string>} selection_on_init An array of record IDs to pre-select when the widget initializes.
+ */
 $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
     
-    _entityName: 'to be specified in descendant',
-    _entityPrefix: '',
-    _title:'',
+    _entityName: 'to be specified in descendant', // To be overridden by child widgets
+    _entityPrefix: '', // To be overridden by child widgets, e.g., 'rtg' for Record Type Groups, 'dtg' for Detail Type Groups
+    _title:'', // To be overridden by child widgets, used as the title in isFrontUI mode
     
+    /**
+     * @brief Initializes the widget.
+     * @memberof heurist.manageDefGroups
+     * @override
+     * @description Sets default options, adjusts UI based on `select_mode` and `isFrontUI`,
+     * and registers an event listener for `ON_STRUCTURE_CHANGE` to refresh data.
+     */
     _init: function() {
 
         this.options.default_palette_class = 'ui-heurist-design';
@@ -68,18 +92,39 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
         
     },
     
+    /**
+     * @brief Cleans up the widget upon destruction.
+     * @memberof heurist.manageDefGroups
+     * @override
+     * @description Removes the `ON_STRUCTURE_CHANGE` event listener.
+     */
     _destroy: function() {
        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
        this._super(); 
     },
     
+    /**
+     * @brief Placeholder for handling drop events when an item is moved to a group.
+     * @memberof heurist.manageDefGroups
+     * @param {number} type_ID The ID of the item being dropped.
+     * @param {number} group_ID The ID of the group it's dropped onto.
+     * @description This method is intended to be overridden by descendant widgets
+     * to implement specific logic for when an item (e.g., a Record Type or Detail Type)
+     * is dragged and dropped onto a group in the list.
+     */
     _addOnDrop: function(type_ID, group_ID){
         //to be implemented in descendant 
     },
     
-    //  
-    // invoked from _init after load entity config    
-    //
+    /**
+     * @brief Initializes the controls for the widget.
+     * @memberof heurist.manageDefGroups
+     * @override
+     * @description Sets up the record list with sortable and droppable capabilities.
+     * If `isFrontUI` is true, it configures toolbar buttons for adding groups and saving order.
+     * Loads initial data.
+     * @returns {boolean} False if the parent's `_initControls` fails, otherwise true.
+     */
     _initControls: function() {
 
         if(!this._super()){
@@ -153,9 +198,12 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
         return true;
     },    
 
-    //
-    //
-    //
+    /**
+     * @brief Loads or reloads the group data.
+     * @memberof heurist.manageDefGroups
+     * @description Fetches entity data for the `_entityName` and updates the record list.
+     * If `selection_on_init` option was set, it attempts to select those records.
+     */
     _loadData: function(){
         let that = this;
         window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,
@@ -170,10 +218,17 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
         // this.selectRecordInRecordset();
     },
 
-    //----------------------
-    //
-    // customized item renderer for search result list
-    //
+    /**
+     * @brief Renders a single group item in the list.
+     * @memberof heurist.manageDefGroups
+     * @override
+     * @param {HRecordSet} recordset The recordset containing the data.
+     * @param {object} record The record object (group) to render.
+     * @returns {string} HTML string representing the list item.
+     * @description Displays the group name. If the name is 'Trash', a trash icon is shown.
+     * Includes edit/delete buttons if not 'Trash' and in 'popup' edit mode.
+     * Also includes a selection pointer icon.
+     */
     _recordListItemRenderer: function(recordset, record){
         
         let recID   = recordset.fld(record, this._entityPrefix+'_ID');
@@ -212,9 +267,16 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
         
     },
 
-    //
-    // update list after save (refresh)
-    //
+    /**
+     * @brief Handles events after a group record is saved.
+     * @memberof heurist.manageDefGroups
+     * @override
+     * @param {number} recID The ID of the saved group.
+     * @param {object} fieldvalues The values of the saved group.
+     * @description If in 'editonly' mode, selects the record and closes. Otherwise, calls parent's handler.
+     * If it was an insert, triggers 'save-order' and selects the first record.
+     * Triggers a refresh event for the entity type.
+     */
     _afterSaveEventHandler: function( recID, fieldvalues ){
         
         if(this.options.edit_mode=='editonly'){
@@ -236,9 +298,14 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
         
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Handles events after a group record is deleted.
+     * @memberof heurist.manageDefGroups
+     * @override
+     * @param {number} recID The ID of the deleted group.
+     * @description Calls parent's handler, triggers a refresh event, and selects the first record in the list.
+     * Note: Original method name might have a typo "EvenHandler" vs "EventHandler".
+     */
     _afterDeleteEvenHandler: function( recID ){
         this._super( recID );
         this._triggerRefresh(this._entityPrefix, recID);   
@@ -246,9 +313,14 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
         this.selectRecordInRecordset();
     },
     
-    //
-    // cant remove group with assigned fields
-    //     
+    /**
+     * @brief Deletes the current group record.
+     * @memberof heurist.manageDefGroups
+     * @override
+     * @param {boolean} unconditionally If true, deletes without confirmation.
+     * @description Prompts for confirmation before deleting, unless `unconditionally` is true.
+     * It does not check for assigned fields here; that might be handled by DB constraints or specific implementations.
+     */
     _deleteAndClose: function(unconditionally){
    
         if(unconditionally===true){
@@ -263,9 +335,15 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
         }
     },
     
-    //
-    // extend for save order
-    //
+    /**
+     * @brief Handles actions triggered by events, such as button clicks.
+     * @memberof heurist.manageDefGroups
+     * @override
+     * @param {Event} event The event object.
+     * @param {object|string} action The action object (typically containing `action` and `recID`) or action string.
+     * @description Extends the parent's `_onActionListener`. Handles 'save-order' to persist
+     * the new order of groups and 'trash' to select the trash group if `onSelect` is configured.
+     */
     _onActionListener: function(event, action){
 
         let isresolved = this._super(event, action);

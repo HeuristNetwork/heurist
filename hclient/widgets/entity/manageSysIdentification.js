@@ -1,12 +1,15 @@
 /**
-* manageDefDetailTypeGroups.js - main widget mo manage defDetailTypeGroups
-*
+* @file manageSysIdentification.js
+* @brief Manages System Identification and Access Control settings.
+* @fileOverview Provides a UI for administrators to configure system identification, authentication methods (e.g., LDAP, Shibboleth), IP whitelisting/blacklisting, and other access control mechanisms.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*  
@@ -17,11 +20,33 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
+/**
+ * @class heurist.manageSysIdentification
+ * @brief Widget for System Identification and Access Control.
+ * @augments $.heurist.manageEntity
+ * @description This widget provides an interface for administrators to configure
+ * system-wide identification, authentication, and access control settings.
+ * It operates in 'editonly' mode, directly loading the single system identification record for editing.
+ *
+ * @property {string} default_palette_class Default CSS class for theming, set to 'ui-heurist-design'.
+ * @property {string} edit_mode Set to 'editonly', as this widget edits a single, specific system record.
+ * @property {string} select_mode Set to 'manager'. In conjunction with 'editonly', this means no list selection is presented.
+ * @property {string} layout_mode Set to 'editonly', reinforcing that only the editing interface for the system record is shown.
+ * @property {number} width Default width of the widget, set to 1020 pixels.
+ * @property {number} height Default height of the widget, set to 800 pixels.
+ * @property {boolean} use_cache If true, client-side caching might be used for data; set to true.
+ */
 $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
     
     _entityName:'sysIdentification',
     
+    /**
+     * @brief Initializes the widget.
+     * @override
+     * @memberof heurist.manageSysIdentification
+     * Sets default options for palette class, edit mode (to 'editonly'), dimensions,
+     * and other configurations specific to managing system identification settings.
+     */
     _init: function() {
 
         this.options.default_palette_class = 'ui-heurist-design';
@@ -36,6 +61,17 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         this._super();
     },
     
+    /**
+     * @brief Initializes the controls for the widget.
+     * @override
+     * @memberof heurist.manageSysIdentification
+     * @returns {boolean} False if the parent `_initControls` fails, otherwise true.
+     * Fetches the system identification data (expected to be a single record) and
+     * then calls `addEditRecord` to display it in the form, as this widget is 'editonly'.
+     * It also sets up a 'mouseleave' event handler on the widget's main element
+     * to potentially trigger `defaultBeforeClose` if the window loses focus,
+     * unless the target is a button (e.g., from a select popup).
+     */
     _initControls: function() {
 
         if(!this._super()){
@@ -68,7 +104,14 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         return true;
     }, 
     
-    // change label for remove
+    /**
+     * @brief Customizes the buttons for the edit dialog.
+     * @override
+     * @memberof heurist.manageSysIdentification
+     * @returns {Array<object>} An array of button definition objects.
+     * Retrieves the default buttons from the parent widget and then removes the "Remove"
+     * button, as the system identification record should not be deleted.
+     */
     _getEditDialogButtons: function(){
         let btns = this._super();
         
@@ -83,7 +126,18 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         return btns;
     },
     
-    
+    /**
+     * @brief Performs actions after the edit form is initialized.
+     * @override
+     * @memberof heurist.manageSysIdentification
+     * Calls the parent `_afterInitEditForm`.
+     * Customizes the appearance of form field labels (wider).
+     * Sets up the file uploader's paste zone for the entire form.
+     * Hides the 'sys_URLCheckFlag' field if the user is not a super admin (access level < 2).
+     * Initializes 'sys_AllowRegistration' and 'sys_AllowUserImportAtLogin' fields based on
+     * the bitmask value of 'sys_AllowRegistration' from the loaded record.
+     * Resets the modified flag of the editing widget.
+     */
     _afterInitEditForm: function(){
 
         const record = this._cachedRecordset.getFirstRecord();
@@ -114,6 +168,20 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         this._editing.setModified(0);
     },
 	
+    /**
+     * @brief Saves the system identification settings and handles follow-up actions.
+     * @override
+     * @memberof heurist.manageSysIdentification
+     * @param {?object} fields Field values to save. If null, values are retrieved from the form.
+     * @param {string|function} afterAction Action to perform after saving (e.g., 'close', callback).
+     * @param {string|function} [onErrorAction] Action if an error occurs.
+     * Prepares field data before saving:
+     * - Combines `sys_AllowRegistration` and `sys_AllowUserImportAtLogin` into the `sys_AllowRegistration` bitmask.
+     * - Validates and formats `sys_SyncDefsWithDB` (Zotero key).
+     * - Stringifies `sys_ExternalReferenceLookups` from `HAPI4.sysinfo['service_config']`.
+     * Calls the parent `_saveEditAndClose` to perform the actual save operation.
+     * Removes 'mouseleave' handler if not in dialog mode.
+     */
     _saveEditAndClose: function( fields, afterAction, onErrorAction ){
 
         let that = this;

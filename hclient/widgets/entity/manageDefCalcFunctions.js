@@ -1,12 +1,15 @@
 /**
-* manageDefCalcFunctions.js - main widget to manage field calculations
-*
+* @file manageDefCalcFunctions.js
+* @brief Manages Defined Calculated Functions entities.
+* @fileOverview Provides a user interface for managing (CRUD operations) Defined Calculated Functions within the Heurist system. This includes listing, creating, editing, and deleting these functions.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*  
@@ -20,6 +23,25 @@
 //
 // there is no search, select mode for Calculations - only edit
 //
+/**
+ * @class heurist.manageDefCalcFunctions
+ * @brief A jQuery UI widget for managing Defined Calculated Functions entities.
+ * @augments $.heurist.manageEntity
+ * @property {string} [default_palette_class='ui-heurist-admin'] Default palette class for the widget.
+ * @property {boolean} [use_cache=false] Whether to use caching.
+ * @property {string} [edit_mode='popup'] The edit mode for the widget. Can be 'editonly' or 'popup'.
+ * @property {string} [select_mode='manager'] The select mode.
+ * @property {string} [layout_mode='editonly'] The layout mode, especially when edit_mode is 'editonly'.
+ * @property {number} [width=1000] The width of the widget, adjusted based on edit_mode.
+ * @property {number} [height=600] The height of the widget, adjusted based on edit_mode.
+ * @property {function} [beforeClose] Callback function executed before the widget closes, especially in 'editonly' mode.
+ * @property {boolean} [list_header=true] Whether to show the header for the result list.
+ * @property {string} [title='Select formula for calculated field'] The title of the widget, especially in select_mode.
+ * @property {number} [edit_height=640] The height of the edit form.
+ * @property {number} [edit_width=1200] The width of the edit form.
+ * @property {number} [cfn_ID] The ID of the Calculated Function to be edited in 'editonly' mode.
+ * @property {number} [rst_RecTypeID] The Record Type ID used in the formula editor context.
+ */
 $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
    
     _entityName:'defCalcFunctions',
@@ -27,6 +49,11 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
     //keep to refresh after modifications
     _keepRequest:null,
     
+    /**
+     * @brief Initializes the widget. Sets up options based on edit_mode and calls the parent's _init method.
+     * @memberof heurist.manageDefCalcFunctions
+     * @override
+     */
     _init: function() {
 
         if(!this.options.default_palette_class){
@@ -60,9 +87,16 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         this._super();
     },
     
-    //  
-    // invoked from _init after load entity config    
-    //
+    /**
+     * @brief Initializes the controls for the widget.
+     * @memberof heurist.manageDefCalcFunctions
+     * @override
+     * @description This method is invoked from _init after loading the entity configuration.
+     * It sets up the UI differently based on the 'edit_mode'.
+     * If 'editonly', it loads a specific calculation record or prepares for a new one.
+     * Otherwise, it sets up the search form and result list.
+     * @returns {boolean} False if the parent's _initControls fails, otherwise true.
+     */
     _initControls: function() {
         
         if(!this._super()){
@@ -124,8 +158,13 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
 
         return true;
     },
-    
-//----------------------------------------------------------------------------------    
+    /**
+     * @brief Validates the input fields before saving.
+     * @memberof heurist.manageDefCalcFunctions
+     * @override
+     * @description Extends the parent's _getValidatedValues method to add specific validation for the 'cfn_FunctionSpecification' field.
+     * @returns {?object} An object containing the validated field values, or null if validation fails.
+     */
     _getValidatedValues: function(){
         
         let fields = this._super();
@@ -141,9 +180,14 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         return fields;
     },
 
-    //
-    //
-    //
+    /**
+     * @brief Saves the edited record and closes the edit form.
+     * @memberof heurist.manageDefCalcFunctions
+     * @override
+     * @description Assigns record ID if in 'editonly' mode and validates record type selection before calling parent's _saveEditAndClose.
+     * @param {object} fields The field values to save.
+     * @param {string} afteraction The action to perform after saving.
+     */
     _saveEditAndClose: function( fields, afteraction ){
 
         //assign record id    
@@ -164,9 +208,14 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         this._super();
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Handles events after a record is saved.
+     * @memberof heurist.manageDefCalcFunctions
+     * @override
+     * @description Overrides the parent's _afterSaveEventHandler. If in 'editonly' mode, it closes the dialog. Otherwise, it updates the record set and refreshes the list.
+     * @param {number} recID The ID of the saved record.
+     * @param {object} fieldvalues The values of the saved record.
+     */
     _afterSaveEventHandler: function( recID, fieldvalues ){
         this._super( recID, fieldvalues );
         
@@ -178,6 +227,13 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         }
     },
 
+    /**
+     * @brief Deletes the current record and closes the edit form.
+     * @memberof heurist.manageDefCalcFunctions
+     * @override
+     * @description Prompts for confirmation before deleting, unless 'unconditionally' is true.
+     * @param {boolean} unconditionally If true, deletes without confirmation.
+     */
     _deleteAndClose: function(unconditionally){
     
         if(unconditionally===true){
@@ -190,6 +246,12 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         }
     },
     
+    /**
+     * @brief Performs actions after the edit form is initialized.
+     * @memberof heurist.manageDefCalcFunctions
+     * @override
+     * @description Sets up UI elements specific to calculated functions, including the formula editor and record type selection logic.
+     */
     _afterInitEditForm: function(){
 
         this._super();
@@ -256,9 +318,12 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
 
     },
 
-    //
-    // header for resultList
-    //     
+    /**
+     * @brief Renders the header for the result list.
+     * @memberof heurist.manageDefCalcFunctions
+     * @override
+     * @returns {string} HTML string for the list header. Currently returns a span for spacing.
+     */
     _recordListHeaderRenderer:function(){
         return '<span style="height:10px;background:none;"></span>'; // add space above result list
         /*
@@ -273,9 +338,14 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
     },
     
     //----------------------
-    //
-    //  overwrite standard render for resultList
-    //
+    /**
+     * @brief Renders a single item in the result list.
+     * @memberof heurist.manageDefCalcFunctions
+     * @override
+     * @param {HRecordSet} recordset The recordset containing the data.
+     * @param {object} record The record object to render.
+     * @returns {string} HTML string representing the list item.
+     */
     _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){
@@ -317,9 +387,14 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         
     },
     
-    //
-    // extend for edit formula
-    //
+    /**
+     * @brief Handles actions triggered by events, extending parent's listener.
+     * @memberof heurist.manageDefCalcFunctions
+     * @override
+     * @description Specifically handles the 'edit-formula' action to open the calculated field editor. Otherwise, calls the parent's _onActionListener.
+     * @param {Event} event The event object.
+     * @param {object} action The action object, typically containing `action` (string) and `recID` (number).
+     */
     _onActionListener: function(event, action){
 
         if(action && action.action=='edit-formula'){

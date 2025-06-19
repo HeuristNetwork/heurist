@@ -1,12 +1,15 @@
 /**
-* manageDefFileExtToMimetype.js - main widget mo manage extension to mimetype 
-*
+* @file manageDefFileExtToMimetype.js
+* @brief Manages File Extension to MIME Type mappings.
+* @fileOverview Provides a UI for managing the mapping between file extensions and MIME types within Heurist. This allows administrators to define how different file types are recognized and handled by the system.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*  
@@ -17,12 +20,25 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-
+/**
+ * @class heurist.manageDefFileExtToMimetype
+ * @brief Widget for managing file extension to MIME type mappings.
+ * @augments $.heurist.manageEntity
+ * @property {string} [default_palette_class='ui-heurist-admin'] Default palette class for the widget.
+ * @property {number} [width=570] Default width of the widget. Minimum 420. Adjusted if select_mode is not 'manager'.
+ * @property {number} [height=600] Default height of the widget.
+ * @property {boolean} [use_cache=true] Whether to use caching for entity data. This is set to true in `_initControls`.
+ */
 $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
     
     
     _entityName:'defFileExtToMimetype',
     
+    /**
+     * @brief Initializes the widget. Sets default palette, width, and height.
+     * @memberof heurist.manageDefFileExtToMimetype
+     * @override
+     */
     _init: function() {
 
         this.options.default_palette_class = 'ui-heurist-admin';
@@ -34,9 +50,14 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
         this._super();
     },
     
-    //  
-    // invoked from _init after load entity config    
-    //
+    /**
+     * @brief Initializes the controls for the widget.
+     * @memberof heurist.manageDefFileExtToMimetype
+     * @override
+     * @description Sets widget width based on select_mode, enables caching,
+     * initializes search form and result list, and loads initial data.
+     * @returns {boolean} False if the parent's _initControls fails, otherwise true.
+     */
     _initControls: function() {
         
         if(this.options.select_mode!='manager'){
@@ -83,10 +104,14 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
         return true;
     },    
     
-    //----------------------
-    //
-    // customized item renderer for search result list
-    //
+    /**
+     * @brief Renders a single item in the result list.
+     * @memberof heurist.manageDefFileExtToMimetype
+     * @override
+     * @param {HRecordSet} recordset The recordset containing the data.
+     * @param {object} record The record object to render.
+     * @returns {string} HTML string representing the list item.
+     */
     _recordListItemRenderer: function(recordset, record){
         
         function fld(fldname){
@@ -130,6 +155,14 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
     },
     */
     
+    /**
+     * @brief Further initializes the edit form, particularly adjusting field display based on edit mode.
+     * @memberof heurist.manageDefFileExtToMimetype
+     * @override
+     * @param {number} recID The ID of the record being edited. If less than 0, it's a new record.
+     * @description Sets the 'fxm_Extension' field to visible for new records and readonly for existing ones.
+     * Adjusts the layout of dialog buttons. Calls the parent's `_initEditForm_step3`.
+     */
     _initEditForm_step3: function(recID){
         
         if(recID<0){
@@ -145,6 +178,13 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
         this._super(recID);
     },
     
+    /**
+     * @brief Defines the buttons to be displayed in the edit dialog.
+     * @memberof heurist.manageDefFileExtToMimetype
+     * @override
+     * @returns {Array<object>} An array of button definition objects for the dialog.
+     * @description Returns a custom set of buttons: "Add New File Type", "Close", "Drop Changes", and "Save".
+     */
     _getEditDialogButtons: function(){
                                     
             let that = this;        
