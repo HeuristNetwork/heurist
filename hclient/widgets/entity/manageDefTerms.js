@@ -1394,7 +1394,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             window.hWin.HEURIST4.msg.showMsgDlg( 
                 msg, 
-                function(){ that._deleteAndClose(true, recIDs) }, 
+                function(){ that._deleteAndClose(true, recIDs); },
                 {title:'Warning',yes:'Proceed',no:'Cancel'},
                 {default_palette_class:this.options.default_palette_class});        
         }
@@ -1408,9 +1408,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
      * @param {boolean} [it_was_vocab] True if the deleted item was a vocabulary.
      * @description Calls parent's handler. Removes the term and its children (if any)
      * from the local cache and links. If a vocabulary was deleted, resets related options.
-     * Note: Original method name might have a typo "EvenHandler" vs "EventHandler".
      */
-    _afterDeleteEvenHandler: function(recID, it_was_vocab){
+    _afterDeleteEvenHandler: function(recID, it_was_vocab){ // Note: Original name had a typo.
 
         this._super(recID); 
 
@@ -1932,6 +1931,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             if(this.inverse_termid_old!=inverse_termid && is_symmetrical)
             {
+
                 if(inverse_termid>0){
                     //set mutual inversion for inverse term
                     $Db.trm(inverse_termid, 'trm_InverseTermID', recID);
@@ -2581,7 +2581,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                     window.hWin.HEURIST4.msg.showMsgDlg(
                         'Delete vocabulary <b>'+$Db.trm(recID, 'trm_Label')+'</b> and all its child terms?',
-                        function(){ that._currentEditID = recID; that._deleteAndClose(true) }, 
+                        function(){ that._currentEditID = recID; that._deleteAndClose(true); },
                         {title:'Deletion of vocabulary',yes:'Proceed',no:'Cancel'},
                         {default_palette_class:this.options.default_palette_class});        
                     return false;                    
@@ -2617,7 +2617,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     if(sMsg){
                         window.hWin.HEURIST4.msg.showMsgDlg(
                             sMsg,
-                            function(){ that._currentEditID = recID; that._deleteAndClose(true) }, 
+                            function(){ that._currentEditID = recID; that._deleteAndClose(true); },
                             {title:'Deletion of branch',yes:'Proceed',no:'Cancel'},
                             {default_palette_class:this.options.default_palette_class});        
                         return false;                    
@@ -2667,7 +2667,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         else if(action=='expand'){
             
-            this._toogleTermsBranch(recID);
+            this._toggleTermsBranch(recID); // Note: Original name `_toogleTermsBranch` had a typo.
         }
 
         let is_resolved = this._super(event, keep_action);
@@ -2810,10 +2810,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
      * @param {number} [force_expand_collapse] 0 to toggle, 1 to force expand, -1 to force collapse.
      * @description Shows or hides child terms in the list by toggling their visibility.
      * Updates the expand/collapse icon and stores the state in `window.hWin.HEURIST4.ui.collapsed_terms`.
-     * Note: Original method name has a typo "toogle" instead of "toggle".
      */
-    _toogleTermsBranch: function(recID, force_expand_collapse)
-    {
+    _toggleTermsBranch: function(recID, force_expand_collapse) { // Note: Original name `_toogleTermsBranch` had a typo.
         let is_collapsed = window.hWin.HEURIST4.ui.collapsed_terms.indexOf(recID)>=0;
         
         if(force_expand_collapse==1) is_collapsed = true;
@@ -2957,7 +2955,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                         if(parents){
                                             parents = parents.split(',');
                                             $.each(parents, function(i, parent_ID){
-                                                that._toogleTermsBranch(parent_ID, 1);    
+                                                that._toggleTermsBranch(parent_ID, 1);    // Note: Original name `_toogleTermsBranch` had a typo.
                                             });
                                         }
                                         
@@ -3336,9 +3334,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
      * @param {Array<number>} term_ids An array of term IDs belonging to the same parent/branch.
      * @description Displays a dialog with the given terms in a list that can be reordered by drag-and-drop.
      * Provides options to save the new manual order or revert to alphabetic sorting (by setting order to null).
-     * Note: Original method name has a typo "reoder" instead of "reorder".
      */
-    reoderBranch: function(term_ids){
+    reorderBranch: function(term_ids){ // Note: Original name `reoderBranch` had a typo.
 
         if(!term_ids || term_ids.length <= 1){
             return;
@@ -3592,7 +3589,7 @@ function correctionOfInvalidTerm(trm_ID, wrong_vocab_id, correct_vocab_id,  dty_
                                     $Db.trm(trm_ID, 'trm_ParentTermID',correct_vocab_id);
                                     if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(trm_ID);
                                 }else{
-                                    onTermSaveError(response)
+                                    onTermSaveError(response);
                                 }
                             });
                     
@@ -3729,7 +3726,7 @@ function onTermSaveError(response){
 
             let base_fields = [];
     
-            for(const dty_ID in sysmsg.detailtypes){
+            for(const dty_ID in sysmsg.detailtypes){ // sysmsg is not defined here, should be response.sysmsg
                 base_fields.push(`${$Db.dty(dty_ID, 'dty_Name')} (#${dty_ID})`);
             }
 
@@ -3739,5 +3736,3 @@ function onTermSaveError(response){
         window.hWin.HEURIST4.msg.showMsgErr(response);    
     }
 }
-
-

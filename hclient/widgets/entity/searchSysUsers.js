@@ -1,13 +1,16 @@
 /**
-* Search header for manageSysUsers manager
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file        searchSysUsers.js
+ * @brief       Provides a search interface for System Users.
+ * @fileOverview This widget handles the search functionality for System User accounts, allowing filtering by name, group, role, and status (active/inactive).
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\entity
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       4.0
+ */
 
 /*  
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
@@ -17,9 +20,42 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/**
+ * @class heurist.searchSysUsers
+ * @brief Search widget for System User accounts.
+ * @augments $.heurist.searchEntity
+ * @description This widget provides a user interface for searching system user accounts.
+ *              It allows filtering by user name, group membership, role within a group,
+ *              and active/inactive status.
+ *
+ * @property {?string} subtitle If provided, this text is displayed as an H3 subtitle within the widget.
+ * @property {string} [edit_mode='none'] Defines the editing capabilities available in the UI.
+ *           Impacts visibility of "Add New User" and "Find/Add User" buttons. Inherited, but its usage is prominent.
+ * @property {?number} ugl_GroupID If provided, the user search is contextualized to this specific Group ID.
+ *           If the ID is positive, it filters users within that group. If negative, it finds users *not* in the
+ *           group (identified by the absolute value of the ID). This option significantly affects the UI
+ *           for group and role selection.
+ *
+ * @listens heurist.searchSysUsers#onadd - Fired when the "Add New User" button is clicked.
+ * @listens heurist.searchSysUsers#onfind - Fired when the "Find/Add User" button is clicked.
+ */
 $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
 
-    //
+    /**
+     * @brief Initializes the controls for the System Users search widget.
+     * @override
+     * @memberof heurist.searchSysUsers
+     * @description Sets up various UI elements:
+     *              - An optional subtitle.
+     *              - A dropdown for selecting user groups (`input_search_group`), populated based on admin status.
+     *              - "Add New User" and "Find/Add User" buttons, with visibility and behavior
+     *                dependent on `options.edit_mode` and `options.ugl_GroupID`.
+     *              - A checkbox to include inactive users (`input_search_inactive`).
+     *              - A dropdown for user roles (`input_search_role`), often shown in context of a selected group.
+     *              - A sort type dropdown (`input_sort_type`).
+     *              Helper text visibility is adjusted based on `options.select_mode`.
+     *              Triggers an initial search upon completion.
+     */
     _initControls: function() {
         
         let that = this;
@@ -111,9 +147,17 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
     },  
 
     
-    //
-    // public methods
-    //
+    /**
+     * @brief Initiates a search for system users.
+     * @override
+     * @memberof heurist.searchSysUsers
+     * @description Constructs a search request based on the user name from `input_search`,
+     *              selected group from `input_search_group`, role from `input_search_role`,
+     *              and the "inactive" checkbox state.
+     *              Handles special logic for `options.ugl_GroupID` (filtering by group, or excluding from a group if negative).
+     *              Determines sort order based on `input_sort_type`.
+     *              Populates `this._search_request` and calls the parent `startSearch` method.
+     */
     startSearch: function(){
             
             let request = {}
@@ -159,7 +203,7 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
 
             if(this.options.ugl_GroupID < 0)
             {
-                request['ugr_Enabled'] = '-n';
+                request['ugr_Enabled'] = '-n'; // Ensure only enabled users are searched when excluding from a group
                 this.input_search_inactive.prop('disabled', true);
             }       
             
@@ -168,7 +212,7 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
                 request['sort:ugr_LastName'] = '1' 
             }else if(this.input_sort_type.val()=='recent'){
                 request['sort:ugr_ID'] = '-1' 
-            }else{
+            }else{ // name
                 request['sort:ugr_Name'] = '1';   
             }
             
