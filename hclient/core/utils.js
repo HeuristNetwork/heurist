@@ -578,8 +578,6 @@ window.hWin.HEURIST4.util = {
      * @returns {void}
      */
     windowOpenInPost: function(actionUrl, windowName, windowFeatures, params) {
-        
-    {
         let mapForm = document.createElement("form");
         let milliseconds = new Date().getTime();
         windowName = windowName+milliseconds;
@@ -606,7 +604,7 @@ window.hWin.HEURIST4.util = {
      * Calculates the width of the browser's scrollbar.
      * @returns {number} The scrollbar width in pixels.
      */
-getScrollBarWidth: function() {
+    getScrollBarWidth: function() {
         let $outer = $('<div>').css({visibility: 'hidden', width: 100, overflow: 'scroll'}).appendTo('body'),
             widthWithScroll = $('<div>').css({width: '100%'}).appendTo($outer).outerWidth();
         $outer.remove();
@@ -741,14 +739,6 @@ getScrollBarWidth: function() {
         return json;        
 
     },
-
-
-    /*: function(e){
-    for(var r=0,i=0;i<e.length;i++){
-    r=(r<<5)-r+e.charCodeAt(i),r&=r;   
-    }
-    return r
-    },*/
 
     hashString: function(str) {
 
@@ -1167,7 +1157,7 @@ String.prototype.htmlEscape = function() {
 }
 /*
 String.prototype.htmlUnescape = function() {
-    var e = document.createElement("textarea");
+    let e = document.createElement("textarea");
     e.innerHTML = this;
     // handle case of empty input
     return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;    
@@ -1207,32 +1197,6 @@ if (!Array.prototype.indexOf)
     };
 }
 
-
-
-/*
-if (!Array.prototype.unique){
-
-    Array.prototype.unique = function()
-    {
-        
-        //return $.grep(this, function(el, index) {
-       
-       
-        
-        
-            var n = {},r=[];
-            for(var i = 0; i < this.length; i++) 
-            {
-                if (!n[this[i]]) 
-                {
-                    n[this[i]] = true; 
-                    r.push(this[i]); 
-                }
-            }
-            return r;        
-    };
-}
-*/
 }
 
 
@@ -1245,9 +1209,9 @@ $.getStyles = function(path){
     window.hWin.HEURIST4.cssFilesAdded.push(path);
     */
 
-    var head = document.getElementsByTagName('head')[0] 
+    let head = document.getElementsByTagName('head')[0] 
     // Creating link element 
-    var style = document.createElement('link');
+    let style = document.createElement('link');
     style.href = path;
     style.type = 'text/css';
     style.rel = 'stylesheet';
@@ -1257,12 +1221,12 @@ $.getStyles = function(path){
 function selectorExists(selector) { 
     
     function getAllSelectors() { 
-        var ret = [];
-        for(var i = 0; i < document.styleSheets.length; i++) {
+        let ret = [];
+        for(let i = 0; i < document.styleSheets.length; i++) {
             if(document.styleSheets[i].href!=null) continue;
             try{
-                var rules = document.styleSheets[i].rules || document.styleSheets[i].cssRules;
-                for(var x in rules) {
+                let rules = document.styleSheets[i].rules || document.styleSheets[i].cssRules;
+                for(let x in rules) {
                     if(typeof rules[x].selectorText == 'string') ret.push(rules[x].selectorText);
                 }
             }catch(e){} //to avoid security error
@@ -1270,8 +1234,8 @@ function selectorExists(selector) {
         return ret;
     }
     
-    var selectors = getAllSelectors();
-    for(var i = 0; i < selectors.length; i++) {
+    let selectors = getAllSelectors();
+    for(let i = 0; i < selectors.length; i++) {
         if(selectors[i] == selector) return true;
     }
     return false;

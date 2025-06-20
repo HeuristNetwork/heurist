@@ -17,7 +17,7 @@
  * @since 4.0
  */
  
-/* global ActionHandler, HSystemMgr, HRecordSet, HLayout, HLayoutMgr, HRecordSearch */ // Consolidated globals
+/* global ActionHandler, HSystemMgr, HLayoutMgr */ 
 
 /**
 * Factory function for the Heurist objects.
@@ -32,42 +32,29 @@
 *    sysinfo
 *    is_publish_mode - false if Heurist is inited via main index.php and layout is not from the set of application (DH, EN, WebSearch)
 *
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/* global ActionHandler, HSystemMgr, HLayoutMgr */
-
-/*
-
-Properties:
-    baseURL
-    baseURL_pro
-    iconBaseURL - url for record type icon (rty_ID to be added)
-    database - current database name
-    sysinfo
-    is_publish_mode - false if Heurist is inited via main index.php and layout is not from the set of application (DH, EN, WebSearch)
-
-Localization routines (assigned to window.hWin)
-
-    HR  returns localized string
-    HRA = localize all elements with class slocale for given element
-    HRes = returns url or loads content for localized resource
-    HRJ = returns localized value for json (options in widget)
-
-LayoutMgr   HLayout object (@todo replace to new version from CMS)
-
-Classes for server interaction
-
-    SystemMgr - user credentials and system utilities
-    RecordMgr - Records SCRUD actions    
-    RecordSearch - wrapper for RecordMgr.search method
-    EntityMgr - SCRUD for database defenitions and user/groups
-
+* Localization routines (assigned to window.hWin)
+*
+*    HR  returns localized string
+*    HRA = localize all elements with class slocale for given element
+*    HRes = returns url or loads content for localized resource
+*    HRJ = returns localized value for json (options in widget)
+*
+* LayoutMgr   HLayout object (@todo replace to new version from CMS)
+*
+* Classes for server interaction
+*
+*    SystemMgr - user credentials and system utilities
+*    RecordMgr - Records SCRUD actions    
+*    RecordSearch - wrapper for RecordMgr.search method
+*    EntityMgr - SCRUD for database defenitions and user/groups
+* 
+* @constructor hAPI
+* @param {string} [_db] - The name of the database to connect to. If omitted, it's typically derived from the URL.
+* @param {function(boolean): void} [_oninit] - A callback function executed after initialization.
+*                                             Receives `true` if initialization is successful, `false` otherwise.
+* @param {string} [_baseURL] - Optional base URL for the Heurist server, used in embedded scenarios
+*                              where client and server locations differ. If omitted, it's auto-detected.
+* @returns {Object} The initialized hAPI instance with methods and properties for interacting with Heurist.
 */
 function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     const _className = "HAPI",

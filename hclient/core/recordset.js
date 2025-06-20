@@ -21,7 +21,7 @@
  * @since 4.0
  */
 
-/* global parseWKT, $Db */ 
+/* global parseWKT */ 
 
 /**
  * Factory function for creating HRecordSet objects.

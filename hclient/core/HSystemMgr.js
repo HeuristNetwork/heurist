@@ -20,7 +20,7 @@
  * @since 6.0
  */
  
-/* global prepared_params, $Db */
+/* global prepared_params */
 
 /**
  * @class HSystemMgr

@@ -196,9 +196,9 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
          */
         function processObject(obj){
             let display_val = '';
-            for(let key in s){
+            for(let key in obj){
                 if(display_val != ''){ display_val += ', '; }
-                display_val += s[key];
+                display_val += obj[key];
             }
             return display_val;
         }
