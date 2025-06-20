@@ -25,7 +25,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-/* global ActionHandler, HSystemMgr */
+/* global ActionHandler, HSystemMgr, HLayoutMgr */
 
 /*
 

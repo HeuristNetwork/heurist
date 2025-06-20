@@ -2105,7 +2105,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         if(!window.hWin.HEURIST4.util.isFunction($('body')['lookupBase'])){
 
             $.getScript(`${window.hWin.HAPI4.baseURL}hclient/widgets/lookup/lookupBase.js`, () => {
-                that._loadAuthorLookup(lookup_name, dialog_options);
+                that._loadAuthorLookup();
             }).fail(() => {
                 window.hWin.HEURIST4.msg.showMsgErr({
                     status: window.hWin.ResponseStatus.UNKNOWN_ERROR,
@@ -2116,7 +2116,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
             return;
         }
-
+        let $dlg;
         let dlg_opts = {
             mapping: {
                 dialog: 'lookupNakalaAuthor',
@@ -2141,6 +2141,6 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 }
             }
         };
-        window.hWin.HEURIST4.ui.showRecordActionDialog('lookupNakalaAuthor', dlg_opts);
+        $dlg = window.hWin.HEURIST4.ui.showRecordActionDialog('lookupNakalaAuthor', dlg_opts);
     }
 });

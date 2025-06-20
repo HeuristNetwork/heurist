@@ -29,6 +29,7 @@
  * @since       6.0
  */
 
+/* global EditorCodeMirror */
 /**
  * Widget for executing custom SPARQL queries against Wikidata and mapping results.
  * It provides a CodeMirror editor for SPARQL input and a dynamic interface for

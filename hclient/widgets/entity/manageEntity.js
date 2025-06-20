@@ -623,17 +623,17 @@ $.widget( "heurist.manageEntity", {
                     return true; 
              }
             
-             let s = 'User clicked action "'+action+'" for ';
+             //let s = 'User clicked action "'+action+'" for ';
              if(recID>0){
-                 s = s + 'rec# '+recID;
+                 //s = s + 'rec# '+recID;
                  
               //take records ID from selection   
              }else if(window.hWin.HEURIST4.util.isRecordSet(this._selection) && this._selection.length()>0){
-                 s = s + this._selection.length() + ' selected record';
+                 //s = s + this._selection.length() + ' selected record';
                  let recs = this._selection.getOrder();
                  recID = recs[recs.length-1];
              }else{
-                 s = 'Nothing selected';
+                 //s = 'Nothing selected';
                  recID = null;
              }
              
@@ -2144,5 +2144,3 @@ $.widget( "heurist.manageEntity", {
         });
     }
 });
-
-[end of hclient/widgets/entity/manageEntity.js]

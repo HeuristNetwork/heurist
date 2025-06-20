@@ -1166,7 +1166,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             
             const hasIcon = $Db.trmHasIcon(recID);
 
-            let recIcon = hasIcon?window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon', null, null, true):'';
+            //let recIcon = hasIcon?window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon', null, null, true):'';
 
             recTitle = '<div class="item truncate label_term rolloverTooltip"'
             +' style="'+sFontSize+sWidth+sBold+'" '+sHint+'>'

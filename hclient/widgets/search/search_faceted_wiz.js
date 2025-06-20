@@ -1729,8 +1729,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
             let allRectypesIds = rectypes.join(',');
 
-            for(let i = 1; i < rectypes.length; i++){
-            }
+            //for(let i = 1; i < rectypes.length; i++){ }
             
                 for(let j = 0; j < fieldIds.length; j++){
 
