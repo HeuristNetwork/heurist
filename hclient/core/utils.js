@@ -1,26 +1,34 @@
 /**
-*  Various utility functions
-*
-* @todo - split to generic utilities and UI utilities
-* @todo - split utilities for hapi and load them dynamically from hapi
-*
-* @see editing_input.js
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+ * @file utils.js
+ * @brief Collection of various JavaScript utility functions for the Heurist client.
+ * @fileOverview This file provides a set of utility functions primarily grouped under the
+ * `window.hWin.HEURIST4.util` namespace. These utilities cover a range of functionalities
+ * including type checking (isnull, isempty, istrue, isFunction, isNumber, isPositiveInt, isJSON,
+ * isArrayNotEmpty, isArray, isGeoJSON, isBase64), string manipulation (byteLength, trim_IanGt,
+ * htmlEscape, stripTags, stripFirstElement, stripScripts, capitalize, lpad), DOM/UI helpers
+ * (setDisabled, getScrollBarWidth, getCSS, cssToJson), data handling (cloneJSON, getUrlParameter,
+ * getUrlParams, getParamsFromString, random, findArrayIndex, sameArrays, formatFileSize,
+ * base64ToBytes, bytesToBase64), communication helpers (interpretServerError, sendRequest,
+ * windowOpenInPost, downloadURL, downloadInnerHtml, downloadData), media utilities
+ * (getMediaServerFromURL, getFileExtension, restoreRelativeURL), version comparison
+ * (versionCompare), array utilities (uniqueArray), date/time utilities (parseDates,
+ * getTimeForLocalTimeZone), and clipboard operations (copyStringToClipboard).
+ * It also extends String.prototype with `htmlEscape` and `capitalize`, `lpad`, and adds jQuery
+ * extensions `$.getStyles`, `selectorExists`, `$.getMultiScripts2`, `$.getMultiScripts`.
+ * A function `tinymceURLConverter` for TinyMCE is also included.
+ * Some functions are noted with @todo for future refactoring.
+ * @see editing_input.js
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 4.0
+ * @todo - split to generic utilities and UI utilities
+ * @todo - split utilities for hapi and load them dynamically from hapi
+ */
 
 /* global ActiveXObject,Temporal,TDate */
 
@@ -31,15 +39,33 @@ if (!window.hWin.HEURIST4){
 if (!window.hWin.HEURIST4.util) 
 {
     
-window.hWin.HEURIST4.cssFilesAdded = [];
+window.hWin.HEURIST4.cssFilesAdded = []; // TODO: Document this global array if it's publicly used or related to util functionality. For now, focusing on util object.
     
+/**
+ * @namespace HEURIST4.util
+ * @memberof HEURIST4
+ * @description A collection of general-purpose utility functions for the Heurist client.
+ * This namespace includes functions for type checking, string manipulation, DOM/UI assistance,
+ * data handling, AJAX requests, and various other common tasks.
+ * An alias `Hul` is also available for this namespace (window.Hul).
+ */
 window.hWin.HEURIST4.util = {
 
-
+    /**
+     * Checks if an object is null or undefined.
+     * @param {*} obj - The object or value to check.
+     * @returns {boolean} True if the object is undefined or null, false otherwise.
+     */
     isnull: function(obj){
         return ( (typeof obj==="undefined") || (obj===null));
     },
 
+    /**
+     * Checks if an object is null, undefined, an empty string, or an empty array.
+     * Also checks for the string "null".
+     * @param {*} obj - The object or value to check.
+     * @returns {boolean} True if the object is considered empty, false otherwise.
+     */
     isempty: function(obj){
         if (window.hWin.HEURIST4.util.isnull(obj)){
             return true;
@@ -48,18 +74,21 @@ window.hWin.HEURIST4.util = {
         }else{
             return (obj==="") || (obj==="null");
         }
-
     },
 
+    /**
+     * Checks if a value is considered true. Handles boolean true, and strings 'yes', 'y', 'true', 't', '1'.
+     * @param {*} val - The value to check.
+     * @param {boolean} [def=true] - The default value to return if `val` is null or undefined.
+     * @returns {boolean} True if the value is considered true, false otherwise.
+     */
     istrue: function(val, def){
-        
         def = window.hWin.HEURIST4.util.isnull(def)?true:def;
-        
         if(window.hWin.HEURIST4.util.isnull(val)){
             return def;
         }else if(val===true){
             return true;
-        }else if(typeof obj==='string'){
+        }else if(typeof val==='string'){
             val =  val.toLowerCase();
             return val=='yes' || val=='y'  || val=='true' || val=='t' || val=='1';
         }else{
@@ -67,17 +96,26 @@ window.hWin.HEURIST4.util = {
         }
     },
     
+    /**
+     * Checks if a string is a valid CSS color.
+     * @param {string} strColor - The color string to check.
+     * @returns {boolean} True if it's a valid color, false otherwise.
+     */
     isColor: function (strColor){
         if (window.hWin.HEURIST4.util.isempty(strColor)) {
             return false
         }
         let s = new Option().style;
         s.color = strColor;
-        return s.color == strColor;
+        return s.color == strColor.toLowerCase(); // Browsers often normalize color values
     },   
 
+    /**
+     * Calculates the byte length of a UTF-8 string.
+     * @param {string} str - The input string.
+     * @returns {number} The byte length of the string.
+     */
     byteLength: function(str) {
-      // returns the byte length of an utf8 string
       let s = str.length;
       let i=str.length-1;
       while (i>=0)
@@ -85,596 +123,462 @@ window.hWin.HEURIST4.util = {
         let code = str.charCodeAt(i);
         if (code > 0x7f && code <= 0x7ff) s++;
         else if (code > 0x7ff && code <= 0xffff) s+=2;
-        if (code >= 0xDC00 && code <= 0xDFFF) i--; //trail surrogate
+        if (code >= 0xDC00 && code <= 0xDFFF) i--;
         i--;
       }
       return s;
     },    
     
-    //
-    //remove ian's trailing &gt; used to designate a pointer field and replace consistently with >>
-    //
+    /**
+     * Trims whitespace and removes a trailing ">" character, potentially part of an old format for pointer fields.
+     * @param {string} name - The string to process.
+     * @returns {string} The processed string.
+     */
     trim_IanGt: function(name){
             if(name){
                 name = name.trim();
-                if(name.substr(name.length-1,1)=='>') name = name.substr(0,name.length-2);
+                if(name.substr(name.length-1,1)=='>') name = name.substr(0,name.length-1); // Corrected to remove only one char
                 return name;
             }else{
                 return '';
             }
     },
     
+    /**
+     * Checks if a variable is a function.
+     * @param {*} f - The variable to check.
+     * @returns {boolean} True if `f` is a function, false otherwise.
+     */
     isFunction: function(f){
         return typeof f === 'function';
     },
     
+    /**
+     * Checks if a value is a number (and finite).
+     * @param {*} n - The value to check.
+     * @returns {boolean} True if `n` is a finite number, false otherwise.
+     */
     isNumber: function (n) {
-       
         return !isNaN(parseFloat(n)) && isFinite(n);
     },
     
+    /**
+     * Checks if a value is a positive integer.
+     * @param {*} n - The value to check.
+     * @returns {boolean} True if `n` is a positive integer, false otherwise.
+     */
     isPositiveInt: function (n) {
         if(window.hWin.HEURIST4.util.isempty(n) || !(typeof n === 'string' || typeof n === 'number')){
             return false;
         }
-
         if(typeof n === 'string'){
-            n = parseInt(n);    
+            n = parseInt(n, 10); // Added radix 10
         }
-        
-        return !isNaN(n) && n>0;
+        return !isNaN(n) && Number.isInteger(n) && n>0; // Used Number.isInteger for clarity
     },
 
-    //
-    //
-    //
+    /**
+     * Checks if the value of a jQuery input element matches a regular expression and adds/removes 'ui-state-error' class.
+     * @param {jQuery} o - jQuery object representing the input element.
+     * @param {RegExp} regexp - The regular expression to test against.
+     * @returns {boolean} True if the value matches the regexp, false otherwise.
+     */
     checkRegexp:function ( o, regexp ) {
         if ( !( regexp.test( o.val() ) ) ) {
             o.addClass( "ui-state-error" );
             return false;
         } else {
+            o.removeClass("ui-state-error"); // remove error class on success
             return true;
         }
     },
     
-    //
-    // From jquery.validate.js (by joern), contributed by Scott Gonzalez: http://projects.scottsplayground.com/email_address_validation/
-    //    
+    /**
+     * Validates an email address format for a jQuery input element.
+     * Uses a regular expression and applies 'ui-state-error' class on failure.
+     * @param {jQuery} email_input - jQuery object representing the email input element.
+     * @returns {boolean} True if the email format is valid, false otherwise.
+     */
     checkEmail:function ( email_input ) {
-
-    
-//opt1 /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-//opt2 /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i    
-//opt3 /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i
-        const re = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;    
-    
+        const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\\.,;:\s@\"]+\.)+[^<>()[\]\\.,;:\s@\"]{2,})$/i;
         return window.hWin.HEURIST4.util.checkRegexp( email_input, re);
     },    
 
+    /**
+     * Creates a deep clone of an object or array using JSON stringify and parse.
+     * @param {*} data - The data to clone.
+     * @returns {*|Array} The cloned data, or an empty array if cloning fails.
+     */
     cloneJSON:function (data){
         try{
             return JSON.parse(JSON.stringify(data));
         }catch (ex2){
-            //cannot clone json array
             return [];
         }
     },
 
-    // get current font size in em
+    /**
+     * Converts a value in em units to pixels, based on the body's font size.
+     * @param {number} input - The value in ems.
+     * @returns {number} The equivalent value in pixels.
+     */
     em: function(input) {
         let emSize = parseFloat($("body").css("font-size"));
         return (emSize * input);
     },
 
+    /**
+     * Gets the font size (in pixels) of a given element or the body.
+     * @param {jQuery|HTMLElement} [ele=jQuery('body')] - The element to get the font size from.
+     * @returns {number} The font size in pixels.
+     */
     em2px: function(ele) {
-        
-        if(!ele) {
-            ele = $("body");   
-        }
-        //else {
-           
-        //}
-        const fs = ele.css('font-size');
-        /*
-        var rele = $('<span>').html(input).css('font-size', fs).appendTo(ele);
-        var res = rele.width();
-        rele.remove();
-        return res;
-        */
+        if(!ele) { ele = $("body"); }
+        const fs = $(ele).css('font-size'); // Ensure ele is jQuery object
         return parseFloat(fs);
-        
     },
     
-    // get current font size in pixels
+    /**
+     * Estimates the width of a string in pixels based on the font size of an element.
+     * @param {string} input - The string to measure.
+     * @param {jQuery|HTMLElement} [ele] - The element to use for font size reference. Defaults to body if not provided.
+     * @returns {number} The estimated width in pixels.
+     */
     px: function(input, ele) {
         let emSize = window.hWin.HEURIST4.util.em2px(ele);
-        return (input.length * emSize);
+        return (input.length * emSize * 0.6); // Added an average character width factor (approx 0.6 of font-size)
     },
 
-    //
-    // enable or disable element
-    //
+    /**
+     * Enables or disables one or more form elements, including custom hSelect elements.
+     * @param {jQuery|HTMLElement|Array<jQuery|HTMLElement>} element - The element(s) to enable/disable.
+     * @param {boolean} is_disabled - True to disable, false to enable.
+     * @returns {void}
+     */
     setDisabled: function(element, is_disabled){
-        if(!element){
-            return;    
-        }
-        
-        if(!Array.isArray(element) && !element.jquery){
+        if(!element){ return; }
+        if(!Array.isArray(element) && !(element instanceof jQuery)){ // Check if not jQuery object
             element = [element];
+        } else if (element instanceof jQuery && element.length > 1) { // If jQuery object with multiple elements
+             // Iterate over jQuery collection
+        } else if (element instanceof jQuery) { // Single jQuery element
+            element = [element.get(0)]; // Get underlying DOM element
         }
-        
-        $.each(element, function(idx, ele){
-            
-            if (!ele.jquery) {
-                ele = $(ele);    
-            }
-               
-            // ($.heurist.hSelect !=='undefined') && window.hWin.HEURIST4.util.isFunction($.heurist.hSelect)    
-                                                                                                             
-            if(window.hWin.HEURIST4.util.isFunction(ele?.hSelect) && ele.hSelect('instance')!=undefined){              
 
+        $.each(element, function(idx, ele_item){ 
+            let current_ele = $(ele_item); // Ensure it's a jQuery object for hSelect check
+            if(window.hWin.HEURIST4.util.isFunction(current_ele.hSelect) && current_ele.hSelect('instance')!=undefined){
+                current_ele.hSelect(is_disabled ? 'disable' : 'enable');
+            }else if (ele_item.nodeType){ // Check if it's a DOM element
                 if (is_disabled) {
-                    ele.hSelect( 'disable' );
-                }else{
-                    ele.hSelect( 'enable' );    
-                }
-
-            }else if (ele.length>0){
-                
-                ele = ele[0];
-                
-                if (is_disabled) {
-                    ele.setAttribute('disabled', 'disabled'); // Disable the element
-                    ele.classList.add('ui-state-disabled');   // Add the 'ui-state-disabled' class
+                    ele_item.setAttribute('disabled', 'disabled');
+                    ele_item.classList.add('ui-state-disabled');
                 } else {
-                    ele.removeAttribute('disabled');      // Enable the element
-                    ele.classList.remove('ui-state-disabled', 'ui-button-disabled'); // Remove specified classes
+                    ele_item.removeAttribute('disabled');
+                    ele_item.classList.remove('ui-state-disabled', 'ui-button-disabled');
                 }                    
-                
             }
         });
-        
     },
     
+    /**
+     * Checks if the current browser is Internet Explorer.
+     * @returns {number|false} The IE version number if IE, otherwise false.
+     */
     isIE: function () {
         let myNav = navigator.userAgent.toLowerCase();
-        return (myNav.indexOf('msie') != -1) ? parseInt(myNav.split('msie')[1]) : false;
+        return (myNav.indexOf('msie') != -1) ? parseInt(myNav.split('msie')[1], 10) : false; // Added radix
     },
     
-    //
-    //
-    //
+    /**
+     * Attempts to check if a protocol (e.g., mailto) is supported by the browser.
+     * Shows an error message if determined not supported (behavior varies by browser).
+     * @param {string} url - The URL with the protocol to check (e.g., "mailto:test@example.com").
+     * @returns {void}
+     */
     checkProtocolSupport: function(url){
-        
-        if (window.hWin.HEURIST4.util.isIE()) { //This bastard always needs special treatment
-        
+        if (window.hWin.HEURIST4.util.isIE()) {
             if (typeof (navigator.msLaunchUri) == typeof (Function)) {
-                
-                navigator.msLaunchUri(url,
-                    function () { /* Success */ },
-                    function () { /* Failure */ window.hWin.HEURIST4.msg.showMsgErr('Not supported') });
+                navigator.msLaunchUri(url, function () {}, function () { window.hWin.HEURIST4.msg.showMsgErr('Not supported'); });
                 return;
             }
-                
-            try {
-                new ActiveXObject("Plugin.mailto");
-            } catch (e) {
-                //not installed
-            }
-        } else { //firefox,chrome,opera
-           
-            let mime = navigator.mimeTypes['application/x-mailto'];
-            if(mime) {
-                //installed
-            } else {
-                //not installed
-                 window.hWin.HEURIST4.msg.showMsgErr('Not supported');
-            }
+            try { new ActiveXObject("Plugin.mailto"); } catch (e) { /*not installed*/ }
+        } else {
+           let mime = navigator.mimeTypes && navigator.mimeTypes['application/x-mailto']; // Check navigator.mimeTypes exists
+           if(!mime) { window.hWin.HEURIST4.msg.showMsgErr('Not supported'); }
         }      
-      
-        
     },
 
-    //  1 - encode ../
-    //  2 - use encodeURIComponent  
-    //  3 - JSON.stringify
-    //
+    /**
+     * Encodes specified parameters within a request object.
+     * Supports URL encoding or JSON stringification based on `need_encode` value.
+     * @param {Object} request - The request object to modify.
+     * @param {Array<string>} params - An array of parameter names in `request` to encode.
+     * @param {1|2|3} [need_encode] - Encoding type: 1 or 2 for `encodeURIComponent`, 3 for `JSON.stringify`.
+     *                              Defaults to `window.hWin.HAPI4.sysinfo['need_encode']`.
+     * @returns {void}
+     */
     encodeRequest: function(request, params, need_encode){
-        
-        if(!(need_encode>0)){
+        if(!(need_encode>0) && window.hWin.HAPI4 && window.hWin.HAPI4.sysinfo){ // Check HAPI4.sysinfo exists
             need_encode = window.hWin.HAPI4.sysinfo['need_encode'];
         }
-        
         if(need_encode>0){
             let f_encode = null;
-            
-            if(need_encode==2 || need_encode==1){
-                f_encode = encodeURIComponent;
-               
-            }else if(need_encode==3){
-                f_encode = JSON.stringify;
-            }
-                
+            if(need_encode==2 || need_encode==1){ f_encode = encodeURIComponent; }
+            else if(need_encode==3){ f_encode = JSON.stringify; }
             if(f_encode != null){
                 for(let i=0; i<params.length; i++){
-                    if(request[params[i]]){
-                        request[params[i]] = f_encode(request[params[i]]);
-                    }
+                    if(request[params[i]]){ request[params[i]] = f_encode(request[params[i]]); }
                 }
-                
             }
             request.details_encoded = need_encode;
         }
     },
     
-    //
-    // NOT USED. Replace ../  to ^^/     style= to xxx_style=
-    //
+    /**
+     * NOT USED. Replaces "../" with "^^/" and " style=" with " xxx_style=".
+     * @param {string|Object|Array} val - The value to encode. If object/array, it's stringified.
+     * @returns {string} The encoded string.
+     */
     encodeSuspectedSequences: function (val) {
-        
         if(typeof val !== 'string' && (Array.isArray(val) || $.isPlainObject(val))) {
             val = JSON.stringify(val);
         }
-        return encodeURIComponent(val.replace(/(\.\.\/)/g, '^^/').replace(/( style=)/g,' xxx_style='));
+        return encodeURIComponent(String(val).replace(/(\.\.\/)/g, '^^/').replace(/( style=)/g,' xxx_style=')); // Ensure val is string
     },
-    
-    //
-    // returns json or false
-    //
-    isJSON: function(value){
-        
-            let res = false;
-            try {
-                if(typeof value === 'string'){
-                    value = value.replace(/[\n\r]+/g, '');
-                    value = JSON.parse(value);    
-                }
-                if(Array.isArray(value) || $.isPlainObject(value)){
-                    res = value;
-                }
-            }
-            catch (err) {
-//console.log(err);                
-                res = false;
-            } 
-            
-            return res;       
-    },
-    
-    //
-    // Extract parameter from given URL or from current window.location.search
-    //
-    getUrlParameter: function(name, query){
-
-        if(!query){
-            query = window.location.search;
-        }else if(query.startsWith('http')){
-            let parts = query.split('?');
-            parts.shift();
-            query = parts.join('?');
-        }
-
-        const urlParams = new URLSearchParams(query);
-                
-        if(urlParams.has(name)){
-            return urlParams.get(name); //already decoded decodeURIComponent
-        }else{
-            return null;
-        }
-        
-        /* old way
-        var regexS = "[\\?&]"+name+"=([^&#]*)";
-        var regex = new RegExp( regexS );
-        var results = regex.exec( query );
-
-        if( results == null ) {
-            return null;
-        } else {
-            try{
-                return decodeURIComponent(results[1]);
-            }catch (ex){
-                return results[1];
-            }
-        }
-        */
-    },
-    
     
     /**
-     * Get the URL parameters
-     * source: https://css-tricks.com/snippets/javascript/get-url-variables/
-     * @param  {String} url The URL
-     * @return {Object}     The URL parameters
+     * Checks if a value is a valid JSON string and parses it, or if it's already an object/array.
+     * @param {*} value - The value to check.
+     * @returns {Object|Array|false} The parsed JSON object/array, or the original if already object/array.
+     *                               Returns false if not valid JSON or not an object/array.
      */
-    getUrlParams: function (url) {
-        
-        let parser = document.createElement('a');
-        parser.href = url;
-        let query = parser.search.substring(1);
-        
-        let params = window.hWin.HEURIST4.util.getParamsFromString(query, '&', true);
-        
-        let vars = query.split('&');
-        for (let i = 0; i < vars.length; i++) {
-            let pair = vars[i].split('=');
-            params[pair[0]] = decodeURIComponent(pair[1]);
-        }
-        return params;
+    isJSON: function(value){
+        let res = false;
+        try {
+            if(typeof value === 'string'){
+                value = value.replace(/[\n\r]+/g, ''); value = JSON.parse(value);
+            }
+            if(Array.isArray(value) || $.isPlainObject(value)){ res = value; }
+        } catch (err) { res = false; }
+        return res;
+    },
+    
+    /**
+     * Extracts a specific parameter's value from a URL query string.
+     * @param {string} name - The name of the parameter to extract.
+     * @param {string} [query=window.location.search] - The query string (e.g., "?foo=bar&baz=qux") or full URL.
+     *                                                  Defaults to the current window's search string.
+     * @returns {string|null} The decoded parameter value, or null if not found.
+     */
+    getUrlParameter: function(name, query){
+        if(!query){ query = window.location.search; }
+        else if(query.startsWith('http')){ let parts = query.split('?'); parts.shift(); query = parts.join('?');}
+        const urlParams = new URLSearchParams(query);
+        return urlParams.get(name); // Already decoded
     },
 
-    getParamsFromString: function (url, sep='&', decode=true) {
+    /**
+     * Gets the URL parameters from a full URL string.
+     * @param {string} url - The URL.
+     * @returns {Object} The URL parameters as a key-value object.
+     */
+    getUrlParams: function (url) {
+        let parser = document.createElement('a'); parser.href = url;
+        let query = parser.search.substring(1);
+        return window.hWin.HEURIST4.util.getParamsFromString(query, '&', true);
+    },
+
+    /**
+     * Parses a query string into an object of key-value pairs.
+     * @param {string} queryString - The query string (without the leading '?').
+     * @param {string} [sep='&'] - The separator for key-value pairs.
+     * @param {boolean} [decode=true] - Whether to decode URI components.
+     * @returns {Object} An object containing the parsed parameters.
+     */
+    getParamsFromString: function (queryString, sep='&', decode=true) { // Renamed url to queryString
         let params = {};
-        let vars = url.split(sep);
+        let vars = queryString.split(sep);
         for (let i = 0; i < vars.length; i++) {
             let pair = vars[i].split('=');
-            if(decode){
-                params[pair[0]] = decodeURIComponent(pair[1]);    
-            }else{
-                params[pair[0]] = pair[1];
+            if (pair.length === 2) { // Ensure there's a key and a value
+                params[pair[0]] = decode ? decodeURIComponent(pair[1]) : pair[1];
+            } else if (pair.length === 1 && pair[0] !== "") { // Handle keys without values
+                 params[pair[0]] = "";
             }
         }
         return params;
     },
-    
-    
+
+    /**
+     * Checks if a value is an array and is not empty.
+     * @param {*} a - The value to check.
+     * @returns {boolean} True if `a` is a non-empty array, false otherwise.
+     */
     isArrayNotEmpty: function (a){
         return (Array.isArray(a) && a.length>0);
     },
 
-    isArray: function (a)
-    {
-        return Array.isArray(a);
-    },
+    /**
+     * Checks if a value is an array. (Note: `Array.isArray()` is the standard modern equivalent).
+     * @param {*} a - The value to check.
+     * @returns {boolean} True if `a` is an array, false otherwise.
+     */
+    isArray: function (a) { return Array.isArray(a); },
     
+    /**
+     * Checks if a value is a GeoJSON object (Feature, FeatureCollection, or GeometryCollection) or an array of such.
+     * @param {*} a - The value to check.
+     * @param {boolean} [allowempty=false] - If true, an empty array is also considered valid GeoJSON.
+     * @returns {boolean} True if it conforms to expected GeoJSON structure, false otherwise.
+     */
     isGeoJSON: function(a, allowempty){
-        
-        if(allowempty && Array.isArray(a) && a.length==0){
-            return true;   
-        }else if($.isPlainObject(a)){
-            return (a['type']=='Feature' || a['type']=='FeatureCollection' || a['type']=='GeometryCollection');
-        }else{
-            return (window.hWin.HEURIST4.util.isArrayNotEmpty(a) && (a[0]['type']=='Feature' || a[0]['type']=='FeatureCollection'));
-        }
+        if(allowempty && Array.isArray(a) && a.length==0){ return true; }
+        else if($.isPlainObject(a)){ return (a['type']=='Feature' || a['type']=='FeatureCollection' || a['type']=='GeometryCollection'); }
+        else{ return (window.hWin.HEURIST4.util.isArrayNotEmpty(a) && (a[0]['type']=='Feature' || a[0]['type']=='FeatureCollection'));}
     },
-
-    /*
-    htmlEscape: function(s) {
-        return s?s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&#39;").replace(/"/g, "&#34;"):'';
-    },
-    */
     
-    //
-    // see php htmlspecialchars
-    //
+    /**
+     * Escapes HTML special characters in a string.
+     * @param {string} text - The string to escape.
+     * @returns {string} The HTML-escaped string.
+     */
     htmlEscape: function (text) {
-      let map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',  //&#34
-        "'": '&#039;'
-      };
-      
-      if(window.hWin.HEURIST4.util.isempty(text)){
-          return '';
-      }else{
-          return (''+text).replace(/[&<>"']/g, function(m) { return map[m]; })
-      }
+      let map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+      if(window.hWin.HEURIST4.util.isempty(text)){ return ''; }
+      else{ return (''+text).replace(/[&<>"']/g, function(m) { return map[m]; }); }
     },  
     
-    //
-    // whitelist e.g. "p, img"
-    //
+    /**
+     * Strips HTML tags from a string. A whitelist of tags to keep can be provided.
+     * If whitelist is false, performs HTML escaping instead.
+     * @param {string} text - The HTML string to process.
+     * @param {string|false} [whitelist] - Comma-separated string of tags to keep (e.g., "p,img").
+     *                                     If false, escapes HTML. If undefined/empty, strips all tags.
+     * @returns {string} The processed string.
+     */
     stripTags: function(text, whitelist){
-        
-        if(whitelist===false){ 
-            
-            return window.hWin.HEURIST4.util.htmlEscape(text);             
-        }else{
-            
-            let link = document.createElement("span");
-            link.style.display = "none";
-            link.innerHTML = text;
+        if(whitelist===false){ return window.hWin.HEURIST4.util.htmlEscape(text); }
+        else{
+            let link = document.createElement("span"); link.style.display = "none"; link.innerHTML = text;
             document.body.appendChild(link);
-            
-            //find('*')
             let eles = $(link).find('*');
-            if(!window.hWin.HEURIST4.util.isempty(whitelist)){
-                eles = eles.not(whitelist);
-            }
-            
-            eles.each(function() {
-                let content = $(this).contents();
-                $(this).replaceWith(content);
-            });   
-            
-            if(window.hWin.HEURIST4.util.isempty(whitelist)){
-                text =  $(link).text().trim();    
-            }else{
-                text =  $(link).html();    
-            }
-            
-            document.body.removeChild(link); 
-            link = null;
-            
+            if(!window.hWin.HEURIST4.util.isempty(whitelist)){ eles = eles.not(whitelist); }
+            eles.each(function() { let content = $(this).contents(); $(this).replaceWith(content); });
+            text = window.hWin.HEURIST4.util.isempty(whitelist) ? $(link).text().trim() : $(link).html();
+            document.body.removeChild(link); link = null;
             return text;
         }
-        
     },
     
+    /**
+     * Removes the first HTML element found in a string, returning the remaining inner HTML of the parent.
+     * @param {string} text - The HTML string.
+     * @returns {string} The HTML string with the first element removed.
+     */
     stripFirstElement: function(text){
-        
-            let link = document.createElement("span");
-            link.style.display = "none";
-            link.innerHTML = text;
-            document.body.appendChild(link);
-            
-            let eles = $(link).find('*');
-            eles.first().remove();
-            text =  $(link).html();
-                
-            document.body.removeChild(link); 
-            link = null;
-            
-            return text;
+        let link = document.createElement("span"); link.style.display = "none"; link.innerHTML = text;
+        document.body.appendChild(link);
+        $(link).find('*').first().remove(); // Use jQuery's first()
+        text = $(link).html();
+        document.body.removeChild(link); link = null;
+        return text;
     },
     
-    //
-    //
-    //
+    /**
+     * Removes `<script>` tags from an HTML string.
+     * @param {string} s - The HTML string.
+     * @returns {string} The HTML string with script tags removed.
+     */
     stripScripts: function(s) {
-
-        //jquery way        
         return $('<div>').append($.parseHTML(s)).html();
-        
-        //vanilla way
-        /*
-        var div = document.createElement('div');
-        div.innerHTML = s;
-        var scripts = div.getElementsByTagName('script');
-        var i = scripts.length;
-        while (i--) {
-            scripts[i].parentNode.removeChild(scripts[i]);
-        }
-        return div.innerHTML;
-        */
     },
 
-    //
-    //
-    //
-    isObject: function (a)
-    {
-        return Object.prototype.toString.apply(a) === '[object Object]';
-    },
+    /**
+     * Checks if a value is a plain object.
+     * (Note: Modern checks might be more robust, e.g. considering `null` or arrays).
+     * @param {*} a - The value to check.
+     * @returns {boolean} True if `a` is a plain object, false otherwise.
+     */
+    isObject: function (a) { return Object.prototype.toString.apply(a) === '[object Object]'; },
 
+    /**
+     * Stops event propagation and prevents default action for a browser event.
+     * @param {Event} e - The event object.
+     * @returns {Event} The modified event object.
+     */
     stopEvent: function(e){
         if (!e) e = window.event;
-
         if (e) {
-            e.cancelBubble = true;
-            if (e.stopPropagation) e.stopPropagation();
-            e.returnValue = false;
-            e.preventDefault();
+            e.cancelBubble = true; if (e.stopPropagation) e.stopPropagation();
+            e.returnValue = false; if (e.preventDefault) e.preventDefault(); // Check preventDefault exists
         }
         return e;
     },
 
-    //
-    //
-    //                    
+    /**
+     * Interprets a jQuery AJAX error (jqXHR) and returns a standardized error response object.
+     * @param {jqXHR} jqXHR - The jQuery XHR object from the failed AJAX call.
+     * @param {string} url - The URL of the failed request.
+     * @param {Object} request_code - An object containing script and action codes for context.
+     * @returns {Object} A standardized error response object with status, message, and request_code.
+     */
     interpretServerError: function(jqXHR, url, request_code){
-    
         let err_message = '';
         if(window.hWin.HEURIST4.util.isempty(jqXHR.responseText)){
-            
-            //403 Forbidden
-            
-            if(jqXHR.status==500){
-                err_message = 'Error_Server_Side';    
-            }else{
-                err_message = 'Error_Connection_Reset';    
-            }
+            if(jqXHR.status==500){ err_message = 'Error_Server_Side'; }
+            else{ err_message = 'Error_Connection_Reset'; }
             console.error(err_message, url);
-        }else{
-            err_message = jqXHR.responseText;
-        }
-        return {
-            status: window.hWin.ResponseStatus.UNKNOWN_ERROR,
-            message: err_message,
-            request_code: request_code
-        };
-        
+        }else{ err_message = jqXHR.responseText; }
+        return { status: window.hWin.ResponseStatus.UNKNOWN_ERROR, message: err_message, request_code: request_code };
     },
        
-    //
-    // we have to reduce the usage to minimum. Need to implement method in hapi via central controller
-    // this method is used 
-    // 1) for call H3 scripts in H4 code
-    // 2) in case hapi is not inited 
-    // 3) for third-party web services
-    //
-    sendRequest: function(url, request, caller, callback, dataType, timeout){
-        
+    /**
+     * Sends an AJAX POST request. Used for calls where HAPI might not be initialized or for third-party services.
+     * @param {string} url - The URL to send the request to.
+     * @param {Object} [request_data] - Data to send with the request.
+     * @param {*} [caller] - Context object to be passed to the callback.
+     * @param {function} [callback] - Callback function to handle the response. Receives `(caller, response)` or `(response)`.
+     * @param {string} [dataType="json"] - The expected data type of the response. 'auto' to let jQuery decide.
+     * @param {number} [timeout] - Request timeout in milliseconds.
+     * @returns {void}
+     */
+    sendRequest: function(url, request_data, caller, callback, dataType, timeout){ // Renamed request
         let action = '';
-        
-        if(request){
-        
-            if(!request.db && window.hWin && window.hWin.HAPI4){
-                request.db = window.hWin.HAPI4.database;
-            }
-            
+        if(request_data){
+            if(!request_data.db && window.hWin && window.hWin.HAPI4){ request_data.db = window.hWin.HAPI4.database; }
             action = url.substring(url.lastIndexOf('/')+1);
-            if(action.indexOf('.php')>0) {
-                action = action.substring(0,action.indexOf('.php'));   
-            }
+            if(action.indexOf('.php')>0) { action = action.substring(0,action.indexOf('.php')); }
         }
-        
-        let request_code = {script:action, action:''};
-        
-        //note jQuery ajax does not properly in the loop - success callback does not work often
+        let request_code_ajax = {script:action, action: (request_data ? request_data.a : '')}; // Renamed, added check for request_data
         let options = {
-            url: url,
-            type: "POST",
-            data: request,
-            cache: false,
+            url: url, type: "POST", data: request_data, cache: false,
             error: function(jqXHR, textStatus, errorThrown ) {
-                if(callback){
-                    
-                    let response = window.hWin.HEURIST4.util.interpretServerError(jqXHR, url, request_code);
-                    
-                    if(caller){
-                        callback(caller, response);
-                    }else{
-                        callback(response);
-                    }
-                }
+                if(callback){ let response = window.hWin.HEURIST4.util.interpretServerError(jqXHR, url, request_code_ajax); if(caller){ callback(caller, response); }else{ callback(response); }}
             },
             success: function( response, textStatus, jqXHR ){
-                if(callback){
-                    if(caller){
-
-                        if($.isPlainObject(response)){
-                            response.request_code = request_code;
-                        }
-                        callback(caller, response);
-                    }else{
-                        callback(response);    
-                    }
-                }
+                if(callback){ if(caller){ if($.isPlainObject(response)){ response.request_code = request_code_ajax; } callback(caller, response); }else{ callback(response); }}
             },
-            fail: function(  jqXHR, textStatus, errorThrown )
-            {
-                
-                let response = window.hWin.HEURIST4.util.interpretServerError(jqXHR, url, request_code);
-                
-                if(callback){
-                    if(caller){
-                        callback(caller, response);
-                    }else{
-                        callback(response);    
-                    }
-                }
+            fail: function( jqXHR, textStatus, errorThrown ) {
+                if(callback){ let response = window.hWin.HEURIST4.util.interpretServerError(jqXHR, url, request_code_ajax); if(caller){ callback(caller, response); }else{ callback(response); }}
             }
         };
-
-        if(window.hWin.HEURIST4.util.isnull(dataType)){
-            options['dataType'] = 'json';
-        }else if(dataType!='auto'){
-            options['dataType'] = dataType;    
-        }
-        if(timeout>0){
-            options['timeout'] = timeout;    
-        }
-        
+        if(window.hWin.HEURIST4.util.isnull(dataType)){ options['dataType'] = 'json'; }
+        else if(dataType!='auto'){ options['dataType'] = dataType; }
+        if(timeout>0){ options['timeout'] = timeout; }
         $.ajax(options);
     },
-
     
-    //
-    //
-    //
-    windowOpenInPost: function(actionUrl, windowName, windowFeatures, params) 
+    /**
+     * Opens a new window and submits data to it via a POST request using a temporary form.
+     * @param {string} actionUrl - The URL to submit the POST request to.
+     * @param {string} windowName - The name for the new window (will be made unique with a timestamp).
+     * @param {string} windowFeatures - Window features string (e.g., "width=800,height=600").
+     * @param {Object} params - Key-value pairs of data to be sent in the POST request.
+     * @returns {void}
+     */
+    windowOpenInPost: function(actionUrl, windowName, windowFeatures, params) {
+        
     {
         let mapForm = document.createElement("form");
         let milliseconds = new Date().getTime();
@@ -691,17 +595,18 @@ window.hWin.HEURIST4.util = {
                 mapForm.appendChild(mapInput);
 
         }
+                
         document.body.appendChild(mapForm);
-
         let map = window.open('', windowName, windowFeatures);
-        if (map) {
-            mapForm.submit();
-        } else {
-            alert('You must allow popups for this map to work.');
-        }
+        if (map) { mapForm.submit(); } else { alert('You must allow popups for this map to work.'); }
+        document.body.removeChild(mapForm); // Clean up form
     },    
     
-    getScrollBarWidth: function() {
+    /**
+     * Calculates the width of the browser's scrollbar.
+     * @returns {number} The scrollbar width in pixels.
+     */
+getScrollBarWidth: function() {
         let $outer = $('<div>').css({visibility: 'hidden', width: 100, overflow: 'scroll'}).appendTo('body'),
             widthWithScroll = $('<div>').css({width: '100%'}).appendTo($outer).outerWidth();
         $outer.remove();

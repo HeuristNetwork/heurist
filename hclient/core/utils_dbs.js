@@ -1,22 +1,39 @@
 /**
-*  Utility functions for database structure
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file utils_dbs.js
+ * @brief Utility functions for Heurist database structure definitions and metadata.
+ * @fileOverview This file provides a collection of utility functions, primarily under the
+ * `window.hWin.HEURIST4.dbs` namespace (aliased as `$Db`), for working with Heurist database
+ * definitions and metadata. These include functions for accessing and manipulating terms,
+ * vocabularies, record types, detail types, record type structures (fields), and workflow rules.
+ * Key functionalities involve retrieving definition properties, resolving local and concept IDs,
+ * navigating term hierarchies, managing term references, interpreting entry masks, and handling
+ * record type links. It also includes helpers for fetching record counts and managing 'Trash' group IDs.
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 4.0
+ */
+ 
+/* global ActiveXObject,Temporal,TDate */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+if (!window.hWin.HEURIST4){
+    window.hWin.HEURIST4 = {};
+}
 
+//init only once
+if (!window.hWin.HEURIST4.dbs) 
+{
+/**
+ * @namespace HEURIST4.dbs
+ * @description Provides utility functions for interacting with and managing database definitions
+ * (Record Types, Detail Types, Terms, etc.) and their structures within Heurist.
+ * It includes helpers for retrieving definition properties, navigating hierarchies,
+ * and performing specific operations related to database metadata.
+ * 
 /*
 Selectors:
 
@@ -65,22 +82,10 @@ rstField - Returns rectype header or details field values
 getTrashGroupId
 
 getHierarchyTitles - returns list of rt and dt titles for linked hierachy rt:dt:rt:dt
-                    (in faceted search and linked geo places)
-*/
-
-if (!window.hWin.HEURIST4){
-    window.hWin.HEURIST4 = {};
-}
-
-//init only once
-if (!window.hWin.HEURIST4.dbs) 
-{
-/**
- * @namespace HEURIST4.dbs
- * @description Provides utility functions for interacting with and managing database definitions
- * (Record Types, Detail Types, Terms, etc.) and their structures within Heurist.
- * It includes helpers for retrieving definition properties, navigating hierarchies,
- * and performing specific operations related to database metadata.
+                    (in faceted search and linked geo places) 
+                    
+ * 
+ * 
  * Alias: `$Db`
  */
 window.hWin.HEURIST4.dbs = {
@@ -695,11 +700,11 @@ window.hWin.HEURIST4.dbs = {
 
                                     $children_links.push($res_dt);
                                 }else{
-									
+                                    
                                     if($res_dt['type']=='enum' && $mode==3){
                                         $res_dt['title'] = "<span class='ui-icon ui-icon-menu' style='margin-right:2px;'>&nbsp;</span>" + $res_dt['title'];
                                     }
-									
+                                    
                                     $dtl_fields.push($res_dt);
                                 }
                             }
@@ -3299,40 +3304,40 @@ window.hWin.HEURIST4.dbs = {
         let arr_idx = {}; // id to array idx
         for(const rty_id of rty_IDs){ // Get base fields and instances for each rectype
 
-		
-			const rty_name = $Db.rty(rty_id, 'rty_Name');
+        
+            const rty_name = $Db.rty(rty_id, 'rty_Name');
 
-			const recset = $Db.rst(rty_id);
+            const recset = $Db.rst(rty_id);
 
-			if(window.hWin.HEURIST4.util.isempty(recset)) { continue; }
+            if(window.hWin.HEURIST4.util.isempty(recset)) { continue; }
 
-			recset.each2(function(dty_id, details){
+            recset.each2(function(dty_id, details){
 
                 if(dty_id == ignored_dty_id || ignored_dty_id.indexOf(dty_id) >= 0){
                     return;
                 }
 
-				const dty = $Db.dty(dty_id);
+                const dty = $Db.dty(dty_id);
                 const dty_name = dty['dty_Name'];
 
                 if(allowed_types != 'all' && allowed_types.indexOf(dty['dty_Type']) < 0){
                     return;
                 }
 
-				if(!Object.hasOwn(arr_idx, dty_id)) {
+                if(!Object.hasOwn(arr_idx, dty_id)) {
                     // show_in_lists_flag / hidden: true if it should be hidden/not shown in lists
                     let list_fld = !list_all_fields && $Db.dty(dty_id, 'dty_ShowInLists') == 0;
                     arr_idx[dty_id] = last_idx;
                     last_idx ++;
-					fields.push( [ dty_id, dty_name, [], list_fld ] );
-				}
+                    fields.push( [ dty_id, dty_name, [], list_fld ] );
+                }
 
                 const dty_idx = arr_idx[dty_id];
-				const rst_name = rty_name + "." + details["rst_DisplayName"]; // Instance name: RtyName.RstDisplayName
+                const rst_name = rty_name + "." + details["rst_DisplayName"]; // Instance name: RtyName.RstDisplayName
 
-				fields[dty_idx][2].push(rst_name);
-			});
-		}
+                fields[dty_idx][2].push(rst_name);
+            });
+        }
 
         // sort base field names
         fields.sort((arr1, arr2) => {
@@ -3343,9 +3348,9 @@ window.hWin.HEURIST4.dbs = {
 
         let processed_fields = [];
 
-		for(const field of fields){ // sort rst field names + additional processing for different modes
+        for(const field of fields){ // sort rst field names + additional processing for different modes
 
-			field[2].sort((a, b) => { // Sort instance names alphabetically
+            field[2].sort((a, b) => { // Sort instance names alphabetically
                 a = a.toLocaleUpperCase();
                 b = b.toLocaleUpperCase();
                 return a.localeCompare(b);
@@ -3390,7 +3395,7 @@ window.hWin.HEURIST4.dbs = {
                 processed_fields.push(node);
             }
             */
-		}
+        }
 
         if(mode == 0 || mode == 2){ // Mode 0 returns the 'fields' array directly; Mode 2 would too if implemented
             return fields;

@@ -1,10 +1,19 @@
 /**
  * @file detectHeurist.js
- * @description This script is responsible for detecting the main Heurist window (`hWin`)
- *              across frames and initializing global Heurist-specific configurations
- *              like `ResponseStatus` and a default `entityRecordCfg` if they are not already defined.
- *              This ensures that core Heurist objects and configurations are accessible
- *              consistently, especially in applications that might operate within iframes.
+ * @brief Detects main Heurist window and initializes global configurations.
+ * @fileOverview This script is responsible for detecting the main Heurist window (`hWin`) across frames
+ * and initializing global Heurist-specific configurations like `ResponseStatus` and a default
+ * `entityRecordCfg` if they are not already defined. This ensures that core Heurist objects and
+ * configurations are accessible consistently, especially in applications that might operate within
+ * iframes. It includes the `_detectHeurist` function to find the main window and sets up default
+ * `ResponseStatus` enums and `entityRecordCfg` if they don't exist on `window.hWin`.
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 6.0
  */
 
 /**

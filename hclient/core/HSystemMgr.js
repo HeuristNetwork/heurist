@@ -1,69 +1,33 @@
 /**
-*  HSystemMgr
-*
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @since       6.0
-*/
+ * @file HSystemMgr.js
+ * @brief Manages system-level interactions like user authentication, session management, and system information retrieval.
+ * @fileOverview The HSystemMgr class provides methods for system-level operations. This includes user login,
+ * logout, password reset, and credential verification. It handles fetching and saving user preferences,
+ * managing user activity logs, and retrieving system information (like user details, database settings,
+ * and structure definitions). It also includes functionalities for managing saved searches (though some
+ * are marked for potential migration to EntityMgr), interacting with repositories, and performing version
+ * checks for client and database software. Additionally, it provides utilities for file system operations
+ * (listing/managing folders in HEURIST_FILESTORE_DIR), translation services via DeepL, and Matomo
+ * analytics tracking integration.
+ * 
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 6.0
+ */
+ 
+/* global prepared_params, $Db */
 
-/* global prepared_params */
-
-    /**
-    * @class 
-    * System class that responsible for interaction with server in domains:
-    *       user/groups information/credentials
-    *       saved searches - @todo move to EntityMgr
-    *       system info
-    *
-    * see usr_info.php and sys_structure.php
-    *
-    * methods:
-    *   login        - login and get current user info
-    *   logout
-    *   reset_password
-    *   verify_credentials  - checks whether user is logged in and force_refresh_sys_info in case change roles or update db settings
-    * 
-    *   sys_info     - get current user info and database settings - used only in hapi.init and on force_refresh_sys_info
-    *                  (for details $system->getCurrentUserAndSysInfo) 
-    *   sys_info_count - 
-    *   save_prefs   - save user preferences  in session
-    * 
-    *   -----
-    *           @later move to EntityMgr
-    *   ssearch_get  - get saved searches for current user and all usergroups where user is memeber, or by list of ids
-    *   ssearch_save - save saved search in database
-    *   ssearch_copy - duplicate
-    *   ssearch_delete - delete saved searches by IDs
-    *   ssearch_savetree - save saved search treeview data
-    *   ssearch_gettree - get saved search treeview data
-    *   ------ 
-    *          @later move to EntityMgr 
-    *   user_get
-    *   usr_names
-    *   mygroups  - description of current user's Workgroups
-    *   user_log  - activity log
-    *   user_save
-    *   user_wss  - working subset
-    *   ------
-    *   get_defs     - get the desired database structure definition (used in import definitionss only)
-    *   get_defs_all - returns number of records in database, worksets and dashboard info
-    * 
-    *   ------ 
-    *   get_url_content_type - resolve mimetype for given url
-    *   get_foldercontent
-    *   get_sysfolders
-    *   checkPresenceOfRectype - check and download missed rectypes
-    *   import_definitions
-    *   versionCheck  - checks client software version and db version check
-    * 
-    *
-    * @returns {Object}
-    */
+/**
+ * @class HSystemMgr
+ * @classdesc System class responsible for server interactions related to user/group information,
+ * credentials, saved searches, system info, and various other system-level operations.
+ * Interacts primarily with server-side controllers like `usr_info.php` and `sys_structure.php`.
+ */
 class HSystemMgr {
     /** @private */
   hapi4;
@@ -320,10 +284,23 @@ class HSystemMgr {
 
   }
   
+  /**
+   * Performs an action on a repository via the `repoController`.
+   * @param {Object} request - The request object for the repository action.
+   * @param {function(Object): void} callback - Callback to handle the server response.
+   * @returns {void}
+   */
   repositoryAction(request, callback) {
       window.hWin.HAPI4.callserver('repoController', request, callback);
   }
 
+  /**
+   * Performs a database action (e.g., create, delete, register) via the relevant controller.
+   * @param {Object} request - The request object for the database action.
+   * @param {string} request.action - The specific database action (e.g., 'register', 'create').
+   * @param {function(Object): void} callback - Callback to handle the server response.
+   * @returns {void}
+   */
   databaseAction(request, callback) {
       let controller = 'databaseController';
       if(request.action=='register'){
@@ -332,6 +309,12 @@ class HSystemMgr {
       window.hWin.HAPI4.callserver(controller, request, callback, 600000); //5 minutes
   }
 
+  /**
+   * Executes a reporting action via the `ReportController`.
+   * @param {Object} request - The request object for the report action.
+   * @param {function(Object): void} callback - Callback to handle the server response.
+   * @returns {void}
+   */
   reportAction(request, callback) {
       //let controller = 'ReportController';
       request.controller = 'ReportController';
@@ -339,10 +322,6 @@ class HSystemMgr {
   }
   
 
-  /**
-  * Returns number of records in database, worksets and dashboard info
-  * @param {Function} callback
-  */
   /**
   * Retrieves system information counts, such as total records, dashboard status, and workset count.
   * Updates `window.hWin.HAPI4.sysinfo` with this data.
