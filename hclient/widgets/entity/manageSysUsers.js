@@ -1,32 +1,52 @@
 /**
-* manageSysUsers.js - main widget to manage sysUGrps users
-*
+* @file manageSysUsers.js
+* @brief Manages System User entities.
+* @fileOverview Provides a UI for administrators to manage system user accounts. This includes creating users, editing user details (like name, email, password), assigning users to groups, and managing user status (active/inactive).
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 
+
+/**
+ * @widget heurist.manageSysUsers
+ * @brief Widget for managing System User accounts.
+ * @extends $.heurist.manageEntity
+ * @description This widget provides an interface for administrators and authorized users
+ * to manage system user accounts. It supports listing users, creating new users,
+ * editing user details (including name, email, password - though password handling might be indirect),
+ * assigning users to groups, and managing user status (enabled/disabled).
+ *
+ * @property {string} default_palette_class Default CSS class for theming, set to 'ui-heurist-admin'.
+ * @property {string} layout_mode Defines the overall layout structure, set to 'short'.
+ * @property {boolean} use_cache If true, client-side caching might be used for data; set to false.
+ * @property {boolean} edit_need_load_fullrecord If true, a full record load is required for editing user details; set to true.
+ * @property {number} edit_height Default height for the edit dialog of a user, set to 640.
+ * @property {number} height Default height of the widget, set to 640.
+ * @property {number} width Default width of the widget. Adjusted based on `options.edit_mode` and `options.select_mode` (e.g., 790 in 'editonly', ~750 in selection modes).
+ * @property {?number} ugl_GroupID If provided, the widget contextually manages users for a specific group (e.g., listing members, adding users to this group).
+ *                                 A negative value might indicate a mode for selecting users to add to the group.
+ */
 $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
    
     _entityName:'sysUsers',
     
     _currentSaml: null,
 
-    //
-    //
-    //    
+    /**
+     * @brief Initializes the widget.
+     * @override
+     * @memberof heurist.manageSysUsers
+     * Sets default options for palette class, layout mode, dimensions, and other
+     * configurations specific to managing system user accounts. It adjusts the width
+     * based on the `edit_mode` and `select_mode`.
+     */
     _init: function() {
         
         this.options.default_palette_class = 'ui-heurist-admin';
@@ -54,9 +74,17 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         this._super();
     },
     
-    //  
-    // invoked from _init after load entity config    
-    //
+    /**
+     * @brief Initializes the controls for the widget.
+     * @override
+     * @memberof heurist.manageSysUsers
+     * @returns {boolean} False if the parent `_initControls` fails, otherwise true.
+     * Handles different initialization paths based on `options.edit_mode`.
+     * If not 'editonly', it sets up the widget title (contextualized by `options.ugl_GroupID`),
+     * initializes the search form (`searchSysUsers`), and configures the record list,
+     * including a custom header and event listeners for role changes and group assignments.
+     * If 'editonly', it calls `_initEditorOnly` (which is not defined in this snippet but assumed to exist or be inherited).
+     */
     _initControls: function() {
         
         if(!this._super()){
@@ -64,7 +92,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }
         
         if(this.options.edit_mode=='editonly'){
-            this._initEditorOnly();
+            this._initEditorOnly(); // Assumes _initEditorOnly() is defined in parent or will be mixed in.
             return;
         }
         
@@ -343,9 +371,18 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
     
 
     //----------------------
-    //
-    //
-    //
+    /**
+     * @brief Renders a single system user item in the list.
+     * @override
+     * @memberof heurist.manageSysUsers
+     * @param {HRecordSet} recordset The recordset containing the item.
+     * @param {object} record The specific record object for the item to render.
+     * @returns {string} HTML string representing the user item.
+     * Formats the display of a user, including their ID, name (as a mailto link if email exists),
+     * full name, status icon (enabled/disabled), and action buttons (edit, delete/remove from group)
+     * based on permissions and context (`options.ugl_GroupID`). It also shows group membership
+     * information or controls for role assignment within a group.
+     */
     , _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){
@@ -465,6 +502,17 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         
     },
 
+    /**
+     * @brief Handles actions triggered from the record list, specifically the 'remove' action in group context.
+     * @override
+     * @memberof heurist.manageSysUsers
+     * @param {Event} event The event object.
+     * @param {object} action The action object, expected to have `recID` (user ID) and `action` type.
+     * @returns {boolean} True if the action was handled, otherwise false or result of super call.
+     * If the action is 'remove' and `options.ugl_GroupID` is set (managing users for a specific group),
+     * it triggers a change on the role selector for that user to 'remove', effectively initiating
+     * their removal from the group.
+     */
     _onActionListener: function(event, action){
 
         let is_resolved = this._super(event, action);
@@ -489,7 +537,17 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         return is_resolved;
     },
 
-    //overwritten    
+    /**
+     * @brief Fetches full data for specified user record IDs, potentially including group role information.
+     * @override
+     * @memberof heurist.manageSysUsers
+     * @param {string[]} arr_ids An array of user record IDs to fetch.
+     * @param {number} pageno The page number for pagination.
+     * @param {function} callback The function to call with the server response.
+     * Constructs a request to search for 'sysUsers' entities. If `ugl_GroupID` is specified
+     * in the search form (i.e., viewing users within a specific group context), it includes
+     * this group ID in the request to fetch role information for users within that group.
+     */
     _recordListGetFullData:function(arr_ids, pageno, callback){
 
         let request = {
@@ -510,8 +568,20 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
     
     
     //-----
-    // adding group ID value for new user
-    //
+    /**
+     * @brief Performs actions after the edit form for a user is initialized.
+     * @override
+     * @memberof heurist.manageSysUsers
+     * Calls the parent's `_afterInitEditForm`.
+     * If adding a new user in the context of a specific group (`ugl_GroupID > 0`),
+     * it pre-fills and potentially hides the group assignment field.
+     * It hides the "Remove" button if editing the DB owner (user ID 2) or if the current
+     * user is not an admin.
+     * It adds a "Transfer Ownership" button if the current user is the DB owner (user ID 2)
+     * and is not editing their own account.
+     * It hides the "Enabled" field if the current user is not an admin or is editing their own account.
+     * It also initializes SAML service provider selection an related fields.
+     */
     _afterInitEditForm: function(){
 
         this._super();
@@ -593,9 +663,15 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }
     },
     
-    //
-    // save current saml values
-    //
+    /**
+     * @brief Saves SAML configuration from UI fields to the 'usr_ExternalAuthentication' field.
+     * @memberof heurist.manageSysUsers
+     * @param {?string} saml_id The ID of the SAML service provider whose settings are being saved.
+     * If `saml_id` is provided, this method reads the 'ugl_SpUID' (SAML User ID) and
+     * 'ugl_SpMail' (Use SAML email) fields from the form. It updates the JSON object
+     * stored in 'usr_ExternalAuthentication' for the given `saml_id`. If both UID and
+     * mail flag are empty/default, the entry for this SAML provider is removed.
+     */
     _Saml_from_UI: function( saml_id ){
        
        if(saml_id){
@@ -619,9 +695,15 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
        }
     },
     
-    //
-    // assign values to UI
-    //
+    /**
+     * @brief Populates SAML configuration UI fields based on stored values in 'usr_ExternalAuthentication'.
+     * @memberof heurist.manageSysUsers
+     * @param {?string} saml_id The ID of the SAML service provider whose settings are to be loaded into the UI.
+     * Sets `this._currentSaml` to `saml_id`.
+     * Reads the JSON object from 'usr_ExternalAuthentication'. If an entry exists for `saml_id`,
+     * it populates the 'ugl_SpUID' and 'ugl_SpMail' form fields with the stored values.
+     * Otherwise, it clears these fields or sets them to default.
+     */
     _Saml_To_UI: function( saml_id ){
         
        this._currentSaml = saml_id;
@@ -639,17 +721,33 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         
     },               
     
-    //
-    //
-    //
+    /**
+     * @brief Retrieves and validates form values, including SAML settings.
+     * @override
+     * @memberof heurist.manageSysUsers
+     * @returns {object} The validated field values.
+     * Calls `_Saml_from_UI` to ensure the latest SAML settings from the UI are captured
+     * into the 'usr_ExternalAuthentication' field before calling the parent's
+     * `_getValidatedValues` method.
+     */
     _getValidatedValues: function(){
         this._Saml_from_UI( this._currentSaml );
         return this._super();
     },
     
     
-    // update list after save (refresh)
-    //
+    /**
+     * @brief Handles events after a user record is saved.
+     * @override
+     * @memberof heurist.manageSysUsers
+     * @param {number} recID The ID of the saved user.
+     * @param {object} fieldvalues The saved field values.
+     * If a new user was added in 'select_single' mode, it selects the new user and closes.
+     * If a new user was added, it sets their default role to 'member'.
+     * Calls the parent `_afterSaveEventHandler`.
+     * If not in 'editonly' mode, updates the local recordset and refreshes the list.
+     * Otherwise (in 'editonly' mode), closes the dialog.
+     */
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
         // close on addition of new record in select_single mode    
@@ -675,6 +773,15 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }
     },
     
+    /**
+     * @brief Handles the deletion of a user account, with a confirmation prompt.
+     * @override
+     * @memberof heurist.manageSysUsers
+     * @param {boolean} [unconditionally=false] If true, deletes without confirmation.
+     * If `unconditionally` is false (the default), it shows a confirmation dialog
+     * asking "Are you sure you wish to delete this user?". If confirmed, or if
+     * `unconditionally` is true, it calls the parent's `_deleteAndClose` method.
+     */
     _deleteAndClose: function(unconditionally){
     
         if(unconditionally===true){
@@ -682,16 +789,23 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }else{
             let that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this user?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this user?', function(){ that._deleteAndClose(true); },
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     },
 
-    /*
-     * Transfer DB Ownership to the selected User, will reload the page after completion to reset certain variables
-     * It shows Warning Message about Transfering Ownership to another user.
-     *
-     * Param: unconditionally (bool) -> DB Owner's agreement to complete task
+    /**
+     * @brief Handles the transfer of database ownership to the currently edited user.
+     * @memberof heurist.manageSysUsers
+     * @param {boolean} [unconditionally=false] If true, proceeds with the transfer without confirmation.
+     * This function is typically triggered by a button available only to the current DB owner (user ID 2)
+     * when editing another enabled user's account.
+     * - Checks if the current record has unsaved modifications or if the target user is disabled, showing alerts if so.
+     * - If `unconditionally` is false, it displays a warning dialog about the implications of ownership transfer
+     *   and the need to log out and reload Heurist.
+     * - If confirmed (or `unconditionally` is true), it sends a request to the server
+     *   (`transferOwner` action on `sysUsers` entity) to perform the ownership change.
+     * - On success, calls `_afterTransferOwnerHandler`.
      */
     _transferDBOwner: function(unconditionally){
 
@@ -744,8 +858,14 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }
     },
     
-    /*
-     * After Action Handler for DB Ownership Tranfer, needs to logout the user and reload the page
+    /**
+     * @brief Handles actions after database ownership has been successfully transferred.
+     * @memberof heurist.manageSysUsers
+     * @param {number} recID The ID of the user who is now the new database owner.
+     * Displays a success message indicating that ownership has been transferred and
+     * that Heurist will now refresh. It then calls `HAPI4.SystemMgr.logout`
+     * with a callback to reload the page, effectively forcing a new session login
+     * which is necessary for the ownership change to take full effect system-wide.
      */
     _afterTransferOwnerHandler: function(recID){
 

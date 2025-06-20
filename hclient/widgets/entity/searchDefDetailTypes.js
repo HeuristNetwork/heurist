@@ -1,26 +1,53 @@
 /**
-* Search header for manageDefDetailTypes manager
-*
-* 
-*  @package     Heurist academic knowledge management system
+* @file searchDefDetailTypes.js
+* @brief Provides a search interface for Detail Types (Fields).
+* @fileOverview This widget handles the search functionality for Detail Types, allowing users to find specific field definitions.
+* @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
+/**
+ * @widget heurist.searchDefDetailTypes
+ * @brief Search widget for Detail Types (Fields).
+ * @extends $.heurist.searchEntity
+ * @description This widget provides a search interface for finding Detail Types (field definitions).
+ * It allows filtering by name, ID, concept code, data type, and group. It also supports
+ * different display and interaction modes based on context (e.g., general management, import structure).
+ *
+ * @property {object} [filters] Optional filters to apply to the search.
+ * @property {string[]} [filters.types] An array of data type strings (e.g., "freetext", "resource") to restrict the search.
+ * @property {?number} dtg_ID The ID of a Detail Type Group to filter the list by. If negative, it might imply excluding that group.
+ * @property {?boolean} import_structure If true, enables a mode for importing structures, which can alter UI and behavior (e.g., showing only fields not yet in the local DB).
+ * @property {?boolean} simpleSearch If true, simplifies the search UI by hiding some filter options like type and sort.
+ * @property {?function} onInitCompleted A callback function to execute after the controls are initialized.
+ * @property {?boolean} use_cache Inherited, but its usage with `input_filter_rectype` for client-side filtering by record type is notable here.
+ */
 $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
 
-    //
+    /**
+     * @brief Initializes the controls for the search widget.
+     * @override
+     * @memberof heurist.searchDefDetailTypes
+     * Sets up various input fields for filtering Detail Types:
+     *  - Data type dropdown (`#input_search_type`).
+     *  - Detail Type Group dropdown (`#input_search_group`).
+     *  - Text search input (`#input_search`).
+     *  - Sort order dropdown (`#input_sort_type`).
+     *  - "Show All Groups" checkbox (`#chb_show_all_groups`).
+     *  - "Show Already in DB" checkbox (`#chb_show_already_in_db`) for import mode.
+     *  - Record Type filter dropdown (`#input_filter_rectype`) when `use_cache` is true.
+     * Initializes "Add" and "Import from CSV" buttons and their event handlers.
+     * Hides/shows controls based on `options.edit_mode`, `options.import_structure`,
+     * `options.simpleSearch`, and `options.select_mode`.
+     * Attaches event listeners to input fields to trigger `startSearch` on change.
+     * Calls `startSearch` or `options.onInitCompleted` at the end.
+     */
     _initControls: function() {
 
         this.input_search_type = this.element.find('#input_search_type');   //field type
@@ -157,8 +184,17 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
     },  
     
     //
-    //
-    //
+    /**
+     * @brief Sets an option value for the widget.
+     * @override
+     * @memberof heurist.searchDefDetailTypes
+     * @param {string} key The name of the option to set.
+     * @param {any} value The value to set for the option.
+     * Calls the parent `_setOption`. If the `key` is 'dtg_ID' (Detail Type Group ID),
+     * it updates the group filter dropdown (if "Show All Groups" is not checked)
+     * and triggers a new search. It also shows/hides the "Add Record" button
+     * if the selected group is the trash group.
+     */
     _setOption: function( key, value ) {
         this._super( key, value );
         if(key == 'dtg_ID'){
@@ -168,8 +204,22 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
     },
 
     //
-    // public methods
-    //
+    /**
+     * @brief Executes a search for Detail Types (Fields).
+     * @override
+     * @memberof heurist.searchDefDetailTypes
+     * Constructs a search request object based on the current values of the filter controls:
+     *  - Text search (`dty_Name`, `dty_ID`, or `dty_OriginatingDBID`/`dty_IDInOriginatingDB`).
+     *  - Data type (`dty_Type`).
+     *  - Detail Type Group (`dty_DetailTypeGroupID` or `not:dty_DetailTypeGroupID`).
+     *  - "Show Already in DB" (`dty_ID_local`) for import mode.
+     *  - Sort order (`sort:dty_Modified`, `sort:dty_Type`, or `sort:dty_Name`).
+     *  - Record Type filter (`rtyID`) if `use_cache` is true.
+     * If `options.use_cache` is true, it triggers an "onfilter" event with the request.
+     * Otherwise, it stores the request in `_search_request` and calls the parent's
+     * `_super()` (which is `searchEntity.startSearch`) to perform the server-side search.
+     * Updates the group information display.
+     */
     startSearch: function(){
         
         let request = {}

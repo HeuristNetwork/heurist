@@ -17,7 +17,7 @@
  * @since       4.0
  */
 
-/* global HEditing, HRecordSet, $Db, tinyMCE */
+/* global HEditing */
 
 /**
  * Opens a dialog for editing map symbology properties.

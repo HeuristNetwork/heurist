@@ -1,27 +1,40 @@
 /**
-* Search header for DefTerms manager
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file        searchSysDatabases.js
+ * @brief       Provides a search interface for System Databases.
+ * @fileOverview This widget handles the search functionality for System Databases, allowing users to find and select registered databases, with options to filter by database name, user email, and role.
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\entity
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       4.0
+ */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
+
+/**
+ * @widget heurist.searchSysDatabases
+ * @brief Search widget for System Databases.
+ * @extends $.heurist.searchEntity
+ * @description This widget provides a user interface for searching system databases.
+ *              Users can filter by database name, user email (associated with the database), and user role.
+ *              Sorting options are also available.
+ *
+ * @property {?string} subtitle If provided, this text is displayed as an H3 subtitle within the widget's header area.
+ */
 $.widget( "heurist.searchSysDatabases", $.heurist.searchEntity, {
 
     input_email: null,
 
-    //
+    /**
+     * @brief Initializes the controls for the System Databases search widget.
+     * @override
+     * @memberof heurist.searchSysDatabases
+     * @description Sets up input fields for database name, user email, user role (type), and sort order.
+     *              It also handles the display of an optional subtitle.
+     */
     _initControls: function() {
         this._super();
         
@@ -60,9 +73,16 @@ $.widget( "heurist.searchSysDatabases", $.heurist.searchEntity, {
         }
     },  
 
-    //
-    // public methods
-    //
+    /**
+     * @brief Initiates a search for system databases.
+     * @override
+     * @memberof heurist.searchSysDatabases
+     * @description Constructs a search request based on the values in the database name,
+     *              user email, user role, and sort type input fields.
+     *              Triggers an "onfilter" event with the request object.
+     *              This widget typically operates with `use_cache: true` in its parent manager,
+     *              so it triggers "onfilter" for client-side filtering rather than making a server call itself.
+     */
     startSearch: function(){
         
         let request = {};

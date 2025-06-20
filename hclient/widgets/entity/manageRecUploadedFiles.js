@@ -1,23 +1,42 @@
 /**
-* manageRecUploadedFiles.js - main widget to manage recUploadedFiles
-*
+* @file manageRecUploadedFiles.js
+* @brief Manages uploaded files associated with records.
+* @fileOverview Provides a UI for listing, uploading, and managing files linked to Heurist records. It handles file uploads, metadata display, and potentially file deletion or updating.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 /* global HEditing */
 
+/**
+ * @widget heurist.manageRecUploadedFiles
+ * @brief Widget for managing files uploaded to records.
+ * @extends $.heurist.manageEntity
+ * @property {?number} rec_ID The ID of the record these files are associated with.
+ * While not a direct option in `this.options`, it's a key contextual parameter, often passed as `options.rec_ID` for specific operations like 'editonly'.
+ * @property {object} [uploader_options] Configuration options for the file uploader.
+ * (Implicitly configured within methods like `_uploadFileAndRegister` and `_handleExternalRepository`).
+ * @property {string} [default_palette_class='ui-heurist-populate'] Default palette class for the widget.
+ * @property {boolean} [coverall_on_save=true] Whether to show a loading overlay during save operations.
+ * @property {string} [layout_mode='short'] Layout mode for the widget.
+ * @property {boolean} [use_cache=false] Whether to use client-side caching for file data.
+ * @property {boolean} [edit_need_load_fullrecord=true] Whether a full record load is needed for editing file metadata.
+ * @property {number} [edit_height=700] Default height of the edit dialog for file metadata.
+ * @property {number} [edit_width=950] Default width of the edit dialog for file metadata.
+ * @property {number} [height=800] Default height of the widget.
+ * @property {boolean} [edit_addrecordfirst=false] If true, shows the editor for adding a new file immediately.
+ * @property {string} select_mode Defines item selection behavior. Adjusted based on `edit_addrecordfirst`.
+ * @property {string} [additionMode='local'] Controls the UI for adding files: 'local', 'remote', 'any', 'tiled'.
+ * @property {?string} _init_ExternalFileReference Initial value for external file reference if provided in `selection_on_init`.
+ * @property {?string} _init_MimeExt Initial value for MIME extension if provided in `selection_on_init`.
+ */
 $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
    
     _entityName:'recUploadedFiles',
@@ -2086,7 +2105,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         if(!window.hWin.HEURIST4.util.isFunction($('body')['lookupBase'])){
 
             $.getScript(`${window.hWin.HAPI4.baseURL}hclient/widgets/lookup/lookupBase.js`, () => {
-                that._loadAuthorLookup(lookup_name, dialog_options);
+                that._loadAuthorLookup();
             }).fail(() => {
                 window.hWin.HEURIST4.msg.showMsgErr({
                     status: window.hWin.ResponseStatus.UNKNOWN_ERROR,
@@ -2097,7 +2116,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
             return;
         }
-
+        let $dlg;
         let dlg_opts = {
             mapping: {
                 dialog: 'lookupNakalaAuthor',
@@ -2122,6 +2141,6 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 }
             }
         };
-        window.hWin.HEURIST4.ui.showRecordActionDialog('lookupNakalaAuthor', dlg_opts);
+        $dlg = window.hWin.HEURIST4.ui.showRecordActionDialog('lookupNakalaAuthor', dlg_opts);
     }
 });

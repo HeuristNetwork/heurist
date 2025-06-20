@@ -1,25 +1,48 @@
 /**
-* Search header for manageSysUsers manager
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file        searchSysDashboard.js
+ * @brief       Provides a search interface for System Dashboards.
+ * @fileOverview This widget handles the search functionality for System Dashboards, allowing users to find and select available dashboards. It also includes controls for managing dashboard preferences like visibility on startup.
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\entity
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       4.0
+ */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
+
+/**
+ * @widget heurist.searchSysDashboard
+ * @brief Search widget for System Dashboards.
+ * @extends $.heurist.searchEntity
+ * @description This widget provides a user interface for searching and managing System Dashboard entries.
+ *              It includes controls for adding new dashboards, reordering existing ones, and setting user
+ *              preferences related to dashboard visibility.
+ *
+ * @property {boolean} [isViewMode=false] If true, the search is configured for displaying dashboards to a user
+ *           (filters for enabled, sorts by display order, and may hide dashboards not relevant for empty databases).
+ *           If false, it's configured for management (allows searching inactive, sorts by order or label).
+ *
+ * @listens heurist.searchSysDashboard#onadd - Fired when the "Add New Entry" button is clicked.
+ * @listens heurist.searchSysDashboard#onorder - Fired when the "Save New Order" button is clicked.
+ * @listens heurist.searchSysDashboard#onclose - Fired when "View shortcuts", "Hide shortcuts", or "Don't show again" buttons are clicked,
+ *           typically signaling the parent manager to close.
+ * @listens heurist.searchSysDashboard#oninit - Fired when the `_initControls` method has completed its setup.
+ */
 $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
 
-    //
+    /**
+     * @brief Initializes the controls for the System Dashboard search widget.
+     * @override
+     * @memberof heurist.searchSysDashboard
+     * @description Sets up buttons for adding new dashboard entries, applying a new order,
+     *              setting dashboard viewing preferences (show as ribbon, show on startup),
+     *              and filtering by active/inactive status. Triggers an "oninit" event
+     *              and an initial search.
+     */
     _initControls: function() {
         
         let that = this;
@@ -96,9 +119,16 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
     },  
 
     
-    //
-    // public methods
-    //
+    /**
+     * @brief Initiates a search for System Dashboard entries.
+     * @override
+     * @memberof heurist.searchSysDashboard
+     * @description Constructs a search request based on the `isViewMode` option.
+     *              If `isViewMode` is true, it filters for enabled dashboards, sorts by display order,
+     *              and potentially filters out dashboards not relevant for empty databases.
+     *              Otherwise (management mode), it can filter by inactive status and sorts by order or label.
+     *              Calls the parent `startSearch` method with the constructed request.
+     */
     startSearch: function(){
         
             let request = {}
