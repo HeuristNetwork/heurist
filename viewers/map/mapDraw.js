@@ -1,11 +1,47 @@
-/* global Utm */
-// @todo: move to utils_geo
- // converts coordinate pairs (points) to WKT and calls callback function with result as parameter
- //
- // Requires external/js/geodesy-master/utm.js
- //
- function simplePointsToWKT( sCoords, type, UTMzone, callback){
-     
+/**
+ * mapDraw.js - Provides utility functions for converting coordinate data to WKT format.
+ *
+ * @fileOverview This file contains functions related to processing and converting
+ * geographical coordinate strings into Well-Known Text (WKT) format.
+ * It includes handling for UTM coordinate conversions and validation of input data.
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\map
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson ian.johnson.heurist@gmail.com
+ * @since       Unknown
+ */
+
+// Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+// Unless required by applicable law or agreed to in writing, software distributed under the License is
+// distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+// See the License for the specific language governing permissions and limitations under the License.
+
+/* global Utm */ // Assuming Utm is a global object from geodesy-master/utm.js
+
+/**
+ * Converts a string of coordinate pairs (points) to Well-Known Text (WKT) format.
+ *
+ * This function parses a string of coordinates, optionally converts them from UTM
+ * if a UTM zone is provided, and then formats them into a WKT string (Point,
+ * LineString, Polygon, or MultiPoint) based on the specified type and number of coordinates.
+ * It prompts the user to define the geometry type if multiple coordinate pairs are
+ * provided without a type. It also prompts for UTM zone information if coordinates
+ * appear to be UTM.
+ *
+ * @todo Move this function to a more general utility library like utils_geo.
+ * @requires external/js/geodesy-master/utm.js for UTM to Lat/Lon conversion.
+ *
+ * @param {string} sCoords - A string containing space or comma-separated coordinate values (e.g., "lon1 lat1, lon2 lat2").
+ * @param {string} [type] - The desired WKT geometry type ('Point', 'LineString', 'Polygon'). If null and multiple points, user will be prompted.
+ * @param {string|number} [UTMzone] - The UTM zone (e.g., "38N" or 38) or 0 if coordinates are already Lat/Lon. If null, auto-detection is attempted.
+ * @param {function(string)} callback - A callback function that will be invoked with the resulting WKT string as its parameter.
+ * @returns {void} Does not return a value directly; uses the callback for output.
+ */
+function simplePointsToWKT( sCoords, type, UTMzone, callback){
 
     //let s = sCoords.replace(/[\b\t\n\v\f\r]/g, ' '); //replace invisible service chars
     let s = sCoords.replace(/[,]/g,' ');

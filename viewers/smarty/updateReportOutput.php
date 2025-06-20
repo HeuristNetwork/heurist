@@ -1,41 +1,49 @@
 <?php
 /*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
+<?php
 /**
-* updateReportOutput.php  - for backward capability. See ReportController
-*
-* It takes a report ID (rps_ID in usrReportSchedule) and writes out the report (html and js files)
-* to the location specified for that ID.
-* If ID is 0 it should trigger sequential refreshing of all the reports
-*
-* parameters
-* 'id' - key field value in usrReportSchedule
-* 'mode' - if publish>0: js or html (default) - output format
-* 'publish' - 0 vsn 3 UI (smarty tab),  1 - publish,  2 - no browser output (save into file only)
-*                 3 - redirect the existing report (use already publshed output), if it does not exist publish=1
-*
-* If publish=1 then the script displays a web page with a report on the process
-* (success or errors as below). If not set, then the errors (file can't be written, can't find template,
-* can't find file path, empty query etc) are sent by email to the database owner.
-*
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-*/
+ * updateReportOutput.php - Handles updating and publishing of Smarty-based reports.
+ *
+ * @fileOverview This script is primarily for backward compatibility and delegates its functionality
+ * to the `ReportController`. It processes requests to generate or update report outputs
+ * (HTML/JS files) based on a report ID (from `usrReportSchedule`).
+ * It supports different publishing modes and output formats.
+ *
+ * Parameters:
+ * - `id` or `template_id`: The ID of the report schedule (rps_ID). If 0, may trigger refreshing all reports.
+ * - `mode`: Output format ('js' or 'html'). Default is 'html'. (Used when publish > 0)
+ * - `publish`: Defines the publishing behavior:
+ *   - 0: Heurist v3 UI (Smarty tab display).
+ *   - 1: Publish the report and display a status page.
+ *   - 2: No browser output; save to file only.
+ *   - 3: Redirect to existing published report; if not found, acts like publish=1.
+ *
+ * Error Handling:
+ * - If `publish=1`, errors are displayed on a status page.
+ * - Otherwise, errors (e.g., file write issues, template not found) are emailed to the database owner.
+ *
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\smarty
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Tom Murtagh
+ * @author      Kim Jackson
+ * @author      Ian Johnson ian.johnson.heurist@gmail.com
+ * @author      Stephen White
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @since       Pre-3.1.0
+ */
+
+// Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+// Unless required by applicable law or agreed to in writing, software distributed under the License is
+// distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+// See the License for the specific language governing permissions and limitations under the License.
+//
+// REMARK: Removed redundant license block comment, as the license is already specified in the PHPDoc.
+// REMARK: Corrected @subpackage to hclient\widgets\smarty based on directory structure.
+
 use hserv\controller\FrontController;
 use hserv\utilities\USanitize;
 

@@ -1,48 +1,49 @@
 /**
-* mapDocument.js - working with map document and dependent record types
-* 
-* loads list of map documents and theirs content (layers and datasources), 
-* opens map document - creates mapLayers
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
-*/
+ * mapDocument.js - Manages map documents and their associated layers and data sources.
+ *
+ * @fileOverview This script is responsible for loading, opening, and managing map documents within Heurist.
+ * It handles the retrieval of map document records, their content (layers and data sources),
+ * and the creation of HMapLayer objects for display on the map. It also provides functionalities
+ * for managing symbology, visibility, and interactions with map documents and their layers.
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\map
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson ian.johnson.heurist@gmail.com
+ * @since       4
+ */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+// Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+// Unless required by applicable law or agreed to in writing, software distributed under the License is
+// distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+// See the License for the specific language governing permissions and limitations under the License.
+//
+// REMARK: Removed redundant license block comment, as the license is already specified in the JSDoc.
 
-/* global HMapLayer */
+/* global HMapLayer, HRecordSet, $Db */ // Assuming HRecordSet and $Db are global or imported elsewhere
 
 /**
-* Manages list of map documents
-* 
-* 
-* @param _options
-
-  private 
-    _loadMapDocuments - loads all or filtered map document records
-    _getTreeData - converts mapdocument recordset (list of layers) to treeview data
-    _loadMapDocumentContent - loads all linked layer and datasources for mapdocument - store it in map_documents_content 
-    _openMapDocument - call _loadMapDocumentContent add layer to map
-    _addLayerRecord - add new layer to map_documents_content and on map
-    _getSymbology - returns symbology for layer (or if not defined it returns general mapdocument symbology)
-    _editSymbology - opens symbology editor for layer and then call layer.applyStyle
-    
-* 
-* @returns {Object}
-*/
+ * Manages a list of map documents, their layers, and data sources.
+ *
+ * This function provides methods to:
+ * - Load map document records from the server.
+ * - Load the content (layers, data sources) of a specific map document.
+ * - Open a map document, creating HMapLayer instances for each layer.
+ * - Add new layers (from search results or existing records) to a map document.
+ * - Manage the visibility and symbology of layers.
+ * - Convert map document content to a tree structure for UI display.
+ * - Handle CRS (Coordinate Reference System) and zoom level settings for map documents.
+ *
+ * @param {object} _options - Configuration options for the map document manager.
+ * @param {jQuery} _options.container - The jQuery object representing the container for any UI elements (currently unused directly).
+ * @param {object} _options.mapwidget - Reference to the main mapping widget (mapping.js instance) for interaction.
+ * @returns {object} An object with public methods to manage map documents.
+ */
 function hMapDocument( _options )
-{    
+{
     const _className = "MapDocument",
     _version   = "0.4";
 

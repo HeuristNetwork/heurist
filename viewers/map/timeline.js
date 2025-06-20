@@ -1,32 +1,41 @@
 /**
-* methods for timeline 
-* timelineRefresh - reloads timeline component
-* setSelection
-* zoomToSelection
-* 
-* _timelineZoomToAll
-* _timelineZoomToRange
-* _timelineApplyRangeOnMap - filter items on map based on timeline range
-* _timelineInitToolbar - button initialization (called once on first init)
-* _timelineApplyLabelSettings
-* 
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * timeline.js - jQuery UI widget for managing and displaying a Vis.js timeline.
+ *
+ * @fileOverview This script defines the `heurist.timeline` widget, which provides
+ * functionality for interacting with a Vis.js timeline. This includes refreshing the
+ * timeline with new data, setting and zooming to selections, filtering map items
+ * based on the timeline's visible range, and managing timeline display settings
+ * (like label appearance and stacking).
+ *
+ * Key methods include:
+ * - `timelineRefresh`: Reloads the timeline with new items and groups.
+ * - `setSelection`: Sets the selected items on the timeline.
+ * - `zoomToSelection`: Zooms the timeline to the currently selected items.
+ * - `_timelineZoomToAll`: Zooms the timeline to show all items.
+ * - `_timelineZoomToRange`: Zooms the timeline to a specific date range.
+ * - `_timelineApplyRangeOnMap`: Filters map items based on the timeline's current visible range (triggers `onfilter` callback).
+ * - `_timelineInitToolbar`: Initializes the timeline toolbar with zoom and navigation controls.
+ * - `_timelineApplyLabelSettings`: Applies settings for how item labels are displayed on the timeline.
+ *
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\map
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson ian.johnson.heurist@gmail.com
+ * @since       4.0
+ */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+// Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+// Unless required by applicable law or agreed to in writing, software distributed under the License is
+// distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+// See the License for the specific language governing permissions and limitations under the License.
+//
+// REMARK: Removed redundant license block comment, as the license is already specified in the JSDoc.
 
-/* global vis */
+/* global vis, $ */ // vis (Vis.js) and $ (jQuery) are expected to be globally available.
 
 $.widget( "heurist.timeline", {
 

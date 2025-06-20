@@ -1,127 +1,186 @@
 /**
-* mapPublish.js - publish map dialogue
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
-*/
+ * mapPublish.js - Defines Leaflet controls for publishing a map and accessing help.
+ *
+ * @fileOverview This script creates custom Leaflet controls: one for initiating the
+ * "Publish Map" dialog and another for displaying help content related to mapping.
+ * These controls are intended to be added to a Leaflet map instance.
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\map
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson ian.johnson.heurist@gmail.com
+ * @since       4
+ */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-/* global L */
+// Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+// Unless required by applicable law or agreed to in writing, software distributed under the License is
+// distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+// See the License for the specific language governing permissions and limitations under the License.
+//
+// REMARK: Removed redundant license block comment, as the license is already specified in the JSDoc.
+
+/* global L, $ */ // Leaflet (L) and jQuery ($) are expected to be globally available.
 
 if((typeof L !=='undefined') && L.Control)
 {
-    
-function commonCodeInit(options)
-{
-        options = options || {};
-        
-        L.Util.setOptions(this, options);
-        
-        this._mapwidget = options.mapwidget;
-        
-        L.Control.prototype.initialize.call(this, this.options);
-} 
-
-function commonOnAdd(label, icon){
-
-        let container = this._container = L.DomUtil.create('div','leaflet-bar');
-
-        L.DomEvent
-          .disableClickPropagation(container)
-          .disableScrollPropagation(container);
-        
-        $('<a>').attr('title', window.hWin.HR(label))
-            .css({'width':'22px','height':'22px','border-radius': '2px','cursor':'pointer','margin':'0.1px'})
-            .addClass('ui-icon '+icon)
-            .appendTo(container);
-    
-}   
-    
-L.Control.Publish = L.Control.extend({
-    
-    mapPublish: null,
-    _container: null,
-    _mapwidget: null,
-    
-    initialize: commonCodeInit,
-
-    
-    onAdd: function(map) {
-        
-        commonOnAdd.call(this, 'Publish Map', 'ui-icon-globe');
-        
-        L.DomEvent
-            .on(this._container, 'click', this._onClick, this);
-        
-        return this._container;
-    },
-
-    onRemove: function(map) {
-        // Nothing to do here
-    },
-    
-    _onClick: function(map) {
-        
-       window.hWin.HEURIST4.ui.showPublishDialog( {mode:'mapquery', mapwidget:this._mapwidget} );
-       //this.mapPublish.openPublishDialog();
-        
-       
+    /**
+     * Common initialization logic for custom Leaflet controls.
+     * Sets options and stores a reference to the map widget.
+     * @this L.Control
+     * @param {object} options - Options for the control.
+     * @param {object} options.mapwidget - Reference to the main mapping widget.
+     */
+    function commonCodeInit(options)
+    {
+            options = options || {};
+            L.Util.setOptions(this, options);
+            this._mapwidget = options.mapwidget;
+            L.Control.prototype.initialize.call(this, this.options);
     }
-});
 
-L.control.publish = function(opts) {
-    return new L.Control.Publish(opts);
-}
+    /**
+     * Common logic for creating the control's button element.
+     * @this L.Control
+     * @param {string} label - The title/tooltip for the button.
+     * @param {string} icon - The CSS class for the button's icon (e.g., 'ui-icon-globe').
+     * @returns {HTMLElement} The container element for the control button.
+     */
+    function commonOnAdd(label, icon){
+            let container = this._container = L.DomUtil.create('div','leaflet-bar');
 
-//HELP control
+            L.DomEvent
+              .disableClickPropagation(container)
+              .disableScrollPropagation(container);
 
-L.Control.Help = L.Control.extend({
-    
-    _container: null,
-    _mapwidget: null,
-    
-    initialize: commonCodeInit,
-    
-    onAdd: function(map) {
-        
-        commonOnAdd.call(this, 'Help', 'ui-icon-help');
-        
-        window.hWin.HEURIST4.ui.initHelper({ button:this._container,
-                url: window.hWin.HRes('mapping_overview #content'),
-                position:{ my: "center center", at: "center center", 
-                of: $(window.parent.document) }, no_init:true} ); 
-        
-        /*L.DomEvent
-            .on(container, 'click', this._onClick, this);*/
-        
-        return this._container;
-    },
-
-    onRemove: function(map) {
-        // Nothing to do here
-    },
-    
-    _onClick: function(map) {
-       //show help popup 
-       //this.mapPublish.openPublishDialog();
+            $('<a>').attr('title', window.hWin.HR(label)) // HR is assumed to be a localization function
+                .css({'width':'22px','height':'22px','border-radius': '2px','cursor':'pointer','margin':'0.1px'})
+                .addClass('ui-icon '+icon)
+                .appendTo(container);
+            return container; // Added return statement
     }
-});
 
-L.control.help = function(opts) {
-    return new L.Control.Help(opts);
-}
+    /**
+     * Leaflet Control for publishing the current map view/query.
+     * When clicked, it opens the Heurist publish dialog.
+     * @class L.Control.Publish
+     * @augments L.Control
+     */
+    L.Control.Publish = L.Control.extend({
+        /** Reference to the map publish handler (currently null, seems unused). */
+        mapPublish: null,
+        /** @type {HTMLElement} The control's container element. */
+        _container: null,
+        /** @type {object} Reference to the main mapping widget. */
+        _mapwidget: null,
 
+        /**
+         * Initializes the control.
+         * @param {object} options - Control options.
+         * @param {object} options.mapwidget - Reference to the main mapping widget.
+         */
+        initialize: commonCodeInit,
+
+        /**
+         * Called when the control is added to the map. Creates the button.
+         * @param {L.Map} map - The Leaflet map instance.
+         * @returns {HTMLElement} The control's container element.
+         */
+        onAdd: function(map) {
+            this._container = commonOnAdd.call(this, 'Publish Map', 'ui-icon-globe'); // Added this._container assignment
+            L.DomEvent
+                .on(this._container, 'click', this._onClick, this);
+            return this._container;
+        },
+
+        /**
+         * Called when the control is removed from the map.
+         * @param {L.Map} map - The Leaflet map instance.
+         */
+        onRemove: function(map) {
+            // Nothing to do here
+        },
+
+        /**
+         * Handles the click event on the publish button.
+         * Opens the Heurist publish dialog.
+         * @param {L.Map} map - The Leaflet map instance (passed by Leaflet, not directly used here).
+         * @private
+         */
+        _onClick: function(map) {
+           window.hWin.HEURIST4.ui.showPublishDialog( {mode:'mapquery', mapwidget:this._mapwidget} );
+        }
+    });
+
+    /**
+     * Factory function for creating L.Control.Publish instances.
+     * @param {object} opts - Options for the L.Control.Publish control.
+     * @returns {L.Control.Publish} A new Publish control instance.
+     */
+    L.control.publish = function(opts) {
+        return new L.Control.Publish(opts);
+    }
+
+    /**
+     * Leaflet Control for displaying help information related to the map.
+     * @class L.Control.Help
+     * @augments L.Control
+     */
+    L.Control.Help = L.Control.extend({
+        /** @type {HTMLElement} The control's container element. */
+        _container: null,
+        /** @type {object} Reference to the main mapping widget. */
+        _mapwidget: null,
+
+        /**
+         * Initializes the control.
+         * @param {object} options - Control options.
+         * @param {object} options.mapwidget - Reference to the main mapping widget.
+         */
+        initialize: commonCodeInit,
+
+        /**
+         * Called when the control is added to the map. Creates the button and initializes the help functionality.
+         * @param {L.Map} map - The Leaflet map instance.
+         * @returns {HTMLElement} The control's container element.
+         */
+        onAdd: function(map) {
+            this._container = commonOnAdd.call(this, 'Help', 'ui-icon-help'); // Added this._container assignment
+            window.hWin.HEURIST4.ui.initHelper({ button:this._container,
+                    url: window.hWin.HRes('mapping_overview #content'), // HRes is assumed to be a resource loading function
+                    position:{ my: "center center", at: "center center",
+                    of: $(window.parent.document) }, no_init:true} );
+            return this._container;
+        },
+
+        /**
+         * Called when the control is removed from the map.
+         * @param {L.Map} map - The Leaflet map instance.
+         */
+        onRemove: function(map) {
+            // Nothing to do here
+        },
+
+        /**
+         * Handles the click event on the help button (currently does nothing as help is initialized on add).
+         * @param {L.Map} map - The Leaflet map instance.
+         * @private
+         */
+        _onClick: function(map) {
+           //show help popup
+        }
+    });
+
+    /**
+     * Factory function for creating L.Control.Help instances.
+     * @param {object} opts - Options for the L.Control.Help control.
+     * @returns {L.Control.Help} A new Help control instance.
+     */
+    L.control.help = function(opts) {
+        return new L.Control.Help(opts);
+    }
 }
         
         
