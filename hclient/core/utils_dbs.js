@@ -34,7 +34,6 @@ if (!window.hWin.HEURIST4.dbs)
  * It includes helpers for retrieving definition properties, navigating hierarchies,
  * and performing specific operations related to database metadata.
  * 
-/*
 Selectors:
 
 TERMS
