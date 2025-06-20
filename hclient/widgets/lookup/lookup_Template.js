@@ -163,6 +163,8 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
      */
     _rendererResultList: function(recordset, record){
 
+        let that = this;
+
         /**
          * Process author values to string format
          *
@@ -175,14 +177,13 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
 
             for(let cur_obj of authors){
                 let cur_string = '';
-                if(typeof cur_obj === 'object' && cur_obj !== null){
+                if(that.$H.isObject(cur_obj)){
                     if(cur_obj.firstname){ cur_string = cur_obj.firstname; }
                     if(cur_obj.surname){ cur_string = (cur_string ? cur_obj.surname + ', ' + cur_string : cur_obj.surname); }
-                    if(cur_obj.active){ cur_string += ` (${cur_obj.active})`; }
                 } else {
                     cur_string = String(cur_obj); // Fallback for non-object authors
                 }
-                creator_val += cur_string ? `${cur_string}; ` : 'Missing author; ';
+                creator_val += `${cur_string}; `;
             }
 
             return creator_val;
@@ -221,11 +222,11 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
 
                 s = creator_val.replace(/; $/,''); // Clean trailing semicolon
             } else if(Array.isArray(s)){
-                s = this.$H.htmlEscape(s.join('; '));
-            } else if(this.$H.isObject(s)){
+                s = that.$H.htmlEscape(s.join('; '));
+            } else if(that.$H.isObject(s)){
                 s = processObject(s);
             } else {
-                s = this.$H.htmlEscape(s ? String(s) : '');
+                s = that.$H.htmlEscape(s ? String(s) : '');
             }
 
             let title = s; // Tooltip is the processed string
@@ -359,7 +360,6 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
                 if(typeof item === 'object' && item !== null){
                     // Construct display value and search value from sub-properties
                     structured_item.value = `${item.firstname || ''} ${item.surname || ''}`.trim();
-                    if(item.active) structured_item.value += ` [${item.active}]`;
                     if(item.id) structured_item.value += ` (id: ${item.id})`;
                     structured_item.search = `${item.firstname || ''} ${item.surname || ''}`.trim();
                     if(item.role) structured_item.relation = item.role; // For relmarkers
