@@ -180,7 +180,9 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
                 if(that.$H.isObject(cur_obj)){
                     if(cur_obj.firstname){ cur_string = cur_obj.firstname; }
                     if(cur_obj.surname){ cur_string = (cur_string ? cur_obj.surname + ', ' + cur_string : cur_obj.surname); }
-                } else {
+                }else if(String(cur_obj).startsWith('[object')){ // skip objects
+                    continue;
+                }else{
                     cur_string = String(cur_obj); // Fallback for non-object authors
                 }
                 creator_val += `${cur_string}; `;
@@ -351,7 +353,7 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
         // The following is a detailed example assuming a complex data structure like BnF's.
         // Adapt or remove this section based on your actual service's response.
 
-        function processAuthor(authors){
+        function processAuthor(authors, type){
 
             let processed_authors = [];
 
@@ -366,7 +368,7 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
                 } else {
                     structured_item.value = structured_item.search = String(item);
                 }
-                if(field_type === 'resource' || field_type === 'relmarker'){
+                if(type === 'resource' || type === 'relmarker'){
                     processed_authors.push(structured_item);
                 } else {
                     processed_authors.push(structured_item.value);
@@ -375,7 +377,7 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
 
             return processed_authors;
         }
-        function processPublisher(publishers){
+        function processPublisher(publishers, type){
 
             let processed_publishers = [];
 
@@ -387,7 +389,7 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
                 } else {
                     structured_item.value = structured_item.search = String(item);
                 }
-                if(field_type === 'resource' || field_type === 'relmarker'){
+                if(type === 'resource' || type === 'relmarker'){
                     processed_publishers.push(structured_item);
                 } else {
                     processed_publishers.push(structured_item.value);
@@ -417,11 +419,11 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
 
             if(field_name === 'author' || field_name === 'contributor'){ // Example: special handling for author/contributor
                 // Replace or merge with values from prepareValues
-                res[dty_ID] = processAuthor(val); // This example replaces; merging might be needed
+                res[dty_ID] = processAuthor(val, field_type); // This example replaces; merging might be needed
 
             } else if(field_name === 'publisher'){ // Example: special handling for publisher
 
-                res[dty_ID] = processPublisher(val);
+                res[dty_ID] = processPublisher(val, field_type);
 
             } else if (field_type === 'enum') {
                 // If prepareValues didn't fully resolve terms (e.g. needs code mapping not just label)
