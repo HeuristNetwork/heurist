@@ -164,6 +164,44 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
     _rendererResultList: function(recordset, record){
 
         /**
+         * Process author values to string format
+         *
+         * @param {Array<object|string>} authors - Array of author values to be processed
+         * @returns {string} Formatted author values string
+         */
+        function processAuthors(authors){
+
+            let creator_val = '';
+
+            for(let cur_obj of authors){
+                let cur_string = '';
+                if(typeof cur_obj === 'object' && cur_obj !== null){
+                    if(cur_obj.firstname){ cur_string = cur_obj.firstname; }
+                    if(cur_obj.surname){ cur_string = (cur_string ? cur_obj.surname + ', ' + cur_string : cur_obj.surname); }
+                    if(cur_obj.active){ cur_string += ` (${cur_obj.active})`; }
+                } else {
+                    cur_string = String(cur_obj); // Fallback for non-object authors
+                }
+                creator_val += cur_string ? `${cur_string}; ` : 'Missing author; ';
+            }
+
+            return creator_val;
+        }
+        /**
+         * Converts objects into readable strings
+         *
+         * @param {object} obj - Object with values
+         * @returns {string} Formatted values string
+         */
+        function processObject(obj){
+            let display_val = '';
+            for(let key in s){
+                if(display_val != ''){ display_val += ', '; }
+                display_val += s[key];
+            }
+            return display_val;
+        }
+        /**
          * Example inner helper function to format a field for display.
          * @param {string} fldname - The logical name of the field (should match a key in the service's field mapping or a field in the HRecordSet).
          * @param {number} width - Desired display width in 'ex' units for truncation.
@@ -176,32 +214,18 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
                 if(!s){ 
                     return '<div style="display:inline-block;width:'+width+'ex" class="truncate"">No provided creator</div>';
                 }
-                let creator_val = '';
+
                 // Assuming s might be an array of author objects
                 let authors = Array.isArray(s) ? s : [s];
-                for(let cur_obj of authors){
-                    let cur_string = '';
-                    if(typeof cur_obj === 'object' && cur_obj !== null){
-                        if(cur_obj.firstname){ cur_string = cur_obj.firstname; }
-                        if(cur_obj.surname){ cur_string = (cur_string ? cur_obj.surname + ', ' + cur_string : cur_obj.surname); }
-                        if(cur_obj.active){ cur_string += ` (${cur_obj.active})`; }
-                    } else {
-                        cur_string = String(cur_obj); // Fallback for non-object authors
-                    }
-                    creator_val += cur_string ? `${cur_string}; ` : 'Missing author; ';
-                }
+                let creator_val = processAuthors(authors);
+
                 s = creator_val.replace(/; $/,''); // Clean trailing semicolon
             } else if(Array.isArray(s)){
-                s = window.hWin.HEURIST4.util.htmlEscape(s.join('; '));
-            } else if(window.hWin.HEURIST4.util.isObject(s)){
-                let display_val = '';
-                for(let key in s){
-                    if(display_val != ''){ display_val += ', '; }
-                    display_val += s[key];
-                }
-                s = display_val;
+                s = this.$H.htmlEscape(s.join('; '));
+            } else if(this.$H.isObject(s)){
+                s = processObject(s);
             } else {
-                s = window.hWin.HEURIST4.util.htmlEscape(s ? String(s) : '');
+                s = this.$H.htmlEscape(s ? String(s) : '');
             }
 
             let title = s; // Tooltip is the processed string
@@ -326,6 +350,53 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
         // The following is a detailed example assuming a complex data structure like BnF's.
         // Adapt or remove this section based on your actual service's response.
 
+        function processAuthor(authors){
+
+            let processed_authors = [];
+
+            for(let item of authors){
+                let structured_item = {};
+                if(typeof item === 'object' && item !== null){
+                    // Construct display value and search value from sub-properties
+                    structured_item.value = `${item.firstname || ''} ${item.surname || ''}`.trim();
+                    if(item.active) structured_item.value += ` [${item.active}]`;
+                    if(item.id) structured_item.value += ` (id: ${item.id})`;
+                    structured_item.search = `${item.firstname || ''} ${item.surname || ''}`.trim();
+                    if(item.role) structured_item.relation = item.role; // For relmarkers
+                } else {
+                    structured_item.value = structured_item.search = String(item);
+                }
+                if(field_type === 'resource' || field_type === 'relmarker'){
+                    processed_authors.push(structured_item);
+                } else {
+                    processed_authors.push(structured_item.value);
+                }
+            }
+
+            return processed_authors;
+        }
+        function processPublisher(publishers){
+
+            let processed_publishers = [];
+
+            for(let item of publishers){
+                let structured_item = {};
+                    if(typeof item === 'object' && item !== null){
+                    structured_item.value = `${item.name || ''} ${item.location || ''}`.trim();
+                    structured_item.search = item.name || item.location || '';
+                } else {
+                    structured_item.value = structured_item.search = String(item);
+                }
+                if(field_type === 'resource' || field_type === 'relmarker'){
+                    processed_publishers.push(structured_item);
+                } else {
+                    processed_publishers.push(structured_item.value);
+                }
+            }
+
+            return processed_publishers;
+        }
+
         let map_flds = Object.keys(this.options.mapping.fields);
 
         for(let field_name of map_flds){
@@ -344,46 +415,13 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
 
             val = this.valueToArray(val);
 
-            let processed_vals = [];
-
             if(field_name === 'author' || field_name === 'contributor'){ // Example: special handling for author/contributor
-                for(let item of val){
-                    let structured_item = {};
-                    if(typeof item === 'object' && item !== null){
-                        // Construct display value and search value from sub-properties
-                        structured_item.value = `${item.firstname || ''} ${item.surname || ''}`.trim();
-                        if(item.active) structured_item.value += ` [${item.active}]`;
-                        if(item.id) structured_item.value += ` (id: ${item.id})`;
-                        structured_item.search = `${item.firstname || ''} ${item.surname || ''}`.trim();
-                        if(item.role) structured_item.relation = item.role; // For relmarkers
-                    } else {
-                        structured_item.value = structured_item.search = String(item);
-                    }
-                    if(field_type === 'resource' || field_type === 'relmarker'){
-                        processed_vals.push(structured_item);
-                    } else {
-                        processed_vals.push(structured_item.value);
-                    }
-                }
                 // Replace or merge with values from prepareValues
-                res[dty_ID] = processed_vals; // This example replaces; merging might be needed
+                res[dty_ID] = processAuthor(val); // This example replaces; merging might be needed
 
             } else if(field_name === 'publisher'){ // Example: special handling for publisher
-                 for(let item of val){
-                    let structured_item = {};
-                     if(typeof item === 'object' && item !== null){
-                        structured_item.value = `${item.name || ''} ${item.location || ''}`.trim();
-                        structured_item.search = item.name || item.location || '';
-                    } else {
-                        structured_item.value = structured_item.search = String(item);
-                    }
-                     if(field_type === 'resource' || field_type === 'relmarker'){
-                        processed_vals.push(structured_item);
-                    } else {
-                        processed_vals.push(structured_item.value);
-                    }
-                }
-                res[dty_ID] = processed_vals;
+
+                res[dty_ID] = processPublisher(val);
 
             } else if (field_type === 'enum') {
                 // If prepareValues didn't fully resolve terms (e.g. needs code mapping not just label)
@@ -517,8 +555,8 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
             return;
         }
 
-        let res_records = {}; // { local_id: [field_values_array] }
-        let res_orders = [];  // [local_id1, local_id2, ...]
+        let res_records = { /* local_id: [field_values_array] */ };
+        let res_orders = [ /* local_id1, local_id2, ... */ ];
 
         // Define fields for HRecordSet. Must include 'rec_ID', 'rec_RecTypeID'.
         // Other field names should match those you'll extract from `json_data.result` items
