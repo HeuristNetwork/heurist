@@ -17,7 +17,7 @@
  * @author Ian Johnson <ian.johnson.heurist@gmail.com>
  * @since 4.0
  */
-/* global cfg_widgets, prepareTemplateBlog, layoutMgr, cfg_layouts */ // Added cfg_layouts based on usage
+/* global cfg_widgets, prepareTemplateBlog, layoutMgr, cfg_layouts */
 
 /**
  * Manages the generation and initialization of web page layouts from JSON configurations.
@@ -1158,9 +1158,8 @@ class HLayoutMgr {
     this.#layoutInitKey(layout_array, i);
   }
 
-  // not used
   /**
-   * Adds a widget to the layout. (Note: Original code comments suggest this might be unused or for specific editor use).
+   * Adds a widget to the layout.
    *
    * @param {Object} layout_config - The JSON configuration for the widget.
    * @param {jQuery} target_container - The container to add the widget to.

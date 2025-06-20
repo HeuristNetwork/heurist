@@ -1,7 +1,7 @@
 /**
  * @file hapi.js
- * @brief Core Heurist API (hAPI) factory function and initialization logic.
- * @fileOverview This file defines the main Heurist API (hAPI) factory function. The hAPI object serves as
+ * @brief Core Heurist factory function and initialization logic.
+ * @fileOverview This file defines the main Heurist factory function. The hAPI object serves as
  * the central hub for client-side Heurist operations. It manages configuration information (base URLs,
  * database name, system info), handles localization, initializes and provides access to various managers
  * (SystemMgr, RecordMgr, RecordSearch, EntityMgr, LayoutMgr), and includes the core `_callserver`
@@ -16,20 +16,46 @@
  * @author Ian Johnson <ian.johnson.heurist@gmail.com>
  * @since 4.0
  */
+ 
 /* global ActionHandler, HSystemMgr, HRecordSet, HLayout, HLayoutMgr, HRecordSearch */ // Consolidated globals
+
 /**
- * Factory function for the Heurist API (hAPI) object.
- * Initializes and returns the central hAPI instance that manages client-side Heurist operations,
- * including configuration, localization, server communication, and access to various managers.
- *
- * @constructor hAPI
- * @param {string} [_db] - The name of the database to connect to. If omitted, it's typically derived from the URL.
- * @param {function(boolean): void} [_oninit] - A callback function executed after initialization.
- *                                             Receives `true` if initialization is successful, `false` otherwise.
- * @param {string} [_baseURL] - Optional base URL for the Heurist server, used in embedded scenarios
- *                              where client and server locations differ. If omitted, it's auto-detected.
- * @returns {Object} The initialized hAPI instance with methods and properties for interacting with Heurist.
- */
+* Factory function for the Heurist objects.
+* Initializes and returns the central hAPI instance that manages client-side Heurist operations,
+* including configuration, localization, server communication, and access to various managers.
+*
+* Properties:
+*    baseURL
+*    baseURL_pro
+*    iconBaseURL - url for record type icon (rty_ID to be added)
+*    database - current database name
+*    sysinfo
+*    is_publish_mode - false if Heurist is inited via main index.php and layout is not from the set of application (DH, EN, WebSearch)
+*
+* Localization routines (assigned to window.hWin)
+*
+*    HR  returns localized string
+*    HRA = localize all elements with class slocale for given element
+*    HRes = returns url or loads content for localized resource
+*    HRJ = returns localized value for json (options in widget)
+*
+* LayoutMgr   HLayout object (@todo replace to new version from CMS)
+*
+* Classes for server interaction
+*
+*    SystemMgr - user credentials and system utilities
+*    RecordMgr - Records SCRUD actions    
+*    RecordSearch - wrapper for RecordMgr.search method
+*    EntityMgr - SCRUD for database defenitions and user/groups
+* 
+* @constructor hAPI
+* @param {string} [_db] - The name of the database to connect to. If omitted, it's typically derived from the URL.
+* @param {function(boolean): void} [_oninit] - A callback function executed after initialization.
+*                                             Receives `true` if initialization is successful, `false` otherwise.
+* @param {string} [_baseURL] - Optional base URL for the Heurist server, used in embedded scenarios
+*                              where client and server locations differ. If omitted, it's auto-detected.
+* @returns {Object} The initialized hAPI instance with methods and properties for interacting with Heurist.
+*/
 function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     const _className = "HAPI",
         _version = "0.4";
@@ -50,6 +76,16 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         actionHandler = null;
                 
 
+    /**
+    * initialization of hAPI object
+    *  1) define paths from top.location
+    *  2) takes regional from  localization_xxx.txt
+    *
+    * @param _db - database name, if omit it takes from url parameter
+    * @param _oninit - callback function, obtain parameter true if initialization is successeful
+    * @param _baseURL - defined for embed mode only when location of heurist client is differend from heurist server 
+    *
+    */    
     function _init(_db, _oninit, _baseURL) { //, _currentUser) {
 
         that.SystemMgr = new HSystemMgr(that);
@@ -196,6 +232,17 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         }
         return _key_count;
     }
+    
+    /**
+     * internal function see HSystemMgr, HRecordMgr - ajax request to server
+     *
+     * @param {string} action - name of php script in hserv/controller folder on server side
+     * @param {Request} request - data to be sent to server side
+     * @param {callserverCallback} callback - callback, which receives object with following properties:
+     * - `status`: a complete list of possible statuses can be found in `hclient/core/detectHeurist.js`
+     * - `message`: error message or Ajax response
+     * - `data`: data returned for request
+     */    
     function _callserver(action, request, callback, timeout=0) {
 
         _is_callserver_in_progress = true;
@@ -312,6 +359,15 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
     }
 
+    /**
+     * Clears records that were affected by the action from the browseRecordCache, then
+     * triggers HAPI4.Event.ON_REC_UPDATE
+     * 
+     * @param {Object} response
+     * @param {string} response.status - status code of the response, see hclient/core/detectHeurist.js
+     * @param {(string|Array)=} response.affectedRty - comma-seperated list or array of record ids
+     * @param {Function=} callback
+     */    
     function _triggerRecordUpdateEvent(response, callback) {
         if (response && response.status == window.hWin.ResponseStatus.OK) {
             // $Db is alias for HEURIST4.dbs, defined in hclient/core/utils_dbs.js

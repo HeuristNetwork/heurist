@@ -13,6 +13,7 @@
  * @see editing_input.js
  * @see mapDraw.js
  * @see recordset.js
+ *
  * @package Heurist academic knowledge management system
  * @subpackage hclient\core
  * @link https://HeuristNetwork.org

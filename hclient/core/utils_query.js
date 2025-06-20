@@ -13,11 +13,13 @@
  * - Creating facet query structures (`createFacetQuery`).
  * - Helper for displaying a "copy query string" popup (`hQueryCopyPopup`).
  * These utilities are central to how search and filtering are handled throughout the Heurist client.
+ * 
  * @package Heurist academic knowledge management system
  * @subpackage hclient\core
  * @link https://HeuristNetwork.org
  * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Brandon McKay   <blmckay13@gmail.com>
  * @author Artem Osmakov <osmakov@gmail.com>
  * @author Ian Johnson <ian.johnson.heurist@gmail.com>
  * @since 4.0
@@ -40,8 +42,6 @@ if (!window.hWin.HEURIST4.query)
  */
 window.hWin.HEURIST4.query = {
 
-    //--- HEURIST QUERY ROUTINES ------- (This comment can be removed if all routines below are documented)
-    
     /**
      * Composes a Heurist URL query string from a query request object.
      * Includes database, mapdocument (if present in current URL), 'w' (domain), 'q' (query),
@@ -715,57 +715,52 @@ window.hWin.HEURIST4.query = {
      */
     stringQueryToPlainText: function(query){
 
-        const getSubquery = /\(([^[)])*\)/g; // Regex to find parenthesized subqueries
-        const removeParenthesis = /(?:^[\s(]+)|(?:[\s)]+$)/g; // Regex to remove leading/trailing spaces and parentheses
+        const getSubquery = /\(([^[)])*\)/g;
+        const removeParenthesis = /(?:^[\s(]+)|(?:[\s)]+$)/g;
 
         query = typeof query === 'string' ? query.replaceAll(/\s+/g, ' ').trim() : query; // remove double spacing, and leading + trailing spaces
-        let is_invalid = typeof query !== 'string' || query === '' || /^[^\w"]/.exec(query) !== null; // Basic check for invalid query start
+        let is_invalid = typeof query !== 'string' || query === '' || /^[^\w]/.exec(query) !== null;
 
-        let json_query_from_string; // To store potentially parsed JSON from string
-        if(typeof query === 'string'){
-            json_query_from_string = window.hWin.HEURIST4.util.isJSON(query);
+        if(window.hWin.HEURIST4.util.isJSON(query) || is_invalid){
+            return is_invalid ? '' : window.hWin.HEURIST4.query.jsonQueryToPlainText(json_query);
         }
 
-        if(json_query_from_string || is_invalid && typeof query !== 'object'){ // If already JSON or invalid (and not an object)
-            return is_invalid ? '' : window.hWin.HEURIST4.query.jsonQueryToPlainText(json_query_from_string || query);
-        }
-
-        // Recursively process subqueries
         let subqueries = [...query.matchAll(getSubquery)];
-        for(const subqueryMatch of subqueries){ // Iterate using of for match objects
-            let subqueryContent = subqueryMatch[0].replace(removeParenthesis, '');
-            let processedSubquery = window.hWin.HEURIST4.query.stringQueryToPlainText(subqueryContent);
-            query = query.replace(subqueryMatch[0], `(${processedSubquery})`); // Keep parentheses for structure if needed by jsonQueryToPlainText
+        for(const idx in subqueries){
+
+            let subquery = subqueries[idx].replaceAll(removeParenthesis, '');
+            
+            let result = window.hWin.HEURIST4.query.stringQueryToPlainText(subquery);
+            query = query.replace(subqueries[idx], result);
         }
 
-        let parts = [...query.matchAll(/(?:".*?"|[^"\s]+)+(?=\s*|\s*$)/g)]; // extract terms, respecting quotes
+        let parts = [...query.matchAll(/(?:".*?"|[^"\s]+)+(?=\s*|\s*$)/g)]; // extract via spaces, not within double quotes
 
-        // Convert plain query to json query structure for jsonQueryToPlainText
-        let json_query_parts = [];
+        // Convert plain query to json query, validation will be performed within jsonQueryToPlainText
+        let json_query = [];
         for(const part of parts){
-            if(part?.length > 0 && part[0].indexOf(':') > 0){ // Field-prefixed term
-                let pieces = part[0].split(':');
-                let key;
-                let searchValue;
-                if (pieces.length > 1) {
-                    key = pieces.shift(); // The part before the first colon is the key
-                    searchValue = pieces.join(':').replaceAll(/(^"|"$)/g, ''); // Join the rest, remove surrounding quotes
-                    json_query_parts.push({ [key]: searchValue });
-                } else { // Not a valid field:value, treat as plain text if necessary or part of a larger structure
-                    json_query_parts.push({ plain: part[0].replaceAll(/(^"|"$)/g, '') });
-                }
-            } else if (part?.length > 0) { // Plain text term
-                 json_query_parts.push({ plain: part[0].replaceAll(/(^"|"$)/g, '') });
+
+            if(part?.length == 0 || part[0].indexOf(':') <= 0){
+                continue;
             }
+
+            let pieces = part[0].split(':');
+            if(pieces.length == 2){
+                json_query.push({ [pieces[0]]: pieces[1] });
+                continue;
+            }
+
+            let key = Number.isNaN(pieces[1]) ? pieces.shift() : `${pieces.shift()}:${pieces.shift()}`;
+            let search = pieces.join(':').replaceAll(/(?:^")|(?:"$)/g, '');
+
+            json_query.push({ [key]: search });
         }
 
-        if(json_query_parts.length == 0 && typeof query === 'string' && query.trim() !== ''){ // If no structured parts but query is not empty
-             return query; // Return the original query string as is, likely a single plain text search.
-        } else if(json_query_parts.length == 0){
+        if(json_query.length == 0){
             return '';
         }
 
-        return window.hWin.HEURIST4.query.jsonQueryToPlainText(json_query_parts);
+        return window.hWin.HEURIST4.query.jsonQueryToPlainText(json_query);
     },
 
     /**
@@ -789,230 +784,250 @@ window.hWin.HEURIST4.query = {
 
         const commaListRegex = /^\d+(?:,\d+)*$/;
         let plain_text = '';
-        // Attempt to parse if query is a string and might be JSON
-        let queryObj = typeof query === 'string' ? window.hWin.HEURIST4.util.isJSON(query) : query;
-
-        if (typeof query === 'string' && queryObj === false) { // Was a string but not valid JSON
-             // If it's a sub_query, it might be a plain search term from a more complex string query
-            return is_sub_query ? query : window.hWin.HEURIST4.query.stringQueryToPlainText(query);
-        }
-        if (queryObj === false || window.hWin.HEURIST4.util.isempty(queryObj)) {
-            return plain_text; // Return empty if not valid JSON or is empty
+        if(window.hWin.HEURIST4.util.isempty(query) || !window.hWin.HEURIST4.util.isJSON(query)){
+            return window.hWin.HEURIST4.util.isempty(query) ? plain_text : window.hWin.HEURIST4.query.stringQueryToPlainText(query);
         }
 
-        query = queryObj; // Use the parsed object or original if it was an object
+        query = window.hWin.HEURIST4.util.isJSON(query);
         query = Array.isArray(query) ? query : Object.entries(query).map((part) => { return {[part[0]]: part[1]}; });
-        let rty_ID = null; // Stores current record type context
-        let deconstructed = []; // Stores parts of the human-readable query
-        let sortby = []; // Stores sort criteria
+        let rty_ID = null;
+        let deconstructed = [];
+        let sortby = [];
 
-        // --- Internal Helper Functions ---
-        // (These are not JSDoc'd as they are internal to jsonQueryToPlainText)
+        function handleRectype(rty_IDs){
 
-        function handleRectype(rty_IDs_input){ // Renamed to avoid conflict with outer rty_ID
-            let rty_IDs = rty_IDs_input;
             if(window.hWin.HEURIST4.util.isPositiveInt(rty_IDs) || ( typeof rty_IDs === 'string' && commaListRegex.exec(rty_IDs) )){
-                rty_IDs = window.hWin.HEURIST4.util.isPositiveInt(rty_IDs) ? [String(rty_IDs)] : rty_IDs.split(',').filter((id) => window.hWin.HEURIST4.util.isPositiveInt(id));
-            }else if (typeof rty_IDs === 'string' && !window.hWin.HEURIST4.util.isPositiveInt(rty_IDs)){ // Potentially a record type name
-                 rty_IDs = [rty_IDs]; // Keep as string for $Db.rtyByName
-            }else if (!Array.isArray(rty_IDs)){
-                 rty_IDs = [String(rty_IDs)];
+                rty_IDs = window.hWin.HEURIST4.util.isPositiveInt(rty_IDs) ? [rty_IDs] : rty_IDs.split(',').filter((id) => window.hWin.HEURIST4.util.isPositiveInt(id));
+            }else{
+                rty_IDs = [rty_IDs];
             }
-
 
             let labels = [];
-            let valid_ids = [];
-            for(const id_or_name of rty_IDs){
-                let label = id_or_name;
-                let current_id = id_or_name;
-                if (window.hWin.HEURIST4.util.isPositiveInt(id_or_name)) {
-                    label = $Db.rty(id_or_name, 'rty_Name') ?? id_or_name;
-                } else { // Assume it's a name
-                    current_id = $Db.rtyByName(id_or_name); // Get ID by name
-                    if (current_id) label = id_or_name; // Use name if ID found
-                    else current_id = id_or_name; // Fallback if name not found
-                }
-                labels.push(label);
-                if (window.hWin.HEURIST4.util.isPositiveInt(current_id)) valid_ids.push(current_id);
+            for(const id of rty_IDs){
+                labels.push($Db.rty(id, 'rty_Name') ?? id);
             }
 
-            rty_ID = valid_ids.join(','); // Update outer rty_ID context with actual IDs
+            rty_ID = rty_IDs.join(',');
             deconstructed.unshift(`Find: <strong>${window.hWin.HEURIST4.util.stripTags(labels.join(' | '))}</strong><br>`);
         }
 
-        function handleDefault(key_input, field_input, value_input){
-            let key = key_input;
-            let field = field_input;
-            let value = value_input;
+        function handleDefault(key, field, value){
+
             let type = '';
             let conditional = '';
 
-            if(field.indexOf(':') > 0){ // e.g. "fldType:123"
+            if(field.indexOf(':') > 0){
                 field = field.split(':');
-                field = field[field.length-1]; // take the ID part
-            }else if(key != 'f' && key.startsWith('f')){ // e.g. "f123"
-                let match = key.match(/\d+/); // Extract numeric part
+                field = field[field.length-1];
+            }else if(key != 'f' && key.startsWith('f')){
+                let match = key.match(/\d/);
                 field = match === null ? 'Any field' : key.substring(1);
-            }else if(window.hWin.HEURIST4.util.isPositiveInt(key)){ // If key itself is a field ID (e.g. {123: "value"})
-                field = key; // The key is the field ID
-                value = value_input; // The value is the search term for this field
+            }else if(window.hWin.HEURIST4.util.isPositiveInt(key)){
+                field = value;
             }
-
 
             if(window.hWin.HEURIST4.util.isPositiveInt(field)){
                 type = $Db.dty(field, 'dty_Type');
                 let field_name = $Db.rst(rty_ID, field, 'rst_DisplayName') ?? $Db.dty(field, 'dty_Name');
-                field = field_name ?? `Field ID ${field}`; // Use name or fallback to ID
+                field = field_name;
             }
 
-            if(key === 'r' && (field === field_input || field === 'Any field')){ // Relation type field handling (no specific field ID in key)
-                value = typeof value !== 'string' ? String(value) : value;
-                let condPrefix = value.startsWith('-') ? 'not' : '';
-                let valToParse = value.startsWith('-') ? value.substring(1) : value;
+            if(key === 'r' && !field){ // Relation type field handling
 
-                if(window.hWin.HEURIST4.util.isPositiveInt(valToParse) || commaListRegex.exec(valToParse)){
-                    let term_ids = valToParse.split(',');
-                    term_ids = term_ids.filter((id) => window.hWin.HEURIST4.util.isPositiveInt(id));
-                    let term_labels = term_ids.map((id) => $Db.trm(id, 'trm_Label'));
-                    valToParse = term_labels.filter((trm) => !window.hWin.HEURIST4.util.isempty(trm)).join(' | ');
+                value = typeof value !== 'string' ? value.toString() : value;
+                let cond = value.startsWith('-') ? 'not' : '';
+                if(window.hWin.HEURIST4.util.isPositiveInt(value) || commaListRegex.exec(value)){
+                    value = value.split(',');
+                    value = value.filter((id) => window.hWin.HEURIST4.util.isPositiveInt(id));
+                    value = value.map((id) => $Db.trm(id, 'trm_Label'));
+                    value = value.filter((trm) => !window.hWin.HEURIST4.util.isempty(trm)).join(' | ');
                 }
-                conditional = `<em>Relationship type</em> that is ${condPrefix} a match or is ${condPrefix} a child of "${valToParse}"`;
-            }else if(key === 'r' || key === 'relf' || key === 'rf'){ // Relation field with specific field ID
-                field = `Relationship <em>${field}</em>`;
-            }
 
-            // Handle link/relation subqueries
-            if(key.startsWith('link') || key.startsWith('related')){
-                let linking = key.includes('link') ? 'Linked' : 'Related';
-                let direction = key.includes('from') ? 'from' : (key.includes('to') ? 'to' : '');
+                conditional = `<em>Relationship type</em> that is ${cond} a match or is ${cond} a child of "${value}"`;
+            }else if(key === 'r' || key === 'relf' || key === 'rf'){ // Relation field
+                field = `Relationship ${field}`;
+            } // other
+
+            if(key.startsWith('link') || key.startsWith('related')){ // linked_to,linkedfrom,related_to,relatedfrom,links
+
+                let linking = key.indexOf('link') >= 0 ? 'Linked' : 'Related';
+                let direction = key.indexOf('from') >= 0 ? 'from' : 'to';
 
                 if(window.hWin.HEURIST4.util.isPositiveInt(value) || ( typeof value === 'string' && commaListRegex.exec(value) )){
                     let recIDs = window.hWin.HEURIST4.util.isPositiveInt(value) ? value : value.split(',').filter((id) => window.hWin.HEURIST4.util.isPositiveInt(id)).join(',');
-                    conditional = `<br>Search for ${linking} Records ${direction} record ID(s): ${recIDs}`;
+                    conditional = `<br>Search for ${linking} Records ${direction} record ID: ${recIDs}`;
                 }else{
                     let sub_query = window.hWin.HEURIST4.query.jsonQueryToPlainText(value, true) ?? 'Missing sub query';
-                    conditional = `<br>Search ${linking} Records ${direction} <em>${field}</em>:<br><div style="padding:5px;">${sub_query}</div>`;
+                    conditional = `<br>Search ${linking} Records ${direction} ${field}:<br><div style="padding:5px;">${sub_query}</div>`;
                 }
-                field = ''; // Field name is incorporated into the conditional string
+
+                field = '';
             }
+
             return [field, conditional, type];
         }
 
-        function handleAnyAll(type, value_input){
+        function handleAnyAll(type, value){
             let is_any = type === 'any';
-            let sub_text = window.hWin.HEURIST4.query.jsonQueryToPlainText(value_input, true, is_any) ?? 'Missing sub query';
-            deconstructed.push(`${is_any ? 'Meets one of the following filters:<div style="margin-left:5px;">' : 'Meets all of the following filters:<div style="margin-left:5px;">'}${sub_text}</div>`);
-        }
-        // --- End Internal Helper Functions ---
-
-        let idx = query.findIndex((obj) => Object.hasOwn(obj, 't') || Object.hasOwn(obj, 'type'));
-        if(idx >= 0){ // Process 't' or 'type' first if it exists
-            let typeObj = query.splice(idx, 1)[0];
-            handleRectype(typeObj.t || typeObj.type);
+            let sub_text = window.hWin.HEURIST4.query.jsonQueryToPlainText(value, true, is_any) ?? 'Missing sub query';
+            deconstructed.push(`${is_any ? 'Meets one of the following filters:<div style="margin-left:5px;">' : ''}${sub_text}${is_any ? '</div>' : ''}`);
         }
 
-        let multi_rectype = false; // Flag for multiple 't'/'type' definitions
+        let idx = query.findIndex((obj) => Object.hasOwn(obj, 't'));
+        if(idx > 0){
+            query.unshift(query.splice(idx, 1)[0]);
+        }
+
+        let multi_rectype = false;
         let usingSavedSearch = false;
 
-        for(const part of query){ // Iterate using of for direct objects
-            let field_key = Object.keys(part)[0]; // Should only be one key per object in the array
-            let value = part[field_key];
+        for(const idx in query){
+
+            let part = query[idx];
+            let key = Object.keys(part)[0];
+            let field_key = key;
+            let value = part[key];
             let cond = '';
 
-            let key_parts = field_key.split(':');
-            let main_key = key_parts.shift(); // The primary part of the key (e.g., 'f', 'title', 'linkto')
-            let field_specifier = key_parts.join(':'); // The rest, could be field ID or sub-type for links
+            let parts = null;
+            try{                
+                parts = key.split(':');
+            }catch{
+                continue;
+            }
 
-            let field_display_name = ''; // Human-readable field name
-            let field_type = 'freetext'; // Default field type
+            key = parts.shift();
 
-            switch(main_key){
-                case 'ids': case 'id': field_display_name = 'Record IDs'; break;
-                case 'title': field_display_name = 'Record Titles'; break;
-                case 'url': case 'u': field_display_name = 'Record URLs'; break;
-                case 'notes': case 'n': field_display_name = 'Record Notes'; break;
-                case 'added': field_display_name = 'Record Creation date'; field_type = 'date'; break;
-                case 'date': case 'modified': field_display_name = 'Record Last Modification'; field_type = 'date'; break;
-                case 'addedby': field_display_name = 'Record Creator'; break;
-                case 'owner': case 'workgroup': case 'wg': field_display_name = 'Record Owner'; break;
-                case 'tag': case 'keyword': case 'kwd': field_display_name = 'Record Tags'; break;
-                case 'visibility': case 'access': field_display_name = 'Record Accessibility'; break;
+            let field = '';
+            let type = 'freetext';
+
+            switch(field_key){
+                case 'ids':
+                case 'id':
+                    field = 'Record IDs';
+                    break;
+                case 'title':
+                    field = 'Record Titles';
+                    break;
+                case 'url':
+                case 'u':
+                    field = 'Record URLs';
+                    break;
+                case 'notes':
+                case 'n':
+                    field = 'Record Notes';
+                    break;
+                case 'added':
+                    field = 'Record Creation date';
+                    break;
+                case 'date':
+                case 'modified':
+                    field = 'Record Last Modification';
+                    break;
+                case 'addedby':
+                    field = 'Record Creator';
+                    break;
+                case 'owner':
+                case 'workgroup':
+                case 'wg':
+                    field = 'Record Owner';
+                    break;
+                case 'tag':
+                case 'keyword':
+                case 'kwd':
+                    field = 'Record Tags';
+                    break;
+                case 'visibility':
+                case 'access':
+                    field = 'Record Accessibility';
+                    break;
                 case 'user':
-                    value = String(value).split(',');
+                    value = value.split(',');
                     value = value.length == 0 || value[0] == '' ? ' User' : `: "${value.filter((usr_ID) => window.hWin.HEURIST4.util.isPositiveInt(usr_ID)).join(',')}"`;
                     cond = `Records Bookmarked by${value}`;
                     break;
-                case 'before': case 'after':
-                    cond = `Records last modified ${main_key} ${value}`; field_type = 'date';
+                case 'before':
+                case 'after':
+                    cond = `Records last modified ${field_key} ${value}`;
                     break;
                 case 'sortby':
-                    let sort_val = typeof value !== 'string' ? '' : window.hWin.HEURIST4.query.sortbyValue(value, rty_ID);
-                    if (sort_val) sortby.push(sort_val);
-                    continue; // Skip adding to deconstructed
-                case 'exists':
-                     field_display_name = $Db.dty(field_specifier, 'dty_Name') || `Field ID ${field_specifier}`;
-                    cond = `<em>${field_display_name}</em> ${String(value).toLowerCase() === 'false' || value === 0 ? 'does not exist' : 'exists'}`;
+                    value = typeof value !== 'string' ? '' : window.hWin.HEURIST4.query.sortbyValue(value, rty_ID);
+                    !value || sortby.push(value);
                     break;
-                case 't': case 'type': // Should have been handled already if primary, otherwise it's a multi-type error
-                    if(deconstructed.length > 0 || rty_ID !== null) multi_rectype = true; else handleRectype(value);
-                    continue;
-                case 'all': case 'any':
-                    handleAnyAll(main_key, value);
-                    continue;
+                case 'exists':
+                    cond = `${window.hWin.HEURIST4.util.isempty(value) ? 'Existing' : 'Missing'} connected records`;
+                    break;
+                case 't':
+                case 'type':
+                    if(deconstructed.length > 0){
+                        multi_rectype = true;
+                    }else{
+                        handleRectype(value);
+                    }
+                    break;
+                case 'all':
+                case 'any':
+                    handleAnyAll(field_key, value);
+                    break;
                 case 'plain':
-                    cond = window.hWin.HEURIST4.query.stringQueryToPlainText(value); // Recursively parse plain string
+                    cond = window.hWin.HEURIST4.query.stringQueryToPlainText(value);
                     break;
                 case 'svs':
-                    cond = `Using saved search #${value}`; usingSavedSearch = true;
+                    cond = `Using saved search #${value}`;
+                    usingSavedSearch = true;
                     break;
                 case 'db':
                     cond = `Using the database(s): ${value}`;
                     break;
-                case 'q': continue; // 'q' usually wraps the main query array, skip direct processing of 'q' key
+                case 'q':
+                    break;
 
-                default: // Assumed to be a field-specific query (e.g. f:123, fldType:id, or direct ID if key is numeric)
-                    let default_parts = handleDefault(main_key, field_specifier || main_key, value);
-                    field_display_name = default_parts[0];
-                    cond = default_parts[1];
-                    field_type = default_parts[2];
+                default:
+
+                    // key === 'f' || key === 'field' || key === 'fc' || key === 'count'
+                    [field, cond, type] = handleDefault(key, parts.join(':'), value);
                     break;
             }
 
-            if(window.hWin.HEURIST4.util.isempty(field_display_name) && window.hWin.HEURIST4.util.isempty(cond)){
+            if(window.hWin.HEURIST4.util.isempty(field) && window.hWin.HEURIST4.util.isempty(cond)){
                 continue;
             }
 
-            // If cond wasn't fully formed by switch/handleDefault, extract it now
-            cond = window.hWin.HEURIST4.util.isempty(cond) ? window.hWin.HEURIST4.query.extractCondition(value, field_type) : cond;
+            cond = window.hWin.HEURIST4.util.isempty(cond) ? window.hWin.HEURIST4.query.extractCondition(value, type) : cond;
             if(window.hWin.HEURIST4.util.isempty(cond)){
                 continue;
             }
 
-            deconstructed.push(cond.replace('__FIELD__', field_display_name));
+            deconstructed.push(cond.replace('__FIELD__', field));
         }
 
-        if(rty_ID && deconstructed.length > 0){ // If a record type was set and there are conditions
-             // The first element of deconstructed is already the "Find: RecordType" string due to unshift in handleRectype
-        } else if(!is_sub_query && !usingSavedSearch && !rty_ID){ // No record type defined, not a subquery, not a saved search
+        if(rty_ID){
+            plain_text = `${deconstructed.shift()}${deconstructed.length > 0 || sortby.length > 0 ? '<div style="padding: 5px 10px;">' : ''}`;
+        }else if(!is_sub_query && !usingSavedSearch){
             plain_text = `Searching all records${deconstructed.length > 0 || sortby.length > 0 ? '<div style="padding: 5px 10px;">' : ''}`;
-        } else if (is_sub_query || (usingSavedSearch && deconstructed.length > 0)) { // For subqueries or saved searches with other conditions
-            plain_text = '<div style="padding: 5px 10px;">';
         }
-
 
         plain_text += deconstructed.join(`<br>${use_or ? 'OR ' : 'AND '}`);
-        plain_text += sortby.length == 0 ? '' : `${deconstructed.length > 0 ? '<br>' : ''}<strong>SORT BY</strong> ${sortby.join(', ')}`;
-        plain_text += (deconstructed.length > 0 || sortby.length > 0) && (rty_ID || !is_sub_query && !usingSavedSearch || (usingSavedSearch && deconstructed.length > 0)) ? '</div>' : '';
+        plain_text += sortby.length == 0 ? '' : `<br><strong>SORT BY</strong> ${sortby.join(', ')}`;
+        plain_text += deconstructed.length > 0 || sortby.length > 0 ? '</div>' : '';
 
+        plain_text = window.hWin.HEURIST4.util.stripTags(plain_text, 'br, em, b, strong, u, i, div');
 
-        plain_text = window.hWin.HEURIST4.util.stripTags(plain_text, 'br, em, b, strong, u, i, div'); // Allow specific HTML tags
+        if(!is_sub_query){
 
-        if(!is_sub_query){ // Add legend and warnings only for top-level query display
             let legend = [];
-            if(plain_text.includes(' == ')) legend.push('== Exact match');
-            if(plain_text.includes(' ≠≠ ')) legend.push('≠≠ Not exact match');
-            if(plain_text.includes(' <> ')) legend.push('<> overlap/between');
-            if(plain_text.includes(' >< ')) legend.push('>< falls between');
+            if(plain_text.indexOf(' == ') > 0){
+                legend.push('== Exact match');
+            }
+            if(plain_text.indexOf(' ≠≠ ') > 0){
+                legend.push('≠≠ Not exact match');
+            }
+            if(plain_text.indexOf(' <> ') > 0){
+                legend.push('<> overlap/between');
+            }
+            if(plain_text.indexOf(' >< ') > 0){
+                legend.push('>< falls between');
+            }
             plain_text += legend.length > 0 ? `<br>[Key: ${legend.join(', ')}]` : '';
     
             if(multi_rectype){
@@ -1021,8 +1036,9 @@ window.hWin.HEURIST4.query = {
                     Please remove the un-necessary record type filterings or combine them into one as a comma separated list (e.g. {"t":"10,11,12"}).`;
             }
         }
+
         return plain_text;
-    },
+    },    
 
     /**
      * Extracts and formats a human-readable condition string from a query field's value and type.
@@ -1045,17 +1061,18 @@ window.hWin.HEURIST4.query = {
         if(typeof value !== 'string' && typeof value !== 'number'){
             return res;
         }
-        value = String(value); // Ensure value is a string for string methods
 
-        if(type === 'enum' && (window.hWin.HEURIST4.util.isPositiveInt(value) || commaListRegex.exec(value) )){
-            let term_ids = value.split(',');
-            term_ids = term_ids.filter((id) => window.hWin.HEURIST4.util.isPositiveInt(id));
+        if(type === 'enum' && (window.hWin.HEURIST4.util.isPositiveInt(value) || ( typeof value === 'string' && commaListRegex.exec(value) ))){
 
-            let term_labels = term_ids.map((id) => {
+            value = value.split(',');
+            value = value.filter((id) => window.hWin.HEURIST4.util.isPositiveInt(id));
+
+            value = value.map((id) => {
                 let trm_Code = $Db.trm(id, 'trm_Code') !== '' ? ` [code ${$Db.trm(id, 'trm_Code')}]` : '';
                 return `${$Db.trm(id, 'trm_Label')}${trm_Code}`;
             });
-            value = term_labels.filter((trm) => !window.hWin.HEURIST4.util.isempty(trm)).join(' | ');
+
+            value = value.filter((trm) => !window.hWin.HEURIST4.util.isempty(trm)).join(' | ');
         }
 
         let val = '';
@@ -1072,41 +1089,35 @@ window.hWin.HEURIST4.query = {
         }else if(value.startsWith('@')){
             val = value.substring(1);
             res = `contains any of: ${val}`;
-        }else if(value.startsWith('%') && value.endsWith('%') && value.length > 1){ // Contains (improved)
-             val = value.substring(1, value.length -1);
-             res = `contains "${val}"`;
-        }else if(value.startsWith('%')){ // Ends with
-            val = value.substring(1);
-            res = `ends with "${val}"`;
-        }else if(value.endsWith('%')){ // Starts with
-            val = value.slice(0, -1);
-            res = `starts with "${val}"`;
+        }else if(value[0] === '%' || value.endsWith('%')){
+            val = value[0] === '%' ? value.substring(1) : value.slice(0, -1);
+            res = `${value[0] === '%' ? 'starts' : 'ends'} with: ${val}`;
         }else if(value.startsWith('<') || value.startsWith('>')){
-            let compare = value.slice(0, value.includes('=') ? 2 : 1); // Handles <=, >=, <, >
-            val = value.substring(compare.length);
-            res = `${compare} ${val}`;
-        }else if(value.includes('<>') || value.includes('><')){
-            let compare = value.includes('<>') ? '<>' : '><';
-            let parts = value.split(compare);
-            if (parts.length === 2) {
-                 res = `${parts[0].trim()} ${compare} ${parts[1].trim()}`;
-            } else { // Fallback for malformed range
-                 res = `is "${value}"`;
-            }
+            let compare = value.slice(0, value.indexOf('=') == 1 ? 2 : 1);
+            value = value.substring(value.indexOf('=') == 1 ? 2 : 1);
+            res = `${compare} ${value}`;
+        }else if(value.startsWith('<>') || value.startsWith('><')){
+            let compare = value.indexOf('<>') > 0 ? '<>' : '><';
+            value = value.substring(2).split('/');
+            res = `${value[0]} ${compare} ${value[1]}`;
         }else if(type == 'date'){
+
             let parts = value.split('/');
-            if(parts.length == 2){ // Assumed date range d1/d2
-                res = `${parts[0]} <> ${parts[1]}`;
+            if(parts.length > 0){
+                let mid = Math.floor(parts.length / 2);
+                value = [parts.slice(0, mid).join('/'), parts.slice(mid).join('/')];
+                res = `${value[0]} <> ${value[1]}`;
             }else{
-                res = `is "${value}"`; // Single date
+                res = `is ${value}`;
             }
         }else{
-            res = `contains "${value}"`; // Default for freetext and other types
+
+            res = `contains ${value}`;
         }
 
         return `<em>__FIELD__</em> ${res}`;
     },
-
+    
     /**
      * Converts a sort key (and optional direction prefix '-') into a human-readable string.
      * Handles common sort keys like 'id', 'title', 'modified', 'added', 'record type',

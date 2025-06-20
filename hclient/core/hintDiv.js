@@ -7,6 +7,7 @@
  * like delayed hiding on mouseout and staying visible on hover over the hint itself. This utility is
  * used throughout Heurist for providing contextual information to users. It requires jQuery.
  * @package Heurist academic knowledge management system
+ * 
  * @subpackage hclient\core
  * @link https://HeuristNetwork.org
  * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
@@ -54,6 +55,13 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	/** @private @type {string} Initial HTML content. */
 	let initcontent = _initcontent;
 
+    /**
+     * Initializes the hint div element.
+     * If not already created, it appends a new div to the body, styles it,
+     * sets its initial content, and attaches mouse event handlers for hover behavior.
+     * @private
+     * @returns {void}
+     */    
 	function _init()
 	{
 		if(popup_div===null){
@@ -103,6 +111,12 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		}
 	}
 
+    /**
+     * Sets the width and height of the hint div.
+     * @private
+     * @param {Array<number>} wh - An array containing [width, height] in pixels.
+     * @returns {void}
+     */    
 	function _setSize(wh){
 		if(popup_div !== null && wh && wh.length === 2){
 			popup_div.css({
@@ -112,6 +126,12 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		}
 	}
 
+    /**
+     * Gets the mouse position relative to the document.
+     * @private
+     * @param {MouseEvent} e - The mouse event object.
+     * @returns {Array<number>} An array `[posX, posY]` containing the mouse x and y coordinates.
+     */    
 	function _getMousePos(e){
 		let posx = 0;
 		let posy = 0;
@@ -127,6 +147,16 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		return [posx, posy];
 	}
 
+    /**
+     * Positions the hint div at the specified coordinates, adjusting to keep it within window boundaries.
+     * @private
+     * @param {Array<number>} xy - An array `[posX, posY]` for the desired initial position (usually mouse coordinates).
+     * @param {number} viewport_border_top - The top scroll offset of the window.
+     * @param {number} viewport_border_right - The right edge of the viewport (window width).
+     * @param {number} viewport_height - The height of the viewport.
+     * @param {number} [offset_val=5] - Offset in pixels from the mouse position.
+     * @returns {void}
+     */    
 	function _showPopupDivAt(xy, viewport_border_top, viewport_border_right, viewport_height, offset_val){
 		if (!popup_div) _init();
 
@@ -156,6 +186,12 @@ function HintDiv(_id, _width, _height, _initcontent) {
         });
 	}
 
+    /**
+     * Shows the hint div at the current mouse position based on the provided event.
+     * @private
+     * @param {MouseEvent} event - The mouse event.
+     * @returns {void}
+     */    
 	function _showAt(event) {
 		const xy = _getMousePos(event);
 		_showAtXY(xy);
@@ -171,6 +207,12 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		return popup_div;
 	}
 
+    /**
+     * Clears the timer that is set to hide the tooltip.
+     * This is used, for example, when the mouse enters the tooltip itself.
+     * @private
+     * @returns {void}
+     */    
 	function _clearHideTimer(){
 		if (hideTimer) {
 			window.clearTimeout(hideTimer);
@@ -178,6 +220,13 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		}
 	}
 
+    /**
+     * Hides the tooltip if `needHideTip` is true.
+     * Clears any existing hide timer before hiding.
+     * Hiding is done by setting visibility to hidden and opacity to 0.
+     * @private
+     * @returns {void}
+     */    
 	function _hideToolTip(){
 		if(needHideTip && popup_div){
 			_clearHideTimer();

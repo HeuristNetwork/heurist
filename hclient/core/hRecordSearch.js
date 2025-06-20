@@ -54,7 +54,18 @@ function HRecordSearch() {
       */
      let _owner_doc = null;
          
-    function _doSearchWithCallback( request, callback ){
+    /**
+     * Performs a standalone search operation and passes the results to a callback function.
+     * This method does not trigger global search events.
+     *
+     * @private
+     * @param {Object} request - The search request object, compatible with `HAPI4.RecordMgr.search`.
+     *                           It should define the query, filters, sorting, etc.
+     * @param {function(HRecordSet|null): void} callback - A function to be called with the search results.
+     *        Receives an `HRecordSet` instance on success, or `null` on failure or if the response indicates an error.
+     * @returns {void}
+     */
+     function _doSearchWithCallback( request, callback ){
         
         window.hWin.HAPI4.RecordMgr.search(request,
             function(response){
@@ -75,6 +86,22 @@ function HRecordSearch() {
         );
     }
 
+    /**
+     * Performs a search operation and triggers global events before and after the search.
+     * `ON_REC_SEARCHSTART` is triggered before the search begins.
+     * `ON_REC_SEARCHFINISH` is triggered when the search completes, providing the results.
+     * The results are also stored in `window.hWin.HAPI4.currentRecordset` if no `search_realm` is specified.
+     * This method primarily fetches record IDs (`detail: 'ids'`).
+     *
+     * @private
+     * @param {Document|{document: Document, element: jQuery}} originator - The document or an object containing the document
+     *        and originating jQuery element that initiated the search. This context is used for triggering events.
+     * @param {Object} request - The search request object. It will be augmented with properties like `id`, `source`, `limit`, `needall`, `detail`.
+     * @property {string} [request.q] - The query string.
+     * @property {string} [request.search_realm] - An optional realm to scope the search and results.
+     *                                            If empty, `HAPI4.currentRecordset` is updated.
+     * @returns {void}
+     */    
     function _doSearch( originator, request ){
         
             let owner_element_id, owner_doc_context; // Renamed owner_doc to avoid conflict with global _owner_doc
@@ -132,6 +159,18 @@ function HRecordSearch() {
             });
     }
     
+    /**
+     * Callback function for handling results from `HAPI4.RecordMgr.search` (initiated by `_doSearch`).
+     * Processes the server response, creates an `HRecordSet`, updates global state
+     * (`HAPI4.currentRecordset`), and triggers the `ON_REC_SEARCH_FINISH` event.
+     *
+     * @private
+     * @param {Object} response - The server response object from `HAPI4.RecordMgr.search`.
+     * @property {string} response.queryid - The unique ID of the query this response corresponds to.
+     * @property {string} response.status - The status of the response (e.g., from `window.hWin.ResponseStatus`).
+     * @property {Object} [response.data] - The data payload, containing record IDs and potentially other info like `memory_warning`.
+     * @returns {void}
+     */    
     function _onSearchResult(response){
             let recordset = null;
             // Ensure the response corresponds to a known query request
@@ -183,11 +222,31 @@ function HRecordSearch() {
             }
     }
     
+    /**
+    * Resets the internal state related to ongoing queries (`_query_request` and `_owner_doc`).
+    * This can be used to effectively terminate or clear pending search contexts.
+    *
+    * @private
+    * @returns {void}
+    */
     function _searchTerminate(){
         _query_request = null;
         _owner_doc = null;
     }
 
+    /**
+     * Applies a set of rules to an existing result set (`window.hWin.HAPI4.currentRecordset`).
+     * This constructs a new search request using the IDs from the current recordset and the provided rules,
+     * then executes this search using `_doSearch`.
+     *
+     * @private
+     * @param {Document|{document: Document, element: jQuery}} originator - The context for the search, same as in `_doSearch`.
+     * @param {Object} rules - The rules object to be applied to the search.
+     * @param {boolean} rulesonly - If true, only these rules are applied, potentially ignoring parts of the original query.
+     *                             (Server-side interpretation of this parameter).
+     * @param {string} [search_realm] - Optional search realm for this rule application.
+     * @returns {boolean} `true` if rules were applied (i.e., currentRecordset existed and was not empty), `false` otherwise.
+     */    
     function _doApplyRules( originator, rules, rulesonly, search_realm ){
         
         // Check if there's a current recordset with records to apply rules to

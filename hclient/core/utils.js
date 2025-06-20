@@ -88,7 +88,7 @@ window.hWin.HEURIST4.util = {
             return def;
         }else if(val===true){
             return true;
-        }else if(typeof val==='string'){ // Corrected: typeof obj to typeof val
+        }else if(typeof val==='string'){
             val =  val.toLowerCase();
             return val=='yes' || val=='y'  || val=='true' || val=='t' || val=='1';
         }else{
@@ -265,7 +265,7 @@ window.hWin.HEURIST4.util = {
             element = [element.get(0)]; // Get underlying DOM element
         }
 
-        $.each(element, function(idx, ele_item){ // Renamed ele to ele_item
+        $.each(element, function(idx, ele_item){ 
             let current_ele = $(ele_item); // Ensure it's a jQuery object for hSelect check
             if(window.hWin.HEURIST4.util.isFunction(current_ele.hSelect) && current_ele.hSelect('instance')!=undefined){
                 current_ele.hSelect(is_disabled ? 'disable' : 'enable');
@@ -578,11 +578,24 @@ window.hWin.HEURIST4.util = {
      * @returns {void}
      */
     windowOpenInPost: function(actionUrl, windowName, windowFeatures, params) {
-        let mapForm = document.createElement("form"); let milliseconds = new Date().getTime();
-        windowName = windowName+milliseconds; mapForm.target = windowName; mapForm.method = "POST"; mapForm.action = actionUrl;
-        for (const key in params){ if (Object.hasOwnProperty.call(params, key)) { // Added hasOwnProperty check
-            let mapInput = document.createElement("input"); mapInput.type = "hidden"; mapInput.name = key; mapInput.value = params[key]; mapForm.appendChild(mapInput);
-        }}
+        
+    {
+        let mapForm = document.createElement("form");
+        let milliseconds = new Date().getTime();
+        windowName = windowName+milliseconds;
+        mapForm.target = windowName;
+        mapForm.method = "POST";
+        mapForm.action = actionUrl;
+        
+        for (const key in params){
+            let mapInput = document.createElement("input");
+                mapInput.type = "hidden";
+                mapInput.name = key;
+                mapInput.value = params[key];
+                mapForm.appendChild(mapInput);
+
+        }
+                
         document.body.appendChild(mapForm);
         let map = window.open('', windowName, windowFeatures);
         if (map) { mapForm.submit(); } else { alert('You must allow popups for this map to work.'); }
@@ -593,559 +606,722 @@ window.hWin.HEURIST4.util = {
      * Calculates the width of the browser's scrollbar.
      * @returns {number} The scrollbar width in pixels.
      */
-    getScrollBarWidth: function() {
-        let $outer = $('<div>').css({visibility: 'hidden', width: 100, overflow: 'scroll'}).appendTo('body');
-        let widthWithScroll = $('<div>').css({width: '100%'}).appendTo($outer).outerWidth();
+getScrollBarWidth: function() {
+        let $outer = $('<div>').css({visibility: 'hidden', width: 100, overflow: 'scroll'}).appendTo('body'),
+            widthWithScroll = $('<div>').css({width: '100%'}).appendTo($outer).outerWidth();
         $outer.remove();
         return 100 - widthWithScroll;
     },
 
-    /**
-     * Parses start and end date strings using the Temporal library.
-     * Converts dates to a format suitable for VIS.js timeline (ISO string with timezone).
-     * @param {string} [start] - The start date string.
-     * @param {string} [end] - The end date string. If `start` is null and `end` is provided, `end` is treated as `start`.
-     * @returns {Array<string>|null} An array `[startDate, endDate]` in ISO format, or `null` if parsing fails or input is invalid.
-     */
+    //
+    // Parse string date using Temporal library
+    //
     parseDates: function(start, end){
         if(window['Temporal'] && (start || end)){   
-            if(start==null && end!=null){ start = end; end = null; }
+            //Temporal.isValidFormat(start)){
+            if(start==null && end!=null){
+                start = end;
+                end = null;
+            }
+
+            // for VISJS timeline - must be ISO string
             function __forVis(dt){
-                if(dt){ if(!dt.getMonth()){ dt.setMonth(1); } if(!dt.getDay()){ dt.setDay(1); } return dt.toString('yyyy-MM-ddTHH:mm:ssz'); }
-                else{ return ''; }
-            }    
-            try{
-                let temporal_start, temporal_end; // Renamed
-                if(start!='' && typeof start === 'string'){
-                    if(start.search(/VER=/)!==-1){
-                        temporal_start = new Temporal(start);
-                        if(temporal_start){
-                            let dt_start = temporal_start.getTDate('TPQ') || temporal_start.getTDate('PDB') || temporal_start.getTDate('DAT'); // More robust check
-                            if(dt_start){
-                                let dt2_start = temporal_start.getTDate('TAQ') || temporal_start.getTDate('PDE');  // More robust check
-                                if (dt2_start) end = __forVis(dt2_start); // end might be defined by start string if it's a range
-                                start = __forVis(dt_start);
-                            } else { return null; }
-                        }
-                    }else{ start = __forVis(new TDate(start)); }
+                if(dt){
+                    if(!dt.getMonth()){
+                        dt.setMonth(1)
+                    }
+                    if(!dt.getDay()){
+                        dt.setDay(1)
+                    }
+
+                    let res = dt.toString('yyyy-MM-ddTHH:mm:ssz');
+                    return res;
+                }else{
+                    return '';
                 }
+
+            }    
+
+
+            try{
+                let temporal;
+                if(start!='' && typeof start === 'string'){
+
+                    if(start.search(/VER=/)!==-1){
+                        temporal = new Temporal(start);
+                        if(temporal){
+                            let dt = temporal.getTDate('TPQ');  
+                            if(!dt) dt = temporal.getTDate('PDB'); //probable begin
+
+                            if(dt){ //this is range - find end date
+                                let dt2 = temporal.getTDate('TAQ'); 
+                                if(!dt2) dt2 = temporal.getTDate('PDE'); //probable end
+                                end = __forVis(dt2);
+                            }else{
+                                dt = temporal.getTDate('DAT');  //simple date
+                            }
+
+                            if(dt){
+                                start = __forVis(dt);
+                            }else{
+                                return null;
+                            }
+                        }
+                    }else{
+                        start = __forVis(new TDate(start));
+                    }
+                }
+
                 if(end!='' && typeof end === 'string') {
                     if(end.search(/VER=/)!==-1){
-                        temporal_end = new Temporal(end); // Renamed
-                        if(temporal_end){
-                            let dt_end = temporal_end.getTDate('TAQ') || temporal_end.getTDate('PDE') || temporal_end.getTDate('DAT'); // More robust check
-                            end = __forVis(dt_end);
+                        temporal = new Temporal(end);
+                        if(temporal){
+                            let dt = temporal.getTDate('TAQ'); 
+                            if(!dt) dt = temporal.getTDate('PDE');//probable end
+                            if(!dt) dt = temporal.getTDate('DAT');
+                            end = __forVis(dt);
                         }
-                    }else{ end = __forVis(new TDate(end)); }
+                    }else{
+                        end = __forVis(new TDate(end));
+                    }
                 }
-            }catch(e){ return null; }
+            }catch(e){
+                return null;
+            }
             return [start, end];
         }
         return null;
     },    
 
-    /**
-     * Gets the computed value of a CSS property for a given class name by temporarily applying it to a hidden element.
-     * @param {string} prop - The CSS property name (e.g., "background-color").
-     * @param {string} fromClass - The class name to apply.
-     * @returns {string} The value of the CSS property.
-     */
+    //
+    // Get CSS property value for a not yet applied class
+    //
     getCSS: function (prop, fromClass) {
         let $inspector = $("<div>").css('display', 'none').addClass(fromClass);
-        $("body").append($inspector);
-        try { return $inspector.css(prop); }
-        finally { $inspector.remove(); }
+        $("body").append($inspector); // add to DOM, in order to read the CSS property
+        try {
+            return $inspector.css(prop);
+        } finally {
+            $inspector.remove(); // and remove from DOM
+        }
     },
 
-    /**
-     * Converts a CSS style string (e.g., "color: red; font-size: 12px;") into a JSON object.
-     * Converts boolean-like string values "true"/"false" to actual booleans.
-     * @param {string} css - The CSS string.
-     * @returns {Object} A JSON object representing the CSS styles.
-     */
+    //
+    //
+    //
     cssToJson: function(css){
+
         let json = {};
-        if(css && typeof css === 'string'){ // Added typeof check
-            let styles = css.split(';'), i= styles.length, k, v;
-            while (i--) {
-                if (styles[i].trim() === "") continue; // Skip empty parts
+
+        if(css){
+
+            let styles = css.split(';'),
+            i= styles.length,
+            k, v;
+
+            while (i--)
+            {
                 let pos = styles[i].indexOf(':');
-                if(pos>0){ // Ensure colon is present and not at the beginning
+                if(pos>1){
                     k = String(styles[i].substr(0,pos)).trim();
                     v = String(styles[i].substr(pos+1)).trim();
-                    if (k && v && k.length > 0 && v.length > 0) {
-                        if(v==='true')v=true; else if(v==='false')v=false;
-                        json[k] = v;
-                    }
+                }
+                /*style = styles[i].split(':');
+                k = String(style[0]).trim();
+                v = String(style[1]).trim();*/
+                if (k && v && k.length > 0 && v.length > 0)
+                {
+                    if(v==='true')v=true;
+                    else if(v==='false')v=false;     
+                    json[k] = v;
                 }
             }
         }
+
         return json;        
+
     },
 
-    /**
-     * Generates a 32-bit integer hash from a string.
-     * @param {string} str - The input string.
-     * @returns {number} The calculated hash value.
-     */
+
+    /*: function(e){
+    for(var r=0,i=0;i<e.length;i++){
+    r=(r<<5)-r+e.charCodeAt(i),r&=r;   
+    }
+    return r
+    },*/
+
     hashString: function(str) {
-        let hash = 0, i, c; let strlen = str?str.length:0;
+
+        let hash = 0, i, c;
+        let strlen = str?str.length:0;
         if (strlen == 0) return hash;
-        for (i = 0; i < strlen; i++) { c = str.charCodeAt(i); hash = ((hash<<5)-hash)+c; hash = hash & hash; }
+
+        for (i = 0; i < strlen; i++) {
+            c = str.charCodeAt(i);
+            hash = ((hash<<5)-hash)+c;
+            hash = hash & hash; // Convert to 32bit integer
+        }
         return hash;    
     },
 
-    /**
-     * Formats a file size in bytes into a human-readable string (KB, MB, GB).
-     * @param {number} bytes - The file size in bytes.
-     * @returns {string} The formatted file size string, or an empty string if input is not a number.
-     */
     formatFileSize: function (bytes) {
-        if (typeof bytes !== 'number' || isNaN(bytes)) { return ''; } // Added NaN check
-        if (bytes >= 1000000000) { return (bytes / 1000000000).toFixed(2) + ' GB'; }
-        if (bytes >= 1000000) { return (bytes / 1000000).toFixed(2) + ' MB'; }
+        if (typeof bytes !== 'number') {
+            return '';
+        }
+        if (bytes >= 1000000000) {
+            return (bytes / 1000000000).toFixed(2) + ' GB';
+        }
+        if (bytes >= 1000000) {
+            return (bytes / 1000000).toFixed(2) + ' MB';
+        }
         return (bytes / 1000).toFixed(2) + ' KB';
     },
 
-    /**
-     * Initiates a file download by setting an iframe's source to the given URL.
-     * @param {string} url - The URL of the file to download.
-     * @param {function} [callback] - Optional callback to execute when the iframe loads (may not reliably indicate download completion).
-     * @returns {void}
-     */
+
+    //
+    // download given url as a file (repalcement of usage A)
+    //
     downloadURL: function(url, callback) {
         let $idown = $('#idown');
-        if ($idown.length==0) { $idown = $('<iframe>', { id:'idown' }).hide().appendTo('body'); }
-        if (window.hWin.HEURIST4.util.isFunction(callback)) { $idown.on('load', callback); }
+
+        if ($idown.length==0) {
+            $idown = $('<iframe>', { id:'idown' }).hide().appendTo('body');
+        }
+        if (window.hWin.HEURIST4.util.isFunction(callback)) {
+            $idown.on('load', callback);   
+        }
         $idown.attr('src',url);
     },
 
-    /**
-     * Initiates a download of the inner HTML content of a given element as a file.
-     * @param {string} filename - The desired name for the downloaded file.
-     * @param {jQuery|HTMLElement|string} ele - The element or selector for the element whose content is to be downloaded.
-     * @param {string} [mimeType="text/plain"] - The MIME type for the download.
-     * @returns {void}
-     */
+    //
+    // download content of given element (for example text area) as a text file
+    //
     downloadInnerHtml: function (filename, ele, mimeType) {
+
         let elHtml = $(ele).html();
         window.hWin.HEURIST4.util.downloadData(filename, elHtml, mimeType);
     }, 
 
-    /**
-     * Initiates a download of provided data as a file.
-     * @param {string} filename - The desired name for the downloaded file.
-     * @param {string} data - The data content to download.
-     * @param {string} [mimeType="text/plain"] - The MIME type for the download.
-     * @returns {void}
-     */
+    //
+    // download some data locally
+    //
     downloadData: function (filename, data, mimeType) {
+
         mimeType = mimeType || 'text/plain';
-        let content = 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(data);
+        let  content = 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(data);
+
         let link = document.createElement("a");
-        link.setAttribute('download', filename); link.setAttribute('href', content);
-        if (window.webkitURL != null) { link.click(); link = null; }
-        else { link.onclick = function(){ document.body.removeChild(link); link=null;}; link.style.display = "none"; document.body.appendChild(link); link.click(); }
+        link.setAttribute('download', filename);
+        link.setAttribute('href', content);
+        if (window.webkitURL != null)
+        {
+            // Chrome allows the link to be clicked
+            // without actually adding it to the DOM.
+            link.click();
+            link = null;
+        }
+        else
+        {
+            // Firefox requires the link to be added to the DOM
+            // before it can be clicked.
+            link.onclick = function(){ document.body.removeChild(link); link=null;} //destroy link
+            link.style.display = "none";
+            document.body.appendChild(link);
+            link.click();
+        }
+
     },    
 
-    /**
-     * Checks if an object is an instance of HRecordSet.
-     * @param {*} recordset - The object to check.
-     * @returns {boolean} True if it's an HRecordSet instance, false otherwise.
-     */
+
     isRecordSet: function(recordset){
         return !window.hWin.HEURIST4.util.isnull(recordset) && window.hWin.HEURIST4.util.isFunction(recordset.isA) && recordset.isA("HRecordSet");   
     },
 
-    /**
-     * Generates a random string of numbers, using `window.crypto` if available, otherwise falls back to Math.random.
-     * @returns {string} A random string of numbers.
-     */
     random: function(){
-        if(window.crypto && window.crypto.getRandomValues){ // Check crypto.getRandomValues
-            const typedArray = new Uint8Array(10); window.crypto.getRandomValues(typedArray);
-            return typedArray.join('').substr(0,15);
-        }else{ return ''+Math.floor(Date.now() * Math.random()); }
+       
+       
+        if(window.crypto){
+            const typedArray = new Uint8Array(10);
+            const randomValues = window.crypto.getRandomValues(typedArray);
+            return randomValues.join('').substr(0,15);        
+        }else{
+            return ''+Math.floor(Date.now() * Math.random())
+           
+            //return Math.ceil( arng.quick() * 99999999 ); //1~87  
+        }
+        
     },
 
-    /**
-     * Searches for an object by its name within all iframes of the current document.
-     * @param {string} name - The name of the object to find in `contentWindow` of iframes.
-     * @returns {*|null} The found object, or null if not found in any frame.
-     */
+    //scan all frames of current window and return object by name
     findObjInFrame: function(name){
-        let i, frames; frames = document.getElementsByTagName("iframe");
-        for (i = 0; i < frames.length; ++i) {
-            try { // Add try-catch for cross-origin frames
-                if(frames[i].contentWindow && !window.hWin.HEURIST4.util.isnull(frames[i]['contentWindow'][name])){ return frames[i]['contentWindow'][name]; }
-            } catch(e) { /* Cross-origin access denied */ }
+
+        let i, frames;
+        frames = document.getElementsByTagName("iframe");
+        for (i = 0; i < frames.length; ++i)
+        {  
+            if( !window.hWin.HEURIST4.util.isnull(frames[i]['contentWindow'][name])){
+                return frames[i]['contentWindow'][name];
+            }
         }
         return null;
     },
 
-    /**
-     * Detects the media server (youtube, vimeo, soundcloud) from a given URL.
-     * @param {string} filename - The URL to check.
-     * @returns {string|null} The name of the media server if detected, otherwise null.
-     */
     getMediaServerFromURL:function(filename){
-        if (typeof filename !== 'string') return null; // Added type check
         filename = filename.toLowerCase();
-        if(filename.indexOf('youtu.be')>=0 || filename.indexOf('youtube.com')>=0){ return 'youtube'; }
-        else if(filename.indexOf('vimeo.com')>=0){ return 'vimeo'; }
-        else if(filename.indexOf('soundcloud.com')>=0){ return 'soundcloud'; }
-        else{ return null; }
+        if(filename.indexOf('youtu.be')>=0 || filename.indexOf('youtube.com')>=0){
+            return 'youtube';
+        }else if(filename.indexOf('vimeo.com')>=0){
+            return 'vimeo';
+        }else if(filename.indexOf('soundcloud.com')>=0){
+            return 'soundcloud';            
+        }else{
+            return null;
+        }
     },
 
-    /**
-     * Extracts the file extension from a filename or URL.
-     * @param {string} filename - The filename or URL.
-     * @returns {string} The file extension (without the dot), or an empty string if not found or input is invalid.
-     */
     getFileExtension:function(filename){
-        if(filename && typeof filename === 'string'){ // Added typeof check
-            let res = filename.match(/\.([^\./\?]+)(?:$|\?)/); // Non-capturing group for end or query
+       
+       
+       
+        if(filename){
+            let res = filename.match(/\.([^\./\?]+)($|\?)/);
             return (res && res.length>1)?res[1]:'';
-        }else{ return ''; }
+        }else{
+            return '';
+        }
+
     },
 
-    /**
-     * Compares two version strings (e.g., "1.0.0", "1.0.1b").
-     * @param {string} v1 - The first version string.
-     * @param {string} v2 - The second version string.
-     * @param {Object} [options] - Options for comparison.
-     * @param {boolean} [options.lexicographical=false] - If true, compares alphabetically after splitting.
-     * @param {boolean} [options.zeroExtend=false] - If true, pads shorter version parts with zeros.
-     * @returns {number|NaN}
-     *          - -1 if v1 < v2
-     *          -  0 if v1 == v2
-     *          -  1 if v1 > v2
-     *          - NaN if versions have invalid parts.
-     *          (Note: Original code's return of -2 for v1 > v2 was specific to its logic, this is more standard).
-     */
+    //
+    //
+    //
     versionCompare: function(v1, v2, options) {
-        let lexicographical = options && options.lexicographical, zeroExtend = options && options.zeroExtend;
-        let v1parts = String(v1).split('.'), v2parts = String(v2).split('.'); // Ensure strings
-        function isValidPart(x) { return (lexicographical ? /^\d+[A-Za-z]*$/ : /^\d+$/).test(x); }
-        if (!v1parts.every(isValidPart) || !v2parts.every(isValidPart)) { return NaN; }
+        // determines if the version in the cache (v1) is older than the version in configIni.php (v2)
+        // used to detect change in version so that user is prompted to clear cache and reload
+        // returns -1 if v1 is older, -2 v1 is newer, +1 if they are the same
+        let lexicographical = options && options.lexicographical,
+        zeroExtend = options && options.zeroExtend,
+        v1parts = v1.split('.'),
+        v2parts = v2.split('.');
+
+        function isValidPart(x) {
+            return (lexicographical ? /^\d+[A-Za-z]*$/ : /^\d+$/).test(x);
+        }
+
+        if (!v1parts.every(isValidPart) || !v2parts.every(isValidPart)) {
+            return NaN;
+        }
+
         if (zeroExtend) {
             while (v1parts.length < v2parts.length) v1parts.push("0");
             while (v2parts.length < v1parts.length) v2parts.push("0");
         }
-        if (!lexicographical) { v1parts = v1parts.map(Number); v2parts = v2parts.map(Number); }
-        for (let i = 0; i < v1parts.length; ++i) {
-            if (v2parts.length == i) { return 1; } // v1 is longer
-            if (v1parts[i] < v2parts[i]) { return -1; }
-            if (v1parts[i] > v2parts[i]) { return 1; }
+
+        if (!lexicographical) {
+            v1parts = v1parts.map(Number);
+            v2parts = v2parts.map(Number);
         }
-        if (v1parts.length != v2parts.length) { return -1; } // v2 is longer
+
+        let i = 0;
+        for (; i < v1parts.length; ++i) {
+
+            if (v1parts[i] == v2parts[i]) {
+                continue; // sub elements are the same, continue compare
+            }
+            else if (v1parts[i] > v2parts[i] || window.hWin.HEURIST4.util.isnull(v2parts[i])) {
+                return -2; // cached version is newer, we will still need to clear cache and reload
+            }
+            else {
+                return -1; // cached version is older, we will need to clear cache and reload
+            }
+        }
+
+        if (v2parts.length == i) {
+            return 1; // versions are the saame
+        }
+
+        if (v1parts.length != v2parts.length) {
+            return -1;
+        }
+
         return 0;
     },
 
-    /**
-     * Returns a new array with unique values from the input array.
-     * For objects, uniqueness is based on reference.
-     * @param {Array} arr - The input array.
-     * @returns {Array} A new array with unique values.
-     */
     uniqueArray: function(arr){
+
         let n = {},r=[];
-        for(let i = 0; i < arr.length; i++) {
-            if($.isPlainObject(arr[i])){ r.push(arr[i]); } // Objects are pushed as is (reference uniqueness)
-            else if (!n[arr[i]]) { n[arr[i]] = true; r.push(arr[i]); }
+        for(let i = 0; i < arr.length; i++) 
+        {
+            if($.isPlainObject(arr[i])){
+                r.push(arr[i]);
+            }else if (!n[arr[i]]) 
+            {
+                n[arr[i]] = true; 
+                r.push(arr[i]); 
+            }
         }
         return r;            
     },
 
-    /**
-     * Finds the index of an element in an array. Uses `==` for comparison.
-     * @param {*} elt - The element to find.
-     * @param {Array} arr - The array to search in.
-     * @param {number} [from=0] - The index to start searching from.
-     * @returns {number} The index of the element, or -1 if not found.
-     */
-    findArrayIndex: function(elt, arr /*, from*/) {
+    //not strict search - valuable for numeric vs string 
+    findArrayIndex: function(elt, arr /*, from*/)
+    {
         if( window.hWin.HEURIST4.util.isempty(arr) ) return -1;
-        let len = arr.length; let from = Number(arguments[2]) || 0;
-        from = (from < 0) ? Math.ceil(from) : Math.floor(from);
-        if (from < 0) from += len;
-        for (; from < len; from++) { if (from in arr && arr[from] == elt) return from; }
+
+        let len = arr.length;
+
+        let from = Number(arguments[2]) || 0;
+        from = (from < 0)
+        ? Math.ceil(from)
+        : Math.floor(from);
+        if (from < 0)
+            from += len;
+
+        for (; from < len; from++)
+        {
+            if (from in arr &&
+                arr[from] == elt)
+                return from;
+        }
         return -1;
     },
 
-    /**
-     * Checks if two arrays are the same (same length and same elements in the same order using `==` comparison).
-     * @param {Array} arr1 - The first array.
-     * @param {Array} arr2 - The second array.
-     * @returns {boolean} True if the arrays are considered the same, false otherwise.
-     */
     sameArrays: function(arr1, arr2){
-        if(!Array.isArray(arr1) || !Array.isArray(arr2)){ return false; }
-        else if(arr1.length != arr2.length){ return false; } // Check length first
-        else if(arr1 === arr2){ return true; } // Same reference
+
+        if(!Array.isArray(arr1) || !Array.isArray(arr2)){
+            return false;
+        }else if(arr1.length == 0 || arr2.length == 0 || arr1.length != arr2.length){
+            return arr1.length == arr2.length;
+        }else if(arr1 === arr2){
+            return true;
+        }
+
         return arr1.every((value, index) => value == arr2[index]);
     },
 
-    /**
-     * Converts a UTC date string to a local time string (HH:mm:ss).
-     * @param {string} sdate - The UTC date string.
-     * @returns {string} The time string in local timezone.
-     */
+    //
+    // assumed that sdate is in UTC
+    //
     getTimeForLocalTimeZone: function (sdate){
-        let date = new Date(sdate+"+00:00"); // Append UTC indicator for correct parsing
-        return String(date.getHours()).padStart(2, "0") + ':' + String(date.getMinutes()).padStart(2, "0") + ':' + String(date.getSeconds()).padStart(2, "0");
+        let date = new Date(sdate+"+00:00");
+        return (''+date.getHours()).padStart(2, "0")
+        +':'+(''+date.getMinutes()).padStart(2, "0")
+        +':'+(''+date.getSeconds()).padStart(2, "0");
     },
 
-    /**
-     * Copies a string to the clipboard using the `document.execCommand('copy')` method.
-     * @param {string} string_to_copy - The string to copy.
-     * @returns {void}
-     */
+    //
+    //flflnaixr
+    //
     copyStringToClipboard: function(string_to_copy) {
-        function handler (event){ event.clipboardData.setData('text/plain', string_to_copy); event.preventDefault(); document.removeEventListener('copy', handler, true); }
-        document.addEventListener('copy', handler, true); document.execCommand('copy');
+        function handler (event){
+            event.clipboardData.setData('text/plain', string_to_copy);
+            event.preventDefault();
+            document.removeEventListener('copy', handler, true);
+        }
+
+        document.addEventListener('copy', handler, true);
+        document.execCommand('copy');
     },
 
-    /**
-     * Extracts the YouTube video ID from various YouTube URL formats.
-     * @param {string} url - The YouTube URL.
-     * @returns {string|null} The YouTube video ID, or null if not found or URL is invalid.
-     */
+    //
+    // Retrieve youtube id from url
+    //
     get_youtube_id: function(url){
-        if (typeof url !== 'string') return null; // Added type check
+
         let matches = url.match(/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?&\"'>]+)/);
-        return matches ? matches[1] : null; // Return null if no match
+
+        return matches[1];
     },
 
-    /**
-     * Performs a merge sort on an array.
-     * @param {Array} array - The array to sort.
-     * @param {function} [compare] - Optional comparison function `(a, b)` that returns true if `a` should come before `b`.
-     *                               Defaults to `a < b`.
-     * @returns {Array} The sorted array.
-     */
+    //
+    // General merge sorting function
+    // array => Array of items to be sorted
+    // compare => Function used for comparing array indexes
+    //
     merge_sort: function(array, compare){
-        if(!Array.isArray(array) || array.length < 2){ return array; }
-        if(!compare){ compare = (a, b) => { return a < b; }; }
-        else if(!window.hWin.HEURIST4.util.isFunction(compare)){ return array; }
-        let arr_len = array.length; let mid = Math.floor(arr_len / 2);
+
+        if(!Array.isArray(array) || array.length < 2){
+            return array;
+        }
+        if(!compare){
+            compare = (a, b) => {
+                return a < b;
+            };
+        }else if(!window.hWin.HEURIST4.util.isFunction(compare)){
+            return array;
+        }
+
+        let arr_len = array.length;
+        let mid = Math.floor(arr_len / 2);
+
         let left_array = window.hWin.HEURIST4.util.merge_sort(array.slice(0, mid), compare);
         let right_array = window.hWin.HEURIST4.util.merge_sort(array.slice(mid), compare);
+
         let sorted_array = [];
+
         while(left_array.length != 0 && right_array.length != 0){
-            if(compare(left_array[0], right_array[0])){ sorted_array.push(left_array.shift()); }
-            else{ sorted_array.push(right_array.shift()); }
+            if(compare(left_array[0], right_array[0])){
+                sorted_array.push(left_array.shift());
+            }else{
+                sorted_array.push(right_array.shift());
+            }
         }
-        return sorted_array.concat(left_array.concat(right_array));
+        let results = sorted_array.concat(left_array.concat(right_array));
+
+        return results;
     },
     
-    /**
-     * Restores relative image URLs to absolute URLs based on `HAPI4.baseURL_pro`.
-     * It inspects `src` and `data-id` attributes of an element (expected to be an image).
-     * Also handles some specific URL parameters for embedding and display.
-     * @param {HTMLElement} ele - The HTML element (typically `<img>`) whose src needs to be restored.
-     * @returns {void}
-     */
-    restoreRelativeURL: function(ele) {
-        let src = ele.getAttribute('src'); let file_id = ele.getAttribute('data-id');
-        let db = (window.hWin.HAPI4 && window.hWin.HAPI4.database) ? window.hWin.HAPI4.database : ''; // Check HAPI4 exists
+    //
+    // Restore IMG url. Converts from relative path to current "pro"
+    //
+    restoreRelativeURL: function(ele)
+    {
+        
+        let src = ele.getAttribute('src');
+        let file_id = ele.getAttribute('data-id');
+        let db = window.hWin.HAPI4.database;
         let extra_params = '';
+
+        //extract params from image src and recreate new url pointed to  baseURL_pro
         if(!window.hWin.HEURIST4.util.isempty(src)){
             let query = src.slice(src.indexOf('?'));
-            if(src.indexOf('file=') > 0){ file_id = window.hWin.HEURIST4.util.getUrlParameter('file', query); }
-            if(src.indexOf('embedplayer=') > 0){ extra_params += '&embedplayer='+window.hWin.HEURIST4.util.getUrlParameter('embedplayer', query); }
-            if(src.indexOf('fancybox=') > 0){ extra_params += '&fancybox='+window.hWin.HEURIST4.util.getUrlParameter('fancybox', query); }
-            else{ extra_params += '&fancybox=1'; }
-            if(window.hWin.HAPI4 && window.hWin.HAPI4.is_publish_mode){
-                let webcached = window.hWin.HEURIST4.util.getUrlParameter('fullres', query);
-                webcached = !webcached ? 0 : webcached; extra_params += `&fullres=${webcached}`;
+            if(src.indexOf('file=') > 0){
+                file_id = window.hWin.HEURIST4.util.getUrlParameter('file', query);
             }
-            if(src.indexOf('db=') > 0){ db = window.hWin.HEURIST4.util.getUrlParameter('db', query); }
+
+            if(src.indexOf('embedplayer=') > 0){
+                extra_params += '&embedplayer='+window.hWin.HEURIST4.util.getUrlParameter('embedplayer', query);
+            }
+
+            if(src.indexOf('fancybox=') > 0){
+                extra_params += '&fancybox='+window.hWin.HEURIST4.util.getUrlParameter('fancybox', query);
+            }else{
+                extra_params += '&fancybox=1';
+            }
+
+            if(window.HAPI4.is_publish_mode){ // image for a webpage
+
+                let webcached = window.hWin.HEURIST4.util.getUrlParameter('fullres', query);
+                webcached = !webcached ? 0 : webcached;
+
+                extra_params += `&fullres=${webcached}`; // look for scaled down image, when retrieving
+            }
+
+            if(src.indexOf('db=') > 0){
+                db = window.hWin.HEURIST4.util.getUrlParameter('db', query);
+            }
         }
-        if(!window.hWin.HEURIST4.util.isempty(file_id) && !window.hWin.HEURIST4.util.isempty(db) && window.hWin.HAPI4){ // Check HAPI4
+
+        //yes this is link to registered image
+        if(!window.hWin.HEURIST4.util.isempty(file_id) && !window.hWin.HEURIST4.util.isempty(db)){
             src = window.hWin.HAPI4.baseURL_pro + '?db=' + db + '&file=' + file_id + extra_params;
             ele.setAttribute('src', src);
-        }else if (!window.hWin.HEURIST4.util.isempty(src) && (src.indexOf('./')==0 || src.indexOf('/')==0) && window.hWin.HAPI4){ // Check HAPI4
+        }else 
+        if (!window.hWin.HEURIST4.util.isempty(src) 
+            && (src.indexOf('./')==0 || src.indexOf('/')==0)){ //relative path
               src = window.hWin.HAPI4.baseURL + src.substring(src.indexOf('/')==0?1:2);
               ele.setAttribute('src', src);
         }        
     },
     
-    /**
-     * Converts a Base64 encoded string to a Uint8Array of bytes.
-     * @param {string} base64 - The Base64 encoded string.
-     * @returns {Uint8Array} The array of bytes.
-     */
     base64ToBytes: function(base64) {
         const binString = atob(base64);
         return Uint8Array.from(binString, (m) => m.codePointAt(0));
     },
 
-    /**
-     * Converts a Uint8Array of bytes to a Base64 encoded string.
-     * @param {Uint8Array} bytes - The array of bytes.
-     * @returns {string} The Base64 encoded string.
-     */
     bytesToBase64: function(bytes) {
         const binString = Array.from(bytes, (x) => String.fromCodePoint(x)).join("");
         return btoa(binString);
     },
-
-    /**
-     * Checks if a string is a valid Base64 encoded string.
-     * @param {string} str - The string to check.
-     * @returns {boolean} True if the string is valid Base64, false otherwise.
-     */
+    
+    
     isBase64: function(str) {
           const notBase64 = /[^A-Z0-9+\/=]/i;
+          
           if(typeof str === 'string'){
               const len = str.length;
-              if (!len || len % 4 !== 0 || notBase64.test(str)) { return false; }
+              if (!len || len % 4 !== 0 || notBase64.test(str)) {
+                return false;
+              }
               const firstPaddingChar = str.indexOf('=');
-              return firstPaddingChar === -1 || firstPaddingChar === len - 1 || (firstPaddingChar === len - 2 && str[len - 1] === '=');
-          }else{ return false; }
-    }
-}; //end HEURIST4.util
+              return firstPaddingChar === -1 ||
+                firstPaddingChar === len - 1 ||
+                (firstPaddingChar === len - 2 && str[len - 1] === '=');
+          }else{
+              return false;
+          }
+    },
+    
+    //constants for saved searches\
+    _NAME: 0, 
+    _QUERY: 1,
+    _GRPID: 2
+}//end util
 
-window.Hul = window.hWin.HEURIST4.util; // Alias for HEURIST4.util
+window.Hul = window.hWin.HEURIST4.util;
 
 //-------------------------------------------------------------
 
-/**
- * Escapes HTML special characters in a string.
- * @returns {string} The HTML-escaped string.
- * @memberof String.prototype
- */
 String.prototype.htmlEscape = function() {
-    return this.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&#039;").replace(/"/g, "&#34;");
+    return this.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/'/g, "&#39;");
 }
+/*
+String.prototype.htmlUnescape = function() {
+    var e = document.createElement("textarea");
+    e.innerHTML = this;
+    // handle case of empty input
+    return e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;    
+}
+*/
 
-/**
- * Capitalizes the first letter of a string.
- * @returns {string} The string with the first letter capitalized.
- * @memberof String.prototype
- */
 String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
 }
-
-/**
- * Left-pads a string with a specified character to a certain length.
- * @param {string} padString - The string to use for padding.
- * @param {number} length - The desired total length of the string.
- * @returns {string} The left-padded string.
- * @memberof String.prototype
- */
 String.prototype.lpad = function(padString, length) {
-    let str = String(this); // Ensure 'this' is treated as a string
+    let str = this;
     while (str.length < length)
         str = padString + str;
     return str;
 }
 
-if (!Array.prototype.indexOf) {
-    /**
-     * Polyfill for Array.prototype.indexOf.
-     * Finds the first index at which a given element can be found in the array, or -1 if it is not present.
-     * @param {*} elt - Element to locate in the array.
-     * @param {number} [from=0] - The index to start the search at.
-     * @returns {number} The first index of the element in the array; -1 if not found.
-     * @memberof Array.prototype
-     */
-    Array.prototype.indexOf = function(elt /*, from*/) {
+if (!Array.prototype.indexOf)
+{
+    Array.prototype.indexOf = function(elt /*, from*/)
+    {
         let len = this.length;
+
         let from = Number(arguments[1]) || 0;
-        from = (from < 0) ? Math.ceil(from) : Math.floor(from);
-        if (from < 0) from += len;
-        for (; from < len; from++) {
-            if (from in this && this[from] === elt) return from;
+        from = (from < 0)
+        ? Math.ceil(from)
+        : Math.floor(from);
+        if (from < 0)
+            from += len;
+
+        for (; from < len; from++)
+        {
+            if (from in this &&
+                this[from] === elt)
+                return from;
         }
         return -1;
     };
 }
-} // End of HEURIST4.util initialization block
 
-/**
- * Dynamically loads a CSS file by creating a <link> element in the document's head.
- * @memberof jQuery
- * @function getStyles
- * @param {string} path - The URL of the CSS file to load.
- * @returns {void}
- */
+
+
+/*
+if (!Array.prototype.unique){
+
+    Array.prototype.unique = function()
+    {
+        
+        //return $.grep(this, function(el, index) {
+       
+       
+        
+        
+            var n = {},r=[];
+            for(var i = 0; i < this.length; i++) 
+            {
+                if (!n[this[i]]) 
+                {
+                    n[this[i]] = true; 
+                    r.push(this[i]); 
+                }
+            }
+            return r;        
+    };
+}
+*/
+}
+
+
 $.getStyles = function(path){
-    var head = document.getElementsByTagName('head')[0];
+
+    /*
+    if(window.hWin.HEURIST4.cssFilesAdded.indexOf(path) !== -1) {
+       return    
+    }
+    window.hWin.HEURIST4.cssFilesAdded.push(path);
+    */
+
+    var head = document.getElementsByTagName('head')[0] 
+    // Creating link element 
     var style = document.createElement('link');
-    style.href = path; style.type = 'text/css'; style.rel = 'stylesheet';
+    style.href = path;
+    style.type = 'text/css';
+    style.rel = 'stylesheet';
     head.append(style); 
 }
 
-/**
- * Checks if a CSS selector exists in any of the document's stylesheets.
- * @param {string} selector - The CSS selector to check (e.g., ".my-class", "#my-id").
- * @returns {boolean} True if the selector exists, false otherwise.
- */
 function selectorExists(selector) { 
+    
     function getAllSelectors() { 
         var ret = [];
         for(var i = 0; i < document.styleSheets.length; i++) {
-            if(document.styleSheets[i].href!=null) continue; // Skip external stylesheets that might cause CORS issues
+            if(document.styleSheets[i].href!=null) continue;
             try{
                 var rules = document.styleSheets[i].rules || document.styleSheets[i].cssRules;
-                for(var x in rules) { if(Object.hasOwnProperty.call(rules, x) && typeof rules[x].selectorText == 'string') ret.push(rules[x].selectorText); } // Added hasOwnProperty
-            }catch(e){}
+                for(var x in rules) {
+                    if(typeof rules[x].selectorText == 'string') ret.push(rules[x].selectorText);
+                }
+            }catch(e){} //to avoid security error
         }
         return ret;
     }
+    
     var selectors = getAllSelectors();
-    for(var i = 0; i < selectors.length; i++) { if(selectors[i] == selector) return true; }
+    for(var i = 0; i < selectors.length; i++) {
+        if(selectors[i] == selector) return true;
+    }
     return false;
 }
 
-/**
- * Loads multiple JavaScript files sequentially using async/await and Promises.
- * @memberof jQuery
- * @function getMultiScripts2
- * @param {Array<string>} arr - An array of script filenames (without path).
- * @param {string} [path=""] - Optional base path for the script files.
- * @returns {Promise<void>} A Promise that resolves when all scripts have been loaded, or rejects if any script fails.
- */
+
 $.getMultiScripts2 = function(arr, path) {
+    
     return new Promise(function(_resolve, _reject){
+    
         (async () => {
-          for (const scr of arr) { await $.getScript((path||"") + scr); }
+          for (const scr of arr) {
+            await $.getScript((path||"") + scr);
+          }
+          
           _resolve();
-        })().catch((err) => { _reject(err); });
+        })()
+        .catch((err) => {
+            //console.log(err);            
+            // Something went wrong
+            _reject(err);
+        });
+    
     });
+    
 }
 
-/**
- * Loads multiple JavaScript files using jQuery's `$.getScript` and `$.when`.
- * Scripts may load in parallel, but the returned Promise resolves after all are done.
- * @memberof jQuery
- * @function getMultiScripts
- * @param {Array<string>} arr - An array of script filenames (without path).
- * @param {string} [path=""] - Optional base path for the script files.
- * @returns {jQuery.Promise} A jQuery Promise that resolves when all scripts have been loaded.
- */
 $.getMultiScripts = function(arr, path) {
-    let _arr = $.map(arr, function(scr) { return $.getScript( (path||"") + scr ); });
-    _arr.push($.Deferred(function( deferred ){ $( deferred.resolve ); }));
+    let _arr = $.map(arr, function(scr) {
+        return $.getScript( (path||"") + scr );
+    });
+
+    _arr.push($.Deferred(function( deferred ){
+        $( deferred.resolve );
+    }));
+
     return $.when.apply($, _arr);
 }
 
-/**
- * URL converter function for TinyMCE editor instances within Heurist.
- * Converts absolute Heurist URLs (based on `HAPI4.baseURL_pro` or `HAPI4.baseURL`) to relative paths (e.g., "./...").
- * @param {string} url - The URL to convert.
- * @param {HTMLElement} node - The DOM node this URL is associated with (e.g., `<a>` or `<img>`).
- * @param {boolean} on_save - True if the conversion is happening on save, false on load.
- * @param {string} name - The attribute name being converted (e.g., "src", "href").
- * @returns {string} The converted URL.
- */
-function tinymceURLConverter(url, node, on_save, name) {
-    if (window.hWin.HAPI4) { // Check if HAPI4 is available
-        if(url.indexOf(window.hWin.HAPI4.baseURL_pro)===0) { url = url.replace(window.hWin.HAPI4.baseURL_pro, './'); }
-        else if(url.indexOf(window.hWin.HAPI4.baseURL)===0) { url = url.replace(window.hWin.HAPI4.baseURL, './'); }
+function tinymceURLConverter(url, node, on_save, name)
+{
+    if(url.indexOf(window.hWin.HAPI4.baseURL_pro)===0)
+    {
+        url = url.replace(window.hWin.HAPI4.baseURL_pro, './');
+        
+    }else if(url.indexOf(window.hWin.HAPI4.baseURL)===0)
+    {
+        url = url.replace(window.hWin.HAPI4.baseURL, './');
     }
+
+    // Return URL
     return url;
-}
+}   

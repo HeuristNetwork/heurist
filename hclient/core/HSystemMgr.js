@@ -9,6 +9,7 @@
  * checks for client and database software. Additionally, it provides utilities for file system operations
  * (listing/managing folders in HEURIST_FILESTORE_DIR), translation services via DeepL, and Matomo
  * analytics tracking integration.
+ * 
  * @package Heurist academic knowledge management system
  * @subpackage hclient\core
  * @link https://HeuristNetwork.org
@@ -18,7 +19,8 @@
  * @author Ian Johnson <ian.johnson.heurist@gmail.com>
  * @since 6.0
  */
-/* global prepared_params, $Db */ // Added $Db based on usage in checkPresenceOfRectype
+ 
+/* global prepared_params, $Db */
 
 /**
  * @class HSystemMgr

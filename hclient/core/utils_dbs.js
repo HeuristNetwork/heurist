@@ -17,7 +17,8 @@
  * @author Ian Johnson <ian.johnson.heurist@gmail.com>
  * @since 4.0
  */
-/* global ActiveXObject,Temporal,TDate */ // Retained original globals. $Db is aliased at the end.
+ 
+/* global ActiveXObject,Temporal,TDate */
 
 if (!window.hWin.HEURIST4){
     window.hWin.HEURIST4 = {};
@@ -32,6 +33,59 @@ if (!window.hWin.HEURIST4.dbs)
  * (Record Types, Detail Types, Terms, etc.) and their structures within Heurist.
  * It includes helpers for retrieving definition properties, navigating hierarchies,
  * and performing specific operations related to database metadata.
+ * 
+/*
+Selectors:
+
+TERMS
+
+getInverseTermById  - (used in record edit for relmarker fields)
+
+getTermValue - Returns Label and Termcode in brackets (optionally) (used in EN and faceted search)
+
+getTermByCode - returns term by code in given vocab (used in lookup geonames only)
+
+getTermByLabel - returns term ID in vocabulary by label (in record edit for search and duplication check)
+
+getTermVocab - returns vocabulary for given term - real vocabulary (not by reference)
+
+trm_InVocab - returns true if term belongs to vocabulary (including by reference)
+
+isTermByReference - return false if given term belongs to vocabulary, otherwise returns level of reference
+
+getColorFromTermValue - Returns hex color by label or code for term by id (for googlemaps only)
+
+    trm_TreeData  - returns hierarchy for given vocabulary as a flat array, recordset or tree data
+    trm_HasChildren - is given term has children
+    trm_getVocabs - get all vocabularies OR for given domain
+    trm_getAllVocabs - get all vocab where given term presents directly or by reference
+    trm_RemoveLinks - remove all entries of term from trm_Links
+
+    
+WORKFLOW STAGES
+
+getSwfByRectype - returns rules for recordtype and current user 
+
+RECTYPES
+   
+
+createRectypeStructureTree
+getLinkedRecordTypes  -  FIX in search_faceted.js
+
+hasFields - returns true if rectype has a field in its structure
+rstField - Returns rectype header or details field values
+
+
+    getLocalID
+    getConceptID
+
+getTrashGroupId
+
+getHierarchyTitles - returns list of rt and dt titles for linked hierachy rt:dt:rt:dt
+                    (in faceted search and linked geo places) 
+                    
+ * 
+ * 
  * Alias: `$Db`
  */
 window.hWin.HEURIST4.dbs = {
@@ -146,7 +200,15 @@ window.hWin.HEURIST4.dbs = {
         
         let t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
 
-        // Internal helper to recursively check parentage for term reference.
+        /**
+         * @function __checkParents
+         * @private
+         * @description Internal helper to recursively check parentage for term reference.
+         * @param {number} recID - The current record ID (vocabulary or term) being checked.
+         * @param {number} lvl - The current reference level.
+         * @returns {number|false} The reference level if the term is found as a child (by reference), otherwise `false`.
+         */
+        
         function __checkParents(recID, lvl){
             
             let children = t_idx[recID]; //array of children ids trm_Links (including references)    
@@ -344,7 +406,23 @@ window.hWin.HEURIST4.dbs = {
         
         //-------------------- internal functions    
 
-        // Internal helper: Recursively builds a tree node for a given record type.
+    /**
+     * @function __getRecordTypeTree
+     * @private
+     * @description Recursively builds a tree node for a given record type.
+     * This is an internal helper function for `createRectypeStructureTree_new`.
+     * @param {(number|string)} $recTypeId - The ID of the record type, or 'Relationship' for the generic relationship type.
+     * @param {number} $recursion_depth - Current depth in the recursion, used to limit nesting.
+     * @param {number} $mode - The generation mode (passed from `createRectypeStructureTree_new`).
+     * @param {string[]} $fieldtypes - Array of field types to include.
+     * @param {number[]} [$pointer_fields=null] - Array of pointer field IDs already processed to avoid infinite recursion.
+     * @param {boolean} [$is_parent_relmarker=false] - True if the parent context is a relationship marker.
+     * @param {boolean} [is_multi_constrained=false] - True if the context involves multiple constraints.
+     * @returns {Object|null} A tree node object for the record type, or null if not applicable.
+     * The node object typically includes `key`, `title`, `type`, `conceptCode`, `rtyID_local`, `code`, and `children` properties.
+     */    
+        
+
     function __getRecordTypeTree($recTypeId, $recursion_depth, $mode, $fieldtypes, $pointer_fields, $is_parent_relmarker, is_multi_constrained){
             
             let $res = {};
@@ -622,11 +700,11 @@ window.hWin.HEURIST4.dbs = {
 
                                     $children_links.push($res_dt);
                                 }else{
-									
+                                    
                                     if($res_dt['type']=='enum' && $mode==3){
                                         $res_dt['title'] = "<span class='ui-icon ui-icon-menu' style='margin-right:2px;'>&nbsp;</span>" + $res_dt['title'];
                                     }
-									
+                                    
                                     $dtl_fields.push($res_dt);
                                 }
                             }
@@ -807,7 +885,22 @@ window.hWin.HEURIST4.dbs = {
     $mode - 3 all, 4, 5 for treeview (5 lazy) , 6 - for import csv(dependencies)
     */
 
-    // Internal helper: Builds a tree node for a specific detail field.
+    /**
+     * @function __getDetailSection
+     * @private
+     * @description Builds a tree node for a specific detail field within a record type structure.
+     * This is an internal helper function for `__getRecordTypeTree`.
+     * @param {number} $recTypeId - The ID of the parent record type.
+     * @param {number} $dtID  - The ID of the detail type (field).
+     * @param {number} $recursion_depth - Current recursion depth.
+     * @param {number} $mode - The generation mode.
+     * @param {string[]} $fieldtypes - Array of allowed field types.
+     * @param {number} [$reverseRecTypeId=null] - If this is a reverse link, the ID of the target record type.
+     * @param {number[]} [$pointer_fields=null] - Pointer fields already processed.
+     * @returns {Object|null} A tree node object for the detail field, or `null` if the field should not be included.
+     * The node object includes properties like `key`, `title`, `type`, `code`, `name`, `display_order`, `conceptCode`, `dtyID_local`.
+     * For pointer types (`resource`, `relmarker`), it can also include `children`, `lazy`, `rt_ids`, `constraint`, `isreverse`, `isparent`.
+     */
     function __getDetailSection($recTypeId, $dtID, $recursion_depth, $mode, $fieldtypes, $reverseRecTypeId, $pointer_fields){
 
         let $res = null;
@@ -3211,40 +3304,40 @@ window.hWin.HEURIST4.dbs = {
         let arr_idx = {}; // id to array idx
         for(const rty_id of rty_IDs){ // Get base fields and instances for each rectype
 
-		
-			const rty_name = $Db.rty(rty_id, 'rty_Name');
+        
+            const rty_name = $Db.rty(rty_id, 'rty_Name');
 
-			const recset = $Db.rst(rty_id);
+            const recset = $Db.rst(rty_id);
 
-			if(window.hWin.HEURIST4.util.isempty(recset)) { continue; }
+            if(window.hWin.HEURIST4.util.isempty(recset)) { continue; }
 
-			recset.each2(function(dty_id, details){
+            recset.each2(function(dty_id, details){
 
                 if(dty_id == ignored_dty_id || ignored_dty_id.indexOf(dty_id) >= 0){
                     return;
                 }
 
-				const dty = $Db.dty(dty_id);
+                const dty = $Db.dty(dty_id);
                 const dty_name = dty['dty_Name'];
 
                 if(allowed_types != 'all' && allowed_types.indexOf(dty['dty_Type']) < 0){
                     return;
                 }
 
-				if(!Object.hasOwn(arr_idx, dty_id)) {
+                if(!Object.hasOwn(arr_idx, dty_id)) {
                     // show_in_lists_flag / hidden: true if it should be hidden/not shown in lists
                     let list_fld = !list_all_fields && $Db.dty(dty_id, 'dty_ShowInLists') == 0;
                     arr_idx[dty_id] = last_idx;
                     last_idx ++;
-					fields.push( [ dty_id, dty_name, [], list_fld ] );
-				}
+                    fields.push( [ dty_id, dty_name, [], list_fld ] );
+                }
 
                 const dty_idx = arr_idx[dty_id];
-				const rst_name = rty_name + "." + details["rst_DisplayName"]; // Instance name: RtyName.RstDisplayName
+                const rst_name = rty_name + "." + details["rst_DisplayName"]; // Instance name: RtyName.RstDisplayName
 
-				fields[dty_idx][2].push(rst_name);
-			});
-		}
+                fields[dty_idx][2].push(rst_name);
+            });
+        }
 
         // sort base field names
         fields.sort((arr1, arr2) => {
@@ -3255,9 +3348,9 @@ window.hWin.HEURIST4.dbs = {
 
         let processed_fields = [];
 
-		for(const field of fields){ // sort rst field names + additional processing for different modes
+        for(const field of fields){ // sort rst field names + additional processing for different modes
 
-			field[2].sort((a, b) => { // Sort instance names alphabetically
+            field[2].sort((a, b) => { // Sort instance names alphabetically
                 a = a.toLocaleUpperCase();
                 b = b.toLocaleUpperCase();
                 return a.localeCompare(b);
@@ -3302,7 +3395,7 @@ window.hWin.HEURIST4.dbs = {
                 processed_fields.push(node);
             }
             */
-		}
+        }
 
         if(mode == 0 || mode == 2){ // Mode 0 returns the 'fields' array directly; Mode 2 would too if implemented
             return fields;
