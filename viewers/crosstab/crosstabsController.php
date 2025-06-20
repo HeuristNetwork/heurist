@@ -8,14 +8,21 @@
 */
 
 /**
-* Corsstabs server side interface/controller
+* crosstabsController.php - Server-side controller for Crosstabs viewer.
 *
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @fileOverview This file handles server-side logic for the crosstab viewer.
+* It processes requests from the client-side JavaScript to fetch data needed for
+* generating crosstabulations, such as min/max values for fields, distinct pointer
+* values, the main crosstab data, and record type information for a given set of records.
+*
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\widgets\crosstab
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       3.1.0
 */
 require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
@@ -97,9 +104,14 @@ function recordSearchMinMax( $params){
    return $response;
 }
 */
-//
-//
-//
+/**
+ * Extracts and prepares record IDs from the request parameters.
+ * Used to filter queries based on a specific recordset.
+ *
+ * @param array $params Request parameters, potentially including a 'recordset' key.
+ *                      The 'recordset' can be an array or a JSON string containing 'recIDs'.
+ * @return array|null An array of prepared record IDs, or null if not provided.
+ */
 function getWhereRecordIds($params){
 
     $recIDs = null;
@@ -120,11 +132,18 @@ function getWhereRecordIds($params){
 
 
 /**
-* finds the list of distict record IDs for given detail type "record pointer"
-*
-* @param mixed $mysqli
-* @param mixed $params:  dt
-*/
+ * Finds the list of distinct record IDs and their titles for a given "record pointer" detail type.
+ * Results are filtered by the current user's permissions and any provided recordset or query.
+ *
+ * @global hserv\System $system The global Heurist system object.
+ * @global mysqli $mysqli The global mysqli database connection object.
+ * @param array $params Request parameters. Expected keys:
+ *                      'dt' (int): The detail type ID for the record pointer field.
+ *                      'recordset' (array|string, optional): Recordset to filter by.
+ *                      'q' (string, optional): Query string to filter by if recordset not provided.
+ *                      'w' (string, optional): Domain for the query string.
+ * @return array A response array with 'status' and 'data' (list of {id, text} objects) or error details.
+ */
 function recordSearchDistinctPointers( $params ){
     global $system, $mysqli;
 
@@ -175,17 +194,26 @@ function recordSearchDistinctPointers( $params ){
 }
 
 /**
-* main request to find crosstab data
-*
-* @param mixed $mysqli
-* @param mixed $params
-*               dt_page - detail type for page/groups
-*               dt_col - detail type for columns
-*               dt_row - detail type for rows
-*               agg_mode - aggreagation mode: sum, avg, count
-*               agg_field - field for avg or sum mode
-*               q - current Heurist query
-*/
+ * Generates the main crosstabulation data based on request parameters.
+ * Constructs and executes a complex SQL query to aggregate data according
+ * to specified row, column, and page dimensions, and aggregation mode.
+ *
+ * @global hserv\System $system The global Heurist system object.
+ * @global mysqli $mysqli The global mysqli database connection object.
+ * @param array $params Request parameters. Expected keys:
+ *                      'dt_row' (int): Detail type ID for rows.
+ *                      'dt_rowtype' (string): Data type of the row field (e.g., "integer", "float", "enum").
+ *                      'dt_col' (int, optional): Detail type ID for columns.
+ *                      'dt_coltype' (string, optional): Data type of the column field.
+ *                      'dt_page' (int, optional): Detail type ID for pages.
+ *                      'dt_pagetype' (string, optional): Data type of the page field.
+ *                      'agg_mode' (string, optional): Aggregation mode ("count", "sum", "avg"). Defaults to "count".
+ *                      'agg_field' (int, optional): Detail type ID for the field to aggregate if mode is "sum" or "avg".
+ *                      'recordset' (array|string, optional): Recordset to filter by.
+ *                      'q' (string, optional): Query string to filter by if recordset not provided.
+ *                      'w' (string, optional): Domain for the query string.
+ * @return array A response array with 'status' and 'data' (the crosstab resultset) or error details.
+ */
 function getCrossTab( $params){
 
     global $system;
@@ -303,6 +331,18 @@ return $response;
 
 }
 
+/**
+ * Retrieves the record type IDs present in a given list of record IDs.
+ * If a single record ID is provided, its record type is returned.
+ * If multiple record IDs are provided, it returns a list of unique record type IDs
+ * found among those records, ordered by frequency (most common first).
+ *
+ * @global hserv\System $system The global Heurist system object.
+ * @global mysqli $mysqli The global mysqli database connection object.
+ * @param array $params Request parameters. Expected key:
+ *                      'recIDs' (array|string): A single record ID or an array/comma-separated string of record IDs.
+ * @return array A response array with 'status' and 'data' (an array of record type IDs) or error details.
+ */
 function getRecTypesCrosstabs($params){
 
     global $system;

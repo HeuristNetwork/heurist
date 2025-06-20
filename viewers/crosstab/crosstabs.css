@@ -1,3 +1,20 @@
+/**
+* crosstabs.css - Stylesheet for the crosstab viewer functionality.
+*
+* @fileOverview This file contains all the CSS rules for displaying and interacting
+* with crosstabulation tables within the Heurist system. It includes styles for
+* input forms, list views, table headers, cells, totals, percentages, pagination,
+* loading indicators, modal dialogs, tabs, buttons, and responsive design adjustments.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\crosstab
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       0.1.0
+*/
+
 * {
     -moz-box-sizing: border-box;
 }

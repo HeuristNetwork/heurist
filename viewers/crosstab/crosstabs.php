@@ -14,15 +14,23 @@
 */
 
 /**
- *   Corsstabs analysis UI
- *
- * @author      Artem Osmakov   <osmakov@gmail.com>
- * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
- * @link        https://HeuristNetwork.org
- * @version     3.1.0
- * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
- * @package     Heurist academic knowledge management system
- */
+* crosstabs.php - Main user interface for the Crosstabs viewer.
+*
+* @fileOverview This file provides the HTML structure and initial JavaScript setup for the
+* crosstab analysis tool. It includes links to necessary CSS and JavaScript files,
+* defines the layout for input controls (record type, variables, display options),
+* and areas for displaying results (tables, charts). It also initializes the
+* CrosstabsAnalysis JavaScript class.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\crosstab
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       3.1.0
+*/
 
 define('PDIR', '../../');//need for proper path to js and css
 require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
@@ -49,7 +57,12 @@ require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
 <script>
     var mapping, menu_datasets, btn_datasets;
 
-    // Callback function on page initialization - see initPage.php
+    /**
+     * Callback function executed on page initialization.
+     * Initializes the CrosstabsAnalysis class and potentially resizes layout panels.
+     * This function is typically called by `initPage.php`.
+     * @param {boolean} success - Indicates whether the initial page setup (from initPage.php) was successful.
+     */
     function onPageInit(success) {
 
         const urlParams = new URLSearchParams(window.location.search);

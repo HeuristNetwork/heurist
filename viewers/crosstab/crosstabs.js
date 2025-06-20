@@ -1,26 +1,20 @@
-/*
-* Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* https://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
 /**
-*  Corsstabs UI class
+* crosstabs.js - UI and logic for generating and displaying crosstabulation tables.
 *
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @fileOverview This file implements the client-side functionality for the crosstabs viewer.
+* It includes the CrosstabsAnalysis class which handles data retrieval, interval calculation,
+* user interactions for defining crosstab parameters (rows, columns, pages, aggregation),
+* and rendering the resulting tables and charts. It interacts with a server-side
+* controller for data operations.
+*
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\crosstab
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       3.1.0
 */
 
 /* global Chart */
@@ -31,10 +25,17 @@
 window.crosstabsAnalysis = null;
 
 /**
-*  CrosstabsAnalysis - class for crosstab analysis
+* CrosstabsAnalysis - Main class for handling crosstab analysis UI and logic.
 *
+* This class manages the selection of record types, fields for rows, columns, and pages,
+* defines intervals for these fields, handles aggregation options, retrieves data from
+* the server, and renders the crosstabulation tables and associated charts.
+*
+* @class
+* @param {string} [_query] - Optional initial query string.
+* @param {string} [_query_domain] - Optional query domain.
 * @author Artem Osmakov <osmakov@gmail.com>
-* @version 2013.0530
+* @since 2013.0530
 */
 function CrosstabsAnalysis(_query, _query_domain) {
 
@@ -67,6 +68,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
     let _isPopupMode = false;
 
+    /**
+     * Initializes the CrosstabsAnalysis component.
+     * Sets up UI elements, event handlers, and initial state.
+     * @param {string} [_query] - Optional initial query string.
+     * @param {string} [_query_domain] - Optional query domain.
+     * @private
+     */
     function _init(_query, _query_domain)
     {
         if(!window.hWin.HEURIST4.util.isempty(_query)){
@@ -125,9 +133,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
     }
 
     /**
-    * update list of fields for selected record type
-    * 1. columns 2.rows 3. pages 4, aggreagation
-    */
+     * Handles the change event of the record type selector.
+     * Updates the field selectors based on the newly selected record type.
+     * @param {Event} event - The event object.
+     * @param {object} data - Data associated with the selection change.
+     * @private
+     */
     function _onRectypeChange(event, data){
 
         needServerRequest = true;
@@ -182,9 +193,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
     }
 
     /**
-     * Determine the modal type,
-     * either row, column or page
-     * return its value.
+     * Determine the modal type (row, column, or page) and returns the jQuery object for the modal.
+     * @param {string} name - The base name for the modal type (e.g., 'row', 'column', 'page').
+     * @returns {jQuery} The jQuery object representing the modal.
      */
     function determineModalType(name){
         let modal = $('#'+name+'IntervalsModal');
@@ -195,8 +206,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
 
     /**
-    * collapse/expand intervals
-    */
+     * Toggles the visibility of the intervals section for a given type (row, column, page).
+     * @param {string} name - The type of intervals section to toggle (e.g., 'rowIntervals').
+     * @returns {boolean} True if the section is now visible, false otherwise.
+     */
     function showHideIntervals(name){
 
         //let name = $(event.target).attr('id');
@@ -215,8 +228,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
     }
 
     /**
-    * remove all intervals for given type (page,col,row)
-    */
+     * Clears all intervals for a given type (page, column, row).
+     * Resets the UI elements related to interval definition for that type.
+     * @param {string} name - The type of intervals to clear (e.g., 'column', 'row', 'page').
+     * @returns {jQuery} The jQuery object for the container where intervals were displayed.
+     */
     function clearIntervals(name){
         let $headerModal = $('#'+name+'Header');
         let $container = $('#'+name+'IntervalsBody');
@@ -242,10 +258,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
     }
 
     //
-    //Apply intervals from saved file
-    //Replace intervals with saved intervals
-    //Only used when settings have been saved.
-    //
+    /**
+     * Applies intervals from a saved settings object.
+     * This function is used when loading previously saved crosstab configurations.
+     * @param {object} allFields - An object containing the interval definitions for columns, rows, and pages.
+     * @param {number} counts - The number of intervals (bucket count) for numeric fields.
+     * @param {string} [name] - (Unused in current implementation, but kept for potential future use or legacy reasons) The name of the specific dimension to apply intervals to.
+     * @private
+     */
     function _applySavedIntervals(allFields, counts, name){
         fields3['column'] = allFields['column'];
         fields3['row'] = allFields['row'];
@@ -316,9 +336,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
     }
 
     /**
-    * create set of intervals specific for particular detail type
-    * get min and max values
-    */
+     * Resets intervals for a field when its selection changes in the UI.
+     * This is typically triggered by a user changing the field for a row, column, or page.
+     * @param {Event} event - The change event from the select element.
+     * @private
+     */
     function _resetIntervals(event){
         needServerRequest = true;
 
@@ -328,9 +350,16 @@ function CrosstabsAnalysis(_query, _query_domain) {
         _resetIntervals_continue(name, detailid, true);
     }
 
-    //
-    //
-    //
+    /**
+     * Continues the process of resetting intervals for a specific dimension (row, column, page).
+     * Fetches necessary data (min/max, pointer values, terms) based on the detail type
+     * and then calls `calculateIntervals`.
+     * @param {string} name - The dimension name ('column', 'row', 'page').
+     * @param {string|number} detailid - The ID of the selected detail field.
+     * @param {boolean} notSaved - True if these are new/unsaved intervals (triggers UI update).
+     * @param {function} [callback] - Optional callback function to execute after completion.
+     * @private
+     */
     function _resetIntervals_continue(name, detailid, notSaved, callback){
 
         let $container = $('#'+name+'Intervals');
@@ -474,8 +503,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
     }
 
     /**
-    * create intervals
-    */
+     * Calculates and creates default intervals based on the field type and its data.
+     * For numeric/date types, it divides the range into a specified number of buckets.
+     * For enum/resource types, it uses the distinct values.
+     * @param {string} name - The dimension name ('column', 'row', 'page').
+     * @param {number} [count] - The desired number of intervals for numeric/date types. Uses `keepCount` if not provided.
+     * @param {boolean} notSaved - True if these are new/unsaved intervals (triggers UI update by calling `renderIntervals`).
+     * @private
+     */
     function calculateIntervals(name, count, notSaved)
     {
         if(fields3[name].type=="float" || fields3[name].type=="integer")
@@ -580,8 +615,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
     }
 
     /**
-    * render intervals (create divs)
-    */
+     * Renders the UI for defining and editing intervals in a modal dialog.
+     * The structure of the modal differs based on whether the field type is
+     * categorical (enum, resource) or numerical/date.
+     * @param {string} name - The dimension name ('column', 'row', 'page').
+     * @param {boolean} notSaved - True if these are new/unsaved intervals, which affects UI elements like counts.
+     * @private
+     */
     function renderIntervals(name, notSaved){
 
         //let $container = $('#'+name+'Intervals');
@@ -1125,9 +1165,15 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
     }
 
-    /*
-    * Create the rows for the numeric detail types.
-    */
+    /**
+     * Generates and renders the rows within the interval editing modal for numeric or date type fields.
+     * Allows editing of interval boundaries and handles outliers.
+     * @param {string} name - The dimension name ('column', 'row', 'page').
+     * @param {Array<object>} int - The array of interval objects for this dimension.
+     * @param {jQuery} htmlElement - The jQuery object of the container where rows should be appended.
+     * @param {number|string} decimalPlace - The number of decimal places to use for displaying numeric values.
+     * @private
+     */
     function generateNumericIntervalsRows(name, int, htmlElement, decimalPlace){
         //Update description before rendering.
         updateDescriptionName(name, int, decimalPlace);
@@ -1375,9 +1421,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
         _doRender();
     }
 
-    /*
-    * Update the description and name within the fields3 objects
-    */
+    /**
+     * Updates the 'name' and 'description' properties of interval objects, typically for numeric/date intervals,
+     * formatting them based on their values and specified decimal places.
+     * @param {string} name - The dimension name ('column', 'row', 'page') whose intervals are being updated.
+     * @param {Array<object>} ints - The array of interval objects to update.
+     * @param {number|string} decimalPlace - The number of decimal places for formatting.
+     * @private
+     */
     function updateDescriptionName(name, ints, decimalPlace){
 
         for(let i=0;i<ints.length;i++){
@@ -1389,8 +1440,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
     }
 
     /**
-    * remove interval and rearange div rowids to correspond to the array.
-    */
+     * Removes an interval or a value from a grouped interval.
+     * Updates the internal `fields3` data structure and triggers a re-render.
+     * @param {string} name - The dimension name ('column', 'row', 'page').
+     * @param {number} idx - The index of the interval (or value within a group) to remove.
+     * @param {number} groupidx - The index of the group if removing a value from a grouped interval; -1 otherwise.
+     * @private
+     */
     function removeInterval(name, idx, groupidx){
 
         //Remove the value from the interval with multiple values.
@@ -1435,7 +1491,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
         _doRender(); //Render after the removal of a value.
     }
 
-    //Find the position of the value within the stored array
+    /**
+     * Finds the position (index) of a specific detail ID within an array of intervals or grouped interval values.
+     * @param {string} name - The dimension name ('column', 'row', 'page').
+     * @param {string|number} detailID - The detail ID to search for.
+     * @returns {number|undefined} The index if found, otherwise undefined.
+     * @private
+     */
     function findPositionInArray(name, detailID){
         let idx;
 
@@ -1460,8 +1522,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
     }
 
     /**
-    * add/edit interval
-    */
+     * Initiates the UI for adding or editing a categorical interval.
+     * Creates a temporary UI row for defining the new interval and its values.
+     * @param {string} name - The dimension name ('column', 'row', 'page').
+     * @param {number} idx - The index of the interval to edit, or -1 to add a new interval.
+     * @private
+     */
     function editInterval( name, idx){
 
         let $editedRow = $('#'+name+idx);
@@ -1516,6 +1582,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
     }
 
+    /**
+     * Finalizes adding or editing a categorical interval based on user selections in the modal.
+     * Updates the `fields3` data structure and renders the new/modified interval in the modal.
+     * @param {string} name - The dimension name ('column', 'row', 'page').
+     * @param {number} idx - The index of the interval being edited, or a new index if adding.
+     * @param {boolean} notSaved - True if this is a new/unsaved interval (affects how data is processed).
+     * @private
+     */
     function __addeditInterval( name, idx, notSaved){
 
         if(notSaved){
@@ -1920,7 +1994,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if(notSaved) _doRender();
     }
 
-    //Create error message
+    /**
+     * Creates and prepends an error message (Bootstrap alert) to a specified location in the DOM.
+     * @param {jQuery|HTMLElement|string} location - The DOM element or selector to prepend the error message to.
+     * @param {string} message - The error message text.
+     * @private
+     */
     function createErrorMessage(location, message){
 
         if($('#alert').length){
@@ -1942,9 +2021,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .prependTo(location);
     }
 
-    //
-    //
-    //
+    /**
+     * Automatically retrieves crosstab data if conditions are met (e.g., recordset size is small enough).
+     * This is called after changes that might affect the data, like interval modifications.
+     * @private
+     */
     function _autoRetrieve(){
 
         if(!_isPopupMode){
@@ -1965,8 +2046,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
     }
 
     /**
-    * request to server for crosstab data
-    */
+     * Performs the actual request to the server to retrieve crosstab data based on current settings.
+     * Handles request parameters, displays progress indicators, and processes the server response.
+     * If data is already available and `needServerRequest` is false, it calls `_doRender` directly.
+     * @private
+     */
     function _doRetrieve(){
 
         if(needServerRequest){
@@ -2119,12 +2203,22 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
     }
 
-    //round to two digits
+    /**
+     * Rounds a number to two decimal places.
+     * @param {number} original - The number to round.
+     * @returns {number} The rounded number.
+     * @private
+     */
     function rnd(original){
         return Math.round(original*100)/100;
     }
 
-    //Change the decimal places within the array
+    /**
+     * Changes the decimal places for numeric interval values and updates their stored representation.
+     * @param {string} name - The dimension name ('column', 'row', 'page').
+     * @param {number|string} option - The number of decimal places to apply.
+     * @private
+     */
     function changeIntervalDecimal(name, option){
         $.extend(true, fields3[name].intervals, intervalsNumeric);
         for(let i=0;i<fields3[name].intervals.length;i++){
@@ -2136,8 +2230,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
     }
 
     /**
-    * render crosstab data as set of tables
-    */
+     * Renders the main crosstabulation table(s) and associated elements like titles,
+     * record counts, and potentially a pie chart.
+     * This function orchestrates the display of the analyzed data.
+     * @private
+     */
     function _doRender(){
 
         //Destroy chart if exists
@@ -2504,6 +2601,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
         _setMode(2);//results
     }//_doRenders
 
+    /**
+     * Extracts data (labels or values) from the intervals of a specified dimension,
+     * typically for use in charts.
+     * @param {string} name - The dimension name ('row', 'column', 'page').
+     * @param {boolean} isLabel - True to extract interval names (labels), false to extract interval output values.
+     * @returns {Array<string|number>} An array of extracted labels or data values.
+     * @private
+     */
     function extractData(name, isLabel){
         let data = [];
         if(isLabel){
@@ -2521,8 +2626,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
     }
 
     /**
-    * render particular page (group)
-    */
+     * Renders a single "page" of the crosstab results.
+     * If page dimension is not used, this renders the entire table.
+     * Constructs the HTML table structure including headers, rows, totals, and percentages.
+     * @param {string} pageName - The name of the current page (or an empty string if no pages).
+     * @param {Array<Array>} records - The subset of data records relevant to this page.
+     * @private
+     */
     function doRenderPage(pageName, records){
 
         //fields3 {column:{field:0, type:'', values:[], intervals:[]}
@@ -2999,6 +3109,16 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
     }
 
+    /**
+     * Checks if a given value fits within a specified interval.
+     * Handles different logic for categorical (enum, resource, relationtype) and numerical/date types.
+     * @param {string} type - The data type of the field (e.g., "enum", "float", "date").
+     * @param {Array} values - The interval's boundary values. For categorical, it's an array of allowed values. For numerical/date, it's `[min, max]`.
+     * @param {string|number} val - The value to check.
+     * @param {string} name - The dimension name ('column', 'row', 'page'), used to access overall min/max for date/numeric boundary conditions.
+     * @returns {boolean} True if the value fits within the interval, false otherwise.
+     * @private
+     */
     function fitToInterval(type, values, val, name){
         if(type=="enum" || type=="resource" || type=="relationtype"){
             return (window.hWin.HEURIST4.util.findArrayIndex(val,values)>=0); // values.indexOf(val)
@@ -3009,6 +3129,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
     }
 
+    /**
+     * Handles changes in the aggregation mode selection (count, sum, average).
+     * Updates UI elements related to aggregation field selection and percentage display.
+     * @private
+     */
     function _changeAggregationMode(){
         needServerRequest = true;
 
@@ -3049,10 +3174,16 @@ function CrosstabsAnalysis(_query, _query_domain) {
     }
 
     //
-    // 0,2 - show results
-    // 1 - progress
-    // 3 - empty set
-    //
+    /**
+     * Sets the display mode of the crosstab viewer.
+     * This controls visibility of elements like progress indicators, results area, or empty set messages.
+     * Modes:
+     * 0, 2: Show results view.
+     * 1: Show progress indicator.
+     * 3: Show empty set message (no results from filter).
+     * @param {number} mode - The mode to set.
+     * @private
+     */
     function _setMode(mode){
 
         $("#inporgress").hide();
@@ -3076,9 +3207,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
     }
 
-    //
-    //
-    //
+    /**
+     * Gathers the current crosstab settings into an object.
+     * This is used for saving the configuration.
+     * @returns {object} An object containing all current crosstab settings.
+     * @private
+     */
     function _getSettings(){
 
         let settings = {
@@ -3098,9 +3232,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
         return settings;
     }
 
-    //
-    //
-    //
+    /**
+     * Applies a given settings object to the crosstab viewer.
+     * This is used for loading a previously saved configuration.
+     * @param {object} settings - The settings object to apply.
+     * @private
+     */
     function _applySettings( settings ){
 
         clearIntervals('column');
@@ -3123,49 +3260,89 @@ function CrosstabsAnalysis(_query, _query_domain) {
     }
 
     //
-    //public members
-    //
+    /** @lends CrosstabsAnalysis.prototype */
     let that = {
 
+        /**
+         * Gets the class name.
+         * @returns {string} The class name 'CrosstabsAnalysis'.
+         */
         getClass: function () {
             return _className;
         },
 
+        /**
+         * Checks if this object is an instance of a given class name.
+         * @param {string} strClass - The class name to check against.
+         * @returns {boolean} True if it's an instance of CrosstabsAnalysis, false otherwise.
+         */
         isA: function (strClass) {
             return (strClass === _className);
         },
 
+        /**
+         * Public method to change the aggregation mode and trigger data retrieval.
+         */
         changeAggregationMode: function(){
             _changeAggregationMode();
             _autoRetrieve();
         },
 
+        /**
+         * Public method to reset intervals based on a UI event.
+         * @param {Event} event - The UI event that triggered the reset.
+         */
         resetIntervals: function(event){
             _resetIntervals(event);
         },
 
+        /**
+         * Public method to force a data retrieval from the server.
+         */
         doRetrieve: function(){
             needServerRequest = true;
             _doRetrieve();
         },
 
+        /**
+         * Placeholder for saving crosstab settings (currently not implemented).
+         */
         doSave: function(){
             //_doRetrieve();
             window.hWin.HEURIST4.msg.showMsgDlg('Sorry. Not implemented yet');
         },
 
+        /**
+         * Closes the current window/tab.
+         */
         doCancel: function(){
             window.close(null);
         },
 
+        /**
+         * Public method to set the display mode of the viewer.
+         * @param {number} mode - The display mode to set.
+         */
         setMode: function(mode){
             _setMode(mode);
         },
 
+        /**
+         * Placeholder for printing the crosstab (currently not implemented).
+         */
         doPrint: function(){
             window.hWin.HEURIST4.msg.showMsgDlg('Sorry. Not implemented yet');
         },
 
+        /**
+         * Assigns a new recordset to the crosstab viewer.
+         * Updates UI elements like the record type selector and triggers data retrieval.
+         * @param {object} recordset - The recordset object.
+         * @param {Array<number|string>} recordset.recTypes - Array of record type IDs in the recordset.
+         * @param {Array<number|string>} recordset.recIDs - Array of record IDs.
+         * @param {number} [recordset.first_rt] - The primary record type ID.
+         * @param {number} recordset.resultCount - Total number of records in the set.
+         */
         assignRecordset: function(recordset){
 
             if(recordset.recTypes?.length == 0 && recordset.recIDs.length > 0){
@@ -3222,10 +3399,16 @@ function CrosstabsAnalysis(_query, _query_domain) {
             _autoRetrieve();
         },
 
+        /**
+         * Public method to trigger an automatic data retrieval.
+         */
         autoRetrieve:function(){
             _autoRetrieve();
         },
 
+        /**
+         * Public method to trigger a rendering of the crosstab data.
+         */
         doRender:function(){
             _doRender();
         }
