@@ -12,18 +12,12 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 /**
- * @class heurist.manageUsrTags
+ * @widget heurist.manageUsrTags
  * @brief Widget for managing User Tags.
- * @augments $.heurist.manageEntity
+ * @extends $.heurist.manageEntity
  * @description This widget provides an interface for users to manage their personal and group tags.
  * It supports different display modes ('compact', 'accordions') and allows for creating,
  * selecting, renaming, and deleting tags.
@@ -664,7 +658,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
      * Clears `_currentEditID`. Detaches the inline editor if it was active.
      * Removes the tag element from the list and from the `_cachedRecordset`.
      */
-    _afterDeleteEventHandler: function( recID ){ // Note: Original name `_afterDeleteEvenHandler` had a typo.
+    _afterDeleteEventHandler: function( recID ){
         this._currentEditID = null;
         
         //detach inline input    

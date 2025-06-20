@@ -12,18 +12,12 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 /**
- * @class heurist.manageDefDetailTypes
+ * @widget heurist.manageDefDetailTypes
  * @brief Widget for managing Detail Type (field definition) entities.
- * @augments $.heurist.manageEntity
+ * @extends $.heurist.manageEntity
  * @property {string} [default_palette_class='ui-heurist-design'] Default palette class for the widget.
  * @property {number} [newFieldForRtyID=0] If greater than 0, indicates that a new field is being created for this Record Type ID, influencing UI and behavior.
  * @property {boolean} [innerTitle=false] Whether to display an inner title.
@@ -772,7 +766,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
      * @description Calls the parent's handler, then refreshes the search and triggers a 'dty' refresh event.
      * Note: Original method name might have a typo "EvenHandler" vs "EventHandler".
      */
-    _afterDeleteEvenHandler: function(recID){
+    _afterDeleteEventHandler: function(recID){
         
             this._super();
 

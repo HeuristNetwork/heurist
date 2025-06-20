@@ -12,18 +12,12 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 /**
- * @class heurist.manageUsrSavedSearches
+ * @widget heurist.manageUsrSavedSearches
  * @brief Widget for managing User Saved Searches.
- * @augments $.heurist.manageEntity
+ * @extends $.heurist.manageEntity
  * @description This widget allows users to manage their saved search configurations.
  * It supports listing saved searches, creating new ones (implicitly by saving a current search elsewhere),
  * editing their names and notes, and deleting them.
@@ -135,11 +129,8 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
             }else
             if(this.options.svs_UGrpID>0){
                 usr_ID = this.options.svs_UGrpID;
-                title = 'Manage Users of Workgroup #'+this.options.svs_UGrpID+': '; // Title seems incorrect here, likely should be 'Manage Saved Searches for Group'
-            }else /*if(this.options.ugl_GroupID<0){ // This condition seems to be from another widget
-                usr_ID = Math.abs(this.options.ugl_GroupID);
-                title = 'Select Users to add to Workgroup #'+usr_ID+': ';
-            }else*/
+                title = 'Manage Saved Filters for Workgroup #'+this.options.svs_UGrpID+': '; 
+            }else 
             {
                 if(window.hWin.HAPI4.is_admin()){
                     title = 'Manage All Filters as Database Administrator';    
@@ -259,10 +250,10 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         if(this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
             html = html 
                 + '<div class="rec_view_link logged-in-only" style="width:60px">'
-                + '<div title="Click to edit reminder" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit"  style="height:16px">' // Title seems incorrect, should be "edit filter/search"
+                + '<div title="Click to edit filter" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit"  style="height:16px">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
                 + '</div>'
-                +'<div title="Click to delete reminder" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete"  style="height:16px">' // Title seems incorrect
+                +'<div title="Click to delete filter" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete"  style="height:16px">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
                 + '</div></div>';
         }
@@ -365,10 +356,6 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
                 this._selection.addRecord(recID, fieldvalues);
                 this._selectAndClose();
                 return;        
-        }
-        
-        if (this._currentEditID<0) {
-            fieldvalues['ugl_Role'] = 'member';    // This seems like a copy-paste artifact, usrSavedSearches don't have ugl_Role
         }
         
         this._super( recID, fieldvalues );

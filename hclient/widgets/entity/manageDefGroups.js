@@ -12,18 +12,12 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 /**
- * @class heurist.manageDefGroups
+ * @widget heurist.manageDefGroups
  * @brief Base widget for managing generic group entities.
- * @augments $.heurist.manageEntity
+ * @extends $.heurist.manageEntity
  * @property {string} [default_palette_class='ui-heurist-design'] Default palette class for the widget.
  * @property {boolean} [innerTitle=false] Whether to display an inner title within the widget.
  * @property {string} [layout_mode='short'] The layout mode for the widget.
@@ -306,7 +300,7 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
      * @description Calls parent's handler, triggers a refresh event, and selects the first record in the list.
      * Note: Original method name might have a typo "EvenHandler" vs "EventHandler".
      */
-    _afterDeleteEvenHandler: function( recID ){
+    _afterDeleteEventHandler: function( recID ){
         this._super( recID );
         this._triggerRefresh(this._entityPrefix, recID);   
         //select first

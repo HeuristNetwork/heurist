@@ -12,13 +12,7 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 /* global HEditing */
 
 //
@@ -57,11 +51,11 @@
 // _afterInitEditForm perform required after edit form init modifications (show/hide fields, assign even listener )
 // addEditRecord - call _initEditForm_step1 and popup edit dialog
 
-// _afterDeleteEvenHandler
+// _afterDeleteEventHandler
 //  _deleteAndClose
 
 /**
- * @class heurist.manageEntity
+ * @widget heurist.manageEntity
  * @brief Base jQuery UI widget providing core functionalities for entity management.
  * @property {object} options The configuration options for the widget.
  * @property {boolean} [options.isdialog=false] If true, the widget is rendered as a jQuery UI dialog.
@@ -1637,7 +1631,7 @@ $.widget( "heurist.manageEntity", {
     //
     //  after save event handler
     //
-    _afterDeleteEvenHandler: function( recID ){
+    _afterDeleteEventHandler: function( recID ){
         
             this._currentEditID = null;
             window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle+' '+window.hWin.HR('has been deleted'), 2000);
@@ -1693,7 +1687,7 @@ $.widget( "heurist.manageEntity", {
                             if(that.options.use_cache){
                                 that._cachedRecordset.removeRecord( recID );
                             }
-                            that._afterDeleteEvenHandler( recID );
+                            that._afterDeleteEventHandler( recID );
                             
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);

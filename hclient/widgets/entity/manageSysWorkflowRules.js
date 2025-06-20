@@ -12,21 +12,15 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 //
 // there is no search, select mode for reminders - only edit
 //
 /**
- * @class heurist.manageSysWorkflowRules
+ * @widget heurist.manageSysWorkflowRules
  * @brief Widget for managing System Workflow Rules.
- * @augments $.heurist.manageEntity
+ * @extends $.heurist.manageEntity
  * @description This widget provides an interface for administrators to define and manage
  * system workflow rules. These rules automate processes based on triggers, conditions, and actions.
  * The widget behavior can vary significantly based on `edit_mode` and `select_mode`.
@@ -465,10 +459,10 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
      * @override
      * @memberof heurist.manageSysWorkflowRules
      * @param {number} recID The ID of the deleted rule.
-     * Calls the parent's `_afterDeleteEventHandler` (correcting typo from `_afterDeleteEvenHandler`).
+     * Calls the parent's `_afterDeleteEventHandler`
      * Removes the rule from the local cache (`$Db.swf()`) and triggers a search refresh.
      */
-    _afterDeleteEventHandler: function(recID){ // Note: Original name `_afterDeleteEvenHandler` had a typo.
+    _afterDeleteEventHandler: function(recID){
         this._super(recID);
         $Db.swf().removeRecord(recID);
         this.searchForm.searchSysWorkflowRules('startSearch');

@@ -12,18 +12,10 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 /**
- * @class heurist.searchDefFileExtToMimetype
+ * @widget heurist.searchDefFileExtToMimetype
  * @brief Search widget for File Extension to MIME Type mappings.
- * @augments $.heurist.searchEntity
+ * @extends $.heurist.searchEntity
  * @description This widget provides a search interface for finding mappings
  * between file extensions and MIME types. It allows users to search by
  * extension or by MIME type.

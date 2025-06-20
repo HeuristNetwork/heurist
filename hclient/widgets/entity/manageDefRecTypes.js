@@ -12,13 +12,7 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 /*
 we may take data from 
@@ -26,9 +20,9 @@ we may take data from
 2) use_cache = true   from client cache - it loads once per heurist session (actually we force load)
 */
 /**
- * @class heurist.manageDefRecTypes
+ * @widget heurist.manageDefRecTypes
  * @brief Widget for managing Record Type definitions.
- * @augments $.heurist.manageEntity
+ * @extends $.heurist.manageEntity
  * @property {?object} import_structure If provided, enables import mode, allowing selection of record types from a remote Heurist instance.
  * @property {boolean} [use_structure=false] Internal flag, true if `import_structure` is active.
  * @property {boolean} [isFrontUI=false] If true, adapts UI for front-end display, including a groups editor panel.
@@ -1207,7 +1201,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
      * @description Calls parent's handler, updates group count, and selects the first record in the list.
      * Note: Original method name might have a typo "EvenHandler" vs "EventHandler".
      */
-    _afterDeleteEvenHandler: function(recID){
+    _afterDeleteEventHandler: function(recID){
 
         
             this._super(recID);

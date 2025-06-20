@@ -12,18 +12,12 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 /**
- * @class heurist.manageDefRecStructure
+ * @widget heurist.manageDefRecStructure
  * @brief Widget for managing the structure of Record Types.
- * @augments $.heurist.manageEntity
+ * @extends $.heurist.manageEntity
  * @property {number} rty_ID The ID of the Record Type whose structure is being managed. Defaults to 4 if not provided.
  * @property {number} [rec_ID_sample=-1] The ID of a sample record to load in the preview.
  * @property {?jQuery} external_preview A jQuery element to use as an external preview area. If provided, influences layout.
@@ -1084,10 +1078,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgFlash('All data deleted', 1000);
                                 }
-                                that._afterDeleteEvenHandler( recID );
+                                that._afterDeleteEventHandler( recID );
                             });
                         }else{
-                            that._afterDeleteEvenHandler( recID );
+                            that._afterDeleteEventHandler( recID );
                         }
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -2867,7 +2861,7 @@ console.log('onEditFormChange @todo check buttons!!!');
      * @param {?number} [recID] The dty_ID of the field to remove. If not provided, uses the active tree node.
      * @description If the node is a field (not a folder/separator), triggers the 'delete' action
      * which will call `_deleteAndClose` with the composite ID (rty_ID.dty_ID).
-     * Does not directly handle folder/separator removal here, that's done in `_afterDeleteEvenHandler`.
+     * Does not directly handle folder/separator removal here, that's done in `_afterDeleteEventHandler`.
      */
     _removeField: function(recID){
         
@@ -2885,7 +2879,7 @@ console.log('onEditFormChange @todo check buttons!!!');
             const recID = node.key;
             
             this._cachedRecordset.removeRecord( recID );
-            this._afterDeleteEvenHandler( recID );
+            this._afterDeleteEventHandler( recID );
             
         }else */
         if(node.key>0){
@@ -2906,7 +2900,7 @@ console.log('onEditFormChange @todo check buttons!!!');
      * Refreshes the preview editor.
      * Note: Original method name might have a typo "EvenHandler" vs "EventHandler".
      */
-    _afterDeleteEvenHandler: function( recID ){
+    _afterDeleteEventHandler: function( recID ){
         
         if(recID.indexOf(this.options.rty_ID+'.')===0){
             recID = recID.substring(recID.indexOf('.')+1);

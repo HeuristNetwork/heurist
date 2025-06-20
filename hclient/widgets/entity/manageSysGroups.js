@@ -12,18 +12,12 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 /**
- * @class heurist.manageSysGroups
+ * @widget heurist.manageSysGroups
  * @brief Widget for managing System User Groups.
- * @augments $.heurist.manageEntity
+ * @extends $.heurist.manageEntity
  * @description This widget provides an interface for administrators and group members
  * to manage system user groups (workgroups). It allows for viewing groups,
  * creating new groups, editing group details, and managing user membership and roles within groups.
@@ -593,7 +587,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
      * Removes the group from the current user's credentials if they were a member,
      * calls the parent's delete handler, and triggers an ON_CREDENTIALS event.
      */
-    _afterDeleteEventHandler: function( recID )   { // Note: Original name `_afterDeleteEvenHandler` had a typo.
+    _afterDeleteEventHandler: function( recID )   {
         window.hWin.HAPI4.currentUserRemoveGroup(recID, true);
         
         this._super( recID );

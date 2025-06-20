@@ -12,18 +12,12 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 /**
- * @class heurist.manageSysUsers
+ * @widget heurist.manageSysUsers
  * @brief Widget for managing System User accounts.
- * @augments $.heurist.manageEntity
+ * @extends $.heurist.manageEntity
  * @description This widget provides an interface for administrators and authorized users
  * to manage system user accounts. It supports listing users, creating new users,
  * editing user details (including name, email, password - though password handling might be indirect),

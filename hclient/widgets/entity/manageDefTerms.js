@@ -12,27 +12,19 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-/*
-we may take data from 
-1) use_cache = false  from server on every search request (live data) 
-2) use_cache = true   from client cache - it loads once per heurist session (actually we force load)
-3) use_cache = true + use_structure - use HEURSIT4.rectypes
-*/
 /**
- * @class heurist.manageDefTerms
+ * @widget heurist.manageDefTerms
  * @brief Widget for managing terms within vocabularies.
- * @augments $.heurist.manageEntity
+ * 
+ * 
+ * @extends $.heurist.manageEntity
  * @property {string} [default_palette_class='ui-heurist-design'] Default palette class.
  * @property {boolean} [innerTitle=false] Whether to display an inner title.
  * @property {boolean} [use_cache=true] Whether to use client-side caching for term data.
+ *              It may take data from 
+ *              1) use_cache = false  from server on every search request (live data) 
+ *              2) use_cache = true   from client cache - it loads once per heurist session (actually we force load)
+ *              3) use_cache = true + use_structure - use HEURSIT4.rectypes
  * @property {boolean} [use_structure=false] Internal flag, related to `import_structure`.
  * @property {?object} import_structure If provided, enables import mode from a remote Heurist instance.
  * @property {string} [layout_mode='short'] Layout mode for the widget.
@@ -1353,7 +1345,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 that._cachedRecordset.removeRecord( recID );
                             }
 
-                            that._afterDeleteEvenHandler( recID, it_was_vocab );
+                            that._afterDeleteEventHandler( recID, it_was_vocab );
                         }
 
                        
@@ -1409,7 +1401,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
      * @description Calls parent's handler. Removes the term and its children (if any)
      * from the local cache and links. If a vocabulary was deleted, resets related options.
      */
-    _afterDeleteEvenHandler: function(recID, it_was_vocab){ // Note: Original name had a typo.
+    _afterDeleteEventHandler: function(recID, it_was_vocab){
 
         this._super(recID); 
 
@@ -2509,7 +2501,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 return;
             }
 
-            this.reoderBranch(ids);
+            this.reorderBranch(ids);
         }else if(action=='add-reference'){
 
             if(this.options.trm_VocabularyID<0){
@@ -2667,7 +2659,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         else if(action=='expand'){
             
-            this._toggleTermsBranch(recID); // Note: Original name `_toogleTermsBranch` had a typo.
+            this._toggleTermsBranch(recID);
         }
 
         let is_resolved = this._super(event, keep_action);
@@ -2811,7 +2803,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
      * @description Shows or hides child terms in the list by toggling their visibility.
      * Updates the expand/collapse icon and stores the state in `window.hWin.HEURIST4.ui.collapsed_terms`.
      */
-    _toggleTermsBranch: function(recID, force_expand_collapse) { // Note: Original name `_toogleTermsBranch` had a typo.
+    _toggleTermsBranch: function(recID, force_expand_collapse) {
         let is_collapsed = window.hWin.HEURIST4.ui.collapsed_terms.indexOf(recID)>=0;
         
         if(force_expand_collapse==1) is_collapsed = true;
@@ -2955,7 +2947,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                         if(parents){
                                             parents = parents.split(',');
                                             $.each(parents, function(i, parent_ID){
-                                                that._toggleTermsBranch(parent_ID, 1);    // Note: Original name `_toogleTermsBranch` had a typo.
+                                                that._toggleTermsBranch(parent_ID, 1);
                                             });
                                         }
                                         
@@ -3335,7 +3327,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
      * @description Displays a dialog with the given terms in a list that can be reordered by drag-and-drop.
      * Provides options to save the new manual order or revert to alphabetic sorting (by setting order to null).
      */
-    reorderBranch: function(term_ids){ // Note: Original name `reoderBranch` had a typo.
+    reorderBranch: function(term_ids){
 
         if(!term_ids || term_ids.length <= 1){
             return;
@@ -3726,7 +3718,7 @@ function onTermSaveError(response){
 
             let base_fields = [];
     
-            for(const dty_ID in sysmsg.detailtypes){ // sysmsg is not defined here, should be response.sysmsg
+            for(const dty_ID in response.sysmsg.detailtypes){
                 base_fields.push(`${$Db.dty(dty_ID, 'dty_Name')} (#${dty_ID})`);
             }
 

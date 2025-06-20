@@ -12,18 +12,12 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 /**
- * @class heurist.manageSysDashboard
+ * @widget heurist.manageSysDashboard
  * @brief Widget for managing System Dashboards.
- * @augments $.heurist.manageEntity
+ * @extends $.heurist.manageEntity
  * @description This widget allows users, typically administrators, to configure the system dashboard,
  * which often consists of shortcuts or quick access panels to various Heurist functions.
  * It supports both a view mode (production) and an edit mode for arranging and defining dashboard items.
@@ -503,7 +497,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
      * Calls the parent's `_afterDeleteEventHandler` (assuming typo `Even` -> `Event`).
      * Triggers a system info count update to reflect changes in active dashboards.
      */
-    _afterDeleteEventHandler: function( recID ){ // Note: Original name `_afterDeleteEvenHandler` had a typo.
+    _afterDeleteEventHandler: function( recID ){
         this._super( recID );
         
         //refresh count of active dashboards

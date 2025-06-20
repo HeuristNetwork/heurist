@@ -12,20 +12,14 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 /* global Temporal,TDate,temporalToHumanReadableString */
 
 /**
- * @class heurist.manageRecords
+ * @widget heurist.manageRecords
  * @brief Widget for managing Heurist Record entities.
- * @augments $.heurist.manageEntity
+ * @extends $.heurist.manageEntity
  *
  * @property {?number} rec_ID The ID of the specific record to be managed or displayed. If negative or 0, typically indicates a new record.
  * @property {?number} rty_ID The Record Type ID. Used when creating a new record to specify its type, or can be used to filter views.
@@ -6850,61 +6844,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         });
     },
 
-    focusField: function(field_id){
-
-        let $ele = this._editing.getFieldByName(field_id);
-        let isSeparator = false;
-
-        if(!$ele || $ele.length == 0){ // assume separator
-            isSeparator = true;
-            $ele = this.editForm.find('fieldset[data-dtid='+field_id+']');
-
-            if($ele.length == 0){ // try simple divider
-                $ele = this.editForm.find('div[data-dtid='+ field_id +']');
-            }
-        }
-
-        if($ele.length == 0){
-            return;
-        }
-
-        if($ele.parents('.ui-tabs').length > 0){ // Tabs
-
-            let index = 0;
-            if(!$ele.is('fieldset')){
-                index = $ele.parents('fieldset:first').attr('data-tabindex');
-            }else{
-                index = $ele.attr('data-tabindex');
-            }
-            $ele.parents('.ui-tabs').tabs('option', 'active', index);
-        }else if($ele.parents('.ui-accordion').length > 0){ // Accordion
-
-            let accordion_content = $ele.parents('.ui-accordion-content');
-            if(!accordion_content.is(':visible')){
-                let id = accordion_content.attr('aria-labelledby');
-                $.each($ele.parents('.ui-accordion:first').find('.ui-accordion-header'), function(idx, item){ // Find corresponding header
-                    if($(item).attr('id') == id){
-                        $ele.parents('.ui-accordion:first').accordion('option', 'active', idx);
-                        return false;
-                    }
-                });
-            }
-        }
-
-        this.editForm.animate({scrollTop: $ele.offset().top}, 1000); // scrollIntoView()
-
-        if(!isSeparator){
-            $ele.editing_input('focus');
-        }
-    },
-
     /**
      * @brief Focuses a specific field in the edit form.
      * @memberof heurist.manageRecords
      * @param {number} field_id The DetailTypeID of the field to focus.
      * Scrolls the form to bring the field into view and then attempts to focus its input element.
      * Handles fields within tabs or accordions by activating the respective container first.
-     */
+     */    
     focusField: function(field_id){
 
         let $ele = this._editing.getFieldByName(field_id);
@@ -6962,7 +6908,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
      * This action is restricted to administrators or the record owner.
      */
     _toggleRecordVisibility: function(){
-
         const that = this;
                        
         let ele = this._editing.getFieldByName('rec_NonOwnerVisibility');
@@ -7012,9 +6957,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
 
         const that = this;
-        const rectype = this._getField('rec_RecTypeID'); // Current record's type
+        const rectype = this._getField('rec_RecTypeID');
 
-        let request = { // API request parameters
+        let request = {
             entity: 'sysArchive',
             a: 'batch',
             get_record_history: 1,
@@ -7153,109 +7098,110 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 $acc_ele.children('div').html(content);
 
                 that._on($acc_ele.find('#btn-history-revert').button(), {
-                    click: function(){ // Handler for "Revert changes" button
+                    click: function(){
                         that._revertRecordHistory();
                     }
                 });
-                that._on($acc_ele.find('#btn-history-cancel').button(), { // Handler for "Cancel" button
+                that._on($acc_ele.find('#btn-history-cancel').button(), {
                     click: function(){
-                        $acc_ele.find('input[type="checkbox"][name="revert-change"]').prop('checked', false); // Uncheck all
+                        $acc_ele.find('input[type="checkbox"][name="revert-change"]').prop('checked', false);
                     }
                 });
-                that._on($acc_ele.find('#record_history_setby_group'), { // Handler for "Bulk check by modification date" checkbox
+                that._on($acc_ele.find('#record_history_setby_group'), {
                     click: function(){
-                        $acc_ele.find(`input[name="revert-change"]`).prop('checked', false); // Reset individual checks when mode changes
+                        $acc_ele.find(`input[name="revert-change"]`).prop('checked', false); // reset checks
                     }
                 });
-                // Handler for clicking on a history row to check/uncheck its revert checkbox
+                // Check checkbox on clicking row
                 that._on($acc_ele.find('div.record_history_value'), {
                     click: function(event){
 
-                        let $target_element = $(event.target);
-                        let is_checkbox_click = $target_element.is('input[type="checkbox"]');
-                        // Ensure $target_element refers to the checkbox itself or its row container
-                        if(!$target_element.hasClass('record_history_value') && !is_checkbox_click){
-                            $target_element = $target_element.closest('.record_history_value');
+                        let $ele = $(event.target);
+                        let org_target_checkbox = $ele.is('input[type="checkbox"]');
+                        if(!$ele.hasClass('record_history_value') && !org_target_checkbox){
+                            $ele = $ele.closest('.record_history_value');
                         }
 
-                        let $checkbox = is_checkbox_click || $target_element.is('input[type="checkbox"]') ? $target_element : $target_element.find('input[type="checkbox"]');
-                        if($checkbox.length == 0){
-                            return; // Should not happen if markup is correct
+                        $ele = org_target_checkbox || $ele.is('input[type="checkbox"]') ? $ele : $ele.find('input[type="checkbox"]');
+                        if($ele.length == 0){
+                            return;
                         }
 
-                        let [dty_id_str, field_idx_str, archive_idx_str] = $checkbox.val().split('-');
-                        let modification_date_str = that._record_history[dty_id_str][field_idx_str][archive_idx_str]['arc_TimeOfChange'];
+                        let val = $ele.val().split('-'); // get base of value
+                        let date = that._record_history[val[0]][val[1]][val[2]]['arc_TimeOfChange'];
 
-                        let new_checked_status = $checkbox.is(':checked');
-                        new_checked_status = is_checkbox_click ? new_checked_status : !new_checked_status; // Invert if row was clicked, not checkbox itself
+                        val.pop();
 
-                        if($acc_ele.find('#record_history_setby_group').is(':checked')){ // If bulk checking by date
-                            modification_date_str = TDate.parse(modification_date_str).toString('H:m d  MMMM y'); // Format date for matching
-                            let $same_date_checkboxes = $acc_ele.find(`.record_history_datestamp:contains("${modification_date_str}")`)
-                                                            .closest('.record_history_value').find('input[type="checkbox"]');
+                        let new_status = $ele.is(':checked');
+                        new_status = org_target_checkbox ? new_status : !new_status; // invert status if the checkbox was not clicked
 
-                            // Uncheck all checkboxes for this field first, then check relevant ones
-                            $acc_ele.find(`input[value^="${dty_id_str}-${field_idx_str}-"]`).prop('checked', false);
-                            $checkbox = $checkbox.add($same_date_checkboxes); // Add all checkboxes with the same modification date
-                        } else {
-                             // Uncheck all other checkboxes for this specific field instance before setting the new one
-                            $acc_ele.find(`input[value^="${dty_id_str}-${field_idx_str}-"]`).prop('checked', false);
+                        if($acc_ele.find('#record_history_setby_group').is(':checked')){
+
+                            date = TDate.parse(date).toString('H:m d  MMMM y');
+                            let $dates = $acc_ele.find(`.record_history_datestamp:contains("${date}")`);
+
+                            $dates.each((idx, date) => {
+                                let $parent = $(date).closest('.record_history_value');
+                                if($parent.length == 0){
+                                    return;
+                                }
+
+                                $parent.parent().find('input[type="checkbox"]').prop('checked', false);
+
+                                $ele = $ele.add($parent.find('input[type="checkbox"]'));
+                            });
                         }
 
-                        $checkbox.prop('checked', new_checked_status); // Apply the new checked status
+                        val = `${val.join('-')}-`;
+
+                        $acc_ele.find(`input[value^="${val}"]`).prop('checked', false); // remove all selections for this field
+
+                        $ele.prop('checked', new_status); // now, set clicked row's check status
                     }
                 });
 
-                that.editFormPopup.layout().open('east'); // Ensure summary panel is open
+                that.editFormPopup.layout().open('east'); // Expand layout panel
 
-                // Activate the history accordion section
+                // Expand accordion header
                 if($acc_ele.accordion('instance') != undefined){
                     $acc_ele.accordion('option', 'active', 0);
                 }
 
-                // Potentially enlarge the summary panel if it's too narrow
-                let current_panel_width = that.editFormPopup.layout().state['east']['outerWidth'];
-                let desired_width = $(document).width() * 0.4;
-                if(current_panel_width < desired_width){
-                    that.editFormPopup.layout().sizePane('east', desired_width);
+                // Enlarge layout panel
+                let width = $(document).width() * 0.4;
+                if(that.editFormPopup.layout().state['east']['outerWidth'] < width){
+                    that.editFormPopup.layout().sizePane('east', width);
                 }
-            }else{ // No history content was generated
-                that._check_history = false; // Don't try to fetch again this session for this record
-                that._getRecordHistory(); // Will show "No edits found"
+            }else{
+                that._check_history = false;
+                that._getRecordHistory();
             }
 
-            // If record IDs were collected (for resource/relmarker fields), create links for them
             if(Object.keys(rec_ids).length > 0){
-                let $history_panel_content = $(that.editFormSummary.find('.summary-accordion').get(6)); // Get the history panel
-                for(const field_and_index_key in rec_ids){
-                    let $value_span = $history_panel_content.find(`span[data-idx="${field_and_index_key}"]`);
-                    if($value_span.length < 1){
+
+                let $acc_ele = $(that.editFormSummary.find('.summary-accordion').get(6));
+
+                for(const fld_idx in rec_ids){
+
+                    let $ele = $acc_ele.find(`span[data-idx="${fld_idx}"]`);
+                    if($ele.length < 1){
                         continue;
                     }
-                    // Create a record link (without edit button)
-                    window.hWin.HEURIST4.ui.createRecordLinkInfo($value_span, rec_ids[field_and_index_key], false);
-                    if($value_span.find('.btn-edit').length > 0){ // Remove default edit button if present
-                        $value_span.find('.btn-edit').parent().css('padding-left', '');
-                        $value_span.find('.btn-edit').remove();
+
+                    window.hWin.HEURIST4.ui.createRecordLinkInfo($ele, rec_ids[fld_idx], false);
+                    if($ele.find('.btn-edit').length > 0){
+                        $ele.find('.btn-edit').parent().css('padding-left', '');
+                        $ele.find('.btn-edit').remove();
                     }
                 }
             }
         });
     },
 
-    /**
-     * @brief Reverts selected historical changes to the record.
-     * @memberof heurist.manageRecords
-     * Collects all checked "revert-change" checkboxes from the record history panel.
-     * For each selected change, it constructs a request to revert that specific archived value.
-     * Presents a confirmation dialog listing all proposed reversions.
-     * If confirmed, sends a batch request to `sysArchive` entity with `revert_record_history` action.
-     * On success, reloads the edit form to reflect the reverted data.
-     */
     _revertRecordHistory: function(){
 
         const that = this;
-        const rectype = this._getField('rec_RecTypeID'); // Current record's type
+        const rectype = this._getField('rec_RecTypeID');
 
         let $checked_options = that.editFormPopup.find('input[type="checkbox"][name="revert-change"]:checked');
 
@@ -7360,18 +7306,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     },
 
     /**
-     * @brief Checks if the record type's structure has updates available from its originating source database.
-     * @memberof heurist.manageRecords
-     * @param {number} [org_DBID=-1] The originating DB ID to check. If -1, it's determined from the record type's properties.
-     * This function is relevant for record types that were imported or derived from another Heurist database.
-     * 1. It first determines the source database ID (`rty_OriginatingDBID`) and the record type's ID in that source (`rty_IDInOriginatingDB`).
-     * 2. Skips if the source is self, 0, or already known to have no updates (`this._source_db.id == -1`).
-     * 3. If source details (`this._source_db.id`, `this._source_db.url`) are not yet fetched, it queries the `master` database list for them.
-     * 4. Fetches the record type definition from the source database using `SystemMgr.get_defs`.
-     * 5. Compares the fields in the source definition with the local record type's fields.
-     * 6. If any field from the source (matched by concept code) is missing locally, it shows the "Update structure" button.
-     *    Otherwise, the button is hidden.
-     * It may also attempt to check against the core Heurist definitions (DBID 2 or 0) if the primary source check fails or yields no updates.
+     * Check source database for any structure updates
      */
     _checkStructureFromSource: function(org_DBID = -1){
 
@@ -7501,7 +7436,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         const that = this;
 
-        if(this._source_db.id < 1){ // Source DB details not available or invalid
+        if(this._source_db.id < 1){
             window.hWin.HEURIST4.msg.showMsgFlash('Source database couldn\'t be found...', 2000);
             return;
         }
@@ -7673,33 +7608,30 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         let that = this;
 
-        let req = { // Request to check if ESTC lookup is allowed for this database
+        let req = {
             a: 'check_allow_estc',
             db: window.hWin.HAPI4.database,
-            ver: dlg_opts.mapping.service // Service version (e.g., 'ESTC_editions')
+            ver: dlg_opts.mapping.service
         };
 
         window.hWin.HAPI4.SystemMgr.check_allow_estc(req, function(response){
-            if(response.status != window.hWin.ResponseStatus.OK){ // Not allowed or error
+
+            if(response.status != window.hWin.ResponseStatus.OK){
                 window.hWin.HEURIST4.msg.showMsgErr(response);
-                return false; // Abort lookup
+                return false;
             }
-            // Allowed, proceed to load the actual lookup widget
+
             that._loadParentLookup(dialog_name, dlg_opts);
         });
     },
 
     /**
-     * @brief Loads a lookup widget, ensuring its base/parent widget is loaded first if necessary.
-     * @memberof heurist.manageRecords
-     * @param {string} lookup_name The name of the specific lookup widget to load (e.g., 'lookupESTC_editions', 'lookupGN_postalCode').
-     * @param {object} dialog_options Options to pass to the lookup widget when it's shown.
-     * This function handles cases where lookup widgets might have dependencies on a base widget
-     * (e.g., `lookupESTC` for ESTC variants, `lookupGeonames` for Geonames variants, `lookupBnF` for BnF variants).
-     * 1. It first ensures `lookupBase.js` (the ultimate base for all lookups) is loaded.
-     * 2. It identifies if a specific parent lookup (like `lookupESTC`) is required for `lookup_name`.
-     * 3. If a parent is needed and not yet loaded, it loads the parent script first.
-     * 4. Finally, it calls `window.hWin.HEURIST4.ui.showRecordActionDialog` to load and display the target `lookup_name` widget.
+     * Load base widget and any other possible parent widget
+     *  ESTC <= ESTC_editions, ESTC_works and LRC18C
+     *  Geonames <= GN and GN_postalCode
+     *
+     * @param {string} lookup_name - lookup/service name
+     * @param {json} dialog_options - dialog options; title, modal, width, height, etc...
      */
     _loadParentLookup: function(lookup_name, dialog_options){
 
@@ -7750,22 +7682,11 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
      *
      * @param {boolean} force_close - whether to ignore any changes when switching
      */
-    /**
-     * @brief Switches the record editor from structure editing mode back to data entry mode.
-     * @memberof heurist.manageRecords
-     * @param {boolean} [force_close=false] If true, switches mode without prompting, even if there are unsaved changes.
-     * If `force_close` is false and there are unsaved structure changes (checked via `rts_editor.checkIfEditing()`)
-     * or unsaved data changes (`_editing.isModified()`), it prompts the user to save or discard them.
-     * - If structure changes need saving, it triggers the save action in the RTS editor.
-     * - If data changes need saving, it calls `_saveEditAndClose` with a callback to complete the mode switch.
-     * Once changes are handled (or if `force_close` is true), it hides the west layout panel (structure editor),
-     * nullifies `this.options.rts_editor`, and reloads the record edit form (`reloadEditForm(true)`).
-     */
     _switchToDataMode: function(force_close = false){
 
         let that = this;
 
-        let struct_changes = this.options.rts_editor.manageDefRecStructure('checkIfEditing'); // Check for unsaved structure modifications
+        let struct_changes = this.options.rts_editor.manageDefRecStructure('checkIfEditing');
         let data_changes = this._editing.isModified();
 
         if(!force_close && (struct_changes || data_changes)){
@@ -7804,4 +7725,4 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         this.options.rts_editor = null;
         this.reloadEditForm( true );
     }
-});
+});        

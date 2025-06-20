@@ -12,21 +12,15 @@
 * @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 //
 // there is no search, select mode for Calculations - only edit
 //
 /**
- * @class heurist.manageDefCalcFunctions
+ * @widget heurist.manageDefCalcFunctions
  * @brief A jQuery UI widget for managing Defined Calculated Functions entities.
- * @augments $.heurist.manageEntity
+ * @extends $.heurist.manageEntity
  * @property {string} [default_palette_class='ui-heurist-admin'] Default palette class for the widget.
  * @property {boolean} [use_cache=false] Whether to use caching.
  * @property {string} [edit_mode='popup'] The edit mode for the widget. Can be 'editonly' or 'popup'.

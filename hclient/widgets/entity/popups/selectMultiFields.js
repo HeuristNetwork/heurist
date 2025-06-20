@@ -359,7 +359,7 @@ class HRapidFieldAdditions{
 
 			let main_ele;
 
-			if(name.toLowerCase == searched || in_other_array == true){ // Note: name.toLowerCase needs to be name.toLowerCase()
+			if(name.toLowerCase() == searched || in_other_array == true){
 				main_ele = first_entry;
 			}else{
 				main_ele = $('<div>', {class: 'no-overflow-item'}).appendTo(result_container);
