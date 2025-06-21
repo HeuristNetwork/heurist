@@ -14,16 +14,33 @@
     */
 
     /**
-    * This is fix for bug of database creation (happened between 2017-09-22 and 2017-10-16)
-    * New database has empty pointer constraints for resouce fields
+    * verifyForOrigin.php - Verifies database structures against their original definitions from core databases.
     *
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @link        https://HeuristNetwork.org
-    * @version     3.1
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @fileOverview This script checks the consistency of record types, detail types, and their associated
+    *               pointer constraints and term lists in specified target databases against their
+    *               definitions in origin databases (typically `hdb_Heurist_Bibliographic` and
+    *               `hdb_Heurist_Core_Definitions`).
+    *               It reports discrepancies such as:
+    *               - Mismatched concept codes for record types based on their names.
+    *               - Missing fields (required, recommended, or optional based on parameters).
+    *               - Missing or incorrect record type constraints on pointer fields.
+    *               - Missing or incorrect terms in enumeration fields.
+    *               The script takes various URL parameters to control its behavior, including database
+    *               filters and which checks to perform (e.g., `biblio=0` to skip bibliographic checks,
+    *               `optfields=1` to include optional fields in checks).
+    *               Primarily intended for use by Heurist developers/administrators to ensure consistency
+    *               after database creation or major updates, particularly to address a past bug related
+    *               to empty pointer constraints in newly created databases.
+    *               Requires admin password.
+    *
     * @package     Heurist academic knowledge management system
-    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+    * @subpackage  /admin/verification
+    * @link        https://HeuristNetwork.org
+    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+    * @author      Artem Osmakov   <osmakov@gmail.com>
+    * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @since       3.1
     */
     use hserv\utilities\USanitize;
 

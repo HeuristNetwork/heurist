@@ -1,20 +1,25 @@
 <?php
 
 /**
-* purgeFullTextIndexes.php:
+* purgeFullTextIndexes.php - Removes full-text indexes from inactive databases.
 *
-* Remove fulltext indexes and optimize Records and recDetail tables for databases
-* inactive for 3 months
-*
-* Runs from shell only
+* @fileOverview This script identifies Heurist databases that have been inactive for 3 months
+*               (based on the last modification date of records or record structures).
+*               For these inactive databases, it removes full-text indexes from the
+*               `Records` (index `rec_Title_FullText`) and `recDetails` (index `dtl_Value_FullText`)
+*               tables and then optimizes these tables. This helps to save disk space.
+*               The script can be run from the shell (with `-purge` to perform actions, otherwise
+*               it only reports) or from a web browser (report mode only).
+*               Databases listed in `databases_not_to_purge.txt` are excluded.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6
+* @since       6
 */
 
 /*
@@ -194,6 +199,16 @@ if(!$arg_no_action){
 
 echo $tabs0.'finished'.$eol;
 
+/**
+ * Purges a specific full-text search (FTS) index from a table if it exists.
+ * If the index is dropped, the table is then optimized.
+ * REMARK: This function uses the global $mysqli variable without explicitly declaring it global.
+ *
+ * @param string $table The name of the table from which to drop the index.
+ * @param string $index The name of the FTS index to drop.
+ * @param string &$report A string passed by reference, to which status messages will be appended.
+ * @return void
+ */
 function purgeFtsIndex($table, $index, &$report ){
 
             $res = false;
@@ -220,6 +235,13 @@ function purgeFtsIndex($table, $index, &$report ){
 
 }
 
+/**
+ * Reads a list of database names from 'databases_not_to_purge.txt'.
+ * The file is expected to be in the root directory of the Heurist installation.
+ * Lines starting with '#' or empty lines are ignored.
+ *
+ * @return array<string> An array of database names to exclude. Returns an empty array if the file doesn't exist or is empty.
+ */
 function exclusionList(){
 
     $res = array();

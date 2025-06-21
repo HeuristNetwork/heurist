@@ -14,16 +14,26 @@
     */
 
     /**
+    * verifyScripts.php - A collection of administrative scripts for data and database structure verification and correction.
     *
-    * Various actions to check/correct data and db structure per all databases on server
+    * @fileOverview This file contains a suite of functions designed for various administrative tasks
+    *               across all databases on a Heurist server. These tasks include checking database
+    *               versions, verifying spatial vocabularies, finding improperly encoded characters,
+    *               identifying overly long term labels, modifying table structures (like term name length),
+    *               fixing specific term inconsistencies (e.g., Yes/No terms), removing duplicate values
+    *               in `recDetails`, listing admin users, converting TUSTEP markup, finding RDF links,
+    *               dropping backup date indexes, and fixing direct image paths in CMS content.
+    *               Many of these functions appear to be for specific, possibly one-off, maintenance tasks.
+    *               NOTE: This script is currently disabled by an initial `print 'disabled'; exit;` statement.
     *
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @link        https://HeuristNetwork.org
-    * @version     3.1
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @package     Heurist academic knowledge management system
-    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+    * @subpackage  /admin/verification
+    * @link        https://HeuristNetwork.org
+    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+    * @author      Artem Osmakov   <osmakov@gmail.com>
+    * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @since       3.1
     */
 print 'disabled';
 exit;

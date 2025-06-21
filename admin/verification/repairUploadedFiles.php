@@ -14,15 +14,29 @@
     */
 
     /**
-    * Correct file paths in recUploadFiles table, find missed and orphaned images
+    * repairUploadedFiles.php - Server-side script to repair uploaded file entries.
     *
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @link        https://HeuristNetwork.org
-    * @version     3.1
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @fileOverview This script handles AJAX requests from `listUploadedFilesErrors.php` to perform
+    *               repair actions on `recUploadedFiles` and related `recDetails` entries.
+    *               Supported actions based on the 'data' parameter:
+    *               - 'files_notreg': Deletes physical files from the filestore that are not registered
+    *                 in `recUploadedFiles`.
+    *               - 'unused_file_local' / 'unused_file_remote': Deletes entries from `recUploadedFiles`
+    *                 that are not referenced in any `recDetails` (orphaned).
+    *               - 'files_notfound': Deletes entries from `recDetails` and `recUploadedFiles` for
+    *                 files that are registered but physically missing from the filestore.
+    *               The script expects JSON data detailing the IDs or filenames to act upon.
+    *               It returns a JSON response indicating the status of the operation.
+    *               Requires database owner privileges.
+    *
     * @package     Heurist academic knowledge management system
-    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+    * @subpackage  /admin/verification
+    * @link        https://HeuristNetwork.org
+    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+    * @author      Artem Osmakov   <osmakov@gmail.com>
+    * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @since       3.1
     */
 
 use hserv\utilities\USanitize;

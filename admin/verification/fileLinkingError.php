@@ -1,9 +1,22 @@
 <?php
 
 /**
-* Lists orphaned and missed files, broken paths
+* fileLinkingError.php - Checks for errors in uploaded file records and paths.
+*
+* @fileOverview This script iterates through all databases and their `recUploadedFiles` entries
+*               to identify various file linking issues:
+*               - **Orphaned files:** Files in `recUploadedFiles` that are not referenced by any
+*                 record in `recDetails`.
+*               - **Missing files:** Files referenced in `recUploadedFiles` but not found at their
+*                 specified path in the filesystem.
+*               - **Incorrect paths:** Files where the stored `ulf_FilePath` does not match the
+*                 actual relative path of the file in the filestore.
+*               The script outputs an HTML report detailing these errors for each database.
+*               It also generates a log file (`missed_files.log`) for missing files.
+*               Requires owner-level access.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Tom Murtagh
@@ -11,7 +24,7 @@
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.1.0
+* @since       3.1.0
 */
 
 /*

@@ -1,10 +1,20 @@
 <?php
 
 /**
-* listUploadedFilesMissed.php - light weight version of listUploadedFilesErrors.php:
-* Lists missed files that are listed in recUploadedFiles
+* listUploadedFilesMissed.php - Reports missing physical files for registered uploaded files.
+*
+* @fileOverview This script provides a lightweight check for missing files. It iterates through
+*               `recUploadedFiles` entries in one or all databases and verifies if the
+*               physical file exists at the path specified by `ulf_FilePath` and `ulf_FileName`.
+*               It's a simpler version of `listUploadedFilesErrors.php`, focusing only on
+*               files that are registered in the database but cannot be found in the filestore.
+*               The output is an HTML page listing the database name, directory, and filename
+*               for each missing file.
+*               Can be run for a single database or all databases (if `?all=1` and admin password provided).
+*               Requires admin privileges if checking all databases.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Tom Murtagh
@@ -12,7 +22,7 @@
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.1.0
+* @since       3.1.0
 */
 
 /*

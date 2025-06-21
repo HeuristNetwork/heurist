@@ -1,4 +1,25 @@
 <?php
+/**
+* getDatabaseURL.php - Retrieves the URL for a registered Heurist database by its ID.
+*
+* @fileOverview This script provides backward compatibility for older versions of Heurist
+*               and has largely been replaced by `DbRegis::registrationGet()`.
+*               It requests the URL for a registered database (identified by `$database_id`)
+*               from the Heurist Reference Index server. If the current server is not the
+*               reference index, it forwards the request to `HEURIST_INDEX_BASE_URL`.
+*               The script outputs a JSON response containing the `rec_URL` or an `error_msg`.
+*               This script can be included (where `$database_id` is predefined) or invoked via HTTP.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  /admin/setup/dbproperties
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @since       3.1.0
+*/
+
 /*
 * Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 *
@@ -13,21 +34,6 @@
 * the License.
 */
 
-/**
-* BACKWARD capabilities for old versions. It has been replaced with DbRegis::registrationGet
-*
-* getDatabaseURL.php - requests URL for registered DB by its ID from Heurist Reference Index
-*
-* this script may be inited via http, otherwise it is included and $database_id already defined
-*
-* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-*/
 use hserv\structure\ConceptCode;
 
 require_once dirname(__FILE__).'/../../../autoload.php';

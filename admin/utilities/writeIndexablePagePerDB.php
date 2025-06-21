@@ -1,15 +1,33 @@
 <?php
 
 /**
-* writeIndexablePagePerDB.php: Creates a html page containing details about each database
+* writeIndexablePagePerDB.php - Generates indexable HTML pages for each Heurist database.
+*
+* @fileOverview This script creates a set of HTML pages in a specified directory (default 'db-html-pages')
+*               that provide descriptive, indexable information about each Heurist database on the server.
+*               For each database, it generates a page including:
+*               - Database name, display name, and logo.
+*               - Hosting server and database URL.
+*               - Links to any generated CMS websites.
+*               - Registration ID, description, ownership, copyright.
+*               - Database owner details (name, email).
+*               - Record count, file count.
+*               - Dates of last record update and last structure update.
+*               - List of entity/record type names.
+*               It also creates/updates an `index.html` file in the target directory linking to all
+*               generated database pages (only for databases with public websites) and a `sitemap.xml`
+*               in the Heurist root directory.
+*               This script is intended for command-line execution. It can process all databases or a
+*               specified list via the `-- -db=database1,database2` argument.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6
+* @since       6
 */
 
 /*

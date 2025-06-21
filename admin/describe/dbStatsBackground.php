@@ -1,14 +1,19 @@
 <?php
 /**
-* dbStatsBackground: Create a text file filled with simple statics about each database, stored locally, and sent to the Main server
+* dbStatsBackground.php - Creates and manages database statistics files.
 *
+* @fileOverview This script runs in the background to generate a text file (`db_stats.txt`)
+*               containing simple statistics for each database on the server. These statistics
+*               are stored locally and can be sent to a main Heurist server for aggregation.
+*               It also handles receiving stats files from other servers if this is the main server.
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/describe
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.0
+* @since       6.0
 */
 
 /*
@@ -124,9 +129,12 @@ if(count($_FILES) == 1 && array_key_exists('stats_file', $_FILES)){
 }
 
 /**
- * Send db_stats.txt to main server's _ALL_STATS
+ * Send db_stats.txt to main server's _ALL_STATS directory.
+ * If this is the main server, it zips the stats locally. Otherwise, it POSTs the file.
  *
- * @return void [exits]
+ * @global hserv\System $system The global system object.
+ * @global bool $is_main_server Flag indicating if this is the main Heurist server.
+ * @return void This function calls exitScript() and does not return.
  */
 function sendStatsToMain(){
 
@@ -178,10 +186,11 @@ function sendStatsToMain(){
 }
 
 /**
- * Create db_stats.txt file within local _DB_STATS
- *  Per database, includes: record count, last newest record, last record modification, new records per month
+ * Create db_stats.txt file within local _DB_STATS directory.
+ * Per database, includes: record count, last newest record, last record modification, new records per month.
  *
- * @return bool success or failure
+ * @global hserv\System $system The global system object.
+ * @return bool True on success, false on failure.
  */
 function createStats(){
 
@@ -233,11 +242,12 @@ function createStats(){
 }
 
 /**
- * Zips the db stats within _ALL_STATS
+ * Zips the db stats file into an archive within the _ALL_STATS directory.
  *
- * @param string $file_to_zip file going into zip achive
- * @param string $server_name used for zip name
- * @param bool $delete_original delete the original text file, if file is from external server
+ * @param string $file_to_zip     Path to the file to be zipped (e.g., db_stats.txt).
+ * @param string $server_name     The name of the server, used for naming the zip archive.
+ * @param bool   $delete_original Optional. If true, the original text file will be deleted after zipping. Defaults to false.
+ * @return void This function calls exitScript() on failure and does not return directly.
  */
 function zipStats($file_to_zip, $server_name, $delete_original = false){
 
@@ -249,7 +259,7 @@ function zipStats($file_to_zip, $server_name, $delete_original = false){
         exitScript(HEURIST_ERROR, 'Failed to create zip folder for stats', true);
     }
 
-    if(!$zip->addFile($file_to_zip, "db_stats.txt")){
+    if(!$zip->addFile($file_to_zip, "db_stats.txt")){ // REMARK: Hardcoded "db_stats.txt" as the name within zip.
         $zip->close();
         exitScript(HEURIST_ERROR, 'Failed to add stats into zip', true);
     }
@@ -261,9 +271,11 @@ function zipStats($file_to_zip, $server_name, $delete_original = false){
 }
 
 /**
- * Check if directory: has been created and can be written to
+ * Checks if a directory exists and is writable. Creates it if it doesn't exist.
+ * Calls exitScript() on failure.
  *
- * @param string $dir directory to check
+ * @param string $dir The path to the directory.
+ * @return void This function calls exitScript() on failure and does not return directly.
  */
 function checkDirectory($dir){
 
@@ -282,11 +294,14 @@ function checkDirectory($dir){
 }
 
 /**
- * Remove file lock and exit on error if necessary
+ * Removes the lock file and exits the script.
+ * If an error is indicated, it calls the system error exit handler.
  *
- * @param string|null $status HTTP status code
- * @param string|null $msg error message
- * @param bool $is_error whether this is for an error
+ * @global hserv\System $system The global system object.
+ * @param string|null $status    HTTP status code (used if $is_error is true and $msg is provided).
+ * @param string|null $msg       Error message (used if $is_error is true).
+ * @param bool        $is_error  Whether this exit is due to an error.
+ * @return void This function always exits the script and does not return.
  */
 function exitScript($status = null, $msg = null, $is_error = false){
 

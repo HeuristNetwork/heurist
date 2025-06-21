@@ -14,15 +14,28 @@
     */
 
     /**
-    * Verifies duplications for concept code in rectypes, fieldtypes and terms
+    * verifyConceptCodes.php - Checks for duplicate concept codes within each database.
     *
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @link        https://HeuristNetwork.org
-    * @version     3.1
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @fileOverview This script iterates through all Heurist databases on the server and checks
+    *               for duplicated concept codes (i.e., the same combination of `xxx_OriginatingDBID`
+    *               and `xxx_IDInOriginatingDB`) within:
+    *               - Record types (`defRecTypes`)
+    *               - Detail types (`defDetailTypes`)
+    *               - Terms (`defTerms`)
+    *               Duplicate concept codes are an error condition, as they can lead to ambiguity
+    *               in identifying and linking definitions across databases. The script outputs
+    *               an HTML report listing any duplicate concept codes found, grouped by database
+    *               and definition table.
+    *               Requires admin password.
+    *
     * @package     Heurist academic knowledge management system
-    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+    * @subpackage  /admin/verification
+    * @link        https://HeuristNetwork.org
+    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+    * @author      Artem Osmakov   <osmakov@gmail.com>
+    * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @since       3.1
     */
 
 define('ADMIN_PWD_REQUIRED', 1);

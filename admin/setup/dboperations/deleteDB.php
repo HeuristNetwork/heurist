@@ -1,15 +1,24 @@
 <?php
 /**
-* deleteDB.php: delete MULTIPLE databases. Called by dbStatistics.php (for system admin only)
-*               note that deletion of current database is handled separately by deleteCurrentDB.php which calls dbUtils.php
+* deleteDB.php - Deletes one or more Heurist databases.
+*
+* @fileOverview This script handles the deletion of specified Heurist databases.
+*               It is typically called by `dbStatistics.php` and is intended for system administrator use.
+*               Deletion of the *currently active* database by its owner might be handled differently
+*               or have specific password requirements (e.g., 'DELETE MY DATABASE').
+*               The script validates the request, checks permissions, and then proceeds to drop
+*               the database and its associated file store directory. It can also create an archive
+*               of the database before deletion if requested. An email notification is sent to the
+*               database owner upon deletion by a system administrator.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/setup/dboperations
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
+* @since       4
 */
 
 /*

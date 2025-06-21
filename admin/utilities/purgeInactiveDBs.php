@@ -1,46 +1,34 @@
 <?php
 
 /**
-* purgeInactiveDBs.php: Reports (default) or purge/archive inactive databases
+* purgeInactiveDBs.php - Reports on or purges/archives inactive Heurist databases and their components.
 *
-* Report/purge occurs if no data added/edited for more than:
-*
-*           3 months with 10 records or less
-*           6 months with 50 records or less
-*           one year with 200 records or less
-*
-* Sends sysadmin a list of databases
-*            inactive for more than a year with more than 200 records
-
-* @TODO: Should send the message out as a warning message one month before and 1 week before
-*        stressing in particular the need to tell us if you want your database marked as non-purging
-*
-* @TODO: Should also check date of last modification of record types and record type structures
-*        to detect databases which are being configured but have very little data
-*
-* Dump and bz2 import tables that are
-*           more than 2 months old
-*           older than 1 month if more than 10 tables
-*           reduce to 20 most recent tables if more than 20 left
-*
-*           HEURIST_FILESTORE/_PURGES_IMPORTS/dbname_[name of original file]_yyyy-mm-dd.bz2
-*
-* Dump and bzip the sysArchive table if it exceeds 50,000 records (50K records is ~10MB)
-*   with a name structured as below.
-*          …HEURIST_FILESTORE/_PURGES_SYSARCHIVE/dbname_yyyy-mm-dd.bz2
-* @TODO: should retain last week of archive records when table is purged
-*
-* Databases in HEURIST/databases_not_to_purge.txt are ignored
-*
-* Runs from shell only
+* @fileOverview This script is designed to manage server space by identifying and acting upon inactive
+*               Heurist databases. It can run in report-only mode or perform actual purge/archive operations.
+*               Key functionalities include:
+*               - **Database Purge/Archive:** Databases are flagged for archival based on inactivity period
+*                 and record count (e.g., >3 months inactive with <=10 records). Archived databases
+*                 are dropped, and their filestores are moved to `DELETED_DATABASES`. Owners are notified.
+*               - **Import Table Purge:** Old imported data tables (`sysImportFiles` entries and associated
+*                 temporary tables) are dumped and compressed into `_PURGES_IMPORTS`.
+*               - **sysArchive Table Purge:** If the `sysArchive` table exceeds a certain size (e.g., 50,000 records),
+*                 it's dumped and compressed into `_PURGES_SYSARCHIVE`.
+*               - **Exclusion List:** Databases listed in `databases_not_to_purge.txt` (in Heurist root) are skipped.
+*               - **Reporting:** Provides detailed output of actions taken or proposed. Sends email summaries to admin.
+*               Intended primarily for shell execution. Use `-- -purge` to enable actions.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6
+* @since       6
+*
+* @todo Send warning messages one month and one week before actual purging.
+* @todo Consider last modification of record types/structures to detect databases under configuration.
+* @todo Retain last week of archive records when `sysArchive` table is purged.
 */
 
 /*
@@ -686,6 +674,17 @@ if(!isEmptyArray($email_list) && $need_email)
         .implode(",\n", $email_list));
 }
 
+/**
+ * Reads the exclusion list of database names from 'databases_not_to_purge.txt'.
+ * This file is expected to be in the Heurist root directory.
+ * Lines starting with '#' or empty lines in the file are ignored.
+ * If the file is not found and the script is in action mode (not report-only),
+ * it sends an error email to the admin and returns false, halting further processing.
+ *
+ * @global bool $arg_no_action Indicates if the script is in "action mode" (false) or "report mode" (true).
+ * @return array<string>|false An array of database names to exclude. Returns false if the exclusion
+ *                             file is critical and not found.
+ */
 function exclusion_list(){
     global $arg_no_action;
 

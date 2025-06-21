@@ -14,14 +14,22 @@
 */
 
 /**
-* checkRecURL.php - checks all record URLs to see if they are valid
+* checkRecURL.php - Verifies the validity of URLs stored in Heurist records.
 *
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @fileOverview This script iterates through records in a Heurist database and checks the validity
+*               of URLs found in predefined fields (typically `rec_URL` and other text fields
+*               that might contain URLs). It uses the `DbVerifyURLs` class to perform the checks.
+*               The output is an HTML page listing any invalid URLs found.
+*               Requires admin privileges.
+*
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @since       3.1.0
 */
 
 set_time_limit(0);

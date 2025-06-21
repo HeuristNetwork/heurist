@@ -1,12 +1,21 @@
 <?php
 
 /**
-* longOperationInit.php:
+* longOperationInit.php - Wrapper for initiating long-running verification/rebuild operations.
 *
-* iframe (wait) wrapper for listUploadedFilesErrors,rebuildRecordTitles,
-* rebuildCalculatedFields and checkRecURL
+* @fileOverview This script acts as an iframe wrapper to display a "waiting" message
+*               while another, potentially long-running, script executes. It is used to
+*               initiate operations such as:
+*               - `listUploadedFilesErrors.php`
+*               - `rebuildRecordTitles.php`
+*               - `rebuildCalculatedFields.php`
+*               - `checkRecURL.php`
+*               - `rebuildEntryMasks.php`
+*               It takes a `type` parameter to determine which script to load into the iframe
+*               and passes along `db` and optional `recTypeIDs` parameters.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Tom Murtagh
@@ -14,7 +23,7 @@
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.1.0
+* @since       3.1.0
 */
 
 /*

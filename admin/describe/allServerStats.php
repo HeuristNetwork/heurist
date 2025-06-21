@@ -1,15 +1,18 @@
 <?php
 /**
-* allServerStats: Save server statistics to _ALL_SERVER_STATS
-*   Currently handles: db_stats
+* allServerStats.php - Saves server statistics to the _ALL_SERVER_STATS directory.
 *
+* @fileOverview This script receives statistics files (currently 'db_stats') from other Heurist servers
+*               and stores them, typically in a compressed format. It's designed to be used by the
+*               main Heurist server to aggregate statistics from various installations.
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/describe
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.0
+* @since       6.0
 */
 
 /*
@@ -107,11 +110,13 @@ dataOutput(['status' => HEURIST_OK, 'data' => 1]);
 exit;
 
 /**
- * Zip text into server's file within ALL_SERVER_STATS
+ * Zip text into server's file within ALL_SERVER_STATS.
  *
- * @param string $remote_file location of remote server's text file
- * @param string $server_name remote server's name
- * @param string $file_name stat type, becomes local file's name
+ * @global hserv\System $system The global system object.
+ * @param string $remote_file Location of remote server's text file.
+ * @param string $server_name Remote server's name.
+ * @param string $file_name   Stat type, becomes local file's name.
+ * @return void
  */
 function transferTextFile($remote_file, $server_name, $file_name){
 
@@ -129,11 +134,13 @@ function transferTextFile($remote_file, $server_name, $file_name){
 }
 
 /**
- * Transfer text files from zip folder, received from remote server
+ * Transfer text files from zip folder, received from remote server.
  *
- * @param string $remote_zip location of remote server's zip folder
- * @param string $server_name remote server's name
- * @param array<string> $allowed_stats filenames to save
+ * @global hserv\System $system The global system object.
+ * @param string $remote_zip      Location of remote server's zip folder.
+ * @param string $server_name     Remote server's name.
+ * @param array<string> $allowed_stats Filenames to save.
+ * @return void
  */
 function transferZipFiles($remote_zip, $server_name, $allowed_stats){
 

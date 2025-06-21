@@ -14,15 +14,25 @@
 */
 
 /**
-* Order record pointer fields by rec_Title
+* orderLinksByTitle.php - Reorders multi-valued record pointer fields alphabetically by the title of the pointed-to records.
 *
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @fileOverview This script is an administrative utility that processes a specified multi-valued
+*               record pointer field within a given record type. For each source record, it
+*               retrieves all its linked records through this field, orders these linked records
+*               alphabetically by their `rec_Title`, and then updates the `dtl_Value` in the
+*               `recDetails` table to reflect this new order. This ensures that when multiple
+*               records are linked via such a field, they appear in a consistent, alphabetized order.
+*               Requires admin privileges and `rty_ID` (record type ID) and `dty_ID` (detail type ID)
+*               as request parameters.
+*
 * @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @subpackage  /admin/verification
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @since       3.1
 */
 
 require_once dirname(__FILE__).'/../../autoload.php';
@@ -84,6 +94,23 @@ if($res){
 
 print $cnt.' records updated';
 
+/**
+ * Updates the dtl_Value for a set of detail records to reorder them.
+ *
+ * Given arrays of detail IDs and their corresponding target record IDs (values),
+ * this function sorts the detail IDs and then updates each dtl_Value with the
+ * target record ID from the original (but now implicitly title-sorted due to query order) $vals array.
+ *
+ * @param \mysqli $mysqli The mysqli database connection object.
+ * @param array<int> $ids Array of detail IDs (dtl_ID) for a specific source record and detail type.
+ *                        These are assumed to correspond to the $vals order as retrieved from the initial query.
+ * @param array<int> $vals Array of target record IDs (dtl_Value) for the given details,
+ *                         ordered by the target records' titles from the initial query.
+ * @param array<string> $titles Array of titles of the target records (unused in the current implementation
+ *                              but fetched by the calling query, likely for original sorting intent).
+ * @return int Returns 1 if any updates were made (i.e., if there was more than one value to order),
+ *             otherwise returns 0.
+ */
 function updateDtlValues($mysqli, $ids, $vals, $titles){
 
     if(is_array($vals) && count($vals)>1){

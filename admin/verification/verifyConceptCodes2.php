@@ -14,15 +14,25 @@
     */
 
     /**
-    * Verifies missed IDinOriginatingDB
+    * verifyConceptCodes2.php - Checks for missing `xxx_IDInOriginatingDB` values in definitions.
     *
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @link        https://HeuristNetwork.org
-    * @version     3.1
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @fileOverview This script iterates through all Heurist databases (excluding 'hdb_DEF19')
+    *               and checks record types, detail types, and terms for missing or invalid
+    *               `xxx_IDInOriginatingDB` values when `xxx_OriginatingDBID` is set (greater than 0).
+    *               A valid `xxx_IDInOriginatingDB` should be a positive integer. Missing or zero
+    *               values indicate an inconsistency in how the definition is linked to its origin.
+    *               The script outputs an HTML report listing definitions with such issues,
+    *               grouped by database and definition table.
+    *               Requires admin password.
+    *
     * @package     Heurist academic knowledge management system
-    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+    * @subpackage  /admin/verification
+    * @link        https://HeuristNetwork.org
+    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+    * @author      Artem Osmakov   <osmakov@gmail.com>
+    * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @since       3.1
     */
 
 define('ADMIN_PWD_REQUIRED', 1);

@@ -1,10 +1,21 @@
 <?php
 
     /**
-    * rebuildCalculatedFields.php
-    * Rebuilds the calculated fields for records listed in search results, for ALL records or for speficied rectypes
+    * rebuildCalculatedFields.php - Rebuilds calculated fields for specified or all records.
+    *
+    * @fileOverview This script recalculates the values of calculated fields for records in a
+    *               Heurist database. It can operate on all records, records of specific
+    *               record types (specified by `recTypeIDs`), or records listed in search results (not implemented in this version).
+    *               The script compares the newly calculated value with the existing stored value
+    *               and updates the field if they differ. It provides a summary of records processed,
+    *               fields updated, cleared, or unchanged, and lists any errors encountered during
+    *               formula execution.
+    *               It can be run as a standalone script or initiated from the client-side with
+    *               progress updates (using a session ID).
+    *               Requires manager-level access.
     *
     * @package     Heurist academic knowledge management system
+    * @subpackage  /admin/verification
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Tom Murtagh
@@ -13,7 +24,7 @@
     * @author      Stephen White
     * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     3.1.0
+    * @since       3.1.0
     */
 
     /*

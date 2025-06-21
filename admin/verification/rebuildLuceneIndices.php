@@ -1,17 +1,22 @@
 <?php
 
     /**
-    * rebuildLuceneIndices.php: Rebuilds all Lucence (Elastic Search) indices for the database
+    * rebuildLuceneIndices.php - Rebuilds all Lucene (Elasticsearch) indices for the current database.
     *
-    * from admin menu
+    * @fileOverview This script triggers a full rebuild of the Elasticsearch indices
+    *               for the currently selected Heurist database. This is typically used
+    *               when the search index needs to be refreshed due to schema changes,
+    *               data corruption, or other administrative reasons.
+    *               It is accessed from the Heurist admin menu.
     *
     * @package     Heurist academic knowledge management system
+    * @subpackage  /admin/verification
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Artem Osmakov   <osmakov@gmail.com>
     * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
+    * @since       4.0
     */
 
     /*

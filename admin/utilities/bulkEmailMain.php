@@ -1,14 +1,27 @@
 <?php
 
 /**
-*  Email Users of any Heurist database located on this server, requires a Heurist Database + System Administrator password
+* bulkEmailMain.php - Main user interface for the Heurist Bulk Email utility.
+*
+* @fileOverview This script generates the HTML page that users interact with to send bulk emails.
+*               It requires System Administrator privileges to access. The page allows users to:
+*               - Filter and select target databases based on criteria like record count and last modification date.
+*               - Select target user groups (owners, managers, all users, etc.).
+*               - Choose an "Email" record from the current database to use as a template for subject and body.
+*               - Edit the email subject and body (with WYSIWYG editor support).
+*               - Preview user counts and database counts.
+*               - Initiate the email sending process (handled by `bulkEmailController.php` and `bulkEmailSystem.php`).
+*               - Export a CSV of targeted users and databases.
+*               It handles cases where the "Email" record type (2-9) might be missing and prompts for its download.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Brandon McKay   <blmckay13@gmail.com>
+* @author      Brandon McKay <blmckay13@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.0
+* @since       6.0
 */
 
 /*
@@ -324,6 +337,13 @@ $stmt->close();
         </style>
 
         <script type="text/javascript">
+            /**
+             * @fileOverview Inline JavaScript for the Bulk Email Main interface (bulkEmailMain.php).
+             * This script handles UI interactions, form validation, AJAX calls to the
+             * bulkEmailController.php, and dynamic updates to the page.
+             * @author Brandon McKay <blmckay13@gmail.com>
+             * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+             */
 
             window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>');
 
@@ -338,9 +358,11 @@ $stmt->close();
             const handled_sort = ['name', 'rec_count', 'last_update'];
             var database_details = null; // [{name: db_name, rec_count: db_rec_count, last_update: db_last_update}, ...]
 
-            //
-            // Get list of currently selected databases
-            //
+            /**
+             * Gets the list of currently selected (checked) databases from the UI.
+             * Updates the hidden 'db_list' input field with a comma-separated string of selected database names.
+             * @returns {Array<string>} An array of selected database names (with HEURIST_DB_PREFIX).
+             */
             function getDbList(){
 
                 var checked_dbs = $("#dbSelection").find(".dbListCB:checked");
@@ -355,9 +377,11 @@ $stmt->close();
                 return dbs;
             }
 
-            //
-            // Get list of all databases in current list
-            //
+            /**
+             * Gets a list of all databases currently displayed in the UI's selection area,
+             * regardless of their checked state.
+             * @returns {Array<string>} An array of all database names (with HEURIST_DB_PREFIX) in the list.
+             */
             function getAllDbs() {
 
                 var dbs = [];
@@ -370,9 +394,13 @@ $stmt->close();
                 return dbs;
             }
 
-            //
-            // Prepare and run export script
-            //
+            /**
+             * Handles the CSV export functionality.
+             * Validates the form, sets a flag for CSV export, submits the form,
+             * and then resets the flag.
+             * @param {Event} e The click event object from the export button.
+             * @returns {boolean} Returns false to prevent default form submission behavior.
+             */
             function doExportCSV(e) {
 
                 if(!validateForm(e)) {
@@ -398,9 +426,14 @@ $stmt->close();
                 return false;
             }
 
-            //
-            // Valid main form
-            //
+            /**
+             * Validates the main email options form.
+             * Checks for required fields: database selection, email title, email body, and admin password.
+             * Also validates numeric inputs for record count and last modified period.
+             * Displays a flash message with errors if validation fails.
+             * @param {Event} e The event object, typically from a submit or button click.
+             * @returns {boolean} True if the form is valid, false otherwise.
+             */
             function validateForm(e) {
 
                 var isValid = true;
@@ -465,9 +498,13 @@ $stmt->close();
                 return isValid;
             }
 
-            //
-            // Setup database list (left hand section)
-            //
+            /**
+             * Populates the database selection area in the UI.
+             * Creates checkboxes for each database and sets up event handlers for selection
+             * and double-click. Initializes database and user counts to zero.
+             * @param {Array<string>} dbs An array of database names (with HEURIST_DB_PREFIX) to display.
+             * @returns {void}
+             */
             function setupDBSelection(dbs) {
 
                 var $db_selection = $("#dbSelection");
@@ -521,9 +558,14 @@ $stmt->close();
                 $("#filterMsg").hide();
             }
 
-            //
-            // Sort database list
-            //
+            /**
+             * Sorts the displayed list of databases in the UI.
+             * The sorting is based on the `database_details` global array and the selected sort order.
+             * Reorders the DOM elements in the #dbSelection container.
+             * @param {string} [order='name'] The field to sort by: 'name', 'rec_count', or 'last_update'.
+             *                                Defaults to 'name' or the currently checked radio button.
+             * @returns {void}
+             */
             function applyDBSort(order = 'name') {
 
                 if(getting_databases){
@@ -602,9 +644,12 @@ $stmt->close();
                 }
             }
 
-            //
-            // Setup user filtering elements
-            //
+            /**
+             * Sets up the user selection dropdown menu.
+             * Populates it with options for user types (Owner, Manager, Admin, All Users)
+             * and attaches an event handler to update user counts on change.
+             * @returns {void}
+             */
             function setupUserSelection() {
 
                 var $user_selection = $('#userSelection');
@@ -632,9 +677,12 @@ $stmt->close();
                 select.on("change", getUserCount);
             }
 
-            //
-            // Setup email selection elements
-            //
+            /**
+             * Sets up the email template selection dropdown menu.
+             * Populates it with "Email" records from the current database (titles from `all_emails` global).
+             * Attaches an event handler to fetch and display email details (title and body) when a template is selected.
+             * @returns {void}
+             */
             function setupEmailSelection() {
 
                 var $email_selection = $("#emailOutline");
@@ -667,9 +715,11 @@ $stmt->close();
                 });
             }
 
-            //
-            // Setup remaining elements
-            //
+            /**
+             * Sets up event handlers and initial states for other UI elements.
+             * This includes the "Last Modified" filter controls and the "Apply Filter" and "Send Emails" buttons.
+             * @returns {void}
+             */
             function setupOtherElements() {
 
                 var modifySel = $("#recModifiedSel");
@@ -803,6 +853,12 @@ $stmt->close();
                 $('input[id="name"]').prop('checked', true);
             }
 
+            /**
+             * Initiates the process of sending emails.
+             * Serializes the form data, makes an AJAX request to the controller's 'send_emails' action,
+             * and displays a progress dialog that polls for updates.
+             * @returns {void}
+             */
             function sendEmails(){
 
                 const SESSION_ID = window.hWin.HEURIST4.util.random();
@@ -873,9 +929,12 @@ $stmt->close();
 
             }
 
-            //
-            // Get complete list of databases on current server
-            //
+            /**
+             * Fetches the initial complete list of databases from the server.
+             * Populates `database_details` and calls `setupDBSelection` on success.
+             * Handles potential filtering if `run_filter` is true after the initial load.
+             * @returns {void}
+             */
             function getInitDbList() {
 
                 getting_databases = 1;
@@ -933,9 +992,13 @@ $stmt->close();
                 });
             }
 
-            //
-            // Retrieve selected email details
-            //
+            /**
+             * Retrieves the title and body for a selected email template record.
+             * Makes an AJAX call to the controller's 'email_details' action.
+             * Updates the email title input and TinyMCE editor content on success.
+             * @param {(string|number)} id The ID of the "Email" record to fetch details for.
+             * @returns {void}
+             */
             function getEmailDetails(id) {
 
                 $.ajax({
@@ -983,9 +1046,13 @@ $stmt->close();
                 });
             }
 
-            //
-            // Display record counts for databases
-            //
+            /**
+             * Displays record counts next to each database in the list and updates the total record count for selected databases.
+             * @param {(Object|Array)} data Either an object mapping database names (prefixed) to record counts,
+             *                            or an array of database detail objects (from `database_details`).
+             *                            If empty, uses `database_details` global.
+             * @returns {void}
+             */
             function displayRecordCount(data) {
 
                 if(window.hWin.HEURIST4.util.isempty(data)){
@@ -1027,9 +1094,12 @@ $stmt->close();
                 set_element_position();
             }
 
-            //
-            // Retrieve record count for list of databases
-            //
+            /**
+             * Retrieves and displays the record count for all listed databases.
+             * If `database_details` already contains record counts, it uses that data directly.
+             * Otherwise, makes an AJAX call to the 'record_count' action.
+             * @returns {void}
+             */
             function getRecordCount() {
 
                 if(getting_databases){
@@ -1094,18 +1164,21 @@ $stmt->close();
                 })
             }
 
-            //
-            // Count number of databases selected and update label
-            //
+            /**
+             * Counts the number of selected databases and updates the corresponding label in the UI.
+             * @returns {void}
+             */
             function getDBCount() {
 
                 const $sel_dbs = $("#dbSelection").find(".dbListCB:checked");
                 $("#dbCount").text($sel_dbs.length);
             }
 
-            //
-            // Get distinct user count for selected databases
-            //
+            /**
+             * Retrieves and displays the count of distinct users based on the selected databases and user type filter.
+             * Makes an AJAX call to the 'user_count' action.
+             * @returns {void}
+             */
             function getUserCount() {
 
                 if(getting_databases){
@@ -1167,6 +1240,11 @@ $stmt->close();
                 });
             }
 
+            /**
+             * Adjusts the position of the "Send Emails" and "Export CSV" buttons
+             * based on the position of the password input field.
+             * @returns {void}
+             */
             function set_element_position(){
                 $("#btnEmail")
                     .position({
@@ -1183,6 +1261,11 @@ $stmt->close();
                     });
             }
 
+            /**
+             * Initializes the "View WYSIWYG" / "View Plain Text" button for the email body editor.
+             * Toggles between TinyMCE and a plain textarea.
+             * @returns {void}
+             */
             function initEditorButton(){
 
                 let currentMode = 'Plain Text';
@@ -1201,6 +1284,11 @@ $stmt->close();
                 });
             }
 
+            /**
+             * Initializes the TinyMCE WYSIWYG editor on the #emailBody textarea.
+             * Configures plugins, toolbar, and custom buttons.
+             * @returns {void}
+             */
             function initTinyMCE(){
 
                 if(typeof tinyMCE === 'undefined'){
@@ -1280,7 +1368,6 @@ $stmt->close();
             });
 
         </script>
-
     </head>
 
     <body style="margin: 10px 10px 10px 20px;">

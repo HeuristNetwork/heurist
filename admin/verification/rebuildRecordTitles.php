@@ -1,10 +1,22 @@
 <?php
 
     /**
-    * rebuildRecordTitles.php
-    * Rebuilds the constructed record titles listed in search results, for ALL records or for speficied rectypes
+    * rebuildRecordTitles.php - Rebuilds constructed record titles based on their title masks.
+    *
+    * @fileOverview This script recalculates the `rec_Title` for records in a Heurist database
+    *               based on the `rty_TitleMask` defined for their respective record types.
+    *               It can operate on all records or be restricted to specific record types
+    *               (via the `recTypeIDs` parameter).
+    *               The script compares the newly generated title with the existing one and updates
+    *               it if different. It reports counts of total records, updated titles,
+    *               unchanged titles, and titles that would become blank (which are generally
+    *               left unchanged, with an attempt to populate a standard 'Title' field instead
+    *               for relationship records).
+    *               It supports client-side initiation with progress updates via a session ID.
+    *               Requires manager-level access.
     *
     * @package     Heurist academic knowledge management system
+    * @subpackage  /admin/verification
     * @link        https://HeuristNetwork.org
     * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
     * @author      Tom Murtagh
@@ -13,7 +25,7 @@
     * @author      Stephen White
     * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
     * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     3.1.0
+    * @since       3.1.0
     */
 
     /*
@@ -228,9 +240,19 @@ if(@$_REQUEST['recTypeIDs']){
     </body>
 </html>
 <?php
-//
-//
-//
+/**
+ * Performs the core logic of rebuilding record titles.
+ *
+ * Iterates through records (all or filtered by $recTypeIDs), calculates new titles based on masks,
+ * compares with existing titles, and updates the database if necessary.
+ * Tracks progress if a $progress_session_id is provided.
+ *
+ * @param \hserv\System $system The Heurist system object.
+ * @param int|null    $progress_session_id ID for tracking progress if run from client-side; null otherwise.
+ * @param string|null $recTypeIDs A comma-separated string of record type IDs to process. If null, all records are processed.
+ * @return array|false An associative array with statistics ('changed_count', 'same_count', 'blank_count', 'total_count',
+ *                     'q_updates', 'q_blanks') on success, or false on database error.
+ */
 function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
     $updates = array();
     $blanks = array();
@@ -322,9 +344,19 @@ function doRecTitleUpdate( $system, $progress_session_id, $recTypeIDs ){
     return array('changed_count'=>count($updates), 'same_count'=>$unchanged_count, 'blank_count'=>$blank_count, 'total_count'=>$rec_count,
        'q_updates'=>$q_updates, 'q_blanks'=>$q_blanks);
 }
-//
-//
-//
+
+/**
+ * Updates or reports progress for a long-running operation.
+ *
+ * If a valid $progress_session_id is provided, this function interacts with the
+ * `mysql__update_progress` mechanism to store or retrieve progress.
+ * It typically updates progress every 25 records if $total_count > 25.
+ *
+ * @param int|null $progress_session_id The session ID for progress tracking. If null or 0, the function does nothing.
+ * @param int|string $processed_count The number of items processed so far. If 'REMOVE', the progress session is cleared.
+ * @param int $total_count The total number of items to be processed.
+ * @return bool Returns true if the client has signaled to terminate the operation, false otherwise or if no session ID.
+ */
 function progressSession($progress_session_id, $processed_count, $total_count){
     
     if($progress_session_id>0 && $total_count>0){
@@ -346,9 +378,17 @@ function progressSession($progress_session_id, $processed_count, $total_count){
     }
     return false;
 }
-//
-//
-//
+
+/**
+ * Attempts to update a standard 'Title' or 'Name' field (dtl_DetailTypeID based on DT_NAME)
+ * for a relationship record (rec_RecTypeID = 1) if its calculated rec_Title would become blank.
+ * This is a fallback to ensure relationship records have some textual representation.
+ * REMARK: This function uses the global $mysqli variable without explicitly declaring it global.
+ *
+ * @param array $rec Associative array of the record data, must include 'rec_RecTypeID', 'rec_ID', and 'rec_Title'.
+ * @param int $titleDT The detail type ID for the 'Title' or 'Name' field (typically from Concept Code 2-1).
+ * @return bool True if a title detail was successfully inserted or updated for the relationship record, false otherwise.
+ */
 function updateRaltionhipForBlankTitle($rec, $titleDT){
    
     if ( $rec['rec_RecTypeID'] == 1 && $rec['rec_Title']) {

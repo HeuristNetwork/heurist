@@ -1,17 +1,22 @@
 <?php
 
 /**
-* notifyDatabaseArchive.php:
-*   Send emails about creating DB archives to DB owners
-*   Owners will recieve the email if records in their DB has been modified within the last month
+* notifyDatabaseArchive.php - Sends email notifications to database owners about archiving their databases.
+*
+* @fileOverview This script is intended to be run from the command line. It iterates through
+*               Heurist databases on the server. If a database has had record modifications
+*               within the last month, an email is sent to its owner reminding them to
+*               create an archive (backup) of their database. The script can process all
+*               databases or a specified list via the `-- -db=database1,database2` argument.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6
+* @since       6
 */
 
 /*

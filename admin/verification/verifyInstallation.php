@@ -1,16 +1,24 @@
 <?php
 
 /**
-* verifyInstallation.php
-* Verifies presence and correct versions for external JS components, Help, fiel directories and so forth
+* verifyInstallation.php - Checks server environment and PHP extension requirements for Heurist.
+*
+* @fileOverview This script verifies that the server environment meets the necessary
+*               requirements for Heurist to function correctly. It checks for:
+*               - Presence of required PHP extensions (e.g., gd, pdo, mysqli, json, curl, xsl, imagick).
+*               - Correct MySQL server version (at least 5.5).
+*               - Basic path configurations (though this part seems less developed in the current script).
+*               The output is an HTML page listing the status of each check (OK or MISSING/Error).
+*               Requires an admin password to run.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       4.0
 */
 
 /*

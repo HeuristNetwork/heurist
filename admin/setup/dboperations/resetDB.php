@@ -1,14 +1,22 @@
 <?php
 /**
-* resetDB.php removes and rectreats the certain demo database. For daily cron job
+* resetDB.php - Removes and recreates a demo database, typically for a daily cron job.
+*
+* @fileOverview This script is designed to reset a specific Heurist demo database (identified by
+*               the constants `DEMO_DB` and `DEMO_DB_TEMPLATE`). It first drops the existing
+*               demo database. Then, if `DEMO_DB_ONLY` is true, it creates a new empty database.
+*               Otherwise, it creates the new database and clones it from the `DEMO_DB_TEMPLATE`,
+*               copies the filestore, and adjusts user #2 to be 'guest' with a 'guest' password.
+*               This is often used as a cron job to ensure a clean demo environment.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/setup/dboperations
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
+* @since       4
 */
 
 /*

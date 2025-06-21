@@ -14,15 +14,30 @@
     */
 
     /**
-    * convertTextFieldToFileField - change text field to file field, register new remote in recUploadedFiles and update recDetails
+    * convertTextFieldToFileField.php - Converts a specified text field type to a file field type across databases.
     *
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @link        https://HeuristNetwork.org
-    * @version     3.1
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @fileOverview This script is an administrative utility used to change a specified text-based
+    *               detail type (identified by its concept code) into a file-based detail type.
+    *               For each database on the server where this detail type exists:
+    *               1. The `dty_Type` in `defDetailTypes` is changed from 'freetext' to 'file'.
+    *               2. For every existing detail instance of this type (`recDetails`):
+    *                  - The text value (assumed to be a URL) is moved to `ulf_ExternalFileReference`
+    *                    in a new `recUploadedFiles` entry.
+    *                  - A new `recUploadedFiles` entry is created for this URL.
+    *                  - The `dtl_Value` in `recDetails` is set to NULL.
+    *                  - The `dtl_UploadedFileID` in `recDetails` is updated with the ID of the new
+    *                    `recUploadedFiles` entry.
+    *               This script requires a system administrator password and the concept code of the
+    *               detail type to be converted.
+    *
     * @package     Heurist academic knowledge management system
-    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+    * @subpackage  /admin/verification
+    * @link        https://HeuristNetwork.org
+    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+    * @author      Artem Osmakov   <osmakov@gmail.com>
+    * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @since       3.1
     */
 
 define('PDIR','../../');//need for proper path to js and css

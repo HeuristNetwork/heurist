@@ -14,15 +14,25 @@
     */
 
     /**
-    * Find orphaned file folders ie without databases
+    * findOrphanedFileFolder.php - Identifies filestore directories that do not have a corresponding database.
     *
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @link        https://HeuristNetwork.org
-    * @version     3.1
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @fileOverview This script scans the Heurist filestore root directory and compares the found
+    *               subdirectories (potential database filestores) against the list of actual
+    *               databases existing in the MySQL server. Any subdirectory in the filestore
+    *               that does not have a matching database is considered orphaned.
+    *               The script outputs an HTML page listing these orphaned folders and provides
+    *               checkboxes to select them for removal. If run with `?mail=1`, it can
+    *               email a report of orphaned folders to the admin.
+    *               Requires owner-level access and an admin password.
+    *
     * @package     Heurist academic knowledge management system
-    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+    * @subpackage  /admin/verification
+    * @link        https://HeuristNetwork.org
+    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+    * @author      Artem Osmakov   <osmakov@gmail.com>
+    * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @since       3.1
     */
 
 ini_set('max_execution_time', '0');

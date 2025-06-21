@@ -14,15 +14,25 @@
     */
 
     /**
-    * Find missed system folders for all databases
+    * findMissedFileFolder.php - Identifies missing or non-writable Heurist filestore directories.
     *
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @link        https://HeuristNetwork.org
-    * @version     3.1
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @fileOverview This script checks the filestore for each Heurist database on the server.
+    *               It verifies the existence and writability of the main database filestore directory
+    *               (e.g., `HEURIST_FILESTORE_ROOT/mydb/`) and its standard subdirectories
+    *               (like 'scratch', 'backup', 'file_uploads', etc., as defined in the system).
+    *               It reports any missing directories or directories that are not writable by the web server.
+    *               The output is an HTML page listing the issues. It can also send an email report to the admin
+    *               if run with `?mail=1` (though primarily intended for web interface).
+    *               Requires admin password.
+    *
     * @package     Heurist academic knowledge management system
-    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+    * @subpackage  /admin/verification
+    * @link        https://HeuristNetwork.org
+    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+    * @author      Artem Osmakov   <osmakov@gmail.com>
+    * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @since       3.1
     */
 
 ini_set('max_execution_time', '0');

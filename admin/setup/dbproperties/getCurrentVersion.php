@@ -1,4 +1,22 @@
 <?php
+/**
+* getCurrentVersion.php - Retrieves the current Heurist code and database schema versions.
+*
+* @fileOverview This script is intended to run on a Heurist master index server.
+*               When invoked by other Heurist servers, it returns the main Heurist
+*               application version (HEURIST_VERSION) and the schema version of the
+*               specified database, concatenated with a pipe character (e.g., "6.x.x|1.3.14").
+*               This allows remote instances to check if they are up-to-date.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  /admin/setup/dbproperties
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @since       3.1.0
+*/
 
 /*
 * Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
@@ -14,19 +32,6 @@
 * the License.
 */
 
-/**
-* getCurrentVersion.php - requests code and database version from Heurist master index server
-* this script runs on master index server ONLY
-* this script is invoked from other than Heurist master index server domains ONLY
-*
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-*/
 require_once dirname(__FILE__).'/../../../autoload.php';
 
 $rawdata = '';

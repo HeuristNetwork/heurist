@@ -1,6 +1,39 @@
 <?php
+/**
+* DBUpgrade.php - Core database upgrade logic for Heurist.
+*
+* @fileOverview This file contains the primary function `doUpgradeDatabase` responsible for
+*               applying incremental updates to a Heurist database to bring its schema
+*               to a newer version. It iterates through version steps, applying corresponding
+*               SQL or PHP upgrade scripts.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  /admin/setup/dbupgrade
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @since       1.0 (Assumed, based on function content)
+*/
+
 require_once dirname(__FILE__).'/../../../hserv/utilities/DbExecuteScript.php';
 
+/**
+ * Upgrades a specified Heurist database from its current version to a target version.
+ *
+ * This function iteratively applies version upgrade scripts (SQL or PHP) located in
+ * the `admin/setup/dbupgrade/` directory. Scripts are named convention-based, e.g.,
+ * `DBUpgrade_1.0.0_to_1.1.0.sql`.
+ * The process is transactional: if any step fails, changes are rolled back.
+ *
+ * @param hserv\System $system    The Heurist system object, providing access to database connections and error handling.
+ * @param string       $dbname    The name of the database to upgrade (e.g., 'mydata', without 'hdb_' prefix).
+ * @param int          $trg_maj   The target major version number for the database schema.
+ * @param int          $trg_min   The target minor version number for the database schema.
+ * @param bool         $verbose   Optional. If true, progress messages are printed to output. Defaults to false.
+ * @return bool True if the upgrade completes successfully for all steps, false otherwise.
+ */
 function doUpgradeDatabase($system, $dbname, $trg_maj, $trg_min, $verbose=false)
 {
 

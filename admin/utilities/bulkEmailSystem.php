@@ -1,14 +1,23 @@
 <?php
 
 /**
-*  Related class for Heurist System Email (massEmailSystem.php)
+* bulkEmailSystem.php - Core logic for sending bulk emails in Heurist.
+*
+* @fileOverview This file defines the `BulkEmailSystem` class, which encapsulates
+*               the functionality for processing form data, generating user lists,
+*               constructing, and sending emails to users across multiple Heurist databases.
+*               It handles email templating with placeholder substitution, CSV export of
+*               targeted users, and receipt generation. It supports sending emails via
+*               PHP's native `mail()`, PHPMailer, or a specified mail relay.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Brandon McKay   <blmckay13@gmail.com>
+* @author      Brandon McKay <blmckay13@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.0
+* @since       6.0
 */
 
 /*
@@ -102,6 +111,11 @@ class BulkEmailSystem {
     private $sessionID = null; // session ID
     private $progress = ''; // progress update
 
+    /**
+     * Constructor for BulkEmailSystem.
+     *
+     * @param hserv\System $system The Heurist system object.
+     */
     public function __construct($system){
 
         $this->system = $system;
@@ -486,7 +500,7 @@ class BulkEmailSystem {
      *
      * @param string $users type of users to be searched for {owner, manager, admin, user, all}
      * @param string $db database, with prefix, searching in, for admin search
-     * @return string SLQ where clause
+     * @return string SQL where clause
      */
     private function generateWhereClause($users, $db) {
         switch ($users) {
@@ -887,6 +901,8 @@ class BulkEmailSystem {
      */
     private function logEmailStatus($email_rtn, $details, $email, $db_listed, $records_listed, $lastmod_listed, $body) {
         $status_msg = $email_rtn == 0 ? "Sent, Sent Message: {$body}" : "Failed, Error Message: " . $this->getError();
+        // REMARK: $body can be very large and contain HTML. Logging it directly might be problematic for log size and parsing.
+        // Consider logging a snippet or only if $email_rtn != 0.
         $this->log = htmlspecialchars("Values: {databases: {{$db_listed}}, email: {$email}, name: {$details['first_name']} {$details['last_name']}"
             . ", record_count: {{$records_listed}}, last_modified: {{$lastmod_listed}} },"
             . "Timestamp: " . date(DATE_8601) . ", Status: {$status_msg}");
@@ -989,9 +1005,9 @@ class BulkEmailSystem {
     }
 
     /**
-     * Get both the values of error_msg and log
+     * Get both the current error message and the email log.
      *
-     * @return array<string, array> [current error message, email log]
+     * @return array{0: string, 1: string} An array containing the current error message and the email log.
      */
     public function getErrorLog() {
         return [$this->error_msg, $this->log];
@@ -1000,10 +1016,9 @@ class BulkEmailSystem {
     // Receipt Functions
 
     /**
-     * Prepare receipt value
+     * Prepare receipt value.
      *
-     * @param int|null $status 0 || < 0, whether the emails were all sent
-     * @param int $user_count count of users who have been emailed
+     * @param int|null $status Status of the email sending process (0 for success, <0 for failure, null for pre-process).
      * @return void
      */
     private function saveReceipt($status) {
@@ -1113,8 +1128,8 @@ class BulkEmailSystem {
     /**
      * Finish up receipt and save to database as a note record
      *
-     * @param bool $pre_emails whether this is before or after the emails have been sent
-     * @return array|int Returns the results from recordSave, or an error code
+     * @param bool $pre_emails Whether this is before or after the emails have been sent.
+     * @return array|int Returns the results from recordSave (typically an array with status and data/message), or an error code (-1).
      */
     public function exportReceipt($pre_emails = false) {
 
@@ -1179,8 +1194,8 @@ class BulkEmailSystem {
     /**
      * Prepare records details for saving the receipt
      *
-     * @param int $recID receipt's record ID
-     * @param mixed $preEmails whether this is before or after the emails have been sent
+     * @param int  $recID receipt's record ID
+     * @param bool $preEmails whether this is before or after the emails have been sent
      * @return array record details
      */
     private function prepareReceiptDetails($recID, $preEmails){
@@ -1239,18 +1254,26 @@ class BulkEmailSystem {
         mysql__update_progress($this->system->getMysqli(), $this->sessionID, false, $this->progress);
     }
 
+    /**
+     * Checks if the current bulk email process has been signaled to terminate.
+     * This is typically checked via a progress update mechanism.
+     *
+     * @return bool True if termination is signaled, false otherwise.
+     */
     private function isTerminated(){
 
         if(!$this->sessionID){
             return false;
         }
 
-        $curProgress = mysql__update_progress($this->system->getMysqli, $this->sessionID, false, null);
+        $curProgress = mysql__update_progress($this->system->getMysqli(), $this->sessionID, false, null);
         return $curProgress === 'terminate';
     }
 
     /**
-     * Determine whether the MySQL connection is still active, mainly an issue on Huma-num's server where MySQL is restarted at midnight
+     * Determine whether the MySQL connection is still active.
+     * If the connection is lost (e.g. MySQL server restarted), it attempts to re-initialize it.
+     * This is particularly relevant for long-running scripts.
      *
      * @return void
      */
@@ -1281,6 +1304,7 @@ class BulkEmailSystem {
  *
  * @param array $data Form input data
  * @return array|int Returns the results from exportReceipt, or an error code
+ * @global hserv\System $system The global Heurist System object.
  */
 function sendSystemEmail($data) {
 
@@ -1315,8 +1339,9 @@ function sendSystemEmail($data) {
 /**
  * Export Selected data as CSV
  *
- * @param mixed $data Form input data
+ * @param array $data Form input data
  * @return int Returns an error code, otherwise the script exits while printing the CSV details
+ * @global hserv\System $system The global Heurist System object.
  */
 function getCSVDownload($data) {
 
