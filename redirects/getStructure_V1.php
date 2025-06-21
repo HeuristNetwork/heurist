@@ -1,17 +1,15 @@
 <?php
-
 /**
-*
-* getStructure_V1.php
-* redirector to getDBStructureAsSQL.php to provide a stable URL in case of restructuring of the codebase
-*
+* getStructure_V1.php - Redirector for fetching database structure.
+* @fileOverview This script acts as a stable URL redirector to `getDBStructureAsSQL.php`. It ensures that external services relying on this URL for database structure information are not affected by potential codebase restructuring. The `_V1` suffix indicates version 1 of this redirector, allowing for future versions with potentially different behaviors or target scripts.
 * @package     Heurist academic knowledge management system
+* @subpackage  /redirects
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
+* @since       4
 */
 
 /*

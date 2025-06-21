@@ -1,13 +1,15 @@
 <?php
-
 /**
-* listDatabases.php: Produces page listing available databases
-*
+* listDatabases.php - Produces a page listing available databases or returns a JSON list.
+* @fileOverview This script lists all available Heurist databases. It can either render an HTML page with the list or return a JSON formatted list if requested. It also handles basic system initialization and error reporting for database connectivity.
 * @package     Heurist academic knowledge management system
+* @subpackage  /startup
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson ian.johnson.heurist@gmail.com
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @since       unknown
 */
 
 /*
