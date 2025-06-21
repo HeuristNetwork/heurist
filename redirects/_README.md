@@ -1,14 +1,3 @@
-<!--
-_README.md - Explains the purpose of the /redirects directory and its files.
-@fileOverview This file describes the /redirects directory, which contains redirector files for cross-server function calls, particularly to the Heurist Reference Index Server. These redirectors ensure stability even if the underlying code structure or versions change.
-@package Heurist academic knowledge management system
-@subpackage /redirects
-@link https://HeuristNetwork.org
-@copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-@license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-@author Ian Johnson ian.johnson.heurist@gmail.com
-@since 24th December 2015
--->
 Directory:	/redirects
 
 Overview:
