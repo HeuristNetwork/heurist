@@ -269,13 +269,13 @@ window.hWin.HEURIST4.util = {
             let current_ele = $(ele_item); // Ensure it's a jQuery object for hSelect check
             if(window.hWin.HEURIST4.util.isFunction(current_ele.hSelect) && current_ele.hSelect('instance')!=undefined){
                 current_ele.hSelect(is_disabled ? 'disable' : 'enable');
-            }else if (ele_item.nodeType){ // Check if it's a DOM element
+            }else if (current_ele.length){ // Check if it's a DOM element
                 if (is_disabled) {
-                    ele_item.setAttribute('disabled', 'disabled');
-                    ele_item.classList.add('ui-state-disabled');
+                    current_ele[0].setAttribute('disabled', 'disabled');
+                    current_ele[0].classList.add('ui-state-disabled');
                 } else {
-                    ele_item.removeAttribute('disabled');
-                    ele_item.classList.remove('ui-state-disabled', 'ui-button-disabled');
+                    current_ele[0].removeAttribute('disabled');
+                    current_ele[0].classList.remove('ui-state-disabled', 'ui-button-disabled');
                 }                    
             }
         });
