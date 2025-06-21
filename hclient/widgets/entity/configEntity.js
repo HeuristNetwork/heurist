@@ -1,24 +1,34 @@
 /**
-* Save/load cfg files for given entity
-* configuration is stored in [dbfilestore]/entity/[entity name]/[config name]/[entity_id]/name.cfg
-*
+* @file configEntity.js
+* @brief Configuration management for entities.
+* @fileOverview Provides functionality to save and load configurations for specified entities. Configurations are stored in the file system and managed via UI components.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-
+/**
+ * @widget heurist.configEntity
+ * @brief A jQuery UI widget to manage loading and saving of entity configurations.
+ * @property {?string} entityName The name of the entity.
+ * @property {?string} configName The name of the configuration set.
+ * @property {?number} entityID The ID of the entity instance.
+ * @property {?string} loadSettingLabel Custom label for the load settings dropdown.
+ * @property {?function} getSettings Callback function to retrieve current configuration settings.
+ * @property {?function} setSettings Callback function to apply loaded configuration settings.
+ * @property {?jQuery} divSaveSettings jQuery element where save settings UI will be built.
+ * @property {boolean} showButtons Whether to display action buttons (rename, open edit, remove).
+ * @property {?function} openEditAction Callback for the 'open edit' button.
+ * @property {?object} buttons Configuration for button labels/visibility.
+ * @property {boolean} saveOnExit If true, automatically saves settings when exiting.
+ * @property {boolean} useHTMLselect If true, uses a standard HTML select element instead of hSelect.
+ * @property {boolean} is_vertical_layout If true, adjusts layout for vertical alignment.
+ */
 $.widget( "heurist.configEntity", {
 
     
@@ -52,14 +62,19 @@ $.widget( "heurist.configEntity", {
     
     original_settings: null,
 
-    // the widget's constructor
+    /**
+     * @brief Initializes the widget, disabling text selection on the element.
+     * @memberof heurist.configEntity
+     */
     _create: function() {
         // prevent double click to select text
         this.element.disableSelection();
     }, //end _create
 
-    // Any time the widget is called with no arguments or with only an option hash, 
-    // the widget is initialized; this includes when the widget is created.
+    /**
+     * @brief Sets up the UI elements for loading and saving configurations, including select dropdowns and buttons.
+     * @memberof heurist.configEntity
+     */
     _init: function() {
         let that = this;
 
@@ -374,9 +389,11 @@ $.widget( "heurist.configEntity", {
 
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Checks if the current settings have changed compared to the original settings.
+     * @memberof heurist.configEntity
+     * @returns {boolean|string} True if settings changed, otherwise the selected configuration name, or an empty string if no settings.
+     */
     isSomethingChanged: function(){
 
         let new_settings = this.options.getSettings();            
@@ -389,16 +406,20 @@ $.widget( "heurist.configEntity", {
         }
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Gets the file name of the current configuration.
+     * @memberof heurist.configEntity
+     * @returns {undefined} Currently returns undefined as the method is not fully implemented.
+     */
     getFileName: function(){
         return 
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Saves the current settings to a .cfg file.
+     * @memberof heurist.configEntity
+     * @param {function} [callback] Optional callback function after settings are saved.
+     */
     saveSettings: function(callback){
 
         let fileName = this.inpt_save_setting_name.val();
@@ -469,9 +490,12 @@ $.widget( "heurist.configEntity", {
 
     },    
     
-    //
-    // initial_value - selected config file
-    //
+    /**
+     * @brief Updates the list of saved configurations for a given entity ID.
+     * @memberof heurist.configEntity
+     * @param {string|number} rtyID The record type ID or 'all'.
+     * @param {string} [initial_value] The configuration file to select initially.
+     */
     updateList: function( rtyID, initial_value ){
         
         this.options.entityID = rtyID;

@@ -862,8 +862,6 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
         // Now add items into the HTML list
         this.assoc_endindex = this.renderAssocKeywods(keywords);
 
-        //this.assoc_endindex = i;
-
         let jump = this.assoc_endindex - this.assoc_startindex;
 
         if(this.assoc_startindex-jump < 0 && this.assoc_endindex+13 > keywords.length && this.assoc_endindex <= keywords.length){
@@ -942,7 +940,12 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
             click: (e) => {
 
                 let id = $(e.target).val();
-                this.handleAssocOption($(e.target).is(':checked'), id);
+
+                if($(e.target).is(':checked')){
+                    this.assoc_selected.push(id);
+                }else{
+                    this.removeAssocByID(id);
+                }
 
                 that.disableUpdateBtn(); 
             }
@@ -1347,29 +1350,29 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
                 continue;
             }
 
-            this.handleAssocOption(isChecked, chkbox.val());
+            if(isChecked){
+                this.assoc_selected.push(chkbox.val());
+            }else{
+                this.removeAssocByID(chkbox.val());
+            }
+
         }
 
         this.disableUpdateBtn();
     },
 
     /**
-     * Add or remove keyword by ID from the associated keywords list
+     * Remove keyword by ID from the associated keywords list
      *
-     * @param {Boolean} is_checked - triggers whether to add/remove id from the list
      * @param {Number} id - Keyword ID
      */
-    handleAssocOption: function(is_checked, id){
+    removeAssocByID: function(id){
 
-        if(is_checked){
-            this.assoc_selected.push(id);
-        }else if(!is_checked){
-            if(this.assoc_selected.length == 0){ return; }
+        if(this.assoc_selected.length == 0){ return; }
 
-            let index = this.assoc_selected.indexOf(id);
-            if(index > -1){
-                this.assoc_selected.splice(index, 1);
-            }
+        let index = this.assoc_selected.indexOf(id);
+        if(index > -1){
+            this.assoc_selected.splice(index, 1);
         }
     },
 

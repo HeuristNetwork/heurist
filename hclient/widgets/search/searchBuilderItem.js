@@ -1,23 +1,29 @@
 /**
-* searchBuilderItem.js - element in filter builder - to define query element
+* @file searchBuilderItem.js
+* @brief UI element for defining a single criterion in the advanced search builder.
+* @fileOverview This file defines the `heurist.searchBuilderItem` jQuery UI widget.
+* This widget represents a single line or criterion within the main `searchBuilder`
+* interface. It allows users to select a field, specify a comparison operator,
+* and provide values for the search. It handles different field types (text,
+* numbers, dates, enumerations, resources, etc.) and dynamically updates its
+* input elements and available operators based on the selected field.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\search
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @designer    Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       6.0
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
+/**
+ * @widget heurist.searchBuilderItem
+ * @description
+ * jQuery UI widget representing a single item (criterion) in the searchBuilder.
+ * It allows users to define a search condition based on a field, operator, and value.
+ */
 $.widget( "heurist.searchBuilderItem", {
 
     //{ conjunction: [ {predicate} , {predicate}, .... ] }
@@ -47,7 +53,22 @@ $.widget( "heurist.searchBuilderItem", {
      linked_to,linkedfrom,related_to,relatedfrom,links: various link predicates 
 */    
     
-    // default options
+    /**
+     * @memberof heurist.searchBuilderItem
+     * @instance
+     * @property {Object} options - Default options for the widget.
+     * @property {?string} options.code - Hierarchical code representing the field path.
+     * @property {number} options.top_rty_ID - Record type ID of the top-level entity in the hierarchy.
+     * @property {number} options.rty_ID - Record type ID of the immediate parent entity for the selected field.
+     * @property {number|string} options.dty_ID - Field (Detail Type) ID or a special token (e.g., 'title', 'added').
+     * @property {?string} options.enum_field - Specific part of an enumeration/term to search (e.g., 'term', 'code').
+     * @property {boolean} options.hasFieldSelector - If true, a button is shown to trigger field selection via `onselect_field`.
+     * @property {?function} options.onremove - Callback function triggered when the item is removed.
+     * @property {?function} options.onchange - Callback function triggered when the item's value or operator changes.
+     * @property {?function} options.onselect_field - Callback function to trigger field selection from a tree view.
+     * @property {?string} options.language - Selected language code (3-character ISO639-2) for multilingual fields.
+     * @property {number} options.reverse_RtyID - Record type ID for reverse links.
+     */
     options: {
         //token:null,  //t, f, linkedXXX
         
@@ -73,13 +94,42 @@ $.widget( "heurist.searchBuilderItem", {
         reverse_RtyID: 0  // rectord type for reverse links
     },
 
+    /**
+     * @memberof heurist.searchBuilderItem
+     * @instance
+     * @private
+     * @property {?string} _current_field_type - The type of the currently selected field (e.g., 'freetext', 'enum', 'date').
+     */
     _current_field_type:null, // type of input field
+    /**
+     * @memberof heurist.searchBuilderItem
+     * @instance
+     * @private
+     * @property {?jQuery} _predicate_input_ele - jQuery element for the `editing_input` widget used for value input.
+     */
     _predicate_input_ele:null,     // reference to editing_input
+    /**
+     * @memberof heurist.searchBuilderItem
+     * @instance
+     * @private
+     * @property {?jQuery} _predicate_reltype_ele - jQuery element for the relation type selector (if applicable).
+     */
     _predicate_reltype_ele:null,     // reference to relation type selector
 
+    /**
+     * @memberof heurist.searchBuilderItem
+     * @instance
+     * @private
+     * @property {?Array<Object>} _all_fields - Cached array of field definitions for "any record type" selection.
+     */
     _all_fields: null, // field cache for any record type
 
-    // the widget's constructor
+    /**
+     * @memberof heurist.searchBuilderItem
+     * @instance
+     * @private
+     * @description Widget creation method. Initializes the UI elements for the item.
+     */
     _create: function() {
 
         let that = this;
@@ -198,9 +248,13 @@ $.widget( "heurist.searchBuilderItem", {
         
     }, //end _create
     
-    //
-    //
-    //
+    /**
+     * @memberof heurist.searchBuilderItem
+     * @instance
+     * @description Changes the options for the widget and refreshes its state.
+     *              Specifically handles default comparison operator for term labels.
+     * @param {Object} ext_options - New options to apply.
+     */
     changeOptions: function(ext_options){
 
         if(ext_options.enum_field == 'term'){ // for term labels, default comparison to equals //ext_options.code != this.options.code && 
@@ -212,10 +266,13 @@ $.widget( "heurist.searchBuilderItem", {
         this._refresh();
     },
     
-    /*
-    * private function
-    * show/hide buttons depends on current login status
-    */
+    /**
+     * @memberof heurist.searchBuilderItem
+     * @instance
+     * @private
+     * @description Refreshes the UI elements of the item, particularly the field selector
+     *              and initializes the input elements based on the current field type.
+     */
     _refresh: function(){
 
         if(!this.options.hasFieldSelector){
@@ -271,12 +328,26 @@ $.widget( "heurist.searchBuilderItem", {
         }
 
     },
-    //
-    // custom, widget-specific, cleanup.
+    /**
+     * @memberof heurist.searchBuilderItem
+     * @instance
+     * @private
+     * @description Widget destruction method. (Currently empty).
+     */
     _destroy: function() {
 
     },
 
+    /**
+     * @memberof heurist.searchBuilderItem
+     * @instance
+     * @private
+     * @description Defines and initializes the input element (`editing_input`) for the currently selected field type.
+     *              It configures the `editing_input` based on the field's data type (e.g., text, date, enum, resource)
+     *              and sets up the available comparison operators.
+     * @param {string} [field_type] - The type of the field to define the input for. If not provided, it's determined
+     *                                from `this.options.dty_ID`.
+     */
     _defineInputElement: function( field_type ){
 
         if(this.options.code){
@@ -708,9 +779,12 @@ Whole value = EQUAL
         this.select_comparison.trigger('change');
     },
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.searchBuilderItem
+     * @instance
+     * @description Gets the hierarchical field code for the current item.
+     * @returns {string} The field code string.
+     */
     getCodes: function(){
         let codes = this.options.code.split(':');
         codes[codes.length-1] = this.options.dty_ID
@@ -718,9 +792,14 @@ Whole value = EQUAL
         return codes.join(':');
     },
     
-    //
-    //
-    //
+    /**
+     * @memberof heurist.searchBuilderItem
+     * @instance
+     * @description Gets the current values and operator for the item, formatted as a Heurist query predicate object.
+     * @returns {?Object} A predicate object (e.g., `{"f:123":"value"}` or `{"f:123:term":"search term"}`),
+     *                    or null if no value is set and the operator is not 'any' or 'NULL'.
+     *                    For relationship markers, it can return a more complex object like `{"related_to": [{"ids":"1,2"}, {"r":"3"}]}`.
+     */
     getValues: function(){
         if(this._predicate_input_ele){
             
@@ -869,9 +948,13 @@ Whole value = EQUAL
         }
     },
     
-    //
-    //
-    //    
+    /**
+     * @memberof heurist.searchBuilderItem
+     * @instance
+     * @private
+     * @description Event handler for when the selected field changes (if not using field selector button).
+     *              Updates `options.dty_ID` and redefines the input element.
+     */
     _onSelectField:function(){
 
         if(!(this.options.top_rty_ID>0)){        
@@ -882,7 +965,13 @@ Whole value = EQUAL
         
     },
     
-
+    /**
+     * @memberof heurist.searchBuilderItem
+     * @instance
+     * @private
+     * @description Manages the visibility and text of the conjunction selector ('and'/'or')
+     *              based on the number of values entered for the current field.
+     */
     _manageConjunction: function()
     {                
         this.select_conjunction.parent().find('.conj').remove(); //previous

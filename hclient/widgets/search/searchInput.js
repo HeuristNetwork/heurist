@@ -1,28 +1,58 @@
 /**
-* Simplified Search input form with possible preliminary filter
-* This widget is not used in main interface. It is listed aming available widgets in CMS
+* @file searchInput.js
+* @brief Simplified Search input form with possible preliminary filter.
+* @fileOverview This file defines the `heurist.searchInput` jQuery UI widget.
+* This widget provides a simplified search input interface. It can be used
+* in contexts where a less complex search input is required, such as within
+* the CMS or other specific parts of the Heurist application. It supports
+* preliminary filters, different search domains, and can interact with the
+* main search system.
+*
+* This widget is not used in main interface. It is listed among available widgets in CMS.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\search
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @note        Completely revised for Heurist version 4
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       5.0
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 /* global showSearchBuilder */
 
+/**
+ * @widget heurist.searchInput
+ * @description
+ * jQuery UI widget providing a simplified search input form.
+ * It can include a preliminary filter and supports various search domains.
+ * This widget is often used in specific contexts like the CMS rather than the main Heurist interface.
+ */
 $.widget( "heurist.searchInput", {
 
-    // default options
+    /**
+     * @memberof heurist.searchInput
+     * @instance
+     * @property {Object} options - Default options for the widget.
+     * @property {boolean} options._is_publication - (Private) Flag indicating if in publication mode.
+     * @property {?string} options.sup_filter - Additional filter to be applied to searches.
+     * @property {string} options.search_domain - Current search domain (e.g., 'a' for all, 'b' for bookmark).
+     * @property {?string} options.search_domain_set - Comma-separated list of allowed search domains.
+     * @property {string} options.search_button_label - Label for the search button.
+     * @property {string} options.search_input_label - Label for the search input field.
+     * @property {string} options.placeholder_text - Placeholder text for the search input textarea.
+     * @property {boolean} options.show_search_assistant - Whether to show the search assistant/builder button.
+     * @property {string} options.button_class - CSS class for buttons.
+     * @property {?string} options.preliminary_filter - A filter to apply by default on initialization.
+     * @property {boolean} options.suppress_default_search - If true, suppresses the default search action.
+     * @property {?function} options.onsearch - Callback function triggered when a search starts.
+     * @property {?function} options.onresult - Callback function triggered when search results are received.
+     * @property {?string} options.search_page - Target page for the search (used in CMS context).
+     * @property {?string} options.search_realm - Search realm for event scoping.
+     * @property {boolean} options.update_on_external_search - If true, updates the input value upon external search events.
+     * @property {boolean} options.append_all_to_search - If true, prepends "all:" to the search query if no other specifier is used.
+     */
     options: {
         _is_publication: false,
 
@@ -53,11 +83,27 @@ $.widget( "heurist.searchInput", {
         append_all_to_search: false // prepend all: to search
     },
 
+    /**
+     * @memberof heurist.searchInput
+     * @instance
+     * @property {?Object} query_request - Stores the last search query request object.
+     */
     query_request:null,
 
+    /**
+     * @memberof heurist.searchInput
+     * @instance
+     * @private
+     * @property {boolean} _is_publication - Internal flag indicating if in publication mode.
+     */
     _is_publication:false, //this is CMS publication - take css from parent
     
-    // the constructor
+    /**
+     * @memberof heurist.searchInput
+     * @instance
+     * @private
+     * @description Widget creation method. Initializes UI elements and event handlers.
+     */
     _create: function() {
         
         let that = this;

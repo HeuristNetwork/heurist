@@ -1,58 +1,60 @@
 /**
-* Main class for Heurist 
-*   it stores major config info
-*   local db definitions
-*   and provides methods to call server side 
+ * @file hapi.js
+ * @brief Core Heurist factory function and initialization logic.
+ * @fileOverview This file defines the main Heurist factory function. The hAPI object serves as
+ * the central hub for client-side Heurist operations. It manages configuration information (base URLs,
+ * database name, system info), handles localization, initializes and provides access to various managers
+ * (SystemMgr, RecordMgr, RecordSearch, EntityMgr, LayoutMgr), and includes the core `_callserver`
+ * method for AJAX communication with the Heurist server. It also defines global Heurist events and
+ * provides utility functions for user session management, preference handling, and image URL generation.
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 4.0
+ */
+ 
+/* global ActionHandler, HSystemMgr, HLayoutMgr */ 
+
+/**
+* Factory function for the Heurist objects.
+* Initializes and returns the central hAPI instance that manages client-side Heurist operations,
+* including configuration, localization, server communication, and access to various managers.
 *
-* Constructor:
-* @param _db - database name, if omit it takes from url parameter
-* @param _oninit - callback function, obtain parameter true if initialization is successeful
-* @returns hAPI Object
+* Properties:
+*    baseURL
+*    baseURL_pro
+*    iconBaseURL - url for record type icon (rty_ID to be added)
+*    database - current database name
+*    sysinfo
+*    is_publish_mode - false if Heurist is inited via main index.php and layout is not from the set of application (DH, EN, WebSearch)
 *
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-/* global ActionHandler, HSystemMgr */
-
-/*
-
-Properties:
-    baseURL
-    baseURL_pro
-    iconBaseURL - url for record type icon (rty_ID to be added)
-    database - current database name
-    sysinfo
-    is_publish_mode - false if Heurist is inited via main index.php and layout is not from the set of application (DH, EN, WebSearch)
-
-Localization routines (assigned to window.hWin)
-
-    HR  returns localized string
-    HRA = localize all elements with class slocale for given element
-    HRes = returns url or loads content for localized resource
-    HRJ = returns localized value for json (options in widget)
-
-LayoutMgr   HLayout object (@todo replace to new version from CMS)
-
-Classes for server interaction
-
-    SystemMgr - user credentials and system utilities
-    RecordMgr - Records SCRUD actions    
-    RecordSearch - wrapper for RecordMgr.search method
-    EntityMgr - SCRUD for database defenitions and user/groups
-
+* Localization routines (assigned to window.hWin)
+*
+*    HR  returns localized string
+*    HRA = localize all elements with class slocale for given element
+*    HRes = returns url or loads content for localized resource
+*    HRJ = returns localized value for json (options in widget)
+*
+* LayoutMgr   HLayout object (@todo replace to new version from CMS)
+*
+* Classes for server interaction
+*
+*    SystemMgr - user credentials and system utilities
+*    RecordMgr - Records SCRUD actions    
+*    RecordSearch - wrapper for RecordMgr.search method
+*    EntityMgr - SCRUD for database defenitions and user/groups
+* 
+* @constructor hAPI
+* @param {string} [_db] - The name of the database to connect to. If omitted, it's typically derived from the URL.
+* @param {function(boolean): void} [_oninit] - A callback function executed after initialization.
+*                                             Receives `true` if initialization is successful, `false` otherwise.
+* @param {string} [_baseURL] - Optional base URL for the Heurist server, used in embedded scenarios
+*                              where client and server locations differ. If omitted, it's auto-detected.
+* @returns {Object} The initialized hAPI instance with methods and properties for interacting with Heurist.
 */
 function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     const _className = "HAPI",
@@ -69,7 +71,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         _use_debug = true,
         
-        
        
         actionHandler = null;
                 
@@ -83,7 +84,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     * @param _oninit - callback function, obtain parameter true if initialization is successeful
     * @param _baseURL - defined for embed mode only when location of heurist client is differend from heurist server 
     *
-    */
+    */    
     function _init(_db, _oninit, _baseURL) { //, _currentUser) {
 
         that.SystemMgr = new HSystemMgr(that);
@@ -230,23 +231,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         }
         return _key_count;
     }
-    /**
-     * Signature for _callserver callback
-     * 
-     * A complete list of status codes can be found in `hclient/core/detectHeurist.js`.
-     * They are stored in `hWin.ResponseStatus` when Heurist is initialised in the window.
-     * 
-     * @callback callserverCallback
-     * @param {{status: string, message: string, data: Object}} response - server response
-     */
     
-    /**
-     * Request to Heurist server, specifying action to be taken
-     * @typedef {Object} Request
-     * @property {string} a - action to be performed
-     * @property {string=} db - database to be affected
-     */
-
     /**
      * internal function see HSystemMgr, HRecordMgr - ajax request to server
      *
@@ -256,7 +241,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
      * - `status`: a complete list of possible statuses can be found in `hclient/core/detectHeurist.js`
      * - `message`: error message or Ajax response
      * - `data`: data returned for request
-     */
+     */    
     function _callserver(action, request, callback, timeout=0) {
 
         _is_callserver_in_progress = true;
@@ -381,7 +366,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
      * @param {string} response.status - status code of the response, see hclient/core/detectHeurist.js
      * @param {(string|Array)=} response.affectedRty - comma-seperated list or array of record ids
      * @param {Function=} callback
-     */
+     */    
     function _triggerRecordUpdateEvent(response, callback) {
         if (response && response.status == window.hWin.ResponseStatus.OK) {
             // $Db is alias for HEURIST4.dbs, defined in hclient/core/utils_dbs.js
@@ -1286,6 +1271,12 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             }
         },
 
+        /**
+         * Removes a group from the current user's group list and optionally from system-wide group info.
+         * @param {number|string} groupID - The ID of the group to remove.
+         * @param {boolean} [isfinal=false] - If true, also removes the group from `HAPI4.sysinfo.db_usergroups`.
+         * @returns {void}
+         */
         currentUserRemoveGroup: function (groupID, isfinal) {
 
             if (window.hWin.HAPI4.currentUser['ugr_Groups'][groupID]) {
@@ -1303,6 +1294,10 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         // However, before start any action or open widget popup need to call 
         // SystemMgr.verify_credentials
 
+        /**
+         * Checks if the current user is a guest user.
+         * @returns {boolean} True if the current user is a guest, false otherwise.
+         */
         is_guest_user: function(){
              return window.hWin.HAPI4.currentUser && 
                     window.hWin.HAPI4.currentUser['ugr_Permissions'] && 

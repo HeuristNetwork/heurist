@@ -1,29 +1,72 @@
 /**
-* app_timemap.js - load map + timeline into an iframe in the interface.
-* This widget acts as a wrapper for viewers/map/map.php (leaflet)
-* 
-* app_timemap -> map.php -> mapping.js
-*
+* @file        app_timemap.js
+* @brief       Heurist Timemap application wrapper for Leaflet mapping.
+* @fileOverview This file provides the `heurist.app_timemap` jQuery UI widget.
+*              It acts as a controller and wrapper for the main mapping interface
+*              (map.php, which uses Leaflet and potentially the SIMILE Timemap library
+*              or similar timeline components). It handles loading the map and
+*              timeline into an iframe, manages record sets and selections for
+*              display, and listens to system events to refresh or update the map
+*              content. It supports dynamic loading of map data based on search
+*              results and selections within the Heurist interface.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\viewers
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-
+/**
+ * @widget heurist.app_timemap
+ * @description Manages the display of Heurist data on a map and timeline.
+ * This widget embeds an iframe containing the mapping interface (map.php),
+ * which utilizes Leaflet for map rendering and may include timeline components.
+ * It handles data loading, event listening for record selections and searches,
+ * and communication with the embedded map/timeline.
+ */
 $.widget( "heurist.app_timemap", {
 
-    // default options
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @property {Object} options - Default options for the widget.
+     * @property {?HRecordSet|Object} options.recordset - The primary record set to display on the map/timeline.
+     *           Can be an HRecordSet instance or an object defining a search query.
+     * @property {?Array<number>} options.selection - An array of record IDs to be highlighted or selected.
+     * @property {?Array<string>} options.layout - Deprecated. Defines visible components like 'header', 'map', 'timeline'.
+     *           Use `layout_params` instead.
+     * @property {boolean} [options.eventbased=true] - If true, the widget listens to global Heurist events
+     *           (e.g., search results, record selections) to update its display.
+     * @property {boolean} [options.tabpanel=false] - If true, indicates the widget is hosted within a tab panel,
+     *           adjusting its layout (e.g., top offset).
+     * @property {boolean} [options.leaflet=true] - Indicates that Leaflet is the mapping library used in the iframe.
+     * @property {?string} options.search_realm - A string identifier to scope event listening. Only events from
+     *           the same realm will be processed.
+     * @property {?string|number} options.search_initial - An initial query string or saved search ID (svs_ID)
+     *           to load data when the widget is first initialized.
+     * @property {boolean} [options.init_at_once=false] - If true, loads the base map and initial data immediately
+     *           upon widget creation. Useful for published views.
+     * @property {?Object} options.layout_params - Parameters passed to the underlying mapping.js to control
+     *           its layout and available controls.
+     * @property {?number} options.mapdocument - The ID of a map document record to load on initialization.
+     * @property {boolean} [options.preserveViewport=false] - If true, attempts to maintain the current map
+     *           viewport (zoom and center) when new data is loaded. Resets after each search.
+     * @property {boolean} [options.use_cache=false] - If true, attempts to use cached data for subsequent
+     *           requests after the initial data load, showing/hiding items instead of full reloads.
+     * @property {?function} options.onMapInit - Callback function triggered when the embedded map and
+     *           timeline interface (map.php) is fully loaded and initialized.
+     * @property {?Object} options.custom_links - An object specifying custom CSS and JavaScript file URLs
+     *           to be injected into the map iframe's document.
+     * @property {?Object|string} options.current_search_filter - An additional filter (query object or string)
+     *           to be applied to the main `recordset` before display.
+     * @property {boolean} [options.init_completed=false] - Internal flag set to true when the widget and
+     *           its embedded map are fully initialized.
+     * @property {boolean} [options.showCurrentResults=true] - If true, a "Current query" entry is shown
+     *           in the map's layer/dataset list.
+     */
     options: {
         recordset: null,
         selection: null, //list of record ids
@@ -57,20 +100,66 @@ $.widget( "heurist.app_timemap", {
         showCurrentResults: true // show 'Current query' within Result Sets
     },
 
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @private
+     * @property {?string} _events - A string concatenating Heurist event names that this widget listens to.
+     * Initialized in `_create`.
+     */
     _events: null,
 
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @private
+     * @property {boolean} recordset_changed - Flag indicating if the main `recordset` has changed
+     * and the map display needs to be updated.
+     */
     recordset_changed: true,
     
-    //whether mapping widget is inited (frame is loaded)
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @private
+     * @property {boolean} is_map_inited - Flag indicating if the embedded map (map.php) has been
+     * successfully loaded and initialized.
+     */
     is_map_inited: false,
     
-    //it is  set to true for addSearchResult to avoid multiple mapqueries @todo REVISE
-    map_curr_search_inited: false,  
-    map_cache_got: false, 
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @private
+     * @property {boolean} map_curr_search_inited - Flag related to whether the current search results
+     * have been processed and sent to the map.
+     * @todo Clarify exact purpose and lifecycle.
+     */
+    map_curr_search_inited: false,
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @private
+     * @property {boolean} map_cache_got - Flag indicating if map data has been cached.
+     * Related to `options.use_cache`.
+     */
+    map_cache_got: false,
 
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @private
+     * @property {number} map_resize_timer - Timer ID for debouncing map resize events.
+     */
     map_resize_timer: 0,
     
-    // the constructor
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @private
+     * @description Widget constructor. Initializes the iframe for the map, sets up event listeners
+     * if `options.eventbased` is true, and handles initial loading if `options.init_at_once` is true.
+     */
     _create: function() {
 
         let that = this;
@@ -238,13 +327,30 @@ $.widget( "heurist.app_timemap", {
     //
     //
     //
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @private
+     * @description Checks if the provided event data belongs to the same search realm as this widget.
+     * @param {Object} data - The event data object, expected to have a `search_realm` property.
+     * @returns {boolean} True if realms match or if realms are not defined for comparison, false otherwise.
+     */
     _isSameRealm: function(data){
         return (!this.options.search_realm && (!data || window.hWin.HEURIST4.util.isempty(data.search_realm)))
         ||
         (this.options.search_realm && (data && this.options.search_realm==data.search_realm));
     },
     
-    /* private function */
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @private
+     * @description Refreshes the map display. If the map iframe (`mapframe`) is already loaded,
+     * it calls `_initmap()`. Otherwise, it constructs the URL for map.php (the iframe source)
+     * with appropriate parameters based on widget options (like database, layout, map document ID,
+     * initial search query) and sets the iframe's `src` attribute to load it.
+     * This function is typically called when the widget becomes visible or when `recordset_changed` is true.
+     */
     _refresh: function(){
 
         if ( this.element.is(':visible') && this.recordset_changed) {  //to avoid reload if recordset is not changed
@@ -312,6 +418,15 @@ $.widget( "heurist.app_timemap", {
 
     },
     
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @private
+     * @description Reloads the map iframe. This is typically used when settings that affect
+     * the iframe's URL parameters (like `layout_params`) are changed.
+     * It shows a flash message, sets `recordset_changed` to true, and clears the iframe's `src`
+     * to force a reload on the next `_refresh` cycle.
+     */
     _reload_frame: function(){
         if(this.element.is(':visible')){
             
@@ -322,20 +437,32 @@ $.widget( "heurist.app_timemap", {
         }
     },
     
-    //
-    // called as soon as map.php is loaded into iframe and on _refresh (after search finished)
-    //
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @private
+     * @description Initializes the map by calling `_applyCurrentSearch` if the iframe is loaded.
+     * This function is called after map.php is loaded into the iframe or during a `_refresh`
+     * if the iframe was already loaded.
+     * @param {number} [cnt_call] - Legacy parameter, not actively used.
+     */
     _initmap: function( cnt_call ){
         if( !window.hWin.HEURIST4.util.isnull(this.mapframe) && this.mapframe.length > 0){
             this._applyCurrentSearch(); 
         }
 
-    }
+    },
     
-    //
-    // Event listener - it is called when mapping is fully loaded (basemap and mapdocuments are inited)
-    //
-    , onMapInit: function(){
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @description Callback function executed when the embedded map (map.php) signals that it
+     * has fully initialized. This function performs setup tasks that require the map
+     * to be ready, such as assigning event listeners for map selections and layer status changes.
+     * It also injects custom CSS/JS links if specified in `options.custom_links`.
+     * Finally, it calls `_applyCurrentSearch` to load initial data.
+     */
+    onMapInit: function(){
         
         //execte once - assign listeners
         if(!this.is_map_inited){ 
@@ -377,12 +504,18 @@ $.widget( "heurist.app_timemap", {
         
         // seach object on maps and timeline for current search
         this._applyCurrentSearch();
-    }
+    },
     
-    //
-    // seach object on maps and timeline for current search
-    //
-    ,_applyCurrentSearch: function(){
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @private
+     * @description Applies the current search results (defined in `options.recordset`) to the map.
+     * If `options.use_cache` is true and data has been cached, it may only update visibility.
+     * Otherwise, it calls the `addSearchResult` method of the embedded mapping widget.
+     * Sets `recordset_changed` to false after processing.
+     */
+    _applyCurrentSearch: function(){
     
             if(!this.is_map_inited){
                 return;
@@ -420,9 +553,19 @@ $.widget( "heurist.app_timemap", {
                     }
             }
             this.recordset_changed = false;
-    }
+    },
     
-    , updateDataset: function(data, dataset_name){
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @description Updates or adds a dataset to the map.
+     * @param {HRecordSet|Object} data - The record set or query object for the dataset.
+     * @param {string} dataset_name - The name to assign to this dataset in the map interface.
+     * @returns {boolean} True if the dataset was successfully passed to the map, false otherwise
+     * (e.g., if the map is not yet initialized). If mapping is not ready but `data` contains a query,
+     * it sets `options.search_initial` and triggers a refresh.
+     */
+    updateDataset: function(data, dataset_name){
         let mapping = null;
         if(this.mapframe[0].contentWindow){
             mapping = this.mapframe[0].contentWindow.mapping;
@@ -439,12 +582,18 @@ $.widget( "heurist.app_timemap", {
             
         }
         return false;
-    }
+    },
 
-    //
-    // highlight and zoom
-    //
-    , _doVisualizeSelection: function (selection) {
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @private
+     * @description Visualizes the current selection (from `options.selection`) on the map
+     * by calling `setFeatureSelection` on the embedded mapping widget.
+     * This usually involves highlighting and potentially zooming to the selected features.
+     * @param {Array<number>} selection - An array of record IDs to visualize.
+     */
+    _doVisualizeSelection: function (selection) {
 
         if(window.hWin.HEURIST4.util.isnull(this.options.recordset)) return;
 
@@ -460,12 +609,18 @@ $.widget( "heurist.app_timemap", {
             
             mapping.mapping('setFeatureSelection', this.options.selection, true);
         }
-    }
+    },
     
-    //
-    //  sends request for map data (json, kml or shp) and text file with links (to record view and hml) 
-    //
-    , _downloadLayerData: function (selection) {
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @private
+     * @description Initiates a download of map data for the selected layer(s).
+     * It calls the `getMapData` method on the specific layer object within the embedded map.
+     * @param {Array<number>} selection - An array of layer/record IDs for which to download data.
+     *                                    Typically contains a single layer ID.
+     */
+    _downloadLayerData: function (selection) {
 
         if(window.hWin.HEURIST4.util.isnull(this.options.recordset)) return;
 
@@ -483,12 +638,16 @@ $.widget( "heurist.app_timemap", {
             (layer_rec['layer']).getMapData();
             
         }        
-    }
+    },
 
-    //
-    // zoom to layer extent - selection - layer id 
-    //
-    , _zoomToLayer: function (selection) {
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @private
+     * @description Zooms the map to the extent of the specified layer.
+     * @param {Array<number>} selection - An array containing the ID of the layer to zoom to.
+     */
+    _zoomToLayer: function (selection) {
         
         if (this.mapframe[0].contentWindow.mapping && selection && selection.length>0) {
             let  mapping = this.mapframe[0].contentWindow.mapping;  
@@ -500,12 +659,19 @@ $.widget( "heurist.app_timemap", {
                 (layer_rec['layer']).zoomToLayer();    
             }
         }        
-    }
+    },
 
-    //
-    // show (expand) layer/dataset or hide it on map
-    //
-    , _setLayersVisibility: function (selection, mapdoc_ID, new_visiblity) {
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @private
+     * @description Sets the visibility of specified layers or items within a map document.
+     * @param {Array<number>|string} selection - An array of layer/record IDs, or a string like 'show_all'/'hide_all'.
+     * @param {number} mapdoc_ID - The ID of the map document context (0 for current/default).
+     * @param {boolean|Array<number>} new_visiblity - True to show, false to hide, or an array of specific
+     *                                                IDs to filter by (making only those visible).
+     */
+    _setLayersVisibility: function (selection, mapdoc_ID, new_visiblity) {
 
         if(!this.element.is(':visible')
             || window.hWin.HEURIST4.util.isnull(this.mapframe) || this.mapframe.length < 1){
@@ -523,11 +689,16 @@ $.widget( "heurist.app_timemap", {
             this.zoomToSelection( new_visiblity );
             
         }        
-    }
+    },
 
-    // events bound via _on are removed automatically
-    // revert other modifications here
-    , _destroy: function() {
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @private
+     * @description Cleans up the widget before it's removed. Unbinds global event listeners
+     * and removes the generated iframe and container elements.
+     */
+    _destroy: function() {
 
         this.element.off("myOnShowEvent");
         if(this._events)  $(this.document).off(this._events);
@@ -536,9 +707,15 @@ $.widget( "heurist.app_timemap", {
         this.mapframe.remove();
         this.framecontent.remove();
 
-    }
+    },
 
-    , loadanimation: function(show){
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @description Shows or hides a loading animation overlay on the map iframe.
+     * @param {boolean} show - True to show the loading animation, false to hide it.
+     */
+    loadanimation: function(show){
        
         if(show){
             this.mapframe.css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center');
@@ -547,37 +724,56 @@ $.widget( "heurist.app_timemap", {
            
             this.mapframe.css('background','none');
         }
-    }
+    },
 
     /**
-    * public method
+    * @memberof heurist.app_timemap
+    * @instance
+    * @description Public method to trigger a reload of the map iframe.
+    * Calls the private `_reload_frame` method.
     */
-
-    , reloadMapFrame: function(){
+    reloadMapFrame: function(){
         this._reload_frame();    
-    }
+    },
 
-    //leaflet
-    , zoomToSelection:function(selection, fly_params){
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @description Public method to zoom the map to a given selection.
+     * @param {Array<number>|Object} selection - The selection to zoom to (e.g., array of record IDs,
+     *                                           or an object defining bounds/features).
+     * @param {Object} [fly_params] - Optional parameters for "fly to" animation, if supported by the map.
+     */
+    zoomToSelection:function(selection, fly_params){
         let mapping = this.mapframe[0].contentWindow.mapping;
         if(mapping){
             mapping.mapping('zoomToSelection', selection, fly_params );
         }
-    }
+    },
 
-    //    
-    //
-    //
-    , getMapping: function(){
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @description Public method to get a reference to the underlying mapping widget instance
+     * from the iframe.
+     * @returns {?Object} The mapping widget instance, or null if not available.
+     */
+    getMapping: function(){
         if(this.mapframe[0].contentWindow){
             let map = this.mapframe[0].contentWindow.mapping;
             return map.mapping('instance');
         }else{
             return null;
         }
-    }
+    },
     
-    , isMapInited: function(){
+    /**
+     * @memberof heurist.app_timemap
+     * @instance
+     * @description Public method to check if the embedded map is fully initialized.
+     * @returns {boolean} True if the map is initialized, false otherwise.
+     */
+    isMapInited: function(){
         return this.is_map_inited;
     }
 

@@ -1,37 +1,23 @@
 /**
-* Search wrapper for HRecordMgr.search. 
-* It executes this method either callback or global events.
-* It allows to load entire set of records (incremental search by chunks has been disabled)
-* 
-* It searches for record IDS only. Rules are searched on server side
-* 
-* Three main methods
-* 
-* doSearchWithCallback - result is passed to provided callback function
-*
-* doSearch - before search it trigers global event ON_REC_SEARCHSTART
-*            on finish ON_REC_SEARCHFINISH and pass result as event data
-*            besides it keeps result in HAPI4.currentRecordset
-* 
-* doApplyRules - applies rules to existing result set (HAPI4.currentRecordset)
-* 
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @note        Completely revised for Heurist version 4
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+ * @file hRecordSearch.js
+ * @brief Provides a wrapper for record searching, supporting callbacks and global events.
+ * @fileOverview This file defines HRecordSearch, a factory function that creates a search manager for
+ * Heurist records. It wraps HAPI4.RecordMgr.search and offers different search execution modes:
+ * direct callback-based searches (_doSearchWithCallback), event-driven searches (_doSearch)
+ * that update global state (HAPI4.currentRecordset) and trigger ON_REC_SEARCHSTART / ON_REC_SEARCHFINISH
+ * events, and rule application to existing result sets (_doApplyRules). The search manager primarily
+ * focuses on fetching record IDs, with complex rule processing handled on the server. It also manages
+ * internal query request states and document contexts for event triggering.
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @note Completely revised for Heurist version 4
+ * @since 4.0
+ */
 
 /**
  * @constructor HRecordSearch
@@ -79,7 +65,7 @@ function HRecordSearch() {
      *        Receives an `HRecordSet` instance on success, or `null` on failure or if the response indicates an error.
      * @returns {void}
      */
-    function _doSearchWithCallback( request, callback ){
+     function _doSearchWithCallback( request, callback ){
         
         window.hWin.HAPI4.RecordMgr.search(request,
             function(response){
@@ -115,7 +101,7 @@ function HRecordSearch() {
      * @property {string} [request.search_realm] - An optional realm to scope the search and results.
      *                                            If empty, `HAPI4.currentRecordset` is updated.
      * @returns {void}
-     */
+     */    
     function _doSearch( originator, request ){
         
             let owner_element_id, owner_doc_context; // Renamed owner_doc to avoid conflict with global _owner_doc
@@ -184,7 +170,7 @@ function HRecordSearch() {
      * @property {string} response.status - The status of the response (e.g., from `window.hWin.ResponseStatus`).
      * @property {Object} [response.data] - The data payload, containing record IDs and potentially other info like `memory_warning`.
      * @returns {void}
-     */
+     */    
     function _onSearchResult(response){
             let recordset = null;
             // Ensure the response corresponds to a known query request
@@ -260,7 +246,7 @@ function HRecordSearch() {
      *                             (Server-side interpretation of this parameter).
      * @param {string} [search_realm] - Optional search realm for this rule application.
      * @returns {boolean} `true` if rules were applied (i.e., currentRecordset existed and was not empty), `false` otherwise.
-     */
+     */    
     function _doApplyRules( originator, rules, rulesonly, search_realm ){
         
         // Check if there's a current recordset with records to apply rules to

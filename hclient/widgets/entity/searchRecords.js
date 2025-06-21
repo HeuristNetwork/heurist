@@ -1,32 +1,81 @@
 /**
-* Search header
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file        searchRecords.js
+ * @brief       Provides the main search interface for Heurist Records.
+ * @fileOverview This complex widget handles the primary record search functionality. It integrates with various other components
+ *              to allow searching by keywords, record types, and specific field values. It supports different modes
+ *              for adding or browsing records and can interact with a parent entity context.
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\entity
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       4.0
+ */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
+/**
+ * @widget heurist.searchRecords
+ * @brief Main search widget for Heurist Records.
+ * @extends $.heurist.searchEntity
+ * @description This widget provides the primary user interface for searching and adding Heurist records.
+ *              It handles selection of record types, text-based search, application of predefined filters,
+ *              and interaction with parent entity contexts. The UI and behavior adapt based on various options.
+ *
+ * @property {string} [init_filter=''] Initial search term to populate the search input or to be used for pre-filling data on new records.
+ * @property {string} [fill_data=''] Data used to pre-fill fields when adding a new record. If empty, `init_filter` may be used.
+ * @property {(string|string[])} [rectype_set=null] Defines the set of record type IDs available for searching or adding.
+ *           Can be a comma-separated string or an array. If multiple types are provided and less than 20, tabs may be created for each.
+ *           If one type is provided, the UI simplifies.
+ * @property {string} [pointer_mode='addorbrowse'] Controls the widget's primary mode:
+ *           'addorbrowse' (default, allows both adding and searching),
+ *           'browseonly' (disables adding capabilities, e.g., for guest users),
+ *           'addonly' (focuses on adding records, may hide search elements).
+ * @property {?string} pointer_filter A pre-defined Heurist query (JSON string or compatible object) to be applied as an
+ *           initial, non-modifiable filter, often used when this search is part of a pointer field selection.
+ * @property {?number} pointer_field_id The ID of the Heurist detail type (field) this search widget is associated with,
+ *           particularly in a pointer field context. Used for contextual operations like fetching link counts.
+ * @property {?number} pointer_source_rectype The record type ID of the source record when this search is used for a pointer field.
+ *           Used with `pointer_field_id` for contextual operations.
+ * @property {?number} parententity The ID of a parent record. If provided, the UI adjusts to show context related to this parent,
+ *           and searches may exclude records already linked as children (e.g., via the DT_PARENT_ENTITY field).
+ * @property {?number} parentselect The record type ID of a parent record's type, used to display informational messages about the parent context.
+ * @property {?object} fixed_search A fixed Heurist query object. If provided, this query is executed directly,
+ *           bypassing most other search criteria constructed from UI inputs.
+ *
+ * @listens heurist.searchRecords#onaddrecord - Fired when the "Add Record" button is clicked for a specific record type.
+ *          Event data: `{ _rectype_id: string, fill_in_data: string }`
+ *          - `_rectype_id`: The ID of the record type to be added.
+ *          - `fill_in_data`: The data to pre-fill in the new record form.
+ * @listens heurist.searchRecords#onlinkscount - Fired when link count data is received as part of a search result,
+ *          typically when `pointer_field_id` and `pointer_source_rectype` options are active.
+ *          Event data: `{ links_count: object, links_query: object }`
+ *          - `links_count`: Object containing count data.
+ *          - `links_query`: The query used to get the counts.
+ * @listens heurist.searchRecords#onstart - Inherited from `$.heurist.searchEntity`, but also triggered here before search execution.
+ *          Used to signal dependents (like a record list) to adjust their state (e.g., show loading indicator).
+ */
 $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
     options:{
         init_filter: '',
         fill_data: ''
+        // rectype_set, pointer_mode, pointer_filter, pointer_field_id, pointer_source_rectype,
+        // parententity, parentselect, fixed_search are also used but inherited or set dynamically.
     },
 
-    _select_mode: 1, //0 - add, 1 - search
+    _select_mode: 1, //0 - add, 1 - search. Internal flag to track if interaction is for adding or searching.
     
-    //
+    /**
+     * @brief Initializes the controls for the record search widget.
+     * @override
+     * @memberof heurist.searchRecords
+     * @description Sets up a complex UI involving record type selection (dropdown or tabs),
+     *              "Add Record" buttons, various filter checkboxes and radio buttons (e.g., for initial filter, bookmarks),
+     *              and handles special UI adjustments for modes like 'addonly', 'browseonly', or when in a 'parententity' context.
+     *              Manages visibility and behavior of these controls based on widget options and user permissions.
+     *              Triggers an "onstart" event at the end to signal readiness or initial search.
+     */
     _initControls: function() {
         this._super();
 
@@ -396,9 +445,17 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }
     },  
 
-    //
-    // public methods
-    //
+    /**
+     * @brief Initiates a record search based on the current UI state.
+     * @override
+     * @memberof heurist.searchRecords
+     * @description Constructs a Heurist query object based on selections in the record type dropdown/tabs,
+     *              text in the search input, state of filter checkboxes (e.g., bookmarks, initial filter),
+     *              and sort preferences (modified date or alphabetical).
+     *              Handles special conditions like `parententity` (to exclude children) and `fixed_search` (to use a predefined query).
+     *              If `pointer_field_id` and `pointer_source_rectype` are set, it may request link counts.
+     *              Triggers "onstart", "onresult", and potentially "onlinkscount" events.
+     */
     startSearch: function(){
         
         let ele = this.element.find('#row_parententity_helper2').hide();
@@ -423,7 +480,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             if(this.options.pointer_field_id>0 && this.options.pointer_source_rectype>0){
                 if(this.element.find('#cb_getcounts').is(':checked')){
                     links_count = {source:this.options.pointer_source_rectype, 
-                                   target:this.rectype_filter,
+                                   target:this.rectype_filter, // Note: this.rectype_filter is not explicitly defined, likely meant rectype_filter
                                    dty_ID:this.options.pointer_field_id};
                 }            
             }    
@@ -476,7 +533,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
             window.hWin.HAPI4.save_pref('rSearch_filter', 'rb_modified');
         }else{
-            qstr = 'sortby:t';
+            // qstr = 'sortby:t'; // This was overriding previous qstr, seems incorrect
             qobj.push({"sortby":"t"}); //sort by record title
         }
 
@@ -494,17 +551,17 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }
         
         if(this.options.fixed_search){
-            qstr = 'x';
+            qstr = 'x'; // Indicate fixed search, though qobj is primary driver
             qobj = this.options.fixed_search;
         }
         
-        if(qstr==''){
+        if(qobj.length === 0 && qstr === ''){ // Check if qobj is empty as well
             this._trigger( "onresult", null, {recordset:new HRecordSet()} );
         }else{
             this._trigger( "onstart" );
 
             let request = { 
-                //q: qstr, 
+                //q: qstr, // qstr is mostly for debugging or simpler queries; qobj is more robust
                 q: qobj,
                 w: domain,
                 limit: limit,

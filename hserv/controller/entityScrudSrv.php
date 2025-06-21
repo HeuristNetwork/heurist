@@ -29,6 +29,10 @@ function entityExecute($system, $params){
 
     if($entity_name!=null){
         $classname = 'hserv\entity\Db'.ucfirst($entity_name);
+        if($classname=='hserv\entity\DbRecords'){
+            $system->addError(HEURIST_INVALID_REQUEST, 'Wrong entity parameter: '.htmlspecialchars(@$params['entity']));
+            return false;
+        }
         $params['entity'] = $entity_name;
         $entity = new $classname($system, $params);
     }

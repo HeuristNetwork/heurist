@@ -1,25 +1,56 @@
 /**
-* Menu for result list
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file resultListMenu.js
+ * @brief Manages and displays a context-sensitive menu for actions related to a result list.
+ * @fileOverview
+ * This file defines the `heurist.resultListMenu` jQuery UI widget. This widget is responsible
+ * for creating and managing a set of dropdown menus that provide actions applicable to a list
+ * of records (typically a `heurist.resultList`). The menu items can be context-sensitive,
+ * for example, depending on user permissions, selection state, or the number of collected items.
+ * Actions include operations on selected records (e.g., tagging, deleting, batch editing),
+ * managing collected items (e.g., adding from selection, clearing, saving), and other
+ * data manipulation tasks like recoding or sharing. The widget listens to global Heurist events
+ * to update its state and the availability of menu items.
+ *
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\widgets\viewers
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 4.0
+ */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
+/**
+ * @widget heurist.resultListMenu
+ * @description A widget that creates and manages a set of context-sensitive dropdown menus
+ * for performing actions on records from a result list. Actions can include operations on
+ * selected records, collected items, and general data manipulations.
+ *
+ * @example
+ * $('#myMenuContainer').resultListMenu({
+ *     resultList: $('#myResultListWidget'), // Reference to the associated result list
+ *     is_h6style: true // Apply H6 styling for menu items
+ * });
+ */
 $.widget( "heurist.resultListMenu", {
 
-    // default options
+    /**
+     * @typedef {object} heurist.resultListMenu.options
+     * @description Options for configuring the resultListMenu widget.
+     * @property {boolean} [is_h6style=false]
+     *  If true, applies styling to the menu items to resemble H6 headings, making them larger.
+     *  Otherwise, a default, slightly smaller font size is used.
+     * @property {string|null} [menu_class=null]
+     *  An optional CSS class to be added to the main element of the widget for custom styling.
+     * @property {jQuery|null} [resultList=null]
+     *  A jQuery object representing the `heurist.resultList` widget to which this menu is related.
+     *  This is used to access options like `search_realm` and to trigger actions on the result list.
+     * @property {string|null} [search_realm=null]
+     *  The search realm associated with this menu. If a `resultList` is provided,
+     *  this option is typically derived from the `resultList`'s `search_realm`. Used for
+     *  filtering global events.
+     */
     options: {
         is_h6style: false,
         // callbacks
@@ -28,10 +59,35 @@ $.widget( "heurist.resultListMenu", {
         search_realm: null
     },
 
+    /**
+     * @property {object} _query_request
+     * @private
+     * @description Stores the current query request object associated with the result list.
+     * This is typically updated by the `ON_REC_SEARCHSTART` event and used when actions
+     * like reloading the search are performed.
+     */
     _query_request: {},   //keep current query request
+    /**
+     * @property {heurist.HRecordSet|null} _selection
+     * @private
+     * @description Stores the current set of selected records (as an HRecordSet or similar object)
+     * from the associated result list. This is updated by the `ON_REC_SELECT` event and used
+     * by actions that operate on selected items.
+     */
     _selection: null,     //current set of selected records (not just ids)
 
-    // the widget's constructor
+    /**
+     * @function _create
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @private
+     * @description Initializes the widget. Sets up the main menu container and initializes
+     * individual menu sections (Selected, Collected, Recode, Shared, Reorder) by calling `_initMenu`.
+     * Applies styling based on `options.is_h6style` and `options.menu_class`.
+     * Binds listeners to global Heurist events (credentials, search start, collection updates, selection changes)
+     * to refresh the menu state and update internal properties like `_query_request` and `_selection`.
+     * Triggers an initial refresh and an update of the collection display.
+     */
     _create: function() {
 
         let that = this;
@@ -113,9 +169,17 @@ $.widget( "heurist.resultListMenu", {
 
     }, //end _create
 
-    //
-    //
-    //
+    /**
+     * @function _isSameRealm
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @private
+     * @description Checks if the widget's current search realm matches the realm from incoming event data.
+     * This is used to ensure the widget only responds to events relevant to its configured context.
+     * An empty or null realm on either side is considered a match for broader compatibility.
+     * @param {object} data Event data, expected to have a `search_realm` property.
+     * @returns {boolean} True if the realms are considered the same, false otherwise.
+     */
     _isSameRealm: function(data){
         return (!this.options.search_realm && (!data || window.hWin.HEURIST4.util.isempty(data.search_realm)))
         ||
@@ -123,21 +187,40 @@ $.widget( "heurist.resultListMenu", {
     },
 
     
-    // Any time the widget is called with no arguments or with only an option hash,
-    // the widget is initialized; this includes when the widget is created.
+    /**
+     * @function _init
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @private
+     * @description Post-creation initialization. Currently empty, but can be used for tasks
+     * that need to run after the widget is created and DOM elements are in place.
+     */
     _init: function() {
 
     },
-    //Called whenever the option() method is called
-    //Overriding this is useful if you can defer processor-intensive changes for multiple option change
+
+    /**
+     * @function _setOptions
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @private
+     * @description Called when options are set on the widget. Uses `_superApply` to call the base
+     * widget's method, ensuring proper option handling.
+     * @param {object} options An object containing option key-value pairs to set.
+     */
     _setOptions: function( ) {
         this._superApply( arguments );
     },
 
-    /*
-    * private function
-    * show/hide buttons depends on current login status
-    */
+    /**
+     * @function _refresh
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @private
+     * @description Refreshes the visibility and enabled state of menu items based on user login status
+     * and administrative privileges. Shows or hides menu items marked with `logged-in-only` class
+     * and enables/disables items based on `data-user-admin-status` attributes.
+     */
     _refresh: function(){
 
         if(window.hWin.HAPI4.has_access()){
@@ -183,8 +266,15 @@ $.widget( "heurist.resultListMenu", {
             this['menu_Recode'].find('.logged-in-only:not([data-user-experience-level])').hide();			
         }
     },
-    //
-    // custom, widget-specific, cleanup.
+
+    /**
+     * @function _destroy
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @private
+     * @description Cleans up the widget upon removal. Unbinds global event listeners and removes
+     * all DOM elements created by the widget (menu buttons and their associated dropdown menus).
+     */
     _destroy: function() {
 
         $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS+' '
@@ -193,7 +283,7 @@ $.widget( "heurist.resultListMenu", {
             +window.hWin.HAPI4.Event.ON_REC_SELECT); 
 
         // remove generated elements
-        if(this.btn_Search){
+        if(this.btn_Search){ // btn_Search is not initialized in _create, this check prevents errors.
             this.btn_Search.remove();
             this.menu_Search.remove();
         }
@@ -205,13 +295,25 @@ $.widget( "heurist.resultListMenu", {
         this.menu_Recode.remove();
         this.btn_Shared.remove();
         this.menu_Shared.remove();
-        this.btn_Reorder.remove();
+        if (this.btn_Reorder) this.btn_Reorder.remove(); // Check if Reorder button exists
         this.divMainMenuItems.remove();
     },
 
-    //
-    //
-    //
+    /**
+     * @function _initMenu
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @private
+     * @description Initializes a top-level menu button and its associated dropdown menu.
+     * Creates the button, loads its dropdown content from an HTML file (e.g., `resultListMenuSelected.html`),
+     * sets up hover and click handlers for showing/hiding the dropdown, and initializes the
+     * dropdown as a jQuery UI menu. Handles localization of menu item text and tooltips.
+     * @param {string} name The base name for the menu (e.g., "Selected", "Collected"). Used to
+     * generate element IDs and load the corresponding HTML file.
+     * @param {string} [menu_label] Optional label for the menu button. If not provided, `name` is used.
+     * @param {number} [competency_level] Optional competency level for the menu button. If provided,
+     * the button may be hidden based on the user's competency level settings.
+     */
     _initMenu: function(name, menu_label, competency_level){
 
         let that = this;
@@ -353,7 +455,17 @@ $.widget( "heurist.resultListMenu", {
         
     },
 
-
+    /**
+     * @function menuActionHandler
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @description Handles click events on individual menu items within the dropdowns.
+     * Dispatches to appropriate actions based on the menu item's ID.
+     * Actions include selection manipulation (select all/none, show selection),
+     * record operations (tagging, bookmarking, deleting, ownership, batch editing),
+     * collection management (add, remove, clear, show, save), and subset operations.
+     * @param {string} action The ID of the clicked menu item, used to determine the action.
+     */
     menuActionHandler: function(action){
 
         let that = this;
@@ -616,9 +728,14 @@ $.widget( "heurist.resultListMenu", {
         }
     },
 
-    //
-    //
-    // 
+    /**
+     * @function reloadSearch
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @description Reloads the current search. If a new query string is provided, it updates
+     * the internal `_query_request`. It then triggers a new search using `HAPI4.RecordSearch.doSearch`.
+     * @param {string} [query] Optional new query string to execute.
+     */
     reloadSearch: function(query){
 
         if(!window.hWin.HEURIST4.util.isempty(query)){
@@ -630,17 +747,30 @@ $.widget( "heurist.resultListMenu", {
         window.hWin.HAPI4.RecordSearch.doSearch( this, this._query_request );
     },
     
-    //
-    // clean details for current recordset and force refresh current page
-    // it will be faster than perform search again
-    //
+    /**
+     * @function reloadPage
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @description Placeholder function intended to clean details for the current recordset
+     * and force a refresh of the current page. Currently not implemented.
+     * @todo Implement page reload logic.
+     */
     reloadPage: function(){
     
     },
     
-    //
-    //
-    //
+    /**
+     * @function getSelectionIds
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @description Retrieves the IDs of the currently selected records.
+     * If a message is provided and no records are selected, it displays the message.
+     * If a limit is provided and the selection exceeds it, it displays a message.
+     * @param {string} [msg] Optional message to display if no records are selected.
+     * @param {number} [limit] Optional limit on the number of selected records.
+     * @returns {Array<number>|null} An array of selected record IDs, or null if no records are
+     * selected (and `msg` was provided) or if a limit was exceeded.
+     */
     getSelectionIds: function(msg, limit){
 
         let recIDs_list = [];
@@ -660,6 +790,14 @@ $.widget( "heurist.resultListMenu", {
     },
 
     //-------------------------------------- EMAIL FORM -------------------------------
+    /**
+     * @function openEmailForm
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @description Opens a dialog for sending a bulk email to contacts derived from the
+     * currently selected records. Ensures records are selected before proceeding.
+     * The selected record IDs are passed to the email form via `window.hWin.HAPI4.selectedRecordIds`.
+     */
     openEmailForm: function() {
         // Selection check
         let ids = this.getSelectionIds('resultList_select_record');
@@ -676,18 +814,40 @@ $.widget( "heurist.resultListMenu", {
 
     //-------------------------------------- SELCT ALL, NONE, SHOW -------------------------------
 
+    /**
+     * @function selectAll
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @description Selects all records in the current result set context.
+     * Updates the internal `_selection` and triggers a global `ON_REC_SELECT` event.
+     */
     selectAll: function(){
         this._selection = window.hWin.HAPI4.getSelection('all', false);
         $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
             {selection:"all", source:this.element.attr('id'), search_realm:this.options.search_realm} );
     },
 
+    /**
+     * @function selectNone
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @description Clears the current selection. Sets `_selection` to null and triggers
+     * a global `ON_REC_SELECT` event with a null selection.
+     */
     selectNone: function(){
         this._selection = null;
         $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
             {selection:null, source:this.element.attr('id'), search_realm:this.options.search_realm} );
     },
 
+    /**
+     * @function selectShow
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @description Triggers a global `ON_REC_SELECT` event to show only the currently
+     * selected items in the associated result list (by setting `subset_only: true`).
+     * This typically filters the result list to display only the `_selection`.
+     */
     selectShow: function(){
         if(this._selection!=null){
             let recIDs_list = this._selection.getIds();
@@ -698,6 +858,13 @@ $.widget( "heurist.resultListMenu", {
         }
     },
 
+    /**
+     * @function selectShowNewTab
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @description Opens a new browser tab displaying the currently selected records.
+     * Constructs a URL with the selected record IDs.
+     */
     selectShowNewTab: function(){
         if(this._selection!=null){
             let recIDs_list = this._selection.getIds();
@@ -709,9 +876,15 @@ $.widget( "heurist.resultListMenu", {
     },
 
     //-------------------------------------- COLLECTIONS -------------------------------
-    //
-    // render counter
-    //
+
+    /**
+     * @function collectionRender
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @description Updates the label of the "Collected" menu button to reflect the current
+     * number of items in the collection.
+     * @param {Array<number>} _collection An array of record IDs representing the current collection.
+     */
     collectionRender: function(_collection) {
         
         this.menu_Collected_link.html( 
@@ -720,6 +893,14 @@ $.widget( "heurist.resultListMenu", {
     },
 
     //-------------------------------------- RELATION, MERGE -------------------------------
+    /**
+     * @function fixDuplicatesPopup
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @description Opens a dialog for merging duplicate records. Requires at least two records
+     * to be selected. If prerequisites are met, it opens the `combineDuplicateRecords.php`
+     * admin tool in a dialog. Reloads the search upon dialog close if changes were made.
+     */
     fixDuplicatesPopup: function(){
 
         let recIDs_list = this.getSelectionIds(null);
@@ -745,6 +926,14 @@ $.widget( "heurist.resultListMenu", {
     },
 
     
+    /**
+     * @function isResultSetEmpty
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @description Checks if the current result set (globally available via `window.hWin.HAPI4.getSelection("all", true)`)
+     * is empty. Displays a message if it is.
+     * @returns {boolean} True if the result set is empty, false otherwise.
+     */
     isResultSetEmpty: function(){
         let recIDs_all = window.hWin.HAPI4.getSelection("all", true);
         if (window.hWin.HEURIST4.util.isempty(recIDs_all)) {
@@ -757,9 +946,20 @@ $.widget( "heurist.resultListMenu", {
     
 
     //------ ADD, REPLACE, DELETE FIELD VALUES, CHANGE RECTYPE -------------------------------
-    //
-    //  MAIN  in use 
-    //  
+
+    /**
+     * @function detailBatchEditPopup
+     * @memberof heurist.resultListMenu
+     * @instance
+     * @description Opens a dialog for performing various batch edit actions on record details.
+     * Ensures that the result set is not empty before proceeding.
+     * The specific action is determined by `action_type`.
+     * @param {string} action_type The type of batch action to perform (e.g., 'add_detail',
+     * 'replace_detail', 'url_to_file', 'rectype_change'). This determines the content/script
+     * loaded into the dialog.
+     * @param {Function} [callback] Optional callback function to execute after the dialog closes.
+     * Default callback may set a flag to refresh tags.
+     */
     detailBatchEditPopup: function(action_type, callback) {
         
         if(this.isResultSetEmpty()) return;

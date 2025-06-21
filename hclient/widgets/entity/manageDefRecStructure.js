@@ -1,22 +1,36 @@
 /**
-* manageDefRecStructure.js - main widget to manage record type structure
-*
+* @file manageDefRecStructure.js
+* @brief Manages Record Type Structure definitions.
+* @fileOverview Provides a UI for defining and managing the structure of Record Types. This includes adding, removing, and reordering fields (Detail Types) within a Record Type, and configuring their display properties (e.g., tab, group, order).
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
+
+/**
+ * @widget heurist.manageDefRecStructure
+ * @brief Widget for managing the structure of Record Types.
+ * @extends $.heurist.manageEntity
+ * @property {number} rty_ID The ID of the Record Type whose structure is being managed. Defaults to 4 if not provided.
+ * @property {number} [rec_ID_sample=-1] The ID of a sample record to load in the preview.
+ * @property {?jQuery} external_preview A jQuery element to use as an external preview area. If provided, influences layout.
+ * @property {string} [default_palette_class='ui-heurist-design'] Default palette class for the widget.
+ * @property {string} [layout_mode='short'] The layout mode for the widget. Can be complex HTML if `external_preview` is used.
+ * @property {boolean} [use_cache=true] Whether to use caching for entity data.
+ * @property {number} [edit_height=640] Default height of the edit area/dialog.
+ * @property {number} [edit_width=640] Default width of the edit area/dialog.
+ * @property {number} [width=1200] Default width of the widget.
+ * @property {number} [height=640] Default height of the widget.
+ * @property {string} [edit_mode='inline'] Default edit mode. Can also be 'editonly'.
+ * @property {?jQuery} external_toolbar If provided, the widget will use this element to render its toolbar buttons, particularly when integrated with another editor like `manageRecords`.
+ */
 $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     
 //specific options
@@ -50,9 +64,14 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
     create_sub_record: false, // is the new field for creating sub records (child record(s)) automatically
     
-    //
-    //
-    //    
+    /**
+     * @brief Initializes the manageDefRecStructure widget.
+     * @memberof heurist.manageDefRecStructure
+     * @override
+     * @description Sets up default options, including palette, record ID sample, record type ID,
+     * layout mode (which can be complex depending on `external_preview`), and dimensions.
+     * Calls the parent's `_init` method.
+     */
     _init: function() {
         
         this.element.addClass(this._entityName); //to find all exisiting editors in application
@@ -141,9 +160,16 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     },
     
     
-    //  
-    // invoked from _init after load entity config    
-    //
+    /**
+     * @brief Initializes the controls for the widget after entity configuration is loaded.
+     * @memberof heurist.manageDefRecStructure
+     * @override
+     * @description Sets up user preferences, handles 'editonly' mode, updates dialog title,
+     * configures UI layout (potentially using jQuery UI Layout if `external_preview` is not set),
+     * initializes the record list and tree view, and sets up event listeners for UI interactions
+     * like downloading structure or calculating field usage.
+     * @returns {boolean} False if the parent's `_initControls` fails, otherwise true.
+     */
     _initControls: function() {
         
         if(!this._super()){
@@ -338,9 +364,14 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     },            
     
     
-    //
-    // Inits or reloads rt structure treeview
-    //
+    /**
+     * @brief Initializes or reloads the record type structure tree view (FancyTree).
+     * @memberof heurist.manageDefRecStructure
+     * @description Constructs tree data from the cached recordset (`_cachedRecordset`),
+     * handling separators and group structures (tabs, accordions). Initializes or reloads
+     * the FancyTree instance with click, dblclick, activate, and dnd (drag and drop) handlers
+     * for managing field order and properties.
+     */
     _initTreeView: function(){
         
         let recset = this._cachedRecordset;
@@ -596,9 +627,14 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this.__updateActionIcons(500);
     },
     
-    //
-    //add and init action icons
-    //
+    /**
+     * @brief Updates action icons for all nodes in the tree view, typically after a delay.
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @param {number} [delay=1] Delay in milliseconds before updating icons.
+     * @description Iterates through tree nodes and calls `__defineActionIcons` for each.
+     * Also triggers field usage calculation if conditions are met.
+     */
     __updateActionIcons: function(delay){ 
         
         if(!(delay>0)) delay = 1;
@@ -614,9 +650,16 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }, delay);
     },
 
-    //
-    // for treeview on mouse over toolbar
-    //
+    /**
+     * @brief Defines and initializes action icons (e.g., delete) for a single tree node.
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @param {jQuery} item The tree node list item (li) element.
+     * @description Adds a context menu div with delete (and potentially other) actions
+     * to the tree node if not already present. Sets up event handlers for these actions
+     * and mouseenter/mouseleave to show/hide the menu and field tooltips.
+     * Also adds a placeholder for displaying field data counts.
+     */
     __defineActionIcons: function(item){ 
         if($(item).find('.svs-contextmenu3').length==0){
             
@@ -778,9 +821,15 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }
     },
     
-    //
-    // init popup menu for repeatability and requirement
-    //
+    /**
+     * @brief Initializes a popup menu for field properties like repeatability and requirement.
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @param {string} name The type of menu to initialize ('req' for requirement, 'rep' for repeatability).
+     * @description Creates a jQuery UI menu with options based on the `name`.
+     * Handles selection to update the corresponding field property (`rst_MaxValues` or `rst_RequirementType`)
+     * and saves the changes.
+     */
     _initMenu: function(name){
 
         let that = this;
@@ -868,7 +917,12 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
     },
     
-        //show hide function
+    /**
+     * @brief Hides a specified menu element after a short delay.
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @param {jQuery} ele The menu element to hide.
+     */
     _hideMenu: function(ele) {
             this._menuTimeoutId = setTimeout(function() {
                 $( ele ).hide();
@@ -876,6 +930,14 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
            
     },
     
+    /**
+     * @brief Shows a specified menu element, positioning it relative to a parent element.
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @param {jQuery} ele The menu element to show.
+     * @param {jQuery} parent The parent element to position the menu against.
+     * @returns {boolean} False to prevent default event behavior.
+     */
     _showMenu: function(ele, parent) {
             clearTimeout(this._menuTimeoutId);
             
@@ -889,10 +951,16 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     },
     
     
-    //----------------------
-    // list view is not visbile - we show everything in treeview
-    //
-    //
+    /**
+     * @brief Renders a single item in the record list.
+     * @memberof heurist.manageDefRecStructure
+     * @override
+     * @description This implementation is minimal as the primary display is the tree view.
+     * It constructs a basic HTML representation of a record structure item.
+     * @param {HRecordSet} recordset The recordset.
+     * @param {object} record The record object.
+     * @returns {string} HTML string for the list item.
+     */
     _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){
@@ -951,14 +1019,27 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
     },
     
+    /**
+     * @brief Updates the record list and selects the current record.
+     * @memberof heurist.manageDefRecStructure
+     * @override
+     * @param {Event} event The event that triggered the update.
+     * @param {object} data Data containing the recordset.
+     */
     updateRecordList: function( event, data ){
         this._super(event, data);
         this.selectRecordInRecordset();
     },
         
-    //
-    // can remove group with assigned fields
-    //     
+    /**
+     * @brief Deletes a field from the record type structure.
+     * @memberof heurist.manageDefRecStructure
+     * @override
+     * @param {boolean} unconditionally If true, deletes without confirmation.
+     * @param {boolean} [delete_data=false] If true, also attempts to delete associated data for the field (admin only).
+     * @description Handles deletion of a field from the structure. Prompts for confirmation.
+     * If `delete_data` is true and user is admin, it will also delete field data from records.
+     */
     _deleteAndClose: function(unconditionally, delete_data=false){
     
         let that = this;
@@ -997,10 +1078,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgFlash('All data deleted', 1000);
                                 }
-                                that._afterDeleteEvenHandler( recID );
+                                that._afterDeleteEventHandler( recID );
                             });
                         }else{
-                            that._afterDeleteEvenHandler( recID );
+                            that._afterDeleteEventHandler( recID );
                         }
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -1046,9 +1127,15 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         return (node || this.editForm.is(':visible')) && this._editing.isModified();
     },
     
-    //
-    // set visibility of buttons on toolbar (depends on isModified)
-    //
+    /**
+     * @brief Handles changes in the edit form, updating UI elements accordingly.
+     * @memberof heurist.manageDefRecStructure
+     * @override
+     * @param {jQuery} [changed_element] The element that triggered the change.
+     * @description Updates visibility of save/close buttons and action icons in the tree view
+     * based on whether the form is visible and has been modified.
+     * Also handles deactivation of tree nodes if the edit form is closed or a different node is activated.
+     */
     onEditFormChange: function( changed_element ){
        
             
@@ -1088,10 +1175,14 @@ console.log('onEditFormChange @todo check buttons!!!');
             
     },  
     
-    //
-    // special case when rts editor is placed over record editor (manageRecords)
-    // in this method it hides native record toolbar and replace it with rts toolbar
-    //
+    /**
+     * @brief Manages the toolbar when this widget is integrated over another (e.g., record editor).
+     * @memberof heurist.manageDefRecStructure
+     * @param {?jQuery} re_toolbar The toolbar of the underlying record editor.
+     * @description If `re_toolbar` is provided, it hides the record editor's buttons and
+     * appends this widget's specific buttons. If `re_toolbar` is null, it restores
+     * the record editor's original buttons.
+     */
     toolbarOverRecordEditor: function( re_toolbar ){
         
         if(re_toolbar){ //replace
@@ -1114,9 +1205,14 @@ console.log('onEditFormChange @todo check buttons!!!');
         
     },
     
-    //
-    // array of buttons for toolbar
-    //  
+    /**
+     * @brief Defines the buttons for the widget's toolbar or dialog.
+     * @memberof heurist.manageDefRecStructure
+     * @override
+     * @returns {Array<object>} An array of button definition objects.
+     * @description Returns buttons for "Refresh Preview" and "Close", adjusting text based on context
+     * (e.g., if `external_toolbar` is used).
+     */
     _getEditDialogButtons: function(){
                                     
             let that = this;   
@@ -1136,16 +1232,18 @@ console.log('onEditFormChange @todo check buttons!!!');
             return btns;
     },    
     
-    //
-    // Opens defDetailTypes editor
-    // arg1 - dty_ID (if -1 - add/select new field)
-    // arg1 - not defined or not integer - use current 
-    // arg2 - add new field after dty_ID 
-    // allow_proceed - flag to ask user first
-    // parent_dialog - parent dialog/popup
-    // create_sub_record - whether to treat the new field as a sub record field 
-    //                      (automatically creates child records for current record type)
-    //
+    /**
+     * @brief Shows the editor for a base field (Detail Type) or allows adding/selecting a new one.
+     * @memberof heurist.manageDefRecStructure
+     * @param {number|Event} arg1 Either the dty_ID to edit, -1 to add/select new, or an event object (implies current field).
+     * @param {?number} [arg2] If adding, the dty_ID after which the new field should be inserted.
+     * @param {boolean} [allow_proceed=false] If true, bypasses modification checks.
+     * @param {?jQuery} [parent_dialog] The parent dialog, if applicable, for positioning.
+     * @param {boolean} [create_sub_record=false] If true, configures the new field for automatic sub-record creation.
+     * @description This function opens the `manageDefDetailTypes` widget in 'editonly' mode to edit
+     * an existing field's base definition or in a selection/creation mode to add a new field
+     * to the record type structure. Handles modification checks and callbacks for updating the structure.
+     */
     showBaseFieldEditor: function( arg1, arg2, allow_proceed, parent_dialog, create_sub_record = false ){
 
         let that = this;
@@ -1258,6 +1356,15 @@ console.log('onEditFormChange @todo check buttons!!!');
         window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', popup_options);
     },
     
+    /**
+     * @brief Step 3 of initializing the edit form (formlet) for a field in the record structure.
+     * @memberof heurist.manageDefRecStructure
+     * @override
+     * @param {number} recID The dty_ID of the field being edited.
+     * @description Populates formlet fields with data from `defDetailTypes` (base field definition)
+     * if `recID` is valid, then calls the parent's `_initEditForm_step3`. This ensures the formlet
+     * reflects both the base field properties and the record-type-specific overrides.
+     */
     _initEditForm_step3: function( recID ){
         
             if(recID>0){
@@ -2039,9 +2146,13 @@ console.log('onEditFormChange @todo check buttons!!!');
         }
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Closes the field properties formlet (edit form).
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @description Resets `_currentEditID`, closes any associated dialog, hides the edit form,
+     * shows the preview editor (if not external), enables the record editor, and updates button states.
+     */
     _closeFormlet: function() {
                             
         this._currentEditID = null;
@@ -2062,9 +2173,14 @@ console.log('onEditFormChange @todo check buttons!!!');
     },  
                       
     
-    //
-    // Event listener for dty_Type - shows/hides dependent fields
-    //
+    /**
+     * @brief Handles changes in the 'dty_Type' (base field data type) within the formlet.
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @description Shows or hides fields in the formlet that are dependent on the selected data type.
+     * For example, vocabulary controls are shown for 'enum' or 'relmarker' types,
+     * resource pointer options for 'resource' type, etc.
+     */
     _onDetailTypeChange: function(){
 
         let dt_type = this._editing.getValue('dty_Type')[0]
@@ -2128,9 +2244,14 @@ console.log('onEditFormChange @todo check buttons!!!');
         }
     },    
     
-    //
-    //
-    //
+    /**
+     * @brief Recreates the terms preview selector in the formlet for enum/relmarker/relationtype fields.
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @description Populates the term preview selector based on `rst_FilteredJsonTermIDTree`
+     * (the vocabulary/term selection for this specific field in the record type) and other
+     * relevant vocabulary settings from the base field definition.
+     */
     _recreateTermsPreviewSelector: function(){
         
         let allTerms = this._editing.getValue('rst_FilteredJsonTermIDTree')[0];
@@ -2171,9 +2292,14 @@ console.log('onEditFormChange @todo check buttons!!!');
 
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Recreates resource-related selectors in the formlet for 'resource' or 'relmarker' type fields.
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @description Configures the default value resource selector (`rst_DefaultValue_resource`)
+     * based on the allowed target record types (`rst_PtrFilteredIDs`) and pointer mode.
+     * Disables direct editing of `rst_PtrFilteredIDs` in the formlet as it's derived from the base field.
+     */
     _recreateResourceSelector: function(){
         
         let ptrIds = this._editing.getValue('rst_PtrFilteredIDs')[0];
@@ -2200,9 +2326,13 @@ console.log('onEditFormChange @todo check buttons!!!');
         
     },
 
-    //
-    //
-    //
+    /**
+     * @brief Recreates the default value input controls in the formlet for freetext, integer, or float types.
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @description Provides UI for setting a static default value or an "increment by 1" option.
+     * Updates `rst_DefaultValue` based on user input.
+     */
     _recreateDefaultValue: function(){
         
         let defval = this._editing.getValue('rst_DefaultValue')[0];
@@ -2251,9 +2381,13 @@ console.log('onEditFormChange @todo check buttons!!!');
             
     },
 
-    //
-    //
-    //
+    /**
+     * @brief Recreates the field width input controls in the formlet.
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @description Provides UI for setting a specific width or choosing "Max width" (which translates to 0).
+     * Updates `rst_DisplayWidth` based on user input. Hides the original `rst_DisplayWidth` field.
+     */
     _recreateFieldWidth: function(){
 
         const that = this;
@@ -2304,9 +2438,15 @@ console.log('onEditFormChange @todo check buttons!!!');
         }
     },
 
-    //
-    // trigger to update rst_DisplayOrder
-    //
+    /**
+     * @brief Saves the current order of fields in the record type structure tree.
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @description Iterates through the FancyTree nodes to get the current order,
+     * updates `rst_DisplayOrder` in the local cache and global $Db,
+     * then sends a request to the server to save the new order.
+     * Refreshes the tree and preview upon successful save.
+     */
     _saveRtStructureTree: function(){
 
         let recset = this._cachedRecordset;
@@ -2354,10 +2494,15 @@ console.log('onEditFormChange @todo check buttons!!!');
         );
     },
     
-    //
-    // for tree rt structure
-    // Remove all data excect keys for fields 
-    //
+    /**
+     * @brief Cleans the tree structure data before saving it.
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @param {Array} data The tree data array (nodes).
+     * @description Recursively removes properties like 'title', 'data', 'expanded', 'extraClasses'
+     * from field nodes (non-folders) to keep only essential 'key' and 'children' information
+     * for storing the structure.
+     */
     _cleanTreeStructure: function(data){
         
         if(Array.isArray(data)){
@@ -2374,13 +2519,16 @@ console.log('onEditFormChange @todo check buttons!!!');
         }
     },
     
-    //-----------------------------------------------------
-    //
-    // special case for separator field
-    // 1. update content of data field in treeview for this separator
-    // 2. get treeview.toDict
-    // 3. save this json in ExtDescription of field 2-57 ("Header 1") 
-    //
+    /**
+     * @brief Saves the current field's properties from the formlet and closes it.
+     * @memberof heurist.manageDefRecStructure
+     * @override
+     * @param {?object} fields Field values to save. If null, values are taken from the formlet.
+     * @param {?string|function} afterAction Action to perform after saving (e.g., 'close') or a callback function.
+     * @description Handles saving of field properties. Includes specific logic for separator fields
+     * (prompting if label is empty for certain separator types), validating data,
+     * and preparing data for server submission. Calls parent's `_saveEditAndClose`.
+     */
     _saveEditAndClose: function( fields, afterAction ){
 
         const that = this;
@@ -2467,9 +2615,14 @@ console.log('onEditFormChange @todo check buttons!!!');
         this._super( fields, afterAction );
     },
     
-    //
-    // update tree on save/exit/load other record
-    //
+    /**
+     * @brief Step 2 of initializing the edit form, handling updates after potential saves.
+     * @memberof heurist.manageDefRecStructure
+     * @override
+     * @param {number} recID The ID of the record being loaded into the form.
+     * @description If `_stillNeedUpdateForRecID` is set (indicating a pending update from a previous save),
+     * calls `_afterSaveEventHandler` to complete that update before proceeding with initializing the form for `recID`.
+     */
     _initEditForm_step2: function( recID ){
  
         if(this._stillNeedUpdateForRecID>0) {
@@ -2478,9 +2631,14 @@ console.log('onEditFormChange @todo check buttons!!!');
         this._super( recID );
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Closes the main widget dialog or interface.
+     * @memberof heurist.manageDefRecStructure
+     * @override
+     * @param {boolean} [is_force=false] If true, closes without checking for modifications.
+     * @description Saves UI preferences. If an `external_toolbar` is used (integrated mode),
+     * it calls `defaultBeforeClose` and then `onClose` if configured. Otherwise, calls parent's `closeDialog`.
+     */
     closeDialog: function(is_force){
         
         if(window.hWin.HEURIST4.util.isFunction(this.saveUiPreferences)) this.saveUiPreferences();
@@ -2500,11 +2658,16 @@ console.log('onEditFormChange @todo check buttons!!!');
         }
     },
     
-    //--------------------------------------------------------------------------
-    //  
-    // update 1) defintions 2)treeview 
-    // (recordset is already updated in _saveEditAndClose)
-    //
+    /**
+     * @brief Handles actions after a field's properties in the record structure are saved.
+     * @memberof heurist.manageDefRecStructure
+     * @override
+     * @param {number} recID The dty_ID of the field whose structure entry was saved.
+     * @param {object} fieldvalues The saved field values for the rst_ (record structure) entry.
+     * @description Resets `_stillNeedUpdateForRecID`. If the "alter base field" checkbox was checked,
+     * calls `updateBaseFieldDefinition`. Refreshes the recordset, definition, and tree node item.
+     * Sets `_dragIsAllowed` to true. If `create_sub_record` was active, calls `_createSubRecords`.
+     */
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
         //rare case when edited edit form reload with another record
@@ -2530,9 +2693,14 @@ console.log('onEditFormChange @todo check buttons!!!');
         }
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Refreshes a single item in the cached recordset, its definition in $Db, and its corresponding tree node.
+     * @memberof heurist.manageDefRecStructure
+     * @param {number} recID The dty_ID of the field to refresh.
+     * @param {?object} fieldvalues If provided, these values are used to update the recordset entry for `recID`.
+     * @description Updates the local recordset, $Db cache, and the visual representation (title, classes)
+     * of the specified node in the FancyTree. Also re-attaches action icons and usage counts.
+     */
     refreshRecset_Definition_TreeNodeItem: function( recID, fieldvalues ){
 
         //1. update recordset if fieldvalues are set
@@ -2596,10 +2764,15 @@ console.log('onEditFormChange @todo check buttons!!!');
     },
 
     
-    //  -----------------------------------------------------
-    //
-    // add new separator/group
-    //
+    /**
+     * @brief Adds a new separator/group field to the record type structure.
+     * @memberof heurist.manageDefRecStructure
+     * @param {?number} [after_dtid] The dty_ID of the field after which the new separator should be inserted.
+     * @param {string} [seperator_type='tabs'] The type of separator to add (e.g., 'tabs', 'group', 'accordion'). Note original typo "seperator_type".
+     * @param {?boolean} [allow_proceed=null] If true, bypasses modification checks.
+     * @description Finds an unused separator-type Detail Type or creates a new one,
+     * then calls `addNewFieldToStructure` to add it to the current record type's structure.
+     */
     addNewSeparator: function( after_dtid, seperator_type = 'tabs', allow_proceed = null ){
         
         let that = this;
@@ -2681,10 +2854,15 @@ console.log('onEditFormChange @todo check buttons!!!');
         
     },
 
-    //  -----------------------------------------------------
-    //
-    // remove field from tree, special mode for separator/group
-    //
+    /**
+     * @brief Removes a field or separator/group from the record type structure tree.
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @param {?number} [recID] The dty_ID of the field to remove. If not provided, uses the active tree node.
+     * @description If the node is a field (not a folder/separator), triggers the 'delete' action
+     * which will call `_deleteAndClose` with the composite ID (rty_ID.dty_ID).
+     * Does not directly handle folder/separator removal here, that's done in `_afterDeleteEventHandler`.
+     */
     _removeField: function(recID){
         
         let node = null;
@@ -2701,7 +2879,7 @@ console.log('onEditFormChange @todo check buttons!!!');
             const recID = node.key;
             
             this._cachedRecordset.removeRecord( recID );
-            this._afterDeleteEvenHandler( recID );
+            this._afterDeleteEventHandler( recID );
             
         }else */
         if(node.key>0){
@@ -2710,10 +2888,19 @@ console.log('onEditFormChange @todo check buttons!!!');
      
     },
     
-    //
-    //
-    //
-    _afterDeleteEvenHandler: function( recID ){
+    /**
+     * @brief Handles actions after a field is removed from the record structure.
+     * @memberof heurist.manageDefRecStructure
+     * @override
+     * @param {string} recID The composite ID (rty_ID.dty_ID) of the removed field.
+     * @description Parses the dty_ID, removes the record from the cached recordset,
+     * calls parent's handler, and removes the node from the FancyTree.
+     * If the removed node was a folder (separator), its children are moved to its parent.
+     * Triggers a check for potential base field deletion if the field is no longer used.
+     * Refreshes the preview editor.
+     * Note: Original method name might have a typo "EvenHandler" vs "EventHandler".
+     */
+    _afterDeleteEventHandler: function( recID ){
         
         if(recID.indexOf(this.options.rty_ID+'.')===0){
             recID = recID.substring(recID.indexOf('.')+1);
@@ -2748,18 +2935,29 @@ console.log('onEditFormChange @todo check buttons!!!');
         this._showRecordEditorPreview(); //redraw
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Activates a specific field in the tree view for editing.
+     * @memberof heurist.manageDefRecStructure
+     * @param {number|string} recID The dty_ID of the field to edit.
+     * @description Sets the tree's root node active (to ensure proper event flow if needed)
+     * and then activates the node corresponding to `recID`. This will trigger the
+     * 'activate' event on the tree, which in turn opens the formlet for that field.
+     */
     editField: function(recID){
         this._tree.getRootNode().setActive();
         let node = this._tree.getNodeByKey(String(recID));
         node.setActive();
     },
     
-    //
-    // enable or disable dropdown entries for rst_PointerMode
-    //
+    /**
+     * @brief Enables or disables browse-related options in the 'rst_PointerMode' dropdown.
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @param {boolean} is_enable True to enable browse options, false to disable.
+     * @description Adjusts the enabled/disabled state of 'dropdown' and 'browseonly' options
+     * in the pointer mode selector. If disabling and current mode is one of these,
+     * it defaults to 'addorbrowse'. Refreshes the hSelect widget.
+     */
     _rst_PointerMode_EnableBrowse: function(is_enable){
         
         let ptrMode = this._editing.getValue('rst_PointerMode')[0];
@@ -2809,9 +3007,15 @@ console.log('onEditFormChange @todo check buttons!!!');
     },
     
     
-    //
-    //
-    //
+    /**
+     * @brief Handles the change event of the 'rst_CreateChildIfRecPtr' (Create Child Records) checkbox.
+     * @memberof heurist.manageDefRecStructure
+     * @param {jQuery} ed_input The editing input element for 'rst_CreateChildIfRecPtr'.
+     * @description Prompts the user with warnings about the consequences of turning child-record functionality
+     * on or off. If turning on, initiates a server-side action to add reverse pointers and potentially
+     * convert existing records. Updates UI and pointer mode options accordingly.
+     * @returns {boolean} False if an early exit occurs (e.g., user cancels a dialog).
+     */
     onCreateChildIfRecPtr: function ( ed_input ){
         
         let rty_ID = this.options.rty_ID;
@@ -2933,7 +3137,12 @@ console.log('onEditFormChange @todo check buttons!!!');
         return false;
     },
 
-    //
+    /**
+     * @brief Retrieves UI preferences specific to this widget.
+     * @memberof heurist.manageDefRecStructure
+     * @override
+     * @returns {object} User preferences, including `treepanel_closed` and `treepanel_width`.
+     */
     getUiPreferences:function(){
         this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, {
             treepanel_closed: true,
@@ -2943,7 +3152,13 @@ console.log('onEditFormChange @todo check buttons!!!');
         return this.usrPreferences;
     },
     
-    //    
+    /**
+     * @brief Saves UI preferences, specifically the state of the tree panel (west pane).
+     * @memberof heurist.manageDefRecStructure
+     * @override
+     * @description If `mainLayout` is initialized, saves the `treepanel_closed` (isClosed state)
+     * and `treepanel_width` (size of the west pane) preferences.
+     */
     saveUiPreferences:function(){
    
         if(this.mainLayout){
@@ -2961,9 +3176,15 @@ console.log('onEditFormChange @todo check buttons!!!');
         }
     },
     
-    //
-    // Delete base field 
-    //
+    /**
+     * @brief Deletes a base field (Detail Type) from the system.
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @param {number} dtyid The ID of the Detail Type to delete.
+     * @description Checks if the field is reserved. If not, proceeds to delete it.
+     * If the field is used in any record structures, those links are also removed.
+     * Shows appropriate messages and refreshes caches.
+     */
     _deleteBaseField: function(dtyid){
 
         if(window.hWin.HEURIST4.util.isempty(dtyid) || !$Db.dty(dtyid)){
@@ -3021,9 +3242,14 @@ console.log('onEditFormChange @todo check buttons!!!');
         });
     },
 
-    //
-    // Check base field for any data, before offering to delete the base field
-    //
+    /**
+     * @brief Checks if a base field contains any data across all record types.
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @param {number} dtyid The ID of the Detail Type to check.
+     * @description If the field has no data and is not used in any other record structures (besides the current one,
+     * from which it's being removed), it prompts the user if they want to delete the base field definition itself.
+     */
     checkFieldForData: function(dtyid){
 
         let that = this;
@@ -3069,10 +3295,15 @@ console.log('onEditFormChange @todo check buttons!!!');
         });
     },
 
-    //
-    // Popup to update a base field's name and help text with provided values
-    // NOTE: does NOT update each base field's usage within rectypes
-    //
+    /**
+     * @brief Opens a dialog to allow updating the name and help text of a base field definition.
+     * @memberof heurist.manageDefRecStructure
+     * @param {number} dtyID The ID of the Detail Type (base field) to update.
+     * @param {string} name The new proposed name for the base field.
+     * @param {string} helptext The new proposed help text for the base field.
+     * @description Displays a dialog showing current usages of the base field and allows the user
+     * to confirm changes to its name and/or help text. Saves changes to the server.
+     */
     updateBaseFieldDefinition: function(dtyID, name, helptext){
 
         let that = this;
@@ -3159,10 +3390,14 @@ console.log('onEditFormChange @todo check buttons!!!');
         });
     },
 
-    //
-    // Update field data count display within fancytree nodes (left panel of record editor)
-    //  If provided, update specific fields
-    //
+    /**
+     * @brief Updates the display of field data usage counts in the tree view.
+     * @memberof heurist.manageDefRecStructure
+     * @param {?Array<number>|number} [dty_IDs=null] Specific dty_ID(s) to update. If null, updates all visible.
+     * @description For each relevant field node in the tree, displays the count of records
+     * that have data for that field. Adds icons to search for records with/without data for the field.
+     * Uses `_calculated_usages` data populated by a server request.
+     */
     updateFieldUsage: function(dty_IDs = null){
 
         let that = this;
@@ -3264,9 +3499,14 @@ console.log('onEditFormChange @todo check buttons!!!');
         });
     },
 
-    //
-    // Add or remove fancytree-active from node(s) in structure fancytree
-    //
+    /**
+     * @brief Highlights or unhighlights a specified node in the FancyTree.
+     * @memberof heurist.manageDefRecStructure
+     * @param {number} dty_ID The key (dty_ID) of the node to highlight/unhighlight.
+     * @param {boolean} [is_unselect=false] If true, unhighlights the node; otherwise, highlights it.
+     * @description Adds or removes the 'ui-state-active' class from the specified tree node.
+     * If highlighting, also scrolls the parent container to bring the node into view.
+     */
     highlightNode: function(dty_ID, is_unselect=false){
 
         if(!is_unselect && this._treeview && this._treeview.find('span.fancytree-node').length > 0){
@@ -3291,11 +3531,18 @@ console.log('onEditFormChange @todo check buttons!!!');
         }
     },
 
-    //
-    // Create 'sub-records' for the current record type
-    //  Sub-records are child records that contain field values that original appeared within the parent record
-    //  The user will be prompted to select the fields to transfer to the sub-record(s)
-    // 
+    /**
+     * @brief Manages the process of creating sub-records from existing fields in a record type.
+     * @memberof heurist.manageDefRecStructure
+     * @private
+     * @param {number} rstID The rst_ID (actually dty_ID in this context) of the 'resource' type field
+     * that will point to the newly created sub-records.
+     * @description This complex method guides the user through:
+     * 1. Selecting fields from the source record type to move to the sub-record type.
+     * 2. Choosing or confirming the target (sub-record) record type.
+     * 3. Optionally splitting multi-valued fields into separate sub-records.
+     * It then makes a server request to perform the data migration and structure update.
+     */
     _createSubRecords: function(rstID){
 
         // Setup details

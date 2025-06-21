@@ -547,7 +547,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
 
         let replaced_value = false;
 
-        for(const idx in values){
+        for(let idx = 0; idx < values.length; idx++){
 
             if(values[idx] == to_replace){
 

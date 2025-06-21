@@ -1,24 +1,43 @@
 /**
-* manageRecords.js - main widget to EDIT Records
-*
+* @file manageRecords.js
+* @brief Manages Record entities.
+* @fileOverview Provides a comprehensive UI for creating, viewing, editing, listing, and managing Heurist Record entities. This is a central widget for interacting with record data and includes features for handling different record types, structures, and associated data like files and comments.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 /* global Temporal,TDate,temporalToHumanReadableString */
 
+/**
+ * @widget heurist.manageRecords
+ * @brief Widget for managing Heurist Record entities.
+ * @extends $.heurist.manageEntity
+ *
+ * @property {?number} rec_ID The ID of the specific record to be managed or displayed. If negative or 0, typically indicates a new record.
+ * @property {?number} rty_ID The Record Type ID. Used when creating a new record to specify its type, or can be used to filter views.
+ * @property {?boolean} edit_structure If true, the widget opens with the record structure editor visible, allowing for simultaneous editing of record data and its underlying structure.
+ * @property {?boolean} show_toolbar Controls the visibility of the main toolbar associated with record management actions. (Implicitly true by default).
+ * @property {?boolean} show_statusbar Controls the visibility of the status bar, which might display information about the current record or operation. (Implicitly true by default).
+ * @property {?(object|boolean)} fixed_search If an object, defines a fixed search query; the search form will be hidden. If true, implies a predefined fixed search.
+ * @property {?(string[]|string)} rectype_set A list (array of numbers or comma-separated string) of Record Type IDs to filter the available record types, typically used in selection modes.
+ * @property {?boolean} selectOnSave Special mode, often true when the record editor is opened from a selection popup (e.g., choosing a record for a pointer field), affecting behavior on save.
+ * @property {?boolean} allowAdminToolbar If false, administrative tools like "Modify Structure" or "Edit title mask" are hidden.
+ * @property {?object} rts_editor A reference to an instance of the `manageDefRecStructure` widget, used when `edit_structure` is true.
+ * @property {?number} parententity If this record is being created or viewed as a child in a parent-child relationship, this holds the ID of the parent record.
+ * @property {?number} relmarker_field If a relationship record is being edited as accessed via a relationship marker field from a source or target record, this holds the ID of that marker field (a DetailTypeID).
+ * @property {?boolean} relmarker_is_inward Indicates the direction of the relationship if `relmarker_field` is present (true if inward, false if outward).
+ * @property {?object} fill_in_data An object containing initial values to populate fields when creating a new record. Keys are DetailTypeIDs or field concept codes.
+ * @property {object} usrPreferences User-specific preferences for the widget's UI, such as panel widths, visibility of optional fields, and help text. Loaded from user settings.
+ * @property {object} defaultPrefs Default UI preferences for the widget, used if no user-specific preferences are found. Includes default dimensions and settings for optional fields and help.
+ */
 $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
    
     //_entityName:'records',
@@ -88,6 +107,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     _source_def: null, // source def from source db
 
+    /**
+     * @brief Initializes the manageRecords widget.
+     * @override
+     * @memberof heurist.manageRecords
+     * This method sets up the widget options, including entity configuration, layout mode,
+     * and dimensions. It calls the parent `_init` method and then performs specific
+     * initializations for record management, such as adjusting UI elements based on
+     * edit mode and setting up event listeners for keyboard shortcuts (Ctrl+S/Cmd+S for save).
+     * It also initializes the RTS (Record Type Structure) actions menu if applicable.
+     */
     _init: function() {
         
         this.options.entity = window.hWin.entityRecordCfg;
@@ -458,14 +487,24 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
     },
     
+    /**
+     * @brief Hides the RTS (Record Type Structure) actions menu.
+     * @memberof heurist.manageRecords
+     * Closes any open hSelect dropdowns within the RTS actions menu and then hides the menu itself.
+     */
     hideRtsMenu: function(){
             this.rts_actions_menu.find('.edit_rts').hSelect('close');
             this.rts_actions_menu.hide(); 
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Saves the current record data quickly without performing full validation.
+     * @memberof heurist.manageRecords
+     * @param {function} [_callback] Optional callback function to execute after the save operation.
+     * If the record has been modified, it retrieves the field values (marking them for no_validation)
+     * and calls `_saveEditAndClose`. If a callback is provided, it's passed to `_saveEditAndClose`.
+     * If the record is not modified but a callback is provided, the callback is executed directly.
+     */
     saveQuickWithoutValidation: function( _callback ){
       
         if(this._editing.isModified()){ //2020-12-06 !this.options.edit_structure &&   
@@ -480,8 +519,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     
     
     //
-    // adds gear button before edit field - it opens rts_actions_menu on mouse over
-    //
+    /**
+     * @brief Creates and attaches a "gear" button to a field element for RTS (Record Type Structure) editing actions.
+     * @memberof heurist.manageRecords
+     * @param {number} dtId The DetailTypeID of the field.
+     * @param {jQuery} div_ele The jQuery element representing the field's container in the form.
+     * This button, when hovered, reveals the `rts_actions_menu` allowing users to edit field properties,
+     * insert new fields/blocks, etc., if RTS editing is active. It populates the menu with current
+     * field properties like requirement type, repeatability, and display width.
+     */
     _createRtsEditButton : function(dtId, div_ele){  
         
         let that = this;
@@ -568,8 +614,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    //
-    //
+    /**
+     * @brief Creates an "add to structure" button for a non-standard field present in the record data but not in the current Record Type Structure.
+     * @memberof heurist.manageRecords
+     * @param {number} dtId The DetailTypeID of the non-standard field.
+     * @param {jQuery} div_ele The jQuery element where the button should be inserted (typically the field's input cell).
+     * Clicking this button adds the non-standard field to the current record type's structure,
+     * making it a standard field. It determines the display order and other default properties for the new structure element.
+     * This is relevant when `options.rts_editor` is active.
+     */
     _createNonStandardField: function(dtId, div_ele){
 
         let that = this;
@@ -665,8 +718,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //  
-    // invoked from _init after load entity config    
-    //
+    /**
+     * @brief Initializes the main controls of the widget after the entity configuration is loaded.
+     * @override
+     * @memberof heurist.manageRecords
+     * @returns {boolean} False if the parent `_super()` call fails, otherwise true.
+     * This method sets up user interface preferences, initializes the search form (`searchRecords`),
+     * configures the record list (`resultList`) including its renderer and action listeners,
+     * and adjusts the layout based on the widget's mode (e.g., manager vs. select).
+     * It also binds event listeners for search actions and results.
+     */
     _initControls: function() {
 
         this.getUiPreferences();
@@ -732,8 +793,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    //
-    //
+    /**
+     * @brief Adjusts the top position of the record list based on the visibility and height of the search form.
+     * @memberof heurist.manageRecords
+     * If the search form is present and visible, the record list's `top` CSS property is set to the
+     * search form's height. Otherwise, it's set to 0. This ensures the list is positioned correctly
+     * below the search form.
+     */
     _adjustResultListTop: function(){
          if(this.searchForm && this.searchForm.length>0 && this.searchForm.is(':visible')){
              this.recordList.css('top', this.searchForm.height());
@@ -744,8 +810,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    //
-    //
+    /**
+     * @brief Handles actions triggered from the record list or other UI elements.
+     * @override
+     * @memberof heurist.manageRecords
+     * @param {Event} event The event object.
+     * @param {object|string} action The action to perform. If an object, it may contain `recID` and `action` properties.
+     * @returns {boolean} True if the action was handled, false otherwise.
+     * This method extends the parent's `_onActionListener`. It specifically handles actions like
+     * 'edit_ext' (edit record in a new window/tab) and 'save_quick' (quick save without validation).
+     */
     _onActionListener:function(event, action){    
             let res = this._super(event, action)
             if(!res){
@@ -772,8 +846,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    //
-    //
+    /**
+     * @brief Initializes properties for the edit dialog, particularly when in 'editonly' mode.
+     * @override
+     * @memberof heurist.manageRecords
+     * This method is called before the edit dialog is created or shown. It restores UI preferences
+     * like width and height from `usrPreferences` if the widget is in 'editonly' mode.
+     * It ensures that if a `forced_Width` is provided in options, it takes precedence.
+     */
     _initDialog: function(){
 
         //restore from preferences    
@@ -791,8 +871,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
 
     //
-    //
-    //
+    /**
+     * @brief Navigates to the previous or next record in the current list.
+     * @memberof heurist.manageRecords
+     * @param {number} dest A number indicating direction: -1 for previous, 1 for next.
+     * If the current record has been modified, it prompts the user to save or drop changes
+     * before navigating. Updates the navigation display (e.g., "record X of Y").
+     */
     _navigateToRec: function(dest){
         if(this._currentEditID>0){
                 let recset = this.recordList.resultList('getRecordSet');
@@ -843,9 +928,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },    
     //override some editing methods
     
-    //
-    //
-    //
+    /**
+     * @brief Gets the configuration for buttons to be displayed in the edit dialog.
+     * @override
+     * @memberof heurist.manageRecords
+     * @returns {object[]} An array of button configuration objects.
+     * The buttons change based on the widget's state, such as `options.selectOnSave`,
+     * `options.edit_structure`, or normal record editing mode. Buttons can include
+     * Save, Save + Close, Close, Drop Changes, Dupe, New, and navigation (Prev/Next).
+     */
     _getEditDialogButtons: function(){
         
             let that = this;        
@@ -1027,8 +1118,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    //
-    //
+    /**
+     * @brief First step in initializing the edit form, handling popup mode.
+     * @override
+     * @memberof heurist.manageRecords
+     * @param {number} recID The ID of the record to edit, or a negative value for a new record.
+     * If `options.edit_mode` is 'popup', this method may open the record editor in a new
+     * widget instance (`HEURIST4.ui.openRecordEdit`) rather than inline. It prepares
+     * options for the popup, including callbacks for selection if in `selectOnSave` mode.
+     * Otherwise, it calls the parent's `_super` method.
+     */
     _initEditForm_step1: function(recID){
 
         this.element.attr('data-recid', recID);
@@ -1078,8 +1177,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    // open popup edit dialog if we need it
-    //
+    /**
+     * @brief Second step in initializing the edit form, setting up the dialog and layout.
+     * @override
+     * @memberof heurist.manageRecords
+     * @param {number} recID The ID of the record.
+     * This method sets up the edit dialog if not already open, including its buttons
+     * and title. It configures the layout (e.g., west panel for structure, east for summary)
+     * using `jquery.layout` and initializes the summary panel accordion. It also handles
+     * navigation buttons (Prev/Next) if applicable.
+     */
     _initEditForm_step2: function(recID){
     
         if(recID==null || this.options.edit_mode=='none') return;
@@ -1382,8 +1489,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     
     
     //    
-    //
-    //
+    /**
+     * @brief Handles resizing of tabbed content within the edit form.
+     * @memberof heurist.manageRecords
+     * This method is typically called when the dialog or a layout panel is resized.
+     * It uses a timer to debounce resize events and then calls the `pagingResize`
+     * method on any tab instances to adjust their layout.
+     */
     handleTabsResize: function() {
             if (this._resizeTimer) {
                 clearTimeout(this._resizeTimer);
@@ -1410,8 +1522,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    //
-    //
+    /**
+     * @brief Handles the resize event of the dialog.
+     * @override
+     * @memberof heurist.manageRecords
+     * Calls the parent's `_onDialogResize`, adjusts the result list's top position,
+     * and saves UI preferences.
+     */
     _onDialogResize: function(){
         this._super();
         this._adjustResultListTop();
@@ -1419,8 +1536,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    //
-    //
+    /**
+     * @brief Closes the edit dialog.
+     * @override
+     * @memberof heurist.manageRecords
+     * Handles closing the dialog based on its mode (`editonly` or standard popup).
+     * It ensures that UI preferences are saved before closing if `options.edit_mode` is 'editonly'.
+     */
     closeEditDialog:function(){
         
         //save preferences
@@ -1442,8 +1564,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    // fill one of summary tab panels
-    //
+    /**
+     * @brief Fills the content of a specific panel within the summary accordion.
+     * @memberof heurist.manageRecords
+     * @param {jQuery} panel The jQuery object representing the panel to fill.
+     * The content depends on the panel's `data-id`, which corresponds to different
+     * summary sections like Admin, Private (bookmarks/reminders), Tags, Linked records, etc.
+     * It dynamically loads and renders the relevant information.
+     */
     _fillSummaryPanel: function(panel){
         
         let that = this;
@@ -1979,8 +2107,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    //
-    //
+    /**
+     * @brief Renders the reminders section in the summary panel.
+     * @memberof heurist.manageRecords
+     * @param {?HRecordSet} recordset Optional: A recordset of reminders. If null, reminders are fetched.
+     * @param {jQuery} panel The parent panel (typically the 'Private' summary section).
+     * Displays reminders associated with the current record and provides a button
+     * to manage them (opening the `usrReminders` dialog).
+     */
     _renderSummaryReminders: function(recordset, panel){
         
             let that = this, sContent = '',
@@ -2055,8 +2189,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    //
-    //
+    /**
+     * @brief Renders the bookmarks section in the summary panel.
+     * @memberof heurist.manageRecords
+     * @param {?HRecordSet} recordset Optional: A recordset of bookmarks. If null, bookmarks are fetched.
+     * @param {jQuery} panel The parent panel (typically the 'Private' summary section).
+     * Displays bookmark information (rating, password reminder, notes) for the current
+     * record and provides a button to manage them (opening the `usrBookmarks` dialog).
+     */
     _renderSummaryBookmarks: function(recordset, panel){
 
             let that = this, sContent = '',
@@ -2121,8 +2261,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
     },
     //
-    // NOT USED anymore TO REMOVE
-    //
+    /**
+     * @brief Renders the tags section in the summary panel.
+     * @deprecated This method is marked as "NOT USED anymore TO REMOVE".
+     * @memberof heurist.manageRecords
+     * @param {HRecordSet} recordset A recordset of tags.
+     * @param {jQuery} panel The panel to render tags into.
+     * Displays tags grouped by user/group and provides a button to manage them.
+     */
     _renderSummaryTags: function(recordset, panel){
         
             let that = this, idx, isnone=true;
@@ -2215,8 +2361,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
 
     //
-    // Open Edit record structure on new tab - NOT USED
-    //
+    /**
+     * @brief Opens the record type structure editor in a new browser tab.
+     * @deprecated This method is marked as "NOT USED".
+     * @memberof heurist.manageRecords
+     * Warns the user about needing to reload the page to see changes and prompts
+     * to save the current record if modified.
+     */
     editRecordTypeOnNewTab: function(){
 
         let that = this;
@@ -2235,8 +2386,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
 
     //
-    //
-    //
+    /**
+     * @brief Opens the dialog for editing the record type's title mask.
+     * @memberof heurist.manageRecords
+     * It uses `HEURIST4.ui.showRecordActionDialog` to display the 'rectypeTitleMask' dialog.
+     */
     editRecordTypeTitle: function(){
         
         let that = this;
@@ -2257,8 +2411,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
 
     //
-    //
-    //
+    /**
+     * @brief Opens the dialog for editing the attributes of the current record type.
+     * @memberof heurist.manageRecords
+     * If the current record has unsaved changes, it prompts the user to save them first.
+     * Then, it displays the `defRecTypes` entity dialog for the current record type.
+     * After the dialog closes, it re-initializes the edit form to reflect any changes.
+     */
     editRecordTypeAttributes: function(){
         
         let that = this;
@@ -2299,15 +2458,22 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    //
-    //
+    /**
+     * @brief Closes the west panel of the layout (typically the structure editor).
+     * @memberof heurist.manageRecords
+     */
     closeWestPanel: function(){
         this.editFormPopup.layout().close("west");  
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Initiates editing of the record type structure, either inline or by switching view.
+     * @memberof heurist.manageRecords
+     * @param {boolean} [is_inline] If true, attempts to enable inline structure editing.
+     * If the current record has unsaved data changes and `options.edit_structure` is false,
+     * it prompts the user to save or drop changes.
+     * If `is_inline` is true, it reloads the RTS editor and shows the west layout panel.
+     */
     editRecordType: function(is_inline){
 
         let that = this;
@@ -2372,8 +2538,17 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    //
-    //
+    /**
+     * @brief Third step in initializing the edit form: loads record data or prepares for new record.
+     * @override
+     * @memberof heurist.manageRecords
+     * @param {number} recID The ID of the record, or negative for a new record.
+     * @param {boolean} [is_insert] True if this is a new record insertion.
+     * Clears summary panel content. If `recID` is positive, fetches full record data.
+     * If `recID` is negative, prepares for a new record, potentially prompting for
+     * record type selection or handling predefined `new_record_params`. It also
+     * handles special logic for child records and relationship records.
+     */
     _initEditForm_step3: function(recID, is_insert){
         
         //fill with values
@@ -2599,8 +2774,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    // apparently it should be moved to dbs?  - @TODO replace with $Db.rst_links
-    //
+    /**
+     * @brief Finds parent record types for a given child record type.
+     * @memberof heurist.manageRecords
+     * @param {number} childRecordType The ID of the child record type.
+     * @returns {number[]|undefined} An array of parent record type IDs, or undefined if none.
+     * Uses `$Db.rst_links().parents` to determine which record types can be parents
+     * of the specified `childRecordType`.
+     * @todo Consider moving to a more global database utility service/object.
+     */
     __findParentRecordTypes: function(childRecordType){
 
         let parentRecordTypes = $Db.rst_links().parents[childRecordType];
@@ -2609,8 +2791,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    // get record field structure. It needs to addition of non-standard fields
-    //
+    /**
+     * @brief Creates a "fake" record type structure field object for a given DetailTypeID.
+     * @memberof heurist.manageRecords
+     * @param {number} detailTypeID The DetailTypeID for which to create the fake field structure.
+     * @param {number|string} [order] The display order for this fake field.
+     * @returns {object} An object mimicking a record type structure field definition.
+     * This is used to represent fields that are present in a record's data but not
+     * formally part of its defined record type structure (non-standard fields).
+     * It populates the fake field with default properties based on the global DetailType definition.
+     */
     _getFakeRectypeField: function(detailTypeID, order){
         
         let dt = $Db.dty(detailTypeID);
@@ -2650,7 +2840,18 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                
     //
     // 
-    //     
+    /**
+     * @brief Prepares a field's structural definition for use in the record editor.
+     * @memberof heurist.manageRecords
+     * @param {?object} rfr The initial record field structure object, if available from `$Db.rst()`.
+     * @param {number} rty_ID The Record Type ID.
+     * @param {number} dty_ID The DetailTypeID (field ID).
+     * @returns {object} A consolidated field definition object suitable for the editor.
+     * This method takes a base field definition (rfr) or fetches it using rty_ID and dty_ID.
+     * It then merges it with global DetailType properties (`$Db.dty()`) to ensure all necessary
+     * attributes (like `dty_Type`, `rst_PtrFilteredIDs`, `rst_FilteredJsonTermIDTree`, `rst_FieldConfig`)
+     * are present for the editing input widgets.
+     */
     _prepareFieldForEditor: function (rfr, rty_ID, dty_ID){                    
 
             if(!rfr){
@@ -2689,8 +2890,23 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    // prepare fields and init editing
-    //
+    /**
+     * @brief Fourth and final step of edit form initialization: prepares field structures and initializes the HEditing widget.
+     * @override
+     * @memberof heurist.manageRecords
+     * @param {?object} response The server response object containing record data (if editing an existing record) or new record template.
+     * This is a critical method that:
+     * 1. Sets the `_currentEditRecordset` and `_isInsert` flag.
+     * 2. Determines the `_currentEditRecTypeID`.
+     * 3. Gathers all fields for the form: standard fields from `$Db.rst()`, non-standard fields present in the data, and special fields like "Parent Entity" or "Workflow Stage".
+     * 4. Handles constraints for relationship records (e.g., filtering target resources and relation types).
+     * 5. Sorts fields by display order.
+     * 6. Organizes fields into groups (tabs, accordions) based on separator fields.
+     * 7. Initializes the `HEditing` widget with the prepared field structure and record data.
+     * 8. Calls `_afterInitEditForm` for post-initialization UI adjustments.
+     * 9. Manages UI states like scroll position, active tabs, and warnings for new relationship records or missing title masks.
+     * 10. Sets up display for "view-only" mode if user lacks edit permissions.
+     */
     _initEditForm_step4: function(response){
         
         let that = this;
@@ -3468,10 +3684,24 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     },  //_initEditForm_step4                  
     
     //  -----------------------------------------------------
-    //  OVERRIDE
-    //  send update request and close popup if edit is in dialog
-    //  afteraction - none, close, newrecord or callback function
-    //
+    /**
+     * @brief Saves the record and then performs a follow-up action.
+     * @override
+     * @memberof heurist.manageRecords
+     * @param {?object} fields Field values to save. If null, values are taken from the form.
+     * @param {string|function} afterAction Action to perform after saving: 'none', 'close', 'newrecord', 'close_rst', or a callback function.
+     * This method handles the entire save process:
+     * 1. Prevents concurrent save attempts.
+     * 2. If `fields` is not provided, it calls `_getValidatedValues()` to retrieve and validate form data.
+     * 3. Performs various checks: data presence, script tag injection, field value size limits.
+     * 4. Handles ambiguous date conversions and entry mask validations.
+     * 5. Manages workflow stage selection if applicable.
+     * 6. Updates tags if `_updated_tags_selection` is set.
+     * 7. Constructs the save request object, including record ID, type, header fields (URL, owner, visibility), detail fields, and field visibility settings.
+     * 8. Calls `window.hWin.HAPI4.RecordMgr.saveRecord` to send the data to the server.
+     * 9. On successful save, updates internal state, shows a success message, and calls `_afterSaveHandler` to execute the `afterAction`.
+     * 10. On failure, re-enables save buttons and shows an error message.
+     */
     _saveEditAndClose: function( fields, afterAction ){
 
             if(!(this._currentEditID>0)) return;
@@ -3935,13 +4165,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
     _afterSaveHandler: function(response, afterAction){
 
-        if(!Object.hasOwn(response, 'issues')){
+        if(!Object.hasOwn(response, 'issues')){ // No issues reported from server-side save
 
-            if(window.hWin.HEURIST4.util.isFunction(afterAction)){
+            if(window.hWin.HEURIST4.util.isFunction(afterAction)){ // Callback function provided
 
                 afterAction.call();
 
-            }else if(afterAction=='close'){
+            }else if(afterAction=='close'){ // Close dialog/editor
 
                 this._currentEditID = null;
                 /*A123  remarked since
@@ -4062,9 +4292,18 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         return this._afterSaveHandler(response, afterAction);
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Handles changes in the edit form, enabling/disabling save buttons.
+     * @override
+     * @memberof heurist.manageRecords
+     * @param {HEditing_input|boolean} [changed_element] The input element that changed, or true to force hide save buttons.
+     * This method is called when a field value changes in the `HEditing` widget.
+     * It updates the visibility/state of save-related buttons based on whether the form
+     * has modifications (`_editing.isModified()` or `_updated_tags_selection` is set).
+     * It also includes special logic for certain field types, like auto-populating
+     * related fields for Tiled Image Map Source or Map Layer records, or auto-saving
+     * if a parent-child pointer field is modified.
+     */
     onEditFormChange:function(changed_element){
         
         let that = this;
@@ -4072,7 +4311,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         let force_hide = (changed_element===true); //hide save buttons
         
         let mode = 'hidden';
-        if(force_hide!==true){
+        if(force_hide!==true){ // If not forcing hide, check for modifications
             let isChanged = this._editing.isModified() || this._updated_tags_selection!=null;
             mode = isChanged?'visible':'hidden';
             
@@ -4283,11 +4522,25 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     
     //
     // 1. show-hide optional fields
-    // 2. add menu button on top of screen
-    // 3. add record title at the top
-    // 4. init cms open edit listener 
-    // 5. init rts_editor action buttons 
-    //    
+    // 2. add menu button on top of screen (_configureHeaderControls)
+    // 3. add record title at the top (_displayRecordTitle)
+    // 4. init cms open edit listener (conditionally)
+    // 5. init rts_editor action buttons (_setupRtsEditingFeatures)
+    /**
+     * @brief Performs UI adjustments and sets up controls after the HEditing form is initialized.
+     * @override
+     * @memberof heurist.manageRecords
+     * This method is responsible for a variety of UI setup tasks post-HEditing initialization:
+     * 1. Sets up header controls: "Show Help", "Optional Fields", "Workflow Stage" selector, "Toggle Record Visibility",
+     *    "Modify Structure", "Attributes", "Update Structure", "History", "Template", and "Bug Report" buttons.
+     * 2. Displays the record title and type information in the dialog header or a dedicated header div.
+     * 3. Manages the visibility and state of these controls based on user permissions and widget options (e.g., `edit_structure`, `allowAdminToolbar`).
+     * 4. Initializes functionality for the RTS (Record Type Structure) editor integration if active, including "gear" icons on fields.
+     * 5. Applies user competency levels to the form and handles help text visibility.
+     * 6. Restores group (accordion/tab) states.
+     * 7. Logs the record edit action.
+     * 8. Calls `onEditFormChange()` to set initial save button states.
+     */
     _afterInitEditForm: function(){
 
         let that = this;
@@ -4854,8 +5107,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     },//END _afterInitEditForm
     
     //
-    //
-    //
+    /**
+     * @brief Updates the "Toggle Record Visibility" button's appearance and tooltip.
+     * @memberof heurist.manageRecords
+     * @param {boolean} is_public True if the record is currently public, false otherwise.
+     * Changes the button's icon (eye-open/eye-crossed) and label ("Hide from public"/"Make record public")
+     * to reflect the current visibility state.
+     */
     _updateRecToggleButton: function(is_public){
             if(is_public){
                 this.element.find('#icon_rec_visibility').removeClass('ui-icon-eye-crossed').addClass('ui-icon-eye-open');
@@ -4871,8 +5129,14 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     },
     
     //
-    //
-    //
+    /**
+     * @brief Reloads the Record Type Structure (RTS) editor.
+     * @memberof heurist.manageRecords
+     * @param {boolean} [force_reload=false] If true, forces a reload even if the editor seems current.
+     * This is typically called when the record type changes or when RTS editing is explicitly invoked.
+     * It clears the existing RTS editor container and re-initializes the `manageDefRecStructure`
+     * widget within it for the current `_currentEditRecTypeID`.
+     */
     _reloadRtsEditor: function(force_reload = false){            
 
             if(!force_reload && this.options.rts_editor 
@@ -4900,15 +5164,25 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     },
     
     //
-    //
-    //
-    showOptionalFieds: function(isShow){
+    /**
+     * @brief Shows or hides optional fields in the form.
+     * @memberof heurist.manageRecords
+     * @param {boolean} isShow True to show optional fields, false to hide them.
+     * This method programmatically checks or unchecks the "Optional fields" checkbox
+     * and triggers its change event to apply the visibility change.
+     */
+    showOptionalFields: function(isShow){ // Note: Original name `showOptionalFieds` had a typo.
         this.element.find('.chb_opt_fields').prop('checked', isShow).trigger('change');
     },
     
-    //
-    //to save space - hide all fieldsets without visible fields
-    //
+    /**
+     * @brief Shows or hides field groups (fieldsets) based on whether they contain visible fields.
+     * @memberof heurist.manageRecords
+     * Iterates through fieldsets in the edit form. If a fieldset (not part of a tab or accordion)
+     * contains no visible child elements (fields), it's hidden to save space.
+     * If optional fields are hidden and a section contains only optional fields, a hint
+     * "This section contains optional fields" may be displayed.
+     */
     _showHideEmptyFieldGroups: function(){
         
         this.editForm.find('fieldset').each(function(idx,item){
@@ -4967,8 +5241,14 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     },
     
     //
-    //
-    //
+    /**
+     * @brief Retrieves UI preferences for the manageRecords widget.
+     * @memberof heurist.manageRecords
+     * @returns {object} The user preferences object.
+     * Loads preferences using `window.hWin.HAPI4.get_prefs_def` with the key
+     * 'prefs_records' and `this.defaultPrefs` as defaults. It also applies
+     * minimum and maximum constraints to width and height.
+     */
     getUiPreferences: function(){
         this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
         if(this.usrPreferences.width<600) this.usrPreferences.width=600;
@@ -4979,8 +5259,15 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     },
     
     //
-    // save width,heigth and summary tab prefs
-    //
+    /**
+     * @brief Saves the current UI preferences for the manageRecords widget.
+     * @memberof heurist.manageRecords
+     * @returns {boolean} Always returns true.
+     * Collects current UI state: dialog dimensions (width, height, position if applicable),
+     * summary panel state (closed, width, active tabs), structure panel state (width, closed),
+     * and visibility of help text and optional fields. Saves these using
+     * `window.hWin.HAPI4.save_pref` with the key 'prefs_records'.
+     */
     saveUiPreferences: function(){
         
         let that = this;
@@ -5051,8 +5338,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     },
 
     //
-    // Set popup height + width to value based on current window
-    //
+    /**
+     * @brief Sets the size of the edit dialog (popup).
+     * @memberof heurist.manageRecords
+     * @param {boolean} [is_full=false] If true, sets to 95% of window dimensions; otherwise, 80%.
+     * Adjusts the width and height of the `_as_dialog` or `_edit_dialog` and centers it.
+     * Then, triggers a resize of the internal layout.
+     */
     _setDialogSize: function(is_full = false){
 
         let width = window.hWin.innerWidth * 0.8;
@@ -5081,9 +5373,14 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     },
 
     //
-    // Add plus symbol to end of each tab group, 
-    // when clicked (activated) begins process of adding new tab to group
-    //
+    /**
+     * @brief Adds a "+" button to tab groups for creating new tabs.
+     * @memberof heurist.manageRecords
+     * This function is active when the RTS (Record Type Structure) editor is enabled.
+     * It appends a special "add new tab" control to each `ul[role="tablist"]` within
+     * tabbed groups. Clicking this control triggers an action in the RTS editor
+     * (`manageDefRecStructure('addNewSeparator', dt_id)`) to insert a new tab separator.
+     */
     _addNewTabButton: function(){
 
         if(this._currentEditRecTypeID <= 0){
@@ -5138,10 +5435,20 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     },
 	
     //
-	// Display extra record details at the top and bottom of the editor
-    //  Details included at the top: Record title, Child record of (if applicable), and Record URL (if set to appear)
-    //  Details included at the bottom: Current workflow stage
-	//
+	/**
+	 * @brief Displays extra record information at the top and bottom of the record editor form.
+	 * @memberof heurist.manageRecords
+     * This method rearranges and styles several key pieces of record information:
+     * - **Top of form**:
+     *   - Displays an "admin override" message if the current user is an admin but not the record owner.
+     *   - Shows the "Constructed Title" field (rec_Title), making it read-only and adding a gear icon for admins to edit the title mask.
+     *   - Moves the "Child record of" field (DT_PARENT_ENTITY), if present and not part of the formal structure, to this top section.
+     *   - Moves the "Record URL" field (rec_URL), if set to be shown on the edit form, to this top section.
+     *   - If the record was just duplicated, shows a temporary message indicating this.
+     * - **Bottom of form**:
+     *   - Moves the "Workflow Stage" field (DT_WORKFLOW_STAGE), if present and not part of the formal structure, to a fieldset at the bottom.
+     * It creates dedicated fieldsets (`#receditor-top`, `#receditor-bottom`) for these elements.
+	 */
     showExtraRecordInfo: function(){
 
         const that = this;
@@ -5271,9 +5578,19 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
     },
 	
-    //
-    // Popup that requests user to replace ambiguous dates 
-    //
+    /**
+     * @brief Handles ambiguous date entries by presenting a dialog to the user for clarification.
+     * @memberof heurist.manageRecords
+     * @param {object[]} ambiguous_dates An array of objects, each representing an ambiguous date encountered during validation.
+     * Each object contains `dtyid`, `org_value` (original input), `index` (if multi-value field), and `type` (simple, approx, carbon, range).
+     * Iteratively shows a dialog for each ambiguous date, allowing the user to:
+     * - Re-enter the date in a standard format (YYYY-MM-DD).
+     * - Specify if it's approximate (circa) or a B.P. (radiocarbon) date.
+     * - For ranges, clarify the start (TPQ) and end (TAQ) dates.
+     * - Add a comment to the temporal value.
+     * Upon saving from the dialog, the clarified date (potentially as a Temporal string) updates the corresponding field value.
+     * Continues until all ambiguous dates are processed or the user cancels.
+     */
     _handleAmbiguousDates: function(ambiguous_dates){
 
         let that = this;
@@ -5468,7 +5785,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         let msg = '';
         let value_style = 'display: inline-block; width: 150px; max-width: 150px;';
 
-        for(const dty_ID in invalid_entries){
+        for(const dty_ID in invalid_entries){ // Iterate through fields with invalid entries
 
             const fld_Name = $Db.rst(this._currentEditRecTypeID, dty_ID, 'rst_DisplayName');
             let values = invalid_entries[dty_ID];
@@ -5524,32 +5841,33 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         let $dlg;
         let btns = {};
 
-        btns[window.hWin.HR('Continue')] = function(){
+        btns[window.HR('Continue')] = function(){ // "Continue" button handler
 
-            fields[dtyID] = $dlg.find('.sel_current_stage').val();
-            that._saveEditAndClose( fields, _callback );
+            fields[dtyID] = $dlg.find('.sel_current_stage').val(); // Get selected stage
+            that._saveEditAndClose( fields, _callback ); // Proceed with saving
 
             $dlg.dialog('close');
         };
-        btns[window.hWin.HR('Cancel')] = function(){
+        btns[window.HR('Cancel')] = function(){ // "Cancel" button handler
             $dlg.dialog('close');
         };
 
+        // Show dialog
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
         '<div class="heurist-helper3">Changing this setting will determine actions to be taken such as visibility settings, marking for publication or email notifications</div>'
         +'<p style="margin: 20px 0px 0px"><label>Workflow stage: </label><select class="text ui-corner-all sel_current_stage">'
-            + opts_swf_stages
+            + opts_swf_stages // Options for stages
         +'</select>&nbsp;&nbsp;<button id="btn_advance">Advance</button></p>', btns, 
         {title: window.hWin.HR('Set workflow stage'), yes: window.hWin.HR('Continue'), no: window.hWin.HR('Cancel')},
-        {default_palette_class: this.options.default_palette_class}); //'ui-heurist-populate'
+        {default_palette_class: this.options.default_palette_class});
 
-        if($ele.length == 1){
-            $ele.clone(true, true)
+        if($ele.length == 1){ // If existing workflow stage UI elements are present in the main form
+            $ele.clone(true, true) // Clone them into the dialog
                 .insertAfter($dlg.find('div'));
 
-            $dlg.find('button#show_workflow_stages').remove(); // remove button to open popup
+            $dlg.find('button#show_workflow_stages').remove(); // Remove redundant "show" button from cloned UI
 
-            $dlg.find('.sel_workflow_stages')
+            $dlg.find('.sel_workflow_stages') // Style and bind change event for the "popup mode" selector
                 .css({
                     display: 'inline-block',
                     margin: '10px 0px 0px'
@@ -5557,40 +5875,47 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 .val(swf_mode);
             $dlg.find('.sel_workflow_stages').on('change', function(){
                 swf_mode = $dlg.find('.sel_workflow_stages').val();
-                that.element.find('.sel_workflow_stages').val(swf_mode).trigger('change'); // change value and trigger onChange
-            })
+                that.element.find('.sel_workflow_stages').val(swf_mode).trigger('change'); // Sync with main form
+            });
         }
 
-        let $swf_popup = $dlg.find('.sel_workflow_stages');
-        let $stage = $dlg.find('.sel_current_stage');
+        let $swf_popup_mode_selector = $dlg.find('.sel_workflow_stages'); // Selector for "New records only", "New and existing", "OFF"
+        let $stage_selector = $dlg.find('.sel_current_stage'); // Selector for actual workflow stages
 
+        // "Advance" button to select next stage
         $dlg.find('#btn_advance').button({icon:'ui-icon-caret-1-e',iconPosition:'end'})
                 .css('font-size','0.9em')
-        .on('click', function(){  //select next
-            $stage[0].selectedIndex++;    
-            if($stage[0].selectedIndex < 0){
-                $stage[0].selectedIndex = 0;            
+        .on('click', function(){
+            $stage_selector[0].selectedIndex++;
+            if($stage_selector[0].selectedIndex < 0){
+                $stage_selector[0].selectedIndex = 0;
             }
-            $stage.trigger('change');
+            $stage_selector.trigger('change');
         });
 
         $dlg.parent().find('.ui-dialog-buttonpane .ui-button').css('margin-right', '20px');
 
-        // Disable save button until the values are changed
-        let $save_btn = $($dlg.parent().find('.ui-dialog-buttonpane .ui-button')[0]);
-
-        let stage_popup = $swf_popup.val();
-        let stage = $stage.val();
+        // Change "Continue" button label to "Save change" if a stage or mode is actually changed
+        let initial_popup_mode = $swf_popup_mode_selector.val();
+        let initial_stage = $stage_selector.val();
+        let $save_btn = $($dlg.parent().find('.ui-dialog-buttonpane .ui-button')[0]); // The "Continue" button
 
         $dlg.find('select').on('change', () => {
-            let swf_changed = $stage.val() != stage || $swf_popup.val() != stage_popup;
-            $save_btn.button('option', 'label', window.hWin.HR(swf_changed ? 'Save change' : 'Continue'));
+            let changed = $stage_selector.val() != initial_stage || $swf_popup_mode_selector.val() != initial_popup_mode;
+            $save_btn.button('option', 'label', window.hWin.HR(changed ? 'Save change' : 'Continue'));
         });
     },
 	
-    //
-    // Setup external lookup buttons, placed at top of popup/window
-    //
+    /**
+     * @brief Sets up buttons for external lookup services at the top of the record editor.
+     * @memberof heurist.manageRecords
+     * Reads service configurations from `window.hWin.HAPI4.sysinfo['service_config']`.
+     * For each configured service relevant to the current record type (`cfg.rty_ID`),
+     * it creates a button. Clicking a service button triggers its respective lookup dialog
+     * (e.g., `lookupTLC`, `lookupBnFLibrary_bib`).
+     * Also adds a gear icon to configure these lookup services.
+     * If no relevant services are found, the lookup area is hidden.
+     */
     _setupExternalLookups: function(){
 
         let that = this;
@@ -5693,8 +6018,20 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
     },
 
     //
-    //
-    //
+    /**
+     * @brief Handles the response from an external lookup service dialog.
+     * @memberof heurist.manageRecords
+     * @param {?object|HRecordSet} recset The data returned from the lookup. This can be an HRecordSet or a plain object mapping field IDs to values.
+     * @param {string} service The name of the service that returned the data (key from `service_config`).
+     * This method processes the `recset` to populate fields in the current record's edit form.
+     * - If `recset` is an `HRecordSet`, it maps fields based on `cfg.fields`.
+     * - If `recset` is an object, it iterates through its keys (DetailTypeIDs).
+     *   - For 'resource', 'enum', 'relmarker' types, it prepares values for further processing (e.g., term creation, resource selection).
+     *   - For 'file' types, it collects URLs for remote file registration.
+     *   - For other types, it directly sets field values.
+     *   - Handles special cases like dumping BnF record XML to scratchpad.
+     * After initial processing, it calls `processTermFields` to handle any pending term creations/selections.
+     */
     _handleLookupResponse: function(recset, service){
 
         let that = this;
@@ -5890,14 +6227,23 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
     },
 	
-	//
-    // Process term field values from External Lookups, that aren't integers (ids)
-    //
-    // Param:
-    //  completed_fields (array): array of field names that have already been assigned
-    //  new_terms (object): contains the values for enum fields to assign after handling all terms {dt_id: [trm_id, ...]}
-    //      key => field id (dt_id), value => array of term id(s) ([trm_id1, trm_id2, ...])
-    //
+    /**
+     * @brief Processes term (enum/vocabulary) field values obtained from external lookups.
+     * @memberof heurist.manageRecords
+     * @param {string[]} completed_fields An array of field display names that have already been successfully populated. This array is updated by this method.
+     * @param {object} new_terms An object to accumulate new term IDs to be set on fields. Keys are DetailTypeIDs, values are arrays of term IDs.
+     * This method iteratively processes `that.term_values` (populated by `_handleLookupResponse`).
+     * For each term value that isn't a direct term ID:
+     * - It checks if a term with the given label (or details) already exists in the target vocabulary.
+     * - If not, it presents a dialog (`handle-terms`) to the user, allowing them to:
+     *   - Select an existing term from the vocabulary.
+     *   - Create a new term with the provided label, description, code, and URI.
+     *   - Optionally import translations if provided by the lookup service.
+     * - Once a term ID is resolved (either existing or newly created), it's added to `new_terms`.
+     * - After all terms in `that.term_values` are processed, it updates the corresponding fields in the edit form
+     *   with the collected term IDs. If new terms were created, it may refresh the local term cache (`defTerms`).
+     * Finally, it calls `processFileFields` to continue with file field processing.
+     */
     processTermFields: function(completed_fields, new_terms){
 
         let that = this;
@@ -6104,10 +6450,17 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
 	//
     // Process file field values from External Lookups, handles remote resources only
-    // 
-    // Param:
-    //  completed_fields (array): array of field names that have already been assigned
-    //
+    /**
+     * @brief Processes file field values obtained from external lookups, specifically for remote files.
+     * @memberof heurist.manageRecords
+     * @param {string[]} completed_fields An array of field display names that have already been successfully populated. This array is updated by this method.
+     * This method takes file URLs stored in `that.file_values` (populated by `_handleLookupResponse`).
+     * It makes a batch request to the server (`regExternalFiles` action on `recUploadedFiles` entity)
+     * to register these external URLs as Heurist file records.
+     * - On success, it updates the corresponding file fields in the edit form with the new file record IDs/details.
+     * - If any errors occur during registration (invalid URL, save error), it displays them to the user.
+     * Finally, it calls `processResourceFields` to handle record pointer and relationship marker fields.
+     */
     processFileFields: function(completed_fields){
 
         let that = this;
@@ -6190,10 +6543,22 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
 	//
     // Process record pointer and relationship fields values from External Lookups, that aren't integers (ids)
-    // 
-    // Param:
-    //  completed_fields (array): array of field names that have already been assigned
-    //
+    /**
+     * @brief Processes record pointer and relationship marker field values obtained from external lookups.
+     * @memberof heurist.manageRecords
+     * @param {string[]} completed_fields An array of field display names that have already been successfully populated.
+     * This method handles values stored in `that.resource_values` (for record pointers) and
+     * `that.relmarker_values` (for relationship markers), which were populated by `_handleLookupResponse`.
+     * It presents a dialog (`lookup_RecPointers`) to the user listing the fields and their proposed string values
+     * that need to be resolved into actual Heurist record IDs.
+     * - For each listed item, the user can click to open a record selection dialog (`showEntityDialog('records')`),
+     *   pre-filtered with the search string from the lookup.
+     * - The user selects or creates the target record.
+     * - For record pointers, the selected record ID is directly assigned to the field.
+     * - For relationship markers, it additionally captures the relationship type (if provided by the lookup)
+     *   and uses the `editing_input('setup_Relmarker_Target')` mechanism to create the relationship.
+     * Once all items are processed or the user closes the dialog, it displays a summary of successfully mapped fields.
+     */
     processResourceFields: function(completed_fields){
 
         let that = this;
@@ -6479,6 +6844,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         });
     },
 
+    /**
+     * @brief Focuses a specific field in the edit form.
+     * @memberof heurist.manageRecords
+     * @param {number} field_id The DetailTypeID of the field to focus.
+     * Scrolls the form to bring the field into view and then attempts to focus its input element.
+     * Handles fields within tabs or accordions by activating the respective container first.
+     */    
     focusField: function(field_id){
 
         let $ele = this._editing.getFieldByName(field_id);
@@ -6527,11 +6899,15 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         }
     },
 
-    //
-    //
-    //
+    /**
+     * @brief Toggles the public visibility of the current record.
+     * @memberof heurist.manageRecords
+     * Reads the current 'rec_NonOwnerVisibility' value. If 'public', changes to 'viewable',
+     * and vice-versa. Sends an access update request to `HAPI4.RecordMgr.access`.
+     * On success, updates the field in the form, the toggle button state, and the summary panel.
+     * This action is restricted to administrators or the record owner.
+     */
     _toggleRecordVisibility: function(){
-
         const that = this;
                        
         let ele = this._editing.getFieldByName('rec_NonOwnerVisibility');
@@ -7349,4 +7725,4 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         this.options.rts_editor = null;
         this.reloadEditForm( true );
     }
-});
+});        

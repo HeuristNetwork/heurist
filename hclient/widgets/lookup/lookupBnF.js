@@ -178,39 +178,6 @@ $.widget("heurist.lookupBnF", $.heurist.lookupBase, {
     },
 
     /**
-     * Retrieves the current settings for dumping the raw BnF record data.
-     * It checks the state of UI elements in the settings tab:
-     * - `input[name="dump_record"]`: A checkbox to enable/disable record dumping.
-     * - `input[name="dump_field"]`: Radio buttons to select the dump target (either 'rec_ScratchPad' or 'dty_ID' for a specific field).
-     * - `#rty_flds`: A select dropdown for the specific field ID if 'dty_ID' is chosen.
-     *
-     * @memberof heurist.lookupBnF
-     * @instance
-     * @private
-     * @returns {Array<boolean, string>} An array where:
-     *          - The first element (`boolean`) is `true` if record dumping is enabled, `false` otherwise.
-     *          - The second element (`string`) is the target field for dumping:
-     *            - 'rec_ScratchPad' if dumping to ScratchPad.
-     *            - The selected dty_ID (as a string) if dumping to a specific field.
-     *            - An empty string if record dumping is disabled.
-     */
-    _getRecDumpSetting: function(){
-
-        const get_recdump = this.element.find('input[name="dump_record"]').is(':checked');
-        let recdump_fld = '';
-        
-        if(get_recdump){
-
-            recdump_fld = this.element.find('input[name="dump_field"]:checked').val();
-            if(recdump_fld === 'dty_ID'){
-                recdump_fld = this.element.find('#rty_flds').val();
-            }
-        }
-
-        return [ get_recdump, recdump_fld ];
-    },
-
-    /**
      * Processes the search results received from the BnF service and prepares them
      * for display in the `resultList` widget.
      * This method overrides the parent `_onSearchResult`.

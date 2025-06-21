@@ -1,25 +1,45 @@
-/**                                  
-* manageSysWorkflowRules.js - main widget to Workflow Stages Rules
-*
+/**
+* @file manageSysWorkflowRules.js
+* @brief Manages System Workflow Rule entities.
+* @fileOverview Provides a UI for administrators to define and manage system workflow rules. This includes specifying triggers, conditions, and actions for automated processes within Heurist.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 //
 // there is no search, select mode for reminders - only edit
 //
+/**
+ * @widget heurist.manageSysWorkflowRules
+ * @brief Widget for managing System Workflow Rules.
+ * @extends $.heurist.manageEntity
+ * @description This widget provides an interface for administrators to define and manage
+ * system workflow rules. These rules automate processes based on triggers, conditions, and actions.
+ * The widget behavior can vary significantly based on `edit_mode` and `select_mode`.
+ *
+ * @property {number} [edit_height=600] Default height for the edit dialog of a workflow rule.
+ * @property {string} default_palette_class Default CSS class for theming, typically 'ui-heurist-design'.
+ * @property {boolean} [innerTitle=false] If true, allows for an inner title within the widget.
+ * @property {boolean} [use_cache=true] If true, client-side caching is used for data.
+ * @property {string} edit_mode Controls how editing is handled. Can be 'editonly' (directly opens editor for a specific or new rule),
+ *                              'popup' (opens editor in a dialog), or other modes inherited from `manageEntity`.
+ * @property {string} select_mode Influences selection behavior, e.g., 'manager' for standard list management.
+ * @property {string} layout_mode Defines the overall layout. If `edit_mode` is 'editonly', this is also set to 'editonly'.
+ * @property {number} width Default width of the widget, conditionally set (e.g., to 790 if 'editonly').
+ * @property {number} height Default height of the widget, conditionally set (e.g., to 600 if 'editonly' and not otherwise specified).
+ * @property {?function} beforeClose Custom function to call before closing the dialog, conditionally set.
+ * @property {boolean} [list_header=false] If true, shows a header for the record list (when not in 'editonly' mode).
+ * @property {?boolean} isFrontUI If true, indicates the widget is used in a front-end UI context, potentially altering styling and behavior.
+ * @property {?number} swf_ID If `edit_mode` is 'editonly' and this ID is provided, the widget directly loads this specific workflow rule for editing.
+ */
 $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
    
     _entityName:'sysWorkflowRules',
@@ -33,6 +53,14 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
     //keep to refresh after modifications
     _keepRequest:null,
     
+    /**
+     * @brief Initializes the widget.
+     * @override
+     * @memberof heurist.manageSysWorkflowRules
+     * Sets default options for palette class, layout mode, dimensions, caching, and other
+     * configurations. It tailors the widget's behavior based on `edit_mode` and `select_mode`.
+     * Also sets up an event listener for `ON_STRUCTURE_CHANGE` to reload data if workflow definitions change.
+     */
     _init: function() {
         
         if(!this.options.default_palette_class){
@@ -91,6 +119,13 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
     },
     
     
+    /**
+     * @brief Loads or updates the list of workflow rules.
+     * @memberof heurist.manageSysWorkflowRules
+     * @param {boolean} [is_first] Indicates if this is the first time data is being loaded.
+     * Updates the record list with workflow rules from the local cache (`$Db.swf()`).
+     * If not the first load and the search form is initialized, it triggers a new search.
+     */
     _loadData: function( is_first ){
         
             this.updateRecordList(null, {recordset:$Db.swf()});
@@ -99,9 +134,15 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
             }
     },
     
-    //  
-    // invoked from _init after load entity config    
-    //
+    /**
+     * @brief Initializes the controls for the widget.
+     * @override
+     * @memberof heurist.manageSysWorkflowRules
+     * @returns {boolean} False if the parent `_initControls` fails, otherwise true.
+     * If in 'editonly' mode, it loads a specific rule (if `options.swf_ID` is provided) or a new rule form.
+     * Otherwise, it initializes the search form (`searchSysWorkflowRules`), configures the record list
+     * for sortable list view, and sets up event listeners for search actions (filter, add, add set, edit vocabulary).
+     */
     _initControls: function() {
         
         if(!this._super()){
@@ -114,7 +155,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
             //load rules
             if(this.options.swf_ID>0){
                     let request = {};
-                    request['swf_ID']  = this.options.rem_RecID;
+                    request['swf_ID']  = this.options.rem_RecID; // Should likely be this.options.swf_ID
                     request['a']          = 'search'; //action
                     request['entity']     = this.options.entity.entityName;
                     request['details']    = 'full';
@@ -220,9 +261,17 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
         return true;
     },
     
-    //
-    // listener of onfilter event generated by searchEtity. appicable for use_cache only       
-    //
+    /**
+     * @brief Filters the record list based on search criteria.
+     * @override
+     * @memberof heurist.manageSysWorkflowRules
+     * @param {Event} event The event object.
+     * @param {object} request The search request object.
+     * @returns {HRecordSet|null} The filtered recordset, or null if no results.
+     * If it's the first time filtering, it calls `_loadData`.
+     * Applies the filter request to the cached recordset and updates the displayed list.
+     * It also updates the state of buttons in the search form based on whether results are found.
+     */
     filterRecordList: function(event, request){
 
         if( this.is_first ){
@@ -260,9 +309,14 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
         
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Adds a complete set of default workflow rules for a selected record type.
+     * @memberof heurist.manageSysWorkflowRules
+     * Retrieves the currently selected record type from the search form.
+     * Sends a batch request to the server (operation 'add_rule_set') to create
+     * a default set of workflow rules for that record type.
+     * On success, refreshes the workflow rule cache (`$Db.swf()`) and re-triggers a search.
+     */
     _addRuleSet: function(){
         
         let that = this;
@@ -289,6 +343,17 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
     
     
 //----------------------------------------------------------------------------------    
+    /**
+     * @brief Retrieves and validates form values before saving a workflow rule.
+     * @override
+     * @memberof heurist.manageSysWorkflowRules
+     * @returns {?object} The validated field values, or null if validation fails.
+     * Calls the parent `_getValidatedValues`. It then performs specific transformations for
+     * visibility and ownership fields:
+     * - `swf_Visibility` (from UI dropdown: 'null', 'hidden', 'viewable', 'public') is mapped to `swf_SetVisibility`.
+     * - `swf_SetOwnership` is adjusted if its UI value is 'null'.
+     * This ensures the data is in the correct format for server-side processing.
+     */
     _getValidatedValues: function(){
         
         let fields = this._super();
@@ -319,9 +384,15 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
         return fields;
     },
 
-    //
-    //
-    //
+    /**
+     * @brief Saves the workflow rule and handles follow-up actions.
+     * @override
+     * @memberof heurist.manageSysWorkflowRules
+     * @param {?object} fields Field values to save. If null, values are retrieved from the form.
+     * @param {string|function} afteraction Action to perform after saving.
+     * If in 'editonly' mode and an `swf_ID` is provided, ensures this ID is part of the saved data.
+     * Calls the parent `_saveEditAndClose`.
+     */
     _saveEditAndClose: function( fields, afteraction ){
 
         //assign record id    
@@ -333,27 +404,44 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
         this._super();
     },
     
+    /**
+     * @brief Handles events after a workflow rule is saved.
+     * @override
+     * @memberof heurist.manageSysWorkflowRules
+     * @param {number} recID The ID of the saved rule.
+     * @param {object} fieldvalues The saved field values.
+     * Calls the parent `_afterSaveEventHandler`. Updates the local cache (`$Db.swf()`)
+     * with the new/updated rule. Refreshes the global SWF cache.
+     * If in 'editonly' mode, closes the dialog. Otherwise, updates the search form's
+     * selected record type to reflect the context of the saved rule.
+     */
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
         this._super( recID, fieldvalues );
         
-        $Db.swf().setRecord(recID, fieldvalues);
+        $Db.swf().setRecord(recID, fieldvalues); // Update local cache with saved values.
 
-        window.hWin.HAPI4.EntityMgr.refreshEntityData('swf', () => { // Update cache
+        window.hWin.HAPI4.EntityMgr.refreshEntityData('swf', () => { // Refresh global swf cache
             
             if(this.options.edit_mode=='editonly'){
-                this.closeDialog(true);
+                this.closeDialog(true); // Close if in 'editonly' mode
             }else{
-                //this.getRecordSet().setRecord(recID, fieldvalues);    
-                //this.recordList.resultList('refreshPage'); 
-                
+                // If in list mode, update the selected record type in the search form
+                // to potentially refresh the list for that record type.
                 this.searchForm.searchSysWorkflowRules('option', 'rty_ID', fieldvalues['swf_RecTypeID']);                    
-                //this.searchForm.searchSysWorkflowRules('refreshSelectors', fieldvalues['swf_RecTypeID']); 
             }
         });
 
     },
 
+    /**
+     * @brief Handles the deletion of a workflow rule, with a confirmation prompt.
+     * @override
+     * @memberof heurist.manageSysWorkflowRules
+     * @param {boolean} [unconditionally=false] If true, deletes without confirmation.
+     * If `unconditionally` is false (the default), it shows a confirmation dialog.
+     * If confirmed, or if `unconditionally` is true, it calls the parent's `_deleteAndClose` method.
+     */
     _deleteAndClose: function(unconditionally){
     
         if(unconditionally===true){
@@ -361,18 +449,41 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
         }else{
             let that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this rule?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this rule?', function(){ that._deleteAndClose(true); },
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     },
     
-    _afterDeleteEvenHandler: function(recID){
+    /**
+     * @brief Handles events after a workflow rule is deleted.
+     * @override
+     * @memberof heurist.manageSysWorkflowRules
+     * @param {number} recID The ID of the deleted rule.
+     * Calls the parent's `_afterDeleteEventHandler`
+     * Removes the rule from the local cache (`$Db.swf()`) and triggers a search refresh.
+     */
+    _afterDeleteEventHandler: function(recID){
         this._super(recID);
         $Db.swf().removeRecord(recID);
         this.searchForm.searchSysWorkflowRules('startSearch');
     },
 
     
+    /**
+     * @brief Performs actions after the edit form for a workflow rule is initialized.
+     * @override
+     * @memberof heurist.manageSysWorkflowRules
+     * Calls the parent's `_afterInitEditForm`.
+     * If adding a new rule (`_currentEditID < 0`):
+     *   - Pre-fills `swf_RecTypeID` with the currently selected record type from the search form.
+     *   - Disables already selected stages in the `swf_Stage` dropdown to prevent duplicate rules for the same stage.
+     * If editing an existing rule:
+     *   - Disables `swf_RecTypeID` and `swf_Stage` fields as they shouldn't be changed post-creation.
+     * Sets up logic for the `swf_Visibility` and `swf_SetVisibility` fields to work together
+     * (e.g., showing `swf_SetVisibility` only when `swf_Visibility` is 'hidden').
+     * Initializes the "Record Email Field" selector (`_setupRecordEmailField`).
+     * Adds help text with field substitution placeholders for the `swf_EmailText` field.
+     */
     _afterInitEditForm: function(){
 
         this._super();
@@ -568,9 +679,13 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
         }
     },
 
-    //
-    // header for resultList
-    //     
+    /**
+     * @brief Renders the header for the workflow rule list.
+     * @override
+     * @memberof heurist.manageSysWorkflowRules
+     * @returns {string} HTML string for the list header.
+     * Defines column headers: 'Stage', 'Restricted to', 'Ownership', 'Visibility', 'Notification'.
+     */
     _recordListHeaderRenderer:function(){
         
         function __cell(colname, width){
@@ -585,9 +700,17 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
     },
     
     //----------------------
-    //
-    //  overwrite standard render for resultList
-    //
+    /**
+     * @brief Renders a single workflow rule item in the list.
+     * @override
+     * @memberof heurist.manageSysWorkflowRules
+     * @param {HRecordSet} recordset The recordset containing the item.
+     * @param {object} record The specific record object for the item to render.
+     * @returns {string} HTML string representing the rule item.
+     * Formats the display of a rule, showing its stage, restrictions, ownership changes,
+     * visibility settings, and email notification details. Includes edit/delete buttons
+     * if in 'manager' select mode and 'popup' edit mode.
+     */
     _recordListItemRenderer:function(recordset, record){
 
         let that = this;
@@ -690,62 +813,76 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
 
     },
 
+    /**
+     * @brief Sets up the "Record Email Field" selector in the workflow rule edit form.
+     * @memberof heurist.manageSysWorkflowRules
+     * @param {boolean} has_freetext Indicates if the current record type has any freetext fields.
+     * This method enhances the `swf_RecEmailField` (which stores the ID of a freetext field).
+     * It hides the original input and replaces it with a checkbox to enable/disable email field selection,
+     * and an hSelect dropdown populated with all freetext fields available in the current record type
+     * (selected via the search form). This allows users to choose a field whose content will be
+     * used as the recipient email address for notifications.
+     */
     _setupRecordEmailField: function(has_freetext){
 
         let rty_ID = this.searchForm.searchSysWorkflowRules('getSelectedRty');
-        let ele = this._editing.getFieldByName('swf_RecEmailField');
+        let ele = this._editing.getFieldByName('swf_RecEmailField'); // The hidden input storing the selected field ID
 
-        if(!has_freetext){
-            ele.hide();
+        if(!has_freetext){ // If the current record type has no freetext fields
+            ele.hide(); // Hide the email field selector entirely
             return;
         }
         
-        let $input = ele.find('input');
+        let $input = ele.find('input'); // The actual hidden input element
 
+        // Checkbox to enable/disable selecting a field
         let $chk_Enabled = $('<input>', {
             type: 'checkbox',
             class: 'chkbx_EnableFld'
         }).insertAfter($input);
 
+        // Select dropdown for choosing the freetext field
         let $sel_Field = $('<select>', {
             class: 'sel_RecField'
         }).insertAfter($chk_Enabled);
 
+        // Event handler for the enable/disable checkbox
         this._on($chk_Enabled, {
             change: () => {
-                window.hWin.HEURIST4.util.setDisabled($sel_Field, !$chk_Enabled.is(':checked'));
+                window.hWin.HEURIST4.util.setDisabled($sel_Field, !$chk_Enabled.is(':checked')); // Enable/disable dropdown
                 if(!$chk_Enabled.is(':checked')){
-                    $input.val('').trigger('change');
+                    $input.val('').trigger('change'); // Clear hidden input if disabled
                 }else if(!window.hWin.HEURIST4.util.isempty($sel_Field.val())){
-                    $input.val($sel_Field.val()).trigger('change');
+                    $input.val($sel_Field.val()).trigger('change'); // Set hidden input if enabled and a field is selected
                 }
             }
         });
 
-        // Consider: should add rec owner? current user?
-        window.hWin.HEURIST4.ui.createRectypeDetailSelect($sel_Field[0], rty_ID, ['freetext'],
-            [ {key: '', title: window.hWin.HR('Select field...')} ], {
-                useHtmlSelect: false,
-                selectedValue: $input.val(),
+        // Populate the dropdown with freetext fields from the current record type
+        window.hWin.HEURIST4.ui.createRectypeDetailSelect($sel_Field[0], rty_ID, ['freetext'], // Filter for freetext type
+            [ {key: '', title: window.hWin.HR('Select field...')} ], { // Default option
+                useHtmlSelect: false, // Use hSelect
+                selectedValue: $input.val(), // Pre-select if a value is already stored
                 eventHandlers: {
-                    onSelectMenu: (event) => {
+                    onSelectMenu: (event) => { // When a field is selected from dropdown
                         let new_fld = $chk_Enabled.is(':checked') ? $sel_Field.val() : '';
-                        $input.val(new_fld).trigger('change');
+                        $input.val(new_fld).trigger('change'); // Update hidden input
                     }
                 }
             }
         );
 
+        // Default to 'email' field (dty_ConceptID '1317-242') if available and nothing is selected
         let def_value = $Db.getLocalID('dty', '1317-242');
-        if($sel_Field.val() !== ''){
-            $chk_Enabled.prop('checked', true);
-        }else if($sel_Field.find(`option[value="${def_value}"]`).length == 1){
-            $sel_Field.val(def_value).hSelect('refresh');
+        if($sel_Field.val() !== ''){ // If a field is already selected (e.g., editing existing rule)
+            $chk_Enabled.prop('checked', true); // Check the enable checkbox
+        }else if($sel_Field.find(`option[value="${def_value}"]`).length == 1){ // If 'email' field exists
+            $sel_Field.val(def_value).hSelect('refresh'); // Select it by default
         }
 
-        window.hWin.HEURIST4.util.setDisabled($sel_Field, !$chk_Enabled.is(':checked'));
+        window.hWin.HEURIST4.util.setDisabled($sel_Field, !$chk_Enabled.is(':checked')); // Set initial disabled state of dropdown
 
-        $input.hide();
+        $input.hide(); // Hide the original text input, as it's now managed by the checkbox and dropdown
     }
 
 });

@@ -1,28 +1,51 @@
 /**
-* manageDefRecTypes.js - main widget to manage defRecTypes users
-*
+* @file manageDefTerms.js
+* @brief Manages Term entities within vocabularies.
+* @fileOverview Provides a UI for managing terms within hierarchical vocabularies. This includes creating, editing, deleting, and organizing terms, as well as operations like merging or correcting terms.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-/*
-we may take data from 
-1) use_cache = false  from server on every search request (live data) 
-2) use_cache = true   from client cache - it loads once per heurist session (actually we force load)
-3) use_cache = true + use_structure - use HEURSIT4.rectypes
-*/
+/**
+ * @widget heurist.manageDefTerms
+ * @brief Widget for managing terms within vocabularies.
+ * 
+ * 
+ * @extends $.heurist.manageEntity
+ * @property {string} [default_palette_class='ui-heurist-design'] Default palette class.
+ * @property {boolean} [innerTitle=false] Whether to display an inner title.
+ * @property {boolean} [use_cache=true] Whether to use client-side caching for term data.
+ *              It may take data from 
+ *              1) use_cache = false  from server on every search request (live data) 
+ *              2) use_cache = true   from client cache - it loads once per heurist session (actually we force load)
+ *              3) use_cache = true + use_structure - use HEURSIT4.rectypes
+ * @property {boolean} [use_structure=false] Internal flag, related to `import_structure`.
+ * @property {?object} import_structure If provided, enables import mode from a remote Heurist instance.
+ * @property {string} [layout_mode='short'] Layout mode for the widget.
+ * @property {string} [auxilary='term'] Specifies the primary entity type being managed ('term' or 'vocabulary').
+ * @property {string} edit_mode Determines editing behavior (e.g., 'editonly', 'popup').
+ * @property {string} select_mode Determines selection behavior (e.g., 'manager', 'select_single').
+ * @property {boolean} isFrontUI If true, adapts UI for front-end display, potentially integrating vocabulary group and vocabulary panels.
+ * @property {number} [edit_height=440] Default height of the edit form.
+ * @property {number} [edit_width=600] Default width of the edit form (660 if `auxilary` is 'vocabulary').
+ * @property {?string} vocab_type Filters vocabularies by domain ('enum' or 'relation') when `auxilary` is 'vocabulary'.
+ * @property {boolean} [create_one_term=false] If true, allows creation of only one term and returns its ID.
+ * @property {boolean} [edit_need_load_fullrecord=true] Whether a full record load is needed for editing.
+ * @property {?number} initial_filter Sets the initially selected vocabulary ID.
+ * @property {?string} filter_groups Restricts vocabulary domain display (e.g., 'enum', 'relation').
+ * @property {?string} select_mode_reference Special mode for selecting reference or inverse terms.
+ * @property {?string} select_mode_target Name of the target term/vocabulary, displayed in the UI for context in special selection modes.
+ * @property {?number} trm_VocabularyGroupID Filters vocabularies by this group ID when `auxilary` is 'vocabulary'.
+ * @property {?number} trm_VocabularyID Filters terms by this vocabulary ID when `auxilary` is 'term'.
+ * @property {?number} trm_ParentTermID Sets the parent term ID when adding a new term.
+ * @property {?string} suggested_name Pre-fills the label for a new term or vocabulary.
+ */
 $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     /*
@@ -59,9 +82,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     _getTranslatedLabels: false, // get translated labels, runs once
 
-    //
-    //                                                  
-    //    
+    /**
+     * @brief Initializes the manageDefTerms widget.
+     * @memberof heurist.manageDefTerms
+     * @override
+     * @description Sets up default options, handles different modes (e.g., `import_structure`, `auxilary` for terms vs. vocabularies),
+     * adjusts UI based on `isFrontUI`, and registers event listeners for structure changes.
+     */
     _init: function() {
 
         this.options.default_palette_class = 'ui-heurist-design';
@@ -141,6 +168,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         
     },
 
+    /**
+     * @brief Cleans up the widget upon destruction.
+     * @memberof heurist.manageDefTerms
+     * @override
+     * @description Removes custom elements (like `fields_list_div`, `space_for_drop`) and event listeners.
+     */
     _destroy: function() {
 
         if(this.fields_list_div){
@@ -155,9 +188,16 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         this._super(); 
     },
 
-    //  
-    // invoked from _init after load entity config    
-    //
+    /**
+     * @brief Initializes the controls for the widget.
+     * @memberof heurist.manageDefTerms
+     * @override
+     * @description Sets up UI based on `edit_mode`, `select_mode`, and `auxilary` option.
+     * If managing 'vocabulary', it sets up vocabulary groups panel.
+     * If managing 'term', it sets up vocabulary selection panel and term list/tree view with specific actions.
+     * Initializes search/filter capabilities and loads initial data.
+     * @returns {boolean} False if the parent's `_initControls` fails, otherwise true.
+     */
     _initControls: function() {
 
         if(!this._super()){
@@ -809,9 +849,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     },//_initControls   
 
 
-    //
-    //
-    //
+    /**
+     * @brief Selects a specific vocabulary in the UI.
+     * @memberof heurist.manageDefTerms
+     * @param {number} vocab_id The ID of the vocabulary to select.
+     * @description If managing vocabularies (`auxilary=='vocabulary'`), this selects the vocabulary's group
+     * and then the vocabulary itself in the list.
+     */
     selectVocabulary: function(vocab_id){
         
         let vcg_ID = $Db.trm(vocab_id, 'trm_VocabularyGroupID');
@@ -825,9 +869,16 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     },         
 
 
-    //
-    // invoked after all elements are inited 
-    //
+    /**
+     * @brief Loads data for the widget (terms or vocabularies).
+     * @memberof heurist.manageDefTerms
+     * @param {boolean} [is_first_call] Indicates if this is the initial data load.
+     * @description Handles loading data based on configuration:
+     * If `use_remote` and `import_structure`, fetches terms from a remote source.
+     * If `auxilary` is 'vocabulary', loads vocabularies (parent terms).
+     * Otherwise, loads all terms into `_cachedRecordset`.
+     * Calls `_filterByVocabulary` to display the relevant subset.
+     */
     _loadData: function( is_first_call ){
 
         let that = this;
@@ -874,9 +925,16 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         
     },
 
-    //
-    //
-    //
+    /**
+     * @brief Filters and displays terms or vocabularies based on the selected group/vocabulary.
+     * @memberof heurist.manageDefTerms
+     * @private
+     * @description Updates the displayed list/tree of terms or vocabularies.
+     * If `auxilary` is 'vocabulary', filters by `trm_VocabularyGroupID`.
+     * If `auxilary` is 'term', filters by `trm_VocabularyID`, reconstructs the term tree,
+     * and fetches/updates term usage counts and translations.
+     * Updates the title/header to reflect the current selection.
+     */
     _filterByVocabulary: function(){
 
         if(!this.getRecordSet()) return;
@@ -994,9 +1052,18 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     },
 
-    //
-    //
-    //
+    /**
+     * @brief Renders a single term or vocabulary item in the list.
+     * @memberof heurist.manageDefTerms
+     * @override
+     * @param {HRecordSet} recordset The recordset.
+     * @param {object} record The record (term or vocabulary) to render.
+     * @returns {string} HTML string for the list item.
+     * @description Generates HTML for a list item. Differentiates rendering based on
+     * whether `auxilary` option is 'vocabulary' or 'term'. For terms, it handles
+     * indentation for hierarchy, displays reference info, inverse terms, codes, URIs,
+     * and action buttons.
+     */
     _recordListItemRenderer:function(recordset, record){
 
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
@@ -1099,7 +1166,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             
             const hasIcon = $Db.trmHasIcon(recID);
 
-            let recIcon = hasIcon?window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon', null, null, true):'';
+            //let recIcon = hasIcon?window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon', null, null, true):'';
 
             recTitle = '<div class="item truncate label_term rolloverTooltip"'
             +' style="'+sFontSize+sWidth+sBold+'" '+sHint+'>'
@@ -1195,9 +1262,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     },
 
-    //
-    //
-    //
+    /**
+     * @brief Called after a page/view of the list is rendered.
+     * @memberof heurist.manageDefTerms
+     * @override
+     * @description Attaches mouseenter/mouseleave handlers to vocabulary items
+     * if in 'popup' edit mode and `auxilary` is 'vocabulary', to adjust item width for actions.
+     */
     _onPageRender: function(){
 
         if(this.options.edit_mode == 'popup'){
@@ -1231,9 +1302,16 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
     },
 
-    //
-    //
-    //
+    /**
+     * @brief Deletes one or more terms/vocabularies.
+     * @memberof heurist.manageDefTerms
+     * @override
+     * @param {boolean} unconditionally If true, deletes without confirmation.
+     * @param {?Array<number>} [recIDs=null] An array of term/vocabulary IDs to delete. If null, uses `_currentEditID`.
+     * @description Handles deletion of terms or vocabularies. Prompts for confirmation,
+     * especially if deleting multiple items or items with children.
+     * Makes a server request to delete and updates the local cache and UI.
+     */
     _deleteAndClose: function(unconditionally, recIDs = null){
 
         let that = this;
@@ -1267,7 +1345,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 that._cachedRecordset.removeRecord( recID );
                             }
 
-                            that._afterDeleteEvenHandler( recID, it_was_vocab );
+                            that._afterDeleteEventHandler( recID, it_was_vocab );
                         }
 
                        
@@ -1308,16 +1386,22 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             window.hWin.HEURIST4.msg.showMsgDlg( 
                 msg, 
-                function(){ that._deleteAndClose(true, recIDs) }, 
+                function(){ that._deleteAndClose(true, recIDs); },
                 {title:'Warning',yes:'Proceed',no:'Cancel'},
                 {default_palette_class:this.options.default_palette_class});        
         }
     },
 
-    //
-    //
-    //
-    _afterDeleteEvenHandler: function(recID, it_was_vocab){
+    /**
+     * @brief Handles actions after a term or vocabulary is deleted.
+     * @memberof heurist.manageDefTerms
+     * @override
+     * @param {number} recID The ID of the deleted item.
+     * @param {boolean} [it_was_vocab] True if the deleted item was a vocabulary.
+     * @description Calls parent's handler. Removes the term and its children (if any)
+     * from the local cache and links. If a vocabulary was deleted, resets related options.
+     */
+    _afterDeleteEventHandler: function(recID, it_was_vocab){
 
         this._super(recID); 
 
@@ -1340,11 +1424,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     },
 
 
-    //-----
-    //
-    // show hide some elements on edit form according to type: 
-    //    vocab/term and enum/relation
-    //
+    /**
+     * @brief Performs actions after the edit form is initialized for a term or vocabulary.
+     * @memberof heurist.manageDefTerms
+     * @override
+     * @description Sets up the form based on whether a term or vocabulary is being edited.
+     * Hides/shows relevant fields (e.g., inverse term fields for relations, group for vocabularies).
+     * Sets default values for new items. Configures help text and specific input behaviors.
+     */
     _afterInitEditForm: function(){
         this._super();
 
@@ -1552,16 +1639,20 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     },   
     
-    //
-    //
-    //
+    /**
+     * @brief Gets the ID of the last vocabulary that was added through this widget instance.
+     * @memberof heurist.manageDefTerms
+     * @returns {number} The ID of the last added vocabulary, or 0 if none.
+     */
     getLastAddedVocabulary: function(){
         return this.last_added_vocabulary;    
     },
     
-    //
-    // returns context value that is passed as parameter to function options.onClose
-    //
+    /**
+     * @brief Determines the context value to pass to the `onClose` callback.
+     * @memberof heurist.manageDefTerms
+     * @returns {number} The ID of the relevant vocabulary (either the last added one or the currently selected one).
+     */
     contextOnClose: function(){
         
         let last_vocab_id = this.vocabularies_div?this.vocabularies_div.manageDefTerms('getLastAddedVocabulary'):0;
@@ -1570,9 +1661,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     },
 
 
-    //
-    //
-    //
+    /**
+     * @brief Defines the buttons for the edit dialog.
+     * @memberof heurist.manageDefTerms
+     * @override
+     * @returns {Array<object>} An array of button definition objects.
+     * @description Customizes dialog buttons based on the context (e.g., `edit_mode`, `options.container`).
+     * May include "Add Child" and "Import terms" buttons if integrated within another widget.
+     */
     _getEditDialogButtons: function(){
         let btns = this._super();
 
@@ -1643,6 +1739,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         return btns;  
     },
 
+    /**
+     * @brief Handles changes in the edit form.
+     * @memberof heurist.manageDefTerms
+     * @override
+     * @param {jQuery|boolean} changed_element The element that changed or true if a general change occurred.
+     * @description Calls parent's handler. Updates visibility of "Edit All" button if applicable.
+     */
     onEditFormChange: function(changed_element){
 
         this._super(changed_element);
@@ -1654,9 +1757,16 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     },
 
-    //
-    // update list after save (refresh)
-    //
+    /**
+     * @brief Handles actions after a term or vocabulary is saved.
+     * @memberof heurist.manageDefTerms
+     * @override
+     * @param {number} recID The ID of the saved item.
+     * @param {object} fieldvalues The saved field values.
+     * @description Handles different scenarios based on `edit_mode`, `auxilary`, and `select_mode`.
+     * Updates UI, caches, and potentially closes dialogs or reloads forms.
+     * Calls `_afterSaveEventHandler2` for further processing.
+     */
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
         let that = this;
@@ -1760,9 +1870,15 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         this._super( recID, fieldvalues );
     },
 
-    // 
-    // this event handler is always called
-    // 
+    /**
+     * @brief Secondary handler called after a term or vocabulary is saved, for additional processing.
+     * @memberof heurist.manageDefTerms
+     * @private
+     * @param {number} recID The ID of the saved item.
+     * @param {object} fieldvalues The saved field values.
+     * @description If it was an insert, updates local term links cache ($Db.trm_Links).
+     * Handles symmetrical inverse term updates if applicable. Triggers a refresh event.
+     */
     _afterSaveEventHandler2: function( recID, fieldvalues ){  
 
         if(this.it_was_insert){
@@ -1807,6 +1923,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             if(this.inverse_termid_old!=inverse_termid && is_symmetrical)
             {
+
                 if(inverse_termid>0){
                     //set mutual inversion for inverse term
                     $Db.trm(inverse_termid, 'trm_InverseTermID', recID);
@@ -1826,6 +1943,16 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     },
     
+    /**
+     * @brief Saves the term/vocabulary and closes the edit dialog.
+     * @memberof heurist.manageDefTerms
+     * @override
+     * @param {?object} fields Field values to save. If null, values are taken from the form.
+     * @param {?function} afterAction Callback after successful save.
+     * @param {?function} onErrorAction Callback on save error, defaults to `onTermSaveError`.
+     * @description Gets validated values. If creating a new vocabulary and the name doesn't include "vocab", appends it.
+     * Calls parent's `_saveEditAndClose`.
+     */
     _saveEditAndClose: function( fields, afterAction, onErrorAction ){
 
         if(window.hWin.HAPI4.is_callserver_in_progress()) {
@@ -1861,9 +1988,16 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         this._super( fields, afterAction, onErrorAction );
     },
 
-    //
-    // params: {trm_ID:trm_ID, trm_ParentTermID:trm_ParentTermID }
-    //
+    /**
+     * @brief Merges one term into another.
+     * @memberof heurist.manageDefTerms
+     * @param {object} params Parameters for the merge.
+     * @param {number} params.trm_ID The ID of the term to be merged (and subsequently deleted).
+     * @param {number} params.trm_ParentTermID The ID of the target term to merge into.
+     * @description Shows a dialog to confirm which code and description to retain.
+     * Makes a server request to perform the merge, then updates local caches and UI.
+     * Prevents merging if terms are from different vocabularies or if it would create a recursion.
+     */
     mergeTerms: function(params){
 
         let that = this;   
@@ -2031,9 +2165,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     },
 
-    //
-    // Change vocab group (for vocabularies) or parent for term
-    //                                
+    /**
+     * @brief Changes the group of a vocabulary or the parent of a term.
+     * @memberof heurist.manageDefTerms
+     * @param {object} params Parameters for the change.
+     *        For vocabularies: `{ trm_ID: vocabID, trm_VocabularyGroupID: groupID }`
+     *        For terms: `{ trm_ID: termID, trm_ParentTermID: newParentTermID }`
+     * @param {boolean} [no_check=false] If true, bypasses some client-side checks (e.g., for duplicates when moving terms).
+     * @description Handles moving a term to a new parent (within the same or different vocabulary, including by reference)
+     * or moving a vocabulary to a new group. Includes checks for recursion, duplication, and references.
+     * Saves changes to the server and updates the UI.
+     */
     changeVocabularyGroup: function(params, no_check){                                    
 
         if(params['trm_ParentTermID']>0){
@@ -2295,9 +2437,18 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     },
     
-    //
-    // extend for group actions
-    //
+    /**
+     * @brief Handles actions triggered by events, such as button clicks or menu selections.
+     * @memberof heurist.manageDefTerms
+     * @override
+     * @param {Event} event The event object.
+     * @param {object|string} action The action object (e.g., `{action: 'add', recID: 123}`) or action string.
+     * @description Extends parent's handler. Manages actions like 'add' (term or vocabulary),
+     * 'moveup' (term in hierarchy), 'add-child', 'sort-branch', 'add-reference',
+     * 'edit-inline', 'delete' (with specific checks for terms/vocabularies and references),
+     * 'expand' (term branch), 'term-import', 'term-import-translations', 'term-export',
+     * and view mode changes ('viewmode-list', 'viewmode-thumbs', 'viewmode-tree').
+     */
     _onActionListener: function(event, action){
 
         let that = this;
@@ -2350,7 +2501,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 return;
             }
 
-            this.reoderBranch(ids);
+            this.reorderBranch(ids);
         }else if(action=='add-reference'){
 
             if(this.options.trm_VocabularyID<0){
@@ -2422,7 +2573,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                     window.hWin.HEURIST4.msg.showMsgDlg(
                         'Delete vocabulary <b>'+$Db.trm(recID, 'trm_Label')+'</b> and all its child terms?',
-                        function(){ that._currentEditID = recID; that._deleteAndClose(true) }, 
+                        function(){ that._currentEditID = recID; that._deleteAndClose(true); },
                         {title:'Deletion of vocabulary',yes:'Proceed',no:'Cancel'},
                         {default_palette_class:this.options.default_palette_class});        
                     return false;                    
@@ -2458,7 +2609,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     if(sMsg){
                         window.hWin.HEURIST4.msg.showMsgDlg(
                             sMsg,
-                            function(){ that._currentEditID = recID; that._deleteAndClose(true) }, 
+                            function(){ that._currentEditID = recID; that._deleteAndClose(true); },
                             {title:'Deletion of branch',yes:'Proceed',no:'Cancel'},
                             {default_palette_class:this.options.default_palette_class});        
                         return false;                    
@@ -2508,7 +2659,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         else if(action=='expand'){
             
-            this._toogleTermsBranch(recID);
+            this._toggleTermsBranch(recID);
         }
 
         let is_resolved = this._super(event, keep_action);
@@ -2643,11 +2794,16 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
     },
 
-    //
-    // force_expand_collapse - 0 toggle, 1 expand, -1 collapse
-    //
-    _toogleTermsBranch: function(recID, force_expand_collapse)
-    {
+    /**
+     * @brief Toggles the expansion state of a term branch in the list view.
+     * @memberof heurist.manageDefTerms
+     * @private
+     * @param {number} recID The ID of the parent term whose branch is to be toggled.
+     * @param {number} [force_expand_collapse] 0 to toggle, 1 to force expand, -1 to force collapse.
+     * @description Shows or hides child terms in the list by toggling their visibility.
+     * Updates the expand/collapse icon and stores the state in `window.hWin.HEURIST4.ui.collapsed_terms`.
+     */
+    _toggleTermsBranch: function(recID, force_expand_collapse) {
         let is_collapsed = window.hWin.HEURIST4.ui.collapsed_terms.indexOf(recID)>=0;
         
         if(force_expand_collapse==1) is_collapsed = true;
@@ -2684,9 +2840,15 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     },
             
 
-    //
-    // show dropdown for field suggestions to be added
-    //
+    /**
+     * @brief Handles keyup events in the term search input field to provide suggestions.
+     * @memberof heurist.manageDefTerms
+     * @private
+     * @param {Event} event The keyup event object.
+     * @description Displays a dropdown list of terms matching the typed input (name or code).
+     * Clicking a suggestion selects the corresponding vocabulary and term in the UI.
+     * Filters suggestions based on `options.filter_groups` if set.
+     */
     _onFindTerms: function(event){
 
         let input_name = $(event.target);
@@ -2785,7 +2947,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                         if(parents){
                                             parents = parents.split(',');
                                             $.each(parents, function(i, parent_ID){
-                                                that._toogleTermsBranch(parent_ID, 1);    
+                                                that._toggleTermsBranch(parent_ID, 1);
                                             });
                                         }
                                         
@@ -2818,6 +2980,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     },
 
+    /**
+     * @brief Validates field values from the edit form.
+     * @memberof heurist.manageDefTerms
+     * @override
+     * @returns {?object} An object of validated field values, or null if validation fails.
+     * @description Extends parent's validation. Checks for duplicate term labels or codes
+     * within the same parent vocabulary/term before allowing save.
+     */
     _getValidatedValues: function(){
 
         let fields = this._super();  
@@ -2851,8 +3021,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     },
 
 
-    //
-    //
+    /**
+     * @brief Retrieves UI preferences for this widget.
+     * @memberof heurist.manageDefTerms
+     * @override
+     * @returns {object} User preferences, defaulting to `{ help_on: true }`.
+     */
     getUiPreferences:function(){
         this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, {
             help_on: true
@@ -2860,11 +3034,16 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         return this.usrPreferences;
     },
 
-    //saveUiPreferences:function() { this._super(); }, 
+    //saveUiPreferences:function() { this._super(); }, // No specific save logic beyond what manageEntity might do
     
-    //
-    // invokes popup to import list of terms from file
-    //
+    /**
+     * @brief Initiates the import of terms or vocabularies from a CSV file.
+     * @memberof heurist.manageDefTerms
+     * @param {number} parent_ID The ID of the parent item (vocabulary group if `isVocab` is true, otherwise parent term/vocabulary).
+     * @param {boolean} isVocab True if importing vocabularies, false if importing terms.
+     * @description Opens a dialog (`importDefTerms.php`) for CSV import.
+     * Refreshes data and shows a summary upon completion.
+     */
     importTerms: function(parent_ID, isVocab) {
 
         let sTitle;
@@ -2917,9 +3096,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     },
 
-    //
-    // invokes popup to import translations of terms from file
-    //
+    /**
+     * @brief Initiates the import of term translations from a CSV file.
+     * @memberof heurist.manageDefTerms
+     * @param {number} parent_ID The ID of the vocabulary or parent term for which translations are being imported.
+     * @description Opens a dialog (`importDefTerms.php` with `trn=1`) for CSV import of translations.
+     * Shows a summary report upon completion and refreshes term data.
+     */
     importTermsTranslations: function(parent_ID) {
 
         let isTerm = ($Db.trm(parent_ID,'trm_ParentTermID')>0);
@@ -2961,9 +3144,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     },
     
-    //
-    // invokes popup to import list of terms from file
-    //
+    /**
+     * @brief Exports terms or vocabularies to a CSV file.
+     * @memberof heurist.manageDefTerms
+     * @param {number} parent_ID The ID of the vocabulary group (if `isVocab` is true) or vocabulary/parent term.
+     * @param {boolean} isVocab True if exporting vocabularies, false if exporting terms.
+     * @description Generates a CSV string of the specified vocabularies or term hierarchy
+     * and initiates a download for the user.
+     */
     exportTerms: function(parent_ID, isVocab) {
         let s;
         let trm_Children = [];
@@ -3006,10 +3194,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         window.hWin.HEURIST4.util.downloadData(vocab_name + '_vocabulary.csv', s, 'text/csv');
     },
 
-    //
-    // Retrieve term usage and update record list with values, placed with square brackets '[' & ']'
-    //  For terms with zero usage, set text color to grey 
-    //
+    /**
+     * @brief Updates the display of term usage counts in the list view.
+     * @memberof heurist.manageDefTerms
+     * @param {object} term_usages An object mapping term IDs to their usage counts.
+     * @description Iterates through visible term items in the list and updates their
+     * display to include the usage count (e.g., "[5]"). Adds click handlers to search
+     * for records using the term. Terms with zero usage are grayed out.
+     */
     updateTermUsage: function(term_usages){
 
         if(window.hWin.HEURIST4.util.isempty(term_usages)){
@@ -3066,6 +3258,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         });
     },
 
+    /**
+     * @brief Updates the display of term translations in the list view.
+     * @memberof heurist.manageDefTerms
+     * @description Fetches translation data. For each visible term, if translations exist,
+     * displays an icon and a list of language codes for available translations in the tooltip.
+     * Caches fetched translation data.
+     */
     updateTermTranslations: function(){
 
         let termTranslations = window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation');
@@ -3121,10 +3320,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         });
     },
 
-    //
-    // Show popup with listed terms, and allow sorting
-    //
-    reoderBranch: function(term_ids){
+    /**
+     * @brief Allows reordering of terms within a branch via a sortable dialog.
+     * @memberof heurist.manageDefTerms
+     * @param {Array<number>} term_ids An array of term IDs belonging to the same parent/branch.
+     * @description Displays a dialog with the given terms in a list that can be reordered by drag-and-drop.
+     * Provides options to save the new manual order or revert to alphabetic sorting (by setting order to null).
+     */
+    reorderBranch: function(term_ids){
 
         if(!term_ids || term_ids.length <= 1){
             return;
@@ -3241,6 +3444,16 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         });
     },
     
+    /**
+     * @brief Creates a HRecordSet from remote term definitions.
+     * @memberof heurist.manageDefTerms
+     * @param {object} terms The raw term definitions from a remote source.
+     * @param {boolean} [hideDisabled] If true, filters out disabled or trash items.
+     * @param {boolean} [vocab_only] If true, only includes top-level terms (vocabularies).
+     * @returns {HRecordSet} A Heurist HRecordSet object.
+     * @description Used during `import_structure` operations to convert remotely fetched term data.
+     * Maps fields and handles local ID mapping if importing. Updates the result list.
+     */
     getRecordsetFromRemote: function( terms, hideDisabled, vocab_only ){
         
         let rdata = { 
@@ -3318,8 +3531,19 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 });
 
 /**
-* Correction of invalid term in record details OR addition missed term to vocabulry
-*/
+ * @global
+ * @brief Handles correction of an invalid term associated with a record detail.
+ * @param {number} trm_ID The ID of the term that is invalid in its current context.
+ * @param {number} wrong_vocab_id The ID of the vocabulary where the term is currently (incorrectly) assigned or referenced for this detail.
+ * @param {number} correct_vocab_id The ID of the vocabulary where the term should be, or be referenced from, for this detail.
+ * @param {number} dty_ID The Detail Type ID of the field where the invalid term is used.
+ * @param {function} callback Callback function to execute after correction.
+ * @description This function is typically invoked when a record detail uses a term that is not valid
+ * for its field's vocabulary settings. It presents a dialog to the user with options:
+ * 1.  **Reference**: Add the term `trm_ID` as a reference into the `correct_vocab_id`.
+ * 2.  **Move**: Move the term `trm_ID` from `wrong_vocab_id` to `correct_vocab_id`. (This changes its global parent).
+ * The choice updates the term's vocabulary association or reference, aiming to make it valid for the field.
+ */
 function correctionOfInvalidTerm(trm_ID, wrong_vocab_id, correct_vocab_id,  dty_ID, callback){
     
     let $dlg, buttons = [
@@ -3357,7 +3581,7 @@ function correctionOfInvalidTerm(trm_ID, wrong_vocab_id, correct_vocab_id,  dty_
                                     $Db.trm(trm_ID, 'trm_ParentTermID',correct_vocab_id);
                                     if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(trm_ID);
                                 }else{
-                                    onTermSaveError(response)
+                                    onTermSaveError(response);
                                 }
                             });
                     
@@ -3392,9 +3616,15 @@ function correctionOfInvalidTerm(trm_ID, wrong_vocab_id, correct_vocab_id,  dty_
     
 }
 
-//
-//
-//
+/**
+ * @global
+ * @brief Displays a warning dialog when attempting to delete a vocabulary that is used by Detail Types.
+ * @param {number} recID The ID of the vocabulary (term with trm_ParentTermID=0) being deleted.
+ * @param {Array<number>} refs An array of dty_IDs (Detail Type IDs) that reference this vocabulary.
+ * @description Shows a dialog listing the Detail Types (fields) that use the vocabulary.
+ * Provides links to edit these Detail Types, guiding the user to remove or change the vocabulary association
+ * before the vocabulary itself can be deleted.
+ */
 function showWarningAboutTermUsage(recID, refs){
     let sList = '';
     for(let i=0; i<refs.length; i++) if(refs[i]>0){
@@ -3423,6 +3653,17 @@ function showWarningAboutTermUsage(recID, refs){
     });
 }
 
+/**
+ * @global
+ * @brief Handles errors that occur during term save operations, particularly related to usage conflicts.
+ * @param {object} response The error response object from the server.
+ * @description This function is typically used as an error callback for term save operations.
+ * If the error indicates that a term (or its children) is in use by records or referenced by fields,
+ * it displays a detailed message to the user.
+ * For record usage, it provides a link to a search results page listing the records.
+ * For field usage (detail types), it lists the fields, similar to `showWarningAboutTermUsage`.
+ * Otherwise, it falls back to the generic error display.
+ */
 function onTermSaveError(response){
 
     let has_sysmsg = response.sysmsg;
@@ -3477,7 +3718,7 @@ function onTermSaveError(response){
 
             let base_fields = [];
     
-            for(const dty_ID in sysmsg.detailtypes){
+            for(const dty_ID in response.sysmsg.detailtypes){
                 base_fields.push(`${$Db.dty(dty_ID, 'dty_Name')} (#${dty_ID})`);
             }
 
@@ -3487,5 +3728,3 @@ function onTermSaveError(response){
         window.hWin.HEURIST4.msg.showMsgErr(response);    
     }
 }
-
-

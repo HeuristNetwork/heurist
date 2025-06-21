@@ -1,36 +1,24 @@
-/*
-* Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* https://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
 /**
-* temporal.js
-* Temporal Object Library V 1.0
-*
+* @file temporal.js
+* @brief Temporal Object Library V 1.0
+* @fileOverview 
 * This file contains Objects for dealing with temporals. Temporals are a robust representation
 * of date - time information allowing for uncertainty and imprecision.
 *
+* @package Heurist academic knowledge management system
+* @subpackage hclient\core
+* @link https://HeuristNetwork.org
+* @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
 * @author      Stephen White   
 * @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @author Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since 3.1.0
 */
+
 /* global TDate, TDuration */ // Added TDuration to globals
 
 /**
@@ -61,8 +49,8 @@ function Temporal (strInitTemporal) {
      * @const
      */
     const _className = "Temporal";
-    let _ver = g_version;				//version number for data representation
-    let _type = null;					// type of temporal with the default to be a simple date
+    let _ver = g_version;                //version number for data representation
+    let _type = null;                    // type of temporal with the default to be a simple date
     let _strTemporal = strInitTemporal;
     /**
      * @private
@@ -84,7 +72,7 @@ function Temporal (strInitTemporal) {
      * Initializes the Temporal object by parsing the initial string if provided.
      * @private
      */
-    function _init (){	//initailization code
+    function _init (){    //initailization code
         if (!_strTemporal) { // empty string return basic temporal
             return;
         }
@@ -754,8 +742,8 @@ function Temporal (strInitTemporal) {
 
     };  // end that
 
-    _init();		// initialize before returning
-    return that;	// returning "that"  keeps all variables due to closure
+    _init();        // initialize before returning
+    return that;    // returning "that"  keeps all variables due to closure
 }
 
 /**
@@ -799,9 +787,9 @@ Temporal.parse = function () {
         if(!(str.indexOf("VER=")>=0 || str.indexOf("TYP=")>=0)){
             try {
                 let tDate = TDate.parse(str);
-                if(tDate) { fieldType = "DAT"; }	// save string as a TDate object
+                if(tDate) { fieldType = "DAT"; }    // save string as a TDate object
             }
-            catch(e) {	// save string in COM field and keep an empty simple date temporal
+            catch(e) {    // save string in COM field and keep an empty simple date temporal
             }
         }
         if(fieldType !== "DAT"){
@@ -854,11 +842,11 @@ Temporal.parse = function () {
  * @static
  * @type {Object<string, string>}
  */
-Temporal.typeDict = {"s" :	"Simple Date",
-    "c"	:	"Radiometric",
-    "f"	:	"Approximate Date",
-    "p"	:	"Probability Date Range",
-    "d"	:	"Duration"
+Temporal.typeDict = {"s" :    "Simple Date",
+    "c"    :    "Radiometric",
+    "f"    :    "Approximate Date",
+    "p"    :    "Probability Date Range",
+    "d"    :    "Duration"
 };
 
 /**
@@ -880,16 +868,16 @@ Temporal.typeDict = {"s" :	"Simple Date",
  * @type {Object<string, string>}
  * @todo Add definitions for PRF, SPF, EPF if they represent specific code values rather than free text.
  */
-Temporal.fieldsDict = {	"VER"	:	"Version Number",
-    "TYP"	:	"Temporal Type Code",
-    "PRF"	:	"Probability Profile",					// FIXME: add definitions
-    "SPF"	:	"Start Profile",					// FIXME: add definitions
-    "EPF"	:	"End Profile",					// FIXME: add definitions
-    "CAL"	:	"Calibrated",
-    "COD"	:	"Laboratory Code",
-    "DET"	:	"Determination Type",
-    "COM"	:	"Comment",
-    "EGP"	:	"Egyptian Date",
+Temporal.fieldsDict = {    "VER"    :    "Version Number",
+    "TYP"    :    "Temporal Type Code",
+    "PRF"    :    "Probability Profile",                    // FIXME: add definitions
+    "SPF"    :    "Start Profile",                    // FIXME: add definitions
+    "EPF"    :    "End Profile",                    // FIXME: add definitions
+    "CAL"    :    "Calibrated",
+    "COD"    :    "Laboratory Code",
+    "DET"    :    "Determination Type",
+    "COM"    :    "Comment",
+    "EGP"    :    "Egyptian Date",
     "CLD"   :   "Calendar",
     "CL2"   :   "Non-gregorian value",  //value in calendar value
     "CIR"   :   "Circa or approximate"
@@ -905,10 +893,10 @@ Temporal.fieldsDict = {	"VER"	:	"Version Number",
  * @static
  * @type {Object<number, string>}
  */
-Temporal.determination = {	0	:	"Unknown",
-    1	:	    "Attested",
-    2	:	"Conjecture",
-    3	:	"Measurement"
+Temporal.determination = {    0    :    "Unknown",
+    1    :        "Attested",
+    2    :    "Conjecture",
+    3    :    "Measurement"
 };
 
 /**
@@ -921,10 +909,10 @@ Temporal.determination = {	0	:	"Unknown",
  * @static
  * @type {Object<number, string>}
  */
-Temporal.profiles = {	0	:	"Flat",
-    1	:	"Central",
-    2	:	"Slow Start",
-    3	:	"Slow Finish"
+Temporal.profiles = {    0    :    "Flat",
+    1    :    "Central",
+    2    :    "Slow Start",
+    3    :    "Slow Finish"
 };
 
 /**
@@ -940,14 +928,14 @@ Temporal.profiles = {	0	:	"Flat",
  * @static
  * @type {Object<string, string>}
  */
-Temporal.tDateDict = {	"DAT"	:	"ISO DateTime",
-    "BPD"	:	"Before Present (1950) Date",
-    "BCE"	:	"Before Current Era",
-    "TPQ"	:	"Terminus Post Quem",
-    "TAQ"	:	"Terminus Ante Quem",
-    "PDB"	:	"Probable begin",
-    "PDE"	:	"Probable end",
-    "SRT"	:	"Sortby Date"
+Temporal.tDateDict = {    "DAT"    :    "ISO DateTime",
+    "BPD"    :    "Before Present (1950) Date",
+    "BCE"    :    "Before Current Era",
+    "TPQ"    :    "Terminus Post Quem",
+    "TAQ"    :    "Terminus Ante Quem",
+    "PDB"    :    "Probable begin",
+    "PDE"    :    "Probable end",
+    "SRT"    :    "Sortby Date"
 };
 
 /**
@@ -962,12 +950,12 @@ Temporal.tDateDict = {	"DAT"	:	"ISO DateTime",
  * @static
  * @type {Object<string, string>}
  */
-Temporal.tDurationDict = {	"DUR"	:	"Simple Duration",
-    "DEV"	:	"Standard Deviation",
-    "DVP"	:	"Deviation Positive",
-    "DVN"	:	"Deviation Negative",
-    "RNG"	:	"Range",
-    "ERR"	:	"Error Margin"
+Temporal.tDurationDict = {    "DUR"    :    "Simple Duration",
+    "DEV"    :    "Standard Deviation",
+    "DVP"    :    "Deviation Positive",
+    "DVN"    :    "Deviation Negative",
+    "RNG"    :    "Range",
+    "ERR"    :    "Error Margin"
 };
 
 /**
@@ -979,13 +967,13 @@ Temporal.tDurationDict = {	"DUR"	:	"Simple Duration",
  * @static
  * @type {Object<string, {req: Array<Array<string>>, opt: Array<string>, hdr: Array<string>}>}
  */
-Temporal._typeFieldMap = {	s : {
+Temporal._typeFieldMap = {    s : {
         req : [["DAT"]],
-        //											[]],		// empty date allows to capture ill-formed date strings
+        //                                            []],        // empty date allows to capture ill-formed date strings
         opt : ["COM","DET","CLD","CL2","CIR"],
         hdr : ["DAT"]
     },
-    c :	{
+    c :    {
         req : [["DVP","DVN","BPD","COD"],
             ["DEV","BPD","COD"],
             ["DVP","DVN","BCE","COD"],
@@ -993,17 +981,17 @@ Temporal._typeFieldMap = {	s : {
         opt : ["CAL","DET","COM","SRT"],
         hdr : ["DVP","DVN","BCE","BPD","COD","DEV","DAT"]
     },
-    p :	{
+    p :    {
         req : [["PDB","PDE","TPQ","TAQ"],["TPQ","TAQ"]],
         opt : ["PRF","DET","SPF","EPF","COM","SRT","CLD","CL2"],
         hdr : ["PDB","PDE","TPQ","TAQ"]
     },
-    f :	{
+    f :    {
         req : [["DAT","RNG"]],
         opt : ["DET","PRF","COM","SRT","CLD","CL2","TPQ","TAQ"],
         hdr : ["DAT","RNG"]
     },
-    d :	{
+    d :    {
         req : [["DUR"]],
         opt : ["DET","ERR","COM","CLD","CL2"],
         hdr : ["DUR"]
@@ -1223,7 +1211,7 @@ Temporal.getTypeOpt = function (type) {
  */
 Temporal.getFieldsForType = function (type) {
     if ( type && typeof type === "string" && typeof Temporal.typeFieldMap(type) === "object") {
-        return 	Temporal.typeFieldMap(type).hdr.concat(Temporal.typeFieldMap(type).opt);
+        return     Temporal.typeFieldMap(type).hdr.concat(Temporal.typeFieldMap(type).opt);
     } else {
         throw "Temporal Exception - invalid temporal type passed to getFieldsForType - " + type;
     }
@@ -1611,7 +1599,7 @@ window.TDate = function (strDate) {
                         case "tt":
                             return  (format[0] === " " ? " " : "") + (_hours < 12 ? "AM" : "PM");
                         case " zzz":
-                        case "zzz":	//output Zone
+                        case "zzz":    //output Zone
                             return (format[0] === " " ? " " : "") + (_tz ? _tz : "Z");
                         case " zz":
                         case "zz":  //output offset
@@ -1717,7 +1705,7 @@ window.TDate = function (strDate) {
          */
         setHours: function (str) {
             if ( str !== null && str !== "" ) {
-				if(Number(str)==24) { str = '0'; }
+                if(Number(str)==24) { str = '0'; }
                 if ( isNaN(str) || !TDate.validateHour(Number(str))) {
                     throw " TDate exception - invalid string supplied to setHours() - " + str;
                 }
@@ -1917,11 +1905,11 @@ TDate.parse = function () {
 
 
     let temp = str.replace(/(GMT|UTC)/,"");   //remove  GMT or UTC marker
-    temp = temp.replace(/\s+/g," ");	//compress multiple spaces into a single space
+    temp = temp.replace(/\s+/g," ");    //compress multiple spaces into a single space
     temp = temp.replace(/\s*\([^\)]{1,50}\)\s*$/,""); //remove any Timezone adorment like (AUS  Eastern Daylight Time)
     temp = temp.replace(/\s*(sun|mon|tues?|wed(nes)?|thur?s?|fri)(day)?\.?,?\s*/i,"");  //remove any day indicators
     temp = temp.replace(/([012]?\d)\s*(th|rd|nd|st)(\s*of)?/i,"$1d");
-    temp = temp.replace(/\s+/g," ");	//compress multiple spaces into a single space
+    temp = temp.replace(/\s+/g," ");    //compress multiple spaces into a single space
     if (temp.match(/\d\d?\s*(?:am|pm)/i)) {  //  12 hour clock need to convert
         let t12 = temp.match(/(?:\s+(\d\d?)([:\.,]\d\d?\d?){0,3})\s*(am|pm)/i);
         if ( t12[3].match(/pm/i) ) {
@@ -2017,9 +2005,9 @@ TDate.parse = function () {
         date = date.replace(/\s+/g," "); //reduce spaces to single space
         date = date.split(/[\/\-\s]/); //separate year, month and day using slash, dash or space as a delimiter
         for (let i = 0; i < date.length - 1; i++) {
-            if (!date[i] && date[i+1]) {	// neg sign add it back in
+            if (!date[i] && date[i+1]) {    // neg sign add it back in
                 date[i+1] = "-" + date[i+1];
-                date.splice(i,1);	// remove the empty element
+                date.splice(i,1);    // remove the empty element
                 break;
             } else if (i === date.length - 2 && date[i+1] === "") { // last interation
                 date.splice(i+1,1);
@@ -2092,7 +2080,7 @@ TDate.parse = function () {
                 /*
                 if ( !monthFound && date[i].search(/[^\-\d]/) !== -1) {  // found characters should be month name
                 if ( date[i].substring(0,3).match(/jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/i)) {
-                date[i] = {	jan:"01",feb:"02",mar:"03",
+                date[i] = {    jan:"01",feb:"02",mar:"03",
                 apr:"04",may:"05",jun:"06",
                 jul:"07",aug:"08",sep:"09",
                 oct:"10",nov:"11",dec:"12"}[date[i].substring(0,3).toLowerCase()];
@@ -2172,7 +2160,7 @@ TDate.parse = function () {
                             dateFormat.push("yd");
                         }
                     }
-                } else {	// can be month, day or year
+                } else {    // can be month, day or year
                     if (dayFound) {
                         dateFormat.push( (yearFound || ( date.length === 3 && i === 1 ) ? "m" : "ym"));
                     } else if (yearFound) {
@@ -2194,8 +2182,8 @@ TDate.parse = function () {
                 throw "TDate parser exception -  ambiguous date string supplied  - " + (temp && temp[1] ? temp[1] : "" );
             }
             switch  (dFrm.length ) {
-                case 1 :	// should only happen for a year
-                case 2 :	// ym my md dm
+                case 1 :    // should only happen for a year
+                case 2 :    // ym my md dm
                     _setDatePart( date,dateFormat);
                     break;
                 default:
@@ -2238,7 +2226,7 @@ TDate.parse = function () {
 
         time = time.match(/\s*(\d+)(?:([\.,:\s])(\d+))?(?:([\.,:\s])(\d+))?(?:([\.,:\s])(\d+))?\s*/);
 
-		if(time[1] !== null && Number(time[1])==24) { time[1] = '0'; }
+        if(time[1] !== null && Number(time[1])==24) { time[1] = '0'; }
 
         if (time[1] !== null  && TDate.validateHour(time[1])) { //valid hour input
             _hours = time[1];
@@ -2818,7 +2806,7 @@ function isTemporal(str) {
 
     let res = false;
 
-    if (str && str.search(/\|VER/) != -1) {	//we have a temporal
+    if (str && str.search(/\|VER/) != -1) {    //we have a temporal
         res = true;
 
         if (!(str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/))) {
@@ -2885,7 +2873,7 @@ function formatGregJulian(val, isneed){
 function temporalToHumanReadableString(inputStr) {
     let str = inputStr;
     let cld = '';
-    if (str && str.search(/\|VER/) != -1) {	//we have a temporal
+    if (str && str.search(/\|VER/) != -1) {    //we have a temporal
 
         let cldname = 'gregorian';
         if (str.match(/CLD=([^\|]+)/)){ //calendar

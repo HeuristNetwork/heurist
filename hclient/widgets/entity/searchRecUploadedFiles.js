@@ -1,25 +1,53 @@
 /**
-* Search header for Record Uploaded Files manager
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file        searchRecUploadedFiles.js
+ * @brief       Provides a search interface for Uploaded Files associated with records.
+ * @fileOverview This widget handles the search functionality for files uploaded to records, allowing users to find specific files based on various criteria like name, path, type, and domain (local, external, tiled).
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\entity
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       4.0
+ */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
+
+/**
+ * @widget heurist.searchRecUploadedFiles
+ * @brief Search widget for Uploaded Files.
+ * @extends $.heurist.searchEntity
+ * @description This widget provides a comprehensive interface for searching and managing uploaded files
+ *              associated with records. It supports filtering by file domain (local, external, tiled),
+ *              MIME types, and various other attributes. It also includes action menus for file operations.
+ *
+ * @property {string} [edit_mode='none'] Defines the editing capabilities available in the UI (e.g., 'inline', 'dialog', 'none').
+ *           This impacts the visibility and behavior of add/edit buttons and menus. Inherited from `searchEntity` but its usage is prominent here.
+ * @property {?string} filter_groups A comma-separated string defining the available file domains (e.g., 'local,external,tiled') for filtering via tabs.
+ * @property {?string} filter_group_selected The default file domain (e.g., 'local') to be active when the widget loads.
+ * @property {?string} filter_types A pre-selected MIME type value to filter the search results. If set, the MIME type filter UI might be hidden.
+ * @property {?number} rec_ID The ID of the record for which files are being managed. While not directly used in the `startSearch`
+ *           request construction by this widget, it is a crucial contextual option typically set by the parent manager
+ *           (e.g., `manageRecUploadedFiles`) to scope file operations and listings to a specific record.
+ *
+ * @listens heurist.searchRecUploadedFiles#onaction - Fired when an action is selected from one of the dynamic menus (e.g., add file, delete selected).
+ *          Event data: `{string}` The ID of the selected menu action.
+ * @listens heurist.searchRecUploadedFiles#oninit - Fired when the widget's `_initControls` method has completed its setup.
+ *          No parameters.
+ */
 $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
 
-    //
+    /**
+     * @brief Initializes the UI controls for the uploaded files search widget.
+     * @override
+     * @memberof heurist.searchRecUploadedFiles
+     * @description Sets up various UI elements including action buttons (add local/external file, edit mimetypes),
+     *              a dynamic context menu (`#btn_menu`), domain selection tabs (`#sel_group`),
+     *              and multiple input fields for filtering by path, type, reference status, URL, ownership, and sort order.
+     *              Adjusts UI elements based on `edit_mode`, `select_mode`, and admin status.
+     *              Triggers an initial search and an "oninit" event upon completion.
+     */
     _initControls: function() {
         this._super();
         
@@ -153,6 +181,10 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         that._trigger( "oninit" );
     },  
 
+    /**
+     * @brief Clears the content of various search input fields.
+     * @memberof heurist.searchRecUploadedFiles
+     */
     clearInputs: function(){
         this.input_search.val('');
         this.input_search_url.val('');
@@ -160,9 +192,15 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this.input_search_type.val('');
         this.input_search_referenced.val('');
     },
-    //
-    // special case to show recently added record
-    //
+
+    /**
+     * @brief Initiates a search specifically for recently added files.
+     * @memberof heurist.searchRecUploadedFiles
+     * @param {string} [domain] Optional. The file domain ('local', 'external', 'tiled') to filter by.
+     *                          If provided, the domain tabs will be switched accordingly.
+     * @description Clears existing search inputs, sets the sort type to 'recent',
+     *              optionally switches to the specified domain, and then calls `startSearch`.
+     */
     searchRecent: function(domain){
         this.clearInputs();
         
@@ -176,9 +214,15 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
         this.startSearch();
     },
     
-    //
-    // public methods
-    //
+    /**
+     * @brief Initiates a search for uploaded files based on the current UI selections.
+     * @override
+     * @memberof heurist.searchRecUploadedFiles
+     * @description Constructs a search request object based on the active domain tab (local, external, tiled)
+     *              and the values in various input fields (path, original filename, URL, MIME type,
+     *              referenced status, uploader, sort order). It then populates `this._search_request`
+     *              and calls the parent `startSearch` method.
+     */
     startSearch: function(){
         
             let request = {}
@@ -206,7 +250,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 }
                 request['ulf_OrigFileName'] = '-_tiled';
             }
-            else{
+            else{ // local
                 
                 this.input_search_url.parent().hide();
                 this.input_search.parent().show();
@@ -240,7 +284,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                 request['sort:ulf_FileSizeKB'] = '-1' 
             }else if(this.input_sort_type.val()=='recent'){
                 request['sort:ulf_Added'] = '-1' 
-            }else{
+            }else{ // name
                 request['sort:ulf_OrigFileName'] = '-1';   
             }
             
@@ -248,11 +292,23 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
             this._super();
     },
     
+    /**
+     * @brief Determines the current search domain based on the active tab in the group selector.
+     * @memberof heurist.searchRecUploadedFiles
+     * @returns {string} The current domain, which can be 'local', 'external', or 'tiled'.
+     */
     currentDomain:function(){
             let domain = this.selectGroup.tabs('option','active');
             return domain==1?'external':((domain==2)?'tiled':'local');
     },
     
+    /**
+     * @brief Returns the jQuery element intended as a container for inline file uploads.
+     * @memberof heurist.searchRecUploadedFiles
+     * @returns {jQuery} The jQuery object for the upload container element.
+     * @description This is likely used by the parent manager widget (`manageRecUploadedFiles`)
+     *              to integrate with a file uploader. `btn_add_record_inline` is expected to be defined in the HTML template.
+     */
     getUploadContainer:function(){
         return this.btn_add_record_inline;
     }

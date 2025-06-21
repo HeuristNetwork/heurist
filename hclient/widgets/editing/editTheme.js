@@ -14,7 +14,7 @@
 * @since       5.0
 */
 
-/* global HEditing, HRecordSet */
+/* global HEditing */
 
 /**
  * @global

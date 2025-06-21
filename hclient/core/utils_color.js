@@ -1,21 +1,23 @@
 /**
-* CSS filter generator to convert from black to target hex color
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      MultiplyByZer0 for their post https://stackoverflow.com/a/43960991/604861
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+ * @file utils_color.js
+ * @brief Generates CSS filters to approximate a target HEX color, starting from black.
+ * @fileOverview This file defines a `Color` class for representing and manipulating RGB colors with CSS
+ * filter-like operations (hueRotate, grayscale, sepia, saturate, brightness, contrast, invert).
+ * It also includes a `Solver` class that uses a stochastic approximation algorithm (SPSA) to
+ * find the optimal combination of CSS filter values to transform a base color (assumed black)
+ * to a target HEX color. The primary utility function `hexToFilter(hex)` uses these classes
+ * to produce a CSS filter string.
+ * 
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author MultiplyByZer0 (for the core algorithm via StackOverflow https://stackoverflow.com/a/43960991/604861)
+ * @author Heurist Team
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 4.0
+ */
 
 'use strict';
 
@@ -481,6 +483,4 @@ function hexToFilter(hex) {
     }*/
 
     return result.filter;  
-}  
-
-
+}

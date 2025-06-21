@@ -128,7 +128,7 @@ $.widget( "heurist.dbVerify", $.heurist.dbAction, {
 
         if(termination_message){
             let error = window.hWin.HEURIST4.util.isObject(termination_message)
-                        ? terminatation_message
+                        ? termination_message
                         : {message: termination_message};
             error['error_title'] = window.hWin.HEURIST4.util.isempty(error['error_title']) ? 'Verification terminated' : error['error_title'];
             window.hWin.HEURIST4.msg.showMsgErr(error);

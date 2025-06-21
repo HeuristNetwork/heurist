@@ -1,25 +1,41 @@
-/**
-* Query result listing.
-*
-* Requires hclient/widgets/viewers/resultListMenu.js (must be preloaded)
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
 /*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+ * @file resultList.js  
+ * @brief A widget that displays a list of records, allowing for different view modes (list, grid, table).
+ * @fileOverview
+ * This file defines the `heurist.resultList` jQuery UI widget. This widget is responsible for
+ * rendering a collection of records in various formats (list, grid, table). It handles features
+ * like incremental rendering, view mode switching, selection management, and interaction
+ * with a recordset. It also supports pagination and displays messages for empty or loading states.
+ *
+ * Key functionalities include:
+ * - Displaying records in list, grid, or table views.
+ * - Incremental rendering of records for performance.
+ * - Handling record selection and hover states.
+ * - Responding to changes in the underlying recordset.
+ * - Providing controls for view mode switching and pagination.
+ * - Customizable rendering of record details.
+ *
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\widgets\viewers
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Stephen White
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 3.1.0
+ */
 
-
+/**
+ * @widget heurist.resultList
+ * @description A widget that displays a list of records, allowing for different view modes
+ * (e.g., list, grid, table). It handles incremental rendering, selection, and interaction
+ * with a {@link heurist.RecordSet}.
+ *
+ * The widget provides various options to customize its appearance and behavior,
+ * including how records are displayed, which view modes are available, and how
+ * pagination is handled.
+ */
 $.widget( "heurist.resultList", {
 
     // default options
@@ -113,11 +129,11 @@ $.widget( "heurist.resultList", {
         
         aggregate_values: null, //supplementary values per record id - usually to store counts, sum, avg 
         aggregate_link: null,    //link to assigned to aggregate value label
-		
+        
         allow_record_content_view: false,   // show record_content mode as an option, for Webpages, 
                                             // can be overridden if the initial view mode is record_content or if set to blog mode
 
-		blog_result_list: false,    //whether the result list is used for blog records, limiting pagesize if it is
+        blog_result_list: false,    //whether the result list is used for blog records, limiting pagesize if it is
 
         auto_select_first: false,   //automatically select first record within result list
         placeholder_text: null,     //text to display while no recordset is loaded (search is not prefromed yet)
@@ -392,7 +408,7 @@ $.widget( "heurist.resultList", {
                     if(recset==null){
                         
                         that._currentRecordset = recset;
-						
+                        
                         if(data.empty_remark){
 
                             let msg = data.is_facet && !window.hWin.HEURIST4.util.isempty(that.options.placeholder_text) ? 
@@ -1035,8 +1051,8 @@ $.widget( "heurist.resultList", {
             this.div_content.css({'margin-top': top+'px'});    
         }
         
-		
-		if(has_content_header){
+        
+        if(has_content_header){
             this.div_content_header
                     .position({my:'left bottom', at:'left top', of:this.div_content});
         }
@@ -3124,7 +3140,7 @@ $.widget( "heurist.resultList", {
                     $__dlg.dialog( "close" );
                 }
                 }, {title:window.hWin.HR('Warning')});
-				
+                
             return true;          
         }else{
             return false;

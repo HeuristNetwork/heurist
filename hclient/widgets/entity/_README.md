@@ -1,165 +1,78 @@
-Directory:    /hclient/widgets/entity
+# Directory: /hclient/widgets/entity
 
-Overview:   Search, manage and edit forms for all tables 
+## Overview
 
-manageEntity.js base widget (ancestor) for all manageXXX widgets
+This directory contains JavaScript widgets and HTML templates related to searching, managing, and editing various data entities within the Heurist system. These include definitions (like calculated functions, detail types, record types, terms), system entities (like bug reports, dashboards, databases, groups, users, workflow rules), and user-specific entities (like bookmarks, reminders, saved searches, tags).
 
-It consists of recordList widgets and manages edit form (editing/editing2.js) (based on entity.json config file) 
+## Key Files
 
-searchEntity.js base search widget. It loads searchXXX.html template with search form and generates search request
+Below is a list of key JavaScript (.js) and HTML (.html) files in this directory.
 
+### JavaScript Files
 
-Updated:     14 Dec 2018
+-   **configEntity.js**: Save/load cfg files for given entity.
+-   **manageDefCalcFunctions.js**: Main widget to manage field calculations.
+-   **manageDefDetailTypeGroups.js**: Main widget to manage defDetailTypeGroups.
+-   **manageDefDetailTypes.js**: Main widget for field types.
+-   **manageDefFileExtToMimetype.js**: Main widget to manage extension to mimetype mappings.
+-   **manageDefGroups.js**: Abstract base widget for group management.
+-   **manageDefRecStructure.js**: Main widget to manage record type structure.
+-   **manageDefRecTypeGroups.js**: Main widget to manage record type groups.
+-   **manageDefRecTypes.js**: Main widget to manage defRecTypes.
+-   **manageDefTerms.js**: Main widget to manage defTerms.
+-   **manageDefVocabularyGroups.js**: Main widget to manage vocabulary groups.
+-   **manageEntity.js**: Base widget for managing entities.
+-   **manageRecThreadedComments.js**: Main widget to manage records comments.
+-   **manageRecUploadedFiles.js**: Main widget to manage recUploadedFiles.
+-   **manageRecords.js**: Main widget to EDIT Records.
+-   **manageSysBugreport.js**: Prepare and send bugreport by email.
+-   **manageSysDashboard.js**: Main widget to manage sysDashboard.
+-   **manageSysDatabases.js**: Work with list of all databases on current server.
+-   **manageSysGroups.js**: Main widget to manage sysUGrps workgroups.
+-   **manageSysIdentification.js**: Widget for system identification and configuration.
+-   **manageSysUsers.js**: Main widget to manage sysUGrps users.
+-   **manageSysWorkflowRules.js**: Main widget to Workflow Stages Rules.
+-   **manageUsrBookmarks.js**: Main widget to manage users bookmarks.
+-   **manageUsrReminders.js**: Main widget to manage users reminders.
+-   **manageUsrSavedSearches.js**: Main widget to manage usrSavedSearches.
+-   **manageUsrTags.js**: Main widget to manage defTerms (tags).
+-   **searchDefCalcFunctions.js**: Search header for defCalcFunctions manager.
+-   **searchDefDetailTypes.js**: Search header for manageDefDetailTypes manager.
+-   **searchDefFileExtToMimetype.js**: Search header for Mimetypes.
+-   **searchDefRecTypes.js**: Search header for manageDefRecTypes manager.
+-   **searchDefTerms.js**: Search header for DefTerms manager.
+-   **searchEntity.js**: Search header for Entity Manager - BASE widget.
+-   **searchRecThreadedComments.js**: Search header for recThreadedComments manager.
+-   **searchRecUploadedFiles.js**: Search header for Record Uploaded Files manager.
+-   **searchRecords.js**: Search header for records.
+-   **searchSysDashboard.js**: Search header for Dashboards.
+-   **searchSysDatabases.js**: Search header for Databases.
+-   **searchSysGroups.js**: Search header for manageSysGroups manager.
+-   **searchSysIdentification.js**: *File reported as missing.*
+-   **searchSysUsers.js**: Search header for manageSysUsers manager.
+-   **searchSysWorkflowRules.js**: Search header for SysWorkflowRules manager.
+-   **searchUsrBookmarks.js**: *File reported as missing.*
+-   **searchUsrReminders.js**: Search header for usrReminders manager.
+-   **searchUsrSavedSearches.js**: Search header for UsrSavedSearches manager.
+-   **searchUsrTags.js**: Search header for Tags.
 
-----------------------------------------------------------------------------------------------------------------
+### HTML Files
 
-
-Notes:
-
-(in order of development): 1) Records, 2)WorkGroups 2a)Users, 3)Tags, 
-4)UploadedFiles, 5)Reminders, 6)Databases, 7)SavedSearches,
-8)RecordTypes and 9)RT Groups, 10)FieldTypes and 11)FT  Groups, 12)Terms, 
-14)Record Comments 15)Record Bookmarks
-16)Smarty Reports (from files) and 17)Report Schedules, 
-
-
-How entity managers are implemented:
-
-It consists of 3 widgets: manageEntity (and descendants), searchEntity(and descendants), resultList (optional) 
-
-3) manageEntity - an any widget can be applied to element (and optionally this element can be displayed as popup dialog).
-
-        this widget is manager for 3 main parts: search, represent(list) and edit
-        
-        layout is defined in _initControls method 
-                    by default this is fixed cardinal layout 
-                    north - search
-                    west - list
-                    east - edit
-
-        widget options can be devided on the same parts: search, list, edit
-        
-        //DIALOG section       
-        isdialog: false,     // show as dialog @see  _initDialog(), popupDialog(), _closeDialog
-        dialogcleanup: true, // remove dialog div on close
-        height: 400,
-        width:  760,
-        modal:  true,
-        title:  '',
-        
-        //LIST section 
-        pagesize: 100,      // page size in resultList 
-        
-        //SEARCH/filter section
-        list_header: false, // show header in list mode (@todo implement)
-        use_cache: false,   // search performed once and then we apply local filter  @see updateRecordList, filterRecordList
-        //initial search/filter values by title and subset of groups to search
-        filter_title: null,
-        filter_group_selected:null,
-        filter_groups: null,
-
-        //EDIT section
-        edit_dialog: true,  //show editor in east panel or as popup
-        edit_height:null,
-        edit_width :null,
-        edit_title :null,
-        edit_need_load_fullrecord: false, //if for edit form we need to load full(all data) record
-        
-        // manager - all selection ui (buttons, checkboxes, label with number of sel.records) is hidden
-        //        highlight in list works as usual and selected records are used in actions
-        // select_single - in list only one item can be highlighted, in dialog mode it will be closed
-        // select_multi - several items can be highlighted, chekboxes are visible in list, onselect works only if button prerssed
-        select_mode: 'manager', //'select_single','select_multi','manager'
-
-        selectbutton_label: 'Select',  //@todo remove?? 
-        
-        
-        //it either loaded from server side if _entityName defined or defined explicitely on client side
-        entity: {}       //configuration
-
-    
-    
-
-
-
-
-2) searchEntity 
-    Content is loaded from associated html snippet and activated in widget.
-    Each search header has search by name input field,  by user/group filter or some other basic filters, 
-    as well: recently added/selected filters. 
-    
-    it performs the search with top.HAPI4.entityManager.crud('entityName', crud_method);
-    
-    options
-        add_new_record: add button
-        select_mode
-        onstart
-        onresult
-    
-3) resultList - display records in list, allow selection, pagination and action menu
-
-    options
-        renderer: custom renderer function
-        items_init: callback to initialize elements(button,links) 
-        keep_selection: to keep selection among pages
-        multiselect: allows multiselection (ctrl, shift or checkboxes)
-
-        actions: array of actions with callback
-                 or special widget (for records for example)
-        //Add new entity button (option: can_add_new)
-    methods    
-        selection
-        updateRecordList  
-    
-    
-
-                   
-                 
-4) editEntity      
-        uses JSON array to create the EDIT form (list of editing_input)            
-                   
----
-HAPI.entityManager
-crud methods: search,get,save,delete,merge
-custom methods: specific for each entity 
-                   
-----
-Entity Hierarchies: workgroup(user), rectype, fieldtype, term (vocabulary)
-
-1) Records
-        by Record Type->Record Type Groups
-        by Added By User
-        by Onwer User or Workgroup
-
-2) Workgroup
-        by SuperGroup(s)   can have many parents
-2a)Users
-        by Workgroup(->SuperWorkgroup) - can belong to many groups with different roles
-
-3)Tags 
-        by User or Workgroup
-
-4)UploadedFiles
-        by Added By User
-5)Reminders
-        by Added By User
-        by Recipient User or Workgroup
-6)Databases
-7)SavedSearches
-        by User or Workgroup and by tree stored in User navigation tree
-
-8)RecordTypes and 9)Groups, 10)FieldTypes and 11)Groups, 12)Terms, 
-
-14)Record Comments
-        by Added By User (for admin only)
-15)Record Bookmarks
-        by User
-16)Smarty Reports (from files) 
-        to implement
-17)Report Schedules, 
-        to implement
-
-
-
-
-        
+-   **searchDefCalcFunctions.html**: HTML template for Calculated Functions search.
+-   **searchDefDetailTypes.html**: HTML template for Detail Types search.
+-   **searchDefFileExtToMimetype.html**: HTML template for File Extension to Mimetype search.
+-   **searchDefRecTypes.html**: HTML template for Record Types search.
+-   **searchDefTerms.html**: HTML template for Terms search.
+-   **searchRecThreadedComments.html**: HTML template for Threaded Comments search.
+-   **searchRecUploadedFiles.html**: HTML template for Uploaded Files search.
+-   **searchRecords.html**: HTML template for Records search.
+-   **searchSysDashboard.html**: HTML template for System Dashboard search.
+-   **searchSysDatabases.html**: HTML template for System Databases search.
+-   **searchSysGroups.html**: HTML template for System Groups search.
+-   **searchSysIdentification.html**: *File reported as missing.*
+-   **searchSysUsers.html**: HTML template for System Users search.
+-   **searchSysWorkflowRules.html**: HTML template for System Workflow Rules search.
+-   **searchUsrBookmarks.html**: *File reported as missing.*
+-   **searchUsrReminders.html**: HTML template for User Reminders search.
+-   **searchUsrSavedSearches.html**: HTML template for User Saved Searches search.
+-   **searchUsrTags.html**: HTML template for User Tags search.

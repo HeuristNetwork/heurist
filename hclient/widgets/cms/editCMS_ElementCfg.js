@@ -1,28 +1,48 @@
 /**
-* editCMS_ElementCfg.js - configuration dialog for css and cardinal properties,
-* for widgets it uses editCMS_WidgetCfg.js 
-* 
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+ * @file editCMS_ElementCfg.js
+ * @brief Provides the configuration dialog for CMS page elements, handling CSS and layout properties.
+ * @fileOverview This file defines the 'editCMS_ElementCfg' function, which creates and manages
+ *               a configuration dialog or panel for page elements within the CMS editor. It allows users
+ *               to modify CSS properties (like display, flexbox, border, background, margin, padding, dimensions),
+ *               element name, ID, classes, and specific properties for cardinal layouts. For widget elements,
+ *               it can integrate with 'editCMS_WidgetCfg.js'. It also provides a direct HTML source editor
+ *               using CodeMirror for text elements.
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\widgets\cms
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 6.0
+ */
 
 /* global editCMS_WidgetCfg, CodeMirror, default_language, current_language, website_languages */
 
-//
-//
-//
+/**
+ * Initializes and manages a configuration dialog/panel for a CMS page element.
+ * This allows editing of CSS properties, element attributes, and specific configurations
+ * for layout types like cardinal or widgets.
+ *
+ * @param {Object} element_cfg - The JSON configuration of the element to be edited.
+ * @param {Array<Object>} _layout_content - The full layout JSON of the current page.
+ * @param {jQuery} _layout_container - jQuery object of the main CMS content area.
+ * @param {jQuery} $container - jQuery object of the container where this editor panel will be rendered.
+ * @param {function(Object|null, string=):void} main_callback - Callback function executed when changes are applied or cancelled.
+ *      Receives the updated element configuration (or null if cancelled) and an action mode ('save', 'save_close').
+ * @param {boolean} [already_changed=false] - Flag indicating if the page already has pending changes.
+ * @returns {Object} An object with public methods for the element configuration editor.
+ *
+ * @property {string} _className - Internal class name identifier.
+ * @property {jQuery} element - jQuery object for the actual page element being configured.
+ * @property {Object} l_cfg - A local copy of the element's JSON configuration, modified by the editor.
+ * @property {Object|null} widget_cfg - Instance of editCMS_WidgetCfg if the element is a widget.
+ * @property {CodeMirror.Editor|null} codeEditor - CodeMirror instance for HTML source editing.
+ * @property {jQuery|null} codeEditorDlg - jQuery dialog object for the CodeMirror editor.
+ * @property {Array|null} codeEditorBtns - Buttons configuration for the CodeMirror dialog.
+ * @property {jQuery|null} textAreaCss - jQuery object for the textarea displaying raw CSS.
+ * @property {boolean} margin_mode_full - Flag to toggle between full (top/right/bottom/left) and shorthand margin/padding input.
+ */
 function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $container, main_callback, already_changed ){
 
     const _className = 'editCMS_ElementCfg';
@@ -35,6 +55,11 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
     let textAreaCss;
     let margin_mode_full = true;
     
+    /**
+     * Initializes the element configuration editor.
+     * Clones the element configuration and loads the HTML structure for the editor panel.
+     * @private
+     */
     function _init(){
 
         /* not used as dialog
@@ -67,9 +92,12 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             );
     }
     
-    //
-    // Assign widget properties to UI
-    //
+    /**
+     * Initializes the UI controls within the element configuration panel.
+     * Sets up input fields, accordions, event listeners for CSS properties,
+     * and integrates with widget configuration if applicable.
+     * @private
+     */
     function _initControls(){
 
         let cont = $container;
@@ -321,9 +349,11 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
     }
 
 
-    //
-    //
-    //
+    /**
+     * Retrieves the current configuration values from the UI input fields
+     * and updates the local `l_cfg` object.
+     * @private
+     */
     function _getCfgFromUI(){            
         
             let cont = $container;
@@ -371,9 +401,12 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             
     }            
     
-    //
-    //
-    //
+    /**
+     * Gathers CSS property values from the UI input fields, constructs a CSS object,
+     * applies it to the live element, and updates `l_cfg.css`.
+     * @private
+     * @returns {Object} The constructed CSS object.
+     */
     function _getCss()
     {
         let cont = $container;
@@ -492,9 +525,12 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         return css;
     }
 
-    //
-    //
-    //
+    /**
+     * Handles the change event for margin/padding synchronization checkboxes.
+     * Toggles readonly state of individual margin/padding fields.
+     * @private
+     * @param {jQuery.Event} event - The change event object.
+     */
     function _onMarginSync(event){
         
         let type = $(event.target).attr('data-type');
@@ -516,9 +552,13 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         }       
     }
     
-    //
-    //
-    //
+    /**
+     * Synchronizes margin or padding values when linked (e.g., top/right/bottom/left all same).
+     * Triggered when the primary input (e.g., padding-left) changes and sync is active.
+     * @private
+     * @param {jQuery.Event} [event] - The change event object from the input field.
+     * @param {string} [type] - The base type ('margin' or 'padding') if called directly without an event.
+     */
     function _onMarginSyncVal(event, type){
         
         if(!type){
@@ -536,9 +576,11 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         }
     }
 
-    //
-    //
-    //
+    /**
+     * Toggles the display mode for margin and padding inputs between
+     * shorthand (e.g., 'margin: 5px') and full (e.g., 'margin-top: 5px', 'margin-left: 5px', etc.).
+     * @private
+     */
     function _onMarginMode(){
         let cont = $container;
         let btn = cont.find('.margin-mode').hide();
@@ -553,17 +595,20 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         }
     }
 
-    //
-    //
-    //
+    /**
+     * Enables the 'Save Element' and 'Save Page' buttons, indicating that changes have been made.
+     * @private
+     */
     function _enableSave(){
         window.hWin.HEURIST4.util.setDisabled($container.find('.btn-save-element'), false);
         window.hWin.HEURIST4.util.setDisabled($container.find('.btn-save-page'), false);
     }
     
-    //
-    //
-    //
+    /**
+     * Populates the CSS textarea with the current CSS rules from `l_cfg.css`,
+     * formatting them as a semicolon-separated string. Handles 'border' shorthand.
+     * @private
+     */
     function _assignCssTextArea(){
 
         let s = '';
@@ -654,9 +699,12 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         $container.find('textarea[name="elementCss"]').val(s);    
     }
     
-    //
-    //
-    //
+    /**
+     * Populates the UI input fields (selects, text inputs, color pickers)
+     * with values from the `l_cfg.css` object. Initializes UI elements like
+     * color pickers and hSelect if not already done.
+     * @private
+     */
     function _assignCssToUI(){        
             
             let cont = $container;
@@ -737,17 +785,22 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
 
     
    
-    // NOT USED
-    // from UI to element properties/css
-    //
+    /**
+     * Placeholder function, originally perhaps intended to gather all UI values.
+     * Currently not used.
+     * @private
+     * @returns {string} An empty string.
+     */
     function _getValues(){
         return '';
     }//_getValues
 
 
-    //
-    // init codemirror editor - direct html editor
-    //
+    /**
+     * Initializes and shows the CodeMirror editor in a dialog for direct HTML source editing
+     * of a text element's content. Handles multi-language content if applicable.
+     * @private
+     */
     function _initCodeEditor() {
         
         let $dlg;
@@ -948,9 +1001,11 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         _enableSave();
     }
     
-    //
-    //
-    //
+    /**
+     * Opens the Heurist media selection dialog to choose a background image.
+     * Updates the relevant input fields and CSS configuration upon selection.
+     * @private
+     */
     function _selecHeuristMedia(){
 
         let popup_options = {
@@ -996,9 +1051,14 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_options);
     }
 
-    //
-    //
-    //    
+    /**
+     * Checks if the element configuration has unsaved changes and prompts the user
+     * to save or discard them before proceeding with another action.
+     * @private
+     * @param {function(boolean):void} callback - Function to call after user interaction.
+     *      Receives `true` if saved, `false` if discarded.
+     * @returns {boolean} True if a warning dialog was shown, false otherwise.
+     */
     function _warningOnExit( callback ){
         
         if($container.find('.btn-save-element').attr('disabled')!='disabled'){
@@ -1043,31 +1103,67 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
     //public members
     let that = {
 
+        /**
+         * Gets the class name of this editor instance.
+         * @returns {string} The class name.
+         * @public
+         */
         getClass: function () {
             return _className;
         },
 
+        /**
+         * Checks if the instance is of a given class name.
+         * @param {string} strClass - The class name to check against.
+         * @returns {boolean} True if it is an instance of the class, false otherwise.
+         * @public
+         */
         isA: function (strClass) {
             return (strClass === _className);
         },
         
+        /**
+         * Public method to handle warnings on exit. Delegates to _warningOnExit.
+         * @param {function(boolean):void} callback - Function to call after user interaction.
+         * @returns {boolean} See _warningOnExit return value.
+         * @public
+         */
         warningOnExit: function( callback ){
             return _warningOnExit( callback );
         },
         
+        /**
+         * Checks if the element configuration has been modified in the UI.
+         * @returns {boolean} True if changes are pending, false otherwise.
+         * @public
+         */
         isModified: function(){
             return $container.find('.btn-save-element').attr('disabled')!='disabled';
         },
         
-        //update from main editor
+        /**
+         * Updates the content of the element, typically called from an external editor like TinyMCE.
+         * @param {string} new_content - The new HTML content.
+         * @param {string} lang - The language identifier for the content (e.g., 'en', 'fr', or empty for default).
+         * @public
+         */
         updateContent: function(new_content, lang){
             l_cfg['content'+lang] = new_content;            
         },
         
+        /**
+         * Handles content change events, typically enabling save buttons.
+         * @public
+         */
         onContentChange: function(){
             _enableSave();
         },
         
+        /**
+         * Gets the unique key of the element being configured.
+         * @returns {string|number} The element key.
+         * @public
+         */
         getKey: function(){
             return element_cfg.key;
         }

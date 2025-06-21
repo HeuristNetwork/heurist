@@ -1,23 +1,43 @@
 /**
-* manageDefDetailTypes.js - main widget for field types
-*
+* @file manageDefDetailTypes.js
+* @brief Manages Detail Type (Field Definition) entities.
+* @fileOverview Provides a UI for creating, configuring, listing, and managing Detail Types (field definitions) within Heurist. This includes setting properties like name, data type, widget, and associated group.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 
+
+/**
+ * @widget heurist.manageDefDetailTypes
+ * @brief Widget for managing Detail Type (field definition) entities.
+ * @extends $.heurist.manageEntity
+ * @property {string} [default_palette_class='ui-heurist-design'] Default palette class for the widget.
+ * @property {number} [newFieldForRtyID=0] If greater than 0, indicates that a new field is being created for this Record Type ID, influencing UI and behavior.
+ * @property {boolean} [innerTitle=false] Whether to display an inner title.
+ * @property {string} [layout_mode='short'] The layout mode for the widget.
+ * @property {boolean} [use_cache=true] Whether to use caching for entity data.
+ * @property {?object} import_structure If provided, indicates that detail types are being imported from a remote structure, enabling remote mode.
+ * @property {boolean} [edit_need_load_fullrecord=false] Whether loading a full record is needed for editing.
+ * @property {number} [height=640] Default height of the widget.
+ * @property {number} [edit_width=850] Default width of the edit dialog.
+ * @property {number} [edit_height=640] Default height of the edit dialog.
+ * @property {string} edit_mode Determines the editing behavior ('editonly', 'popup').
+ * @property {string} select_mode Determines selection behavior ('manager', 'select_multi', 'select_single').
+ * @property {number} width Default width of the widget, adjusted based on select_mode.
+ * @property {boolean} isFrontUI If true, adapts UI for front-end display, including a groups editor panel.
+ * @property {?number} dtg_ID ID of the detail type group to filter by, used by the search/filter controls.
+ * @property {?string} newFieldName Pre-fills the name for a new field.
+ * @property {?string} newFieldType Pre-selects and potentially disables the data type for a new field.
+ * @property {?number} newFieldResource If `newFieldType` is 'resource', this specifies the target record type ID.
+ * @property {boolean} create_sub_record If true, configures the new field as a sub-record pointer.
+ */
 $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
     _entityName:'defDetailTypes',
@@ -34,9 +54,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     
     _record_type: 'all', // filter based on record type
     
-    //
-    //
-    //    
+    /**
+     * @brief Initializes the widget, setting up options and UI elements based on configuration.
+     * @memberof heurist.manageDefDetailTypes
+     * @override
+     * @description This method configures various options like palette class, layout mode, caching,
+     * dimensions, and edit/select modes. It also sets up specific UI adjustments if `isFrontUI` is true,
+     * including a panel for detail type groups and event listeners for window resizing.
+     */
     _init: function() {
 
         this.options.default_palette_class = 'ui-heurist-design';
@@ -115,7 +140,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }        
     
     },
-        
+
+    /**
+     * @brief Cleans up the widget, removing event listeners and custom elements.
+     * @memberof heurist.manageDefDetailTypes
+     * @override
+     */
     _destroy: function() {
 
         window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_WINDOW_RESIZE);        
@@ -127,9 +157,15 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         this._super();
     },
         
-    //  
-    // invoked from _init after load entity config    
-    //
+    /**
+     * @brief Initializes the controls for the widget after the entity configuration is loaded.
+     * @memberof heurist.manageDefDetailTypes
+     * @override
+     * @description Sets up the UI based on `edit_mode`. For 'editonly', it initializes the editor.
+     * Otherwise, it configures the search form, result list, and related event handlers.
+     * It also initializes the detail type groups panel if `isFrontUI` is true.
+     * @returns {boolean} Returns false if the parent's `_initControls` fails, otherwise true.
+     */
     _initControls: function() {
         
         if(!this._super()){
@@ -310,9 +346,13 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         return true;
     },            
     
-    //
-    // invoked after all elements are inited 
-    //
+    /**
+     * @brief Loads data for the widget, either from a remote source or local cache.
+     * @memberof heurist.manageDefDetailTypes
+     * @param {boolean} [is_first] Indicates if this is the first time data is being loaded.
+     * @description If `use_remote` and `import_structure` are true, it fetches detail types from a remote database.
+     * Otherwise, if `use_cache` is true, it loads data from the local cache ($Db.dty()).
+     */
     _loadData: function(is_first){
         
         let that = this;
@@ -351,10 +391,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     },
     
     visible_fields: ['dtyid','ccode','edit','name','type','usedin','status','description', 'show'], //'usedin','show','ccode','group',       
-    //----------------------
-    //
-    //
-    //
+    /**
+     * @brief Renders the header for the record list.
+     * @memberof heurist.manageDefDetailTypes
+     * @override
+     * @returns {string} HTML string for the list header.
+     * @description Calculates column widths and generates HTML for the header row
+     * based on the `visible_fields` array.
+     */
     _recordListHeaderRenderer: function(){
 
         let max_width = this.recordList.find('.div-result-list-content').width() - 23;
@@ -427,10 +471,16 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         return html;
     },
     
-    //----------------------
-    //
-    //
-    //
+    /**
+     * @brief Renders a single item in the record list.
+     * @memberof heurist.manageDefDetailTypes
+     * @override
+     * @param {HRecordSet} recordset The recordset containing the data.
+     * @param {object} record The record object to render.
+     * @returns {string} HTML string representing the list item, or an empty string if the item is in trash and not in manager mode.
+     * @description Generates HTML for a single row in the list, including action buttons
+     * and data fields based on `visible_fields`. Applies gray background if `dty_ShowInLists` is 0.
+     */
     _recordListItemRenderer:function(recordset, record){
 
         const that = this;
@@ -543,9 +593,16 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Handles actions triggered by events, such as button clicks in the list.
+     * @memberof heurist.manageDefDetailTypes
+     * @override
+     * @param {Event} event The event object.
+     * @param {object} action The action object, typically containing `action` (string) and `recID` (number).
+     * @description Extends the parent's `_onActionListener`. Handles 'delete' (with usage check),
+     * 'show_in_list'/'hide_in_list', and 'usedin' actions.
+     * For 'usedin', it displays a dropdown list of record types using the field.
+     */
     _onActionListener:function(event, action){
         
         
@@ -669,9 +726,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
     },
        
-    //
-    // can remove group with assigned fields
-    //     
+    /**
+     * @brief Deletes the current detail type record and closes the edit form.
+     * @memberof heurist.manageDefDetailTypes
+     * @override
+     * @param {boolean} unconditionally If true, deletes without confirmation.
+     * @description Prompts for confirmation before deleting if the field is in use,
+     * unless `unconditionally` is true. Sets `deleted_from_group_ID` for potential UI updates.
+     */
     _deleteAndClose: function(unconditionally){
     
         if(unconditionally===true){
@@ -696,10 +758,15 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
     },
     
-    //
-    //
-    //
-    _afterDeleteEvenHandler: function(recID){
+    /**
+     * @brief Handles actions after a detail type record is deleted.
+     * @memberof heurist.manageDefDetailTypes
+     * @override
+     * @param {number} recID The ID of the deleted record.
+     * @description Calls the parent's handler, then refreshes the search and triggers a 'dty' refresh event.
+     * Note: Original method name might have a typo "EvenHandler" vs "EventHandler".
+     */
+    _afterDeleteEventHandler: function(recID){
         
             this._super();
 
@@ -710,11 +777,16 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     },
     
 
-    //-----
-    //
-    // Set group ID value for new field type
-    // and perform some after load modifications (show/hide fields,tabs )
-    //
+    /**
+     * @brief Performs actions after the edit form is initialized.
+     * @memberof heurist.manageDefDetailTypes
+     * @override
+     * @description This extensive method sets up the edit form based on whether it's a new field
+     * or an existing one. It handles UI for `newFieldForRtyID` (suggesting existing fields,
+     * providing guidance), `newFieldType` (constraining data type selection),
+     * `create_sub_record` (configuring for sub-record creation). It initializes vocabulary
+     * controls for enum/relmarker types, sets up help text toggles, and adjusts dialog height.
+     */
     _afterInitEditForm: function(){
 
         this._super();
@@ -1065,9 +1137,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         this._adjustEditDialogHeight();
     },    
     
-    //
-    //
-    //
+    /**
+     * @brief Handles changes to the 'dty_Type' (Data Type) field in the edit form.
+     * @memberof heurist.manageDefDetailTypes
+     * @param {string} dt_type The new data type value.
+     * @description Updates the form UI to show/hide fields relevant to the selected data type.
+     * Activates specific controls for 'enum', 'relmarker', or 'relationtype'.
+     * Adjusts UI for 'newFieldForRtyID' mode.
+     */
     _onDataTypeChange: function(dt_type)
     {
            /*
@@ -1121,9 +1198,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
            }
     },
     
-    //
-    // show dropdown for field suggestions to be added
-    //
+    /**
+     * @brief Provides suggestions for existing base fields when creating a new field for a record type.
+     * @memberof heurist.manageDefDetailTypes
+     * @param {Event} event The keyup event object from the name input field.
+     * @description This function is triggered on keyup in the field name input when `newFieldForRtyID` is active.
+     * It displays a dropdown list of existing base fields that match the typed input and are not already in the current record type.
+     * Clicking a suggestion adds that base field to the record type.
+     */
     _onFieldAddSuggestion: function(event){
         
         let input_name = $(event.target);
@@ -1251,9 +1333,13 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
     },
 
-    //
-    //
-    //
+    /**
+     * @brief Activates and configures controls specific to the 'relationtype' data type.
+     * @memberof heurist.manageDefDetailTypes
+     * @param {jQuery} ele The jQuery element (likely a fieldset or div) containing the controls for 'dty_Mode_enum'.
+     * @description Sets up the UI for selecting/editing terms related to relation types,
+     * including a preview selector and an "edit terms tree" link.
+     */
     _activateRelationTypeControls: function( ele ){
 
             ele.find('.header').text('Relation types:');
@@ -1285,9 +1371,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     },
 
     
-    //
-    //
-    //
+    /**
+     * @brief Activates and configures controls specific to the 'enum' (enumeration) data type.
+     * @memberof heurist.manageDefDetailTypes
+     * @param {jQuery} ele The jQuery element (likely a fieldset or div) containing the controls for 'dty_Mode_enum'.
+     * @param {boolean} [full_mode] Not explicitly used in the provided code, but often indicates a more comprehensive UI setup.
+     * @description Sets up UI for managing vocabularies and terms associated with an enum field,
+     * including vocabulary selection, term preview, and links to add/edit vocabularies/terms.
+     */
     _activateEnumControls: function( ele, full_mode ){
         
             ele = ele.find('.input-div');
@@ -1335,10 +1426,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     },
     
     /**
-    * _onAddVocabOrTerms
-    *
-    * Add new vocabulary or add child to currently selected
-    */
+    /**
+     * @brief Handles adding a new vocabulary or new terms to an existing vocabulary.
+     * @memberof heurist.manageDefDetailTypes
+     * @param {Event} event The click event object.
+     * @description Opens the 'defTerms' management dialog to allow creating a new vocabulary
+     * or adding terms to the currently selected vocabulary for an enum/relmarker field.
+     * Refreshes vocabulary selectors upon dialog close.
+     */
     _onAddVocabOrTerms: function(event){
         
         let is_add_vocab = ($(event.target).attr('id')=='add_vocabulary');
@@ -1389,13 +1484,22 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
     },
 
+    /**
+     * @brief Convenience method to open the defTerms manager for adding a new vocabulary.
+     * @memberof heurist.manageDefDetailTypes
+     */
     _onAddVocabulary: function(){
         this._showOtherTerms('add_new');
     },    
     
-    //
-    // Opens defTerms manager
-    //
+    /**
+     * @brief Opens the 'defTerms' (Terms Management) dialog.
+     * @memberof heurist.manageDefDetailTypes
+     * @param {Event|string} event The click event or a string like 'add_new'.
+     * @description Displays the terms management interface, potentially pre-selecting a vocabulary
+     * or setting it up for adding a new one based on the context (enum, relmarker, relationtype).
+     * Refreshes vocabulary selectors upon dialog close.
+     */
     _showOtherTerms: function(event){
         
 
@@ -1468,9 +1572,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
     },    
     
-    //
-    //
-    //
+    /**
+     * @brief Recreates the vocabulary selector dropdown for enum/relmarker fields.
+     * @memberof heurist.manageDefDetailTypes
+     * @param {?number|string} [newval] The new vocabulary ID or term tree string to select.
+     * If not provided, uses the current value from the edit form.
+     * @description Populates the vocabulary selector (`#selVocab`) based on the current data type
+     * (enum or relation) and selected term/vocabulary. Also sets up change listeners.
+     */
     _recreateTermsVocabSelector: function(newval){
         
         //selected vocabulary
@@ -1518,9 +1627,13 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Recreates the terms preview selector dropdown.
+     * @memberof heurist.manageDefDetailTypes
+     * @description Populates the terms preview selector (`#selPreview`) based on the
+     * currently selected vocabulary in `dty_JsonTermIDTree`. Shows or hides the preview
+     * based on whether a vocabulary is selected. For 'relationtype', it defaults to 'relation' terms.
+     */
     _recreateTermsPreviewSelector: function(){
 
         let allTerms = this._editing.getValue('dty_JsonTermIDTree')[0];
@@ -1596,9 +1709,13 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
     },
 
-    //
-    // NOT USED ANYMORE
-    //
+    /**
+     * @brief Updates the field count for a detail type group.
+     * @memberof heurist.manageDefDetailTypes
+     * @deprecated This method is marked as "NOT USED ANYMORE" in the source code.
+     * @param {number} dtg_ID The ID of the detail type group.
+     * @param {number} delta The change in count (e.g., +1 or -1).
+     */
     updateGroupCount:function(dtg_ID,  delta){
         
         if(dtg_ID>0){
@@ -1611,11 +1728,18 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     },    
     
     
-    //-----------------------------------------------------
-    //
-    // send update request and close popup if edit is in dialog
-    // afteraction is used in overriden version of this method
-    //
+    /**
+     * @brief Saves the detail type record and closes the popup/dialog.
+     * @memberof heurist.manageDefDetailTypes
+     * @override
+     * @param {?object} fields Field values to save. If null, values are taken from the form.
+     * @param {?function} afterAction Callback function after a successful save.
+     * @param {?function} onErrorAction Callback function if an error occurs during save.
+     * @description This method handles the complex logic of saving a detail type.
+     * It performs validation, checks for unconstrained pointers (resource/relmarker types),
+     * prompts for sysadmin password if editing a reserved field, and handles specific UI flows
+     * for new record pointer fields (customization dialog).
+     */
     _saveEditAndClose: function( fields, afterAction, onErrorAction ){
         
         let that_widget = this;
@@ -1824,6 +1948,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
     },
     
+    /**
+     * @brief Handles errors that occur during the save operation.
+     * @memberof heurist.manageDefDetailTypes
+     * @param {object} response The error response object from the server.
+     * @description Provides specific error handling for scenarios like vocabulary in use
+     * or duplicate field names. It may show dialogs with options to resolve conflicts
+     * (e.g., delete or rename existing field).
+     */
     _onSaveError: function(response){
 
         let that = this;
@@ -1969,10 +2101,15 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
     },
     
-    //  -----------------------------------------------------
-    //
-    // perform validation
-    //
+    /**
+     * @brief Validates the field values from the edit form.
+     * @memberof heurist.manageDefDetailTypes
+     * @override
+     * @returns {?object} An object containing the validated field values, or null if validation fails.
+     * @description Extends the parent's validation. Ensures that for 'enum' or 'relmarker' data types,
+     * a `dty_JsonTermIDTree` (vocabulary/term selection) is present.
+     * Clears term tree fields for other data types.
+     */
     _getValidatedValues: function(){
         
         //fieldvalues - is object {'xyz_Field':'value','xyz_Field2':['val1','val2','val3]}
@@ -2008,11 +2145,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     },
     
     
-    //
-    // event handler for select-and-close (select_multi)
-    // or for any selection event for select_single
-    // triger onselect event
-    //
+    /**
+     * @brief Handles selection and closing of the dialog, triggering an "onselect" event.
+     * @memberof heurist.manageDefDetailTypes
+     * @override
+     * @description Extends the parent's method. If `newFieldForRtyID` is active,
+     * it packages relevant `rst_` (record structure) field values into the `_resultOnSelection`
+     * object to be passed with the "onselect" event.
+     */
     _selectAndClose: function(){
         
         if(this.options.newFieldForRtyID>0){
@@ -2031,9 +2171,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         this._super();
     },
    
-    //
-    //
-    //                                
+    /**
+     * @brief Changes the group of a detail type.
+     * @memberof heurist.manageDefDetailTypes
+     * @param {object} params Parameters for the update, typically including `dty_ID` and `dty_DetailTypeGroupID`.
+     * @description Saves the detail type with the new group ID and refreshes the UI.
+     */
     changeDetailtypeGroup: function(params){                                    
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
@@ -2047,8 +2190,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         });
     },                                    
     
-    //
-    //
+    /**
+     * @brief Retrieves UI preferences specific to this widget.
+     * @memberof heurist.manageDefDetailTypes
+     * @returns {object} The user preferences object, defaulting to `{ help_on: true }`.
+     */
     getUiPreferences:function(){
         this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, {
             help_on: true
@@ -2059,9 +2205,15 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     
     //saveUiPreferences:function() { this._super(); }, 
    
-    //
-    // show warning
-    //
+    /**
+     * @brief Opens the add/edit dialog for a detail type record.
+     * @memberof heurist.manageDefDetailTypes
+     * @override
+     * @param {number} recID The ID of the record to edit, or a negative value to add a new record.
+     * @param {boolean} [is_proceed=false] If true, bypasses the initial warning cover message when adding a new record.
+     * @description Overrides the parent method to show a warning/guidance message (`coverMessage`)
+     * when a user attempts to add a new base field directly, unless `is_proceed` is true.
+     */
     addEditRecord: function(recID, is_proceed){
 
         if(recID<0 && is_proceed !== true){
@@ -2071,9 +2223,17 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
     },
 
-    //
-    // listener of onfilter event generated by searchEtity. appicable for use_cache only       
-    //
+    /**
+     * @brief Filters the record list based on search criteria.
+     * @memberof heurist.manageDefDetailTypes
+     * @override
+     * @param {Event} event The filter event.
+     * @param {object} request The request object containing filter parameters.
+     * @description This method is an event listener for filter events from the search form,
+     * applicable when `use_cache` is true. It filters the list by record type (`rtyID`) if provided
+     * and then applies general filtering from the parent method. Updates the empty list message
+     * if no results match.
+     */
     filterRecordList: function(event, request){ 
 
         if(request['rtyID']){
@@ -2115,9 +2275,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
     },
 
-    //
-    // cover message warning a standard user to not define base fields at this location
-    //
+    /**
+     * @brief Displays a cover message warning users against creating base fields directly.
+     * @memberof heurist.manageDefDetailTypes
+     * @param {?number} recID The record ID, used if proceeding from the message to edit/add.
+     * @description Shows an overlay message guiding users to create base fields within the
+     * record type structure definition for a more intuitive experience.
+     * Clicking outside the message box or proceeding allows access to the manager.
+     */
     coverMessage: function(recID){
         let that = this;
 
@@ -2153,9 +2318,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Gets the array of buttons for the edit dialog.
+     * @memberof heurist.manageDefDetailTypes
+     * @override
+     * @returns {Array<object>} An array of button definition objects for the dialog.
+     * @description Extends the parent method to add an extra "Create and customise new field" button
+     * if `newFieldForRtyID` is active and it's not a `newFieldType` or `create_sub_record` scenario.
+     */
     _getEditDialogButtons: function(){
 
             let btn_array = this._super();
@@ -2177,6 +2347,16 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             return btn_array;
     },
 
+    /**
+     * @brief Constructs a recordset from remote detail type definitions.
+     * @memberof heurist.manageDefDetailTypes
+     * @param {object} detailtypes The raw detail type definitions from a remote source.
+     * @param {boolean} hideDisabled If true, filters out disabled or trash items.
+     * @returns {HRecordSet} A Heurist recordset object.
+     * @description Used during import_structure operations to convert remotely fetched
+     * detail type data into a usable HRecordSet. It maps fields and handles
+     * local ID mapping if `import_structure` is active.
+     */
     getRecordsetFromRemote: function( detailtypes, hideDisabled ){
 
         let rdata = { 
@@ -2253,9 +2433,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         return this._cachedRecordset;
     },
 
-    //
-    // Extra details for the user when setting up sub-records
-    //
+    /**
+     * @brief Configures the edit form fields when creating a sub-record field.
+     * @memberof heurist.manageDefDetailTypes
+     * @description This method is called when `options.create_sub_record` is true.
+     * It forces the data type to 'resource', sets 'Create Child Records' to true,
+     * makes the field repeatable (MaxValues=0), sets default help text,
+     * and adds a prominent message guiding the user through sub-record setup.
+     */
     _setupSubRecordField: function(){ //create_sub_record
 
         // Force type to record pointer
@@ -2291,6 +2476,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         + '<br>In the next step you will select fields to be transferred to the sub-records</div><br>').prependTo($(this._editing.getContainer()[0]).find('fieldset')[0]);
     },
 
+    /**
+     * @brief Initiates the process of importing Base Fields from a CSV file.
+     * @memberof heurist.manageDefDetailTypes
+     * @description Opens a dialog for importing base fields. After import, it reloads data,
+     * displays a report, and refreshes entity data and structure.
+     */
     importDetailTypes: function(){
 
         const that = this;

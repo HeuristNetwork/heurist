@@ -1,21 +1,15 @@
 /**
-* thematicMapping.js - Find duplicates by record type and selected fields
-*                           It uses levenshtein function on server side
-*
+* @file thematicMapping.js
+* @brief Provides a popup UI for configuring thematic mapping settings.
+* @fileOverview This widget allows users to define rules and settings for thematic mapping, likely used for map visualizations based on record data.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity\popups
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /*
@@ -55,9 +49,27 @@ It creates thematic map in the following format
 "fields":[}
 12:1109
 
-
-
 */
+
+/**
+ * @widget heurist.thematicMapping
+ * @brief Popup widget for configuring thematic mapping.
+ * @extends $.heurist.recordAction
+ * @description This widget provides a dialog for users to define thematic maps.
+ * Users can create multiple thematic map configurations, each with a title, base symbology,
+ * and a set of fields. For each field, ranges or categories can be defined with specific
+ * symbology that overrides the base or layer default.
+ *
+ * @property {number} [height=780] Default height of the dialog.
+ * @property {number} [width=1100] Default width of the dialog.
+ * @property {boolean} [modal=true] Whether the dialog is modal.
+ * @property {string} [title='Define thematic mapping'] Default title of the dialog.
+ * @property {string} [default_palette_class='ui-heurist-design'] Default CSS class for theming.
+ * @property {?string} maplayer_query The HAPI query string for the map layer, used to determine relevant record types and potentially data ranges.
+ * @property {?object|object[]} thematic_mapping The initial thematic mapping configuration(s) to load.
+ * @property {string} [path='widgets/entity/popups/'] Path to the widget's HTML template.
+ * @property {string} [htmlContent='thematicMapping.html'] Name of the HTML template file.
+ */
 $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
 
     // default options
@@ -85,6 +97,13 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     popele: null, //element for popup dialog
     maplayer_ids: null, //list of ids from map layer - result of maplayer_query 
     
+    /**
+     * @brief Destroys the widget and its components.
+     * @override
+     * @memberof heurist.thematicMapping
+     * Calls the parent `_destroy` method. Also specifically destroys the Fancytree instance
+     * used for displaying the record type structure if it exists.
+     */
     _destroy: function() {
         this._super(); 
         
@@ -96,9 +115,13 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         
     },
         
-    //    
-    //
-    //
+    /**
+     * @brief Gets the action buttons for the dialog.
+     * @override
+     * @memberof heurist.thematicMapping
+     * @returns {object[]} An array of button definition objects for the dialog.
+     * Modifies the default "OK" button text to "Save thematic map" and "Cancel" button text.
+     */
     _getActionButtons: function(){
         let res = this._super();
         res[1].text = window.hWin.HR('Save thematic map');
@@ -106,9 +129,19 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         return res;
     },    
         
-    //
-    // Fills record type selector. Parent method is overwritten
-    //
+    /**
+     * @brief Initializes the main controls of the widget after HTML content is loaded.
+     * @override
+     * @memberof heurist.thematicMapping
+     * This method, specific to widgets augmenting `$.heurist.recordAction` or `$.heurist.baseAction`,
+     * is the primary entry point for UI setup. It initializes:
+     * - Selection list for thematic map configurations.
+     * - Buttons for adding/removing thematic maps and fields.
+     * - Symbol editor for base and range-specific symbology.
+     * - Record type selector and field selection tree (Fancytree).
+     * - Loads existing thematic mapping configurations or initializes a new one.
+     * - Populates record type selector based on `options.maplayer_query` if available.
+     */
     _fillSelectRecordScope: function (){
 
         this.selectRecordScope.empty();
@@ -266,9 +299,14 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         
     },
             
-    //
-    // Save thematic mapping
-    //
+    /**
+     * @brief Main action performed when the primary dialog button ("Save thematic map") is clicked.
+     * @override
+     * @memberof heurist.thematicMapping
+     * Calls `_saveThematicMap()` to save the current configuration. If successful,
+     * it prepends the base layer symbol (if any) to the `thematic_mapping` array,
+     * sets this array as the result for `_context_on_close`, and closes the dialog.
+     */
     doAction: function(){
         
         //get values
@@ -283,17 +321,24 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Hides the progress bar and shows the main search/config div.
+     * @override
+     * @memberof heurist.thematicMapping
+     */
     _hideProgress: function (){
         this._super(); 
         this.element.find('#div_search').show();  
     },
     
-    //
-    // overwritten - reload treeview
-    //
+    /**
+     * @brief Handles changes in the selected record scope (record type).
+     * @override
+     * @memberof heurist.thematicMapping
+     * @returns {boolean} Result of the superclass's `_onRecordScopeChange` method.
+     * If the selected record type ID has changed, it reloads the field selection tree
+     * for the new record type using `_loadRecordTypesTreeView`.
+     */
     _onRecordScopeChange: function() 
     {
         let isdisabled = this._super();
@@ -312,9 +357,15 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         return isdisabled;
     },
     
-    //
-    // show treeview with record type structure
-    //
+    /**
+     * @brief Loads and initializes the Fancytree for selecting fields from a record type.
+     * @memberof heurist.thematicMapping
+     * @param {number} rtyID The ID of the record type whose fields are to be displayed.
+     * Creates a hierarchical tree of fields available for the given record type,
+     * allowing users to select fields for thematic mapping. Filters for field types
+     * suitable for thematic mapping (enum, date, numeric, resource).
+     * Handles lazy loading for related record structures.
+     */
     _loadRecordTypesTreeView: function(rtyID){
         
         let that = this;
@@ -514,9 +565,13 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         }   
     },
 
-    //
-    //
-    //
+    /**
+     * @brief Adds a new thematic map configuration to the list.
+     * @memberof heurist.thematicMapping
+     * Saves the currently edited thematic map (if any) via `_saveThematicMap()`.
+     * Appends a new, empty thematic map object to `this.options.thematic_mapping`.
+     * Adds an option for the new map to the selection list and selects it.
+     */
     _addThematicMap: function(){
         
         if(this._saveThematicMap()){
@@ -537,9 +592,14 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     },
     
     
-    //
-    // 
-    //
+    /**
+     * @brief Handles deletion of the currently selected thematic map configuration.
+     * @memberof heurist.thematicMapping
+     * @param {boolean} [unconditional=false] If true, deletes without confirmation.
+     * If `unconditional` is false, prompts the user for confirmation.
+     * If confirmed, removes the map from `this.options.thematic_mapping` and the UI list.
+     * If no maps remain, prompts to exit; otherwise, selects the first map.
+     */
     _onThematicMapDelete: function(unconditional){
         if(this.currentThemeIdx>=0){
             
@@ -547,7 +607,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
 
             if(unconditional!==true){    
                 window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
-                    function(){that._onThematicMapDelete(true)});
+                    function(){that._onThematicMapDelete(true);});
                 return;
             }
             
@@ -574,9 +634,18 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         }
     },
     
-    //
-    // 
-    //
+    /**
+     * @brief Saves the current thematic map configuration being edited.
+     * @memberof heurist.thematicMapping
+     * @returns {boolean} True if save was successful or no map was being edited, false if validation failed.
+     * If `this.currentThemeIdx` is valid:
+     *  - Updates the title, active state, and base symbol from UI inputs.
+     *  - Calls `_saveThemeField()` to save the currently edited field's ranges.
+     *  - Reconstructs the `fields` array for the current thematic map from `this.selectedFields`,
+     *    only including fields that have defined ranges.
+     *  - Validates that a title and at least one field with ranges are present.
+     *  - Updates the thematic map's title in the selection list.
+     */
     _saveThematicMap: function(){
         
         if(this.currentThemeIdx>=0){
@@ -627,9 +696,15 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         return true;
     },
 
-    //
-    // load thematic map on selection in the list
-    //
+    /**
+     * @brief Handles selection of a thematic map from the list.
+     * @memberof heurist.thematicMapping
+     * @param {Event} [event] The change event object from the selection list.
+     * Saves the currently edited thematic map (if any) via `_saveThematicMap()`.
+     * Loads the selected thematic map's configuration into the UI fields (title, active state, base symbol).
+     * Populates `this.selectedFields` and the "Selected Fields" list based on the loaded map.
+     * Triggers selection of the first field in the list.
+     */
     _onThematicMapSelect: function( event ){
         
         if(this._saveThematicMap()){
@@ -673,9 +748,13 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     },
     
     //-----------------------
-    //
-    //
-    //
+    /**
+     * @brief Adds a field selected from the Fancytree to the current thematic map's field list.
+     * @memberof heurist.thematicMapping
+     * @param {string} nodekey The key of the Fancytree node representing the selected field.
+     * Extracts field information (code, name) from the node.
+     * If the field is not already in `this.selectedFields`, adds it and updates the "Selected Fields" UI list.
+     */
     _addThemeField: function( nodekey )
     {
         let tree = $.ui.fancytree.getTree( this.element.find('.rtt-tree') );
@@ -702,9 +781,15 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     
     
     
-    //
-    //
-    //
+    /**
+     * @brief Saves the configuration of the currently selected theme field from the UI to `this.selectedFields`.
+     * @memberof heurist.thematicMapping
+     * If `this.currentField` is set (a field is selected for editing):
+     *  - Iterates through the range definition elements in the UI.
+     *  - Updates the `value` and `symbol` for each range in the `selfield.ranges` array.
+     *  - Removes ranges with empty values.
+     *  - Updates the field's title from the UI input.
+     */
     _saveThemeField: function(){
         
         if(this.currentField>0){
@@ -763,10 +848,15 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         
     },
     
-    //
-    //  saves previous field/range settings 
-    //  and shows title and ranges for current field
-    //
+    /**
+     * @brief Handles selection of a field from the "Selected Fields" list for editing its ranges.
+     * @memberof heurist.thematicMapping
+     * @param {Event} [event] The change event object from the selection list.
+     * Saves the configuration of the previously selected field (if any) via `_saveThemeField()`.
+     * Sets `this.currentField` to the newly selected field's ID.
+     * Clears and repopulates the range definition area (`#f_ranges`) based on the selected field's configuration.
+     * Shows the work area if a field is selected, hides it otherwise.
+     */
     _onThemeFieldSelect: function(event){                                                           
         
         let main_area = this.element.find('#div_work_area');        
@@ -797,9 +887,19 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         }
     },
     
-    //
-    // inits and returns range element
-    //
+    /**
+     * @brief Defines and renders a single range configuration row in the UI.
+     * @memberof heurist.thematicMapping
+     * @param {number} idx The index of the range in the field's `ranges` array.
+     * @param {object} range The range object containing `value` and `symbol`.
+     * Creates HTML elements for editing a range:
+     *  - A remove button.
+     *  - Input(s) for the range value(s) (a select for enum type, one or two inputs for numeric/date ranges).
+     *  - A preview span for the symbol.
+     *  - An input for the JSON symbol definition.
+     * Populates these elements with the `range` data and sets up symbol editor and event handlers.
+     * Assigns a unique ID to the range's UI element and stores it in `range.uid`.
+     */
     _defThemeFieldRange: function(idx, range){   
 
         let selfield = this.selectedFields[this.currentField];
@@ -870,9 +970,13 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
 
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Initializes the symbol editor for a given symbol input field.
+     * @memberof heurist.thematicMapping
+     * @param {jQuery} fele The jQuery object for the symbol input field.
+     * Makes the input read-only and appends "Reset" and "Open editor" buttons.
+     * The "Open editor" button launches the `showEditSymbologyDialog`.
+     */
     _initSymbolEditor: function(fele){
         
         let f_ranges = this.element.find('#f_ranges');
@@ -903,9 +1007,17 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             
     },//_initSymbolEditor
     
-    //
-    //  toolbar button action
-    //
+    /**
+     * @brief Handles actions from the toolbar for the currently selected field's ranges.
+     * @memberof heurist.thematicMapping
+     * @param {Event} event The click event object.
+     * Actions:
+     *  - `btn_f_remove`: Removes the current field from the thematic map.
+     *  - `btn_f_range_add`: Adds a new empty range definition for the current field.
+     *  - `btn_f_range_auto`: Opens the dialog to automatically define ranges (`_defineAutoRanges`).
+     *  - `btn_f_range_reset`: Removes all ranges for the current field.
+     *  - `btn_f_range_symb`: Opens a dialog to set symbol gradients across existing ranges.
+     */
     _onThemeFieldAction: function(event){
         
         if(this.currentField>0){
@@ -1045,9 +1157,15 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         }
     },
     
-    //
-    // Searches for min/max and unique values for given field
-    //
+    /**
+     * @brief Opens a dialog to automatically define ranges for the selected field.
+     * @memberof heurist.thematicMapping
+     * @param {string} code The field code (e.g., "rtyID:dtyID" or "dtyID").
+     * Fetches unique values or min/max for the specified field based on `this.options.maplayer_query`.
+     * Presents a dialog (`#divAutoRanges`) allowing the user to configure how ranges are generated
+     * (number of intervals, rounding for numeric/date, use all terms or DB values for enums).
+     * Calls `_definePreviewRanges` to update the preview as settings change.
+     */
     _defineAutoRanges: function(code){
         
         let $dlg;
@@ -1194,9 +1312,14 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
                 });        
     },
     
-    //
-    // Event listener - recalc preview ranges
-    //
+    /**
+     * @brief Event listener for range definition controls; recalculates and displays preview ranges.
+     * @memberof heurist.thematicMapping
+     * Clears `this.preview_ranges` and the preview UI area.
+     * Based on the selected field type (`dty_Type`) and UI inputs (min, max, count, rounding for numeric/date;
+     * source for enums - DB values or all terms), it calculates and populates `this.preview_ranges`.
+     * Renders the preview of these ranges in `#ranges_preview`.
+     */
     _definePreviewRanges: function(){
 
         this.preview_ranges = [];
@@ -1293,9 +1416,16 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         this.preview_ranges = ranges;
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Renders a preview of a symbol based on combined symbology.
+     * @memberof heurist.thematicMapping
+     * @param {?jQuery} ele The jQuery element to update with the symbol preview. If null, updates all range previews.
+     * @param {object} layer_symbol The base symbology from the map layer.
+     * @param {string|object} base_symbol The base symbology for the current thematic map (JSON string or object).
+     * @param {string|object} range_symbol The symbology specific to the current range (JSON string or object).
+     * Merges layer, thematic map base, and range-specific symbols to get the final style.
+     * Updates the `background-color`, `border`, etc., of the `ele` to show a visual preview.
+     */
     _renderSymbolPreview: function(ele, layer_symbol, base_symbol, range_symbol){
         
             if(ele==null){
@@ -1323,7 +1453,7 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
             function __mergeThematicSymbol(basesymbol, fsymb){
                 
                     let use_style = window.hWin.HEURIST4.util.cloneJSON( basesymbol );
-                    if($.isPlainObject(range_symbol)){
+                    if($.isPlainObject(range_symbol)){ // range_symbol was defined as parameter, but fsymb is used here. Assuming fsymb is range_symbol
                         let keys = Object.keys(fsymb);
                         for(let j=0; j<keys.length; j++){
                             use_style[keys[j]] = fsymb[keys[j]];
@@ -1371,4 +1501,3 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
     
 
 });
-

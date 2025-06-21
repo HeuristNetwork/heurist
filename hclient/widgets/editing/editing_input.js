@@ -17,8 +17,7 @@
  */
 
 /*global Temporal, TDate, fixCalendarPickerCMDs, temporalToHumanReadableString, tinyMCE, EditorCodeMirror,
-translationSupport, selectRecord,browseRecords,browseTerms, correctionOfInvalidTerm, calculateImageExtentFromWorldFile,
-$Db */
+translationSupport, selectRecord,browseRecords,browseTerms, correctionOfInvalidTerm, calculateImageExtentFromWorldFile */
 
 /**
  * @namespace heurist.editing_input
@@ -444,7 +443,6 @@ $.widget( "heurist.editing_input", {
         }
         
         this.detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
-        this._isForRecords = this.options?.recordset?.entityName == 'Records' || this.configMode?.entity == 'records';
 
         if(!window.hWin.HEURIST4.util.isPositiveInt(this.options.rectypeID) && this.options.recordset){ // detect rectype for (heurist data) Records/recDetails
             this.options.rectypeID = this.options.recordset.fld(this.options.recID, 'rec_RecTypeID'); // this.options.recordset.getFirstRecord()
@@ -472,6 +470,8 @@ $.widget( "heurist.editing_input", {
             this.configMode = {entity:'records'};
         }
 
+        this._isForRecords = this.options?.recordset?.entityName == 'Records' || !this.configMode || this.configMode?.entity == 'records';
+        
         this.isFileForRecord = (this.detailType=='file' && this._isForRecords);
         if(this.isFileForRecord){
             this.configMode = {
@@ -3564,8 +3564,8 @@ $.widget( "heurist.editing_input", {
                             sz = 16;
                         }
                         
-                        //container for image
-                        let $input_img = this.input_img = $('<div tabindex="0" contenteditable class="image_input fileupload ui-widget-content ui-corner-all" style="border:dashed blue 2px;">'
+                        //container for image       fileupload
+                        let $input_img = this.input_img = $('<div tabindex="0" contenteditable class="image_input ui-widget-content ui-corner-all" style="border:dashed blue 2px;">'
                             + '<img src="'+urlThumb+'" class="image_input" style="'+(sz>0?('width:'+sz+'px;'):'')+'">'
                             + '</div>').appendTo( $inputdiv );                
                         if(this.configMode.entity=='recUploadedFiles'){
@@ -3775,6 +3775,8 @@ $.widget( "heurist.editing_input", {
                     $input_img.find('img').prop('src', urlThumb);
                     if(that.configMode.entity=='recUploadedFiles'){
                         that.newvalues[$input.attr('id')] = file;
+                    }else if(that.configMode.entity == 'sysBugreport'){
+                        that.newvalues[$input.attr('id')] = urlThumb; // to ensure the thumbnails appear
                     }else{
                         //unique temp name to store uploaded file before record's save - then it will be renamed to recId.ext
                         that.newvalues[$input.attr('id')] = file.tempname;  //it will be renamed on save
@@ -3782,16 +3784,16 @@ $.widget( "heurist.editing_input", {
                 }
                 $input.attr('title', file.name);
                 that.onChange();//need call it manually since onchange event is redifined by fileupload widget
-                });
-            }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response);// .message
-            }
+            });
+        }else{
+            window.hWin.HEURIST4.msg.showMsgErr(response);// .message
+        }
 
-            let inpt = this;
-            $input_img.off('click');
-            $input_img.on({click: function(){
-                $(inpt).trigger('click');
-            }});
+        let inpt = this;
+        $input_img.off('click');
+        $input_img.on({click: function(){
+            $(inpt).trigger('click');
+        }});
     },
     fail: function(e, data){
 
@@ -3847,10 +3849,10 @@ $.widget( "heurist.editing_input", {
     }                
        
                         //init upload widget
+                        $input.addClass('fileupload');
                         $input.fileupload( fileupload_opts );
                 
                         //init click handlers
-                       
                         $input_img.on({click: function(e){ //find('a')
                             $input.trigger('click'); //open file browse
                         }});

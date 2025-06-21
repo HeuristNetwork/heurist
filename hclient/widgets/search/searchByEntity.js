@@ -1,28 +1,46 @@
 /**
-* Filter by enity (record type)
+* @file searchByEntity.js
+* @brief Filter by entity (record type).
+* @fileOverview This file defines the `heurist.searchByEntity` jQuery UI widget.
+* This widget provides functionality to filter search results by record type (entity).
+* It can display a list of "favorite" record types as buttons for quick filtering,
+* and/or a dropdown list of record types sorted by usage count. Users can configure
+* their favorite record types. The widget interacts with the main search system
+* to apply the selected record type filter.
+*
 * It takes entity id either from "by usage" list or from pre-selected list of record types
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\search
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @note        Completely revised for Heurist version 4
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       5.0
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-
+/**
+ * @widget heurist.searchByEntity
+ * @description
+ * jQuery UI widget for filtering search results by entity (record type).
+ * It provides options to display favorite entity filters as buttons and/or
+ * a usage-based dropdown for selecting entity filters.
+ */
 $.widget( "heurist.searchByEntity", {
 
-    // default options
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @property {Object} options - Default options for the widget.
+     * @property {boolean} options.is_publication - If true, adapts styling for publication mode.
+     * @property {boolean} options.use_combined_select - If true, uses a combined dropdown for favorites, usage, and configuration.
+     *                                                  Otherwise, favorites are shown as buttons.
+     * @property {boolean} options.by_favorites - If true, shows favorite entity filters.
+     * @property {boolean} options.by_usage - If true, shows a usage-based entity filter dropdown.
+     * @property {?string} options.search_realm - The search realm this widget is associated with.
+     * @property {?function} options.menu_locked - Callback to prevent menu closing in H6 style.
+     */
     options: {
         is_publication: false,
         use_combined_select: false,  // component is combination of 3 selectors (otherwise favorires are buttons)
@@ -35,21 +53,72 @@ $.widget( "heurist.searchByEntity", {
         menu_locked: null // callback to prevent close in h6
     },
 
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @property {Array<string>} selected_rty_ids - Array of currently selected favorite record type IDs.
+     */
     selected_rty_ids:[], //
 
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @property {?jQuery} combined_select - jQuery element for the combined select dropdown (if `options.use_combined_select` is true).
+     */
     combined_select: null, // if use_combined_select  usage>,config>,list of favorites
     
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @property {?jQuery} config_btn - Button to open the configuration selector.
+     */
     config_btn: null, // button to open config selector
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @property {?jQuery} config_select - The configuration selector element (for choosing favorites).
+     */
     config_select: null, //configuration selector
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @property {?Object} config_select_options - Options for the configuration selector.
+     */
     config_select_options: null,
     
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @property {?jQuery} usage_btn - Button/trigger for the usage-based selector.
+     */
     usage_btn: null, //by usage selector
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @property {?jQuery} usage_select - The usage-based record type selector element.
+     */
     usage_select: null, 
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @property {?Object} usage_select_options - Options for the usage-based selector.
+     */
     usage_select_options: null,
     
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @private
+     * @property {boolean} _waiting_server_response - Flag to indicate if waiting for a server response (e.g., for record counts).
+     */
     _waiting_server_response: false,
 
-    // the constructor
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @private
+     * @description Widget creation method. Initializes UI elements and event listeners.
+     */
     _create: function() {
         
         let that = this;
@@ -200,9 +269,12 @@ $.widget( "heurist.searchByEntity", {
 
     }, //end _create
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @private
+     * @description Refreshes the widget when it becomes visible, particularly for updating record counts if needed.
+     */
     refreshOnShow: function(){
         if( $Db.needUpdateRtyCount==0 ){
             $Db.needUpdateRtyCount = -1;
@@ -220,9 +292,15 @@ $.widget( "heurist.searchByEntity", {
         }
     },
 
-    //
-    // recreate list of buttons or recreate combined_select
-    //
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @private
+     * @description Redraws the favorite entity filter buttons or the combined select list.
+     *              It retrieves favorite entity IDs from user preferences or initializes a default set.
+     *              Updates the display with icons, names, and record counts.
+     * @param {boolean} [is_init=false] - If true, initializes `selected_rty_ids` from preferences or defaults.
+     */
     _redraw_buttons_by_entity: function(is_init){
 
         let needs_saving = false;
@@ -380,6 +458,15 @@ $.widget( "heurist.searchByEntity", {
 
     },
 
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @private
+     * @description Creates a grouped list of selected record type IDs.
+     * @returns {Array<Array<string|Array<string>>>} An array where each inner array contains a record type group ID
+     *                                                and an array of selected record type IDs belonging to that group.
+     *                                                Returns an empty array if no record types are selected.
+     */
     _createRectypeList: function(){
 
         if(window.hWin.HEURIST4.util.isempty(this.selected_rty_ids)){
@@ -413,13 +500,22 @@ $.widget( "heurist.searchByEntity", {
         return rtn;
     },
 
-    /* private function */
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @private
+     * @description Refreshes the widget. (Currently empty, logic might be in other refresh methods).
+     */
     _refresh: function(){
     },
 
-    //
-    // creates selectors usage_select or config_select
-    //
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @private
+     * @description Recreates the specified record type selector (either 'usage_select' or 'config_select').
+     * @param {Object} opts - Options for creating the selector, including `select_name`.
+     */
     _recreateSelectRectypeFilter: function(opts){
 
         let that = this;
@@ -449,12 +545,12 @@ $.widget( "heurist.searchByEntity", {
 
     },
 
-    //
-    // recreate rectype selectors and filter button set
-    // 1. searches counts by rectype
-    // 2. redraw buttons by entiry
-    // 3. recres selectors for config and "by usage"
-    //
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @description Recreates all record type selectors (usage and configuration) and the favorite entity buttons.
+     *              This is typically called when the database structure changes or when record counts need updating.
+     */
     recreateRectypeSelectors: function(){
 
         if(this._waiting_server_response || !$Db.rty()) return;
@@ -474,9 +570,14 @@ $.widget( "heurist.searchByEntity", {
 
     },
 
-    //
-    // opens selector on correct position
-    //
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @private
+     * @description Opens the specified record type selector dropdown and positions it correctly.
+     *              Handles locking the menu if a callback is provided.
+     * @param {Object} opts - Options for the selector to open, including `select_name` and `ancor` element.
+     */
     _openSelectRectypeFilter: function( opts ){
 
         let select_rectype = opts['select_name'];
@@ -522,9 +623,13 @@ $.widget( "heurist.searchByEntity", {
 
     },
 
-    //
-    // search from input - query is defined manually
-    //
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @private
+     * @description Executes a search for the given record type ID.
+     * @param {number|string} rty_ID - The record type ID to filter by.
+     */
     _doSearch: function(rty_ID){
 
         let request = {};
@@ -542,8 +647,12 @@ $.widget( "heurist.searchByEntity", {
         }
     }
 
-    // events bound via _on are removed automatically
-    // revert other modifications here
+    /**
+     * @memberof heurist.searchByEntity
+     * @instance
+     * @private
+     * @description Widget destruction method. Removes event listeners and generated UI elements.
+     */
     ,_destroy: function() {
 
         window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);

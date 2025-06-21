@@ -4402,8 +4402,10 @@ function bugreportUpdate($system, $recID){
     Title: $title<br>
     Bug description:<br>
     $desc<br><br>
-    When an issue is fixed and marked as DONE, the change will typically appear in the alpha version (/h6-alpha/, /h7-alpha/, ...) within a couple of days on HeuristRef.net<br>
-    and any server which has automated daily update of the alpha version, and a week or more on the Huma-Num server (due to new approval protocols from July 2025).
+    When an issue is fixed and marked as DONE, the change will typically appear in the alpha version <br>
+    (/h6-alpha/, /h7-alpha/, ...) within a couple of days on HeuristRef.net and any server which has <br>
+    automated daily update of the alpha version, and a week or more on the Huma-Num server <br>
+    (due to new approval protocols from July 2025).
     EMAIL;
 
     $to = [$reportersEmail];
