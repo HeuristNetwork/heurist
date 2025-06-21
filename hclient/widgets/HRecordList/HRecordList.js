@@ -572,7 +572,7 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
             // loads record to be rendered
             // this._loadRecordsDetails( rec_toload );
         }else{
-            
+            //show empty set message?            
         }
         this._renderPagination(true);
         

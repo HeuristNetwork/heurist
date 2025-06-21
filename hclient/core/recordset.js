@@ -1,30 +1,40 @@
 /**
-* Storage of records and its definitions (fields and structure)
-* 
-* requires temporalOBjectLibrary.js to validate and convert date for timeline
-* 
-* @see recordSearch in db_recsearch.php
-* @param initdata
-* @returns {Object}
-* @see editing_input.js
-* 
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file recordset.js
+ * @brief Defines the HRecordSet factory for managing collections of Heurist records.
+ * @fileOverview This file provides the HRecordSet factory function, which creates objects for storing
+ * and managing sets of Heurist records. An HRecordSet instance holds record data, field definitions,
+ * record type information, and structural metadata. It offers methods for accessing records and their
+ * fields, sorting, filtering (getSubSetByRequest), creating subsets, converting to GeoJSON, and
+ * managing relationships between records within the set. It's a fundamental component for handling
+ * data retrieved from server searches or other operations. It may require `temporalObjectLibrary.js`
+ * for date validation and timeline conversions.
+ * 
+ * @see db_recsearch.php recordSearch
+ * @see editing_input.js
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 4.0
+ */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-/* global parseWKT */
+/* global parseWKT */ 
 
+/**
+ * Factory function for creating HRecordSet objects.
+ * HRecordSet instances store and manage collections of records, including their data,
+ * field definitions, and structural metadata.
+ *
+ * @constructor HRecordSet
+ * @param {Object|Array} initdata - Initialization data for the recordset.
+ *        If an array, it's assumed to be a list of records.
+ *        If an object, it should conform to the expected server response structure for a search result,
+ *        containing properties like `entityName`, `count`, `offset`, `fields`, `records`, `order`, etc.
+ * @returns {Object} An HRecordSet instance with methods for accessing and manipulating the record collection.
+ */
 function HRecordSet(initdata) {
     const _className = "HRecordSet",
     _version   = "0.4";

@@ -36,7 +36,7 @@ Widget hierarchy:<br>
 | Nakala | Search Nakala's publicly available multi-media records | site: [nakala.fr](https://nakala.fr/) | Done |
 | Nakala Authors | Search the authority records from Nakala's database | site: [nakala.fr](https://nakala.fr/) | Done |
 | Opentheso | Query various servers that have a Opentheso service | sites: [pactols.frantiq.fr](https://pactols.frantiq.fr/index.xhtml) ; [opentheso.huma-num.fr](https://opentheso.huma-num.fr/index.xhtml) | Done |
-| Wikidata | Perform SPARQL requests on the Wikidata database | site: [wikidata.org](https://query.wikidata.org/) | In development |
+| Wikidata | Perform SPARQL requests on the Wikidata database | site: [wikidata.org](https://query.wikidata.org/) | Done |
 | Isadore | Request data from ISIDORE's database | site: [isidore.science](https://isidore.science/) |  |
 | MediHAL | Request data from MediHal's database | site: [hal.science](https://media.hal.science/) |  |
 
@@ -123,6 +123,6 @@ A list of the response status code can be found in the global JSON object window
 For displaying a list of selectable records, you can use Heurist's [Result List widget](../viewers/resultList.js).<br>
 However, this widget requires the incoming records to be setup as a [HRecordSet](../../core/recordset.js)<br><br>
 
-Updated: 04 April 2025
+Updated: 20 June 2025
 
 ---

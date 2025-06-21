@@ -1,25 +1,45 @@
 /**
-* Search header for SysWorkflowRules manager
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file        searchSysWorkflowRules.js
+ * @brief       Provides a search interface for System Workflow Rules.
+ * @fileOverview This widget handles the search functionality for System Workflow Rules, primarily allowing filtering by Record Type.
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\entity
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       4.0
+ */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
+
+/**
+ * @widget heurist.searchSysWorkflowRules
+ * @brief Search widget for System Workflow Rules.
+ * @extends $.heurist.searchEntity
+ * @description This widget provides a user interface for searching and managing System Workflow Rules.
+ *              The primary filter is by Record Type. It also provides controls for adding rules/stages
+ *              and editing the associated workflow vocabulary.
+ *
+ * @property {?number} rty_ID The Record Type ID to initially filter by or set programmatically.
+ *           This is primarily controlled via the `_setOption` method.
+ *
+ * @listens heurist.searchSysWorkflowRules#onadd - Fired when the "Add set of Rules" or "Add Stage" button is clicked.
+ * @listens heurist.searchSysWorkflowRules#onvocabedit - Fired when the "Edit Workflow Vocabulary" control is clicked.
+ * @listens heurist.searchSysWorkflowRules#onfilter - Inherited from `$.heurist.searchEntity`, triggered by `startSearch`.
+ */
 $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
 
-    //
+    /**
+     * @brief Initializes the controls for the System Workflow Rules search widget.
+     * @override
+     * @memberof heurist.searchSysWorkflowRules
+     * @description Sets up the title, "Add" button, "Edit Workflow Vocabulary" link,
+     *              and a Record Type selector. It also fetches all users if not already cached,
+     *              as this might be needed by the workflow management context.
+     *              Triggers an initial search.
+     */
     _initControls: function() {
         this._super();
         
@@ -81,9 +101,17 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
         }
     },  
     
-    //
-    // public methods
-    //
+    /**
+     * @brief Initiates a search for workflow rules based on the selected Record Type ID.
+     * @override
+     * @memberof heurist.searchSysWorkflowRules
+     * @description If a specific Record Type is selected, it constructs a request to filter
+     *              workflow rules by `swf_RecTypeID` and sorts them by `swf_Order`.
+     *              If no specific Record Type is selected (or 'any'), it attempts to default
+     *              to the first available Record Type with existing rules or the first in the list,
+     *              then calls `_setOption` to trigger a search for that Record Type.
+     *              Triggers an "onfilter" event with the request.
+     */
     startSearch: function(){
         
             let request = {};
@@ -110,16 +138,22 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
             
     },
     
-    //
-    //
-    //    
+    /**
+     * @brief Gets the currently selected Record Type ID from the dropdown.
+     * @memberof heurist.searchSysWorkflowRules
+     * @returns {?string} The selected Record Type ID as a string, or 'any', or null/undefined if nothing is selected.
+     */
     getSelectedRty: function(){
         return this.input_search_rectype.val();
     },
 
-    //
-    //
-    //    
+    /**
+     * @brief Sets the label of the "Add" button.
+     * @memberof heurist.searchSysWorkflowRules
+     * @param {boolean} is_empty True if there are no existing rules/stages for the current context,
+     *                           which sets the button label to "Add set of Rules".
+     *                           False otherwise, setting the label to "Add Stage".
+     */
     setButton: function(is_empty){
 
         if(is_empty){
@@ -130,9 +164,16 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
         
     },
 
-    //
-    //
-    //
+    /**
+     * @brief Sets an option for the widget.
+     * @override
+     * @memberof heurist.searchSysWorkflowRules
+     * @param {string} key The name of the option to set.
+     * @param {*} value The value to set for the option.
+     * @description Handles the 'rty_ID' option specifically by updating the
+     *              Record Type selector dropdown and then triggering `startSearch`.
+     *              Calls the parent widget's `_setOption` for other keys.
+     */
     _setOption: function( key, value ) {
         this._super( key, value );
         if(key == 'rty_ID'){
@@ -142,9 +183,13 @@ $.widget( "heurist.searchSysWorkflowRules", $.heurist.searchEntity, {
         }
     },
 
-    //
-    // Refresh list of rectypes with sys workflow setup
-    //
+    /**
+     * @brief Refreshes a displayed list of Record Type names that have workflow rules assigned.
+     * @memberof heurist.searchSysWorkflowRules
+     * @description Iterates through the cached System Workflow Rules (`$Db.swf()`) and compiles
+     *              a unique list of Record Type names associated with these rules.
+     *              Updates the text of an element with ID `existing_swr` to display these names.
+     */
     refreshRectypeList: function(){
 
         // List rectypes that have swf assigned

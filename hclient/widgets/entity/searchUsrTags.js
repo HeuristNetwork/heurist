@@ -1,25 +1,45 @@
 /**
-* Search header for DefTerms manager
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file        searchUsrTags.js
+ * @brief       Provides a search interface for User Tags.
+ * @fileOverview This widget handles the search functionality for User Tags, allowing filtering by tag text and providing sorting options. It also includes a group filter that primarily affects UI display rather than the search query itself.
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\entity
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       4.0
+ */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
+
+/**
+ * @widget heurist.searchUsrTags
+ * @brief Search widget for User Tags.
+ * @extends $.heurist.searchEntity
+ * @description This widget provides a user interface for searching user tags.
+ *              It allows users to search by tag text and apply various sorting criteria.
+ *              A user group filter is available, which triggers an "ongroupfilter" event
+ *              for the parent manager to handle UI changes (e.g., accordion display) rather than
+ *              directly filtering the tag search query itself.
+ *
+ * @listens heurist.searchUsrTags#ongroupfilter - Fired when the user group filter selection changes.
+ *          Event data: `{string}` The selected group ID ('any', or a specific user group ID).
+ * @listens heurist.searchUsrTags#onfilter - Inherited from `$.heurist.searchEntity`, triggered by `startSearch`.
+ */
 $.widget( "heurist.searchUsrTags", $.heurist.searchEntity, {
 
-    //
+    /**
+     * @brief Initializes the controls for the user tags search widget.
+     * @override
+     * @memberof heurist.searchUsrTags
+     * @description Sets up the user group selection dropdown (`input_search_group`),
+     *              radio buttons for sorting (by name, popularity, recent),
+     *              and the main search input field. Helper text visibility is adjusted
+     *              based on `options.select_mode`. Triggers an initial search or loads
+     *              all data if `options.use_cache` is true.
+     */
     _initControls: function() {
         this._super();
         
@@ -56,9 +76,17 @@ $.widget( "heurist.searchUsrTags", $.heurist.searchEntity, {
         }
     },  
     
-    //
-    // public methods
-    //
+    /**
+     * @brief Initiates a search for user tags.
+     * @override
+     * @memberof heurist.searchUsrTags
+     * @description Constructs a search request based on the tag text from `input_search`
+     *              and the selected sort order (popularity, recent, or name).
+     *              Note: The user group filter (`input_search_group`) does not directly add
+     *              a condition to this search request; it triggers an "ongroupfilter" event instead.
+     *              Triggers an "onfilter" event with the request, typically for client-side
+     *              filtering as this widget often operates with `use_cache: true`.
+     */
     startSearch: function(){
         
             let request = {}

@@ -128,6 +128,8 @@ $.widget( "heurist.editTranslations", {
         this._container = $('<div class="ent_content_full" style="top:0;padding:10px"></div>')
                     .appendTo( $('<div class="ent_wrapper">').appendTo(this.element) );
 
+        let that = this;
+
         if(this.options.is_dialog){
             
             let $dlg;

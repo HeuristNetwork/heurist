@@ -8,7 +8,7 @@
 * @version     7.0
 */
 
-/* global HCmsConfig */
+/* global HCmsConfig, HCmsEditor */
 
 class HCmsConfigGroup extends HCmsConfig {
    

@@ -1,92 +1,53 @@
-/** 
-*  Wizard to define new faceted search
-*    1. Options
-*    2. [removed]
-*    3. Select fields for facets (recTitle, numeric, date, terms, pointers, relationships)
-*    4. Define ranges for date and numeric fields
-*    5. Preview
-*    6. Save into database
+/**
+* @file search_faceted_wiz.js
+* @brief Wizard for defining and configuring faceted search interfaces.
+* @fileOverview This file implements a jQuery UI widget that provides a step-by-step wizard for users
+* to create and configure faceted search interfaces. The wizard guides users through
+* selecting record types, choosing fields for facets, defining ranges for numeric/date
+* fields, previewing the search interface, and saving the configuration.
+* It supports various options for customizing the faceted search behavior and appearance.
+*
+* The wizard involves several steps:
+*    1. Options: General settings for the faceted search.
+*    2. Select fields for facets: Choose fields (e.g., record title, numeric, date, terms, pointers, relationships) to be used as facets.
+*    3. Define ranges: Specify ranges for date and numeric fields.
+*    4. Preview: View a live preview of the configured faceted search.
+*    5. Save: Store the configuration into the database.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\search
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 /* global translationFromUI, translationToUI */
-
-/* Explanation of faceted search - @todo OUTDATED - NEED TO REWRITE
-
-There are two types of queries: 1) to search facet values 2) to search results
-
-Examples
-1) No levels:
-
-search results: t:10 f:1:"XXX" - search persons by name
-facet search:   f:1  where t:10 + other current queries
-
-2) One level:
-
-search results: t:10 linked_to:5-61 [t:5 f:1:"XXX"] - search persons where multimedia name is XXX
-facet search:   f:1  where t:5 linkedfrom:10-61 [other current queries(parent query)]
-
-3) Two levels
-
-search results: t:10 linked_to:5-61 [t:5 linked_to:4-15 [t:4 f:1:"XXX"]] - search persons where multimedia has copyright of organization with name is XXX
-facet search:   f:1 where t:4 linkedfrom:5-15 [t:5 linkedfrom:10-61 [other current queries for person]]   - find organization who is copyright of multimedia that belong to person
-
-
-Thus, our definition has the followig structure
-rectype - main record type to search
-domain
-facets:[ [
-code:  10:61:5:15:4:1  to easy init and edit    rt:ft:rt:ft:rt:ft  if link is unconstrained it will be empty  61::15
-title: "Author Name < Multimedia"
-id:  1  - field type id
-type:  "freetext"  - field type
-levels: [t:4 linkedfrom:5-15, t:5 linkedfrom:10-61]   (the last query in this array is ommitted - it will be current query)
-
-search - main query to search results
-[linked_to:5-61, t:5 linked_to:4-15, t:4 f:1]    (the last query in the top most parent )
-
-currentvalue:
-history:  - to keep facet values (to avoid redundat search)
-
-],
-the simple (no level) facet
-[
-code: 10:1
-title: "Family Name"
-type:  "freetext"
-id: 1
-levels: []
-search: [t:10 f:1]
-]
-
-]
-
-NOTE - to make search fo facet value faster we may try to omit current search in query and search for entire database
-
-*/
                      
-/*
-step1 - selection of rectype, sup filter, rules
-step2 - select fields in treeview
-step3 - define label, help prompt and filter type (by first letter, by full name, directly) + preview
-*/
+/**
+ * @widget heurist.search_faceted_wiz
+ * @description A wizard for defining and configuring faceted search interfaces.
+ * This widget provides a step-by-step process to select record types, fields for facets,
+ * define ranges, preview, and save faceted search configurations.
+ * It is instantiated primarily through the global {@link showSearchFacetedWizard} function.
+ */
 $.widget( "heurist.search_faceted_wiz", {
 
-    // default options
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @property {Object} options - Default options for the widget.
+     * @property {boolean} [options.is_h6style=false] - Whether to apply H6 styling.
+     * @property {?number} options.svsID - ID of the saved search if editing an existing one.
+     * @property {?string} options.domain - The domain for the search (e.g., 'bookmark', 'all', or a user group ID).
+     * @property {boolean} [options.is_modal=true] - Whether the wizard dialog should be modal.
+     * @property {?function} options.menu_locked - Callback function related to menu locking.
+     * @property {Object} options.params - Parameters for the faceted search configuration.
+     * @property {number} [options.params.viewport=5] - Default viewport limit for facet lists.
+     * @property {?function} options.onsave - Callback function executed after saving the search configuration.
+     */
     options: {
         is_h6style: false,
         svsID: null,
@@ -98,9 +59,33 @@ $.widget( "heurist.search_faceted_wiz", {
         },
         onsave: null
     },
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @property {number} isversion - Internal versioning for the parameters structure.
+     */
     isversion:2,
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @property {boolean} is_edit_continuing - Flag to indicate if editing is being continued (non-modal context).
+     */
     is_edit_continuing: false,
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @property {boolean} _lock_mouseleave - Internal flag for managing mouse leave locking behavior.
+     */
     _lock_mouseleave: false,
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @property {boolean} _save_in_porgress - Flag to prevent concurrent save operations.
+     */
     _save_in_porgress: false,
     //params:
     // domain
@@ -126,20 +111,74 @@ $.widget( "heurist.search_faceted_wiz", {
 
     */
 
-
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @property {?Object} select_main_rectype - jQuery hSelect object for the main record type selector.
+     */
     select_main_rectype: null,
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @property {?Object} select_additional_rectypes - jQuery editing_input object for additional record types.
+     */
     select_additional_rectypes: null,
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @property {?jQuery} svs_MultiRtSearch - jQuery object for the multi-record type search checkbox.
+     */
     svs_MultiRtSearch: null,
 
-    step: 0, //current step
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @property {number} step - Current step in the wizard.
+     */
+    step: 0,
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @property {Array<jQuery>} step_panels - Array of jQuery objects representing the panels for each wizard step.
+     */
     step_panels:[],
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @property {?string} current_tree_rectype_ids - Comma-separated string of current record type IDs used in the field tree.
+     */
     current_tree_rectype_ids:null,
-    current_tree_mode: 0, // how the tree is displayed; 0 => Normal (each record type is separate, with all fields), 1 => Show all field that appear in each record type
-    originalRectypeID:null, //flag that allows to save on first page for edit mode
-    
-    facetPreview_reccount:0, 
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @property {number} current_tree_mode - Mode for displaying the field tree (0: Normal, 1: Shared fields only).
+     */
+    current_tree_mode: 0,
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @property {?number} originalRectypeID - Stores the original record type ID when editing, to check for changes.
+     */
+    originalRectypeID:null,
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @property {number} facetPreview_reccount - Count of records for the facet preview, used to optimize preview updates.
+     */
+    facetPreview_reccount:0,
 
-    // the widget's constructor
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description The widget's constructor. Initializes the dialog and step panels.
+     */
     _create: function() {
 
         let that = this;
@@ -156,7 +195,12 @@ $.widget( "heurist.search_faceted_wiz", {
         if(ht>700) ht = 700;
 
        
-
+        /**
+         * @memberof heurist.search_faceted_wiz
+         * @instance
+         * @private
+         * @property {jQuery} _dialog - The jQuery UI dialog instance for the wizard.
+         */
         this._dialog = this.element.dialog({
             autoOpen: false,
             height: 400,
@@ -339,16 +383,15 @@ $.widget( "heurist.search_faceted_wiz", {
 
     }, //end _create
 
-    // Any time the widget is called with no arguments or with only an option hash,
-    // the widget is initialized; this includes when the widget is created.
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Widget initialization. Called after _create().
+     * Currently, this method does not perform additional initializations beyond the base widget.
+     */
     _init: function() {
     },
-
-    //Called whenever the option() method is called
-    //Overriding this is useful if you can defer processor-intensive changes for multiple option change
-    /*
-    _setOptions: function( options ) {
-    },*/
 
     /*
     * private function
@@ -357,18 +400,28 @@ $.widget( "heurist.search_faceted_wiz", {
     _refresh: function(){
 
     },
-    //
-    // custom, widget-specific, cleanup.
+
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Custom widget-specific cleanup. Removes generated elements and destroys associated widgets.
+     */
     _destroy: function() {
         
         if(this.select_main_rectype){
             if(this.select_main_rectype.hSelect("instance")!=undefined){
-               this.select_main_rectype.hSelect("destroy"); 
+               this.select_main_rectype.hSelect("destroy");
             }
-            this.select_main_rectype.remove();   
+            this.select_main_rectype.remove();
             this.select_main_rectype = null;
             
-            this.select_additional_rectypes.remove();   
+            if (this.select_additional_rectypes && this.select_additional_rectypes.editing_input("instance") !=undefined) {
+                this.select_additional_rectypes.editing_input("destroy");
+            }
+            if (this.select_additional_rectypes) {
+                this.select_additional_rectypes.remove();
+            }
             this.select_additional_rectypes = null;
         }
         
@@ -380,12 +433,14 @@ $.widget( "heurist.search_faceted_wiz", {
         this.step3.remove();
     }
     
-    //
-    //
-    //
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @description Adjusts the dimensions of the wizard dialog based on the current step and content.
+     */
     , adjustDimension: function(){
 
-        let ch =   this._dialog[0].scrollHeight+100; 
+        let ch =   this._dialog[0].scrollHeight+100;
         let width = this._dialog.dialog( 'option', 'width');
         let minw = 650;
         if(this.step==3){
@@ -411,10 +466,14 @@ $.widget( "heurist.search_faceted_wiz", {
         let dh =  this._dialog.dialog('option', 'height');
 
         let ht = Math.min(ch, window.innerHeight-topPos);
-        this._dialog.dialog('option', 'height', ht);    
-        
+        this._dialog.dialog('option', 'height', ht);
     }
 
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @description Shows the wizard dialog. Initializes or resets state based on options.
+     */
     ,show: function( ){
         this.current_tree_rectype_ids = null;
         
@@ -458,8 +517,14 @@ $.widget( "heurist.search_faceted_wiz", {
         }
     }
 
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @description Navigates between wizard steps, handling validation and initialization for each step.
+     * @param {number|NaN} nav - Number of steps to move (e.g., 1 for next, -1 for back). NaN initializes the first step.
+     */
     , navigateWizard: function(nav){
-        //@todo - validate
+        // @todo - validate current step before proceeding
 
         let newstep = 0;
         if(isNaN(nav)){
@@ -657,8 +722,15 @@ $.widget( "heurist.search_faceted_wiz", {
     }
 
     //
-    // record type selector (@todo move to utils_ui ???)
-    //
+    // record type selector
+    // @todo Consider moving to a shared UI utility if used elsewhere.
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Creates the input element for selecting additional record types using the `editing_input` widget.
+     * @returns {jQuery} The jQuery object for the created editing_input element.
+     */
     ,_createInputElement_RecordTypeSelector: function(){
         
         let that = this;
@@ -687,12 +759,18 @@ $.widget( "heurist.search_faceted_wiz", {
                         svs_name.trigger('focus');
                     }
                     that._resetFacets();
-            }    
+            }
         };
 
         return $("<div>").editing_input(ed_options).insertAfter( this.step0.find('.main-rectype') );
     }
     
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Creates or updates the sort order select dropdown based on the currently selected main record type.
+     */
     ,_createOrderSelect: function(){
         
             let topOptions2 = [
@@ -722,12 +800,18 @@ $.widget( "heurist.search_faceted_wiz", {
             }else{
                 let selObj = $dlg.find('.sa_sortby').get(0);
                 window.hWin.HEURIST4.ui.createSelector(selObj, topOptions2); 
-                window.hWin.HEURIST4.ui.initHSelect(selObj, false); 
+                window.hWin.HEURIST4.ui.initHSelect(selObj, false);
             }
         
     }
     
-    
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Shows the specified wizard step and hides the others. Updates button states.
+     * @param {number} newstep - The index of the step to show.
+     */
     , _showStep :function(newstep){
 
         if(this.step>=0) this.step_panels[this.step].css({'display':'none'});
@@ -772,7 +856,8 @@ $.widget( "heurist.search_faceted_wiz", {
 
 
     /**
-    * Assign values to UI input controls
+    * Assign values to UI input controls for Step 0 (Options).
+    * Initializes selectors, input fields, and event handlers for the options panel.
     */
     , _initStep0_options: function( ){
 
@@ -1112,17 +1197,27 @@ $.widget( "heurist.search_faceted_wiz", {
     }
     
     //
-    // reset flag - facet was changed - need to proceed all steps of wizard
-    //
+    // reset flag - facet was changed - need to proceed all steps of wizard.
+    // This typically means facets need to be reselected or reconfigured.
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Resets facet-related parameters and UI state when significant changes occur (e.g., main record type change).
+     */
     , _resetFacets: function(){
         this.options.params.facets = [];
-        this.originalRectypeID = null; //
+        this.originalRectypeID = null;
         $("#btnSave").css('visibility','hidden');
     }
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Opens the rule builder dialog to edit rules associated with the faceted search.
+     * @param {jQuery} ele_rules - The jQuery input element containing the current rules JSON string.
+     */
     , _editRules: function(ele_rules) {
 
         let that = this;
@@ -1158,7 +1253,16 @@ $.widget( "heurist.search_faceted_wiz", {
     }
 
 
-    // 2d step - init fieldtreeview
+    // 2nd step - init field tree view
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Initializes the Fancytree for field selection in Step 2.
+     * Loads record type structure and populates the tree, handling different tree modes (normal vs. shared fields).
+     * @param {Array<string|number>} rectypeIds - Array of record type IDs for which to display fields.
+     * @param {number} tree_mode - The mode for displaying the tree (0: Normal, 1: Shared fields only).
+     */
     , _initStep2_FieldTreeView: function(rectypeIds, tree_mode){
 
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeIds) && (this.current_tree_rectype_ids != rectypeIds.join(',') || this.current_tree_mode != tree_mode)){
@@ -1437,6 +1541,12 @@ $.widget( "heurist.search_faceted_wiz", {
         }
     }
     
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Shows or hides reverse-linked fields in the Fancytree based on the 'fsw_showreverse' checkbox.
+     */
     , showHideReverse: function(){
         
         let treediv = this.element.find('#field_treeview');
@@ -1462,6 +1572,14 @@ $.widget( "heurist.search_faceted_wiz", {
         }
     }
 
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Determines if the "shared field mode" should be enabled and active based on selected record types and existing facets.
+     * @param {Array<string|number>} rectypeIds - Array of currently selected record type IDs.
+     * @returns {number} 1 if shared field mode is active, 0 otherwise.
+     */
     , _isSharedFieldMode: function(rectypeIds){
 
         let that = this;
@@ -1526,7 +1644,12 @@ $.widget( "heurist.search_faceted_wiz", {
         return 1;
     }
     
-    //restore selection in treeview
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Assigns/restores the selected state of nodes in the Fancytree based on existing facet configurations.
+     */
     , _assignSelectedFacets: function(){
 
         let treediv = $(this.step2).find('#field_treeview');
@@ -1549,6 +1672,14 @@ $.widget( "heurist.search_faceted_wiz", {
         }
     }
 
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Finds a facet configuration object within `this.options.params.facets` by its code.
+     * @param {string} code - The facet code to search for.
+     * @returns {?Object} The facet object if found, otherwise null.
+     */
     , _findFacetByCode: function(code){
         if( window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.params.facets)){
 
@@ -1564,8 +1695,15 @@ $.widget( "heurist.search_faceted_wiz", {
     }
 
     //
-    // 3d step  - define individual setting for facets and preview
-    //
+    // 3rd step - define individual settings for facets and preview
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Initializes Step 3, where users configure individual facet settings (title, help, display type, grouping).
+     * Generates UI elements for each selected facet and populates them with existing or default values.
+     * @returns {boolean} True if initialization is successful, false if no facets are selected or an error occurs.
+     */
     , _initStep3_FacetsSettings: function() {
 
         let facets = [];
@@ -1591,8 +1729,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
             let allRectypesIds = rectypes.join(',');
 
-            for(let i = 1; i < rectypes.length; i++){
-            }
+            //for(let i = 1; i < rectypes.length; i++){ }
             
                 for(let j = 0; j < fieldIds.length; j++){
 
@@ -2093,7 +2230,14 @@ $.widget( "heurist.search_faceted_wiz", {
     
     //
     // from UI to options.params
-    //
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Assigns facet parameters from the UI controls in Step 3 back to `this.options.params.facets`.
+     * This is done before refreshing the preview or saving.
+     * @returns {null} Always returns null.
+     */
     , _assignFacetParams: function(){
         if( window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.params.facets)){
 
@@ -2174,9 +2318,13 @@ $.widget( "heurist.search_faceted_wiz", {
         return null;
     }
     
-    //
-    // old version it updates parms only (from UI to options.params)
-    //
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Refreshes the facet preview. If the record count is high, it might defer to a manual update.
+     * This is old version. It updates params only (from UI to options.params)
+     */
     ,_refresh_FacetsPreview: function(){
 
         if( this.facetPreview_reccount < 10000 ){
@@ -2187,9 +2335,12 @@ $.widget( "heurist.search_faceted_wiz", {
         }
     }
     
-    //
-    // update preview
-    //
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Actually updates the facet preview by re-initializing or updating the `search_faceted` widget in the preview area.
+     */
     ,_refresh_FacetsPreviewReal: function(){
 
         this._assignFacetParams();
@@ -2201,7 +2352,7 @@ $.widget( "heurist.search_faceted_wiz", {
         
         //force search for entire recordset to get total count of records
         if( this.facetPreview_reccount == 0 ){
-            noptions.params.search_on_reset = true; 
+            noptions.params.search_on_reset = true;
             let that = this;
             noptions.params.callback_on_search_finish = function(total_count){
 
@@ -2222,9 +2373,12 @@ $.widget( "heurist.search_faceted_wiz", {
         $(this.step3).find('#btnUpdatePreview').css('opacity',0.5);
     }
 
-    //
-    //
-    //
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Defines the search domain based on the user group selection in Step 0.
+     */
     ,_defineDomain: function(){
 
         let svs_ugrid = this.step0.find('#svs_UGrpID');
@@ -2236,10 +2390,15 @@ $.widget( "heurist.search_faceted_wiz", {
         }
     }
 
-    //
-    // save into database
-    //  prevent_real_save - if true just fill this.options.params
-    //
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Saves the configured faceted search to the database.
+     * Collects all parameters from the UI, validates them, and sends a request to the server.
+     * @param {boolean} [prevent_real_save=false] - If true, only fills `this.options.params` without actually saving to the server.
+     * @returns {boolean|undefined} False if validation fails, otherwise undefined.
+     */
     ,_doSaveSearch:function(prevent_real_save){
 
         let $dlg = this.step0;
@@ -2373,7 +2532,13 @@ $.widget( "heurist.search_faceted_wiz", {
 
     //
     // Remove facet from list and uncheck within fancytree
-    //
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Removes a facet from the configuration list (UI and internal params) and unchecks it in the Fancytree.
+     * @param {string} facetID - The unique variable/ID of the facet to remove.
+     */
     , _remove_facet: function(facetID){
 
         let that = this;
@@ -2401,7 +2566,13 @@ $.widget( "heurist.search_faceted_wiz", {
 
     //
     // Retrieve and display field usages
-    //
+    /**
+     * @memberof heurist.search_faceted_wiz
+     * @instance
+     * @private
+     * @description Calculates and displays the usage count for fields of the current (single) record type.
+     * Fetches data from the server and updates the UI in the field selection tree.
+     */
     , calculateFieldUsage: function(){
 
         if(this.current_tree_rectype_ids.includes(',')!==false){ // single record type only
@@ -2441,6 +2612,16 @@ $.widget( "heurist.search_faceted_wiz", {
     }
 });
 
+/**
+ * Global function to show the faceted search wizard.
+ * Ensures a single instance of the wizard dialog is created and reused.
+ *
+ * @global
+ * @function showSearchFacetedWizard
+ * @param {Object} params - Options to initialize or update the `search_faceted_wiz` widget.
+ *                         See {@link heurist.search_faceted_wiz#options} for details.
+ * @returns {jQuery} The jQuery object for the wizard dialog element.
+ */
 function showSearchFacetedWizard( params ){
 
         let manage_dlg = $('#heurist-search-faceted-dialog');

@@ -1,26 +1,85 @@
 /**
-* Integration with DataTable widget
-* 
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file resultListDataTable.js
+ * @brief Displays Heurist search results in a table powered by the DataTables.net jQuery plugin.
+ * @fileOverview
+ * This file defines the `heurist.resultListDataTable` jQuery UI widget. It is designed to integrate
+ * Heurist record sets with the powerful DataTables.net library, providing an interactive and feature-rich
+ * tabular display for search results. Key functionalities include server-side processing for large datasets,
+ * client-side display for smaller sets, customizable column visibility and ordering (potentially through
+ * configuration widgets), record type filtering, and visual highlighting of selected records.
+ * The widget listens to global Heurist events for search completion and record selection to update
+ * its display accordingly. It also manages DataTables initialization, refresh, and destruction.
+ *
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\widgets\viewers
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 6.0
+ */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-
+/**
+ * @widget heurist.resultListDataTable
+ * @description A widget that renders a {@link heurist.HRecordSet} or search results into an interactive
+ * HTML table using the DataTables.net jQuery plugin. It supports features like pagination, searching,
+ * column configuration, record type filtering, and server-side processing for large datasets.
+ *
+ * @example
+ * $('#myDataTableContainer').resultListDataTable({
+ *     recordset: myHeuristRecordSet,
+ *     show_rt_filter: true,
+ *     show_export_buttons: true,
+ *     dataTableParams: {
+ *         pageLength: 25
+ *     }
+ * });
+ */
 $.widget( "heurist.resultListDataTable", {
 
-    // default options
+    /**
+     * @typedef {object} heurist.resultListDataTable.options
+     * @description Options for configuring the resultListDataTable widget.
+     * @property {heurist.HRecordSet|null} [recordset=null]
+     *  The Heurist recordset to display. If `eventbased` is true, this can be updated
+     *  via the `ON_REC_SEARCH_FINISH` event.
+     * @property {Array<number>|null} [selection=null]
+     *  An array of selected record IDs. This is used to highlight rows in the table.
+     *  Can be updated via the `ON_REC_SELECT` event if `eventbased` is true.
+     * @property {boolean} [eventbased=true]
+     *  If true, the widget listens to global Heurist events (e.g., for search results,
+     *  selection changes) to update its state. If false, it operates only on the initially
+     *  provided `recordset` and `selection`.
+     * @property {string|null} [search_realm=null]
+     *  The search realm this widget belongs to. Used to filter global events if `eventbased` is true.
+     * @property {boolean} [serverSide=false]
+     *  This option is dynamically managed by the widget based on record count.
+     *  If true, DataTables will use server-side processing for pagination, searching, etc.
+     *  This is typically enabled for large recordsets.
+     * @property {boolean} [show_rt_filter=false]
+     *  If true, displays a dropdown filter for record types above the table.
+     * @property {boolean} [show_column_config=true]
+     *  If true, displays controls for configuring table columns (e.g., selecting fields, visibility).
+     *  This often integrates with another widget like `configEntity`.
+     * @property {boolean} [show_search=false]
+     *  If true, displays the DataTables native search/filter input box.
+     * @property {boolean} [show_counter=true]
+     *  If true, displays the DataTables information label (e.g., "Showing 1 to 10 of 57 entries").
+     * @property {boolean} [show_export_buttons=false]
+     *  If true, displays DataTables export buttons (e.g., Copy, Excel, PDF).
+     * @property {string|null} [emptyTableMsg=null]
+     *  Custom message to display when the table is empty. If null, DataTables default is used.
+     *  This message is also shown separately if the recordset is empty before DataTables initialization.
+     * @property {string|null} [placeholder_text=null]
+     *  Text or HTML to display as a placeholder before the initial data load or when the recordset is null.
+     * @property {string|null} [search_initial=null]
+     *  An initial search query string to execute when the widget is created.
+     * @property {object|null} [dataTableParams=null]
+     *  Additional parameters to pass directly to the DataTables.net constructor.
+     *  This can include options for styling, features, internationalization, etc.
+     *  See <a href="https://datatables.net/reference/option/">DataTables options</a>.
+     */
     options: {
         recordset: null,
         selection: null,  //list of selected record ids
@@ -44,20 +103,76 @@ $.widget( "heurist.resultListDataTable", {
         dataTableParams: null
     },
 
+    /**
+     * @property {string|null} _current_query
+     * @private
+     * @description Stores the current query string that resulted in the displayed `recordset`.
+     * Used to determine if a full table rebuild is needed.
+     */
     _current_query: null,
-    _current_url: null,
+    /**
+     * @property {string|null} _current_url
+     * @private
+     * @description Stores the query string associated with the currently initialized DataTable.
+     * This is compared against `_current_query` to decide if the DataTable needs to be destroyed and recreated.
+     */
+    _current_url: null, // Effectively the query for the current DataTable instance
+    /**
+     * @property {string|null} _events
+     * @private
+     * @description A string containing the names of global Heurist events that this widget listens to,
+     * such as `ON_CREDENTIALS`, `ON_REC_SEARCH_FINISH`, etc. Only used if `options.eventbased` is true.
+     */
     _events: null,
+    /**
+     * @property {object|null} _dataTable
+     * @private
+     * @description Holds the DataTables.net API instance after initialization.
+     * Null if DataTable has not been initialized or has been destroyed.
+     */
     _dataTable: null,    
     
+    /**
+     * @property {jQuery|null} selConfigs
+     * @private
+     * @description jQuery object referencing the column configuration UI element, typically
+     * an instance of another widget like `configEntity`. Used to manage column display settings.
+     */
     selConfigs: null,
 
+    /**
+     * @property {Array<number>|null} hidden_cols
+     * @private
+     * @description An array of column indices that are currently set to be hidden in the DataTable.
+     */
     hidden_cols: null, // datatable columns ids that are set to hidden
 
+    /**
+     * @property {jQuery|null} no_records_message
+     * @private
+     * @description jQuery object for the DOM element that displays the `emptyTableMsg`
+     * when no records are available and DataTables itself is not yet initialized or is empty.
+     */
     no_records_message: null, // element containing the 'no records' message
 
+    /**
+     * @property {jQuery|null} placeholder_ele
+     * @private
+     * @description jQuery object for the DOM element that displays the `placeholder_text`
+     * before any data is loaded or when the widget is in an initial empty state.
+     */
     placeholder_ele: null, 
 
-    // the constructor
+    /**
+     * @function _create
+     * @memberof heurist.resultListDataTable
+     * @instance
+     * @private
+     * @description Initializes the widget. Creates the main content div and the table element.
+     * Parses `options.dataTableParams`. Sets up global event listeners if `options.eventbased` is true.
+     * Initializes placeholder and empty message elements if corresponding options are provided.
+     * Triggers an initial search if `options.search_initial` is set.
+     */
     _create: function() {
 
         let that = this;
@@ -155,7 +270,7 @@ $.widget( "heurist.resultListDataTable", {
                 .html(this.options.placeholder_text);
         }
 
-        this.element.on("myOnShowEvent", function(event){
+        this.element.on("myOnShowEvent", function(event){ // Custom event, likely for visibility changes in complex layouts
             if( event.target.id == that.element.attr('id')){
 that._dout('myOnShowEvent');                
                 that._refresh();
@@ -171,21 +286,46 @@ that._dout('myOnShowEvent');
         }
     }, //end _create
 
-    //
-    //
-    //
+    /**
+     * @function _isSameRealm
+     * @memberof heurist.resultListDataTable
+     * @instance
+     * @private
+     * @description Checks if the widget's current search realm matches the realm from incoming event data.
+     * This is used to ensure the widget only responds to events relevant to its configured context.
+     * An empty or null realm on either side is considered a match for broader compatibility.
+     * @param {object} data Event data, expected to have a `search_realm` property.
+     * @returns {boolean} True if the realms are considered the same, false otherwise.
+     */
     _isSameRealm: function(data){
         return (!this.options.search_realm && (!data || window.hWin.HEURIST4.util.isempty(data.search_realm)))
         ||
         (this.options.search_realm && (data && this.options.search_realm==data.search_realm));
     },
 
-
+    /**
+     * @function _setOptions
+     * @memberof heurist.resultListDataTable
+     * @instance
+     * @private
+     * @description Called when options are set on the widget. Uses `_superApply` to call the base
+     * widget's method, ensuring proper option handling.
+     * @param {object} options An object containing option key-value pairs to set.
+     */
     _setOptions: function() {
         // _super and _superApply handle keeping the right this-context
         this._superApply( arguments );
     },
     
+    /**
+     * @function _dout
+     * @memberof heurist.resultListDataTable
+     * @instance
+     * @private
+     * @description Debugging output helper. Currently does nothing.
+     * Could be used for conditional console logging based on a debug flag.
+     * @param {string} msg The message to log.
+     */
     _dout: function(msg){
         //if(this.options.url  && this.options.url.indexOf('renderRecordData')>0){
        
@@ -193,7 +333,22 @@ that._dout('myOnShowEvent');
     },
     
 
-    /* private function */
+    /**
+     * @function _refresh
+     * @memberof heurist.resultListDataTable
+     * @instance
+     * @private
+     * @description Refreshes the DataTable. If the widget is visible and a recordset is available:
+     * - Hides any placeholder text.
+     * - Stops loading animation.
+     * - If the underlying query (`_current_query`) has changed since the last DataTable initialization (`_current_url`),
+     *   it destroys the existing DataTable (if any), then re-initializes it.
+     * - DataTable initialization involves setting up parameters (server-side vs client-side processing,
+     *   AJAX source, column definitions, DOM layout, page length, etc.).
+     * - For server-side processing, it first makes a request to register the query and get a datatable_id.
+     * - If no records are available, it shows the `no_records_message`.
+     * - If the query hasn't changed, it only calls `_highlightSelected` to update row selections.
+     */
     _refresh: function(){
 
         this._dout('refresh vis='+this.element.is(':visible'));            
@@ -400,9 +555,19 @@ this._dout('reload datatable '+this.options.serverSide);
 
     },
     
-    //
-    //
-    //
+    /**
+     * @function _onDataTableInitComplete
+     * @memberof heurist.resultListDataTable
+     * @instance
+     * @private
+     * @description Callback function executed when DataTables has finished its initialization.
+     * Adjusts the CSS of various DataTables elements (length selector, filter input, info display,
+     * pagination, buttons) for better integration with the Heurist UI.
+     * Initializes column visibility based on `this.hidden_cols`.
+     * Adds tooltips to truncated cells.
+     * If `options.show_rt_filter` or `options.show_column_config` is true, it sets up the
+     * record type filter dropdown and/or the column configuration widget (`configEntity`).
+     */
     _onDataTableInitComplete:function(){
         
         //adjust position for datatable controls    
@@ -520,9 +685,16 @@ this._dout('reload datatable '+this.options.serverSide);
         this._highlightSelected();
     },
     
-    //
-    // Set filter for recType_ID column
-    //
+    /**
+     * @function _onRecordTypeFilter
+     * @memberof heurist.resultListDataTable
+     * @instance
+     * @private
+     * @description Event handler for when the record type filter dropdown changes.
+     * It filters the DataTable by the `rec_RecTypeID` column based on the selected value.
+     * Also updates the column configuration list (`selConfigs`) if available.
+     * @param {jQuery.Event} e The change event object from the select element.
+     */
     _onRecordTypeFilter: function(e){
         
         let rty_ID = $(e.target).val();
@@ -540,20 +712,37 @@ this._dout('reload datatable '+this.options.serverSide);
         
     },
     
-    // events bound via _on are removed automatically
-    // revert other modifications here
+    /**
+     * @function _destroy
+     * @memberof heurist.resultListDataTable
+     * @instance
+     * @private
+     * @description Cleans up the widget when it is destroyed. Unbinds global and custom event listeners.
+     * Removes DOM elements created by the widget, including the DataTable.
+     */
     _destroy: function() {
 
         this.element.off("myOnShowEvent");
-        $(this.document).off(this._events);
+        $(this.document).off(this._events); // Assumes this._events is properly namespaced or managed
 
-        let that = this;
+        let that = this; // 'that' is not used here.
 
         // remove generated elements
-        this.div_datatable.remove();
-        this.div_content.remove();
+        if (this._dataTable) { // Destroy DataTable instance
+            this._dataTable.destroy();
+            this._dataTable = null;
+        }
+        this.div_datatable.remove(); // Remove table element
+        this.div_content.remove(); // Remove main content div
     },
 
+    /**
+     * @function loadanimation
+     * @memberof heurist.resultListDataTable
+     * @instance
+     * @description Shows or hides a loading animation on the widget's content area.
+     * @param {boolean} show If true, displays the loading animation. If false, removes it.
+     */
     loadanimation: function(show){
 
         if(show){
@@ -563,9 +752,18 @@ this._dout('reload datatable '+this.options.serverSide);
         }
     },
     
-    //
-    // Assign column definitions for datatable
-    //
+    /**
+     * @function _onApplyColumnDefinition
+     * @memberof heurist.resultListDataTable
+     * @instance
+     * @private
+     * @description Callback function executed when new column definitions are applied,
+     * typically from a column configuration dialog. Saves the new configuration as a preference,
+     * updates the widget's `dataTableParams.columns`, sets `_current_url` to null to force a
+     * DataTable rebuild, and then calls `_refresh()`.
+     * @param {object} config The new column configuration object. Expected to have a `columns`
+     * property (array of DataTables column definitions) and potentially `cfg_name`.
+     */
     _onApplyColumnDefinition: function(config){
         
        window.hWin.HAPI4.save_pref('columns_datatable', config);        
@@ -576,9 +774,17 @@ this._dout('reload datatable '+this.options.serverSide);
        this._refresh();
     },
     
-    //
-    // open column configuration dialog
-    //
+    /**
+     * @function _openColumnDefinition
+     * @memberof heurist.resultListDataTable
+     * @instance
+     * @private
+     * @description Opens a dialog for configuring DataTable columns.
+     * This typically involves showing another widget or UI component specialized for
+     * column selection and ordering (e.g., `recordDataTable` action dialog).
+     * @param {boolean} is_new True if opening for a new configuration, false if editing an existing one.
+     * This influences whether `options.initial_cfg` is passed to the dialog.
+     */
     _openColumnDefinition: function( is_new ){
         
         let that = this;
@@ -597,6 +803,14 @@ this._dout('reload datatable '+this.options.serverSide);
         
     },
 
+    /**
+     * @function _highlightSelected
+     * @memberof heurist.resultListDataTable
+     * @instance
+     * @private
+     * @description Highlights rows in the DataTable that correspond to record IDs present
+     * in `this.options.selection`. Removes highlighting from other rows.
+     */
     _highlightSelected: function(){
 
         const that = this;

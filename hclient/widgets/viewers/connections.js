@@ -1,27 +1,49 @@
 /**
-* Widget for network diagram of a result set. Calls viewers/visualize/springDiagram.php
-* 
+* @file        connections.js
+* @brief       Network graph/connections viewer.
+* @fileOverview This file provides the `heurist.connections` jQuery UI widget, which is
+*              responsible for displaying network diagrams of Heurist result sets. It
+*              loads an iframe pointing to `viewers/visualize/springDiagram.php`,
+*              which likely uses a library like VivaGraphJS or a similar
+*              force-directed graph layout algorithm. The widget listens to Heurist
+*              system events to receive record sets and selections, fetches
+*              relationship data, parses it into a graph format (nodes and links),
+*              and then passes this data to the iframe for visualization. It also
+*              handles user interactions from the graph, such as node selection, and
+*              can expand the graph by fetching related records.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\viewers
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Jan Jaap de Groot    <jjedegroot@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Jan Jaap de Groot <jjedegroot@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-
+/**
+ * @widget heurist.connections
+ * @description Displays a network graph of connections between records in a result set.
+ * It embeds an iframe that loads `springDiagram.php` to render the graph.
+ * The widget listens to Heurist events for data changes and selections,
+ * processes the data to find relationships, and communicates with the
+ * embedded graph visualization.
+ */
 $.widget( "heurist.connections", {
 
-    // default options
+    /**
+     * @memberof heurist.connections
+     * @instance
+     * @property {Object} options - Default options for the widget.
+     * @property {string} [options.title=''] - Title for the connections viewer (not actively used to set header).
+     * @property {?HRecordSet} options.recordset - The primary record set whose connections are to be visualized.
+     * @property {?Array<number>} options.selection - An array of record IDs to be highlighted in the graph.
+     * @property {?string} options.search_realm - A string identifier to scope event listening. Only events
+     *           from the same realm will be processed.
+     * @property {boolean} [options.init_at_once=false] - If true, attempts to load and display the graph
+     *           immediately upon widget creation.
+     */
     options: {
         title: '',
         recordset: null,
@@ -30,10 +52,30 @@ $.widget( "heurist.connections", {
         init_at_once: false
     },
 
+    /**
+     * @memberof heurist.connections
+     * @instance
+     * @private
+     * @property {?string} _events - A string concatenating Heurist event names that this widget listens to.
+     * Initialized in `_create`.
+     */
     _events: null,
+    /**
+     * @memberof heurist.connections
+     * @instance
+     * @private
+     * @property {boolean} recordset_changed - Flag indicating if the main `recordset` has changed
+     * and the graph display needs to be updated.
+     */
     recordset_changed: true,
 
-    // the constructor
+    /**
+     * @memberof heurist.connections
+     * @instance
+     * @private
+     * @description Widget constructor. Initializes the iframe for the graph, sets up event listeners
+     * for data changes and selections, and handles initial loading if `options.init_at_once` is true.
+     */
     _create: function() {
 
         let that = this;
@@ -131,16 +173,20 @@ $.widget( "heurist.connections", {
         
     }, //end _create
 
-
-    /*
-    _setOptions: function() {
-        // _super and _superApply handle keeping the right this-context
-        this._superApply( arguments );
-        this._refresh();
-    },
-    */  
-
-    /* private function */
+    /**
+     * @memberof heurist.connections
+     * @instance
+     * @private
+     * @description Refreshes the graph display. If the widget is visible and the recordset has changed:
+     * - If the iframe (`graphframe`) is not yet loaded or its URL is incorrect, it sets the iframe's `src`
+     *   to `viewers/visualize/springDiagram.php` with the current database parameter.
+     * - If the iframe is loaded:
+     *   - If `options.recordset` is available but `options.relations` is not, it calls `_getRelations()`
+     *     to fetch relationship data.
+     *   - If both `recordset` and `relations` are available, it parses this data using `_parseData()`
+     *     and then visualizes it using `_doVisualize()`.
+     *   - If `recordset` is null but the visualization is initialized, it clears the graph.
+     */
     _refresh: function(){
 
         /* change title
@@ -191,8 +237,13 @@ $.widget( "heurist.connections", {
         }
     },
 
-    // events bound via _on are removed automatically
-    // revert other modifications here
+    /**
+     * @memberof heurist.connections
+     * @instance
+     * @private
+     * @description Cleans up the widget before it's removed. Unbinds global event listeners
+     * and removes the generated iframe and container elements.
+     */
     _destroy: function() {
 
         this.element.off("myOnShowEvent");
@@ -205,6 +256,12 @@ $.widget( "heurist.connections", {
         this.framecontent.remove();
     },
     
+    /**
+     * @memberof heurist.connections
+     * @instance
+     * @description Shows or hides a loading animation overlay on the graph iframe container.
+     * @param {boolean} show - True to show the loading animation, false to hide it.
+     */
     loadanimation: function(show){
         if(show){
            
@@ -215,9 +272,14 @@ $.widget( "heurist.connections", {
         }
     },
     
-    //
-    //
-    //
+    /**
+     * @memberof heurist.connections
+     * @instance
+     * @private
+     * @description Checks if the provided event data belongs to the same search realm as this widget.
+     * @param {Object} data - The event data object, expected to have a `search_realm` property.
+     * @returns {boolean} True if realms match or if realms are not defined for comparison, false otherwise.
+     */
     _isSameRealm: function(data){
 
         return (!this.options.search_realm && (!data || window.hWin.HEURIST4.util.isempty(data.search_realm)))
@@ -225,8 +287,14 @@ $.widget( "heurist.connections", {
     },
     
     /**
-    * private - send request to server side to find all relation withing given recordset
-    * @param recordset
+    * @memberof heurist.connections
+    * @instance
+    * @private
+    * @description Fetches relationship data for the given record set.
+    * It sends a request to the server (`RecordMgr.search_related`) with the IDs from the
+    * record set. On success, it stores the relationship data in `this.options.relations`,
+    * parses the data using `_parseData`, and then visualizes it using `_doVisualize`.
+    * @param {HRecordSet} recordset - The record set for which to fetch relationships.
     */
     _getRelations: function( recordset ){
         
@@ -263,21 +331,29 @@ $.widget( "heurist.connections", {
                 
             });
         }
-    }
-    
-
-    //@todo - move inside widget
-
+    },
 
     /**
-    * Parses record data and relationship data into usable D3 format
-    * 
-    * @param records    Object containing all record
-    * @param relations  Object containing direct & reverse links
-    * 
-    * @returns {Object}
+    * @memberof heurist.connections
+    * @instance
+    * @private
+    * @description Parses record IDs and relationship data into a format suitable for graph visualization (nodes and links).
+    * Nodes are created from `records_ids` and information in `relations.headers`.
+    * Links are created by processing `relations.direct` and `relations.reverse`.
+    * @param {Array<number|string>} records_ids - An array of record IDs that form the primary nodes of the graph.
+    * @param {Object} relations - An object containing relationship data. Expected to have:
+    *   - `relations.headers`: An object mapping record IDs to their title and record type ID (for icons).
+    *   - `relations.direct`: An array of direct relationships (source -> target).
+    *   - `relations.reverse`: An array of reverse relationships (target -> source).
+    * Each relationship object should have `recID` (source), `targetID`, `dtID` (detail type ID for resource relations),
+    * and `trmID` (term ID for relationship types).
+    * @returns {Object} An object with two properties: `nodes` (an array of node objects)
+    *                   and `links` (an array of link objects).
+    *                   Each node object has `id`, `name`, `image` (icon URL), `count`, `depth`, `rty_ID`.
+    *                   Each link object has `source` (node object), `target` (node object), `targetcount`,
+    *                   and `relation` (with `id`, `name`, `type`).
     */
-    , _parseData: function (records_ids, relations) {
+    _parseData: function (records_ids, relations) {
         let data = {}; 
         let nodes = {};                         
         let links = [];
@@ -302,9 +378,10 @@ $.widget( "heurist.connections", {
             
             /**
             * Determines links between nodes
-            * 
-            * @param nodes      All nodes
-            * @param relations  Array of relations
+            * @ignore
+            * @param {Object} nodes      All nodes keyed by ID.
+            * @param {Array<Object>} relations  Array of relationship objects.
+            * @returns {Array<Object>} Array of link objects.
             */
             function __getLinks(nodes, relations) {
                 let links = [];
@@ -353,16 +430,32 @@ $.widget( "heurist.connections", {
             array.push(nodes[id]);
         }
         return {nodes: array, links: links};
-    }
+    },
     
-    , _isVisualizeInited(){
+    /**
+     * @memberof heurist.connections
+     * @instance
+     * @private
+     * @description Checks if the graph visualization iframe is initialized and has the `showData` function.
+     * @returns {boolean} True if the visualization is ready, false otherwise.
+     */
+    _isVisualizeInited(){
         
         return !window.hWin.HEURIST4.util.isnull(this.graphframe) && this.graphframe.length > 0 &&
          window.hWin.HEURIST4.util.isFunction(this.graphframe[0].contentWindow.showData);
-    }
+    },
 
-    /** Calls the visualisation plugin */
-    , _doVisualize: function (data) {
+    /**
+     * @memberof heurist.connections
+     * @instance
+     * @private
+     * @description Sends data to the graph visualization iframe (`springDiagram.php`) to be rendered.
+     * It calls the `showData` function within the iframe, passing the graph data, current selection,
+     * last search request, and callback functions for interactions (selection, get relations, expand search).
+     * @param {Object} data - The graph data, typically an object with `nodes` and `links` properties,
+     *                        as returned by `_parseData`.
+     */
+    _doVisualize: function (data) {
         
         if(this._isVisualizeInited() ){
             let that = this;
@@ -385,9 +478,17 @@ $.widget( "heurist.connections", {
         if(iframe != null && iframe !== undefined && iframe.length >= 1) {
             iframe[0].contentWindow.showData(data);
         }*/
-    }    
+    },    
 
-    , _doVisualizeSelection: function (selection) {
+    /**
+     * @memberof heurist.connections
+     * @instance
+     * @private
+     * @description Sends the current selection (`this.options.selection`) to the graph visualization iframe
+     * to highlight the selected nodes. Calls the `showSelection` function within the iframe.
+     * @param {Array<number>} selection - An array of record IDs to be selected/highlighted in the graph.
+     */
+    _doVisualizeSelection: function (selection) {
 
             if(window.hWin.HEURIST4.util.isnull(this.options.recordset)) return;
 
@@ -399,11 +500,18 @@ $.widget( "heurist.connections", {
     },
 
     /**
-     * Expand the visualiser's graph with connected records, not in the current recordset
-     *  THIS SHOULD ONLY AFFECT THE VISUALISER
-     *
-     * @param {string} type predicate being added to the search {related, related_to, related_from, linked, linked_to, linked_from}
-     * @param {integer} rec_ID record of focus, the point of origin
+     * @memberof heurist.connections
+     * @instance
+     * @private
+     * @description Expands the graph by fetching and adding records related to a specific node (`rec_ID`).
+     * It modifies the last search query (`this._lastRequest.q`) to include related records based on the
+     * `type` of relationship (e.g., 'related', 'linked_to') and then performs a new search using `_performSearch`.
+     * This method is typically called from an interaction within the graph visualization (e.g., double-clicking a node).
+     * The query modification logic attempts to merge the new relationship predicate into existing 'any' clauses
+     * or adds it appropriately to maintain a valid query structure.
+     * @param {string} type - The type of relationship to expand by (e.g., "related", "linked_to", "related_from").
+     *                        This corresponds to Heurist search predicates.
+     * @param {number|string} rec_ID - The ID of the record (node) from which to expand connections.
      */
     _expandSearch: function(type, rec_ID){
 
@@ -467,13 +575,18 @@ $.widget( "heurist.connections", {
     },
 
     /**
-     * Merge the new record ID into the provided query part, to avoid adding more predicates
-     *
-     * @param {object|array} query current query used for the visualiser, to be updated
-     * @param {string} type predicate type to be added/updated
-     * @param {string|integer} rec_ID new record ID to add
-     *
-     * @returns {boolean} whether the query part has been updated
+     * @memberof heurist.connections
+     * @instance
+     * @private
+     * @description Merges a new record ID into an existing query predicate of a specific `type`.
+     * If the predicate `type` already exists in the `query` object/array, its value (which can be
+     * a single ID or a comma-separated list of IDs) is updated to include the new `rec_ID`.
+     * If the predicate `type` does not exist, it's added to the query.
+     * This is a helper function for `_expandSearch` to avoid duplicating relationship predicates.
+     * @param {Object|Array} query - The part of the Heurist search query to modify.
+     * @param {string} type - The predicate type (e.g., "related", "linked_to").
+     * @param {string|number} rec_ID - The new record ID to add to the predicate's value.
+     * @returns {boolean} True if the query was successfully updated, false otherwise.
      */
     _mergeRecordIDs: function(query, type, rec_ID){
 
@@ -485,9 +598,8 @@ $.widget( "heurist.connections", {
 
         /**
          * Updates the existing list of values
-         *
-         * @param {string|integer} curValue current record ID(s) being used for the predicate type
-         *
+         * @ignore
+         * @param {string|number} curValue current record ID(s) being used for the predicate type
          * @returns {string} updated list of values
          */
         function updateValue(curValue){
@@ -506,6 +618,7 @@ $.widget( "heurist.connections", {
 
         /**
          * Micro function to appease Sonarcloud
+         * @ignore
          */
         function updateArrayPred(){
             if(Object.hasOwn(query, type)){
@@ -559,9 +672,15 @@ $.widget( "heurist.connections", {
     },
 
     /**
-     * Perform localised search to update the visualiser
-     *
-     * @param {json} new_query 
+     * @memberof heurist.connections
+     * @instance
+     * @private
+     * @description Performs a new Heurist search with the provided `new_query`.
+     * This is typically used by `_expandSearch` to fetch additional records and their relationships
+     * to update the graph. On successful search, it updates `this.options.recordset`,
+     * resets `this.options.relations`, updates `this._lastRequest`, and calls `_refresh()`
+     * to re-render the graph with the new data.
+     * @param {Object|string} new_query - The Heurist search query (JSON object or query string).
      */
     _performSearch: function(new_query){
 

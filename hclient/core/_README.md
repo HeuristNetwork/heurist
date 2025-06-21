@@ -1,32 +1,31 @@
-Directory:    /hclient/core
+# Directory
 
-Overview:  Core client-side functions, H4 onwards.
+`hclient/core`
 
-Notes:
+## Overview
 
-Updated:     18 Oct 2015
+This directory contains the core functionalities and building blocks of the hclient application. It includes essential JavaScript modules and PHP scripts that handle system management, layout, API interactions, and various utilities.
 
+## Key files
 
-utilsCollection.js - manages user's collection of record ids stored in SESSION
-
-
-Heurist Records,recDetails
-
-    hRecordSearch.js - wrapper class for hRecordMgr.search - executes this method either callback or global events
-
-    
-    
-    
-
-Javascript classes
-
-hAPI - main class that stores current system values and allows to interact with server API
-hEditing - add/edit record
-hMapping - work with OS Timemap
-hRecordSet - record set container/manipulation
-
-editing_input.js - input control widget
-utils.js - set of utilty functions
-
-----------------------------------------------------------------------------------------------------------------
- 
+-   `ActionHandler.js`: Handles various user actions or system events within the application.
+-   `HLayoutMgr.js`: Manages the layout and arrangement of UI components.
+-   `HSystemMgr.js`: Responsible for system-level operations and management.
+-   `accessTokens.php`: A PHP script keeps tokens for authentication for third-party applications and APIs.
+-   `actions.json`: A JSON file that defines available actions within Heurist.
+-   `detectHeurist.js`: Script to detect a Heurist instance in parent window (to prevent redundant initialization).
+-   `hRecordSearch.js`: JavaScript for handling record searching functionalities.
+-   `hapi.js`: Core class to init Heuirst application.
+-   `hintDiv.js`: JavaScript for creating or managing hint popups or divs.
+-   `jquery.calendars.japanese.js`: A jQuery plugin for Japanese calendar support.
+-   `layout.js`: Contains old version to manage UI layout.
+-   `recordset.js`: JavaScript for managing sets or collections of records.
+-   `temporalObjectLibrary.js`: A library for handling temporal objects or data with time-based properties.
+-   `utils.js`: A collection of general utility functions in JavaScript.
+-   `utilsCollection.js`: Utility functions specifically for collections or arrays.
+-   `utils_color.js`: Utilities related to color manipulation or management.
+-   `utils_dbs.js`: Utilities for manipulate local copy of database definitions.
+-   `utils_geo.js`: Utilities for geographical data or mapping functions.
+-   `utils_msg.js`: Utilities for handling messages or notifications.
+-   `utils_query.js`: Utilities for building or handling queries.
+-   `utils_ui.js`: Utilities related to user interface elements or interactions.

@@ -1,29 +1,42 @@
 /**
-* manageDefRecTypeGroups.js - main widget mo record type groups
-*
+* @file manageDefRecTypeGroups.js
+* @brief Manages Record Type Group entities.
+* @fileOverview Provides a UI for managing Record Type Groups. This includes creating, listing, editing, deleting, and reordering groups, and managing their association with Record Types.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 
+
+/**
+ * @widget heurist.manageDefRecTypeGroups
+ * @brief Widget for managing Record Type Groups.
+ * @extends $.heurist.manageDefGroups
+ * @property {?object} reference_rt_manger A reference to the `manageDefRecTypes` widget,
+ * used to update record type group associations when a record type is moved to a new group.
+ */
 $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageDefGroups, {
     
     _entityName:'defRecTypeGroups',
     _entityPrefix: 'rtg',
     _title: 'Record Type Groups',
     
+    /**
+     * @brief Handles the drop event when a record type is moved to a new group.
+     * @memberof heurist.manageDefRecTypeGroups
+     * @override
+     * @param {number} type_ID The ID of the record type (rty_ID) being moved.
+     * @param {number} group_ID The ID of the target group (rtg_ID).
+     * @description This function is called when a record type is dropped onto a group.
+     * It updates the record type's group association (`rty_RecTypeGroupID`) and visibility status (`rty_ShowInLists`)
+     * via the referenced `manageDefRecTypes` widget instance (`options.reference_rt_manger`).
+     */
     _addOnDrop: function(type_ID, group_ID){
 
         if(type_ID>0 && group_ID>0 && this.options.reference_rt_manger){

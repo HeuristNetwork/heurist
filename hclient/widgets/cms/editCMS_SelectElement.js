@@ -1,24 +1,37 @@
 /**
-* Select element to be inserted into CMS page - opens popup
-* 
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file editCMS_SelectElement.js
+ * @brief Provides a dialog for selecting a new CMS element or template to insert into a page.
+ * @fileOverview This file defines the 'editCMS_SelectElement' function. This function
+ *               is responsible for displaying a modal dialog that allows users to choose from a predefined
+ *               list of page content elements, layout structures (like groups, tabs, accordions),
+ *               Heurist widgets, or full-page templates. Upon selection, it invokes a callback function
+ *               with the chosen element type and name.
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\widgets\cms
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 6.0
+ */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-//
-//
-//
+/**
+ * Displays a dialog for selecting a CMS component (element, layout, widget, or template) to be inserted into a page.
+ *
+ * The dialog presents a list of available components, grouped by categories like "Web pages",
+ * "Page Content" (Layout, Content, Widgets). When a user selects a component and confirms,
+ * the provided callback function is invoked with the identifier of the selected component
+ * and its display name.
+ *
+ * For composite page templates (those starting with 'tpl_'), an intermediate dialog is shown
+ * to ask whether to insert the template as a new page in the menu or as components into the current page.
+ *
+ * @param {function(string, string):void} callback - A function to be called when an element is selected.
+ *      It receives two arguments:
+ *      1. `selected_element`: A string identifier for the selected element/widget/template (e.g., 'group', 'heurist_SearchInput', 'tpl_default', 'new_tpl_discover').
+ *      2. `selected_name`: The human-readable name of the selected component (e.g., 'Group', 'Filter', 'Simple Page').
+ */
 function editCMS_SelectElement( callback ){
 
     let $dlg;

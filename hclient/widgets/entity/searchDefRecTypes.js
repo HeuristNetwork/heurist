@@ -1,25 +1,34 @@
 /**
-* Search header for manageDefRecTypes manager
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file        searchDefRecTypes.js
+ * @brief       Provides a search interface for Record Types.
+ * @fileOverview This widget handles the search functionality for Record Types, allowing users to find specific Record Type definitions.
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hclient\widgets\entity
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since       4.0
+ */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
+/**
+ * @widget heurist.searchDefRecTypes
+ * @brief Search widget for Record Types.
+ * @extends $.heurist.searchEntity
+ * @property {?number} rtg_ID The ID of the Record Type Group to filter by. If null or 'any', all groups are included.
+ * @property {boolean} import_structure If true, adjusts UI for importing structures, showing/hiding relevant controls.
+ * @property {boolean} simpleSearch If true, simplifies the search interface, hiding some sorting/filtering options.
+ * @property {string} select_mode Defines the selection mode (e.g., 'manager', 'select_multi', 'select_single'), affecting UI elements and behavior.
+ * @property {?function} onInitCompleted Optional callback function executed after initialization is complete.
+ */
 $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
 
-    //
+    /**
+     * @brief Initializes the controls for the search widget.
+     * @override
+     * @memberof heurist.searchDefRecTypes
+     */
     _initControls: function() {
         
         let that = this;
@@ -164,9 +173,13 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         }
     },  
     
-    //
-    //
-    //
+    /**
+     * @brief Sets an option for the widget, with specific handling for 'rtg_ID'.
+     * @override
+     * @memberof heurist.searchDefRecTypes
+     * @param {string} key The option key.
+     * @param {*} value The option value.
+     */
     _setOption: function( key, value ) {
         this._super( key, value );
         if(key == 'rtg_ID'){
@@ -182,9 +195,13 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         }
     },
     
-    //
-    //
-    //    
+    /**
+     * @brief Displays and handles the UI configuration dialog.
+     * @memberof heurist.searchDefRecTypes
+     * @description This method allows users to configure which fields are displayed
+     *              in the search results by showing a dialog with sortable checkboxes.
+     *              The changes are applied by triggering an "onuichange" event.
+     */
     configureUI: function(){
         
         let that = this;
@@ -272,13 +289,24 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
 
     },
     
+    /**
+     * @brief Placeholder function for reloading a group selector.
+     * @memberof heurist.searchDefRecTypes
+     * @description This function is intended to reload a group selector UI element,
+     *              but it is currently not implemented.
+     */
     reloadGroupSelector: function(){
         
     },
 
-    //
-    // public methods
-    //
+    /**
+     * @brief Initiates a search for record types based on current criteria.
+     * @override
+     * @memberof heurist.searchDefRecTypes
+     * @description Collects search terms, group filters, sorting preferences,
+     *              and other options to build a request object. It then triggers
+     *              an "onfilter" event or calls the parent's search method.
+     */
     startSearch: function(){
         
             if(!this.input_search) return;

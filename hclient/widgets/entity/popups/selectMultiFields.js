@@ -1,12 +1,15 @@
 /**
-*  Quick addition of fields to a record type
-*
+* @file selectMultiFields.js
+* @brief Provides a UI for rapidly adding multiple base fields to a Record Type structure.
+* @fileOverview This file defines the HRapidFieldAdditions class, which powers a user interface enabling the quick selection and addition of multiple existing base fields (DetailTypes) to a specified Record Type's structure. It's designed to streamline the process of building out record type definitions.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity\popups
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Brandon McKay   <blmckay13@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.0
+* @author      Brandon McKay <blmckay13@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       6.0
 */
 
 /*
@@ -19,27 +22,22 @@
 
 /**
  * @class HRapidFieldAdditions
- * @classdesc Simple interface to insert several fields into the record structure at once
- * 
- * @property {integer} rty_ID - Current Record Type ID
- * @property {array} assigned_fields - List of newly assigned fields
- * @property {array} selected_fields - List of checked options
- * @property {array} all_fields - Base Fields [ [ dty id, dty name, [rst name 1, rst name 2, ...] ], ... ]
- * @property {jQuery} tab_container - Container for tabs widget
- * @property {jQuery} btn_action - Action button
- * @property {jQuery} btn_close - Cancel/close button
- * 
- * @function setupVariables - Initialise class properties
- * @function setupElements - Initialise elements
- * @function setupStyling - Add styling to elements
- * @function getAssignedFields - Get fields already in record structure
- * @function populateBaseFields - Populate and initialise tabs
- * @function getCheckedFields - Get list of selected fields to add
- * @function searchBaseField - Search for field using user input
- * @function getTypeName - Field type to plain text
- * @function alphabeticSort - Alphabetic sorting on a specific 2d array
- * @function stripNewlines - Remove newlines from text
- * @function isInArray - Search array of strings
+ * @brief UI component for rapidly adding multiple existing base fields to a Record Type.
+ * @description This class provides the logic and UI management for a tool that allows users
+ * to quickly select from a list of all available base fields (DetailTypes) in the system
+ * and add them to the structure of a specified Record Type. It features a tabbed interface
+ * grouped by DetailTypeGroup, search functionality, and visual indication of fields already
+ * present in the target Record Type.
+ *
+ * @property {?number} rty_ID The ID of the current Record Type to which fields will be added.
+ * @property {Array<number|string>} assigned_fields An array storing the IDs of DetailTypes already assigned to the current Record Type.
+ * @property {Array<number|string>} selected_fields An array to store the IDs of DetailTypes selected by the user in the UI for addition.
+ * @property {Array<Array<any>>} all_fields An array containing data for all available base fields in the system,
+ *                                         structured as `[ [dty_id, dty_name, [rst_name1, rst_name2, ...]], ... ]`,
+ *                                         where `rst_name` refers to instances where the base field is used in other record types.
+ * @property {?jQuery} tab_container jQuery object representing the main container for the tabbed interface displaying field groups.
+ * @property {?jQuery} btn_action jQuery object for the primary action button (e.g., "Insert selected fields").
+ * @property {?jQuery} btn_close jQuery object for the close/cancel button.
  */
 class HRapidFieldAdditions{
 
@@ -54,6 +52,12 @@ class HRapidFieldAdditions{
 	btn_action = null;
 	btn_close = null;
 
+	/**
+	 * @brief Constructs an HRapidFieldAdditions instance.
+	 * @memberof HRapidFieldAdditions
+	 * @param {number} _rty_ID The ID of the Record Type to which fields will be added.
+	 * If `_rty_ID` is not provided, an error message is shown, and the window may be closed.
+	 */
 	constructor(_rty_ID){
 
 		if(window.hWin.HEURIST4.util.isempty(_rty_ID)){
@@ -69,6 +73,12 @@ class HRapidFieldAdditions{
 		this.rty_ID = _rty_ID;
 	}
 
+	/**
+	 * @brief Initializes the main functionality of the HRapidFieldAdditions UI.
+	 * @memberof HRapidFieldAdditions
+	 * Calls methods to set up internal variables, get already assigned fields,
+	 * populate the base fields display, initialize UI elements, and apply styling.
+	 */
 	init(){
 
 		this.setupVariables();
@@ -82,6 +92,14 @@ class HRapidFieldAdditions{
 		this.setupStyling();
 	}
 
+	/**
+	 * @brief Sets up initial class variables and retrieves all base fields.
+	 * @memberof HRapidFieldAdditions
+	 * Initializes `all_fields` by fetching all base field instances from the database,
+	 * excluding those from the current `rty_ID`. Sorts the record types alphabetically
+	 * before fetching their field instances. Initializes jQuery references for `tab_container`,
+	 * `btn_action`, and `btn_close`.
+	 */
 	setupVariables(){
 
 		let rectypes = $Db.rty().getIds();
@@ -105,6 +123,14 @@ class HRapidFieldAdditions{
 		this.btn_close = $('#btnClose');
 	}
 
+	/**
+	 * @brief Sets up UI elements and event handlers.
+	 * @memberof HRapidFieldAdditions
+	 * Initializes the jQuery UI Tabs for the `tab_container`.
+	 * Sets up the main action button (`btn_action`) to collect checked fields and close the window.
+	 * Sets up the close button (`btn_close`).
+	 * Initializes the text search input (`#field_search`) for filtering fields.
+	 */
 	setupElements(){
 
 		this.tab_container.tabs({
@@ -140,6 +166,11 @@ class HRapidFieldAdditions{
 		$('#field_search').on('keyup', () => { this.searchBaseField(); });
 	}
 
+	/**
+	 * @brief Applies CSS styling to specific UI elements.
+	 * @memberof HRapidFieldAdditions
+	 * Styles the action button and the close button.
+	 */
 	setupStyling(){
 
 		this.btn_action.css({'font-size':'1em', 'float':'right', 'color':'white', 'background':'#3D9946 0% 0% no-repeat padding-box'});
@@ -148,7 +179,11 @@ class HRapidFieldAdditions{
 	}
 
 	/**
-	 * Get list of already assigned fields, to disable from master list
+	 * @brief Retrieves the list of DetailType IDs already assigned to the current Record Type.
+	 * @memberof HRapidFieldAdditions
+	 * Populates `this.assigned_fields` with the IDs of fields present in the
+	 * structure of the current `this.rty_ID`. These fields will be marked as
+	 * disabled/checked in the selection UI.
 	 */
 	getAssignedFields(){
 
@@ -160,7 +195,15 @@ class HRapidFieldAdditions{
 	}
 
 	/**
-	 * Retrieve all existing base fields, grey out/disable options already assigned
+	 * @brief Populates the tabbed interface with available base fields, grouped by DetailTypeGroup.
+	 * @memberof HRapidFieldAdditions
+	 * Iterates through DetailTypeGroups (excluding "Trash"). For each group:
+	 *  - Creates a new tab.
+	 *  - Fetches all DetailTypes belonging to that group.
+	 *  - Sorts these DetailTypes alphabetically.
+	 *  - For each DetailType, creates a checkbox item showing its name, type, and help text.
+	 *  - If a DetailType is already in `this.assigned_fields`, its checkbox is disabled and checked.
+	 * Sets up click handlers for field items to toggle their checkboxes.
 	 */
 	populateBaseFields(){
 
@@ -233,7 +276,10 @@ class HRapidFieldAdditions{
 	}
 
 	/**
-	 * Retrieve full list of checked fields to send back
+	 * @brief Retrieves the list of DetailType IDs selected by the user from the checkboxes.
+	 * @memberof HRapidFieldAdditions
+	 * Populates `this.selected_fields` with the `data-id` attribute of all
+	 * checked and enabled input checkboxes within the `tab_container`.
 	 */
 	getCheckedFields(){
 
@@ -246,7 +292,16 @@ class HRapidFieldAdditions{
 	}
 
 	/**
-	 * Base Field searching and displaying results
+	 * @brief Filters and displays base fields based on user input in the search box.
+	 * @memberof HRapidFieldAdditions
+	 * @returns {boolean|undefined} False if the search field is empty, otherwise undefined.
+	 * Implements a live search functionality:
+	 *  - Hides the results dropdown if the search term is too short (<= 2 chars).
+	 *  - Iterates through `this.all_fields`.
+	 *  - If a base field's name or any of its instance names (rst_name) match the search term
+	 *    (case-insensitive) and it's not already assigned, it's added to the results dropdown.
+	 *  - Results are clickable; clicking a result checks the corresponding checkbox in the tabs
+	 *    and shows a confirmation message.
 	 */
 	searchBaseField(){
 
@@ -304,7 +359,7 @@ class HRapidFieldAdditions{
 
 			let main_ele;
 
-			if(name.toLowerCase == searched || in_other_array == true){
+			if(name.toLowerCase() == searched || in_other_array == true){   
 				main_ele = first_entry;
 			}else{
 				main_ele = $('<div>', {class: 'no-overflow-item'}).appendTo(result_container);
@@ -388,11 +443,10 @@ class HRapidFieldAdditions{
 	}
 
 	/**
-	 * Assign more standard names to dty_Types
-	 *
-	 * @param {string} type - detail type's Type
-	 * 
-	 * @returns {string} Type Name
+	 * @brief Assigns more standard, user-friendly names to internal DetailType type strings.
+	 * @memberof HRapidFieldAdditions
+	 * @param {string} type - The internal DetailType type string (e.g., 'freetext', 'resource').
+	 * @returns {string} A more user-friendly name for the field type (e.g., 'Single line Text', 'Record pointer').
 	 */
 	getTypeName(type){
 
@@ -452,7 +506,12 @@ class HRapidFieldAdditions{
 	}
 
 	/**
-	 * Alphabetic sorting, sortby index 1
+	 * @brief Sorts an array of items alphabetically based on a specific element if items are arrays.
+	 * @memberof HRapidFieldAdditions
+	 * @param {Array|string} a The first item to compare. If an array, `a[1]` is used for comparison.
+	 * @param {Array|string} b The second item to compare. If an array, `b[1]` is used for comparison.
+	 * @returns {number} -1 if `a` comes before `b`, 1 if `a` comes after `b`, 0 if equal.
+	 * Performs a case-insensitive alphabetic sort.
 	 */
 	alphabeticSort(a, b){
 
@@ -489,24 +548,23 @@ class HRapidFieldAdditions{
 	}
 
 	/**
-	 * Remove newline chars and br tags from string
-	 *
-	 * @param {string} text - Text to be stripped of newline values
-	 *
-	 * @returns {string} string stripped of newlines
+	 * @brief Removes newline characters and `<br>` tags from a string, replacing them with spaces.
+	 * @memberof HRapidFieldAdditions
+	 * @param {string} text The input string.
+	 * @returns {string} The string with newline characters and `<br>` tags replaced by spaces.
 	 */
 	stripNewlines(text){
 		return text.replaceAll(/\n|\r|<br>/g, ' ');
 	}
 
 	/**
-	 * Search 2d array of strings
-	 *
-	 * @param {string} needle - searching for
-	 * @param {string} haystack - searching in
-	 * @param {boolean} check_partial - whether to check for a partial match
-	 * 
-	 * @returns {boolean || integer} whether the needle is in the haystack
+	 * @brief Checks if a 'needle' string exists within a 'haystack' array of strings.
+	 * @memberof HRapidFieldAdditions
+	 * @param {string} needle The string to search for.
+	 * @param {string[]} haystack The array of strings to search within.
+	 * @param {boolean} check_partial If true, checks for partial matches (if `needle` is a substring of any element in `haystack`).
+	 * @returns {boolean|number} If `check_partial` is false, returns true if `needle` is found, false otherwise.
+	 *                             If `check_partial` is true, returns the index of the first partial match if found, otherwise false.
 	 */
 	isInArray(needle, haystack, check_partial){
 

@@ -29,6 +29,9 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
 class DbUsrTags extends DbEntityBase
 {
 
+    /** @var array Tag ID to replace the original tag */
+    private $newTagID = [];
+
     /**
      * Searches for user tags (`usrTags`) based on criteria in `$this->data`.
      *
@@ -233,31 +236,31 @@ class DbUsrTags extends DbEntityBase
 
         $ret = false;
 
-            $newTagID = $this->newTagID[0];
+        $newTagID = $this->newTagID[0];
 
-            $update_query = 'UPDATE IGNORE usrRecTagLinks set rtl_TagID = '.$newTagID.' WHERE rtl_TagID in ('
-                 . implode(',', $this->recordIDs) . ')';
+        $update_query = 'UPDATE IGNORE usrRecTagLinks set rtl_TagID = '.$newTagID.' WHERE rtl_TagID in ('
+                . implode(',', $this->recordIDs) . ')';
 
-            $mysqli = $this->system->getMysqli();
+        $mysqli = $this->system->getMysqli();
 
-            $res = $mysqli->query($update_query);
-            if(!$res){
-                $this->system->addError(HEURIST_DB_ERROR, 'Cannot replace tags', $mysqli->error );
-            }else{
-                $ret = true;
-                if(@$this->data['removeOld']==1){
-                    $ret = parent::delete();
-                }
-                if($ret){
-                    //calculate new usage
-                    $query = 'SELECT COUNT(*) FROM usrRecTagLinks WHERE rtl_TagID = '.$newTagID;
-                    $ret = mysql__select_value($mysqli, $query);
-                    if($ret==null){
-                        $this->system->addError(HEURIST_DB_ERROR, 'Cannot find tag usage', $mysqli->error );
-                        $ret = false;
-                    }
+        $res = $mysqli->query($update_query);
+        if(!$res){
+            $this->system->addError(HEURIST_DB_ERROR, 'Cannot replace tags', $mysqli->error );
+        }else{
+            $ret = true;
+            if(@$this->data['removeOld']==1){
+                $ret = parent::delete();
+            }
+            if($ret){
+                //calculate new usage
+                $query = 'SELECT COUNT(*) FROM usrRecTagLinks WHERE rtl_TagID = '.$newTagID;
+                $ret = mysql__select_value($mysqli, $query);
+                if($ret==null){
+                    $this->system->addError(HEURIST_DB_ERROR, 'Cannot find tag usage', $mysqli->error );
+                    $ret = false;
                 }
             }
+        }
 
         return $ret;
     }

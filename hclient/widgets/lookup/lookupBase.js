@@ -234,13 +234,13 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
 
             // Init select & double click events for result list
             this._on( this.recordList, {
-                resultlistonselect: function(event, selected_recs){
-                    window.hWin.HEURIST4.util.setDisabled(
+                resultlistonselect: (event, selected_recs) => {
+                    this.$H.setDisabled(
                         this.element.parents('.ui-dialog').find('.btnDoAction'),
                         selected_recs && selected_recs.length() < 1
                     );
                 },
-                resultlistondblclick: function(event, selected_recs){
+                resultlistondblclick: (event, selected_recs) => {
                     if(selected_recs && selected_recs.length()==1){
                         this.doAction();
                     }
@@ -273,18 +273,18 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
             this._on(this.element.find('input, select, .search-input'), {
                 keyup: () => {
                     let $inputs_with_value = this.element.find('input, select, .search-input').filter((idx, ele) => { 
-                        return !window.hWin.HEURIST4.util.isempty($(ele).val());
+                        return !this.$H.isempty($(ele).val());
                     });
-                    window.hWin.HEURIST4.util.setDisabled(this.search_buttons, $inputs_with_value.length == 0);
+                    this.$H.setDisabled(this.search_buttons, $inputs_with_value.length == 0);
                 },
                 change: () => {
                     let $inputs_with_value = this.element.find('input, select, .search-input').filter((idx, ele) => { 
-                        return !window.hWin.HEURIST4.util.isempty($(ele).val());
+                        return !this.$H.isempty($(ele).val());
                     });
-                    window.hWin.HEURIST4.util.setDisabled(this.search_buttons, $inputs_with_value.length == 0);
+                    this.$H.setDisabled(this.search_buttons, $inputs_with_value.length == 0);
                 }
             });
-            window.hWin.HEURIST4.util.setDisabled(this.search_buttons, true);
+            this.$H.setDisabled(this.search_buttons, true);
         }
 
         // Init save settings button
@@ -320,7 +320,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         this._setupSettings();
 
         // By default action button is disabled
-        window.hWin.HEURIST4.util.setDisabled(this.element.parents('.ui-dialog').find('.btnDoAction'), true);
+        this.$H.setDisabled(this.element.parents('.ui-dialog').find('.btnDoAction'), true);
 
         return this._super();
     },
@@ -333,12 +333,12 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      * @memberof heurist.lookupBase
      * @instance
      * @private
-     * @param {jQuery.Event} e - The keypress event object.
+     * @param {jQuery.Event} event - The keypress event object.
      */
-    startSearchOnEnterPress: function(e){
-        if(e.key === 'Enter' || e.key === 'NumpadEnter'){
-            window.hWin.HEURIST4.util.stopEvent(e);
-            e.preventDefault();
+    startSearchOnEnterPress: function(event){
+        if(event.key === 'Enter' || event.key === 'NumpadEnter'){
+            this.$H.stopEvent(event);
+            event.preventDefault();
             this._doSearch();
         }
     },
@@ -386,14 +386,14 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         const rec_ID = recordset.fld(record, 'rec_ID');
         const rec_Title = recordset.fld(record, 'rec_Title');
         const rec_RecTypeID = recordset.fld(record, 'rec_RecTypeID');
-        const rec_Icon = window.hWin.HAPI4.iconBaseURL + rec_RecTypeID;
+        const rec_Icon = this.HAPI.iconBaseURL + rec_RecTypeID;
 
         const thumb = `<div class="recTypeThumb" style="background-image: url(&quot;${rec_Icon}&version=thumb&quot;);"></div>`;
 
         const html = `<div class="recordDiv" id="rd${rec_ID}" recid="${rec_ID}" rectype="${rec_RecTypeID}">`
                     + thumb
                     + '<div class="recordIcons">'
-                        + `<img src="${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif" class="rt-icon" `
+                        + `<img src="${this.HAPI.baseURL}hclient/assets/16x16.gif" class="rt-icon" `
                         +   `style="background-image: url(&quot;${rec_Icon}&quot;)" />`
                     + '</div>'
                     + rec_Title
@@ -417,7 +417,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      */
     doAction: function(url_fld = ''){
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
+        this.$Hmsg.bringCoverallToFront(this._as_dialog.parent());
 
         let [recset, record] = this._getSelection(true);
         if(recset?.length() < 0 || !record){
@@ -426,8 +426,10 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
 
         let res = {};
 
-        if(!window.hWin.HEURIST4.util.isempty(url_fld) && recset.getFields().indexOf(url_fld) !== -1){
+        if(!this.$H.isempty(url_fld) && recset.getFields().indexOf(url_fld) !== -1){
             res['ext_url'] = recset.fld(record, url_fld);
+        }else if(!this.$H.isempty(url_fld) && url_fld.startsWith('http')){
+            res['ext_url'] = url_fld;
         }
 
         res = this.prepareValues(recset, record, res);
@@ -463,7 +465,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      */
     prepareValues: function(recordset, record, dlg_response = {}, extra_settings = {}){
 
-        if(!window.hWin.HEURIST4.util.isObject(dlg_response)){
+        if(!this.$H.isObject(dlg_response)){
             dlg_response = {};
         }
 
@@ -482,7 +484,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
             this.prepareValue(values, dty_ID, extra_settings);
 
             // Check that values is valid, add to response object
-            if(window.hWin.HEURIST4.util.isempty(values)){
+            if(this.$H.isempty(values)){
                 continue;
             }
             if(!Object.hasOwn(dlg_response, dty_ID)){
@@ -517,7 +519,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
 
         values = this.valueToArray(values);
 
-        if(window.hWin.HEURIST4.util.isempty(values)){
+        if(this.$H.isempty(values)){
             return;
         }
 
@@ -564,7 +566,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
             clearTimeout(this.timeout.action_timeout); // clear timeout
         }
 
-        if(dlg_response !== false && window.hWin.HEURIST4.util.isempty(dlg_response)){
+        if(dlg_response !== false && this.$H.isempty(dlg_response)){
             dlg_response = {};
         }
 
@@ -577,11 +579,11 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
                     continue;
                 }
 
-                dlg_response[ID] = dlg_response[ID].filter((value) => !window.hWin.HEURIST4.util.isempty(value));
+                dlg_response[ID] = dlg_response[ID].filter((value) => !this.$H.isempty(value));
             }
         }
 
-        window.hWin.HEURIST4.msg.sendCoverallToBack(true);
+        this.$Hmsg.sendCoverallToBack(true);
 
         // Pass mapped values back and close dialog
         this._context_on_close = dlg_response;
@@ -613,13 +615,13 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         this.recordList.show();
 
         let invalid_data = data === false 
-            || !window.hWin.HEURIST4.util.isObject(data) 
+            || !this.$H.isObject(data) 
             || (!is_record_set && (!Object.hasOwn(data, 'fields') || !Object.hasOwn(data, 'order') || !Object.hasOwn(data, 'records')));
 
         if(invalid_data && data !== null){
 
             this.recordList.resultList('updateResultSet', null);
-            window.hWin.HEURIST4.msg.showMsgErr({
+            this.$Hmsg.showMsgErr({
                 message: 'Service did not return data in an appropriate format',
                 error_title: 'No valid data'
             });
@@ -680,7 +682,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      *
      * If `settings` is provided and is an object, it updates the service configuration
      * for the current `service_id` (from `this.options.mapping.service_id`) and saves it.
-     * After a successful save, it updates `window.hWin.HAPI4.sysinfo['service_config']`
+     * After a successful save, it updates `this.HAPI.sysinfo['service_config']`
      * and `this.options.mapping` with the new configuration.
      *
      * If `close_dlg` is true, the dialog will be closed after the operation,
@@ -696,11 +698,9 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      */
     _saveExtraSettings: function(settings, close_dlg = false){
 
-        let that = this;
+        let services = this.$H.isJSON(this.HAPI.sysinfo['service_config']);
 
-        let services = window.hWin.HEURIST4.util.isJSON(window.hWin.HAPI4.sysinfo['service_config']);
-
-        if(services !== false && window.hWin.HEURIST4.util.isObject(settings)){
+        if(services !== false && this.$H.isObject(settings)){
 
             let service_id = this.options.mapping.service_id;
             services[service_id]['options'] = settings;
@@ -714,27 +714,27 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
             let request = {
                 'a': 'save',
                 'entity': 'sysIdentification',
-                'request_id': window.hWin.HEURIST4.util.random(),
+                'request_id': this.$H.random(),
                 'isfull': 0,
                 'fields': fields
             };
     
-            window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+            this.HAPI.EntityMgr.doRequest(request, (response) => {
     
                 if(response.status != window.hWin.ResponseStatus.OK){
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    this.$Hmsg.showMsgErr(response);
                     return;
                 }
 
-                window.hWin.HAPI4.sysinfo['service_config'] = window.hWin.HEURIST4.util.cloneJSON(services); // update global copy
+                this.HAPI.sysinfo['service_config'] = this.$H.cloneJSON(services); // update global copy
 
                 if(close_dlg === true){
-                    that._saveExtraSettings(false, true);
+                    this._saveExtraSettings(false, true);
                     return;
                 }
 
-                that.options.mapping = window.hWin.HEURIST4.util.cloneJSON(services[service_id]);
-                window.hWin.HEURIST4.msg.showMsgFlash('Extra lookup settings saved...', 3000);
+                this.options.mapping = this.$H.cloneJSON(services[service_id]);
+                this.$Hmsg.showMsgFlash('Extra lookup settings saved...', 3000);
             });
 
             return;
@@ -747,10 +747,47 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     },
 
     /**
+     * Retrieves the current settings for dumping the raw BnF record data.
+     * It checks the state of UI elements in the settings tab:
+     * - `input[name="dump_record"]`: A checkbox to enable/disable record dumping.
+     * - `input[name="dump_field"]`: Radio buttons to select the dump target (either 'rec_ScratchPad' or 'dty_ID' for a specific field).
+     * - `#rty_flds`: A select dropdown for the specific field ID if 'dty_ID' is chosen.
+     *
+     * @memberof heurist.lookupBnF
+     * @instance
+     * @private
+     * @returns {Array<boolean, string>} An array where:
+     *          - The first element (`boolean`) is `true` if record dumping is enabled, `false` otherwise.
+     *          - The second element (`string`) is the target field for dumping:
+     *            - 'rec_ScratchPad' if dumping to ScratchPad.
+     *            - The selected dty_ID (as a string) if dumping to a specific field.
+     *            - An empty string if record dumping is disabled.
+     */
+    _getRecDumpSetting: function(){
+
+        if(this.element.find('input[name="dump_record"]').length === 0){
+            return;
+        }
+
+        const get_recdump = this.element.find('input[name="dump_record"]').is(':checked');
+        let recdump_fld = '';
+        
+        if(get_recdump){
+
+            recdump_fld = this.element.find('input[name="dump_field"]:checked').val();
+            if(recdump_fld === 'dty_ID'){
+                recdump_fld = this.element.find('#rty_flds').val();
+            }
+        }
+
+        return [ get_recdump, recdump_fld ];
+    },
+
+    /**
      * Creates a new Heurist record.
      * This method is typically used when `this.options.add_new_record` is true and a selection
      * from the lookup should result in a new record being created in Heurist.
-     * It sends a 'save' request to `HAPI4.RecordMgr.saveRecord` with the provided
+     * It sends a 'save' request to `this.HAPI.RecordMgr.saveRecord` with the provided
      * record type ID and details.
      * After a successful save, it closes the lookup dialog.
      *
@@ -764,9 +801,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      */
     _addNewRecord: function(rec_RecTypeID, details){
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
-
-        let that = this;
+        this.$Hmsg.bringCoverallToFront(this._as_dialog.parent());
 
         let request = {
             a: 'save',
@@ -775,17 +810,17 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
             details: details
         };
 
-        window.hWin.HAPI4.RecordMgr.saveRecord(request, function(response){
+        this.HAPI.RecordMgr.saveRecord(request, (response) => {
 
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
+            this.$Hmsg.sendCoverallToBack();
 
             if(response.status != window.hWin.ResponseStatus.OK){
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+                this.$Hmsg.showMsgErr(response);
                 return;
             }
 
             // ... Complete final tasks, then
-            that._as_dialog.dialog('close'); // close dialog
+            this._as_dialog.dialog('close'); // close dialog
         });
     },
 
@@ -808,7 +843,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         // get selected recordset
         let recset = this.recordList.resultList('getSelected', false);
         if(!recset || recset.length() < 0){
-            window.hWin.HEURIST4.msg.showMsgFlash('Please make a selection first...', 3000);
+            this.$Hmsg.showMsgFlash('Please make a selection first...', 3000);
             return [null, null];
         }
 
@@ -853,7 +888,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
             return values;
         }
 
-        for(const idx in values){
+        for(let idx = 0; idx < values.length; idx++){
 
             if(!Number.isInteger(+values[idx])){
                 continue;
@@ -889,7 +924,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
 
         for(const idx in values){
 
-            if(!window.hWin.HEURIST4.util.isNumber(values[idx])){
+            if(!this.$H.isNumber(values[idx])){
                 new_values.push({value: values[idx], search: values[idx], relation: null});
                 continue;
             }
@@ -918,12 +953,12 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      */
     _processValues: function(values){
 
-        for(const idx in values){
+        for(let idx = 0; idx < values.length; idx++){
 
             let value = values[idx];
             value = typeof value === 'string' ? value.trim() : value;
 
-            !window.hWin.HEURIST4.util.isempty(value) || values.splice(idx, 1);
+            !this.$H.isempty(value) || values.splice(idx, 1);
         }
     },
 
@@ -936,7 +971,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      * The timeout is set to 20 seconds. If it elapses, it:
      * - Hides the loading coverall.
      * - Constructs an error message detailing the problematic field and value.
-     * - Displays the error message using `window.hWin.HEURIST4.msg.showMsgErr`.
+     * - Displays the error message using `this.$Hmsg.showMsgErr`.
      *
      * The timeout ID is stored in `this.timeout.action_timeout`.
      * `this.timeout.field_name` and `this.timeout.value` should be set before or when
@@ -951,27 +986,25 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      */
     setupTimeout: function(){
 
-        let that = this;
+        this.timeout.action_timeout = setTimeout(() => {
 
-        this.timeout.action_timeout = setTimeout(function(){
+            this.$Hmsg.sendCoverallToBack();
 
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
+            let field = this.timeout.field_name;
+            let value = this.timeout.value;
+            let dty_ID = this.options.mapping.fields[field];
 
-            let field = that.timeout.field_name;
-            let value = that.timeout.value;
-            let dty_ID = that.options.mapping.fields[field];
-
-            if(Array.isArray(value) || window.hWin.HEURIST4.util.isObject(value)){
+            if(Array.isArray(value) || this.$H.isObject(value)){
                 value = JSON.stringify(value);
             }
 
-            window.hWin.HEURIST4.msg.showMsgErr({
+            this.$Hmsg.showMsgErr({
                 message: 'An error has occurred with mapping values to their respective fields,<br>'
                         + 'please report this by using the bug reporter under Help at the top right of the main screen or,<br>'
                         + 'via email directly to support@heuristnetwork.org so we can fix this quickly.<br><br>'
                         + 'Invalid field details:<br>'
                         + `Response field - "${field}"<br>`
-                        + `Record field - "${$Db.rst(that.options.mapping.rty_ID, dty_ID, 'rst_DisplayName')}" (<em>${$Db.dty(dty_ID, 'dty_Type')}</em>)<br>`
+                        + `Record field - "${$Db.rst(this.options.mapping.rty_ID, dty_ID, 'rst_DisplayName')}" (<em>${$Db.dty(dty_ID, 'dty_Type')}</em>)<br>`
                         + `Value to insert - "${value}"<br>`,
                 error_title: 'Saving selection canceled',
                 status: window.hWin.ResponseStatus.UNKNOWN_ERROR
@@ -993,7 +1026,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
     checkResultSize: function(result_size, max_size){
 
         if(result_size > max_size){
-            window.hWin.HEURIST4.msg.showMsgDlg(
+            this.$Hmsg.showMsgDlg(
                 `There are ${result_size} records satisfying these criteria, only the first ${max_size} are shown.<br>Please narrow your search.`
             );
         }
@@ -1028,7 +1061,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      */
     _getCountryCode: function(country_code){
 
-        if(window.hWin.HEURIST4.util.isempty(country_code)){
+        if(this.$H.isempty(country_code)){
             return '';
         }
 
@@ -1095,12 +1128,12 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      */
     getValueByParts: function(fld_Names, value){
 
-        if(window.hWin.HEURIST4.util.isempty(value)){
+        if(this.$H.isempty(value)){
             return value;
         }
 
         for(const part of fld_Names){
-            if(value && !window.hWin.HEURIST4.util.isempty(value[part])){
+            if(value && !this.$H.isempty(value[part])){
                 value = value[part];
             }else if(part == 'count'){
                 value = 0;
@@ -1138,7 +1171,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
 
         let wkt = stringifyMultiWKT(value);    
 
-        if(window.hWin.HEURIST4.util.isempty(wkt)){
+        if(this.$H.isempty(wkt)){
             return '';
         }
 
@@ -1160,7 +1193,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      * Constructs a WKT POINT string from longitude and latitude values,
      * prefixed with the Heurist point type code 'p '.
      *
-     * If either `long` or `lat` is empty (as determined by `window.hWin.HEURIST4.util.isempty`),
+     * If either `long` or `lat` is empty (as determined by `this.$H.isempty`),
      * an empty string is returned.
      *
      * @memberof heurist.lookupBase
@@ -1172,7 +1205,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      */
     constructLocation: function(long, lat){
 
-        return !window.hWin.HEURIST4.util.isempty(long) && !window.hWin.HEURIST4.util.isempty(lat)
+        return !this.$H.isempty(long) && !this.$H.isempty(lat)
                 ? `p POINT(${long} ${lat})`
                 : '';
     },
@@ -1202,7 +1235,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      */
     getTimespan: function(fld_Names, value){
 
-        if(!fld_Names[0].startsWith('when') || window.hWin.HEURIST4.util.isempty(value)){
+        if(!fld_Names[0].startsWith('when') || this.$H.isempty(value)){
             return value;
         }
 
@@ -1221,7 +1254,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      * If `parameters` are empty or result in an empty query string, it shows an error and returns.
      *
      * The actual request to the external service is proxied through a Heurist PHP script
-     * (`/heurist/hserv/controller/record_lookup.php`) via `window.hWin.HAPI4.RecordMgr.lookup_external_service`.
+     * (`/heurist/hserv/controller/record_lookup.php`) via `this.HAPI.RecordMgr.lookup_external_service`.
      *
      * Before sending the request, it shows a loading coverall.
      * On receiving a response:
@@ -1242,8 +1275,6 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      */
     _doSearch: function(parameters, request = {}){
 
-        let that = this;
-
         // Prepare URL
         let full_url = this.baseURL;
         if(!full_url.endsWith('?') && !full_url.endsWith('&')){
@@ -1252,10 +1283,10 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
 
         // Process + Add parameters
         let has_params = false;
-        if(!window.hWin.HEURIST4.util.isempty(parameters) && window.hWin.HEURIST4.util.isObject(parameters)){
+        if(!this.$H.isempty(parameters) && this.$H.isObject(parameters)){
             let params = {};
             for(let key in parameters){
-                if(Object.hasOwn(parameters, key) && !window.hWin.HEURIST4.util.isempty(parameters[key])){
+                if(Object.hasOwn(parameters, key) && !this.$H.isempty(parameters[key])){
                     params[key] = parameters[key];
                 }
             }
@@ -1264,7 +1295,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         }
 
         if(!has_params){
-            window.hWin.HEURIST4.msg.showMsgErr({
+            this.$Hmsg.showMsgErr({
                 status: window.hWin.ResponseStatus.ACTION_BLOCKED,
                 message: 'Please enter a value into one of the input fields'
             });
@@ -1276,28 +1307,27 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
             serviceType: this.serviceName
         }, request);
 
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
+        this.$Hmsg.bringCoverallToFront(this.element);
 
         // calls /heurist/hserv/controller/record_lookup.php
-        window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (response) => {
+        this.HAPI.RecordMgr.lookup_external_service(request, (response) => {
 
-            window.hWin.HEURIST4.msg.sendCoverallToBack(); // hide loading cover
+            this.$Hmsg.sendCoverallToBack(); // hide loading cover
 
-            response = window.hWin.HEURIST4.util.isJSON(response);
+            response = this.$H.isJSON(response);
 
             if(Object.hasOwn(response, 'status') && response.status != window.hWin.ResponseStatus.OK){ // Error return
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+                this.$Hmsg.showMsgErr(response);
                 return;
             }else if(!response){
-                window.hWin.HEURIST4.msg.showMsgErr({
+                this.$Hmsg.showMsgErr({
                     status: window.hWin.ResponseStatus.UNKNOWN_ERROR,
                     message: 'Service data was returned in an unhandled format.'
                 });
                 return;
             }
 
-            that._handleSearchResult(response);
-
+            this._handleSearchResult(response);
         });
     },
 
@@ -1326,10 +1356,10 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      *
      * - If `values` is an object, it's converted to an array of its values (`Object.values(values)`).
      * - If `values` is not an array (e.g., a string or number), it's wrapped in a single-element array.
-     *   Empty initial values (as per `window.hWin.HEURIST4.util.isempty`) result in an array with an empty string `['']`,
+     *   Empty initial values (as per `this.$H.isempty`) result in an array with an empty string `['']`,
      *   which is then filtered.
      * - Finally, it filters the resulting array to remove any values that are considered empty
-     *   by `window.hWin.HEURIST4.util.isempty`.
+     *   by `this.$H.isempty`.
      *
      * @memberof heurist.lookupBase
      * @instance
@@ -1338,15 +1368,15 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      */
     valueToArray: function(values){
 
-        if(window.hWin.HEURIST4.util.isObject(values)){
+        if(this.$H.isObject(values)){
             values = Object.values(values);
         }
         if(!Array.isArray(values)){
-            values = window.hWin.HEURIST4.util.isempty(values) ? '' : values;
+            values = this.$H.isempty(values) ? '' : values;
             values = [values];
         }
 
-        values = values.filter((val) => !window.hWin.HEURIST4.util.isempty(val));
+        values = values.filter((val) => !this.$H.isempty(val));
 
         return values;
     }

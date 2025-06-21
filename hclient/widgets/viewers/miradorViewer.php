@@ -1,9 +1,11 @@
 <?php
 /**
-* Mirador viewer. It uses customized Mirador viwer (from external folder) with annotation and image tools
+* miradorViewer.php - Inits and handles Mirador viewer. 
+* 
+* It uses customized Mirador viewer (from external folder) with annotation and image tools
 * If it is missed, it uses latest mirador distribution from unpkg.com
 *
-* For annotations, heurist database must have either RT_MAP_ANNOTATION or RT_ANNOTATION
+* For annotations, heurist database must have reord type either RT_MAP_ANNOTATION or RT_ANNOTATION
 *
 * As a mirador viewer with annotation tool we use customized https://github.com/ProjectMirador/mirador-integration
 * Modified files are in mirador-integration-changes.zip in external5/mirador3 folder
@@ -12,28 +14,20 @@
 * Apply changes from mirador-integration-changes.zip
 * To build webpack: npm run webpack
 *
-*
 * We pass to mirador-integration application
 * endpointURL - url to heurist api that pass all requests to dbAnnotation.php
 * manifestUrl - url of iiif image (it needs for thumbnail creation for annotated area)
 * sourceRecordId - heurist record id - reference to image to be annotated
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\viewers
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       6.0
 */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 
 /*
 Parameters:

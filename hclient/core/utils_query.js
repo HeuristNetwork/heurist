@@ -1,21 +1,29 @@
 /**
-* HEURIST QUERY utility functions
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+ * @file utils_query.js
+ * @brief Provides utility functions for constructing, parsing, and manipulating Heurist search queries.
+ * @fileOverview This file defines the `HEURIST4.query` namespace. Its functions facilitate
+ * the conversion between Heurist query objects (often JSON-based) and URL query strings.
+ * Key functionalities include:
+ * - Composing URL query strings from request objects (`composeHeuristQueryFromRequest`, `composeHeuristQuery2`).
+ * - Parsing URL query strings or JSON query representations into a standardized query object (`parseHeuristQuery`).
+ * - Merging multiple query objects (`mergeHeuristQuery`, `mergeTwoHeuristQueries`).
+ * - Cleaning and simplifying query rule structures (`cleanRules`).
+ * - Stringifying query objects for specific uses, like map queries (`hQueryStringify`).
+ * - Generating human-readable plain text descriptions of queries (`stringQueryToPlainText`, `jsonQueryToPlainText`).
+ * - Creating facet query structures (`createFacetQuery`).
+ * - Helper for displaying a "copy query string" popup (`hQueryCopyPopup`).
+ * These utilities are central to how search and filtering are handled throughout the Heurist client.
+ * 
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Brandon McKay   <blmckay13@gmail.com>
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 4.0
+ */
 
 if (!window.hWin.HEURIST4){
     window.hWin.HEURIST4 = {};
@@ -24,14 +32,31 @@ if (!window.hWin.HEURIST4){
 if (!window.hWin.HEURIST4.query) 
 {
 
+/**
+ * @namespace HEURIST4.query
+ * @memberof HEURIST4
+ * @description Provides a collection of utility functions for constructing, parsing, merging,
+ * and interpreting Heurist search queries. These functions handle the conversion between
+ * internal query representations (often JSON objects) and URL query strings,
+ * as well as generating human-readable descriptions of queries.
+ */
 window.hWin.HEURIST4.query = {
 
-    //--- HEURIST QUERY ROUTINES -------
-    
-    //
-    // from object to query string
-    // JSON to URL
-    // hQueryComposeURL
+    /**
+     * Composes a Heurist URL query string from a query request object.
+     * Includes database, mapdocument (if present in current URL), 'w' (domain), 'q' (query),
+     * 'rules', and 'rulesonly' parameters.
+     *
+     * @param {Object} [query_request] - The query request object.
+     * @param {string} [query_request.w] - The domain or scope of the query (e.g., 'all', 'bookmark', record type ID).
+     * @param {string|Object|Array} [query_request.q] - The main query part. Can be a string, object, or array.
+     *                                                  If object/array, it will be JSON stringified.
+     * @param {string|Object|Array} [query_request.rules] - The query rules. If object/array, it will be JSON stringified.
+     * @param {boolean|number} [query_request.rulesonly] - If true or 1, indicates only rules should be applied.
+     *                                                     If 2, also indicates a specific rules-only mode.
+     * @param {boolean} [encode=false] - If true, URI encodes the 'q' and 'rules' parameter values.
+     * @returns {string} The composed URL query string (e.g., "db=mydb&w=all&q=...").
+     */
     composeHeuristQueryFromRequest: function(query_request, encode){
             let query_string = 'db=' + window.hWin.HAPI4.database;
             
@@ -85,18 +110,23 @@ window.hWin.HEURIST4.query = {
             return query_string;        
     },
 
-    /* 
-                JSON to URL
-    params:{
-    q,
-    w or domain,
-    rules,
-    rulesonly
-    notes
-    viewmode
-    }}
-    
-    */
+    /**
+     * Composes a Heurist URL query string from a parameters object (alternative version).
+     * This version focuses on specific parameters like 'q', 'w' (or 'domain'), 'rules', 'rulesonly',
+     * 'notes', and 'viewmode'.
+     *
+     * @param {Object} [params] - The parameters object.
+     * @param {string|Object|Array} [params.q] - The main query part. Stringified if object/array.
+     * @param {string} [params.w] - The domain/scope. Alias: `params.domain`.
+     * @param {string} [params.domain] - Alternative for `params.w`.
+     * @param {string|Object|Array} [params.rules] - Query rules. Stringified if object/array.
+     * @param {boolean|number} [params.rulesonly] - Rules-only mode flag.
+     * @param {string} [params.notes] - Notes associated with the query.
+     * @param {string} [params.viewmode] - View mode for the query results.
+     * @param {boolean} [encode=false] - If true, URI encodes 'q', 'rules', and 'notes' values.
+     * @returns {string} The composed URL query string, starting with '?' (e.g., "?w=all&q=...").
+     *                   Returns "?" if no parameters are provided.
+     */
     composeHeuristQuery2: function(params, encode){
         if(params){
 
@@ -148,9 +178,15 @@ window.hWin.HEURIST4.query = {
             return '?';
     },
 
-    //
-    // removes codes section and empty levels
-    //
+    /**
+     * Cleans a Heurist query rules structure by recursively removing 'codes' properties
+     * and empty 'levels' arrays from each rule object.
+     *
+     * @param {Object[]|string} rules - An array of rule objects or a JSON string representing it.
+     *                                  Each rule object can have 'codes' and 'levels' properties.
+     * @returns {Object[]|null} The cleaned array of rule objects, or `null` if the input
+     *                          is empty or invalid JSON.
+     */
     cleanRules: function(rules){
         
         if(window.hWin.HEURIST4.util.isempty(rules)){
@@ -180,9 +216,15 @@ window.hWin.HEURIST4.query = {
         return rules;        
     },
 
-    //
-    // both parameter should be JSON array or Object (rules are ignored)
-    //
+    /**
+     * Merges multiple Heurist query objects or query strings into a single query representation.
+     * It iteratively calls `mergeTwoHeuristQueries` for each argument.
+     *
+     * @param {...(Object|string)} arguments - A variable number of Heurist query objects or query strings to merge.
+     * @returns {Object[]|string} The merged query. If all inputs were plain strings and successfully merged as such,
+     *                            a concatenated string is returned. Otherwise, an array of query objects is returned.
+     *                            Returns an empty array if no arguments are provided.
+     */
     mergeHeuristQuery: function(){
         
         let res_query = [];
@@ -201,9 +243,31 @@ window.hWin.HEURIST4.query = {
         return res_query;
     },
     
+    /**
+     * Merges two Heurist queries (which can be query objects, JSON strings, or plain text query strings).
+     * - If both queries are determined to be plain text strings (not parsable as JSON or JSON with a 'q' property),
+     *   they are concatenated with a space.
+     * - Otherwise, queries are normalized (parsed if JSON strings, wrapped if plain text) into query objects.
+     * - Rules (`rules` property) from the input objects are preserved if present but are not merged;
+     *   the rules from the first query object (`query1`) would typically take precedence if the result is treated as a single query structure.
+     * - If one query is empty or null, the other is returned.
+     * - If both are valid query objects, their 'q' parts (which become arrays) are concatenated.
+     *
+     * The internal helper `__prepareQuery` is used to normalize input queries.
+     *
+     * @param {Object|string} query1 - The first query (JSON object, JSON string, or plain text string).
+     * @param {Object|string} query2 - The second query (JSON object, JSON string, or plain text string).
+     * @returns {Object[]|string|Object} The merged query.
+     *                                   - Returns a concatenated string if both inputs were plain text.
+     *                                   - Returns an array of query objects if inputs were structured queries.
+     *                                   - Returns one of the inputs if the other was empty/null.
+     *                                   - May return a single query object if one input was empty.
+     */
     mergeTwoHeuristQueries: function(query1, query2){
 
-        //return object  {q:, rules:, plain:}
+        // Internal helper function: __prepareQuery
+        // Normalizes a query input (string or object) into a consistent object structure:
+        // {q: query_object, rules: rules_object|false, plain: plain_text_string|false}
         function __prepareQuery(query){
             
             let rules = false, sPlain = false;
@@ -311,11 +375,38 @@ window.hWin.HEURIST4.query = {
         
     },
     
-    //
-    // converts query string to object
-    // URL to JSON
-    // hQueryParseURL
-    //
+    /**
+     * Parses a Heurist query, which can be provided as a URL query string (e.g., from `window.location.search`)
+     * or as a JSON string/object, into a standardized query object.
+     * The resulting object includes properties like `q` (main query), `w` (domain/scope, also aliased as `domain`),
+     * `rules`, `rulesonly`, `notes`, `primary_rt`, `viewmode`, `db`, and `type` (indicating query complexity).
+     * It also preserves UI-related properties like `ui_name` and `ui_notes`.
+     * Handles faceted search structures by identifying `rectypes` array and setting type to 3.
+     *
+     * @param {string|Object} qsearch - The query input.
+     *                                  - If a string starting with '?', it's treated as a URL query string.
+     *                                  - Otherwise, it's treated as a JSON string or a direct query object.
+     * @returns {Object} A standardized query object.
+     *                   Properties:
+     *                   - `q`: The core query part (string or parsed JSON).
+     *                   - `w`: Domain/scope ('all', 'bookmark', etc.).
+     *                   - `domain`: Alias for `w`.
+     *                   - `rules`: Parsed rules string (or original if not JSON).
+     *                   - `rulesonly`: Parsed rulesonly flag.
+     *                   - `notes`: Notes from the query.
+     *                   - `primary_rt`: Primary record type from the query.
+     *                   - `viewmode`: Viewmode from the query.
+     *                   - `db`: Database name from the query.
+     *                   - `type`: An integer indicating the query type/complexity:
+     *                             - -1: Empty query.
+     *                             -  0: Search query only.
+     *                             -  1: Search query with rules.
+     *                             -  2: Rules only.
+     *                             -  3: Faceted search (if `rectypes` array found in JSON input).
+     *                   - `ui_name...`: Any properties from input starting with `ui_name`.
+     *                   - `ui_notes...`: Any properties from input starting with `ui_notes`.
+     *                   Returns a basic structure with `type: -1` if `qsearch` is empty.
+     */
     parseHeuristQuery: function(qsearch)
     {
 
@@ -334,18 +425,18 @@ window.hWin.HEURIST4.query = {
                 query = window.hWin.HEURIST4.util.getUrlParameter('q', qsearch);
                 db = window.hWin.HEURIST4.util.getUrlParameter('db', qsearch);
                 
-                res.ui_notes = notes;
+                res.ui_notes = notes; // Preserve notes if coming from URL params directly
                 
-            }else{ //it may be aquery in form of json
+            }else{ //it may be a query in form of json
             
                 let r = window.hWin.HEURIST4.util.isJSON(qsearch);
-                if(r!==false){
+                if(r!==false){ // Successfully parsed as JSON or was already an object
                     
-                    if(Array.isArray(r.rectypes)){
+                    if(Array.isArray(r.rectypes)){ // Special handling for faceted search structure
                         r.type = 3; // faceted
                         r.w = (r.domain=='b' || r.domain=='bookmark')?'bookmark':'all';
                         r.domain = r.w;
-                        return r;
+                        return r; // Return early as this structure is specific
                     }
                     
                     if(r.rules){
@@ -353,7 +444,7 @@ window.hWin.HEURIST4.query = {
                     }
                     if(r.q){
                         query = r.q;
-                    }else if(r.type!=3 && !r.rules) {
+                    }else if(r.type!=3 && !r.rules) { // If not faceted and no rules, the object itself might be the query
                         query = r;
                     }
                     
@@ -363,6 +454,7 @@ window.hWin.HEURIST4.query = {
                     domain = r.w?r.w:'all';
                     primary_rt = r.primary_rt; 
                     rulesonly = r.rulesonly;
+                    viewmode = r.viewmode; // Capture viewmode from JSON object
                     
                     //localized name and note
                     $(Object.keys(r)).each(function(i,key){
@@ -370,7 +462,7 @@ window.hWin.HEURIST4.query = {
                             res[key] = r[key];
                         }
                     });
-                }else{ //usual string
+                }else{ //usual string (not URL params, not JSON)
                     query = qsearch;
                 }
             }
@@ -378,12 +470,12 @@ window.hWin.HEURIST4.query = {
         }
         
         if(window.hWin.HEURIST4.util.isempty(query)){
-            type = window.hWin.HEURIST4.util.isempty(rules) ?-1:2; //empty, rulesonly 
+            type = window.hWin.HEURIST4.util.isempty(rules) ?-1:2; //empty (-1), rulesonly (2)
         }else {
-            type = window.hWin.HEURIST4.util.isempty(rules) ?0:1; //searchonly, both
+            type = window.hWin.HEURIST4.util.isempty(rules) ?0:1; //searchonly (0), both (1)
         }
         
-        domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
+        domain = (domain=='b' || domain=='bookmark')?'bookmark':'all'; // Normalize domain
         
         res = $.extend(res, {q:query, w:domain, domain:domain, rules:rules, rulesonly:rulesonly, 
                             primary_rt:primary_rt, viewmode:viewmode, type:type});    
@@ -395,10 +487,25 @@ window.hWin.HEURIST4.query = {
         return res;
     },
 
-    //
-    // get combination query and rules as json array for map query layer
-    // Returns current search request as stringified JSON
-    //    
+    /**
+     * Stringifies a Heurist query request object into a JSON string.
+     * This is often used for preparing queries for map layers or saved searches.
+     * It can optionally include only the 'q' part or the full request (q, rules, w, rulesonly, db, svs).
+     * Faceted searches (identified by `r.facets`) will result in an empty string as they are not allowed for this stringification purpose.
+     *
+     * @param {Object} request - The query request object.
+     * @param {string|Object} [request.q] - The main query part.
+     * @param {string|Object} [request.rules] - Query rules.
+     * @param {string} [request.w] - Domain/scope.
+     * @param {boolean|number} [request.rulesonly] - Rules-only flag.
+     * @param {string} [request.database] - Database name (also checks `request.db`).
+     * @param {string} [request.db] - Alternative for database name.
+     * @param {number} [request.svs] - Saved search ID. If present and `query_only` is false, only `svs` is included.
+     * @param {boolean} [query_only=false] - If true, only the 'q' part of the request is stringified.
+     *                                      If false, the entire relevant request object is stringified.
+     * @returns {string} A JSON string representation of the query, or an empty string if the input
+     *                   is unsuitable (e.g., empty query, faceted search for map query).
+     */
     hQueryStringify: function(request, query_only){
         
         let res = {};
@@ -422,7 +529,7 @@ window.hWin.HEURIST4.query = {
         }else{ 
         
             if(!window.hWin.HEURIST4.util.isempty(request.rules)){
-                //cleanRules?
+                //cleanRules? // Consider if cleanRules should be applied here.
                 let r = window.hWin.HEURIST4.util.isJSON(request.rules);
                 if(r!==false){
                     if(r.facets) return ''; //faceted search not allowed for map queries
@@ -452,9 +559,17 @@ window.hWin.HEURIST4.query = {
         return JSON.stringify(res);
     },
     
-    //
-    //
-    //
+    /**
+     * Displays a popup dialog that shows the JSON stringified version of a query request
+     * (obtained via `hQueryStringify`) in a textarea, allowing the user to copy it.
+     * Typically used for copying queries for map layers or other advanced uses.
+     *
+     * @param {Object} request - The Heurist query request object to be stringified and displayed.
+     * @param {jQuery|Object} [pos_element] - Element or jQuery UI position object to position the dialog relative to.
+     *                                        If an object, expects `my`, `at`, `of` properties.
+     *                                        If a jQuery element, positions dialog to its 'right bottom'.
+     * @returns {void}
+     */
     hQueryCopyPopup: function(request, pos_element){
         
         let res = window.hWin.HEURIST4.query.hQueryStringify(request);
@@ -494,9 +609,31 @@ window.hWin.HEURIST4.query = {
         
     },
 
-    //
-    // Converts string 10:123 to heurist query {t:10, f123: }
-    //
+    /**
+     * Creates a structured facet query object from a colon-separated code string.
+     * The code string typically represents a path through record types and fields
+     * (e.g., "rtid1:dtid1:rtid2:dtid2:final_dtid").
+     * It determines the target record type ID (`rtid`), the final field ID (`id`),
+     * and the query path code (`code`).
+     * If `need_query` is true, it also constructs a nested query structure (`facet`)
+     * for searching facet values, handling link and relation directions.
+     *
+     * @param {string} code - A colon-separated string representing the facet path.
+     *                        e.g., "10:lf123:20:f456" where 10, 20 are rt_IDs, lf123, f456 are dty_IDs.
+     *                        Link types (lt, lf, rt, rf) are handled specially.
+     * @param {boolean} [need_query=false] - If true, generates the nested 'facet' query structure
+     *                                       for retrieving facet values.
+     * @param {boolean} [respect_relation_direction=false] - If true, distinguishes between 'related_to' and 'relatedfrom'
+     *                                                       for relation fields when `need_query` is true.
+     *                                                       Otherwise, uses 'related'.
+     * @returns {Object} A facet query object with properties:
+     *                   - `id`: The final detail type ID (field ID) in the path.
+     *                   - `rtid`: The record type ID associated with the final field.
+     *                   - `code`: The input code string excluding the final field ID.
+     *                   - `facet` (optional): If `need_query` was true, this contains the nested query structure.
+     *                   - `relation_direction` (optional): If `need_query` was true and the path involves relations/links,
+     *                                                    this indicates the direction of the first link/relation from the target.
+     */
     createFacetQuery: function(code, need_query, respect_relation_direction){
 
         let result = {};
@@ -506,18 +643,18 @@ window.hWin.HEURIST4.query = {
         let dtid = code[code.length-1];
         let linktype = dtid.substr(0,2);
         if(linktype=='lt' || linktype=='lf' || linktype=='rt' || linktype=='rf'){
-            //unconstrained link
-            code.push('0');         //!!!!!!!!
-            code.push('title');
+            //unconstrained link, assume title field of target type
+            code.push('0');         // Placeholder for rt_ID of the target type of the unconstrained link (usually resolved later)
+            code.push('title');     // Assume 'title' field for unconstrained links by default
         }
 
         result['id']   = code[code.length-1]; //last dty_ID
-        result['rtid'] = code[code.length-2];
+        result['rtid'] = code[code.length-2]; // rt_ID for the field 'id'
         
         //creates lists of queries to search facet values
         if(need_query===true){  //not direct input
 
-            //create query to search facet values
+            // Internal recursive helper to build the 'facet' query part
             function __crt( idx, depth ){
                 let res = null;
                 if(idx>0){  //this is relation or link
@@ -527,48 +664,55 @@ window.hWin.HEURIST4.query = {
                     let pref = '';
                     let qp = {};
 
-                    if(code[idx]>0){ //if 0 - unconstrained
+                    if(code[idx]>0){ //if rt_ID is 0 - unconstrained link target type
                         qp['t'] = code[idx];
                         res.push(qp);
                     }
 
-                    //for facet queries direction will be reverted
-                    let fld = code[idx-1]; //link field
-                    if(fld.indexOf('lf')==0){
+                    //for facet queries direction will be reverted for links/relations
+                    let fld = code[idx-1]; //link/relation field dty_ID
+                    if(fld.indexOf('lf')==0){ // linked_from field
                         pref = 'linked_to';    
-                    }else if(fld.indexOf('lt')==0){
+                    }else if(fld.indexOf('lt')==0){ // linked_to field
                         pref = 'linkedfrom';    
-                    }else if(fld.indexOf('rf')==0){
+                    }else if(fld.indexOf('rf')==0){ // related_from field
                         pref = respect_relation_direction?'related_to':'related';    
-                    }else if(fld.indexOf('rt')==0){
+                    }else if(fld.indexOf('rt')==0){ // related_to field
                         pref = respect_relation_direction?'relatedfrom':'related';
                     }
                      
-                    if(depth==0){
+                    if(depth==0 && pref !== ''){ // Store direction of the first segment if it's a link/relation
                         result['relation_direction'] = pref;
                     }
 
                     qp = {};
                     qp[pref+':'+fld.substr(2)] = __crt(idx-2, depth+1);    
                     res.push(qp);
-                }else{ //this is simple field
-                    res = '$IDS';
+                }else{ //this is simple field (end of recursion, or direct field of initial type)
+                    res = '$IDS'; // Placeholder for the actual IDs to be searched
                 }
                 return res;
             }
-
-            /*if(code.length-2 == 0){
-            res['facet'] = {ids:'$IDS'};
-            }else{}*/
             result['facet'] = __crt( code.length-2, 0 );
         }
 
-        code.pop();
-        result['code'] = code.join(':');  //qcode without last dty_ID
+        code.pop(); // Remove the final field ID from the code path
+        result['code'] = code.join(':');  // qcode without last dty_ID (path to the field's record type)
         
         return result;
     },
 
+    /**
+     * Converts a plain text Heurist query string into a more human-readable HTML formatted string.
+     * It first tries to parse subqueries enclosed in parentheses recursively.
+     * Then, it attempts to convert field-prefixed parts (e.g., "title:something") into a JSON-like
+     * structure which is then processed by `jsonQueryToPlainText`.
+     * If the input is already JSON or invalid, it directly calls `jsonQueryToPlainText`.
+     *
+     * @param {string} query - The plain text query string.
+     * @returns {string} An HTML string representing the human-readable version of the query.
+     *                   Returns an empty string if the query is empty or invalid.
+     */
     stringQueryToPlainText: function(query){
 
         const getSubquery = /\(([^[)])*\)/g;
@@ -619,6 +763,23 @@ window.hWin.HEURIST4.query = {
         return window.hWin.HEURIST4.query.jsonQueryToPlainText(json_query);
     },
 
+    /**
+     * Converts a Heurist JSON query object (or an array of query objects) into a human-readable HTML formatted string.
+     * It iterates through query parts, identifies record types, fields, conditions, and logical operators (AND/OR),
+     * and constructs a descriptive string. It uses database schema information ($Db) for labels.
+     * Handles various query keys like 't' (type), 'ids', 'title', field IDs (e.g., 'f123'),
+     * 'any', 'all', 'plain', 'svs' (saved search), 'db', 'sortby', link/relation keys.
+     *
+     * @param {Object|Array|string} query - The Heurist JSON query object, an array of such objects,
+     *                                      or a string that can be parsed by `stringQueryToPlainText`.
+     * @param {boolean} [is_sub_query=false] - True if this is processing a sub-query (e.g., within 'any' or 'all'),
+     *                                         which affects formatting (no "Searching all records" prefix).
+     * @param {boolean} [use_or=false] - If true and processing an array of conditions, joins them with "OR" instead of "AND".
+     * @returns {string} An HTML string representing the human-readable version of the query.
+     *                   Returns an empty string if the query is empty or invalid.
+     *                   Includes a legend for special characters like '==', '≠≠', '<>', '><' if used.
+     *                   May include a warning for invalid multi-record-type queries.
+     */
     jsonQueryToPlainText: function(query, is_sub_query = false, use_or = false){
 
         const commaListRegex = /^\d+(?:,\d+)*$/;
@@ -877,8 +1038,21 @@ window.hWin.HEURIST4.query = {
         }
 
         return plain_text;
-    },
+    },    
 
+    /**
+     * Extracts and formats a human-readable condition string from a query field's value and type.
+     * It handles various operators/prefixes in the value string (e.g., '=', '-', '@', '%', '<', '>')
+     * and formats them into phrases like "== value", "≠≠ value", "contains any of: value", "starts with: value",
+     * "is value", "value1 <> value2" (for ranges).
+     * For 'enum' type and numeric values, it attempts to resolve term labels from the database.
+     *
+     * @param {string|number} value - The value part of a query condition.
+     * @param {string} type - The data type of the field (e.g., 'enum', 'date', 'freetext').
+     * @returns {string} A formatted string representing the condition (e.g., "<em>__FIELD__</em> == \"example\"").
+     *                   The placeholder "__FIELD__" is intended to be replaced by the actual field name later.
+     *                   Returns an empty string if the value cannot be meaningfully formatted.
+     */
     extractCondition: function(value, type){
 
         const commaListRegex = /^\d+(?:,\d+)*$/;
@@ -943,7 +1117,17 @@ window.hWin.HEURIST4.query = {
 
         return `<em>__FIELD__</em> ${res}`;
     },
-
+    
+    /**
+     * Converts a sort key (and optional direction prefix '-') into a human-readable string.
+     * Handles common sort keys like 'id', 'title', 'modified', 'added', 'record type',
+     * 'rating', 'popularity', and field-specific sorts (e.g., 'f:123' or 'field:fieldname').
+     *
+     * @param {string} value - The sort key string, possibly prefixed with '-' for descending order.
+     * @param {string|number} [rty_ID] - The record type ID, used to resolve display names for field-specific sorts.
+     * @returns {string} A human-readable string describing the sort criterion (e.g., "Record Title ascending order").
+     *                   Returns an empty string or a partially resolved string if the sort key is unknown or field name cannot be resolved.
+     */
     sortbyValue: function(value, rty_ID){
 
         let res = '';

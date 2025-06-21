@@ -22,6 +22,8 @@
 import '../HBase/HBaseWidget.js';
 import '../HFilter/HFilter.js';
 
+/* global bootstrap */
+
 $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
 
     // default options
@@ -200,12 +202,12 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
                 //must have data-heurist-action or data-heurist-pageid attribute
                 let ele2 = ele.parents('[data-heurist-action]');// If a span inside a button is clicked
                 if(ele2.length==0){
-                    ele = ele.parents('[data-heurist-pageid]');
-                }else if(ele2.length==0){
-                    ele = ele.parents('[data-heurist-search]');
-                }else{
-                    ele = ele2;
+                    ele2 = ele.parents('[data-heurist-pageid]');
+                    if(ele2.length==0){
+                        ele2 = ele.parents('[data-heurist-search]');
+                    }
                 }
+                ele = ele2;
             }
         }
         
@@ -353,10 +355,9 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
             //JSON.stringify(newOptions.menuItems)!=JSON.stringify(this.options.menuItems)
             
             
-            if(true) //newids!=oldids
-            {
-                this._menuData = null;    //reset
-            }
+            //if(true) //newids!=oldids
+            this._menuData = null;    //reset
+            
             if(this.options.viewMode!=newOptions.viewMode){
                 this.clearContent();
             }
@@ -556,7 +557,7 @@ console.log( that._menuData );
     executeSavedSearch: function(opts){
         
         if(this.$H.isPositiveInt(opts)){
-            opts = {svsID:options};
+            opts = {svsID:opts};
         }                              
         
         if(!this.filterView){

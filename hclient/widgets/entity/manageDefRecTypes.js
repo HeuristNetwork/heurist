@@ -1,27 +1,44 @@
 /**
-* manageDefRecTypes.js - main widget to manage defRecTypes users
-*
+* @file manageDefRecTypes.js
+* @brief Manages Record Type definitions.
+* @fileOverview Provides a UI for creating, configuring, listing, and managing Record Types within Heurist. This includes setting properties like name, associated group, defining its structure (fields), and managing templates or masks.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 /*
 we may take data from 
 1) use_cache = false  from server on every search request (live data) 
 2) use_cache = true   from client cache - it loads once per heurist session (actually we force load)
 */
+/**
+ * @widget heurist.manageDefRecTypes
+ * @brief Widget for managing Record Type definitions.
+ * @extends $.heurist.manageEntity
+ * @property {?object} import_structure If provided, enables import mode, allowing selection of record types from a remote Heurist instance.
+ * @property {boolean} [use_structure=false] Internal flag, true if `import_structure` is active.
+ * @property {boolean} [isFrontUI=false] If true, adapts UI for front-end display, including a groups editor panel.
+ * @property {?number} rtg_ID ID of the record type group to filter by, used by the search/filter controls.
+ * @property {object} [ui_params] Stores UI preferences like visible fields and column widths, loaded from `usrPreferences`.
+ * @property {string} [default_palette_class='ui-heurist-design'] Default palette class for the widget.
+ * @property {boolean} [innerTitle=false] Whether to display an inner title.
+ * @property {string} [layout_mode='short'] The layout mode for the widget.
+ * @property {boolean} [use_cache=true] Whether to use caching for entity data.
+ * @property {number} [edit_height=640] Default height of the edit dialog.
+ * @property {number} [edit_width=1000] Default width of the edit dialog.
+ * @property {number} [height=640] Default height of the widget.
+ * @property {string} edit_mode Determines editing behavior ('editonly', 'popup').
+ * @property {string} select_mode Determines selection behavior ('manager', 'select_multi', 'select_single').
+ * @property {number} width Default width of the widget, adjusted based on select_mode.
+ */
 $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
    
     _entityName:'defRecTypes',
@@ -47,9 +64,14 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //             name:'Name',description:'Description',show:'Show',duplicate:'Dup',fields:'Info',status:'Del'},
 
 
-    //
-    //                                                  
-    //    
+    /**
+     * @brief Initializes the widget.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @description Sets up default options, handles `import_structure` mode,
+     * adjusts dimensions based on `select_mode`, and registers event listeners
+     * for structure changes, record updates, and window resizing.
+     */
     _init: function() {
 
         this.element.addClass(this._entityName); //to find all exisiting editors in application
@@ -151,6 +173,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
     },
     
+    /**
+     * @brief Cleans up the widget upon destruction.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @description Removes event listeners registered during initialization.
+     */
     _destroy: function() {
         
        window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);        
@@ -160,9 +188,15 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
        this._super(); 
     },
     
-    //  
-    // invoked from _init after load entity config    
-    //
+    /**
+     * @brief Initializes the controls for the widget.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @description Sets up UI based on `edit_mode` and `select_mode`.
+     * Initializes search form, result list (with draggable items if in manager mode),
+     * and record type groups panel if `isFrontUI` is true. Loads initial data.
+     * @returns {boolean} False if the parent's `_initControls` fails, otherwise true.
+     */
     _initControls: function() {
         
         if(!this._super()){
@@ -350,9 +384,14 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         return true;
     },            
     
-    //
-    // invoked after all elements are inited 
-    //
+    /**
+     * @brief Loads data for the widget.
+     * @memberof heurist.manageDefRecTypes
+     * @param {boolean} [is_first] Indicates if this is the first time data is being loaded.
+     * @description Handles loading data based on `use_cache` and `use_structure` options.
+     * If importing, fetches data from a remote source. Otherwise, uses local cache or server calls.
+     * Triggers a record count update if `is_first` and counts are stale.
+     */
     _loadData: function(is_first){
         
         let that = this;
@@ -487,9 +526,17 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
     },
 
-    //
-    // get recordset from HEURIST4.rectypes - it is used for import structure only
-    //
+    /**
+     * @brief Creates a HRecordSet from a Heurist record type structure object.
+     * @memberof heurist.manageDefRecTypes
+     * @param {?object} rectypes The raw record type definitions (e.g., from `window.hWin.HEURIST4.rectypes` or a remote source).
+     *                           If null, uses local `window.hWin.HEURIST4.rectypes`.
+     * @param {boolean} [hideDisabled] If true, filters out record types not shown in lists or in the 'Trash' group.
+     * @returns {HRecordSet} A Heurist HRecordSet object populated with the record type data.
+     * @description This method is primarily used when `options.import_structure` is true,
+     * converting the structure data (potentially from a remote Heurist instance) into a standard recordset.
+     * It maps fields, handles local ID mapping if importing, and updates the result list.
+     */
     getRecordsetFromStructure: function( rectypes, hideDisabled ){
         
         let rdata = { 
@@ -576,10 +623,14 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         return this._cachedRecordset;
     },
     
-    //----------------------
-    //
-    //
-    //
+    /**
+     * @brief Renders the header for the record type list.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @returns {string} HTML string for the list header.
+     * @description Generates HTML for the header row based on visible fields
+     * defined in `usrPreferences.fields` and `fields_width`. Calculates column widths dynamically.
+     */
     _recordListHeaderRenderer: function(){
 
         let max_width = this.recordList.find('.div-result-list-content').width() - 33;
@@ -680,6 +731,16 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     },
     
     
+    /**
+     * @brief Renders a single record type item in the list.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {HRecordSet} recordset The recordset containing the data.
+     * @param {object} record The record object (record type) to render.
+     * @returns {string} HTML string representing the list item.
+     * @description Generates HTML for a single row, displaying data and action buttons
+     * based on `usrPreferences.fields`. Handles icon display and status indicators.
+     */
     _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){
@@ -918,9 +979,18 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Handles actions triggered by events, such as button clicks in the list or search form.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {Event} event The event object.
+     * @param {object} action The action object, typically containing `action` (string) and `recID` (number).
+     * @description Extends the parent's `_onActionListener`. Handles various actions including:
+     * 'delete'/'delete_hasrecs' (with checks for record counts and linked fields),
+     * 'addrec' (opens new record form), 'filter' (opens search for this type),
+     * 'editstr' (opens structure editor), 'show_in_list'/'hide_in_list',
+     * 'duplicate' (duplicates record type), and 'fields' (shows list of fields).
+     */
     _onActionListener:function(event, action){
         
         if(action && (action.action=='delete' || action.action=='delete_hasrecs')){
@@ -1100,6 +1170,13 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     },
     
     
+    /**
+     * @brief Deletes the current record type.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {boolean} unconditionally If true, deletes without confirmation.
+     * @description Prompts for confirmation before deleting. Stores the group ID for potential later updates.
+     */
     _deleteAndClose: function(unconditionally){
     
         if(unconditionally===true){
@@ -1116,10 +1193,15 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }
     },
     
-    //
-    //
-    //
-    _afterDeleteEvenHandler: function(recID){
+    /**
+     * @brief Handles actions after a record type is deleted.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {number} recID The ID of the deleted record type.
+     * @description Calls parent's handler, updates group count, and selects the first record in the list.
+     * Note: Original method name might have a typo "EvenHandler" vs "EventHandler".
+     */
+    _afterDeleteEventHandler: function(recID){
 
         
             this._super(recID);
@@ -1131,11 +1213,15 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
     },
     
-    //-----
-    //
-    // adding group ID value for new rectype
-    // open select icon dialog for new record
-    //
+    /**
+     * @brief Performs actions after the edit form is initialized.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @description Sets default group ID for new record types, opens icon library for new records,
+     * configures the title mask field (making it read-only and adding an edit button),
+     * adds an "Edit Structure" button, and sets up help text toggles.
+     * Calls `mergeIconThumbnailFields` if in manager mode.
+     */
     _afterInitEditForm: function(){
 
         this._super();
@@ -1290,9 +1376,13 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }
     },   
 
-    //
-    // Combine Icon and Thumbnail fields into one, in popup form
-    //
+    /**
+     * @brief Merges the 'Icon' and 'Thumbnail' fields in the edit form for a more compact UI.
+     * @memberof heurist.manageDefRecTypes
+     * @description Hides the original 'Thumbnail' field and integrates its functionality
+     * (display and upload) into the 'Icon' field area. Links their clear buttons.
+     * This is typically called when `select_mode` is 'manager'.
+     */
     mergeIconThumbnailFields: function(){
         // fields
         let $icon = this._editing.getFieldByName('rty_Icon');
@@ -1340,6 +1430,14 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         });
     },
 
+    /**
+     * @brief Handles changes in the edit form.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {jQuery|boolean} changed_element The element that changed or true if a general change occurred.
+     * @description Calls parent's handler. If the 'rty_Name' field changed, it auto-populates
+     * the 'rty_Plural' field by appending 's' to the new name.
+     */
     onEditFormChange: function(changed_element){
         
        this._super(changed_element);
@@ -1355,9 +1453,14 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
        }
     },    
         
-    //
-    // show warning
-    //
+    /**
+     * @brief Opens the add/edit dialog for a record type.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {number} recID The ID of the record type to edit, or -1 to add a new one.
+     * @param {boolean} [is_proceed=false] If true, bypasses the confirmation/hint message.
+     * @description Shows a hint dialog before adding a new record type, then calls the parent's `addEditRecord`.
+     */
     addEditRecord: function(recID, is_proceed){
     
         if(recID<0 && is_proceed !== true){
@@ -1375,9 +1478,16 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }
     },
 	
-    //
-    // listener of onfilter event generated by searchEtity. appicable for use_cache only       
-    //
+	/**
+     * @brief Filters the record list based on search criteria.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {Event} event The filter event.
+     * @param {object} request The request object containing filter parameters.
+     * @description Calls parent's filter handler. If no results and in manager mode,
+     * displays a specific message about record types within the current group or active filters.
+     * @returns {HRecordSet|null} The filtered recordset or null.
+     */
     filterRecordList: function(event, request){ 
         
         let results = this._super(event, request);
@@ -1469,6 +1579,16 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     },
     */
 
+    /**
+     * @brief Saves the record type and closes the edit dialog.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {?object} fields Field values to save. If null, values are taken from the form.
+     * @param {?function} afterAction Callback after successful save.
+     * @param {?function} onErrorAction Callback on save error.
+     * @description Ensures server call is not already in progress. Gets validated values.
+     * Updates default title mask if creating a new record type. Calls parent's `_saveEditAndClose`.
+     */
     _saveEditAndClose: function(fields, afterAction, onErrorAction){
 
         if(window.hWin.HAPI4.is_callserver_in_progress()) {
@@ -1490,9 +1610,17 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         this._super(fields, afterAction, onErrorAction);
     },
     
-    //
-    // update list after save (refresh)
-    //
+    /**
+     * @brief Handles actions after a record type is saved.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {number} recID The ID of the saved record type.
+     * @param {object} fieldvalues The saved field values.
+     * @description Handles 'select_single' mode by selecting and closing.
+     * Updates local $Db cache, calls parent's handler. If it was an insert,
+     * refreshes search, auto-selects in 'select_multi' mode, and calls `_addInitialTabs`.
+     * Triggers a refresh event.
+     */
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
         // close on addition of new record in select_single mode    
@@ -1536,9 +1664,14 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 */        
     },
 
-	//
-	// Display dialog with set of default tab options for new rectypes
-	//
+	/**
+     * @brief Displays a dialog with default tab options for newly created record types.
+     * @memberof heurist.manageDefRecTypes
+     * @private
+     * @param {number} rty_ID The ID of the newly created record type.
+     * @description Prompts the user to select from a list of common tab headings (e.g., "General Info", "Description").
+     * Based on the selection, calls `_addNewFields` or `_makeAdditionalHeaders` if more separator fields are needed.
+     */
     _addInitialTabs: function(rty_ID){
 
         let that = this;
@@ -1598,9 +1731,17 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Suggested tabs', yes: 'Create tabs', no: 'No tabs'}, {default_palette_class: 'ui-heurist-design'});
     },
 
-	//
-	// Create additional separators if more are needed for selected default headers
-	//
+	/**
+     * @brief Creates additional separator Detail Types if needed for default tabs.
+     * @memberof heurist.manageDefRecTypes
+     * @private
+     * @param {number} rty_ID The ID of the record type being configured.
+     * @param {Array<string>} headings The list of chosen tab headings.
+     * @param {number} cur_dty_count The current count of available separator Detail Types.
+     * @param {number} dtg_id The Detail Type Group ID to assign to new separators.
+     * @description Recursively creates new separator Detail Types until enough are available
+     * for the selected `headings`. Then calls `_addNewFields`.
+     */
     _makeAdditionalHeaders: function(rty_ID, headings, cur_dty_count, dtg_id){
 
         let that = this;
@@ -1646,9 +1787,16 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
     },
 
-    //
-    // Add default tab separators to new record type
-    //    
+    /**
+     * @brief Adds selected default tab separators to a new record type's structure.
+     * @memberof heurist.manageDefRecTypes
+     * @private
+     * @param {number} rty_ID The ID of the record type.
+     * @param {?Array<string>} tab_headings An array of chosen tab headings. If null or empty, no tabs are added.
+     * @description Constructs a request to add separator fields (Detail Types of type 'separator')
+     * to the record type structure with the specified headings.
+     * After successful addition, opens the structure editor for the record type.
+     */
     _addNewFields: function(rty_ID, tab_headings){
       
 		this._selected_fields = {};
@@ -1710,9 +1858,14 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 		);
     },
 
-    //
-    //
-    //
+    /**
+     * @brief Updates the record type count for a group.
+     * @memberof heurist.manageDefRecTypes
+     * @param {number} rtg_ID The ID of the record type group.
+     * @param {number} delta The change in count (e.g., +1 or -1).
+     * @description This method appears to be commented out in the source and thus non-functional.
+     * It was likely intended to update `rtg_RtCount` and trigger a refresh.
+     */
     updateGroupCount:function(rtg_ID,  delta){
     /*
         if(rtg_ID>0){
@@ -1725,14 +1878,25 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     */
     },    
     
-    //
-    //
-    //
+    /**
+     * @brief Retrieves UI preferences for this widget.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @returns {object} The user preferences object, using `defaultPrefs` if none are saved.
+     */
     getUiPreferences:function(){
         this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
         return this.usrPreferences;
     },
     
+    /**
+     * @brief Saves UI preferences, specifically the visible fields configuration.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {?object} new_params If provided, contains the new 'fields' array to save.
+     * @description Saves the `fields` array (which columns are visible and their order)
+     * to user preferences unless in 'select_multi' or 'select_single' mode.
+     */
     saveUiPreferences:function(new_params){
 
         if(this.options.select_mode=='select_multi' || this.options.select_mode=='select_single') return;
@@ -1748,9 +1912,14 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }
     },
     
-    //
-    // update ui and call save prefs
-    //
+    /**
+     * @brief Handles UI changes, such as column visibility or order.
+     * @memberof heurist.manageDefRecTypes
+     * @param {?Event} event The event that triggered the UI change (can be null).
+     * @param {object} params Parameters describing the UI change, typically includes a 'fields' array.
+     * @description If `event` is present, saves the new UI preferences.
+     * Updates `this.options.ui_params` and refreshes the record list.
+     */
     changeUI: function( event, params ){
         
         if(this.options.edit_mode=='editonly') return;
@@ -1766,9 +1935,14 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     },
     
     
-    //
-    // duplicate record type and then call edit type dialogue
-    //
+    /**
+     * @brief Duplicates a record type.
+     * @memberof heurist.manageDefRecTypes
+     * @private
+     * @param {number} rectypeID The ID of the record type to duplicate.
+     * @description Prompts for confirmation, then sends a request to the server
+     * to duplicate the record type. Refreshes data upon success.
+     */
     _duplicateType: function (rectypeID) {
 
         window.hWin.HEURIST4.msg.showMsgDlg(
@@ -1802,9 +1976,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     },
 
 
-    // Change group for rectype
-    // params:  {rty_ID:rty_ID, rty_RecTypeGroupID:rtg_ID }
-    //                                
+    /**
+     * @brief Changes the group assignment for a record type.
+     * @memberof heurist.manageDefRecTypes
+     * @param {object} params Object containing `rty_ID` and `rty_RecTypeGroupID`.
+     * @description Saves the record type with the new group ID and refreshes the UI.
+     */
     changeRectypeGroup: function(params){                                    
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
 
@@ -1823,6 +2000,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         });
     },
 
+    /**
+     * @brief Initiates the process of importing Record Types from a CSV file.
+     * @memberof heurist.manageDefRecTypes
+     * @description Opens a dialog for importing record types. After import, it reloads data,
+     * displays a report, and triggers a refresh of record type data.
+     */
     importRecordTypes: function(){
 
         const that = this;

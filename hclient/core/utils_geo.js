@@ -1,38 +1,30 @@
 /**
-* WKT and GeiJSON utility functions
-*
-* @see editing_input.js, mapDraw.js, recordset.js
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file utils_geo.js
+ * @brief Provides utility functions for handling WKT (Well-Known Text) and GeoJSON data formats.
+ * @fileOverview This file contains a collection of functions under the `HEURIST4.geo` namespace
+ * designed to parse, convert, and manipulate geospatial data. Key functionalities include:
+ * - Converting WKT to GeoJSON and vice-versa (using external `parseWKT` and `stringifyWKT`).
+ * - Preparing GeoJSON data for different mapping libraries (e.g., Google Maps, Timemap.js).
+ * - Extracting bounding boxes from WKT or GeoJSON data.
+ * - Merging multiple bounding boxes.
+ * - Generating human-readable descriptions from WKT values.
+ * - Parsing WorldFile data to extract georeferencing information.
+ * These utilities are used in various parts of Heurist that deal with maps and geographic data.
+ * @see editing_input.js
+ * @see mapDraw.js
+ * @see recordset.js
+ *
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 4.0
+ */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 /* global parseWKT, stringifyWKT */
-
-/*
-getWktBoundingBox
-wktValueToShapes
-prepareGeoJSON  json to timemap
-wktValueToDescription
-
-parseWKTCoordinates
-
-simplePointsToWKT -  coordinate pairs to WKT
-
-parseWorldFile -  worldfile data to bbox
-
-*/
 
 if (!window.hWin.HEURIST4){
     window.hWin.HEURIST4 = {};
@@ -41,15 +33,38 @@ if (!window.hWin.HEURIST4){
 if (!window.hWin.HEURIST4.geo) 
 {
 
+/**
+ * @namespace HEURIST4.geo
+ * @memberof HEURIST4
+ * @description Provides a collection of utility functions for working with geospatial data,
+ * primarily focusing on WKT (Well-Known Text) and GeoJSON formats. This includes parsing,
+ * conversion between formats, preparing data for map display, calculating bounding boxes,
+ * and generating textual descriptions of geographic features.
+ */
 window.hWin.HEURIST4.geo = {
     
-    //
-    // prepare geojson  - get array of timemap shapes and summary extent
-    // need for
-    // 1. recordset.toTimemap convert wkt to timemap shapes (in parseWKTCoordinates) and draw on main map 
-    // 2. mapDraw._loadWKT convert wkt to shapes for further load as separate overlays to edit
-    // 3. get type and number of shapes with extent to get human readable description in wktValueToDescription
-    //
+    /**
+     * Parses GeoJSON data and prepares it for use with mapping libraries, optionally calculating the extent.
+     * This function can handle FeatureCollection, Feature, and GeometryCollection types, recursively
+     * processing nested structures. It transforms coordinates into a format suitable for
+     * Google Maps or a generic array format (e.g., for Timemap.js).
+     *
+     * Internal helper functions `__loadGeoJSON_primitive`, `_isvalid_pnt`, `__extractCoords`, `__extractCoords2`
+     * handle the detailed processing of individual geometry types and coordinate transformations.
+     *
+     * @param {Object|string} mdata - The GeoJSON data to process. Can be a GeoJSON object or a JSON string.
+     * @param {Object|Array} [resdata] - An optional initial results object/array to accumulate processed shapes.
+     *                                   If `_format` is 'google', this should be an object like:
+     *                                   `{Point:[], Polyline:[], Polygon:[], _extent:{xmin,xmax,ymin,ymax}}`.
+     *                                   Otherwise, it's an array of shape objects.
+     * @param {string} [_format] - The target format. 'google' for Google Maps specific structure,
+     *                             otherwise a generic array of shapes is produced. If 'google',
+     *                             `resdata._extent` will be populated.
+     * @returns {Object|Array} The processed shape data. If `_format` is 'google', returns an object
+     *                         with Point, Polyline, Polygon arrays and an _extent object.
+     *                         Otherwise, returns an array of shape objects. Returns an empty object
+     *                         if input `mdata` is null, empty, or invalid JSON.
+     */
     prepareGeoJSON: function(mdata, resdata, _format){
 
         if (typeof(mdata) === "string" && !window.hWin.HEURIST4.util.isempty(mdata)){
@@ -63,11 +78,6 @@ window.hWin.HEURIST4.geo = {
            
             return {};            
         }
-
-        //FeatureCollection.features[feature]        
-        //feature.geometry.type  , coordinates
-        //GeometryCollection.geometries[{type: ,coordinates: },...]
-
         
         if(window.hWin.HEURIST4.util.isnull(resdata)){
             if( _format=='google' ){
@@ -245,21 +255,32 @@ window.hWin.HEURIST4.geo = {
 
     },
     
-
     /**
-    * convert wkt to
-    * format - 0 timemap, 1 google
-    *
-    * @todo 2 - kml
-    * @todo 3 - OpenLayers
-    */
+     * Converts a WKT (Well-Known Text) string to a shape object suitable for Timemap.js or Google Maps.
+     * It uses an external `parseWKT` function (from wellknown.js) to convert WKT to GeoJSON first,
+     * then processes the GeoJSON coordinates.
+     *
+     * @param {string} type - The geometry type code (e.g., 'p' for point, 'l' for polyline, 'pl' for polygon, 'c' for circle).
+     * @param {string} wkt - The WKT string representing the geometry.
+     * @param {number} format - The desired output format:
+     *                          - 0 for Timemap.js shape object.
+     *                          - 1 for Google Maps (requires `google.maps.LatLng` to be available).
+     * @param {Object} [google] - The Google Maps API object (only used if format is 1, to access `google.maps.LatLng` and `google.maps.LatLngBounds`).
+     * @returns {Object|Array|null} The shape data.
+     *                            - If format is 0 (Timemap): Returns a Timemap shape object (e.g., `{point:{lat,lon}}`, `{polyline:[{lat,lon},...]}`, `{polygon:[{lat,lon},...]}`) or an array of such objects.
+     *                            - If format is 1 (Google): Returns an object `{bounds:google.maps.LatLngBounds, points:Array<google.maps.LatLng>}`.
+     *                            Returns `null` if `format` is 1 and `google.maps.LatLng` is not available, or if WKT parsing fails.
+     * @todo For format 0 (Timemap) and type 'circle', implement proper radius calculation using geodesy library instead of approximation.
+     * @todo For format 1 (Google) and type 'circle', the implementation for creating a Google Maps circle is noted as a TODO (ARTEM TODO).
+     * @todo Consider support for KML (format 2) and OpenLayers (format 3) as originally placeholder-commented.
+     */
     parseWKTCoordinates: function(type, wkt, format, google) {
     
-        if(format==1 && typeof google.maps.LatLng != "function") {
+        if(format==1 && typeof google.maps.LatLng != "function") { // Ensure google object and maps.LatLng are available for format 1
             return null;
         }
         
-        let gjson =  parseWKT(wkt);    //wkt to json see wellknown.js
+        let gjson =  parseWKT(wkt); //wkt to json via wellknown.js
         
         let bounds = null, southWest, northEast,
         shape  = null,
@@ -399,10 +420,18 @@ window.hWin.HEURIST4.geo = {
     
     },
     
-    //
-    // geodata = _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']);           
-    // WKT to Shapes to bbox array
-    //    
+    /**
+     * Calculates the bounding box for a given WKT geometry.
+     * The input `geodata` is expected to be an array where the first element
+     * can be an object `{wkt: "...", geotype: "..."}` or just a WKT string.
+     * It internally uses `wktValueToShapes` to parse the WKT and determine the extent.
+     *
+     * @param {Array<Object|string>} geodata - An array containing the WKT data.
+     *                                         Typically `[{wkt: "WKT_STRING", geotype: "TYPE_CODE"}]`
+     *                                         or `["WKT_STRING"]`.
+     * @returns {Array<Array<number>>|null} The bounding box as `[[ymin, xmin], [ymax, xmax]]`,
+     *                                      or `null` if geodata is invalid or extent cannot be determined.
+     */
     getWktBoundingBox: function(geodata){
       
          if(geodata && geodata[0]){
@@ -424,9 +453,16 @@ window.hWin.HEURIST4.geo = {
         
     },
 
-    //
-    //
-    //
+    /**
+     * Merges an array of bounding boxes into a single bounding box that encompasses all of them.
+     * Each bounding box in the input array should be in the format `[[ymin, xmin], [ymax, xmax]]`.
+     * Invalid bounding boxes in the input array are skipped.
+     *
+     * @param {Array<Array<Array<number>>>} extents - An array of bounding box extents.
+     *                                                Each extent is `[[ymin, xmin], [ymax, xmax]]`.
+     * @returns {Array<Array<number>>|null} The merged bounding box as `[[ymin, xmin], [ymax, xmax]]`,
+     *                                      or `null` if no valid extents were provided.
+     */
     mergeBoundingBox: function(extents){
         
         let isset = false;
@@ -449,9 +485,14 @@ window.hWin.HEURIST4.geo = {
         return isset ?[[minLat, minLng],[maxLat, maxLng]] :null;
     },
 
-    //
-    //
-    //
+    /**
+     * Converts a bounding box array into a WKT Polygon string.
+     * The input extent is expected to be in the format `[[ymin, xmin], [ymax, xmax]]`.
+     *
+     * @param {Array<Array<number>>} extent - The bounding box extent `[[ymin, xmin], [ymax, xmax]]`.
+     * @returns {string|null} A WKT Polygon string representing the bounding box,
+     *                        or `null` if the input extent is invalid.
+     */
     boundingBoxToWKT: function(extent){
 
         let isValid = (Array.isArray(extent) && extent.length==2 && 
@@ -474,13 +515,27 @@ window.hWin.HEURIST4.geo = {
         }
     },
     
+    /**
+     * Checks if two bounding boxes are equal.
+     * Note: This function currently always returns `false` and needs to be implemented.
+     *
+     * @param {Array<Array<number>>} ext1 - The first bounding box `[[ymin, xmin], [ymax, xmax]]`.
+     * @param {Array<Array<number>>} ext2 - The second bounding box `[[ymin, xmin], [ymax, xmax]]`.
+     * @returns {boolean} True if the bounding boxes are considered equal, otherwise false.
+     * @todo Implement the actual logic for comparing bounding boxes.
+     */
     isEqualBoundingBox: function(ext1, ext2){
         return false;    
     },
     
-    //
-    // Convert mapdocument bookamark string to bbox
-    //    
+    /**
+     * Converts a Heurist map bookmark string into a bounding box array.
+     * The bookmark string is expected to be in the format "Name,MinLongitude,MaxLongitude,MinLatitude,MaxLatitude".
+     *
+     * @param {string} geodata - The Heurist map bookmark string.
+     * @returns {Array<Array<number>>|null} The bounding box as `[[ymin, xmin], [ymax, xmax]]`,
+     *                                      or `null` if the input string is not in the expected format.
+     */
     getHeuristBookmarkBoundingBox: function(geodata){
       
          if(geodata){
@@ -494,16 +549,30 @@ window.hWin.HEURIST4.geo = {
          return null;
     },
     
-    //
-    //  _format - google or timemap
-    //    
+    /**
+     * Converts a WKT (Well-Known Text) value, which may include a Heurist type prefix (e.g., "p ", "l "),
+     * into an array of shapes suitable for Google Maps or Timemap.js.
+     * It uses an external `parseWKT` (from wellknown.js) and the internal `prepareGeoJSON` function.
+     * Handles a special case for 'circle' type by approximating it as a polygon.
+     *
+     * @param {string} wkt - The WKT string, optionally prefixed with a type code (e.g., "p (POINT(...))").
+     * @param {string} [typeCode] - The geometry type code (e.g., 'p', 'l', 'c'). If empty or null,
+     *                              the function attempts to extract it from the `wkt` string.
+     * @param {string} [_format] - The target format: 'google' for Google Maps specific structure,
+     *                             otherwise a generic array of shapes (for Timemap.js).
+     *                             If 'google', the output will include an `_extent` property.
+     * @returns {Object|Array|undefined} The processed shape data.
+     *                                 - If `_format` is 'google': An object `{Point:[], Polyline:[], Polygon:[], _extent:{...}}`.
+     *                                 - Otherwise: An array of shape objects.
+     *                                 Returns `undefined` if the WKT string (after stripping type code) is invalid or cannot be parsed.
+     */
     wktValueToShapes:function(wkt, typeCode, _format){
 
         if(window.hWin.HEURIST4.util.isempty(typeCode)){
 
             let matches = wkt.match(/\??(\S{1,2})\s+(.*)/);
             if (! matches) {
-                return;
+                return; // Return undefined if no match
             }
             
             if(matches.length>2){
@@ -514,13 +583,15 @@ window.hWin.HEURIST4.geo = {
             }
         }   
         
-        let gjson =  parseWKT(wkt);    //wkt to json see  wellknown.js  
+        let gjson =  parseWKT(wkt);    //wkt to json via wellknown.js
       
         let resdata;
         
-        //special case to support old format
+        //special case to support old format for circles
         if(typeCode=='c' || typeCode=='circle'){
-            
+            if (!gjson || !gjson.coordinates || !Array.isArray(gjson.coordinates[0]) || gjson.coordinates[0].length < 2 || !Array.isArray(gjson.coordinates[1]) || gjson.coordinates[1].length < 2) {
+                return; // Invalid circle WKT representation
+            }
             let x0 = gjson.coordinates[0][0];
             let y0 = gjson.coordinates[0][1];
             let radius = gjson.coordinates[1][0] - gjson.coordinates[0][0];
@@ -551,9 +622,18 @@ window.hWin.HEURIST4.geo = {
         return resdata; 
     },
 
-    //
-    //
-    //
+    /**
+     * Parses a WKT (Well-Known Text) string into a GeoJSON object.
+     * Optionally, it can check for and strip a Heurist-specific type prefix (e.g., "p ", "l ")
+     * from the WKT string before parsing. Uses the external `parseWKT` function (from wellknown.js).
+     *
+     * @param {string} wkt - The WKT string to parse.
+     * @param {boolean} [checkWkt=false] - If true, attempts to identify and strip a Heurist type prefix
+     *                                     (e.g., "p ", "l ") from the `wkt` string before parsing.
+     * @returns {Object|string} The parsed GeoJSON object, or an empty string if `checkWkt` is true
+     *                          and no valid WKT string is found after attempting to strip a prefix.
+     *                          If `parseWKT` itself fails, its behavior will dictate the return (e.g., it might throw an error or return null).
+     */
     getParsedWkt: function(wkt, checkWkt=false){
 
         if(checkWkt){
@@ -570,15 +650,24 @@ window.hWin.HEURIST4.geo = {
             }
         }
 
-        return parseWKT(wkt); //see wellknown.js
+        return parseWKT(wkt); // see wellknown.js for parsing implementation
     },
 
-    //
-    //
-    //
+    /**
+     * Generates a human-readable description (type and summary) for a WKT (Well-Known Text) value.
+     * It attempts to extract a Heurist type prefix, then parses the WKT to GeoJSON,
+     * and uses `prepareGeoJSON` to analyze the geometry.
+     * Provides different summary formats for points, paths, and collections/polygons (including extent).
+     *
+     * @param {string} wkt - The WKT string, optionally prefixed with a Heurist type code (e.g., "p POINT(...)").
+     * @param {boolean} [simple_polygon=false] - If true and the type is Polygon, a simpler summary is generated
+     *                                           (omitting point count and detailed extent coordinates for very large/small values).
+     * @returns {{type: string, summary: string}} An object containing the determined `type` (e.g., "Point", "Path", "Polygon", "Collection (...)")
+     *                                           and a `summary` string. Returns `{type:'', summary:''}` if parsing fails or geometry is empty.
+     */
     wktValueToDescription:function(wkt, simple_polygon = false){
 
-        let decPoints = 7; //5
+        let decPoints = 7;
         let matches = wkt.match(/\??(\S{1,2})\s+(.*)/);
         if (! matches) {
             return { type:'', summary:''};
@@ -649,9 +738,19 @@ window.hWin.HEURIST4.geo = {
         }
     },
 
-    //
-    //
-    //
+    /**
+     * Generates a human-readable description (type and summary) for a WKT value using an older parsing method.
+     * This version uses regular expressions to directly parse common WKT patterns (Point, Path, Polygon, Rectangle, Circle)
+     * and their coordinates, then calculates a summary.
+     * It is generally less robust than `wktValueToDescription` which uses GeoJSON conversion.
+     *
+     * @param {string} wkt - The WKT string, expected to start with a type code (p, c, r, pl, l)
+     *                       followed by the geometry definition.
+     * @returns {{type: string, summary: string}} An object containing the determined `type`
+     *                                           (e.g., "Point", "Path", "Polygon") and a `summary` string.
+     *                                           Returns `{type:'', summary:''}` if parsing fails.
+     * @deprecated Consider using the more robust `wktValueToDescription` function instead.
+     */
     wktValueToDescription_old:function(wkt){
         
         // parse a well-known-text value and return the standard description (type + summary)
@@ -697,14 +796,23 @@ window.hWin.HEURIST4.geo = {
     },
     
 
-    /*
-    0 X pixel width
-    1
-    2
-    3 Y pixel width
-    4 topleft pixel X
-    5 topleft pixel Y
-    */    
+    /**
+     * Parses the content of a World File and calculates the bounding box WKT for the corresponding image.
+     * A World File typically contains 6 lines representing affine transformation parameters:
+     * Line 1: X-component of the pixel width (A)
+     * Line 2: Y-component of the pixel width (D)
+     * Line 3: X-component of the pixel height (B)
+     * Line 4: Y-component of the pixel height (E)
+     * Line 5: X-coordinate of the center of the upper-left pixel (C)
+     * Line 6: Y-coordinate of the center of the upper-left pixel (F)
+     * This function uses these parameters along with image dimensions to compute the geographic extent.
+     *
+     * @param {string} data - The content of the World File as a string.
+     * @param {number} image_width - The width of the corresponding image in pixels.
+     * @param {number} image_height - The height of the corresponding image in pixels.
+     * @returns {string|null} A WKT Polygon string representing the calculated bounding box,
+     *                        or `null` if the World File data is invalid or insufficient.
+     */
     parseWorldFile: function (data, image_width, image_height){
         if(data){
             let lines = data.split('\r\n');

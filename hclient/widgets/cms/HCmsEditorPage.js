@@ -9,7 +9,7 @@
 * @version     7.0
 */
 
-/* global editCMS_SelectElement */
+/* global editCMS_SelectElement, HCmsEditorMargin,HCmsConfigCardinal,HCmsConfigWidget,HCmsConfigGroup,HCmsConfig */
 
 /*
 * HCmsEditorPage.js - web page editor - page treeview+element property editor
@@ -1698,9 +1698,9 @@ function(value){
         $.getJSON(sURL, 
         function( new_element_json ){
             
-            if(template_name=='default'){
+            if(templateName=='default'){
                 new_element_json = new_element_json.children[0];
-            }else if(template_name=='blog'){
+            }else if(templateName=='blog'){
                 this.layoutMgr.prepareTemplate(new_element_json, function(updated_json){
                     that.#layoutInsertElement_continue( ele_id, updated_json );
                 });
@@ -1732,9 +1732,9 @@ function(value){
             
             if(Array.isArray(items))
             for(let i=0; i<items.length; i++){
-                if(items[i].hasOwnProperty('key')) delete items[i].key;
-                if(items[i].hasOwnProperty('title')) delete items[i].title;
-                if(items[i].hasOwnProperty('folder')) delete items[i].folder;
+                if(Object.hasOwn(items[i],'key')) delete items[i].key;
+                if(Object.hasOwn(items[i],'title')) delete items[i].title;
+                if(Object.hasOwn(items[i],'folder')) delete items[i].folder;
                 if(window.hWin.HEURIST4.util.isempty(items[i].css)){
                     delete items[i].css;
                 }

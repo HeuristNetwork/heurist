@@ -8,6 +8,8 @@
 * @version     7.0
 */
 
+/* global HCmsEditor */
+
 /*
 * HCmsEditorMargin.js - editor for header or footer
 */

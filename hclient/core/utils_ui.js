@@ -3461,7 +3461,7 @@ window.hWin.HEURIST4.ui = {
   *  IntersectionObserver should be used instead of this method 
   *  see HRecordList for example
   */
-  isElementInViewport: function(el, container) {
+  isElementInViewport: function(element, container) {
 
       const elRect = element.getBoundingClientRect();
       let conRect;

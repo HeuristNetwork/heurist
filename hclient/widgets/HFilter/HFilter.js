@@ -197,7 +197,7 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
                     if(! this.HAPI.RecordSearch.doApplyRules( this, request.rules, 
                                         (request.rulesonly>0)?request.rulesonly:0, this.options.searchDomain ) ){
                         window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('RuleSets require an initial search result as a starting point.'),
-                            3000, window.hWin.HR('Warning'), ele);
+                            3000, window.hWin.HR('Warning'));
                     }else{
                         //this.HAPI.SystemMgr.user_log('search_Record_applyrules');
                     }

@@ -593,7 +593,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
      */
     getAuthorValues: function(values, field_type){
 
-        for(const idx in values){
+        for(let idx = 0; idx < values.length; idx++){
 
             const cur_val = values[idx];
             let is_object = window.hWin.HEURIST4.util.isObject(cur_val);
@@ -639,7 +639,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
      */
     getPublisherValues: function(values, field_type){
 
-        for(const idx in values){
+        for(let idx = 0; idx < values.length; idx++){
 
             let value = '';
             let search = '';
@@ -682,7 +682,7 @@ $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
      */
     getLanguageValues: function(values){
 
-        for(const idx in values){
+        for(let idx = 0; idx < values.length; idx++){
             values[idx] = window.hWin.HEURIST4.util.isempty(values[idx])
                         || values[idx] == '###'
                         || values[idx] == 'und'

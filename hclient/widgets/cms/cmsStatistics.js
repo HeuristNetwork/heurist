@@ -1,22 +1,30 @@
 /**
-* cmsStatistics.js
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * @file cmsStatistics.js
+ * @brief jQuery widget to display CMS statistics fetched from Matomo.
+ * @fileOverview This file defines the 'cmsStatistics' jQuery widget. It provides functionality to select a website and a date range, fetch analytics data from a Matomo (formerly Piwik) instance, and display this data in tabular and chart formats.
+ * @package Heurist academic knowledge management system
+ * @subpackage hclient\widgets\cms
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 6.0
+ */
+/* global Chart */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
+/**
+ * @widget cmsStatistics
+ * @description A jQuery UI widget for displaying CMS statistics from Matomo.
+ * This widget allows users to select a website and a period, then fetches
+ * and displays analytics data. It inherits from `$.heurist.baseAction`.
+ *
+ * @property {number} _website_id Stores the ID of the currently selected website for statistics.
+ * @property {Object} options Default options for the widget.
+ * @property {string} options.actionName='cmsStatistics' The base name for HTML content loading.
+ * @property {string} options.default_palette_class='ui-heurist-publish' Default CSS class for styling.
+ * @property {string} options.path='widgets/cms/' Path for loading HTML content.
+ */
 $.widget( "heurist.cmsStatistics", $.heurist.baseAction, {
 
     
@@ -30,6 +38,12 @@ $.widget( "heurist.cmsStatistics", $.heurist.baseAction, {
     },
 
     
+    /**
+     * Initializes the widget.
+     * Checks for Matomo API key and sets up HTML content loading path.
+     * Calls the superclass's _init method.
+     * @private
+     */
     _init: function() {
         if(!window.hWin.HAPI4.sysinfo.matomo_api_key){
             this.element.text('Matomo credentials are not defined');
@@ -41,9 +55,12 @@ $.widget( "heurist.cmsStatistics", $.heurist.baseAction, {
         this._super();
     },
     
-    //  
-    // invoked from _init after loading of html content
-    //
+    /**
+     * Initializes the UI controls for the widget after HTML content is loaded.
+     * Sets up buttons, date pickers, and the website selector.
+     * @private
+     * @returns {jQuery} The result of the superclass's _initControls method.
+     */
     _initControls:function(){
         // init controls
         this._$('button').button();
@@ -63,9 +80,11 @@ $.widget( "heurist.cmsStatistics", $.heurist.baseAction, {
         return this._super();
     },
     
-    //
-    //
-    //
+    /**
+     * Fetches and displays statistics from Matomo.
+     * Validates website selection, prepares the request parameters for Matomo API,
+     * and calls the API.
+     */
     doAction: function(){
         
         this._website_id = this._$('#selWebsite').editing_input('getValues');
@@ -122,10 +141,14 @@ $.widget( "heurist.cmsStatistics", $.heurist.baseAction, {
                     request, null, function(response){that._afterActionEventHandler(response)});
     },
 
-    //  -----------------------------------------------------
-    //
-    //  after save event handler
-    //
+    /**
+     * Handles the response from the Matomo API (alternative handler, seems unused or for debugging).
+     * Displays the raw JSON response.
+     * REMARK: The method name `_afterActionEvenHandler2` seems to have a typo ("Even" instead of "Event").
+     * This was not corrected to adhere to "DO NOT MODIFY THE CODE" instruction.
+     * @private
+     * @param {Object|string} response - The response from the Matomo API.
+     */
     _afterActionEvenHandler2: function( response ){
 
         this.element.css('cursor','auto');
@@ -138,10 +161,13 @@ $.widget( "heurist.cmsStatistics", $.heurist.baseAction, {
         //div_res.html('<xmp>'+response.message+'</xmp>');
     },
     
-    //  -----------------------------------------------------
-    //
-    //  after save event handler
-    //
+    /**
+     * Handles the successful response from the Matomo API.
+     * Parses the data, filters it for the selected website, and renders
+     * a data table and a line chart with the statistics.
+     * @private
+     * @param {Object|string} response - The JSON response from the Matomo API.
+     */
     _afterActionEventHandler: function( response ){
 
         this.element.css('cursor','auto');

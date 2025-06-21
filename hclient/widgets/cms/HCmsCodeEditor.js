@@ -7,6 +7,7 @@
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @version     7.0
 */
+/* global CodeMirror */
 
 import '../HBase/HBaseView.js';
 

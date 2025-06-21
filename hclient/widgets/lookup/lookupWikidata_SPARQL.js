@@ -29,6 +29,7 @@
  * @since       6.0
  */
 
+/* global EditorCodeMirror */
 /**
  * Widget for executing custom SPARQL queries against Wikidata and mapping results.
  * It provides a CodeMirror editor for SPARQL input and a dynamic interface for
@@ -223,36 +224,6 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
         }
 
         this._super(settings, close_dlg); // Call parent to handle saving
-    },
-
-    /**
-     * Retrieves the current settings for dumping raw record data from the UI.
-     * This includes whether dumping is enabled and the target field (ScratchPad or a specific field ID).
-     *
-     * @todo This method is duplicated in `lookupBnF.js`. Consider moving to `lookupBase.js` if applicable.
-     *
-     * @memberof heurist.lookupWikidata_SPARQL
-     * @instance
-     * @private
-     * @returns {Array<boolean, string>} An array where:
-     *          - The first element (`boolean`) is `true` if record dumping is enabled, `false` otherwise.
-     *          - The second element (`string`) is the target field for dumping:
-     *            - 'rec_ScratchPad' if dumping to ScratchPad.
-     *            - The selected dty_ID (as a string from `#rty_flds`) if dumping to a specific field.
-     *            - An empty string if record dumping is disabled or no specific field is chosen.
-     */
-    _getRecDumpSetting: function(){
-
-        const get_recdump = this.element.find('input[name="dump_record"]').is(':checked');
-        let recdump_fld = '';
-        
-        if(get_recdump){ // If dumping is enabled
-            recdump_fld = this.element.find('input[name="dump_field"]:checked').val(); // Check radio ('rec_ScratchPad' or 'dty_ID')
-            if(recdump_fld === 'dty_ID'){ // If specific field is chosen
-                recdump_fld = this.element.find('#rty_flds').val(); // Get field ID from dropdown
-            }
-        }
-        return [ get_recdump, recdump_fld ];
     },
 
     /**
@@ -658,24 +629,12 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
         let order = [];   // To store [rec_ID1, rec_ID2, ...]
 
         for(const rec_ID_idx in response.data.results.bindings){ // Iterate through each result binding
+
             let local_rec_ID = parseInt(rec_ID_idx); // Use array index as local ID for display
-            let record_values = [local_rec_ID]; // Start Heurist row with local ID
             let wikidata_binding = response.data.results.bindings[rec_ID_idx]; // Current SPARQL result object
 
-            for(const field_var of this.result_fields){ // Iterate through each SPARQL variable
-                let cell_data = wikidata_binding[field_var];
-                let cell_value = cell_data ? cell_data['value'] : ''; // Default to empty string if no value
-
-                // Auto-detect the first URI field to use as a potential external link
-                if(this.url_field === '' && cell_data && cell_data['type'] === 'uri'){
-                    this.url_field = field_var;
-                } else if (cell_data && cell_data['type'] === 'literal' && Object.hasOwn(cell_data, 'xml:lang')){
-                    // Prepend language code if literal has a language tag
-                    let language = window.hWin.HAPI4.getLangCode3(cell_data['xml:lang'], 'MUL');
-                    cell_value = language !== 'MUL' ? `${language}:${cell_value}` : cell_value;
-                }
-                record_values.push(cell_value);
-            }
+            let record_values = this._processSPARQLRow(wikidata_binding);
+            record_values.unshift(local_rec_ID); // Start Heurist row with local ID
 
             records[local_rec_ID] = record_values;
             order.push(local_rec_ID);
@@ -684,5 +643,37 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
         // Prepare final result object for the parent's display mechanism
         let res = order.length > 0 ? {fields: fields, order: order, records: records} : false;
         this._super(res); // Pass to parent to render in resultList
+    },
+
+    /**
+     * Process the data from a SPARQL result row, effectively turning it into an array
+     *
+     * @param {Object} row - A row from the SPARQL resutls
+     * @returns {Array<*>} Heurist record ready data for display
+     */
+    _processSPARQLRow: function(row){
+
+        if(this.$H.isempty(this.result_fields)){
+            return [];
+        }
+
+        let values = [];
+
+        for(const field_var of this.result_fields){ // Iterate through each SPARQL variable
+            let cell_data = row[field_var];
+            let cell_value = cell_data ? cell_data['value'] : ''; // Default to empty string if no value
+
+            // Auto-detect the first URI field to use as a potential external link
+            if(this.url_field === '' && cell_data && cell_data['type'] === 'uri'){
+                this.url_field = field_var;
+            } else if (cell_data && cell_data['type'] === 'literal' && Object.hasOwn(cell_data, 'xml:lang')){
+                // Prepend language code if literal has a language tag
+                let language = window.hWin.HAPI4.getLangCode3(cell_data['xml:lang'], 'MUL');
+                cell_value = language !== 'MUL' ? `${language}:${cell_value}` : cell_value;
+            }
+            values.push(cell_value);
+        }
+
+        return values;
     }
 });

@@ -1,23 +1,37 @@
 /**
-* manageDefTerms.js - main widget to manage defTerms
-*
+* @file manageUsrTags.js
+* @brief Manages User Tag entities.
+* @fileOverview Provides a UI for users to manage their personal tags. This includes creating, listing, editing (e.g., renaming), and deleting tags, as well as applying tags to records.
 * @package     Heurist academic knowledge management system
+* @subpackage  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4.0
 */
 
 
+
+/**
+ * @widget heurist.manageUsrTags
+ * @brief Widget for managing User Tags.
+ * @extends $.heurist.manageEntity
+ * @description This widget provides an interface for users to manage their personal and group tags.
+ * It supports different display modes ('compact', 'accordions') and allows for creating,
+ * selecting, renaming, and deleting tags.
+ *
+ * @property {string} default_palette_class Default CSS class for theming, typically 'ui-heurist-admin'.
+ * @property {string[]} [selection_ids=[]] Array of initially selected tag IDs.
+ * @property {boolean} [use_cache=true] If true, client-side caching is used for tag data.
+ * @property {string} [list_mode='accordions'] Display mode for tags, can be 'compact' or 'accordions'.
+ * @property {string} [edit_mode='inline'] How tags are edited, set to 'inline'.
+ * @property {string[]|string} groups Specifies which groups' tags to display ('all', 'personal', 'grouponly', or an array of group IDs).
+ * @property {number} width Default width of the widget, conditionally set (e.g., 900 if not 'compact').
+ * @property {number} height Default height of the widget, conditionally set (e.g., 600 if not 'compact').
+ * @property {?boolean} show_top_n_recent If true, shows lists of top and recently used tags in compact mode.
+ */
 $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
    
     _entityName:'usrTags',
@@ -26,6 +40,15 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
     _keepRequest:null,
     _showAutoTags:false,
     
+    /**
+     * @brief Initializes the widget.
+     * @override
+     * @memberof heurist.manageUsrTags
+     * Sets up default options, including palette class, selection IDs, caching behavior,
+     * display mode ('compact' or 'accordions'), edit mode ('inline'), and group filtering.
+     * Adjusts dimensions based on list mode. Initializes inline editor controls if in 'manager' select mode.
+     * Sets up a dropdown list for tag suggestions.
+     */
     _init: function() {
         
         this.options.default_palette_class = 'ui-heurist-admin';
@@ -108,9 +131,14 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         }
         
     },
-    //  
-    // invoked from _init after loading of entity config    
-    //
+    /**
+     * @brief Initializes the controls for the widget.
+     * @override
+     * @memberof heurist.manageUsrTags
+     * @returns {boolean} False if the parent `_initControls` fails, otherwise true.
+     * If not in 'compact' mode, initializes the search form (`searchUsrTags`) and its event listeners.
+     * If in 'compact' mode, directly loads tag data.
+     */
     _initControls: function() {
         
         if(!this._super()){
@@ -145,9 +173,15 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         return true;
     },
     
-    //
-    // update all accodions after getting data from server
-    //
+    /**
+     * @brief Updates the record list when search results are received or data is loaded.
+     * @override
+     * @memberof heurist.manageUsrTags
+     * @param {Event} event The event object.
+     * @param {object} data The data containing the recordset.
+     * Calls the parent `updateRecordList`. Then, based on `options.list_mode`,
+     * it either initializes the compact UI (`_initCompactUI`) or updates the accordion UI (`_updateAccordions`).
+     */
     updateRecordList: function( event, data ){
         this._super(event, data);
         
@@ -158,6 +192,13 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         }
     },
     
+    /**
+     * @brief Shows or hides tag groups based on the selected group filter.
+     * @memberof heurist.manageUsrTags
+     * @param {Event} event The event object.
+     * @param {string|number} groupid The ID of the group to show, or 'any' to show all.
+     * Used in 'accordions' list mode.
+     */
     showHideGroups: function(event, groupid){
     
         if(groupid!='any' && groupid>0){
@@ -168,9 +209,13 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         }
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Toggles the visibility of the tag usage/details panel.
+     * @memberof heurist.manageUsrTags
+     * @param {Event} event The event object.
+     * Manages the layout when showing or hiding the right-hand panel for tag details.
+     * Adjusts widths and positions of the record list and search form accordingly.
+     */
     showHideUsage:function(event){
         
         if(this.editForm.parent().is(':visible')){
@@ -187,9 +232,11 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         }
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Shows the right-hand panel (editForm) for tag details.
+     * @memberof heurist.manageUsrTags
+     * Adjusts layout to make the editForm visible alongside the record list.
+     */
     _showRightHandPanel: function(){
             this.editForm.parent().show();
             this.editForm.parent().css({'left':306});
@@ -198,9 +245,14 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             this.searchForm.css({'height':'6.4em'});
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Filters the displayed list of tags based on the request from the search form.
+     * @memberof heurist.manageUsrTags
+     * @param {Event} event The event object.
+     * @param {object} request The filter request object.
+     * Applies the filter to the `_cachedRecordset` and updates the accordion display.
+     * Also manages visibility of groups based on the group filter.
+     */
     filterRecordList: function(event, request){
        
         
@@ -212,12 +264,24 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         }
     },
     
+    /**
+     * @brief Refreshes the record list using the last applied filter.
+     * @memberof heurist.manageUsrTags
+     */
     refreshRecordList:function(){
         this.filterRecordList(null, this._keepRequest);
     },
     
 //----------------------------------------------------------------------------------    
     
+    /**
+     * @brief Updates the accordion display with a given recordset of tags.
+     * @memberof heurist.manageUsrTags
+     * @param {HRecordSet} recordset The recordset of tags to display.
+     * Clears and rebuilds the accordion UI, creating sections for personal tags and each group.
+     * Populates each section with tags from the `recordset`. Handles selection state if in 'select_multi' mode.
+     * Attaches event handlers for adding and deleting tags within the accordions.
+     */
     _updateAccordions: function( recordset ){
         
         let that = this;
@@ -377,9 +441,13 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             this.element.find('#input_search').trigger('focus');
     },
 
-    //
-    //
-    //
+    /**
+     * @brief Handles the "add tag" action triggered from the UI.
+     * @memberof heurist.manageUsrTags
+     * @param {Event} event The event object from the input field or add button.
+     * Validates the new tag text. Checks for duplicates within the same group.
+     * If valid and not a duplicate, it calls `_saveEditAndClose` to save the new tag.
+     */
     onAddTag: function( event ) {
         
         let that = this;
@@ -440,6 +508,12 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         inpt.trigger('focus'); 
     },
     
+    /**
+     * @brief Handles the "delete tag" action from the UI.
+     * @memberof heurist.manageUsrTags
+     * @param {Event} event The event object from the delete button.
+     * Retrieves the tag ID and triggers the `_onActionListener` with a 'delete' action.
+     */
     onDeleteTag: function(event){
         
         let recid = $(event.target).parents('.recordDiv').attr('recid');
@@ -449,6 +523,16 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         window.hWin.HEURIST4.util.stopEvent(event);
     },
 
+    /**
+     * @brief Handles clicks on tag items in the list.
+     * @memberof heurist.manageUsrTags
+     * @param {Event} event The event object.
+     * Behavior depends on `options.select_mode`:
+     * - 'select_multi': Toggles the tag's selection state and moves it between 'available' and 'picked' areas.
+     * - 'select_single': Selects the tag and closes the dialog.
+     * - 'manager' (default): If the click is not on a "search usage" link, it shows the inline editor for the tag.
+     *   If it is on the usage link, it opens a search for records with that tag.
+     */
     onTagItemClick: function(event) {
         
                         let item = $(event.target).parents('.recordDiv');
@@ -493,6 +577,19 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                         }
     },
 
+    /**
+     * @brief Handles events after a tag record is saved.
+     * @override
+     * @memberof heurist.manageUsrTags
+     * @param {number} recID The ID of the saved tag.
+     * @param {object} fields The saved field values.
+     * If a new tag was created:
+     *   - In 'compact' mode, adds it to the picked list.
+     *   - In 'accordions' mode, appends it to the appropriate group in the UI.
+     * If an existing tag was updated (renamed):
+     *   - Updates its label and usage count in the list.
+     *   - Adjusts column widths if the new label is longer.
+     */
     _afterSaveEventHandler: function( recID, fields ){
         
             let isNewRecord = (this._currentEditID<0);
@@ -553,10 +650,15 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             }
     },
     
-    //
-    //
-    //   
-    _afterDeleteEvenHandler: function( recID ){
+    /**
+     * @brief Handles events after a tag record is deleted.
+     * @override
+     * @memberof heurist.manageUsrTags
+     * @param {number} recID The ID of the deleted tag.
+     * Clears `_currentEditID`. Detaches the inline editor if it was active.
+     * Removes the tag element from the list and from the `_cachedRecordset`.
+     */
+    _afterDeleteEventHandler: function( recID ){
         this._currentEditID = null;
         
         //detach inline input    
@@ -566,9 +668,14 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         this._cachedRecordset.removeRecord(recID);
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Gets or sets the selected records (tags).
+     * @override
+     * @memberof heurist.manageUsrTags
+     * @param {?HRecordSet|string[]} [value] If provided, sets the selection. If null/undefined, returns the current selection.
+     * @returns {HRecordSet|undefined} The current selection as an HRecordSet if no value is provided, otherwise undefined.
+     * If `value` is null, it populates `_selection` from `this.options.selection_ids` using the `_cachedRecordset`.
+     */
     selectedRecords: function(value){
         
         if(window.hWin.HEURIST4.util.isnull(value)){
@@ -580,12 +687,16 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
     
 //----------------------------------------------------------------------------------    
     
-    //
-    // compact mode
-    // consist of three elements 
-    // 1) selected tags by group
-    // 2) input and group selector  
-    // 3) top and recent tags by group
+    /**
+     * @brief Initializes the UI for compact display mode.
+     * @memberof heurist.manageUsrTags
+     * Clears and rebuilds the record list for compact mode. This includes:
+     * - Displaying selected tags grouped by personal/group.
+     * - Providing an input field to add new tags, with a group selector.
+     * - Showing lists of "Top" and "Recent" tags for the selected group if `options.show_top_n_recent` is true.
+     * - Includes a checkbox to show/hide automatically added tags.
+     * Sets up event handlers for tag input, add button, and selection from suggested lists.
+     */
     _initCompactUI: function(){
         
        let that = this;
@@ -835,9 +946,17 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
     },
     
-    //
-    //
-    //
+    /**
+     * @brief Retrieves and renders a list of top or recent tags for a given group.
+     * @memberof heurist.manageUsrTags
+     * @param {number|string} group_id The ID of the group for which to retrieve tags.
+     * @param {string} sort_mode 'Top' to get most used tags, 'Recent' to get recently modified tags.
+     * @param {number} limit The maximum number of tags to retrieve.
+     * @returns {jQuery} A jQuery div element containing the list of tags as links.
+     * Filters `_cachedRecordset` based on `group_id` and `sort_mode`, then limits the results.
+     * Renders each tag as a clickable link that adds the tag to the picked list.
+     * Optionally filters out auto-tags if `_showAutoTags` is false.
+     */
     _getTagList: function(group_id, sort_mode, limit){
         
         let request = {tag_UGrpID:group_id};    
@@ -905,6 +1024,16 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         return list_div;
     },
     
+    /**
+     * @brief Adds a tag to the "picked" or selected list in the compact UI.
+     * @memberof heurist.manageUsrTags
+     * @param {number|string} recID The ID of the tag to add.
+     * @param {boolean} [isinit=false] True if called during initial population, false if from user interaction.
+     * Retrieves the tag from `_cachedRecordset`. Creates a UI element for the tag (label with a remove icon)
+     * and appends it to the appropriate group in the picked list.
+     * If not `isinit`, updates `options.selection_ids` and triggers the `onselect` event.
+     * Manages visibility of group headers.
+     */
     _addTagToPicked: function(recID, isinit){
 
         let that = this, is_picked = false;;
@@ -977,9 +1106,11 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
     },
     
-    //
-    // return selected tags as wokrgroupname/label
-    //
+    /**
+     * @brief Generates a string representation of selected tags, including their group names.
+     * @memberof heurist.manageUsrTags
+     * @returns {string[]} An array of strings, where each string is "GroupName\TagName" or "TagName" for personal tags.
+     */
     _selectedTagsAsString: function(){
 
         let res = [];        
@@ -1010,9 +1141,13 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         return res;
     },
     
-    //
-    // init input element
-    //    
+    /**
+     * @brief Initializes controls for inline editing of tags (renaming).
+     * @memberof heurist.manageUsrTags
+     * Creates a hidden input field (`this.edit_replace_input`) used for renaming tags directly in the list.
+     * Sets up event handlers for keypress (Enter for rename, Esc for cancel) and keyup (for suggesting existing tags).
+     * Also handles document clicks to hide the inline editor and suggestion list if focus is lost.
+     */
     _initInlineEditorControls: function(){
         
         let that = this;
@@ -1105,9 +1240,14 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             
     },
     
-    //
-    // 0 ask, 1 rename, 2 - final
-    //
+    /**
+     * @brief Renames a tag after inline editing.
+     * @memberof heurist.manageUsrTags
+     * @param {number} _step Internal step for confirmation process (0 for initial, 1 for confirmed rename, 2 for final save after prompt).
+     * Validates the new tag label length. Checks for duplicates.
+     * If `_step` is 0, it prompts for confirmation before renaming if the new label is different.
+     * If `_step` is 1 (or 2 after prompt), it saves the tag with the new label.
+     */
     _renameTag: function(_step){
         
         if(!window.hWin.HEURIST4.msg.checkLength(this.edit_replace_input, 'Tag', null, 3, 0)){
@@ -1154,16 +1294,24 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to rename tag "'+oldTagLabel+'" to "'+newTagLabel+'"?', 
-                    function(){ that._renameTag(2) }, 
+                    function(){ that._renameTag(2); },
                     
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
             
         }
     },
 
-    //
-    //
-    //
+    /**
+     * @brief Replaces an existing tag with another existing tag (merging them).
+     * @memberof heurist.manageUsrTags
+     * @param {number|string} newTagID The ID of the tag to merge into.
+     * @param {boolean} [unconditionally=false] If true, performs the replacement without confirmation.
+     * Retrieves details of the old tag (being replaced) and the new tag.
+     * If `unconditionally` is false, it prompts the user for confirmation.
+     * If confirmed, sends a request to the server (action 'action' on 'usrTags' entity with `newTagID` and `removeOld` flags)
+     * to reassign all records from the old tag to the new tag and delete the old tag.
+     * Updates usage counts and UI.
+     */
     _replaceTag: function(newTagID, unconditionally){
         
         let item = this.edit_replace_input.parent();
@@ -1193,7 +1341,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        that._afterDeleteEvenHandler(tagID); //remove old tag
+                        that._afterDeleteEventHandler(tagID); //remove old tag
                         
                         let usage = response.data;
                         that._currentEditID = newTagID;
@@ -1209,7 +1357,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to replace tag "'+oldTagLabel+'" with tag "'+newTagLabel+'"?', 
-                    function(){ that._replaceTag(newTagID, true) }, 
+                    function(){ that._replaceTag(newTagID, true); },
                     
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
@@ -1217,9 +1365,10 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             
     },
 
-    //
-    //
-    //
+    /**
+     * @brief Hides the inline tag editor input and restores the tag label display.
+     * @memberof heurist.manageUsrTags
+     */
     _hideInlineEditorControls: function(){
         
         let item  = this.edit_replace_input.parent();
@@ -1235,6 +1384,13 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
     },
     
+    /**
+     * @brief Shows the inline editor for a specific tag item.
+     * @memberof heurist.manageUsrTags
+     * @param {jQuery} item The jQuery element of the tag item to be edited.
+     * Replaces the tag's label with the `edit_replace_input` field, pre-filled with the current tag label.
+     * Hides other action links on the tag item. Sets focus to the input field.
+     */
     _showInlineEditorControls: function( item ){
         
         if(this.edit_replace_input.parent().hasClass('recordDiv')){
@@ -1253,6 +1409,12 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         
     },
     
+    /**
+     * @brief Retrieves the label text of a tag given its ID.
+     * @memberof heurist.manageUsrTags
+     * @param {number|string} tagID The ID of the tag.
+     * @returns {string} The label of the tag, or an empty string if not found.
+     */
     _getTagLabel:function(tagID){
         
         let recordset = this._cachedRecordset;
@@ -1264,6 +1426,14 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         }
     }
     
+    /**
+     * @brief Handles the deletion of a tag, with a confirmation prompt.
+     * @override
+     * @memberof heurist.manageUsrTags
+     * @param {boolean} [unconditionally=false] If true, deletes without confirmation.
+     * If `unconditionally` is false (the default), it shows a confirmation dialog.
+     * If confirmed, or if `unconditionally` is true, it calls the parent's `_deleteAndClose` method.
+     */
     ,_deleteAndClose: function(unconditionally){
     
         if(unconditionally===true){
@@ -1271,7 +1441,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         }else{
             let that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this tag?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this tag?', function(){ that._deleteAndClose(true); },
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     }
