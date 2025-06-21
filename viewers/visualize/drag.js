@@ -1,4 +1,3 @@
-
 /**
 * drag.js - Functions to add nodes and make them draggable
 *
@@ -16,16 +15,9 @@
 * @since       4
 */
 
-// Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-// with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-// Unless required by applicable law or agreed to in writing, software distributed under the License is
-// distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-// See the License for the specific language governing permissions and limitations under the License.
-//
-
-/* global svg, data, settings, force, currentMode, circleSize, iconSize, _editRecStructure,
+/* global svg, data, settings, force, currentMode, circleSize, iconSize, editRecStructure,
 drag_link_source_id, drag_link_target_id, drag_link_line, selectionColor, determineColour, closeRectypeSelector,
-getSetting, putSetting, createOverlay, getEntityRadius, truncateText, updateCircles, tick, $Db */
+getSetting, putSetting, createOverlay, getEntityRadius, truncateText, updateCircles, tick */
 
 /** @global {null|number} currentNode Stores the ID of the currently dragged node. */
 let currentNode = null;
@@ -50,7 +42,7 @@ function addNodes() {
                     if(!settings.isDatabaseStructure){ //Added Double Click to Edit Function - Travis Doyle 19/9
                         window.open(window.hWin.HAPI4.baseURL + '?fmt=edit&db=' + window.hWin.HAPI4.database + '&recID=' + d.id, '_blank');
                     }else if(window.hWin.HAPI4.is_admin()){
-                        _editRecStructure(d.id);
+                        editRecStructure(d.id);
                     }
                   });
                  

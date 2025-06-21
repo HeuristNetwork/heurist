@@ -1,4 +1,3 @@
-
 /**
 * selection.js - Functions to select nodes in the visualisation
 *
@@ -16,13 +15,6 @@
 * @since       4
 */
 
-// Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-// with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-// Unless required by applicable law or agreed to in writing, software distributed under the License is
-// distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-// See the License for the specific language governing permissions and limitations under the License.
-//
-
 /* global svg, currentMode, settings, getEntityRadius, getRecordOverlayData, createOverlay,
    getSetting, zoomBehaviour */
 
@@ -31,7 +23,6 @@
  * @namespace
  * @description Functions and variables related to node selection in the visualization.
  */
-
 
 /**
  * Color used to highlight selected nodes.
@@ -173,6 +164,7 @@ function onRecordNodeClick(event, data, node) {
         if (idx > -1) {
             // Deselect if already selected
             needSelect = false;
+            //NOTE - need test IT WAS ".node"
             updateCircles(".node.id"+recID, foregroundColor, bgColor); // Deselect this specific node
             settings.selectedNodeIds.splice(idx, 1);
         }

@@ -1,4 +1,3 @@
-
 /**
 * overlay.js - Functions to handle node and relationship overlays
 *
@@ -16,16 +15,10 @@
 * @since       4
 */
 
-// Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-// with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-// Unless required by applicable law or agreed to in writing, software distributed under the License is
-// distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-// See the License for the specific language governing permissions and limitations under the License.
-//
 
 /* global svg, settings, currentMode,
 drag_link_source_id, drag_link_target_id, drag_link_line,
-getSetting, tick, filterData, $Db, _editRecStructure, showNodeInformation */
+getSetting, tick, filterData, showNodeInformation */
 
 /** @global {null|number} drag_link_source_id - ID of the source node when creating a new link. */
 window.drag_link_source_id = null;
@@ -857,7 +850,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                     
                     if(settings.isDatabaseStructure){
                         if(window.hWin.HAPI4.is_admin())
-                        _editRecStructure(rty_ID);    
+                        editRecStructure(rty_ID);    
                     }else{
                         window.open(window.hWin.HAPI4.baseURL
                             +'?fmt=edit&db='+window.hWin.HAPI4.database+'&recID='+rec_ID, '_new');
@@ -998,9 +991,15 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
    return overlay;     
 }
 
+/*
+*
+*/
+function editRecStructure(rty_ID) {
+    //edit structure (it opens fake record and switches to edit structure mode)
+    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                        {new_record_params:{RecTypeID: rty_ID}, edit_structure:true});
 
-// _editRecStructure is defined in visualize.js and drag.js, no need to redefine here if it's globally available.
-// If it's not, it should be passed as a parameter or handled via settings.
+}
 
 /**
  * Removes a specific overlay from the visualization.

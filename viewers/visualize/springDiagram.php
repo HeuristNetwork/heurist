@@ -1,29 +1,20 @@
 <?php
-
-    /**
-    * springDiagram.php - Renders a search result set as a network diagram.
-    *
-    * @fileOverview This file is the main entry point for displaying a network visualization
-    * based on a Heurist search query. It initializes the page, fetches data if in standalone mode,
-    * and then uses the `visualize.js` plugin to render the graph. It also provides functions
-    * for parsing data into the required D3 format and for showing/updating the visualization.
-    * @package     Heurist academic knowledge management system
-    * @subpackage  /viewers/visualize
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @author      Jan Jaap de Groot    <jjedegroot@gmail.com>
-    * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
-    * @since       4
-    */
-
-    // Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    // with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    // Unless required by applicable law or agreed to in writing, software distributed under the License is
-    // distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    // See the License for the specific language governing permissions and limitations under the License.
-    //
-
+/**
+* springDiagram.php - Renders a search result set as a network diagram.
+*
+* @fileOverview This file is the main entry point for displaying a network visualization
+* based on a Heurist search query. It initializes the page, fetches data if in standalone mode,
+* and then uses the `visualize.js` plugin to render the graph. It also provides functions
+* for parsing data into the required D3 format and for showing/updating the visualization.
+* @package     Heurist academic knowledge management system
+* @subpackage  /viewers/visualize
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Jan Jaap de Groot    <jjedegroot@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4
+*/
 define('PDIR','../../');//need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 ?>
@@ -161,15 +152,14 @@ function onPageInit(success){
         */
         function __parseData(records_ids, relations) {
 
-            var data = {}; // Unused variable
-            var nodes = {};
-            var links = [];
+            let data = {}; // Unused variable
+            let nodes = {};
+            let links = [];
 
             if(records_ids !== undefined && relations !== undefined) {
                 // Construct nodes for each record
-                var i;
-                for(i=0;i<records_ids.length;i++) {
-                    var recId = records_ids[i];
+                for(let i=0;i<records_ids.length;i++) {
+                    const recId = records_ids[i];
                     // Ensure relations.headers[recId] exists to prevent errors
                     if (relations.headers && relations.headers[recId]) {
                         var node = {id: parseInt(recId),
@@ -194,17 +184,17 @@ function onPageInit(success){
                 * @returns {Array<object>} An array of D3 link objects.
                 */
                 function __getLinks(currentNodes, relationSet) {
-                    var newLinks = []; // Renamed to avoid conflict
+                    let newLinks = []; // Renamed to avoid conflict
 
                     // Go through all relations
                     if (relationSet) { // Ensure relationSet is defined
-                        for(var j = 0; j < relationSet.length; j++) { // Changed loop variable
+                        for(let j = 0; j < relationSet.length; j++) { // Changed loop variable
                             // Null check
-                            var sourceId = relationSet[j].recID;
-                            var targetId = relationSet[j].targetID;
-                            var dtID = relationSet[j].dtID;
-                            var trmID = relationSet[j].trmID;
-                            var relationName = "Floating relationship"; // Default name
+                            const sourceId = relationSet[j].recID;
+                            const targetId = relationSet[j].targetID;
+                            const dtID = relationSet[j].dtID;
+                            const trmID = relationSet[j].trmID;
+                            let relationName = "Floating relationship"; // Default name
 
                             if(dtID > 0) {
                                 relationName = $Db.dty(dtID, 'dty_Name'); // Assumes $Db is available
@@ -239,7 +229,7 @@ function onPageInit(success){
             // Construct data object with nodes as an array
             var nodesArray = []; // Renamed for clarity
             for(var id in nodes) {
-                if (nodes.hasOwnProperty(id)) { // Ensure it's an own property
+                if (Object.hasOwn(nodes, id)) { // Ensure it's an own property
                     nodesArray.push(nodes[id]);
                 }
             }
@@ -294,7 +284,7 @@ function onPageInit(success){
                  */
                 function getLineLength(record) {
                     var length = getSetting('setting_linelength'); // Assumes getSetting is globally available
-                    if(record !== undefined && record.hasOwnProperty("depth") && record.depth > 0) { // Ensure depth is positive
+                    if(record !== undefined && Object.hasOwn(record, "depth") && record.depth > 0) { // Ensure depth is positive
                         length = length / (record.depth+1);
                     }
                     return length;

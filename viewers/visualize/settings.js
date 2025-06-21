@@ -1,4 +1,3 @@
-
 /**
 * settings.js - Functions to handle the visualisation settings
 *
@@ -16,13 +15,6 @@
 * @since       4
 * @todo Change storage of settings to user session (instead of current usage of localStorage for non-authenticated users).
 */
-
-// Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-// with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-// Unless required by applicable law or agreed to in writing, software distributed under the License is
-// distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-// See the License for the specific language governing permissions and limitations under the License.
-//
 
 /* global svg, settings, currentMode, force, visualizeData, circleSize, maxEntityRadius, getEntityRadius,
 updateCircles, updateRectangles, tick, maxLinkWidth, getLineWidth, getMarkerWidth, updateLabels,
@@ -281,7 +273,7 @@ function handleSettingsInUI() {
     setLinkMode('straight'); // Default override
     //_syncUI(); // Called later
 
-    let linksLength = getSetting('setting_linelength', 200); // Use stored or default
+    let linksLength = 200; //getSetting('setting_linelength', 200); // Use stored or default
     $('#linksLength').val(linksLength).on('change', function(event){ // Added event parameter
         let newval = $(event.target).val();
         putSetting('setting_linelength', newval);
@@ -290,7 +282,7 @@ function handleSettingsInUI() {
         }
     });
 
-    let linksWidth = getSetting('setting_linewidth', 2); // Use stored or default
+    let linksWidth = 2; //getSetting('setting_linewidth', 2); // Use stored or default
     if(linksWidth<1) linksWidth = 1;  //min
     else if(linksWidth>maxLinkWidth) linksWidth = maxLinkWidth; //max
 
@@ -309,7 +301,7 @@ function handleSettingsInUI() {
         });
 
     $("#linksPathColor_inpt")
-        .val(getSetting('setting_linecolor')) // Initialize with current or default
+        .val('blue') // getSetting('setting_linecolor')
         .colorpicker({
                         hideButton: true, //show button right to input
                         showOn: "both", // Show on focus and button click
@@ -477,7 +469,7 @@ function _syncUI(){
     let formula = getSetting('setting_formula','linear');
     $('#toolbar').find('button[name="nodesMode"][value="'+formula+'"]').addClass('ui-heurist-btn-header1');
 
-    let linetype = getSetting('setting_linetype', 'straight'); // Use stored or default
+    let linetype = 'straight'; //getSetting('setting_linetype', 'straight'); 
     $('#toolbar').find('button[name="linksMode"][value="'+linetype+'"]').addClass('ui-heurist-btn-header1');
 
 
@@ -551,7 +543,7 @@ function setGravity(gravity) {
     putSetting('setting_gravity',  gravity);
 
     // Update gravity impact on nodes
-    svg.selectAll(".node").attr("fixed", function(d) { // Removed unused 'i' parameter
+    svg.selectAll(".node").attr("fixed", function(d) {
         if(gravity == "aggressive") {
             d.fixed = false;
             return false;
