@@ -506,12 +506,12 @@ class ActionHandler {
                 window.hWin.HAPI4.SystemMgr.get_defs_all( true, window.hWin.document);
                 break;
                 
-            case "menu-profile-admin":
+            case "menu-profile-admin":{
             
                 let url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database;
                 window.open(url)
                 break;
-
+            } 
             case "menu-profile-info":
                 popup_dialog_options['edit_mode'] = 'editonly';
                 popup_dialog_options['rec_ID'] = window.hWin.HAPI4.user_id();

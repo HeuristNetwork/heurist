@@ -11,6 +11,8 @@
 import './HMenu.js';
 import './HMenuOpts.js';
 
+/* global selectEntity, browseRecords */
+
 $.widget( 'heurist.HMenuEdit', $.heurist.HMenu, {
 
     // default options
@@ -444,8 +446,7 @@ console.log(item);
             }, 'Edit submenu title', {value:node.title} );
             
         }else if(menuId.indexOf('svs'==0)){
-            
-
+            //TBD
             
         }else if(window.hWin.HEURIST4.util.isPositiveInt(menuId)){
             this._editPageRecord(menuId);   
@@ -456,12 +457,12 @@ console.log(item);
     *
     */
     _editPageRecord: function (record_id){
-            
+            let that = this;
             //edit menu item
             window.hWin.HEURIST4.ui.openRecordEdit(record_id, null,
                 {selectOnSave:true,
                     onClose: function(){ 
-                        parent_span.find('.svs-contextmenu4').hide();
+                        //parent_span.find('.svs-contextmenu4').hide();
                     },
                     onselect:function(event, data){
                         if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
@@ -470,7 +471,7 @@ console.log(item);
                             let pageId = recordset.getOrder()[0];
                             
                             // Update tree
-                            let newTitle = recordset.fld(recordset.getFirstRecord(), DT_NAME);
+                            let newTitle = recordset.fld(recordset.getFirstRecord(), window.hWin.DT_NAME);
                             let node = $.ui.fancytree.getTree( that.element ).getNodeByKey( pageId );
                             if(node.title != newTitle){
                                     node.setTitle( newTitle );

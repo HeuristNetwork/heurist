@@ -14,6 +14,8 @@
 */
 import './HBaseWidget.js';
 
+/* global bootstrap */
+
 $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
 
     // Default options

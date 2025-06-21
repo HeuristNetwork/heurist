@@ -9,7 +9,7 @@
 * @version     7.0
 */
 
-/* global HCmsConfig */
+/* global HCmsConfig, editCMS_WidgetCfg */
 
 class HCmsConfigWidget extends HCmsConfig {
     

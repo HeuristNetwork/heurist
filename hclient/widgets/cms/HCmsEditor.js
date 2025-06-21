@@ -8,7 +8,7 @@
 * @version     7.0
 */
 
-/* global editCMS_SiteMenu */
+/* global editCMS_SiteMenu, HCmsEditorPage */
 
 /*
 * HCmsEditor.js - web page editor
@@ -150,7 +150,6 @@ class HCmsEditor {
             this.#initEditControls();
         }//editor panel is already inited
         
-        $(helpLink)
         this._ws_body.layout().show(this.editor_pos, true );
       
         //load the entire website

@@ -11,6 +11,7 @@
  * @author Ian Johnson <ian.johnson.heurist@gmail.com>
  * @since 6.0
  */
+/* global Chart */
 
 /**
  * @widget cmsStatistics

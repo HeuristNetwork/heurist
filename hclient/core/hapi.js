@@ -936,7 +936,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 }
                    
                 //params = {recID:recID} or {rty_ID:rty_ID} - to load defs for particular record or rectype
-                var entities = (params)?params:'all';
+                let entities = (params)?params:'all';
 
                 window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, function(){
                     let res = false;
@@ -944,7 +944,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         if(arguments[1]){
                             res = true;
                         }else{
-                            var sMsg = 'Cannot obtain database definitions (refreshEntityData function). '
+                            let sMsg = 'Cannot obtain database definitions (refreshEntityData function). '
                             +'This is probably due to a network timeout. However, if the problem '
                             +'persists please report to Heurist developers as it could indicate '
                             +'corruption of the database.';

@@ -1500,7 +1500,7 @@ console.log(content);
           $(app)[widgetname](method, ...params);
       
       }else if(!app){
-            console.log('widget '+element_id+' not found');
+            console.log('widget not found');
       }else if(!window.hWin.HEURIST4.util.isFunction($(app)[widgetname])){
             console.log('widget '+widgetname+' not loaded');
       }

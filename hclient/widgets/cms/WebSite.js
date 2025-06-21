@@ -9,6 +9,8 @@
 * @version     4.0
 */
 
+/* global bootstrap */
+
 /*
 * Apparently need to unite CmsManager and WebSite
 */
@@ -133,10 +135,10 @@ class WebSite {
             return;       
         }
 
-        let fields = ['rec_ID', DT_NAME, DT_SHORT_SUMMARY, DT_EXTENDED_DESCRIPTION, DT_CMS_CSS, DT_CMS_PAGETITLE];
+        let fields = ['rec_ID', window.hWin.DT_NAME, window.hWin.DT_SHORT_SUMMARY, window.hWin.DT_EXTENDED_DESCRIPTION, window.hWin.DT_CMS_CSS, window.hWin.DT_CMS_PAGETITLE];
         
         if(window.hWin.HAPI4.sysinfo['custom_js_allowed']){
-            fields.push(DT_CMS_SCRIPT);
+            fields.push(window.hWin.DT_CMS_SCRIPT);
         }
         
         const server_request = {
@@ -164,22 +166,22 @@ class WebSite {
                             res[key] = res[key][ Object.keys(res[key])[0] ];
                         }
                         */
-                        var keys = Object.keys(res);
-                        for(var idx in keys){
-                            var key = keys[idx];
+                        let keys = Object.keys(res);
+                        for(let idx in keys){
+                            const key = keys[idx];
 
-                            if(key == DT_EXTENDED_DESCRIPTION){
+                            if(key == window.hWin.DT_EXTENDED_DESCRIPTION){
                                 //the size content can be big so it stores in db as 64K chunks
                                 //implode all parts of page
                                 res[key] = Object.values(res[key]).join('');
-                            }else if(key == DT_CMS_CSS || key == DT_CMS_SCRIPT){ //for scripts and styles
+                            }else if(key == window.hWin.DT_CMS_CSS || key == window.hWin.DT_CMS_SCRIPT){ //for scripts and styles
                                 //takes only first value
                                 res[key] = res[key][ Object.keys(res[key])[0] ];
                             }
                         }
-                        if(window.hWin.HEURIST4.util.isBase64(res[DT_EXTENDED_DESCRIPTION])){
-                            res[DT_EXTENDED_DESCRIPTION] = new TextDecoder().decode(
-                                    window.hWin.HEURIST4.util.base64ToBytes(res[DT_EXTENDED_DESCRIPTION]));
+                        if(window.hWin.HEURIST4.util.isBase64(res[window.hWin.DT_EXTENDED_DESCRIPTION])){
+                            res[window.hWin.DT_EXTENDED_DESCRIPTION] = new TextDecoder().decode(
+                                    window.hWin.HEURIST4.util.base64ToBytes(res[window.hWin.DT_EXTENDED_DESCRIPTION]));
                         }
                         
                         res['rec_ID'] = record['rec_ID'];
@@ -267,14 +269,12 @@ class WebSite {
         let that = this;
         
         //waiting till all widgets are inited
-        var is_inited = window.hWin.HAPI4.layoutMgr.layoutCheckWidgets();
+        const is_inited = window.hWin.HAPI4.layoutMgr.layoutCheckWidgets();
         if (is_inited===false) {
             this.timeoutCount++;
             if(this.timeoutCount<100){
                 setTimeout(function(){ that.#onPageLoad() },500);
                 return;
-            }else{
-
             }
         }        
         
@@ -301,14 +301,14 @@ class WebSite {
     */
     #assignPageTitle(){
         
-        let pagetitle = this.#getPageRecValue(DT_NAME);
+        let pagetitle = this.#getPageRecValue(window.hWin.DT_NAME);
         pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'br,hr,p,i,b,u,em,strong,sup,sub,small,span');//<br>
         
-        let isShowTitlePerPage = this.#getPageRecValue(DT_CMS_PAGETITLE); 
+        let isShowTitlePerPage = this.#getPageRecValue(window.hWin.DT_CMS_PAGETITLE); 
         if( window.hWin.HEURIST4.util.isempty(isShowTitlePerPage)){
             isShowTitlePerPage = this.siteOptions.isShowTitle; //per website setting
         }else{
-            isShowTitlePerPage = isShowTitlePerPage!=TRM_NO;
+            isShowTitlePerPage = isShowTitlePerPage!=window.hWin.TRM_NO;
         }
         
         //Add page as a header for this.container (main-content)
@@ -374,7 +374,7 @@ class WebSite {
     #onPageLoadPublisherScripts(){
         
         //remove old style and add custom style per page ===========================
-        if(DT_CMS_CSS>0){
+        if(window.hWin.DT_CMS_CSS>0){
             
             //remove style for previous page
             if(this.currentPageStyle){
@@ -382,7 +382,7 @@ class WebSite {
                 this.currentPageStyle = null;
             }
 
-            const stylesCode = this.currentPageRec[DT_CMS_CSS];
+            const stylesCode = this.currentPageRec[window.hWin.DT_CMS_CSS];
             //custom website css from home page has been added already in WebSite.php
             if(stylesCode && this.pageId!=this.siteId)
             {
@@ -413,10 +413,10 @@ class WebSite {
         this.is_execute_homepage_custom_javascript = false;
         
         //execute custom javascript per loaded page =========================
-        if(this.siteId!=this.pageId && DT_CMS_SCRIPT>0){
+        if(this.siteId!=this.pageId && window.hWin.DT_CMS_SCRIPT>0){
             func_name = 'afterPageLoad'+this.pageId;    
             if(!window.hWin.HEURIST4.util.isFunction(window[func_name])){
-                const script_code = this.currentPageRec[DT_CMS_SCRIPT];
+                const script_code = this.currentPageRec[window.hWin.DT_CMS_SCRIPT];
                 if(script_code && script_code !== false){ //false means it is already inited
 
                     //add script to page header

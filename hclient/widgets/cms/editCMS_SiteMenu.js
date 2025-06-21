@@ -570,19 +570,19 @@ title: "Overview"
      * Creates a new CMS Menu record, typically based on a template, and then adds it to the menu structure.
      * @private
      * @param {number} parent_id - The record ID of the parent menu item (or home page ID for top-level items).
-     * @param {string} page_name - The name for the new page/menu item.
+     * @param {string} pageName - The name for the new page/menu item.
      * @param {string} templateName - The name of the template to use for the page content (e.g., 'default', 'blog').
      * @param {function(number):void} [callback] - Optional callback function, receives the new page ID. Defaults to refreshing the main menu.
      * @param {jQuery} [$dlg_element] - Optional jQuery dialog element to close after creation.
      */
-    function _createMenuRecord(parent_id, page_name, templateName, callback, $dlg_element){
+    function _createMenuRecord(parent_id, pageName, templateName, callback, $dlg_element){
         
         if($dlg_element && $dlg_element.dialog('instance') !== undefined){
             $dlg_element.dialog( "close" );
         }
                 
         let details = {};
-        details['t:'+DT_NAME] = [ page_name ];
+        details['t:'+DT_NAME] = [ pageName ];
         details['t:'+DT_CMS_PAGETYPE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE_MENUITEM'] ];
         if(DT_CMS_PAGETITLE>0 && window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO']){
             details['t:'+DT_CMS_PAGETITLE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'] ];
