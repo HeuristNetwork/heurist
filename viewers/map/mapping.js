@@ -64,7 +64,7 @@
  * @since       Pre-4.0 (version 6.0 indicates significant evolution)
  */
 
-/* global L, HMapManager, hMapDocument, accessToken_MapTiles, simplePointsToWKT, parseWKT, stringifyMultiWKT, cheapRuler, hexToFilter */
+/* global L, HMapManager, hMapDocument, accessToken_MapTiles, simplePointsToWKT, parseWKT, stringifyMultiWKT, cheapRuler, hexToFilter, GeoRasterLayer, parseGeoraster */
 
 $.widget( "heurist.mapping", {
 
