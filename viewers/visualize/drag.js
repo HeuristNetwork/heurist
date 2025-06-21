@@ -1,37 +1,45 @@
 
 /**
-* drag.js
-* 
-* Functions to add nodes and make them draggable
+* drag.js - Functions to add nodes and make them draggable
 *
+* @fileOverview Functions to add nodes and make them draggable.
+* This file includes functionality for appending nodes to the D3 visualization,
+* handling drag events (start, move, end), managing node clicks for displaying
+* information, and updating node positions.
 * @package     Heurist academic knowledge management system
+* @subpackage  /viewers/visualize
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
+* @since       4
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+// Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+// Unless required by applicable law or agreed to in writing, software distributed under the License is
+// distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+// See the License for the specific language governing permissions and limitations under the License.
+//
 
-/* global svg, data, settings, force, currentMode, circleSize, iconSize, _editRecStructure, 
+/* global svg, data, settings, force, currentMode, circleSize, iconSize, _editRecStructure,
 drag_link_source_id, drag_link_target_id, drag_link_line, selectionColor, determineColour, closeRectypeSelector,
-getSetting, putSetting, createOverlay, getEntityRadius, truncateText, updateCircles, tick */
+getSetting, putSetting, createOverlay, getEntityRadius, truncateText, updateCircles, tick, $Db */
 
+/** @global {null|number} currentNode Stores the ID of the currently dragged node. */
 let currentNode = null;
 
 /**
-* Appends nodes to the visualisation
+* Appends nodes to the D3 visualisation.
+* This function creates the visual representation of nodes, including circles, icons,
+* and attaches event listeners for interactions like double-click and dragging.
+* It also restores node positions from local storage if available.
+*
+* @returns {object} The D3 selection of the appended nodes.
 */
 function addNodes() {
-    
+
    // Append nodes
    let nodes = window.d3.select("#container")
                   .selectAll(".node")
@@ -158,6 +166,11 @@ function addNodes() {
      return nodes;
 }
 
+/**
+ * Handles node click events.
+ * Closes the record type selector and, if not a drag event, shows node information.
+ * @param {object} d - The D3 data object for the clicked node.
+ */
 function onNodeClick(d){
 
     closeRectypeSelector();
@@ -169,9 +182,10 @@ function onNodeClick(d){
 }
 
 /**
- * Shows the record details in an iframe when a node is clicked
- *
- * @param {Object} d node data object from d3
+ * Shows the record details in an iframe or a div when a node is clicked.
+ * If `settings.isDatabaseStructure` is true, it displays record type information.
+ * Otherwise, it displays the record viewer in an iframe.
+ * @param {object} d - Node data object from D3.
  */
 function showNodeInformation(d){
 
@@ -293,9 +307,10 @@ function showNodeInformation(d){
 
 }
 
-/*Hides record details shown by showNodeInformation
-  Added by "ISH"
-*/
+/**
+ * Handles actions for the node information display, such as closing or opening in a popup/new tab.
+ * @param {string} [action='close'] - The action to perform: 'close', 'popup', or 'newtab'.
+ */
 function handleNodeAction(action = 'close'){
 
     if(action == 'close'){
@@ -310,7 +325,8 @@ function handleNodeAction(action = 'close'){
 }
 
 /**
-* Updates the locations of all nodes
+* Updates the locations of all nodes in the visualization.
+* Stores the new x, y, px, and py coordinates in local storage for each node.
 */
 function updateNodes() {
     window.d3.selectAll(".node").attr("transform", function(d) { 
@@ -327,7 +343,12 @@ function updateNodes() {
 
 // Functions to make dragging, moving and zooming possible
 
-/** Called when a dragging event starts */
+/**
+ * Called when a D3 dragging event starts on a node.
+ * Stops the force layout, sets the node as fixed, and updates its appearance.
+ * @param {object} d - The D3 data object for the dragged node.
+ * @param {number} i - The index of the dragged node.
+ */
 function dragstart(d, i) {
     
     window.d3.event.sourceEvent.stopPropagation();
@@ -348,7 +369,12 @@ function dragstart(d, i) {
     updateCircles(".node.id"+d.id, selectionColor, selectionColor);
 }
 
-/** Caled when a dragging move event occurs */
+/**
+ * Called when a D3 dragging move event occurs.
+ * Updates the position of the dragged node (and potentially other selected nodes, though current implementation only moves the active one).
+ * @param {object} d - The D3 data object for the dragged node.
+ * @param {number} i - The index of the dragged node.
+ */
 function dragmove(d, i) {  
     
     // Update all selected nodes. A node is selected when the .foreground color is 190,228,248
@@ -368,7 +394,13 @@ function dragmove(d, i) {
 
 }
 
-/** Called when a dragging event ends */
+/**
+ * Called when a D3 dragging event ends.
+ * Sets the node's fixed status based on gravity settings, updates its position in local storage,
+ * and resumes the force layout if applicable.
+ * @param {object} d - The D3 data object for the dragged node.
+ * @param {number} i - The index of the dragged node.
+ */
 function dragend(d, i) {
     
     // Update nodes & lines

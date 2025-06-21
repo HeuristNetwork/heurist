@@ -1,41 +1,48 @@
 
 /**
-* overlay.js: Functions to handle node and relationship overlays
+* overlay.js - Functions to handle node and relationship overlays
 *
+* @fileOverview This file provides functions for creating and managing overlays
+* that display information about nodes (records or record types) and relationships (links)
+* in the visualization. It includes text truncation, data retrieval for overlays,
+* and interaction handling like dragging to create new links.
 * @package     Heurist academic knowledge management system
+* @subpackage  /viewers/visualize
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
+* @since       4
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+// Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+// Unless required by applicable law or agreed to in writing, software distributed under the License is
+// distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+// See the License for the specific language governing permissions and limitations under the License.
+//
 
-/* global svg, settings, currentMode, 
+/* global svg, settings, currentMode,
 drag_link_source_id, drag_link_target_id, drag_link_line,
-getSetting, tick, filterData */
+getSetting, tick, filterData, $Db, _editRecStructure, showNodeInformation */
 
-//global variables
+/** @global {null|number} drag_link_source_id - ID of the source node when creating a new link. */
 window.drag_link_source_id = null;
+/** @global {null|number} drag_link_target_id - ID of the target node when creating a new link. */
 window.drag_link_target_id = null;
+/** @global {null|object} drag_link_line - D3 selection of the line drawn when creating a new link. */
 window.drag_link_line = null;
 
+/** @global {null|number} drag_link_timer - Timer for drag link operations. */
 let drag_link_timer = null;
 
-// Functions to handle node and relationship overlays
 
-//common function 
 /**
-* Truncates text after 80 characaters
-* @param text The text to truncate
+* Truncates text if it exceeds a specified maximum length, appending an ellipsis.
+* @param {?string} text - The text to truncate.
+* @param {number} maxLength - The maximum allowed length of the text.
+* @returns {string} The truncated text, or "[no name]" if the input text is null.
 */
 function truncateText(text, maxLength) {
     if(text !== null) {
@@ -44,11 +51,15 @@ function truncateText(text, maxLength) {
         }
         return text;
     }
-    return "[no name]"; 
+    return "[no name]";
 }
 
-// called from selection - may be private
-/** Finds all outgoing links from a clicked record */
+/**
+ * Retrieves and formats data for a record overlay.
+ * This includes the record's name, count, and its outgoing relationships.
+ * @param {object} record - The D3 data object for the record node.
+ * @returns {Array<object>} An array of objects, each representing a line of text in the overlay.
+ */
 function getRecordOverlayData(record) {
 
     let maxLength = getSetting('setting_textlength');
@@ -156,8 +167,12 @@ function getRecordOverlayData(record) {
     return array;
 }
 
-// public from visualize
-/** get info about particular relation */
+/**
+ * Retrieves and formats data for a relationship (link) overlay.
+ * This includes the names of the source and target records, and details about the relationship(s) between them.
+ * @param {object} line - The D3 data object for the link.
+ * @returns {Array<object>} An array of objects, each representing a line of text in the overlay.
+ */
 function getRelationOverlayData(line) {
     let array = [];
     let maxLength = 60;
@@ -232,11 +247,15 @@ function getRelationOverlayData(line) {
     return array;
 }
 
-//private 
 /**
- * Get all record pointers (fields) that point towards a rectypes not shown yet
- * 
- * @param node_info current array of info 
+ * Adds missing fields (record pointers or relmarkers) to the node information array
+ * for database structure visualizations. It identifies fields of the current record type
+ * that are not already represented in the `node_info` (i.e., not currently linked in the visible graph).
+ *
+ * @private
+ * @param {Array<object>} node_info - The current array of information objects for the node overlay.
+ *                                   The first element `node_info[0]` is expected to have an `rtyid` property.
+ * @returns {Array<object>} The updated `node_info` array with added missing fields.
  */
 function addMissingFields(node_info){
 
@@ -300,25 +319,27 @@ function addMissingFields(node_info){
     return node_info;
 }
 
-//public 
 /**
-* Creates an overlay over the node / on the location that the user has clicked on.
-* 
-*  type - record   icon and info box over node
-*  type - relation
-* 
-* @param x Coord-x
-* @param y Coord-y
-* @param selector event target
-* @param node_obj information
+* Creates an overlay for a node or a relationship.
+* The overlay displays information such as name, count, and related fields or links.
+* It can be attached to a parent D3 node (for record overlays) or directly to the main SVG.
+*
+* @param {number} x - The x-coordinate for the overlay (relative to parent or SVG).
+* @param {number} y - The y-coordinate for the overlay (relative to parent or SVG).
+* @param {string} type - The type of overlay, either "record" or "relation".
+* @param {string} selector - A CSS class selector for the overlay, typically based on the node/link ID.
+* @param {object} node_obj - The D3 data object for the node or link.
+* @param {object} [parent_node] - Optional. The D3 selection of the parent node to attach a record overlay to.
+*                                If not provided, the overlay is appended to the main SVG.
+* @returns {object} The D3 selection of the created overlay group element.
 */
 function createOverlay(x, y, type, selector, node_obj, parent_node) {
-    
+
     let info = node_obj;
     if(type=='record'){
         info = getRecordOverlayData(node_obj);
     }
-    
+
     const iconSize = 16;
     const is_admin = window.hWin.HAPI4.is_admin();
     
@@ -978,29 +999,26 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 }
 
 
-// public (call here and from drag) - move to top
-// edit strcuture (from image link in table)
-//
-function _editRecStructure(rty_ID) {
+// _editRecStructure is defined in visualize.js and drag.js, no need to redefine here if it's globally available.
+// If it's not, it should be passed as a parameter or handled via settings.
 
-    //edit structure (it opens fake record and switches to edit structure mode)
-    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
-                        {new_record_params:{RecTypeID: rty_ID}, edit_structure:true});
-    
-}
-
-// public  - from visualize
-/** Removes the overlay with the given ID */
+/**
+ * Removes a specific overlay from the visualization.
+ * @param {string} selector - The CSS selector for the overlay to remove.
+ * @param {number} [delay=1000] - The fade-out duration in milliseconds.
+ */
 function removeOverlay(selector, delay) {
     if(!(delay>=0)) delay = 1000;
     $(".overlay."+selector).fadeOut(delay, function() {
         $(this).remove();
-   }); 
+   });
 }
 
 
-// not used
-/** Removes all overlays */
+/**
+ * Removes all overlays from the visualization.
+ * @deprecated Not currently used in the codebase.
+ */
 function removeOverlays() {
     $(".overlay").each(function() {
         $(this).fadeOut(300, function() {
@@ -1009,13 +1027,19 @@ function removeOverlays() {
     });
 }
 
-// private
-// open popup dialog to define new link or relationship
-//
+/**
+ * Initiates the process of adding a new link field, either by showing a dialog
+ * for selecting/creating a link field type (for database structure visualization)
+ * or by directly linking two records (for record visualization).
+ *
+ * @private
+ * @param {number|string} source_ID - The ID of the source record/record type.
+ * @param {number|string} target_ID - The ID of the target record/record type.
+ */
 function _addNewLinkField(source_ID, target_ID){
 
     let body = $(this.document).find('body');
-    let dim = { h:480, w:700 };//Math.max(900, body.innerWidth()-10) };                
+    let dim = { h:480, w:700 };//Math.max(900, body.innerWidth()-10) };
 
     //ar target_ID = 10;
 
@@ -1072,10 +1096,23 @@ function _addNewLinkField(source_ID, target_ID){
 
 }
 
-// private
-// 
+/**
+ * Links two existing records using the 'recordAddLink' dialog.
+ *
+ * @private
+ * @param {number|string} source_ID - The ID of the source record.
+ * @param {number|string} target_ID - The ID of the target record.
+ */
 function _linkTwoRecords(source_ID, target_ID){
 
+    /**
+     * Callback function executed after the 'recordAddLink' dialog is closed.
+     * If a link was successfully created and `settings.onRefreshData` is defined,
+     * it triggers a data refresh. It also cleans up the drag-link global variables.
+     * @param {object} context - The context object returned from the dialog.
+     *                         Expected to have a `count` property if a link was made.
+     * @private
+     */
     function __onCloseAddLink(context){
         if(context && context.count>0 && settings.onRefreshData){
             // Trigger refresh
@@ -1085,19 +1122,24 @@ function _linkTwoRecords(source_ID, target_ID){
         window.drag_link_source_id = null;
         if(window.drag_link_line) window.drag_link_line.remove();
         window.drag_link_line = null;
-    }                            
+    }
 
     let opts = {
         source_ID: source_ID,
-        onClose: __onCloseAddLink 
+        onClose: __onCloseAddLink
     };
     if(target_ID){
         opts['target_ID'] = target_ID;
     }
 
-    window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLink', opts);    
+    window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLink', opts);
 }
 
+/**
+ * Fetches updated data from the server for the database structure visualization
+ * and then filters and updates the display.
+ * This is typically called after a structural change, like adding a new link field.
+ */
 function getDataFromServer(){
 
     const url = window.hWin.HAPI4.baseURL+"hserv/controller/rectype_relations.php" + window.location.search;
