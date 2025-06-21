@@ -1,48 +1,54 @@
-
 /**
-* settings.js: Functions to handle the visualisation settings
+* settings.js - Functions to handle the visualisation settings
 *
+* @fileOverview This file provides functions for managing visualization settings.
+* It includes retrieving and storing settings (primarily using localStorage or Heurist user preferences),
+* checking and initializing default settings, and handling UI interactions for modifying settings
+* like line type, node size, colors, gravity, etc.
 * @package     Heurist academic knowledge management system
+* @subpackage  /viewers/visualize
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
-* @todo change storage of settings to user session (instead of current usage of localStorage)
+* @since       4
+* @todo Change storage of settings to user session (instead of current usage of localStorage for non-authenticated users).
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-/* global svg, settings, currentMode, force, visualizeData, circleSize, selectionMode, maxEntityRadius, getEntityRadius,
-updateCircles, updateRectangles, tick, maxLinkWidth, getLineWidth, getEntityRadius, getMarkerWidth, updateLabels,
+/* global svg, settings, currentMode, force, visualizeData, circleSize, maxEntityRadius, getEntityRadius,
+updateCircles, updateRectangles, tick, maxLinkWidth, getLineWidth, getMarkerWidth, updateLabels,
 onVisualizeResize */
 
-// Functions to handle the visualisation settings
-
-window.preference_settings = window.hWin.HAPI4.has_access() ? window.hWin.HAPI4.get_prefs_def('vis_struct', {}) : {};
-//localStorage.clear();
 /**
-* Returns the current displayed URL
-* 
+ * Global object to store visualization preferences if the user has access (is logged in).
+ * Falls back to localStorage if user is not authenticated.
+ * @type {object}
+ */
+window.preference_settings = window.hWin.HAPI4.has_access() ? window.hWin.HAPI4.get_prefs_def('vis_struct', {}) : {};
+
+/**
+* Returns the current displayed URL of the visualization page.
+* @returns {string} The current URL.
 */
 function getURL() {
-    return window.location.href; 
+    return window.location.href;
 }
 
 /**
- * Returns a setting from the localStorage
- * @param setting The setting to retrieve
+ * Retrieves a setting value.
+ * It first checks Heurist user preferences if the user is authenticated and the key is not numeric or a transform key.
+ * Otherwise, it falls back to localStorage, prefixed with the database name.
+ * If the value is not found and a default value is provided, the default is stored and returned.
+ *
+ * @param {string|number} key - The key of the setting to retrieve. If it starts with 'setting_', the prefix is removed.
+ * @param {*} [defvalue] - The default value to return (and store) if the setting is not found.
+ * @param {string} [split_string=''] - If provided and the retrieved value is a string, the string will be split by this delimiter.
+ * @returns {*} The retrieved setting value, potentially split into an array, or the default value.
  */
 function getSetting(key, defvalue, split_string = '') {
 
-    let value = '';
+    let value;
 
     if(typeof key === 'string' && key.startsWith('setting_')){
         key = key.split('_');
@@ -74,20 +80,23 @@ function getSetting(key, defvalue, split_string = '') {
 }
 
 /**
-* Stores a value in the localStorage
+* Stores a setting value.
+* It first attempts to save to Heurist user preferences if the user is authenticated and the key is appropriate.
+* Otherwise, it saves to localStorage, prefixed with the database name.
+*
+* @param {string|number} key - The key of the setting to store. If it starts with 'setting_', the prefix is removed for preference storage.
+* @param {*} value - The value to store.
 */
 function putSetting(key, value) {
 
     if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') === -1 && key.indexOf('scale') === -1){
 
-        if(key.startsWith('setting_')){
-            key = key.split('_');
-            key.shift();
-            key = key.join('_');
+        let prefKey = key;
+        if(typeof key === 'string' && key.startsWith('setting_')){
+            prefKey = key.substring('setting_'.length);
         }
 
-        window.preference_settings[key] = value;
-
+        window.preference_settings[prefKey] = value;
         window.hWin.HAPI4.save_pref('vis_struct', window.preference_settings);
     }else{
         localStorage.setItem(window.hWin.HAPI4.database+key, value);
@@ -95,19 +104,23 @@ function putSetting(key, value) {
 }
 
 /**
-* Remove setting from localStorage
+* Removes a setting from localStorage.
+* Note: This does not currently affect Heurist user preferences.
+* @param {string|number} key - The key of the setting to remove from localStorage.
 */
 function removeSetting(key){
     localStorage.removeItem(window.hWin.HAPI4.database+key);
 }
 
 /**
- * This function makes sure the default settings are stored in the localStorage.
- * @param settings The plugin settings object
+ * Ensures that default settings are present by calling `getSetting` for each,
+ * which will store the default if the setting doesn't exist.
+ * This relies on the `settings` object (presumably from the main visualize plugin)
+ * to provide the initial default values if not found in storage.
  */
 function checkStoredSettings() {
-    getSetting(   'setting_linetype', 'straight'); //settings.linetype    );
-    getSetting(   'setting_line_empty_link', 1); //settings.setting_line_empty_link );
+    getSetting(   'setting_linetype', settings.linetype    );
+    getSetting(   'setting_line_empty_link', settings.line_empty_link );
     getSetting(   'setting_linelength',    200); //settings.linelength  );
     getSetting(   'setting_linewidth',     2); //settings.linewidth   );
     getSetting(   'setting_linecolor',     'blue'); //settings.linecolor   );
@@ -129,21 +142,24 @@ function checkStoredSettings() {
 }
 
 /**
-* This function sets the settings in the UI
+* Initializes the user interface elements for controlling visualization settings.
+* This includes setting up sliders, color pickers, radio buttons, and checkboxes
+* for various options like node size, line appearance, labels, and interaction modes.
+* It binds event handlers to these UI elements to update settings and refresh the visualization.
 */
 function handleSettingsInUI() {
-    
+
     //add elements on toolbar
     let tBar = $('#toolbar');
-    
-    
+
+
     let is_advanced = getSetting('setting_advanced');
-    
-    $('#setAdvancedMode').css({cursor:'hand'}).on('click',
+
+    $('#setAdvancedMode').css({cursor:'pointer'}).on('click', // REMARK: Changed cursor from 'hand' to 'pointer' for broader compatibility
         function(){
-              let is_advanced = getSetting('setting_advanced');
-              is_advanced = (is_advanced==='false');
-                if(is_advanced){
+              let is_advanced_current = getSetting('setting_advanced'); // Use a different variable name to avoid confusion
+              is_advanced_current = (is_advanced_current ==='false'); // Strict comparison
+                if(is_advanced_current){
                     $('.advanced').show();
                     $('#setAdvancedMode').find('a').hide();
                     if(settings.isDatabaseStructure){
@@ -153,12 +169,12 @@ function handleSettingsInUI() {
                     $('.advanced').hide();
                     $('#setAdvancedMode').find('a').show();
                 }
-              putSetting('setting_advanced', is_advanced); 
+              putSetting('setting_advanced', is_advanced_current);
               onVisualizeResize();
         }
     );
-    
-    if(is_advanced!=='false'){
+
+    if(is_advanced !=='false'){ // Strict comparison
         $('.advanced').show();
         $('#setAdvancedMode').find('a').hide();
         if(settings.isDatabaseStructure){
@@ -168,22 +184,22 @@ function handleSettingsInUI() {
         $('.advanced').hide();
         $('#setAdvancedMode').find('a').show();
     }
-    
+
     //-------------------------------
-    
+
     $('#btnSingleSelect').button({icon:'ui-icon-cursor' , showLabel:false})
         .on('click', function(){ window.selectionMode = 'single'; $("#d3svg").css("cursor", "default"); _syncUI();});
     $('#btnMultipleSelect').button({icon: 'ui-icon-select', showLabel:false})
         .on('click', function(){ window.selectionMode = 'multi'; $("#d3svg").css("cursor", "crosshair"); _syncUI();});
     $('#selectMode').controlgroup();
-        
+
     $('#btnViewModeIcon').button({icon: 'ui-icon-circle' , showLabel:false})
         .on('click', function(){changeViewMode('icons');} );
     $('#btnViewModeInfo').button({icon: 'ui-icon-circle-b-info' , showLabel:false})
         .on('click', function(){changeViewMode('infoboxes');} );
     $('#btnViewModeFull').button({icon: 'ui-icon-circle-info' , showLabel:false})
         .on('click', function(){changeViewMode('infoboxes_full');} );
-    $( "#setViewMode" ).controlgroup();    
+    $( "#setViewMode" ).controlgroup();
 
     $('#gravityMode0').button(/*{icon: 'ui-icon-gravity0' , showLabel:false}*/)
         .on('click', function(){setGravity('off');} );
@@ -191,231 +207,226 @@ function handleSettingsInUI() {
         .on('click', function(){setGravity('touch');} );
     /*$('#gravityMode2').button(/*{icon: 'ui-icon-gravity2' , showLabel:false})
         .on('click', function(){setGravity('aggressive');} );*/
-    $("#setGravityMode").controlgroup();    
-    
+    $("#setGravityMode").controlgroup();
+
     //------------ NODES ----------
-    
+
     let radius = getSetting('setting_entityradius');
-    if(radius<circleSize) radius = circleSize  //min
-    else if(radius>maxEntityRadius) radius = maxEntityRadius;
-    $('#nodesRadius').val(radius).on('change', function(){
+    if(radius<circleSize) radius = circleSize;  //min
+    else if(radius>maxEntityRadius) radius = maxEntityRadius; //max
+    $('#nodesRadius').val(radius).on('change', function(event){ // Added event parameter
         putSetting('setting_entityradius', $(event.target).val());
-        //visualizeData();
-        window.d3.selectAll(".node > .background").attr("r", function(d) {
+        window.d3.selectAll(".node > .background").attr("r", function(d) { // This will apply to all nodes, not just the one being changed if that's the intent
                         return getEntityRadius(d.count);
-                    })
+                    });
     });
-    
-    //$("input[name='nodesMode'][value='" +getSetting('setting_formula')+ "']").attr("checked", true);
-    
+
     $('#nodesMode0').button().css('width','35px')
         .on('click', function(){ setFormulaMode('linear'); });
     $('#nodesMode1').button().css('width','40px')
-        .on('click', function(){ setFormulaMode('logarithmic'); }); 
+        .on('click', function(){ setFormulaMode('logarithmic'); });
     $('#nodesMode2').button().css('width','50px')
         .on('click', function(){ setFormulaMode('unweighted'); });
-    $( "#setNodesMode" ).controlgroup();    
+    $( "#setNodesMode" ).controlgroup();
 
     if($('#entityColor').length > 0){
         $("#entityColor")
-        //.addClass('ui-icon ui-icon-bullet')
-        //.css({'font-size':'3.5em','color':getSetting('setting_entitycolor')})
         .val(getSetting('setting_entitycolor'))
         .colorpicker({
                         hideButton: false, //show button right to input
                         showOn: "button",
                         val:getSetting('setting_entitycolor')})
-        .on('change.color', function(event, color){
+        .on('change.color', function(event, color){ // Added event parameter
             if(color){
                 putSetting('setting_entitycolor', color);
-                //$(".background").attr("fill", color);
                 updateCircles(".node", null, getSetting('setting_entitycolor'));
                 updateRectangles(".node", getSetting('setting_entitycolor'));
-                visualizeData();
+                visualizeData(); // Consider if a full redraw is always needed
             }
         });
     }
 
     //------------ LINKS ----------
 
-    //$("input[name='linksMode'][value='" +getSetting('setting_linetype')+ "']").attr("checked", true);
-    
-    $('#linksMode0').button({icon: 'ui-icon-link-streight', showLabel:false})
+    $('#linksMode0').button({icon: 'ui-icon-link-streight', showLabel:false}) // REMARK: Typo 'streight' should be 'straight' in icon name if it exists
         .on('click', function(){ setLinkMode('straight');} );
     $('#linksMode1').button({icon: 'ui-icon-link-curved', showLabel:false})
         .on('click', function(){ setLinkMode('curved');} );
     $('#linksMode2').button({icon: 'ui-icon-link-stepped', showLabel:false})
         .on('click', function(){ setLinkMode('stepped');} );
-        
+
     $('#linksEmpty').on('change', function(e){
         putSetting('setting_line_empty_link', $(e.target).is(':checked')?1:0);
         visualizeData();
         _syncUI();
     });
 	$('#expand-links').on('change', function(){ // expand single links
-        tick(); 
+        tick();
 	});
     if(settings.isDatabaseStructure){ // show all links by default for database structure vis
         $('#expand-links').prop('checked', true);
     }
-        
-    $( "#setLinksMode" ).controlgroup();    
-    
-    putSetting('setting_linecolor', '#0070c0');  //2022-01-01
-    setLinkMode('straight'); //2022-01-01
-    //_syncUI();
 
-    let linksLength = 200; //2022-01-01 getSetting('setting_linelength', 200);    
-    $('#linksLength').val(linksLength).on('change', function(){
+    $( "#setLinksMode" ).controlgroup();
+
+    putSetting('setting_linecolor', '#0070c0');  // Default override
+    setLinkMode('straight'); // Default override
+    //_syncUI(); // Called later
+
+    let linksLength = 200; //getSetting('setting_linelength', 200); // Use stored or default
+    $('#linksLength').val(linksLength).on('change', function(event){ // Added event parameter
         let newval = $(event.target).val();
         putSetting('setting_linelength', newval);
-        if(getSetting('setting_gravity') != "off"){
-            visualizeData();    
+        if(getSetting('setting_gravity') != "off"){ // Only redraw if gravity might be affected
+            visualizeData();
         }
     });
-    
-    let linksWidth = 2; //2022-01-01 getSetting('setting_linewidth');    
-    if(linksWidth<1) linksWidth = 1  //min
-    else if(linksWidth>maxLinkWidth) linksWidth = maxLinkWidth;
-    
+
+    let linksWidth = 2; //getSetting('setting_linewidth', 2); // Use stored or default
+    if(linksWidth<1) linksWidth = 1;  //min
+    else if(linksWidth>maxLinkWidth) linksWidth = maxLinkWidth; //max
+
     $('#linksWidth').val(linksWidth).on('change',
-    function(){
+    function(event){ // Added event parameter
         let newval = $(event.target).val();
         putSetting('setting_linewidth', newval);
-        
         refreshLinesWidth();
-    
     });
-    
+
     $("#linksPathColor")
-        //.addClass('ui-icon ui-icon-loading-status-circle')
         .css({'font-size':'1.8em','font-weight':'bold','color':getSetting('setting_linecolor')})
         .on('click', function(e){
-                window.hWin.HEURIST4.util.stopEvent(e);
+                window.hWin.HEURIST4.util.stopEvent(e); // Prevent default if it's a link
                 $("#linksPathColor_inpt").colorpicker("showPalette");
         });
-        
+
     $("#linksPathColor_inpt")
-        .val('blue')  //getSetting('setting_linecolor')
+        .val('blue') // getSetting('setting_linecolor')
         .colorpicker({
                         hideButton: true, //show button right to input
-                        showOn: "both",
+                        showOn: "both", // Show on focus and button click
                         val:getSetting('setting_linecolor')})
-        .on('change.color', function(event, color){
+        .on('change.color', function(event, color){ // Added event parameter
             if(color){
                 putSetting('setting_linecolor', color);
-                $(".bottom-lines.link").attr("stroke", color);
-                $('#linksPathColor').css('color', color);
-                visualizeData();
+                $(".bottom-lines.link").attr("stroke", color); // Update existing lines
+                $('#linksPathColor').css('color', color); // Update display icon
+                visualizeData(); // Redraw might be needed if new lines adopt this color
             }
         });
-        
-      
+
+
     $("#linksMarkerColor")
-        .addClass('ui-icon ui-icon-triangle-1-e')
+        .addClass('ui-icon ui-icon-triangle-1-e') // Standard jQuery UI icon
         .css({'color':getSetting('setting_markercolor')})
         .on('click', function(e){
                 window.hWin.HEURIST4.util.stopEvent(e);
                 $("#linksMarkerColor_inpt").colorpicker("showPalette");
         });
-        
+
     $("#linksMarkerColor_inpt")
         .val(getSetting('setting_markercolor'))
         .colorpicker({
                         hideButton: true, //show button right to input
-                        showOn: "focus",
+                        showOn: "focus", // Show only on focus
                         val:getSetting('setting_markercolor')})
-        .on('change.color', function(event, color){
+        .on('change.color', function(event, color){ // Added event parameter
             if(color){
                 putSetting('setting_markercolor', color);
-                $("marker").attr("fill", color);
-                $('#linksMarkerColor').css('color', color);
-                visualizeData();
+                $("marker").attr("fill", color); // Update existing markers
+                $('#linksMarkerColor').css('color', color); // Update display icon
+                visualizeData(); // Redraw might be needed
             }
         });
-    
-    
+
+
     //------------ LABELS ----------
-    
-    putSetting('setting_labels', 'on'); //always on
+
+    putSetting('setting_labels', 'on'); // Default override: labels always on initially
     let isLabelVisible = (getSetting('setting_labels', 'on')=='on');
-    
-    $('#textOnOff').attr('checked',isLabelVisible).on('change', function(){
-        
+
+    $('#textOnOff').attr('checked',isLabelVisible).on('change', function(event){ // Added event parameter
+
         let newval = $(event.target).is(':checked')?'on':'off';
         putSetting('setting_labels', newval);
 
         if(window.currentMode=='icons'){
-            let isLabelVisible = (newval=='on');
-            
-            if(isLabelVisible) {
-                visualizeData();
+            let isLabelCurrentlyVisible = (newval=='on'); // Use newval
+
+            if(isLabelCurrentlyVisible) {
+                visualizeData(); // Redraw to show labels
             }else{
-                window.d3.selectAll(".nodelabel").style('display', 'none');
+                window.d3.selectAll(".nodelabel").style('display', 'none'); // Hide labels
             }
         }
-        // visualizeData();
+        // If not in 'icons' mode, labels are typically part of infoboxes which are handled by changeViewMode
     });
-    
-    let textLength = getSetting('setting_textlength', 200);    
-    $('#textLength').val(textLength).on('change', function(){
+
+    let textLength = getSetting('setting_textlength', 200);
+    $('#textLength').val(textLength).on('change', function(event){ // Added event parameter
         let newval = $(event.target).val();
         putSetting('setting_textlength', newval);
-        let isLabelVisible = (window.currentMode!='icons' || (getSetting('setting_labels', 'on')=='on'));
-        if(isLabelVisible) visualizeData();    
+        let isLabelCurrentlyVisible = (window.currentMode!='icons' || (getSetting('setting_labels', 'on')=='on'));
+        if(isLabelCurrentlyVisible) visualizeData(); // Redraw if labels are potentially visible
     });
-    
-    
-    let fontSize = getSetting('setting_fontsize', 12);    
-    if(isNaN(fontSize) || fontSize<8) fontSize = 8  //min
-    else if(fontSize>25) fontSize = 25;
+
+
+    let fontSize = getSetting('setting_fontsize', 12);
+    if(isNaN(fontSize) || fontSize<8) fontSize = 8;  //min
+    else if(fontSize>25) fontSize = 25; //max
 
     $('#fontSize').val(fontSize).on('change',
-    function(){
+    function(event){ // Added event parameter
         let newval = $(event.target).val();
         putSetting('setting_fontsize', newval);
-        let isLabelVisible = (window.currentMode!='icons' || (getSetting('setting_labels', 'on')=='on'));
-        if(isLabelVisible) visualizeData();    
+        let isLabelCurrentlyVisible = (window.currentMode!='icons' || (getSetting('setting_labels', 'on')=='on'));
+        if(isLabelCurrentlyVisible) visualizeData(); // Redraw if labels are potentially visible
     });
 
     if(settings.isDatabaseStructure){
-        initRecTypeSelector();    
+        initRecTypeSelector();
         $('#setDivExport').hide();
     }else{
         $('#setDivExport').show();
         $('#gephi-export').button();
     }
-    
+
     tBar.show();
 }
 
+/**
+ * Initializes the record type selector panel for database structure visualizations.
+ * Sets up a jQuery UI Layout for the west panel containing the list of record types.
+ * Handles opening the panel if `window.startup_rectype` indicates it.
+ * @private
+ */
 function initRecTypeSelector(){
 
-    let hidePane = window.startup_rectype != 1;
-    delete window.startup_rectype;
+    let hidePane = window.startup_rectype != 1; // Check if panel should be initially hidden
+    delete window.startup_rectype; // Clean up global flag
 
-    let layout_options = { 
+    let layout_options = {
         applyDefaultStyles: true,
         center:{
-            size: $('#main_content').width(),
+            size: $('#main_content').width(), // Ensure this is calculated correctly at time of call
             contentSelector: '#main_content'
         },
         west:{
             size:400,
             maxWidth:400,
             spacing_open:15,
-            spacing_closed:15,  
+            spacing_closed:15,
             togglerAlign_open:40, // button top value
             togglerAlign_closed:40,
-            initClosed:true,
+            initClosed:true, // Default to closed
             slidable:false,  // disable sliding
             resizable:false, // disable resizing
             contentSelector: '#list_rectypes',
-            onopen_end: function(){ 
+            onopen_end: function(){
                 $('#list_rectypes').show();
                 $('#lblShowRectypeSelector').show();
             },
-            onclose_start: function(){
+            onclose_start: function(){ // Use onclose_start to hide before animation
                 $('#list_rectypes').hide();
                 $('#lblShowRectypeSelector').hide();
             },
@@ -425,163 +436,176 @@ function initRecTypeSelector(){
     };
 
     let layout = $($('body.popup div.layout-container')[0]).layout(layout_options);
-    
-    if(!hidePane){ // initClosed option is inconsistent
-        setTimeout(function(){
-            layout.open('west');
-            $('#list_rectypes').show();
-            $('#lblShowRectypeSelector').show();
 
-            let refresh_chkbx = window.trigger_checkbox_refresh;
-            if(!window.hWin.HEURIST4.util.isempty(refresh_chkbx)){
-                $(`#list_rectypes ${refresh_chkbx}`).trigger('change');
-                delete window.trigger_checkbox_refresh;
+    if(!hidePane){ // If should not be hidden (i.e., startup_rectype was 1)
+        setTimeout(function(){ // Delay to ensure layout is fully initialized
+            layout.open('west');
+            // onopen_end should handle showing elements
+
+            let refresh_chkbx_selector = window.trigger_checkbox_refresh; // Store before deleting
+            if(!window.hWin.HEURIST4.util.isempty(refresh_chkbx_selector)){
+                $(`#list_rectypes ${refresh_chkbx_selector}`).trigger('change');
+                delete window.trigger_checkbox_refresh; // Clean up global flag
             }
-        }, 1000);
+        }, 1000); // Adjust delay if needed
     }
 }
 
+/**
+ * Synchronizes the visual state of toolbar buttons (e.g., selection mode, view mode, gravity)
+ * with the current settings by adding/removing a specific CSS class.
+ * @private
+ */
 function _syncUI(){
-    $('#toolbar').find('button').removeClass('ui-heurist-btn-header1');
-    
+    $('#toolbar').find('button').removeClass('ui-heurist-btn-header1'); // Base class for styling active buttons
+
     $('#toolbar').find('button[value="'+window.selectionMode+'"]').addClass('ui-heurist-btn-header1');
     $('#toolbar').find('button[value="'+window.currentMode+'"]').addClass('ui-heurist-btn-header1');
 
     let grv = getSetting('setting_gravity','off');
-    if(grv=='agressive') grv = 'touch';
+    if(grv=='aggressive') grv = 'touch'; // Normalize 'aggressive' to 'touch' for UI
     $('#toolbar').find('button[name="gravityMode"][value="'+grv+'"]').addClass('ui-heurist-btn-header1');
-    
-    let formula = getSetting('setting_formula','linear')
+
+    let formula = getSetting('setting_formula','linear');
     $('#toolbar').find('button[name="nodesMode"][value="'+formula+'"]').addClass('ui-heurist-btn-header1');
-    
-    let linetype = 'straight'; //getSetting(setting_linetype, 'straight');
+
+    let linetype = 'straight'; //getSetting('setting_linetype', 'straight'); 
     $('#toolbar').find('button[name="linksMode"][value="'+linetype+'"]').addClass('ui-heurist-btn-header1');
-    
-    
+
+
     let is_show_empty = (getSetting('setting_line_empty_link', 1)==1);
     $('#toolbar').find('#linksEmpty').prop('checked', is_show_empty);
 }
 
+/**
+ * Changes the view mode of the visualization (icons, infoboxes, infoboxes_full).
+ * Updates the display style of nodes, labels, and overlays accordingly.
+ *
+ * @param {string} mode - The target view mode: 'icons', 'infoboxes', or 'infoboxes_full'.
+ */
 function changeViewMode(mode){
-    $(".offset_line").remove();
+    $(".offset_line").remove(); // Remove any offset lines (related to link drawing?)
     if(mode!=window.currentMode){
-        if(mode=='infoboxes'){ // && window.currentMode=='icons'
-            window.currentMode = 'infoboxes';
-            
+        window.currentMode = mode; // Update global current mode
+
+        if(mode=='infoboxes'){
             window.d3.selectAll(".info-mode").style('display', 'initial');
             window.d3.selectAll(".info-mode-full").style('display', 'none');
-            window.d3.selectAll("line.inner_divider").style('display', 'none'); // hide inner line dividers
-            
+            window.d3.selectAll("line.inner_divider").style('display', 'none');
+
             window.d3.selectAll(".rect-info-full").style('display', 'none');
             window.d3.selectAll(".rect-info").style('display', 'initial');
 
             window.d3.selectAll("circle.icon-background, circle.icon-foreground, image.node-icon").style('display', 'none');
+            window.d3.selectAll("text.nodelabel.namelabel").attr("x", 10); // Adjust label position
 
-            window.d3.selectAll("text.nodelabel.namelabel").attr("x", 10);
         }else if(mode=='infoboxes_full'){
-            
-            window.currentMode = 'infoboxes_full';
             window.d3.selectAll(".info-mode").style('display', 'initial');
             window.d3.selectAll(".info-mode-full").style('display', 'initial');
             window.d3.selectAll("line.inner_divider").style('display', 'initial');
 
             window.d3.selectAll(".rect-info-full").style('display', 'initial');
             window.d3.selectAll(".rect-info").style('display', 'none');
-            
+
             window.d3.selectAll("circle.icon-background, circle.icon-foreground, image.node-icon").style('display', 'none');
+            window.d3.selectAll("text.nodelabel.namelabel").attr("x", 10); // Adjust label position
 
-            window.d3.selectAll("text.nodelabel.namelabel").attr("x", 10);
-        }else{
-            
-            window.currentMode = 'icons';
-            
-            window.d3.selectAll(".info-mode").style('display', 'none');
-            window.d3.selectAll(".info-mode-full").style('display', 'none');
-            window.d3.selectAll("line.inner_divider").style('display', 'none'); // hide inner line dividers
-
+        }else{ // mode == 'icons'
+            window.d3.selectAll(".info-mode, .info-mode-full, line.inner_divider").style('display', 'none');
             window.d3.selectAll("circle.icon-background, circle.icon-foreground, image.node-icon").style('display', 'initial');
-
-            window.d3.selectAll("text.nodelabel.namelabel").attr("x", 29);
+            window.d3.selectAll("text.nodelabel.namelabel").attr("x", 29); // Adjust label position for icons
         }
-        let isLabelVisible = (window.currentMode != 'icons') || (getSetting('setting_labels')=='on');
-        window.d3.selectAll(".nodelabel").style('display', isLabelVisible?'block':'none');
 
+        // Handle label visibility based on current mode and label setting
+        let isLabelCurrentlyVisible = (window.currentMode != 'icons') || (getSetting('setting_labels')=='on');
+        window.d3.selectAll(".nodelabel").style('display', isLabelCurrentlyVisible?'block':'none');
+
+        // Close any open menus on nodes (related to overlays)
         $.each(window.d3.selectAll("image.menu-open")[0], function(idx, ele){
-
-            let event = new MouseEvent("mouseup");
+            let event = new MouseEvent("mouseup"); // Simulate mouseup to trigger close
             ele.dispatchEvent(event);
         });
 
-        _syncUI();
-
-        tick();
-
-        updateLabels(); // update labels
+        _syncUI(); // Update toolbar button states
+        tick(); // Apply force layout changes
+        updateLabels(); // Update label content/visibility
     }
 }
 
-//
-//
-//
+/**
+ * Sets the gravity mode for the force layout.
+ * Updates the 'fixed' attribute of nodes and resumes the force layout if not 'off'.
+ *
+ * @param {string} gravity - The gravity mode: 'off', 'touch', or 'aggressive'.
+ */
 function setGravity(gravity) {
-    
+
     putSetting('setting_gravity',  gravity);
-    
+
     // Update gravity impact on nodes
-    svg.selectAll(".node").attr("fixed", function(d, i) {
+    svg.selectAll(".node").attr("fixed", function(d) {
         if(gravity == "aggressive") {
             d.fixed = false;
             return false;
-        }else{
+        }else{ // 'off' or 'touch'
             d.fixed = true;
             return true;
         }
     });
-    
-    //visualizeData();
+
+    // visualizeData(); // This might be too heavy, consider more targeted updates or rely on force.resume()
 
     if(gravity !== "off") {
-        force.resume(); 
-    }     
-    
+        force.resume();
+    }
+
     _syncUI();
 }
-//
-//
-//
+
+/**
+ * Sets the formula mode for determining node radius (linear, logarithmic, unweighted).
+ * Updates the radius of existing nodes and refreshes line widths (as they might depend on node size indirectly).
+ *
+ * @param {string} formula - The formula mode: 'linear', 'logarithmic', or 'unweighted'.
+ */
 function setFormulaMode(formula) {
     putSetting('setting_formula', formula);
-    //visualizeData();
+    // visualizeData(); // Potentially too heavy
     window.d3.selectAll(".node > .background").attr("r", function(d) {
-                        return getEntityRadius(d.count);
-                    })
-    refreshLinesWidth();
+                        return getEntityRadius(d.count); // Re-calculate radius based on new formula
+                    });
+    refreshLinesWidth(); // Line widths might change if they are relative to node sizes or if formula affects perceived density
     _syncUI();
 }
 
-//
-//
-//
+/**
+ * Refreshes the stroke width of lines and the size of markers based on current settings.
+ * Typically called when node size formula or line width settings change.
+ * @private
+ */
 function refreshLinesWidth(){
 
-    window.d3.selectAll(".bottom-lines").style("stroke-width", //thickness);
+    window.d3.selectAll(".bottom-lines").style("stroke-width",
             function(d) { return getLineWidth(d.targetcount); });
 
-    window.d3.selectAll("marker").attr("markerWidth", function(d) {    
-                    return getMarkerWidth(d?d.targetcount:0);             
+    window.d3.selectAll("marker").attr("markerWidth", function(d) {
+                    return getMarkerWidth(d?d.targetcount:0); // Ensure 'd' exists
                 })
                 .attr("markerHeight", function(d) {
-                    return getMarkerWidth(d?d.targetcount:0);
+                    return getMarkerWidth(d?d.targetcount:0); // Ensure 'd' exists
                 });
-    
+
 }
 
 
-//
-// straight or curverd links type
-//
-function setLinkMode(formula) {
-    putSetting('setting_linetype', formula);
-    visualizeData();
+/**
+ * Sets the line type for links (straight, curved, stepped).
+ * Triggers a redraw of the visualization.
+ *
+ * @param {string} linetype - The line type: 'straight', 'curved', or 'stepped'.
+ */
+function setLinkMode(linetype) { // Renamed parameter from formula to linetype for clarity
+    putSetting('setting_linetype', linetype);
+    visualizeData(); // Redraw to apply new line type
     _syncUI();
 }
