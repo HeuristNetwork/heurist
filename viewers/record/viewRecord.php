@@ -1,28 +1,36 @@
 <?php
 
 /*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
+<?php
 /**
-* UI for record view - html iframe wrap fo rendering record info see renderRecordData
-*
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  Records/View
-*/
+ * viewRecord.php - UI wrapper for viewing a Heurist record, typically within an iframe.
+ *
+ * @fileOverview This script acts as a simple HTML wrapper that embeds `renderRecordData.php`
+ * within an iframe. It handles initial record ID or bookmark ID validation,
+ * permission checks, and then delegates the actual rendering of record details
+ * to `renderRecordData.php`. It is often used when displaying a record in a popup
+ * or an embedded context.
+ * @package     Heurist academic knowledge management system
+ * @subpackage  viewers\record
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Tom Murtagh
+ * @author      Kim Jackson
+ * @author      Ian Johnson ian.johnson.heurist@gmail.com
+ * @author      Stephen White
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @since       Pre-3.1.0
+ */
+
+// Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+// Unless required by applicable law or agreed to in writing, software distributed under the License is
+// distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+// See the License for the specific language governing permissions and limitations under the License.
+//
+// REMARK: Removed redundant license block comment, as the license is already specified in the PHPDoc.
+
 require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 

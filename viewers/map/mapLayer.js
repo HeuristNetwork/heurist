@@ -1,27 +1,45 @@
 /**
-* LEAFLET layers
-* interface between heurist layer/datasource and leaflet layer
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+ * mapLayer.js - Interface between Heurist layer/datasource and Leaflet layers.
+ *
+ * @fileOverview This script defines the HMapLayer class, which acts as an intermediary
+ * between Heurist's data representation of map layers and data sources, and their
+ * visual representation using the Leaflet library. It handles the loading, styling,
+ * and interaction with various types of map layers, including query-based layers,
+ * tiled images, GeoTIFFs, KML/CSV files, and SHP files.
+ * @package     Heurist academic knowledge management system
+ * @subpackage  viewers\map
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson ian.johnson.heurist@gmail.com
+ * @since       4
+ */
 
 /**
-*  Represents the layer on map
-*/
+ * Represents a map layer, acting as an interface between Heurist data and a Leaflet layer.
+ *
+ * This constructor initializes a map layer based on the provided options, which can include
+ * Heurist record data for layers and data sources, or a direct record ID to load.
+ * It handles different types of data sources (queries, tiled images, GeoTIFF, KML, SHP, etc.)
+ * and adds them to the Leaflet map via the `mapwidget`.
+ *
+ * @constructor
+ * @param {object} _options - Configuration options for the map layer.
+ * @param {object} _options.mapwidget - Reference to the main mapping widget (mapping.js instance).
+ * @param {number} [_options.record_id] - ID of a Heurist layer record to load (used for basemap image layers, etc.).
+ * @param {HRecordSet} [_options.mapdoc_recordset] - Recordset containing data for `rec_layer` and `rec_datasource`.
+ * @param {object} [_options.rec_layer] - Heurist record object for the map layer (RT_MAP_LAYER).
+ *                                        Used for symbology, thematic mapping, and zoom levels.
+ * @param {object} [_options.rec_datasource] - Heurist record object for the data source.
+ * @param {boolean} [_options.not_init_atonce=false] - If true, the layer is not immediately added to the map.
+ *                                                  Visibility can be controlled by DT_IS_VISIBLE field if present.
+ * @param {number} [_options.mapdocument_id] - ID of the parent map document.
+ * @param {boolean} [_options.is_current_search=false] - If true, requests GeoJSON as separate objects (no GeometryCollection).
+ * @param {boolean} [_options.preserveViewport=true] - If false, the map will zoom to this layer upon adding.
+ * @param {HRecordSet} [_options.recordset] - A pre-loaded HRecordSet to be added directly (converted to GeoJSON).
+ * @returns {object} An HMapLayer instance with methods to control the layer.
+ */
 function HMapLayer( _options ) {
     const _className = "MapLayer",
     _version   = "0.4";
