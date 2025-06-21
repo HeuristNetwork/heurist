@@ -8,6 +8,46 @@
  * including GeoJSON, tiled images, and other formats, often by delegating to
  * `mapDocument.js` and `mapLayer.js`. The widget also includes drawing and editing tools.
  *
+ *   loadBaseMap
+ *   defineCRS
+ *   addSearchResult - loads geojson data based on heurist query, recordset or json to current search (see addGeoJson)
+ *    addRecordSet - converts recordset to geojson
+ *   addLayerRecords - add layer records to search result mapdocument
+ *   addGeoJson - adds geojson layer to map, apply style and trigger timeline update
+ *   addTileLayer - adds image tile layer to map
+ *   addImageOverlay - adds image overlay to map
+ *   updateTimelineData - adds/replaces timeline layer_data in this.timeline_items and triggers timelineRefresh
+ *   applyStyle - applies style for given top layer
+ *   getStyle
+ *   
+ *   setFeatureSelection - triggers redraw for path and polygones (assigns styler function)  and creates highlight circles for markers
+ *   setFeatureVisibility - applies visibility for given set of heurist recIds (filter from timeline and filter by zoom)
+ *   zoomToSelection
+ *   zoomToLayer
+ *   setLayerVisibility - show hide entire layer
+ *   setVisibilityAndZoom - show susbset of given recordset and zoom 
+ *   convertZoomToNative - Converts zoom in km to nativemap zoom (0-22)
+ *   
+ *   _onLayerClick - map layer (shape) on click event handler - highlight selection on timeline and map, opens popup
+ *   _clearHighlightedMarkers - removes special "highlight" selection circle markers from map
+ *   setStyleDefaultValues - assigns default values for style (size,color and marker type)
+ *   _createMarkerIcon - creates marker icon for url(image) and fonticon (divicon)
+ *   _stylerForPoly - returns style for every path and polygone, either individual feature style of parent layer style.
+ *   _getMarkersByRecordID - returns markers by heurist ids (for filter and highlight)
+ *   
+ *   
+ *   DRAW Methods
+ *   drawLoadGeometry - detects format and calls the appropriate method to load geo data for drawing (WKT, simple points or JSON)
+ *   drawLoadSimplePoints - converts coordinate pairs (points) to WKT and loads for drawing
+ *   drawLoadWKT - parses WKT, converts to JSON and calls drawLoadJson to adds to drawItems
+ *   drawLoadJson - adds geojson to drawnItems 
+ *   
+ *   drawGetWkt - Gets drawn items as json and converts to WKT string
+ *   drawGetJson -  returns current drawn items as geojson
+ *   
+ *   drawClearAll - remove all drawn items fromm map 
+ *   drawZoomTo - zoom to drawn items
+ *   
  * @todo **Future Enhancements / Outstanding Issues:**
  * - **KML Parsing:** KML is currently loaded as a single collection. Implement parsing for individual placemarks, though this might be limited to Placemarks only, excluding complex KML features like external links or image overlays.
  * - **Selection Tools:** Implement/improve map selector tools (rectangle, polygon/lasso).
@@ -15,7 +55,7 @@
  * - **Thematic Mapping:** Further develop thematic mapping capabilities.
  *
  * @package     Heurist academic knowledge management system
- * @subpackage  hclient\widgets\map
+ * @subpackage  viewers\map
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -24,16 +64,7 @@
  * @since       Pre-4.0 (version 6.0 indicates significant evolution)
  */
 
-// Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-// with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-// Unless required by applicable law or agreed to in writing, software distributed under the License is
-// distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-// See the License for the specific language governing permissions and limitations under the License.
-//
-// REMARK: Removed redundant license block comment, as the license is already specified in the JSDoc.
-
-/* global L, HMapManager, hMapDocument, accessToken_MapTiles, simplePointsToWKT, parseWKT, stringifyMultiWKT, cheapRuler, hexToFilter, GeoRasterLayer, accessToken_MapBox */
-// L (Leaflet), HMapManager, hMapDocument, accessToken_MapTiles, simplePointsToWKT, parseWKT, stringifyMultiWKT, cheapRuler, hexToFilter, GeoRasterLayer, accessToken_MapBox are expected to be globally available or imported.
+/* global L, HMapManager, hMapDocument, accessToken_MapTiles, simplePointsToWKT, parseWKT, stringifyMultiWKT, cheapRuler, hexToFilter */
 
 $.widget( "heurist.mapping", {
 

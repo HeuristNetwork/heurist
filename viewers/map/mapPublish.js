@@ -5,7 +5,7 @@
  * "Publish Map" dialog and another for displaying help content related to mapping.
  * These controls are intended to be added to a Leaflet map instance.
  * @package     Heurist academic knowledge management system
- * @subpackage  hclient\widgets\map
+ * @subpackage  viewers\map
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -14,15 +14,7 @@
  * @since       4
  */
 
-// Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-// with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-// Unless required by applicable law or agreed to in writing, software distributed under the License is
-// distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-// See the License for the specific language governing permissions and limitations under the License.
-//
-// REMARK: Removed redundant license block comment, as the license is already specified in the JSDoc.
-
-/* global L, $ */ // Leaflet (L) and jQuery ($) are expected to be globally available.
+/* global L */
 
 if((typeof L !=='undefined') && L.Control)
 {
@@ -55,7 +47,7 @@ if((typeof L !=='undefined') && L.Control)
               .disableClickPropagation(container)
               .disableScrollPropagation(container);
 
-            $('<a>').attr('title', window.hWin.HR(label)) // HR is assumed to be a localization function
+            $('<a>').attr('title', window.hWin.HR(label))
                 .css({'width':'22px','height':'22px','border-radius': '2px','cursor':'pointer','margin':'0.1px'})
                 .addClass('ui-icon '+icon)
                 .appendTo(container);
@@ -149,7 +141,7 @@ if((typeof L !=='undefined') && L.Control)
         onAdd: function(map) {
             this._container = commonOnAdd.call(this, 'Help', 'ui-icon-help'); // Added this._container assignment
             window.hWin.HEURIST4.ui.initHelper({ button:this._container,
-                    url: window.hWin.HRes('mapping_overview #content'), // HRes is assumed to be a resource loading function
+                    url: window.hWin.HRes('mapping_overview #content'),
                     position:{ my: "center center", at: "center center",
                     of: $(window.parent.document) }, no_init:true} );
             return this._container;
@@ -170,6 +162,7 @@ if((typeof L !=='undefined') && L.Control)
          */
         _onClick: function(map) {
            //show help popup
+           //this.mapPublish.openPublishDialog();
         }
     });
 
