@@ -94,7 +94,7 @@ class VisualiseOverlay{
                 .attr('r', (data) => this.visualiser.getEntityRadius(data.count))
                 .attr('class', 'background icon-background')
                 .style({'fill-opacity': '0.5', display: icon_display})
-                .attr('fill', (data) => this.visualiser.determineColour(data)); // entitycolor
+                .attr('fill', (data) => this.#determineColour(data)); // entitycolor
 
             //add internal circle
             node.append('circle')
@@ -156,7 +156,7 @@ class VisualiseOverlay{
         let array = [];
 
         // Header
-        let header = {text: truncateText(window.hWin.HEURIST4.util.stripTags(record.name), rectypeLength), 
+        let header = {text: this.truncateText(window.hWin.HEURIST4.util.stripTags(record.name), rectypeLength), 
                     count: record.count, rtyid: record.id,
                     size: '9px', weight: 'bold', height: 15, enter: true, image:record.image}; 
 
@@ -179,8 +179,8 @@ class VisualiseOverlay{
         for(const link of data.links){
 
             let isRequired = this.visualiser.options.isStructure && $Db.rst(link.source.rty_ID, link.relation.id, 'rst_RequirementType') == 'required' ? 'y' : 'n';
-            let sourceName = truncateText(window.hWin.HEURIST4.util.stripTags(link.source.name), maxLength);
-            let targetName = truncateText(window.hWin.HEURIST4.util.stripTags(link.target.name), maxLength);
+            let sourceName = this.truncateText(window.hWin.HEURIST4.util.stripTags(link.source.name), maxLength);
+            let targetName = this.truncateText(window.hWin.HEURIST4.util.stripTags(link.target.name), maxLength);
             let weight = isRequired == 'y' ? 'bold' : 'normal';
         
             if(link.relation.name == null && link.relation.type == 'resource'){
@@ -233,7 +233,7 @@ class VisualiseOverlay{
         // Convert map to array
         for(let key in map) {
 
-            let details = { text: truncateText(key, maxLength), size: '8px', xpos: xpos, multiline: true, style: 'italic', height: fontSize, enter: true, subheader: 1 };
+            let details = { text: this.truncateText(key, maxLength), size: '8px', xpos: xpos, multiline: true, style: 'italic', height: fontSize, enter: true, subheader: 1 };
 
             if(map[key]['require_type'] != null){
                 details['require_type'] = map[key]['require_type'];
@@ -271,8 +271,8 @@ class VisualiseOverlay{
         let maxLength = 60;
 
         // Header
-        let header1 = truncateText(window.hWin.HEURIST4.util.stripTags(line.source.name), maxLength);
-        let header2 = truncateText(window.hWin.HEURIST4.util.stripTags(line.target.name), maxLength);
+        let header1 = this.truncateText(window.hWin.HEURIST4.util.stripTags(line.source.name), maxLength);
+        let header2 = this.truncateText(window.hWin.HEURIST4.util.stripTags(line.target.name), maxLength);
 
         if(header1.length+header2.length > maxLength) {
             array.push({ text: `${header1} >`, size: '11px', style: 'bold' });
@@ -288,7 +288,7 @@ class VisualiseOverlay{
             let count = !this.visualiser.options.isStructure && line.targetcount <= 1 ? '' : ', n=' + line.targetcount;
 
             // Show information for this link only
-            let text = `${truncateText(window.hWin.HEURIST4.util.stripTags(line.relation.name), maxLength)}${count}`;
+            let text = `${this.truncateText(window.hWin.HEURIST4.util.stripTags(line.relation.name), maxLength)}${count}`;
 
             return [{ type: line.relation.type, cnt: line.targetcount, text: text, size: '10px', subheader: 0 }];
         }
@@ -296,7 +296,7 @@ class VisualiseOverlay{
         for(const link of data.links){
 
             let count = !this.visualiser.options.isStructure && link.targetcount <= 1 ? '' : `, n=${link.targetcount}`;
-            const linkName = `${truncateText(window.hWin.HEURIST4.util.stripTags(link.relation.name), maxLength)}${count}`;
+            const linkName = `${this.truncateText(window.hWin.HEURIST4.util.stripTags(link.relation.name), maxLength)}${count}`;
 
             // Show information for all links, with same source and target ids
             if(link.source.id == line.source.id && link.target.id == line.target.id){
@@ -403,7 +403,7 @@ class VisualiseOverlay{
         return node_info;
     }
 
-    #addNodeInfo(info, offset){
+    #addNodeInfo(info){
 
         const fontColor = this.visualiser.settings.get('textcolor', '#000');
         let position = 16;
@@ -674,9 +674,9 @@ class VisualiseOverlay{
         // Adding text
         let text = [[]];
         if(type=='record'){ // Nodes
-            text = this.#addNodeInfo(info, offset);
+            text = this.#addNodeInfo(info);
         }else{ // link information, onhover
-            text = this.#addLinkInfo(info, offset);
+            text = this.#addLinkInfo(info);
         }
             
         // Calculate Box sizes
@@ -1258,6 +1258,26 @@ class VisualiseOverlay{
         if(!window.hWin.HEURIST4.util.isPositiveInt(rec_ID)){
             let recviewer_URL = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?recID=${rec_ID}&db=${window.hWin.HAPI4.database}`;
             action == 'popup' ? window.hWin.HEURIST4.ui.openRecordInPopup(rec_ID, null, false) : window.open(recviewer_URL, '_blank');
+        }
+    }
+
+    #determineColour(dataColour){
+
+        //In the array below there are currently 100 colours which will match up to all 100 unique node type ID's
+        const colours = ['#FFEBEE', '#FFCDD2', '#EF9A9A', '#E57373', '#EF5350', '#FCE4EC', '#F8BBD0', '#F48FB1', '#F06292', '#EC407A', 
+                        '#FF8A80', '#E1BEE7', '#CE93D8', '#BA68C8','#AB47BC', '#EDE7F6', '#D1C4E9', '#B39DDB','#9575CD', '#7E57C2', 
+                        '#E8EAF6', '#C5CAE9','#9FA8DA', '#7986CB', '#5C6BC0', '#E3F2FD','#BBDEFB', '#90CAF9', '#64B5F6', '#42A5F5', 
+                        '#E1F5FE', '#B3E5FC', '#81D4FA', '#4FC3F7','#29B6F6', '#E0F7FA', '#B2EBF2', '#80DEEA','#4DD0E1', '#26C6DA', 
+                        '#E0F2F1', '#B2DFDB','#80CBC4', '#4DB6AC', '#26A69A', '#E8F5E9','#C8E6C9', '#A5D6A7', '#81C784', '#66BB6A', 
+                        '#F1F8E9','#F3E5F5', '#DCEDC8', '#C5E1A5', '#AED581','#9CCC65', '#F9FBE7', '#F0F4C3', '#E6EE9C','#DCE775', 
+                        '#D4E157', '#FFFDE7', '#FFF9C4','#FFF59D', '#FFF176', '#FFEE58', '#fff8e1','#ffecb3', '#ffe082', '#ffd54f', 
+                        '#ffca28', '#FFF3E0', '#FFE0B2', '#FFCC80', '#FFB74D','#FFA726', '#FBE9E7', '#FFCCBC', '#FFAB91','#FF8A65', 
+                        '#FF7043', '#EFEBE9', '#D7CCC8','#BCAAA4', '#A1887F', '#8D6E63', '#FAFAFA','#F5F5F5', '#EEEEEE', '#E0E0E0', 
+                        '#BDBDBD', '#ECEFF1', '#CFD8DC', '#B0BEC5', '#90A4AE','#78909C',  '#FF80AB', '#EA80FC', '#B388FF', '#8C9EFF'];
+
+        let idx = dataColour.rty_ID - 1;
+        if(idx > 0 && idx < colours.length){
+            return colours[idx];
         }
     }
 }
