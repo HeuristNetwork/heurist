@@ -37,12 +37,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
         <link href="<?php echo PDIR;?>external/jquery.widgets/evol.colorpicker.css" rel="stylesheet" type="text/css">
 
         <!-- Visualize plugin -->
-        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/settings.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/overlay.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/selection.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/gephi.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/drag.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/visualize.js"></script>
+        <script type="module" src="<?php echo PDIR;?>viewers/visualize/visualize.js"></script>
 
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>viewers/visualize/visualize.css">
 

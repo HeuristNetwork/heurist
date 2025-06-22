@@ -167,12 +167,17 @@ class VisualiseExporter{
         this.exportDiv = window.d3.select('#setDivExport');
 
         this.exportButtons = {
-            gephi: this.exportDiv.append('button').button({label: 'GEPHI'}).on('click', () => this.gephi()).attr('id', 'gephi-export'),
-            embed: this.exportDiv.append('button').button({label: 'Embed', icon: 'ui-icon-globe', showLabel: false}).on('click', () => this.links()).attr('id', 'embed-export')
+            gephi: this.exportDiv.append('button'),
+            embed: this.exportDiv.append('button')
         };
+
+        $(this.exportButtons.gephi.node()).button({label: 'GEPHI'}).on('click', () => this.gephi()).attr('id', 'gephi-export');
+        $(this.exportButtons.embed.node()).button({label: 'Embed', icon: 'ui-icon-globe', showLabel: false}).on('click', () => this.links()).attr('id', 'embed-export');
 
         if(this.visualiser.options.isStructure || this.visualiser.options.isStandAlone){
             this.exportButtons.embed.style('visibility', 'hidden');
         }
     }
 }
+
+export default VisualiseExporter;

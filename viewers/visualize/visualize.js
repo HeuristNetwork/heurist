@@ -68,17 +68,31 @@
 * - scale: 1
 */
 
+import VisualiseSettings from './settings.js';
+import VisualiseOverlay from './overlay.js';
+import VisualiseSelection from './selection.js';
+import VisualiseExporter from './exporter.js';
+import VisualiseDrag from './drag.js';
+
 $.widget('heurist.visualise', {
 
     options: {
+
         isStructure: false,
         isStandAlone: false,
 
-        showCounts: false
+        showCounts: false,
+
+        getData: (data) => data,
+        onExpandNode: () => null,
+        onRefreshData: () => null,
+        onSelectNode: () => null,
+
+        data: {}
     },
 
     svg: null,
-    data: null,
+    data: {},
     request: null,
     zoomBehaviour: null,
     force: null,
@@ -99,19 +113,16 @@ $.widget('heurist.visualise', {
     circleSize: 12,
     currentMode: 'infoboxes_full',
 
-    getData: (data) => data,
-    onExpandNode: () => {},
-    onRefreshData: () => [],
-    onSelectNode: () => {},
-
     _init: function(){
 
         this.svg = window.d3.select('#d3svg');
         this.svg.selectAll('*').remove();
         this.svg.append('text').text('Building graph...').attr('x', '25').attr('y', '25');
 
-        this.settings = new VisualiseSettings(this, options);
+        this.settings = new VisualiseSettings(this, this._prepareSettings());
+
         this.overlay = new VisualiseOverlay(this);
+
         this.drag = new VisualiseDrag(this);
         this.selection = new VisualiseSelection(this, this.options.selectedNodeIds);
         this.exporter = new VisualiseExporter(this);
@@ -123,12 +134,12 @@ $.widget('heurist.visualise', {
 
         this.settings.settingsToUI();
 
-        if(data && !window.hWin.HEURIST4.util.isObject(this.data)){
+        if(this.options.data && !window.hWin.HEURIST4.util.isObject(this.options.data)){
             return;
         }
 
         // Check visualisation limit
-        let amount = Object.keys(this.data?.nodes).length;
+        let amount = Object.keys(this.options.data?.nodes).length;
         const MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
 
         let $ele_warn = $('#net_limit_warning');
@@ -153,16 +164,18 @@ $.widget('heurist.visualise', {
         $('#windowPopOut').button().on('click', () => this.openWindow());
     },
 
-    _setOption: function(key, value){
+    _prepareSettings: function(){
 
-        if(typeof value === 'function' && ['getData', 'onExpandNode', 'onRefreshData', 'onSelectNode'].indexOf(key) > -1
-        || key === 'data' || key === 'request'){
-            this[key] = value;
-        }else{
-            return;
+        let settings = {};
+        let skip = ['isStructure', 'isStandAlone', 'showCounts', 'data', 'getData', 'onExpandNode', 'onRefreshData', 'onSelectNode'];
+
+        for(const key in this.options){
+            if(!skip.includes(key)){
+                settings[key] = this.options[key];
+            }
         }
 
-        delete this.options[key];
+        return settings;
     },
 
     visualise: function(){
@@ -172,9 +185,9 @@ $.widget('heurist.visualise', {
 
         //define shadow filter
         this._addDropShadow();
-        
+
         // SVG data  
-        this.data = this.getCurrentData();
+        this.options.data = this.getCurrentData();
         this._getMaxCount();
 
         // Container with zoom and force
@@ -189,15 +202,15 @@ $.widget('heurist.visualise', {
         this._addLines('bottom-lines', this.settings.get('linecolor', '#000'), 1); // shows connections
         this._addLines('top-lines', '#FFF', 1); // displays direction arrows
         this._addLines('rollover-lines', '#FFF', 3); // invisible thicker line for rollover
-    
+
         // Nodes
-        this.overlay.addNodes(this.data);
-        this._addTitles();
+        this.overlay.addNodes(this.options.data);
+        //this._addTitles();
 
         if(this.options.isStructure){
             
-            let cnt_vis = this.data.nodes ? this.data.nodes.length : 0;
-            let cnt_tot = this.data && this.data.nodes ? this.data.nodes.length : 0;
+            let cnt_vis = this.options.data.nodes ? this.options.data.nodes.length : 0;
+            let cnt_tot = this.options.data && this.options.data.nodes ? this.options.data.nodes.length : 0;
 
             let sText;
             if(cnt_vis==0){
@@ -272,7 +285,7 @@ $.widget('heurist.visualise', {
             .append('svg:g')
             .attr('id', name)
             .selectAll('path')
-            .data(data.links)
+            .data(this.options.data.links)
             .enter()
             .append('svg:path');
 
@@ -354,7 +367,7 @@ $.widget('heurist.visualise', {
                     return;
                 }
                 let selector = `s${data.source.id}r${data.relation.id}t${data.target.id}`;
-                this.overlay.createOverlay(window.d3.event.offsetX, window.d3.event.offsetY, 'relation', selector, data);
+                this.overlay.createOverlay(window.d3.event.offsetX, window.d3.event.offsetY, 'relation', selector, this.overlay.getRelationOverlayData(data));
             })
             .on('mouseout', (data) => {
                 let selector = `s${data.source.id}r${data.relation.id}t${data.target.id}`;
@@ -495,8 +508,8 @@ $.widget('heurist.visualise', {
         let height = parseInt(this.svg.style('height'));
 
         this.force = window.d3.layout.force()
-            .nodes(window.d3.values(this.data.nodes))
-            .links(this.data.links)
+            .nodes(window.d3.values(this.options.data.nodes))
+            .links(this.options.data.links)
             .charge(this._attraction) // Using the attraction setting
             .linkDistance((data) => this.getLineLength(data.target))  // Using the linelength setting 
             .on('tick', () => this.tick())
@@ -1075,7 +1088,7 @@ $.widget('heurist.visualise', {
 
             const obj = { px: data.px, py: data.py, x: data.x, y: data.y };
 
-            this.visualiser.settings.put(data.id, JSON.stringify(obj));
+            this.settings.put(data.id, JSON.stringify(obj));
 
             return `translate(${data.x},${data.y})`;
         });
@@ -1106,7 +1119,7 @@ $.widget('heurist.visualise', {
 
     filterData: function(json_data){
 
-        if(!json_data) json_data = this.data;
+        if(!json_data) json_data = this.options.data;
 
         let names = [];
         $('.show-record').each((idx, element) => {
@@ -1136,7 +1149,7 @@ $.widget('heurist.visualise', {
         });
 
         let data_visible = {nodes: nodes, links: links};
-        this.getData = (all_data) => data_visible;
+        this.options.getData = (all_data) => data_visible;
         this.visualise();
     },
 
@@ -1347,24 +1360,24 @@ $.widget('heurist.visualise', {
     },
 
     getCurrentData: function(){
-        return typeof this.getData !== 'function' ? [] : this.getData.call(this, this.data);
+        return typeof this.options.getData !== 'function' ? this.options.data : this.options.getData.call(this, this.options.data);
     },
 
     expandNode: function(cmd, rec_ID){
-        if(typeof this.onExpandNode === 'function'){
-            this.onExpandNode.call(this, cmd, rec_ID);
+        if(typeof this.options.onExpandNode === 'function'){
+            this.options.onExpandNode.call(this, cmd, rec_ID);
         }
     },
     
     refreshData: function(){
-        if(typeof this.onRefreshData === 'function'){
-            this.onRefreshData.call(this);
+        if(typeof this.options.onRefreshData === 'function'){
+            this.options.onRefreshData.call(this);
         }
     },
 
     selectNode: function(selected){
-        if(typeof this.onRefreshData === 'function'){
-            this.onSelectNode.call(this, selected);
+        if(typeof this.options.onSelectNode === 'function'){
+            this.options.onSelectNode.call(this, selected);
         }
     },
 
@@ -1373,22 +1386,22 @@ $.widget('heurist.visualise', {
         this._maxCountForNodes = 1;
         this._maxCountForLinks = 1;
 
-        if(!this.data){
+        if(!this.options.data){
             return;
         }
 
-        if(this.data.nodes.length > 0){
+        if(this.options.data.nodes.length > 0){
 
-            for(const node of this.data.nodes){
+            for(const node of this.options.data.nodes){
                 if(node.count > this._maxCountForNodes){
                     this._maxCountForNodes = node.count;
                 }
             }
         }
 
-        if(this.data.links.length > 0){
+        if(this.options.data.links.length > 0){
 
-            for(const link of this.data.links){
+            for(const link of this.options.data.links){
                 if(link.count > this._maxCountForLinks){
                     this._maxCountForLinks = link.count;
                 }
@@ -1439,5 +1452,13 @@ $.widget('heurist.visualise', {
         query += `${query == '?' ? '' : '&'}db=${window.hWin.HAPI4.database}`;
 
         location.href = query;
+    },
+
+    getSetting: function(key, defValue, splitString = ''){
+        return this.settings.get(key, defValue, splitString);
+    },
+
+    putSetting: function(key, value){
+        return this.settings.put(key, value);
     }
 });

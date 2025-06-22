@@ -67,22 +67,22 @@ class VisualiseOverlay{
             let record = this.visualiser.settings.get(data.id);
             if(record){
 
-                const obj = JSON.parse(record);
-                if(obj.hasOwn('x')){
+                const obj = window.hWin.HEURIST4.util.isJSON(record);
+                if(Object.hasOwn(obj, 'x')){
                     data.x = obj.x;
                 }
-                if(obj.hasOwn('y')){
+                if(Object.hasOwn(obj, 'y')){
                     data.y = obj.y;
                 }
-                if(obj.hasOwn('px')){
+                if(Object.hasOwn(obj, 'px')){
                     data.px = obj.px;
                 }
-                if(obj.hasOwn('py')){
+                if(Object.hasOwn(obj, 'py')){
                     data.py = obj.py;
                 }
             }
 
-            let node = nodes[0][index];
+            let node = window.d3.select(nodes[0][index]);
 
             let icon_display = this.visualiser.currentMode == 'icons' ? 'initial' : 'none';
 
@@ -261,7 +261,7 @@ class VisualiseOverlay{
         return array;
     }
 
-    #getRelationOverlayData(line){
+    getRelationOverlayData(line){
 
         if(!this.visualiser.options.isStructure){
             return node_info;
@@ -386,7 +386,7 @@ class VisualiseOverlay{
     
             let weight = field['rst_RequirementType'] == 'required' ? 'bold' : 'normal';
             let isRequired = weight == 'bold' ? 'y' : 'n';
-            let name = truncateText(window.hWin.HEURIST4.util.stripTags(field['rst_DisplayName']), maxLength);
+            let name = this.truncateText(window.hWin.HEURIST4.util.stripTags(field['rst_DisplayName']), maxLength);
     
             // add new field
             new_fields.push({
@@ -403,13 +403,13 @@ class VisualiseOverlay{
         return node_info;
     }
 
-    #addNodeInfo(info){
+    #addNodeInfo(info, type){
 
         const fontColor = this.visualiser.settings.get('textcolor', '#000');
         let position = 16;
 
         let offset = type == 'record' ? 10 : 6;
-        if(currentMode == 'icons'){
+        if(this.visualiser.currentMode == 'icons'){
             offset = type == 'record' ? 29 : 25;
         }
 
@@ -589,13 +589,12 @@ class VisualiseOverlay{
         return textNodes;
     }
 
-    createOverlay(x, y, type, selector, nodeObject, parent_node) {
+    createOverlay(x, y, type, selector, nodeObject, parent_node){
 
         let info = [];
-        if(type=='record'){
+        if(type == 'record'){
             info = this.#getRecordOverlayData(nodeObject);
         }
-        info = this.#getRelationOverlayData(nodeObject);
 
         const is_admin = window.hWin.HAPI4.is_admin();
 
@@ -604,7 +603,7 @@ class VisualiseOverlay{
             this.#overlay = parent_node.append('g')
                                 .attr('transform', `translate(${x - this.#iconSize / 2 - 6},${y - this.#iconSize / 2 - 6})`);
         }else{
-            this.#overlay = svg.append('g')
+            this.#overlay = this.visualiser.svg.append('g')
                         .attr('class', `overlay ${type} ${selector}`)      
                         .attr('transform', `translate(${x},${y})`);
         }
@@ -667,14 +666,14 @@ class VisualiseOverlay{
                             .style('stroke-width', 0.75);
 
         let offset = type == 'record' ? 10 : 6;
-        if(currentMode == 'icons'){
+        if(this.visualiser.currentMode == 'icons'){
             offset = type == 'record' ? 29 : 25;
         }
 
         // Adding text
         let text = [[]];
         if(type=='record'){ // Nodes
-            text = this.#addNodeInfo(info);
+            text = this.#addNodeInfo(info, type);
         }else{ // link information, onhover
             text = this.#addLinkInfo(info);
         }
@@ -693,7 +692,7 @@ class VisualiseOverlay{
                 maxWidth = width;
             }
             
-            if(i == 0) widthTitle = maxWidth;
+            if(widthTitle === 1) widthTitle = maxWidth;
             
             // Height
             const y = bbox.y * 1.1;
@@ -748,11 +747,11 @@ class VisualiseOverlay{
             return;
         }
 
-        if(currentMode=='infoboxes'){
+        if(this.visualiser.currentMode == 'infoboxes'){
 
             rect_full.style('display', 'none');
             this.#overlay.selectAll(".info-mode-full").style('display', 'none');
-        }else if(currentMode=='infoboxes_full'){
+        }else if(this.visualiser.currentMode == 'infoboxes_full'){
 
             rect_info.style('display', 'none');
 
@@ -798,7 +797,7 @@ class VisualiseOverlay{
                         .attr('id', 'line_divider');
             }
 
-        }else if(currentMode=='icons'){
+        }else if(this.visualiser.currentMode == 'icons'){
             this.#overlay.selectAll('.info-mode, .info-mode-full, .rect-info-full, .rect-info').style('display', 'none');
         }
     }
@@ -1121,7 +1120,7 @@ class VisualiseOverlay{
             }
 
             window.hWin.HEURIST4.msg.bringCoverallToFront(this.infoDiv, {'background-color': 'white', 'opacity': 1, 'font-weight': 'bold', 'font-size': 'smaller', 'color': 'black'}, 
-                `Loading<br><br>${window.hWin.HEURIST4.util.stripTags(truncateText(data.name, 40))}`);
+                `Loading<br><br>${window.hWin.HEURIST4.util.stripTags(this.truncateText(data.name, 40))}`);
 
             const srcURL = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?noclutter=1&recID=${data.id}&db=${window.hWin.HAPI4.database}`; // URL for source of information iframe
 
@@ -1281,3 +1280,5 @@ class VisualiseOverlay{
         }
     }
 }
+
+export default VisualiseOverlay;

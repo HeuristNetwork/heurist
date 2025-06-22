@@ -114,12 +114,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
         <script type="text/javascript" src="<?php echo PDIR;?>external/d3/fisheye.js"></script>
 
         <!-- Visualize plugin -->
-        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/settings.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/overlay.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/selection.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/gephi.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/drag.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>viewers/visualize/visualize.js"></script>
+        <script type="module" src="<?php echo PDIR;?>viewers/visualize/visualize.js"></script>
 
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>viewers/visualize/visualize.css">
 
@@ -276,111 +271,117 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     }
 
                     // Data loaded successfully!
-                    /** RECORD FILTERING */
-                    // Set filtering settings in UI
-                    let at_least_one_marked = false;
 
-                    let displayed_rectypes = getSetting('rectypes', [], ',');
-                    if(displayed_rectypes.length > 0){
-                        //restore setting from previous session
-                        for(const rtyID of displayed_rectypes){
-                            $(`.show-record[id="${rtyID}"]`).prop('checked', true);
+                    function setupRecTypeFiltering($visualiser){
+
+                        /** RECORD FILTERING */
+                        // Set filtering settings in UI
+                        let at_least_one_marked = false;
+
+                        let displayed_rectypes = $visualiser.visualise('getSetting', 'rectypes', [], ','); console.log(displayed_rectypes);
+                        if(displayed_rectypes.length > 0){
+                            //restore setting from previous session
+                            for(const rtyID of displayed_rectypes){
+                                $(`.show-record[id="${rtyID}"]`).prop('checked', true);
+                            }
+                            at_least_one_marked = true;
                         }
-                        at_least_one_marked = true;
-                    }
-
-                    // Listen to 'show-record' checkbox changes
-                    $(".show-record").on('change', function(e) {
-
-                        // Update record field 'checked' value in localstorage
-                        const rtyID = $(e.target).attr("id");
-                        const checked = $(e.target).is(':checked') ? 1 : 0;
-
-                        let displayed_rectypes = getSetting('rectypes', [], ',');
-                        const idx = displayed_rectypes.indexOf(rtyID);
-
-                        if(checked && idx === -1){
-                            displayed_rectypes.push(rtyID);
-                        }else if(!checked && idx !== -1){
-                            displayed_rectypes.splice(idx, 1);
-                        }
-
-                        putSetting('rectypes', displayed_rectypes);
-
-                        // Update visualisation
-                        $('#visualisation').visualize('filterData');
-                    });
-
-                    // Listen to the 'show-all' checkbox
-                    $("#show-all").on('change', function() {
-
-                        // Change all check boxes
-                        const checked = $(this).prop('checked');
-                        $(".show-record").prop("checked", checked);
-
-                        let displayed_rectypes = getSetting('rectypes', [], ',');
-
-                        if(checked){
-
-                            // Update localstorage
-                            $(".show-record").each(function(e) {
-                                const rtyID = $(this).attr("id");
-                                const idx = displayed_rectypes.indexOf(rtyID);
-                                if(idx === -1){
-                                    displayed_rectypes.push(rtyID);
-                                }
-                            });
+    
+                        // Listen to 'show-record' checkbox changes
+                        $('.show-record').on('change', function(e) {
+    
+                            // Update record field 'checked' value in localstorage
+                            const rtyID = $(e.target).attr('id');
+                            const checked = $(e.target).is(':checked') ? 1 : 0;
+    
+                            let displayed_rectypes = $visualiser.visualise('getSetting', 'rectypes', [], ',');
+                            const idx = displayed_rectypes.indexOf(rtyID);
+    
+                            if(checked && idx === -1){
+                                displayed_rectypes.push(rtyID);
+                            }else if(!checked && idx !== -1){
+                                displayed_rectypes.splice(idx, 1);
+                            }
+    
+                            $visualiser.visualise('putSetting', 'rectypes', displayed_rectypes);
+    
+                            // Update visualisation
+                            $visualiser.visualise('filterData');
+                        });
+    
+                        // Listen to the 'show-all' checkbox
+                        $('#show-all').on('change', function() {
+    
+                            // Change all check boxes
+                            const checked = $(this).prop('checked');
+                            $(".show-record").prop('checked', checked);
+    
+                            let displayed_rectypes = $visualiser.visualise('getSetting', 'rectypes', [], ',');
+    
+                            if(checked){
+    
+                                // Update localstorage
+                                $(".show-record").each(function(e) {
+                                    const rtyID = $(this).attr("id");
+                                    const idx = displayed_rectypes.indexOf(rtyID);
+                                    if(idx === -1){
+                                        displayed_rectypes.push(rtyID);
+                                    }
+                                });
+                            }else{
+                                displayed_rectypes = [];
+                            }
+    
+                            $visualiser.visualise('putSetting', 'rectypes', displayed_rectypes);
+    
+                            $visualiser.visualise('filterData');
+                        });
+    
+                        // Listen to the 'group_chkbox' checkboxes, toggles all checkboxes within a record type group
+                        $('.group_chkbox').on('change', function(){
+    
+                            const group_id = $(this).attr('data-id');
+                            const checked = $(this).prop('checked');
+    
+                            let displayed_rectypes = $visualiser.visualise('getSetting', 'rectypes', [], ',');
+    
+                            if(group_id){
+    
+                                $(`input.rectype_grp_${group_id}`).prop('checked', checked);
+    
+                                // Update localstorage
+                                $(`input.rectype_grp_${group_id}`).each(function(e) {
+                                    const rtyID = $(this).attr('id');
+                                    const idx = displayed_rectypes.indexOf(rtyID);
+                                    if(checked && idx === -1){
+                                        displayed_rectypes.push(rtyID);
+                                    }else if(!checked && idx !== -1){
+                                        displayed_rectypes.splice(idx, 1);
+                                    }
+                                });
+    
+                                $visualiser.visualise('putSetting', 'rectypes', displayed_rectypes);
+    
+                                $visualiser.visualise('filterData');
+                            }
+                        });
+    
+                        if(!at_least_one_marked){
+    
+                            $('.group_chkbox').first().prop('checked', true);
+    
+                            window.trigger_checkbox_refresh = '.group_chkbox';
+                            window.startup_rectype = 1;
                         }else{
-                            displayed_rectypes = [];
+                            window.startup_rectype = 0;
                         }
 
-                        putSetting('rectypes', displayed_rectypes);
-
-                        $('#visualisation').visualize('filterData');
-                    });
-
-                    // Listen to the 'group_chkbox' checkboxes, toggles all checkboxes within a record type group
-                    $('.group_chkbox').on('change', function(){
-
-                        const group_id = $(this).attr('data-id');
-                        const checked = $(this).prop('checked');
-
-                        let displayed_rectypes = getSetting('rectypes', [], ',');
-
-                        if(group_id){
-
-                            $(`input.rectype_grp_${group_id}`).prop('checked', checked);
-
-                            // Update localstorage
-                            $(`input.rectype_grp_${group_id}`).each(function(e) {
-                                const rtyID = $(this).attr('id');
-                                const idx = displayed_rectypes.indexOf(rtyID);
-                                if(checked && idx === -1){
-                                    displayed_rectypes.push(rtyID);
-                                }else if(!checked && idx !== -1){
-                                    displayed_rectypes.splice(idx, 1);
-                                }
-                            });
-
-                            putSetting('rectypes', displayed_rectypes);
-
-                            $('#visualisation').visualize('filterData');
-                        }
-                    });
-
-                    if(!at_least_one_marked){
-
-                        $('.group_chkbox').first().prop('checked', true);
-
-                        window.trigger_checkbox_refresh = '.group_chkbox';
-                        window.startup_rectype = 1;
-                    }else{
-                        window.startup_rectype = 0;
+                        $visualiser.visualise('filterData');
                     }
 
                     /** VISUALIZING */
                     // Parses the data
-                    function getData(data) {
+                    function parseData(data) {
                         // Build name filter
                         let names = [];
                         $(".show-record").each(function() {
@@ -395,7 +396,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                         let map = {};
                         let size = 0;
                         let nodes = data.nodes.filter(function(d, i) {
-                            if($.inArray(d.name, names) == -1) {
+                            if(!names.includes(d.name)) {
                                 map[i] = d;
                                 return true;
                             }
@@ -415,22 +416,17 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                         return {nodes: nodes, links: links}
                     }
 
-                    // Visualizes the data
-                    function initVisualizeData() {
-                        // Call plugin
-                        const data_to_vis = getData(json_data);
+                    // Visualise data
+                    const data_to_vis = parseData(json_data);
 
-                        $("#visualisation").visualise({
-                            data: json_data,
-                            getData: () => data_to_vis,
-                            isStructure: true,
-                            isStandAlone: false
-                        });
-                    }
+                    let $visualiser = $("#main_content").visualise({
+                        data: json_data,
+                        getData: () => json_data,
+                        isStructure: true,
+                        isStandAlone: false
+                    });
 
-                    //$(window).on('onresize',onVisualizeResize);
-
-                    initVisualizeData();
+                    setupRecTypeFiltering($visualiser);
 
                 });
             });

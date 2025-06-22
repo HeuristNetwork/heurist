@@ -240,7 +240,7 @@ class VisualiseSelection{
         const dx = event.x - event.offsetX;
         const dy = event.y - event.offsetY;
 
-        this.visualiser.overlay.createOverlay(Math.round(position.left - dx + r), Math.round(position.top - dy + r), 'record', `id${rec_ID}`, data);
+        this.visualiser.overlay.createOverlay(Math.round(position.left - dx + r), Math.round(position.top - dy + r), 'record', `id${rec_ID}`, this.visualiser.overlay.getRelationOverlayData(data));
 
         this.visualiser.selectNode(this.#selectedNodeIds);
     }
@@ -261,3 +261,5 @@ class VisualiseSelection{
         }, []);
     }
 }
+
+export default VisualiseSelection;

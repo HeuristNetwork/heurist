@@ -226,3 +226,5 @@ class VisualiseDrag{
         }
     }
 }
+
+export default VisualiseDrag;

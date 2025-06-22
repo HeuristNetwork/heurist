@@ -49,6 +49,8 @@ class VisualiseSettings{
         advanced: false
     };
 
+    #extra_settings = []; // array of allowed extra settings
+
     #keyPrefix = window.hWin.HAPI4.database;
 
     constructor(visualiserContext, defaultSettings = {}){
@@ -62,8 +64,8 @@ class VisualiseSettings{
         this.settings = this.#usePreferences ? window.hWin.HAPI4.get_prefs_def('vis_struct', {}) : {};
 
         if(window.hWin.HEURIST4.util.isObject(defaultSettings)){
-            this.defaultSettings = $.extend({}, defaultSettings);
-            this.setDefaultSettings();
+            defaultSettings = $.extend(this.defaultSettings, defaultSettings);
+            this.setDefaultSettings(defaultSettings);
         }
     }
 
@@ -137,15 +139,21 @@ class VisualiseSettings{
         }
     }
 
-    setDefaultSettings(){
+    setDefaultSettings(settings){
 
-        for(const key in this.defaultSettings){
+        if(!window.hWin.HEURIST4.util.isempty(settings)){
+            return;
+        }
 
-            if(!Object.hasOwn(this.defaultSettings, key) || !window.hWin.HEURIST4.util.isempty(this.defaultSettings[key])){
+        for(const key in settings){
+
+            if((!Object.hasOwn(this.defaultSettings, key) && this.#extra_settings.includes(key)) || window.hWin.HEURIST4.util.isempty(settings[key])){
                 continue;
             }
 
-            this.get(key, this.defaultSettings);
+            this.defaultSettings[key] = settings[key];
+
+            this.get(key, this.defaultSettings[key]);
         }
     }
 
@@ -602,3 +610,5 @@ class VisualiseSettings{
         }
     }
 }
+
+export default VisualiseSettings;
