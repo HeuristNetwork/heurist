@@ -1,30 +1,25 @@
 <?php
-    /*
-    * Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    *
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-    * in compliance with the License. You may obtain a copy of the License at
-    *
-    * https://www.gnu.org/licenses/gpl-3.0.txt
-    *
-    * Unless required by applicable law or agreed to in writing, software distributed under the License
-    * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-    * or implied. See the License for the specific language governing permissions and limitations under
-    * the License.
-    */
-
-    /**
-    * Find missed system folders for all databases
-    *
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @link        https://HeuristNetwork.org
-    * @version     3.1
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @package     Heurist academic knowledge management system
-    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-    */
-
+/**
+* findMissedFileFolder.php - Identifies missing or non-writable Heurist filestore directories.
+*
+* @fileOverview This script checks the filestore for each Heurist database on the server.
+*               It verifies the existence and writability of the main database filestore directory
+*               (e.g., `HEURIST_FILESTORE_ROOT/mydb/`) and its standard subdirectories
+*               (like 'scratch', 'backup', 'file_uploads', etc., as defined in the system).
+*               It reports any missing directories or directories that are not writable by the web server.
+*               The output is an HTML page listing the issues. It can also send an email report to the admin
+*               if run with `?mail=1` (though primarily intended for web interface).
+*               Requires admin password.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       3.1
+*/
 ini_set('max_execution_time', '0');
 
 define('ADMIN_PWD_REQUIRED',1);

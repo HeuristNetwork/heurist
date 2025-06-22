@@ -1,26 +1,29 @@
 <?php
 
 /**
-* checkSavedSearches.php: Retrieve and process all saved searches, reporting those with issues
-*   These issue aren't normally going to cause major system errors, but just result in empty results
-*   Some can return errors, e.g. query 'q' is missing from search, this are more annoying
+* checkSavedSearches.php - Validates saved searches across all databases on the server.
+*
+* @fileOverview This script iterates through all Heurist databases on the server and inspects
+*               each saved search (`usrSavedSearches` table). It reports on various potential issues:
+*               - Searches with queries in an unknown format.
+*               - Searches belonging to non-existent users/workgroups.
+*               - Simple queries that result in errors when executed (e.g., missing 'q' parameter or rules).
+*               - Facet searches with invalid field codes (e.g., referencing non-existent record types or fields).
+*               The output is an HTML page listing problematic saved searches grouped by database,
+*               with interactive filters for database name, search name, and search type.
+*               Requires manager-level access.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.0
+* @since       6.0
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 ini_set('max_execution_time', '0');
 

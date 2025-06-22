@@ -1,24 +1,27 @@
 <?php
-
-    /**
-    * upgradeDatabase.php: detects outdataed database and applies SQL to database to make changes to underlying format
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     3.2
-    */
-
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
+/**
+* upgradeDatabase.php - Manages the user interface and process for upgrading a single Heurist database.
+*
+* @fileOverview This script provides an HTML interface for upgrading a Heurist database.
+*               It detects if the current database's schema version is older than the
+*               minimum required version (`HEURIST_MIN_DBVERSION`). If an upgrade is needed
+*               and the user is an administrator, it allows them to trigger the upgrade process.
+*               The upgrade itself involves applying a series of SQL or PHP scripts to update
+*               the database schema incrementally. It displays information about the safety
+*               and description of each upgrade script.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  /admin/setup/dbupgrade
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Stephen White
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @since       3.2
+*/
 
 if(!defined('PDIR')){
     define('PDIR','../../../');//need for proper path to js and css
@@ -335,6 +338,15 @@ $description = 'Modify tables:  defRecStructure(rst_SemanticReferenceURL,rst_Ter
 </html>
 
 <?php
+    /**
+     * Executes a given SQL script file against the current database.
+     *
+     * Outputs error messages directly to HTML if the script execution fails or if the user is not an admin.
+     *
+     * @global hserv\System $system The global Heurist System object, used to check admin status.
+     * @param string $filename The full path to the SQL script file to be executed.
+     * @return bool True if the script execution was successful, false otherwise.
+     */
     function executeScript($filename){
 
         global $system;
@@ -345,7 +357,7 @@ $description = 'Modify tables:  defRecStructure(rst_SemanticReferenceURL,rst_Ter
 ?>
                 <div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">
                     <span class="ui-icon ui-icon-alert" style="float: left; margin: .3em;"></span>
-                    Error: Unable to execute <?php echo $filename;?> for database <?php echo HEURIST_DBNAME; ?><br>
+                    Error: Unable to execute <?php echo htmlspecialchars($filename);?> for database <?php echo htmlspecialchars(HEURIST_DBNAME); ?><br>
                     Please check whether this file is valid. <?php echo CONTACT_HEURIST_TEAM_PLEASE;?> if needed<br>
                 </div>
 <?php

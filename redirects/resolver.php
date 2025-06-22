@@ -1,31 +1,33 @@
 <?php
-
 /**
+* resolver.php - Universal Heurist URL resolver and redirector.
+* @fileOverview This script acts as a central resolver for various Heurist URLs, including PIDs (Persistent Identifiers),
+* database views, record views, edits, and exports. It interprets incoming URL patterns and redirects
+* to the appropriate internal script or resource. It can handle requests for different output formats (XML, HML, JSON, RDF, HTML).
+* It also supports resolving records across different databases, potentially involving a lookup
+* on a master Heurist index for remote databases.
 *
-* resolver.php     (developed 2015)
-* Acts as a PID redirector to an XML rendition of the record (database on current server).
-* Future version will resolve to remote databases via a lookup on the Heurist master index
-* and caching of remote server URLs to avoid undue load on the Heurist master index.
+* Key functionalities:
+* - Resolves short URLs for databases, CMS pages, record views/edits.
+* - Handles requests for specific output formats (e.g., `fmt=xml`).
+* - Redirects to appropriate viewers or export scripts.
+* - Supports resolving records with database IDs (e.g., `recID=DBID-RecordID`).
+* - Manages special domain configurations (e.g., *.huma-num.fr).
 *
-* Note: up to Dec 2015 V4.1.3, resolver.php redirected to a human-readable form, viewRecord.php
-*       from Jan 2016 V4.1.4, resolver.php is intended to return a machine consumable XML rendition
+* Note: Up to Dec 2015 (V4.1.3), resolver.php redirected to a human-readable form (viewRecord.php).
+* From Jan 2016 (V4.1.4 onwards), it's intended to primarily return machine-consumable XML/HML renditions by default for PIDs,
+* while still supporting human-readable views and other formats via parameters or specific URL patterns.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /redirects
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 // Input is of the form .../redirects/resolver.php?db=mydatabase&recID=3456
 
 // TODO: future form accepting recID=123-3456 which redirects to record 3456 on database 123.
@@ -567,6 +569,12 @@ if($database_url!=null){ //redirect to resolver for another database
 
 redirectURL2($redirection_path.$redirect);
 
+/**
+ * Performs a header redirect to the specified URL.
+ *
+ * @param string $url The URL to redirect to.
+ * @return void
+ */
 function redirectURL2($url){
     header('Location: '.$url);
 }

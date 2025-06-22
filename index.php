@@ -1,15 +1,19 @@
 <?php
-
 /**
-* Main script initializing Heurist layout and performing initial search of parameter q is defined
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * index.php - Main entry point for the Heurist application.
+ *
+ * @fileOverview This script initializes the Heurist layout, handles various URL parameters for actions like
+ * displaying records, CMS content, API requests, file downloads, and asset loading.
+ * It performs initial setup and can trigger an initial search if query parameters are defined.
+ * @package Heurist academic knowledge management system
+ * @subpackage /
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 4.0
+ */
 
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
@@ -370,6 +374,13 @@ if(false && $isLocalHost){
 
 <script type="text/javascript">
 
+    /**
+     * Initializes the page after basic setup is complete.
+     * Sets up layout manager, closes 'about' dialog if open, sets system info,
+     * and initializes the main application layout and Matomo tracking.
+     * @param {boolean} success - Indicates if the initial PHP setup was successful.
+     * @returns {void}
+     */
     function onPageInit(success){
 
         if(!success) {return;}
@@ -426,9 +437,11 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
         onInitCompleted_PerformSearch();
     }
 
-    //
-    // init about dialog
-    //
+    /**
+     * Initializes the "About Heurist" dialog.
+     * This dialog displays version and copyright information.
+     * @returns {void}
+     */
     function onAboutInit(){
         //definition of ABOUT dialog, called from Help > About, see content below
         $( "#heurist-about" ).dialog(
@@ -451,9 +464,12 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
 
     }
 
-    //
-    // Performs inital search: parameters from request or from user preferences
-    //
+    /**
+     * Performs initial actions after the main system components are initialized.
+     * This includes version checks, handling record editing/creation requests via URL parameters,
+     * displaying dashboards, and platform-specific warnings (e.g., for mobile or unsupported browsers).
+     * @returns {void}
+     */
     function onInitCompleted_PerformSearch(){
 
         if(!window.hWin.HAPI4.is_publish_mode)

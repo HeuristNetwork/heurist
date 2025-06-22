@@ -1,24 +1,20 @@
 <?php
-
 /**
-* databaseSummary.php : displays table of record types and counts and SVG entity connections schema scaled with counts (built with D3.js)
+* databaseSummary.php - displays table of record types and counts and SVG entity connections schema scaled with counts (built with D3.js)
 * based on an aggregation query for all records grouped by record type
 *
+* @fileOverview displays table of record types and counts and SVG entity connections schema scaled with counts (built with D3.js)
+* based on an aggregation query for all records grouped by record type
 * @package     Heurist academic knowledge management system
+* @subpackage  /viewers/visualize
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Jan Jaap de Groot <jjedegroot@gmail.com>  SVG schema
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
+* @author      Jan Jaap de Groot <jjedegroot@gmail.com>  SVG schema
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       4
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 print '<!DOCTYPE html>';
 define('PDIR','../../');//need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
@@ -125,6 +121,13 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
         <!-- On Row Click -->
         <script>
+            /**
+             * Opens a search for the given record type ID.
+             *
+             * @param {number} rt_ID The record type ID.
+             * @param {boolean} innewtab Whether to open the search in a new tab.
+             * @returns {boolean} False to prevent default link behavior.
+             */
             function onrowclick(rt_ID, innewtab){
                 var query = "w=all&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
                 if(innewtab){
@@ -145,6 +148,12 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 }
             }
 
+            /**
+             * Initializes the page after successful loading.
+             * Triggers a click on the expand button.
+             *
+             * @param {boolean} success Whether the page initialization was successful.
+             */
            function onPageInit(success){
                    if(!success) {return;}
                    $("#expand").trigger('click');
@@ -152,7 +161,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
         </script>
 
-        
+
         <meta name="robots" content="noindex,nofollow">
     </head>
 
@@ -276,7 +285,9 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                     }
 
                     // Data loaded successfully!
-                    /** RECORD FILTERING */
+                    /**
+                     * RECORD FILTERING
+                     */
                     // Set filtering settings in UI
                     let at_least_one_marked = false;
 
@@ -378,8 +389,12 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                         window.startup_rectype = 0;
                     }
 
-                    /** VISUALIZING */
-                    // Parses the data
+                    /**
+                     * Parses the data, filtering nodes and links based on selected record types.
+                     *
+                     * @param {object} data The raw data from the server.
+                     * @returns {object} The filtered data containing nodes and links.
+                     */
                     function getData(data) {
                         // Build name filter
                         let names = [];
@@ -415,7 +430,9 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                         return {nodes: nodes, links: links}
                     }
 
-                    // Visualizes the data
+                    /**
+                     * Initializes the visualization with the filtered data.
+                     */
                     function initVisualizeData() {
                         // Call plugin
                         const data_to_vis = getData(json_data);
@@ -436,6 +453,10 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 });
             });
 
+            /**
+             * Placeholder function for resize event.
+             * Called in settings.js.
+             */
             function onVisualizeResize(){} // noop function called in settings.js
 
         </script>

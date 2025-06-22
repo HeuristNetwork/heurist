@@ -1,26 +1,30 @@
 <?php
-
 /**
-* rebuildEntryMasks.php: Re-apply field entry masks for ALL records, specified records or records of a specific type
+* rebuildEntryMasks.php - Re-applies field entry masks to record detail values.
+*
+* @fileOverview This script iterates through specified records (all, by record type, or by specific IDs)
+*               and re-applies any defined entry masks to their detail fields.
+*               Entry masks are regular expressions defined in the record structure (`defRecStructure`)
+*               that clean or format input data. This utility is useful if masks have been
+*               updated or if data was imported bypassing initial mask application.
+*               It reports on the number of records processed, values updated, skipped (already matching),
+*               or invalid (not matching the mask after application). It also updates record titles
+*               if their constituent masked fields changed.
+*               Can be run client-side with progress updates or server-side.
+*               Requires manager-level access.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6
+* @author      Brandon McKay <blmckay13@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6
 */
-
 use hserv\utilities\USanitize;
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 set_time_limit(0);
 

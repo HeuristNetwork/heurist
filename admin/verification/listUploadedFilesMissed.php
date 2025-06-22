@@ -1,28 +1,28 @@
 <?php
-
 /**
-* listUploadedFilesMissed.php - light weight version of listUploadedFilesErrors.php:
-* Lists missed files that are listed in recUploadedFiles
+* listUploadedFilesMissed.php - Reports missing physical files for registered uploaded files.
+*
+* @fileOverview This script provides a lightweight check for missing files. It iterates through
+*               `recUploadedFiles` entries in one or all databases and verifies if the
+*               physical file exists at the path specified by `ulf_FilePath` and `ulf_FileName`.
+*               It's a simpler version of `listUploadedFilesErrors.php`, focusing only on
+*               files that are registered in the database but cannot be found in the filestore.
+*               The output is an HTML page listing the database name, directory, and filename
+*               for each missing file.
+*               Can be run for a single database or all databases (if `?all=1` and admin password provided).
+*               Requires admin privileges if checking all databases.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.1.0
+* @since       3.1.0
 */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 use hserv\utilities\USanitize;
 
 $is_included = (defined('PDIR'));

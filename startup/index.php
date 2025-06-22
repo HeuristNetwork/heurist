@@ -1,21 +1,15 @@
 <?php
 /**
-* Main setup sequence page
-*
+* index.php - Main setup sequence page for Heurist.
+* @fileOverview This file handles the initial user interaction for setting up a new database or finding an existing one. It manages user registration, database creation, and displays introductory information.
 * @package     Heurist academic knowledge management system
+* @subpackage  /startup
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson ian.johnson.heurist@gmail.com
+* @since       4.0
 */
 use hserv\utilities\USystem;
 
@@ -86,9 +80,11 @@ if (!defined('PDIR')){
     _showDatabaseList()  - all databases (step8)
 */
 
-    //
-    //
-    //
+    /**
+     * Shows a specific step/screen in the setup process.
+     * Hides all '.center-box' elements and fades in the one corresponding to the step number.
+     * @param {number|Event} arg - Either the step number to show, or an event object from which the step number is extracted from a 'data-step' attribute.
+     */
     function _showStep(arg){
         let step_no = 1;
         if(window.hWin.HEURIST4.util.isNumber(arg)){
@@ -101,9 +97,11 @@ if (!defined('PDIR')){
         $('.center-box.screen'+step_no).fadeIn(300);
     }
 
-    //
-    //
-    //
+    /**
+     * Shows the user registration form (step 2).
+     * If the form is already loaded, it refreshes the captcha and shows the step.
+     * Otherwise, it loads 'userRegistration.html', initializes its controls, and then shows the step.
+     */
     function _showRegistration(){
 
         let screen = $('.center-box.screen2');
@@ -176,9 +174,11 @@ if (!defined('PDIR')){
 
     }
 
-    //
-    // allow only alphanumeric characters for db name
-    //
+    /**
+     * Event handler for key press to allow only alphanumeric characters, underscore, and dollar sign for database names.
+     * @param {Event} event - The keypress event object.
+     * @returns {boolean} Returns true if the character is allowed, false otherwise.
+     */
     function onKeyPress(event){
 
         event = event || window.event;
@@ -197,9 +197,10 @@ if (!defined('PDIR')){
         return true;
     }
 
-    //
-    // in user reg form
-    //
+    /**
+     * Refreshes the CAPTCHA image or text in the user registration form.
+     * It clears the current CAPTCHA input and loads a new one from the server.
+     */
     function refreshCaptcha(){
         $('#ugr_Captcha').val('');
         const id = window.hWin.HEURIST4.util.random();
@@ -212,9 +213,12 @@ if (!defined('PDIR')){
         }
     }
 
-    //
-    // validate user registration form (step2)
-    //
+    /**
+     * Validates the user registration form (step 2).
+     * Checks for mandatory fields, email format, login name format and length, password match, and password length.
+     * If validation passes, it proceeds to step 3 (define database name).
+     * Otherwise, it displays an error message.
+     */
     function _validateRegistration(){
 
         let regform = $('.registration-form');
@@ -304,9 +308,13 @@ if (!defined('PDIR')){
         }
     }
 
-    //
-    // create new database (from step5)
-    //
+    /**
+     * Creates a new database (called from step 3, after user registration and database name input).
+     * Validates the database name length.
+     * Sends a request to the server with user registration data and the chosen database name.
+     * On success, redirects the user to the new database.
+     * On failure, shows an error message and may return to the registration or database name step.
+     */
     function _doCreateDatabase(){
 
         let err_text = window.hWin.HEURIST4.msg.checkLength2( $("#dbname"), 'Database name', 1, 60 );
@@ -330,7 +338,7 @@ if (!defined('PDIR')){
 
             const url = baseURL+'hserv/controller/databaseController.php';
 
-            _showStep(4);
+            _showStep(4); // Show "in progress" screen
 
             window.hWin.HEURIST4.util.sendRequest(url, request, null,
                 function(response){
@@ -349,7 +357,7 @@ if (!defined('PDIR')){
                             $('#div_warnings').hide()
                         }
 
-                        _showStep(5);
+                        _showStep(5); // Show success screen
                         */
                     }else{
                         //either wrong captcha or invalid registration values
@@ -369,9 +377,15 @@ if (!defined('PDIR')){
 
     }
 
-    //
-    // server request for db list
-    //
+    /**
+     * Fetches the list of databases from the server.
+     * Sends a request to 'startup/listDatabases.php'.
+     * On success, stores the database list in `all_databases`.
+     * If `show_list` is true and databases are found, it calls `_showDatabaseList`.
+     * Otherwise, it calls `_initControls`.
+     * On failure, it clears `all_databases` and shows an error.
+     * @param {boolean} show_list - If true, attempts to show the database list screen immediately after fetching.
+     */
     function _getDatabases( show_list ){
             const url = baseURL+'startup/listDatabases.php';
 
@@ -399,9 +413,11 @@ if (!defined('PDIR')){
                 });
     }
 
-    //
-    // loads getting started
-    //
+    /**
+     * Loads and displays the "Getting Started" content (step 6).
+     * Loads 'gettingStarted.html' into the appropriate screen container.
+     * Updates image sources and initializes event handlers for video links and the continue button.
+     */
     function _showGetStarted(){
 
         let sForm = (document.location.pathname.indexOf('startup/')>0
@@ -426,7 +442,7 @@ if (!defined('PDIR')){
                 $('#btnOpenHeurist').button({icon:'ui-icon-arrow-1-e',iconPosition:'end'}).on({click:function(){
                     const turl = $('#newdblink').text();
                     $('.ent_wrapper').effect('drop',null,500,function(){
-                        location.href = url;
+                        location.href = turl;
                     });
                 }});
 
@@ -435,9 +451,16 @@ if (!defined('PDIR')){
 
     }
 
-    //
-    // init db lookup - open dropdown list on keypress in search database input
-    //
+    /**
+     * Initializes controls on the main startup screen (step 1).
+     * Sets up event handlers for registration, database creation, and getting started buttons.
+     * If existing databases are found (`all_databases` is populated):
+     *  - Initializes the "Find your database" search input with autocomplete functionality.
+     *  - Sets up the "Open Database" button.
+     *  - Sets up the "Browse all databases" link.
+     * If no databases are found, it hides the "Existing Users" section.
+     * Finally, shows step 1.
+     */
     function _initControls(){
 
         if(window.hWin.HAPI4){
@@ -533,9 +556,13 @@ if (!defined('PDIR')){
         _showStep(1);
     }
 
-    //
-    // opens list of all databases
-    //
+    /**
+     * Shows the list of all databases (step 8).
+     * If the list hasn't been populated yet, it dynamically creates list items for each database from `all_databases`.
+     * Initializes a filter input to search through the database list.
+     * Makes list items clickable to navigate to the selected database.
+     * @param {Event} [event] - The click event object (optional), used to stop event propagation.
+     */
     function _showDatabaseList(event){
         
         window.hWin.HEURIST4.util.stopEvent(event);
@@ -597,7 +624,12 @@ if (!defined('PDIR')){
         _showStep(8);
     }
 
-    // if hAPI is not defined in parent(top most) window we have to create new instance
+    /**
+     * Document ready function.
+     * Initializes the page by showing step 8 (database list/loading) and fetching the list of databases.
+     * Determines whether to show the list immediately based on the 'list' URL parameter.
+     * Displays any error messages passed via URL parameters or server-side variables.
+     */
     $(document).ready(function() {
         _showStep(8);
         _getDatabases( <?php echo (@$_REQUEST['list']==1)?'true':'false';?> );

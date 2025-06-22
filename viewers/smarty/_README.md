@@ -1,13 +1,12 @@
+# Directory: /viewers/smarty
 
-Directory:	/smarty
+## Overview
+Primarily for backward capability, this directory contains scripts related to Smarty template-based report generation, display, and publishing. Modern report functionality is generally found in `/hserv/report` and `/hclient/widgets/report`. Smarty templates offer an alternative to XSL templates and can be edited via the Heurist web interface.
 
-Overview:	for backward capability. See /hserv/report and /hclient/widgets/report
+## Subfolders
+- None
 
-Notes:      Smarty templates are to a large degree a replacement for the XSL templates
-
-            Unlike the printview templates, Smarty templates can be edited through the Heurist
-            web interface. Although they use internal codes to define variables, routines are
-            provided to translate a Smarty templte to global concept codes and vice versa, to
-            allow standard templates to be written and exchange of templates between databases
-
-Updated:     12 Oct 2024
+## Key files
+- `index.php`: Main entry point for Smarty-based report viewing and file access. Acts as a router to file handlers or the `ReportController`.
+- `showReps.php`: Invokes the `ReportController` for displaying reports (primarily for backward compatibility).
+- `updateReportOutput.php`: Handles updating and publishing of Smarty-based reports, delegating to `ReportController` (primarily for backward compatibility).

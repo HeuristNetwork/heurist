@@ -1,348 +1,406 @@
 /**
-* visualize.js: Visualisation plugin
+* visualize.js - Core D3.js visualization plugin for Heurist.
+*
+* @fileOverview This file defines a jQuery plugin `$.fn.visualize` that sets up and manages
+* a D3.js force-directed graph. It handles node and link creation, styling, interactions
+* (zoom, drag, selection), and settings integration. It provides functions for data parsing,
+* layout calculations, and UI updates.
+*
+* Requirements:
+* Internal Javascript:
+* - settings.js: Manages user-configurable settings.
+* - overlay.js: Handles informational overlays for nodes and links.
+* - selection.js: Manages node selection logic.
+* - gephi.js: Provides GEXF export functionality.
+* - drag.js: Handles node dragging and related interactions.
+* External Javascript:
+* - jQuery: General DOM manipulation and plugin structure.
+* - D3.js: Core library for data visualization and SVG manipulation.
+* - D3 fisheye plugin: For fisheye distortion effect (optional).
+* - evol-colorpicker: For color selection in settings.
+*
+* Node Data Structure:
+* Each node object in the input data must have at least:
+* - `id`: Unique identifier.
+* - `name`: Display name.
+* - `image`: URL for the node's icon.
+* - `count`: A numerical value (e.g., number of records) used for sizing.
+*
+* Link Data Structure:
+* Each link object must have:
+* - `source`: Source node object or ID.
+* - `target`: Target node object or ID.
+* - `relation`: An object describing the relationship, with `id`, `name`, and `type`.
+* - `targetcount`: A numerical value for link weighting/styling.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /viewers/visualize
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
+* @since       4
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
-/**
-* Visualisation plugin
-* Requirements:
-* 
-* Internal Javascript:
-* - settings.js
-* - overlay.js
-* - gephi.js
-* - visualize.js
-* 
-* External Javascript:
-* - jQuery          http://jquery.com/
-* - D3              http://d3js.org/
-* - D3 fisheye      https://github.com/d3/d3-plugins/tree/master/fisheye
-* - Colpicker       https://github.com/evoluteur/colorpicker
-*
-* Objects must have at least the following properties:
-* - id
-* - name
-* - image
-* - count
-* 
-* Available settings and their default values:
-* - linetype: "straight",
-* - linelength: 100,
-* - linewidth: 15,
-* - linecolor: "#22a",
-* - markercolor: "#000",
-* 
-* - entityradius: 30,
-* - entitycolor: "#b5b5b5",
-* 
-* - labels: true,
-* - fontsize: "8px",
-* - textlength: 60,
-* - textcolor: "#000",
-* 
-* - formula: "linear",
-* - fisheye: false,
-* 
-* - gravity: "off",
-* - attraction: -3000,
-* 
-* - translatex: 0,
-* - translatey: 0,
-* - scale: 1
-*/
 /* global svg, data, settings, zoomBehaviour, force, iconSize, currentMode, circleSize, maxLinkWidth, maxEntityRadius, truncateText, 
 getSetting, putSetting, checkStoredSettings, handleSettingsInUI, addSelectionBox, 
 addNodes,  updateNodes,
 createOverlay, getRelationOverlayData, removeOverlay,
 isStandAlone */
 
-window.settings = null;   // Plugin settings object
-window.svg = null;        // The SVG where the visualisation will be executed on
+/**
+ * Global settings object for the visualization plugin. Initialized by `$.fn.visualize`.
+ * @type {object|null}
+ */
+window.settings = null;
+/**
+ * D3 selection of the main SVG element.
+ * @type {object|null}
+ */
+window.svg = null;
 
-window.data = null; // Currently visualised dataset
+/**
+ * The current dataset being visualized (nodes and links).
+ * @type {object|null}
+ */
+window.data = null;
+/**
+ * D3 zoom behavior instance.
+ * @type {object|null}
+ */
 window.zoomBehaviour = null;
+/**
+ * D3 force layout instance.
+ * @type {object|null}
+ */
 window.force = null;
 
-//public settings
-window.iconSize = 16; // The icon size
-window.circleSize = 12; //iconSize * 0.75; // Circle around icon size
-window.currentMode = 'infoboxes_full'; //or 'icons';
+// Public settings/constants
+/**
+ * Default size for node icons in pixels.
+ * @type {number}
+ */
+window.iconSize = 16;
+/**
+ * Default size for the circle around icons in pixels.
+ * @type {number}
+ */
+window.circleSize = 12; // iconSize * 0.75;
+/**
+ * Current display mode for nodes ('infoboxes_full', 'infoboxes', or 'icons').
+ * @type {string}
+ */
+window.currentMode = 'infoboxes_full';
+/**
+ * Maximum radius for entity nodes.
+ * @type {number}
+ */
 window.maxEntityRadius = 40;
+/**
+ * Maximum width for links.
+ * @type {number}
+ */
 window.maxLinkWidth = 25;
 
-//private
-let maxCountForNodes, maxCountForLinks; 
+// Private module-level variables
+/**
+ * Maximum count value among all nodes, used for scaling.
+ * @type {number}
+ * @private
+ */
+let maxCountForNodes;
+/**
+ * Maximum targetcount value among all links, used for scaling.
+ * @type {number}
+ * @private
+ */
+let maxCountForLinks;
 
 (function ( $ ) {
-    // jQuery extension
+    /**
+     * jQuery plugin for creating a D3.js force-directed graph visualization.
+     * @param {object} options - Configuration options for the visualization.
+     * @see window.settings for default option values.
+     * @returns {jQuery} The jQuery object for chaining.
+     */
     $.fn.visualize = function( options ) {
-        
+
         // Select and clear SVG.
-        window.svg = window.d3.select("#d3svg");
-        svg.selectAll("*").remove();
-        svg.append("text").text("Building graph ...").attr("x", "25").attr("y", "25");   
-        
-        
-        // Default plugin settings
+        window.svg = window.d3.select("#d3svg"); // Assumes an SVG element with id="d3svg" exists
+        svg.selectAll("*").remove(); // Clear previous content
+        svg.append("text").text("Building graph ...").attr("x", "25").attr("y", "25"); // Initial message
+
+
+        // Default plugin settings, extended by user-provided options
         window.settings = $.extend({
             // Custom functions
-            getData: $.noop(), // Needs to be overriden with custom function
-            getLineLength: function() { return getSetting('setting_linelength',200); },
-            
-            selectedNodeIds: [],
-            onRefreshData: function(){},
-            onExpandNode: null,
-            triggerSelection: function(selection){}, 
-            
-            isDatabaseStructure: false,
-            
-            showCounts: true,
-            
-            // UI setting controls
+            getData: $.noop, // Needs to be overridden with custom function to get data
+            getLineLength: function() { return getSetting('setting_linelength',200); }, // Gets line length from settings
+
+            selectedNodeIds: [], // Array of initially selected node IDs
+            onRefreshData: function(){}, // Callback for data refresh
+            onExpandNode: null, // Callback for node expansion
+            triggerSelection: function(selection){}, // Callback when selection changes
+
+            isDatabaseStructure: false, // True if visualizing DB structure, false for record data
+
+            showCounts: true, // Whether to show counts in overlays/labels
+
+            // UI setting controls visibility (can be used to customize the settings panel)
             showLineSettings: true,
             showLineType: true,
             showLineLength: true,
             showLineWidth: true,
             showLineColor: true,
-            showMarkerColor: true, 
-            
-            showEntitySettings: true, 
+            showMarkerColor: true,
+
+            showEntitySettings: true,
             showEntityRadius: true,
             showEntityColor: true,
-            
+
             showTextSettings: true,
             showLabels: true,
             showFontSize: true,
             showTextLength: true,
             showTextColor: true,
-            
+
             showTransformSettings: true,
             showFormula: true,
-            showFishEye: true,
-            
+            showFishEye: true, // For D3 fisheye plugin
+
             showGravitySettings: true,
             showGravity: true,
             showAttraction: true,
-            
-            
-            // UI default settings
-            advanced: false,
-            linetype: "straight",
-            line_show_empty: true,
+
+
+            // Default UI settings values
+            advanced: false,        // Whether advanced settings panel is shown
+            linetype: "straight",   // 'straight', 'curved', 'stepped'
+            line_show_empty: true,  // Whether to show lines for zero-count links (as faint lines)
             linelength: 100,
             linewidth: 3,
-            linecolor: "#22a",
-            markercolor: "#000",
-            
-            entityradius: 30,
-            entitycolor: "#b5b5b5",
-            
-            labels: true,
+            linecolor: "#22a",      // Default line color
+            markercolor: "#000",    // Default marker (arrowhead) color
+
+            entityradius: 30,       // Base radius for entities
+            entitycolor: "#b5b5b5", // Default entity color
+
+            labels: true,           // Whether to show labels by default
             fontsize: "8px",
-            textlength: 25,
+            textlength: 25,         // Max characters for truncated labels
             textcolor: "#000",
-            
-            formula: "linear",
-            fisheye: false,
-            
-            gravity: "off",
-            attraction: -3000,
-            
+
+            formula: "linear",      // Sizing formula: 'linear', 'logarithmic', 'unweighted'
+            fisheye: false,         // Enable fisheye distortion
+
+            gravity: "off",         // Force layout gravity: 'off', 'touch', 'aggressive'
+            attraction: -3000,      // Force layout charge/attraction
+
+            // Initial transform values for the graph container
             translatex: 200,
             translatey: 200,
             scale: 1
         }, options );
- 
-        // Handle settings (settings.js)
-        checkStoredSettings();  //restore default settings
-        handleSettingsInUI();
 
-        // Check visualisation limit
-        let amount = Object.keys(settings.data.nodes).length;
+        // Handle settings initialization and UI setup (from settings.js)
+        checkStoredSettings();  // Restore or set default settings
+        handleSettingsInUI();   // Initialize the settings panel UI
+
+        // Check visualization limit against user preference
+        let amount = settings.data && settings.data.nodes ? Object.keys(settings.data.nodes).length : 0;
         const MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
-        
-        visualizeData();    
 
+        visualizeData(); // Initial draw of the visualization
+
+        // Display warning if node limit is reached
         let ele_warn = $('#net_limit_warning');
         if(amount >= MAXITEMS) {
-            ele_warn.html('These results are limited to '+MAXITEMS+' records<br>(limit set in your profile Preferences)<br>Please filter to a smaller set of results').show();//.delay(2000).fadeOut(10000);
+            ele_warn.html('These results are limited to '+MAXITEMS+' records<br>(limit set in your profile Preferences)<br>Please filter to a smaller set of results').show();
         }else{
             ele_warn.hide();
         }
 
+        // Initialize UI buttons for zoom and refresh
         $('#btnZoomIn').button({icon:'ui-icon-plus',showLabel:false}).on('click',
-            function(){
-                zoomBtn(true);
-            }
+            function(){ zoomBtn(true); }
         );
-
         $('#btnZoomOut').button({icon:'ui-icon-minus',showLabel:false}).on('click',
-            function(){
-                zoomBtn(false);
-            }
+            function(){ zoomBtn(false); }
         );
-
         $('#btnFitToExtent').button({icon:'ui-icon-fullscreen',showLabel:false}).on('click',
-            function(){
-                zoomToFit();
-            }
+            function(){ zoomToFit(); }
+        );
+        $('#btnRefreshData').button({icon:'ui-icon-refresh'}).on('click',
+            function(){ location.reload(); } // Simple page reload for refresh
         );
 
-        $('#btnRefreshData').button({icon:'ui-icon-refresh'}).on('click',
-            function(){
-                location.reload();
-            }
-        );
- 
-        return this;
+        return this; // Return jQuery object for chaining
     };
 }( jQuery ));
-    
 
-/*******************************START OF VISUALISATION HELPER FUNCTIONS*******************************/
 
-function determineMaxCount(data) {
-    maxCountForNodes = 1;
+/**
+ * Determines the maximum `count` among nodes and `targetcount` among links.
+ * These values are stored in `maxCountForNodes` and `maxCountForLinks` respectively,
+ * and used for scaling node sizes and link widths.
+ * @param {object} currentData - The dataset containing `nodes` and `links` arrays.
+ * @private
+ */
+function determineMaxCount(currentData) { // Renamed parameter for clarity
+    maxCountForNodes = 1; // Initialize to 1 to avoid division by zero
     maxCountForLinks = 1;
-    if(data && data.nodes.length > 0) {
-        for(let i = 0; i < data.nodes.length; i++) {
-            if(data.nodes[i].count > maxCountForNodes) {
-                maxCountForNodes = data.nodes[i].count;
-            } 
+    if(currentData && currentData.nodes && currentData.nodes.length > 0) {
+        for(let i = 0; i < currentData.nodes.length; i++) {
+            if(currentData.nodes[i].count > maxCountForNodes) {
+                maxCountForNodes = currentData.nodes[i].count;
+            }
         }
     }
-    if(data && data.links.length > 0) {
-        for(let i = 0; i < data.links.length; i++) {
-            if(data.links[i].targetcount > maxCountForLinks) {
-                maxCountForLinks = data.links[i].targetcount;
-            } 
+    if(currentData && currentData.links && currentData.links.length > 0) {
+        for(let i = 0; i < currentData.links.length; i++) {
+            if(currentData.links[i].targetcount > maxCountForLinks) {
+                maxCountForLinks = currentData.links[i].targetcount;
+            }
         }
     }
 }
 
+/**
+ * Retrieves a node data object by its ID from the global `data.nodes` array.
+ * @param {string|number} id - The ID of the node to find.
+ * @returns {object|null} The node object if found, otherwise null.
+ */
 function getNodeDataById(id){
-    if(data && data.nodes.length > 0) {
-        for(let i = 0; i < data.nodes.length; i++) {
-            if(data.nodes[i].id==id) {
-                return data.nodes[i];
-            } 
+    if(window.data && window.data.nodes && window.data.nodes.length > 0) { // Use window.data
+        for(let i = 0; i < window.data.nodes.length; i++) {
+            if(window.data.nodes[i].id == id) { // Use == for potential type difference
+                return window.data.nodes[i];
+            }
         }
     }
     return null;
 }
 
-/** Calculates log base 10 */
+/**
+ * Calculates the base-10 logarithm of a value.
+ * @param {number} val - The input value.
+ * @returns {number} The base-10 logarithm.
+ */
 function log10(val) {
     return Math.log(val) / Math.LN10;
 }
 
+/**
+ * Adds an SVG filter definition for a drop shadow effect.
+ * The filter can be applied to SVG elements using `filter: url(#drop-shadow)`.
+ * @private
+ */
 function _addDropShadowFilter(){
+    // filter chain comes from:
+    // https://github.com/wbzyl/d3-notes/blob/master/hello-drop-shadow.html
 
-// filter chain comes from:
-// https://github.com/wbzyl/d3-notes/blob/master/hello-drop-shadow.html
-// cpbotha added explanatory comments
-// read more about SVG filter effects here: http://www.w3.org/TR/SVG/filters.html
+    let defs = svg.append("defs");
+    let filter = defs.append("filter")
+        .attr("id", "drop-shadow")
+        .attr("height", "120%"); // Ensure shadow isn't clipped
 
-// filters go in defs element
-let defs = svg.append("defs");
+    filter.append("feGaussianBlur")
+        .attr("in", "SourceAlpha") // Use opacity of source graphic
+        .attr("stdDeviation", 3)
+        .attr("result", "blur");
 
-// create filter with id #drop-shadow
-// height=130% so that the shadow is not clipped
-let filter = defs.append("filter")
-    .attr("id", "drop-shadow")
-    .attr("height", "120%");
+    filter.append("feOffset")
+        .attr("in", "blur")
+        .attr("dx", 3) // Shadow offset
+        .attr("dy", 3)
+        .attr("result", "offsetBlur");
 
-// SourceAlpha refers to opacity of graphic that this filter will be applied to
-// convolve that with a Gaussian with standard deviation 3 and store result
-// in blur
-filter.append("feGaussianBlur")
-    .attr("in", "SourceAlpha")
-    .attr("stdDeviation", 3)
-    .attr("result", "blur");
-
-// translate output of Gaussian blur to the right and downwards with 2px
-// store result in offsetBlur
-filter.append("feOffset")
-    .attr("in", "blur")
-    .attr("dx", 3)
-    .attr("dy", 3)
-    .attr("result", "offsetBlur");
-
-// overlay original SourceGraphic over translated blurred opacity by using
-// feMerge filter. Order of specifying inputs is important!
-let feMerge = filter.append("feMerge");
-
-feMerge.append("feMergeNode")
-    .attr("in", "offsetBlur")
-feMerge.append("feMergeNode")
-    .attr("in", "SourceGraphic");
+    let feMerge = filter.append("feMerge");
+    feMerge.append("feMergeNode")
+        .attr("in", "offsetBlur"); // Blurred shadow
+    feMerge.append("feMergeNode")
+        .attr("in", "SourceGraphic"); // Original graphic on top
 }
 
-/** Executes the chosen formula with a chosen count & max size */
-
+/**
+ * Executes the chosen sizing formula (linear, logarithmic, or unweighted)
+ * to scale a value (e.g., node radius, link width) based on its count relative to a maximum count.
+ *
+ * @param {number} count - The current item's count.
+ * @param {number} maxCount - The maximum count among all similar items.
+ * @param {number} maxSize - The maximum size the item can have.
+ * @returns {number} The calculated size.
+ */
 function executeFormula(count, maxCount, maxSize) {
-    // Avoid minus infinity and wrong calculations etc.
-    if(count <= 0) {
+    if(count <= 0) { // Avoid issues with log(0) or division by zero
         count = 1;
     }
-    
+
     let formula = getSetting('setting_formula');
-    if(formula == "logarithmic") { // Log                                                           
-        return maxCount>1?(Math.log(count) / Math.log(maxCount)*maxSize):1;
+    if(formula == "logarithmic") {
+        return maxCount > 1 ? (Math.log(count) / Math.log(maxCount) * maxSize) : (maxSize > 0 ? maxSize : 1); // Ensure result is at least 1 if maxSize is positive
     }
-    else if(formula == "unweighted") { // Unweighted
-        return maxSize;                                          
-    }else {  // Linear
-        return (maxCount>0)?((count/maxCount)* maxSize):1 ; 
-    }       
+    else if(formula == "unweighted") {
+        return maxSize;
+    }else {  // Linear (default)
+        return (maxCount > 0) ? ((count / maxCount) * maxSize) : (maxSize > 0 ? maxSize : 1) ; // Ensure result is at least 1 if maxSize is positive
+    }
 }
 
-/** Returns the line length */
-function getLineLength(record) {
+/**
+ * Returns the configured line length for links.
+ * This is a simple getter, but could be extended if line length becomes dynamic.
+ * @param {object} record - (Currently unused) The record data, potentially for dynamic length.
+ * @returns {number} The line length.
+ */
+function getLineLength(record) { // record parameter is not used here, but kept for potential future use.
     return getSetting('setting_linelength',200);
 }
 
-/** Calculates the line width that should be used */
+/**
+ * Calculates the stroke width for a link based on its target count and current settings.
+ * @param {number} count - The target count of the link.
+ * @returns {number} The calculated line width, minimum 1.
+ */
 function getLineWidth(count) {
-
     count = Number(count);
     let maxWidth = Number(getSetting('setting_linewidth', 3));
-    
-    let maxSize = 1;
-    if(maxWidth>maxLinkWidth) {maxSize = maxLinkWidth;}
-    if(maxWidth<1) {maxSize = 1;}
-    
-    if(count > maxCountForLinks) {
-        maxCountForLinks = count;
-    }
-    
-    let val = (count==0)?0:executeFormula(count, maxCountForLinks, maxWidth);
-    if(val<1) val = 1;
-    return val;
-}            
 
-/** Calculates the marker width that should be used */
-function getMarkerWidth(count) {
-    if(isNaN(count)) count = 0;
-    return 4 + getLineWidth(count)*10;
+    // let maxSize = 1; // This variable was misleading, it should be based on maxWidth
+    // if(maxWidth > maxLinkWidth) {maxSize = maxLinkWidth;}
+    // if(maxWidth < 1) {maxSize = 1;}
+    // Use maxWidth directly, clamped by maxLinkWidth
+    let effectiveMaxWidth = Math.min(maxWidth, window.maxLinkWidth);
+    if (effectiveMaxWidth < 1) effectiveMaxWidth = 1;
+
+
+    if(count > maxCountForLinks && maxCountForLinks > 0) { // Only update if count is greater AND maxCountForLinks is not 0 (initial state)
+        // This seems like a side effect that should ideally be handled elsewhere,
+        // e.g., when data is first processed.
+        maxCountForLinks = count; // Potentially problematic if called during rendering loop with fluctuating counts
+    }
+
+    let val = (count==0 && getSetting('setting_line_empty_link', 1) == 0) ? 0 : executeFormula(count, maxCountForLinks, effectiveMaxWidth);
+    if(val<1 && !(count==0 && getSetting('setting_line_empty_link', 1) == 0)) val = 1; // Ensure minimum width of 1 unless it's an explicitly hidden empty link
+    return val;
 }
 
-/** Calculates the entity raadius that should be used */
+/**
+ * Calculates the width/height for link arrowhead markers based on the link's target count.
+ * @param {number} count - The target count of the link.
+ * @returns {number} The calculated marker size.
+ */
+function getMarkerWidth(count) {
+    if(isNaN(count)) count = 0;
+    return 4 + getLineWidth(count)*10; // Marker size scales with line width
+}
+
+/**
+ * Calculates the radius for an entity node based on its count and current settings.
+ * @param {number} count - The count associated with the node.
+ * @returns {number} The calculated radius. Returns 0 if count is 0 and formula is not 'unweighted'.
+ */
 function getEntityRadius(count) {
     
     let maxRadius = getSetting('setting_entityradius');
@@ -761,7 +819,7 @@ function addMarkerDefinitions() {
            .attr("cy", 5)
            .attr("r", 5)
            .style("fill", "darkgray");
-		   
+           
     markers.append("svg:marker") // Text, for self linking nodes
            .attr("id", "self-link")
            .attr("markerWidth", 10)

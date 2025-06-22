@@ -1,28 +1,39 @@
 <?php
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 /**
-* General viewer for user's Heurist record
-*
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  Records/View
-*/
-if(!defined('PDIR')) {define('PDIR','../../');}//need for proper path to js and css
+ * renderRecordData.php - General viewer for Heurist records.
+ *
+ * @fileOverview This script is responsible for fetching and displaying the details of a Heurist record.
+ * It handles various display contexts, such as standard record view, map popups, and print views.
+ * The script retrieves record data, including its fields, relationships, and associated files (media).
+ * It respects user permissions and visibility settings for records and their details.
+ * It also includes functionality for displaying personal and workgroup tags, ratings,
+ * and provides links for editing and citing the record.
+ *
+ * Key functionalities:
+ * - Initializes the Heurist system and required libraries.
+ * - Retrieves record information based on `recID` or bookmark ID (`bkmk_id`).
+ * - Handles different layout parameters (`ll`, `noclutter`, `mapPopup`, `noheader`, `privateDetails`, `hideImages`, `fontsize`).
+ * - Displays public details, relationship details, and linked record details.
+ * - Optionally displays private details (ownership, dates, tags, ratings) based on user preferences and permissions.
+ * - Manages the display of media files (thumbnails, players, download links) associated with the record.
+ * - Implements client-side JavaScript for interactions like image zooming, local time display, and opening linked records.
+ * - Supports localization for term labels and potentially other content.
+ * - Provides helper functions for outputting record information in a structured HTML format.
+ *
+ * @package     Heurist academic knowledge management system
+ * @subpackage  viewers\record
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Tom Murtagh
+ * @author      Kim Jackson
+ * @author      Stephen White
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson ian.johnson.heurist@gmail.com
+ * @since       3.1.0
+ */
+
+if(!defined('PDIR')) {define('PDIR','../../');} //need for proper path to js and css
 
 use hserv\utilities\USanitize;
 use hserv\utilities\Temporal;

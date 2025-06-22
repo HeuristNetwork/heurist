@@ -1,28 +1,26 @@
-
 /**
-* gephi.js: Functions to download the displayed nodes in GEPHI format
+* gephi.js - Functions to download the displayed nodes in GEPHI format
 *
+* @fileOverview This file contains functions to transform the current visualization data
+* into the GEXF (Gephi Exchange Format) and initiate a download for the user.
 * @package     Heurist academic knowledge management system
+* @subpackage  /viewers/visualize
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
+* @since       4
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 /* global settings */
 
- // Functions to download the displayed nodes in GEPHI format.
-
-/** Transforms the visualisation into Gephi format */
+/**
+ * Transforms the current visualization data into GEXF (Gephi Exchange Format)
+ * and initiates a download of the .gexf file.
+ * The function constructs an XML string representing the graph's nodes, edges,
+ * and their attributes, then triggers a browser download.
+ */
 function getGephiFormat() {
     // Get data
     let data = settings.getData.call(this, settings.data);

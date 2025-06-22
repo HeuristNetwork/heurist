@@ -1,29 +1,30 @@
 <?php
-
 /**
-* longOperationInit.php:
+* longOperationInit.php - Wrapper for initiating long-running verification/rebuild operations.
 *
-* iframe (wait) wrapper for listUploadedFilesErrors,rebuildRecordTitles,
-* rebuildCalculatedFields and checkRecURL
+* @fileOverview This script acts as an iframe wrapper to display a "waiting" message
+*               while another, potentially long-running, script executes. It is used to
+*               initiate operations such as:
+*               - `listUploadedFilesErrors.php`
+*               - `rebuildRecordTitles.php`
+*               - `rebuildCalculatedFields.php`
+*               - `checkRecURL.php`
+*               - `rebuildEntryMasks.php`
+*               It takes a `type` parameter to determine which script to load into the iframe
+*               and passes along `db` and optional `recTypeIDs` parameters.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.1.0
+* @since       3.1.0
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 set_time_limit(0);
 
 $recTypeIDs = (@$_REQUEST['recTypeIDs']!=null)?htmlspecialchars($_REQUEST['recTypeIDs']):null;

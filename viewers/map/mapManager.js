@@ -1,28 +1,36 @@
 /**
-* mapManager.js - manage layers and proejcts - map legend
-* 
-* Manager control - map legend
-* Addmapdoc control - addition of new record with type "Map Document"
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
-*/
+ * mapManager.js - Manages layers, map documents (projects), and the map legend.
+ *
+ * @fileOverview This script provides the HMapManager class and associated Leaflet controls
+ * for managing the map legend, including base maps, map documents, and search result sets.
+ * It allows users to toggle the visibility of these items, create new map documents,
+ * and interact with individual layers within map documents (e.g., zoom, edit symbology).
+ * It uses an accordion-style layout for different sections of the legend and integrates
+ * with `hMapDocument.js` for handling map document data.
+ * @package     Heurist academic knowledge management system
+ * @subpackage  viewers\map
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov <osmakov@gmail.com>
+ * @author      Ian Johnson ian.johnson.heurist@gmail.com
+ * @since       4
+ */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-/* global L, hMapDocument */
+/* global L, hMapDocument */ // Leaflet and hMapDocument are expected to be globally available.
 
+/**
+ * Leaflet Control for the main map legend/manager panel.
+ * This control provides a container for the legend and handles its basic UI (resizing).
+ * @class L.Control.Manager
+ * @augments L.Control
+ */
 L.Control.Manager = L.Control.extend({
+    /**
+     * Called when the control is added to the map. Creates the container element.
+     * @param {L.Map} map - The Leaflet map instance.
+     * @returns {HTMLElement} The control's container element.
+     */
     onAdd: function(map) {
         
         let container = this._container = L.DomUtil.create('div','leaflet-bar');

@@ -1,30 +1,24 @@
 <?php
-
 /**
-* cleanupFoldersDBs.php - cleanup temporary and logs from database folder
+* cleanupFoldersDBs.php - Cleans up temporary files, logs, and other non-essential data from database filestore folders.
 *
-* Remove contents of scratch
-* Remove content of backup
-* Remove documentation and templates
-* Remove all files from root (except index.html)
-*
-* Runs from shell and from Server Manager menu
+* @fileOverview This script performs cleanup operations on the filestore directories associated with
+*               Heurist databases. Actions include:
+*               - Removing contents of 'scratch' and 'backup' subdirectories.
+*               - Removing 'documentation' and 'templates' subdirectories.
+*               - Removing most files from the root of each database's filestore (except 'index.html').
+*               - Trimming old entries from 'userInteraction.log' files (older than 1 week).
+*               The script can be run from the shell (with `-purge` for action, `-report` for reporting only)
+*               or via the Server Manager menu (which typically runs in report mode first, then allows purge).
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @since       6
 */
 
 // Default values for arguments
@@ -359,6 +353,14 @@ if(!$is_command_line) {print '</body></html>';}
 //
 //
 //
+/**
+ * Lists the content of a directory and calculates its total size.
+ * This function is primarily used for reporting purposes when the script is run from a web browser.
+ *
+ * @param string $dir The path to the directory.
+ * @return array{0: int, 1: string} An array where the first element is the total size of files in the directory (integer),
+ *                                  and the second element is an HTML string representing a table of the directory contents.
+ */
 function listFolderContent($dir){
 
     $size = 0;

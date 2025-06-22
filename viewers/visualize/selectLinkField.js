@@ -1,40 +1,45 @@
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+/**
+* selectLinkField.js - Selects or creates a link field type (pointer or relationship marker) and adds it to a record type structure.
+*
+* @fileOverview This script provides the user interface and logic for selecting an existing
+* link field (record pointer or relationship marker) or creating a new one to connect
+* two record types within the Heurist database structure visualization.
+* It is typically displayed in a dialog when a user initiates a new link between two record type nodes.
+* @package     Heurist academic knowledge management system
+* @subpackage  /viewers/visualize
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Stephen White
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
+* @since       3.1.0
 */
 
 /**
-* selectLinkField.js
-* selects link field type (pointer or relationship marker) and add it recordtype structure
-*
-* @author      Tom Murtagh
-* @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
-* @author      Stephen White
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-*/
-function SelectLinkField() 
+ * Initializes the SelectLinkField interface and its event handlers.
+ * This function is the main entry point for the script.
+ * It sets up UI elements, retrieves parameters (source and target record type IDs),
+ * populates selectors, and handles user interactions for selecting or creating link fields.
+ */
+function SelectLinkField()
 {
 
-        let rty_ID, target_ID;
+        /** @type {number|string} rty_ID - The ID of the source record type to which the new field will be added. */
+        let rty_ID;
+        /** @type {number|string} target_ID - The ID of the target record type for the link. */
+        let target_ID;
 
-        window.hWin.HEURIST4.ui.initHelper( { button:$('#hint_more_info1'), 
-                            title:'Link types', 
+        window.hWin.HEURIST4.ui.initHelper( { button:$('#hint_more_info1'),
+                            title:'Link types',
                             url: window.hWin.HRes('link_types #content_body'),
-                            position:{ my: "left top", at: "left top", of:$(window.frameElement)}, no_init:true} ); 
-	    
+                            position:{ my: "left top", at: "left top", of:$(window.frameElement)}, no_init:true} );
+
         $('#btnSelect').button().addClass('ui-button-action').on('click', _editDetailType );
 
-        //rectype new field to be added to
+        // Record type new field to be added to
         rty_ID = window.hWin.HEURIST4.util.getUrlParameter("source_ID", document.location.search);
         //rectype to be related (constraint for pointers and relmarker target rectype)
         target_ID = window.hWin.HEURIST4.util.getUrlParameter("target_ID", document.location.search);
@@ -118,9 +123,15 @@ function SelectLinkField()
         rt_selector2.hSelect('refresh');
         rt_selector2.trigger('change');
 
-        
-    //    
-    function _getLinkFields(){    
+
+    /**
+     * Populates the selectors for existing resource (pointer) and relmarker fields
+     * that can link the source record type (`rty_ID`) to the `target_ID`.
+     * It filters available detail types based on whether they already target `target_ID`
+     * and marks them as disabled if they are already in use by `rty_ID` with the same name.
+     * @private
+     */
+    function _getLinkFields(){
         //find existing field types that already refer target_ID
         let dty_ID;
 
@@ -178,17 +189,20 @@ function SelectLinkField()
         window.hWin.HEURIST4.ui.createSelector($('#sel_resource_fields')[0], aPointers);
         window.hWin.HEURIST4.ui.createSelector($('#sel_relmarker_fields')[0], aRelMarkers);
 
-        _updateUI();        
+        _updateUI();
     }
 
-    //
-    //
-    //
+    /**
+     * Handles the action when the 'Select' button is clicked.
+     * If an existing field is chosen, it calls `_addDetailToRtyStructure`.
+     * If 'add new field' is chosen, it opens a dialog to define a new detail type.
+     * @private
+     */
     function _editDetailType(){
 
         let dt_type = $('input[name="ft_type"]:checked').val();
         let dty_ID = 0;
-        
+
         if(!$('#t_add_new_field').is(':checked')){
             if(dt_type=='resource'){
                 dty_ID = $('#sel_resource_fields').val();
@@ -199,7 +213,7 @@ function SelectLinkField()
                 window.hWin.HEURIST4.msg.showMsgFlash('Select field to be added');
                 return;
             }
-            
+
         }
 
         if(dty_ID>0){ //add already existing field type
@@ -207,10 +221,10 @@ function SelectLinkField()
             _addDetailToRtyStructure(dty_ID, 0);
 
         }else{ //create new field type
-        
+
             let popup_options = {
                 select_mode: 'manager',
-                edit_mode: 'editonly', //only edit form is visible, list is hidden
+                edit_mode: 'editonly', // only edit form is visible, list is hidden
                 rec_ID: -1,
                 title: 'Define new ' + $Db.baseFieldType[dt_type]+ ' field for '+$Db.rty(rty_ID,'rty_Name'),
                 newFieldForRtyID: rty_ID,
@@ -230,20 +244,25 @@ function SelectLinkField()
         }
     }
 
-    //
-    //
-    //    
+    /**
+     * Adds a selected or newly created detail type (field) to the structure of the source record type (`rty_ID`).
+     * It constructs a request to save the new record structure element and updates the local cache on success.
+     *
+     * @private
+     * @param {number|string} dty_ID - The ID of the detail type to add.
+     * @param {number} insert_index - The display order for the new field in the record type structure.
+     */
     function _addDetailToRtyStructure(dty_ID, insert_index){
 
         //rty_ID  source rectype id
-        
-        
+
+
         let fields = {
             rst_ID: dty_ID,
-            rst_RecTypeID: rty_ID,  
+            rst_RecTypeID: rty_ID,
             rst_DisplayOrder: insert_index,
             rst_DetailTypeID: dty_ID,
-            //rst_Modified: "2020-03-16 15:31:23"
+            //rst_Modified: "2020-03-16 15:31:23" // Example, not actively set here
             rst_DisplayName: $Db.dty(dty_ID,'dty_Name'),
             rst_DisplayHelpText: $Db.dty(dty_ID,'dty_HelpText'),
             rst_DisplayExtendedDescription: $Db.dty(dty_ID,'dty_ExtendedDescription'),
@@ -304,45 +323,47 @@ function SelectLinkField()
 
     }
 
-    //
-    //
-    //
+    /**
+     * Updates the UI elements based on the current selections (e.g., resource vs. relmarker,
+     * add new vs. use existing). It shows/hides relevant selectors and enables/disables options.
+     * @private
+     */
     function _updateUI(){
-     
+
             let is_resource_selected = $('#t_resourse').is(':checked');
             let is_fields_available = false;
-        
+
             if(is_resource_selected){
                     $('#sel_resource_fields').show();
                     $('#sel_relmarker_fields').hide();
-                    
-                    is_fields_available = 
+
+                    is_fields_available =
                         ($('#sel_resource_fields > option').length>1 ||
                         $('#sel_resource_fields').val()>0)
-                    
+
             }else{
                     $('#sel_resource_fields').hide();
                     $('#sel_relmarker_fields').show();
-                    
-                    is_fields_available = 
+
+                    is_fields_available =
                         ($('#sel_relmarker_fields > option').length>1 ||
                         $('#sel_relmarker_fields').val()>0)
-                    
+
             }
-            
+
             window.hWin.HEURIST4.util.setDisabled($('#t_use_existing_field'), !is_fields_available);
-            
+
             if(!is_fields_available){
                   $('#t_add_new_field').prop('checked', true);
             }
-            
+
             let is_add_new = $('#t_add_new_field').is(':checked');
-            let clr = (is_add_new)?'lightgray':'none';   
+            let clr = (is_add_new)?'lightgray':'none';
             $('#sel_resource_fields').css('background', clr);
             $('#sel_relmarker_fields').css('background', clr);
-            
+
             $('#sel_resource_fields')[0].selectedIndex = 0;
             $('#sel_relmarker_fields')[0].selectedIndex = 0;
     }
-    
-    };  
+
+    };
