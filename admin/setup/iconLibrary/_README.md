@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory serves as a library for icons used within the Heurist setup process. It includes acknowledgement and permission files for icons sourced from Icons8, with actual icon image files organized into subdirectories by size or format (e.g., 16px, 64px, svg).
+This directory serves as a library for icons used for new record types. It includes acknowledgement and permission files for icons sourced from Icons8, with actual icon image files organized into subdirectories by size or format (e.g., 16px, 64px, svg).
 
 ## Key files
 

@@ -1,27 +1,10 @@
-Directory:	/admin/setup/entity
+# Directory: /admin/setup/icons
 
-Overview:
+## Overview
 
-This directory contains images (icons, thumbnails, fullsize) for records of particular tables which are copied to every new database
+This directory holds icons and thumbnails for standatd set of record types and actions. They are copied to datastorage folder for new database.
 
-Updated: 	1st April 2019
+## Subfolders
 
-------------------------------------------------------------------------------------------------------------------------------------------------------
-
-/**
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+- `defRecTypes/`: Contains icons and thumbnails for standatd set of record types.
+- `sysDashboard/`: Contains thumbnails for Heuirst actions (used on dashboard and menu).

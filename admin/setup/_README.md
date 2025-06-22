@@ -2,10 +2,7 @@
 
 ## Overview
 
-This directory contains functions used in setting up new databases, including model directories.
-
-DO NOT FORGET TO ADD ANY NEW MODEL DIRECTORIES TO THE NO-DATA CLONING MECHANISM
-(normal cloning adds everything, but no-data cloning only adds specific directories)
+This directory contains functions used in setting up new databases.
 
 ## Subfolders
 
@@ -13,7 +10,7 @@ DO NOT FORGET TO ADD ANY NEW MODEL DIRECTORIES TO THE NO-DATA CLONING MECHANISM
 - `dboperations/`: This directory contains scripts for various database operations, including daily maintenance (cron jobs), database deletion, resetting demo databases, and managing welcome/notification emails.
 - `dbproperties/`: This directory includes scripts for retrieving database-specific properties, such as version information and registered URLs.
 - `dbupgrade/`: This directory contains scripts and utilities for upgrading Heurist database schemas from one version to another. It includes core logic, batch upgrade tools, and specific version-to-version migration scripts.
-- `iconLibrary/`: This directory serves as a library for icons used within the Heurist setup process. It includes acknowledgement and permission files for icons sourced from Icons8, with actual icon image files organized into subdirectories by size or format (e.g., 16px, 64px, svg).
+- `iconLibrary/`: This directory serves as a library for icons used for new record types.
 
 ## Key files
 

@@ -6,8 +6,8 @@ This directory holds SQL scripts and definition files for creating the fundament
 
 ## Subfolders
 
-- `icons/`: Contains icons potentially used during database creation or for default record types.
-- `smarty-templates/`: This directory contains Smarty template files (.gpl, .tpl) used for generating reports, including basic examples and specific formats like Harvard Bibliography.
+- `icons/`: Contains icons and thumbnails for standatd set of record types and actions.
+- `smarty-templates/`: This directory contains sample Smarty template files (.gpl, .tpl) used for generating reports, including basic examples and specific formats like Harvard Bibliography.
 
 ## Key files
 
@@ -16,4 +16,4 @@ This directory holds SQL scripts and definition files for creating the fundament
 - `addReferentialConstraints.sql`: Script for adding relational constraints in Heurist Vsn 3 Build.
 - `blankDBStructure.sql`: Defines the basic table structure for a new database; requires other SQL scripts in this directory to add functions, procedures, and constraints.
 - `coreDefinitions.txt`: Contains core Heurist definitions, typically used during database creation.
-- `sqlCreateRecLinks.sql`: [Please provide a brief description of this file's purpose.]
+- `sqlCreateRecLinks.sql`: Script for recreating and filling recLinks table - index table for records relations and links
