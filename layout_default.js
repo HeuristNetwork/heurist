@@ -1,11 +1,18 @@
 /**
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
-*/
+ * layout_default.js - Defines default widget and layout configurations for Heurist.
+ *
+ * @fileOverview This file contains the default configurations for widgets (applications)
+ * and layouts used within the Heurist system. These configurations define how different
+ * UI components are structured and behave.
+ * @package Heurist academic knowledge management system
+ * @subpackage /
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 4.0
+ */
 
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
@@ -16,27 +23,22 @@
 */
 
 /**
-* Layout configuration fails  ????? files ????
-* @see js/layout.js
-*
-* @type Array widgets - list of widgets/applications
-* @type Array layouts - list of layouts
-*/
-
-/**
-* List of applications (widgets)
-*  id - unique identificator
-*  name - title
-*  widgetname - name of jquery widget (init function)
-*  script - link to jquery widget file
-*  minsize - array width,height
-*  size   - array width,height
-*  isframe - widget or link will be loaded in iframe
-*  url - link to be loaded (if not widget)
-*
-* @type Array
-*/
-
+ * Defines the list of available widgets (applications) in Heurist.
+ * Each widget object can have properties like:
+ *  - id: Unique identifier for the widget.
+ *  - name: Display name of the widget.
+ *  - widgetname: Name of the jQuery widget initialization function.
+ *  - script: Path to the widget's JavaScript file.
+ *  - minh: Minimum height.
+ *  - minw: Minimum width.
+ *  - size: Default size [width, height].
+ *  - isframe: Boolean, true if the widget or URL should be loaded in an iframe.
+ *  - url: URL to be loaded (if not a widget).
+ *
+ * @see hclient/core/layout.js
+ * @global
+ * @type {Array<Object>}
+ */
 window.hWin.cfg_widgets = [
 
     {id:'heurist_Search', name:'Search', widgetname:'search', script:'hclient/widgets/search/search.js', minh:80, minw:150},
@@ -78,24 +80,23 @@ window.hWin.cfg_widgets = [
 
 ];
 
-
 /**
-entire layout may be divided into 5 panes  : north  west  center  east south
-each pane may have: size, minsize, resizable (true), dropable(false)
-
-each pane contains applications, application may be grouped into tabs
-tab's properties  dockable,dragable,resizable applied to all children applications
-
-dockable - (false) placed into tabcontrol and allows to dock other apps
-if true and not in tabgroup, tabgroup is created by default
-hasheader - (if isdocking false)
-css - list of css parameters - mostly for position
-resizable - (false)
-dragable - (false) it is possible to drag around  otherwise fixed position
-options - parameters to init application
-
-*/
-
+ * Defines the list of available layouts in Heurist.
+ * Each layout object configures the arrangement of panes (north, west, center, east, south)
+ * and the applications (widgets) within them. Properties include:
+ *  - id: Unique identifier for the layout.
+ *  - name: Display name of the layout.
+ *  - theme: Theme to be applied.
+ *  - type: Type of layout (e.g., 'free', 'cardinal').
+ *  - north_pane, west_pane, center_pane, east_pane, south_pane: Objects defining pane properties
+ *    (size, minsize, resizable, dropable, apps within the pane).
+ *  - apps: Array of app configurations within a pane/tab (appid, hasheader, css, options, etc.).
+ *  - tabs: Array of tab configurations if apps are grouped into tabs.
+ *
+ * @see hclient/core/layout.js
+ * @global
+ * @type {Array<Object>}
+ */
 window.hWin.cfg_layouts = [
 
     // Default layout - the standard Heurist interface, used if no parameter provided
