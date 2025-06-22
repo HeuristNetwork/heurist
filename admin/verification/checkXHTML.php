@@ -1,33 +1,25 @@
 <?php
-
-/*
-* Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* https://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
 /**
-* brief description of file
+* checkXHTML.php - Validates XHTML content in WYSIWYG fields.
 *
+* @fileOverview This script checks WYSIWYG text data (typically stored in `woot_Chunks` table,
+*               representing content from personal notes, public notes, blog posts, etc.)
+*               for invalid XHTML markup. It uses the external `xmllint` command-line tool
+*               to perform the validation. The output is an HTML page listing any
+*               woot entries that contain invalid XHTML, along with the error messages
+*               from `xmllint`.
+*               Requires manager-level access.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
 * @author      Stephen White
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
+* @since       3.1.0
 */
 
 define('MANAGER_REQUIRED',1);
@@ -94,6 +86,13 @@ if($res){
                     }
                 }
 
+                /**
+                 * Checks if the given HTML string is valid XHTML using xmllint.
+                 *
+                 * @param string $html The HTML string to validate.
+                 * @return string|int Returns 0 if the HTML is valid XHTML, otherwise returns
+                 *                    a string containing the error output from xmllint.
+                 */
                 function check($html) {
 
                     $descriptorspec = array(

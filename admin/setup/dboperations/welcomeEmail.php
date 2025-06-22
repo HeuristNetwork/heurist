@@ -1,24 +1,34 @@
 <?php
 /**
-* welcomeEmail.php: mails for new and cloned database
+* welcomeEmail.php - Handles sending welcome and notification emails related to database operations.
+*
+* @fileOverview This file contains functions to send standardized emails for events such
+*               as new database creation, database cloning, and database deletion/archiving.
+*               It uses HTML templates for welcome emails and includes attachments.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/setup/dboperations
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       4.0
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 
+
+/**
+ * Sends a welcome email to a user when a new database is created or cloned.
+ * The email includes user details, database URL, and an attachment.
+ *
+ * @param array       $user_record     Associative array containing user details:
+ *                                     'ugr_FirstName', 'ugr_LastName', 'ugr_eMail',
+ *                                     'ugr_Organisation', 'ugr_Interests'.
+ * @param string      $database_name   The name of the new or cloned database.
+ * @param string|null $source_database The name of the source database if this was a clone operation, otherwise null.
+ * @return mixed The result of the underlying `sendEmail` function (e.g., boolean for success/failure).
+ */
 function sendEmailNewDatabase($user_record, $database_name, $source_database){
 
     $fullName = $user_record['ugr_FirstName'].' '.$user_record['ugr_LastName'];
@@ -65,9 +75,14 @@ function sendEmailNewDatabase($user_record, $database_name, $source_database){
                                                     true, dirname(__FILE__).'/Heurist Welcome attachment.pdf');
 }
 
-//
-//
-//
+/**
+ * Sends an email notification to a database owner when their database has been archived/deleted.
+ *
+ * @param array  $usr_owner     Associative array containing the owner's user details:
+ *                              'ugr_FirstName', 'ugr_LastName', 'ugr_eMail'.
+ * @param string $database_name The name of the database that has been archived or deleted.
+ * @return void
+ */
 function sendEmailDatabaseDelete($usr_owner, $database_name){
 
                     $server_name = HEURIST_SERVER_NAME;

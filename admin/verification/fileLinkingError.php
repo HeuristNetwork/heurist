@@ -1,9 +1,21 @@
 <?php
-
 /**
-* Lists orphaned and missed files, broken paths
+* fileLinkingError.php - Checks for errors in uploaded file records and paths.
+*
+* @fileOverview This script iterates through all databases and their `recUploadedFiles` entries
+*               to identify various file linking issues:
+*               - **Orphaned files:** Files in `recUploadedFiles` that are not referenced by any
+*                 record in `recDetails`.
+*               - **Missing files:** Files referenced in `recUploadedFiles` but not found at their
+*                 specified path in the filesystem.
+*               - **Incorrect paths:** Files where the stored `ulf_FilePath` does not match the
+*                 actual relative path of the file in the filestore.
+*               The script outputs an HTML report detailing these errors for each database.
+*               It also generates a log file (`missed_files.log`) for missing files.
+*               Requires owner-level access.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Tom Murtagh
@@ -11,16 +23,9 @@
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.1.0
+* @since       3.1.0
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
 ini_set('max_execution_time', '0');
 
 define('OWNER_REQUIRED',1);

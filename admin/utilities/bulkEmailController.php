@@ -1,23 +1,22 @@
 <?php
-
 /**
-*  Email Users of any Heurist database located on this server, requires a Heurist Database + System Administrator password
-*  For server calls from main form
+* bulkEmailController.php - Handles server-side logic for the bulk email utility.
+*
+* @fileOverview This script acts as the controller for the bulk email functionality.
+*               It processes AJAX requests from the `bulkEmailMain.php` interface.
+*               Operations include listing databases, filtering databases based on criteria
+*               (record count, last modification date), counting users based on roles,
+*               retrieving email template details, and initiating the email sending process
+*               via `bulkEmailSystem.php`. Most actions require System Administrator privileges.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Brandon McKay   <blmckay13@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6.0
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Brandon McKay <blmckay13@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       6.0
 */
 
 define('PDIR','../../');//need for proper path to js and css
@@ -29,6 +28,18 @@ require_once dirname(__FILE__).'/../../autoload.php';
 
 header(CTYPE_JSON);
 
+/**
+ * Controller class for handling bulk email operations.
+ *
+ * This class processes requests from the bulk email interface, interacts with
+ * the Heurist system and database, and prepares JSON responses.
+ *
+ * @property hserv\System $system The Heurist system object.
+ * @property array $request Sanitized input request parameters.
+ * @property array $allowedAction List of valid actions for the controller.
+ * @property string|null $sysadminPWD System administrator password from request.
+ * @property array|string|null $response The response to be sent to the client.
+ */
 class BulkEmailController{
 
     private $system;
@@ -38,6 +49,13 @@ class BulkEmailController{
     private $sysadminPWD;
     private $response;
 
+    /**
+     * Constructor for BulkEmailController.
+     *
+     * Initializes the controller, sanitizes input, and sets up the Heurist system object.
+     *
+     * @param hserv\System $system The Heurist system object.
+     */
     public function __construct($system){
 
         $this->sysadminPWD = USanitize::getAdminPwd('pwd');
@@ -54,6 +72,14 @@ class BulkEmailController{
         }
     }
 
+    /**
+     * Runs the requested action based on the 'a' parameter in the request.
+     *
+     * This is the main entry point for routing actions within the controller.
+     * It sets time limits and calls the appropriate private method for the action.
+     *
+     * @return void
+     */
     public function run(){
 
         if(!empty($this->response)){
@@ -98,6 +124,17 @@ class BulkEmailController{
         }
     }
 
+    /**
+     * Retrieves a list of databases, optionally filtered by criteria.
+     *
+     * If 'db_filtering' is 'all', it fetches details for all available databases.
+     * If 'db_filtering' is an array (with count, lastmod_logic, lastmod_period, lastmod_unit),
+     * it filters the databases accordingly.
+     * Sets $this->response with the list of databases and their details.
+     *
+     * @access private
+     * @return void
+     */
     private function getDatabases(){
 
         $mysqli = $this->system->getMysqli();
@@ -122,6 +159,16 @@ class BulkEmailController{
         $this->response = ['status' => HEURIST_OK, 'data' => $data, 'request' => $dbRequest];
     }
 
+    /**
+     * Gets a list of all available and valid Heurist databases on the server.
+     *
+     * A database is considered valid if it starts with HEURIST_DB_PREFIX,
+     * has a schema version >= 1.3.0, and contains the required tables
+     * ('Records', 'recDetails', 'sysUGrps', 'sysUsrGrpLinks').
+     *
+     * @access private
+     * @return array<string> An array of valid database names.
+     */
     private function getAvailableDatabases(){
 
         $mysqli = $this->system->getMysqli();
@@ -172,6 +219,15 @@ class BulkEmailController{
         return $dbList;
     }
 
+    /**
+     * Gets the total record count for each database in the provided list.
+     *
+     * Sets $this->response with an associative array where keys are database names
+     * and values are their record counts (or 'error' if retrieval fails).
+     *
+     * @access private
+     * @return void
+     */
     private function getRecordCount(){
 
         $mysqli = $this->system->getMysqli();
@@ -205,6 +261,15 @@ class BulkEmailController{
         $this->response = ['status' => HEURIST_OK, 'data' => $data, 'request' => implode(',', $dbList)];
     }
 
+    /**
+     * Gets the count of distinct users across the specified databases, based on user type.
+     *
+     * User types can be 'owner', 'manager', 'admin', or 'user'.
+     * Sets $this->response with the total count of distinct users.
+     *
+     * @access private
+     * @return void
+     */
     private function getUserCount(){
 
         $mysqli = $this->system->getMysqli();
@@ -293,6 +358,15 @@ class BulkEmailController{
         $this->response = ['status' => HEURIST_OK, 'data' => $data, 'request' => $userRequest];
     }
 
+    /**
+     * Retrieves the title and body (short summary) for a specified Email record ID.
+     *
+     * Uses ConceptCodes '2-1' (Title/Name) and '2-3' (Short Summary).
+     * Sets $this->response with an array containing the email title and body.
+     *
+     * @access private
+     * @return void
+     */
     private function getEmailDetails(){
 
         $mysqli = $this->system->getMysqli();
@@ -340,6 +414,17 @@ class BulkEmailController{
         $this->response = ['status' => HEURIST_OK, 'data' => [$emailTitle, $emailBody], 'request' => $id];
     }
 
+    /**
+     * Initiates the email sending process.
+     *
+     * Verifies required parameters and the system administrator password.
+     * If valid, it includes `bulkEmailSystem.php` and calls `sendSystemEmail` to handle the actual sending.
+     * Sets $this->response with the result from `sendSystemEmail`.
+     *
+     * @access private
+     * @global string $passwordForServerFunctions The password required for server functions, defined in heuristConfigIni.php.
+     * @return void
+     */
     private function sendEmails(){
 
         global $passwordForServerFunctions;
@@ -357,6 +442,18 @@ class BulkEmailController{
         $this->response = sendSystemEmail($this->request);
     }
 
+    /**
+     * Retrieves the progress or result of an email sending session.
+     *
+     * Uses `mysql__update_progress` to get the session status. If the session is complete
+     * or terminated, it removes the session progress indicator.
+     * Sets $this->response based on the session status.
+     * REMARK: This method relies on `mysql__update_progress` to eventually populate
+     *         `$this->response` or indicate termination.
+     *
+     * @access private
+     * @return void
+     */
     private function getSessionResult(){
 
         if(!isset($this->request['session'])){
@@ -375,6 +472,12 @@ class BulkEmailController{
         }
     }
 
+    /**
+     * Prints the JSON encoded response and optionally exits.
+     *
+     * @param bool $exit If true, the script will exit after printing the response. Defaults to true.
+     * @return void
+     */
     public function printOutput($exit = true){
 
         if(empty($this->response)){
@@ -395,10 +498,24 @@ class BulkEmailController{
         }
     }
 
+    /**
+     * Gets the current response data.
+     *
+     * @return array|string|null The response data, which may be an array, a JSON string, or null.
+     */
     public function getOutput(){
         return $this->response;
     }
 
+    /**
+     * Filters a list of databases based on record count and last modification date criteria.
+     *
+     * Criteria are provided in `$this->request['db_filtering']`.
+     *
+     * @access private
+     * @param array<string> $dbList The initial list of database names to filter.
+     * @return array<string> The filtered list of database names.
+     */
     private function filterDatabases($dbList){
 
         $mysqli = $this->system->getMysqli();
@@ -450,9 +567,18 @@ class BulkEmailController{
         return $data;
     }
 
-    //
-    // Retrieve the record count and last update (record or structure, depending on which is newer)
-    //
+    /**
+     * Retrieve the record count and last update (record or structure, whichever is newer) for a list of databases.
+     *
+     * @access private
+     * @param \mysqli $mysqli The mysqli connection object.
+     * @param array<string> $dbList An array of database names (prefixed with HEURIST_DB_PREFIX).
+     * @return array<array<string, mixed>> An array of associative arrays, where each inner array contains:
+     *                                     'name' (string) - The database name (without prefix).
+     *                                     'rec_count' (int) - The number of non-temporary records.
+     *                                     'last_update' (string|null) - The date of the last update (YYYY-MM-DD),
+     *                                                                  or null if no updates found.
+     */
     private function getDatabaseDetails($mysqli, $dbList){
 
         $details = [];

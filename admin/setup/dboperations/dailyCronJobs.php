@@ -1,37 +1,29 @@
 <?php
 
 /**
-* Script is run by daily cronjob
-* It performs the following actions
+* dailyCronJobs.php - Performs daily maintenance tasks for Heurist databases.
 *
-* parameters:
-* 1. reminder   Send record remainders sepcified in usrReminders
-* 2. report     Updates reports by schedule specified in usrReportSchedule
-* 3. url        Checks that rec_URL and URL like values are valid, database is skipped if sys_URLCheckFlag is set to false
+* @fileOverview This script is designed to be run by a daily cron job. It can perform several actions:
+*               1. `reminder`: Sends record reminders as specified in `usrReminders`.
+*               2. `report`: Updates reports based on schedules in `usrReportSchedule`.
+*               3. `url`: Checks if `rec_URL` and URL-like values are valid (database is skipped if `sys_URLCheckFlag` is false).
 *
-* Databases in HEURIST/databases_exclude_cronjobs.txt are ignored
-*
-* Runs from shell only
-*
-* in heuristConfigIni.php define $serverName
-* if (!@$serverName && php_sapi_name() == 'cli') {$serverName = 'heuristref.net';}
+*               Databases listed in `HEURIST/databases_exclude_cronjobs.txt` are ignored.
+*               This script is intended to be run from the shell only.
+*               It may require `$serverName` to be defined in `heuristConfigIni.php`, e.g.:
+*               `if (!@$serverName && php_sapi_name() == 'cli') {$serverName = 'heuristref.net';}`
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/setup/dboperations
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6
+* @since       6
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 // Default values for arguments
 $arg_no_action = true;
@@ -394,8 +386,13 @@ if($errors>0){
 }
 
 
-
-
+/**
+ * Reads a list of database names from 'databases_exclude_cronjobs.txt' to be excluded from cron operations.
+ * The file is expected to be in the root directory of the Heurist installation (four levels up from this script).
+ * Lines starting with '#' or empty lines are ignored.
+ *
+ * @return array<string> An array of database names to exclude. Returns an empty array if the file doesn't exist or is empty.
+ */
 function exclusionList(){
 
     $res = array();

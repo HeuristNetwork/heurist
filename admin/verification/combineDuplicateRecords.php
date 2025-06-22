@@ -1,34 +1,33 @@
 <?php
-
-/*
-* Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* https://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
 /**
-* combineDuplicateRecords.php - merge given list of records (by ids)
-* dependcy - titleMask
+* combineDuplicateRecords.php - Merges a given list of duplicate records into a single master record.
 *
+* @fileOverview This script provides an interface for users to combine multiple Heurist records,
+*               identified as duplicates, into one master record. The user selects which record
+*               to keep as the master and can then choose which details from the duplicate records
+*               to merge into the master.
+*               The process involves:
+*               - Displaying all records with their details.
+*               - Allowing selection of a master record.
+*               - Allowing selection of details to keep/merge from duplicates.
+*               - Updating the master record with selected details.
+*               - Transferring bookmarks, tags, and relationships from duplicate records to the master.
+*               - Forwarding references from deleted duplicate records to the master record.
+*               - Deleting the duplicate records.
+*               Requires login and appropriate permissions (create/delete records).
+*               It has a dependency on the titleMask functionality for updating the master record's title.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
 * @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
+* @since       3.1.0
 */
 
 // Add checks for required access + permission
@@ -665,6 +664,20 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
 
 <?php
 
+/**
+ * Generates HTML input elements (checkboxes or radio buttons) for selecting details to merge.
+ *
+ * @global mysqli $mysqli The mysqli database connection object.
+ * @param array $detail An array of detail values for a specific detail type from a single record. Each element
+ *                      is an associative array representing a detail instance (dtl_ID, dtl_DetailTypeID, dtl_Value, etc.).
+ * @param int $repeatCount The maximum number of values allowed for this detail type (0 for unlimited, 1 for single-value).
+ * @param bool $is_master True if the current record being processed is the master record.
+ * @param bool $use_checkbox Optional. If true, forces the use of checkboxes even for single-value fields.
+ *                           This is typically used when a master record is missing a mandatory single-value field,
+ *                           allowing selection from a duplicate. Defaults to false.
+ * @return array<string> An array of HTML strings, each representing an input element (checkbox or radio)
+ *                       for a detail value.
+ */
 function detail_get_html_input_str( $detail, $repeatCount, $is_master, $use_checkbox = false ) {
     global $mysqli;
 
@@ -713,6 +726,17 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master, $use_chec
     return $rv;
 }
 
+/**
+ * Generates an HTML link to edit a Heurist record.
+ *
+ * @param int    $rec_id The ID of the record to link to.
+ * @param string $label The text label for the link.
+ * @param bool   $id_only Optional. If true, the link text will be just the record ID,
+ *                        with the full label displayed as a tooltip. Defaults to false.
+ * @param bool   $strip_tags Optional. If true, HTML tags will be stripped from the label
+ *                           before display. Defaults to true.
+ * @return string The HTML anchor (`<a>`) tag.
+ */
 function edit_link($rec_id, $label, $id_only=false, $strip_tags=true){
 
     $link = '<a target="edit" href="'
@@ -731,11 +755,24 @@ function edit_link($rec_id, $label, $id_only=false, $strip_tags=true){
     return $link;
 }
 
-//
-// $rd_type - detail type id or term id
-
-// Artem: Errneus implementation. dty_ID and trm_ID can have the same values!
-//
+/**
+ * Formats a detail value for display, creating links for resource pointers.
+ *
+ * REMARK: Original comment indicates potential issue: "Artem: Errneus implementation. dty_ID and trm_ID can have the same values!"
+ * This means that `$rd_type` might ambiguously refer to either a detail type ID or a term ID if they happen to collide.
+ * The current logic prioritizes checking against `$reference_bdts` (resource pointers) then `$enum_bdts` (terms).
+ *
+ * @global mysqli $mysqli The mysqli database connection object.
+ * @global array  $reference_bdts An associative array where keys are detail type IDs for resource/pointer fields.
+ * @global array  $enum_bdts An associative array where keys are detail type IDs for enumeration/term fields.
+ * @param int    $rd_type The ID of the detail type (or potentially a term ID, see REMARK).
+ * @param mixed  $rd_val The raw value of the detail. This can be a single ID (for pointers/terms),
+ *                       a text string, or an array of IDs/strings for multi-value fields.
+ * @return string|array<string> A string representation of the detail value, suitable for HTML display.
+ *                              If the detail is a resource pointer, it returns an HTML link to edit the target record.
+ *                              If `$rd_val` is an array (for multi-value fields), it returns an array of formatted strings.
+ *                              Values are HTML-escaped where appropriate.
+ */
 function detail_str($rd_type, $rd_val)
 {
     global $mysqli, $reference_bdts, $enum_bdts;
@@ -779,10 +816,29 @@ function detail_str($rd_type, $rd_val)
     return $rd_val;
 }
 
-// ---------------------------------------------- 
-//
-// function to actually fix stuff on form submission
-//
+/**
+ * Performs the actual merge operation after the user has confirmed selections.
+ *
+ * This function handles:
+ * - Updating the master record with selected details from duplicates and its own chosen details.
+ * - Deleting details from the master record that were deselected.
+ * - Transferring/merging bookmarks, tags, and reminders from duplicate records to the master.
+ * - Updating forward references from deleted records to point to the master record.
+ * - Updating incoming resource pointers from other records to point to the master record.
+ * - Deleting the duplicate records.
+ * - Recalculating the title of the master record based on its title mask.
+ * Finally, it redirects the user to a confirmation page.
+ *
+ * @global hserv\System $system The global Heurist System object.
+ * @global mysqli       $mysqli The mysqli database connection object.
+ * @global int          $master_rec_id The ID of the record designated as the master.
+ * @global bool         &$finished_merge Passed by reference. Flag indicating if the merge process has finished (set to true by this function).
+ * @global array        $enum_bdts Associative array of enumeration/term detail type IDs.
+ * @global string       $bib_ids_list Comma-separated string of all record IDs initially involved in the merge.
+ * @global array        $bib_ids Array of record IDs that the user has access to and are part of the merge.
+ * @global bool         $instant_merge Flag indicating if the merge should happen in "instant" mode (less user interaction).
+ * @return void This function outputs a redirect and exits.
+ */
 function do_fix_dupe()
 {
     global $system, $mysqli, $master_rec_id, $finished_merge, $enum_bdts, $bib_ids_list, $bib_ids, $instant_merge;

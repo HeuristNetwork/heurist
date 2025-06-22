@@ -1,22 +1,25 @@
 <?php
 /**
-* downloadInteractionLog.php: Allow the user to filter and download the userInteraction.log as a CSV file
-*   Filters: All, Record Usage, via Dates, via User Workgroups
+* downloadInteractionLog.php - Allows download of the user interaction log as a CSV file, with filtering options.
+*
+* @fileOverview This script provides a user interface for filtering and downloading the
+*               `userInteraction.log` file for the current Heurist database.
+*               Manager-level access is required.
+*               Users can filter the log by:
+*               - Action type (e.g., record usage, website visits, account actions, all).
+*               - Date range or period (e.g., last 3 months).
+*               - User workgroups.
+*               The output is a CSV file with columns: User, Function, Date, Operating System,
+*               Browser, IP Address, Record ID, Resultset Size.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Brandon McKay     <blmckay13@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6
-*/
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
+* @author      Brandon McKay <blmckay13@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       6
 */
 
 define('MANAGER_REQUIRED',1);

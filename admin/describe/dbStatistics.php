@@ -1,23 +1,22 @@
 <?php
 /**
-* dbStatistics: shows a sortable list of databases on the server and their usage (record counts, access dates etc.)
+* dbStatistics.php - Shows a sortable list of databases on the server and their usage.
 *
+* @fileOverview This script generates an HTML page displaying statistics for each database
+*               on the server, such as record counts, modification dates, owner information, etc.
+*               It also provides functionality to export this data as CSV and to delete databases
+*               (if configured and authorized).
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/describe
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     3.2
+* @since       3.2
 */
 
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+
 
 define('ADMIN_PWD_REQUIRED', 1);
 define('MANAGER_REQUIRED',1);
@@ -41,8 +40,11 @@ $dbs = mysql__getdatabases4($mysqli, true, $starts_with);
 $sysadmin = $system->isSystemAdmin();
 
 /**
-* Selects the value after a query
-* @param mixed $query Query to execute
+* Selects a single value from the database using the provided query.
+*
+* @global mysqli $mysqli The mysqli connection object.
+* @param string $query The SQL query to execute.
+* @return mixed|int The value selected, or 0 if null or query fails.
 */
 function mysql__select_val($query) {
     global $mysqli;
@@ -56,14 +58,17 @@ function mysql__select_val($query) {
 /**
 * NOT USED HERE
 *
-* Calculates the directory size
-* @param mixed $dir Directory to check
+* Calculates the directory size.
+* REMARK: The global $mysqli is declared but not used within this function.
 *
+* @global mysqli $mysqli The mysqli connection object (declared but not used).
+* @param string $dir Path to the directory.
+* @return int The size of the directory in bytes.
 * @todo move to utilities/UFile.php
 */
 function dirsize($dir)
 {
-    global $mysqli;
+    global $mysqli; // REMARK: This global variable is not used in the function.
 
     @$dh = opendir($dir);
     $size = 0;
@@ -280,9 +285,10 @@ if($is_csv){
 
         <!-- Table generation script -->
         <script type="text/javascript">
-
-
-            //v2
+            /**
+             * This script handles the DataTable initialization, data formatting,
+             * and the UI interactions for deleting databases.
+             */
             var showTimer,hideTimer;
             var dataSet = [
                 <?php
@@ -308,6 +314,11 @@ if($is_csv){
             columns: null
         };
 
+        /**
+         * Formats a Unix timestamp into a human-readable date string.
+         * @param {number|string} d The Unix timestamp (seconds since epoch).
+         * @returns {string} The formatted date string (YYYY-MM-DD HH:MM:SS) or an empty string if input is invalid.
+         */
         function __format_date(d){
             var val = parseInt(d);
             if(val>0){
@@ -380,6 +391,12 @@ if($is_csv){
                 var databases = [];
                 var password;
 
+                /**
+                 * Event handler for when a database checkbox selection changes.
+                 * Limits the number of selected databases to 25.
+                 * @param {Event} e The click event object.
+                 * @returns {void}
+                 */
                 function _onSelectDeleteDb(e){
                         var sel_cnt = getSelectedDatabases();
                         if(sel_cnt>25){ //25
@@ -391,7 +408,8 @@ if($is_csv){
                 }
 
                 /**
-                * Returns the values of checkboxes that have been selected
+                * Gets the values of checkboxes that have been selected and stores them in the global `databases` array.
+                * @returns {number} The number of selected databases.
                 */
                 function getSelectedDatabases() {
                     this.databases = [];
@@ -407,7 +425,9 @@ if($is_csv){
                 }
 
                 /**
-                * Makes an API call to delete each selected database
+                * Initiates the process of deleting selected databases.
+                * Performs validation and opens a dialog for password verification.
+                * @returns {boolean|void} Returns `false` if validation fails, otherwise `void`.
                 */
                 function deleteDatabases() {
                     // Determine selected databases
@@ -446,7 +466,9 @@ if($is_csv){
                 }
 
                 /**
-                * Checks if the database deletion password is correct
+                * Checks if the provided database deletion password is correct by making an API call.
+                * If correct, proceeds to delete databases. Otherwise, shows an error.
+                * @returns {void}
                 */
                 function checkPassword() {
                     var submit = document.getElementById("pw-check");
@@ -481,7 +503,10 @@ if($is_csv){
                     );
                 }
                 /**
-                * Posts a delete request to the server for the database at the given index
+                * Posts a delete request to the server for the database at the given index.
+                * This function is called recursively to process all selected databases.
+                * @param {number} current_index The index in the `databases` array for the current database to delete.
+                * @returns {void}
                 */
                 function postDeleteRequest(current_index) {
                     if(current_index < databases.length) {
@@ -532,7 +557,9 @@ if($is_csv){
                 }
 
                 /**
-                * Updates the progress bar
+                * Updates the progress bar display during database deletion.
+                * @param {number} count The number of databases processed so far.
+                * @returns {void}
                 */
                 function updateProgress(count) {
                     $(".progress").text(count+"/"+databases.length);

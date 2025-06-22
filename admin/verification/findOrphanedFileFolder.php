@@ -1,29 +1,25 @@
 <?php
-    /*
-    * Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    *
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-    * in compliance with the License. You may obtain a copy of the License at
-    *
-    * https://www.gnu.org/licenses/gpl-3.0.txt
-    *
-    * Unless required by applicable law or agreed to in writing, software distributed under the License
-    * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-    * or implied. See the License for the specific language governing permissions and limitations under
-    * the License.
-    */
-
-    /**
-    * Find orphaned file folders ie without databases
-    *
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @link        https://HeuristNetwork.org
-    * @version     3.1
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @package     Heurist academic knowledge management system
-    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-    */
+/**
+* findOrphanedFileFolder.php - Identifies filestore directories that do not have a corresponding database.
+*
+* @fileOverview This script scans the Heurist filestore root directory and compares the found
+*               subdirectories (potential database filestores) against the list of actual
+*               databases existing in the MySQL server. Any subdirectory in the filestore
+*               that does not have a matching database is considered orphaned.
+*               The script outputs an HTML page listing these orphaned folders and provides
+*               checkboxes to select them for removal. If run with `?mail=1`, it can
+*               email a report of orphaned folders to the admin.
+*               Requires owner-level access and an admin password.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       3.1
+*/
 
 ini_set('max_execution_time', '0');
 

@@ -1,43 +1,53 @@
 <?php
-
-/*
-* Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-* in compliance with the License. You may obtain a copy of the License at
-*
-* https://www.gnu.org/licenses/gpl-3.0.txt
-*
-* Unless required by applicable law or agreed to in writing, software distributed under the License
-* is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-* or implied. See the License for the specific language governing permissions and limitations under
-* the License.
-*/
-
 /**
-* Verify rst_DefaultValue, dty_JsonTermIDTree dty_TermIDTreeNonSelectableIDs dty_PtrTargetRectypeIDs
-* for terms and rectype existance
+* verifyFieldTypes.php - Library of functions to validate field definitions and term configurations.
 *
-* see dbVerify.php
+* @fileOverview This script provides a collection of functions used to verify the integrity of
+*               field (detail type) definitions within a Heurist database. These checks are
+*               often invoked by other administrative scripts like `dbVerify.php`.
+*               Key validations include:
+*               - Ensuring terms specified in `dty_JsonTermIDTree` (for vocabularies/term lists)
+*                 and `dty_TermIDTreeNonSelectableIDs` (for exclusions) actually exist.
+*               - Ensuring record types specified in `dty_PtrTargetRectypeIDs` (for pointer field
+*                 constraints) actually exist.
+*               - Validating `rst_DefaultValue` for resource and enumeration fields to ensure
+*                 the default value points to an existing and valid record/term that respects
+*                 any defined constraints.
+*               - Identifying issues within the term hierarchy itself, such as terms with missing
+*                 parents, missing inverse terms, or duplicate labels at the same hierarchy level.
+*               These functions typically operate on the currently selected database.
 *
-*
+* @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Tom Murtagh
 * @author      Kim Jackson
-* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
 * @author      Stephen White
 * @author      Artem Osmakov   <osmakov@gmail.com>
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @link        https://HeuristNetwork.org
-* @version     3.1.0
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @package     Heurist academic knowledge management system
-* @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
+* @author      Ian Johnson   <ian.johnson.heurist@gmail.com>
+* @since       3.1.0
 */
 global $trmLookup, $rtyNames;
 
 $trmLookup = array();//list of all terms
 $rtyNames = array();//rty_ID=>rty_Name
 
+/**
+ * Initializes global lookup arrays for terms and record type names.
+ *
+ * This function populates `$trmLookup` with all terms from `defTerms` and
+ * `$rtyNames` with all record type IDs and their names from `defRecTypes`.
+ * It's intended to be called once per database context to cache these lookups.
+ *
+ * @global array $trmLookup Array to be populated with term data (trm_ID => term_details_array).
+ * @global array $rtyNames Array to be populated with record type names (rty_ID => rty_Name).
+ * @param \mysqli $mysqli The mysqli database connection object.
+ * @param string|null $type Optional. If 'trm', only initializes term lookup. If 'rty', only initializes
+ *                          record type name lookup. If null or any other value, initializes both.
+ * @return void
+ */
 function initGlobalArr($mysqli, $type=null){
 
     global $trmLookup, $rtyNames;
@@ -55,11 +65,23 @@ function initGlobalArr($mysqli, $type=null){
 }
 
 /**
-* Finds invalid field types ('enum','relationtype','relmarker','resource')
-*
-* @param mixed $mysqli
-* @param mixed $rectype_id
-*/
+ * Finds detail types ('enum', 'relationtype', 'relmarker', 'resource') with invalid configurations.
+ *
+ * This includes checks for:
+ * - Invalid terms in `dty_JsonTermIDTree`.
+ * - Invalid terms in `dty_TermIDTreeNonSelectableIDs`.
+ * - Invalid record type IDs in `dty_PtrTargetRectypeIDs` for pointer fields.
+ *
+ * @global array $trmLookup Global array of all terms, used by `getInvalidTerms`.
+ * @global array $rtyNames Global array of record type names, used by `getInvalidRectypes`.
+ * @param \mysqli $mysqli The mysqli database connection object.
+ * @param int|null $rectype_id Optional. If provided, limits the check to detail types associated
+ *                             with this specific record type via `defRecStructure`. If null, checks all relevant detail types.
+ * @return array An associative array containing lists of detail types with issues:
+ *               - 'terms': Fields with invalid terms in their main term selection tree.
+ *               - 'terms_nonselectable': Fields with invalid terms in their non-selectable list.
+ *               - 'rt_contraints': Pointer fields with invalid record type constraints.
+ */
 function getInvalidFieldTypes($mysqli, $rectype_id){
 
     global $trmLookup, $rtyNames;
@@ -140,9 +162,22 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
                  "rt_contraints"=>$dtysWithInvalidRectypeConstraint);//wrong default values
 }
 
-//
-// Finds and clear wrong default values for record pointer and enum (term) fields
-//
+/**
+ * Finds and clears invalid default values (`rst_DefaultValue`) for record pointer and enum/term fields.
+ *
+ * For 'resource' (pointer) fields, it checks if the default record ID exists and if its record type
+ * matches the field's pointer constraints (`dty_PtrTargetRectypeIDs`).
+ * For 'enum' (term) fields, it checks if the default term ID is valid for the field's
+ * vocabulary (`dty_JsonTermIDTree`).
+ * If an invalid default value is found, it is cleared (set to NULL) in `defRecStructure`.
+ *
+ * @param \mysqli $mysqli The mysqli database connection object.
+ * @param int|null $rectype_id Optional. If provided, limits the check to fields associated
+ *                             with this specific record type. If null, checks fields for all record types.
+ * @return array An associative array with one key:
+ *               - 'rt_defvalues': An array of fields that had invalid default values (which were then cleared).
+ *                                 Each element contains details of the field and the reason for invalidity.
+ */
 function getInvalidDefaultValues($mysqli, $rectype_id=null){
 
     $rtysWithInvalidDefaultValues = array();
@@ -209,10 +244,23 @@ function getInvalidDefaultValues($mysqli, $rectype_id=null){
     return array("rt_defvalues"=>$rtysWithInvalidDefaultValues);//wrong default values
 }
 
-//
-// searches for terms with missed parent and inverse term ids
-// detect duplications on the same level (exact and with numbers)
-//
+/**
+ * Identifies various issues within the term hierarchy (`defTerms`).
+ *
+ * Checks for:
+ * - Terms with `trm_ParentTermID` set to a non-existent parent term.
+ * - Terms with `trm_InverseTermID` set to a non-existent inverse term.
+ * - Duplicate term labels at the same level within a vocabulary (i.e., terms sharing the same parent
+ *   and having the same label, or labels that become identical after removing trailing numbers).
+ *
+ * @global array $trmLookup Global array of all terms, used if not already initialized.
+ * @param \mysqli $mysqli The mysqli database connection object.
+ * @return array An associative array detailing the issues found:
+ *               - 'trm_missed_parents': Array of term IDs with missing parents.
+ *               - 'trm_missed_inverse': Array of term IDs with missing inverse terms.
+ *               - 'trm_dupes': Associative array where keys are parent term IDs and values are arrays
+ *                              of term IDs under that parent which have duplicate labels.
+ */
 function getTermsWithIssues($mysqli){
 
     global $trmLookup;
@@ -282,9 +330,23 @@ function getTermsWithIssues($mysqli){
 }
 
 
-//
-// function that translates all term ids in $formattedStringOfTermIDs to there local/imported value
-//
+/**
+ * Parses a string of term IDs (from `dty_JsonTermIDTree` or `dty_TermIDTreeNonSelectableIDs`)
+ * and identifies any term IDs that do not exist in the `$trmLookup`.
+ *
+ * @global array $trmLookup Global array of all terms, used for validation.
+ * @param string $formattedStringOfTermIDs The string containing term IDs. This can be:
+ *                                         - A JSON object string for hierarchical trees (e.g., `{"1":{"2":{}}}`).
+ *                                         - A single term ID (representing a vocabulary root).
+ *                                         - A JSON array string for flat lists (e.g., `["1","2"]`).
+ * @param bool $is_tree Indicates if `$formattedStringOfTermIDs` represents a hierarchical tree (true)
+ *                      or a flat list/single vocabulary ID (false).
+ * @return array{0: array<int|string>, 1: string} Returns an array where:
+ *                                                 - Index 0: An array of invalid term IDs found.
+ *                                                 - Index 1: A string representation of the valid terms,
+ *                                                            reformatted into the original structure (JSON object/array or single ID).
+ *                                                            Empty if all terms were invalid or input was empty.
+ */
 function getInvalidTerms($formattedStringOfTermIDs, $is_tree) {
     global $trmLookup;
     if(empty($trmLookup)) {
@@ -352,9 +414,18 @@ function getInvalidTerms($formattedStringOfTermIDs, $is_tree) {
     return array($invalidTermIDs, $validStringOfTerms);
 }
 
-//
-//
-//
+/**
+ * Recursively rebuilds a valid term tree string, excluding any invalid term IDs.
+ *
+ * This is a helper function for `getInvalidTerms` when processing hierarchical term structures.
+ *
+ * @param object $termTree A PHP object (decoded from JSON) representing a part of the term tree.
+ *                         Keys are term IDs, and values are objects representing their children.
+ * @param array<int|string> $invalidTermIDs An array of term IDs that have been identified as invalid.
+ * @return string A string representing the valid portion of the term tree, formatted for JSON encoding
+ *                (e.g., `"1":{"2":{}},"3":{}`). Returns an empty string if the input tree part is empty
+ *                or all its terms are invalid.
+ */
 function createValidTermTree($termTree, $invalidTermIDs){
     
     $res = "";
@@ -370,9 +441,18 @@ function createValidTermTree($termTree, $invalidTermIDs){
     return $res==''?'': substr($res,0,-1);
 }
 
-//
-// function that check the existance of all rectype ids in the passed string
-//
+/**
+ * Parses a comma-separated string of record type IDs and identifies any IDs that do not exist.
+ *
+ * Used to validate `dty_PtrTargetRectypeIDs` for pointer fields.
+ *
+ * @global array $rtyNames Global array of record type names (rty_ID => rty_Name), used for validation.
+ * @param string $formattedStringOfRectypeIDs A comma-separated string of record type IDs.
+ * @return array{0: array<int>, 1: string} Returns an array where:
+ *                                          - Index 0: An array of invalid record type IDs found.
+ *                                          - Index 1: A comma-separated string of the valid record type IDs.
+ *                                                     Empty if all IDs were invalid or input was empty.
+ */
 function getInvalidRectypes($formattedStringOfRectypeIDs) {
     global $rtyNames;
 

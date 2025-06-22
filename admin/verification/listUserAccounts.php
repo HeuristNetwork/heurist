@@ -1,25 +1,26 @@
 <?php
-
 /**
-* listUserAccounts.php: All users and which databases they appear in, also listing how many records they and whether they're the db owner
+* listUserAccounts.php - Lists all user accounts across all databases on the server.
+*
+* @fileOverview This script iterates through all Heurist databases on the server and compiles a
+*               comprehensive list of all unique user accounts (based on email address).
+*               For each user, it details which databases they have an account in, the number
+*               of records they own in each of those databases, whether they are the database owner
+*               (user ID 2), and whether they are a database administrator (member of group ID 1
+*               with 'admin' role).
+*               The output is an HTML page with interactive filters for email, and toggles to show/hide
+*               owners and administrators.
+*               Requires an admin password.
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6
+* @since       6
 */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 define('ADMIN_PWD_REQUIRED', 1);
 define('PDIR','../../');//need for proper path to js and css
 

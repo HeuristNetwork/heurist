@@ -1,29 +1,28 @@
 <?php
-    /*
-    * Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    *
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-    * in compliance with the License. You may obtain a copy of the License at
-    *
-    * https://www.gnu.org/licenses/gpl-3.0.txt
-    *
-    * Unless required by applicable law or agreed to in writing, software distributed under the License
-    * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-    * or implied. See the License for the specific language governing permissions and limitations under
-    * the License.
-    */
-
-    /**
-    * fixCmsAbsPaths - replace absolute paths in CMS records to relative
-    *
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @link        https://HeuristNetwork.org
-    * @version     3.1
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @package     Heurist academic knowledge management system
-    * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
-    */
+/**
+* fixCmsAbsPaths.php - Replaces absolute paths with relative paths in Heurist CMS records.
+*
+* @fileOverview This script iterates through all databases and specifically targets CMS-related
+*               record types (identified by originating DB ID 99, types 51 and 52, typically
+*               CMS Homepage and CMS Webpage) and their content fields (detail type from
+*               originating DB ID 2, type 4, typically 'Extended description').
+*               It searches for absolute URLs that match a predefined list of server hostnames
+*               (e.g., heuristref.net, heurist.sydney.edu.au) followed by common Heurist
+*               installation paths (e.g., /HEURIST/, /h5-alpha/) and replaces them with
+*               relative paths (e.g., './'). This helps ensure portability and resilience
+*               of internal links within CMS content if the server or Heurist installation
+*               path changes.
+*               Requires admin password.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
+* @link        https://HeuristNetwork.org
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       6
+*/
 
 define('ADMIN_PWD_REQUIRED',1);
 define('PDIR','../../');//need for proper path to js and css
@@ -57,9 +56,17 @@ print 'Servers: '.implode('<br>',$servers).'<br>';
 
  __correctAbsPaths();
 
-//
-//
-//
+/**
+ * Main function to iterate through databases and correct absolute paths in CMS content.
+ *
+ * It identifies relevant CMS record types and detail types, then uses RecordsBatch::detailsReplace
+ * with a custom callback `replaceAbsPathinCMS` to perform the replacements.
+ *
+ * @global hserv\System $system The Heurist system object.
+ * @global \mysqli $mysqli The mysqli database connection object.
+ * @global array $databases List of database names on the server.
+ * @return void
+ */
 function __correctAbsPaths(){
 
     global $system, $mysqli, $databases;
@@ -117,6 +124,13 @@ function __correctAbsPaths(){
 
 }
 
+/**
+ * Replaces occurrences of a given absolute path regex pattern with a relative path ('./') in the provided text.
+ *
+ * @param string $absPath The regex pattern for the absolute path to find and replace.
+ * @param string &$text   The text content to modify (passed by reference).
+ * @return int The number of replacements made.
+ */
 function replaceAbsPath($absPath, &$text){
 
         $cnt = 0;
@@ -135,7 +149,19 @@ function replaceAbsPath($absPath, &$text){
         return $cnt;
 }
 
-
+/**
+ * Callback function used by RecordsBatch::detailsReplace to modify CMS content.
+ *
+ * This function takes the text value of a CMS detail field and applies a series of
+ * regular expression replacements to convert known absolute Heurist URLs into
+ * relative paths. It iterates through predefined server hostnames and common Heurist
+ * installation directory names.
+ *
+ * @global array $servers An array of regex patterns representing known server hostnames.
+ * @param int    $recID The ID of the CMS record being processed.
+ * @param string $val   The text content of the detail field (e.g., extended description).
+ * @return string The modified text content with absolute paths replaced.
+ */
 function replaceAbsPathinCMS($recID, $val){
 
     global $servers;
