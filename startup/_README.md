@@ -1,19 +1,14 @@
-Directory:    /startup
+# Directory: /startup
 
-Overview:  Setup sequence - register new user, create new database, getting started
+## Overview
 
-Notes:
+This directory contains files related to the setup sequence, including new user registration, new database creation, and getting started guides.
 
-index.php - main script 
-            a) to show Register new user/SetUp new database wizard (from https://heuristserver.tld/ )
-            b) to show list of all databases (in case database not found or db parameter is missed https://heuristserver.tld/heurist/?db= )
-            
-listDatabases.php - returns json array with all databases on server 
-                    or produces page with list of all databases (not used)
+## Key files
 
-gettingStarted.html   - html snippets for inroductory guides on startup and as hints from main menu
-userRegistration.html - html snippets - content of new user registration form
-
-Updated:     12 May 2024
-
----------------------------------------------------------------------
+-   `gettingStarted.html`: Contains HTML snippets for introductory guides, used on startup and as hints from the main menu.
+-   `index.php`: Main script for the startup process. It handles:
+    -   Displaying the "Register new user" / "Set up new database" wizard (accessed from `https://heuristserver.tld/`).
+    -   Displaying a list of all databases if a database is not found or the `db` parameter is missing (accessed from `https://heuristserver.tld/heurist/?db=`).
+-   `listDatabases.php`: Returns a JSON array with all databases on the server. It can also produce a page with a list of all databases.
+-   `userRegistration.html`: Contains HTML snippets for the content of the new user registration form.
