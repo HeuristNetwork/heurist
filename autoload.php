@@ -6,6 +6,7 @@
  * automatically loaded if they are not currently defined. It also includes
  * common scripts such as configuration, constants, database access utilities,
  * and other static utility classes.
+ * 
  * @package Heurist academic knowledge management system
  * @subpackage /
  * @link https://HeuristNetwork.org
