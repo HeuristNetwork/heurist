@@ -1,41 +1,31 @@
 <?php
-
-    /**
-    * rebuildRecordTitles.php - Rebuilds constructed record titles based on their title masks.
-    *
-    * @fileOverview This script recalculates the `rec_Title` for records in a Heurist database
-    *               based on the `rty_TitleMask` defined for their respective record types.
-    *               It can operate on all records or be restricted to specific record types
-    *               (via the `recTypeIDs` parameter).
-    *               The script compares the newly generated title with the existing one and updates
-    *               it if different. It reports counts of total records, updated titles,
-    *               unchanged titles, and titles that would become blank (which are generally
-    *               left unchanged, with an attempt to populate a standard 'Title' field instead
-    *               for relationship records).
-    *               It supports client-side initiation with progress updates via a session ID.
-    *               Requires manager-level access.
-    *
-    * @package     Heurist academic knowledge management system
-    * @subpackage  /admin/verification
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Tom Murtagh
-    * @author      Kim Jackson
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @author      Stephen White
-    * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @since       3.1.0
-    */
-
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
-
+/**
+* rebuildRecordTitles.php - Rebuilds constructed record titles based on their title masks.
+*
+* @fileOverview This script recalculates the `rec_Title` for records in a Heurist database
+*               based on the `rty_TitleMask` defined for their respective record types.
+*               It can operate on all records or be restricted to specific record types
+*               (via the `recTypeIDs` parameter).
+*               The script compares the newly generated title with the existing one and updates
+*               it if different. It reports counts of total records, updated titles,
+*               unchanged titles, and titles that would become blank (which are generally
+*               left unchanged, with an attempt to populate a standard 'Title' field instead
+*               for relationship records).
+*               It supports client-side initiation with progress updates via a session ID.
+*               Requires manager-level access.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Stephen White
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       3.1.0
+*/
 set_time_limit(0);
 
 define('MANGER_REQUIRED',1);

@@ -1,42 +1,27 @@
 <?php
-    /*
-    * Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    *
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-    * in compliance with the License. You may obtain a copy of the License at
-    *
-    * https://www.gnu.org/licenses/gpl-3.0.txt
-    *
-    * Unless required by applicable law or agreed to in writing, software distributed under the License
-    * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-    * or implied. See the License for the specific language governing permissions and limitations under
-    * the License.
-    */
-
-    /**
-    * verifyConceptCodes3.php - Checks for definitions lacking concept codes in registered databases.
-    *
-    * @fileOverview This script iterates through all Heurist databases on the server that have a
-    *               valid `sys_dbRegisteredID`. For these registered databases, it checks record types,
-    *               detail types, and terms to find any that are missing concept codes (i.e., where
-    *               `xxx_OriginatingDBID` or `xxx_IDInOriginatingDB` is empty, null, or zero).
-    *               It also attempts to automatically assign the database's own `sys_dbRegisteredID`
-    *               as the `xxx_OriginatingDBID` if it's currently zero, effectively localizing
-    *               unlinked definitions.
-    *               The script outputs an HTML report listing definitions with missing concept codes,
-    *               grouped by database and definition table.
-    *               Requires admin password.
-    *
-    * @package     Heurist academic knowledge management system
-    * @subpackage  /admin/verification
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @since       3.1
-    */
-
+/**
+* verifyConceptCodes3.php - Checks for definitions lacking concept codes in registered databases.
+*
+* @fileOverview This script iterates through all Heurist databases on the server that have a
+*               valid `sys_dbRegisteredID`. For these registered databases, it checks record types,
+*               detail types, and terms to find any that are missing concept codes (i.e., where
+*               `xxx_OriginatingDBID` or `xxx_IDInOriginatingDB` is empty, null, or zero).
+*               It also attempts to automatically assign the database's own `sys_dbRegisteredID`
+*               as the `xxx_OriginatingDBID` if it's currently zero, effectively localizing
+*               unlinked definitions.
+*               The script outputs an HTML report listing definitions with missing concept codes,
+*               grouped by database and definition table.
+*               Requires admin password.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       3.1
+*/
 define('ADMIN_PWD_REQUIRED', 1);
 define('PDIR','../../');//need for proper path to js and css
 

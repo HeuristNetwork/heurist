@@ -1,44 +1,30 @@
 <?php
-    /*
-    * Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    *
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-    * in compliance with the License. You may obtain a copy of the License at
-    *
-    * https://www.gnu.org/licenses/gpl-3.0.txt
-    *
-    * Unless required by applicable law or agreed to in writing, software distributed under the License
-    * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-    * or implied. See the License for the specific language governing permissions and limitations under
-    * the License.
-    */
-
-    /**
-    * convertTextFieldToFileField.php - Converts a specified text field type to a file field type across databases.
-    *
-    * @fileOverview This script is an administrative utility used to change a specified text-based
-    *               detail type (identified by its concept code) into a file-based detail type.
-    *               For each database on the server where this detail type exists:
-    *               1. The `dty_Type` in `defDetailTypes` is changed from 'freetext' to 'file'.
-    *               2. For every existing detail instance of this type (`recDetails`):
-    *                  - The text value (assumed to be a URL) is moved to `ulf_ExternalFileReference`
-    *                    in a new `recUploadedFiles` entry.
-    *                  - A new `recUploadedFiles` entry is created for this URL.
-    *                  - The `dtl_Value` in `recDetails` is set to NULL.
-    *                  - The `dtl_UploadedFileID` in `recDetails` is updated with the ID of the new
-    *                    `recUploadedFiles` entry.
-    *               This script requires a system administrator password and the concept code of the
-    *               detail type to be converted.
-    *
-    * @package     Heurist academic knowledge management system
-    * @subpackage  /admin/verification
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @since       3.1
-    */
+/**
+* convertTextFieldToFileField.php - Converts a specified text field type to a file field type across databases.
+*
+* @fileOverview This script is an administrative utility used to change a specified text-based
+*               detail type (identified by its concept code) into a file-based detail type.
+*               For each database on the server where this detail type exists:
+*               1. The `dty_Type` in `defDetailTypes` is changed from 'freetext' to 'file'.
+*               2. For every existing detail instance of this type (`recDetails`):
+*                  - The text value (assumed to be a URL) is moved to `ulf_ExternalFileReference`
+*                    in a new `recUploadedFiles` entry.
+*                  - A new `recUploadedFiles` entry is created for this URL.
+*                  - The `dtl_Value` in `recDetails` is set to NULL.
+*                  - The `dtl_UploadedFileID` in `recDetails` is updated with the ID of the new
+*                    `recUploadedFiles` entry.
+*               This script requires a system administrator password and the concept code of the
+*               detail type to be converted.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       3.1
+*/
 
 define('PDIR','../../');//need for proper path to js and css
 

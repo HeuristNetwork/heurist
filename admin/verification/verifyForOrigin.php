@@ -1,47 +1,33 @@
 <?php
-    /*
-    * Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    *
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-    * in compliance with the License. You may obtain a copy of the License at
-    *
-    * https://www.gnu.org/licenses/gpl-3.0.txt
-    *
-    * Unless required by applicable law or agreed to in writing, software distributed under the License
-    * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-    * or implied. See the License for the specific language governing permissions and limitations under
-    * the License.
-    */
-
-    /**
-    * verifyForOrigin.php - Verifies database structures against their original definitions from core databases.
-    *
-    * @fileOverview This script checks the consistency of record types, detail types, and their associated
-    *               pointer constraints and term lists in specified target databases against their
-    *               definitions in origin databases (typically `hdb_Heurist_Bibliographic` and
-    *               `hdb_Heurist_Core_Definitions`).
-    *               It reports discrepancies such as:
-    *               - Mismatched concept codes for record types based on their names.
-    *               - Missing fields (required, recommended, or optional based on parameters).
-    *               - Missing or incorrect record type constraints on pointer fields.
-    *               - Missing or incorrect terms in enumeration fields.
-    *               The script takes various URL parameters to control its behavior, including database
-    *               filters and which checks to perform (e.g., `biblio=0` to skip bibliographic checks,
-    *               `optfields=1` to include optional fields in checks).
-    *               Primarily intended for use by Heurist developers/administrators to ensure consistency
-    *               after database creation or major updates, particularly to address a past bug related
-    *               to empty pointer constraints in newly created databases.
-    *               Requires admin password.
-    *
-    * @package     Heurist academic knowledge management system
-    * @subpackage  /admin/verification
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @since       3.1
-    */
+/**
+* verifyForOrigin.php - Verifies database structures against their original definitions from core databases.
+*
+* @fileOverview This script checks the consistency of record types, detail types, and their associated
+*               pointer constraints and term lists in specified target databases against their
+*               definitions in origin databases (typically `hdb_Heurist_Bibliographic` and
+*               `hdb_Heurist_Core_Definitions`).
+*               It reports discrepancies such as:
+*               - Mismatched concept codes for record types based on their names.
+*               - Missing fields (required, recommended, or optional based on parameters).
+*               - Missing or incorrect record type constraints on pointer fields.
+*               - Missing or incorrect terms in enumeration fields.
+*               The script takes various URL parameters to control its behavior, including database
+*               filters and which checks to perform (e.g., `biblio=0` to skip bibliographic checks,
+*               `optfields=1` to include optional fields in checks).
+*               Primarily intended for use by Heurist developers/administrators to ensure consistency
+*               after database creation or major updates, particularly to address a past bug related
+*               to empty pointer constraints in newly created databases.
+*               Requires admin password.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       3.1
+*/
     use hserv\utilities\USanitize;
 
     if(!@$_REQUEST['db']) {$_REQUEST['db'] = 'Heurist_Bibliographic';}

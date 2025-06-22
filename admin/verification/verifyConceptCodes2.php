@@ -1,40 +1,25 @@
 <?php
-    /*
-    * Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    *
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-    * in compliance with the License. You may obtain a copy of the License at
-    *
-    * https://www.gnu.org/licenses/gpl-3.0.txt
-    *
-    * Unless required by applicable law or agreed to in writing, software distributed under the License
-    * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-    * or implied. See the License for the specific language governing permissions and limitations under
-    * the License.
-    */
-
-    /**
-    * verifyConceptCodes2.php - Checks for missing `xxx_IDInOriginatingDB` values in definitions.
-    *
-    * @fileOverview This script iterates through all Heurist databases (excluding 'hdb_DEF19')
-    *               and checks record types, detail types, and terms for missing or invalid
-    *               `xxx_IDInOriginatingDB` values when `xxx_OriginatingDBID` is set (greater than 0).
-    *               A valid `xxx_IDInOriginatingDB` should be a positive integer. Missing or zero
-    *               values indicate an inconsistency in how the definition is linked to its origin.
-    *               The script outputs an HTML report listing definitions with such issues,
-    *               grouped by database and definition table.
-    *               Requires admin password.
-    *
-    * @package     Heurist academic knowledge management system
-    * @subpackage  /admin/verification
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @since       3.1
-    */
-
+/**
+* verifyConceptCodes2.php - Checks for missing `xxx_IDInOriginatingDB` values in definitions.
+*
+* @fileOverview This script iterates through all Heurist databases (excluding 'hdb_DEF19')
+*               and checks record types, detail types, and terms for missing or invalid
+*               `xxx_IDInOriginatingDB` values when `xxx_OriginatingDBID` is set (greater than 0).
+*               A valid `xxx_IDInOriginatingDB` should be a positive integer. Missing or zero
+*               values indicate an inconsistency in how the definition is linked to its origin.
+*               The script outputs an HTML report listing definitions with such issues,
+*               grouped by database and definition table.
+*               Requires admin password.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  /admin/verification
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @since       3.1
+*/
 define('ADMIN_PWD_REQUIRED', 1);
 define('PDIR','../../');//need for proper path to js and css
 

@@ -1,37 +1,26 @@
 <?php
-    /*
-    * Copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    *
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except
-    * in compliance with the License. You may obtain a copy of the License at
-    *
-    * https://www.gnu.org/licenses/gpl-3.0.txt
-    *
-    * Unless required by applicable law or agreed to in writing, software distributed under the License
-    * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
-    * or implied. See the License for the specific language governing permissions and limitations under
-    * the License.
-    */
-
-    /**
-    * DBUpgradeAll.php - Upgrades all Heurist databases on the server to schema version 1.3.
-    *
-    * @fileOverview This script iterates through all databases prefixed with `HEURIST_DB_PREFIX`
-    *               on the current MySQL server. For each database found to be on a version
-    *               less than 1.3 (specifically, major version 1, minor version less than 3),
-    *               it attempts to upgrade it to version 1.3 using the `doUpgradeDatabase` function.
-    *               It outputs a report of databases processed, upgraded, or any errors encountered.
-    *               This script requires owner-level access.
-    *
-    * @package     Heurist academic knowledge management system
-    * @subpackage  /admin/setup/dbupgrade
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov <osmakov@gmail.com>
-    * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @since       3.1
-    */
+/**
+* DBUpgradeAll.php - Upgrades all Heurist databases on the server to schema version 1.3.
+*
+* @fileOverview This script iterates through all databases prefixed with `HEURIST_DB_PREFIX`
+*               on the current MySQL server. For each database found to be on a version
+*               less than 1.3 (specifically, major version 1, minor version less than 3),
+*               it attempts to upgrade it to version 1.3 using the `doUpgradeDatabase` function.
+*               It outputs a report of databases processed, upgraded, or any errors encountered.
+*               This script requires owner-level access.
+*
+* @package     Heurist academic knowledge management system
+* @subpackage  /admin/setup/dbupgrade
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Tom Murtagh
+* @author      Kim Jackson
+* @author      Stephen White
+* @author      Artem Osmakov <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+* @since       3.1
+*/
 
 ini_set('max_execution_time', '0');
 
