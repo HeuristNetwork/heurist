@@ -1,19 +1,20 @@
 <?php
-
 /**
-* configIni.php: configuration file for this Heurist instance.
-*
-* Note: This file is overriden by heuristConfigIni.php in the parent directory, allowing a single config file for all instances
-*       Program version number, however, is always specified by this file and should not be changed
-*
-* @package     Heurist academic knowledge management system
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     6
-*/
+ * configIni.php - Configuration file for a Heurist instance.
+ *
+ * @fileOverview This file contains configuration settings for a specific Heurist instance.
+ * It can be overridden by a `heuristConfigIni.php` file located in the parent directory,
+ * which allows for a centralized configuration for multiple Heurist instances on the same server.
+ * The program version number, however, is always determined by this file.
+ * @package Heurist academic knowledge management system
+ * @subpackage /
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 6
+ */
 
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance

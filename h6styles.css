@@ -1,15 +1,17 @@
 /**
-*
-* h6styles.css : global stylesheet for Heurist Vsn 6
-*
-* @package     Heurist academic knowledge management system
-* @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
-*/
+ * h6styles.css - Global stylesheet for Heurist Version 6.
+ *
+ * @fileOverview This file provides the global CSS styles for the Heurist academic knowledge management system, Version 6.
+ * It includes styles for layout, typography, forms, menus, and various UI components specific to H6.
+ * @package Heurist academic knowledge management system
+ * @subpackage /
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 6
+ */
 
 /*
 * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
