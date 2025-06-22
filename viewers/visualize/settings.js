@@ -169,7 +169,7 @@ class VisualiseSettings{
         $('#btnMultipleSelect').button({icon: 'ui-icon-select', showLabel: false})
             .on('click', () => {
                 this.visualiser.selection.mode = 'multi';
-                this.visualiser.svg.css('cursor', 'crosshair');
+                this.visualiser.svg.style('cursor', 'crosshair');
                 this.#syncUI();
             });
         $('#selectMode').controlgroup();
@@ -480,7 +480,7 @@ class VisualiseSettings{
                 break;
         }
 
-        if(!mode){
+        if(mode){
             this.#updateNodeAppearance(mode);
         }
 
@@ -524,7 +524,7 @@ class VisualiseSettings{
         this.put('gravity', gravity);
     
         // Update gravity impact on nodes
-        this.visualiser.svg.selectAll('.node').attr('fixed', () => {
+        this.visualiser.svg.selectAll('.node').attr('fixed', (data) => {
             data.fixed = gravity === 'aggressive';
             return data.fixed;
         });

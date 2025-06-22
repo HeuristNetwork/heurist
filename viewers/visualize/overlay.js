@@ -816,10 +816,11 @@ class VisualiseOverlay{
                 .on('mouseup', () => {
 
                     let $icon = $(window.d3.event.target);
-                    
+                    let visBox = arguments[1].style('display') === 'none' ? arguments[2] : arguments[1];
+
                     if($icon.hasClass('menu-close')){
 
-                        let dem = this.getBBox();
+                        let dem = visBox.node().parentNode.parentNode.getBBox();
                         const x = dem.x + dem.width / 2;
                         const y = dem.y + dem.height / 2;
 
@@ -933,7 +934,7 @@ class VisualiseOverlay{
                 .style('cursor', 'pointer')
                 .on('mouseup', () => {
 
-                    let event = window.d3.event.sourceEvent;
+                    let event = window.d3.event.sourceEvent ? window.d3.event.sourceEvent : window.d3.event;
 
                     event.preventDefault();
                     
@@ -1089,7 +1090,7 @@ class VisualiseOverlay{
 
     showNodeInformation(data){
 
-        if(this.infoDiv.length == 0 || this.infoFrame.length == 0 || this.infoBox.length == 0){
+        if(this.infoDiv.size() == 0 || this.infoFrame.size() == 0 || this.infoBox.size() == 0){
             return;
         }
 
@@ -1100,8 +1101,8 @@ class VisualiseOverlay{
                 maxHeight: 400,
                 minHeight: this.visualiser.options.isStructure ? 150 : 300,
                 resize: (event, ui) => {
-                    infoFrame.style('height', `${$infoDiv.height()}px`);
-                    infoBox.style('height', `${$infoDiv.height()}px`);
+                    this.infoFrame.style('height', `${$infoDiv.height()}px`);
+                    this.infoBox.style('height', `${$infoDiv.height()}px`);
                 },
                 handles: 's'
             });
@@ -1155,7 +1156,7 @@ class VisualiseOverlay{
             this.infoFrame.style('display', 'none');
             this.infoBox.style('display', 'block');
 
-            if(infoBox.attr("data-rtyID") == data.id){ // block retrival of last record in quick succession
+            if(this.infoBox.attr("data-rtyID") == data.id){ // block retrival of last record in quick succession
                 return;
             }
 
@@ -1197,24 +1198,25 @@ class VisualiseOverlay{
         }
 
         if(this.visualiser.options.isStructure){
-            displayRecTypeInfo();
+            displayRecTypeInfo.call(this);
         }else{
-            displayRecordViewer();
+            displayRecordViewer.call(this);
         }
 
     }
 
     #addInfoDiv(){
 
-        if(window.d3.select('#infoDiv').length > 0){
+        if(window.d3.select('#infoDiv').size() > 0){
             this.#assignInfoDivVars();
             return;
         }
 
-        this.infoDiv = window.d3.select('body').append('div').attr('id', 'infoDiv');
+        this.infoDiv = window.d3.select('.ent_wrapper').append('div').attr('id', 'infoDiv');
         this.infoFrame = this.infoDiv.append('iframe').attr('id', 'infoIframe');
         this.infoBox = this.infoDiv.append('div').attr('id', 'infoBox');
 
+        this.infoDiv.style('background-color', 'white');
         this.infoBox.style('padding', '10px');
 
         this.infoButtons = {

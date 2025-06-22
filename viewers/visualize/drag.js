@@ -39,12 +39,12 @@ class VisualiseDrag{
         this.visualiser = visualiserContext;
 
         this.#selectionDrag = window.d3.behavior.drag()
-                        .on('dragstart', () => this.#selectionDragStart())
+                        .on('dragstart', (data) => this.#selectionDragStart(data))
                         .on('drag', () => this.#selectionDragMove())
-                        .on('dragend', () => this.#selectionDragEnd());
+                        .on('dragend', (data) => this.#selectionDragEnd(data));
 
         this.#linkDrag = window.d3.behavior.drag()
-                        .on('dragstart', () => this.#linkDragStart())
+                        .on('dragstart', (data) => this.#linkDragStart(data))
                         .on('drag', () => this.#linkDragMove())
                         .on('dragend', () => this.#linkDragEnd());
     }
@@ -70,7 +70,7 @@ class VisualiseDrag{
             return data.fixed;
         });
 
-        data.fixed = true; 
+        data.fixed = true;
 
         this.#currentNode = data.id;
 
@@ -85,7 +85,7 @@ class VisualiseDrag{
 
             let event = window.d3.event;
 
-            if(data.id == currentNode){
+            if(data.id == this.#currentNode){
 
                 // Update locations
                 data.px += event.dx;

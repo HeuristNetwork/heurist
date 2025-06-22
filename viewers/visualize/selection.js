@@ -37,8 +37,6 @@ class VisualiseSelection{
 
         this.visualiser = visualiserContext;
 
-        this.addSelectionBox();
-
         if(Array.isArray(selectedNodeIds)){
             this.#selectedNodeIds = selectedNodeIds;
         }else if(window.hWin.HEURIST4.util.isPositiveInt(selectedNodeIds)){
@@ -55,7 +53,10 @@ class VisualiseSelection{
         this.#selectionBox = group.append('rect')
                                   .attr('id', 'selectionBox')
                                   .attr('x', 0)
-                                  .attr('y', 0);
+                                  .attr('y', 0)
+                                  .attr('fill', 'transparent')
+                                  .attr('stroke', 'black')
+                                  .attr('stroke-dasharray', '5,5');
 
         this.visualiser.svg.on('contextmenu', () => window.d3.event.preventDefault())
                            .on('mousedown', () => this.#onMouseDown())
