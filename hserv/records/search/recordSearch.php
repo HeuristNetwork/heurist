@@ -2102,13 +2102,9 @@ function recordSearchMenuItems2($system, $menuitems, &$resultIds, $isRoot){
         foreach($resultTree as $root_item_ID => $subs){ // Iterate only through initial root items
             recordSearchMenuItemsTree($root_item_ID, $resultTree[$root_item_ID], $all_menu_records_details);
         }
-            
-        // The $resultIds array now contains all unique IDs.
-        // The original code assigned $records to $resultIds here, which would change its meaning.
-        // Preserving $resultIds as the flat list of all IDs.
-        // The function returns $resultTree.
-        // For clarity, one might want to pass $all_menu_records_details to the user differently if needed.
-        // $resultIds = $all_menu_records_details; // This line from original code seems to change $resultIds purpose.
+        
+        // assign full record info on final step    
+        $resultIds = $all_menu_records_details;
             
         return $resultTree; 
     }
