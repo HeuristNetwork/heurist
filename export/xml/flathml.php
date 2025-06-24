@@ -26,7 +26,6 @@ $REVERSE,  rev  - yes|no include reverse pointer fields
 $EXPAND_REV_PTR, revexpand   yes|no
 $NO_RELATIONSHIPS  yes|no
 
-$WOOT, woot default to not output text content
 $USEXINCLUDELEVEL, hinclude  default to not output xinclude format for related records until beyound 99 degrees of separation
 $USEXINCLUDE hinclude default to not output xinclude format for related records
 $INCLUDE_FILE_CONTENT fc default NOT expand xml file content
@@ -89,7 +88,6 @@ if (@$argv) {
     $_REQUEST['style'] = '';
     $_REQUEST['depth'] = @$ARGV['-depth'] ? $ARGV['-depth'] : 0;
     if (@$ARGV['-rev']) {$_REQUEST['rev'] = $ARGV['-rev'];}
-    if (@$ARGV['-woot']) {$_REQUEST['woot'] = $ARGV['-woot'];}
     if (@$ARGV['-stub']) {$_REQUEST['stub'] = '1';}
     if (@$ARGV['-fc']) {$_REQUEST['fc'] = '1';}// inline file content
     if (@$ARGV['-file']) {$_REQUEST['file'] = '1';}// inline file content
@@ -365,7 +363,6 @@ if(@$_REQUEST['linkmode']){//direct, direct_links, none, all
 
 $REVERSE = @$_REQUEST['rev'] === 'no' ? false : true; //default to including reverse pointers
 $EXPAND_REV_PTR = @$_REQUEST['revexpand'] === 'no' ? false : true;
-$WOOT = @$_REQUEST['woot'] ? intval($_REQUEST['woot']) : 0; //default to not output text content
 $USEXINCLUDELEVEL = array_key_exists('hinclude', $_REQUEST) && is_numeric($_REQUEST['hinclude']) ? $_REQUEST['hinclude'] : 99;
 //default to not output xinclude format for related records until beyound 99 degrees of separation
 $USEXINCLUDE = array_key_exists('hinclude', $_REQUEST) ? true : false; //default to not output xinclude format for related records
@@ -1275,7 +1272,6 @@ function outputRecords($result) {
  * @global array<int,string> $WGN Workgroup Name lookup.
  * @global array<int,string> $UGN User Name lookup.
  * @global int $MAX_DEPTH Max traversal depth.
- * @global int $WOOT Woot text output flag/level.
  * @global int $USEXINCLUDELEVEL Depth for switching to XInclude.
  * @global array $RECTYPE_FILTERS Record type filters.
  * @global int $relRT Record Type ID for Relationships.
@@ -1302,7 +1298,7 @@ function outputRecords($result) {
 function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
 
 
-    global $system, $RTN, $DTN, $INV, $TL, $RQS, $WGN, $UGN, $MAX_DEPTH, $WOOT, $USEXINCLUDELEVEL, $already_out,
+    global $system, $RTN, $DTN, $INV, $TL, $RQS, $WGN, $UGN, $MAX_DEPTH, $USEXINCLUDELEVEL, $already_out,
     $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $selectedIDs, $intofile, $hunifile, $dbID,
     $EXPAND_REV_PTR, $REVERSE, $NO_RELATIONSHIPS, $rectype_templates, $human_readable_names;
 
@@ -1426,22 +1422,6 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
 
         }
     }
-    /* woot is disabled
-    if ($WOOT) {
-    $result = loadWoot(array('title' => 'record:' . $record['rec_ID']));
-    if ($result['success'] && is_numeric($result['woot']['id']) && count($result['woot']['chunks']) > 0) {
-    openTag('woot', array('title' => 'record:' . $record['rec_ID']));
-    openCDATA();
-    foreach ($result['woot']['chunks'] as $chunk) {
-    $text = preg_replace("/&nbsp;/", " ", $chunk['text']);
-    output( replaceIllegalChars($text) . "\n" );
-    }
-    closeCDATA();
-    closeTag('woot');
-    }
-    }
-    */
-
 
     if(!$rectype_templates && strpos($depth, '.')===false){
 
@@ -2097,7 +2077,7 @@ if($rectype_templates){
     }
 }
 
-$query_attrs = array_intersect_key($_REQUEST, array('q' => 1, 'w' => 1, 'pubonly' => 1, 'hinclude' => 1, 'depth' => 1, 'sid' => 1, 'label' => 1, 'f' => 1, 'limit' => 1, 'offset' => 1, 'db' => 1, 'expandColl' => 1, 'recID' => 1, 'stub' => 1, 'woot' => 1, 'fc' => 1, 'slb' => 1, 'fc' => 1, 'slb' => 1, 'selids' => 1, 'layout' => 1, 'rtfilters' => 1, 'relfilters' => 1, 'ptrfilters' => 1));
+$query_attrs = array_intersect_key($_REQUEST, array('q' => 1, 'w' => 1, 'pubonly' => 1, 'hinclude' => 1, 'depth' => 1, 'sid' => 1, 'label' => 1, 'f' => 1, 'limit' => 1, 'offset' => 1, 'db' => 1, 'expandColl' => 1, 'recID' => 1, 'stub' => 1, 'fc' => 1, 'slb' => 1, 'fc' => 1, 'slb' => 1, 'selids' => 1, 'layout' => 1, 'rtfilters' => 1, 'relfilters' => 1, 'ptrfilters' => 1));
 
 /*if(@$_REQUEST['offset']){
 $offset = intval($_REQUEST['offset']);

@@ -587,7 +587,7 @@ CREATE TABLE recUploadedFiles (
 
 CREATE TABLE sysArchive (
   arc_ID int unsigned NOT NULL auto_increment COMMENT 'Primary key of archive table',
-  arc_Table enum('rec','cfn','crw','dtg','dty','fxm','ont','rst','rtg','rty','rcs','trm','trn','urp','vcb','dtl','rfw','rrc','snd','cmt','ulf','sys','lck','tlu','ugr','ugl','bkm','hyf','rtl','rre','rem','rbl','svs','tag','wprm','chunk','wrprm','woot') NOT NULL COMMENT 'Identification of the MySQL table in which a record is being modified',
+  arc_Table enum('rec','cfn','crw','dtg','dty','fxm','ont','rst','rtg','rty','rcs','trm','trn','urp','vcb','dtl','rfw','rrc','snd','cmt','ulf','sys','lck','tlu','ugr','ugl','bkm','hyf','rtl','rre','rem','rbl','svs','tag') NOT NULL COMMENT 'Identification of the MySQL table in which a record is being modified',
   arc_PriKey int unsigned NOT NULL COMMENT 'Primary key of the MySQL record in the table being modified',
   arc_ChangedByUGrpID smallint unsigned NOT NULL COMMENT 'User who is logged in and modifying this data',
   arc_OwnerUGrpID smallint unsigned default NULL COMMENT 'Owner of the data being modified (if applicable eg. records, bookmarks, tags)',
@@ -930,78 +930,6 @@ CREATE TABLE usrTags (
   KEY tag_Text (tag_Text)
 ) ENGINE=InnoDB COMMENT='Personal and Workgroup tags (formerly keywords)';
 
--- --------------------------------------------------------
-
---
--- Table structure for table 'woot_ChunkPermissions'
---
-
-CREATE TABLE woot_ChunkPermissions (
-  wprm_ChunkID int NOT NULL COMMENT 'ID of chunk for which permission is specified, may be repeated',
-  wprm_UGrpID smallint NOT NULL COMMENT 'User with specified right to this chunk',
-  wprm_GroupID smallint NOT NULL COMMENT 'Workgroups with specified right to this chunk',
-  wprm_Type enum('RW','RO') NOT NULL COMMENT 'Read-write or read-only permission for this chunk/user/wg',
-  wprm_CreatorID smallint NOT NULL COMMENT 'Creator of the permission (= user ID ???? <check>)',
-  wprm_Created datetime NOT NULL COMMENT 'Date and time of creation of the permission',
-  UNIQUE KEY wprm_chunk_composite_key (wprm_ChunkID,wprm_UGrpID,wprm_GroupID)
-) ENGINE=InnoDB COMMENT='Permissions value for individual woot chunks';
-
--- --------------------------------------------------------
-
---
--- Table structure for table 'woot_Chunks'
---
-
-CREATE TABLE woot_Chunks (
-  chunk_ID int NOT NULL auto_increment COMMENT 'Primary ID for a version of the text chunks making up a woot entry (page)',
-  chunk_WootID int NOT NULL COMMENT 'The ID of the woot entry (page) to which this chunk belongs',
-  chunk_InsertOrder int NOT NULL COMMENT 'Order of chunk within woot.',
-  chunk_Version int NOT NULL COMMENT 'A version code for the chunk, incremented when edited',
-  chunk_IsLatest tinyint NOT NULL COMMENT 'Presumably flags whether this is the latest version of the chunk',
-  chunk_DisplayOrder int NOT NULL COMMENT 'The order number of the chunk within the woot entry (page)',
-  chunk_Text text COMMENT 'The actual XHTML content of the chunk',
-  chunk_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date and time of modification of the chunk',
-  chunk_OwnerID int default NULL COMMENT 'Owner/creator (user ID) of the chunk',
-  chunk_Deleted tinyint NOT NULL COMMENT 'Deletion marker for this chunk',
-  chunk_EditorID int NOT NULL COMMENT 'Editor (user ID) of the chunk - presumably the last person to edit',
-  PRIMARY KEY  (chunk_ID),
-  UNIQUE KEY chunk_composite_key (chunk_WootID,chunk_InsertOrder,chunk_Version),
-  KEY chunk_is_latest_key (chunk_IsLatest)
-) ENGINE=InnoDB;
-
--- --------------------------------------------------------
-
---
--- Table structure for table 'woot_RecPermissions'
---
-
-CREATE TABLE woot_RecPermissions (
-  wrprm_WootID int NOT NULL COMMENT 'ID of the woot entry to which this permission applies, may be repeated',
-  wrprm_UGrpID int NOT NULL COMMENT 'User ID to which this permission is being granted',
-  wrprm_GroupID int NOT NULL COMMENT 'Workgroup ID to which this permission is being granted',
-  wrprm_Type enum('RW','RO') NOT NULL COMMENT 'Type of permission being granted - read only or read-write',
-  wrprm_CreatorID int NOT NULL COMMENT 'Creator of the permission',
-  wrprm_Created datetime NOT NULL COMMENT 'Date and time of creation of the permission',
-  UNIQUE KEY wrprm_composite_key (wrprm_WootID,wrprm_UGrpID,wrprm_GroupID)
-) ENGINE=InnoDB COMMENT='Overall permissions for the woot record (entry/page)';
-
--- --------------------------------------------------------
-
---
--- Table structure for table 'woots'
---
-
-CREATE TABLE woots (
-  woot_ID int NOT NULL auto_increment COMMENT 'Primary ID of a woot record/entry/page',
-  woot_Title varchar(8191) default NULL COMMENT 'Name of the woot page, unique identifier of the woot page',
-  woot_Created datetime default NULL COMMENT 'Date and time of creation of the woot record/entry/page',
-  woot_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date and time of modification of the woot record/entry/page',
-  woot_Version int NOT NULL COMMENT 'Version of the woot record/entry/page, presumably incremented on edit',
-  woot_CreatorID int default NULL COMMENT 'Creator (user id) of the woot',
-  PRIMARY KEY  (woot_ID),
-  UNIQUE KEY woot_title_key (woot_Title(200))
-) ENGINE=InnoDB COMMENT='Woot records (entries, pages) are linked to a set of XHTML c';
-                                                               
 -- ------------------------------------------------------------------------------------------------
 
 --

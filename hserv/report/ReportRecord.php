@@ -453,7 +453,6 @@ class ReportRecord
      * - Tags are included as `rec_Tags` (comma-separated string).
      * - Visibility is checked and stored in `rec_IsVisible`.
      * - Detail fields are processed by `processRecordDetails` and added as `f<ID>` keys.
-     * - Woot text is fetched via `getWootText` and added as `recWootText`.
      *
      * Caches the processed record in `$this->recordsCache`.
      *
@@ -495,7 +494,7 @@ class ReportRecord
      * Helper function for `getRecordForSmarty` to process standard record header fields.
      *
      * Maps fields like `rec_ID` to `recID`, `rec_Title` to `recTitle`, etc.
-     * Sets `recTypeID` and `recTypeName`. Fetches Woot text for `recWootText`.
+     * Sets `recTypeID` and `recTypeName`.
      *
      * @param array &$record The Smarty-formatted record array being built (passed by reference).
      * @param string $key The original key of the record field (e.g., "rec_ID").
@@ -512,8 +511,6 @@ class ReportRecord
             $record['recTypeName'] = $this->rtyNames[$recTypeID];
         } elseif ($key == 'rec_Tags') {
             $record['rec_Tags'] = $value;
-        } elseif ($key == 'rec_ID') {
-            $record['recWootText'] = $this->getWootText($value);
         }
     }
 
@@ -899,43 +896,6 @@ class ReportRecord
         }
 
         return $res;
-    }
-
-    /**
-     * Retrieves Woot (collaborative text editor) content associated with a record.
-     *
-     * Note: The current implementation indicates Woot functionality is disabled
-     * and this method will return an empty string. The original logic for loading
-     * Woot data is commented out.
-     *
-     * @param int $recID The Record ID for which to retrieve Woot text.
-     * @return string The Woot text, or an empty string if disabled/not found.
-     */
-    public function getWootText($recID)
-    {
-        // Woot is disabled in this version.
-        return '';
-
-/* woot is disabled in this version
-        $woot = loadWoot(array("title"=>"record:".$recID));
-        if(@$woot["success"])
-        {
-            if(@$woot["woot"]){
-
-                $chunks = $woot["woot"]["chunks"];
-                $cnt = count($chunks);
-
-                for ($i = 0; $i < $cnt; $i++) {
-                    $chunk = $chunks[$i];
-                    if(@$chunk["text"]){
-                        $res = $res.$chunk["text"];
-                    }
-                }//for
-            }
-        }elseif (@$woot["errorType"]) {
-            $res = "WootText: ".$woot["errorType"];
-        }
-*/
     }
 
     /**

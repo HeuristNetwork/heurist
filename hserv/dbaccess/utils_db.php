@@ -2118,7 +2118,6 @@ $mysqli->kill($thread_id);
     /*not used
     defcrosswalk,defontologies,defrelationshipconstraints,defurlprefixes,
     recthreadedcomments,sysdocumentation,syslocks,usrhyperlinkfilters,
-    woot_chunkpermissions,woot_chunks,woot_recpermissions,woots,
     */
 
     //auto recreated
