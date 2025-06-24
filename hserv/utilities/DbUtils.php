@@ -1392,14 +1392,14 @@ class DbUtils {
 
                 //$isCloneTemplate
                 $exception_for_clone_template = array('sysugrps','sysusrgrplinks',
-                'woot_chunkpermissions','woot_chunks','woot_recpermissions','woots',
+                'woot_chunkpermissions','woot_chunks','woot_recpermissions','woots',  //for clone templates
                 'usrworkingsubsets', //'usrrecpermissions',
                 'usrreminders','usrremindersblocklist','recthreadedcomments','usrreportschedule','usrhyperlinkfilters', 'sysarchive');
 
                 $data_tables = array('records','recdetails','reclinks','recdetailsdateindex',
                 'recsimilarbutnotdupes','recthreadedcomments','recuploadedfiles','usrbookmarks','usrrectaglinks',
                 'usrrecpermissions','usrworkingsubsets',
-                'usrreminders','usrremindersblocklist','woot_chunkpermissions','woot_chunks','woot_recpermissions','woots', 'sysarchive');
+                'usrreminders','usrremindersblocklist','sysarchive');
 
 
                 $tables = $mysqli->query("SHOW TABLES");//get all tables from target db

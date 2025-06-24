@@ -48,7 +48,6 @@ if(!$system->init(@$_REQUEST['db'])){
     exit;
 }
 
-//require_once dirname(__FILE__).'/../../records/woot/woot.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../../hserv/records/search/relationshipData.php';
@@ -1372,8 +1371,6 @@ function print_details($bib) {
         if(!$is_map_popup && $show_private_details != 0){
             print_private_details($bib);
             print_other_tags($bib);
-
-            //print_text_details($bib);
         }
 
         $system->userLogActivity('viewRec', $bib['rec_ID']);// log action
@@ -2707,30 +2704,6 @@ function print_linked_details($bib, $link_cnt)
 
 }
 
-//
-// functions below for WOOT and Comments are not used
-//
-function print_text_details($bib) {
-        $cmts = getAllComments($bib["rec_ID"]);
-        $result = loadWoot(array("title" => "record:".$bib["rec_ID"]));
-        if (! $result["success"] && empty($cmts)) {return;}
-
-        $content = "";
-        $woot = @$result["woot"];
-        if(is_array($woot) && is_array($woot["chunks"])){
-            foreach ($woot["chunks"] as $chunk) {
-                $content .= $chunk["text"] . " ";
-            }
-        }
-        if (strlen($content) == 0 && empty($cmts)) {return;}
-
-
-        print '<div class=detailRowHeader>Text';
-        print_woot_precis($content, $bib);
-        print_threaded_comments($cmts);
-        print '</div><br>&nbsp;';// avoid ugly spacing
-}
-
 function output_chunker($val, $return_lang = false) {
 
     list($lang, $val) = extractLangPrefix($val);// remove possible language prefix
@@ -2740,153 +2713,6 @@ function output_chunker($val, $return_lang = false) {
     /* it adds word breaker incorrectly, so Arabic words are displayed incorrecly
     return preg_replace('/(\\b.{15,20}\\b|.{20}.*?(?=[\x0-\x7F\xC2-\xF4]))/', '\\1<wbr>', $val);
     */
-}
-
-/*
-    loadWoot returns:
-
-    {    success
-    errorType?
-    woot? : {    id
-    title
-    version
-    creator
-    permissions : {    type
-    userId
-    userName
-    groupId
-    groupName
-    } +
-    chunks : {    number
-    text
-    modified
-    editorId
-    ownerId
-    permissions : {    type
-    userId
-    userName
-    groupId
-    groupName
-    } +
-    } +
-    }
-    }
-    Array (
-    [id] => 2372
-    [title] => record:45171
-    [version] => 4
-    [creator] => 1
-    [permissions] => Array (
-    [0] => Array (
-    [type] => RW
-    [userId] => 1
-    [userName] => johnson
-    [groupId] =>
-    [groupName] => ) )
-    [chunks] => Array (
-    [0] => Array (
-    [number] => 1
-    [text] => test private to Ian
-    [modified] => 2010-03-08 16:46:08
-    [editorId] => 1
-    [ownerId] => 1
-    [permissions] => Array (
-    [0] => Array (
-    [type] => RW
-    [userId] => 1
-    [userName] => johnson
-    [groupId] =>
-    [groupName] => ) ) ) ) )
-    */
-function print_woot_precis($content,$bib) {
-        if (strlen($content) == 0) {return;}
-        ?>
-        <div class=detailRow>
-            <div class=detailType>WYSIWYG Text</div>
-            <div class=detail>
-                <?php
-                $content = preg_replace("/<.*?>/", " ", $content);
-                if (strlen($content) > 500) {
-                    print substr($content, 0, 500) . " ...";
-                } else {
-                    print $content;
-                }
-                ?>
-
-                <div><a target="_blank" rel="noopener" href="<?=HEURIST_BASE_URL?>records/woot/woot.html?db=<?=HEURIST_DBNAME?>&w=record:<?= $bib['rec_ID'] ?>&t=<?= $bib['rec_Title'] ?>">Click here to edit</a></div>
-            </div>
-        </div>
-        <?php
-    }
-
-
-function print_threaded_comments($cmts) {
-        if (empty($cmts)) {return;}
-        ?>
-        <div class=detailRow>
-            <div class=detailType>Thread Comments</div>
-            <div class=detail>
-                <?php
-                $printOrder = orderComments($cmts);
-                $level = 1;
-                foreach ($printOrder as $pair) {
-                    $level = 20 * $pair["level"];
-                    print '<div style=" font-style:italic; padding: 0px 0px 0px ';
-                    print $level;
-                    print  'px ;"> ['.$cmts[$pair['id']]["user"]. "] " . $cmts[$pair['id']]["text"] . DIV_E;
-                }
-                ?>
-            </div>
-        </div>
-    <?php
-}
-
-
-function orderComments($cmts) {
-    $orderedCmtIds = array();
-    $orderErrCmts = array();
-    foreach ($cmts as $id => $cmt) {
-        //handle root nodes
-        if ($cmt['owner'] == 0) {
-            // skip deleted or children with deleted parents
-            if ($cmt['deleted']) {continue;}
-            $level = $cmts[$id]["level"] = 0;
-            array_push($orderedCmtIds,$id);
-        }else {    //note this algrithm assumes comments are ordered by date and that a child comment always has a more recent date
-            // handle deleted or children of deleted
-            if ($cmts[$cmt["owner"]]["deleted"]) {$cmt["deleted"] = true;}
-            if ($cmt["deleted"]) {continue;}
-            $ownerIndex = array_search($cmt["owner"],$orderedCmtIds);
-            $insertIndex = count($orderedCmtIds);//set insertion to end of array as default
-            if($ownerIndex === false) {  // breaks assumption write code to fix up the ordering here
-                array_push($orderErrCmts,array( 'id' => $id, 'level' => 1));
-            }elseif($ownerIndex +1 < $insertIndex) { //not found at the end of the array  note array index +1 = array offset
-                if (array_key_exists($cmt["owner"],$cmts) && array_key_exists("level",$cmts[$cmt["owner"]])){
-                    $cmts[$id]["level"]  = 1 + $cmts[$cmt["owner"]]["level"] ;//child so increase the level
-                    for ($i = $ownerIndex+1; $i < $insertIndex; $i++) {
-                        if ( $cmts[$orderedCmtIds[$i]]["level"] < $cmts[$id]["level"]) { //found insertion point
-                            $insertIndex = $i;
-                            break;
-                        }
-                    }
-                    // insert id at index point
-                    array_splice($orderedCmtIds,$insertIndex,0,$id);
-                }else{
-                    //something is wrong just add it to the end
-                    array_push($orderErrCmts,array( 'id' => $id, 'level' => 1));
-                }
-            }else{ //parent node is at the end of the array so just append
-                $cmts[$id]["level"]  = 1 + $cmts[$cmt["owner"]]["level"] ;//child so increase the level
-                array_push($orderedCmtIds,$id);
-            }
-        }
-    }
-    $ret = array();
-    foreach ( $orderedCmtIds as $id) {
-        array_push($ret, array( 'id' => $id, 'level' => $cmts[$id]['level']));
-    }
-    if (!empty($orderErrCmts)) {$orderedCmtIds = array_merge($orderedCmtIds,$orderErrCmts);}
-    return $ret;
 }
 
 //sort array by order_by_date for resource (record pointer) details

@@ -193,7 +193,7 @@
 
 
     //
-    //   {rt_id: , rt_name, recID, recTitle, recModified, recURL, recWootText,
+    //   {rt_id: , rt_name, recID, recTitle, recModified, recURL,
     //                  fNNN: 'display name of field',
     //                  fNNN: array(termfield_name: , id, code:  )  // array of term's subfields
     //                  fNNN: array(rt_name: , recID ...... )       // unconstrained pointer or exact constraint
@@ -227,7 +227,6 @@
 
             if($mode==3) {
                 array_push($children, array('key'=>'recURL',      'type'=>'freetext',  'title'=>'URL', 'code'=>$recTypeId.":url"));
-                array_push($children, array('key'=>'recWootText', 'type'=>'blocktext', 'title'=>'WootText', 'code'=>$recTypeId.":woot"));
                 //array_push($children, array('key'=>'recTags',     'type'=>'freetext',  'title'=>'Tags', 'code'=>$recTypeId.":tags"));
             }
         }

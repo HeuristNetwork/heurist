@@ -85,7 +85,7 @@ class DbExportTSV {
             'defcalcfunctions', 'reclinks',
             'recsimilarbutnotdupes', //'records', 'recdetails',
             'sysarchive', 'syslocks', 'usrhyperlinkfilters'
-        ];// tables to skip - woot, import and index are filtered out below
+        ];// tables to skip - import and index are filtered out below
 
         $tables = mysql__select_list2($this->mysqli, "SHOW TABLES");
 
