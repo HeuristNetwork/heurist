@@ -2614,7 +2614,7 @@ window.hWin.HEURIST4.ui = {
         
         const mode = options.mode??'production';
 
-        const version = options.version??'3'; //by default version 3
+        const version = options.version??'2'; //by default version 2
         
         if(mode=='edit' && !options.edit){
             options.edit = version==3?'start':'2';
@@ -2658,7 +2658,7 @@ window.hWin.HEURIST4.ui = {
         if(isEdit){
             params.push('edit='+options.edit);
         }            
-        if(version!=''){
+        if(version!='' && version!='2'){
             params.push('ver='+version);
         }
         if(options.header){

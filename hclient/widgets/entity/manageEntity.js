@@ -240,6 +240,9 @@ $.widget( "heurist.manageEntity", {
         
         //init layout
         let layout = '';
+        if(this.options.layout){
+                layout = this.options.layout;
+        }else
         if(this.options.layout_mode=='basic'){  //common tooolbar on top, list on left, edit form on right side
             layout = 
                 '<div class="ent_wrapper">'
@@ -265,11 +268,11 @@ $.widget( "heurist.manageEntity", {
                 +'</div>';
                 
         }else if(this.options.layout_mode=='listonly'){
-
-            layout = '<div class="ent_wrapper">'
+            
+                layout = '<div class="ent_wrapper">'
                                 +    '<div class="searchForm" style="display:none;"></div>'     
                                 +    '<div class="ent_content_full recordList" style="top:0"></div>'
-                            +'</div>'
+                            +'</div>';
 
         }else if(this.options.layout_mode=='tabbed'){ //for terms - REMOVE
         
@@ -1282,6 +1285,11 @@ $.widget( "heurist.manageEntity", {
             
             if(!this._resultOnSelection) this._resultOnSelection = {};
             this._resultOnSelection.selection = (this.options.select_return_mode=='recordset') ?res :res.getIds();
+            
+            let useNewCmsVersion = $('#useVersion3');
+            if(useNewCmsVersion.length){
+                this._resultOnSelection.useNewCmsVersion = useNewCmsVersion.is(':checked');     
+            }
             
             this._trigger( "onselect", null, this._resultOnSelection);
             

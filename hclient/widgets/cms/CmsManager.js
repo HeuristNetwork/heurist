@@ -241,7 +241,7 @@ class CmsManager {
 
         let is_view_mode = (action == 'menu-cms-view');
 
-        if (this.cms_home_counts.count == 1) {
+        if (false && this.cms_home_counts.count == 1) {
             this.#openCMS(0, is_view_mode ? '' : 'edit');
             return;
         }
@@ -269,6 +269,16 @@ class CmsManager {
      */
     #openCMSlist(sTitle, query_search, is_view_mode) {
         let that = this;
+        
+        
+        let layout = '<div class="ent_wrapper">'
+                                +    '<div class="searchForm" style="display:none;"></div>'
++'<div class="ent_header" style="padding:0 5px"><label>Use CMS version 3 <input type="checkbox" id="useVersion3"></label>'
++'&nbsp;&nbsp;&nbsp;&nbsp;Websites created in previous verion can be distored '+(is_view_mode?'':'if you save in')+' in new version</div>'    
++'<div class="ent_content_full" style="top:30px">' 
+                                +    '<div class="ent_content_full recordList" style="top:0"></div></div>'
+                     +'</div>';
+        
 
         let popup_options = {
             select_mode: 'select_single',
@@ -278,6 +288,7 @@ class CmsManager {
             title: sTitle,
             fixed_search: query_search,
             layout_mode: 'listonly',
+            layout: layout,
             width: 500, height: 400,
             default_palette_class: 'ui-heurist-publish',
             resultList: {
@@ -292,10 +303,13 @@ class CmsManager {
                 }
             },
             onselect: function(event, data) {
+               
                 if (window.hWin.HEURIST4.util.isRecordSet(data.selection)) {
+                    let version = data.useNewCmsVersion?'3':'2';
+                    
                     let recordset = data.selection;
                     let rec_ID = recordset.getOrder()[0];
-                    that.#openCMS(rec_ID, is_view_mode ? '' : 'edit');
+                    that.#openCMS(rec_ID, is_view_mode ? '' : 'edit', version);
                 }
             }
         };
@@ -361,9 +375,9 @@ class CmsManager {
      * @param {number} rec_ID - The record ID of the CMS item.
      * @param {string} mode - The mode to open the CMS in ('edit', 'development', or 'production').
      */
-    #openCMS(rec_ID, mode) {
+    #openCMS(rec_ID, mode, version) {
         if (mode == 'edit') {
-            this.#openCMSedit({ record_id: rec_ID });
+            this.#openCMSedit({ record_id: rec_ID, version:version });
             return;
         }
 
@@ -393,7 +407,7 @@ class CmsManager {
             return;
         }
         
-        url = window.hWin.HEURIST4.ui.getCmsLink({mode:mode, websiteid:rec_ID});
+        url = window.hWin.HEURIST4.ui.getCmsLink({mode:mode, websiteid:rec_ID, version:version});
         window.open(url, '_blank');
     }
 
@@ -489,7 +503,7 @@ class CmsManager {
             return;
         }
                                                     
-        let sURL = window.hWin.HEURIST4.ui.getCmsLink({mode:'edit', websiteid:options.record_id})
+        let sURL = window.hWin.HEURIST4.ui.getCmsLink({mode:'edit', websiteid:options.record_id, version:options.version})
 console.log(sURL);
         if (options.newlycreated) {
             sURL = sURL + '&newlycreated';

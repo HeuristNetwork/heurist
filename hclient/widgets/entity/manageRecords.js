@@ -1154,8 +1154,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     let that = this;
                     popup_options['onselect'] = function(event, data){
                             if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                that._trigger( "onselect", null, {selection:
-                                    (that.options.select_return_mode=='recordset') ?data.selection :data.selection.getIds()});
+                                
+                                that._trigger( "onselect", null, {
+                                    selection: (that.options.select_return_mode=='recordset') ?data.selection :data.selection.getIds()});
                                 that.closeDialog();
                             }
                     };

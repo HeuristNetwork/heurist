@@ -629,7 +629,7 @@ title: "Overview"
             );
         } //___continue_addition        
         
-        if(templateName=='landing' || templateName=='about'){
+        if(templateName=='landing' || templateName=='about'){ //special page templates for  v3
         
             let request = {website:home_page_record_id, raw:1, ver:3, webtemplate:templateName};
             
