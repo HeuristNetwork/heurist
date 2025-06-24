@@ -1017,8 +1017,11 @@ class WebSite
             if($action){
                 $item['action'] = $action;
                 if($actionParams) $item['actionParams'] = $actionParams;
-            }elseif($pageId){
+                
+            }
+            if($pageId){
                 $item['pageId'] = $pageId;    
+                $item['page_id'] = $pageId; //for backward capability
             }
             
             

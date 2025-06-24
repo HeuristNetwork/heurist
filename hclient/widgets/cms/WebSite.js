@@ -330,7 +330,7 @@ class WebSite {
             return;
         }
         
-        const options = {websiteid:this.siteId, pageid:this.pageId, lang:this.currentLanguage};
+        const options = {websiteid:this.siteId, pageid:this.pageId, lang:this.currentLanguage, version:3};
         const surl = window.hWin.HEURIST4.ui.getCmsLink(options);
         window.history.pushState({}, "Title", surl);
         
@@ -445,7 +445,7 @@ class WebSite {
     openPageEditor(options){
         
         if(!options){
-            options = {mode:'edit', websiteid:this.siteId, pageid:this.pageId, lang:this.currentLanguage};
+            options = {mode:'edit', websiteid:this.siteId, pageid:this.pageId, lang:this.currentLanguage, version:3};
         }
     
         let sURL = window.hWin.HEURIST4.ui.getCmsLink(options);
@@ -462,7 +462,7 @@ class WebSite {
     */    
     closePageEditor(options){
         if(window.parent){
-            let sURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.siteId, pageid:this.pageId, lang:this.currentLanguage});
+            let sURL = window.hWin.HEURIST4.ui.getCmsLink({websiteid:this.siteId, pageid:this.pageId, lang:this.currentLanguage, version:3});
             window.parent.location.replace(sURL);
         }
     }
@@ -472,7 +472,7 @@ class WebSite {
     */    
     switchLanguage(){
         
-        let opts = {websiteid:this.siteId, pageid:this.pageId, lang:this.currentLanguage};
+        let opts = {websiteid:this.siteId, pageid:this.pageId, lang:this.currentLanguage, version:3};
         let loc = window.location;
         if(window.parent?.cmsEditor){
             opts['mode'] = 'edit';

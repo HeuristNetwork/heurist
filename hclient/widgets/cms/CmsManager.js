@@ -391,12 +391,12 @@ class CmsManager {
             buttons[window.hWin.HR('Current (development) version')] = function() {
                 let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                 $dlg.dialog("close");
-                that.#openCMS(rec_ID, 'development');
+                that.#openCMS(rec_ID, 'development', version);
             };
             buttons[window.hWin.HR('Production version')] = function() {
                 let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                 $dlg.dialog("close");
-                that.#openCMS(rec_ID, 'production');
+                that.#openCMS(rec_ID, 'production', version);
             };
 
             window.hWin.HEURIST4.msg.showMsgDlg('<p>You are currently running a development version of Heurist.</p>' +
@@ -407,7 +407,7 @@ class CmsManager {
             return;
         }
         
-        url = window.hWin.HEURIST4.ui.getCmsLink({mode:mode, websiteid:rec_ID, version:version});
+        url = window.hWin.HEURIST4.ui.getCmsLink({mode:mode, websiteid:rec_ID, version:version, use_redirect:false});
         window.open(url, '_blank');
     }
 
@@ -503,7 +503,7 @@ class CmsManager {
             return;
         }
                                                     
-        let sURL = window.hWin.HEURIST4.ui.getCmsLink({mode:'edit', websiteid:options.record_id, version:options.version})
+        let sURL = window.hWin.HEURIST4.ui.getCmsLink({mode:'edit', websiteid:options.record_id, version:options.version, use_redirect:false})
 console.log(sURL);
         if (options.newlycreated) {
             sURL = sURL + '&newlycreated';
