@@ -739,11 +739,14 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                         }
 
                         if(check_rty.length == 0){
-                            // remove fancytree-has-children, set lazy to false, remove child nodes
 
-                            $(data.node.span).removeClass('fancytree-has-children');
-                            data.node.lazy = false;
-                            data.node.removeChildren();
+                            if(data.node.type === 'relmarker'){
+                                data.node.data.minify = true;
+                            }else{ // remove fancytree-has-children, set lazy to false, remove child nodes
+                                $(data.node.span).removeClass('fancytree-has-children');
+                                data.node.lazy = false;
+                                data.node.removeChildren();
+                            }
                         }
                     }
 
@@ -770,6 +773,13 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
                         let res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
                                                             rectypes, ['header_ext','all','parent_link'], parentcode, node_order );
+
+                        if(node.data.minify){
+                            for(let idx = 0; idx < res.length; idx ++){
+                                res[idx].children.splice(-1);
+                            }
+                        }
+
                         if(res.length>1){
                             data.result = res;
                         }else{

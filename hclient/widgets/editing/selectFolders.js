@@ -87,7 +87,6 @@ $.widget( "heurist.selectFolders", $.heurist.selectMultiValues, {
     
     /**
      * Internal flag related to showing system folders in the Fancytree.
-     * REMARK: The UI element (a checkbox) and the Fancytree filtering logic that would use this flag
      * are currently commented out in the `_init` method of the source code.
      * 
      * If it were active, it would be used to filter branches in the Fancytree to show or hide system folders.

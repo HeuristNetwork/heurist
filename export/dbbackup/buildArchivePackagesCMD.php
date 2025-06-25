@@ -61,7 +61,8 @@ $arg_skip_tsv = false;      // don't include TSV
 /** @var bool $arg_skip_sql If true, skips SQL dump. Defaults to false. */
 $arg_skip_sql = false;
 
-/** @var bool $with_triggers If true, includes triggers in the SQL dump. REMARK: Currently hardcoded to false and not exposed as a command-line argument. */
+/** @var bool $with_triggers If true, includes triggers in the SQL dump. 
+REMARK: Currently hardcoded to false and not exposed as a command-line argument. */
 $with_triggers = false;
 /** @var string|null $backup_root Path to the root directory where backup packages will be stored. Initialized to null. */
 $backup_root = null;

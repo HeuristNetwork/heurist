@@ -1446,7 +1446,7 @@ $.widget( "heurist.app_storymap", {
                                 {selection:[rec_ids[0]], source:that.element.attr('id'), 
                                     search_realm:that.options.search_realm} ); //highlight in main resultset
                         }
-                    }else{
+                    }else if( that._resultset ){
                         //find selected record id among story elements    
                         rec = that._resultset.getById(rec_ids[0]);
                         if(rec){
@@ -1491,7 +1491,7 @@ $.widget( "heurist.app_storymap", {
         
         //---------
         // find all story elements
-        let request = {q:{ids:recset.getIds()}, detail:this.options.storyFields.join(',')};
+        let request = {q:{ids:recset.getIds().join(',')}, detail:this.options.storyFields.join(',')};
 
         window.hWin.HAPI4.RecordMgr.search(request,
             function(response) {
@@ -1513,7 +1513,7 @@ $.widget( "heurist.app_storymap", {
                     }//for
                     
                     //find filtered stories
-                    let query = [{ids:storyIDs}];
+                    let query = [{ids: storyIDs.join(',')}];
 
                     if( !window.hWin.HEURIST4.util.isempty(that.options.reportOverviewMapFilter)){
                         query = window.hWin.HEURIST4.query.mergeTwoHeuristQueries( query, that.options.reportOverviewMapFilter );    
@@ -1687,7 +1687,7 @@ $.widget( "heurist.app_storymap", {
         }else{ // Data not cached, fetch from server
             
             let server_request = {
-                            q: {ids: this._resultset.getIds()}, //list of story elements/events
+                            q: {ids: this._resultset.getIds().join(',')}, //list of story elements/events
                             leaflet: 1, 
                             simplify: 1, //simplify paths with more than 1000 vertices
                             //suppress_linked_places: 1, //do not load assosiated places
@@ -1925,7 +1925,7 @@ $.widget( "heurist.app_storymap", {
                             return;
                         }
 
-                        let qq = {ids:that._cache_story_places[recID]['places']};
+                        let qq = {ids:that._cache_story_places[recID]['places'].join(',')};
                         
                         if(that.options.reportElementMapMode=='filtered'){ //additional filter for places 
                             qq = window.hWin.HEURIST4.query.mergeTwoHeuristQueries( qq, that.options.reportElementMapFilter );

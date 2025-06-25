@@ -26,8 +26,11 @@ require_once dirname(__FILE__).'/../../utilities/geo/mapCoordConverter.php';
 require_once dirname(__FILE__).'/../../structure/dbsTerms.php';
 require_once dirname(__FILE__).'/../../../admin/verification/verifyValue.php';
 
-if(!defined('H_ID')){
-    define('H_ID',' H-ID');
+if(!defined('H_FLDS')){
+    define('H_FLDS',[
+        'rec_ID' => 'H-ID',
+        'rec_Title' => 'Record Title'
+    ]);
 }
 
 /**
@@ -254,6 +257,7 @@ public static function output($data, $params){
     $idx_dtype = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_Type'];
     $idx_term_tree = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
     $idx_term_nosel = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
+    self::$system->defineConstant('RT_RELATION');
 
     $defTerms = null;
     if(!$term_ids_only){
@@ -315,7 +319,7 @@ public static function output($data, $params){
 
     //create header
     $any_rectype = null;
-    $headers = array();
+    $headers = [];
     $columnInfo = [];
     if($fields){
         foreach($fields as $rt=>$flds){
@@ -325,12 +329,12 @@ public static function output($data, $params){
             }
 
             //always include ID field into output
-            if($flds[0]!='rec_ID') {array_unshift($flds, 'rec_ID');}
+            if(array_search('rec_ID', $flds) === false) {array_unshift($flds, 'rec_ID');}
             $fields[$rt] = $flds;
 
-            $details[$rt] = array();
-            $headers[$rt] = array();
-            $relmarker_details[$rt] = array();
+            $details[$rt] = [];
+            $headers[$rt] = [];
+            $relmarker_details[$rt] = [];
             $columnInfo[$rt] = [];
 
             foreach($flds as $dt_id){
@@ -360,12 +364,12 @@ public static function output($data, $params){
                         $rectypename_is_in_fieldname = (strpos(strtolower($field_name),
                             strtolower(self::$defRecTypes['names'][$constr_rt_id]))!==false);
                         $field_name_title = $field_name.($rectypename_is_in_fieldname
-                            ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').' Record Title';
+                            ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').' '.H_FLDS['rec_Title'];
 
                         $field_name = $field_name.($rectypename_is_in_fieldname
-                            ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').H_ID;
+                            ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').' '.H_FLDS['rec_ID'];
                     }else{
-                        $field_name_title = $field_name.' Record Title';
+                        $field_name_title = $field_name.' '.H_FLDS['rec_Title'];
                     }
                     if($field_type=='relmarker'){
                         $relmarker_details[$rt][$dt_id] = $constr_rt_id;
@@ -374,17 +378,15 @@ public static function output($data, $params){
                     }
 
                 }else{
+                    // record header field
                     $field_type = null;
 
-                    if($dt_id=='rec_ID'){
-                        if($rt>0){
-                            $field_name = self::$defRecTypes['names'][$rt].H_ID;
-                        }else{
-                            $field_name = 'H-ID';
-                            $any_rectype = $rt;
-                        }
+                    $field_name = array_key_exists($dt_id, H_FLDS) ? H_FLDS[$dt_id] : $dt_id;
+
+                    if($rt>0){
+                        $field_name = self::$defRecTypes['names'][$rt].' '.$field_name;
                     }else{
-                        $field_name = $dt_id; //record header field
+                        $any_rectype = $rt;
                     }
                 }
 
@@ -429,7 +431,7 @@ public static function output($data, $params){
                     ];
 
                     if($include_temporals && $field_type=='date'){
-                        array_push($headers[$rt], $field_name.'(temporal)');
+                        array_push($headers[$rt], $field_name.' (temporal)');
                         $csvColIndex = count($headers[$rt]) - 1;
                         $columnInfo[$rt][] = [
                             'index' => $csvColIndex,
@@ -493,8 +495,8 @@ public static function output($data, $params){
                     array_push($headers[$rt], $field_name_title);
                     $columnInfo[$rt][] = [
                         'index' => count($headers[$rt]) - 1,
-                        'type' => 'value', //resource_title
-                        'field_id' => $fieldFullID,
+                        'type' => 'value', // resource_title
+                        'field_id' => 'rec_Title'
                     ];
                 }
 
@@ -806,6 +808,81 @@ public static function output($data, $params){
                         }
 
                         $value = implode($csv_mvsep, $vals);
+                    }elseif($dt_type == 'relmarker' && defined('RT_RELATION') && $constr_rt_id == RT_RELATION){ // selected relationship fields
+
+                        $values = [];
+
+                        foreach($related_recs['direct'] as $related){
+
+                            if($related->relationID == 0 || in_array($related->relationID, $values)){
+                                continue;
+                            }
+
+                            $all_terms = self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_term_tree];
+                            $nonsel_terms = self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_term_nosel];
+                            $isTrmAllowed = \VerifyValue::isValidTerm($all_terms, $nonsel_terms, $related->trmID, $dt_id);
+                            $isRtyAllowed = \VerifyValue::isValidPointer($relmarker_details[$rty_ID][$dt_id], $related->targetID);
+
+                            if(!$isTrmAllowed || !$isRtyAllowed){
+                                continue;
+                            }
+
+                            if(array_key_exists(RT_RELATION, $fields) && !in_array($related->relationID, $records)){
+                                $records[] = $related->relationID;
+                                $related_recs['headers'][$related->relationID] = [
+                                    mysql__select_value(self::$mysqli, 'SELECT rec_Title FROM Records WHERE rec_ID = ?', ['i', $related->relationID]),
+                                    RT_RELATION,
+                                    0,
+                                    mysql__select_value(self::$mysqli, 'SELECT rec_NonOwnerVisibility FROM Records WHERE rec_ID = ?', ['i', $related->relationID])
+                                ];
+                            }
+
+                            $values[] = $related->relationID;
+
+                            if($include_resource_titles){
+                                $resource_titles[] = $related_recs['headers'][$related->relationID][0];
+                            }
+                        }
+
+                        foreach($related_recs['reverse'] as $related){
+
+                            if($related->relationID == 0 || in_array($related->relationID, $values)){
+                                continue;
+                            }
+
+                            $sourceRTY = $related_recs['headers'][$related->sourceID][1];
+
+                            $all_terms = self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_term_tree];
+                            $nonsel_terms = self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_term_nosel];
+                            $isTrmAllowed = \VerifyValue::isValidTerm($all_terms, $nonsel_terms, $related->trmID, $dt_id);
+                            $isRtyAllowed = \VerifyValue::isValidPointer($relmarker_details[$sourceRTY][$dt_id], $recID);
+
+                            if(!$isTrmAllowed || !$isRtyAllowed){
+                                continue;
+                            }
+
+                            if(array_key_exists(RT_RELATION, $fields) && !in_array($related->relationID, $records)){
+                                $records[] = $related->relationID;
+                                $related_recs['headers'][$related->relationID] = [
+                                    mysql__select_value(self::$mysqli, 'SELECT rec_Title FROM Records WHERE rec_ID = ?', ['i', $related->relationID]),
+                                    RT_RELATION,
+                                    0,
+                                    mysql__select_value(self::$mysqli, 'SELECT rec_NonOwnerVisibility FROM Records WHERE rec_ID = ?', ['i', $related->relationID])
+                                ];
+                            }
+
+                            $values[] = $related->relationID;
+
+                            if($include_resource_titles){
+                                $resource_titles[] = $related_recs['headers'][$related->relationID][0];
+                            }
+                        }
+
+                        $value = implode($csv_mvsep, $values);
+
+                        if($include_resource_titles && empty($values)){
+                            $resource_titles[] = '';
+                        }
                     }else{
                         $value = null;
                     }
@@ -817,7 +894,7 @@ public static function output($data, $params){
                             $enum_label[] = '';
                             $enum_code[] = '';
 
-                        }elseif($include_resource_titles && $dt_type=='resource'){
+                        }elseif($include_resource_titles && ($dt_type=='resource' || $dt_type=="relmarker")){
                             $resource_titles[] = '';
                         }elseif($dt_type=='file'){
                             $file_ids[] = '';
@@ -886,7 +963,7 @@ public static function output($data, $params){
                     $record_row[] = implode($csv_delimiter,$record_urls);// two separate columns
                 }
 
-                if($value == '' && $dt_type=="resource" && $include_resource_titles && empty($resource_titles)){ // to avoid mismatched rows when adding details
+                if($value == '' && ($dt_type=='resource' || $dt_type=='relmarker') && $include_resource_titles && empty($resource_titles)){ // to avoid mismatched rows when adding details
                     $record_row[] = $value;
                 }
             }
@@ -1134,11 +1211,11 @@ public static function output_header($data, $params)
                                             strtolower(self::$defRecTypes['names'][$constr_rt_id]))!==false);
                         $field_name_title = $field_name.' '
                                                 //.($rectypename_is_in_fieldname?'':(self::$defRecTypes['names'][$constr_rt_id].' '))
-                                                .'RecordTitle';
+                                                .H_FLDS['rec_Title'];
                         $field_name = $field_name.($rectypename_is_in_fieldname
-                                            ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').H_ID;
+                                            ?'':' ('.self::$defRecTypes['names'][$constr_rt_id].')').' '.H_FLDS['rec_ID'];
                     }else{
-                        $field_name_title = $field_name.' RecordTitle';
+                        $field_name_title = $field_name.H_FLDS['rec_Title'];
                     }
                     if($field_type=='relmarker'){
                         $relmarker_details[$rt][$dt_id] = $constr_rt_id;
@@ -1150,15 +1227,12 @@ public static function output_header($data, $params)
                     //record header
                     $field_type = null;
 
-                    if($dt_id=='rec_ID'){
-                        if($rt>0){
-                            $field_name = self::$defRecTypes['names'][$rt].H_ID;
-                        }else{
-                            $field_name = 'H-ID';
-                            $any_rectype = $rt;
-                        }
+                    $field_name = array_key_exists($dt_id, H_FLDS) ? H_FLDS[$dt_id] : $dt_id;
+
+                    if($rt>0){
+                        $field_name = self::$defRecTypes['names'][$rt].' '.$field_name;
                     }else{
-                        $field_name = $dt_id; //record header field
+                        $any_rectype = $rt;
                     }
                 }
 

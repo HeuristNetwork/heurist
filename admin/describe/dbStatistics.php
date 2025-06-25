@@ -61,14 +61,12 @@ function mysql__select_val($query) {
 * Calculates the directory size.
 * REMARK: The global $mysqli is declared but not used within this function.
 *
-* @global mysqli $mysqli The mysqli connection object (declared but not used).
 * @param string $dir Path to the directory.
 * @return int The size of the directory in bytes.
 * @todo move to utilities/UFile.php
 */
 function dirsize($dir)
 {
-    global $mysqli; // REMARK: This global variable is not used in the function.
 
     @$dh = opendir($dir);
     $size = 0;

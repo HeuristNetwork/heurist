@@ -253,7 +253,6 @@ $.widget( "heurist.buttonsMenu", {
      * Creates a top-level menu button.
      * It extracts attributes like ID, title, label, style, and icons from the provided `top_level` jQuery element,
      * constructs the button HTML, appends it to the main menu, and stores a reference in `this.menuBtns`.
-     * Remark: Corrected typo `icon_righ` to `icon_right`.
      * @memberof heurist.buttonsMenu
      * @private
      * @param {jQuery} top_level - The jQuery object representing the `<ul>` element for this menu button.
@@ -335,7 +334,7 @@ $.widget( "heurist.buttonsMenu", {
      * Initializes individual submenu items by setting their attributes and event handlers.
      * It appends an anchor (`<a>`) to each `<li>` item with the appropriate label, icon, and hint,
      * based on the `data-action` attribute.
-     * Remark: Corrected typo "foind" to "found" in a comment.
+     * 
      * @memberof heurist.buttonsMenu
      * @private
      * @param {number} idx - The index of the submenu item in the collection (unused).

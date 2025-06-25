@@ -178,7 +178,7 @@ $.widget( "heurist.staticPage", {
             let url = this.options.url.replace("[dbname]",  window.hWin.HAPI4.database);
             url = url.replace("[layout]",  window.hWin.HAPI4.sysinfo['layout']);
             if(this.options.url.indexOf('http://')<0 && this.options.url.indexOf('https://')<0){
-                this.options.url = window.hWin.HAPI4.baseURL + url; // REMARK: Original code assigns to this.options.url, potentially modifying it permanently after placeholder replacement. Consider if 'url' (local var) should be used for iframe src and .load() instead.
+                this.options.url = window.hWin.HAPI4.baseURL + url;
             }
 
             

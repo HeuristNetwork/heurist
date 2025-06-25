@@ -144,12 +144,10 @@ $.widget( "heurist.cmsStatistics", $.heurist.baseAction, {
     /**
      * Handles the response from the Matomo API (alternative handler, seems unused or for debugging).
      * Displays the raw JSON response.
-     * REMARK: The method name `_afterActionEvenHandler2` seems to have a typo ("Even" instead of "Event").
-     * This was not corrected to adhere to "DO NOT MODIFY THE CODE" instruction.
      * @private
      * @param {Object|string} response - The response from the Matomo API.
      */
-    _afterActionEvenHandler2: function( response ){
+    _afterActionEventHandler2: function( response ){
 
         this.element.css('cursor','auto');
         window.hWin.HEURIST4.msg.sendCoverallToBack(true);

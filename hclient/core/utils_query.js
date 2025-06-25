@@ -195,7 +195,7 @@ window.hWin.HEURIST4.query = {
         
         rules = window.hWin.HEURIST4.util.isJSON(rules); //parses if string
         
-        if(rules===false){
+        if(!rules){ //this is not json
             return null;
         }
         

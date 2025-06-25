@@ -101,12 +101,9 @@ $.widget( "heurist.selectFile", {
         size: 64,
         
         /**
-         * If true and `isdialog` is true, the dialog element is removed from DOM on close.
-         * If false, the dialog is just hidden.
-         * REMARK: The `close` handler in `_gettingFiles` has `that.option.keep_dialogue` (should be `that.options.keep_dialogue`).
-         * If `keep_dialogue` is true (intending to keep), it calls `that._as_dialog.remove()`, which destroys it.
-         * If `keep_dialogue` is false (intending to not keep), it calls `that._as_dialog.dialog('close')`.
-         * This logic appears inverted or the option name is misleading. Documentation assumes current code logic.
+         * If true and `isdialog` is true the dialog is just hidden,
+         * If false it calls `that._as_dialog.remove()`, which destroys it.
+         * 
          * @option {boolean}
          * @default false
          */
@@ -291,15 +288,6 @@ $.widget( "heurist.selectFile", {
     }, //end _init
 
     /**
-     * Refreshes the widget.
-     * Standard jQuery UI widget lifecycle method. Currently, this method is implemented as an empty function.
-     * @private
-     */
-    _refresh: function(){
-        // REMARK: This method is empty in the source code.
-    },
-
-    /**
      * Cleans up the widget instance upon removal.
      * Removes the internally created `recordList` element and the dialog element (`_as_dialog`)
      * if it exists. This is part of the standard jQuery UI widget lifecycle.
@@ -372,7 +360,7 @@ $.widget( "heurist.selectFile", {
      *      - Otherwise, a new jQuery UI dialog is created using `this.element` as its content,
      *        configured with `options.title` and other dialog settings. The dialog instance
      *        is stored in `_as_dialog`. The `close` handler for this new dialog checks `options.keep_dialogue`
-     *        (REMARK: typo `that.option.keep_dialogue` in original code) to decide whether to remove or just close the dialog.
+     *
      *    - The fetched recordset is cached in `_cachedRecordset`.
      *    - The internal `recordList` widget is updated with the new recordset.
      *  - If no files are found, the dialog (if open) is closed, and a flash message
@@ -416,12 +404,10 @@ $.widget( "heurist.selectFile", {
                                             that.element.css({overflow: 'none !important', width:pele.width()-24 });
                                         },
                                         close:function(){ // Dialog close behavior
-                                            // REMARK: 'that.option.keep_dialogue' in original code, likely a typo for 'that.options.keep_dialogue'.
-                                            // Also, logic for keep_dialogue seems inverted: true removes, false closes.
-                                            if(that.options.keep_dialogue){ // If option indicates to "keep" (but code removes)
-                                                that._as_dialog.remove();        
-                                            }else{ // If option indicates not to keep (but code just closes)
+                                            if(that.options.keep_dialogue){
                                                 that._as_dialog.dialog('close');
+                                            }else{
+                                                that._as_dialog.remove();        
                                             }
                                         }
                                     });

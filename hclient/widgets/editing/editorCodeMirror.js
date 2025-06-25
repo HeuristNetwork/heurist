@@ -71,7 +71,7 @@ class EditorCodeMirror {
      * @property {boolean} matchBrackets - Highlights matching brackets.
      * @property {boolean} smartIndent - Whether to use context-sensitive indentation.
      */
-    #default_options = { // REMARK: Using JS private field syntax. JSDoc uses @private for convention.
+    #default_options = {
         mode           : "htmlmixed", // list of modes: https://codemirror.net/5/mode/index.html
         tabSize        : 2,
         indentUnit     : 2,
@@ -214,7 +214,6 @@ class EditorCodeMirror {
             });
 
             // Make the editor resizable and update CodeMirror size accordingly
-            //$('.CodeMirror') // REMARK: This is a commented out selector, seems like a leftover.
             this.editorContainer.resizable({
                 resize: function() { // jQuery UI resizable event
                     that.codeEditor.setSize($(this).width(), $(this).height());

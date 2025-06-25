@@ -709,8 +709,6 @@ use hserv\utilities\USystem;
      * @param string $rawdata The data to save.
      * @param string $filename The path to the file.
      * @return int|false The number of bytes written to the file on success, or 0 if $rawdata is empty or $filename is not a string.
-     *                   (Note: original code returns filesize, which could be 0 for an empty successful write.
-     *                   Returning 0 for invalid input is consistent with that possible outcome).
      */
     function fileSave($rawdata, $filename)
     {
@@ -731,8 +729,6 @@ use hserv\utilities\USystem;
      * @param string $rawdata The data to append.
      * @param string $filename The path to the file.
      * @return int|false The new file size after appending, or 0 if $rawdata is empty.
-     *                   (Note: original code returns filesize, which could be 0 if file becomes empty or $rawdata is empty.
-     *                   Returning 0 for empty $rawdata is consistent).
      */
     function fileAdd($rawdata, $filename)
     {

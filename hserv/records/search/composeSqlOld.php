@@ -1440,7 +1440,7 @@ class Predicate {
                 // Default to LIKE matching the beginning of the date string
                 return "like '$datestamp%'";
 
-                //old way comment from original code:
+                //old way
                 /*
                 // it's a ":" ("like") query - try to figure out if the user means a whole year or month or default to a day
                 $match = preg_match('/^[0-9]{4}$/', $this->value, $matches);
@@ -1482,7 +1482,6 @@ class Predicate {
      */
     public function makeDateClause() {
 
-        // Original code had a commented out isEmptyValue check.
         // if($this->isEmptyValue()){ return SQL_NULL; } 
 
         if (strpos($this->value,"<>")) { // Value represents a range
@@ -2286,7 +2285,7 @@ class FieldPredicate extends Predicate {
             }
         } elseif (strpos($this->value,"<>")>0) {  // Numeric range (e.g., "10<>20")
             $vals = explode("<>", $this->value);
-            // Ensure values are numeric before using in BETWEEN for safety, though original code doesn't explicitly check type here.
+            // Ensure values are numeric before using in BETWEEN for safety
             $val1 = is_numeric($vals[0]) ? $vals[0] : '0';
             $val2 = is_numeric($vals[1]) ? $vals[1] : '0';
             $match_pred = SQL_BETWEEN.$val1.SQL_AND.$val2.' ';
@@ -2318,8 +2317,7 @@ class FieldPredicate extends Predicate {
                 } else { // Default to LIKE for strings, or exact for numbers if not otherwise specified
                     if(($this->field_type_value=='float' || $this->field_type_value=='integer') && $isnumericvalue){
                         // For numeric types, if no other operator, treat as exact match.
-                        // Original code had ' = "'.floatval($this->value).'"' which casts to float then quotes - potentially problematic.
-                        // Using direct numeric comparison is better:
+                        // Using direct numeric comparison:
                         $match_pred = ' = '.floatval($this->value);
                     } elseif(strpos($this->value,"%")===false){ // If no wildcards in value, add them for LIKE
                         $match_pred = " like '%".$mysqli->real_escape_string($this->value)."%'";

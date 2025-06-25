@@ -169,9 +169,6 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
 
     /**
      * Custom widget-specific cleanup. Called when the widget is destroyed.
-     * Remark: Currently empty. If any elements or event handlers are manually created
-     * outside of jQuery UI's mechanisms (e.g., global event handlers, non-widget elements),
-     * they should be cleaned up here. `_super()` should be called if baseAction has a _destroy.
      * @memberof heurist.dbAction
      * @private
      */
@@ -388,7 +385,6 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     /**
      * Handles the server response after a database action is successfully completed.
      * Displays results, warnings, and appropriate messages or redirects based on the action performed.
-     * Remark: Method name has a typo "EvenHandler", should be "EventHandler".
      * @memberof heurist.dbAction
      * @private
      * @param {object} response_data - The `data` part of the server response.

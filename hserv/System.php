@@ -1599,7 +1599,7 @@ class System {
         if(headers_sent()) {
             // Cannot start session if headers are already sent.
             // Depending on strictness, this could be an error or simply proceed.
-            // Original code returns true, implying it's not a fatal error for this method's contract.
+            // It returns true, implying it's not a fatal error for this method's contract.
             return true;
         }
 
@@ -2150,26 +2150,16 @@ class System {
             }
             return $base_url . '?recID=' . $rec_id_val . '&fmt=html&db=' . $this->dbname;
         }
-
-        // Handle base URL potentially ending with /HEURIST/ or just /
-        // This logic aims to correctly construct the path like /HEURIST/dbname or /dbname
-        $base_path_segment = rtrim($base_url, '/');
-        // If HEURIST_BASE_URL_PRO is 'http://server/HEURIST/', $base_path_segment is 'http://server/HEURIST'
-        // If HEURIST_BASE_URL_PRO is 'http://server/', $base_path_segment is 'http://server'
         
-        // The original code had some complex logic for /HEURIST/. Simplifying:
-        // We want $base_path_segment to be the correct prefix for /dbname/...
-        // If $base_url already ends with /HEURIST, then keep it.
-        // If $base_url is just the server (e.g. http://localhost/), it implies Heurist might be at root, or this needs prefixing.
-        // The original check `strpos($base_url, "/HEURIST/") !== false` is kept.
-        // The part ` $parts[ count($parts) - 1 ] == 'HEURIST' ` seems to assume $base_url is a path not a full URL.
-        // A safer approach for URL construction is usually to ensure no double slashes.
-        // $final_base_url = rtrim($base_url, '/'); // Start with a clean base
+        if(strpos($base_url, "/HEURIST/") !== false){
+            $parts = explode('/', $base_url);
+            $base_url = $parts[ count($parts) - 1 ] == 'HEURIST' ? $base_url : str_replace('/HEURIST', '', $base_url);
+        }        
 
         if (!empty($template)) {
-            return $base_path_segment . '/' . $this->dbname . '/tpl/' . $template . '/' . $rec_id_val;
+            return $base_url . '/' . $this->dbname . '/tpl/' . $template . '/' . $rec_id_val;
         }
-        return $base_path_segment . '/' . $this->dbname . '/view/' . $rec_id_val;
+        return $base_url . '/' . $this->dbname . '/view/' . $rec_id_val;
     }
 
 
