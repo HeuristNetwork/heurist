@@ -103,7 +103,7 @@ $.widget( "heurist.controlPanel", {
      * Sets up the visual and interactive controls for the control panel after its HTML content has been loaded.
      * This includes setting up the logo, version information, database selection dropdown,
      * and the main profile/help menu. It also binds necessary event listeners.
-     * Remark: Corrected an end-of-function comment.
+     * 
      * @memberof heurist.controlPanel
      * @private
      */

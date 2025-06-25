@@ -2062,12 +2062,12 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             
             // Ensure rootID is consistently typed (string or null) for comparison within __addChilds
             const currentRootID = (rootID === null || typeof rootID === 'undefined' || rootID === 0 || rootID === '0') ? null : String(rootID);
-            let res = __addChilds(this, currentRootID);
+            let res_tree = __addChilds(this, currentRootID);
             
-            // Original code had a commented-out section to wrap result in a root node if rootID was provided.
+            // Wrap result in a root node if rootID was provided.
             // This is generally not needed if the tree structure is built directly from the root.
             // if(rootID>0){
-            //    //res = [{key:rootID, title:'root', folder:true, children:res }];
+            //    //res_tree = [{key:rootID, title:'root', folder:true, children:res }];
             // }
             
  /*           
@@ -2101,7 +2101,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             
             }//for
 */            
-            return res;
+            return res_tree;
         },
         
         /**

@@ -557,9 +557,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
     /**
      * Checks if the length of an input field's value is within a specified range [min, max].
-     * If the length is outside the range, it displays a flash error message and adds an error class
-     * to the input field (though the error class addition seems to be commented out in the original code).
-     * Uses `checkLength2` to get the error message text.
+     * If the length is outside the range, it displays a flash error message.
+     * 
+     * Uses `checkLength2` to get the error message text and add error class.
      *
      * @param {jQuery} input - jQuery object representing the input element.
      * @param {string} title - A title or name for the input field, used in the error message (e.g., "Username").
@@ -575,9 +575,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     checkLength: function( input, title, message, min, max ) {
         let message_text = window.hWin.HEURIST4.msg.checkLength2( input, title, min, max );
         if(message_text!=''){
-            // The original code had commented out logic to update a 'message' jQuery element.
-            // Currently, it only shows a flash message.
-            if(!window.hWin.HEURIST4.util.isempty(message) && typeof message === 'string') message_text = message; // Use custom message string if provided
+            // Use custom message string if provided
+            if(!window.hWin.HEURIST4.util.isempty(message) && typeof message === 'string') message_text = message; 
              
             window.hWin.HEURIST4.msg.showMsgFlash('<span style="padding:10px;border:0;">'+message_text+'</span>', 3000);
             
@@ -1670,7 +1669,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * @param {string|number} [options.session_id] - A unique session ID for the progress tracking.
      *                                             If not provided, a random one is generated.
      * @param {number} [options.interval=900] - The interval in milliseconds for polling the progress URL. Defaults to 900ms.
-     *                                          Passed as `t_interval` in original code, renamed here for clarity.
      * @param {number} [options.width=500] - Width of the popup dialog, if applicable.
      * @param {boolean} [options.hideTitle=true] - Whether to hide the title of the popup dialog, if applicable.
      * @returns {string|undefined} The session ID used for the progress tracking, or undefined if a previous progress
@@ -1897,8 +1895,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             window.hWin.HEURIST4.msg._progressDiv = null;
         }
         if(window.hWin.HEURIST4.msg._progressPopup){
-            // Note: Original code uses getMsgDlg() here, which might be incorrect if _progressPopup was created differently.
-            // Assuming _progressPopup is the dialog instance itself.
             if (window.hWin.HEURIST4.msg._progressPopup.dialog('instance')) {
                  window.hWin.HEURIST4.msg._progressPopup.dialog( "close" );
             }

@@ -84,7 +84,7 @@ function ReportScheduleEditor() {
 
         _reports = response['data'];
 
-        let qlabel = ''; // REMARK: qlabel is assigned but not used further in this function. Might be for future use or leftover.
+        let qlabel = '';
         let typeID = window.hWin.HEURIST4.util.getUrlParameter('typeID', location.search);
         let templatefile = window.hWin.HEURIST4.util.getUrlParameter('template', location.search);
         let hquery = window.hWin.HEURIST4.util.getUrlParameter('hquery', location.search);
@@ -133,7 +133,6 @@ function ReportScheduleEditor() {
     /**
      * Populates the template selector dropdown (`#rps_Template`).
      * Uses `window.hWin.HEURIST4.ui.createTemplateSelector` for dynamic population.
-     * REMARK: An older, commented-out implementation for populating the selector was present.
      *
      * @private
      * @todo Consider if `#todo - filter based on record types in result set` is still relevant.
@@ -263,7 +262,6 @@ function ReportScheduleEditor() {
         }
         
         let error = false;
-        // let report = ''; // REMARK: `report` variable was previously assembled but not used. Removed.
 
         for (let ind in response.data) { // Iterate over results for potentially multiple saves (though UI implies one).
             if (!window.hWin.HEURIST4.util.isnull(ind)) {
@@ -273,14 +271,11 @@ function ReportScheduleEditor() {
                     error = true;
                 } else { // Success, item is the (potentially new) record ID.
                     _recID = Number(item); // Update current record ID.
-                    // if (report !== "") { report = report + ","; }
-                    // report = report + Math.abs(_recID);
                 }
             }
         }
 
         if (!error) {
-            // let ss = (_recID < 0) ? "added" : "updated"; // REMARK: `ss` variable was not used. Removed.
             window.close(response); // Close window, passing response back to parent if needed.
         }
     }

@@ -693,9 +693,8 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 $res_dump = DbUtils::databaseDump(HEURIST_DBNAME_FULL, $database_dumpfile, $dump_options, false);
 
                 if (!$res_dump) {
-                    // REMARK: `DIV_E` is likely a constant for an error div, not defined here.
-                    // Assuming it's defined in initPageMin.php or similar.
-                    if (defined('DIV_E')) print DIV_E;
+                    
+                    print defined('DIV_E')?DIV_E:'</div>';
                     report_message("Sorry, unable to generate MySQL database dump. ".$system->getErrorMsg().'  '.$please_advise, true, true);
                 }
 

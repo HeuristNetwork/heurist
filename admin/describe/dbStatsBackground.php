@@ -251,7 +251,7 @@ function zipStats($file_to_zip, $server_name, $delete_original = false){
         exitScript(HEURIST_ERROR, 'Failed to create zip folder for stats', true);
     }
 
-    if(!$zip->addFile($file_to_zip, "db_stats.txt")){ // REMARK: Hardcoded "db_stats.txt" as the name within zip.
+    if(!$zip->addFile($file_to_zip, "db_stats.txt")){
         $zip->close();
         exitScript(HEURIST_ERROR, 'Failed to add stats into zip', true);
     }

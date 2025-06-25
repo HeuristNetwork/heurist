@@ -758,7 +758,7 @@ function edit_link($rec_id, $label, $id_only=false, $strip_tags=true){
 /**
  * Formats a detail value for display, creating links for resource pointers.
  *
- * REMARK: Original comment indicates potential issue: "Artem: Errneus implementation. dty_ID and trm_ID can have the same values!"
+ * REMARK: dty_ID and trm_ID can have the same values!
  * This means that `$rd_type` might ambiguously refer to either a detail type ID or a term ID if they happen to collide.
  * The current logic prioritizes checking against `$reference_bdts` (resource pointers) then `$enum_bdts` (terms).
  *

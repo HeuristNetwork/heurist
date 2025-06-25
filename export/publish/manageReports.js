@@ -34,11 +34,9 @@ let reportManager = null;
  *
  * @constructor
  * @param {boolean} [_isFilterMode=false] - Indicates if the manager is in a mode to select from all reports or filter an existing set.
- *                                         REMARK: Currently marked as NOT USED in original comments.
+ *                                          Currently marked as NOT USED in original comments.
  * @param {boolean} [_isWindowMode=false] - True if the manager is operating within a popup window context, false if embedded in a div.
- *                                         This may affect how cancel/close operations are handled.
- * @author Artem Osmakov <osmakov@gmail.com>
- * @version 2012.0426 // REMARK: Original version, consider updating.
+ *                                          This may affect how cancel/close operations are handled.
  */
 function ReportManager(_isFilterMode, _isWindowMode) { // _isFilterMode is not used
     /** @private @const {string} _className - The name of this class. */
@@ -48,10 +46,6 @@ function ReportManager(_isFilterMode, _isWindowMode) { // _isFilterMode is not u
     /** @private {?object} _dataTableParams - Parameters used to initialize the DataTable. */
     let _dataTableParams;
             
-    // REMARK: _myDataTable and _myDataSource appear to be unused legacy variables.
-	// let _myDataTable;
-	// let _myDataSource;
-
     /** @private {boolean} _isSelection - Flag indicating if selection mode (e.g., checkboxes) is active in the table. */
     let _isSelection = false;
     /** @private {?(number|string)} _usrID - User ID for filtering reports (currently not implemented for filtering). */
@@ -60,8 +54,7 @@ function ReportManager(_isFilterMode, _isWindowMode) { // _isFilterMode is not u
 	let _arr_selection = [];
     /** @private {?function} _callback_func - Callback function to be executed in non-window mode, e.g., after selection. */
 	let _callback_func;
-    /** @private {boolean} _isSingleSelection - Flag for single item selection mode. */
-	// let _isSingleSelection = false; // REMARK: _isSingleSelection is declared but not used.
+
     /** @private {Array<object>} _records - Array storing all report schedule data fetched from the server. */
 	let _records;
     /** @private {?string} _keepParameters - Stores URL parameters to be passed to the edit dialog, e.g., for pre-filling a new schedule. */
@@ -345,8 +338,7 @@ function ReportManager(_isFilterMode, _isWindowMode) { // _isFilterMode is not u
 				/**
 				 * Handles a cancel action, typically for closing the manager interface or a selection process.
 				 * If in window mode, it closes the window. Otherwise, if a callback was provided, it's invoked.
-				 * REMARK: The original comment "NOT USED HERE" might refer to a specific context where this manager
-				 * was embedded, and a generic cancel button was not the primary way to close it.
+				 * NO USED HERE
 				 */
 				cancel : function () {
 					if (_isWindowMode) { // If operating as a separate window/popup

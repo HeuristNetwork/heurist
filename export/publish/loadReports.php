@@ -41,7 +41,7 @@ require_once dirname(__FILE__).'/../../autoload.php';
 // Initialize Heurist system
 $system = new hserv\System();
 if (!$system->init(@$_REQUEST['db'])) {
-    $system->errorExit('Database initialization failed.'); // REMARK: Added more specific error message.
+    $system->errorExit('Database initialization failed.');
 }
 
 // Check user access
@@ -50,7 +50,7 @@ if (!$system->hasAccess()) {
 }
 
 // Set content type to JSON for all responses
-header('Content-Type: application/json; charset=utf-8'); // REMARK: Added charset=utf-8
+header('Content-Type: application/json; charset=utf-8');
 
 /**
  * Global array mapping usrReportSchedule column names to their prepared statement data types.
@@ -71,14 +71,14 @@ $sys_usrReportSchedule_ColumnNames = array(
     "rps_IntervalMinutes" => "i"
 );
 
-$method = @$_REQUEST['method']; // REMARK: Corrected variable name from $metod to $method
+$method = @$_REQUEST['method'];
 $mysqli = $system->getMysqli();
 
 // --- Main Method Dispatcher ---
 if ($method == "searchreports") {
     // Handles searching for scheduled reports.
     // Expects optional 'name' parameter for filtering by title.
-    // $f_id = @$_REQUEST['recID']; // REMARK: $f_id is declared but not used.
+    
     $f_name = $mysqli->real_escape_string(filter_var(@$_REQUEST['name'], FILTER_SANITIZE_STRING));
     // $f_userid = @$_REQUEST['usrID']; // not currently used in query.
 
@@ -98,7 +98,7 @@ if ($method == "searchreports") {
         }
         $res->close();
     } else {
-        // REMARK: Added basic error handling for query failure.
+        // Basic error handling for query failure.
         $system->errorExit('Error executing searchreports query: ' . $mysqli->error);
     }
 
@@ -153,7 +153,7 @@ if ($method == "searchreports") {
     $colNames = $data['report']['colNames'];
     $results = array(); // Stores results of each update/insert operation
 
-    foreach ($data['report']['defs'] as $recID_str => $rt_values) { // REMARK: $recID comes as string key
+    foreach ($data['report']['defs'] as $recID_str => $rt_values) {
         $results[] = updateReportSchedule($mysqli, $colNames, intval($recID_str), $rt_values);
     }
 
@@ -310,18 +310,16 @@ exit; // Ensure script terminates after handling the request.
                     $query = "INSERT INTO usrReportSchedule (".implode(",", $fieldNames_for_insert).") VALUES (".implode(",", $query_parts).")";
                 } else {
                     $query = "UPDATE usrReportSchedule SET ".implode(",", $query_parts)." WHERE rps_ID = ".intval($recID);
-                    // REMARK: For UPDATE, rps_ID is part of WHERE, not SET. If rps_ID itself is in $colNames, it will be set.
                 }
 
                 // Check for duplicate title before saving
-                // REMARK: Ensure $rps_Title is properly escaped for the check query, even though main query uses prepared statement.
+                // Ensure $rps_Title is properly escaped for the check query, even though main query uses prepared statement.
                 $check_query = 'SELECT rps_ID FROM usrReportSchedule WHERE rps_ID!='.intval($recID).' AND rps_Title="'.$mysqli->real_escape_string($rps_Title).'"';
                 $rid = mysql__select_value($mysqli, $check_query);
                 if ($rid > 0) {
                     $ret = 'Duplicate entry. There is already a report with the same name.';
                 } else {
-                    // REMARK: Temporary ALTER TABLE logic from 2016-05-17. This should ideally be a one-time migration.
-                    // Keeping it here as per original code but noting it's unusual for an operational script.
+                    // Temporary ALTER TABLE logic from 2016-05-17. This should ideally be a one-time migration.
                     $res_struct = $mysqli->query("SHOW FIELDS FROM usrReportSchedule WHERE Field='rps_IntervalMinutes'");
                     if ($res_struct) {
                         $struct = $res_struct->fetch_assoc();
@@ -343,7 +341,7 @@ exit; // Ensure script terminates after handling the request.
                         $ret = "Error $oper in updateReportSchedule - ".$rows_affected.' SQL: '.$query;
                     } elseif ($rows_affected > 0 || $rows_affected === 0) { // Success for INSERT (usually >0) or UPDATE (can be 0 if no change)
                         if ($isInsert) {
-                            $ret = -$mysqli->insert_id; // Return negative new ID for insert, as per original logic
+                            $ret = -$mysqli->insert_id; // Return negative new ID for insert
                         } else {
                             $ret = $recID; // Return existing ID for update
                         }

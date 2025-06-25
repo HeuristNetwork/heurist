@@ -136,7 +136,7 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
         let progress_div = this._$('.progressbar_div').show();
         // Uses a global/centralized progress display mechanism
         window.hWin.HEURIST4.msg.showProgress({container: progress_div,
-                        session_id: session_id, t_interval:t_interval || 2000, onComplete:onComplete});
+                        session_id: session_id, interval:t_interval || 2000, onComplete:onComplete});
     },
 
 
@@ -159,7 +159,6 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
      * Updates the UI with statistics (total checked, bad URLs, processed counts per type)
      * and provides links to view problematic records. Manages UI state based on whether
      * the verification process is fully finished.
-     * Remark: Method name has a typo "EvenHandler", should be "EventHandler". The actual method name in code is `_afterActionEventHandler`.
      * @memberof heurist.dbVerifyURLs
      * @private
      * @param {object} response_data - The `data` part of the server response.

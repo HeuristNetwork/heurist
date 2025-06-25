@@ -155,7 +155,7 @@ function handleSettingsInUI() {
 
     let is_advanced = getSetting('setting_advanced');
 
-    $('#setAdvancedMode').css({cursor:'pointer'}).on('click', // REMARK: Changed cursor from 'hand' to 'pointer' for broader compatibility
+    $('#setAdvancedMode').css({cursor:'pointer'}).on('click',
         function(){
               let is_advanced_current = getSetting('setting_advanced'); // Use a different variable name to avoid confusion
               is_advanced_current = (is_advanced_current ==='false'); // Strict comparison
@@ -248,7 +248,7 @@ function handleSettingsInUI() {
 
     //------------ LINKS ----------
 
-    $('#linksMode0').button({icon: 'ui-icon-link-streight', showLabel:false}) // REMARK: Typo 'streight' should be 'straight' in icon name if it exists
+    $('#linksMode0').button({icon: 'ui-icon-link-straight', showLabel:false})
         .on('click', function(){ setLinkMode('straight');} );
     $('#linksMode1').button({icon: 'ui-icon-link-curved', showLabel:false})
         .on('click', function(){ setLinkMode('curved');} );

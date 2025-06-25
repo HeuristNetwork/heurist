@@ -114,7 +114,6 @@ $.widget( "heurist.dbVerify", $.heurist.dbAction, {
      * Handles the server response after a verification action is completed.
      * Displays the results, including any termination messages.
      * Calls `_initVerificationResponse` to process and display the detailed verification report.
-     * Remark: Method name has a typo "EvenHandler", should be "EventHandler".
      * @memberof heurist.dbVerify
      * @private
      * @param {object} response_data - The `data` part of the server response containing verification results.

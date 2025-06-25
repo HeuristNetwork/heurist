@@ -373,13 +373,14 @@ function progressSession($progress_session_id, $processed_count, $total_count){
  * Attempts to update a standard 'Title' or 'Name' field (dtl_DetailTypeID based on DT_NAME)
  * for a relationship record (rec_RecTypeID = 1) if its calculated rec_Title would become blank.
  * This is a fallback to ensure relationship records have some textual representation.
- * REMARK: This function uses the global $mysqli variable without explicitly declaring it global.
  *
  * @param array $rec Associative array of the record data, must include 'rec_RecTypeID', 'rec_ID', and 'rec_Title'.
  * @param int $titleDT The detail type ID for the 'Title' or 'Name' field (typically from Concept Code 2-1).
  * @return bool True if a title detail was successfully inserted or updated for the relationship record, false otherwise.
  */
 function updateRaltionhipForBlankTitle($rec, $titleDT){
+    
+    global $mysqli;
    
     if ( $rec['rec_RecTypeID'] == 1 && $rec['rec_Title']) {
         

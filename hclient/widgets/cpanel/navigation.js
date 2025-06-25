@@ -218,7 +218,7 @@ $.widget( "heurist.navigation", {
      * Handles different orientations ('treeview', 'horizontal', 'vertical', 'list').
      * Detects and flags recursive menu structures.
      * Caches generated menu items in `this.ids_cached_entries`.
-     * Remark: The condition `if(!lvl>0)` might be confusing; `if(lvl === undefined || lvl === null || lvl <= 0)` or `if(!lvl || lvl <= 0)` would be clearer.
+     *
      * @memberof heurist.navigation
      * @param {?string} orientation - The desired orientation ('treeview', 'horizontal', 'vertical', 'list'). Defaults to `this.options.orientation`.
      * @param {string|number} parent_id - The ID of the parent menu item. '0' for top level.
@@ -514,7 +514,7 @@ $.widget( "heurist.navigation", {
      * Initializes either Fancytree (for 'treeview') or jQuery UI Menu with the generated content.
      * Applies custom CSS and event handlers for jQuery UI Menu.
      * Calls `options.onInitComplete` callback if provided.
-     * Remark: The dialogId 'dialog-common-messages222' in the recursion error message seems specific and might be a leftover.
+     * 
      * @memberof heurist.navigation
      * @private
      */
@@ -541,7 +541,7 @@ $.widget( "heurist.navigation", {
             +(s.join('<br>'))
             +'</div>If you are the author, simply edit the CMS Home record through the website editor (Site tab, then the Edit website layout/properties button), and delete duplicates (this will not delete the page content, only the extra reference to the menu entry)'
             +'<p>If you can\'t fix this problem yourself, please send a bug report and we will take care of it.</p>'
-            ,null,null,{dialogId:'dialog-common-messages222',removeOnClose:true}); // Remark: dialogId is specific.
+            ,null,null,{dialogId:'dialog-common-messages222',removeOnClose:true});
 
         }
 
@@ -938,21 +938,6 @@ $.widget( "heurist.navigation", {
         }
     },
 
-
-    /**
-     * Placeholder for the _init method.
-     * Remark: In jQuery UI widgets, `_create` is the main initialization method.
-     * This `_init` method is part of the widget factory's lifecycle but typically not overridden
-     * unless there's a specific need to hook into re-initialization calls.
-     * Currently, it's empty and doesn't perform any operations.
-     * @memberof heurist.navigation
-     * @private
-     */
-    _init: function() {
-        // This is called on widget creation and on subsequent calls without arguments.
-        // _create() is the primary constructor.
-    },
-
    /**
     * Handles option changes for the widget.
     * This method is called by jQuery UI when `option()` is called on the widget.
@@ -963,19 +948,6 @@ $.widget( "heurist.navigation", {
    _setOptions: function( ) {
         this._superApply( arguments );
         // Potentially call _refresh() or other methods if options change requires UI update.
-   },
-
-
-   /**
-    * Placeholder for a refresh method.
-    * Remark: This method is currently empty and does not perform any actions.
-    * It could be implemented to update the widget based on external changes or option modifications.
-    * @memberof heurist.navigation
-    * @private
-    */
-   _refresh: function(){
-        // This method could be used to redraw or update the menu if needed.
-        // For example, if menuData could change dynamically after initialization.
    },
 
    /**

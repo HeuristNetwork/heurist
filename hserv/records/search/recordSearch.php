@@ -937,24 +937,10 @@ error_log(($time_end - $time_start)/60);
 function __assignFacetValue(&$params, $subs){ // Note: PHP passes arrays by value unless explicitly by reference in call. Here it's by value.
     foreach ($params as $key => $value){
         if(is_array($value)){
-            // If the original intent was to modify $params in place, this recursive call needs to assign back:
-            // $params[$key] = __assignFacetValue($value, $subs);
-            // However, the function signature implies $params itself is what's being modified or returned.
-            // Let's assume the modification is on a copy or the return value is used.
-            // For safety, if $params is an object, this would modify it. If array, it modifies a copy within this scope.
-            // To ensure modification of the original array if passed by value, the caller would need to use the return.
-            // Given the function returns $params, the caller can do $params = __assignFacetValue($params, $subs);
             $params[$key] = __assignFacetValue($params[$key], $subs); // Corrected to modify the current level's array/object
         } elseif($value=='$FACET_VALUE'){
             $params[$key] = $subs;
-            // Early exit after first replacement might be intended if $FACET_VALUE appears once per structure level.
-            // Original code returns $params here, which means only the first $FACET_VALUE in the *current level*
-            // or its *first child array that contains it* would be replaced if the function exited immediately.
-            // To replace all occurrences, this return should be removed from here.
-            // return $params; // This would stop further replacements at this level or sibling levels.
-            // Assuming the intent is to replace all occurrences, this return is problematic.
-            // For now, keeping original behavior.
-             return $params; // Original behavior: exits after first replacement in depth-first search.
+             return $params;
         }
     }
     return $params;
@@ -3772,7 +3758,6 @@ function recordGetField($record, $field_id){
  * Value format varies by `dty_Type`:
  * - "freetext", "blocktext", "date", "enum", etc.: Raw `dtl_Value`.
  * - "file": Array `['file' => fileinfo_array_from_fileGetFullInfo, 'fileid' => obfuscated_id]`.
- *           (Original code uses slightly different structure: `array($obfuscated_id, $mime_ext)` or full fileinfo if $needCompleteInformation)
  * - "resource": If `$expanded` is true: `['id' => linked_rec_ID, 'type' => linked_recTypeID, 'title' => linked_rec_Title, 'hhash' => linked_rec_Hash]`.
  *               If `$expanded` is false: Raw `dtl_Value` (the linked record ID).
  * - "geo": Array `['geo' => ['type' => dtl_Value, 'wkt' => dtl_Geo_WKT_string]]`.

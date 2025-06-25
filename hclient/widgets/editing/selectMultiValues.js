@@ -65,6 +65,7 @@ $.widget( "heurist.selectMultiValues", {
          * If true, allows multiple items to be selected in the tree.
          * This influences the Fancytree `selectMode` option (typically 3 for multi-hier).
          * If false, selection might be restricted (though Fancytree `selectMode:1` would be needed).
+         * 
          * REMARK: The Fancytree `selectMode` is hardcoded to `3` in `_initTreeView`, implying multiselect is always hierarchical.
          * This option's direct effect on Fancytree configuration might need review if single selection is desired.
          * @option {boolean}
@@ -170,16 +171,6 @@ $.widget( "heurist.selectMultiValues", {
             // If no data, show the empty message
             window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR(this.options.emptyMessage));
         }
-    },
-
-    /**
-     * Refreshes the widget.
-     * Standard jQuery UI widget lifecycle method. Currently, this method is implemented as an empty function
-     * in this base widget. Extending widgets may override it to implement specific refresh logic.
-     * @private
-     */
-    _refresh: function(){
-        // REMARK: This method is empty in the source code.
     },
 
     /**
@@ -346,7 +337,7 @@ $.widget( "heurist.selectMultiValues", {
                         if(response.status == window.hWin.ResponseStatus.OK){
                             data.node.setTitle(newname); // Update Fancytree node title
                             data.node.origTitle = newname; // Update original title tracker
-                            data.node.key = newname; // REMARK: Key is updated to new name. If keys should be stable IDs, this might be an issue.
+                            data.node.key = newname;
                             data.node.folder = true; // Ensure it's marked as a folder
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response); // Show error on failure

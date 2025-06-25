@@ -193,7 +193,6 @@ echo $tabs0.'finished'.$eol;
 /**
  * Purges a specific full-text search (FTS) index from a table if it exists.
  * If the index is dropped, the table is then optimized.
- * REMARK: This function uses the global $mysqli variable without explicitly declaring it global.
  *
  * @param string $table The name of the table from which to drop the index.
  * @param string $index The name of the FTS index to drop.
@@ -202,6 +201,8 @@ echo $tabs0.'finished'.$eol;
  */
 function purgeFtsIndex($table, $index, &$report ){
 
+     global $mysqli;
+     
             $res = false;
 
             $query = "SHOW INDEX FROM $table WHERE Key_name='$index'";
