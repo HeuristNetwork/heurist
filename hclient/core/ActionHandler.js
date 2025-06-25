@@ -357,8 +357,7 @@ class ActionHandler {
             entity: 'sysUsers',
             roles: data.selection,
             userIDs: selected_users,
-            sourceDB: selected_database,
-            request_id: window.hWin.HEURIST4.util.random()
+            sourceDB: selected_database
         };
 
         window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
