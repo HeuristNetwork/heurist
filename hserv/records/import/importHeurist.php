@@ -705,7 +705,7 @@ class ImportHeurist {
             }
 
             //3. add DT_THUMBNAIL detail to mapdocument record
-            $dbRecDetails = new RecordsBatch(self::$system, array('ulfID'=>$ulf_ID, dtyID=>DT_THUMBNAIL, 'recIDs'=>$rec_ID));
+            $dbRecDetails = new RecordsBatch(self::$system, array('ulfID'=>$ulf_ID, 'dtyID'=>DT_THUMBNAIL, 'recIDs'=>$rec_ID));
             $res = $dbRecDetails->detailsAdd();
 
             return $res;

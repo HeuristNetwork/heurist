@@ -16,6 +16,7 @@
 use hserv\entity\DbDefTerms;
 use hserv\utilities\USanitize;
 use hserv\entity\DbRecUploadedFiles;
+use hserv\utilities\Temporal;
 
 require_once dirname(__FILE__).'/../edit/recordModify.php';
 require_once dirname(__FILE__).'/../../utilities/geo/mapCoordinates.php';
@@ -1084,7 +1085,7 @@ public static function validateImport($params) {
         if(!$ignore_insert){
             $imp_session['validation']["count_insert"] = $imp_session['reccount'];
             $imp_session['validation']["count_insert_rows"] = $imp_session['reccount'];//all rows will be imported as new records
-            $select_query = self::composeQuery($sel_fields, $import_table)." LIMIT 5000";//for peview only
+            $select_query = self::composeQuery($sel_query, $import_table)." LIMIT 5000";//for peview only
             $imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query);
         }
 
@@ -2664,7 +2665,7 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
             //for}
 
             foreach($details['imp_id'] as $imp_id){
-                print "<div><span style='color:red'>Line: ".intval($imp_id).".</span> ".implode(";",$value);
+                print "<div><span style='color:red'>Line: ".intval($imp_id).".</span> $value";
                 $res = self::getImportValue($imp_id, $import_table);
                 if(is_array($res)){
                     $s = htmlspecialchars(implode(", ", $res));
@@ -2851,8 +2852,8 @@ private static function getImportValue($rec_id, $import_table){
      *                      - 'session': (Optional) Progress session ID.
      *                      - 'is_csv_import': (Optional) Flag indicating if the source is CSV, affecting geo error counting.
      * @param string $mode_output Output mode for error messages during the process (e.g., 'html', 'json').
-     * @return array|false The updated import session array, now including an 'import_report' with statistics
-     *                     (processed, inserted, updated, skipped, permissions issues, etc.), or `false` on critical error.
+     * @return array|false|string The updated import session array, now including an 'import_report' with statistics
+     *                            (processed, inserted, updated, skipped, permissions issues, etc.), or `false` on critical error.
      */
 public static function performImport($params, $mode_output){
 
@@ -3828,7 +3829,7 @@ public static function importTerms($params){
             $row_count ++;
 
             if(mb_strlen($term) > 200){
-                $results['error'][$idx] = "Row $row => Invalid term label (more than 200 characters)";
+                $results['error'][$idx][] = "Row $row => Invalid term label (more than 200 characters)";
                 continue;
             }
 
@@ -3846,7 +3847,7 @@ public static function importTerms($params){
 
                 $res = $def_terms->batch_action();
                 if(!$res){
-                    $results['error'][$idx] = 'batch_action: '.self::$system->getErrorMsg();
+                    $results['error'][$idx][] = 'batch_action: '.self::$system->getErrorMsg();
                     continue 2;
                 }
 
@@ -3886,7 +3887,8 @@ public static function importTerms($params){
         if(empty($results['error'][$idx])){
             unset($results['error'][$idx]);
         }else{
-            $results['error'][$idx] = "Tab $tab_num:<br>" . implode('<br>', $results['error'][$idx]) . "<br>";
+            $error = is_array($results['error'][$idx]) ? implode('<br>', $results['error'][$idx]) : $results['error'][$idx];
+            $results['error'][$idx] = "Tab $tab_num:<br>{$error}<br>";
         }
     }
 
