@@ -300,7 +300,6 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
 
         this._showProgress( this._session_id, false, (this.options.actionName=='register')?0:1000 );
         let that = this;
-
         window.hWin.HAPI4.SystemMgr.databaseAction( request,  function(response){
                 that._hideProgress();
                 if (response.status == window.hWin.ResponseStatus.OK) {
@@ -449,7 +448,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
      * @param {Function} [onComplete] - Optional callback when progress is hidden (not currently used).
      */
     _showProgress: function ( session_id, is_autohide, t_interval, onComplete ){
-        if(window.hWin.HEURIST4.util.isPositiveInt(session_id)) { // Validate session_id
+        if(!window.hWin.HEURIST4.util.isPositiveInt(session_id)) { // Validate session_id
              this._hideProgress();
              return;
         }
