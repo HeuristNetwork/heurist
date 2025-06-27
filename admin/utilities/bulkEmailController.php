@@ -189,31 +189,31 @@ class BulkEmailController{
 
         while($db = $heuristDBs->fetch_row()){
 
+            $dbname = $db[0];
+            if(preg_match('/[^A-Za-z0-9_\$]/', $dbname)){ //invalid dbname
+                continue;
+            }
+            
             // check version - use >=1.3.0
-            $query = "SELECT sys_dbVersion, sys_dbSubVersion FROM {$db[0]}.sysIdentification";
+            $query = "SELECT sys_dbVersion, sys_dbSubVersion FROM {$dbname}.sysIdentification";
             $ver = mysql__select_row_assoc($mysqli, $query);
             if(!$ver || $ver['sys_dbSubVersion'] < 3){
                 continue; //skip - broken database || old database
             }
 
             // Ensure that the Heurist db has the required tables, ignore if they don't
-            $dbname = $db[0];
-            if(preg_match('/[^A-Za-z0-9_\$]/', $dbname)){ //invalid dbname
-                continue;
-            }
-
             $query = "SHOW TABLES IN {$dbname} WHERE Tables_in_{$dbname} = 'Records' OR Tables_in_{$dbname} = 'recDetails' OR Tables_in_{$dbname} = 'sysUGrps' OR Tables_in_{$dbname} = 'sysUsrGrpLinks'";
             $table_listing = $mysqli->query($query);
             if(!$table_listing || mysqli_num_rows($table_listing) != 4){ // Skip, missing required tables
 
                 if($table_listing && $dbRequest == 'all'){
-                    $invalidDBs[] = $db[0];
+                    $invalidDBs[] = $dbname;
                 }
 
                 continue;
             }
 
-            $dbList[] = $db[0];
+            $dbList[] = $dbname;
         }
 
         return $dbList;

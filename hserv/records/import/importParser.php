@@ -357,7 +357,7 @@ private static function convertEncodingIfNeeded($upload_file_name, $original_fil
      *                      - 'keyfield', 'datefield', 'memofield': Arrays mapping column indices to user-defined field types.
      *                      - 'csv_dateformat': Format string for date parsing.
      *                      - 'csv_mvsep', 'csv_delimiter', 'csv_linebreak', 'csv_enclosure': CSV format settings.
-     * @return array|false If `$limit` > 0 (preview mode): Returns an associative array with preview data:
+     * @return array|false|string If `$limit` > 0 (preview mode): Returns an associative array with preview data:
      *                     `['encoded_filename_id', 'original_filename', 'step'=>1, 'col_count', 'err_colnums',
      *                      'err_encoding', 'err_encoding_count', 'int_fields', 'empty_fields', 'num_fields',
      *                      'empty75_fields', 'fields' (headers), 'values' (parsed rows)]`.
@@ -685,7 +685,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
             
             if($check_encoding){
                 
-                if($lb==null){
+                if($lb===null){
                     $line = fgets($handle, 1000000);//read line and auto detect line break
                 }else{
                     $line = stream_get_line($handle, 1000000, $lb);

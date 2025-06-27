@@ -1421,6 +1421,10 @@ class DbUtils {
                         if($isCloneTemplate &&  in_array(strtolower($table), $exception_for_clone_template)){
                             continue;
                         }
+                        if (!preg_match('/^[a-zA-Z0-9_]+$/', $table)) {//invalid tablename
+                            continue;
+                        }
+                        
 
                         if(strtolower($table)=='usrrecpermissions'){
                             $cnt = mysql__select_value($mysqli,'select count(*) from usrRecPermissions');
@@ -1433,6 +1437,7 @@ class DbUtils {
                             }
                         }
 
+                        $table = $mysqli->real_escape_string($table);
                         $mysqli->query("ALTER TABLE `".$table."` DISABLE KEYS");
                         $res = $mysqli->query("INSERT INTO `".$table."` SELECT * FROM `".$db_source."`.`".$table."`"  );
 
