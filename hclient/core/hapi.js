@@ -1698,7 +1698,7 @@ Automatic translation
                 
                 $.each($(ele).find('.slocale'), function (i, item) {
                     let s = $(item).text();
-                    $(item).html(window.hWin.HR(s));
+                    $(item).text(window.hWin.HR(s));
                 });
 
                 $(ele).find('[slocale-title]').each(function () {
