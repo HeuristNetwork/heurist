@@ -11,7 +11,7 @@
 *   update - Saves or deletes repository credentials in user preferences (ugr_Preferences) (calls user_saveRepositoryCredentials).
 *
 * @package     Heurist academic knowledge management system
-* @subpackage  controller
+* @subpackage  hserv\controller
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

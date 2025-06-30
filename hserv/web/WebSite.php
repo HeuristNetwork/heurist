@@ -1,24 +1,16 @@
 <?php
 /*
-* WebSite.php - 
+* WebSite.php - Class to generate web page content
 *
 * @package     Heurist academic knowledge management system
+* @subpackage  hserv\web
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2024 University of Sydney
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     7.0
+* @since       7.0
 */
-
-/*
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
-
 namespace hserv\web;
 
 use hserv\utilities\USanitize;

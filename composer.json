@@ -1,4 +1,4 @@
- {
+{
       "require": {
           "smalot/pdfparser": "*",
           "phpmailer/phpmailer": "~6.0",
@@ -7,5 +7,10 @@
  	      "gasparesganga/php-shapefile": "*",
  	      "ezyang/htmlpurifier": "*",
           "easyrdf/easyrdf": "*"
+      },
+      "config": {
+            "allow-plugins": {
+                  "symfony/flex": true
+            }
       }
- }
+}

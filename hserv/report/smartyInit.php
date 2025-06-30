@@ -25,7 +25,8 @@ use Smarty\Template;
  * It extends the base Smarty Security class to tailor the security settings
  * for the Heurist environment.
  *
- * @package hserv\report
+ * @package     Heurist academic knowledge management system
+ * @subpackage  hserv\report
  */
 class HeuristSecurityPolicy extends Security {
 

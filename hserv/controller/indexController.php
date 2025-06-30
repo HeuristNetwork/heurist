@@ -3,7 +3,7 @@
 * indexController.php - Controller for requests to Heurist_Reference_Index database
 *
 * @package     Heurist academic knowledge management system
-* @subpackage  controller
+* @subpackage  hserv\controller
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
