@@ -801,10 +801,28 @@ function includeJQuery($useBootstrap=false){
 -->        
         <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js" integrity="sha384-/L7+EN15GOciWSd0nb17+43i1HKOo5t8SFtgDKGqRJ2REbp8N6fwVumuBezFc4qC" crossorigin="anonymous"></script>
         <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
+        
+
+        <script src="https://js-de.sentry-cdn.com/bd493ee1a58acc612b6cc71d055d8ff9.min.js" 
+                integrity="sha384-9VO5vanIJCFDnA2SFKhCvK9vMoaNQIY2Lja47RSYp3T3wSWl1se77mZSzdpVlJgD"
+                crossorigin="anonymous"></script>
+          
+        
+        <script type="text/javascript"> 
+  Sentry.onLoad(function() {
+        Sentry.init({
+          dsn: "https://bd493ee1a58acc612b6cc71d055d8ff9@o4509586661507072.ingest.de.sentry.io/4509586665701456",
+          integrations: [
+            // send console.log, console.error, and console.warn calls as logs to Sentry
+            Sentry.consoleLoggingIntegration({ levels: ["log", "error", "warn"] }),
+          ],
+        });
+      });
+        </script>        
 <?php
    }
 ?>
-        
+       
         <!-- Calendar picker -->
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.plugin.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.js"></script>
