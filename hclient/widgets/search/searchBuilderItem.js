@@ -437,6 +437,11 @@ $.widget( "heurist.searchBuilderItem", {
             field_type = $Db.dty(dty_ID,'dty_Type');
             if(field_type=='blocktext' || compare == 'count') field_type = 'freetext';
 
+            if(field_type == 'relationtype'){ // replace dty ID with relmarker dty ID, to avoid loading ALL relation terms
+                let parts = this.options.code.split(':');
+                dty_ID = parts[parts.length - 3].replace(/\D/g, '');
+            }
+
             if(this.options.rty_ID>0){
                 ed_options['rectypeID'] = this.options.rty_ID;
             }else{

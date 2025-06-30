@@ -2146,20 +2146,20 @@ class System {
 
         if (!$use_rewrite) {
             if (!empty($template)) {
-                return $base_url . '?db=' . $this->dbname . '&q=ids:' . $rec_id_val . '&template=' . $template;
+                return "{$base_url}?db={$this->dbname}&q=ids:{$rec_id_val}&template={$template}";
             }
-            return $base_url . '?recID=' . $rec_id_val . '&fmt=html&db=' . $this->dbname;
+            return "{$base_url}?recID={$rec_id_val}&fmt=html&db={$this->dbname}";
         }
         
         if(strpos($base_url, "/HEURIST/") !== false){
             $parts = explode('/', $base_url);
             $base_url = $parts[ count($parts) - 1 ] == 'HEURIST' ? $base_url : str_replace('/HEURIST', '', $base_url);
-        }        
+        }
 
         if (!empty($template)) {
-            return $base_url . '/' . $this->dbname . '/tpl/' . $template . '/' . $rec_id_val;
+            return "{$base_url}{$this->dbname}/tpl/{$template}/{$rec_id_val}";
         }
-        return $base_url . '/' . $this->dbname . '/view/' . $rec_id_val;
+        return "{$base_url}{$this->dbname}/view/{$rec_id_val}";
     }
 
 
