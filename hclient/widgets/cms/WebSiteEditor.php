@@ -1,7 +1,4 @@
 <?php
-use hserv\utilities\USystem;
-use hserv\utilities\USanitize;
-
 /**
 *  Website generator based on CMS records 99-51,52,53
 *
@@ -17,13 +14,17 @@ use hserv\utilities\USanitize;
 * main-content where content of particular page will be loaded
 *
 *
-* @package     Heurist academic knowledge management system
+* @project     Heurist academic knowledge management system
+* @package CMS
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2025 Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @version     7.0
 */
+
+use hserv\utilities\USystem;
+use hserv\utilities\USanitize;
 
 if(!defined('PDIR')) {
     define('PDIR','../../../');//need for proper path to js and css

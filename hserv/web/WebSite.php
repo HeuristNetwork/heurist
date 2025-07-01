@@ -2,8 +2,8 @@
 /*
 * WebSite.php - Class to generate web page content
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv\web
+* @project     Heurist academic knowledge management system
+* @package CMS
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2024 University of Sydney
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

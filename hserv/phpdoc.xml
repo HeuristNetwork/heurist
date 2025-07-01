@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdocumentor>
+
+    <title>Heurist academic knowledge management system</title>
+
+    <parser>
+        <default-package-name>heurist</default-package-name>
+        <target>D:/xampp/htdocs/phpdoc</target>
+    </parser>
+
+    <transformer>
+        <target>D:/xampp/htdocs/heurist/help/phpdoc</target>
+    </transformer>
+    <files>
+        <directory>.</directory>
+        <ignore>tests/**/*</ignore>
+        <ignore>build/**/*</ignore>
+    </files>
+    <transformations>
+        <template name="default" />
+    </transformations>
+</phpdocumentor>

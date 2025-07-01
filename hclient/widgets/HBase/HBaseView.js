@@ -6,7 +6,8 @@
 * - Bootstrap Offcanvas
 * or inline (it may add header and footer)
 *
-* @package     Heurist academic knowledge management system
+* @project     Heurist academic knowledge management system
+* @package Wigets
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

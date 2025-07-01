@@ -4,8 +4,8 @@
 * It is included in website output by WebSiteTemplate.php that in turn is included in WebSite.php
 *  $this - is instance of WebSite class
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv\web
+* @project     Heurist academic knowledge management system
+* @package CMS
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

@@ -2,7 +2,7 @@
 * HCmsConfigWidget.js - configuration for Heurist widget. Besides css/classes 
 * coonfigutation forms it loads HBaseWidgetOpts - form with widget options
 * 
-* @package     Heurist academic knowledge management system
+* @project     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

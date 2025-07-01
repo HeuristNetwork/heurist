@@ -7,7 +7,8 @@
 * 
 * This widget is integrated with HMenu and its properties can be defined along with its property editor. For standalone mode, the saved filter ID can be obtained from HMenu (via search group link ON_ACTION event) or defined as a widget property.
 * 
-* @package     Heurist academic knowledge management system
+* @project     Heurist academic knowledge management system
+* @package Wigets
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
