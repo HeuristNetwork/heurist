@@ -7,7 +7,7 @@
 * controller to process these manifests, create or update annotation records, and report on the
 * import process (e.g., total processed, added, updated, missed, issues).
 *
-* @package     Heurist academic knowledge management system
+* @project     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

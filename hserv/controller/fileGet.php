@@ -21,8 +21,8 @@
 * encoding - (Optional) The character encoding of the CSV file, if it's not UTF-8 (will be converted to UTF-8).
 * 
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv\controller
+* @project     Heurist academic knowledge management system
+* @package Controller
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

@@ -2,8 +2,8 @@
 * @file manageDefVocabularyGroups.js
 * @brief Manages Vocabulary Group entities.
 * @fileOverview Provides a UI for managing Vocabulary Groups. This includes creating, listing, editing, deleting, and reordering groups, and managing their association with Vocabularies.
-* @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\entity
+* @project     Heurist academic knowledge management system
+* @package  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

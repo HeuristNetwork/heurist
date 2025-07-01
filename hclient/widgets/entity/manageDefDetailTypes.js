@@ -2,8 +2,8 @@
 * @file manageDefDetailTypes.js
 * @brief Manages Detail Type (Field Definition) entities.
 * @fileOverview Provides a UI for creating, configuring, listing, and managing Detail Types (field definitions) within Heurist. This includes setting properties like name, data type, widget, and associated group.
-* @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\entity
+* @project     Heurist academic knowledge management system
+* @package  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

@@ -7,7 +7,7 @@
 * change, and state (deleted/updated). The widget displays search results in a list, and users can
 * select a record version to restore. The restoration process itself is typically a confirmation dialog.
 *
-* @package     Heurist academic knowledge management system
+* @project     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

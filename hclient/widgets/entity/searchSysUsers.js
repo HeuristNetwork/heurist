@@ -2,8 +2,8 @@
  * @file        searchSysUsers.js
  * @brief       Provides a search interface for System Users.
  * @fileOverview This widget handles the search functionality for System User accounts, allowing filtering by name, group, role, and status (active/inactive).
- * @package     Heurist academic knowledge management system
- * @subpackage  hclient\widgets\entity
+ * @project     Heurist academic knowledge management system
+ * @package  hclient\widgets\entity
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

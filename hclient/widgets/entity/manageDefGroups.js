@@ -2,8 +2,8 @@
 * @file manageDefGroups.js
 * @brief Manages generic group entities.
 * @fileOverview Provides a base UI widget for managing generic group structures within Heurist. This widget is typically extended by more specific group management widgets (e.g., for Detail Type Groups, Record Type Groups). It handles common functionalities like listing, creating, editing, deleting, and reordering groups.
-* @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\entity
+* @project     Heurist academic knowledge management system
+* @package  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

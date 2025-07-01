@@ -6,7 +6,7 @@
 * tags (e.g., for bookmarking with specific tags). The widget embeds the `usrTags` entity
 * dialog/widget for tag selection and management.
 *
-* @package     Heurist academic knowledge management system
+* @project     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

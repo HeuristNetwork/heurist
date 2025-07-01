@@ -7,7 +7,7 @@
 * depth) and specify visibility and width for each selected column. These configurations can be saved
 * and loaded.
 *
-* @package     Heurist academic knowledge management system
+* @project     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

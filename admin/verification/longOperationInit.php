@@ -13,8 +13,8 @@
 *               It takes a `type` parameter to determine which script to load into the iframe
 *               and passes along `db` and optional `recTypeIDs` parameters.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  /admin/verification
+* @project     Heurist academic knowledge management system
+* @package Admin
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

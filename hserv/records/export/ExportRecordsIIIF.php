@@ -4,8 +4,8 @@
 *
 * Extends `ExportRecords` for exporting records as IIIF manifest.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv\records\export
+* @project     Heurist academic knowledge management system
+* @package Records\Export
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

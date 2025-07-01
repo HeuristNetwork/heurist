@@ -6,8 +6,8 @@
  *              within dynamic forms. It handles different data types, validation, repeatability,
  *              and integration with other Heurist features like term selection and record pointers.
  *
- * @package     Heurist academic knowledge management system
- * @subpackage  hclient\widgets\editing
+ * @project     Heurist academic knowledge management system
+ * @package  hclient\widgets\editing
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

@@ -18,8 +18,8 @@
  *  7. Allows users to select concepts for mapping to Heurist fields, with special handling
  *     for multilingual labels and preparing data for enum or text fields.
  *
- * @package     Heurist academic knowledge management system
- * @subpackage  hclient\widgets\lookup
+ * @project     Heurist academic knowledge management system
+ * @package  hclient\widgets\lookup
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

@@ -15,8 +15,8 @@
 *               It returns a JSON response indicating the status of the operation.
 *               Requires database owner privileges.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  /admin/verification
+* @project     Heurist academic knowledge management system
+* @package Admin
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

@@ -7,8 +7,8 @@
 * This ensures that users accessing the directory directly are forwarded to the
 * functional page of the crosstab viewer.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\crosstab
+* @project     Heurist academic knowledge management system
+* @package  Viewers\Crosstab
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

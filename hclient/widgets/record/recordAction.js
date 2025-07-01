@@ -6,7 +6,7 @@
 * (e.g., all, selected, current) and progress display for long-running actions. Widgets extending
 * `recordAction` can implement specific operations on records.
 *
-* @package     Heurist academic knowledge management system
+* @project     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

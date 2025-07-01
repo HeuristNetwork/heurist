@@ -13,8 +13,8 @@
 * including JQuery and related libraries.
 * Many constants are initialized based on values provided in `configIni.php` (or `../heuristConfigIni.php`).
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv
+* @project     Heurist academic knowledge management system
+* @package Core
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

@@ -8,8 +8,8 @@
  * or performing database management tasks. It integrates with other parts of the HAPI (Heurist API)
  * and UI components to provide a cohesive user experience for invoking system commands.
  * 
- * @package Heurist academic knowledge management system
- * @subpackage hclient\core
+ * @project     Heurist academic knowledge management system
+ * @package hclient\core
  * @link https://HeuristNetwork.org
  * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

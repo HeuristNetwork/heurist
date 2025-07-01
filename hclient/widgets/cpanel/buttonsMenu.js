@@ -18,8 +18,8 @@
 * @property {Array<jQuery>} menuBtns - Stores references to the top-level menu buttons.
 * @property {Array<jQuery>} menuSubs - Stores submenus linked to the top-level buttons.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\cpanel
+* @project     Heurist academic knowledge management system
+* @package  hclient\widgets\cpanel
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

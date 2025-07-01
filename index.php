@@ -5,8 +5,8 @@
  * @fileOverview This script initializes the Heurist layout, handles various URL parameters for actions like
  * displaying records, CMS content, API requests, file downloads, and asset loading.
  * It performs initial setup and can trigger an initial search if query parameters are defined.
- * @package Heurist academic knowledge management system
- * @subpackage /
+ * @project     Heurist academic knowledge management system
+ * @package Core
  * @link https://HeuristNetwork.org
  * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

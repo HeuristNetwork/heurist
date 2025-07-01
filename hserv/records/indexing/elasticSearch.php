@@ -4,8 +4,8 @@
 * 
 * Functions to interact with ElasticSearch index server.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv\records]indexing
+* @project     Heurist academic knowledge management system
+* @package Indexing
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -74,7 +74,7 @@ require_once 'elasticSearchHelper.php';
  * or Elasticsearch best practices due to security concerns at the time regarding
  * running Elasticsearch on the server.
  *
- * @package hserv\records\indexing
+ * @package Indexing
  */
 class ElasticSearch {
 

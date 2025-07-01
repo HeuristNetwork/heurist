@@ -6,8 +6,8 @@
 * (`selectLinkField.js`) for the dialog that allows users to define a new link
 * (either a record pointer or a relationship marker) between two record types in the
 * Heurist database structure visualization.
-* @package     Heurist academic knowledge management system
-* @subpackage  /viewers/visualize
+* @project     Heurist academic knowledge management system
+* @package  Viewers\Network
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

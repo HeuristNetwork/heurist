@@ -2,8 +2,8 @@
 * @file manageSysIdentification.js
 * @brief Manages System Identification and Access Control settings.
 * @fileOverview Provides a UI for administrators to configure system identification, authentication methods (e.g., LDAP, Shibboleth), IP whitelisting/blacklisting, and other access control mechanisms.
-* @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\entity
+* @project     Heurist academic knowledge management system
+* @package  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

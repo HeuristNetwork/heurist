@@ -6,7 +6,7 @@
 * user's bookmark of the record and is managed through the `usrBookmarks` entity. The widget displays
 * radio buttons for selecting the rating and then applies it to the chosen records.
 *
-* @package     Heurist academic knowledge management system
+* @project     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

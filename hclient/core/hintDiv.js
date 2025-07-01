@@ -6,9 +6,9 @@
  * follow the mouse, and automatically adjusts to stay within viewport boundaries. It includes features
  * like delayed hiding on mouseout and staying visible on hover over the hint itself. This utility is
  * used throughout Heurist for providing contextual information to users. It requires jQuery.
- * @package Heurist academic knowledge management system
+ * @project     Heurist academic knowledge management system
  * 
- * @subpackage hclient\core
+ * @package hclient\core
  * @link https://HeuristNetwork.org
  * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

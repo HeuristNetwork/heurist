@@ -2,8 +2,8 @@
 /**
 * viewRecord.php - PID redirector for viewing records.
 * @fileOverview This script acts as a Persistent Identifier (PID) redirector to the main record viewing script (`viewers/record/viewRecord.php`). It provides a stable URL for accessing record views, abstracting the actual location of the viewing script. This is useful for maintaining stable links even if the internal file structure changes.
-* @package     Heurist academic knowledge management system
-* @subpackage  /redirects
+* @project     Heurist academic knowledge management system
+* @package  Core
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

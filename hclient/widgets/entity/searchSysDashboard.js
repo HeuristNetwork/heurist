@@ -2,8 +2,8 @@
  * @file        searchSysDashboard.js
  * @brief       Provides a search interface for System Dashboards.
  * @fileOverview This widget handles the search functionality for System Dashboards, allowing users to find and select available dashboards. It also includes controls for managing dashboard preferences like visibility on startup.
- * @package     Heurist academic knowledge management system
- * @subpackage  hclient\widgets\entity
+ * @project     Heurist academic knowledge management system
+ * @package  hclient\widgets\entity
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

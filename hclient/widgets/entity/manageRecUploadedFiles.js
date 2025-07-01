@@ -2,8 +2,8 @@
 * @file manageRecUploadedFiles.js
 * @brief Manages uploaded files associated with records.
 * @fileOverview Provides a UI for listing, uploading, and managing files linked to Heurist records. It handles file uploads, metadata display, and potentially file deletion or updating.
-* @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\entity
+* @project     Heurist academic knowledge management system
+* @package  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

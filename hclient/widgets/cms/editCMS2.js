@@ -3,8 +3,8 @@
  * @brief Provides the core functionality for the Heurist CMS editor interface.
  * @fileOverview This file initializes and manages the CMS editing environment. It handles the layout of the editor, including the page structure tree, website menu tree, and property viewers. It integrates with TinyMCE for rich text editing and manages element configurations, creation, and modification within a CMS page or website structure. It also includes functionality for saving changes, handling navigation warnings, and switching between page and website editing modes.
  * 
- * @package Heurist academic knowledge management system
- * @subpackage hclient\widgets\cms
+ * @project     Heurist academic knowledge management system
+ * @package hclient\widgets\cms
  * @link https://HeuristNetwork.org
  * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

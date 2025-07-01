@@ -48,8 +48,8 @@
 *             If >1 and "q" is not defined and "draw" is defined: Takes the query from the session.
 *             If 1: Uses the "q" parameter directly for the search.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv\controller
+* @project     Heurist academic knowledge management system
+* @package Controller
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

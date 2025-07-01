@@ -2,8 +2,8 @@
  * @file        searchSysDatabases.js
  * @brief       Provides a search interface for System Databases.
  * @fileOverview This widget handles the search functionality for System Databases, allowing users to find and select registered databases, with options to filter by database name, user email, and role.
- * @package     Heurist academic knowledge management system
- * @subpackage  hclient\widgets\entity
+ * @project     Heurist academic knowledge management system
+ * @package  hclient\widgets\entity
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

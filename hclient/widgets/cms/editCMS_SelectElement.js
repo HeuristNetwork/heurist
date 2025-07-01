@@ -6,8 +6,8 @@
  *               list of page content elements, layout structures (like groups, tabs, accordions),
  *               Heurist widgets, or full-page templates. Upon selection, it invokes a callback function
  *               with the chosen element type and name.
- * @package Heurist academic knowledge management system
- * @subpackage hclient\widgets\cms
+ * @project     Heurist academic knowledge management system
+ * @package hclient\widgets\cms
  * @link https://HeuristNetwork.org
  * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

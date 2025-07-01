@@ -4,8 +4,8 @@
 *
 * @param includeUgrps=1 will output user and group information in addition to definitions
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv\structure\export
+* @project     Heurist academic knowledge management system
+* @package Structure
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

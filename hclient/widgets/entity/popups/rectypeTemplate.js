@@ -2,8 +2,8 @@
 * @file rectypeTemplate.js
 * @brief Provides a popup UI for downloading Record Type templates (XML/JSON).
 * @fileOverview This widget allows users to select record types and download their structure as either an XML or JSON template. This is useful for import/export and for understanding record type definitions.
-* @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\entity\popups
+* @project     Heurist academic knowledge management system
+* @package  hclient\widgets\entity\popups
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

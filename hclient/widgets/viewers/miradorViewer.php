@@ -19,8 +19,8 @@
 * manifestUrl - url of iiif image (it needs for thumbnail creation for annotated area)
 * sourceRecordId - heurist record id - reference to image to be annotated
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\viewers
+* @project     Heurist academic knowledge management system
+* @package  hclient\widgets\viewers
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

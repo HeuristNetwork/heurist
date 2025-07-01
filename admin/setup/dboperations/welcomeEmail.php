@@ -6,8 +6,8 @@
 *               as new database creation, database cloning, and database deletion/archiving.
 *               It uses HTML templates for welcome emails and includes attachments.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  /admin/setup/dboperations
+* @project     Heurist academic knowledge management system
+* @package Admin/dboperations
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

@@ -7,8 +7,8 @@
  * digitizing capabilities. Users can draw points, lines, and polygons, load existing
  * WKT or GeoJSON data, and export their drawings. The tool can also be used for
  * defining geographic filters or image extents.
- * @package     Heurist academic knowledge management system
- * @subpackage  viewers\map
+ * @project     Heurist academic knowledge management system
+ * @package  Viewers\Map
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

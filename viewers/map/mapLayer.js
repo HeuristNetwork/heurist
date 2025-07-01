@@ -6,8 +6,8 @@
  * visual representation using the Leaflet library. It handles the loading, styling,
  * and interaction with various types of map layers, including query-based layers,
  * tiled images, GeoTIFFs, KML/CSV files, and SHP files.
- * @package     Heurist academic knowledge management system
- * @subpackage  viewers\map
+ * @project     Heurist academic knowledge management system
+ * @package  Viewers\Map
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

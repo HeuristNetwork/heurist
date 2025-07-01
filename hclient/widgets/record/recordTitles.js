@@ -5,7 +5,7 @@
 * process to rebuild the titles of records within a selected scope. This is typically used when title
 * generation rules have changed or to ensure consistency.
 *
-* @package     Heurist academic knowledge management system
+* @project     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

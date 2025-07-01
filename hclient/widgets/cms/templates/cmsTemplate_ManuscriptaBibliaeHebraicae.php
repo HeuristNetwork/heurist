@@ -47,7 +47,7 @@
 * $page_header - custom content for main-header defined in website home page record
 * $page_footer - custom content for footer
 *
-* @package Heurist academic knowledge management system
+* @project     Heurist academic knowledge management system
 * @link https://HeuristNetwork.org
 * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author Artem Osmakov <osmakov@gmail.com>

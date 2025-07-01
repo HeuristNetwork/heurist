@@ -15,8 +15,8 @@
 * Ported to PHP by Andreychumak.
 * @link http://github.com/andreychumak/simplify-php
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv\utilities\geo
+* @project     Heurist academic knowledge management system
+* @package  Utilities\geo
 */
 
 /**
@@ -25,6 +25,7 @@
 * A PHP port of the simplify.js library for high-performance polyline simplification.
 * Uses a combination of radial distance and Douglas-Peucker algorithms to reduce
 * the number of points in a series of coordinates.
+* @package  Utilities\geo
 */
 class Simplify {
 

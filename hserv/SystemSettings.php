@@ -8,8 +8,8 @@
 * in JSON files within the database's 'settings' directory (e.g., text_styles.json, webfonts.json),
 * or in files located in the Heurist server's root directory (e.g., for JavaScript allowances, disk quotas).
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv
+* @project     Heurist academic knowledge management system
+* @package Core
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -35,6 +35,7 @@ use hserv\utilities\USystem;
 *   which are typically defined in files in the Heurist application's root directory.
 *
 * An instance of this class is usually accessed via the main `System` object.
+* @package Core
 */
 class SystemSettings {
 

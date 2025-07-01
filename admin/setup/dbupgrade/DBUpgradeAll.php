@@ -9,8 +9,8 @@
 *               It outputs a report of databases processed, upgraded, or any errors encountered.
 *               This script requires owner-level access.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  /admin/setup/dbupgrade
+* @project     Heurist academic knowledge management system
+* @package Admin/dbupgrade
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

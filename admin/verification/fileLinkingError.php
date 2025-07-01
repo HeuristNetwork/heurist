@@ -14,8 +14,8 @@
 *               It also generates a log file (`missed_files.log`) for missing files.
 *               Requires owner-level access.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  /admin/verification
+* @project     Heurist academic knowledge management system
+* @package Admin
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Tom Murtagh

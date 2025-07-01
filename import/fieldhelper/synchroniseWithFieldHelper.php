@@ -8,8 +8,8 @@
 *   - Indexes new files found in the directories that are not yet in a manifest, creating Heurist records and adding them to the manifest.
 *   - Supports a range of common file types (text, image, audio, video) and allows for custom-defined extensions.
 * 
-* @package     Heurist academic knowledge management system
-* @subpackage  import\fieldhelper
+* @project     Heurist academic knowledge management system
+* @package  import\fieldhelper
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

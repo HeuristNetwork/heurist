@@ -2,8 +2,8 @@
 /**
 * getRectypesAsJSON.php - Loads record type names and groups into a JavaScript object for use in the bookmarklet popup.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  import\bookmarklet
+* @project     Heurist academic knowledge management system
+* @package  import\bookmarklet
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

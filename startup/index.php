@@ -2,8 +2,8 @@
 /**
 * index.php - Main setup sequence page for Heurist.
 * @fileOverview This file handles the initial user interaction for setting up a new database or finding an existing one. It manages user registration, database creation, and displays introductory information.
-* @package     Heurist academic knowledge management system
-* @subpackage  /startup
+* @project     Heurist academic knowledge management system
+* @package  Startup
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

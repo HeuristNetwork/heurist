@@ -4,8 +4,8 @@
 * 
 * Implements a query composer that translates JSON (and plain text via JSON) search criteria into SQL queries. This is crucial for dynamic search capabilities.
 * 
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv\records\search
+* @project     Heurist academic knowledge management system
+* @package Records\Search
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -636,7 +636,7 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
  * An HQuery object contains a tree of HLimb and HPredicate objects that represent
  * the logical structure of the search query.
  *
- * @package hserv\records\search
+ * @package Records\Search
  */
 class HQuery {
 
@@ -1089,7 +1089,7 @@ class HQuery {
  * that groups a set of predicates (HPredicate objects) or other nested HLimb objects.
  * It's a key component in building the tree structure of a parsed Heurist query.
  *
- * @package hserv\records\search
+ * @package Records\Search
  */
 class HLimb {
 
@@ -1335,7 +1335,7 @@ class HLimb {
  * and its value, and then translating this into a specific SQL WHERE clause fragment.
  * It handles a wide variety of Heurist search keywords and their associated logic.
  *
- * @package hserv\records\search
+ * @package Records\Search
  */
 class HPredicate {
 

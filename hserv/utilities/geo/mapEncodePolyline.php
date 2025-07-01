@@ -14,8 +14,8 @@
 * - `$forceEndpoints`: Boolean indicating whether endpoints should always be visible at all zoom levels.
 * - `$zoomLevelBreaks`: An array calculated from the above, defining distance thresholds for each zoom level.
 * 
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv\utilities\geo
+* @project     Heurist academic knowledge management system
+* @package Utilities\geo
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

@@ -11,8 +11,8 @@
 *
 * Fields in Titlemask are stored in internal codes and decoded to human readable for editing.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv\records\edit
+* @project     Heurist academic knowledge management system
+* @package Records\Edit
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -45,6 +45,7 @@ define('TITLEMASK_EMPTY_MSG', '**** No data in title fields for this record ****
 * Provides methods to check the validity of a title mask, fill a mask with record data
 * to generate a title, and convert masks between internal coded format and human-readable format.
 * Title masks allow dynamic generation of record titles based on field values and static text.
+* @package Records\Edit
 */
 class TitleMask {
 

@@ -7,8 +7,8 @@
  * permission checks, and then delegates the actual rendering of record details
  * to `renderRecordData.php`. It is often used when displaying a record in a popup
  * or an embedded context.
- * @package     Heurist academic knowledge management system
- * @subpackage  viewers\record
+ * @project     Heurist academic knowledge management system
+ * @package  Viewers\Record
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

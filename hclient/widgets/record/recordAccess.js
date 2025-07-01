@@ -5,8 +5,8 @@
 * ownership and access permissions of records within the Heurist system. It integrates with
 * the Heurist API and provides a user interface for these operations.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\record
+* @project     Heurist academic knowledge management system
+* @package  hclient\widgets\record
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

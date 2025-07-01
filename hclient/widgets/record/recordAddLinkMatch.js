@@ -8,7 +8,7 @@
 * widget provides UI to select source scope, source and target record types, the fields to match,
 * and the pointer field in the source to update.
 *
-* @package     Heurist academic knowledge management system
+* @project     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
