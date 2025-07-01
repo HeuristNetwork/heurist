@@ -10,8 +10,8 @@
 *               the database schema incrementally. It displays information about the safety
 *               and description of each upgrade script.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  /admin/setup/dbupgrade
+* @project     Heurist academic knowledge management system
+* @package Admin/dbupgrade
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Tom Murtagh

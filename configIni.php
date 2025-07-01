@@ -6,8 +6,8 @@
  * It can be overridden by a `heuristConfigIni.php` file located in the parent directory,
  * which allows for a centralized configuration for multiple Heurist instances on the same server.
  * The program version number, however, is always determined by this file.
- * @package Heurist academic knowledge management system
- * @subpackage /
+ * @project     Heurist academic knowledge management system
+ * @package Core
  * @link https://HeuristNetwork.org
  * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

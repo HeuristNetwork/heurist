@@ -7,8 +7,8 @@
  * It includes all necessary CSS and JavaScript dependencies for map rendering and interaction,
  * including Leaflet, jQuery, and various Leaflet plugins, as well as Heurist-specific mapping scripts.
  * The page structure includes areas for the map, toolbar, and timeline.
- * @package     Heurist academic knowledge management system
- * @subpackage  viewers\map
+ * @project     Heurist academic knowledge management system
+ * @package  Viewers\Map
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

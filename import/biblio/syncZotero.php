@@ -6,8 +6,8 @@
 * Set zotero API key in sys_SyncDefsWithDB/HEURIST_ZOTEROSYNC 
 * Mapping is specified in zoteroMap.xml
 * 
-* @package     Heurist academic knowledge management system
-* @subpackage  import\biblio
+* @project     Heurist academic knowledge management system
+* @package  import\biblio
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

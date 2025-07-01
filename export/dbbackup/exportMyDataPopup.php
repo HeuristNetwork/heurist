@@ -16,8 +16,8 @@
 * - mode=5: Downloads the HML file only (ZIP/TAR).
 * - mode=6: Downloads the TSV folder only (ZIP/TAR).
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  export\dbbackup
+* @project     Heurist academic knowledge management system
+* @package Export
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

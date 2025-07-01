@@ -2,8 +2,8 @@
 * @file manageDefRecTypes.js
 * @brief Manages Record Type definitions.
 * @fileOverview Provides a UI for creating, configuring, listing, and managing Record Types within Heurist. This includes setting properties like name, associated group, defining its structure (fields), and managing templates or masks.
-* @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\entity
+* @project     Heurist academic knowledge management system
+* @package  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

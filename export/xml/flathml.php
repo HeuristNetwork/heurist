@@ -6,8 +6,8 @@
 * $hunifile indicates special one-file-per-record + manifest file for HuNI (huni.net.au)
 * $output_file - file handler to write output, it allows to avoid memory overflow for large databases
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  export\xml
+* @project     Heurist academic knowledge management system
+* @package Export
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

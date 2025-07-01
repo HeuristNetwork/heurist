@@ -13,8 +13,8 @@
 *              URLs, and special Heurist internal formats like IIIF manifests or
 *              tiled images. It can also display links to open media in new tabs or
 *              download them.
-* @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\viewers
+* @project     Heurist academic knowledge management system
+* @package  hclient\widgets\viewers
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

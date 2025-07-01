@@ -9,8 +9,8 @@
 *               copies the filestore, and adjusts user #2 to be 'guest' with a 'guest' password.
 *               This is often used as a cron job to ensure a clean demo environment.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  /admin/setup/dboperations
+* @project     Heurist academic knowledge management system
+* @package Admin/dboperations
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

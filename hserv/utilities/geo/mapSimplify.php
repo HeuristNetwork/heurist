@@ -15,8 +15,8 @@
 * Ported to PHP by Andreychumak.
 * @link http://github.com/andreychumak/simplify-php
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  Utilities/Geo
+* @project     Heurist academic knowledge management system
+* @package  Utilities
 */
 
 /**

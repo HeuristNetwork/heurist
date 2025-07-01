@@ -4,8 +4,8 @@
  * @fileOverview This complex widget handles the primary record search functionality. It integrates with various other components
  *              to allow searching by keywords, record types, and specific field values. It supports different modes
  *              for adding or browsing records and can interact with a parent entity context.
- * @package     Heurist academic knowledge management system
- * @subpackage  hclient\widgets\entity
+ * @project     Heurist academic knowledge management system
+ * @package  hclient\widgets\entity
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

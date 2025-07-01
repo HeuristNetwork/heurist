@@ -11,8 +11,8 @@
 *               The script can be run from the shell (with `-purge` for action, `-report` for reporting only)
 *               or via the Server Manager menu (which typically runs in report mode first, then allows purge).
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  /admin/utilities
+* @project     Heurist academic knowledge management system
+* @package Admin
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

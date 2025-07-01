@@ -2,8 +2,8 @@
 /**
 * entityScrudSrv.php - Library of function that inits instance of hserv/entity class and runs the requested action.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  controller
+* @project     Heurist academic knowledge management system
+* @package Controller
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

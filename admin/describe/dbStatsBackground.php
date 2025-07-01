@@ -6,8 +6,8 @@
 *               containing simple statistics for each database on the server. These statistics
 *               are stored locally and can be sent to a main Heurist server for aggregation.
 *               It also handles receiving stats files from other servers if this is the main server.
-* @package     Heurist academic knowledge management system
-* @subpackage  /admin/describe
+* @project     Heurist academic knowledge management system
+* @package Admin
 * @link        https://HeuristNetwork.org
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network

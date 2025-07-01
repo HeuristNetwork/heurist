@@ -2,8 +2,8 @@
 * @file configEntity.js
 * @brief Configuration management for entities.
 * @fileOverview Provides functionality to save and load configurations for specified entities. Configurations are stored in the file system and managed via UI components.
-* @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\entity
+* @project     Heurist academic knowledge management system
+* @package  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

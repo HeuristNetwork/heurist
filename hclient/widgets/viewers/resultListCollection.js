@@ -11,8 +11,8 @@
  * UI controls (buttons) for various collection-related actions. It can also render a small preview
  * of the collected items using an internal `resultList` instance.
  *
- * @package Heurist academic knowledge management system
- * @subpackage hclient\widgets\viewers
+ * @project     Heurist academic knowledge management system
+ * @package hclient\widgets\viewers
  * @link https://HeuristNetwork.org
  * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

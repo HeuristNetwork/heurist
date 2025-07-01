@@ -8,8 +8,8 @@
 *               specified database, concatenated with a pipe character (e.g., "6.x.x|1.3.14").
 *               This allows remote instances to check if they are up-to-date.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  /admin/setup/dbproperties
+* @project     Heurist academic knowledge management system
+* @package Admin/dbproperties
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

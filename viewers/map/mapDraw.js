@@ -4,8 +4,8 @@
  * @fileOverview This file contains functions related to processing and converting
  * geographical coordinate strings into Well-Known Text (WKT) format.
  * It includes handling for UTM coordinate conversions and validation of input data.
- * @package     Heurist academic knowledge management system
- * @subpackage  viewers\map
+ * @project     Heurist academic knowledge management system
+ * @package  Viewers\Map
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

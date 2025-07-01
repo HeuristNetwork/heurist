@@ -15,8 +15,8 @@
 * generating crosstabulations, such as min/max values for fields, distinct pointer
 * values, the main crosstab data, and record type information for a given set of records.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv\widgets\crosstab
+* @project     Heurist academic knowledge management system
+* @package  Viewers\Crosstab
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

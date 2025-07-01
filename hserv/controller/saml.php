@@ -9,8 +9,8 @@
 *      logout - Logs the user out of both Heurist and the SimpleSAMLphp session.
 *      login  - Initiates SAML authentication. On success, closes the authentication dialog (JavaScript) and returns the user ID as context.
 * 
-* @package     Heurist academic knowledge management system
-* @subpackage  controller
+* @project     Heurist academic knowledge management system
+* @package Controller
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

@@ -6,7 +6,7 @@
 * when opened, displays the list of these records in a Heurist search. The widget utilizes the
 * `usrReminders` entity's dialog/widget for composing the notification message and selecting recipients.
 *
-* @package     Heurist academic knowledge management system
+* @project     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

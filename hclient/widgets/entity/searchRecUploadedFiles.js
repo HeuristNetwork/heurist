@@ -2,8 +2,8 @@
  * @file        searchRecUploadedFiles.js
  * @brief       Provides a search interface for Uploaded Files associated with records.
  * @fileOverview This widget handles the search functionality for files uploaded to records, allowing users to find specific files based on various criteria like name, path, type, and domain (local, external, tiled).
- * @package     Heurist academic knowledge management system
- * @subpackage  hclient\widgets\entity
+ * @project     Heurist academic knowledge management system
+ * @package  hclient\widgets\entity
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

@@ -14,7 +14,7 @@
  * (e.g., historically `hserv/controller/record_lookup_config.json`, now more likely
  * managed via `HAPI4.sysinfo['services_list']` and `HAPI4.sysinfo['service_config']`).
  *
- * @package     Heurist academic knowledge management system
+ * @project     Heurist academic knowledge management system
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @author      Artem Osmakov   <osmakov@gmail.com>

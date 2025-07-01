@@ -10,8 +10,8 @@
 * jQuery File Upload Plugin PHP Class
 * https://github.com/blueimp/jQuery-File-Upload
 * 
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv\utilities
+* @project     Heurist academic knowledge management system
+* @package Utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2010, Sebastian Tschan
 * @copyright   (C) https://blueimp.net

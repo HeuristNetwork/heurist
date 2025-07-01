@@ -2,8 +2,8 @@
 * @file manageDefFileExtToMimetype.js
 * @brief Manages File Extension to MIME Type mappings.
 * @fileOverview Provides a UI for managing the mapping between file extensions and MIME types within Heurist. This allows administrators to define how different file types are recognized and handled by the system.
-* @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\entity
+* @project     Heurist academic knowledge management system
+* @package  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

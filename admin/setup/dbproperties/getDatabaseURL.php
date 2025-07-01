@@ -10,8 +10,8 @@
 *               The script outputs a JSON response containing the `rec_URL` or an `error_msg`.
 *               This script can be included (where `$database_id` is predefined) or invoked via HTTP.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  /admin/setup/dbproperties
+* @project     Heurist academic knowledge management system
+* @package Admin/dbproperties
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

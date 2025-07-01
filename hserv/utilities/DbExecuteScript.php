@@ -4,8 +4,8 @@
 * 
 * Heavily modified from bigdump.php (ozerov.de/bigdump) allowing processing of very large MySQL dump files
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv\utilities
+* @project     Heurist academic knowledge management system
+* @package Utilities
 * @link        https://HeuristNetwork.org
 * @link        http://www.ozerov.de/bigdump 
 * @copyright   (C) 2003-2013 

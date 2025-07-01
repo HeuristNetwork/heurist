@@ -4,8 +4,8 @@
 *
 * Operations for the `usrTags` table.
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv\entity 
+* @project     Heurist academic knowledge management system
+* @package Entity 
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -24,7 +24,7 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
 * Provides database access and operations for the `usrTags` table,
 * which stores user-created tags that can be applied to records.
 *
-* @package  hserv\entity
+* @package Entity
 */
 class DbUsrTags extends DbEntityBase
 {

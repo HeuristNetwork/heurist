@@ -7,7 +7,7 @@
 * generates the export file (e.g., XML, JSON, KML, HML). Options for including linked records and
 * definitions can be configured.
 *
-* @package     Heurist academic knowledge management system
+* @project     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

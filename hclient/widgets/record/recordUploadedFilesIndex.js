@@ -7,7 +7,7 @@
 * aware of these files, allowing them to be linked to records and managed within the system. The
 * widget displays a report of the indexing process.
 *
-* @package     Heurist academic knowledge management system
+* @project     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

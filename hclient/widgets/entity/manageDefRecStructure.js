@@ -2,8 +2,8 @@
 * @file manageDefRecStructure.js
 * @brief Manages Record Type Structure definitions.
 * @fileOverview Provides a UI for defining and managing the structure of Record Types. This includes adding, removing, and reordering fields (Detail Types) within a Record Type, and configuring their display properties (e.g., tab, group, order).
-* @package     Heurist academic knowledge management system
-* @subpackage  hclient\widgets\entity
+* @project     Heurist academic knowledge management system
+* @package  hclient\widgets\entity
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

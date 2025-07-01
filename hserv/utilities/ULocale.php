@@ -11,8 +11,8 @@
 * - Handling "no translate" tags for content passed to translation services (addNoTranslateTags, removeNoTranslateTags).
 * - Preparing a list of languages for UI presentation (getPreparedLanguageList).
 *
-* @package     Heurist academic knowledge management system
-* @subpackage  hserv\utilities
+* @project     Heurist academic knowledge management system
+* @package Utilities
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

@@ -4,7 +4,7 @@
 * Override configuration file for a Heurist installation - place in parent of the individual codebases,
 * obviating the need to set these parameters for each version, avoiding redundancy and ensuring consistency
 *
-* @package     Heurist academic knowledge management system
+* @project     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2024 University of Sydney
 * @author      Artem Osmakov   <osmakov@gmail.com>

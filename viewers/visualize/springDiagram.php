@@ -6,8 +6,8 @@
 * based on a Heurist search query. It initializes the page, fetches data if in standalone mode,
 * and then uses the `visualize.js` plugin to render the graph. It also provides functions
 * for parsing data into the required D3 format and for showing/updating the visualization.
-* @package     Heurist academic knowledge management system
-* @subpackage  /viewers/visualize
+* @project     Heurist academic knowledge management system
+* @package  Viewers\Network
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
