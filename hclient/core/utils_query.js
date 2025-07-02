@@ -832,7 +832,7 @@ window.hWin.HEURIST4.query = {
                 field = field_name;
             }
 
-            if(key === 'r' && !field){ // Relation type field handling
+            if(key === 'r' && (!field || field == window.hWin.HAPI4.sysinfo.dbconst.DT_RELATION_TYPE)){ // Relation type field handling
 
                 value = typeof value !== 'string' ? value.toString() : value;
                 let cond = value.startsWith('-') ? 'not' : '';

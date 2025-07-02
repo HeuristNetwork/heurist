@@ -1509,9 +1509,11 @@ class HPredicate {
      * @var array{exists: bool, recIDs: string, negate: bool} 
      */
     private $existsFilter = [
-        'exists' => false, // Overall flag if this type of filter is active
-        'recIDs' => '',    // Comma-separated string of record IDs resulting from the sub-filter
-        'negate' => false  // Whether to negate the IN (recIDs) condition
+        'exists' => false,  // Overall flag if this type of filter is active
+        'recIDs' => '',     // Comma-separated string of record IDs resulting from the sub-filter
+        'rlIDs' => '',      // Comma-separated string of recLink IDs resulting from the sub-filter
+        'negate' => false,  // Whether to negate the IN (recIDs) condition
+        'reltype' => false  // Whether filter by relation type has already occurred
     ];
 
     /*
@@ -1667,8 +1669,7 @@ class HPredicate {
                     }
                 }
             }elseif($p_type == 'lt' || $p_type == 'linked_to' || $p_type == 'linkedto'
-                 || $p_type == 'lf' || $p_type == 'linked_from' || $p_type == 'linkedfrom'
-                 || $p_type == 'links'){
+                 || $p_type == 'lf' || $p_type == 'linked_from' || $p_type == 'linkedfrom'){
 
                 $this->handleResourceExistsPred($value);
             }
@@ -2725,7 +2726,7 @@ class HPredicate {
 
         }
 
-        $rtn['where'] .= $this->getExistsWhere(true, $p);
+        $rtn['where'] .= $this->getExistsWhere(true, $p, $rl);
 
         return $rtn;
     }
@@ -2835,7 +2836,7 @@ class HPredicate {
             $rtn = ["from" => "recLinks $rl", "where" => $where];
         }
 
-        $rtn['where'] .= $this->getExistsWhere(true, $p);
+        $rtn['where'] .= $this->getExistsWhere(true, $p, $rl);
 
         return $rtn;
     }
@@ -2931,11 +2932,10 @@ class HPredicate {
         }
 
         $where = $where
-        //(($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :"$rl.rl_RelationID is not null")
          ." (($where_direct_reltypes r$p.rec_ID=$rl.$s1 AND  $rl.rl_TargetID".$val                   //direct
             .") OR ($where_reverce_reltypes r$p.rec_ID=$rl.$s2 AND  $rl.rl_SourceID".$val.'))';//reverse
 
-        $where .= $this->getExistsWhere(true, $p);
+        $where .= $this->getExistsWhere(true, $p, $rl);
 
         return array("from"=>"recLinks $rl", "where"=>$where);
     }
@@ -3010,7 +3010,13 @@ class HPredicate {
        //{"t":10,"rf:245":[{"t":4},{"r":6421},{"relf:10":">2010"}]}}
        //{"t":10,"rf:6421}
 
-       $rtn = [];
+        $rtn = [];
+        [$reltypes, $rty_constraints] = $this->_getRelationFieldConstraints();
+
+        $reltype_fld = ($this->isEmptyValue() ? '' : "{$rl}.") . 'rl_RelationTypeID';
+        $reltypes = !empty($reltypes) ? predicateId($reltype_fld, $reltypes) : "$reltype_fld IS NOT NULL";
+
+        $val = '';
 
        if($this->isEmptyValue()){
 
@@ -3025,7 +3031,6 @@ class HPredicate {
                 $reltypes = getTermChildrenAll($mysqli, $vocab_id);
                 $rty_constraints = explode(',',$rty_constraints);
                 */
-                list($reltypes, $rty_constraints) = $this->_getRelationFieldConstraints();
 
                 if($rty_constraints!=null && !empty($rty_constraints)){
 
@@ -3034,14 +3039,6 @@ class HPredicate {
                     $rty_constraints = ', Records where '.$rty_constraints.SQL_AND;
                 }else{
                     $rty_constraints = SQL_WHERE;
-                }
-
-                if($reltypes!=null && !empty($reltypes)){
-
-                    $reltypes = predicateId('rl_RelationTypeID', $reltypes);
-
-                }else{
-                    $reltypes = 'rl_RelationTypeID IS NOT NULL';
                 }
 
                 $where = "r$p.rec_ID ".(($this->negate)?'':SQL_NOT)
@@ -3082,7 +3079,7 @@ class HPredicate {
             //compose where with recLinks ($rl) fields
             $where = "r$p.rec_ID=$rl.$part1 ";
             if($val){
-                $where = $where . "AND $rl.$part2".$val;
+                $where .= "AND {$rl}.{$part2}{$val}";
             }
 
             if(is_array($this->relation_types)&& !empty($this->relation_types)){
@@ -3092,8 +3089,8 @@ class HPredicate {
 
                 $where = $where . SQL_AND. predicateId("$rl.rl_RelationTypeID", $this->relation_types);
 
-            }else{
-                $where = $where . " AND $rl.rl_RelationID is not null";
+            }elseif(!$this->existsFilter['reltype']){
+                $where .= " AND $reltypes";
             }
 
             if($this->relation_fields !== null){
@@ -3107,7 +3104,7 @@ class HPredicate {
             $rtn = ["from" => "recLinks $rl", "where" => $where];
         }
 
-        $rtn['where'] .= $this->getExistsWhere(true, $p);
+        $rtn['where'] .= $this->getExistsWhere(true, $p, $rl);
 
         return $rtn;
     }
@@ -3144,10 +3141,9 @@ class HPredicate {
             }
         }
 
-        //($rl.rl_RelationID is not null) AND
         $where = "((r$p.rec_ID=$rl.rl_SourceID AND $rl.rl_TargetID".$val.") OR (r$p.rec_ID=$rl.rl_TargetID AND $rl.rl_SourceID".$val."))";
 
-        $where .= $this->getExistsWhere(true, $p);
+        $where .= $this->getExistsWhere(true, $p, $rl);
 
         return array("from"=>"recLinks $rl", "where"=>$where);
     }
@@ -3961,17 +3957,22 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
      * Construct exists conditional
      *
      * @param bool $conjunct - whether to add an ' AND ' to append to other conditions
-     * @param int $table - table level
+     * @param int $recTable - Records table level
+     * @param string $linkTable - RecLinks table alias
      *
-     * @return string exiss conditional
+     * @return string exists conditional
      */
-    private function getExistsWhere($conjunct, $table){
+    private function getExistsWhere($conjunct, $recTable, $linkTable = ''){
 
         $logic = $this->existsFilter['negate'] ? 'NOT' : '';
 
-        $exists = !empty($this->existsFilter['recIDs']) ? "r{$table}.rec_ID $logic IN ({$this->existsFilter['recIDs']})" : '';
+        $exists = !empty($this->existsFilter['recIDs']) ? "r{$recTable}.rec_ID {$logic} IN ({$this->existsFilter['recIDs']})" : '';
 
-        $exists = $exists == '' && $logic != 'NOT' && $this->existsFilter['exists'] ? "r{$table}.rec_ID = 0" : $exists;
+        $exists = $exists == '' && $logic != 'NOT' && $this->existsFilter['exists'] ? "r{$recTable}.rec_ID = 0" : $exists;
+
+        if(!empty($linkTable) && !empty($this->existsFilter['rlIDs'])){
+            $exists .= (empty($exists) ? '' : ' AND ') . "{$linkTable}.rl_ID $logic IN ({$this->existsFilter['rlIDs']})";
+        }
 
         return $conjunct && !empty($exists) ? " AND {$exists}" : $exists;
     }
@@ -3983,7 +3984,7 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
      */
     private function handleRelExistsPred($values){ // isRel = true
 
-        global $mysqli, $dty_id_relation_type;
+        global $mysqli, $dty_id_relation_type, $rty_id_relation;
 
         $new_values = [];
         $has_other_filter = false;
@@ -3999,6 +4000,8 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
         $rel_negate = false;
         $rel_IDs = [];
 
+        $filtered_ids = [];
+
         // Extract the relation and record types, separate them from the remaining filter
         foreach($values as $idx => $value){
 
@@ -4013,6 +4016,10 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
             if($key === 'r' || $key === 'relf' || $key === "r:{$dty_id_relation_type}" || $key === "relf:{$dty_id_relation_type}"){
                 $rel_negate = strpos($val, '-') === 0;
                 $rel_IDs = prepareIds(ltrim($val, '-'));
+                continue;
+            }
+            if($key === 'ids'){
+                $filtered_ids = prepareIds($val);
                 continue;
             }
             if($key !== 'exists'){
@@ -4038,42 +4045,76 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
         $from = $this->pred_type == 'related' || $this->pred_type == 'rf' || $this->pred_type == 'related_from' || $this->pred_type == 'relatedfrom';
 
         // Relationship type handling, get all child terms as well
+        $has_reltypes = !empty($rel_IDs);
         if($rel_negate){
             $rel_IDs = array_diff($complete_rel_IDs, $rel_IDs);
+        }else{
+            $rel_IDs = empty($rel_IDs) && empty($filtered_ids) ? $complete_rel_IDs : $rel_IDs;
+            $rel_IDs = !empty($rel_IDs) ? array_merge($rel_IDs, getTermChildrenAll($mysqli, $rel_IDs)) : [];
+    
+            if($has_reltypes && !empty($rel_IDs)){ // get inverse terms, if a reltype was given and not negated
+                $rel_IDs = array_merge($rel_IDs, getTermInverseAll($mysqli, $rel_IDs));
+            }
         }
-        $rel_IDs = empty($rel_IDs) ? $complete_rel_IDs : $rel_IDs;
-        $rel_IDs = !empty($rel_IDs) ? array_unique( array_merge($rel_IDs, getTermChildrenAll($mysqli, $rel_IDs)) ) : [];
-        if($to && $from){ // get inverse terms for a complete search
-            $rel_IDs = !empty($rel_IDs) ? array_merge($rel_IDs, getTermInverseAll($mysqli, $rel_IDs)) : [];
-        }
+
+        $rel_IDs = array_unique($rel_IDs);
         $rel_count = count($rel_IDs);
 
         $rel_IDs = implode(',', $rel_IDs);
 
+        $ids_count = count($filtered_ids);
+        $filtered_ids = implode(',', $filtered_ids);
+
         // Get list of relevant record IDs
         $rec_IDs = [];
+        $rl_IDs = [];
         $where = [];
 
-        $rty_where = $rty_count > 1 ? "rec_RecTypeID IN ({$rty_IDs})" : "rec_RecTypeID = {$rty_IDs}";
+        if($rty_IDs !== $rty_id_relation){
+            $rty_where = $rty_count > 1 ? "rec_RecTypeID IN ({$rty_IDs})" : "rec_RecTypeID = {$rty_IDs}";
+        }
         $rel_where = $rel_count > 1 ? "rl_RelationTypeID IN ({$rel_IDs})" : "rl_RelationTypeID = {$rel_IDs}";
 
-        $rty_count == 0 || $where[] = $rty_where;
-        $rel_count == 0 || $where[] = $rel_where;
+        $ids_where = $ids_count > 1 ? " IN ({$filtered_ids})" : '';
+        $ids_where = $ids_count == 1 ? " = {$filtered_ids}" : $ids_where;
+
+        empty($rty_where) || $where[] = $rty_where;
+        empty($rel_where) || $where[] = $rel_where;
 
         $where = empty($where) ? '' : 'WHERE ' . implode(' AND ', $where);
 
         if($to){
+
             $to_query = "SELECT DISTINCT rl_SourceID FROM recLinks INNER JOIN Records ON rec_ID = rl_TargetID {$where}";
+
+            if(!empty($ids_where)){
+                $to_query .= (!empty($where) ? ' AND rl_SourceID ' : 'rl_SourceID ') . $ids_where;
+            }
+
             $rec_IDs = mysql__select_list2($mysqli, $to_query, 'intval');
+
+            $rl_IDs = mysql__select_list2($mysqli, str_replace('DISTINCT rl_SourceID', 'DISTINCT rl_ID', $to_query), 'intval');
         }
         if($from){
+
             $from_query = "SELECT DISTINCT rl_TargetID FROM recLinks INNER JOIN Records ON rec_ID = rl_SourceID {$where}";
+
+            if(!empty($ids_where)){
+                $from_query .= (!empty($where) ? ' AND rl_TargetID ' : 'rl_TargetID ') . $ids_where;
+            }
+
             $rec_IDs_from = mysql__select_list2($mysqli, $from_query, 'intval');
+
+            $rl_IDs_from = mysql__select_list2($mysqli, str_replace('DISTINCT rl_TargetID', 'DISTINCT rl_ID', $from_query), 'intval');
+
             $rec_IDs = array_unique(array_merge($rec_IDs, $rec_IDs_from));
+            $rl_IDs = array_unique(array_merge($rl_IDs, $rl_IDs_from));
         }
 
         $this->existsFilter['recIDs'] = implode(',', prepareIds($rec_IDs));
+        $this->existsFilter['rlIDs'] = $has_other_filter ? implode(',', prepareIds($rl_IDs)) : '';
         $this->existsFilter['exists'] = !$has_other_filter;
+        $this->existsFilter['reltype'] = $rel_count > 0;
 
         return $new_values;
     }
