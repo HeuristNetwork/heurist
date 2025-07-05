@@ -302,10 +302,18 @@ global $glb_lang_codes;
 $glb_lang_codes = null;
 
 // Default common languages for translation of database definitions (ISO 639-2 codes).
-// Value from $common_languages_for_translation in configIni.php or defaults here.
-if(!isset($common_languages_for_translation)){
-    $common_languages_for_translation = array('ENG','FRE','CHI','SPA','ITA','ARA','GER','POR','LAT','GRE','GRC');
+// Value from $commonLanguagesForTranslation in configIni.php or defaults here.
+if(!isset($commonLanguagesForTranslation)){
+    $commonLanguagesForTranslation = ['ENG','FRE','CHI','SPA','ITA','ARA','GER','POR','LAT','GRE','GRC'];
 }
+
+// Common languages for translation database definitions (ISO639-2 codes) 3 char in upper case
+// change here to set for the entire installation, overriden by list in configIni.php if present for a specific instance
+// The full names and 2 character codes will be looked up in hclient\assets\language-codes-active-list.txt
+// The order puts languages at the top which are most likely to be used on this installation
+// Place languages supported by DEEPL at the top of the list
+// Place languages which are not supported by DEEPL at the end of the list - they can still be used to insert the translation prefix
+$commonLanguagesLong = ['ENG','FRE','CHI','SPA','ITA','DUT','GER','GRE','TUR','DAN','NOR','SWE','EST','FIN','ARA','BUR','CZE','HIN','HUN','IND','JPN','JAV','KOR','KUR','LAO','LAT','MAO','MAY','MKH','BUR','NEP','PER','POR','RUS','SLO','SLV','SWA','THA','TIB','UIG','UKR','VIE','YID','ZUL'];
 
 // File Upload and Media Handling
 /** @const string Comma-separated list of allowed file extensions for uploads. Used in Uploadhandler.php. */

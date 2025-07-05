@@ -33,7 +33,7 @@
 $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
     
     _entityName:'sysIdentification',
-    
+
     /**
      * @brief Initializes the widget.
      * @override
@@ -85,6 +85,9 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         if(!this.options.isdialog){
             let fele = this.element.find('.ent_wrapper:first');
             $(fele).on("mouseleave", function(e){
+                return; 
+                // @todo: Change implmentation (use same system for other similar functions, e.g. My preferences, External lookup, etc...)
+                // On Menu Change and On Menu Action
                 if($(e.target).is('button')){ return; } // for Rectype Select popup
                 
                 setTimeout(function(){ // Determine if user has switched tabs/minimised window
@@ -159,9 +162,212 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         $ele = this._editing.getFieldByName('sys_AllowUserImportAtLogin');
         $ele.editing_input('setValue', [2 & status]);
 
+        this._setupLanguages();
+
         this._editing.setModified(0);
     },
-	
+
+    /**
+     * @brief Prepares the database languages field after the edit form has is initialised
+     * @memberof heurist.manageSysIdentification
+     */
+    _setupLanguages: async function(){
+
+        let $languages = this._editing.getFieldByName('sys_CommonLanguages');
+        let commonLanguages = window.hWin.HAPI4.sysinfo.common_languages;
+        commonLanguages = Object.keys(commonLanguages).join(',');
+        let allLanguages = [];
+
+        if(!window.hWin.HAPI4.allLanguages){
+            // Retrieve complete list of languages
+            try{
+
+                let response = await fetch(`${window.hWin.HAPI4.baseURL}/hclient/assets/language-codes-active-list.json`);
+
+                if(!response.ok){
+                    throw new Error(`Failed to retrieve language codes from assets directory, status: ${response.status}`);
+                }
+
+                allLanguages = await response.json();
+
+                window.hWin.HAPI4.allLanguages = allLanguages;
+
+            }catch(error){
+                console.error(error.message);
+            }
+        }else{
+            allLanguages = window.hWin.HAPI4.allLanguages;
+        }
+
+        let languageOpts = [];
+        $languages.editing_input('setValue', commonLanguages);
+        if(allLanguages.length === 0 && window.hWin.HEURIST4.util.isempty(commonLanguages)){
+            return;
+        }else if(allLanguages.length > 0){
+
+            for(let idx = 0; idx < allLanguages.length; idx ++){
+
+                let lang = allLanguages[idx];
+                const ar3 = lang.a3.toUpperCase();
+
+                if(!Object.hasOwn(window.hWin.HAPI4.sysinfo.common_languages, ar3)){
+                    languageOpts.push({key: ar3, title: lang.name, idx: idx});
+                }
+            }
+        }
+
+        const editLink = '<span style="text-decoration: underline; padding-left: 10px;"><span class="ui-icon ui-icon-pencil" style="padding-right: 5px;"></span>Edit list</span>';
+
+        $languages.find('input').prop('readonly', true);
+        $languages.find('span.btn_input_clear').replaceWith(editLink);
+
+        $languages.attr('title', window.hWin.HR('Click to edit field')).css('cursor', 'pointer');
+        this._on($languages, {
+            click: () => {
+
+                let $dlg;
+                let records = {};
+                let fields = ['AR3', 'name'];
+                let order = [];
+                for(const ar3 in window.hWin.HAPI4.sysinfo.common_languages){
+
+                    if(!Object.hasOwn(window.hWin.HAPI4.sysinfo.common_languages, ar3)){
+                        continue;
+                    }
+
+                    records[ar3] = [ar3, window.hWin.HAPI4.sysinfo.common_languages[ar3]['name']];
+                    order.push(ar3);
+                }
+                let recordset = new HRecordSet({
+                    count: order.length,
+                    offset: 0,
+                    fields: fields,
+                    rectypes: [1],
+                    records: records,
+                    order: order
+                });
+
+                let content = `<div>
+                    <div style="width: 35em;">
+                        This is the list and order of languages that will appear when adding 
+                        translations for record data and also the allowed languages for any CMS 
+                        website
+                    </div>
+                    <div style='padding: 15px 10px 10px;'>
+                        <select id='sel_AddLanguage' style='max-width: 20em; vertical-align: middle; margin-right: 10px;'></select>
+                        <button id='btn_AddLanguage' style='padding: .3em; font-size: .5em; margin-top: 0px;' title='Add selected language to list'>Add language</button>
+                    </div>
+                    <div style='height: 55em; width: 30em;'>
+                        <div id='rl_Languages' class='ent_content_full' style='top: 9em;'></div>
+                    </div>
+                </div>`;
+
+                let btn = {};
+                btn[window.hWin.HR('Save')] = () => {
+
+                    // Update database settings with new list of languages
+                    let recset = $dlg.find('#rl_Languages').resultList('getRecordSet');
+
+                    let request = {
+                        entity: this._entityName,
+                        a: 'batch',
+                        languages: recset.getOrder()
+                    };
+
+                    window.hWin.HEURIST4.msg.bringCoverallToFront();
+
+                    window.hWin.HAPI4.EntityMgr.doRequest(request, (response) => {
+
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                        if(response.status !== window.hWin.ResponseStatus.OK){
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                            return;
+                        }
+
+                        $languages.editing_input('setValue', Object.keys(response.data).join(','));
+                        window.hWin.HAPI4.sysinfo.common_languages = response.data;
+
+                        $dlg.dialog('close');
+                    });
+                };
+
+                let labels = {title: 'Manage database languages', ok: window.hWin.HR('Save')};
+
+                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btn, labels, {default_palette_class: 'ui-heurist-design', dialogId: 'database-languages'});
+
+                // Initialise Languages result list
+                $dlg.find('#rl_Languages').resultList({
+                    eventbased: false,
+                    multiselect: false,
+                    select_mode: 'none',
+                    view_mode: 'list',
+                    show_viewmode: false,
+                    pagesize: 100,
+                    entityName: 'Languages',
+                    empty_remark: '<div style="padding:1em 0 1em 0">No languages selected</div>',
+                    show_toolbar:false,
+                    sortable: true,
+                    renderer: (recset, record) => {
+
+                        const recID = recset.fld(record, 'AR3');
+                        const label = recset.fld(record, 'name');
+
+                        let btn = this._defineActionButton(
+                            {key: 'delete', label: 'Remove language', title: '', icon: 'ui-icon-delete', class: 'rec_actions_button'}, null, 'icon_text', 'display: inline-block; cursor: pointer;'
+                        );
+
+                        const label_css = 'display: inline-block; width: 35em; max-width: 35em;';
+
+                        return `<div class="recordDiv" recid="${recID}"><div title='${label}' class='truncate' style='${label_css}'>${label}</div>${btn}</div>`;
+                    },
+                    sortable_opts: {
+                        axis: 'y'
+                    }
+                });
+
+                // Add handler for 'Remove' buttons
+                this._on('#rl_Languages', {
+                    resultlistonpagerender: () => {
+                        this._on($dlg.find('#rl_Languages [data-key="delete"]'), {
+                            click: (event) => {
+
+                                const ar3 = $(event.target).closest('[recid]').attr('recid');
+
+                                let recset = $dlg.find('#rl_Languages').resultList('getRecordSet');
+                                recset.removeRecord(ar3);
+                                $dlg.find('#rl_Languages').resultList('updateResultSet', recset);
+                            }
+                        });
+                    }
+                });
+
+                $dlg.find('#rl_Languages').resultList('updateResultSet', recordset);
+
+                window.hWin.HEURIST4.ui.fillSelector($dlg.find('#sel_AddLanguage').get(0), languageOpts);
+
+                // Add handling for adding a new language to list
+                this._on($dlg.find('#btn_AddLanguage').button({icon: 'ui-icon-plus'}), {
+                    click: () => {
+
+                        const ar3 = $dlg.find('#sel_AddLanguage').val();
+                        const idx = languageOpts.findIndex((lang) => lang.key === ar3);
+
+                        if(idx > 0){
+
+                            let language = languageOpts[idx];
+                            language = allLanguages[language.idx];
+
+                            let recset = $dlg.find('#rl_Languages').resultList('getRecordSet');
+                            recset.addRecord(ar3, [ar3, language['name']]);
+                            $dlg.find('#rl_Languages').resultList('updateResultSet', recset);
+                        }
+                    }
+                });
+            }
+        });
+    },
+
     /**
      * @brief Saves the system identification settings and handles follow-up actions.
      * @override

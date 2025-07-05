@@ -58,10 +58,13 @@ class SystemSettings {
      * e.g., 'TinyMCE formats' maps to 'text_styles.json'.
      * @var array<string, string>
      */
-    private $settingsInFiles = ['TinyMCE formats' => 'text_styles.json', 
-                                'Webfonts' => 'webfonts.json',
-                                'Invalid URLs' => 'invalid_urls.json',
-                                'Notifications' => 'user_notifications.json'];
+    private $settingsInFiles = [
+        'TinyMCE formats' => 'text_styles.json', 
+        'Webfonts' => 'webfonts.json',
+        'Invalid URLs' => 'invalid_urls.json',
+        'Notifications' => 'user_notifications.json',
+        'Languages' => 'db_languages.json'
+    ];
 
     /**
      * Constructor for SystemSettings.
@@ -143,7 +146,6 @@ class SystemSettings {
         return $settings;
     }
 
-    /**
     /**
     * Retrieves settings for the current database that are stored in a JSON file within the 'settings/' directory.
     *

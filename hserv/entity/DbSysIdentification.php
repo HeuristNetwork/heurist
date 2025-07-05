@@ -114,6 +114,12 @@ class DbSysIdentification extends DbEntityBase
             $res = $mysqli->query($query);
         }
 
+        foreach($this->records as $record){
+            if(array_key_exists('sys_CommonLanguages', $record)){
+                unset($record['sys_CommonLanguages']);
+                break;
+            }
+        }
 
         $ret = parent::save();
 
@@ -149,6 +155,48 @@ class DbSysIdentification extends DbEntityBase
         return false;
     }
 
+    /**
+     * Save list and order of allowed languages to database settings directory
+     *
+     * @param string|array<string> $languages Array or comma separated list of AR3 language codes
+     * @return array|false Array of allowed language details or false on error
+     */
+    private function saveLanguageSettings($languages){
 
+        if(is_string($languages)){
+            $languages = explode(',', $languages);
+        }
+        if(!is_array($languages)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid list of AR3 language codes provided');
+            return false;
+        }
+
+        $finalList = [];
+        foreach($languages as $lang){
+            $lang = getLangCode3($lang);
+            if(empty($lang) || strlen($lang) !== 3){
+                continue;
+            }
+            $finalList[] = $lang;
+        }
+
+        $commonLanguages = [];
+        if($this->system->settings->setDatabaseSetting('Languages', $finalList)){
+            [$commonLanguages] = getPreparedLanguageList($this->system);
+        }
+
+        return $commonLanguages;
+    }
+
+    public function batch_action(){
+
+        $res = true;
+
+        if(array_key_exists('languages', $this->data)){
+            $res = $this->saveLanguageSettings($this->data['languages']);
+        }
+
+        return $res;
+    }
 }
 ?>

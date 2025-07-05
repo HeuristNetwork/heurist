@@ -1244,7 +1244,7 @@ class System {
         $needEncodeRecordDetails = $needEncodeRecordDetails ?? 0;
 
         // Prepare language list (assuming getPreparedLanguageList is a global function)
-        [$common_languages, $locale_files] = getPreparedLanguageList();
+        [$common_languages, $locale_files] = getPreparedLanguageList($this);
         
         // Determine if rewrite rules are enabled (USystem::checkRewriteRuleEnabled might be static or global)
         $useRewriteRulesForRecordLink = $useRewriteRulesForRecordLink ?? USystem::checkRewriteRuleEnabled();

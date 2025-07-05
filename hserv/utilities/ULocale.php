@@ -164,7 +164,7 @@
 
             if($lang){ //lang detected
 
-                //if (strcasecmp($lang,'ALL')===0 || in_array($lang, $common_languages_for_translation)){
+                //if (strcasecmp($lang,'ALL')===0 || in_array($lang, $commonLanguagesForTranslation)){
                 if($tag_to_remove == null){
                     $val = substr($val_orig, $pos);
                 }else{
@@ -605,22 +605,32 @@
      * Prepares a list of common languages for translation and available UI localization files.
      * Used to populate language selection UI elements.
      *
-     * @global array $common_languages_for_translation Array of common language codes (3-letter) defined in heuristConfigIni.php.
+     * @global array $commonLanguagesForTranslation Array of common language codes (3-letter) defined in heuristConfigIni.php.
      * @global array $glb_lang_codes Global array of language code objects.
+     * @param \hserv\System $system Heurist's initialized system object.
      * @return array An array containing two elements:
      *               0: An associative array of common languages (uppercase 3-letter code => language object).
      *               1: An array of available UI locale file language codes (2-letter, lowercase).
      */
-    function getPreparedLanguageList(){
+    function getPreparedLanguageList($system = null){
 
-        global $common_languages_for_translation, $glb_lang_codes;
+        global $commonLanguagesForTranslation, $glb_lang_codes;
 
         // extracts from $glb_lang_codes names and alpha2 codes to be sent to client
         initLangCodes();
 
+        $languages = $commonLanguagesForTranslation;
+        if($system && is_a($system, 'hserv\System')){
+            $languages = $system->settings->getDatabaseSetting('Languages');
+            if(empty($languages)){
+                $languages = $commonLanguagesForTranslation;
+                $system->settings->setDatabaseSetting('Languages', $languages);
+            }
+        }
+
         // ordered as in $commonLanguages (defined in heuristConfigIni)
         $commonLanguages = [];
-        foreach($common_languages_for_translation as $code){
+        foreach($languages as $code){
 
             $lang = strtolower($code);
 

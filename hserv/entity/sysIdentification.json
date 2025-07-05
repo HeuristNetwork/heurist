@@ -45,7 +45,7 @@
                         "rst_DisplayName": "Database format version",
                         "rst_DisplayHelpText": "", 
                         "rst_Display":"hidden",
-                        "dty_Role":"virtual"
+                        "dty_Role": "virtual"
                     }
                 },
                 {
@@ -177,6 +177,16 @@
         "groupType": "group",
             "children":[
                 {
+                    "dtID": "sys_CommonLanguages",
+                    "dtFields": {
+                        "dty_Type": "freetext",
+                        "rst_DisplayName": "List of allowed languages to be used for record data and CMS websites",
+                        "rst_DisplayHelpText": "Comma separated list of AR3 language codes",
+                        "rst_DisplayWidth": 100,
+                        "dty_Role": "virtual"
+                    }
+                },
+                {
                     "dtID": "sys_NewRecAccess",
                     "dtFields":{
                         "dty_Type":"enum",
@@ -189,7 +199,7 @@
                             {"key":"pending","title":"pending"}
                         ]}
                     }
-                }, 
+                },
                 {
                     "dtID": "sys_SetPublicToPendingOnEdit",
                     "dtFields":{
