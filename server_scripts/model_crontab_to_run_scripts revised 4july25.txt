@@ -1,0 +1,77 @@
+# CRONTAB FILE FOR SATELLITE SERVER (single server installation, CET time zone)
+
+# Last revised (Huma-Num server): 4 July 2025
+
+MAILTO=ian.johnson.heurist@gmail.com
+
+# minute, hour, day of month, month, day of week 0=sun, 1=mon etc.
+
+# Monitor server metrics (hourly)
+5 * * * * /srv/scripts/alert_server.sh >/dev/null 2>&1
+
+# Update h6-alpha at 1am from reference server - build runs daily at 8am or later Sydney time
+40 00 * * * curl -l https://heuristref.net/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s h6-alpha  >/dev/null 2>&1
+
+# Update h6-beta at 4.15am from reference server - build runs daily at 8.15am or later Sydney time
+50 00 * * * curl -l https://heuristref.net/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s h6-beta >/dev/null 2>&1
+
+
+# LOCAL BACKUPS
+
+# --------------------------------------------------------------
+
+# SEARCH ENGINE HARVESTABLE REFERENCES
+
+# Update harvestable static HTML descriptive pages for each database on the server - very quick
+00 00 * * * php -f /var/www/html/heurist/admin/utilities/writeIndexablePagePerDB.php -- -db=
+
+# Note: this writes to .../HEURIST/HarvestableDatabaseDescriptions
+#       This directory should be simlinked in /var/www/html to allow short path access
+
+# ------------------------------------------------------------------------------------------
+
+# precautionary fix of group ownership and permissions
+50 23 * * * chown -R apache:heurist /var/www/html/HEURIST
+55 23 * * * chmod -R g+rwx /var/www/html/HEURIST
+50 23 * * * chown -R apache:heurist /data/HEURIST_FILESTORE
+55 23 * * * chmod -R g+rwx /data/HEURIST_FILESTORE
+
+# Remove orphaned html files in HarvestableDatabaseDescriptions
+# late 2024: php script now rewrites all files so this is no logner needed
+# 0 01 * * 0 /srv/scripts/remove_orphaned_harvestable_html.sh
+
+#Ansible: Local backups for all databases
+00 01 * * * /srv/scripts/backup_all_dbs.sh
+
+# Creates archive copy of database dumps when bz2 files change
+30 02 * * * /srv/scripts/archive_bzip_dbs.sh >/dev/null 2>&1
+
+# Precautionary restart of apache and mysqld in the early hours
+00 03 * * * service mysqld restart
+05 03 * * * /usr/sbin/apachectl restart
+
+# Removes redundant older bz2 files of SQL database dumps
+15 03 * * * /srv/scripts/purge_ARCHIVE.sh >/dev/null 2>&1
+
+# AUTOMATED REPORTING ON USERS AND SETUP OF THE DATABASES
+
+# Email lists to support
+# set last item to * for daily, 0 for sunday, 1 for Monday mailout
+00 04 * * 0 /srv/scripts/run_checks_and_email_lists_to_support.sh >/dev/null 2>&1
+
+# Email reminders and update scheduled smarty reports
+00 05 * * * php -f /var/www/html/HEURIST/heurist/admin/setup/dboperations/dailyCronJobs.php
+
+# Cleanup database folders (root, backup and scratch) 4:30am on Monday
+00 05 * * 0  php -f /var/www/html/HEURIST/h6-alpha/admin/utilities/cleanupFoldersDBs.php -- -purge
+
+#Ansible: Check all database tables
+10 05 * * 0 /srv/scripts/check_for_required_tables.sh
+
+# Purge inactive databases, import and sysArchive tables
+30 05 * * 0  php -f /var/www/html/HEURIST/heurist/admin/utilities/purgeInactiveDBs.php -- -purge
+
+
+# Create list of all users for all databases (Sunday)
+19 10 * * 0 /srv/scripts/list_all_users_with_dbs.sh
+
