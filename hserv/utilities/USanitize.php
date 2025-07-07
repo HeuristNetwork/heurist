@@ -268,6 +268,7 @@ class USanitize {
             $config->set('CSS.Trusted', true);
 
             $config->set('Attr.AllowedFrameTargets','_blank');
+            $config->set('HTML.SafeEmbed', true);
             $config->set('HTML.SafeIframe', true);
             /*$config->set('Core.AcceptFullDocuments',false);
             $config->set('Core.HiddenElements',array (
