@@ -182,7 +182,7 @@
                         "dty_Type": "freetext",
                         "rst_DisplayName": "List of allowed languages to be used for record data and CMS websites",
                         "rst_DisplayHelpText": "Comma separated list of AR3 language codes",
-                        "rst_DisplayWidth": 100,
+                        "rst_DisplayWidth": 85,
                         "dty_Role": "virtual"
                     }
                 },

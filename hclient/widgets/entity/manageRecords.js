@@ -4232,7 +4232,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     readded_parents = window.hWin.HEURIST4.msg.prepareParentRecordMsg(response.issues['parents']);
                     if(typeof readded_parents === 'object'){
 
-                        handlers = $.extend({}, handlers, readded_parents.handlers);
+                        handlers = $.extend(handlers, readded_parents.handlers);
 
                         headers += `<li><a href="#${id}">${readded_parents.title}</a></li>`;
 
@@ -4261,16 +4261,94 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     }
 
                     if(!window.hWin.HEURIST4.util.isempty(msg)){
-                        
+
                         headers += `<li><a href="#${id}">Failed entry masks</a></li>`;
+
+                        contents += `<div id="${id}" style="margin: 7.5px 10px;">${msg}</div>`;
+
+                        has_msg = true;
+                    }
+
+                    break;
+
+                case 'languages':{
+
+                    if(issues?.added && Object.keys(issues.added).length > 0){
+
+                        let multiple = Object.keys(issues.added).length > 1;
+                        let languages = Object.entries(issues.added).reduce((arr, lang) => arr.concat(lang[1].name), []);
+                        msg = multiple ?
+                            `The following languages have been added to the allowed list: <strong>${languages.join(', ')}</strong>.` :
+                            `The language <strong>${languages[0]}</strong> was added to the allowed list.`;
+
+                        msg += `<br><br>This will allow the language(s) to appear in language selectors and to work within this database's websites.<br><br>
+                        You can edit the list of allowed languages (and their order) at 
+                        <span id="lnk_Props" style="text-decoration: underline; cursor: pointer;">
+                            "Design" > "Properties"
+                        </span> > "List of allowed languages to be used for record data and CMS websites".<br><hr><br>`;
+
+                        $.extend(window.hWin.HAPI4.sysinfo.common_languages, issues.added);
+                        $.extend(handlers, {
+                            '#lnk_Props': () => window.hWin.HAPI4.SystemMgr.verify_credentials(() => window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification'), 1)
+                        });
+                    }
+
+                    if(issues?.unknown && Object.keys(issues.unknown).length > 0){
+
+                        let unknown = Object.values(issues.unknown).join('<br>');
+                        msg += `Unknown Languages for websites:<br><strong>${unknown}</strong><br>
+                        Please ensure that these <span id="lnk_Terms" style="text-decoration: underline; cursor: pointer;">
+                            language terms have a term standard code and that it is in ISO 639-2 format
+                        </span><br>(e.g. eng = English).<br><hr><br>`;
+
+                        $.extend(handlers, {
+                            '#lnk_Terms': () => {
+                                let vocabID = $Db.dty(window.hWin.HAPI4.sysinfo.dbconst.DT_LANGUAGES, 'dty_JsonTermIDTree');
+                                let langTrm = {
+                                    height:800, width:1300,
+                                    selection_on_init: vocabID,
+                                    innerTitle: false,
+                                    innerCommonHeader: $(`<div>
+                                        <span style="margin-left:260px">Field: <b>${$Db.dty(window.hWin.HAPI4.sysinfo.dbconst.DT_LANGUAGES, 'dty_Name')}</b></span>
+                                        <span style="margin-left:110px">This field uses vocabulary: <b>${$Db.trm(vocabID, 'trm_Label')}</b></span>
+                                    </div>`)
+                                };
+
+                                window.hWin.HEURIST4.ui.showEntityDialog('defTerms', langTrm);
+                            }
+                        });
+                    }
+
+                    if(issues?.website && Object.keys(issues.website).length > 0){
+
+                        let webLangs = Object.entries(issues.skipped).reduce((string, lang) => `${string}<br>${lang[0]}: ${lang[1]}`, '');
+                        msg += `The following languages have been set for CMS website usage but are not setup for database usage:<strong>${webLangs}</strong><br>
+                        While these languages will be listed as options on CMS websites, Heurist will instead use English.<br><br>
+                        To allow the usage for these languages, please request a database administrator to add them to the list found at 
+                        "Design" > "Properties" > "List of allowed languages to be used for record data and CMS websites".<br><hr><br>`;
+                    }
+
+                    if(issues?.skipped && Object.keys(issues.skipped).length > 0){
+
+                        let skipped = Object.entries(issues.skipped).reduce((string, lang) => `${string}<br>${lang[0]}: ${lang[1]}`, '');
+                        msg += `The following languages were found in record data that are not currently allowed:<strong>${skipped}</strong><br><br>
+                        These values have been saved and are accessible but will only be partially supported.<br><br>
+                        Please ask a database administrator to add the above languages to the list of database languages, 
+                        found at "Design" > "Properties" > "List of allowed languages to be used for record data and CMS websites".<br>`;
+                    }
+
+                    if(!window.hWin.HEURIST4.util.isempty(msg)){
+    
+                        headers += `<li><a href="#${id}">Languages</a></li>`;
     
                         contents += `<div id="${id}" style="margin: 7.5px 10px;">${msg}</div>`;
     
                         has_msg = true;
                     }
-
+    
                     break;
-            
+                }
+
                 default:
                     break;
             }
@@ -4280,10 +4358,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             headers += '</ul>';
 
-            let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(headers + contents + '</div>', null, {title: 'Record issues'}, {default_palette_class: 'ui-heurist-populate'});
+            let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(headers + contents + '</div>', null, {title: 'Record issues'}, {default_palette_class: 'ui-heurist-populate', dialogId: 'record-issues'});
 
             for(const selector in handlers){
-                $dlg.find(selector).on('click', readded_parents.handlers[selector]);
+                $dlg.find(selector).on('click', handlers[selector]);
             }
 
             $dlg.find('.issues-tabs').tabs();
