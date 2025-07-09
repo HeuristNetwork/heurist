@@ -1284,6 +1284,7 @@ class WebSite
                 $config->set('Cache', 'SerializerPath', $this->system->getSysDir('scratch'));
                 $config->set('CSS.Trusted', true);
                 $config->set('Attr.AllowedFrameTargets','_blank');
+                $config->set('HTML.SafeEmbed', true);
                 $config->set('HTML.SafeIframe', true);
                 //allow YouTube, Soundlcoud and Vimeo
                 // https://w.soundcloud.com/player/

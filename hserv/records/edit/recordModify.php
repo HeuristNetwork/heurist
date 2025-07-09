@@ -460,6 +460,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     $is_save_new_record = false;
     $missingParents = [];
     $entryMaskIssues = [];
+    $languageIssues = [];
 
     // recDetails data
     if ( @$record['details'] ) {
@@ -808,6 +809,8 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
 
         $entryMaskIssues = recordUpdateMaskFields($system, $recID, $rectype);
 
+        $languageIssues = recordCheckLanguages($system, $recID, $rectype);
+
         //check that this record my affect other records with calculated fields
         //1. cfn_RecTypeIDs -> cfn_ID
         //2. defRecStructure where rst_CalcFunctionID  -> rst_RecTypeID+rst_DetailTypeID
@@ -916,6 +919,9 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     }
     if(!empty($entryMaskIssues)){
         $rtn['issues']['entryMask'] = $entryMaskIssues;
+    }
+    if(!empty($languageIssues)){
+        $rtn['issues']['languages'] = $languageIssues;
     }
 
     return $rtn;
@@ -4297,6 +4303,112 @@ function updateMaskFields($type, $value, $length, $range){
     }
 
     return [$value, $reason];
+}
+
+function recordCheckLanguages($system, $recID, $recTypeID){
+
+    global $glb_lang_codes;
+
+    $mysqli = $system->getMysqli();
+    $isAdmin = $system->isAdmin();
+
+    $system->defineConstant('RT_CMS_HOME');
+    $system->defineConstant('DT_LANGUAGES');
+    $allowedLanguages = $system->settings->getDatabaseSetting('Languages');
+
+    if(empty($allowedLanguages)){
+        return [];
+    }
+
+    initLangCodes();
+
+    $query = "SELECT rst_DetailTypeID FROM defRecStructure INNER JOIN defDetailTypes ON dty_ID = rst_DetailTypeID WHERE rst_RecTypeID = {$recTypeID} AND (dty_Type = 'freetext' OR dty_Type = 'blocktext')";
+    $textFields = mysql__select_list2($mysqli, $query, 'intval');
+    $isCMSHome = defined('RT_CMS_HOME') && defined('DT_LANGUAGES') && $recTypeID == RT_CMS_HOME;
+
+    if(empty($textFields) && !$isCMSHome){
+        return [];
+    }
+
+    $select = "IF(REGEXP_LIKE(dtl_Value, '^[A-Za-z]{2}:'), SUBSTRING(dtl_Value, 1, 2), SUBSTRING(dtl_Value, 1, 3))";
+    $issues = [
+        'added' => [],
+        'skipped' => [],
+        'website' => [],
+        'unknown' => []
+    ];
+    if(!$isCMSHome){
+
+        foreach($textFields as $dtyID){
+
+            $values = mysql__select_list2($mysqli, "SELECT {$select} FROM recDetails WHERE dtl_RecID = {$recID} AND dtl_DetailTypeID = {$dtyID} AND REGEXP_LIKE(dtl_Value, '^[A-Za-z]{2,3}:')");
+
+            if(count($values) <= 1){
+                continue;
+            }
+
+            foreach($values as $value){
+
+                $AR3 = getLangCode3($value);
+                $ar3 = strtolower($AR3);
+                $key = array_search($ar3, array_column($glb_lang_codes, 'a3'));
+
+                if($key === false || in_array($AR3, $allowedLanguages)){
+                    continue;
+                }
+
+                if($isAdmin){ // add language
+                    $issues['added'][$AR3] = $glb_lang_codes[$key];
+                    $allowedLanguages[] = $AR3;
+                }else{
+                    $issues['skipped'][$AR3] = $glb_lang_codes[$key]['name'];
+                }
+            }
+        }
+    }
+
+    if($isCMSHome){
+
+        $webLanguages = mysql__select_list2($mysqli, "SELECT dtl_Value FROM recDetails WHERE dtl_RecID = {$recID} AND dtl_DetailTypeID = ". DT_LANGUAGES, 'intval');
+        $languageCodes = getTermCodes($mysqli, $webLanguages);
+        $languageLabels = getTermLabels($mysqli, $webLanguages);
+
+        if(!empty($webLanguages) && !empty($languageCodes)){
+
+            foreach($webLanguages as $trmID){
+
+                $trmCode = $languageCodes[$trmID];
+                $trmLabel = $languageLabels[$trmID];
+
+                if(empty($trmCode)){
+                    $issues['unknown'][] = "{$trmLabel} is missing a term code";
+                    continue;
+                }
+
+                $AR3 = getLangCode3($trmCode);
+                $ar3 = strtolower($AR3);
+                $key = array_search($ar3, array_column($glb_lang_codes, 'a3'));
+
+                if($key === false){
+                    $issues['unknown'][] = "{$trmLabel} unknown language code '{$trmCode}'";
+                    continue;
+                }elseif(in_array($ar3, $allowedLanguages)){
+                    continue;
+                }
+
+                if($isAdmin){ // add language
+                    $issues['added'][$AR3] = $glb_lang_codes[$key];
+                    $allowedLanguages[] = $AR3;
+                }else{
+                    $issues['website'][$AR3] = $glb_lang_codes[$key]['name'];
+                }
+            }
+        }
+    }
+
+    $system->settings->setDatabaseSetting('Languages', $allowedLanguages);
+
+    return empty($issues['added']) && empty($issues['skipped']) && empty($issues['website']) && empty($issues['unknown']) ? [] : $issues;
 }
 
 /**

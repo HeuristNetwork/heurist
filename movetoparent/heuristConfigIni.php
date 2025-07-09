@@ -154,14 +154,6 @@ $OPENTHESO_SERVERS = array(
 $accessToken_DeepLAPI = 'OBTAIN THIS FROM DEEPL';// To enable DeepL translations
 $serverName_DeepL = "DEPENDS ON WHETHER FREE OR PAID SERVICE";
 
-// Common languages for translation database definitions (ISO639-2 codes) 3 char in upper case
-// change here to set for the entire installation, overriden by list in configIni.php if present for a specific instance
-// The full names and 2 character codes will be looked up in hclient\assets\language-codes-active-list.txt
-// The order puts languages at the top which are most likely to be used on this installation
-// Place languages supported by DEEPL at the top of the list
-// Place languages which are not supported by DEEPL at the end of the list - they can still be used to insert the translation prefix
-$common_languages_for_translation = array('ENG','FRE','CHI','SPA','ITA','DUT','GER','GRE','TUR','DAN','NOR','SWE','EST','FIN','ARA','BUR','CZE','HIN','HUN','IND','JPN','JAV','KOR','KUR','LAO','LAT','MAO','MAY','MKH','BUR','NEP','PER','POR','RUS','SLO','SLV','SWA','THA','TIB','UIG','UKR','VIE','YID','ZUL');
-
 
 // [DATABASE DUMP CONFIGURATION - TIERED SERVERS]
 
