@@ -109,7 +109,7 @@ class ActionHandler {
         
         // Handle password and permission verification
         let action_passworded = adata.pwd;
-        if (!action_passworded && !window.hWin.HAPI4.has_access(2)) { // TODO: Investigate HAPI4.has_access(2) - what does 2 mean?
+        if (!action_passworded && !window.hWin.HAPI4.has_access(2)) { // is datbase owner
             action_passworded = adata['pwd-nonowner'];
         }
         
@@ -551,7 +551,7 @@ class ActionHandler {
                 window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', popup_dialog_options);
                 break;
             case "menu-structure-import":
-                window.hWin.HEURIST4.ui.showWdigetDialog('importStructure', popup_dialog_options);
+                window.hWin.HEURIST4.ui.showWidgetDialog('importStructure', popup_dialog_options);
                 break;
             case "menu-profile-preferences":
                 popup_dialog_options['path'] = 'widgets/profile/';

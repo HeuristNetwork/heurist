@@ -143,7 +143,7 @@ class WebSite
 
         
         if(!isPositiveInt($siteId)){
-            // if $siteId is not defined - use fist available "CMS home" record
+            // if $siteId is not defined - use first available "CMS home" record
             
             //find default website
             $res = recordSearch($this->system, array('q'=>array('t'=>RT_CMS_HOME), 'detail'=>'ids'));
@@ -580,7 +580,7 @@ class WebSite
 */        
         
         //get header settings
-        //replace template values {} with settings from siteRecord (CMS_HOME)
+        //replace template values {$website.xxxx} with settings from siteRecord (CMS_HOME)
         $header_tpl = $this->getWebSiteOptions( true );
             
         $values_to_replace = array_map(function ($v) {
@@ -1064,7 +1064,7 @@ class WebSite
      * Handles the output of website content, save to file  or outputting it as required.
      *
      * @param string $website_output The rendered website output.
-     * @param bool $need_sanitize Whether or not to sanitize the output.
+     * @param bool $need_sanitize whether or not to sanitize the output.
      * 
      * @return true/false or string for publishmode==4
      */

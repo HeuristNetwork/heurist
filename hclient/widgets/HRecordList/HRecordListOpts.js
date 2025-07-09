@@ -2,7 +2,7 @@
 * HRecordListOpts - form to modify HRecordList options
 *
 * @project     Heurist academic knowledge management system
-* @package Wigets
+* @package Widgets
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

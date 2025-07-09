@@ -2429,7 +2429,7 @@ window.hWin.HEURIST4.ui = {
         
         if(window.hWin.HEURIST4.util.isFunction($('body')[widgetName])){ //OK! widget script js has been loaded
         
-            return window.hWin.HEURIST4.ui.showWdigetDialog(widgetName, options);
+            return window.hWin.HEURIST4.ui.showWidgetDialog(widgetName, options);
             
         }else{
             
@@ -2466,7 +2466,7 @@ window.hWin.HEURIST4.ui = {
     //
     //
     //    
-    showWdigetDialog: function( widgetName, options ){
+    showWidgetDialog: function( widgetName, options ){
         
         if(!window.hWin.HEURIST4.util.isFunction($('body')[widgetName])){
             window.hWin.HEURIST4.msg.showMsg_ScriptFail();
