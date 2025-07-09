@@ -315,7 +315,7 @@ class HLayoutMgr {
   */
   layoutInitGroup(layout, container, forStorage) {
       
-        layout.dom_id = 'cms-group-'+layout.key;
+        if(!layout.dom_id) layout.dom_id = 'cms-group-'+layout.key;
         
         let $d = this.#layoutCreateDiv(layout, !forStorage && this._isEditMode?'cms-element brick':'', forStorage);
         
@@ -566,7 +566,7 @@ console.log(content);
    */
     layoutInitCardinal(layout, container, forStorage){
 
-        layout.dom_id = 'cms-group-'+layout.key;
+        if(!layout.dom_id) layout.dom_id = 'cms-group-'+layout.key;
         
         let $parent = this.#layoutCreateDiv(layout, '', forStorage);
         
@@ -632,7 +632,7 @@ console.log(content);
 
                 if(layout.children[i].children.length>1){
                   
-                    lpane.dom_id = 'cms-group-'+lpane.key;
+                    if(!layout.dom_id) lpane.dom_id = 'cms-group-'+lpane.key;
                     //@todo additional container for children>1        
                     layout_opts[pos+'__contentSelector'] = '#'+lpane.dom_id;
                     
@@ -677,7 +677,7 @@ console.log(content);
    */
   layoutInitTabs(layout, container, forStorage){
 
-        layout.dom_id = 'cms-group-'+layout.key;
+        if(!layout.dom_id) layout.dom_id = 'cms-group-'+layout.key;
         
         let $d = this.#layoutCreateDiv(layout, !forStorage && this._isEditMode?'cms-element brick':'', forStorage);
                                           
@@ -750,7 +750,7 @@ console.log(content);
    */
     layoutInitAccordion(layout, container, forStorage){
        
-        layout.dom_id = 'cms-group-'+layout.key;
+        if(!layout.dom_id) layout.dom_id = 'cms-group-'+layout.key;
         
         let $d = this.#layoutCreateDiv(layout, !forStorage && this._isEditMode?'cms-element brick':'', forStorage);
         
