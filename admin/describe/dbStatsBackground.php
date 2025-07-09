@@ -194,7 +194,7 @@ function createStats(){
 
     $databases = mysql__getdatabases4($mysqli);
 
-    $head_liner = "Server: " . SERVER_NAME . "   Database count: " . count($databases) . "\n";
+    $head_liner = "Server: " . SERVER_NAME . "   Database count: " . count($databases) . "   Date: " . date("Y-m-d H:i:s") . "\n";
     if(!file_put_contents(DB_STATS_FILE,  $head_liner)){
         $system->addError(HEURIST_ERROR, 'Unable to write to stats file');
         return false;

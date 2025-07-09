@@ -17,7 +17,7 @@
 
 
 
-require_once __DIR__ . '/../autoload.php';
+require_once __DIR__ . '/../../autoload.php';
 
 use hserv\utilities\USanitize;
 
@@ -174,5 +174,5 @@ function transferZipFiles($remote_zip, $server_name, $allowed_stats){
     $to_zip->close();
     $from_zip->close();
 
-    fileDelete($from_zip);
+    fileDelete($remote_zip);
 }
