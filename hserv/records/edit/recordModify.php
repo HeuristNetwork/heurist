@@ -4330,7 +4330,7 @@ function recordCheckLanguages($system, $recID, $recTypeID){
         return [];
     }
 
-    $select = "IF(REGEXP_LIKE(dtl_Value, '^[A-Za-z]{2}:'), SUBSTRING(dtl_Value, 1, 2), SUBSTRING(dtl_Value, 1, 3))";
+    $select = "IF(RLIKE(dtl_Value, '^[A-Za-z]{2}:'), SUBSTRING(dtl_Value, 1, 2), SUBSTRING(dtl_Value, 1, 3))";
     $issues = [
         'added' => [],
         'skipped' => [],
@@ -4341,7 +4341,7 @@ function recordCheckLanguages($system, $recID, $recTypeID){
 
         foreach($textFields as $dtyID){
 
-            $values = mysql__select_list2($mysqli, "SELECT {$select} FROM recDetails WHERE dtl_RecID = {$recID} AND dtl_DetailTypeID = {$dtyID} AND REGEXP_LIKE(dtl_Value, '^[A-Za-z]{2,3}:')");
+            $values = mysql__select_list2($mysqli, "SELECT {$select} FROM recDetails WHERE dtl_RecID = {$recID} AND dtl_DetailTypeID = {$dtyID} AND RLIKE(dtl_Value, '^[A-Za-z]{2,3}:')");
 
             if(count($values) <= 1){
                 continue;
