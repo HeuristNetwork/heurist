@@ -842,7 +842,7 @@ $.widget( "heurist.navigation", {
                 }
 
                 //load page content to page_target element
-                if(page_target_selector.startsWith('#')) page_target_selector = '#'+page_target_selector;
+                if(!page_target_selector.startsWith('#')) page_target_selector = '#'+page_target_selector;
 
 
                 let continue_load_page = function() {

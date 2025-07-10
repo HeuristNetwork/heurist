@@ -1049,8 +1049,8 @@ class ReportExecute
 
                  $baseURL = HEURIST_BASE_URL;
                  $head .= <<<EXP
-                            {$script_tag}external/external/jquery/jquery-3.7.1.js"></script>
-                            {$script_tag}external/external/jquery/jquery-ui.js"></script>
+                            {$script_tag}external/jquery/jquery-3.7.1.js"></script>
+                            {$script_tag}external/jquery/jquery-ui.js"></script>
                             {$script_tag}external/jquery.fancybox/jquery.fancybox.js"></script>
                             {$script_tag}hclient/core/detectHeurist.js"></script>
                             {$script_tag}hclient/widgets/viewers/mediaViewer.js"></script>
@@ -1088,8 +1088,8 @@ class ReportExecute
              if(strpos($tpl_source,'fancybox-thumb')>0){
 
                  $head = <<<EXP
-    {$script_tag}external/external/jquery/jquery-3.7.1.js"></script>
-    {$script_tag}external/external/jquery/jquery-ui.js"></script>
+    {$script_tag}external/jquery/jquery-3.7.1.js"></script>
+    {$script_tag}external/jquery/jquery-ui.js"></script>
     {$script_tag}external/jquery.fancybox/jquery.fancybox.js"></script>
     {$script_tag}hclient/core/detectHeurist.js"></script>
     {$script_tag}hclient/widgets/viewers/mediaViewer.js"></script>

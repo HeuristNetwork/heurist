@@ -3357,7 +3357,8 @@ window.hWin.HEURIST4.ui = {
                 img.hide().attr('src',item.img);
             }else{
                 title_ele.html(item.title);    
-                img.load(__onImageLoad).attr('src',item.img); 
+                // $.load(url, params, callback)
+                img.load(item.img, __onImageLoad);
             } 
         });
 

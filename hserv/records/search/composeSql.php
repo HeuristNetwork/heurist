@@ -3881,7 +3881,8 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
 
 
                     if(empty($lang)){ // default only
-                        $res = $res . " AND NOT REGEXP_LIKE(dtl_Value, '^[A-Za-z]{2,3}:')";
+                        //$res = $res . " AND NOT REGEXP_LIKE(dtl_Value, '^[A-Za-z]{2,3}:') "; //since mysql v8
+                        $res = $res . " AND dtl_Value NOT RLIKE '^[A-Za-z]{2,3}:' "; 
                     }elseif($lang == 'ALL' && $this->exact && !$this->fulltext){ // any language, exact and not a fulltext search
                         $res = $res . " OR SUBSTRING(dtl_Value, 0, 4) = '" . $mysqli->real_escape_string($this->value) . "'";
                         $res = $res . " OR SUBSTRING(dtl_Value, 0, 3) = '" . $mysqli->real_escape_string($this->value) . "'";
