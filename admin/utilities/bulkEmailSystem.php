@@ -892,8 +892,7 @@ class BulkEmailSystem {
      */
     private function logEmailStatus($email_rtn, $details, $email, $db_listed, $records_listed, $lastmod_listed, $body) {
         $status_msg = $email_rtn == 0 ? "Sent, Sent Message: {$body}" : "Failed, Error Message: " . $this->getError();
-        // REMARK: $body can be very large and contain HTML. Logging it directly might be problematic for log size and parsing.
-        // Consider logging a snippet or only if $email_rtn != 0.
+
         $this->log = htmlspecialchars("Values: {databases: {{$db_listed}}, email: {$email}, name: {$details['first_name']} {$details['last_name']}"
             . ", record_count: {{$records_listed}}, last_modified: {{$lastmod_listed}} },"
             . "Timestamp: " . date(DATE_8601) . ", Status: {$status_msg}");
@@ -1237,7 +1236,7 @@ class BulkEmailSystem {
 
         $this->progress .= $msg;
 
-        $curProgress = mysql__update_progress($this->system->getMysqli, $this->sessionID, false, null);
+        $curProgress = mysql__update_progress($this->system->getMysqli(), $this->sessionID, false, null);
         if($curProgress === 'terminate'){
             return;
         }
@@ -1321,7 +1320,7 @@ function sendSystemEmail($data) {
     }elseif($setup_res){
         $rtn = ['status' => HEURIST_OK, 'data' => 'terminated'];
     }else{
-        $rtn = ['status' => HEURIST_INVALID_REQUEST, 'message' => 'An error occurred with processing the form\'s data.'];
+        $rtn = ['status' => HEURIST_INVALID_REQUEST, 'message' => 'An error occurred with processing the form\'s data.<br>' . $email_obj->getError()];
     }
 
     return $rtn;
@@ -1331,7 +1330,7 @@ function sendSystemEmail($data) {
  * Export Selected data as CSV
  *
  * @param array $data Form input data
- * @return int Returns an error code, otherwise the script exits while printing the CSV details
+ * @return array|int Returns an error code, otherwise the script exits while printing the CSV details
  * @global hserv\System $system The global Heurist System object.
  */
 function getCSVDownload($data) {
@@ -1339,22 +1338,21 @@ function getCSVDownload($data) {
     global $system;
 
     $csv_obj = new BulkEmailSystem($system);
+    $rtn = [];
 
-    if ($csv_obj->processFormData($data) == 0) {
+    $setup_res = $csv_obj->processFormData($data);
+    if($setup_res == 0){
 
-        if ($csv_obj->exportDetailsToCSV() <= -1) {
-
-            echo "An error occurred with exporting the selected data as a CSV file<br>";
-            $output = $csv_obj->getError();
-            print $output[0];
+        $export_res = $csv_obj->exportDetailsToCSV();
+        if($export_res <= -1){
+            $rtn = ['status' => HEURIST_ERROR, 'message' => 'An error occurred with preparing and sending the system emails.<br>' . $csv_obj->getError()];
         }
 
-    } else {
-
-        echo "An error occurred with processing the form's data<br>";
-        $output = $csv_obj->getError();
-        print htmlspecialchars($output);
+    }elseif($setup_res){
+        $rtn = ['status' => HEURIST_OK, 'data' => 'terminated'];
+    }else{
+        $rtn = ['status' => HEURIST_INVALID_REQUEST, 'message' => 'An error occurred with processing the form\'s data.<br>' . $csv_obj->getError()];
     }
 
-    return -1;
+    return $rtn;
 }

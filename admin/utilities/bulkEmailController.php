@@ -44,7 +44,7 @@ class BulkEmailController{
 
     private $system;
     private $request;
-    private $allowedAction = ['list_databases', 'email_details', 'record_count', 'user_count', 'send_emails', 'session'];
+    private $allowedAction = ['list_databases', 'email_details', 'record_count', 'user_count', 'send_emails', 'csv_export', 'session'];
 
     private $sysadminPWD;
     private $response;
@@ -92,28 +92,23 @@ class BulkEmailController{
 
         switch($this->request['a']){
 
-            case 'list_databases':
-                if(isset($this->request['db_filtering'])){ // Get a list of DBs based on the list of provided filters, first search gets all dbs
-                    $this->getDatabases();
-                }
+            case 'list_databases': // Get a list of DBs based on the list of provided filters, first search gets all dbs
+                $this->getDatabases();
                 break;
             case 'record_count': // Get a count of records
-                if(isset($this->request['db_list'])){
-                    $this->getRecordCount();
-                }
+                $this->getRecordCount();
                 break;
             case 'user_count': // Get a count of distinct users
-                if(isset($this->request['user_count'], $this->request['db_list'])){
-                    $this->getUserCount();
-                }
+                $this->getUserCount();
                 break;
             case 'email_details': // Get the Title and Short Summary field for the selected id, id is for Email record
-                if(isset($this->request['recid'])){
-                    $this->getEmailDetails();
-                }
+                $this->getEmailDetails();
                 break;
             case 'send_emails':
                 $this->sendEmails();
+                break;
+            case 'csv_export':
+                $this->exportCSV();
                 break;
             case 'session':
                 $this->getSessionResult();
@@ -136,6 +131,10 @@ class BulkEmailController{
      * @return void
      */
     private function getDatabases(){
+
+        if(!isset($this->request['db_filtering'])){
+            return;
+        }
 
         $mysqli = $this->system->getMysqli();
 
@@ -230,6 +229,10 @@ class BulkEmailController{
      */
     private function getRecordCount(){
 
+        if(!isset($this->request['db_list'])){
+            return;
+        }
+
         $mysqli = $this->system->getMysqli();
 
         $dbList = $this->request['db_list'];
@@ -271,6 +274,10 @@ class BulkEmailController{
      * @return void
      */
     private function getUserCount(){
+
+        if(!isset($this->request['user_count'], $this->request['db_list'])){
+            return;
+        }
 
         $mysqli = $this->system->getMysqli();
 
@@ -369,6 +376,10 @@ class BulkEmailController{
      */
     private function getEmailDetails(){
 
+        if(!isset($this->request['recid'])){
+            return;
+        }
+
         $mysqli = $this->system->getMysqli();
 
         $emailTitle = '';
@@ -429,7 +440,7 @@ class BulkEmailController{
 
         global $passwordForServerFunctions;
 
-        if(isset($this->request['databases'], $this->request['users'], $this->request['emailBody'], $this->request['db'], $this->sysadminPWD)){
+        if(!isset($this->request['databases'], $this->request['users'], $this->request['emailBody'], $this->request['db'], $this->sysadminPWD)){
             $this->response = ['status' => HEURIST_ACTION_BLOCKED, 'message' => 'Missing required parameters for sending bulk emails'];
             return;
         }elseif($this->system->verifyActionPassword($this->sysadminPWD, $passwordForServerFunctions)){
@@ -440,6 +451,34 @@ class BulkEmailController{
         // Attempt to send the system email.
         require_once __DIR__ . '/bulkEmailSystem.php'; // BulkEmailSystem
         $this->response = sendSystemEmail($this->request);
+    }
+
+    /**
+     * Initiates the CSV export process.
+     *
+     * Verifies required parameters and the system administrator password.
+     * If valid, it includes `bulkEmailSystem.php` and calls `getCSVDownload` to handle the actual sending.
+     * Sets $this->response with the result from `sendSystemEmail`.
+     *
+     * @access private
+     * @global string $passwordForServerFunctions The password required for server functions, defined in heuristConfigIni.php.
+     * @return void
+     */
+    private function exportCSV(){
+
+        global $passwordForServerFunctions;
+
+        if(!isset($this->request['databases'], $this->request['users'], $this->request['emailBody'], $this->request['db'], $this->sysadminPWD)){
+            $this->response = ['status' => HEURIST_ACTION_BLOCKED, 'message' => 'Missing required parameters for sending bulk emails'];
+            return;
+        }elseif($this->system->verifyActionPassword($this->sysadminPWD, $passwordForServerFunctions)){
+            $this->response = ['status' => HEURIST_ACTION_BLOCKED, 'message' => 'The System Administrator password is invalid, please re-try in the previous tab/window.'];
+            return;
+        }
+
+        // Attempt to send the system email.
+        require_once __DIR__ . '/bulkEmailSystem.php'; // BulkEmailSystem
+        $this->response = getCSVDownload($this->request);
     }
 
     /**
