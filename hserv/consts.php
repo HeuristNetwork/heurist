@@ -822,7 +822,9 @@ function includeJQuery($useBootstrap=false){
           dsn: "https://bd493ee1a58acc612b6cc71d055d8ff9@o4509586661507072.ingest.de.sentry.io/4509586665701456",
           integrations: [
             // send console.log, console.error, and console.warn calls as logs to Sentry
-            Sentry.consoleLoggingIntegration({ levels: ["log", "error", "warn"] }),
+            //Sentry.consoleLoggingIntegration({ levels: ["log", "error", "warn"] }), it works for NPM only
+            Sentry.browserTracingIntegration()
+            //Sentry.replayIntegration()
           ],
         });
       });

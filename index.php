@@ -385,7 +385,6 @@ if(false && $isLocalHost){
 
         if(!success) {return;}
 
-
         $(document).on('focusin', function(e) {
             if ($(e.target).closest(".mce-window, .moxman-window").length) {
                 e.stopImmediatePropagation();
