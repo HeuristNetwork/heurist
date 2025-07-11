@@ -806,7 +806,7 @@ console.log(content);
                 $d.accordion({heightStyle: "content", 
                       active: false,
                       //active:(currGroupType == 'expanded')?0:false,
-                      collapsible: layout.options?.acc_collapse });        
+                      collapsible: layout.options?.acc_collapse!==false });        
             }
         }
         
