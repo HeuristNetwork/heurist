@@ -328,6 +328,7 @@ $stmt->close();
             window.history.pushState({}, '', '<?php echo htmlspecialchars($_SERVER['PHP_SELF']);?>');
 
             const emailRecords = <?php echo json_encode($emails)?>;// Object of Email records id->title
+            let emailRec = 0; // Current email details being displayed
 
             const BASE_URL = "<?php echo HEURIST_BASE_URL ?>";
             const CURRENT_DB = "<?php echo $currentDb ?>";
@@ -652,11 +653,11 @@ $stmt->close();
 
                         let emailDraft = $(event.target).val();
 
-                        if (emailDraft == null || emailDraft == "null") {
+                        if(!window.hWin.HEURIST4.util.isPositiveInt(emailDraft)){
                             $("#emailTitle").text("");
                             $("#emailBody").text("");
-                        } else {
-                            getEmailDetails(emailDraft);
+                        }else{
+                            getEmailDetails();
                         }
                     }
                 });
@@ -1004,13 +1005,16 @@ $stmt->close();
              * @param {(string|number)} id The ID of the "Email" record to fetch details for.
              * @returns {void}
              */
-            function getEmailDetails(id) {
+            function getEmailDetails() {
 
                 if(callInProgress){
                     window.hWin.HEURIST4.msg.showMsgFlash('A server call is already in progress, please wait for it to finish...', 6000);
+                    $("#emailOutline").val(emailRec);
                     return;
                 }
                 callInProgress = true;
+
+                emailRec = $("#emailOutline").val();
 
                 $.ajax({
                     url: 'bulkEmailController.php',
@@ -1120,7 +1124,6 @@ $stmt->close();
                     window.hWin.HEURIST4.msg.showMsgFlash('A server call is already in progress, please wait for it to finish...', 6000);
                     return;
                 }
-                callInProgress = true;
 
                 if(window.hWin.HEURIST4.util.isArrayNotEmpty(databaseDetails) && Object.hasOwn(databaseDetails[0], 'rec_count')){
                     displayRecordCount();
@@ -1132,6 +1135,8 @@ $stmt->close();
                 if(dbs.length == 0){
                     return;
                 }
+
+                callInProgress = true;
 
                 let data = {
                     a: 'record_count',
@@ -1203,7 +1208,6 @@ $stmt->close();
                     window.hWin.HEURIST4.msg.showMsgFlash('A server call is already in progress, please wait for it to finish...', 6000);
                     return;
                 }
-                callInProgress = true;
 
                 let dbs = getDbList();
 
@@ -1211,6 +1215,8 @@ $stmt->close();
                     $("#userCount").text('0');
                     return;
                 }
+
+                callInProgress = true;
 
                 let data = {
                     a: 'user_count',
