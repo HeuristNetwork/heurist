@@ -5060,13 +5060,16 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             }
 
             //show the attributes button
+            let parentEle = this.element.find('.chb_show_help').parent().parent();
             this.element.find('.btn-edit-rt')
                         .show()
                         .button('option', 'label', 'Edit record type attributes')
-                        .css('position', 'absolute')
-                        .position({
-                            my: 'left+20 center', at: 'right center', of: this.element.find('.chb_show_help').parent().parent()
+                        .css('position', 'absolute');
+            if(parentEle.length){            
+                    this.element.find('.btn-edit-rt').position({
+                            my: 'left+20 center', at: 'right center', of: parentEle
                         });
+            }
             
             this.element.find('.btn-update-struct')
                         .css('position', 'absolute');

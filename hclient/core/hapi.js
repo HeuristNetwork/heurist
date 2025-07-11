@@ -1072,25 +1072,35 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             //
             setEntityData: function (entityName, data) {
                 
+                if(!data) return;
+                
                 if(entityName=='timestamp'){ 
                     entity_timestamp = Number(data[entityName]); //db structure cache file last update time
                 }else if (window.hWin.HEURIST4.util.isRecordSet(data)) {
 
                     entity_data[entityName] = data;
-                } else {
+                } else { 
+                    let entytyData = null;                    
+                    if(data[entityName]){
+                        entytyData = data[entityName];
+                    }else if(data.entityName = entityName){
+                        entytyData = data;
+                    }
                     
-                    entity_data[entityName] = new HRecordSet(data[entityName]);
+                    if(!entytyData) return;
+                    
+                    entity_data[entityName] = new HRecordSet(entytyData);
 
                     //build rst index
                     if (entityName == 'defRecStructure') {
                         window.hWin.HAPI4.EntityMgr.createRstIndex();
                     } else if (entityName == 'defTerms') {
-                        entity_data['trm_Links'] = data[entityName]['trm_Links'];
-                        entity_data['trm_Icons'] = data[entityName]['trm_Icons'] ?? [];
+                        entity_data['trm_Links'] = entytyData['trm_Links'];
+                        entity_data['trm_Icons'] = entytyData['trm_Icons'] ?? [];
                     }
 
-                    if (data[entityName]['config']) {
-                        entity_configs[entityName] = data[entityName]['config'];
+                    if (entytyData.config) {
+                        entity_configs[entityName] = entytyData.config;
                         //find key and title fields
                         window.hWin.HAPI4.EntityMgr.resolveFields(entityName);
                     }
