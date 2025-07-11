@@ -773,11 +773,11 @@ function assignPageTitle(pageid){
         if(h==144 || h==180){ //default values
             $('#main-header').height(is_show_pagetitle?180:144);
             $('#main-content-container').css({top:is_show_pagetitle?187:151});
-        }else if(h == 137 && navigator.userAgent.indexOf('Firefox') > 0){ //default value on Firefox
-            $('#main-content-container').css({top:144});
+        //}else if(h == 137 && navigator.userAgent.indexOf('Firefox') > 0){ //default value on Firefox
+        //    $('#main-content-container').css({top:144});
+        
+            $('#main-menu').css('bottom',is_show_pagetitle?40:0);
         }
-
-        $('#main-menu').css('bottom',is_show_pagetitle?40:0);
 
     }
 }
