@@ -4392,7 +4392,7 @@ function recordCheckLanguages($system, $recID, $recTypeID){
                 if($key === false){
                     $issues['unknown'][] = "{$trmLabel} unknown language code '{$trmCode}'";
                     continue;
-                }elseif(in_array($ar3, $allowedLanguages)){
+                }elseif(in_array($AR3, $allowedLanguages)){
                     continue;
                 }
 

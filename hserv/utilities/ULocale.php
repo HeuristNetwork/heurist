@@ -625,6 +625,9 @@
             if(empty($languages)){
                 $languages = $commonLanguagesForTranslation;
                 $system->settings->setDatabaseSetting('Languages', $languages);
+            }else{
+                $languages = array_unique(array_map('strtoupper', $languages));
+                $system->settings->setDatabaseSetting('Languages', $languages);
             }
         }
 
