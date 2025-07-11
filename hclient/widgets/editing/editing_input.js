@@ -1343,6 +1343,11 @@ $.widget( "heurist.editing_input", {
             //&& this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']
             && this.options.dtID > 0)
             {
+             
+                const isCMS_record = 
+                        (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
+                         this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']);
+             
                 
                 let eid = $input.attr('id')+'_editor';
                 
@@ -1357,7 +1362,19 @@ $.widget( "heurist.editing_input", {
                 //hidden textarea for codemirror editor
                 let codeEditor = null;
                 if(typeof EditorCodeMirror !== 'undefined'){
-                    codeEditor = new EditorCodeMirror($input);
+                    
+                    let editorMode = {};
+
+                    if (isCMS_record){
+                        
+                        if(this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT']){
+                            editorMode = {mode:'javascript'};
+                        }else if(this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS']){
+                            editorMode = {mode:'css'};
+                        }
+                    }
+                    
+                    codeEditor = new EditorCodeMirror($input, editorMode);
                 }
                 
                 let $btn_edit_switcher;
@@ -1376,7 +1393,7 @@ $.widget( "heurist.editing_input", {
 
                     $('<span>wysiwyg</span>')
                         .attr('title', 'rendering of the text, taken as html')
-                        .addClass('smallbutton')
+                        .addClass('smallbutton wysiwyg')
                         .css({cursor: 'pointer', 'margin-left': '10px'})
                         .appendTo($btn_edit_switcher);
 
@@ -1755,14 +1772,12 @@ $.widget( "heurist.editing_input", {
                     return true;
                 } // _showEditor()
 
-                // RT_ indicates the record types affected, DT_ indicates the fields affected
-                // DT_EXTENDED_DESCRIPTION (field concept 2-4) is the page content or header/footer content
-                let isCMS_content = (( 
-                         this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
-                         this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']) &&
+                         
+                // page content or header/footer content for CMS records                         
+                let isCMS_content = isCMS_record &&           
                         (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'] || 
                          this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'] || 
-                         this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_FOOTER']));
+                         this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_FOOTER']);
 
                 let cur_action = 'text', cms_div_prompt = null, cms_label_edit_prompt = null;
 
@@ -1823,6 +1838,14 @@ $.widget( "heurist.editing_input", {
                             .attr('title','Edit website content in the website editor');   
                             
                     }
+                }
+                
+                //hide wyswyg options for custom js and css fields
+                if (isCMS_record && (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'] || 
+                    this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'])){
+                
+                    isCMS_content = true;
+                    $btn_edit_switcher.find('span.wysiwyg').hide();
                 }
                 
                 if($btn_edit_switcher.is('div')){

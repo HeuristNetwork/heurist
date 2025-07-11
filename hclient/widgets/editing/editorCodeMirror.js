@@ -126,6 +126,8 @@ class EditorCodeMirror {
         let scripts = [ //'lib/codemirror.css', CSS is included in index.php
                         'lib/codemirror.js',
                         'lib/util/formatting.js', // For autoFormatRange
+                        'mode/css/css.js',        
+                        'mode/javascript/javascript.js',        
                         'mode/xml/xml.js',        // Dependency for htmlmixed
                         'mode/htmlmixed/htmlmixed.js' // Default mode
                         ];
@@ -138,7 +140,7 @@ class EditorCodeMirror {
             window.hWin.HEURIST4.msg.showMsg_ScriptFail(); // Show generic script failure message.
         });
     }
-
+    
     /**
      * Hides the CodeMirror editor container if it has been initialized and is visible.
      * This does not destroy the editor instance, allowing it to be shown again later.
@@ -205,6 +207,7 @@ class EditorCodeMirror {
 
         // Initialize CodeMirror instance if it doesn't exist
         if(this.codeEditor==null){
+
             this.codeEditor = CodeMirror(this.editorContainer[0], this.options); // Create CodeMirror
 
             // Sync CodeMirror changes back to the original textarea
