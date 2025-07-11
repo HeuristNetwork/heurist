@@ -120,6 +120,8 @@ private static function getConceptID($lclID, $tableName, $fieldNamePrefix) {
 
     self::initialize();
 
+    $lclID = intval($lclID);
+    
     if($lclID>0){
 
         $query = "select {$fieldNamePrefix}OriginatingDBID,{$fieldNamePrefix}IDInOriginatingDB from $tableName where {$fieldNamePrefix}ID = $lclID";
