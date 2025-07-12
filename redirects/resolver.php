@@ -177,10 +177,6 @@ if( (count($requestUri)==3 || count($requestUri)==4)
         $_REQUEST['recID'] = $recID;    
     }
     
-
-    //redirectURL2('/h6-alpha/redirects/resolver.php?recID='.$requestUri[2].'&fmt='.$format);
-
-    
 // --------------- 
     
 }elseif(count($requestUri)>1 && (in_array($requestUri[1],$allowedActions) || in_array(@$requestUri[2],$allowedActions))){

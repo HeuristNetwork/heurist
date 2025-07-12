@@ -663,6 +663,9 @@ class USystem {
             //'Bug reporter',
             sendEmail(HEURIST_MAIL_TO_BUG, $msgTitle, $msg, true);
         }
+        
+        // TODO: needs an else in case there are no logfiles corresponding with the expected path and name
+        //       this code seems rather too fragile to be portable between systems
 
 
     }
@@ -815,7 +818,7 @@ class USystem {
 
         }else{
             $url = ($isAlpha
-                ? HEURIST_MAIN_SERVER . '/h6-alpha/'
+                ? HEURIST_MAIN_SERVER . '/h7-alpha/'
                 : HEURIST_INDEX_BASE_URL)
             . "admin/setup/dbproperties/getCurrentVersion.php?db=".HEURIST_INDEX_DATABASE."&check=1";
             $rawdata = loadRemoteURLContentSpecial($url);//it returns HEURIST_VERSION."|".HEURIST_DBVERSION
