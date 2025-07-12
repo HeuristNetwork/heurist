@@ -6,12 +6,13 @@ This directory contains scripts for installation, update, and verification of He
 
 ## Subfolders
 
--   `experiments/`: Contains experimental scripts and test files.
--   `housekeeping/`: Contains scripts for regular cleanup and problem alerting.
--   `monitoring/`: Contains scripts for monitoring various aspects of the Heurist installation and server.
--   `prerequisites/`: Contains scripts related to installing prerequisites for Heurist. These are older scripts, retained mainly for reference.
--   `safeguard/`: Contains scripts for backing up, archiving backups, and managing archive space. These are typically placed in `/srv/scripts` and called from cron jobs.
--   `utility/`: Contains various utility scripts for managing and maintaining Heurist.
+-   `monitoring/`: scripts for monitoring various aspects of the Heurist installation and server, including listing infromation.
+-   `safeguard/`:  scripts for backing up, archiving backups, and managing archive space. 
+                   These are typically placed in `/srv/scripts` and called from cron jobs.
+     
+-   `utility/`: various utility scripts for managing and maintaining Heurist, mostly old requirements.
+-   `experiments/`: experimental scripts and test files.
+-   `prerequisites/`: scripts related to installing prerequisites for Heurist. These are older scripts, retained mainly for reference.
 
 ## Key files
 
@@ -22,3 +23,4 @@ This directory contains scripts for installation, update, and verification of He
 -   `model_crontab_to_run_scripts.txt`: Model crontab file for running scripts.
 -   `model_robots.txt`: Model `robots.txt` file.
 -   `virtual_host_configurations.txt`: Example virtual host configurations.
+-   'run_checks_and_email_lists_to_support.sh' : generates various useful summaries of databases

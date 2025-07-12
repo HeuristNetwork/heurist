@@ -1,34 +1,32 @@
-# CRON JOBS TO BUILD INSTALLATION PACKAGE
+# CRONTAB FILE FOR SATELLITE SERVER (single server installation, CET time zone)
 
-# Install this with:  sudo crontab -e  (vim editor: A for add/edit mode, Esc to exit, then :wq to write and quit)
+# Last revised (Huma-Num server): 4 July 2025
 
-MAILTO=<replace with email address of server manager>
+# Set the address for mailign results and warnings. Comma delimit multiple addresses
+MAILTO=<email address(es)>
 
-# ----------------------------------------------------------------------------------
+# minute, hour, day of month, month, day of week 0=sun, 1=mon etc.
 
-# This section is only for the master HeuristRef.net server where development work is carried out
-# based on the setup as at June 2023 and h6-ao version of Heurist as the alpha development version
-# Script timing is based on Sydney early morning times and minimisation of disruption elsewhere
+# Monitor server metrics every 5 mins and report hourly if over limit
+5 * * * * /srv/scripts/alert_server.sh >/dev/null 2>&1
 
-# The following creates a distribution h6-beta-in-wating on Monday morning, and the following week moves this to h6-beta
-# Update h6-beta from h6-beta-in-waiting weekly at 5am Monday Sydney time
-57 04 * * 1 cd /var/www/html/HEURIST/DISTRIBUTION/;rm h6-beta.tar.bz2;mv h6-beta-in-waiting.tar.bz2  h6-beta.tar.bz2
-# Update h6-beta-in-waiting from Artem's development directory: build runs weekly at 7.30am Monday Sydney time
-0 05 * * 1 cd /var/www/html/HEURIST/h6-ao/;./copy_distribution_files.sh h6-beta-in-waiting
+# Update h7-alpha at 1am from reference server - build runs daily at 8am or later Sydney time
+30 00 * * * curl -lk https://HeuristRef.Net/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s h7-alpha
 
-# Update current heurist from /heurist/ version: build runs daily at ~5am Sydney time
-15 05 * * * cd /var/www/html/HEURIST/heurist/;./copy_distribution_files.sh heurist
+# Update h6-alpha at 1am from reference server - build runs daily at 8am or later Sydney time
+40 00 * * * curl -l https://heuristref.net/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s h6-alpha  >/dev/null 2>&1
 
-# Update h6-alpha from Artem's development directory: build runs daily at ~5am Sydney time
-25 05 * * * cd /var/www/html/HEURIST/h6-ao/;./copy_distribution_files.sh h6-alpha
+# Update h6-beta at 4.15am from reference server - build runs daily at 8.15am or later Sydney time
+50 00 * * * curl -l https://heuristref.net/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s h6-beta >/dev/null 2>&1
 
+# *********************
 
-# ----------------------------------------------------------------------------------
+# IF TWO TIER SYSTEM: 
+#      Copy this file to both, then:
+#           REMOVE MYSQL SCRIPTS FROM WEB SERVER 
+#           REMOVE WEB SERVER SCRIPTS FROM MYSQL SERVER
 
-# SERVER MONITORING
-
-# Monitor sever metrics every 5 minutes
-# 5 * * * * /srv/scripts/alert_server.sh >/dev/null 2>&1
+# *********************
 
 # --------------------------------------------------------------
 
@@ -40,26 +38,75 @@ MAILTO=<replace with email address of server manager>
 # Note: this writes to .../HEURIST/HarvestableDatabaseDescriptions
 #       This directory should be simlinked in /var/www/html to allow short path access
 
-# --------------------------------------------------------------
+# ------------------------------------------------------------------------------------------
 
-# DATABASE MONITORING
+# precautionary fix of group ownership and permissions
+50 23 * * * chown -R apache:heurist /var/www/html/HEURIST
+55 23 * * * chmod -R g+rwx /var/www/html/HEURIST
+50 23 * * * chown -R apache:heurist /data/HEURIST_FILESTORE
+55 23 * * * chmod -R g+rwx /data/HEURIST_FILESTORE
 
-# Local backups for all databases
+# Remove orphaned html files in HarvestableDatabaseDescriptions
+# late 2024: php script now rewrites all files so this is no logner needed
+# 0 01 * * 0 /srv/scripts/remove_orphaned_harvestable_html.sh
+
+# -------------------------------------------------------------------------------------------
+
+# LOCAL BACKUPS
 
 # mins hour  day  month  weekday  command   * indicates any, weekdays 0 - 6
 
 # BACKUPS - early morning = late evening in Europe, afternoon in USA
-#  Runs on the database server, slowish for backups compared with single tier
+# Runs on the database server. 
+# If run from the web server these scripts will be SLOW compared with running on single tier or directly on the DB server
 
-#Ansible: Local backups for all databases 1am
+#Ansible: Local backups for all databases
 00 01 * * * /srv/scripts/backup_all_dbs.sh
 
-# Creates archive copy of the database dump when bz2 file has changed 3am daily
-00 03 * * * /srv/scripts/archive_bzip_dbs.sh >/dev/null 2>&1
+# Creates archive copy of database dumps when bz2 files change
+30 02 * * * /srv/scripts/archive_bzip_dbs.sh >/dev/null 2>&1
 
-# Email reminders and update scheduled smarty reports    at 4am daily
-0 04 * * *  php -f /var/www/html/h6-alpha/admin/setup/dboperations/dailyCronJobs.php
+# Precautionary restart of apache and mysqld in the early hours
+00 03 * * * service mysqld restart
+05 03 * * * /usr/sbin/apachectl restart
+
+# Removes redundant older bz2 files of SQL database dumps
+15 03 * * * /srv/scripts/purge_ARCHIVE.sh >/dev/null 2>&1
+
+# AUTOMATED REPORT_ARCHIVEING ON USERS AND SETUP OF THE DATABASES
+
+# Email lists to support
+# set last item to * for daily, 0 for sunday, 1 for Monday mailout
+00 04 * * 0 /srv/scripts/run_checks_and_email_lists_to_support.sh >/dev/null 2>&1
+
+# Email reminders and update scheduled smarty reports
+00 05 * * * php -f /var/www/html/HEURIST/heurist/admin/setup/dboperations/dailyCronJobs.php
 
 # Cleanup database folders (root, backup and scratch) 4:30am on Monday
-30 04 * * 1  php -f /var/www/html/h6-alpha/admin/utilities/cleanupFoldersDBs.php -- -purge
+00 05 * * 0  php -f /var/www/html/HEURIST/h6-alpha/admin/utilities/cleanupFoldersDBs.php -- -purge
+
+#Ansible: Check all database tables
+10 05 * * 0 /srv/scripts/check_for_required_tables.sh
+
+# Purge inactive databases, import and sysArchive tables
+30 05 * * 0  php -f /var/www/html/HEURIST/heurist/admin/utilities/purgeInactiveDBs.php -- -purge
+
+
+# Create list of all users for all databases (Sunday)
+19 10 * * 0 /srv/scripts/list_all_users_with_dbs.sh
+
+
+#Ansible: Email PHP errors logs
+15 03 * * * /usr/bin/php -f /srv/scripts/php_error_log_sender.php
+
+#Ansible: Send Apache 404 errors
+45 02 * * 1 /srv/scripts/apache_error_log.sh
+
+
+# SECURITY PATCHING
+
+#Ansible: Apply security patches
+@daily yum -y -q -e 0 update --security
+0 21 * * * nice -n 10 /opt/snow/snowagent -w /opt/snow/ >/dev/null 2>&1
+
 
