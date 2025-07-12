@@ -65,8 +65,8 @@ foreach($databases as $database){
             $user_list[$usr_email] = [];
         }
 
-        $rec_count = mysql__select_value($mysqli, "SELECT COUNT(rec_ID) FROM Records WHERE rec_OwnerUGrpID = $usr_ID", 'intval');
-        $is_admin = mysql__select_value($mysqli, "SELECT ugl_ID FROM sysUsrGrpLinks WHERE ugl_GroupID = 1 AND ugl_Role = 'admin' AND ugl_UserID = $usr_ID");
+        $rec_count = mysql__select_value($mysqli, "SELECT COUNT(rec_ID) FROM Records WHERE rec_OwnerUGrpID = ?", ['i', $usr_ID]);
+        $is_admin = mysql__select_value($mysqli, "SELECT ugl_ID FROM sysUsrGrpLinks WHERE ugl_GroupID = 1 AND ugl_Role = 'admin' AND ugl_UserID = ?", ['i', $usr_ID]);
 
         $user_list[$usr_email][] = [
             $database,
@@ -90,6 +90,7 @@ ksort($user_list, SORT_FLAG_CASE);
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         <meta name="robots" content="noindex,nofollow">
 
+        <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
 
         <title>List of Users</title>
