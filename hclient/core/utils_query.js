@@ -1076,6 +1076,7 @@ window.hWin.HEURIST4.query = {
         }
 
         let val = '';
+        value = ''+value;
         if(value === 'NULL'){
             res = `Missing`;
         }else if(window.hWin.HEURIST4.util.isempty(value)){

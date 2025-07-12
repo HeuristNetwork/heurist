@@ -3988,7 +3988,8 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
 
         $new_values = [];
         $has_other_filter = false;
-
+        
+        //relation types and rectypes
         [$complete_rel_IDs, $complete_rty_IDs] = $this->_getRelationFieldConstraints();
 
         $complete_rty_IDs = prepareIds($complete_rty_IDs);
@@ -3998,7 +3999,7 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
         $rty_IDs = [];
 
         $rel_negate = false;
-        $rel_IDs = [];
+        $rel_IDs = [];// relation type defined from user conditions
 
         $filtered_ids = [];
 
@@ -4014,6 +4015,7 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
                 continue;
             }
             if($key === 'r' || $key === 'relf' || $key === "r:{$dty_id_relation_type}" || $key === "relf:{$dty_id_relation_type}"){
+                //particular relation type defined in conditions
                 $rel_negate = strpos($val, '-') === 0;
                 $rel_IDs = prepareIds(ltrim($val, '-'));
                 continue;
@@ -4070,10 +4072,12 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
         $rl_IDs = [];
         $where = [];
 
-        if($rty_IDs !== $rty_id_relation){
+        if($rty_IDs !== $rty_id_relation && $rty_count>0){
             $rty_where = $rty_count > 1 ? "rec_RecTypeID IN ({$rty_IDs})" : "rec_RecTypeID = {$rty_IDs}";
         }
-        $rel_where = $rel_count > 1 ? "rl_RelationTypeID IN ({$rel_IDs})" : "rl_RelationTypeID = {$rel_IDs}";
+        if($rel_count>0){
+            $rel_where = $rel_count > 1 ? "rl_RelationTypeID IN ({$rel_IDs})" : "rl_RelationTypeID = {$rel_IDs}";
+        }
 
         $ids_where = $ids_count > 1 ? " IN ({$filtered_ids})" : '';
         $ids_where = $ids_count == 1 ? " = {$filtered_ids}" : $ids_where;
@@ -4088,7 +4092,7 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
             $to_query = "SELECT DISTINCT rl_SourceID FROM recLinks INNER JOIN Records ON rec_ID = rl_TargetID {$where}";
 
             if(!empty($ids_where)){
-                $to_query .= (!empty($where) ? ' AND rl_SourceID ' : 'rl_SourceID ') . $ids_where;
+                $to_query .= (!empty($where) ? ' AND rl_TargetID ' : 'rl_TargetID ') . $ids_where;
             }
 
             $rec_IDs = mysql__select_list2($mysqli, $to_query, 'intval');
@@ -4100,7 +4104,7 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
             $from_query = "SELECT DISTINCT rl_TargetID FROM recLinks INNER JOIN Records ON rec_ID = rl_SourceID {$where}";
 
             if(!empty($ids_where)){
-                $from_query .= (!empty($where) ? ' AND rl_TargetID ' : 'rl_TargetID ') . $ids_where;
+                $from_query .= (!empty($where) ? ' AND rl_SourceID ' : 'rl_SourceID ') . $ids_where;
             }
 
             $rec_IDs_from = mysql__select_list2($mysqli, $from_query, 'intval');
