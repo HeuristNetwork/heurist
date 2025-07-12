@@ -20,6 +20,7 @@
 */
     use hserv\utilities\USanitize;
     use hserv\utilities\Temporal;
+    use hserv\utilities\USystem;
 
     require_once dirname(__FILE__).'/../../autoload.php';
 
@@ -124,50 +125,18 @@
             }
         }
 
-    }elseif($action == 'check_for_alpha'){ // check if an alpha version is available
+    }elseif($action == 'check_for_version'){ // check if a specified version is available
 
-        $is_alpha = (preg_match("/h\d+\-alpha|alpha\//", HEURIST_BASE_URL) === 1) ? true : false;
-        $res = '';
-
-        if(!$is_alpha){
-
-            if(!defined('HEURIST_FILESTORE_ROOT')){
-                if($system->setDbnameFull($dbname)){
-                    $system->initPathConstants($dbname);
-                }
-            }
-
-            if(defined('HEURIST_FILESTORE_ROOT')){
-                $fname = HEURIST_FILESTORE_ROOT."lastAdviceSent.ini";
-                $verison_numbers = array();
-                array_push($verison_numbers, explode('.', HEURIST_VERSION)[0]);// Check using current major version
-
-                if (file_exists($fname)){
-                    list($date_last_check, $version_last_check, $release_last_check) = explode("|", file_get_contents($fname));
-                    if($verison_numbers[0] < explode('.', $version_last_check)[0]){
-                        array_unshift($verison_numbers, explode('.', $version_last_check)[0]);// Check using new major version, performed first
-                    }
-                }
-
-                foreach ($verison_numbers as $number) {
-
-                    $url = HEURIST_SERVER_URL . '/h' . $number . '-alpha/';
-                    $http_response = get_headers($url)[0];
-                    if(preg_match('/4\d{2}|5\d{2}/', $http_response) === 0){ // valid
-                        $res = $url;
-                        break;
-                    }
-                }
-
-                if($res == ''){ // Finally, check last supported version
-                    $url = HEURIST_SERVER_URL . '/alpha/';
-                    $http_response = get_headers($url)[0];
-                    if(preg_match('/4\d{2}|5\d{2}/', $http_response) === 0){ // valid
-                        $res = $url;
-                    }
-                }
+        if(!defined('HEURIST_FILESTORE_ROOT')){
+            if($system->setDbnameFull($dbname)){
+                $system->initPathConstants($dbname);
             }
         }
+
+        $version = array_key_exists('ver', $req_params) && is_numeric($req_params['ver']) ? intval($req_params['ver']) : null;
+
+        $res = USystem::checkForVersion($version === null, $version);
+
     }elseif($action == 'get_time_diffs'){
 
         $data = $req_params['data'];

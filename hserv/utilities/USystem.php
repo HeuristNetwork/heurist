@@ -843,6 +843,66 @@ class USystem {
 
         return $version_last_check;
     }
+
+    public static function checkForVersion($checkForAlpha = false, $version = null){
+
+        $response = '';
+
+        // Check for a specific version
+        $alphaVersion = is_numeric($version) ? intval($version) : -1;
+        $specificVersion = is_string($version) ? preg_match('/h\d+\.\d{1,2}\.\d{1,2}/', $version) : -1;
+        if($alphaVersion > 0 || $specificVersion !== -1){
+
+            $version = $alphaVersion !== -1 ? "h{$version}-alpha" : $specificVersion;
+            if(preg_match("/{$version}/", HEURIST_BASE_URL) === 1){
+                return '';
+            }
+
+            $url = HEURIST_SERVER_URL . "/{$version}/";
+            $httpResponse = get_headers($url)[0];
+            $response = preg_match('/4\d{2}|5\d{2}/', $httpResponse) === 0 ? $url : $httpResponse;
+
+            $checkForAlpha = false;
+        }
+        
+        // Check for any available alpha
+        $isAlpha = preg_match("/h\d+-alpha|\/alpha\//", HEURIST_BASE_URL) === 1 ? true : false;
+
+        if(!defined('HEURIST_FILESTORE_ROOT') || !$checkForAlpha || $isAlpha){
+            return $response;
+        }
+
+        $fname = HEURIST_FILESTORE_ROOT."lastAdviceSent.ini";
+        $versionNumbers = [];
+        array_push($versionNumbers, explode('.', HEURIST_VERSION)[0]);// Check using current major version
+
+        if (file_exists($fname)){
+            [, $versionLastCheck,] = explode("|", file_get_contents($fname));
+            if($versionNumbers[0] < explode('.', $versionLastCheck)[0]){
+                array_unshift($versionNumbers, explode('.', $versionLastCheck)[0]);// Check using new major version, performed first
+            }
+        }
+
+        foreach($versionNumbers as $number){
+
+            $url = HEURIST_SERVER_URL . "/h{$number}-alpha/";
+            $httpResponse = get_headers($url)[0];
+            if(preg_match('/4\d{2}|5\d{2}/', $httpResponse) === 0){ // valid
+                $response = $url;
+                break;
+            }
+        }
+
+        if(empty($response)){ // Finally, check last supported version
+            $url = HEURIST_SERVER_URL . '/alpha/';
+            $httpResponse = get_headers($url)[0];
+            if(preg_match('/4\d{2}|5\d{2}/', $httpResponse) === 0){ // valid
+                $response = $url;
+            }
+        }
+
+        return $response;
+    }
     
     /**
      * Calculates the difference between two `getrusage` arrays for a specific index (e.g., 'utime' for user time).

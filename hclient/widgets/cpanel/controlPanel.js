@@ -589,13 +589,14 @@ $.widget( "heurist.controlPanel", {
         const SPIN_INTERVAL = 30000; // how often to spin - 30 seconds (not 5 minutes as per old comment)
         const SPIN_DURATION = 1000; // how long the spin takes - 1 second
 
-        if(this.version_message && this.version_message !== true){ // Check if it's already a jQuery object
+        if(this.version_message && this.version_message !== true && this.element.find('#heuristVersionSwapper').length === 0){ // Check if it's already a jQuery object
             return;
         }
 
         this.version_message = true; // Mark as initialized to prevent re-entry before elements are created
 
         let is_alpha = window.hWin.HAPI4.baseURL.match(/h\d+-alpha|alpha/);
+        let is_version7 = window.hWin.HAPI4.baseURL.match(/h7-alpha|heurist2025/);
         let suggestion_txt = '';
         let styling = {float:'left', 'margin-left':'25px', width:'360px', 'font-size':'0.85em', cursor:'default'};
 
@@ -603,7 +604,7 @@ $.widget( "heurist.controlPanel", {
 
         // Add message about reporting bugs
         styling['width'] = '220px';
-        let $bug_msg = $('<div>', {title: 'Click to make a bug report'})
+        let $bug_msg = $('<div>', {title: 'Click to make a bug report', id: 'heuristVersionSwapper'})
             .css($.extend({}, styling, {color: '#FFFF66', cursor: 'pointer'}))
             .insertAfter(this.div_dbname)
             .html('<span class="ui-icon ui-icon-bug" style="float: left;margin: 5px;"></span>Please report bugs here, or suggest improvements. We are responsive');
@@ -631,7 +632,7 @@ $.widget( "heurist.controlPanel", {
         }, SPIN_INTERVAL);
 
         if(!is_alpha){ // need to check that an alpha version is available on this server
-            window.hWin.HAPI4.SystemMgr.check_for_alpha({a:'check_for_alpha'}, function(response){
+            window.hWin.HAPI4.SystemMgr.check_for_version({a:'check_for_version'}, function(response){
 
                 if(window.hWin.HEURIST4.util.isempty(response.data)){
                     return;
@@ -648,18 +649,22 @@ $.widget( "heurist.controlPanel", {
             });
         }else{ // currently on alpha
 
-            suggestion_txt = 'This is the latest (alpha) version. If you are blocked by a new bug you can switch to the '
-                + '<a style="cursor: pointer;text-decoration: underline;" href="#" id="lnk_change" title="Go to standard version">standard version</a>';
+            suggestion_txt = `<span style="flex: 0 0 24em;">
+                This is the latest (alpha) version. If you are blocked by a new bug you can switch to the 
+                <a style="cursor: pointer;text-decoration: underline;" href="#" id="lnk_Change" title="Go to standard version">standard version</a>
+            </span>`;
 
-            styling['width'] = '280px';
+            styling['width'] = '37.5em';
+            styling['display'] = 'flex';
+            styling['align-items'] = 'center';
 
             // Store the jQuery object in this.version_message
-            that.version_message = $("<div>")
+            that.version_message = $('<div>')
                 .css(styling)
                 .insertAfter($bug_msg)
                 .html(suggestion_txt);
 
-            this._on(that.version_message.find('#lnk_change'), {
+            this._on(that.version_message.find('#lnk_Change'), {
                 click: () => {
 
                     let $dlg;
@@ -696,6 +701,22 @@ $.widget( "heurist.controlPanel", {
                     });
                 }
             });
+
+            if(!is_version7){
+
+                window.hWin.HAPI4.SystemMgr.check_for_version({a:'check_for_version', ver: 7}, (response) => {
+
+                    if(window.hWin.HEURIST4.util.isempty(response.data)){
+                        return;
+                    }
+
+                    $('<span>', {
+                        style: 'flex: 0 0 12em; padding-left: 1.5em;',
+                        html: `<a style="cursor: pointer;text-decoration: underline;" href="${response.data}?db=${window.hWin.HAPI4.database}" id="lnk_newest" title="Move to newest alpha version">
+                        Try version 7</a> (compatible)`
+                    }).appendTo(this.version_message);
+                });
+            }
         }
     },
 
@@ -731,7 +752,7 @@ $.widget( "heurist.controlPanel", {
                 window.hWin.HAPI4.actionHandler.executeActionById('menu-help-bugreport');
             }
         });
-    },
+    }
 
 });
 

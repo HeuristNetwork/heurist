@@ -979,18 +979,18 @@ class HSystemMgr {
   }
 
   /**
-  * Checks if the current server has an alpha build setup/configured.
+  * Checks if the current server has an alpha build, or specified version, setup/configured.
   *
-  * @param {Object} [request={a: 'check_for_alpha'}] - Request object.
+  * @param {Object} [request={a: 'check_for_version'}] - Request object.
   * @param {function(Object): void} callback - Callback to handle server response.
   *        Response `data` indicates if an alpha build is set up.
   * @returns {void}
   */
-  check_for_alpha(request, callback) {
+  check_for_version(request, callback) {
       if (!request) {
-          request = { a: 'check_for_alpha' };
+          request = { a: 'check_for_version' };
       } else if (!request.a) {
-          request.a = 'check_for_alpha';
+          request.a = 'check_for_version';
       }
       window.hWin.HAPI4.callserver('usr_info', request, callback);
   }
