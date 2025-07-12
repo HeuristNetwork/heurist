@@ -1926,7 +1926,7 @@ $.widget( "heurist.mapping", {
         
         if(this.isImageLayer(affected_layer)){
 
-            if( affected_layer instanceof GeoRasterLayer ){
+            if( typeof GeoRasterLayer === 'function' && affected_layer instanceof GeoRasterLayer ){
                 L.setOptions(affected_layer, newStyle);
                 return;
             }
