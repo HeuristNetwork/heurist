@@ -2,7 +2,7 @@
 
 # Script: backup_all_dbs.sh
 #
-# Dumps all bases to SQL in /data/BACKUP
+# Dumps all databases to SQL in /srv/BACKUP
 #
 
 # Connection to the MySQL database. If on a single tier system omit the H (Host) specification and P (Port)
@@ -14,20 +14,20 @@ servername="<ENTER THE SERVER NAME>"
 
 now=$(date)
 
-cd /data/BACKUP
+cd /srv/BACKUP
 
 # Allow others to read backups
 umask 022
 
 # clear BACKUP folder
 
-rm -f /data/BACKUP/backup_failure_log.txt
-rm -f /data/BACKUP/*.bz2
-rm -f /data/BACKUP/*.sql
+rm -f /srv/BACKUP/backup_failure_log.txt
+rm -f /srv/BACKUP/*.bz2
+rm -f /srv/BACKUP/*.sql
 
 # first entry in log file
 
-echo "start" >> /data/BACKUP/backup_failure_log.txt
+echo "start" >> /srv/BACKUP/backup_failure_log.txt
 
 ((CNT = 0))
 ((TOT_SIZE = 0))
@@ -48,7 +48,7 @@ for db in `/usr/bin/mysql --login-path=$connection -N -e "select schema_name fro
                     filesize=$(stat -c%s "$db.sql")
 
                     if (( filesize > 100))
-                         then echo "$db : success ... $filesize"  >> /data/BACKUP/backup_failure_log.txt
+                         then echo "$db : success ... $filesize"  >> /srv/BACKUP/backup_failure_log.txt
                               echo "$db : success ... $filesize"
 
 
@@ -63,7 +63,7 @@ for db in `/usr/bin/mysql --login-path=$connection -N -e "select schema_name fro
 
         else 
         
-            echo "$db : FAILURE -ddump file size $filesize"  >> /data/BACKUP/backup_failure_log.txt
+            echo "$db : FAILURE -ddump file size $filesize"  >> /srv/BACKUP/backup_failure_log.txt
                   echo "$db : FAILURE -dump file size $filesize"
                   ((EMPTY++))
                   read -p "$db : FAILURE 90 sec pause...." -t 90
@@ -81,7 +81,7 @@ for db in `/usr/bin/mysql --login-path=$connection -N -e "select schema_name fro
 
 done
                 
-echo "Backup completed $(date +'%d-%m-%Y %H:%M:%S')" >> /data/BACKUP/backup_failure_log.txt
+echo "Backup completed $(date +'%d-%m-%Y %H:%M:%S')" >> /srv/BACKUP/backup_failure_log.txt
 
 #send email with log file
 
