@@ -10,6 +10,9 @@ MAILTO=<email address(es)>
 # Monitor server metrics every 5 mins and report hourly if over limit
 5 * * * * /srv/scripts/alert_server.sh >/dev/null 2>&1
 
+# Puts a copy of the support directory files on the server as a backup against the HeuristRef.net server going down
+20 0 * * * /srv/scripts/sync_HEURIST_SUPPORT_from_HeuristRef.sh
+
 # Update h7-alpha at 1am from reference server - build runs daily at 8am or later Sydney time
 30 00 * * * curl -lk https://HeuristRef.Net/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s h7-alpha
 
