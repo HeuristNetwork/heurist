@@ -1,4 +1,3 @@
-
 #!/bin/sh
 
 # This script lists out the filestore sizes for all databases on the server.
@@ -12,4 +11,3 @@
 du -s /var/www/html/HEURIST/HEURIST_FILESTORE/* |sort -rn > results/filestore_sizes.txt
 
 echo DONE
-
