@@ -211,7 +211,7 @@ function ReportManager(_isFilterMode, _isWindowMode) { // _isFilterMode is not u
             { data: "rps_HQuery", title: "Query", sortable: false, /* resizeable:true, */
                 render: function(data, type) {
                     if (type === 'display' && data) { // Prevent null from being displayed as "null"
-                        return "<div style='max-width:400px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;' title='" + he.encode(data) + "'>" + he.encode(data) + "</div>";
+                        return "<div style='max-width:400px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;' title='" + data + "'>" + data + "</div>";
                     }
                     return data ? data : ''; // Return empty string for filtering/sorting if data is null
             }},
