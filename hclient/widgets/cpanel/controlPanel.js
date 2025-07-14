@@ -596,8 +596,21 @@ $.widget( "heurist.controlPanel", {
         this.version_message = true; // Mark as initialized to prevent re-entry before elements are created
 
         let is_alpha = window.hWin.HAPI4.baseURL.match(/h\d+-alpha|alpha/);
+        let is_version7 = window.hWin.HAPI4.baseURL.match(/h7-alpha|heurist2025/);
+        let h7_msg = null;
+        if(!is_version7){
+        
+                 h7_msg = $('<span>', {
+                        style: 'flex: 0 0 12em; padding-left: 1.5em;',
+                  html: `<a style="cursor: pointer;text-decoration: underline;" href="../h7-alpha?db=${window.hWin.HAPI4.database}" id="lnk_newest" title="Move to newest alpha version">Try version 7</a> (compatible)`
+                    });
+            
+        }
+        
+        
+        
         let suggestion_txt = '';
-        let styling = {float:'left', 'margin-left':'25px', width:'360px', 'font-size':'0.85em', cursor:'default'};
+        let styling = {float:'left', 'margin-left':'25px', width:'360px', 'font-size':'0.85em', cursor:'default', display:'flex'};
 
         styling['margin-top'] = '0.9em';
 
@@ -637,27 +650,38 @@ $.widget( "heurist.controlPanel", {
                     return;
                 }
 
-                suggestion_txt = `<a style="cursor: pointer;text-decoration: underline;" href="${response.data}?db=${window.hWin.HAPI4.database}" id="lnk_change" title="Move to alpha version">`
-                               + `Use the latest (alpha) version</a> (recommended)`;
+                suggestion_txt = `<span><a style="cursor: pointer;text-decoration: underline;" href="${response.data}?db=${window.hWin.HAPI4.database}" id="lnk_change" title="Move to alpha version">`
+                               + `Use the latest (alpha) version</a> (recommended)</span>`;
+
+	        styling['width'] = !is_version7?'360px':'220px';
 
                 // Store the jQuery object in this.version_message
                 that.version_message = $("<div>")
                     .css(styling)
                     .insertAfter($bug_msg)
                     .html(suggestion_txt);
+                    
+                if(h7_msg){
+            	    h7_msg.appendTo(that.version_message);
+                }
             });
         }else{ // currently on alpha
 
-            suggestion_txt = 'This is the latest (alpha) version. If you are blocked by a new bug you can switch to the '
-                + '<a style="cursor: pointer;text-decoration: underline;" href="#" id="lnk_change" title="Go to standard version">standard version</a>';
-
-            styling['width'] = '280px';
+            suggestion_txt = '<span>This is the latest (alpha) version. If you are blocked by a new bug you can switch to the '
+                + '<a style="cursor: pointer;text-decoration: underline;" href="#" id="lnk_change" title="Go to standard version">standard version</a></span>';
+  
+            styling['width'] = !is_version7?'360px':'280px';
 
             // Store the jQuery object in this.version_message
             that.version_message = $("<div>")
                 .css(styling)
                 .insertAfter($bug_msg)
                 .html(suggestion_txt);
+
+                if(h7_msg){
+            	    h7_msg.appendTo(that.version_message);
+                }
+
 
             this._on(that.version_message.find('#lnk_change'), {
                 click: () => {
@@ -697,6 +721,7 @@ $.widget( "heurist.controlPanel", {
                 }
             });
         }
+        
     },
 
     /**
