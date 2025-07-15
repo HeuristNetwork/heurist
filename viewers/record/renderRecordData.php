@@ -199,7 +199,7 @@ if(!($is_map_popup || $without_header)){
         <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
         <link rel="stylesheet" type="text/css" href="<?php echo HEURIST_BASE_URL;?>h4styles.css">
 
-        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>hclient/core/hintDiv.js"></script> <!-- for mapviewer roolover -->
+        <script type="text/javascript" src="<?=HEURIST_BASE_URL?>hclient/core/hintDiv.js"></script> <!-- for mapviewer rollover -->
         <script type="text/javascript" src="<?=HEURIST_BASE_URL?>hclient/core/detectHeurist.js"></script>
 <?php
 if(!$system->hasAccess()){
@@ -940,6 +940,10 @@ if(!$system->hasAccess()){
 
             function recviewer_showMap(event, rec_id){
 
+                if(!hint_popup){
+                    hint_popup = new HintDiv('mapPopup', 300, 300, '<div id="recviewer_map_popup" style="width:100%;height:100%;"></div>');
+                }
+
                 hint_popup.showAt(event);
 
                 if(!$map_frame || $map_frame.length == 0){ // create iframe
@@ -1024,8 +1028,6 @@ if(!$system->hasAccess()){
 
                 onWindowResize();
                 $(document).on('resize', onWindowResize);
-
-                hint_popup = new HintDiv('mapPopup', 300, 300, '<div id="recviewer_map_popup" style="width:100%;height:100%;"></div>');
 
                 let $login_icon = $('.login-viewer');
                 if(window.hWin?.HAPI4){
@@ -2012,8 +2014,8 @@ function print_public_details($bib) {
                     }
                     $geoimage =
                     "<img class='geo-image' style='vertical-align:top;' src='".HEURIST_BASE_URL
-                    ."hclient/assets/geo.gif' onmouseout='{if(typeof recviewer_hideMap === \"function\"){recviewer_hideMap();}else if(mapViewer){mapViewer.hide();}}' "
-                    ."onmouseover='{if(typeof recviewer_showMap === \"function\"){recviewer_showMap(event,".$bib['rec_ID'].");}else if(mapViewer){mapViewer.showAtStatic(event, ".$bib['rec_ID'].");}}'>&nbsp;";
+                    ."hclient/assets/geo.gif' onmouseout='{if(typeof recviewer_hideMap === \"function\"){recviewer_hideMap();}else if(typeof mapViewer !== 'undefined'){mapViewer.hide();}}' "
+                    ."onmouseover='{if(typeof recviewer_showMap === \"function\"){recviewer_showMap(event,".$bib['rec_ID'].");}else if(typeof mapViewer !== 'undefined'){mapViewer.showAtStatic(event, ".$bib['rec_ID'].");}}'>&nbsp;";
 
                     $bd['val'] = $geoimage.$bd['val'];
 
