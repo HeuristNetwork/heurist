@@ -70,7 +70,7 @@ class TitleMask {
     /** @var array|null Cache for record detail type structures (from defRecStructure), indexed by record type ID. */
     private static $rdr = null;
     /** @var array|null Cache for record data, indexed by record ID. */
-    private static $records = null;
+    private static $records = [];
 
     /** @var string|null Stores the title mask currently being checked or processed. */
     private static $provided_mask = null;
@@ -193,11 +193,11 @@ public static function fill($rec_id, $mask=null){
 
     self::initialize();
 
-    $rec_value = self::__get_record_value($rec_id, true);
+    $rec_value = self::__get_record_value($rec_id, true); //reset
     if($rec_value){
-        if($mask==null){
-            $mask = $rec_value['rty_TitleMask'];
-        }
+        //if($mask==null){
+        //}
+        $mask = $rec_value['rty_TitleMask'];
         $rt = $rec_value['rec_RecTypeID'];
         return self::execute($mask, $rt, 0, $rec_id, ERROR_REP_WARN);
     }else{
@@ -252,7 +252,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
     }
 
     if (!$mask) {
-        $ret = ($rep_mode!=ERROR_REP_SILENT)?"Title mask is not defined": ($mode==0?self::__get_forempty($rec_id, $rt):"");
+        $ret = ($rep_mode!=ERROR_REP_SILENT)?"Title mask is not defined": ($mode==0?self::__get_forempty($rec_id, $rt, 'mask not defined'):"");
         return $ret;
     }
 
@@ -273,8 +273,10 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
         return $mask;    // nothing to do -- no substitutions
     }
 
-    $replacements = array();
     $len = count($matches[1]);
+    $cnt = 0; //not empty matches ( [[]] - for escaping it produces the empty match )
+
+    $replacements = array();
     $fields_err = 0;
     $fields_blank = 0;
     for ($i=0; $i < $len; ++$i) {
@@ -286,6 +288,8 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
         */
 
         if(!trim($matches[3][$i])) {continue;} //empty []
+        
+        $cnt++;
 
         $value = self::__fill_field($matches[3][$i], $rt, $mode, $rec_id);
 
@@ -299,7 +303,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
                 $replacements[$matches[1][$i]] = "";
                 $fields_err++;
             }
-        }elseif (null==$value || trim($value)==""){
+        }elseif (null==$value || trim($value)==""){ //field value is empty
             $replacements[$matches[1][$i]] = "";
             $fields_blank++;
 
@@ -313,8 +317,8 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
     }
 
     if($mode==0){
-        if($fields_err==$len){
-            return self::__get_forempty($rec_id, $rt);
+        if($fields_err==$cnt){
+            return self::__get_forempty($rec_id, $rt, 'all fields are empty '.$cnt);
         }
         $replacements['[['] = '[';
         $replacements[']]'] = ']';
@@ -404,8 +408,8 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
     if($mode==0){  //fill the mask with values
 
 
-        if($fields_blank==$len && $rec_id){ //If all the title mask fields are blank
-            $title =  "Record ID $rec_id - no data has been entered in the fields used to construct the title";
+        if($fields_blank==$cnt && $rec_id){ //If all the title mask fields are blank
+            $title =  "Record ID $rec_id - no data have been entered in the fields used to construct the title [$fields_blank,$rt]";
         }
 
         /* Clean up miscellaneous stray punctuation &c. */
@@ -431,7 +435,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
         if($title==""){
 
             if($rep_mode==ERROR_REP_SILENT){
-                $title = self::__get_forempty($rec_id, $rt);
+                $title = self::__get_forempty($rec_id, $rt, 'result is empty');
             }elseif($rep_mode==ERROR_REP_MSG){
                 return array(TITLEMASK_EMPTY_MSG);
             }else{
@@ -453,14 +457,14 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=ERROR_
  * non-forbidden, and allowed-type data fields from the record's structure.
  * Allowed types include 'freetext', 'enum', 'float', 'date', 'relmarker', 'integer', 'year', 'boolean'.
  * Each field value is truncated to 40 characters. These values are then joined by pipe symbols ("|").
- * If no such data fields yield any value, a generic message "Record ID X - no data has been entered..." is returned.
+ * If no such data fields yield any value, a generic message "Record ID X - no data have been entered..." is returned.
  *
  * @access private
  * @param int $rec_id The ID of the record for which the default title is being generated.
  * @param int $rt The record type ID of the record.
  * @return string The generated default title string.
  */
-private static function __get_forempty($rec_id, $rt){
+private static function __get_forempty($rec_id, $rt, $msg){
 
     $rdr = self::__get_rec_detail_types($rt);
     //$rec_values = self::__get_record_value($rec_id);
@@ -481,7 +485,8 @@ private static function __get_forempty($rec_id, $rt){
     }
     $title = implode("|", $title);
     if(!$title){
-        $title =  "Record ID $rec_id - no data has been entered in the fields used to construct the title";
+        if(!$msg) $msg = '2';
+        $title =  "Record ID $rec_id - no data have been entered in the fields used to construct the title ($rt, $msg)";
     }
     return $title;
 }
@@ -709,12 +714,12 @@ private static function __get_record_value($rec_id, $reset=false) {
 */
     //if not reset it leads to memory exhaustion
     //$reset = true;
-    if ($reset || !is_array(self::$records) || count(self::$records)>1000) {
-        self::$records = array();
-    }
-
-    if(@self::$records[$rec_id]){
+    if(!$reset && array_key_exists($rec_id, self::$records)){
         return self::$records[$rec_id];
+    }
+    
+    if ($reset || count(self::$records)>1000) {
+        self::$records = array();
     }
 
         $ret = null;

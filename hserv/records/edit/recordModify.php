@@ -760,7 +760,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                         list($child_rectype, $child_title) = mysql__select_row($mysqli,
                             'SELECT rec_RecTypeID, rec_Title FROM Records WHERE rec_ID='
                             .intval($dtl_Value));
-                        recordUpdateTitle($system, $dtl_Value, $child_rectype, $child_title);
+                        recordUpdateTitle($system, $dtl_Value, $child_rectype, $child_title); //update for child records
                     }
 
                 }elseif($dtyID == DT_PARENT_ENTITY){
@@ -779,7 +779,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                         list($parent_rectype, $parent_title) = mysql__select_row($mysqli,
                             'SELECT rec_RecTypeID, rec_Title FROM Records WHERE rec_ID='
                             .intval($dtl_Value));
-                        recordUpdateTitle($system, $dtl_Value, $parent_rectype, $parent_title);
+                        recordUpdateTitle($system, $dtl_Value, $parent_rectype, $parent_title); //update for parent record
                     }
 
                 }
@@ -798,7 +798,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         return $system->addError(HEURIST_DB_ERROR, 'Cannot save details(3)', $syserror);
     }
 
-    $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['Title']);
+    $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['Title']); //for main record on save
     $rty_counts = null;
 
     if(!$is_insert && !$modeImport)
@@ -835,7 +835,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         //reset temporary flag for all relationship records
         if(!isEmptyArray($relRecsIDs)){
             foreach($relRecsIDs as $relID){
-                $res = recordUpdateTitle($system, $relID, $mask, 'Title Mask for Relationship not defined');
+                $res = recordUpdateTitle($system, $relID, $mask, 'Title Mask for Relationship not defined'); //for relationship (1) records
             }
             $query = 'UPDATE Records set rec_FlagTemporary=0 where rec_ID in ('.implode(',',$relRecsIDs).')';
             $res = $mysqli->query($query);
@@ -850,7 +850,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
                 .implode(',',$links_rectypes) .')');
 
             foreach($links as $linkRecID=>$linkRecTypeID){
-                $res = recordUpdateTitle($system, $linkRecID, $masks[$linkRecTypeID], null);
+                $res = recordUpdateTitle($system, $linkRecID, $masks[$linkRecTypeID], null); //for linked and related records
             }
         }
         mysql__supress_trigger($mysqli, false);
@@ -2503,7 +2503,7 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
 
     $recID = intval($recID);
 
-    if($mask == null)
+    if($mask == null) //this is for verification only - it gets mask and rectype in "fill" method
     {
         if(!isPositiveInt($rectype)){
             $rectype = mysql__select_value($mysqli, "select rec_RecTypeID from Records where rec_ID=".$recID);
@@ -2522,7 +2522,7 @@ function recordUpdateTitle($system, $recID, $rectype_or_mask, $recTitleDefault)
     }
 
     TitleMask::initialize($system);
-    $new_title = TitleMask::fill($recID, $mask);
+    $new_title = TitleMask::fill($recID);
 
     if(($new_title==null || strpos($new_title, 'Title mask not generated.') === 0) && $recTitleDefault!=null) {
         $new_title = $recTitleDefault;

@@ -499,7 +499,7 @@ class RecordsBatch
                 $child_rectype = $row[3];
                 $child_title = $row[4];
 
-                if(!recordUpdateTitle($this->system, $child_id, $child_rectype, $child_title)){
+                if(!recordUpdateTitle($this->system, $child_id, $child_rectype, $child_title)){ //on add child record
                     $titlesFailed[] = $child_id;
                 }
             }
@@ -713,7 +713,7 @@ class RecordsBatch
                 $sqlErrors[$recID] = ERR_REC_MODDATE.$ret;
             }else{
                 //update record title
-                if(!recordUpdateTitle($this->system, $recID, $rectype_ID, null)){
+                if(!recordUpdateTitle($this->system, $recID, $rectype_ID, null)){ //on add details
                     $sqlErrors[$recID] = ERR_REC_TITLE;
                 }
             }
@@ -1198,7 +1198,7 @@ class RecordsBatch
 
         //update record title
         foreach ($processedRecIDs as $recID){
-                if(!recordUpdateTitle($this->system, $recID, null, null)){
+                if(!recordUpdateTitle($this->system, $recID, null, null)){ //on replace details
                     $sqlErrors[$recID] = ERR_REC_TITLE;
                 }
         }
@@ -1476,7 +1476,7 @@ class RecordsBatch
                if (!is_numeric($ret)) {
                     $sqlErrors[$recID] = ERR_REC_MODDATE.$ret;
                }else{
-                    if(!recordUpdateTitle($this->system, $recID, null, null)){
+                    if(!recordUpdateTitle($this->system, $recID, null, null)){ //on remove details
                         $sqlErrors[$recID] = ERR_REC_TITLE;
                     }
                }
@@ -1566,7 +1566,7 @@ class RecordsBatch
                }else{
                    array_push($processedRecIDs, $recID);
                    //update title
-                   $new_title = TitleMask::fill($recID);
+                   $new_title = TitleMask::fill($recID); //on change rectype
                    $rec_update2 = array('rec_ID'  => $recID, 'rec_Title'  => $new_title);
                    mysql__insertupdate($mysqli, 'Records', 'rec', $rec_update2);
                }
