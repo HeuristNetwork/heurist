@@ -59,8 +59,7 @@ $.widget("heurist.lookupGN_postalCode", $.heurist.lookupGeonames, {
      * @returns {void|*} The result of `this._super()`.
      */
     _initControls: function(){
-        this.element.find('#search_container > div > div > .header').css({width:'80px','min-width':'80px', display: 'inline-block'});
-        this.element.find('#btn_container').position({my: 'left center', at: 'right center', of: '#search_container'});
+        this.element.find('#search_container > div > div > .header').css({width:'8em','min-width':'8em', display: 'inline-block'});
         return this._super();
     },
 
