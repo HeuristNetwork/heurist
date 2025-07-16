@@ -458,7 +458,8 @@ $.widget( "heurist.search_faceted_wiz", {
         
         let topPos = 0;
         let pos = this._dialog.dialog('option', 'position');
-        if(pos && pos.of && !(pos.of instanceof Window)){
+        if (pos && pos.of && !$(pos.of).is(window) && typeof pos.of.getClientRects === 'function') 
+        {
             let offset = $(pos.of).offset();
             if(offset) topPos = offset.top+40;
         }

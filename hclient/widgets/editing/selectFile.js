@@ -296,7 +296,7 @@ $.widget( "heurist.selectFile", {
     _destroy: function() {
         // remove generated elements
         this.recordList.remove();
-        if(this._as_dialog) this._as_dialog.remove();        
+        // Note: _as_dialog is removed in its own 'close' handler if it exists.
     },
     
     /**
