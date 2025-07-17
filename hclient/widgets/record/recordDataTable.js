@@ -292,9 +292,9 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                 //include parent resource (record pointer) field
                 let parent_rtid = ids[0];
                 let parent_dtid = ids[1];
-                let linktype = parent_dtid.substr(0,2); //remove link type lt ot rt  10:lt34
+                let linktype = parent_dtid.slice(0,2); //remove link type lt ot rt  10:lt34
                 if(isNaN(Number(linktype))){
-                    parent_dtid = parent_dtid.substr(2);
+                    parent_dtid = parent_dtid.slice(2);
                 }
                 parentcode = parent_rtid+':'+parent_dtid;
                 

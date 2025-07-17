@@ -1168,7 +1168,7 @@ window.hWin.HEURIST4.dbs = {
                 is_parent_relmarker = (lastcode.indexOf('rt')==0 || lastcode.indexOf('rf')==0);
                 
                 if(lastcode.indexOf('lt')==0 && is_multi_constrained==1){
-                   pointer_field_id =  lastcode.substr(2); 
+                   pointer_field_id =  lastcode.slice(2); 
                 }else{
                    is_multi_constrained = 0;
                 }
@@ -2905,12 +2905,12 @@ window.hWin.HEURIST4.dbs = {
             if(dtid){ // If dtid is present and not a header field
                 
                 if(dtid.indexOf('r.')==0){ // Relationship field prefix
-                    dtid = dtid.substr(2);
+                    dtid = dtid.slice(2);
                 }
 
-                let linktype = dtid.substr(0,2); // Check for link type prefixes (lt, rt, lf, rf)
+                let linktype = dtid.slice(0,2); // Check for link type prefixes (lt, rt, lf, rf)
                 if(isNaN(Number(linktype))){ // If prefix is not a number, it's a link type
-                    dtid = dtid.substr(2); // Actual dty_ID
+                    dtid = dtid.slice(2); // Actual dty_ID
 
                     if(dtid>0){
 
@@ -3196,12 +3196,12 @@ window.hWin.HEURIST4.dbs = {
             // End of header field specific section for harchy_fields
             
             if(dtid.indexOf('r.')==0){ // Relationship field prefix
-                dtid = dtid.substr(2);
+                dtid = dtid.slice(2);
             }
             
-            let linktype = dtid.substr(0,2);  // Check for link type prefixes
+            let linktype = dtid.slice(0,2);  // Check for link type prefixes
             if(isNaN(Number(linktype))){ // If prefix is not a number, it's a link type
-                dtid = dtid.substr(2); // Actual dty_ID
+                dtid = dtid.slice(2); // Actual dty_ID
                 
                 if(dtid>0){
                 

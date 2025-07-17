@@ -1874,7 +1874,7 @@ $.widget( "heurist.slidersMenu", {
             if(section=='populate'){
                 sname = 'Populate';
             }else{
-                sname = section[0].toUpperCase()+section.substr(1);
+                sname = section[0].toUpperCase()+section.slice(1);
             }
 
             this.introductions[section] = $('<div><div class="gs-box" style="margin:10px;max-width:500px;height:100px;cursor:pointer">'
@@ -2159,7 +2159,7 @@ $.widget( "heurist.slidersMenu", {
                     $ele.hide();
                     
                     if(option != 'explore'){
-                        that.switchContainer(option[0].toLowerCase() + option.substr(1));
+                        that.switchContainer(option[0].toLowerCase() + option.slice(1));
                     }
                 });
                 // Add image to explore header

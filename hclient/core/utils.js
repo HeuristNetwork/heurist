@@ -835,7 +835,7 @@ window.hWin.HEURIST4.util = {
         if(window.crypto){
             const typedArray = new Uint8Array(10);
             const randomValues = window.crypto.getRandomValues(typedArray);
-            return randomValues.join('').substr(0,15);        
+            return randomValues.join('').slice(0,15);        
         }else{
             return ''+Math.floor(Date.now() * Math.random())
            

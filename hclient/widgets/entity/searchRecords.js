@@ -245,7 +245,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             
             //on switch - change filter
             cont.tabs({activate:function( event, ui ) {
-                let rtyid = ui.newPanel.attr('id').substr(3);
+                let rtyid = ui.newPanel.attr('id').slice(3);
                 that._select_mode = 1; //search
                 that.selectRectype.val( rtyid ).hSelect('refresh');
                 that.selectRectype.trigger('change');

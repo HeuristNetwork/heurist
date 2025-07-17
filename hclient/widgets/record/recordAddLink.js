@@ -375,7 +375,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     _onRecordScopeChange: function () 
     {
         this.source_RecTypeID = this.selectRecordScope.val(); 
-        if(this.source_RecTypeID && this.source_RecTypeID[0]=='s') this.source_RecTypeID = this.source_RecTypeID.substr(1);
+        if(this.source_RecTypeID && this.source_RecTypeID[0]=='s') this.source_RecTypeID = this.source_RecTypeID.slice(1);
         this._fillSelectFieldTypes('source', this.source_RecTypeID);
     },
     

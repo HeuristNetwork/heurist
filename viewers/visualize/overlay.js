@@ -358,7 +358,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
     let rollover = info[0].text;
     if(type=='record'){
         if(settings.isDatabaseStructure){
-            rty_ID = selector.substr(2);
+            rty_ID = selector.slice(2);
             const desc = $Db.rty(rty_ID, 'rty_Description');
             if(desc!=null){
                 rollover = rollover + ' ' + desc;
@@ -366,7 +366,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                 console.error('Rectype not found '+rty_ID);
             }
         }else{
-            rec_ID = selector.substr(2);
+            rec_ID = selector.slice(2);
         }
             
     }

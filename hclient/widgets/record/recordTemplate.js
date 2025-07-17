@@ -97,9 +97,9 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
                 if(header_fields[dtid]){
                     dtid = header_fields[dtid];
                 }else{
-                    let linktype = dtid.substr(0,2); //remove link type lt ot rt  10:lt34
+                    let linktype = dtid.slice(0,2); //remove link type lt ot rt  10:lt34
                     if(isNaN(Number(linktype))){
-                        dtid = dtid.substr(2);
+                        dtid = dtid.slice(2);
                     }
                 }
                 return dtid;

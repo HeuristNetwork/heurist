@@ -2255,7 +2255,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 sContent += '<br>&nbsp;&nbsp;&nbsp;Pwd: '+((!window.hWin.HEURIST4.util.isempty(val))?val:''); 
                 val = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(rec, 'bkm_Notes'));
                 sContent += '<br>&nbsp;Notes: '+((!window.hWin.HEURIST4.util.isempty(val))
-                        ?(val.substr(0,500)+(val.length>500?'...':'')):''); 
+                        ?(val.slice(0,500)+(val.length>500?'...':'')):''); 
                 
             }
             pnl.append(sContent);

@@ -425,9 +425,9 @@ $.widget( "heurist.searchBuilderItem", {
         let dty_ID = this.options.dty_ID;
 
         if(dty_ID.indexOf('r.')==0){
-            dty_ID = dty_ID.substr(2);    
+            dty_ID = dty_ID.slice(2);    
         }else if(dty_ID.indexOf('lt')==0 || dty_ID.indexOf('lf')==0){
-            dty_ID = dty_ID.substr(2);    
+            dty_ID = dty_ID.slice(2);    
         }
         
         if(dty_ID>0){ //numeric - base field
@@ -906,7 +906,7 @@ Whole value = EQUAL
                 key = 'geo';    
             }else 
             if(this.options.dty_ID.indexOf('r.')==0){
-                key = 'r:'+this.options.dty_ID.substr(2); 
+                key = 'r:'+this.options.dty_ID.slice(2); 
             }else
             if(this.options.dty_ID>0){
                 key = (org_op!='count' ? 'f:' : 'fc:') + this.options.dty_ID;

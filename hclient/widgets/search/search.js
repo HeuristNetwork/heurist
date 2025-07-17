@@ -537,7 +537,7 @@ $.widget( "heurist.search", {
         .appendTo( this.document.find('body') )
         .menu({
             select: function( event, ui ) {
-                let mode =  ui.item.attr('id').substr(14); 
+                let mode =  ui.item.attr('id').slice(14); 
                 that.option("search_domain", mode);
                 that._refresh();
         }})

@@ -1382,7 +1382,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             
                         }
                     }else{
-                        let realFieldName = fieldName.substr(5);
+                        let realFieldName = fieldName.slice(5);
                         sortFieldsOrder.push(Number(request[fieldName])); //1 - ASC, -1 DESC
                         sortFields.push(realFieldName);
                         dataTypes[realFieldName] = __getDataType(realFieldName, structure);

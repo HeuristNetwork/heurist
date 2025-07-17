@@ -658,7 +658,7 @@ $.widget( "heurist.manageSysWorkflowRules", $.heurist.manageEntity, {
                         let value = $txt_emailtext.val();
                         let insert = `#${$(event.target).attr('data-dtyid')}#`;
 
-                        value = `${value.substr(0, cursor_pos)}${insert}${value.substr(cursor_pos)}`;
+                        value = `${value.slice(0, cursor_pos)}${insert}${value.slice(cursor_pos)}`;
                         $txt_emailtext.val(value).trigger('change');
                     });
 

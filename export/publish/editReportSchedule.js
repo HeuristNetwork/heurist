@@ -237,7 +237,7 @@ function ReportScheduleEditor() {
             if (window.hWin.HEURIST4.util.isempty(el.value) &&
                 !(fname === 'rps_FilePath' || fname === 'rps_URL' || fname === 'rps_IntervalMinutes')) {
                 if (isShowWarn) {
-                    alert(fname.substr(4) + " is a mandatory field"); // Show user-friendly field name.
+                    alert(fname.slice(4) + " is a mandatory field"); // Show user-friendly field name.
                 }
                 el.dispatchEvent(new Event('focus'));
                 _updatedFields = []; // Clear updated fields as validation failed.

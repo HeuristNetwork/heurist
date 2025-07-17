@@ -351,12 +351,12 @@ $.widget( "heurist.editTranslations", {
         if(check_default){
             
             if(!window.hWin.HEURIST4.util.isempty(value)){
-                if(value.substr(3,1)==':'){ //ISO639-2
-                    lang = value.substr(0,3);
-                    value = value.substr(4).trim();
-                }else if(value.substr(2,1)==':'){ //ISO639-1
-                    lang = value.substr(0,2);
-                    value = value.substr(3).trim();
+                if(value.slice(3,4)==':'){ //ISO639-2
+                    lang = value.slice(0,3);
+                    value = value.slice(4).trim();
+                }else if(value.slice(2,3)==':'){ //ISO639-1
+                    lang = value.slice(0,2);
+                    value = value.slice(3).trim();
 
                     lang = window.hWin.HAPI4.getLangCode3(lang); //convert to ISO639-2
                 }

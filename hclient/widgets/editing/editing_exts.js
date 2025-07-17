@@ -1685,7 +1685,7 @@ function browseRecords(_editing_input, $input, popupTitle){
                     
                     $.each(window.hWin.HEURIST4.browseRecordCache[key], function(idx, item){
                         
-                        let title = item['rec_Title'].substr(0,64).replace(/[\r\n]+/g, ' ');
+                        let title = item['rec_Title'].slice(0,64).replace(/[\r\n]+/g, ' ');
                         
                         let opt = window.hWin.HEURIST4.ui.addoption(that.selObj, item['rec_ID'], title); 
                         
@@ -2313,9 +2313,9 @@ function translationToUI(params, $container, keyname, name, is_text_area){
                 for(let i=0; i<newvalues.length; i++){
                     let keyname2=keyname, value = newvalues[i];
                     
-                    if(!window.hWin.HEURIST4.util.isempty(value) && value.substr(3,1)==':'){ // lang:value format
-                        keyname2 = keyname2+':'+value.substr(0,3); // e.g. keyname:eng
-                        value = value.substr(4).trim();
+                    if(!window.hWin.HEURIST4.util.isempty(value) && value.slice(3,4)==':'){ // lang:value format
+                        keyname2 = keyname2+':'+value.slice(0,3); // e.g. keyname:eng
+                        value = value.slice(4).trim();
                     }else{ // Default language value
                         value = value.trim();
                     }

@@ -52,7 +52,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             // Assuming response is an error object from a failed JSON.parse, not the unparsed string.
             // If response IS the unparsed string that failed, this message might be confusing.
             // For now, documenting as is.
-            window.hWin.HEURIST4.msg.showMsgErr(window.hWin.HR('Error_Json_Parse')+': '+String(response).substr(0,255)+'...');
+            window.hWin.HEURIST4.msg.showMsgErr(window.hWin.HR('Error_Json_Parse')+': '+String(response).slice(0,255)+'...');
         }
     },
 

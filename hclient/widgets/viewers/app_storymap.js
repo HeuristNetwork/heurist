@@ -1183,7 +1183,7 @@ $.widget( "heurist.app_storymap", {
         let isSmarty = false;
         
         if( typeof this.options.reportOverview === 'string' 
-                        && this.options.reportOverview.substr(-4)=='.tpl' ){
+                        && this.options.reportOverview.slice(-4)=='.tpl' ){
         
             infoURL = window.hWin.HAPI4.baseURL + '?snippet=1&q=ids:'
                     + recID 
@@ -1281,7 +1281,7 @@ $.widget( "heurist.app_storymap", {
         let infoURL;
         
         if( typeof this.options.reportEndPage === 'string' 
-                        && this.options.reportEndPage.substr(-4)=='.tpl' ){
+                        && this.options.reportEndPage.slice(-4)=='.tpl' ){
         
             infoURL = window.hWin.HAPI4.baseURL + '?snippet=1&q=ids:'
                     + recID 
@@ -1752,7 +1752,7 @@ $.widget( "heurist.app_storymap", {
                 let isSmarty = false;
                 
                 if( typeof this.options.reportElement === 'string' 
-                                && this.options.reportElement.substr(-4)=='.tpl' ){
+                                && this.options.reportElement.slice(-4)=='.tpl' ){
                 
                     infoURL = window.hWin.HAPI4.baseURL + '?snippet=1&q=ids:'
                             + recID 

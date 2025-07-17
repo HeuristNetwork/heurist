@@ -1616,17 +1616,17 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                 return window.hWin.HEURIST4.util.stripFirstElement(val_orig);
                             }
                         
-                            if(val.length>4 && val.substr(3,1)==':'){ //has lang prefix
+                            if(val.length>4 && val.slice(3,4)==':'){ //has lang prefix
 
-                                if(val.substr(0,3).toUpperCase() == lang){
-                                    def_val = (tag_to_remove==null)?val.substr(4).trim() 
+                                if(val.slice(0,3).toUpperCase() == lang){
+                                    def_val = (tag_to_remove==null)?val.slice(4).trim() 
                                                              :__removeFirstTag();
                                     break;
                                 }
-                            }else if(val.length > 3 && val.substr(2, 1) == ':'){ // check for ar2 code
+                            }else if(val.length > 3 && val.slice(2, 3) == ':'){ // check for ar2 code
 
-                                if(val.substr(0, 2).toUpperCase() == a2_lang){
-                                    def_val = (tag_to_remove==null)?val.substr(3).trim() 
+                                if(val.slice(0, 2).toUpperCase() == a2_lang){
+                                    def_val = (tag_to_remove==null)?val.slice(3).trim() 
                                                                     :__removeFirstTag();
                                     break;
                                 }

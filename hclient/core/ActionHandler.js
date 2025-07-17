@@ -454,7 +454,7 @@ class ActionHandler {
             case "menu-database-register":
             case "menu-database-verify":
             case "menu-database-verifyURLs":{
-                const s = actionid.substr(actionid.lastIndexOf('-') + 1);
+                const s = actionid.slice(actionid.lastIndexOf('-') + 1);
                 const actionName = 'db' + s.charAt(0).toUpperCase() + s.slice(1);
                 window.hWin.HEURIST4.ui.showRecordActionDialog(actionName, popup_dialog_options);
                 break;

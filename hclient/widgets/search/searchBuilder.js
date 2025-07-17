@@ -1623,7 +1623,7 @@ $.widget( "heurist.searchBuilder", {
                         let dtid = codes[codes.length-1];
                         if(dtid.indexOf('r.')==0){
                             //replace f to r for value
-                            dtid = dtid.substr(2);
+                            dtid = dtid.slice(2);
                             let nkey = 'r';
                             if(dtid!=window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']) nkey = 'r:'+dtid;
                             

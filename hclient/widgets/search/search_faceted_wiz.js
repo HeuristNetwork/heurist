@@ -1041,10 +1041,10 @@ $.widget( "heurist.search_faceted_wiz", {
                     let s = this.options.params.sort_order;
                     if(s.indexOf('-')==0){
                         $dlg.find('.sa_sortasc').val(1);    
-                        s = s.substr(1);
+                        s = s.slice(1);
                     }
                     if(s.indexOf('f:')==0){
-                        s = s.substr(2);                        
+                        s = s.slice(2);                        
                     }
                     
                    sa_order.val(s)

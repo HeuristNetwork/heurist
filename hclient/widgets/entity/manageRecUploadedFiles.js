@@ -906,7 +906,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             if(val.indexOf('_tiled')==0){
                 rectype = 'tiled';
                 if(val.indexOf('_tiled@')==0){ 
-                        val = val.substr(7);
+                        val = val.slice(7);
                 }
                 if(!window.hWin.HEURIST4.util.isempty(val)){
                     recTitle = '<div class="item" style="width:auto">'+val+'</div>';    

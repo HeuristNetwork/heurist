@@ -641,7 +641,7 @@ window.hWin.HEURIST4.query = {
         code = code.split(':');
 
         let dtid = code[code.length-1];
-        let linktype = dtid.substr(0,2);
+        let linktype = dtid.slice(0,2);
         if(linktype=='lt' || linktype=='lf' || linktype=='rt' || linktype=='rf'){
             //unconstrained link, assume title field of target type
             code.push('0');         // Placeholder for rt_ID of the target type of the unconstrained link (usually resolved later)
@@ -686,7 +686,7 @@ window.hWin.HEURIST4.query = {
                     }
 
                     qp = {};
-                    qp[pref+':'+fld.substr(2)] = __crt(idx-2, depth+1);    
+                    qp[pref+':'+fld.slice(2)] = __crt(idx-2, depth+1);    
                     res.push(qp);
                 }else{ //this is simple field (end of recursion, or direct field of initial type)
                     res = '$IDS'; // Placeholder for the actual IDs to be searched

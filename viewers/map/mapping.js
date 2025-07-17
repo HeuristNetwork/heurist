@@ -312,7 +312,7 @@ $.widget( "heurist.mapping", {
         //2. INIT MAP
         let map_element_id = 'map';
         if(this.options.element_map && this.options.element_map.indexOf('#')==0){
-            map_element_id = this.options.element_map.substr(1);
+            map_element_id = this.options.element_map.slice(1);
         }
         
         $('#'+map_element_id).css('padding',0); //reset padding otherwise layout set it to 10px

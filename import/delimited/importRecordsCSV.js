@@ -1532,7 +1532,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
          }else{
              //parent_field_key = parent_field_key+'.'+currentTypeID;
              /*if(parent_field_key.indexOf('.')>0){
-                parent_rectype_id = parent_field_key.substr(parent_field_key.indexOf('.')+1);
+                parent_rectype_id = parent_field_key.slice(parent_field_key.indexOf('.')+1);
              }else{
                 parent_rectype_id = parent_field_key;
              }*/
@@ -1558,7 +1558,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                        
                        let ids = (field.rt_ids)?field.rt_ids.split(','):[];
                        let field_id = field['key'];
-                       field_id = field_id.substr(2);//remove prefix "f:"
+                       field_id = field_id.slice(2);//remove prefix "f:"
 
                        for (i=0;i<ids.length;i++){
                                                       
@@ -1869,7 +1869,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         //init listeners
         $("input[id^='cbsa_dt_']").on('change', function(e){
             let cb = $(e.target);
-            let idx = cb.val();//attr('id').substr(8);
+            let idx = cb.val();//attr('id').slice(8);
             if(cb.is(':checked')){
                 $('#sa_dt_'+idx).parent().show();
                 //autoMapField(idx);
@@ -4507,7 +4507,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 /*
                 if(checked_field && checked_field.length>0){
                     for (let m=0;m<checked_field.length;m++){    
-                        ismultivalue = imp_session['multivals'][checked_field[m].substr(6)];//highlight errors individually
+                        ismultivalue = imp_session['multivals'][checked_field[m].slice(6)];//highlight errors individually
                         if(ismultivalue) break;
                     }
                 }*/

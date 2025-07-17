@@ -563,7 +563,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
         
         if(!type){
             type = $(event.target).attr('name');
-            type = type.substr(0,type.indexOf('-'));
+            type = type.slice(0,type.indexOf('-'));
         }
         
         if($container.find('.cb_sync[data-type="'+type+'"]').is(':checked')){

@@ -334,7 +334,7 @@ $.widget( "heurist.ruleBuilder", {
                         let tlen = title.length; //text on dropdown already too long    
                         if(tlen<73){
                             if(tlen>=70){
-                                title = title.substr(0,70)+'...';
+                                title = title.slice(0,70)+'...';
                             }else{
                                 title = '<< '+rt_name+' | '+title.substr(3,tlen-1);
                             }

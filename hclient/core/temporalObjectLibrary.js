@@ -155,7 +155,7 @@ function Temporal (strInitTemporal) {
             
                     if ($tDate["CLD"] && $tDate["CL2"] && ($tDate["CLD"].toLowerCase()!='gregorian')) {
                             let $cld = $tDate["CL2"]+" "+$tDate["CLD"];
-                            if($cld.indexOf('null')>=0) $tDate["CLD"] = $cld.substr(4); //some dates were saved in wrong format - fix it
+                            if($cld.indexOf('null')>=0) $tDate["CLD"] = $cld.slice(4); //some dates were saved in wrong format - fix it
                     }        
                     
                     switch ($tDate["TYP"]) {
@@ -2991,8 +2991,8 @@ function temporalSimplifyDate(sdate) {
             }else{
                 let parts = val.split('.');
                 let year = parts[0];
-                let month = parts[1]?parts[1].substr(0,2):0;
-                let day = parts[1]?parts[1].substr(2):0;
+                let month = parts[1]?parts[1].slice(0,2):0;
+                let day = parts[1]?parts[1].slice(2):0;
 
                 val = year;
                 if(month>0){

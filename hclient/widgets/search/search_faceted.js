@@ -677,7 +677,7 @@ $.widget( "heurist.search_faceted", {
 
                 let code = field['code'];
                 code = code.split(':')
-                const linktype = code[code.length-1].substr(0,2);
+                const linktype = code[code.length-1].slice(0,2);
                 if(linktype=='lt' || linktype=='lf' || linktype=='rt' || linktype=='rf'){
                     //unconstrained link
                     code.push('0');         //!!!!!!!!
@@ -696,7 +696,7 @@ $.widget( "heurist.search_faceted", {
                     if(rtid > 0 || rtid.indexOf(',') > 0){  //AA!!  ||  rtid.indexOf(',')>0
                         curr_level = __checkEntry(curr_level,"t",rtid);
                     }
-                    const linktype = dtid.substr(0,2);
+                    const linktype = dtid.slice(0,2);
                     let slink = null;
 
                     if(linktype=='rt'){
@@ -715,7 +715,7 @@ $.widget( "heurist.search_faceted", {
                     if(slink!=null){
 
                         const rtid_linked = code[j+2];  //linked record type, if null or 0 - unconstrained
-                        key  = slink+rtid_linked+":"+dtid.substr(2); //rtid need to distinguish links/relations for various recordtypes
+                        key  = slink+rtid_linked+":"+dtid.slice(2); //rtid need to distinguish links/relations for various recordtypes
                         val = [];
                     }else{
                         //multifield search for datetime
@@ -726,7 +726,7 @@ $.widget( "heurist.search_faceted", {
                         }
                         
                         if(dtid.indexOf('r.')==0){
-                            key = "r:"+dtid.substr(2);
+                            key = "r:"+dtid.slice(2);
                         }else if(dtid>0){
                             key = "f:"+dtid;
                         }else{
@@ -1142,7 +1142,7 @@ $.widget( "heurist.search_faceted", {
                  
                  let dty_ID = field['id'];
                  if(dty_ID.indexOf('r.')==0){
-                    dty_ID = dty_ID.substr(2);    
+                    dty_ID = dty_ID.slice(2);    
                  }
                  
                  let fld_type = (field['type'] == 'blocktext') ? 'freetext' : field['type'];
@@ -2000,7 +2000,7 @@ let s_time = new Date().getTime() / 1000;
                 
                 let fieldid = field['id'];
                 if(fieldid.indexOf('r.')==0){
-                    fieldid = fieldid.substr(2);    
+                    fieldid = fieldid.slice(2);    
                 }
                 
 
@@ -2254,7 +2254,7 @@ let s_time = new Date().getTime() / 1000;
 
                     let dty_ID = field['id']; 
                     if(dty_ID.indexOf('r.')==0){
-                        dty_ID = dty_ID.substr(2);    
+                        dty_ID = dty_ID.slice(2);    
                     }
 
                     if((field['type']=='enum' || field['type']=='reltype') && field['groupby']!='firstlevel'){
@@ -2637,8 +2637,8 @@ let s_time = new Date().getTime() / 1000;
                                        
                                         let parts = val.split('.');
                                         let year = parts[0];
-                                        let month = parts[1]?parts[1].substr(0,2):0;
-                                        let day = parts[1]?parts[1].substr(2):0;
+                                        let month = parts[1]?parts[1].slice(0,2):0;
+                                        let day = parts[1]?parts[1].slice(2):0;
                                         
                                         val = (year<0?'-':'')+(''+Math.abs(year)).lpad('0',parseInt(year)<0?6:4)
                                             +'-'+((month==0)?'01':month.lpad('0',2))
@@ -2974,7 +2974,7 @@ let s_time = new Date().getTime() / 1000;
 
                                     let dty_ID = field['id'];
                                     if(dty_ID.indexOf('r.')==0){
-                                        dty_ID = dty_ID.substr(2);    
+                                        dty_ID = dty_ID.slice(2);    
                                     }
                                     
                                     let request = {
@@ -3970,7 +3970,7 @@ let s_time = new Date().getTime() / 1000;
                 }
                 if(iscurrent) 
                     //do not highlight if initals selected
-                    //|| (currval.length==2 &&  currval.substr(1,1)=='%' && currval.substr(0,1)==cterm.value.substr(0,1)) )
+                    //|| (currval.length==2 &&  currval.slice(1,2)=='%' && currval.slice(0,1)==cterm.value.slice(0,1)) )
                 {
                      
                      f_link_content.css({ 'font-weight': 'bold', 'font-size':'1.1em', 'font-style':'normal' });   
@@ -4096,7 +4096,7 @@ let s_time = new Date().getTime() / 1000;
 
         let dty_ID = field['id']; 
         if(dty_ID.indexOf('r.')==0){
-            dty_ID = dty_ID.substr(2);    
+            dty_ID = dty_ID.slice(2);    
         }
         
         let facet_title = window.hWin.HEURIST4.util.htmlEscape(window.hWin.HRJ('title', field, this.options.language));

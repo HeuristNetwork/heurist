@@ -415,7 +415,7 @@ function HLayout(args) {
 
                 var app = _appGetWidgetById($app_content.attr('widgetid')); //ART04-26
                 var offset = $pane_content.offset();
-                var $tab = appCreateTabControl($pane_content, {appid: $app_content.attr('widgetid'), content_id: content_id.substr(1) }, //to remove #
+                var $tab = appCreateTabControl($pane_content, {appid: $app_content.attr('widgetid'), content_id: content_id.slice(1) }, //to remove #
                     {dockable: true, dragable:true, resizable:true,
                         css:{top:event.pageY-offset.top,left:event.pageX-offset.left,height:200,width:200}});
                 appAdjustContainer();
@@ -587,7 +587,7 @@ function HLayout(args) {
                         let locationUrl = window.hWin.HAPI4.baseURL;
                         $pane.find('li > a').each(function(idx, item){
                            let href = $(item).attr('href');
-                           href = href.substr(href.indexOf('#'));           
+                           href = href.slice(href.indexOf('#'));           
                            $(item).attr('href', locationUrl + href);
                         });
                         $pane.tabs();    
@@ -782,7 +782,7 @@ console.error('Cardinal layout widget does not have proper options');
                 let $src_tab = $app_content.parent();
 
                 let offset = $pane_content.offset();
-                let $tab = appCreateTabControl($pane_content, {appid: $app_content.attr('widgetid'), content_id: content_id.substr(1) }, //to remove #
+                let $tab = appCreateTabControl($pane_content, {appid: $app_content.attr('widgetid'), content_id: content_id.slice(1) }, //to remove #
                     {dockable: true, dragable:true, resizable:true,
                         css:{top:event.pageY-offset.top,left:event.pageX-offset.left,height:200,width:200}});
                 appAdjustContainer();

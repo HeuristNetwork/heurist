@@ -2484,7 +2484,7 @@ $.widget( "heurist.resultList", {
                     let isSmarty = false;
                     
                     if( typeof rendererTemplate === 'string' 
-                            && rendererTemplate.substr(-4)=='.tpl' ){
+                            && rendererTemplate.slice(-4)=='.tpl' ){
 
                         infoURL = window.hWin.HAPI4.baseURL + '?snippet=1&q=ids:'
                         + recID 
@@ -4368,7 +4368,7 @@ $.widget( "heurist.resultList", {
         let lt = 'WebSearch';//window.hWin.HAPI4.sysinfo['layout'];  
         if( !recInfoUrl ){
             
-            if ( typeof this.options.rendererExpandDetails === 'string' && this.options.rendererExpandDetails.substr(-4)=='.tpl' ){
+            if ( typeof this.options.rendererExpandDetails === 'string' && this.options.rendererExpandDetails.slice(-4)=='.tpl' ){
 
                 recInfoUrl = window.hWin.HAPI4.baseURL + '?q=ids:'
                 + rec_ID
