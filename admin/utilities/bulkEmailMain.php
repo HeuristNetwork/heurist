@@ -657,7 +657,7 @@ $stmt->close();
                             $("#emailTitle").text("");
                             $("#emailBody").text("");
                         }else{
-                            getEmailDetails();
+                            getEmailDetails( emailDraft );
                         }
                     }
                 });
@@ -754,7 +754,6 @@ $stmt->close();
                                     applyDBSort($('input[name="dbSortBy"]:checked').attr('id'));
 
                                 } else {
-
                                     if(window.hWin.HEURIST4.util.isempty(response.message)){
                                         window.hWin.HEURIST4.msg.showMsgErr({
                                             message: "An unknown error has occurred with retrieving the filtered list of databases.",
@@ -857,14 +856,23 @@ $stmt->close();
                         $prog_dlg.find('#email-results').html('<strong>CANCELLED</strong>');
                         return;
                     }
+                    
+                    if(response.status != 'ok'){
+                        $prog_dlg.find('#email-results').html(`<strong>${response.message}</strong>`);
+                        return;
+                    }else if(response.rec_Title){
+                        $prog_dlg.find('#email-results').html(`<strong>Saved final receipt as a Note record: ID #${response.data} ${response.rec_Title}</strong>`);
+                    }
 
                     window.hWin.HEURIST4.util.sendRequest(mail_url, {a: 'session', session: SESSION_ID, db: CURRENT_DB}, null, (session_resp) => {
 
                         if(session_resp.status == 'ok'){
                             $prog_dlg.find('#progress-report').html(session_resp.data);
+                        
+                            if(session_resp.rec_Title){    
+                                $prog_dlg.find('#email-results').html(`<strong>Saved final receipt as a Note record: ID #${session_resp.data} ${session_resp.rec_Title}</strong>`);
+                            }
                         }
-
-                        $prog_dlg.find('#email-results').html(`<strong>Saved final receipt as a Note record: ID #${response.data} ${response.rec_Title}</strong>`);
                     });
                 });
 
@@ -1005,7 +1013,7 @@ $stmt->close();
              * @param {(string|number)} id The ID of the "Email" record to fetch details for.
              * @returns {void}
              */
-            function getEmailDetails() {
+            function getEmailDetails(  ) {
 
                 if(callInProgress){
                     window.hWin.HEURIST4.msg.showMsgFlash('A server call is already in progress, please wait for it to finish...', 6000);
@@ -1019,7 +1027,7 @@ $stmt->close();
                 $.ajax({
                     url: 'bulkEmailController.php',
                     type: 'POST',
-                    data: { a: 'email_details', db: CURRENT_DB, recid: id, req_id: window.hWin.HEURIST4.util.random() },
+                    data: { a: 'email_details', db: CURRENT_DB, recid: emailRec, req_id: window.hWin.HEURIST4.util.random() },
                     dataType: 'json',
                     cache: false,
                     xhrFields: {
