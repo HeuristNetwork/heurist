@@ -105,7 +105,7 @@ class DbsTerms
      */
     public function findTermByConceptCode($ccode, $domain=null){
 
-        if($domain==null){
+        if($domain==null){ //search both domains
             $term_id = $this->findTermByConceptCode($ccode, 'enum');
             if($term_id==null){
                 $term_id = $this->findTermByConceptCode($ccode, 'relation');

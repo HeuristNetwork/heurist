@@ -1736,9 +1736,9 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
                 handleError($ret, $dupquery, $ext_db->error);
             } else {
                 $recCount = $res->num_rows;
-                if($recCount>0){
+                if ($recCount>0){
                     $ret = "Duplicate label ('$ch_label') ";
-                    if($ch_code!=''){
+                    if ($ch_code!=''){
                         $ret = $ret." or code ('$ch_code') ";
                     }
                     $ret = $ret.'not allowed for terms at the same branch/level in the tree';

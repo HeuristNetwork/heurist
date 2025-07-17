@@ -209,11 +209,15 @@ $.widget( "heurist.importStructure", {
         .on('click', function(){
             that.panel_report.hide();
             that.panel_defs.show();
-            
+
             //refresh source
+            if(window.hWin.HEURIST4.remote){
+
             that.panel_rty_list.manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes );
             that.panel_dty_list.manageDefDetailTypes('getRecordsetFromRemote', window.hWin.HEURIST4.remote.detailtypes );
             that.panel_trm_list.manageDefTerms('getRecordsetFromRemote', window.hWin.HEURIST4.remote.terms );
+            
+            }
 
             //refresh target
             window.hWin.HEURIST4.ui.createRectypeSelect(that.select_rty_list_target[0],null,null,true);
@@ -1529,7 +1533,7 @@ $.widget( "heurist.importStructure", {
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
             {title: title, yes:'Proceed', no:'Cancel'}, 
-            {default_palette_class: 'ui-heurist-design'}
+            {default_palette_class: 'ui-heurist-design', height:350}
         );
 
         let show_warning = true;
@@ -1608,7 +1612,8 @@ $.widget( "heurist.importStructure", {
                     + msg
                 + '</div>';
 
-        let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, null, {title: 'Importing template results'}, {default_palette_class: 'ui-heurist-design', height: 800});
+        let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, null, {title: 'Importing template results'}, 
+            {default_palette_class: 'ui-heurist-design'}, height:600);
 
         $dlg.find('#handled-defs').tabs();
 

@@ -1761,7 +1761,6 @@ $mysqli->commit();
     */
     private function _importVocabulary($term_id, $domain, &$all_terms_in_vocab, $children=null, $parent_id=null, $same_level_labels=null){
 
-
         if($term_id==null){
             //loop through all this->imp_terms
 
@@ -1812,8 +1811,8 @@ $mysqli->commit();
             // Fill in missing original values
             DbsImport::_setConceptValues($term_import, [$this->source_db_reg_id, $term_id, $term_import[$idx_label]], [$idx_ccode, $idx_origin_dbid, $idx_origin_id, $idx_origin_name]);
 
-            //find term by concept code among local terms
-            $new_term_id = $this->targetTerms->findTermByConceptCode($term_import[$idx_ccode], $domain);
+            //find term by concept code among local terms in both domain
+            $new_term_id = $this->targetTerms->findTermByConceptCode($term_import[$idx_ccode]);
 
             if($new_term_id){
                 //this term aready exists in target - add it as reference to this vocabulary
