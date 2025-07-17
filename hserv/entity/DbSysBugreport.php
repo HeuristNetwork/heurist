@@ -71,8 +71,8 @@ class DbSysBugreport extends DbEntityBase
      * @param array|null $data Optional data to initialize the entity with.
      */
     public function __construct( $system, $data=null ) {
-       parent::__construct( $system, $data );
-       $this->requireAdminRights = false;
+        parent::__construct( $system, $data );
+        $this->requireAdminRights = false;
     }
 
     /**
@@ -193,13 +193,14 @@ class DbSysBugreport extends DbEntityBase
 
         $toEmailAddress = HEURIST_MAIL_TO_BUG;
 
-        if(!(isset($toEmailAddress) && $toEmailAddress)){
+        if(empty($toEmailAddress)){
              $this->system->addError(HEURIST_SYSTEM_CONFIG,
                     'The owner of this instance of Heurist has not defined either the info nor system emails');
              return false;
         }
 
-        $sMessage = '';
+        $toAddresses = ['to' => [$toEmailAddress]];
+        $reportDetails = [];
 
         $new_record = [
             'ID' => 0,// New record
@@ -213,38 +214,33 @@ class DbSysBugreport extends DbEntityBase
         $report_title = htmlspecialchars($record['bug_Title']);
         $bug_title = "Bug report or feature request: $report_title";
         $new_record['details']['1'] = $report_title;
+        $reportDetails['1'] = ['Title' => $report_title];
 
         //keep new line
         $bug_descr = htmlspecialchars($record['bug_Description']);
         if(!empty($bug_descr)){
 
-            $bug_descr = '<p>' . str_replace("\n",'<br>', $bug_descr) . '</p>';
+            $bug_descr = str_replace("\n",'<br>', $bug_descr);
 
-            $new_record['details']['3'] = $bug_descr;
-            $sMessage = $bug_descr;
+            $new_record['details']['3'] = "<p>$bug_descr</p>";
+            $reportDetails['3'] = ['Bug description' => $bug_descr];
         }
-
-        //add current system information into message
-        $ext_info = [];
-        array_push($ext_info, "    Browser information: ".htmlspecialchars($_SERVER['HTTP_USER_AGENT']));
-
-        //add current heurist information into message
-        array_push($ext_info, "   Heurist url: ".HEURIST_BASE_URL.'?db='.HEURIST_DBNAME);
-        array_push($ext_info, "   Heurist version: ".HEURIST_VERSION);
-        array_push($ext_info, "   Heurist dbversion: ".getDbVersion($mysqli));
 
         //extra information
         $new_record['details']['960'] = array_key_exists('bug_Type', $record) ? $record['bug_Type'] : [6986];
+        $reportDetails['960'] = ['Type' => $new_record['details']['960']];
 
         $new_record['details']['958'] = array_key_exists('bug_Location', $record) ? $record['bug_Location'] : [7105];
+        $reportDetails['958'] = ['Location' => $new_record['details']['958']];
 
         $url = @$record['bug_URL'];
         $cur_url = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME;
         if(!empty($url)){
-            array_push($ext_info, "   Provided url: $url   Base url: $cur_url");
-            $new_record['details']['993'] = [$url,$cur_url];
+            $new_record['details']['993'] = [$url, $cur_url];
+            $reportDetails['993'] = ['URL' => [$url, $cur_url]];
         }else{
             $new_record['details']['993'] = $cur_url;
+            $reportDetails['993'] = ['URL' => $cur_url];
         }
 
         $user_info = $this->system->getCurrentUser();
@@ -252,13 +248,12 @@ class DbSysBugreport extends DbEntityBase
 
             $user = user_getByField($mysqli, 'ugr_ID', $user_info['ugr_ID']);
 
-            array_push($ext_info, "   Heurist user: ".@$user['ugr_Name'].' ('.@$user['ugr_eMail'].')');
-
             $new_record['details']['955'] = "{$user_info['ugr_FullName']} [{$user['ugr_Organisation']}]";
             $new_record['details']['956'] = $user['ugr_eMail'];
-        }
 
-        $ext_info = '<p>'.implode('<br>',$ext_info).'</p>';
+            $reportDetails['955'] = ["User's name" => $user['ugr_Name']];
+            $reportDetails['956'] = ["User's email" => $user['ugr_eMail']];
+        }
 
         $filename = null;
         $attachment_temp_name = @$record['bug_Image'];
@@ -270,6 +265,7 @@ class DbSysBugreport extends DbEntityBase
 
             $filename = [];
             $new_record['details']['38'] = [];
+            $reportDetails['38'] = ['Image URLs' => []];
             foreach ($attachment_temp_name as $file) {
 
                 // replace encoded space, brackets and remove extension
@@ -283,7 +279,9 @@ class DbSysBugreport extends DbEntityBase
 
                 $filename[] = $info->getPathname();
 
-                $new_record['details']['38'][] = $this->system->getSysUrl(DIR_ENTITY) . "{$this->config['entityName']}/{$info->getFilename()}";
+                $image = $this->system->getSysUrl(DIR_ENTITY) . "{$this->config['entityName']}/{$info->getFilename()}";
+                $new_record['details']['38'][] = $image;
+                $reportDetails['38']['Image URLs'][] = $image;
             }
         }
 
@@ -325,10 +323,13 @@ class DbSysBugreport extends DbEntityBase
                 $bug_title = "Heurist tracker #$rec_ID: {$record['bug_Title']}";
                 $report_link = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$rec_ID";
                 $report_edit = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/edit/$rec_ID";
-                $sMessage .= "<p>Link: $report_link</p>";
+
+                $reportDetails['report'] = $report_link;
 
                 $user_name = is_array($user_info) ? $user_info['ugr_FullName'] : 'None found';
                 $user_email = is_array($user_info) ? $user_info['ugr_eMail'] : 'None found';
+
+                $toAddresses = is_array($user_info) ? ['to' => [$user_email, HEURIST_MAIL_TO_BUG]] : $toAddresses;
 
                 $res = str_replace(['__LINK__', '__DESC__','__NAME__','__EMAIL__','__DBLINK__','__DB_JOBTRAK__','__EDIT__'],
                     [$report_link, $record['details']['3'], $user_name, $user_email, $cur_url, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE,$report_edit],
@@ -340,20 +341,16 @@ class DbSysBugreport extends DbEntityBase
             }
         }
 
-        $sMessage .= $ext_info;
+        if(!$email_already_sent){
+            $email_already_sent = $this->sendBackupReport($toAddresses, $bug_title, $reportDetails, $filename);
+            $res = $res ?: 'Your bug report has been sent to the Heurist team.';
+        }
 
         if($res && $email_already_sent){
             return [$res];
-        }elseif(!$email_already_sent && sendPHPMailer(null, 'Bug reporter', $toEmailAddress,
-                $bug_title,
-                $sMessage, //since 02 Dec 2021 we sent human readable message
-                $filename, true)){
-
-            $message = $res ?: "Your bug report has been sent to the Heurist team.";
-            return $res === false ? false : [$message];
         }else{
 
-            $error_msg = 'An unknown error has prevented Heurist from create the bug report.<br>Please re-try in a few minutes, however if the issue persists please ' . CONTACT_HEURIST_TEAM . ' directly.';
+            $error_msg = 'An unknown error has prevented Heurist from create the bug report.<br>If you do not recieve an email confirming the bug report, please re-try in a few minutes.<br>However, if the issue persists please ' . CONTACT_HEURIST_TEAM . ' directly.';
             $email_already_sent || $this->system->addError(HEURIST_UNKNOWN_ERROR, $error_msg);
             return false;
         }
@@ -473,10 +470,176 @@ class DbSysBugreport extends DbEntityBase
         return ['status' => HEURIST_OK, 'data' => ['recID' => $res, 'email_sent' => $sent_email]];
     }
 
-    //
-    // this is response to emailForm widget
-    // it sends email to owner of database or to email specified in website_id record
-    //
+    /**
+     * Sends a backup bug report email in case the main server cannot be reached, or couldn't send an email
+     *
+     * If the main server is unavailable the email is sent to the Heurist team only, and includes:
+     *  - A submittable HTML form made from the user's report
+     *  - Submitting the form will attempt the normal process, ending with a confirmation email to the reporter
+     *
+     * If the report was made but the usual confirmation email wasn't sent, then the Heurist team and reporter will recieve a simple report summary
+     *
+     * @param array|string $toAddresses - 'to' addresses for email
+     * @param string $emailTitle - Email title, dependant on whether the report was generated
+     * @param array $details - Report details, to be displayed
+     * @param array|null $files - screenshots + attachments
+     * @return bool whether the email was successfully sent
+     */
+    private function sendBackupReport($toAddresses, $emailTitle, $details, $files = null){
+
+        if(empty($toAddresses) || empty($emailTitle) || empty($details)){
+            return false;
+        }
+        if(empty($files)){
+            $files = null;
+        }
+
+        $form = '';
+        $reportLink = null;
+
+        if(array_key_exists('report', $details)){
+            $reportLink = $details['report'];
+            unset($details['report']);
+        }
+
+        // [field ID => [field name => [ field values ]], ...]
+        foreach($details as $dtyID => $values){
+
+            $fieldName = array_keys($values)[0];
+            $fieldValues = array_values($values)[0];
+            $fieldValues = is_array($fieldValues) ? $fieldValues : [$fieldValues];
+
+            if(empty($value)){
+                continue;
+            }
+
+            $form .= <<<ROW
+                <div class="row">
+                    <div class="fieldName">{$fieldName}</div>
+                    <div class="value">
+            ROW;
+            $fieldID = "new_record[details][{$dtyID}]" . (count($fieldValues) > 1 ? '[]' : '');
+            foreach($fieldValues as $value){
+
+                $inputType = '';
+                if(strpos($value, '<br>') !== false){
+                    // For blocktext values, place it within a div (textarea was too messy)
+                    $processedValue = str_replace('"', '&quot;', $value);
+                    $inputType = <<<FLD
+                        <div>{$value}</div>
+                        <input name="{$fieldID}" type="hidden" readonly="readonly" value="{$processedValue}" />
+                    FLD;
+                }else{
+                    $inputType = <<<FLD
+                        <input name="{$fieldID}" type="text" readonly="readonly" size="80" value="{$value}" />
+                    FLD;
+                }
+
+                $form .= <<<ROW
+                        $inputType
+                ROW;
+            }
+
+            $form .= <<<ROW
+                    </div>
+                </div>
+            ROW;
+        }
+
+        if(!empty($reportLink)){ // Report has been made, this is just to inform
+            $form = <<<HEAD
+                <div style="font-size: 0.9em;">Your bug report has been sent to the Heurist team and can be viewed <a href="{$reportLink}">here</a>.</div>
+                <h4>Report details:</h4>
+                $form
+            HEAD;
+        }else{ // HeuristRef was unavailable, allows the team to create a new report
+
+            $script = HEURIST_MAIN_SERVER . '/heurist/hserv/controller/entityScrud.php';
+            $database = HEURIST_BUGREPORT_DATABASE;
+
+            $form = <<<FORM
+                <div style="font-size: 0.9em;">A new bug report/feature request has been made while HeuristRef is unavailable.</div>
+                <h4>Report details:</h4>
+                <form method="POST" action="{$script}" style="width: 60em;">
+                    $form
+                    <input type="hidden" name="a" value="save" />
+                    <input type="hidden" name="entity" value="sysBugreport" />
+                    <input type="hidden" name="db" value="{$database}" />
+                    <input type="hidden" name="new_record[ID]" value="0" />
+                    <input type="hidden" name="new_record[RecTypeID]" value="101" />
+                    <input type="hidden" name="new_record[NonOwnerVisibility]" value="public" />
+                    <input type="hidden" name="new_record[NonOwnerVisibilityGroups]" value="0" />
+                    <input type="hidden" name="new_record[OwnerUGrpID]" value="0" />
+                    <input type="hidden" name="fields[is_bug_report]" value="1" />
+                    <button>Create job</button> <span class='smaller'>(this will attempt to create a bug report on the Heurist Job Tracker database, please check it's available before trying)</span>
+                </form>
+            FORM;
+        }
+
+        $emailBody = <<<EMAIL
+        <html>
+            <head>
+                <style>
+                    *{
+                        font-family: Helvetica,Arial,sans-serif;
+                    }
+                    h4{
+                        margin-bottom: 0.7em;
+                    }
+                    div.row{
+                        cursor: default;
+                        border-top: 1px solid black;
+                        padding: 5px;
+                        width: 50em;
+                    }
+                    div.row:last-of-type{
+                        border-bottom: 1px solid black;
+                    }
+                    div.fieldName{
+                        display: inline-block;
+                        width: 10em;
+                        font-size: 0.9em;
+                        font-weight: bold;
+                        vertical-align: top;
+                    }
+                    div.value{
+                        display: inline-block;
+                        font-size: 0.8em;
+                    }
+                    div.textarea{
+                        padding-left: 2px;
+                    }
+                    input[type="text"]{
+                        cursor: default;
+                        border: none;
+                        cursor: default;
+                    }
+                    input[type="text"]:focus-visible{
+                        outline: none;
+                    }
+                    button{
+                        margin: 1em;
+                        padding: .4em 1em;
+                        border: 1px solid #f2f2f2;
+                        color: white;
+                        background-color: #3D9946;
+                        cursor: pointer;
+                    }
+                    span.smaller{
+                        font-size: 0.75em;
+                        font-style: italic;
+                    }
+                </style>
+            </head>
+            <body>
+                $form
+            </body>
+        </html>
+        EMAIL;
+
+        return sendPHPMailer(null, 'Bug report', $toAddresses, $emailTitle, $emailBody, $files, true);
+    }
+
     /**
      * Prepares and sends an email from a website contact form.
      *
@@ -575,9 +738,6 @@ class DbSysBugreport extends DbEntityBase
 
     }
 
-    //
-    //
-    //
     /**
      * Disables direct deletion of bug reports via this entity class.
      *
@@ -588,10 +748,6 @@ class DbSysBugreport extends DbEntityBase
         return false;
     }
 
-    //
-    // batch action for users
-    // 1) import users from another db
-    //
     /**
      * Disables batch actions for bug reports via this entity class.
      *
@@ -601,9 +757,6 @@ class DbSysBugreport extends DbEntityBase
          return false;
     }
 
-    //
-    // Add missing values that have a default value
-    //
     /**
      * Adds default values to a bug report record's details.
      *
