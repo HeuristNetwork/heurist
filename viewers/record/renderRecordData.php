@@ -447,15 +447,19 @@ if(!$system->hasAccess()){
                 var $eles = $('.cmsContent');
 
                 if($eles.length > 0){
-
+                    
                     $eles.each(function(idx, ele){
                         var $ele = $(ele);
 
+                        if(window.hWin?.HAPI4){
+                        
                         $ele.find('img').each(function(i,img){window.hWin.HEURIST4.util.restoreRelativeURL(img);});
 
                         $('<div class="detail" style="cursor:pointer;text-decoration:underline;" title="Click to view web page content in a popup">View web page content</div>').on('click', function(){
                             window.hWin.HEURIST4.msg.showElementAsDialog({'element': $ele[0], 'default_palette_class': 'ui-heurist-explore', 'title': 'Web page content', height: '75%', width: '50%'});
                         }).insertBefore($ele);
+                        
+                        }
 
                         $ele.hide().removeClass('detail').css('overflow-wrap', 'anywhere');
                     })
