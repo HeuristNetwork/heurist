@@ -1524,7 +1524,7 @@ function deleteDetailType($dtyID) {
  * @param array $dt Data for the update, expected: `['common' => [new_value_for_col1,...]]`.
  * @return int|string The `$dtyID` on success, or an error string on failure (e.g., not found, duplicate name, SQL error).
  */
-function updateDetailType($commonNames,$dtyID,$dt) {
+function updateDetailType($commonNames, $dtyID, $dt) {
 
     global $mysqli, $dtyColumnNames;
 

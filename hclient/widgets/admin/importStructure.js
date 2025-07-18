@@ -1596,10 +1596,10 @@ $.widget( "heurist.importStructure", {
             return;
         }
 
-        let msg = (!window.hWin.HEURIST4.util.isempty(response.report.rectypes) ? `<div id="rty" style="height: 650px;"><h3>Record types:</h3><br><table>${response.report.rectypes}</table><br></div>` : '')
-                + (!window.hWin.HEURIST4.util.isempty(response.report.detailtypes) ? `<div id="dty" style="height: 650px;"><h3>Base fields:</h3><br><table>${response.report.detailtypes}</table><br></div>` : '')
-                + (!window.hWin.HEURIST4.util.isempty(response.report.terms) ? `<div id="trm" style="height: 650px;"><h3>Terms:</h3><br><table>${response.report.terms}</table><br></div>` : '')
-                + (!window.hWin.HEURIST4.util.isempty(response.report.translations) ? `<div id="translation" style="height: 650px;"><h3>Translations:</h3><br><table>${response.report.translations}</table><br></div>` : '');
+        let msg = (!window.hWin.HEURIST4.util.isempty(response.report.rectypes) ? `<div id="rty" style="height: 455px;"><h3>Record types:</h3><br><table>${response.report.rectypes}</table><br></div>` : '')
+                + (!window.hWin.HEURIST4.util.isempty(response.report.detailtypes) ? `<div id="dty" style="height: 455px;"><h3>Base fields:</h3><br><table>${response.report.detailtypes}</table><br></div>` : '')
+                + (!window.hWin.HEURIST4.util.isempty(response.report.terms) ? `<div id="trm" style="height: 455px;"><h3>Terms:</h3><br><table>${response.report.terms}</table><br></div>` : '')
+                + (!window.hWin.HEURIST4.util.isempty(response.report.translations) ? `<div id="translation" style="height: 455px;"><h3>Translations:</h3><br><table>${response.report.translations}</table><br></div>` : '');
 
         msg = '<div id="handled-defs">'
                     + '<div>'
@@ -1617,6 +1617,7 @@ $.widget( "heurist.importStructure", {
             {default_palette_class: 'ui-heurist-design', height:600, dialogId:'import-result-dialog', removeOnClose:true});
 
         $dlg.find('#handled-defs').tabs();
+        $('#import-result-dialog').css({'padding':'0px','overflow':'hidden'});
 
         window.hWin.HAPI4.EntityMgr.refreshEntityData('rty,trm,dty,rst', null);
     }
