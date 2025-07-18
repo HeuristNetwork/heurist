@@ -1266,7 +1266,7 @@ class HSystemMgr {
   * @returns {void}
   */
   import_definitions(source_databaseID, definition_ids, entity_type, is_rename_target, is_conservative, callback) {
-
+      
       let request = {
           a: 'import', // Server-side action might be different, this seems like a sub-parameter for sys_structure
           databaseID: source_databaseID,

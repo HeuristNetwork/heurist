@@ -400,7 +400,7 @@ class DbsImport {
             // 3.3 Handle record type
             $rty_ids = $this->_getLocalCode('rectype', $this->source_defs, null, true);
             foreach ($rty_ids as $rty_id) {
-                $this->_findDependentRecordTypesByFieldId($rty_id);
+                $this->_findDependentRecordTypes($rty_id, 0);
             }
 
         }elseif($this->prime_defType=='term'){ // terms only
@@ -582,6 +582,8 @@ class DbsImport {
         $this->broken_terms_reason = array();
 
 // I. Add Terms (whole vocabulary)
+//$this->imp_recordtypes = [];
+        if(true){
         $stub = array();//stub for $all_terms_in_vocab
         if(! ($this->_importVocabulary(null, "enum", $stub) &&
               $this->_importVocabulary(null, "relation", $stub)) ){
@@ -599,6 +601,7 @@ class DbsImport {
             $mysqli->rollback();
             $mysqli->close();
             return false;
+        }
         }
 
         if(empty($this->imp_recordtypes) && empty($this->imp_fieldtypes)){
@@ -783,6 +786,11 @@ $columnNames = array("dtg_Name","dtg_Order","dtg_Description");
 $idx_dt_grp = $def_dts['fieldNamesToIndex']['dty_DetailTypeGroupID'];
 
 foreach ($this->imp_fieldtypes as $ftId){
+    
+    if (!array_key_exists($ftId, $def_dts)) { 
+            continue; 
+    }
+    
     $src_group = [];
     $grp_id = $def_dts[$ftId]['commonFields'][$idx_dt_grp];//get from source
     $grp_name = "";
@@ -1407,7 +1415,7 @@ $mysqli->commit();
      *                        If `$sall` is true, returns an array of all matching local IDs, or an empty array if none found.
      */
     public static function getLocalCode($defType, $database_defs, $conceptCode, $sall=false){
-        $res = array();
+        
         $defs2 = null;
 
         if($defType=='rectype' || $defType=='rt' || $defType == 'rectypes'){
@@ -1435,7 +1443,17 @@ $mysqli->commit();
             $defs2 = $database_defs['terms']['termsByDomainLookup']['relation'];
 
         }
-
+        
+        if($sall){
+            $res = array();
+            foreach ($defs as $id => $def) {
+                if(is_numeric($id)){
+                    array_push($res, $id);
+                }
+            }
+            return $res;
+        }
+        
         $local_id = 0;
 
         if(strpos($conceptCode,'-')!==false){
@@ -1470,16 +1488,11 @@ $mysqli->commit();
                     }
 
                     if($is_equal){
-                        if($sall){
-                            array_push($res, $id);
-                        }else{
                             return $id;
-                        }
                     }
-
                 }
             }
-            if($defs2){
+            if($defs2){ //for relationtypes only
                 foreach ($defs2 as $id => $def) {
                     if(is_numeric($id) && $def[$idx_ccode]==$conceptCode){
                         return $id;
@@ -1489,8 +1502,7 @@ $mysqli->commit();
 
         }
 
-        $ret = ($sall)?$res:null;
-        return $ret;
+        return null;
 
     }
 
@@ -1646,7 +1658,7 @@ $mysqli->commit();
         if($local_dtid>0){  //already exist
             $this->fields_correspondence[$field_id] = $local_dtid;
         }
-
+        
         array_push($this->imp_fieldtypes, $field_id);
 
         $res = array();
