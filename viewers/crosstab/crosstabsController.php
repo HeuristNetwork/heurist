@@ -163,7 +163,7 @@ function recordSearchDistinctPointers( $params ){
         if($pos){
             $where = substr($where,0,$pos);
         }*/
-        $where = '(select rec_ID '.$where_clause.' )';
+        $where = '(select rec_ID FROM Records TOPBIBLIO WHERE '.$where_clause.' )';
     }else{
 
         $where = '('.implode(',',$where).')';
