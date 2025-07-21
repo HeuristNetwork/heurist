@@ -25,7 +25,7 @@ onVisualizeResize */
  * Falls back to localStorage if user is not authenticated.
  * @type {object}
  */
-window.preference_settings = window.hWin.HAPI4.has_access() ? window.hWin.HAPI4.get_prefs_def('vis_struct', {}) : {};
+window.preference_settings = window.hWin && window.hWin.HAPI4 && window.hWin.HAPI4.has_access() ? window.hWin.HAPI4.get_prefs_def('vis_struct', {}) : {};
 
 /**
 * Returns the current displayed URL of the visualization page.
@@ -56,15 +56,18 @@ function getSetting(key, defvalue, split_string = '') {
         key = key.join('_');
     }
 
-    if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') === -1 && key.indexOf('scale') === -1){
+    if(window.hWin?.HAPI4 ){
 
-        value = Object.hasOwn(window.preference_settings, key) ? window.preference_settings[key] : localStorage.getItem(`${window.hWin.HAPI4.database}${key}`);
+        if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') === -1 && key.indexOf('scale') === -1){
+            
+            value = Object.hasOwn(window.preference_settings, key) ? window.preference_settings[key] : localStorage.getItem(`${window.hWin.HAPI4.database}${key}`);
 
-        if(!Object.hasOwn(window.preference_settings, key)){
-            putSetting(key, value);
+            if(!Object.hasOwn(window.preference_settings, key)){
+                putSetting(key, value);
+            }
+        }else{
+            value = localStorage.getItem(window.hWin.HAPI4.database+key);
         }
-    }else{
-        value = localStorage.getItem(window.hWin.HAPI4.database+key);
     }
 
     if(window.hWin.HEURIST4.util.isempty(value) && !window.hWin.HEURIST4.util.isnull(defvalue)){
@@ -88,6 +91,10 @@ function getSetting(key, defvalue, split_string = '') {
 * @param {*} value - The value to store.
 */
 function putSetting(key, value) {
+    
+    if(!window.hWin?.HAPI4 ){
+        return;
+    }
 
     if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') === -1 && key.indexOf('scale') === -1){
 
@@ -109,7 +116,9 @@ function putSetting(key, value) {
 * @param {string|number} key - The key of the setting to remove from localStorage.
 */
 function removeSetting(key){
-    localStorage.removeItem(window.hWin.HAPI4.database+key);
+    if(window.hWin?.HAPI4 ){
+        localStorage.removeItem(window.hWin.HAPI4.database+key);
+    }
 }
 
 /**

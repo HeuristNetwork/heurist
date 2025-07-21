@@ -1506,8 +1506,6 @@ $.widget( "heurist.importStructure", {
 
                 btn2['Yes, overwrite'] = function(){
                     $dlg2.dialog('close');
-                    $dlg.dialog('close');
-
                     that.startImport(id, type);
                 };
                 btn2['Get me out of here'] = function(){
