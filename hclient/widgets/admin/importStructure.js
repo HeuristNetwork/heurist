@@ -208,12 +208,17 @@ $.widget( "heurist.importStructure", {
         //.css({'line-height': '0.9em'})
         .on('click', function(){
             that.panel_report.hide();
-            that.panel_defs.show();
+            if(!window.hWin.HEURIST4.remote){
+                return;
+            }
             
+            that.panel_defs.show();
             //refresh source
             that.panel_rty_list.manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes );
             that.panel_dty_list.manageDefDetailTypes('getRecordsetFromRemote', window.hWin.HEURIST4.remote.detailtypes );
             that.panel_trm_list.manageDefTerms('getRecordsetFromRemote', window.hWin.HEURIST4.remote.terms );
+            
+            
 
             //refresh target
             window.hWin.HEURIST4.ui.createRectypeSelect(that.select_rty_list_target[0],null,null,true);
@@ -803,7 +808,6 @@ $.widget( "heurist.importStructure", {
                     {title:'Info',yes:'Proceed',no:'Cancel'});        
 
             }else if(action=='clone'){
-
                 if(!recURL) return;
 
                 this._selectedDB = recID;
@@ -961,7 +965,8 @@ $.widget( "heurist.importStructure", {
         let subset = null;
         if(this._cachedRecordset_dbs){
             subset = this._cachedRecordset_dbs.getSubSetByRequest(request, this.options.entity.fields);
-            this.recordList_dbs.resultList('updateResultSet', subset, request);   
+            if(this.recordList_dbs.resultList('instance'))
+                this.recordList_dbs.resultList('updateResultSet', subset, request);   
         }
         return subset;
     },
@@ -1014,12 +1019,12 @@ $.widget( "heurist.importStructure", {
 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    that.panel_report.find('#btn_close_panel_report').trigger('click');
-
                     if(type == 'all'){
                         that._processCloneResponse(response);
                         return;
                     }
+
+                    that.panel_report.find('#btn_close_panel_report').trigger('click');
 
                     let report = '';
 
@@ -1501,8 +1506,6 @@ $.widget( "heurist.importStructure", {
 
                 btn2['Yes, overwrite'] = function(){
                     $dlg2.dialog('close');
-                    $dlg.dialog('close');
-
                     that.startImport(id, type);
                 };
                 btn2['Get me out of here'] = function(){
@@ -1515,8 +1518,6 @@ $.widget( "heurist.importStructure", {
                     { default_palette_class: 'ui-heurist-design' }
                 );
             }else{
-                $dlg.dialog('close');
-
                 that.startImport(id, type);
             }
 
@@ -1529,7 +1530,7 @@ $.widget( "heurist.importStructure", {
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
             {title: title, yes:'Proceed', no:'Cancel'}, 
-            {default_palette_class: 'ui-heurist-design'}
+            {default_palette_class: 'ui-heurist-design', dialogId: 'pre-import-warning', removeOnClose:true}
         );
 
         let show_warning = true;
@@ -1584,6 +1585,8 @@ $.widget( "heurist.importStructure", {
 
     _processCloneResponse: function(response){
 
+        this.panel_report.hide();
+        
         this._selectedDB = null;
 
         if(!response.report){
@@ -1591,10 +1594,10 @@ $.widget( "heurist.importStructure", {
             return;
         }
 
-        let msg = (!window.hWin.HEURIST4.util.isempty(response.report.rectypes) ? `<div id="rty" style="height: 650px;"><h3>Record types:</h3><br><table>${response.report.rectypes}</table><br></div>` : '')
-                + (!window.hWin.HEURIST4.util.isempty(response.report.detailtypes) ? `<div id="dty" style="height: 650px;"><h3>Base fields:</h3><br><table>${response.report.detailtypes}</table><br></div>` : '')
-                + (!window.hWin.HEURIST4.util.isempty(response.report.terms) ? `<div id="trm" style="height: 650px;"><h3>Terms:</h3><br><table>${response.report.terms}</table><br></div>` : '')
-                + (!window.hWin.HEURIST4.util.isempty(response.report.translations) ? `<div id="translation" style="height: 650px;"><h3>Translations:</h3><br><table>${response.report.translations}</table><br></div>` : '');
+        let msg = (!window.hWin.HEURIST4.util.isempty(response.report.rectypes) ? `<div id="rty" style="height: 455px;"><h3>Record types:</h3><br><table>${response.report.rectypes}</table><br></div>` : '')
+                + (!window.hWin.HEURIST4.util.isempty(response.report.detailtypes) ? `<div id="dty" style="height: 455px;"><h3>Base fields:</h3><br><table>${response.report.detailtypes}</table><br></div>` : '')
+                + (!window.hWin.HEURIST4.util.isempty(response.report.terms) ? `<div id="trm" style="height: 455px;"><h3>Terms:</h3><br><table>${response.report.terms}</table><br></div>` : '')
+                + (!window.hWin.HEURIST4.util.isempty(response.report.translations) ? `<div id="translation" style="height: 455px;"><h3>Translations:</h3><br><table>${response.report.translations}</table><br></div>` : '');
 
         msg = '<div id="handled-defs">'
                     + '<div>'
@@ -1608,9 +1611,11 @@ $.widget( "heurist.importStructure", {
                     + msg
                 + '</div>';
 
-        let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, null, {title: 'Importing template results'}, {default_palette_class: 'ui-heurist-design', height: 800});
+        let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, null, {title: 'Importing template results'}, 
+            {default_palette_class: 'ui-heurist-design', height:600, dialogId:'import-result-dialog', removeOnClose:true});
 
         $dlg.find('#handled-defs').tabs();
+        $('#import-result-dialog').css({'padding':'0px','overflow':'hidden'});
 
         window.hWin.HAPI4.EntityMgr.refreshEntityData('rty,trm,dty,rst', null);
     }
