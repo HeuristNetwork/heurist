@@ -356,7 +356,9 @@ $.widget( "heurist.baseAction", {
     // close dialog
     //
     closeDialog: function(is_force){
-        if(this.options.isdialog){
+
+        if(this._as_dialog && this._as_dialog.length > 0 && this._as_dialog.dialog('instance') !== undefined){
+
             if(is_force===true){
                 this._as_dialog.dialog('option','beforeClose',null);
             }

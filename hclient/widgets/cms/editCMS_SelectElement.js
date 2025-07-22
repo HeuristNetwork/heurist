@@ -150,8 +150,9 @@ function editCMS_SelectElement( callback ){
         buttons, window.hWin.HR('Insert component into web page'), 
         {  container:'cms-add-widget-popup',
             default_palette_class: 'ui-heurist-publish',
+            resizable: true,
             width: 680,
-            height: 724,
+            height: window.hWin.HEURIST4.msg._setDialogDimension({height:'90%'}, 'height'),
             close: function(){
                 $dlg.dialog('destroy');       
                 $dlg.remove();
@@ -205,6 +206,7 @@ function editCMS_SelectElement( callback ){
                 sel.val('group').trigger('change');
                 selected_element = 'group';
 
+                $dlg.css({padding:'0px 2em', overflow:'auto'});
             }
     });
 

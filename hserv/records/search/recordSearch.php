@@ -529,7 +529,7 @@ function recordSearchFacets($system, $params){
         }
         
         $recIDs = null;
-        if(@$params['q']['ids']){
+        if(is_array($params['q']) && array_key_exists('ids',$params['q'])){
             $recIDs = $params['q']['ids'];
         }
 
