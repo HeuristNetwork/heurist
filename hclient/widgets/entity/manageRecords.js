@@ -5253,7 +5253,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
      * This method programmatically checks or unchecks the "Optional fields" checkbox
      * and triggers its change event to apply the visibility change.
      */
-    showOptionalFields: function(isShow){ // Note: Original name `showOptionalFieds` had a typo.
+    showOptionalFields: function(isShow){
         this.element.find('.chb_opt_fields').prop('checked', isShow).trigger('change');
     },
     

@@ -1616,7 +1616,7 @@ console.log('onEditFormChange @todo check buttons!!!');
                     },
                     onInitEditForm:function(){
                         if(that2._show_optional){
-                            that.manageRecords('showOptionalFieds', true);    
+                            that.manageRecords('showOptionalFields', true);    
                         }
                         if(that2._open_formlet_for_recID>0){
                             that2.editField( that2._open_formlet_for_recID );
@@ -1631,7 +1631,7 @@ console.log('onEditFormChange @todo check buttons!!!');
                 if(this.options.external_preview){
                     this.previewEditor.manageRecords('option','onInitEditForm',function(){
                             if(that2._show_optional){
-                                that.manageRecords('showOptionalFieds', true);    
+                                that.manageRecords('showOptionalFields', true);    
                             }
                             if(that2._open_formlet_for_recID>0){
                                 
