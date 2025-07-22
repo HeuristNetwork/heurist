@@ -311,7 +311,7 @@ $.widget("heurist.baseConfig", {
     //
     closeDialog: function(is_force){
 
-        if(!this.options.isdialog){
+        if(!this.options.isdialog || this._as_dialog.length === 0 || this._as_dialog.dialog('instance') === undefined){
             return;
         }
 
