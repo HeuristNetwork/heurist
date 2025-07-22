@@ -909,12 +909,12 @@ $.widget( "heurist.thematicMapping", $.heurist.recordAction, {
         let vocab_id = $Db.dty(key, 'dty_JsonTermIDTree');
 
         let ele = $('<div style="padding:5px" class="field-range">'
-            +'<span class="ui-icon ui-icon-circle-b-close" style="margin:2px 0 0 12px;cursor:pointer"/>'
+            +'<span class="ui-icon ui-icon-circle-b-close" style="margin:2px 0 0 12px;cursor:pointer"></span>'
             + ((dty_Type=='enum')
-            ? '<select class="val1 text ui-widget-content ui-corner-all" style="width:100px;margin-left:5px"/>'
+            ? '<select class="val1 text ui-widget-content ui-corner-all" style="width:100px;margin-left:5px"></select>'
             : ('<input class="val1 text ui-widget-content ui-corner-all" style="width:100px;margin-left:5px"/>'
               +'<span>&nbsp;&lt;&gt;&nbsp;</span><input class="val2 text ui-widget-content ui-corner-all" style="width:100px"/>'))
-            +'<span class="field-symbol-preview" style="position:relative;top:9px;display:inline-block;width:40px;height:40px;margin:2px"/>'
+            +'<span class="field-symbol-preview" style="position:relative;top:9px;display:inline-block;width:40px;height:40px;margin:2px"></span>'
             +'<input class="field-symbol text ui-widget-content ui-corner-all" style="width:250px"/>'
             +'</div>').appendTo(this.element.find('#f_ranges'));
 
