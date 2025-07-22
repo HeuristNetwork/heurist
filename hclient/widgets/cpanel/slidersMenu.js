@@ -1831,36 +1831,40 @@ $.widget( "heurist.slidersMenu", {
     //
     //
     _refreshSubsetSign: function(){
+
+        if(!this.menues['explore']){
+            return;
+        }
+
+        let container = this.menues['explore'].find('li[data-action="menu-subset-set"]');
         
-            let container = this.menues['explore'].find('li[data-action="menu-subset-set"]');
-           
-            let ele = container.find('span.subset-info');
-            if(window.hWin.HAPI4.sysinfo.db_workset_count>0){
-                if(ele.length==0){
-                    ele = $('<span class="subset-info"><span '
+        let ele = container.find('span.subset-info');
+        if(window.hWin.HAPI4.sysinfo.db_workset_count>0){
+            if(ele.length==0){
+                ele = $('<span class="subset-info"><span '
 +'style="display:inline-block;color:red;font-size:smaller;padding-left:22px"></span>' //font-style:italic ;color:lightgray
 +'<span class="ui-icon ui-icon-arrowrefresh-1-w clear_subset" style="font-size:0.7em;color:black;" '
 +'title="'+window.hWin.HR('Click to revert to whole database')+'">'+
 '</span></span>')
-                        .appendTo(container);
-                        
-                    this._on(ele.find('span.clear_subset').css('cursor','pointer'),
-                        {click: function(e){
-                            window.hWin.HEURIST4.util.stopEvent(e);
-                            let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
-                            if(widget){
-                                widget.resultList('callResultListMenu', 'menu-subset-clear'); //call method
-                            }
-                        }});
-                
-                }
-                ele.find('span:first').html(window.hWin.HR('Current subset')
-                        +' n&nbsp;&nbsp;=&nbsp;&nbsp;'+window.hWin.HAPI4.sysinfo.db_workset_count);
-                ele.show();
-                
-            }else if(ele.length>0){
-                ele.hide();
+                    .appendTo(container);
+                    
+                this._on(ele.find('span.clear_subset').css('cursor','pointer'),
+                    {click: function(e){
+                        window.hWin.HEURIST4.util.stopEvent(e);
+                        let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
+                        if(widget){
+                            widget.resultList('callResultListMenu', 'menu-subset-clear'); //call method
+                        }
+                    }});
+            
             }
+            ele.find('span:first').html(window.hWin.HR('Current subset')
+                    +' n&nbsp;&nbsp;=&nbsp;&nbsp;'+window.hWin.HAPI4.sysinfo.db_workset_count);
+            ele.show();
+            
+        }else if(ele.length>0){
+            ele.hide();
+        }
     },
 
     //

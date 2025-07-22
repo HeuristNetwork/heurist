@@ -362,7 +362,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
                     that._menuTimeoutId = setTimeout(function() {
                         that.hideRtsMenu();
-                        that.options.rts_editor.manageDefRecStructure('highlightNode', null);
+                        if(that.options.rts_editor){
+                            that.options.rts_editor.manageDefRecStructure('highlightNode', null);
+                        }
                     }, 800);  
                 },
                 click: function(event){
@@ -603,7 +605,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }, mouseout: function(event){
                     that._menuTimeoutId = setTimeout(function() {
                         that.hideRtsMenu();
-                        that.options.rts_editor.manageDefRecStructure('highlightNode', null); 
+                        if(that.options.rts_editor){
+                            that.options.rts_editor.manageDefRecStructure('highlightNode', null); 
+                        }
                     }, 800);
             }});
         }else{
@@ -5253,7 +5257,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
      * This method programmatically checks or unchecks the "Optional fields" checkbox
      * and triggers its change event to apply the visibility change.
      */
-    showOptionalFields: function(isShow){ // Note: Original name `showOptionalFieds` had a typo.
+    showOptionalFields: function(isShow){
         this.element.find('.chb_opt_fields').prop('checked', isShow).trigger('change');
     },
     

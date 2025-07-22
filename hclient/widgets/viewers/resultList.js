@@ -355,9 +355,11 @@ $.widget( "heurist.resultList", {
                                                 }
                                                 window.hWin.HAPI4.currentUser.usr_SavedSearch[that._currentSavedFilterID] = 
                                                                     response.data[that._currentSavedFilterID];
-                                                
-                                                let new_title = response.data[that._currentSavedFilterID][0];
-                                                that.setHeaderText(new_title);
+
+                                                if(window.hWin.HEURIST4.util.isArrayNotEmpty(response.data[that._currentSavedFilterID])){
+                                                    let new_title = response.data[that._currentSavedFilterID][0];
+                                                    that.setHeaderText(new_title);
+                                                }
                                             }
                                     });
                                     
