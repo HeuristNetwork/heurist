@@ -617,7 +617,7 @@ class USystem {
         self::sendDailyErrorReport();
         self::heuristVersionCheck();// Check if different local and server code versions are different
         self::updateDeeplLanguages();// Get list of allowed target languages from Deepl API
-
+        self::removePreparedParameters();// Remove potential leftover prepared parameters
     }
 
     /**
@@ -767,6 +767,43 @@ class USystem {
     }
 
     /**
+     * Clear temporary perpared parameters from DB scratch directory
+     *
+     * @return void
+     */
+    private static function removePreparedParameters(){
+
+        if(defined('HEURIST_SCRATCH_DIR')){
+            return;
+        }
+
+        $files = scandir(HEURIST_SCRATCH_DIR);
+        $yesterday = strtotime('-1 day');
+
+        foreach($files as $filename){
+
+            $file = HEURIST_SCRATCH_DIR.$filename;
+            if(empty($filename) || $filename === '.' || $filename === '..' || $filename === 'index' || is_dir($file)){
+                continue;
+            }
+
+            [$name, $ext] = explode('.', $filename);
+
+            if($ext !== 'json'){
+                continue;
+            }
+
+            $date = explode('_', $name)[1];
+
+            if(!is_numeric($date) || intval($date) > $yesterday){
+                continue;
+            }
+
+            fileDelete($file);
+        }
+    }
+
+    /**
      * Gets the latest Heurist code version from the main server and compares it with the local version.
      * Caches the fetched server version for 24 hours in a file (`lastAdviceSent.ini`) to reduce server requests.
      * Distinguishes between alpha and stable release channels.
@@ -847,6 +884,13 @@ class USystem {
         return $version_last_check;
     }
 
+    /**
+     * Check for a specific version Heurist on the current server
+     *
+     * @param bool $checkForAlpha Whether to only check for an alpha version
+     * @param int|string $version The specific version looking for
+     * @return string URL to version, or empty if not found/available
+     */
     public static function checkForVersion($checkForAlpha = false, $version = null){
 
         $response = '';
@@ -906,7 +950,7 @@ class USystem {
 
         return $response;
     }
-    
+
     /**
      * Calculates the difference between two `getrusage` arrays for a specific index (e.g., 'utime' for user time).
      * Primarily used for benchmarking or profiling code execution time.

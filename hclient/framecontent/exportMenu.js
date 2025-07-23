@@ -28,6 +28,10 @@ function hexportMenu( container ) {
     const _version   = "0.4";
     /** @type {?object} dialog_options - Options to be passed to dialogs, can be set externally. */
     let dialog_options=null;
+    /** @type {int} preparedSessionID - Prepared output parameters ID */
+    let preparedSessionID = 0;
+    /** @type {bool} skipFields - Skip including additional fields */
+    let skipFields = false;
 
     /**
      * Initializes the export menu. Currently, it directly calls `_initMenu`.
@@ -65,6 +69,8 @@ function hexportMenu( container ) {
                 $('#divWarnAboutReg').show();    
             }
         }
+
+        skipFields = window.hWin.HEURIST4.util.getUrlParameter('skipFields', location.search) == 1;
 
         let outputs = window.hWin.HEURIST4.util.getUrlParameter('output', location.search);
         if(outputs && outputs != 'all'){
@@ -326,7 +332,11 @@ function hexportMenu( container ) {
             
         }else if(action == "menu-export-gephi"){ 
 
-            _popupFields({format:'gephi', save_as_file:save_as_file});
+            if(skipFields){
+                _exportRecords({format:'gephi', save_as_file:save_as_file});
+            }else{
+                _popupFields({format:'gephi', save_as_file:save_as_file});
+            }
 
         }else if(action == "menu-export-iiif"){
             _exportRecords({format:'iiif', save_as_file:save_as_file});
@@ -360,10 +370,10 @@ function hexportMenu( container ) {
      * @param {string} [opts.linksMode] - Controls how linked records are handled ('direct', 'direct_links', 'none', 'all'). Set via dialog.
      * @param {boolean} [opts.questionResolved] - Internal flag to track if the pointer-following dialog has been shown.
      * @param {boolean} [opts.showHumanReadableNames] - (For HML) If true, includes human-readable names.
-     * @param {string} [opts.fields] - (For GEPHI) Comma-separated string of dty_IDs for additional fields to export.
+     * @param {string} [opts.columns] - (For GEPHI) Comma-separated string of dty_IDs for additional fields to export.
      * @returns {boolean|void} False if there's an issue preventing export, otherwise void as it opens a new window/tab.
      */
-    function _exportRecords(opts){ // isAll = resultset, false = current selection only
+    async function _exportRecords(opts){ // isAll = resultset, false = current selection only
 
         if(opts.format=='rdf' && !(window.hWin.HAPI4.sysinfo['db_registeredid']>0) ){
 
@@ -376,6 +386,7 @@ function hexportMenu( container ) {
     
         let q = "",
         layoutString,rtFilter,relFilter,ptrFilter;
+        const parameterLimit = 5000;
         
         let isEntireDb = false;
         
@@ -387,17 +398,10 @@ function hexportMenu( container ) {
             if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
                 
                 q = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
-                
-                /*
-                q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
-                if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.current_query_request.rules)){
-                    q = q + '&rules=' + encodeURIComponent(window.hWin.HEURIST4.current_query_request.rules);
-                }
-                */
-                        
+
                 isEntireDb = (window.hWin.HAPI4.currentRecordset && 
                     window.hWin.HAPI4.currentRecordset.length()==window.hWin.HAPI4.sysinfo.db_total_records);
-                    
+
             }
 
         }else{    //selected only
@@ -406,22 +410,25 @@ function hexportMenu( container ) {
                 window.hWin.HEURIST4.msg.showMsgDlg("Please select at least one record to export");
                 return false;
             }
+
             q = "?w=all&q=ids:"+this._selectionRecordIDs.join(",");
 
         }
 
-        if(q!=''){
-            
-            let script; 
-            let params = '';
-            const showOptionsDialog = true;
-            if(showOptionsDialog){
+        if(window.hWin.HEURIST4.util.isempty(q)){
+            return;
+        }
 
-                if(isEntireDb){
-                    params =  'depth=0&linkmode=none';
-                }else {
-                    if(opts.format!='iiif' && opts.questionResolved!==true){
-                        let $expdlg = window.hWin.HEURIST4.msg.showMsgDlg(
+        let script; 
+        let params = '';
+        const showOptionsDialog = true;
+        if(showOptionsDialog){
+
+            if(isEntireDb){
+                params =  'depth=0&linkmode=none';
+            }else {
+                if(opts.format!='iiif' && opts.questionResolved!==true){
+                    let $expdlg = window.hWin.HEURIST4.msg.showMsgDlg(
 '<p>The records you are exporting may contain pointers to other records which are not in your current results set. These records may additionally point to other records.</p>'                
 //+'<p>Heurist follows the chain of related records, which will be included in the XML or JSON output. The total number of records exported will therefore exceed the results count indicated.</p>'
 //+'<p>To disable this feature and export current result only uncheck "Follow pointers"</p>'
@@ -430,126 +437,140 @@ function hexportMenu( container ) {
 +'<br><br><label><input type="radio" name="links" value="none" style="float:left;margin-right:8px;"/>Don\'t follow pointers or relationship markers (you will lose any data which is referenced by pointer fields in the exported records)</label>'
 +'<br><br><label><input type="radio" name="links" value="all" style="float:left;margin-right:8px;"/>Follow ALL connections including reverse pointers" (warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</label></p>'
 +(opts.format=='hml'?'<p><input type="checkbox" name="human_readable_names"/>Include human-readable names for everything '
-    +'<div class="heurist-helper3">(NOT RECOMMENDED except for small subset troubleshooting.If checked this will result in a VERY large file and VERY long export time)</div>':'')
++'<div class="heurist-helper3">(NOT RECOMMENDED except for small subset troubleshooting.If checked this will result in a VERY large file and VERY long export time)</div>':'')
 +(opts.format=='rdf'?'<p>Since, RDF export is exeprimental please specify the access word: <input type="password" name="rdfpwd"/>':'')
 
-                        , function(){ 
-                            if(opts.format=='rdf' && $expdlg.find('input[name="rdfpwd"]').val()!='Tehri'){
-                                return;
-                            }
-                            
-                            let val = $expdlg.find('input[name="links"]:checked').val();
-
-                            opts.linksMode = val;
-                            opts.questionResolved=true; 
-                            
-                            opts.showHumanReadableNames = $expdlg.find('input[name="human_readable_names"]').is(':checked');
-
-                            _exportRecords( opts ); 
-                        },
-                        {
-                            yes: 'Proceed',
-                            no: 'Cancel'
-                        });
+                    , function(){ 
+                        if(opts.format=='rdf' && $expdlg.find('input[name="rdfpwd"]').val()!='Tehri'){
+                            return;
+                        }
                         
-                        return;
-                    }
-                    params =  'depth=all';
-                }
-                
-            }
-            /*
-            else{
-                if ((opts.format === 'hml' || opts.format === 'json') && !opts.confirmNotFollowPointers) {
-                    window.hWin.HEURIST4.msg.showMsgDlg(
-                        '<p><span style="color:red">WARNING:</span> by allowing the export of records without following pointers, ' +
-                        'you will lose any data which is referenced by pointer fields in the exported records. ' +
-                        'This may be acceptable for simple lists eg. of places or person names, ' +
-                        'but you need to understand the nature of the exported records to be sure that you are not ' +
-                        'losing essential data.</p>' +
-                        '<p>Exporting and importing a CSV file will give you more control on what fields are exported.</p>' +
-                        '<p>Are you sure?</p>', function(){
-                            opts.confirmNotFollowPointers = true;
-                            _exportRecords(opts);
-                        }, {
-                            yes: 'Proceed',
-                            no: 'Cancel'
-                        });
+                        let val = $expdlg.find('input[name="links"]:checked').val();
+
+                        opts.linksMode = val;
+                        opts.questionResolved=true; 
+                        
+                        opts.showHumanReadableNames = $expdlg.find('input[name="human_readable_names"]').is(':checked');
+
+                        _exportRecords( opts ); 
+                    },
+                    {
+                        yes: 'Proceed',
+                        no: 'Cancel'
+                    });
+
                     return;
                 }
-                params =  'depth='+(opts.includeRelated?1:0);
+                params =  'depth=all';
             }
-            */
-            
-            params =  params + (opts.linksMode?('&linkmode='+opts.linksMode):'');  
+        }
 
-            if(opts.format=='hml'){
-                script = 'export/xml/flathml.php';                
+        params =  params + (opts.linksMode?('&linkmode='+opts.linksMode):'');
 
-                //multifile is for HuNI  
-                params =  params + (opts.multifile?'&multifile=1':'');  
-                
-                if(opts.showHumanReadableNames){
-                    params =  params + '&human_readable_names=1';    
+        let urlParams = new URLSearchParams(q);
+        if(!window.hWin.HEURIST4.util.isempty(opts.columns)){
+            urlParams.append('columns', opts.columns);
+        }
+        urlParams = [...urlParams.entries()];
+
+        let newURLParams = new URLSearchParams();
+        let toStoreParams = {};
+        let longParameters = ['q', 'columns'];
+        urlParams.forEach(async (param) => {
+
+            let key = param[0];
+            let value = param[1];
+
+            if(value.length > parameterLimit){ // presend larger parameters in chunks, to avoid a 414 error
+
+                let paramChunks = Math.ceil(value.length / parameterLimit);
+                let start = 0;
+
+                for(let i = 0; i < paramChunks; i++){
+                    preparedSessionID = await _preSendParameters({[key]: value.substring(start, start + parameterLimit)});
+                    start += parameterLimit;
                 }
 
-            }else{
-                
-                script = 'hserv/controller/record_output.php';
-                
-                if(opts.format=='iiif'){
+                return;
+            }else if(!longParameters.includes(key)){ // are there other possible long parameters here?
+                newURLParams.append(key, value);
+                return;
+            }
 
-                    if(opts.save_as_file==='mirador'){
-                        //create dynamic manifest with given set of media
-                        script = 'hclient/widgets/viewers/miradorViewer.php'
-                    }else{
-                        params = 'format=iiif';
+            toStoreParams[key] = value;
+        });
+
+        if(Object.keys(toStoreParams).length > 0){
+            preparedSessionID = await _preSendParameters(toStoreParams);
+        }
+        if(newURLParams.size > 0){
+            q = (q.startsWith('?') ? '' : '') + newURLParams.toString();
+        }else{
+            q = '';
+        }
+
+        if(opts.format=='hml'){
+
+            script = 'export/xml/flathml.php';                
+
+            //multifile is for HuNI  
+            params =  params + (opts.multifile?'&multifile=1':'');  
+
+            if(opts.showHumanReadableNames){
+                params =  params + '&human_readable_names=1';    
+            }
+
+        }else{
+
+            script = 'hserv/controller/record_output.php';
+
+            if(opts.format=='iiif'){
+
+                if(opts.save_as_file==='mirador'){
+                    //create dynamic manifest with given set of media
+                    script = 'hclient/widgets/viewers/miradorViewer.php'
+                }else{
+                    params = 'format=iiif';
+                }
+            }else{
+                params = params + '&format='+opts.format
+
+                if(opts.format=='gephi'){
+                    params += $('#limitGEPHI').is(':checked') ? '&limit=1000' : '';
+                }else if(opts.format=='geojson'){
+                    params = params + '&detail_mode='+$('input[name="detail_mode"]:checked').val();        
+                }else if(opts.format=='rdf'){
+                    params = params + '&vers=2&serial_format='+$('input[name="serial_format"]:checked').val();        
+                    let include_additional_info = '';
+                    include_additional_info += $('#include_definition_label').is(':checked')?'1':'0';
+                    include_additional_info += $('#include_resource_term_label').is(':checked')?'1':'0';
+                    include_additional_info += $('#include_resource_rec_title').is(':checked')?'1':'0';
+                    include_additional_info += $('#include_resource_file_info').is(':checked')?'1':'0';
+                    if(include_additional_info=='1111'){
+                        include_additional_info = '1';
+                    }
+                    if(include_additional_info!==''){
+                        params = params + '&extinfo=' + include_additional_info;
                     }
                 }else{
-                    params = params + '&format='+opts.format
-
-                    if(opts.format=='gephi'){
-                        params += $('#limitGEPHI').is(':checked') ? '&limit=1000' : '';    
-                        params += !window.hWin.HEURIST4.util.isempty(opts.fields) ? `&columns=${opts.fields}` : '';    
-                    }else if(opts.format=='geojson'){
-                        params = params + '&detail_mode='+$('input[name="detail_mode"]:checked').val();        
-                    }else if(opts.format=='rdf'){
-                        params = params + '&vers=2&serial_format='+$('input[name="serial_format"]:checked').val();        
-                        let include_additional_info = '';
-                        include_additional_info += $('#include_definition_label').is(':checked')?'1':'0';
-                        include_additional_info += $('#include_resource_term_label').is(':checked')?'1':'0';
-                        include_additional_info += $('#include_resource_rec_title').is(':checked')?'1':'0';
-                        include_additional_info += $('#include_resource_file_info').is(':checked')?'1':'0';
-                        if(include_additional_info=='1111'){
-                            include_additional_info = '1';
-                        }
-                        if(include_additional_info!==''){
-                            params = params + '&extinfo=' + include_additional_info;
-                        }
-                    }else{
-                        params = params +'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
-                    }
+                    params = params +'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
                 }
             }
-            
-            if(opts.save_as_file===true){          
-                params = params + '&file=1'; //save as file
-            }
-                
-
-            let url = window.hWin.HAPI4.baseURL + script + 
-            q + 
-            "&a=1"+
-            /*(layoutString ? "&" + layoutString : "") +
-            (selFilter ? "&" + selFilter : "") +
-            (rtFilter ? "&" + rtFilter : "") +
-            (relFilter ? "&" + relFilter : "") +
-            (ptrFilter ? "&" + ptrFilter : "") +*/
-            "&db=" + window.hWin.HAPI4.database
-            +'&'+params;
-            
-            window.open(url, '_blank');    
         }
+
+        if(opts.save_as_file===true){          
+            params = params + '&file=1'; //save as file
+        }
+
+        if(window.hWin.HEURIST4.util.isPositiveInt(preparedSessionID)){
+            params += `&preparedID=${preparedSessionID}`;
+        }
+
+        let database = `${(window.hWin.HEURIST4.util.isempty(q) ? '?' : '&')}db=${window.hWin.HAPI4.database}`;
+
+        let url = `${window.hWin.HAPI4.baseURL}${script}${q}${database}&${params}`;
+
+        window.open(url, '_blank');
 
         return false;
     }
@@ -658,16 +679,16 @@ function hexportMenu( container ) {
                 filters: { // Define which field types can be selected
                     types: [ "enum", "float", "date", "file", "geo", "freetext", "blocktext", "integer", "year", "boolean" ]
                 },
-                onselect:function(event, data){ // Callback when fields are selected
-    
+                onselect: function(event, data){ // Callback when fields are selected
+
                     if(data && data.selection){
-                        opts['fields'] = data.selection.join(); // Add selected field IDs to opts
+                        opts.columns = data.selection.join();
                     }
-    
+
                     _exportRecords(opts); // Proceed with export
                 }
             }
-    
+
             window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', dty_dialog_options);
 
             $dlg.dialog('close');
@@ -678,6 +699,19 @@ function hexportMenu( container ) {
         btns[window.hWin.HR('Cancel')] = () => { $dlg.dialog('close'); };
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Add additional fields to export'}, {default_palette_class: 'ui-heurist-publish'});
+    }
+
+    async function _preSendParameters(parameters){
+
+        return new Promise((resolve) => {
+
+            parameters['prepare'] = preparedSessionID;
+            parameters['replace'] = 2;
+
+            window.hWin.HAPI4.callserver('record_output', parameters, (response) => {
+                resolve(response.data);
+            });
+        });
     }
      
     //public members

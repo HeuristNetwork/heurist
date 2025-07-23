@@ -651,7 +651,7 @@
 
             foreach($localisationFiles as $filename){
 
-                if($filename == '.' || $filename == '..' || is_dir($filename)){
+                if($filename == '.' || $filename == '..' || is_dir($localisationDir.$filename)){
                     continue;
                 }
 

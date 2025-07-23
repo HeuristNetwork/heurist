@@ -15,6 +15,8 @@
 */
 namespace hserv\records\export;
 
+use hserv\utilities\USanitize;
+
 require_once dirname(__FILE__).'/../../../vendor/autoload.php';//for geoPHP and EasyRdf
 require_once dirname(__FILE__).'/../../utilities/geo/mapSimplify.php';
 require_once dirname(__FILE__).'/../../utilities/geo/mapCoordConverter.php';
@@ -58,7 +60,7 @@ abstract class ExportRecords {
     /** @var string Separator string, often used for JSON/CSV formatting (e.g., a comma). Initialized to empty. */
     protected $comma = '';
 
-    /** @var string|null A comma-separated string of record header fields to retrieve (e.g., 'rec_ID,rec_Title'). Null means all. */
+    /** @var array|string|null A comma-separated string of record header fields to retrieve (e.g., 'rec_ID,rec_Title'). Null means all. */
     protected $retrieve_header_fields = null;
 
     /** @var array|bool An array of detail type IDs to retrieve. True means all details, false means no details. */
@@ -352,7 +354,7 @@ abstract class ExportRecords {
      *                      - `file`: If true, forces download.
      *                      - `restapi`: If true, sets CORS headers and HTTP status codes.
      *                      - `db`: Database name, used in default filenames.
-     * @return void
+     * @return bool|void
      */
     private function _outputResult($params){
 
@@ -427,8 +429,8 @@ abstract class ExportRecords {
             //archive into zip
             $file_zip = $originalFileName.'.zip';
             $file_zip_full = tempnam($this->system->getSysDir(DIR_SCRATCH), "arc");
-            $zip = new ZipArchive();
-            if (!$zip->open($file_zip_full, ZIPARCHIVE::CREATE)) {
+            $zip = new \ZipArchive();
+            if (!$zip->open($file_zip_full, \ZIPARCHIVE::CREATE)) {
                 $this->system->addError(HEURIST_SYSTEM_CONFIG, "Cannot create zip $file_zip_full");
                 return false;
             }else{
