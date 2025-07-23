@@ -1,3 +1,18 @@
+/**
+ * @file guidedIntroTour.js
+ * @brief A simple guided tour which pops up a series of windows attached to elements of the interface. 
+ * @fileOverview Configuration of a guided tour based on https://introjs.com/ 
+ * This file specifies the element to be described and the description in the order in which they are displayed 
+ * @project Heurist academic knowledge management system
+ * @package hclient\core
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 7.0
+ */
+
 function startIntroTour() {
   // Clear previous overlays (not strictly needed for Intro.js but safe)
   const leftovers = [
@@ -12,6 +27,7 @@ function startIntroTour() {
   });
 
 
+  // Configure the content of the tour here
   introJs.tour().setOptions({
     showProgress: true,
     steps: [
@@ -35,13 +51,14 @@ function startIntroTour() {
         position: 'right'
       }
     ],
+    
     showProgress: true,
     scrollToElement: true,
     scrollTo: 'tooltip'  // or 'element'
   }).onbeforechange(function(targetElement) { // Hook before each step is shown
     
     const currentStep = this._currentStepSignal.rawVal;  
-//console.log('Before step:', this._currentStepSignal.rawVal, targetElement);
+    // May be useful for debugging: console.log('Before step:', this._currentStepSignal.rawVal, targetElement);
 
     switch (currentStep) {
       case 1:

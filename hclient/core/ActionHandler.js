@@ -28,7 +28,9 @@
  */
 class ActionHandler {
     
-    isGuiedTourLoaded = false;
+    
+    // Flags loading of a simple guided tour based on https://introjs.com/
+    isGuidedTourLoaded = false;
 
     /**
      * Initializes the ActionHandler instance.
@@ -579,14 +581,16 @@ class ActionHandler {
             case "menu-help-tour":
                 
                 
-                if(this.isGuiedTourLoaded && typeof startIntroTour === 'function'){
+                // A simple guided tour based on https://introjs.com/ which pops up a series of windows attached 
+                // to elements of the interface. Configure the tour in /documentation/guidedIntroTour.js
+                if(this.isGuidedTourLoaded && typeof startIntroTour === 'function'){
                   
                     startIntroTour()
-                    //startDriverTour();
+                    //startDriverTour(); // This is an alternative tour, better features but seems unstable
     
-                }else if(!this.isGuiedTourLoaded){
+                }else if(!this.isGuidedTourLoaded){
                     
-                    this.isGuiedTourLoaded = true;
+                    this.isGuidedTourLoaded = true;
                     let that = this;
                     $.getScript(window.hWin.HAPI4.baseURL+'documentation/guidedIntroTour.js', function(){
                             startIntroTour();
