@@ -254,15 +254,16 @@ protected function _outputRecord($record){
      */
 protected function _outputFooter(){
 
-        fwrite($this->fd, '</nodes>');
+    fwrite($this->fd, '</nodes>');
 
-        //include links
-        fwrite($this->fd, '<edges>'.file_get_contents($this->gephi_links_dest).'</edges>');
+    //include links
+    fwrite($this->fd, '<edges>'.file_get_contents($this->gephi_links_dest).'</edges>');
 
-        fwrite($this->fd, '</graph></gexf>');
+    fwrite($this->fd, '</graph></gexf>');
 
-        fclose($this->fd_links);
+    fclose($this->fd_links);
 
+    fileDelete($this->gephi_links_dest);
 }
 
 
