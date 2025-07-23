@@ -27,6 +27,8 @@
  * It offers methods for executing actions based on their ID and performing verification tasks where necessary.
  */
 class ActionHandler {
+    
+    isGuiedTourLoaded = false;
 
     /**
      * Initializes the ActionHandler instance.
@@ -573,6 +575,24 @@ class ActionHandler {
             case "menu-help-quick-tips":
                 contentURL = window.hWin.HRes('quickTips');
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Tips', {isPopupDlg:true, width:500, height:500});
+                break;
+            case "menu-help-tour":
+                
+                
+                if(this.isGuiedTourLoaded && typeof startIntroTour === 'function'){
+                  
+                    startIntroTour()
+                    //startDriverTour();
+    
+                }else if(!this.isGuiedTourLoaded){
+                    
+                    this.isGuiedTourLoaded = true;
+                    let that = this;
+                    $.getScript(window.hWin.HAPI4.baseURL+'documentation/guidedIntroTour.js', function(){
+                            startIntroTour();
+                    }); 
+                }
+                
                 break;
             case "menu-subset-set":{ //see menu Explore
                 let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');

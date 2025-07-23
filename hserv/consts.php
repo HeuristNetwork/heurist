@@ -832,7 +832,6 @@ function includeJQuery($useBootstrap=false){
 <?php
    }
 ?>
-       
         <!-- Calendar picker -->
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.plugin.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.calendars-2.1.1/js/jquery.calendars.js"></script>

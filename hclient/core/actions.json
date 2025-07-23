@@ -625,6 +625,14 @@
         "text": "Documentation"
     },
     {
+        
+        "id": "menu-help-tour",
+        "data": {
+            "logaction": "hlp_Tour"
+        },
+        "text": "Guided Tour"
+    },
+    {
         "href": "https://HeuristNetwork.org",
         "target": "_blank",
         "data": {

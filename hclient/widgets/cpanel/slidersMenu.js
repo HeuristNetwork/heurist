@@ -1330,9 +1330,7 @@ $.widget( "heurist.slidersMenu", {
     _openSectionMenu: function(e){
         
         let section = this._getSectionName(e);
-        if(section=='explore' && this._active_section==section){
-            this._onCloseSearchFaceted();
-        }
+
         this.switchContainer( section );
         
         this._collapseMainMenuPanel(true, 200);
@@ -1674,6 +1672,10 @@ $.widget( "heurist.slidersMenu", {
     //
     switchContainer: function( section, force_show ){
 
+        if(section=='explore' && this._active_section==section){
+            this._onCloseSearchFaceted();
+        }
+        
         //hide all intros
         $.each(this.introductions, function(i, item){$(item).hide();});
         

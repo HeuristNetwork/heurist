@@ -372,6 +372,16 @@ if(false && $isLocalHost){
 
 <script src="<?php echo PDIR;?>hclient/widgets/admin/repositoryConfig.js"></script>
 
+
+<!-- Driver.js
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@0.9.8/dist/driver.min.css">
+<script src="https://cdn.jsdelivr.net/npm/driver.js@0.9.8/dist/driver.min.js"></script>
+-->
+
+<!-- Intro.js JS -->
+<script src="https://cdn.jsdelivr.net/npm/intro.js@8.3.2/intro.min.js"></script>
+<link href=" https://cdn.jsdelivr.net/npm/intro.js@8.3.2/minified/introjs.min.css " rel="stylesheet">
+
 <script type="text/javascript">
 
     /**

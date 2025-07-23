@@ -207,6 +207,7 @@
 #menu-help-issues#Current issues
 #menu-help-quick-tips#Understanding Heurist
 #menu-help-online#Documentation
+#menu-help-tour#Guided Tour
 #menu-help-website#Heurist Network website
 #menu-help-online-hint#Comprehensive online documentation for the Heurist system
 #menu-help-website-hint#Heurist Network website - a source for a wide range of information, services and contacts
