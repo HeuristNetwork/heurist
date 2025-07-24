@@ -35,7 +35,7 @@
  * It provides specific mappings for search parameters and result fields relevant to ESTC Works.
  *
  * @widget heurist.lookupESTC_works
- * @extends heurist.lookupESTC
+ * @augments heurist.lookupESTC
  */
 $.widget("heurist.lookupESTC_works", $.heurist.lookupESTC, {
 

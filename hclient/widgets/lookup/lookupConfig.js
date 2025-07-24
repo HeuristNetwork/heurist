@@ -39,7 +39,7 @@
  * - Test service connectivity and view example results.
  *
  * @widget heurist.lookupConfig
- * @extends heurist.baseConfig
+ * @augments heurist.baseConfig
  */
 $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 

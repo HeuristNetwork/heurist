@@ -25,7 +25,7 @@
  * and looking up a specific GeoNames ID which returns XML (and is proxied by Heurist).
  *
  * @widget heurist.lookupGN
- * @extends heurist.lookupGeonames
+ * @augments heurist.lookupGeonames
  */
 $.widget("heurist.lookupGN", $.heurist.lookupGeonames, {
 

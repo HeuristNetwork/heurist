@@ -17,7 +17,7 @@
 /**
  * @widget heurist.searchUsrSavedSearches
  * @brief Search widget for User Saved Searches.
- * @extends $.heurist.searchEntity
+ * @augments $.heurist.searchEntity
  * @description This widget provides a user interface for searching user-saved searches (filters).
  *              It allows filtering by search name and by user group.
  *

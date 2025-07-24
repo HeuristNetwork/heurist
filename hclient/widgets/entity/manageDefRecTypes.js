@@ -22,7 +22,7 @@ we may take data from
 /**
  * @widget heurist.manageDefRecTypes
  * @brief Widget for managing Record Type definitions.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @property {?object} import_structure If provided, enables import mode, allowing selection of record types from a remote Heurist instance.
  * @property {boolean} [use_structure=false] Internal flag, true if `import_structure` is active.
  * @property {boolean} [isFrontUI=false] If true, adapts UI for front-end display, including a groups editor panel.

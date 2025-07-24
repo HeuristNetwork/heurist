@@ -17,7 +17,7 @@
 /**
  * @widget heurist.searchRecords
  * @brief Main search widget for Heurist Records.
- * @extends $.heurist.searchEntity
+ * @augments $.heurist.searchEntity
  * @description This widget provides the primary user interface for searching and adding Heurist records.
  *              It handles selection of record types, text-based search, application of predefined filters,
  *              and interaction with parent entity contexts. The UI and behavior adapt based on various options.

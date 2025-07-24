@@ -1,25 +1,36 @@
 /**
-* baseAction.js - BASE widget for popup dialogue
+* @file baseAction.js
+* @brief BASE widget for popup dialogue
 *
 * @project     Heurist academic knowledge management system
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @since       4.0
 */
 
-/*  
-* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-* Unless required by applicable law or agreed to in writing, software distributed under the License is
-* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-* See the License for the specific language governing permissions and limitations under the License.
-*/
+/**
+ * @namespace Widgets
+ */
 
+/**
+ * @class baseAction
+ * @memberof Widgets
+ * 
+ * @widget heurist.recordAction
+ * @description Base widget for popup dialogue
+ *
+ * @param {object} options - Configuration options for the widget.
+ */
 $.widget( "heurist.baseAction", {
 
-    // default options
+    /**
+     * @memberof Widgets.baseAction
+     * @instance
+     * @type {object}
+     */
     options: {
 
         actionName: '',

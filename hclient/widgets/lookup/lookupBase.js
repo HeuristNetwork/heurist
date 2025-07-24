@@ -25,7 +25,7 @@
  * Inherits from `$.heurist.recordAction`.
  *
  * @widget heurist.lookupBase
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  */
 $.widget( "heurist.lookupBase", $.heurist.recordAction, {
 

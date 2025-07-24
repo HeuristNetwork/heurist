@@ -17,7 +17,7 @@
 /**
  * @widget heurist.rectypeTitleMask
  * @brief Popup widget for managing Record Type title masks.
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description This widget provides a dialog interface for users to construct and test
  * a title mask for a specific record type. The title mask defines how record titles
  * are automatically generated based on the values of selected fields.

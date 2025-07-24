@@ -17,7 +17,7 @@
 /**
  * @widget heurist.manageDefDetailTypes
  * @brief Widget for managing Detail Type (field definition) entities.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @property {string} [default_palette_class='ui-heurist-design'] Default palette class for the widget.
  * @property {number} [newFieldForRtyID=0] If greater than 0, indicates that a new field is being created for this Record Type ID, influencing UI and behavior.
  * @property {boolean} [innerTitle=false] Whether to display an inner title.

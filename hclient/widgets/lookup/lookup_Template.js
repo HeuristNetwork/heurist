@@ -38,7 +38,7 @@
  * the example implementations with logic specific to the target API and data format.
  *
  * @widget heurist.lookup_Template
- * @extends heurist.lookupBase
+ * @augments heurist.lookupBase
  */
 $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
 

@@ -18,7 +18,7 @@
 
 /**
  * @widget heurist.profilePreferences
- * @extends $.heurist.baseAction
+ * @augments $.heurist.baseAction
  * @description Widget for managing user preferences.
  */
 $.widget( "heurist.profilePreferences", $.heurist.baseAction, {

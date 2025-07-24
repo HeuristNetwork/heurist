@@ -18,7 +18,7 @@
 
 /**
  * @widget heurist.recordTitles
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description jQuery widget to trigger the rebuilding of record titles.
  * This widget provides a simple interface to start a long operation
  * on the server (`longOperationInit.php?type=titles`) that rebuilds

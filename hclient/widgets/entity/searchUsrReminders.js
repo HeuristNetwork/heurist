@@ -17,7 +17,7 @@
 /**
  * @widget heurist.searchUsrReminders
  * @brief Search widget for User Reminders.
- * @extends $.heurist.searchEntity
+ * @augments $.heurist.searchEntity
  * @description This widget provides a user interface for searching user reminders.
  *              It allows users to filter reminders by their type (Workgroup, User, Email),
  *              search by message content, and apply various sorting criteria.

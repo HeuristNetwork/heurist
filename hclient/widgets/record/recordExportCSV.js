@@ -21,7 +21,7 @@
 
 /**
  * @widget heurist.recordExportCSV
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description jQuery widget for exporting records to CSV or other delimited text files.
  * Provides a UI for selecting fields (including from related records via a Fancytree),
  * configuring CSV format options, and setting advanced per-field options like

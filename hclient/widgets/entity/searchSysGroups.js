@@ -17,7 +17,7 @@
 /**
  * @widget heurist.searchSysGroups
  * @brief Search widget for System User Groups.
- * @extends $.heurist.searchEntity
+ * @augments $.heurist.searchEntity
  * @description This widget provides a user interface for searching system user groups (workgroups).
  *              It allows filtering by group name and user role, and can be contextualized to a specific user
  *              if `ugl_UserID` is provided.

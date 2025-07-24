@@ -15,7 +15,7 @@
 /**
  * @widget heurist.searchDefRecTypes
  * @brief Search widget for Record Types.
- * @extends $.heurist.searchEntity
+ * @augments $.heurist.searchEntity
  * @property {?number} rtg_ID The ID of the Record Type Group to filter by. If null or 'any', all groups are included.
  * @property {boolean} import_structure If true, adjusts UI for importing structures, showing/hiding relevant controls.
  * @property {boolean} simpleSearch If true, simplifies the search interface, hiding some sorting/filtering options.

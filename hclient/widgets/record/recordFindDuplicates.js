@@ -21,7 +21,7 @@
 
 /**
  * @widget heurist.recordFindDuplicates
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description jQuery widget for finding duplicate records based on selected fields and Levenshtein distance.
  * Users can select a record type and fields to compare. The widget then queries the server,
  * which uses a Levenshtein distance algorithm to find potential duplicates. Results are grouped,

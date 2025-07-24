@@ -15,7 +15,7 @@
 /**
  * @widget heurist.manageDefVocabularyGroups
  * @brief Widget for managing Vocabulary Groups.
- * @extends $.heurist.manageDefGroups
+ * @augments $.heurist.manageDefGroups
  * @property {?object} reference_vocab_manger A reference to the `manageDefTerms` widget (in vocabulary mode),
  * used to update vocabulary group associations when a vocabulary is moved to a new group.
  * @property {number} [edit_width=550] Overrides the default edit form width from the parent widget.

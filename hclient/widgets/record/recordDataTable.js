@@ -20,7 +20,7 @@
 
 /**
  * @widget heurist.recordDataTable
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description jQuery widget for configuring columns to be displayed in a DataTable for a specific record type.
  * Users can select fields from a tree view of the record type's structure (including fields from linked records)
  * and set visibility and width for these columns. Configurations can be saved and loaded using the `configEntity` widget.

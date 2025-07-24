@@ -20,7 +20,7 @@
 /**
  * @widget heurist.manageSysWorkflowRules
  * @brief Widget for managing System Workflow Rules.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @description This widget provides an interface for administrators to define and manage
  * system workflow rules. These rules automate processes based on triggers, conditions, and actions.
  * The widget behavior can vary significantly based on `edit_mode` and `select_mode`.

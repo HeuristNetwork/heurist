@@ -17,7 +17,7 @@
 /**
  * @widget heurist.manageSysUsers
  * @brief Widget for managing System User accounts.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @description This widget provides an interface for administrators and authorized users
  * to manage system user accounts. It supports listing users, creating new users,
  * editing user details (including name, email, password - though password handling might be indirect),

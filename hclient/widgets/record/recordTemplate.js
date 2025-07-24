@@ -19,7 +19,7 @@
 
 /**
  * @widget heurist.recordTemplate
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description jQuery widget for creating downloadable CSV template files (header row only) for a specific record type.
  * Users select fields from the record type's structure via a Fancytree, and the widget generates
  * a CSV header row for these fields, which can then be downloaded.

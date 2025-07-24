@@ -28,7 +28,7 @@
  * UI controls for BnF search parameters and settings, such as record dump options.
  *
  * @widget heurist.lookupBnF
- * @extends heurist.lookupBase
+ * @augments heurist.lookupBase
  */
 $.widget("heurist.lookupBnF", $.heurist.lookupBase, {
 

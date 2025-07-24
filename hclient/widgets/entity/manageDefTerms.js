@@ -17,7 +17,7 @@
  * @brief Widget for managing terms within vocabularies.
  * 
  * 
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @property {string} [default_palette_class='ui-heurist-design'] Default palette class.
  * @property {boolean} [innerTitle=false] Whether to display an inner title.
  * @property {boolean} [use_cache=true] Whether to use client-side caching for term data.

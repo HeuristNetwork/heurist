@@ -17,7 +17,7 @@
 /**
  * @widget heurist.searchRecThreadedComments
  * @brief Search widget for Threaded Comments.
- * @extends $.heurist.searchEntity
+ * @augments $.heurist.searchEntity
  * @description This widget provides a user interface for searching threaded comments.
  *              Users can search by comment text and specify sort order.
  *              It relies on options and events inherited from `$.heurist.searchEntity`.

@@ -17,7 +17,7 @@
 /**
  * @widget heurist.searchSysWorkflowRules
  * @brief Search widget for System Workflow Rules.
- * @extends $.heurist.searchEntity
+ * @augments $.heurist.searchEntity
  * @description This widget provides a user interface for searching and managing System Workflow Rules.
  *              The primary filter is by Record Type. It also provides controls for adding rules/stages
  *              and editing the associated workflow vocabulary.

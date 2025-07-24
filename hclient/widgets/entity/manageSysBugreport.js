@@ -21,7 +21,7 @@
 /**
  * @widget heurist.manageSysBugreport
  * @brief Widget for managing System Bug Reports.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @description This widget provides a specialized interface for submitting bug reports.
  * It operates in 'editonly' mode, meaning it directly presents a form for a new bug report.
  *

@@ -18,7 +18,7 @@
 /**
  * @widget heurist.manageRecUploadedFiles
  * @brief Widget for managing files uploaded to records.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @property {?number} rec_ID The ID of the record these files are associated with.
  * While not a direct option in `this.options`, it's a key contextual parameter, often passed as `options.rec_ID` for specific operations like 'editonly'.
  * @property {object} [uploader_options] Configuration options for the file uploader.

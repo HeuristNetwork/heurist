@@ -20,7 +20,7 @@
 
 /**
  * @widget heurist.recordAdd
- * @extends $.heurist.recordAccess
+ * @augments $.heurist.recordAccess
  * @description jQuery widget for adding new records.
  * This widget provides UI for selecting a record type and optionally setting
  * default ownership, access permissions, and tags for the new record.

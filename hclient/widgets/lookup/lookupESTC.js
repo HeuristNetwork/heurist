@@ -41,7 +41,7 @@
  * to handle data mapping and creation of linked entities.
  *
  * @widget heurist.lookupESTC
- * @extends heurist.lookupBase
+ * @augments heurist.lookupBase
  */
 $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
 

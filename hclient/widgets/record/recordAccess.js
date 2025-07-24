@@ -17,7 +17,7 @@
 
 /**
  * @widget heurist.recordAccess
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description jQuery widget for managing record access and ownership.
  * Provides functionality to change who owns a record and what level of access
  * (e.g., public, viewable, hidden) other users or groups have.

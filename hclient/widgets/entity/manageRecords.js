@@ -19,7 +19,7 @@
 /**
  * @widget heurist.manageRecords
  * @brief Widget for managing Heurist Record entities.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  *
  * @property {?number} rec_ID The ID of the specific record to be managed or displayed. If negative or 0, typically indicates a new record.
  * @property {?number} rty_ID The Record Type ID. Used when creating a new record to specify its type, or can be used to filter views.

@@ -17,7 +17,7 @@
 /**
  * @widget heurist.manageSysDashboard
  * @brief Widget for managing System Dashboards.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @description This widget allows users, typically administrators, to configure the system dashboard,
  * which often consists of shortcuts or quick access panels to various Heurist functions.
  * It supports both a view mode (production) and an edit mode for arranging and defining dashboard items.

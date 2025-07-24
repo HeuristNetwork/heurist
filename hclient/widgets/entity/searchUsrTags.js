@@ -17,7 +17,7 @@
 /**
  * @widget heurist.searchUsrTags
  * @brief Search widget for User Tags.
- * @extends $.heurist.searchEntity
+ * @augments $.heurist.searchEntity
  * @description This widget provides a user interface for searching user tags.
  *              It allows users to search by tag text and apply various sorting criteria.
  *              A user group filter is available, which triggers an "ongroupfilter" event

@@ -20,7 +20,7 @@
 /**
  * @widget heurist.manageRecThreadedComments
  * @brief Widget for managing threaded comments.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @property {boolean} [use_cache=false] Whether to use client-side caching. Set to false by default.
  * @property {string} [edit_mode='popup'] Editing mode. Can be 'editonly' or 'popup'.
  * @property {string} [select_mode='manager'] Selection mode. If 'editonly', this is set to 'manager'.

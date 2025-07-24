@@ -34,7 +34,7 @@
  * then a thesaurus, and optionally language and collections to narrow down their search.
  *
  * @widget heurist.lookupOpentheso
- * @extends heurist.lookupBase
+ * @augments heurist.lookupBase
  */
 $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
 

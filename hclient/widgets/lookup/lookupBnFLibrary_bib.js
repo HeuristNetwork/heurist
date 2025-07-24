@@ -43,7 +43,7 @@
  * publisher, and language data.
  *
  * @widget heurist.lookupBnFLibrary_bib
- * @extends heurist.lookupBnF
+ * @augments heurist.lookupBnF
  */
 $.widget( "heurist.lookupBnFLibrary_bib", $.heurist.lookupBnF, {
 

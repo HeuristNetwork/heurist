@@ -19,7 +19,7 @@
 
 /**
  * @widget heurist.recordAddLink
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description jQuery widget for creating links or relationships between records.
  * It supports linking a single source record to a target, or a scope of source records to a single target.
  * It can also create new relationship records.

@@ -17,7 +17,7 @@
 /**
  * @widget heurist.manageDefRecTypeGroups
  * @brief Widget for managing Record Type Groups.
- * @extends $.heurist.manageDefGroups
+ * @augments $.heurist.manageDefGroups
  * @property {?object} reference_rt_manger A reference to the `manageDefRecTypes` widget,
  * used to update record type group associations when a record type is moved to a new group.
  */

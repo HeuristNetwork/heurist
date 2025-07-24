@@ -22,7 +22,7 @@
 
 /**
  * @widget heurist.reportEditor
- * @extends $.heurist.baseAction
+ * @augments $.heurist.baseAction
  * @description
  * jQuery UI widget for editing Smarty report templates.
  * Provides an interface with a CodeMirror editor, tools for inserting

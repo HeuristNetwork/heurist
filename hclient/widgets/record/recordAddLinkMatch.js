@@ -21,7 +21,7 @@
 
 /**
  * @widget heurist.recordAddLinkMatch
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description jQuery widget for creating links between records by matching field values.
  * This widget facilitates a "foreign key" style linking mechanism. It matches values
  * from a specified text field in source records against values in a text field of

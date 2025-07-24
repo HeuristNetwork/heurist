@@ -20,7 +20,7 @@
 /**
  * @widget heurist.manageUsrReminders
  * @brief Widget for managing User Reminders.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @description This widget provides an interface for users to manage their personal reminders.
  * It can operate in 'editonly' mode to directly edit a reminder (often associated with a specific record)
  * or in a list mode to manage multiple reminders.

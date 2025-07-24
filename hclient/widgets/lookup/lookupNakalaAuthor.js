@@ -24,7 +24,7 @@
  * It allows users to search authors by name and select records for data mapping.
  *
  * @widget heurist.lookupNakalaAuthor
- * @extends heurist.lookupBase
+ * @augments heurist.lookupBase
  */
 $.widget( "heurist.lookupNakalaAuthor", $.heurist.lookupBase, {
 

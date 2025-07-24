@@ -24,7 +24,7 @@
  * It uses the `postalCodeLookupJSON` endpoint of the GeoNames API.
  *
  * @widget heurist.lookupGN_postalCode
- * @extends heurist.lookupGeonames
+ * @augments heurist.lookupGeonames
  */
 $.widget("heurist.lookupGN_postalCode", $.heurist.lookupGeonames, {
 

@@ -17,7 +17,7 @@
 /**
  * @widget heurist.searchSysDashboard
  * @brief Search widget for System Dashboards.
- * @extends $.heurist.searchEntity
+ * @augments $.heurist.searchEntity
  * @description This widget provides a user interface for searching and managing System Dashboard entries.
  *              It includes controls for adding new dashboards, reordering existing ones, and setting user
  *              preferences related to dashboard visibility.

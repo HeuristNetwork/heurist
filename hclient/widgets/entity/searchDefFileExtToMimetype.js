@@ -15,7 +15,7 @@
 /**
  * @widget heurist.searchDefFileExtToMimetype
  * @brief Search widget for File Extension to MIME Type mappings.
- * @extends $.heurist.searchEntity
+ * @augments $.heurist.searchEntity
  * @description This widget provides a search interface for finding mappings
  * between file extensions and MIME types. It allows users to search by
  * extension or by MIME type.

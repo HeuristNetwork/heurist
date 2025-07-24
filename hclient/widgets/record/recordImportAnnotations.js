@@ -20,7 +20,7 @@
 
 /**
  * @widget heurist.recordImportAnnotations
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description jQuery widget for importing annotations from registered IIIF manifests.
  * This widget provides a user interface to trigger the import process for annotations
  * associated with IIIF manifests stored in the system. It communicates with a server-side

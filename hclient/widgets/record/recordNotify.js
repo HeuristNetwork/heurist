@@ -19,7 +19,7 @@
 
 /**
  * @widget heurist.recordNotify
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description jQuery widget for sending email notifications about a set of records.
  * This widget allows a user to select a scope of records and then compose an email
  * notification to share these records with other users. It embeds and uses the

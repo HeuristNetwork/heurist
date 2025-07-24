@@ -43,7 +43,7 @@
  * for assigning keywords and classification terms to Work records.
  *
  * @widget heurist.lookupMPCE
- * @extends heurist.lookupBase
+ * @augments heurist.lookupBase
  */
 $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
 

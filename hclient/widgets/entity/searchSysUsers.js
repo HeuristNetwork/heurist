@@ -17,7 +17,7 @@
 /**
  * @widget heurist.searchSysUsers
  * @brief Search widget for System User accounts.
- * @extends $.heurist.searchEntity
+ * @augments $.heurist.searchEntity
  * @description This widget provides a user interface for searching system user accounts.
  *              It allows filtering by user name, group membership, role within a group,
  *              and active/inactive status.

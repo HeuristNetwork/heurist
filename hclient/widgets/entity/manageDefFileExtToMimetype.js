@@ -17,7 +17,7 @@
 /**
  * @widget heurist.manageDefFileExtToMimetype
  * @brief Widget for managing file extension to MIME type mappings.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @property {string} [default_palette_class='ui-heurist-admin'] Default palette class for the widget.
  * @property {number} [width=570] Default width of the widget. Minimum 420. Adjusted if select_mode is not 'manager'.
  * @property {number} [height=600] Default height of the widget.

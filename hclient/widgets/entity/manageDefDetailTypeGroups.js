@@ -17,7 +17,7 @@
 /**
  * @widget heurist.manageDefDetailTypeGroups
  * @brief Widget for managing Detail Type Groups.
- * @extends $.heurist.manageDefGroups
+ * @augments $.heurist.manageDefGroups
  * @property {?object} reference_dt_manger A reference to the manageDefDetailTypes widget, used to update detail type group associations.
  */
 $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageDefGroups, {

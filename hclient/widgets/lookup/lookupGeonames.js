@@ -30,7 +30,7 @@
  * Specific lookup types (e.g., general search, postal code search) should extend this widget.
  *
  * @widget heurist.lookupGeonames
- * @extends heurist.lookupBase
+ * @augments heurist.lookupBase
  */
 $.widget("heurist.lookupGeonames", $.heurist.lookupBase, {
 

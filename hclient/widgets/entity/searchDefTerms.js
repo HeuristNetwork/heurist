@@ -15,7 +15,7 @@
 /**
  * @widget heurist.searchDefTerms
  * @brief Search widget for Terms.
- * @extends $.heurist.searchEntity
+ * @augments $.heurist.searchEntity
  * @property {?string} filter_groups Comma-separated string of groups (domains like 'relation', 'enum') to make available for filtering. If only one is provided, the group selection UI may be hidden.
  * @property {?string} filter_group_selected The initially selected group (domain, e.g., 'relation') when the widget loads.
  */

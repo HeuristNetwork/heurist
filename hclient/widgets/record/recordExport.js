@@ -20,7 +20,7 @@
 
 /**
  * @widget heurist.recordExport
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description jQuery widget for exporting records to various formats (XML, JSON, KML, HML).
  * This widget prepares and initiates a download of record data based on the current
  * recordset and selected export format.

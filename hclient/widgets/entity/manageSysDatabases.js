@@ -17,7 +17,7 @@
 /**
  * @widget heurist.manageSysDatabases
  * @brief Widget for managing System Database registrations.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @description This widget provides an interface for administrators to view and manage
  * the list of databases registered with the Heurist instance.
  * It is primarily used for listing databases; direct editing capabilities via the

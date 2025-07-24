@@ -17,7 +17,7 @@
 /**
  * @widget heurist.manageDefGroups
  * @brief Base widget for managing generic group entities.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @property {string} [default_palette_class='ui-heurist-design'] Default palette class for the widget.
  * @property {boolean} [innerTitle=false] Whether to display an inner title within the widget.
  * @property {string} [layout_mode='short'] The layout mode for the widget.

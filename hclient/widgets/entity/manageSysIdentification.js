@@ -17,7 +17,7 @@
 /**
  * @widget heurist.manageSysIdentification
  * @brief Widget for System Identification and Access Control.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @description This widget provides an interface for administrators to configure
  * system-wide identification, authentication, and access control settings.
  * It operates in 'editonly' mode, directly loading the single system identification record for editing.

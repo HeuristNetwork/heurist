@@ -17,7 +17,7 @@
 /**
  * @widget heurist.searchRecUploadedFiles
  * @brief Search widget for Uploaded Files.
- * @extends $.heurist.searchEntity
+ * @augments $.heurist.searchEntity
  * @description This widget provides a comprehensive interface for searching and managing uploaded files
  *              associated with records. It supports filtering by file domain (local, external, tiled),
  *              MIME types, and various other attributes. It also includes action menus for file operations.

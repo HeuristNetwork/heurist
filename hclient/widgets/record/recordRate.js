@@ -19,7 +19,7 @@
 
 /**
  * @widget heurist.recordRate
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description jQuery widget for assigning a star rating to a scope of records.
  * This widget allows users to select a rating (0-5 stars) and apply it
  * to records within a specified scope (e.g., selected records). The rating

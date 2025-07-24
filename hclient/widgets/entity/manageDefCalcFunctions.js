@@ -20,7 +20,7 @@
 /**
  * @widget heurist.manageDefCalcFunctions
  * @brief A jQuery UI widget for managing Defined Calculated Functions entities.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @property {string} [default_palette_class='ui-heurist-admin'] Default palette class for the widget.
  * @property {boolean} [use_cache=false] Whether to use caching.
  * @property {string} [edit_mode='popup'] The edit mode for the widget. Can be 'editonly' or 'popup'.

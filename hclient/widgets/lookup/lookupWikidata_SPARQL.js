@@ -36,7 +36,7 @@
  * mapping result variables to Heurist fields.
  *
  * @widget heurist.lookupWikidata_SPARQL
- * @extends heurist.lookupBase
+ * @augments heurist.lookupBase
  */
 $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
 

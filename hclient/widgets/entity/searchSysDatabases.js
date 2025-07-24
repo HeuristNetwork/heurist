@@ -17,7 +17,7 @@
 /**
  * @widget heurist.searchSysDatabases
  * @brief Search widget for System Databases.
- * @extends $.heurist.searchEntity
+ * @augments $.heurist.searchEntity
  * @description This widget provides a user interface for searching system databases.
  *              Users can filter by database name, user email (associated with the database), and user role.
  *              Sorting options are also available.

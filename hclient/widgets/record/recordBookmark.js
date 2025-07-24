@@ -20,7 +20,7 @@
 
 /**
  * @widget heurist.recordBookmark
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description jQuery widget for removing bookmarks and detaching personal tags from a selection of records.
  * This widget allows users to unbookmark records based on a selected scope (e.g., selected records,
  * current search results). The action removes the bookmark entry from `usrBookmarks` and,

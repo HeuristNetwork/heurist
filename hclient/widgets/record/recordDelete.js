@@ -20,7 +20,7 @@
 
 /**
  * @widget heurist.recordDelete
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description jQuery widget for deleting records.
  * This widget manages the process of deleting a selected scope of records.
  * It provides UI confirmations, especially for potentially harmful deletions

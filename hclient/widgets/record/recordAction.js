@@ -15,30 +15,27 @@
 * @since       4.0
 */
 
-
+/**
+ * @namespace Widgets.Records
+ */
 
 /**
+ * @class recordAction
+ * @augments baseAction
+ * @memberof Widgets.Records
+ * 
  * @widget heurist.recordAction
- * @extends $.heurist.baseAction
- * @description Base jQuery widget for actions that operate on a scope of records.
+ * @description Base widget for actions that operate on a scope of records.
  * This widget provides common infrastructure for selecting a set of records (e.g., selected, current search results)
  * and displaying progress for actions performed on these records.
  *
  * @param {object} options - Configuration options for the widget.
- * @param {string} [options.default_palette_class='ui-heurist-explore'] - Default CSS class for the widget palette.
- * @param {string} [options.path='widgets/record/'] - Path to the widget's HTML and other resources.
- * @param {?Array<string>|string} options.scope_types - Defines the available scope selection options.
- *        Can be an array of strings (e.g., ['all', 'selected', 'current', 'rectype_id']) or 'none'.
- *        If null or empty, defaults may include 'all', 'selected', 'current', and available record types.
- * @param {string} [options.init_scope=''] - The initially selected scope.
- * @param {?HRecordSet} options.currentRecordset - The current recordset object to operate on. If not provided, it may use the global current recordset.
- * @param {string} [options.htmlContent='recordAction.html'] - The HTML file to load for the widget's content.
  */
 $.widget( "heurist.recordAction", $.heurist.baseAction, {
 
     /**
-     * @namespace options
-     * @memberof heurist.recordAction
+     * @memberof Widgets.Records.recordAction
+     * @instance
      * @type {object}
      * @property {string} [default_palette_class='ui-heurist-explore'] - Default CSS class for the widget palette.
      * @property {string} [path='widgets/record/'] - Path to the widget's HTML and other resources.

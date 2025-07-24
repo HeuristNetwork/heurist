@@ -17,7 +17,7 @@
 /**
  * @widget heurist.manageSysGroups
  * @brief Widget for managing System User Groups.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @description This widget provides an interface for administrators and group members
  * to manage system user groups (workgroups). It allows for viewing groups,
  * creating new groups, editing group details, and managing user membership and roles within groups.

@@ -15,7 +15,7 @@
 /**
  * @widget heurist.searchDefDetailTypes
  * @brief Search widget for Detail Types (Fields).
- * @extends $.heurist.searchEntity
+ * @augments $.heurist.searchEntity
  * @description This widget provides a search interface for finding Detail Types (field definitions).
  * It allows filtering by name, ID, concept code, data type, and group. It also supports
  * different display and interaction modes based on context (e.g., general management, import structure).

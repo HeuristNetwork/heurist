@@ -21,7 +21,7 @@
 /**
  * @widget heurist.selectFolders
  * @alias selectFolders
- * @extends $.heurist.selectMultiValues
+ * @augments $.heurist.selectMultiValues
  * @description A jQuery UI widget for selecting one or more folders from a hierarchical tree,
  * typically displayed using the Fancytree plugin. It extends {@link $.heurist.selectMultiValues}
  * to provide folder-specific interactions, including optional folder creation and deletion.

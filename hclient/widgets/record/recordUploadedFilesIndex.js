@@ -20,7 +20,7 @@
 
 /**
  * @widget heurist.recordUploadedFilesIndex
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description jQuery widget for indexing uploaded files from server media folders
  * into the `recUploadedFiles` entity. Users can select media folders, and the widget
  * initiates a batch process to register files found in those folders.

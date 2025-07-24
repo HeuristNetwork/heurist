@@ -15,7 +15,7 @@
 /**
  * @widget heurist.searchDefCalcFunctions
  * @brief Search widget for Defined Calculated Functions.
- * @extends $.heurist.searchEntity
+ * @augments $.heurist.searchEntity
  * @description This widget provides a search interface specifically for finding
  * Defined Calculated Functions. It typically includes a text input for searching by name
  * and an "Add New Formula" button.

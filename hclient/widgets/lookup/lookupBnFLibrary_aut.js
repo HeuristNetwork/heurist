@@ -37,7 +37,7 @@
  * complex SRU queries based on user input and processes the XML results.
  *
  * @widget heurist.lookupBnFLibrary_aut
- * @extends heurist.lookupBnF
+ * @augments heurist.lookupBnF
  */
 $.widget( "heurist.lookupBnFLibrary_aut", $.heurist.lookupBnF, {
 

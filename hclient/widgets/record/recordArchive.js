@@ -18,7 +18,7 @@
 
 /**
  * @widget heurist.recordArchive
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description jQuery widget for looking up and restoring records from the system archive.
  * This widget provides a UI to search the `sysArchive` entity based on criteria like
  * record ID, user, date, and content type (deleted/updated). Search results are displayed,

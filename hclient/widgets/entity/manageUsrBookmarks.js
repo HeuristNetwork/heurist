@@ -20,7 +20,7 @@
 /**
  * @widget heurist.manageUsrBookmarks
  * @brief Widget for managing User Bookmarks.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @description This widget provides an interface for users to manage their personal bookmarks.
  * It typically operates in 'editonly' mode to directly edit a bookmark associated with a specific record.
  *

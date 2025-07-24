@@ -17,7 +17,7 @@
 /**
  * @widget heurist.manageUsrTags
  * @brief Widget for managing User Tags.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @description This widget provides an interface for users to manage their personal and group tags.
  * It supports different display modes ('compact', 'accordions') and allows for creating,
  * selecting, renaming, and deleting tags.

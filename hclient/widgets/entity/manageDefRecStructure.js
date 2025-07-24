@@ -17,7 +17,7 @@
 /**
  * @widget heurist.manageDefRecStructure
  * @brief Widget for managing the structure of Record Types.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @property {number} rty_ID The ID of the Record Type whose structure is being managed. Defaults to 4 if not provided.
  * @property {number} [rec_ID_sample=-1] The ID of a sample record to load in the preview.
  * @property {?jQuery} external_preview A jQuery element to use as an external preview area. If provided, influences layout.

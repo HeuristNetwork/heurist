@@ -19,7 +19,7 @@
 
 /**
  * @widget heurist.recordTag
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description jQuery widget for assigning or removing tags from records, or selecting tags.
  * This widget provides UI for users to select tags (using an embedded `usrTags` dialog)
  * and then either assign these tags to a scope of records, remove them, or simply

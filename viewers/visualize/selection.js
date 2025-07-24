@@ -19,21 +19,17 @@
    getSetting, zoomBehaviour */
 
 /**
- * @name NodeSelection
- * @namespace
  * @description Functions and variables related to node selection in the visualization.
  */
 
 /**
  * Color used to highlight selected nodes.
  * @type {string}
- * @memberof NodeSelection
  */
 window.selectionColor = "#bee4f8";
 /**
  * Current selection mode ('single' or 'multi').
  * @type {string}
- * @memberof NodeSelection
  */
 window.selectionMode = 'single';
 

@@ -37,7 +37,7 @@ let mapDict = {}
  * It defines specific mappings for data transformation during the import process.
  *
  * @widget heurist.lookupLRC18C
- * @extends heurist.lookupESTC
+ * @augments heurist.lookupESTC
  */
 $.widget("heurist.lookupLRC18C", $.heurist.lookupESTC, {
 

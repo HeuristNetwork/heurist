@@ -17,7 +17,7 @@
 /**
  * @widget heurist.rectypeTemplate
  * @brief Popup widget for downloading Record Type templates.
- * @extends $.heurist.baseAction
+ * @augments $.heurist.baseAction
  * @description This widget provides a dialog interface for users to select one or more
  * record types and choose a format (XML or JSON) to download their definitions as a template file.
  *

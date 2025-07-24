@@ -17,7 +17,7 @@
 /**
  * @widget heurist.manageUsrSavedSearches
  * @brief Widget for managing User Saved Searches.
- * @extends $.heurist.manageEntity
+ * @augments $.heurist.manageEntity
  * @description This widget allows users to manage their saved search configurations.
  * It supports listing saved searches, creating new ones (implicitly by saving a current search elsewhere),
  * editing their names and notes, and deleting them.

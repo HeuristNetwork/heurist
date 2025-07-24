@@ -54,7 +54,7 @@ It creates thematic map in the following format
 /**
  * @widget heurist.thematicMapping
  * @brief Popup widget for configuring thematic mapping.
- * @extends $.heurist.recordAction
+ * @augments $.heurist.recordAction
  * @description This widget provides a dialog for users to define thematic maps.
  * Users can create multiple thematic map configurations, each with a title, base symbology,
  * and a set of fields. For each field, ranges or categories can be defined with specific

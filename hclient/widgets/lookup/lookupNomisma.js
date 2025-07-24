@@ -37,7 +37,7 @@
  * geometries to WKT for Heurist mapping.
  *
  * @widget heurist.lookupNomisma
- * @extends heurist.lookupBase
+ * @augments heurist.lookupBase
  */
 $.widget( "heurist.lookupNomisma", $.heurist.lookupBase, {
 

@@ -35,7 +35,7 @@
  * Note: This lookup is flagged as potentially not fully functional.
  *
  * @widget heurist.lookupTLC
- * @extends heurist.lookupBase
+ * @augments heurist.lookupBase
  */
 $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
 

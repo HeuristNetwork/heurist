@@ -28,7 +28,7 @@
  * It allows users to filter by various criteria and select records for data mapping.
  *
  * @widget heurist.lookupNakala
- * @extends heurist.lookupBase
+ * @augments heurist.lookupBase
  */
 $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
 
