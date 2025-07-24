@@ -1,0 +1,12 @@
+{
+    "source": {
+      "include": ["hclient","viewers"],
+      "includePattern": ".+\\.js$",
+      "excludePattern": "(^|\\/|\\\\)_"
+    },
+    "opts": {
+      "destination": "documentation/jsdocs",
+      "recurse": true,
+      "template": "default"
+    }
+}
