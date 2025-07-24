@@ -323,6 +323,10 @@ $.widget( "heurist.selectFile", {
         }
     },
     
+    open: function(){
+        this._init();  
+    },
+    
     /**
      * Filters the displayed file list in the `recordList` widget based on the value
      * entered in the search input field (`.input_search`).
