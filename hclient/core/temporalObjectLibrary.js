@@ -1327,19 +1327,19 @@ window.TDate = function (strDate) {
      *              Primarily set by `TDate.parse`.
      */
     let _dateFormat = "ymd";
-    /** @private @type {string|null} */
+    /**  @type {string|null} */
     let _year = null;
-    /** @private @type {string|null} */
+    /**  @type {string|null} */
     let _month = null;
-    /** @private @type {string|null} */
+    /**  @type {string|null} */
     let _day = null;
-    /** @private @type {string|null} */
+    /**  @type {string|null} */
     let _hours = null;
-    /** @private @type {string|null} */
+    /**  @type {string|null} */
     let _minutes = null;
-    /** @private @type {string|null} */
+    /**  @type {string|null} */
     let _seconds = null;
-    /** @private @type {string|null} */
+    /**  @type {string|null} */
     let _milliseconds = null;
     /**
      * @private
@@ -2485,17 +2485,17 @@ function TDuration(strDuration) {
      */
     const _className = "TemporalDuration";
     let _origString = strDuration;
-    /** @private @type {number|null} */
+    /**  @type {number|null} */
     let _year = null;
-    /** @private @type {number|null} */
+    /**  @type {number|null} */
     let _month = null;
-    /** @private @type {number|null} */
+    /**  @type {number|null} */
     let _day = null;
-    /** @private @type {number|null} */
+    /**  @type {number|null} */
     let _hour = null;
-    /** @private @type {number|null} */
+    /**  @type {number|null} */
     let _minute = null;
-    /** @private @type {number|null} */
+    /**  @type {number|null} */
     let _second = null;
 
     /**

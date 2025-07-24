@@ -31,12 +31,10 @@
  */
 function HPublishDialog( _options )
 {
-    /** @const {string} _className - The name of this class module. */
     const _className = "PublishDialog";
-    /** @const {string} _version - The version of this class module. */
     const _version   = "0.4";
 
-    /** @type {object} options - Internal storage for the dialog's configuration and state. */
+    /* Internal storage for the dialog's configuration and state. */
     let options = {
         //container:null, // Example of a potential option, not currently used.
         mode: null, // Current operational mode: 'mapspace', 'mapquery', 'smarty', 'graph', 'websearch'.
@@ -47,9 +45,9 @@ function HPublishDialog( _options )
         url_schedule: ''    // URL for scheduling (e.g., for Smarty reports).
     };
 
-    /** @type {?jQuery} popupelement - jQuery object for the main content of the dialog, loaded from HTML. */
+    /* jQuery object for the main content of the dialog, loaded from HTML. */
     let popupelement = null;
-    /** @type {?jQuery} popupdialog - jQuery UI dialog instance. */
+    /* jQuery UI dialog instance. */
     let popupdialog = null;
     
     /**

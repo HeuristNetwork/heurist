@@ -61,7 +61,7 @@ function HRecordSearch() {
      * @private
      * @param {Object} request - The search request object, compatible with `HAPI4.RecordMgr.search`.
      *                           It should define the query, filters, sorting, etc.
-     * @param {function(HRecordSet|null): void} callback - A function to be called with the search results.
+     * @param {function(HRecordSet): void} callback - A function to be called with the search results.
      *        Receives an `HRecordSet` instance on success, or `null` on failure or if the response indicates an error.
      * @returns {void}
      */
@@ -295,7 +295,7 @@ function HRecordSearch() {
          * Public method to perform a search and handle results with a callback.
          * Wraps `_doSearchWithCallback`.
          * @param {Object} request - The search request object.
-         * @param {function(HRecordSet|null): void} callback - Callback for search results.
+         * @param {function(HRecordSet): void} callback - Callback for search results.
          * @returns {void}
          */
         doSearchWithCallback: function(request, callback){

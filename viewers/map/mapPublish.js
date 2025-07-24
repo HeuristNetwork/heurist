@@ -61,11 +61,9 @@ if((typeof L !=='undefined') && L.Control)
      * @augments L.Control
      */
     L.Control.Publish = L.Control.extend({
-        /** Reference to the map publish handler (currently null, seems unused). */
+
         mapPublish: null,
-        /** @type {HTMLElement} The control's container element. */
         _container: null,
-        /** @type {object} Reference to the main mapping widget. */
         _mapwidget: null,
 
         /**
@@ -121,9 +119,9 @@ if((typeof L !=='undefined') && L.Control)
      * @augments L.Control
      */
     L.Control.Help = L.Control.extend({
-        /** @type {HTMLElement} The control's container element. */
+        /* The control's container element. */
         _container: null,
-        /** @type {object} Reference to the main mapping widget. */
+        /* Reference to the main mapping widget. */
         _mapwidget: null,
 
         /**

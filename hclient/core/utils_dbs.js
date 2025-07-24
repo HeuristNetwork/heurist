@@ -1508,18 +1508,18 @@ window.hWin.HEURIST4.dbs = {
      * @function rst_links
      * @memberof HEURIST4.dbs
      * @returns {Object} An object containing different views of record type links:
-     * @returns {Object<string, {all: string[], dty_ID?: string[]}>} return.direct - Direct resource links from a source rty_ID.
+     * @returns return.direct - Direct resource links from a source rty_ID.
      *          `rty_ID` (string): The source record type ID.
      *          `all` (string[]): Array of all target record type IDs linked directly.
      *          `dty_ID` (string[]): Optional, if specific detail types (fields) are involved, this maps dty_ID to target rty_IDs.
-     * @returns {Object<string, {all: string[], dty_ID?: string[]}>} return.reverse - Reverse resource links to a target rty_ID.
+     *     return.reverse - Reverse resource links to a target rty_ID.
      *          Structure similar to `direct`, but represents links pointing *to* the key rty_ID.
-     * @returns {Object<string, string[]>} return.parents - Parent-child relationships.
+     *     return.parents - Parent-child relationships.
      *          `child_rty_ID` (string): The child record type ID.
      *          `value` (string[]): Array of parent record type IDs.
-     * @returns {Object<string, {all: string[], dty_ID?: string[]}>} return.rel_direct - Direct relationship links (relmarkers).
+     *     return.rel_direct - Direct relationship links (relmarkers).
      *          Structure similar to `direct`.
-     * @returns {Object<string, {all: string[], dty_ID?: string[]}>} return.rel_reverse - Reverse relationship links (relmarkers).
+     *     return.rel_reverse - Reverse relationship links (relmarkers).
      *          Structure similar to `reverse`.
      */
     rst_links: function(){
@@ -3463,7 +3463,7 @@ window.hWin.HEURIST4.dbs = {
       * @function rst_InterpretEntryMask
       * @memberof HEURIST4.dbs
       * @param {string} mask - The entry mask string.
-      * @returns {[string, string]} An array where:
+      * @returns {Array<string>} An array where:
       *          - Index 0: Human-readable description of the mask (e.g., "a string with a maximum of 10 characters, 1 to 5").
       *          - Index 1: The original mask with the pattern part replaced by `&lt;value&gt;` (e.g., "Prefix &lt;value&gt; Suffix").
       *          Returns `['', '']` if the mask does not contain a valid pattern.

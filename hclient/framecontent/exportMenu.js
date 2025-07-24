@@ -22,15 +22,15 @@
 * @since       4.0
 */
 function hexportMenu( container ) {
-    /** @const {string} _className - The name of this class module. */
+
     const _className = "exportMenu";
-    /** @const {string} _version - The version of this class module. */
+
     const _version   = "0.4";
-    /** @type {?object} dialog_options - Options to be passed to dialogs, can be set externally. */
+    /* Options to be passed to dialogs, can be set externally. */
     let dialog_options=null;
-    /** @type {int} preparedSessionID - Prepared output parameters ID */
+    /* Prepared output parameters ID */
     let preparedSessionID = 0;
-    /** @type {bool} skipFields - Skip including additional fields */
+    /* Skip including additional fields */
     let skipFields = false;
 
     /**

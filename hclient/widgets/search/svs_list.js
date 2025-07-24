@@ -168,11 +168,11 @@ $.widget( "heurist.svs_list", {
      */
     treeviews:{},
 
-    /** @const @private {string} _HINT_RULESET - Tooltip text for ruleset-only searches. */
+    /* Tooltip text for ruleset-only searches. */
     _HINT_RULESET:'It does not perform the search. However it applies rules to current result set and  expand the initial search to a larger set of records by following a set of rules specifying which pointers and relationships to follow (including relationship type and target record types)',
-    /** @const @private {string} _HINT_WITHRULES - Tooltip text for searches that include rules. */
+    /* Tooltip text for searches that include rules. */
     _HINT_WITHRULES:'Searches with addition of a RuleSet automatically expand the initial search to a larger set of records by following a set of rules specifying which pointers and relationships to follow (including relationship type and target record types)',
-    /** @const @private {string} _HINT_FACETED - Tooltip text for faceted searches. */
+    /* Tooltip text for faceted searches. */
     _HINT_FACETED:'Faceted searches allow the user to drill-down into the database on a set of pre-selected database fields',
     /**
      * @memberof heurist.svs_list

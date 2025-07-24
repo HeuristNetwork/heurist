@@ -24,7 +24,7 @@
  * The dialog's content and behavior are determined by the `mode_edit` parameter.
  * It uses an `HEditing` instance internally to manage the form fields.
  *
- * @param {Object|Array<Object>|null} current_value - The current symbology configuration object or an array for thematic maps.
+ * @param {Array<Object>} current_value - The current symbology configuration object or an array for thematic maps.
  *                                                  If null, a new symbology is being defined.
  * @param {number} mode_edit - Defines the type of symbology editor to open:
  *                             1: Symbology editor from map legend.
@@ -32,7 +32,7 @@
  *                             3: Symbology editor from record edit for a map layer.
  *                             4: Symbology editor for a thematic map.
  *                             5: Define symbology ranges (gradient values).
- * @param {function(Object|Array<Object>): void} callback - A function to be called when the symbology is saved.
+ * @param {function} callback - A function to be called when the symbology is saved.
  *                                                         It receives the updated symbology object or array as its argument.
  */
 function editSymbology(current_value, mode_edit, callback){
@@ -1298,7 +1298,7 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
  *                          the currently selected record's title and acts as a trigger for opening
  *                          the browser/dropdown.
  * @param {string} popupTitle - title for popup dialog.
- * @returns {function(string|Event): void} A function (`__show_select_dropdown` or `__show_select_dialog`)
+ * @returns {function(string,Event): void} A function (`__show_select_dropdown` or `__show_select_dialog`)
  *                                         that can be called to programmatically open the record browser/dropdown.
  *                                         This returned function itself takes an event object or an input ID string.
  */

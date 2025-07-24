@@ -40,19 +40,19 @@ function HintDiv(_id, _width, _height, _initcontent) {
 	//private members
 	const _className = "HintDiv";
 
-	/** @private @type {jQuery|null} The jQuery object for the hint div. */
+	/** The jQuery object for the hint div. */
 	let popup_div = null;
-	/** @private @type {number|null} Timer ID for hiding the tooltip. */
+	/** @property {number|null} Timer ID for hiding the tooltip. */
 	let hideTimer;
-	/** @private @type {boolean} Flag to control whether the tooltip should be hidden. */
+	/** @property {boolean} Flag to control whether the tooltip should be hidden. */
 	let needHideTip = true;
-	/** @private @type {string} ID of the hint div. */
+	/**  @property {string} ID of the hint div. */
 	let id = _id;
-	/** @private @type {number} Width of the hint div. */
+	/** @property {number} Width of the hint div. */
 	let width = _width || 0;
-	/** @private @type {number} Height of the hint div. */
+	/**  @property {number} Height of the hint div. */
 	let height = _height || 0;
-	/** @private @type {string} Initial HTML content. */
+	/** @property {string} Initial HTML content. */
 	let initcontent = _initcontent;
 
     /**

@@ -520,7 +520,7 @@
          * @param {string} format format string
          * @param {CDate} date calendar date to format
          * @param {array} settings format settings
-         * @returns 
+         * @returns {string} formatted date
          */
         formatDate: function (format, date, settings) {
             return this.gregorianToJapaneseStr(date);
@@ -546,6 +546,7 @@
         /**
          * Check whether the year is valid
          * 
+         * @private
          * @param {CDate} year - calendar date
          * @param {int} year - the date's year 
          * @param {int} month - the date's month

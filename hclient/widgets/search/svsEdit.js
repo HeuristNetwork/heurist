@@ -37,9 +37,7 @@
  * @property {function} showSavedFilterEditDialog Shows the dialog for editing/creating a saved filter or visualization.
  */
 function HSvsEdit(args) {
-    /** @const {string} _className - Internal class name identifier. */
     const _className = "SvsEdit",
-    /** @const {string} _version - Internal version number. */
     _version   = "0.4";
     /**
      * @private

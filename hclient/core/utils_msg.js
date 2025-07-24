@@ -43,6 +43,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      *
      * @param {Object|string} response - The error response object, or a string message if JSON parsing failed.
      *                                   If an object, it's passed to `showMsgErr`.
+     * @memberof HEURIST4.msg
      * @returns {void}
      */
     showMsgErrJson: function(response){
@@ -62,6 +63,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * formats the message, sets an appropriate title, and may include system messages or a prompt to login.
      * Uses `showMsgDlg` for the actual display.
      *
+     * @memberof HEURIST4.msg
      * @param {Object|string} response - The error response object or a simple error message string.
      *                                   If an object, it can have properties like `message`, `status`,
      *                                   `sysmsg`, `error_title`, `request_code`.
@@ -213,6 +215,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * The dialog is created using `getPopupDlg` or `getMsgDlg` based on options.
      * After loading, it calls `showMsgDlg` to configure and show the dialog.
      *
+     * @memberof HEURIST4.msg
      * @param {string} url - The URL from which to load content.
      * @param {Object<string, function>|function} [buttons] - Buttons to display on the dialog, in the format expected by jQuery UI Dialog,
      *                                                        or a callback function for default Yes/No buttons. See `showMsgDlg`.
@@ -247,6 +250,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * Displays a standardized error message when a dynamic script loading fails.
      * The message informs the user about a program error and advises them to report it.
      *
+     * @memberof HEURIST4.msg
      * @param {boolean} isdlg - If true, displays the message in a modal dialog (`showMsgDlg`).
      *                          If false, displays it as a temporary flash message (`showMsgFlash`).
      * @param {string} [message="this feature"] - A string to insert into the error message, indicating
@@ -280,6 +284,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * The dialog contains a message and an input field. If the provided message
      * does not include an element with ID `dlg-prompt-value`, an input field is automatically created.
      *
+     * @memberof HEURIST4.msg
      * @param {string} message - The message or HTML content to display in the prompt.
      *                           If it contains an element with `id="dlg-prompt-value"`, that element is used for input.
      *                           Otherwise, a new text input is created.
@@ -325,6 +330,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * If the dialog element with the specified ID (default "dialog-common-messages") does not exist,
      * it is created and appended to the body.
      *
+     * @memberof HEURIST4.msg
      * @param {string} [dialogId="dialog-common-messages"] - The ID of the dialog element to get or create.
      *                                                       If a leading '#' is present, it's stripped.
      * @returns {jQuery} The jQuery object representing the dialog div.
@@ -351,6 +357,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * If the dialog element with ID "dialog-flash-messages" does not exist,
      * it is created and appended to the body.
      *
+     * @memberof HEURIST4.msg
      * @returns {jQuery} The jQuery object representing the flash message dialog div.
      */
     getMsgFlashDlg: function(){
@@ -368,6 +375,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * If the dialog element with the specified ID (default "dialog-popup") does not exist,
      * it is created and appended to the body.
      *
+     * @memberof HEURIST4.msg
      * @param {string} [element_id="dialog-popup"] - The ID of the dialog element to get or create.
      * @returns {jQuery} The jQuery object representing the popup dialog div.
      */
@@ -387,6 +395,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * Displays a jQuery UI tooltip associated with a given element for a specified duration.
      * The tooltip content is taken from the `message` parameter.
      *
+     * @memberof HEURIST4.msg
      * @param {string} message - The message to display in the tooltip. This will be translated using `window.hWin.HR`.
      * @param {number} [timeout=1000] - The duration in milliseconds for which the tooltip should be visible. Defaults to 1000ms.
      * @param {jQuery|HTMLElement|Object} to_element - The target element for the tooltip.
@@ -439,6 +448,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * Displays a buttonless dialog (flash message) that automatically closes after a specified timeout.
      * The dialog's content is the provided message. Styling and positioning can be customized.
      *
+     * @memberof HEURIST4.msg
      * @param {string|null} message - The message to display. If null, the function returns early.
      *                                This message will be translated using `window.hWin.HR`.
      * @param {number|boolean} [timeout=1000] - Duration in milliseconds before the dialog auto-closes.
@@ -535,6 +545,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * It also ensures the title bar is shown if it was previously hidden.
      * This function respects a `coverallKeep` flag; if true, it won't close the dialog.
      *
+     * @memberof HEURIST4.msg
      * @returns {void}
      */
     closeMsgFlash: function(){
@@ -550,6 +561,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * Displays a simple error dialog with the given message and an "Error" title.
      * This is a convenience wrapper around `showMsgDlg`.
      *
+     * @memberof HEURIST4.msg
      * @param {string} message - The error message to display.
      * @returns {void}
      * @todo The name `redirectToError` is misleading as it doesn't actually redirect. Consider renaming or clarifying its purpose.
@@ -564,6 +576,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * 
      * Uses `checkLength2` to get the error message text and add error class.
      *
+     * @memberof HEURIST4.msg
      * @param {jQuery} input - jQuery object representing the input element.
      * @param {string} title - A title or name for the input field, used in the error message (e.g., "Username").
      * @param {string|jQuery|null} message - If a jQuery object, its text is updated with the error message
@@ -594,6 +607,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * Generates an error message if an input field's value length is outside a specified range.
      * It also adds or removes the "ui-state-error" class from the input field based on validity.
      *
+     * @memberof HEURIST4.msg
      * @param {jQuery} input - jQuery object representing the input element.
      * @param {string} title - A title or name for the input field, used in constructing the error message (e.g., "Username").
      * @param {number} min - The minimum allowed length.
@@ -639,6 +653,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     * It handles creating the dialog, loading the iframe, and setting up communication
     * (e.g., overriding `alert`, providing `close` and `doDialogResize` functions to the iframe content).
     *
+    * @memberof HEURIST4.msg
     * @param {string} url - The URL to load into the iframe. If empty, behavior might be undefined or rely on other options.
     * @param {Object} [options] - Configuration options for the dialog and iframe.
     * @param {string} [options.dialogid] - A unique ID for the dialog. If provided, the dialog div is reused/reopened
@@ -1037,6 +1052,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * Displays URL content within an iframe embedded directly (inline) into a specified container element,
      * styled according to Heurist 6 UI guidelines. This is an alternative to popup dialogs.
      *
+     * @memberof HEURIST4.msg
      * @param {string} url - The URL to load into the iframe.
      * @param {Object} [options] - Configuration options.
      * @param {jQuery} options.container - The jQuery object of the container element where the iframe will be placed.
@@ -1260,6 +1276,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * shown in the dialog, and then re-appended to its original parent when the dialog is closed.
      * The dialog itself is removed from the DOM after closing, unless `onCloseCalback` returns false.
      *
+     * @memberof HEURIST4.msg
      * @param {Object} options - Configuration options for the dialog.
      * @param {HTMLElement} options.element - The DOM element to display in the dialog.
      * @param {Window} [options.window=window] - The window object where the dialog will be created.
@@ -1355,6 +1372,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * Creates an HTML string for a styled alert message div.
      * The div includes an alert icon and the provided message, styled with "ui-state-error".
      *
+     * @memberof HEURIST4.msg
      * @param {string} msg - The message content for the alert.
      * @returns {string} HTML string representing the alert div.
      */
@@ -1369,6 +1387,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * Displays a "coverall" overlay, typically used as a loading indicator that blocks UI interaction.
      * It creates or reuses a div element, styles it, sets a message, and appends it to a specified element or body.
      *
+     * @memberof HEURIST4.msg
      * @param {jQuery|HTMLElement} [ele=jQuery('body')] - The element to append the coverall to. Defaults to document body.
      * @param {Object} [styles] - CSS styles to apply to the coverall div.
      *                            Defaults to an opacity, background color, text color, font size, and font weight.
@@ -1412,6 +1431,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * Hides the "coverall" overlay.
      * This function respects a `coverallKeep` flag; if true, it won't hide the overlay unless `force_close` is also true.
      *
+     * @memberof HEURIST4.msg
      * @param {boolean} [force_close=false] - If true, forces the `coverallKeep` flag to false, ensuring the overlay is hidden.
      * @returns {void}
      */
@@ -1426,6 +1446,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * A simplified method to show a message dialog. It's a wrapper around `showMsgDlg`.
      * This function is intended for displaying a simple message with default "OK" button behavior.
      *
+     * @memberof HEURIST4.msg
      * @param {string|jQuery|Object} message - The message content to display. Can be a string, HTML, or jQuery object.
      * @param {Object} [options] - Additional options passed directly to `showMsgDlg`.
      *                             These options can customize aspects like title, buttons (though typically not used here),
@@ -1440,6 +1461,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * Displays a general-purpose jQuery UI dialog with a message and customizable buttons.
      * This is a core function for creating various types of dialogs (info, confirmation, error).
      *
+     * @memberof HEURIST4.msg
      * @param {string|jQuery|Object|null} message - The content to display in the dialog.
      *                                            Can be a string (HTML is allowed), a jQuery object, or a DOM element.
      *                                            If null, the dialog is created/opened, but content must be set separately.
@@ -1659,6 +1681,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * Displays a progress indicator, either in a popup dialog or an existing container.
      * It periodically polls a progress URL to update the status, steps, and progress bar.
      *
+     * @memberof HEURIST4.msg
      * @param {Object} options - Configuration options for the progress display.
      * @param {jQuery} [options.container] - If provided, the progress indicator is shown within this jQuery element.
      *                                       Otherwise, a popup dialog is created.
@@ -1883,6 +1906,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * It clears the polling interval, hides the progress div, and closes the progress popup if it was used.
      * Also resets the mouse cursor from 'progress' to 'auto'.
      *
+     * @memberof HEURIST4.msg
      * @returns {void}
      */
     hideProgress: function(){
@@ -1911,6 +1935,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * Displays a warning dialog prompting the user to save or ignore changes before exiting.
      * Typically used when there are unsaved modifications.
      *
+     * @memberof HEURIST4.msg
      * @param {string} sMessage - The message content for the dialog (e.g., "You have unsaved changes...").
      *                            This message is translated using `window.hWin.HR`.
      *                            Note: The `sMessage` parameter is defined but not directly used in the current implementation;
@@ -1946,6 +1971,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * If such an error is detected, it displays a warning dialog informing the user and suggesting they request
      * the function to be enabled via a bug report.
      *
+     * @memberof HEURIST4.msg
      * @param {string} txt - The error message string to check.
      * @returns {boolean} True if a warning dialog was shown (meaning the specific error was detected), false otherwise.
      */
@@ -1989,6 +2015,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * that could not be automatically removed due to existing reverse child record pointers.
      * The message explains the situation and provides links to view the affected records.
      *
+     * @memberof HEURIST4.msg
      * @param {Object} details - An object where keys are parent record IDs. Each value is an object:
      *                           `{title: string, type: string, restored: Array<Object>}`.
      *                           `restored` is an array of child info: `{field: string, id: string, title: string, type: string}`.

@@ -6,7 +6,6 @@
     },
     "opts": {
       "destination": "documentation/jsdocs",
-      "recurse": true,
-      "template": "default"
+      "recurse": true
     }
 }
