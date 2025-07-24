@@ -3,7 +3,7 @@
 * @brief Manages Record entities.
 * @fileOverview Provides a comprehensive UI for creating, viewing, editing, listing, and managing Heurist Record entities. This is a central widget for interacting with record data and includes features for handling different record types, structures, and associated data like files and comments.
 * @project     Heurist academic knowledge management system
-* @package  hclient\widgets\entity
+*
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

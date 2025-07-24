@@ -3,7 +3,7 @@
 * @brief Manages User Bookmark entities.
 * @fileOverview Provides a UI for users to manage their personal bookmarks of records or other items within Heurist. This includes creating, listing, editing (e.g., notes), and deleting bookmarks.
 * @project     Heurist academic knowledge management system
-* @package  hclient\widgets\entity
+*
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

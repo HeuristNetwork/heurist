@@ -13,7 +13,7 @@
  * - Specialized dialogs like exit warnings (`showMsgOnExit`) and messages for parent record operations (`prepareParentRecordMsg`).
  * The functions often leverage jQuery UI Dialog for their implementation and provide options for styling and behavior.
  * @project     Heurist academic knowledge management system
- * @package hclient\core
+ *
  * @link https://HeuristNetwork.org
  * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

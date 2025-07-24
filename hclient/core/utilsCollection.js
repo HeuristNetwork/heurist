@@ -9,7 +9,7 @@
  * state by communicating with the `collectionController.php` on the server. It also triggers the
  * `ON_REC_COLLECT` event when the collection changes.
  * @project     Heurist academic knowledge management system
- * @package hclient\core
+ *
  * @link https://HeuristNetwork.org
  * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

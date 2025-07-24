@@ -2,7 +2,7 @@
 * HBaseOpts - base widget for form to modify widget options  (in CMS editor)
 *
 * @project     Heurist academic knowledge management system
-* @package Widgets
+*
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

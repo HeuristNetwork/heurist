@@ -2,7 +2,7 @@
 * HCmsEditorPage.js - web page structure editor
 * 
 * @project     Heurist academic knowledge management system
-* @package CMS
+*
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2025 Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

@@ -3,7 +3,7 @@
 * @brief Manages System Bug Report entities.
 * @fileOverview Provides a UI for users to submit bug reports and for administrators to manage them. Includes fields for bug description, reproduction steps, severity, status, etc.
 * @project     Heurist academic knowledge management system
-* @package  hclient\widgets\entity
+*
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

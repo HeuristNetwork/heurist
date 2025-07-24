@@ -3,7 +3,7 @@
 * @brief Provides a popup UI for managing Record Type title masks.
 * @fileOverview This widget allows users to define a title mask for a Record Type, which controls how record titles are automatically generated or displayed based on field values.
 * @project     Heurist academic knowledge management system
-* @package  hclient\widgets\entity\popups
+*
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

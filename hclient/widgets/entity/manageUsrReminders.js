@@ -3,7 +3,7 @@
 * @brief Manages User Reminder entities.
 * @fileOverview Provides a UI for users to manage their personal reminders. This includes creating, listing, editing, and deleting reminders, which can be associated with records or be standalone.
 * @project     Heurist academic knowledge management system
-* @package  hclient\widgets\entity
+*
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

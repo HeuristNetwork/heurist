@@ -3,7 +3,7 @@
  * @brief       Provides a search interface for System User Groups.
  * @fileOverview This widget handles the search functionality for System User Groups, allowing filtering by group name and user role, especially in the context of a specific user.
  * @project     Heurist academic knowledge management system
- * @package  hclient\widgets\entity
+ *
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

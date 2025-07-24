@@ -14,7 +14,7 @@
 * If Saved Filter has entries to be defined by the website visitor (faceted search), HMenu opens the Filter form. The appearance of this form is similar to HRecordView for HRecordList. It can be inline (over menu), in a floating popup, in a modal dialog, in an offcanvas (side slide panel).  If the publisher prefers to specify their own HForm, it can be connected to HMenu via the search group.
 *
 * @project     Heurist academic knowledge management system
-* @package Widgets
+*
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

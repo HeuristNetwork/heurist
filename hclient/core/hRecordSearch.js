@@ -9,7 +9,7 @@
  * focuses on fetching record IDs, with complex rule processing handled on the server. It also manages
  * internal query request states and document contexts for event triggering.
  * @project     Heurist academic knowledge management system
- * @package hclient\core
+ *
  * @link https://HeuristNetwork.org
  * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

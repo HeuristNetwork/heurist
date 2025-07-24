@@ -3,7 +3,7 @@
 * @brief Manages System Database registrations and configurations.
 * @fileOverview Provides a UI for administrators to register, configure, and manage databases accessible by the Heurist instance. This includes settings related to database connections, aliases, and status.
 * @project     Heurist academic knowledge management system
-* @package  hclient\widgets\entity
+*
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

@@ -3,7 +3,7 @@
 * @brief Provides a UI for rapidly adding multiple base fields to a Record Type structure.
 * @fileOverview This file defines the HRapidFieldAdditions class, which powers a user interface enabling the quick selection and addition of multiple existing base fields (DetailTypes) to a specified Record Type's structure. It's designed to streamline the process of building out record type definitions.
 * @project     Heurist academic knowledge management system
-* @package  hclient\widgets\entity\popups
+*
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

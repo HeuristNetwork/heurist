@@ -3,7 +3,7 @@
 * @brief Base widget for managing entities.
 * @fileOverview This file defines the base jQuery UI widget 'manageEntity', which provides core functionalities for managing various types of entities within the Heurist system. It includes features for listing, searching, selecting, editing, and managing records, and is intended to be extended by specific entity management widgets.
 * @project     Heurist academic knowledge management system
-* @package  hclient\widgets\entity
+*
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

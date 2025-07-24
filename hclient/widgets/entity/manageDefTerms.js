@@ -3,7 +3,7 @@
 * @brief Manages Term entities within vocabularies.
 * @fileOverview Provides a UI for managing terms within hierarchical vocabularies. This includes creating, editing, deleting, and organizing terms, as well as operations like merging or correcting terms.
 * @project     Heurist academic knowledge management system
-* @package  hclient\widgets\entity
+*
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

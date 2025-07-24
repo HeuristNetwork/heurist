@@ -3,7 +3,7 @@
 * @brief Provides a popup UI for configuring thematic mapping settings.
 * @fileOverview This widget allows users to define rules and settings for thematic mapping, likely used for map visualizations based on record data.
 * @project     Heurist academic knowledge management system
-* @package  hclient\widgets\entity\popups
+*
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

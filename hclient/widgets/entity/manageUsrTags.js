@@ -3,7 +3,7 @@
 * @brief Manages User Tag entities.
 * @fileOverview Provides a UI for users to manage their personal tags. This includes creating, listing, editing (e.g., renaming), and deleting tags, as well as applying tags to records.
 * @project     Heurist academic knowledge management system
-* @package  hclient\widgets\entity
+*
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

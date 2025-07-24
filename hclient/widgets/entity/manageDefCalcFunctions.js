@@ -3,7 +3,7 @@
 * @brief Manages Defined Calculated Functions entities.
 * @fileOverview Provides a user interface for managing (CRUD operations) Defined Calculated Functions within the Heurist system. This includes listing, creating, editing, and deleting these functions.
 * @project     Heurist academic knowledge management system
-* @package  hclient\widgets\entity
+*
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

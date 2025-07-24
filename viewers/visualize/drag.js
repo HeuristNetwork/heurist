@@ -6,7 +6,7 @@
 * handling drag events (start, move, end), managing node clicks for displaying
 * information, and updating node positions.
 * @project     Heurist academic knowledge management system
-* @package  Viewers\Network
+*
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0

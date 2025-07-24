@@ -2,7 +2,7 @@
 * HCmsConfigCardinal.js - configuration for Heurist Cardinal widget based on jQuery
 * 
 * @project     Heurist academic knowledge management system
-* @package CMS
+*
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>

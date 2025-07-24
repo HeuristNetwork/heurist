@@ -5,7 +5,7 @@
  * "Publish Map" dialog and another for displaying help content related to mapping.
  * These controls are intended to be added to a Leaflet map instance.
  * @project     Heurist academic knowledge management system
- * @package  Viewers\Map
+ *
  * @link        https://HeuristNetwork.org
  * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
  * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
