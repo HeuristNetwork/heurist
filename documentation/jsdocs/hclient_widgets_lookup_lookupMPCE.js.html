@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: hclient/widgets/lookup/lookupMPCE.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: hclient/widgets/lookup/lookupMPCE.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * lookupMPCE.js - MPCE Super Book (Work) Classification Toolkit.
+ *
+ * @fileOverview
+ * This file defines the `heurist.lookupMPCE` jQuery UI widget, a specialized tool
+ * for the "Mapping Print, Charting Enlightenment" (MPCE) project. It provides an
+ * interface for classifying "Super Book (Work)" records within a Heurist database.
+ *
+ * The widget facilitates:
+ *  1. Loading its UI from `lookupMPCE.html`.
+ *  2. Assigning new keywords to a Super Book (Work) record.
+ *  3. Displaying and allowing assignment of keywords associated with a selected keyword
+ *     from other Work records (Associated Keywords).
+ *  4. Displaying and allowing assignment of keywords from recently viewed/classified
+ *     Work records (Previously Assigned Keywords).
+ *  5. Setting Parisian Category and Basis for Classification terms for the Work.
+ *  6. Adding classification notes.
+ *  7. Linking to external search services (Google Books, WorldCat, HathiTrust, Karlsruhe Portal)
+ *     for the current Work's title.
+ *  8. Viewing associated Edition records.
+ *
+ * It relies heavily on specific Heurist Record Type IDs (RT), Detail Type IDs (DT),
+ * and Vocabulary Item IDs (VI) which are mapped in the `id_map` property, often
+ * configured via the `options.mapping.fields` passed from a lookup configuration.
+ * User preferences for dialog size are also respected.
+ *
+ * @project     Heurist academic knowledge management system
+ *
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov   &lt;osmakov@gmail.com>
+ * @author      Brandon McKay   &lt;blmckay13@gmail.com>
+ * @author      Martin Yldh   &lt;martinsami@yahoo.com>
+ * @author      Staphanson Hudson   &lt;staphanson98@hotmail.com>
+ * @author      Ian Johnson &lt;ian.johnson.heurist@gmail.com>
+ * @since       6.0
+ */
+
+/**
+ * Widget for the MPCE (Mapping Print, Charting Enlightenment) Project's
+ * Super Book (Work) Classification Tool. It provides a specialized interface
+ * for assigning keywords and classification terms to Work records.
+ *
+ * @widget heurist.lookupMPCE
+ * @extends heurist.lookupBase
+ */
+$.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
+
+    /**
+     * Default options for the MPCE lookup widget.
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @property {Object} options
+     * @property {number} options.height - The height of the dialog. Defaults to user preference
+     *                                     `pref_lookupMPCE_h` or 780.
+     * @property {number} options.width - The width of the dialog. Defaults to user preference
+     *                                    `pref_lookupMPCE_w` or 1200.
+     * @property {string} [options.title="Super Book (Work) Classification Tool for MPCE Project"]
+     *           - The title of the dialog.
+     * @property {string} [options.htmlContent="lookupMPCE.html"] - The HTML content file for the dialog.
+     * @property {Object} options.mapping - Configuration from `record_lookup_config.json`,
+     *                                    used by `mapIds` to set up `id_map`.
+     *   @property {Object} options.mapping.fields - Field mappings from the service configuration.
+     *   @property {number} options.mapping.rty_ID - The Record Type ID of the main Work record being classified.
+     * @property {Object} options.edit_fields - Realtime values from the edit form fields of the Work record being classified.
+     */
+    options: {
+        // Setting popup size, based on user preference
+        height: (window.hWin.HAPI4.get_prefs_def('pref_lookupMPCE_h', 780)),
+        width:  (window.hWin.HAPI4.get_prefs_def('pref_lookupMPCE_w', 1200)),
+
+        title:  "Super Book (Work) Classification Tool for MPCE Project",
+
+        htmlContent: "lookupMPCE.html"
+    },
+
+    /**
+     * Label for the main action button (e.g., "Update Record").
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @type {string}
+     */
+    action_button_label: 'Update Record',
+
+    /**
+     * Maps logical names to specific Heurist Record Type IDs (RT), Detail Type IDs (DT),
+     * and Vocabulary Item IDs (VI) relevant to the MPCE classification task.
+     * This map is populated by the `mapIds` method during `_initControls` using
+     * values from `this.options.mapping.fields` and system defaults.
+     *
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @type {Object}
+     * @property {?number} RT_Editions - Record Type ID for Edition records.
+     * @property {?number} RT_Work - Record Type ID for Work records (the record being classified).
+     * @property {?number} RT_Keyword - Record Type ID for Keyword records.
+     * @property {?number} DT_MPCEId - Detail Type ID for the MPCE ID field on a Work record.
+     * @property {?number} DT_Category - Detail Type ID for the Parisian Category field (term pointer) on a Work record.
+     * @property {?number} DT_Keywords - Detail Type ID for the Project Keywords field (record pointer) on a Work record.
+     * @property {?number} DT_Basis - Detail Type ID for the Basis for Classification field (term pointer) on a Work record.
+     * @property {?number} DT_Notes - Detail Type ID for the Classification Notes field on a Work record.
+     * @property {?number} VI_Category - Vocabulary ID for Parisian Category terms.
+     * @property {?number} VI_Basis - Vocabulary ID for Basis for Classification terms.
+     */
+    id_map: {
+        RT_Editions: null,
+        RT_Work: null,
+        RT_Keyword: null,
+
+        DT_MPCEId: null,
+        DT_Category: null,
+        DT_Keywords: null,
+        DT_Basis: null,
+        DT_Notes: null,
+
+        VI_Category: null,
+        VI_Basis: null
+    },
+
+    /**
+     * Array of Keyword record IDs currently assigned to the Work record being classified.
+     * Initialized from `this.options.edit_fields`.
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @type {?Array&lt;number>}
+     */
+    project_keywords: null,
+
+    /**
+     * The Term ID of the selected Parisian Category for the Work record.
+     * Initialized from `this.options.edit_fields`.
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @type {?number}
+     */
+    parisian_category: null,
+
+    /**
+     * The Term ID of the selected Basis for Classification for the Work record.
+     * Initialized from `this.options.edit_fields`.
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @type {?number}
+     */
+    basis_for_classification: null,
+
+    /**
+     * Text content of the Classification Notes for the Work record.
+     * Initialized from `this.options.edit_fields`.
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @type {?string}
+     */
+    classification_notes: null,
+
+    /**
+     * An object caching all available Keyword records, mapping their ID to their title.
+     * Populated by `getKeywords`.
+     * E.g., `{keyword_id_1: "Keyword Title 1", keyword_id_2: "Keyword Title 2"}`.
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @type {?Object&lt;number, string>}
+     */
+    full_keywords_list: null,
+
+    // == Associated Keyword Variables ==
+    /**
+     * The Record ID of the keyword currently selected for finding associated keywords.
+     * @memberof heurist.lookupMPCE
+     * @instance
+     * @private
+     * @type {?number}
+     */
+    assoc_search_id: null,
+    assoc_keywords: null,   // the keywords in association with the selected keyword
+    assoc_work_count: null, // the number of works that contain the selected keyword
+    assoc_startindex: null, // the index of the current start of list 
+    assoc_endindex: null,   // the index of the current end of list
+    assoc_selected: [],   // array of selected keyword ids from the associated keyword list
+
+    // Previously Assigned Keywords Variables
+    prev_works: null,       // ids of the last 5 previous works
+    prev_keywords: null,    // object of keywords assigned to previous works
+
+    // Editions Variables
+    editions_info: null,    // basic information about editions for this work
+
+    _initControls: function(){
+
+        let that = this;
+
+        this.mapIds(this.options.mapping.fields, this.options.mapping.rty_ID); // Set the session variable 'id_map' to be an object of all record, detail and vocab type ids to simplify the replacement task
+
+        let record = this.options.edit_fields;  // Retrieve Edit Fields
+
+        /** Check if selected Work has: project keyword/s, parisian category, and a basis for classification **/
+
+        this.project_keywords = !window.hWin.HEURIST4.util.isempty(record[this.id_map.DT_Keywords]) ? record[this.id_map.DT_Keywords] : null; // Project Keywords
+
+        this.parisian_category = !window.hWin.HEURIST4.util.isempty(record[this.id_map.DT_Category]) ? record[this.id_map.DT_Category] : null; // Parisian Category
+
+        this.basis_for_classification = !window.hWin.HEURIST4.util.isempty(record[this.id_map.DT_Basis]) ? record[this.id_map.DT_Basis] : null; // Basis for Classification
+
+        this.classification_notes = !window.hWin.HEURIST4.util.isempty(record[this.id_map.DT_Notes]) ? record[this.id_map.DT_Notes] : null; // Classification Notes
+        $('#notes_field').val(record[this.id_map.DT_Notes]);
+
+        this.prev_works = !window.hWin.HEURIST4.util.isempty(localStorage.getItem("prev_classify")) 
+                            ? window.hWin.HEURIST4.util.isJSON(localStorage.getItem("prev_classify"))
+                            : null;
+
+        $('#title_field').text(record[1]); // Work Title
+        $('#work-code_field').text(record[this.id_map.DT_MPCEId]);   // Work MPCE_ID
+
+        // Retrieve all Parisian Keywords (Term ID = 6380)
+        if(this.id_map.VI_Category > 0 &amp;&amp; $Db.trm(this.id_map.VI_Category)){
+
+            window.hWin.HEURIST4.ui.createTermSelect( this.element.find('#category_field')[0], {
+                    vocab_id: [this.id_map.VI_Category],    // Vocabulary ID/Term ID
+                    defaultTermID: this.parisian_category,   //Default/Selected Term
+                    topOptions: [{title:"Select a Parisian Classification...", key:''}],      //Top Options  [{key:0, title:'...select me...'},....]
+                    useHtmlSelect: false     // use native select of jquery select
+                }
+            );
+        }else{
+            this.element.find('#category_field').append('&lt;option>No categories&lt;/option>').hSelect();
+        }
+
+        // Retrieve all Basis for Classification (Term ID = 6498)
+        if(this.id_map.VI_Basis > 0 &amp;&amp; $Db.trm(this.id_map.VI_Basis)){
+
+            window.hWin.HEURIST4.ui.createTermSelect( this.element.find('#basis_field')[0], {
+                    vocab_id: [this.id_map.VI_Basis],    // Vocabulary ID/Term ID
+                    defaultTermID: this.basis_for_classification,   // Default/Selected Term
+                    useHtmlSelect: false    // use native select of jquery select
+                }
+            ); 
+        }else{
+            this.element.find('#basis_field').append('&lt;option>No basis&lt;/option>').hSelect();
+        }
+
+        this.getKeywords('assigned');
+        
+        // Add msg next to save button
+        this.element.parents('.ui-dialog').find('.btnDoAction').before('&lt;span id="save-msg" style="display:none;font-size:1.2em;">Add or Uncheck Selections&lt;/span>');        
+
+        // NEXT >> handler
+        this._on($('#assoc_next'), {
+            click: function(){
+                $('#checkall-assoc').attr('checked', false);
+    
+                that.updateAssocDisplay(false);
+            }
+        });
+
+        // &lt;&lt; BACK handler
+        this._on($('#assoc_prev'), {
+            click: function(){
+
+                let jump = that.assoc_endindex - that.assoc_startindex;
+
+                if(jump &lt; 13) { jump = 13; }
+
+                that.assoc_startindex = that.assoc_startindex - jump;
+                that.assoc_endindex = that.assoc_startindex;
+                that.assoc_startindex = that.assoc_startindex - (jump * 2);
+
+                that.assoc_startindex &lt; 0 &amp;&amp; that.assoc_endindex &lt; 13 ? that.updateAssocDisplay(true) : that.updateAssocDisplay(false);
+
+                $('#checkall-assoc').attr('checked', false);            
+            }
+        });
+
+
+        // onClick Handlers
+
+        // Assigning Keywords to Work
+        this._on(this.element.find('#btnLookup').button(),{
+            click: this.keywordLookup
+        });
+
+        this._on(this.element.find('#btnPrevAssign').button(),{
+            click: this.addPrevtoAssigned
+        });
+
+        this._on(this.element.find('#btnAssocAssign').button(),{
+            click: this.addAssoctoAssigned
+        });
+
+        this._on(this.element.find('#btnAssocRemove').button(),{
+            click: this.unselectAssoc
+        });
+
+        // External Searches for Work Title
+        this._on(this.element.find('#btnGoogle').button(),{
+            click: this.lookupGoogle
+        });
+        this._on(this.element.find('#btnWorldCat').button(),{
+            click: this.lookupWorldCat
+        });
+        this._on(this.element.find('#btnHathiTrust').button(),{
+            click: this.lookupHathiTrust
+        });
+        this._on(this.element.find('#btnKarlsruhePortal').button(),{
+            click: this.lookupKarlsruhePortal
+        });
+
+        // Other
+        this._on(this.element.find('#btnEdition').button(),{
+            click: this.lookupEditions
+        });
+
+        this._on(this.element.find('#checkall-prev'),{
+            click: function(e){
+                let check_status = $(e.target).is(':checked');
+                that.checkAllOptions($('#prev_field')[0], check_status);
+            }
+        });
+
+        this._on(this.element.find('#checkall-assoc'),{
+            click: function(e){
+                let check_status = $(e.target).is(':checked');
+                that.checkAllOptions($('#associated_field')[0], check_status, true);
+            }
+        });
+
+        // Disable the 'X' button, located top-right corner
+        this.element.dialog('widget').find('.ui-dialog-titlebar-close').button().hide();
+
+        // Detects the popup being resized, disable the mouseup as resize fires constantly
+        this.element.parent().on('onresize',function() {
+            that.element.parent().off("mouseup");
+
+            that.element.parent().one("mouseup", function(){
+                let width = that.element.parent().width();
+                let height = that.element.parent().height();
+
+                window.hWin.HAPI4.save_pref('pref_lookupMPCE_w', width);
+                window.hWin.HAPI4.save_pref('pref_lookupMPCE_h', height);
+            });
+        });
+
+        return this._super();
+    },
+
+    /**
+     * Update Record with selected Classifications and move back to Record Editor popup
+     */
+    doAction: function(){
+
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent()); // use this function to show "in progress" animation and cover-all screen for long operation
+
+        // assign values to be sent back to edit form - format is similar to this.options.edit_fields
+        let res = {};
+        res[this.id_map.DT_Category] = $('#category_field').val();
+        res[this.id_map.DT_Basis] = $('#basis_field').val();
+        res[this.id_map.DT_Notes] = $('#notes_field').val();
+        res[this.id_map.DT_Keywords] = (this.project_keywords.length == 0) ? null : this.project_keywords;
+
+        let idxRecent = (this.prev_works == null) ? -1 : this.prev_works.findIndex(id => id == this.options.edit_fields.rec_ID[0]);
+        let hasKeywords = !window.hWin.HEURIST4.util.isempty(this.project_keywords);
+
+        // Check if work can be added to list of recently viewed works
+        if(idxRecent == -1 &amp;&amp; hasKeywords){
+
+            this.prev_works.unshift(this.options.edit_fields.rec_ID[0]);
+
+            if(this.prev_works.length == 5){
+                this.prev_works.splice(4, 1);
+            }
+
+            localStorage.setItem("prev_classify", JSON.stringify(this.prev_works));
+        }else if(idxRecent != -1 &amp;&amp; !hasKeywords){
+            this.prev_works.splice(idxRecent, 1);
+            localStorage.setItem("prev_classify", JSON.stringify(this.prev_works));
+        }
+
+        this.closingAction(res, false);
+    },
+
+    /** Keyword Assignment **/
+
+    /**
+     * Creates a Heurist popup capable of searching all Project Keywords,
+     * When an keyword is selected, it is assigned to the work, if it is not already,
+     * this keyword is removed from the associated and previous (recent) keyword lists
+     */
+    keywordLookup: function(){
+
+        let that = this;
+
+        let popup_options = {
+            select_mode: 'select_single', //(false)?'select_multi': enable multi select or not, current set to single select
+            select_return_mode: 'recordset', //or 'ids' (default)
+            edit_mode: 'popup',
+            selectOnSave: true, // true = select popup will be closed after add/edit is completed
+            title: 'Assign a New Keyword',
+            rectype_set: [this.id_map.RT_Keyword], // record type ID
+            pointer_mode: 'browseonly', // options = both, addonly or browseonly
+            pointer_filter: null, // initial filter on record lookup, default = none
+            parententity: 0,
+
+            width: 700,
+            height: 600,
+
+            // onselect Handler for pop-up
+            onselect: function(event, data){
+
+                if(!window.hWin.HEURIST4.util.isRecordSet(data.selection)){
+                    return;
+                }
+
+                let recordset = data.selection;
+                let record = recordset.getFirstRecord();
+
+                if(window.hWin.HEURIST4.util.isempty(record)){
+                    // something is wrong with the record
+
+                    msgToConsole('keywordLookup() Error: Selected Record is Invalid', record, 1);
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'The selected keyword is invalid',
+                        error_title: 'Invalid selection',
+                        status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                    });
+
+                    return;
+                }
+
+                let targetID = recordset.fld(record,'rec_ID');
+                
+                let keyword_IDs = that.project_keywords;
+
+                if(!window.hWin.HEURIST4.util.isempty(keyword_IDs)){
+
+                    let result = keyword_IDs.find(row => row == targetID);
+                
+                    if(result != null){ // Check if Keyword is already a part of Work's Keyword Master List
+                        window.hWin.HEURIST4.msg.showMsgDlg('Project Keyword Already Allocated to Work', null, 'Keyword already assigned');
+
+                        return;
+                    }
+                }
+
+                if(that.full_keywords_list == null){
+                    that.getKeywords('add', targetID);
+                    return;
+                }
+
+                let title = `Record ID - ${targetID}`;
+                if(that.full_keywords_list[targetID] !== undefined){
+                    title = that.full_keywords_list[targetID];
+                }
+                that.addKeyword(targetID, title); // Add Selected Keyword to Master Table+List
+            }
+        };
+
+        window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
+    },
+
+    /**
+     * Retrieve the list of checked keywords that need to be moved to the assigned keyword list
+     */
+    addPrevtoAssigned: function(){
+
+        let list = $('#prev_field')[0];
+
+        let items = this.getAllChecked(list);
+
+        if(items == null || items.length == 0){
+            window.hWin.HEURIST4.msg.showMsgDlg('There are No Recent Keywords Selected to Assign', null, 'No recent keywords');     
+            return;
+        }
+
+        for(const id of items){
+
+            list = $('#prev_field');
+
+            let title = `Record ID - ${id}`;
+            if(this.full_keywords_list[id] !== undefined){
+                title = this.full_keywords_list[id];
+            }
+
+            // Remove from Previous Keyword Table
+            list.find(`input#${id}_r`).parent().remove();
+
+            this.addKeyword(id, title); // Add to Assigned Table + List
+        } 
+
+        this.disableUpdateBtn();
+    },
+
+    /**
+     * Retrieve the list of checked keywords that need to be moved to the assigned keyword list
+     */
+    addAssoctoAssigned: function(){
+
+        let list = $('#associated_field')[0];
+
+        let items = this.getAllChecked(list, true);
+
+        if(this.assoc_selected){
+            items = mergeArraysUnique(items, this.assoc_selected);
+        }
+
+        if(items == null || items.length == 0){
+            window.hWin.HEURIST4.msg.showMsgDlg('There are No Associated Keywords Selected to Assign', null, 'No associated keywords');     
+            return;
+        }
+
+        for(const id of items){
+
+            list = $('#associated_field')[0];
+
+            // Remove from Associated Keyword Table
+            $(list).find(`input#${id}_a`).parent().remove();
+
+            let title = `Record ID - ${id}`;
+            if(this.full_keywords_list[id] !== undefined){
+                title = this.full_keywords_list[id];
+            }
+
+            this.addKeyword(id, title); // Add to Assigned Table + List
+        }
+
+        this.assoc_selected = [];
+
+        this.updateAssocDisplay(true);
+
+        this.disableUpdateBtn();
+    },
+
+    /** External Searches **/
+
+    /**
+     * Search for Editions of the Work within Heurist, displaying the results in a separate popup
+     */
+    lookupEditions: function(){
+
+        let that = this;
+
+        if(this.editions_info != null){
+            this.showEditions();
+            return;
+        }
+
+        this.editions_info = [];
+
+        let query_request = {q: `t:${this.id_map.RT_Editions} linkedto:${this.options.edit_fields.rec_ID[0]}`, detail: 'detail', limit: 10};
+
+        window.hWin.HAPI4.RecordMgr.search(query_request,
+            function( response ){
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    return;
+                }
+                if(window.hWin.HEURIST4.util.isempty(response.data)) { return; }
+
+                let recordset = new HRecordSet(response.data);
+                let records = recordset.getRecords();
+
+                for(let i in records){
+
+                    let record = records[i];
+
+                    that.editions_info.push([record[5], record[2]]);
+                }
+
+                if(that.editions_info != null &amp;&amp; that.editions_info.length > 0){
+                    that.showEditions();
+                }
+            }
+        );
+    },
+
+    /**
+     * Search for All Keywords
+     *
+     * @param {String} next_step - after action
+     * @param {Number|Array&lt;Number>} extra_ids - keyword record id(s)
+     */
+    getKeywords: function(next_step='none', extra_ids = null){
+
+        let that = this;
+
+        if(this.full_keywords_list == null){
+            this.full_keywords_list = {};
+        }
+
+        if(!this.id_map.RT_Keyword || !$Db.rty(this.id_map.RT_Keyword)){
+            return;
+        }
+
+        // Retrieve master list of project keywords, we need to display their titles for the user
+        let query_request = {q: `t:${this.id_map.RT_Keyword}`, detail: 'detail'};
+
+        // Perform Search
+        window.hWin.HAPI4.RecordMgr.search(query_request,
+            function( response ){
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+
+                if(window.hWin.HEURIST4.util.isempty(response.data)) { return; }
+
+                let recordset = new HRecordSet(response.data); // Retieve Search Results
+
+                recordset.each2(function(id, record){
+                    that.full_keywords_list[id] = record?.d[1] ? record.d[1] : record['rec_Title'];
+                });
+
+                if(extra_ids == null &amp;&amp; (next_step == 'associated' || next_step == 'recent' || next_step == 'add')){
+                    return;
+                }
+
+                this.getKeywordsNextStep(next_step, extra_ids);
+            }
+        );
+    },
+
+    /**
+     * Process results from getKeyords
+     *
+     * @param {String} step - action to take
+     * @param {Number|Array&lt;Number>} ids - extra keyword record id(s)
+     */
+    getKeywordsNextStep: function(step, ids){
+        let that = this;
+        let title = null;
+        switch(step){
+            case 'assigned': // add assigned keywords to html list
+
+                if(!window.hWin.HEURIST4.util.isempty(that.project_keywords)){
+
+                    for(const id of that.project_keywords){
+
+                        let title = `Record ID - ${id}`;
+                        if(that.full_keywords_list[id] !== undefined){
+                            title = that.full_keywords_list[id];
+                        }
+
+                        that.showKeyword(id, title); // Add to Keyword Table
+                    }
+                }
+
+                that.setupRecentWorks(); // initialise recent keywords
+
+                break;
+            case 'associated': // retrieve associated keywords
+                that.setupAssocKeywords(ids);
+                break;
+            case 'recent': // retrieve recent keywords
+                that.getRecentKeywords(ids);
+                break;
+            case 'add': // add new assigned keyword
+
+                title = that.full_keywords_list[ids] === undefined ? `Record ID - ${ids}` : that.full_keywords_list[ids];
+                that.addKeyword(ids, title);
+
+                break;
+            default:
+                // Unknown/None, do nothing
+                break;
+        }
+    },
+
+    /**
+     * Search for Work Title in Google Books
+     *
+     * @returns {false}
+     */
+    lookupGoogle: function(){
+        let title = $($('#title_field')[0]).text();
+        let url = `https://books.google.com.au/?q=${title}`;
+
+        window.open(url, '_blank');
+
+        return false;
+    },
+
+    /**
+     * Search for Work Title in World Cat
+     *
+     * @returns {false}
+     */
+    lookupWorldCat: function(){
+        let title = $($('#title_field')[0]).text();
+        let url = `https://www.worldcat.org/search?q=ti%3A${title}`;
+
+        window.open(url, '_blank');
+
+        return false;
+    },
+
+    /**
+     * Search for Work Title in Hathi Trust
+     *
+     * @returns {false}
+     */
+    lookupHathiTrust: function(){
+        let title = $($('#title_field')[0]).text();
+        let url = `https://catalog.hathitrust.org/Search/Advanced?adv=1&amp;lookfor%5B%5D=${title}`;
+
+        window.open(url, '_blank');
+
+        return false;
+    },
+
+    /**
+     * Search for Work Title in Karlsruhe Portal
+     *
+     * @returns {false}
+     */
+    lookupKarlsruhePortal: function(){
+        let title = $($('#title_field')[0]).text();
+        let url = `https://kvk.bibliothek.kit.edu/index.html?lang=en&amp;digitalOnly=0&amp;embedFulltitle=0&amp;newTab=0&amp;TI=${title}`;
+
+        window.open(url, '_blank');
+
+        return false;
+    },
+
+    /** Associated Keyword System **/
+
+    /**
+     * Searches for works that have the selected keyword,
+     *  the program then goes through each returned work's keywords, 
+     *  adding them to the associated keyword list, 
+     *  finally displaying the result to the user.
+     *
+     * @param {String|Number} id - Keyword's Title Mask (or, the Keyword's ID)
+     */
+    setupAssocKeywords: function(id){
+
+        let that = this;
+
+        if(this.full_keywords_list == null){
+            this.getKeywords('associated', id);
+            return;
+        }
+
+        let list = $('#associated_field');
+
+        this.assoc_search_id = id;
+        this.assoc_keywords = [];
+        this.assoc_selected = [];
+
+        $('#assoc_prev').hide();
+       
+        $('#assoc_next').hide(); 
+
+        list.html('&lt;div style="font-size:1.5em">Loading List...&lt;/div>');
+
+        let query_request = {q: `t:${this.id_map.RT_Work} linkedto: ${id}`, detail: 'detail'};  // Retrieve all works that have the selected keyword
+
+        window.hWin.HAPI4.RecordMgr.search(query_request,
+            function(response){
+
+                if(response.status == window.hWin.ResponseStatus.OK){
+
+                    if(window.hWin.HEURIST4.util.isempty(response.data)) { return; }
+
+                    let recordset = new HRecordSet(response.data);
+                    let records = recordset.getRecords();
+
+                    let ids = [];
+
+                    // For displaying the total number of works to user, i.e. (n = ...)
+                    that.assoc_work_count = Object.keys(records).length;
+
+                    // Travel through results to retrieve the each work's list of keywords
+                    for(let i in records){
+
+                        let record = records[i];
+
+                        // To avoid results that are not from the correct table, usually happens if query is wrong
+                        if (record[4] != that.id_map.RT_Work) { continue; }
+
+                        let details = record.d;
+
+                        if((details[that.id_map.DT_Keywords] == null) || (details[that.id_map.DT_Keywords].length &lt; 2)){
+                            continue;
+                        }
+
+                        ids.push(details[that.id_map.DT_Keywords]);
+                    }
+
+                    // Add the complete list retrieved to the associated keyword
+                    that.updateAssocList(ids);
+                } else {
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            }
+        );
+    },
+
+    /**
+     * Updates the Associate Keyword List (this.assoc_keywords)
+     * Performs a check if the current keyword is already part of the list, 
+     *  if it is, increase occurances
+     *  else, push into list
+     * The list is then sorted by occurrances
+     * Once completed, the corresponding table is updated
+     *
+     * @param {Array&lt;Number>} id_list - list of associated keywords
+     */
+    updateAssocList: function(id_list){
+
+        // Go through 2d array of keywords
+        for(const ids of id_list){
+
+            for(const id of ids){
+
+                let title = `Record ID - ${id}`;
+                if(this.full_keywords_list[id] !== undefined){
+                    title = this.full_keywords_list[id];
+                }
+
+                if(this.assoc_keywords.length &lt; 1){ // don't need to check, if there are no associated keywords
+                    this.assoc_keywords.push([id, 1, title]);
+                    continue;
+                }
+
+                this.isAssocKeyword(id, title); // Check if current keyword is already in list
+            }
+        } 
+
+        this.updateAssocDisplay(true); // Update UI display of associated keywords
+    },
+
+    /**
+     * Update the Associated Keywords List, UI, and display which kyeword was selected
+     *
+     * @param {Boolean} move_to_start - whether this is the next set of keywords, or starting from the start of list
+     */
+    updateAssocDisplay: function(move_to_start=true){
+
+        let list = $('#associated_field');
+
+        if(window.hWin.HEURIST4.util.isempty(this.assoc_keywords)){
+            return;
+        }
+
+        let keywords = this.assoc_keywords;
+
+        if(window.hWin.HEURIST4.util.isempty(this.project_keywords)){
+            return;
+        }
+
+        keywords.sort(compareIndexes);
+
+        this.assoc_startindex = list.find('li').length != 0 &amp;&amp; !move_to_start ? this.assoc_endindex : 0;
+
+        // Empty List, before use
+        list.empty();
+
+        let name = $('#keyword_field').find(`li#${this.assoc_search_id}_m`).find('label').text();
+        $('#assoc_kywd').text(name);
+        $('#assoc_total').text(`(n=${this.assoc_work_count})`);
+
+        // Now add items into the HTML list
+        this.assoc_endindex = this.renderAssocKeywods(keywords);
+
+        let jump = this.assoc_endindex - this.assoc_startindex;
+
+        if(this.assoc_startindex-jump &lt; 0 &amp;&amp; this.assoc_endindex+13 > keywords.length &amp;&amp; this.assoc_endindex &lt;= keywords.length){
+            $('#assoc_prev').hide();
+
+            $('#assoc_next').hide();             
+        }else if(this.assoc_startindex-jump &lt; 0){ 
+            $('#assoc_next').show();
+
+            $('#assoc_prev').hide(); 
+        }else if(this.assoc_endindex+jump > keywords.length &amp;&amp; this.assoc_endindex == keywords.length){ 
+            $('#assoc_prev').show();
+
+            $('#assoc_next').hide(); 
+        }else{
+            $('#assoc_prev').show();
+
+            $('#assoc_next').show(); 
+        }
+
+        this.disableUpdateBtn();
+    },
+
+    /**
+     * Render associated keywords list
+     *
+     * @param {Array&lt;Number, Number, String>} keywords - array of keywords [Keyword ID, Count, Keyword Title]
+     *
+     * @returns {Number} starting index for associated list
+     */
+    renderAssocKeywods: function(keywords){
+
+        let list = $('#associated_field');
+
+        let that = this;
+
+        let max = this.assoc_startindex + 13;
+        let assigned = this.project_keywords;
+
+        let i = this.assoc_startindex;
+        for(; i &lt; max &amp;&amp; keywords.length > i; i++){
+
+            let item = $('&lt;li>');
+
+            if(keywords[i] == null){
+                break; 
+            }
+
+            if(assigned.find(e => e == keywords[i][0])){
+                max++;
+                continue;
+            }
+
+            item.html(`&lt;input type='checkbox' value='${keywords[i][0]}' style='vertical-align:middle;' id='${keywords[i][0]}_a'>`
+                    + `&lt;label for='${keywords[i][0]}_a' class='non-selectable key-label truncate' style='max-width:180px;vertical-align:middle;'`
+                    + ` title="${keywords[i][2]}">${keywords[i][2]}&lt;/label>&amp;nbsp;&amp;nbsp;`
+                    + `&lt;button data-value='${keywords[i][0]}' class='btn btn-info ui-icon ui-icon-circle-b-info'`
+                        + " style='float:right;font-size:1em;display:inline-block;width:20px;height:20px;color:white;' title='View keyword record'>&amp;nbsp;"
+                    +"&lt;/button>"
+                    + `&lt;label class='non-selectable' style='vertical-align:middle;float:right;margin-right:5px;'> [ ${keywords[i][1]} ] &lt;/label>`);
+
+            if(this.assoc_selected &amp;&amp; this.assoc_selected.length != 0 &amp;&amp; this.assoc_selected.indexOf(keywords[i][0]) > -1){
+                $(item).find('input').prop('checked', true);
+            }
+
+            list.append(item);
+        }
+
+        this._on(list.find('.btn-info.ui-icon-circle-b-info'), {
+            click: (e) => {
+                let rec_id = $(e.target).parent().find('input').attr('value');
+                that.openRecordInTab(rec_id);
+            }
+        });
+        this._on(list.find(`input[type="checkbox"]`), {
+            click: (e) => {
+
+                let id = $(e.target).val();
+
+                if($(e.target).is(':checked')){
+                    this.assoc_selected.push(id);
+                }else{
+                    this.removeAssocByID(id);
+                }
+
+                that.disableUpdateBtn(); 
+            }
+        });
+
+        return i;
+    },
+
+    /**
+     * Checks if keyword is already in arr,
+     *  if it is, increase the counter
+     *  else, push it in
+     *
+     * @param {Number} id - Keyword ID searching for
+     * @param {String} title - Keyword Title
+     */
+    isAssocKeyword: function(id, title){
+        
+        let found = 0;
+
+        for(let assoc_keyword of this.assoc_keywords){
+
+            if(assoc_keyword[0] == id){
+                assoc_keyword[1] += 1;
+                found = 1;
+                break;
+            }
+        }
+
+        if(found == 0){
+            this.assoc_keywords.push([id, 1, title]);
+        }
+    },
+
+    /**
+     * Unselects and removes all selected keywords from the associated keywords list
+     */
+    unselectAssoc: function(){
+
+        this.assoc_selected = []; // Empty complete selection
+
+        $('#checkall-assoc').attr('checked', false); // Remove any checked boxes in current view
+
+        this.checkAllOptions($('#associated_field')[0], false); // Uncheck the 'Check all' option
+    },
+    
+    /** Recent Keywords System **/
+
+    /**
+     * Sets up the list of works and calls startup function for Recent Keywords,
+     * This will display a list of keywords from previously viewed works from within a session (life span of the tab),
+     *  a list of 4 work titles is remembered and those four work's keywords are displayed to the UI.
+     * Keywords assigned to the current work are ignored, as are ones already displayed under the recent keyword section.
+     */
+    setupRecentWorks: async function(){
+
+        this.prev_keywords = {};
+
+        if (this.prev_works != null){ // Check if there are any previously viewed works
+
+            let ch_set;
+
+            // Which work will have it's keywords automatically set to checked, each work can only appear once in the list
+            if (this.prev_works[0] != this.options.edit_fields.rec_ID[0]){
+                ch_set = this.prev_works[0];
+            }else if(this.prev_works.length != 1){
+                ch_set = this.prev_works[1];
+            }
+
+            // Now retrieve and display the list
+            for(const prev_work of this.prev_works){
+
+                if(prev_work == this.options.edit_fields.rec_ID[0]) { continue; }
+
+                // Additional information is sent, depending on whether the work's keywords are to be checked or not
+                this.startRecentWork(prev_work, ch_set == prev_work);
+
+                await sleep(50); // This is to allow the keywords to be displayed in the correct order, without this the default checked keywords can appear out of order
+            }
+        }else{
+            this.prev_works = [];
+        }
+
+        // Check if current work can be added to the list of previously (recent) works
+        if(this.prev_works.findIndex(id => id == this.options.edit_fields.rec_ID[0]) == -1 &amp;&amp; !window.hWin.HEURIST4.util.isempty(this.project_keywords)){
+            this.prev_works.unshift(this.options.edit_fields.rec_ID[0]);
+        }
+
+        if(this.prev_works.length == 5){ 
+            this.prev_works.splice(4, 1);
+        }
+
+        localStorage.setItem("prev_classify", JSON.stringify(this.prev_works));
+    },
+
+    /**
+     * Retrieves the supplied work's keywords and add them to the displayed list
+     *
+     * @param {Number} id - Keyword to search for
+     * @param {Boolean} is_checked - whether to set checked by default
+     */
+    startRecentWork: function(id, is_checked=false){
+
+        let that = this;   
+
+        if(id == null){
+            return;
+        }
+
+        let query_request = {q: `t:${this.id_map.RT_Work} ids:"${id}"`, detail: 'detail'}; // Retrieve the record for supplied work code
+
+        window.hWin.HAPI4.RecordMgr.search(query_request,
+            function( response ){
+                if(response.status == window.hWin.ResponseStatus.OK){
+
+                    if(window.hWin.HEURIST4.util.isempty(response.data)) { return; }
+
+                    let recordset = new HRecordSet(response.data);
+                    let record = recordset.getFirstRecord();
+                    let details = record.d;
+
+                    // Check if the record has project keywords to display
+                    if (details[that.id_map.DT_Keywords] != null){
+                        that.getRecentKeywords(details[that.id_map.DT_Keywords], is_checked);
+                    }
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            }
+        );
+    },
+
+    /**
+     * From a list of keywords, retrieve their titles and display them to the user, or remove them if necessary
+     *
+     * @param {Array&lt;Number>} keyword_IDs - array of keyword IDs
+     * @param {Boolean} is_checked - whether to set checked for new option
+     */
+    getRecentKeywords: function(keyword_IDs, is_checked=false){
+        
+        let that = this;
+
+        if(this.full_keywords_list == null){
+            this.getKeywords('recent', keyword_IDs);
+            return;
+        }
+
+        for(const id of keyword_IDs){
+
+            let title = `Record ID - ${id}`;
+            if(this.full_keywords_list[id] !== undefined){
+                title = this.full_keywords_list[id];
+            }
+
+            let found = $('#keyword_field').find(`li#${id}_m`); // Check if keyword is already assigned
+
+            if(found.length == 0){
+
+                found = $('#prev_field').find(`input#${id}_r`); // Check if keyword has been displayed as a recently used keyword
+
+                if(found.length == 0){
+
+                    that.updateRecentKeywordDisplay(id, title); // Add new keyword to recently used keyword list
+
+                    this.prev_keywords[id] = title;
+
+                    if(is_checked){
+                        $('#prev_field').find(`input#${id}_r`).prop('checked', true);
+                    }
+                }
+            }
+        }
+    },
+
+    /*
+        
+
+        Param:
+            id -> Keyword's Record ID
+            title -> Keyword Title
+
+        Return: VOID
+     */
+    /**
+     * Add new keyword to recently used keyword list
+     *
+     * @param {Number} id - Keyword ID
+     * @param {String} title - Keyword Title
+     */
+    updateRecentKeywordDisplay: function(id, title){
+
+        let that = this;
+
+        let list = $('#prev_field');
+        let item = $('&lt;li>');
+        let html = '';
+
+        html = `&lt;input type='checkbox' style='vertical-align:middle;' value='${id}' id='${id}_r'>`;
+
+        html += `&lt;label for='${id}_r' class='non-selectable key-label truncate' style='vertical-align:middle;' title="${title}"> ${title} &lt;/label>`
+                + "&lt;button class='btn btn-info ui-icon ui-icon-circle-b-info'"
+                    + " style='float:right;font-size:1em;display:inline-block;width:20px;height:20px;color:white;' title='View keyword record'>&amp;nbsp;"
+                + "&lt;/button>";
+
+        item.html(html);
+
+        $(item).find(`#${id}`).on('click', function(e){ that.disableUpdateBtn(); });
+        $(item).find('.btn-info').on('click', function(e){ that.openRecordInTab(id); });
+
+        list.append(item);
+    },
+
+    /**
+     * Check if provided keyword is a displayed as a recently used keyword
+     *
+     * @param {Number} id - Keyword ID
+     */
+    isRecentKeyword: function(id){
+
+        if (this.prev_works == null || $.isEmptyObject(this.prev_keywords) || this.prev_keywords[id] == undefined){ // Check for a list of previous keywords
+            return;
+        }
+
+        this.updateRecentKeywordDisplay(id, this.prev_keywords[id]);
+    },
+
+    /** Assigned Keyword System **/
+
+    /**
+     * Add Newly Assigned Keyword to Table UI
+     *
+     * @param {String} title - Keyword Title
+     * @param {Number} id - Keyword ID
+     */
+    showKeyword: function(id, title){
+
+        let that = this;
+
+        let list = $('#keyword_field');
+
+        let item = $(`&lt;li id="${id}_m">`);
+
+        item.html(`&lt;label class='key-label truncate' title="${title}">${title}&lt;/label>`
+
+        + `&lt;button data-value='${id}' class='btn btn-info ui-icon ui-icon-circle-b-info'`
+        + " style='float:right;font-size:1em;display:inline-block;width:20px;height:20px;color:white;' title='View keyword record'>&amp;nbsp;&lt;/button>"
+
+        + `&lt;button data-value='${id}' class='btn btn-info btn-lookup'`
+        + " style='float:right;margin-right:5px;font-size:0.75em;display:inline-block;height:20px;' title='Search for associated keywords'>Find Associated&lt;/button>"
+        
+        + `&lt;button data-value='${id}' class='btn btn-delete ui-icon ui-icon-close'`
+        + " style='float:right;margin-right:5px;font-size:1.1em;display:inline-block;width:20px;height:20px;' title='Remove keyword from list'>&amp;nbsp;&lt;/button>");
+
+        $(item).find('.btn-info.ui-icon-circle-b-info').on('click', function(e){ that.openRecordInTab(id); });
+        $(item).find('.btn-lookup').on('click', function(e){ that.setupAssocKeywords(id); });
+        $(item).find('.btn-delete').on('click', function(e){ that.removeKeyword($(e.target), id); });
+
+        list.append(item);
+    },
+
+    /**
+     * Add new Keyword to Assigned Keywords List
+     *
+     * @param {Number} id - Keyword ID
+     * @param {String} title - Keyword Title
+     */
+    addKeyword: function(id, title){
+
+        /* Remove from Associated List */
+        if($('#associated_field').find(`input#${id}_a`).parent().length > 0){
+            $('#associated_field').find(`input#${id}_a`).parent().remove();
+        }
+        /* Remove from Recent List */
+        if($('#prev_field').find(`input#${id}_r`).parent().length > 0){
+            $('#prev_field').find(`input#${id}_r`).parent().remove();
+        }
+
+        if($('#keyword_field').find(`li#${id}_m`).length == 0){
+
+            this.showKeyword(id, title); // Add to Table
+
+            if(window.hWin.HEURIST4.util.isempty(this.project_keywords)){
+                this.project_keywords = [];
+            }
+
+            this.project_keywords.push(id); // Add to List
+        }
+    },
+
+    /*
+        
+
+        Param: id -> Selected Keyword's Record ID
+
+        Return: VOID
+     */
+    /**
+     * Remove selected keyword from Assigned Keyword Table and List
+     *
+     * @param {jQuery} $ele - Element selected by jQuery
+     * @param {Number} id - Keyword ID
+     */
+    removeKeyword: function($ele, id){
+
+        $ele.parent().remove(); // Remove keyword from list
+
+        // Remove keywords from saved list
+        let index = this.project_keywords.indexOf(id);
+        if(index >= 0){
+            this.project_keywords.splice(index, 1);
+        }
+        
+        this.isRecentKeyword(id); // Check if keyword was a recent keyword
+        this.updateAssocDisplay(); // Check if keyword was a associated keyword
+    },
+
+    /**
+     * Display all found editions for the selected work
+     */
+    showEditions: function(){
+
+        let editions = '';
+        let title = 'List of Editions';
+
+        for(const cur_edition of this.editions_info){
+            let rec_url = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?db=${window.hWin.HAPI4.database}&amp;recID=${cur_edition[1]}`;
+            editions = editions.concat(`&lt;div style='font-size: 1.2em;'>${cur_edition[0]} - &lt;a href='${rec_url}' target='_blank' rel='noopener'> view record &lt;/a>&lt;/div>`, "&lt;br>&lt;br>");
+        }
+
+        if(editions == ''){
+            editions = 'No Editions Found';
+            title = 'No editions';
+        }
+
+        window.hWin.HEURIST4.msg.showMsgDlg(editions, null, title, {default_palette_class: 'ui-heurist-explore'});
+    },
+
+    /** Other Function **/
+
+    /**
+     * Determines which keywords have been checked
+     *
+     * @param {HTMLDListElement} list - HTML List to retrieve checked items from
+     * 
+     * @returns {Array&lt;Number>} list of checked keywords
+     */
+    getAllChecked: function(list){
+
+        let checked_items = [];
+
+        let items = $(list).find('li');
+
+        for(const item of items){
+
+            let chkbox = $(item).find('input');
+
+            if(chkbox.length == 1 &amp;&amp; chkbox.is(':checked')){
+                checked_items.push(chkbox.val());
+            }
+        }
+
+        return checked_items;
+    },
+
+    /**
+     * Disable the Update Record button when a checkbox is checked, displaying message to uncheck or add selections
+     */
+    disableUpdateBtn: function(){
+
+        if($('.mpce').find('input:checked').not('.check-all').length > 0 || this.assoc_selected.length > 0){
+            $($('.mpce')[0].parentNode.parentNode).find('.btnDoAction').attr('disabled', true).css({'cursor': 'default', 'opacity': '0.5'});
+            $($('.mpce')[0].parentNode.parentNode).find('#save-msg').css({'margin':'10px', 'display':'inline-block'});
+        }
+        else{
+            $($('.mpce')[0].parentNode.parentNode).find('.btnDoAction').attr('disabled', false).css({'cursor': 'default', 'opacity': '1'});
+            $($('.mpce')[0].parentNode.parentNode).find('#save-msg').css({'margin':'10px', 'display':'none'});
+        }
+    },
+
+    /**
+     * Toggles the checkboxes based on whether the "Check All" options is set
+     *
+     * @param {HTMLLIElement} list - HTML List to retrieve checked items from
+     * @param {Boolean} isChecked - whether we are checking all boxes or not
+     * @param {Boolean} isAssoc - is this for the associated keywords, needs extra handling
+     */
+    checkAllOptions: function(list, isChecked, isAssoc=false){
+
+        let items = $(list).find('li');
+
+        for(const item of items){
+
+            let chkbox = $(item).find('input');
+
+            if(chkbox.length == 0){
+                continue;
+            }
+
+            chkbox.prop('checked', isChecked);
+
+            if(!isAssoc){
+                continue;
+            }
+
+            if(isChecked){
+                this.assoc_selected.push(chkbox.val());
+            }else{
+                this.removeAssocByID(chkbox.val());
+            }
+
+        }
+
+        this.disableUpdateBtn();
+    },
+
+    /**
+     * Remove keyword by ID from the associated keywords list
+     *
+     * @param {Number} id - Keyword ID
+     */
+    removeAssocByID: function(id){
+
+        if(this.assoc_selected.length == 0){ return; }
+
+        let index = this.assoc_selected.indexOf(id);
+        if(index > -1){
+            this.assoc_selected.splice(index, 1);
+        }
+    },
+
+    /**
+     * Open the provided record in a separate tab
+     *
+     * @param {Number} id - Record ID
+     */
+    openRecordInTab: function(id){
+
+        let rec_url = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?db=${window.hWin.HAPI4.database}&amp;recID=${id}`;
+
+        window.open(rec_url, "_blank");
+    },
+
+    /**
+     * Mapping Ids for Detail and Record Types (Heurist Specific)
+     *
+     * @param {Object} mapping - field and vocab mapping for the current setup
+     * @param {Number} main_rty_id - record type this lookup is assigned to
+     */
+    mapIds: function(mapping, main_rty_id){
+
+        // Detail Type, Record Type and Vocab Id Map, for now you need to replace all instances of each value with the database correct one
+        this.id_map.DT_MPCEId = (mapping['workID'] != null) ? mapping['workID'] : 952; // MPCE ID Details Index
+        this.id_map.DT_Category = (mapping['parisianClassify'] != null) ? mapping['parisianClassify'] : 1060; // Parisian Category Details Index
+        this.id_map.DT_Keywords = (mapping['projectKywds'] != null) ? mapping['projectKywds'] : 955; // Project Keywords Details Index
+        this.id_map.DT_Basis = (mapping['basisClassify'] != null) ? mapping['basisClassify'] : 1034; // Basis for Classifcation Details Index
+        this.id_map.DT_Notes = (mapping['classifyNotes'] != null) ? mapping['classifyNotes'] : 1035; // Classification Notes Details Index
+
+        let dty_keywords = $Db.dty(this.id_map.DT_Keywords);
+        let rty_keywords = (dty_keywords['dty_PtrTargetRectypeIDs'] != null) ? dty_keywords['dty_PtrTargetRectypeIDs'] : 56;
+
+        this.id_map.RT_Editions = 54; // Editions Table 
+        this.id_map.RT_Work = (main_rty_id != null) ? main_rty_id : 55; // Super Book (Works) Table
+        this.id_map.RT_Keyword = rty_keywords; // Project Keywords Table
+
+        let dty_category = $Db.dty(this.id_map.DT_Category);
+        let trm_category = (dty_category['dty_JsonTermIDTree'] != null) ? dty_category['dty_JsonTermIDTree'] : 6953;
+        let dty_basis = $Db.dty(this.id_map.DT_Basis);
+        let trm_basis = (dty_basis['dty_JsonTermIDTree'] != null) ? dty_basis['dty_JsonTermIDTree'] : 6936;
+
+        this.id_map.VI_Category = trm_category; // Parisian Category Vocab ID
+        this.id_map.VI_Basis = trm_basis; // Basis for Classification Vocab ID
+    }
+});
+
+/** Misc Function **/
+
+/**
+ * Comparison Function for the arr.sort() function for the 2D of associated keywords
+ * Note: arr[n][1] == the number of occurrances
+ *
+ * @param {Array} a - Array Index 1
+ * @param {Array} b - Array Index 2
+ * @returns {Boolean} whether the second element within index A is larger than B
+ */
+function compareIndexes(a, b){
+
+    if(a[1] == b[1]){
+        return 0;
+    }
+
+    return (a[1] > b[1]) ? -1 : 1;
+}
+
+/**
+ * Merge two arrays, keeping only unqiue values
+ *
+ * @param {Array} a - Base array
+ * @param {Array} b - Array to be merged
+ *
+ * @returns {Array} merged array
+ */
+function mergeArraysUnique(a, b){
+    
+    if(!Array.isArray(a)){
+        msgToConsole('mergeArraysUnique() Error: arguement \'a\' is not an array', a, 1);
+    }
+
+    if(!Array.isArray(b)){
+        msgToConsole('mergeArraysUnique() Error: arguement \'b\' is not an array', b, 1);
+    }
+
+    if(a.length == 0){
+        return b;
+    }
+
+    for(const value of b){
+        if(a.indexOf(value) == -1){
+            a.push(value);
+        }
+    }
+
+    return a;
+}
+
+/**
+ * Message/Data pair for printing to the console
+ *
+ * @param {String} msg - error message
+ * @param {Any} data - error data
+ * @param {Number} type - error type; 0: Warning, 1: Error
+ */
+function msgToConsole(msg, data, type=0){
+
+    type == 0 ? console.warn(msg) : console.error(msg);
+
+    if(data != null){
+        console.info(data);
+    }
+}
+
+/**
+ * Sleep Function
+ *
+ * @param {Number} ms - timeout time in ms
+ * @returns {Promise} promise to await timeout
+ */
+function sleep(ms){
+    return new Promise(r => setTimeout(r, ms));
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="HEURIST4.dbs.html">dbs</a></li><li><a href="HEURIST4.geo.html">geo</a></li><li><a href="HEURIST4.msg.html">msg</a></li><li><a href="HEURIST4.query.html">query</a></li><li><a href="HEURIST4.util.html">util</a></li><li><a href="NodeSelection.html">NodeSelection</a></li><li><a href="heurist.buttonsMenu.html">buttonsMenu</a></li><li><a href="heurist.controlPanel.html">controlPanel</a></li><li><a href="heurist.dbAction.html">dbAction</a></li><li><a href="heurist.dbVerify.html">dbVerify</a></li><li><a href="heurist.dbVerifyURLs.html">dbVerifyURLs</a></li><li><a href="heurist.editTranslations.html">editTranslations</a></li><li><a href="heurist.editing_input.html">editing_input</a></li><li><a href="heurist.navigation.html">navigation</a></li><li><a href="heurist.recordAccess.options.html">options</a></li><li><a href="heurist.recordAction.options.html">options</a></li><li><a href="heurist.recordAdd.options.html">options</a></li><li><a href="heurist.recordAddButton.options.html">options</a></li><li><a href="heurist.recordAddLink.options.html">options</a></li><li><a href="heurist.recordAddLinkMatch.options.html">options</a></li><li><a href="heurist.recordArchive.options.html">options</a></li><li><a href="heurist.recordBookmark.options.html">options</a></li><li><a href="heurist.recordDataTable.options.html">options</a></li><li><a href="heurist.recordDelete.options.html">options</a></li><li><a href="heurist.recordExport.options.html">options</a></li><li><a href="heurist.recordExportCSV.options.html">options</a></li><li><a href="heurist.recordFindDuplicates.options.html">options</a></li><li><a href="heurist.recordImportAnnotations.options.html">options</a></li><li><a href="heurist.recordNotify.options.html">options</a></li><li><a href="heurist.recordRate.options.html">options</a></li><li><a href="heurist.recordTag.options.html">options</a></li><li><a href="heurist.recordTemplate.options.html">options</a></li><li><a href="heurist.recordTitles.options.html">options</a></li><li><a href="heurist.recordUploadedFilesIndex.options.html">options</a></li><li><a href="heurist.selectFile.html">selectFile</a></li><li><a href="heurist.slidersMenu.html">slidersMenu</a></li></ul><h3>Classes</h3><ul><li><a href="ActionHandler.html">ActionHandler</a></li><li><a href="CmsManager.html">CmsManager</a></li><li><a href="Color.html">Color</a></li><li><a href="CrosstabsAnalysis.html">CrosstabsAnalysis</a></li><li><a href="EditorCodeMirror.html">EditorCodeMirror</a></li><li><a href="HEditing.html">HEditing</a></li><li><a href="HLayout.html">HLayout</a></li><li><a href="HLayoutMgr.html">HLayoutMgr</a></li><li><a href="HMapLayer.html">HMapLayer</a></li><li><a href="HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRapidFieldAdditions.HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRecordSearch.html">HRecordSearch</a></li><li><a href="HRecordSet.html">HRecordSet</a></li><li><a href="HSystemMgr.html">HSystemMgr</a></li><li><a href="HintDiv.html">HintDiv</a></li><li><a href="JapaneseCalendar.html">JapaneseCalendar</a></li><li><a href="L.Control.Help.html">Help</a></li><li><a href="L.Control.Manager.html">Manager</a></li><li><a href="L.Control.Publish.html">Publish</a></li><li><a href="Solver.html">Solver</a></li><li><a href="TDuration.html">TDuration</a></li><li><a href="Temporal.html">Temporal</a></li><li><a href="hAPI.html">hAPI</a></li><li><a href="hAPI-HRecordMgr.html">HRecordMgr</a></li><li><a href="window.TDate.html">TDate</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HPublishDialog">HPublishDialog</a></li><li><a href="global.html#HSvsEdit">HSvsEdit</a></li><li><a href="global.html#SelectLinkField">SelectLinkField</a></li><li><a href="global.html#_addInput">_addInput</a></li><li><a href="global.html#_checkStructureFromSource">_checkStructureFromSource</a></li><li><a href="global.html#_checkYear">_checkYear</a></li><li><a href="global.html#_closeDialog">_closeDialog</a></li><li><a href="global.html#_create">_create</a></li><li><a href="global.html#_destroy">_destroy</a></li><li><a href="global.html#_detectHeurist">_detectHeurist</a></li><li><a href="global.html#_doSave">_doSave</a></li><li><a href="global.html#_fromDataToUI">_fromDataToUI</a></li><li><a href="global.html#_getActionButtons">_getActionButtons</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_initControls">_initControls</a></li><li><a href="global.html#_initDialog">_initDialog</a></li><li><a href="global.html#_initInnerHeader">_initInnerHeader</a></li><li><a href="global.html#_initModal">_initModal</a></li><li><a href="global.html#_initOffcanvas">_initOffcanvas</a></li><li><a href="global.html#_japaneseYearToGregorian">_japaneseYearToGregorian</a></li><li><a href="global.html#_loadParentLookup">_loadParentLookup</a></li><li><a href="global.html#_popupDialog">_popupDialog</a></li><li><a href="global.html#_preImportCheck">_preImportCheck</a></li><li><a href="global.html#_processSPARQLRow">_processSPARQLRow</a></li><li><a href="global.html#_refresh">_refresh</a></li><li><a href="global.html#_refreshCaptcha">_refreshCaptcha</a></li><li><a href="global.html#_setOption">_setOption</a></li><li><a href="global.html#_showRecordViewPopup">_showRecordViewPopup</a></li><li><a href="global.html#_switchToDataMode">_switchToDataMode</a></li><li><a href="global.html#_theme_editing_symbology">_theme_editing_symbology</a></li><li><a href="global.html#_updatePanels">_updatePanels</a></li><li><a href="global.html#_validateFromGregorian">_validateFromGregorian</a></li><li><a href="global.html#addAssoctoAssigned">addAssoctoAssigned</a></li><li><a href="global.html#addBackgroundCircles">addBackgroundCircles</a></li><li><a href="global.html#addContainer">addContainer</a></li><li><a href="global.html#addForce">addForce</a></li><li><a href="global.html#addForegroundCircles">addForegroundCircles</a></li><li><a href="global.html#addIcons">addIcons</a></li><li><a href="global.html#addKeyword">addKeyword</a></li><li><a href="global.html#addLabels">addLabels</a></li><li><a href="global.html#addLevel">addLevel</a></li><li><a href="global.html#addLines">addLines</a></li><li><a href="global.html#addMarkerDefinitions">addMarkerDefinitions</a></li><li><a href="global.html#addNodes">addNodes</a></li><li><a href="global.html#addPrevtoAssigned">addPrevtoAssigned</a></li><li><a href="global.html#addSelectionBox">addSelectionBox</a></li><li><a href="global.html#addTitles">addTitles</a></li><li><a href="global.html#applyRules">applyRules</a></li><li><a href="global.html#autofill_login">autofill_login</a></li><li><a href="global.html#browseRecords">browseRecords</a></li><li><a href="global.html#calculateImageExtentFromWorldFile">calculateImageExtentFromWorldFile</a></li><li><a href="global.html#changeDisplay">changeDisplay</a></li><li><a href="global.html#changeViewMode">changeViewMode</a></li><li><a href="global.html#checkAllOptions">checkAllOptions</a></li><li><a href="global.html#checkStoredSettings">checkStoredSettings</a></li><li><a href="global.html#clearContent">clearContent</a></li><li><a href="global.html#close">close</a></li><li><a href="global.html#closeDialog">closeDialog</a></li><li><a href="global.html#commonCodeInit">commonCodeInit</a></li><li><a href="global.html#commonOnAdd">commonOnAdd</a></li><li><a href="global.html#compareIndexes">compareIndexes</a></li><li><a href="global.html#correctionOfInvalidTerm">correctionOfInvalidTerm</a></li><li><a href="global.html#createOverlay">createOverlay</a></li><li><a href="global.html#currentNode">currentNode</a></li><li><a href="global.html#daysInMonth">daysInMonth</a></li><li><a href="global.html#determineColour">determineColour</a></li><li><a href="global.html#disableUpdateBtn">disableUpdateBtn</a></li><li><a href="global.html#doAction">doAction</a></li><li><a href="global.html#doAuthentication">doAuthentication</a></li><li><a href="global.html#doImport">doImport</a></li><li><a href="global.html#doRegister">doRegister</a></li><li><a href="global.html#doSamlLogin">doSamlLogin</a></li><li><a href="global.html#doSearchByID">doSearchByID</a></li><li><a href="global.html#drag_link_line">drag_link_line</a></li><li><a href="global.html#drag_link_source_id">drag_link_source_id</a></li><li><a href="global.html#drag_link_target_id">drag_link_target_id</a></li><li><a href="global.html#drag_link_timer">drag_link_timer</a></li><li><a href="global.html#dragend">dragend</a></li><li><a href="global.html#dragmove">dragmove</a></li><li><a href="global.html#dragstart">dragstart</a></li><li><a href="global.html#editCMS2">editCMS2</a></li><li><a href="global.html#editCMS_ElementCfg">editCMS_ElementCfg</a></li><li><a href="global.html#editCMS_SelectElement">editCMS_SelectElement</a></li><li><a href="global.html#editCMS_SiteMenu">editCMS_SiteMenu</a></li><li><a href="global.html#editCMS_WidgetCfg">editCMS_WidgetCfg</a></li><li><a href="global.html#editSymbology">editSymbology</a></li><li><a href="global.html#editTheme">editTheme</a></li><li><a href="global.html#enable_register">enable_register</a></li><li><a href="global.html#executeFormula">executeFormula</a></li><li><a href="global.html#f">f</a></li><li><a href="global.html#first_level_rty_ID">first_level_rty_ID</a></li><li><a href="global.html#fixCalendarPickerCMDs">fixCalendarPickerCMDs</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#formatGregJulian">formatGregJulian</a></li><li><a href="global.html#fromJD">fromJD</a></li><li><a href="global.html#fromJSDate">fromJSDate</a></li><li><a href="global.html#fset">fset</a></li><li><a href="global.html#getAllChecked">getAllChecked</a></li><li><a href="global.html#getClass">getClass</a></li><li><a href="global.html#getContainer">getContainer</a></li><li><a href="global.html#getDataFromServer">getDataFromServer</a></li><li><a href="global.html#getEntityRadius">getEntityRadius</a></li><li><a href="global.html#getEraFromGregorian">getEraFromGregorian</a></li><li><a href="global.html#getEraFromJapaneseStr">getEraFromJapaneseStr</a></li><li><a href="global.html#getEraLimits">getEraLimits</a></li><li><a href="global.html#getEras">getEras</a></li><li><a href="global.html#getGephiFormat">getGephiFormat</a></li><li><a href="global.html#getKeywords">getKeywords</a></li><li><a href="global.html#getKeywordsNextStep">getKeywordsNextStep</a></li><li><a href="global.html#getLineLength">getLineLength</a></li><li><a href="global.html#getLineWidth">getLineWidth</a></li><li><a href="global.html#getMarkerWidth">getMarkerWidth</a></li><li><a href="global.html#getNodeDataById">getNodeDataById</a></li><li><a href="global.html#getRecentKeywords">getRecentKeywords</a></li><li><a href="global.html#getRecordOverlayData">getRecordOverlayData</a></li><li><a href="global.html#getRelationOverlayData">getRelationOverlayData</a></li><li><a href="global.html#getRulesArray">getRulesArray</a></li><li><a href="global.html#getSelected">getSelected</a></li><li><a href="global.html#getSelection">getSelection</a></li><li><a href="global.html#getSetting">getSetting</a></li><li><a href="global.html#getURL">getURL</a></li><li><a href="global.html#gregorianToJapaneseStr">gregorianToJapaneseStr</a></li><li><a href="global.html#hMapDocument">hMapDocument</a></li><li><a href="global.html#hRecordAction">hRecordAction</a></li><li><a href="global.html#handleNodeAction">handleNodeAction</a></li><li><a href="global.html#handleSettingsInUI">handleSettingsInUI</a></li><li><a href="global.html#hexToFilter">hexToFilter</a></li><li><a href="global.html#hexportMenu">hexportMenu</a></li><li><a href="global.html#imgFilter">imgFilter</a></li><li><a href="global.html#initProfilePreferences">initProfilePreferences</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isA">isA</a></li><li><a href="global.html#isAssocKeyword">isAssocKeyword</a></li><li><a href="global.html#isMonthSpan">isMonthSpan</a></li><li><a href="global.html#isRecentKeyword">isRecentKeyword</a></li><li><a href="global.html#isTemporal">isTemporal</a></li><li><a href="global.html#isValid">isValid</a></li><li><a href="global.html#japaneseToGregorian">japaneseToGregorian</a></li><li><a href="global.html#japaneseToGregorianStr">japaneseToGregorianStr</a></li><li><a href="global.html#keywordLookup">keywordLookup</a></li><li><a href="global.html#loadHtmlContent">loadHtmlContent</a></li><li><a href="global.html#log10">log10</a></li><li><a href="global.html#login_dialog">login_dialog</a></li><li><a href="global.html#lookupEditions">lookupEditions</a></li><li><a href="global.html#lookupGoogle">lookupGoogle</a></li><li><a href="global.html#lookupHathiTrust">lookupHathiTrust</a></li><li><a href="global.html#lookupKarlsruhePortal">lookupKarlsruhePortal</a></li><li><a href="global.html#lookupWorldCat">lookupWorldCat</a></li><li><a href="global.html#mapIds">mapIds</a></li><li><a href="global.html#menuActionHandler">menuActionHandler</a></li><li><a href="global.html#mergeArraysUnique">mergeArraysUnique</a></li><li><a href="global.html#msgToConsole">msgToConsole</a></li><li><a href="global.html#newDate">newDate</a></li><li><a href="global.html#onAdd">onAdd</a></li><li><a href="global.html#onAuthentication">onAuthentication</a></li><li><a href="global.html#onNodeClick">onNodeClick</a></li><li><a href="global.html#onPageInit">onPageInit</a></li><li><a href="global.html#onRecordNodeClick">onRecordNodeClick</a></li><li><a href="global.html#onRemove">onRemove</a></li><li><a href="global.html#onTermSaveError">onTermSaveError</a></li><li><a href="global.html#open">open</a></li><li><a href="global.html#openRecordInTab">openRecordInTab</a></li><li><a href="global.html#openSearchMenu">openSearchMenu</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#popupDialog">popupDialog</a></li><li><a href="global.html#prevSessionExists">prevSessionExists</a></li><li><a href="global.html#project_keywords">project_keywords</a></li><li><a href="global.html#putSetting">putSetting</a></li><li><a href="global.html#removeAssocByID">removeAssocByID</a></li><li><a href="global.html#removeKeyword">removeKeyword</a></li><li><a href="global.html#removeOverlay">removeOverlay</a></li><li><a href="global.html#removeOverlays">removeOverlays</a></li><li><a href="global.html#removeSetting">removeSetting</a></li><li><a href="global.html#renderAssocKeywods">renderAssocKeywods</a></li><li><a href="global.html#renderContent">renderContent</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#saveRules">saveRules</a></li><li><a href="global.html#selectRecord">selectRecord</a></li><li><a href="global.html#setFormulaMode">setFormulaMode</a></li><li><a href="global.html#setGravity">setGravity</a></li><li><a href="global.html#setLinkMode">setLinkMode</a></li><li><a href="global.html#setSelected">setSelected</a></li><li><a href="global.html#setSelection">setSelection</a></li><li><a href="global.html#setValue">setValue</a></li><li><a href="global.html#setupAssocKeywords">setupAssocKeywords</a></li><li><a href="global.html#setupCaptcha">setupCaptcha</a></li><li><a href="global.html#setupRecentWorks">setupRecentWorks</a></li><li><a href="global.html#setupResetPin">setupResetPin</a></li><li><a href="global.html#show">show</a></li><li><a href="global.html#showEditions">showEditions</a></li><li><a href="global.html#showHelp">showHelp</a></li><li><a href="global.html#showKeyword">showKeyword</a></li><li><a href="global.html#showLoginDialog">showLoginDialog</a></li><li><a href="global.html#showNodeInformation">showNodeInformation</a></li><li><a href="global.html#showSearchBuilder">showSearchBuilder</a></li><li><a href="global.html#showSearchFacetedWizard">showSearchFacetedWizard</a></li><li><a href="global.html#showWarningAboutTermUsage">showWarningAboutTermUsage</a></li><li><a href="global.html#simplePointsToWKT">simplePointsToWKT</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#startRecentWork">startRecentWork</a></li><li><a href="global.html#temporalSimplifyDate">temporalSimplifyDate</a></li><li><a href="global.html#temporalToHumanReadableString">temporalToHumanReadableString</a></li><li><a href="global.html#tick">tick</a></li><li><a href="global.html#toJD">toJD</a></li><li><a href="global.html#toJSDate">toJSDate</a></li><li><a href="global.html#translationFromUI">translationFromUI</a></li><li><a href="global.html#translationSupport">translationSupport</a></li><li><a href="global.html#translationToUI">translationToUI</a></li><li><a href="global.html#truncateText">truncateText</a></li><li><a href="global.html#unselectAssoc">unselectAssoc</a></li><li><a href="global.html#updateAssocDisplay">updateAssocDisplay</a></li><li><a href="global.html#updateAssocList">updateAssocList</a></li><li><a href="global.html#updateCircles">updateCircles</a></li><li><a href="global.html#updateCurvedLines">updateCurvedLines</a></li><li><a href="global.html#updateLabels">updateLabels</a></li><li><a href="global.html#updateNodes">updateNodes</a></li><li><a href="global.html#updateRecentKeywordDisplay">updateRecentKeywordDisplay</a></li><li><a href="global.html#updateRectangles">updateRectangles</a></li><li><a href="global.html#updateRuleBuilder">updateRuleBuilder</a></li><li><a href="global.html#updateStatus">updateStatus</a></li><li><a href="global.html#updateStraightLines">updateStraightLines</a></li><li><a href="global.html#validateResetPin">validateResetPin</a></li><li><a href="global.html#visualizeData">visualizeData</a></li><li><a href="global.html#visualizeSelection">visualizeSelection</a></li><li><a href="global.html#weekDay">weekDay</a></li><li><a href="global.html#weekOfYear">weekOfYear</a></li><li><a href="global.html#zoomed">zoomed</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Jul 24 2025 18:09:14 GMT+0400 (GMT+04:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

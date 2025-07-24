@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: hclient/widgets/entity/manageDefRecTypes.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: hclient/widgets/entity/manageDefRecTypes.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+* @file manageDefRecTypes.js
+* @brief Manages Record Type definitions.
+* @fileOverview Provides a UI for creating, configuring, listing, and managing Record Types within Heurist. This includes setting properties like name, associated group, defining its structure (fields), and managing templates or masks.
+* @project     Heurist academic knowledge management system
+*
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov &lt;osmakov@gmail.com>
+* @author      Ian Johnson &lt;ian.johnson.heurist@gmail.com>
+* @since       4.0
+*/
+
+
+
+/*
+we may take data from 
+1) use_cache = false  from server on every search request (live data) 
+2) use_cache = true   from client cache - it loads once per heurist session (actually we force load)
+*/
+/**
+ * @widget heurist.manageDefRecTypes
+ * @brief Widget for managing Record Type definitions.
+ * @extends $.heurist.manageEntity
+ * @property {?object} import_structure If provided, enables import mode, allowing selection of record types from a remote Heurist instance.
+ * @property {boolean} [use_structure=false] Internal flag, true if `import_structure` is active.
+ * @property {boolean} [isFrontUI=false] If true, adapts UI for front-end display, including a groups editor panel.
+ * @property {?number} rtg_ID ID of the record type group to filter by, used by the search/filter controls.
+ * @property {object} [ui_params] Stores UI preferences like visible fields and column widths, loaded from `usrPreferences`.
+ * @property {string} [default_palette_class='ui-heurist-design'] Default palette class for the widget.
+ * @property {boolean} [innerTitle=false] Whether to display an inner title.
+ * @property {string} [layout_mode='short'] The layout mode for the widget.
+ * @property {boolean} [use_cache=true] Whether to use caching for entity data.
+ * @property {number} [edit_height=640] Default height of the edit dialog.
+ * @property {number} [edit_width=1000] Default width of the edit dialog.
+ * @property {number} [height=640] Default height of the widget.
+ * @property {string} edit_mode Determines editing behavior ('editonly', 'popup').
+ * @property {string} select_mode Determines selection behavior ('manager', 'select_multi', 'select_single').
+ * @property {number} width Default width of the widget, adjusted based on select_mode.
+ */
+$.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
+   
+    _entityName:'defRecTypes',
+    fieldSelectorLast:null,
+    fieldSelector:null,
+    fieldSelectorOrig:null,
+    
+    is_new_icons: true,
+    
+    rst_links: null, //reference to links data $Db.rst_links
+
+    usrPreferences:{},
+    defaultPrefs:{
+        width:(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
+        height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
+//rtyid,'ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'        
+        fields:['icon','fields','edit','name','count','filter','addrec','show','duplicate','status','rtyid','ccode','description'] 
+        //'editstr',
+        },
+    fields_width: {rtyid:30,ccode:80,addrec:34,filter:34,count:40,group:34,icon:40,edit:34,editstr:34,
+                name:150,description:34,show:34,duplicate:34,fields:34,status:34},
+    //fields_name:{rtyid:'ID',ccode:'Code',addrec:'Add',filter:'Filter',count:'Count',group:'Group',icon:'Icon',edit:'Attr',editstr:'Edit',
+    //             name:'Name',description:'Description',show:'Show',duplicate:'Dup',fields:'Info',status:'Del'},
+
+
+    /**
+     * @brief Initializes the widget.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @description Sets up default options, handles `import_structure` mode,
+     * adjusts dimensions based on `select_mode`, and registers event listeners
+     * for structure changes, record updates, and window resizing.
+     */
+    _init: function() {
+
+        this.element.addClass(this._entityName); //to find all exisiting editors in application
+        
+        this.options.default_palette_class = 'ui-heurist-design';
+        
+        this.options.innerTitle = false;
+        
+        //define it to load recordtypes from other server/database - if defined it allows selection only
+        if(this.options.import_structure){ //for example HEURIST_INDEX_BASE_URL?db=Heurist_Reference_Set
+            if(this.options.select_mode=='manager') this.options.select_mode='select_single';
+            this.options.use_cache = true;
+            this.options.use_structure = true; //use HEURIST4.remote.rectypes for import structures    
+        }else{
+            this.options.use_cache = true;
+            this.options.use_structure = false
+        }
+        
+        
+        if(!this.options.layout_mode) this.options.layout_mode = 'short';
+        
+       
+        this.options.edit_height = 640;
+        this.options.edit_width = 1000;
+        this.options.height = 640;
+
+        if(this.options.edit_mode=='editonly'){
+            this.options.select_mode = 'manager';
+            this.options.layout_mode = 'editonly';
+            this.options.width = 1000;
+           
+        }else
+        //for selection mode set some options
+        if(this.options.select_mode!='manager' &amp;&amp; this.options.select_mode!='select_multi'){
+            this.options.width = (isNaN(this.options.width) || this.options.width&lt;750)?750:this.options.width;                    
+            //this.options.edit_mode = 'none'
+        }
+        
+        //this.options.edit_mode=='popup'
+        if(this.options.select_mode=='select_multi' || this.options.select_mode=='select_single'){ //special compact case
+            this.options.width = 540;
+        }
+            
+            
+        this._super();
+        
+        
+        let that = this;
+        
+        //
+        if(!this.options.import_structure){        
+            this.rst_links = $Db.rst_links_base();
+        
+            window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+                function(data) { 
+                    if(!data || (data.source != that.uuid &amp;&amp; data.type == 'rty'))
+                    {
+                        that._loadData();    
+                    }else if(data &amp;&amp; (data.type == 'dty' || data.type == 'rst')){
+                        that.rst_links = $Db.rst_links_base();
+                    }
+                });
+                
+            window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_REC_UPDATE,
+                function(data) { 
+
+                    if(that.element.is(':visible'))
+                    $Db.get_record_counts(function(){
+                        that._loadData();
+                    });                                
+                });
+                
+            if(this.options.isFrontUI &amp;&amp; this.options.select_mode!='select_multi' &amp;&amp; this.options.select_mode!='select_single'){ //adjust table widths
+
+                window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_WINDOW_RESIZE, 
+                    function(){
+                        if(that.recordList &amp;&amp; that.recordList.resultList('instance')){
+                            that.recordList.resultList('applyViewMode','list', true);
+                            that.recordList.resultList('refreshPage');
+                        }
+                    });
+            
+            /*
+                that._delayOnResize = 0;
+                window.onresize = function(){
+                    if(that._delayOnResize) clearTimeout(that._delayOnResize);
+                    that._delayOnResize = setTimeout(function(){
+                        if(that.recordList &amp;&amp; that.recordList.resultList('instance')){
+                            that.recordList.resultList('applyViewMode','list', true);
+                            that.recordList.resultList('refreshPage');
+                        }
+                    },500);
+                };
+                */
+            }
+            
+        }
+                
+        
+    },
+    
+    /**
+     * @brief Cleans up the widget upon destruction.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @description Removes event listeners registered during initialization.
+     */
+    _destroy: function() {
+        
+       window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);        
+       window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_WINDOW_RESIZE);        
+       window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_REC_UPDATE);        
+        
+       this._super(); 
+    },
+    
+    /**
+     * @brief Initializes the controls for the widget.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @description Sets up UI based on `edit_mode` and `select_mode`.
+     * Initializes search form, result list (with draggable items if in manager mode),
+     * and record type groups panel if `isFrontUI` is true. Loads initial data.
+     * @returns {boolean} False if the parent's `_initControls` fails, otherwise true.
+     */
+    _initControls: function() {
+        
+        if(!this._super()){
+            return false;
+        }
+        
+        if(this.options.edit_mode=='editonly'){
+            this._initEditorOnly();
+            return;
+        }
+        
+       
+       
+        this.searchForm.parent().css({'overflow-x':'auto'});
+
+        this.options.ui_params = window.hWin.HEURIST4.util.cloneJSON( this.getUiPreferences() );
+        
+        //init viewer 
+        let that = this;
+        
+        if(this.options.select_mode=='manager'){
+   
+            if(this.options.ui_params &amp;&amp; Array.isArray(this.options.ui_params.fields)){
+                let fields = this.options.ui_params.fields;
+                if(fields.indexOf('name')&lt;0) fields.unshift('name');
+                if(fields.indexOf('edit')&lt;0) fields.unshift('edit');
+            }    
+            
+            if(this.options.isFrontUI){
+                
+                this.searchForm.css({padding:'10px 5px 0 10px'});
+                
+                window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, {'background-color':'#fff', opacity:1});   
+                
+                //add record type group editor
+                this.element.addClass('ui-suppress-border-and-shadow');
+                
+                this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css('left',328);
+                
+                this.rectype_groups = $('&lt;div>').addClass('ui-dialog-heurist')
+                    .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:320, overflow: 'hidden'})
+                    .appendTo(this.element);
+            }                
+            
+          
+            this.recordList.resultList({ 
+                    empty_remark: 'There are no record types defined in this group',
+                    show_toolbar: false,
+                    list_mode_is_table: true,
+                    rendererHeader:function(){ return that._recordListHeaderRenderer() },
+                    draggable: function(){
+                        
+                        that.recordList.find('.rt_draggable > .item').draggable({ // 
+                                    revert: 'invalid',
+                                    helper: function(){ 
+                                        return $('&lt;div class="rt_draggable ui-drag-drop" recid="'+
+                                            $(this).parent().attr('recid')
+                                        +'" style="width:300;padding:4px;text-align:center;font-size:0.8em;background:#EDF5FF"'
+                                        +'>Drag and drop to group item to change record type group&lt;/div>'); 
+                                    },
+                                    zIndex:100,
+                                    appendTo:'body',
+                                    scope: 'rtg_change',
+                                    containment: 'window'
+                                    //containment: that.element,
+                                    //delay: 200
+                                });   
+                    }});
+                    
+                    
+            if(this.options.isFrontUI) {
+                this._on( this.recordList, { 
+                        "resultlistondblclick": function(event, selected_recs){
+                                    this.selectedRecords(selected_recs); //assign
+                                    
+                                    if(window.hWin.HEURIST4.util.isRecordSet(selected_recs)){
+                                        let recs = selected_recs.getOrder();
+                                        if(recs &amp;&amp; recs.length>0){
+                                            let recID = recs[recs.length-1];
+                                            this._onActionListener(event, {action:'edit',recID:recID}); 
+                                        }
+                                    }
+                                }
+                        });
+
+            }    
+                    
+                    
+        }else if(this.options.select_mode=='select_multi' || this.options.select_mode=='select_single'){
+            this.recordList.resultList({ 
+                    show_toolbar: true,
+                    view_mode:'list',
+                    show_viewmode: false,
+                    list_mode_is_table: true});
+                   
+            this.searchForm.css({padding:'6px', 'min-width': '420px'});
+            this.recordList.css({'min-width': '420px'});
+                   
+         
+            this.options.ui_params.width = 440;
+            this.options.ui_params.fields = ['icon','name','fields'];
+            
+            this.recordList.resultList('fullResultSet', $Db.rty());   
+        }
+                    
+
+        //may overwrite resultList behaviour
+        if(this.options.recordList){
+            this.recordList.resultList( this.options.recordList );
+        }
+
+
+        this.options.onInitCompleted =  function(){
+
+            if(that.options.isFrontUI){
+                    let rg_options = {
+                        isdialog: false, 
+                        isFrontUI: true,
+                        container: that.rectype_groups,
+                        title: 'Record type groups',
+                        layout_mode: 'short',
+                        select_mode: 'manager',
+                        reference_rt_manger: that.element,
+                        onSelect:function(res){
+
+                            if(window.hWin.HEURIST4.util.isRecordSet(res)){
+                                res = res.getIds();                     
+                            }
+                            
+                            if(res &amp;&amp; Array.isArray(res) &amp;&amp; res.length>0){
+                                that.options.rtg_ID = res[0];
+                                that.searchForm.searchDefRecTypes('option','rtg_ID', that.options.rtg_ID);
+                            }
+
+                            if(!that.getRecordSet()){
+                                that._loadData( true ); //not yet loaded
+                            }
+
+							if(that.options.select_mode == 'manager'){ // reset search to default for manager
+
+                                that.searchForm.find('#input_search').val('');
+                                that.searchForm.find('#chb_show_all_groups').prop('checked', false);
+                                that.searchForm.find('#input_sort_type').val('name');
+
+                                that.searchForm.searchDefRecTypes('startSearch');
+                            }
+                        },
+                        add_to_begin: true
+                    };
+                window.hWin.HEURIST4.ui.showEntityDialog('defRecTypeGroups', rg_options);
+            }else{
+                that._loadData( true );
+            }
+
+            
+            let iheight = that.options.import_structure?0:80;
+            that.searchForm.css({'height':iheight});
+            that.recordList.css({'top':iheight});     
+            //!!!! that.changeUI(null, that.options.ui_params);    
+        }
+        
+        this.searchForm.searchDefRecTypes(this.options);
+        
+        if(this.options.use_cache){
+           
+            //if there are many widgets need to use base searchentityonfilter
+           this._on( this.searchForm, {
+                "searchdefrectypesonfilter": this.filterRecordList,
+                "searchdefrectypesonadd": function() {
+                        this._onActionListener(null, 'add');
+                },
+                "searchdefrectypesonuichange": this.changeUI,  //grouping, visible columns  
+                "searchdefrectypesonimport": this.importRecordTypes
+           });
+        }else{
+            this._on( this.searchForm, {
+                "searchdefrectypesonresult": this.updateRecordList,
+                "searchdefrectypesonadd": function() { this.addEditRecord(-1); },
+                "searchdefrectypesonuichange": this.changeUI,  //grouping, visible columns
+                "searchdefrectypesonimport": this.importRecordTypes
+            });
+        }
+        
+        
+        return true;
+    },            
+    
+    /**
+     * @brief Loads data for the widget.
+     * @memberof heurist.manageDefRecTypes
+     * @param {boolean} [is_first] Indicates if this is the first time data is being loaded.
+     * @description Handles loading data based on `use_cache` and `use_structure` options.
+     * If importing, fetches data from a remote source. Otherwise, uses local cache or server calls.
+     * Triggers a record count update if `is_first` and counts are stale.
+     */
+    _loadData: function(is_first){
+        
+        let that = this;
+      
+        if(this.options.use_cache){
+           
+           /*this._on( this.searchForm, {
+                "searchdefrectypesonfilter": this.filterRecordList  
+           });*/
+            if(this.options.use_structure){  //get recordset from HEURIST4.rectypes
+                
+                if(this.options.import_structure){
+                    //take recordset from REMOTE HEURIST.rectypes format     
+                    window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
+                    
+                    this.recordList.resultList('resetGroups');
+                    this.recordList.resultList('clearAllRecordDivs',null, '&lt;div style="padding: 10px;cursor: wait;">'
+                        + '&lt;span class="ui-icon ui-icon-loading-status-balls">&lt;/span> &amp;nbsp;&amp;nbsp;'
+                        + 'Loading record types from template database&lt;/div>');
+                    this.recordList.resultList('option', 'empty_remark', '');
+                    
+                    let sMsg = window.hWin.HR('manageDefRectypes_longrequest');
+                    sMsg = sMsg.replaceAll( '[url]', this.options.import_structure.database_url); 
+                    
+                    let _too_long = 0;
+                    let _too_long_dlg = null;
+                    
+                    let buttons = {};
+                    buttons[window.hWin.HR('Continue')]  = function() {
+                                //continue
+                                _too_long = setTimeout(__executionTooLong, 5000);
+                                _too_long_dlg.dialog('close')
+                    };
+                    buttons[window.hWin.HR('Abort')]  = function() {
+                                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                                _too_long = -1; //terminate
+                                _too_long_dlg.dialog('close');
+                    };
+                    
+                    function __executionTooLong(){
+                        _too_long = 0; 
+                        _too_long_dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg,
+                            buttons, 'Confirm',
+                            {default_palette_class:that.options.default_palette_class});                        
+                    }
+                    
+                    _too_long = setTimeout(__executionTooLong, 10000);
+                    
+                    
+                    //@todo - obtain rectypes and detailtypes in new format
+                    //get rectypes (in old format) from REMOTE database
+                    window.hWin.HAPI4.SystemMgr.get_defs(
+                            {rectypes:'all', mode:2, remote:this.options.import_structure.database_url}, function(response)
+                    {
+                            window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            
+                            if(_too_long_dlg &amp;&amp; _too_long_dlg.dialog('instance')){
+                                _too_long_dlg.dialog('close');
+                                _too_long_dlg = null;
+                            }
+                            if(_too_long>0){
+                                clearTimeout(_too_long);
+                            }else if(_too_long&lt;0){ // &amp;&amp; response.status != window.hWin.ResponseStatus.OK
+                                return; //terminated
+                            }
+                            _too_long = 0;
+                        
+                            if(response.status == window.hWin.ResponseStatus.OK){
+                                
+                                if(!window.hWin.HEURIST4.remote){
+                                    window.hWin.HEURIST4.remote = {};
+                                }
+
+                                window.hWin.HEURIST4.remote.rectypes = response.data.rectypes;
+                                
+                                that._cachedRecordset = that.getRecordsetFromStructure( response.data.rectypes, true ); //change to true to hide where rty_ShowInList=0
+
+                                if(that.options.import_structure.load_detailstypes){ // retrieve base fields
+                                    window.hWin.HAPI4.SystemMgr.get_defs( //only basefield names
+                                        {detailtypes:'all', mode:0, remote:that.options.import_structure.database_url}, function(response){
+                                            if(response.status == window.hWin.ResponseStatus.OK){
+                                                window.hWin.HEURIST4.remote.detailtypes = response.data.detailtypes;
+                                            }
+                                        }
+                                    );
+                                }
+                                
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }
+                    });                    
+                    
+                }else{
+                    this._loadData();
+                    
+                    //take recordset from LOCAL HEURIST.rectypes format     
+                    this._cachedRecordset = this.getRecordsetFromStructure();
+                }
+            }
+            else{
+                if( is_first &amp;&amp; $Db.needUpdateRtyCount>0 ){
+                    $Db.get_record_counts(function(){
+                        that._loadData(true);
+                    });                                
+                    return;
+                }
+
+                //usual via entity
+                //shorter
+                this.updateRecordList(null, {recordset:$Db.rty()});
+                if(this.searchForm.searchDefRecTypes('instance')){ //is_first!==true &amp;&amp; 
+
+                    this.searchForm.searchDefRecTypes('option','rtg_ID', this.options.rtg_ID);                    
+                    this.searchForm.searchDefRecTypes('startSearch');    
+                }
+                                
+
+                
+                /*
+                //longer but safer - since it reloads data if it is missed locally
+                let that = this;
+                window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,
+                    function(response){
+                        that.updateRecordList(null, {recordset:response});
+                        that.searchForm.searchDefRecTypes('startSearch');
+                    });
+                */
+                
+            }
+                
+        }    
+        
+    },
+
+    /**
+     * @brief Creates a HRecordSet from a Heurist record type structure object.
+     * @memberof heurist.manageDefRecTypes
+     * @param {?object} rectypes The raw record type definitions (e.g., from `window.hWin.HEURIST4.rectypes` or a remote source).
+     *                           If null, uses local `window.hWin.HEURIST4.rectypes`.
+     * @param {boolean} [hideDisabled] If true, filters out record types not shown in lists or in the 'Trash' group.
+     * @returns {HRecordSet} A Heurist HRecordSet object populated with the record type data.
+     * @description This method is primarily used when `options.import_structure` is true,
+     * converting the structure data (potentially from a remote Heurist instance) into a standard recordset.
+     * It maps fields, handles local ID mapping if importing, and updates the result list.
+     */
+    getRecordsetFromStructure: function( rectypes, hideDisabled ){
+        
+        let rdata = { 
+            entityName:'defRecTypes',
+            total_count: 0,
+            fields:[],
+            records:{},
+            order:[] };
+      
+
+        if(!rectypes){
+            //take from local definitions = NOT USED
+            rectypes = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.rectypes); //NOT USED
+        }else{
+            rectypes = window.hWin.HEURIST4.util.cloneJSON(rectypes);
+        }
+
+        rdata.fields = rectypes.typedefs.commonFieldNames;
+        rdata.fields.unshift('rty_ID');
+        
+        let idx_ccode = 0;
+        if(this.options.import_structure){
+            rdata.fields.push('rty_ID_local');
+            idx_ccode = rectypes.typedefs.commonNamesToIndex.rty_ConceptID;
+        }else{
+            rdata.fields.push('rty_RecCount');
+        }
+
+        let idx_visibility = rectypes.typedefs.commonNamesToIndex.rty_ShowInLists;
+        let idx_groupid = rectypes.typedefs.commonNamesToIndex.rty_RecTypeGroupID;
+        let hasRtToImport = false;
+        let trash_id = -1;
+
+        for (let key in rectypes.groups){
+            if(rectypes.groups[key].name == 'Trash'){
+                trash_id = rectypes.groups[key].id;
+                break;
+            }
+        }
+
+        for (let r_id in rectypes.typedefs)
+        {
+            if(r_id>0){
+                let rectype = rectypes.typedefs[r_id].commonFields;
+                let isHidden = (rectype[idx_visibility] == '0' || rectype[idx_groupid] == trash_id);
+
+                if(hideDisabled &amp;&amp; isHidden){
+                    continue;
+                }
+                
+                if(this.options.import_structure){
+                    let concept_code =  rectype[ idx_ccode ];
+                    let local_rtyID = $Db.getLocalID( 'rty', concept_code );
+                    rectype.push( local_rtyID );
+                    hasRtToImport = hasRtToImport || !(local_rtyID>0);
+                }
+                
+                rectype.unshift(r_id);
+                
+                if(rectypes.counts) rectype.push(rectypes.counts[r_id]);
+                
+                rdata.records[r_id] = rectype;
+                rdata.order.push( r_id );
+                
+            }
+        }
+        rdata.count = rdata.order.length;
+        
+        
+        if(this.options.import_structure){
+            this.recordList.resultList('option', 'empty_remark',
+                                        '&lt;div style="padding:1em 0 1em 0">'+
+                                        (hasRtToImport
+                                        ?this.options.entity.empty_remark
+                                        :'Your database already has all the entity types available in this source. Check the Show All box to update existing types.'
+                                        )+'&lt;/div>');
+        }
+        
+        this._cachedRecordset = new HRecordSet(rdata);
+        this.recordList.resultList('updateResultSet', this._cachedRecordset);
+        
+        this.searchForm.searchDefRecTypes('startSearch');
+        
+        return this._cachedRecordset;
+    },
+    
+    /**
+     * @brief Renders the header for the record type list.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @returns {string} HTML string for the list header.
+     * @description Generates HTML for the header row based on visible fields
+     * defined in `usrPreferences.fields` and `fields_width`. Calculates column widths dynamically.
+     */
+    _recordListHeaderRenderer: function(){
+
+        let max_width = this.recordList.find('.div-result-list-content').width() - 33;
+        let used_width = 0;
+        
+        function fld2(col_width, value, hint, style){
+            
+            if(!style) style = '';
+            if(col_width>0){
+                col_width = col_width - 1;
+                used_width = used_width + col_width + 4;
+                style += (';width:'+col_width+'px'); 
+            }
+            if(style!='') style = 'style="'+style+'"';
+            
+            if(!value){
+                value = '';
+            }
+            return '&lt;div class="item truncate" title="'
+                        +hint+'" '+style+'>'
+                        +window.hWin.HEURIST4.util.htmlEscape(value)
+                    +'&lt;/div>';
+        }
+        
+        let html = '';
+        if (!(this.usrPreferences &amp;&amp; this.usrPreferences.fields)) return '';
+        let fields = this.options.ui_params.fields;
+        
+        let i = 0;
+        for (;i&lt;fields.length;i++){
+            switch ( fields[i] ) {
+                case 'rtyid': html += fld2(30,'ID','Local ID','text-align:center'); break;
+                case 'ccode': 
+                    html += fld2(80,'ConceptID','Concept code','text-align:center');     
+                    break;
+                case 'addrec': 
+                    html += fld2(34,'Add','Add record','text-align:center');
+                    break;
+                case 'filter':
+                    html += fld2(34,'Filter','Filter records','text-align:center');
+                    break;
+                case 'count': 
+                    html += fld2(40,'Count','Count','text-align:center');
+                    break;
+                case 'group': 
+                    html += fld2(34,'Group','','text-align:center');
+                    break;
+                case 'icon': 
+                    html += fld2(40,'Icon','','text-align:center');
+                    break;
+                case 'edit':  
+                    html += fld2(34,'Edit','Edit','text-align:center;'); //font-size:12px
+                    break;
+//                case 'editstr': 
+                case 'name':  
+                    html += '$$NAME$$';
+                    break;
+                case 'description':  
+                    html += '$$DESC$$'; //fld2(null,'Description',''); 
+                    break;
+                case 'show': 
+                    html += fld2(34,'Show','Show','text-align:center;'); //font-size:12px
+                    break;
+                case 'duplicate': 
+                    html += fld2(34,'Dup','Duplicate','text-align:center;'); //font-size:12px
+                    break;
+                case 'fields': 
+                    html += fld2(34,'Fld list','List fields','text-align:center;'); //font-size:12px
+                    break;
+                case 'status': 
+                    html += fld2(34,'Del','Delete / protected','text-align:center;'); //font-size:12px
+                    break;
+            }   
+        }
+        
+        //if Description presents it takes all possible width
+        // otherwise this is Name
+        let w_desc = 0, i_desc = fields.indexOf('description');
+        if(i_desc>=0){
+            w_desc = max_width-used_width-250;
+            if(w_desc&lt;30) w_desc = 30;
+            html = html.replace('$$DESC$$',fld2(w_desc, 'Description', 'Description', 'text-align:left'))
+        }
+        let name_width = (this.options.select_mode=='select_multi')?400:250;
+        html = html.replace('$$NAME$$',fld2(name_width, 'Name', 'Name', 'text-align:left'))
+        
+        return html;
+        
+        /*
+        let s = '&lt;div style="width:40px">&lt;/div>&lt;div style="width:3em">ID&lt;/div>'
+                    +'&lt;div style="width:13em">Name&lt;/div>'
+                    +'&lt;div style="width:20em;border:none;">Description&lt;/div>';
+            
+            if (window.hWin.HAPI4.is_admin()){
+                s = s+'&lt;div style="position:absolute;right:4px;width:60px">Edit&lt;/div>';
+            }
+        */    
+    },
+    
+    
+    /**
+     * @brief Renders a single record type item in the list.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {HRecordSet} recordset The recordset containing the data.
+     * @param {object} record The record object (record type) to render.
+     * @returns {string} HTML string representing the list item.
+     * @description Generates HTML for a single row, displaying data and action buttons
+     * based on `usrPreferences.fields`. Handles icon display and status indicators.
+     */
+    _recordListItemRenderer:function(recordset, record){
+        
+        function fld(fldname){
+            return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
+        }
+        function fld2(fldname, col_width, value, style){
+            
+            if(!style) style = '';
+            if(col_width>0){
+                style += (';max-width:'+col_width+'px;min-width:'+col_width+'px');
+            }
+            if(style!='') style = 'style="'+style+'"';
+            
+            if(value==null){
+                value = recordset.fld(record, fldname);
+            }
+            return '&lt;div class="item truncate" '+style+'>'+window.hWin.HEURIST4.util.htmlEscape(value)+'&lt;/div>';
+        }
+        
+        //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
+        
+        const recID   = fld('rty_ID');
+        if(this.options.import_structure){
+
+            const recTitle = fld2('rty_Name','15em')
+                + ' : &lt;div class="item" style="font-style:italic;width:45em">'
+                + window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'rty_Description'))+'&lt;/div>'
+
+            
+            //IJ dwi
+            let rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon', 2, this.options.import_structure.database);
+            rtIcon = '';
+            
+            
+            let html_icon = '&lt;div class="recordIcons" style="min-width:16px;text-align:center;">'
+            +     '&lt;img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+            +     '"  class="rt-icon" style="background-image: url(&amp;quot;'+rtIcon+'&amp;quot;);">'
+            + '&lt;/div>';
+            
+            
+            let html = '&lt;div class="recordDiv" recid="'+recID+'">'
+            + '&lt;div class="recordSelector">&lt;input type="checkbox" />&lt;/div>'
+            + html_icon
+            + '&lt;div class="recordTitle recordTitle2" title="'+fld('rty_Description')
+                            +'" style="right:10px">'
+            +     recTitle
+            + '&lt;/div>';
+            
+            return html;
+        }
+
+        // Skip items in the Trash group, unless in manager mode
+        const isTrash = (recordset.fld(record, 'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg'));
+        if(isTrash &amp;&amp; this.options.select_mode!='manager'){
+            return '';
+        }
+        
+        let rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon');
+        //let recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
+        if(this.is_new_icons){
+            rtIcon = window.hWin.HAPI4.iconBaseURL+recID; 
+            //recThumb = window.hWin.HAPI4.iconBaseURL+recID+'&amp;version=thumb'; 
+        }
+		
+        let random_id = window.hWin.HEURIST4.util.random(); // force php request to redo		
+        
+        //let html_thumb = '&lt;div class="recTypeThumb" style="background-image: url(&amp;quot;'+recThumb+'&amp;'+random_id+'&amp;quot;);">'
+        //+'&lt;/div>';
+        
+        //recordIcons 
+        let html_icon = '&lt;div class="item" style="vertical-align: middle;max-width:40px;min-width:40px;text-align:center">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+        +     '&lt;img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+        +     '"  class="rt-icon" style="background-image: url(&amp;quot;'+rtIcon+'&amp;'+random_id+'&amp;quot;);">'       //opacity:'+recOpacity+'
+        + '&lt;/div>';        
+
+        let html = '';
+        
+        let fields = this.options.ui_params?this.options.ui_params.fields:['rtyid'];
+
+        //fields = ['rtyid','ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'];        
+
+        function __action_btn(action, icon, title, color){
+            if(!color) color = '#555555';            
+            let sbg = '';
+            
+            return '&lt;div class="item" style="min-width:34px;max-width:34px;text-align:center;'+sbg+'">'
+                    +'&lt;div title="'+title+'" '
+                    +'class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
+                    +'role="button" aria-disabled="false" data-key="'+action+'" style="height:18px;">'
+                    +     '&lt;span class="ui-button-icon-primary ui-icon '+icon+'" style="color:'+color+'">&lt;/span>'
+                    + '&lt;/div>&lt;/div>'            
+        }
+        
+        let used_width = 0;
+
+        let grayed = '';
+        let i = 0;
+        for (;i&lt;fields.length;i++){
+            
+            if(fields[i]!='name' &amp;&amp; fields[i]!='description'){
+                used_width = used_width + this.fields_width[fields[i]] + 4;    
+            }
+            
+            switch ( fields[i] ) {
+                case 'rtyid': html += fld2('rty_ID',30,null,'text-align:center'); break;
+                case 'ccode': 
+                    html += ('&lt;div class="item truncate" style="min-width:80px;max-width:80px;text-align:center">'
+                            +$Db.getConceptID('rty',recID,true)+'&lt;/div>');
+                    break;
+                case 'addrec': 
+                    html += __action_btn('addrec','ui-icon-plus',window.hWin.HR('Click to add new')+' '+fld('rty_Name'));    
+                    break;
+                case 'filter':
+                    html += __action_btn('filter','ui-icon-search',window.hWin.HR('Click to launch search for')+' '+fld('rty_Name'));
+                    break;
+                case 'count': 
+                    html += fld2('rty_RecCount',40,null,'text-align:center  '); break;
+                case 'group': 
+                    html += __action_btn('group','ui-icon-carat-d', 'Change group' );
+                    break;                         
+                case 'icon': 
+                    html += html_icon; 
+                    break;
+                case 'edit':  
+                    html += __action_btn('edit','ui-icon-pencil',window.hWin.HR('Click to edit record type'));
+                    break;
+//                case 'editstr': 
+                case 'name':  
+                    html += '$$NAME$$'; 
+                    break;
+                case 'description':  
+                    html += '$$DESC$$';
+                    break;
+                case 'show': 
+                
+                    if(recordset.fld(record, 'rty_ShowInLists')==1){
+                        html += __action_btn('hide_in_list','ui-icon-check-on',window.hWin.HR('Click to hide in lists'));    
+                    }else{
+                        html += __action_btn('show_in_list','ui-icon-check-off',window.hWin.HR('Click to show in lists'));
+                        grayed = 'background:lightgray';
+                    }
+                    
+                    break;
+                case 'duplicate': 
+                    html += __action_btn('duplicate','ui-icon-copy',window.hWin.HR('Duplicate record type'));
+                    break;
+                case 'fields': 
+                    html += __action_btn('fields','ui-icon-circle-b-info',window.hWin.HR('List of fields'));
+                    break;
+                case 'status': 
+                
+                    if(recordset.fld(record, 'rty_Status')=='reserved'){
+                        html += __action_btn('','ui-icon-lock',window.hWin.HR('manageDefRectypes_reserved'),'gray');
+                    }else{
+                        if(recordset.fld(record,'rty_RecCount')>0){
+                            html += __action_btn('delete_hasrecs','ui-icon-trash-b',window.hWin.HR('manageDefRectypes_hasrecs'), 'darkgray');
+                        }else{
+                            //let links = window.hWin.HAPI4.EntityMgr.getEntityData('rst_Links')
+                           
+                            const is_referenced = !window.hWin.HEURIST4.util.isnull(this.rst_links[recID]);
+                                        //(this.rst_links.reverse[recID] || this.rst_links.rel_reverse[recID]); 
+                            if(is_referenced){
+                                html += __action_btn('delete','ui-icon-trash-b', window.hWin.HR('manageDefRectypes_referenced'));    
+                            }else{
+                                html += __action_btn('delete','ui-icon-trash', window.hWin.HR('manageDefRectypes_delete'));
+                            }
+                        }
+                    }    
+                
+                    break;
+            }    
+        }
+        
+        //if Description presents it takes all possible width
+        // otherwise this is Name
+        let max_width = this.recordList.find('.div-result-list-content').width() 
+                - ((this.options.select_mode=='select_multi') ?40:27);
+
+        let w_desc = 0, i_desc = fields.indexOf('description');
+        if(i_desc>=0){
+            w_desc = max_width-used_width-250;
+            if(w_desc&lt;30) w_desc = 30;
+            
+            html = html.replace('$$DESC$$', fld2('rty_Description',null,null,
+                    'min-width:'+w_desc+'px;max-width:'+w_desc+'px;font-style:italic;font-size:smaller')); 
+        }
+        
+        let name_width = (this.options.select_mode=='select_multi')?400:250;
+        html = html.replace('$$NAME$$',fld2('rty_Name', name_width, null,'text-align:left'))
+
+        html = '&lt;div class="recordDiv rt_draggable white-borderless" recid="'
+            +recID+'" style="display:table-row;height:28px;padding:0.4em 0px;'+grayed+'">'
+                    + '&lt;div class="recordSelector item">&lt;input type="checkbox" />&lt;/div>'
+                    + html+'&lt;/div>';
+        
+/*        
+        const has_buttons = (this.options.select_mode=='manager' &amp;&amp; this.options.edit_mode=='popup');
+
+        let html = '&lt;div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+        + html_thumb
+        + '&lt;div class="recordSelector">&lt;input type="checkbox" />&lt;/div>'
+        + html_icon
+        + '&lt;div class="recordTitle recordTitle2" title="'+fld('rty_Description')
+                        +'" style="right:'+(has_buttons?'60px':'10px')
+                        + (this.options.import_structure?';left:30px':'')+'">'
+        +     recTitle
+        + '&lt;/div>';
+        
+        // add edit/remove action buttons in record lisr
+        if(has_buttons){
+        
+                
+               html = html 
+                + '&lt;div class="rec_actions" style="top:4px;width:120px;">'
+                    + '&lt;div title="Click to edit record type" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'
+                    +     '&lt;span class="ui-button-icon-primary ui-icon ui-icon-pencil">&lt;/span>&lt;span class="ui-button-text">&lt;/span>'
+                    + '&lt;/div>&amp;nbsp;'
+                    + '&lt;div title="Click to edit structure" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="structure" style="height:16px">'
+                    +     '&lt;span class="ui-button-icon-primary ui-icon ui-icon-list">&lt;/span>&lt;span class="ui-button-text">&lt;/span>'
+                    + '&lt;/div>&amp;nbsp;'
+                    + '&lt;div title="Duplicate record type" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="duplicate" style="height:16px">'
+                    +     '&lt;span class="ui-button-icon-primary ui-icon ui-icon-copy">&lt;/span>&lt;span class="ui-button-text">&lt;/span>'
+                    + '&lt;/div>&amp;nbsp;'
+                    + '&lt;div title="List of fields" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="fields" style="height:16px">'
+                    +     '&lt;span class="ui-button-icon-primary ui-icon ui-icon-circle-b-info">&lt;/span>&lt;span class="ui-button-text">&lt;/span>'
+                    + '&lt;/div>&amp;nbsp;'
+                    + '&lt;div title="Click to delete record type" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete" style="height:16px">'
+                    +     '&lt;span class="ui-button-icon-primary ui-icon ui-icon-circle-close">&lt;/span>&lt;span class="ui-button-text">&lt;/span>'
+                    + '&lt;/div>&lt;/div>';
+        }
+        
+
+        html = html + '&lt;/div>';
+*/
+        return html;
+        
+    },
+    
+    /**
+     * @brief Handles actions triggered by events, such as button clicks in the list or search form.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {Event} event The event object.
+     * @param {object} action The action object, typically containing `action` (string) and `recID` (number).
+     * @description Extends the parent's `_onActionListener`. Handles various actions including:
+     * 'delete'/'delete_hasrecs' (with checks for record counts and linked fields),
+     * 'addrec' (opens new record form), 'filter' (opens search for this type),
+     * 'editstr' (opens structure editor), 'show_in_list'/'hide_in_list',
+     * 'duplicate' (duplicates record type), and 'fields' (shows list of fields).
+     */
+    _onActionListener:function(event, action){
+        
+        if(action &amp;&amp; (action.action=='delete' || action.action=='delete_hasrecs')){
+
+			if(action.action == 'delete_hasrecs'){
+
+                const rectype_id = action.recID;
+                let $ele = $(event.target);
+
+                const sMsg = 'The record type &lt;b>'+ $Db.rty(rectype_id, 'rty_Name') +'&lt;/b> has existing records.&lt;br>These records must be deleted in order to delete this record type.&lt;br>&lt;br>'
+                    + 'Click the &lt;a href="#" data-rty_ID="'+ rectype_id +'">Filter&lt;/a> button or use Explore > Entities to find and delete all records.';
+
+                let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title: 'Warning'}, {default_palette_class:this.options.default_palette_class});
+
+                this._on($dlg.find('a[data-rty_ID]'),{click:function(e){
+
+                    $ele.find('div[recid="'+ rectype_id +'"]').find('div[data-key="filter"]').trigger('click');
+
+                    $dlg.dialog('close');
+                    return false;
+                }});
+
+                return;
+            }else if(!window.hWin.HEURIST4.util.isnull(this.rst_links[action.recID])){
+
+                let res = this.rst_links[action.recID];
+                /*
+                if(this.rst_links.reverse[action.recID])
+                    res = res.concat(Object.keys(this.rst_links.reverse[action.recID]));
+                if(this.rst_links.rel_reverse[action.recID])
+                    res = res.concat(Object.keys(this.rst_links.rel_reverse[action.recID]));
+                */    
+                let sList = '';
+                for(let i=0; i&lt;res.length; i++) if(res[i]!='all' &amp;&amp; res[i]>0){
+                    sList += ('&lt;a href="#" data-dty_ID="'+res[i]+'">'+$Db.dty(res[i],'dty_Name')+'&lt;/a>&lt;br>');
+                }
+                
+                let sMsg = window.hWin.HR('manageDefRectypes_delete_stop');
+                
+                sMsg = sMsg.replaceAll( '[rtyName]', $Db.rty(action.recID,'rty_Name'));
+                sMsg = sMsg.replaceAll( '[FieldList]', sList);
+                
+                let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg
+                , null, {title: 'Warning'},
+                {default_palette_class:this.options.default_palette_class});        
+                
+                this._on($dlg.find('a[data-dty_ID]'),{click:function(e){
+                    
+                    let rg_options = {
+                         isdialog: true, 
+                         edit_mode: 'editonly',
+                         select_mode: 'manager',
+                         rec_ID: $(e.target).attr('data-dty_ID'),
+                         onSelect:function(res){
+                         }
+                    };
+                    window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', rg_options);
+                    return false;                    
+                }});
+                
+                return;
+            }
+        }
+
+        
+        let isResolved = this._super(event, action);
+
+        if(!isResolved){
+            
+            let recID = 0;
+            let target = null;
+
+            if(action &amp;&amp; action.action){
+                recID =  action.recID;
+                target = action.target;
+                action = action.action;
+            }
+            if(recID>0){
+                
+                if(action=='addrec'){
+                    
+                    let new_record_params = {RecTypeID: recID};
+                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                        {new_record_params:new_record_params,
+                        onClose:function(){
+                            /*   
+                            if($Db &amp;&amp; $Db.needUpdateRtyCount){
+                                $Db.get_record_counts(function(){
+                                    that._triggerRefresh('rty');
+                                });                                
+                            }
+                            */
+                        }});
+                    
+                }else if(action=='filter'){
+                    
+                    window.hWin.HAPI4.RecordSearch.doSearch( this, 
+                        {q:'{"t":"'+recID+'"}',detail:'ids', source:this.element.attr('id')} );
+                    if(this.options.parent_dialog == null){
+                        $('.ui-menu6').slidersMenu('switchContainer', 'explore', true);
+                    }
+                   
+                    
+                //}else if(action=='group'){
+                    
+                }else if(action=='editstr'){
+                    //edit structure (it opens fake record and switches to edit structure mode)
+                    let new_record_params = {RecTypeID: recID};
+                    let opts = {new_record_params:new_record_params, edit_structure:true};
+
+                    if(this.it_was_insert &amp;&amp; this.options.parent_dialog !== null){
+                        opts['parent_dialog'] = this.options.parent_dialog;
+                    }
+
+                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, opts);
+                }else if(action=='show_in_list' || action=='hide_in_list'){
+                    
+                    
+                    let newVal = (action=='show_in_list')?1:0;
+                    this._saveEditAndClose({rty_ID:recID, rty_ShowInLists:newVal });
+                    
+                }else if(action=='duplicate'){
+                    
+                    this._duplicateType(recID);
+                    
+                }else if(action=='fields'){
+                    //show selectmenu with list of fields
+                    if(this.fieldSelectorLast!=recID){
+                        this.fieldSelectorLast   = recID;
+                        let details = $Db.rst(recID); //get all fields for given rectype
+                        if(!details) return;
+                        let options = [];
+                        details.each2(function(dty_ID, detail){
+                            if($Db.dty(dty_ID,'dty_Type')!='separator')
+                                options.push({key:dty_ID, title:detail['rst_DisplayName']});
+                        });
+                        
+                        if(!this.fieldSelector){
+                            this.fieldSelectorOrig = document.createElement("select");    
+                            $(this.fieldSelectorOrig).appendTo(this.element);
+                            window.hWin.HEURIST4.ui.fillSelector(this.fieldSelectorOrig, options);
+                            this.fieldSelector = window.hWin.HEURIST4.ui.initHSelect(this.fieldSelectorOrig, false);
+                            
+                            let menu = this.fieldSelector.hSelect( "menuWidget" );
+                            menu.css({'max-height':'350px'});                        
+                                this.fieldSelector.hSelect({change: function(event, data){
+                                let rg_options = {
+                                     isdialog: true, 
+                                     edit_mode: 'editonly',
+                                     select_mode: 'manager',
+                                     rec_ID: data.item.value,
+                                     onSelect:function(res){
+                                     }
+                                };
+                                window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', rg_options);
+    
+                            }});
+                            
+                        }else{
+                            $(this.fieldSelectorOrig).empty();
+                            window.hWin.HEURIST4.ui.fillSelector(this.fieldSelectorOrig, options);
+                            this.fieldSelector.hSelect('refresh');
+                        }
+                    }
+                    this.fieldSelector.hSelect('open');
+                    this.fieldSelector.hSelect('widget').hide(); //hide selector
+                    this.fieldSelector.val(-1);
+                    this.fieldSelector.hSelect('menuWidget')
+                        .position({my: "left top", at: "left+10 bottom-4", of: $(target)})
+                        .show();
+                    this.fieldSelector.hSelect('hideOnMouseLeave', $(target));
+                }
+                
+            }
+        }
+
+    },
+    
+    
+    /**
+     * @brief Deletes the current record type.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {boolean} unconditionally If true, deletes without confirmation.
+     * @description Prompts for confirmation before deleting. Stores the group ID for potential later updates.
+     */
+    _deleteAndClose: function(unconditionally){
+    
+        if(unconditionally===true){
+            this.deleted_from_group_ID = $Db.rty(this._currentEditID,'rty_RecTypeGroupID');
+            this._super(); 
+        }else{
+            this.deleted_from_group_ID = 0;
+            let that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'manageDefRectypes_delete_warn '
+                , function(){ that._deleteAndClose(true) }, 
+                {title:'Warning',yes:'Proceed',no:'Cancel'},
+                {default_palette_class:this.options.default_palette_class});        
+        }
+    },
+    
+    /**
+     * @brief Handles actions after a record type is deleted.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {number} recID The ID of the deleted record type.
+     * @description Calls parent's handler, updates group count, and selects the first record in the list.
+     * Note: Original method name might have a typo "EvenHandler" vs "EventHandler".
+     */
+    _afterDeleteEventHandler: function(recID){
+
+        
+            this._super(recID);
+            
+            this.updateGroupCount(this.deleted_from_group_ID, -1);
+            
+            //select first
+            this.selectRecordInRecordset();
+            
+    },
+    
+    /**
+     * @brief Performs actions after the edit form is initialized.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @description Sets default group ID for new record types, opens icon library for new records,
+     * configures the title mask field (making it read-only and adding an edit button),
+     * adds an "Edit Structure" button, and sets up help text toggles.
+     * Calls `mergeIconThumbnailFields` if in manager mode.
+     */
+    _afterInitEditForm: function(){
+
+        this._super();
+        
+        let rty_RecTypeGroupID = this.options.rtg_ID;
+        if(this._currentEditID&lt;0){ //rty_RecTypeGroupID>0 &amp;&amp; !this._currentEditRecordset){ //insert       
+
+        
+            if(!(rty_RecTypeGroupID>0)){ //take first from list of groups
+                rty_RecTypeGroupID = $Db.rtg().getOrder()[0];                
+            }
+        
+            let ele = this._editing.getFieldByName('rty_RecTypeGroupID');
+            if(rty_RecTypeGroupID>0) ele.editing_input('setValue', rty_RecTypeGroupID);
+            
+            //open select icon
+            ele = this._editing.getFieldByName('rty_Icon');
+            ele.editing_input('openIconLibrary');
+            
+            //hide save button
+            if(this._toolbar){
+                this._toolbar.find('.btnRecSave').css('visibility', 'visible');
+            }
+            
+            //hide title mask
+            ele = this._editing.getFieldByName('rty_TitleMask');
+            ele.editing_input('setValue', 'Please edit any &lt;b>XXXXX&lt;/b> record to choose fields for the constructed title'); //'record [ID]'
+            ele.hide();
+            
+        }else{
+            
+            let ele = this._editing.getFieldByName('rty_ID');
+            if(ele &amp;&amp; ele.length>0){
+                ele.find('div.input-div').html(this._currentEditID
+                        +'&amp;nbsp;&amp;nbsp;&lt;span style="font-weight:normal">Code: &lt;/span>'
+                        +$Db.getConceptID('rty',this._currentEditID, true));
+            }
+            let that = this;
+
+            function __extendTitleMaskInput(){
+                
+                let ele_mask = that._editing.getFieldByName('rty_TitleMask');
+                let inputs = ele_mask.editing_input('getInputs');
+                let $input = inputs[0];
+
+                $input.removeClass('text').attr('readonly','readonly');
+
+                let $btn_editmask = $( '&lt;span>', {title: window.hWin.HR('Edit Title Mask')})
+                .addClass('smallicon ui-icon ui-icon-pencil')
+                .insertAfter( $input );
+
+                that._on( $btn_editmask, { click: function(){
+
+                    let maskvalue = ele_mask.editing_input('getValues');
+                    maskvalue = maskvalue[0];
+
+                    window.hWin.HEURIST4.ui.showRecordActionDialog('rectypeTitleMask',
+                        {rty_ID:that._currentEditID, 
+                            rty_TitleMask:maskvalue, path: 'widgets/entity/popups/',
+                            onClose: function(newvalue){
+                                if(!window.hWin.HEURIST4.util.isempty(newvalue) &amp;&amp; newvalue != 'false'){
+                                    ele_mask.editing_input('setValue', newvalue);
+                                    that._editing.setModified(true); //restore flag after autosave
+                                    that.onEditFormChange();
+                                }
+                    }});
+
+
+                }} );
+                
+            }
+
+            // extent editing for record title
+            let ele_mask = that._editing.getFieldByName('rty_TitleMask');
+            if(ele_mask){
+                ele_mask.editing_input('option', 'onrecreate', __extendTitleMaskInput);
+                __extendTitleMaskInput();
+            }
+            
+            //
+            // add edit structure button
+            //
+            if(this.options.suppress_edit_structure!==true){
+                
+            let $s = $('&lt;div style="margin: 15px 0 20px 175px;'
+            +'padding: 10px 10px 5px;display: block;">'
+            +'&lt;div class="input-cell">&lt;span style="display: inline-block; padding-left: 20px; padding-bottom: 10px;">&lt;button>&lt;/button>&lt;/span>'
+            +'&lt;span class="heurist-helper3" style="display:inline-block;vertical-align: middle;padding-left: 20px;">'
+            + window.hWin.HR('manageDefRectypes_edit_fields_hint')
+            +'&lt;/span>'
+            +'&lt;/div>&lt;/div>');
+            
+            let edit_ele = this._editing.getFieldByName('rty_ShowURLOnEditForm');
+            $s.insertAfter(edit_ele);
+        
+            let btn = $s.find('button');
+            let new_record_params = {RecTypeID: this._currentEditID};
+            btn.button({icon:'ui-icon-pencil',label: window.hWin.HR('manageDefRectypes_edit_fields')})
+                            .css({'font-weight': 'bold','font-size':'12px'})
+                            .addClass('ui-heurist-button')
+                            .width(150)
+                            .on('click', function(){
+                                //close this form and open edit structure
+                                function __openEditStructure(){
+                                    that._currentEditID = null;
+                                    that._getEditDialog(true).dialog('close');
+                                    
+                                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                                        {new_record_params:new_record_params, 
+                                            edit_structure:true});
+                                }
+                                
+                                if(that._editing.isModified()){
+                                    that._saveEditAndClose( null , __openEditStructure );
+                                }else{
+                                    __openEditStructure();
+                                }
+                            });
+            }
+            
+            let edit_ele = this._editing.getFieldByName('rty_ID');
+            $('&lt;div style="display:block">&lt;span style="margin-top: 15px;display: inline-block;font-size: 12px;">'
+            + window.hWin.HR('Define')+': &lt;/span>&lt;h1 style="display: inline-block;margin:10px;">'
+            +$Db.rty(this._currentEditID,'rty_Name')+'&lt;/h1>&lt;/div>').insertBefore(edit_ele);            
+        }
+        
+        let ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true' || this._currentEditID == -1);
+        let ele = $('&lt;div style="position:absolute;right:6px;top:4px;">&lt;label>&lt;input type="checkbox" '
+                        + (ishelp_on?'checked':'')+'/>'
+                        + window.hWin.HR('explanations')
+                        + '&lt;/label>&lt;/div>').prependTo(this.editForm);
+        this._on( ele.find('input'), {change: function( event){
+            let ishelp_on = $(event.target).is(':checked');
+            this.usrPreferences['help_on'] = ishelp_on;
+            window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
+        }});
+        
+        ele = this._editing.getInputs('rty_Name');
+        if(ele &amp;&amp; ele.length>0){
+            this._on( $(ele[0]), {
+                keypress: window.hWin.HEURIST4.ui.preventChars} );
+        }
+        
+        window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
+        
+        this.editForm.find('div.header').css({'min-widht':'160px', width:'160px'});
+        
+        this._adjustEditDialogHeight();
+
+        if(this.options.select_mode=='manager'){
+            this.mergeIconThumbnailFields();
+        }
+    },   
+
+    /**
+     * @brief Merges the 'Icon' and 'Thumbnail' fields in the edit form for a more compact UI.
+     * @memberof heurist.manageDefRecTypes
+     * @description Hides the original 'Thumbnail' field and integrates its functionality
+     * (display and upload) into the 'Icon' field area. Links their clear buttons.
+     * This is typically called when `select_mode` is 'manager'.
+     */
+    mergeIconThumbnailFields: function(){
+        // fields
+        let $icon = this._editing.getFieldByName('rty_Icon');
+        let $thumb = this._editing.getFieldByName('rty_Thumb');
+        
+        if(!$thumb || !$icon){
+            return; //not yet loaded
+        }
+        $thumb.hide();
+        let thumb_header = $thumb.find('div.header.optional > label').text(); // thumbnail header
+        
+        // Alter icon field
+        $icon.css('width', '');
+
+        $icon.find('div.image_input').css({
+            'min-width': '50px',
+            'min-height': '50px',
+            'margin-left': '25px',
+            'vertical-align': 'top' // for Firefox
+        }); // make visual smaller
+
+        $icon.find('div.header.optional').append($('&lt;br>&lt;label>'+ thumb_header +'&lt;/label>')); // add thumbnail header text to icon header
+        $icon.find('div.heurist-helper1').text('Images to represent this record type'); // replace help text
+
+        // Move library and upload links
+        $icon.find('.file-options-container')
+             .insertBefore($icon.find('div.image_input.fileupload'))
+             .css('padding-top', '4px');
+
+        // Move thumbnail field
+        let $thumb_img = $thumb.find('div.image_input');
+        $thumb_img.css('margin-left', '25px').insertAfter($icon.find('div.image_input.fileupload'));
+
+        // Hide open folder icon, usually is hidden by icon image
+        $icon.find('.input-div span:first').hide();
+
+        // link fields
+        $icon.editing_input('linkIconThumbnailFields', $thumb_img, $thumb);
+        $thumb.editing_input('linkIconThumbnailFields', $icon.find('div.image_input'), $icon);
+        // link clear buttons, only icon clear button is visible
+        this._on($icon.find('span.btn_input_clear'), {
+            'click': function(){
+                $thumb.find('span.btn_input_clear').trigger('click');
+            }
+        });
+    },
+
+    /**
+     * @brief Handles changes in the edit form.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {jQuery|boolean} changed_element The element that changed or true if a general change occurred.
+     * @description Calls parent's handler. If the 'rty_Name' field changed, it auto-populates
+     * the 'rty_Plural' field by appending 's' to the new name.
+     */
+    onEditFormChange: function(changed_element){
+        
+       this._super(changed_element);
+       
+       if(changed_element &amp;&amp; changed_element!==true 
+            &amp;&amp; this._editing.isModified() 
+            &amp;&amp; changed_element.options.dtID=='rty_Name')
+       {
+            let val = this._editing.getValue('rty_Name');
+            let ele = this._editing.getInputs('rty_Plural');
+            $(ele[0]).val(val+'s');
+           
+       }
+    },    
+        
+    /**
+     * @brief Opens the add/edit dialog for a record type.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {number} recID The ID of the record type to edit, or -1 to add a new one.
+     * @param {boolean} [is_proceed=false] If true, bypasses the confirmation/hint message.
+     * @description Shows a hint dialog before adding a new record type, then calls the parent's `addEditRecord`.
+     */
+    addEditRecord: function(recID, is_proceed){
+    
+        if(recID&lt;0 &amp;&amp; is_proceed !== true){
+            let that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                    'manageDefRectypes_new_hint'
+                    , function(){
+                        that.addEditRecord(recID, true); 
+                        //that._super(recID); 
+                    }, {title: 'Confirm', yes:'Continue',no:'Cancel'},
+                    {default_palette_class:this.options.default_palette_class});
+        
+        }else{
+               this._super(recID); 
+        }
+    },
+	
+	/**
+     * @brief Filters the record list based on search criteria.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {Event} event The filter event.
+     * @param {object} request The request object containing filter parameters.
+     * @description Calls parent's filter handler. If no results and in manager mode,
+     * displays a specific message about record types within the current group or active filters.
+     * @returns {HRecordSet|null} The filtered recordset or null.
+     */
+    filterRecordList: function(event, request){ 
+        
+        let results = this._super(event, request);
+
+        if(results!=null &amp;&amp; results.count_total()==0){
+            
+            if(this.options.select_mode=='manager'){
+                
+                let sMsg;
+                let s_all = this.element.find('#chb_show_all_groups').is(':checked');
+                if(!s_all){
+                    sMsg = '&lt;div style="margin-top:5em;">'
+                        +'&lt;b>There are no record types (entity types) defined within this group.&lt;/b>'
+                        +'&lt;br>&lt;br>Please drag record types from other groups or add new record types to this group.'
+                        +'&lt;br>&lt;br>We suggest renaming the "My record types" group to something that suits your project.'
+                        +'&lt;/div>';   
+                }else{
+                    sMsg = '&lt;div style="padding: 10px">'
+                            +'&lt;h3 class="not-found" style="color:red;">Filter/s are active (see above)&lt;/h3>&lt;br>'
+                            +'&lt;h3 class="not-found" style="color:teal">No entities match the filter criteria&lt;/h3>'
+                            +'&lt;/div>';
+                }
+                this.recordList.resultList('option','empty_remark', sMsg);
+                this.recordList.resultList('renderMessage', sMsg);
+            }
+        }
+    },	
+    
+    //overwritten     NOT USED
+    _recordListGetFullData:function(arr_ids, pageno, callback){
+
+        let request = {
+                'a'          : 'search',
+                'entity'     : this.options.entity.entityName,
+                'details'    : 'list',
+                'pageno'     : pageno,
+                'db'         : this.options.database  
+                
+        };
+        let rty_RecTypeGroupID = this.searchForm.find('#input_search_group').val();
+        if(rty_RecTypeGroupID>0){
+            request['rty_RecTypeGroupID'] = rty_RecTypeGroupID;
+        }
+        
+        
+        request[this.options.entity.keyField] = arr_ids;
+        window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
+    },
+    
+    
+
+    //
+    // @todo
+    //
+    /*
+    testTitleMask: function()
+    {
+        if(!rectypeID || rectypeID &lt; 0){
+            let val = "record [ID]";
+            if(document.getElementById("definit").checked &amp;&amp; window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']){
+                val = "["+ $Db.dty(window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], 'dty_Name') +"]";
+            }
+
+            document.getElementById("rty_TitleMask").value = val
+            titleMaskIsOk = true;
+            updateRectypeOnServer_continue();
+
+        }else{
+
+            let mask = document.getElementById("rty_TitleMask").value;
+            
+            let baseurl = window.hWin.HAPI4.baseURL + "hserv/controller/rectype_titlemask.php";
+
+            let request = {rty_id:rectypeID, mask:mask, db:window.hWin.HAPI4.database, check:1}; //verify titlemask
+            
+            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
+                function (response) {
+                    if(response.status != window.hWin.ResponseStatus.OK || response.message){
+                        titleMaskIsOk = false;
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }else{
+                        titleMaskIsOk = true;
+                        updateRectypeOnServer_continue();
+                    }                                        
+                }
+            );
+
+        }
+    },
+    */
+
+    /**
+     * @brief Saves the record type and closes the edit dialog.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {?object} fields Field values to save. If null, values are taken from the form.
+     * @param {?function} afterAction Callback after successful save.
+     * @param {?function} onErrorAction Callback on save error.
+     * @description Ensures server call is not already in progress. Gets validated values.
+     * Updates default title mask if creating a new record type. Calls parent's `_saveEditAndClose`.
+     */
+    _saveEditAndClose: function(fields, afterAction, onErrorAction){
+
+        if(window.hWin.HAPI4.is_callserver_in_progress()) {
+            //prevent repeatative call
+            return;   
+        }
+
+        if(!fields){
+            fields = this._getValidatedValues(); 
+            if(fields) fields['isfull'] = 1;
+        }
+
+        if(fields==null) return; //validation failed
+
+        if(fields['rty_TitleMask'] &amp;&amp; fields['rty_TitleMask'].indexOf('&lt;b>XXXXX&lt;/b>') != -1) { // add rectype name to default title mask
+            fields['rty_TitleMask'] = fields['rty_TitleMask'].replace('XXXXX', fields['rty_Name']);
+        }
+
+        this._super(fields, afterAction, onErrorAction);
+    },
+    
+    /**
+     * @brief Handles actions after a record type is saved.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {number} recID The ID of the saved record type.
+     * @param {object} fieldvalues The saved field values.
+     * @description Handles 'select_single' mode by selecting and closing.
+     * Updates local $Db cache, calls parent's handler. If it was an insert,
+     * refreshes search, auto-selects in 'select_multi' mode, and calls `_addInitialTabs`.
+     * Triggers a refresh event.
+     */
+    _afterSaveEventHandler: function( recID, fieldvalues ){
+
+        // close on addition of new record in select_single mode    
+        //this._currentEditID&lt;0 &amp;&amp; 
+        if(this.options.select_mode=='select_single'){
+            
+                this._selection = new HRecordSet();
+               
+                this._selection.addRecord(recID, fieldvalues);
+                this._selectAndClose();
+                this._triggerRefresh('rty');
+                return;    
+        }
+        
+        //add to local definitions
+        $Db.rty().setRecord(recID, fieldvalues);
+        this._super( recID, fieldvalues );
+        
+        if(this.it_was_insert){
+            this.searchForm.searchDefRecTypes('startSearch'); //refresh
+
+            if(this.options.select_mode=='select_multi'){ // auto select new rectype, and force close
+                this.recordList.find('div[recid="'+ recID +'"]').trigger('click');
+                this._selectAndClose();
+            }
+
+            this._addInitialTabs(recID);
+        }
+        this._triggerRefresh('rty');
+        
+/*        
+        this.getRecordSet().setRecord(recID, fieldvalues);
+        
+        if(this.options.edit_mode == 'editonly'){
+            this.closeDialog(true); //force to avoid warning
+        }else if(this._currentEditID&lt;0){
+            this.searchForm.searchDefRecTypes('startSearch');
+        }else{
+            this.recordList.resultList('refreshPage');  
+        }
+*/        
+    },
+
+	/**
+     * @brief Displays a dialog with default tab options for newly created record types.
+     * @memberof heurist.manageDefRecTypes
+     * @private
+     * @param {number} rty_ID The ID of the newly created record type.
+     * @description Prompts the user to select from a list of common tab headings (e.g., "General Info", "Description").
+     * Based on the selection, calls `_addNewFields` or `_makeAdditionalHeaders` if more separator fields are needed.
+     */
+    _addInitialTabs: function(rty_ID){
+
+        let that = this;
+        let $dlg;
+        let msg = '';
+
+        let dty_ids = [];
+        let def_tabs = ['General Info', 'General', 'Identification', 'Description', 'Categorisation', 'Localisation', 'Dating', 'Images', 'Links', 'References'];
+
+        $Db.dty().each(function(dty_ID, rec){
+           if($Db.dty(dty_ID,'dty_Type')=='separator'){
+               dty_ids.push(dty_ID);
+           } 
+        });
+
+        msg = 'Unless the record type is very simple with few fields, we suggest using tabs to&lt;br>organsie the fields describing this record type.&lt;br>'
+                + 'Please choose from this list of frequently used headings (tabs can be added or&lt;br>removed later, and the labels can be easily edited).&lt;br>&lt;br>';
+
+        for(let i = 0; i &lt; def_tabs.length; i++){
+
+            let checked = '';
+            if(i == 0){
+                checked = ' checked="true"';
+            }
+
+            msg += '&lt;label>&lt;input type="checkbox" value="'+ def_tabs[i] +'"'+ checked +'>'+ def_tabs[i] +'&lt;/label>&lt;br>';
+        }
+
+        let btns = {};
+        btns['Create tabs'] = function(){
+
+            let headings = [];
+
+            let $checked_opts = $dlg.find('input:checked');
+            
+            if($checked_opts.length == 0){ // no options
+                window.hWin.HEURIST4.msg.showMsgFlash('Please select a suggested tab, or click "No tabs"', 3000);
+            }
+
+            for(let j = 0; j &lt; $checked_opts.length; j++){
+                headings.push($($checked_opts[j]).val());
+            }
+
+            $dlg.dialog('close');
+
+            if(headings.length > dty_ids.length){ // not enough ids for selected number of headers, create new separators
+                that._makeAdditionalHeaders(rty_ID, headings, dty_ids.length, $Db.dty(dty_ids[0], 'dty_DetailTypeGroupID'));
+            }else{ // add selected headers to new rectype
+                that._addNewFields(rty_ID, headings);
+            }
+        };
+        btns['No tabs'] = function(){
+            that._addNewFields(rty_ID, null);
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Suggested tabs', yes: 'Create tabs', no: 'No tabs'}, {default_palette_class: 'ui-heurist-design'});
+    },
+
+	/**
+     * @brief Creates additional separator Detail Types if needed for default tabs.
+     * @memberof heurist.manageDefRecTypes
+     * @private
+     * @param {number} rty_ID The ID of the record type being configured.
+     * @param {Array&lt;string>} headings The list of chosen tab headings.
+     * @param {number} cur_dty_count The current count of available separator Detail Types.
+     * @param {number} dtg_id The Detail Type Group ID to assign to new separators.
+     * @description Recursively creates new separator Detail Types until enough are available
+     * for the selected `headings`. Then calls `_addNewFields`.
+     */
+    _makeAdditionalHeaders: function(rty_ID, headings, cur_dty_count, dtg_id){
+
+        let that = this;
+
+        cur_dty_count++;
+
+        let fields = {
+            dty_DetailTypeGroupID: dtg_id,
+            dty_ID: -1,
+            dty_Name: 'Header '+ cur_dty_count +' - edit the name', // give default name
+            dty_HelpText: '',
+            dty_NonOwnerVisibility: "viewable",
+            dty_Status: "open",
+            dty_Type: "separator",
+            dty_ShowInLists: 0
+        };
+            
+        let request = {
+            a: 'save',
+            entity: 'defDetailTypes',
+            'fields': fields
+        };
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+
+                    let dty_ID = response.data[0];
+                    fields['dty_ID'] = dty_ID;
+
+                    $Db.dty(dty_ID, null, fields); //update cache
+
+                    if(headings.length > cur_dty_count){
+                        that._makeAdditionalHeaders(rty_ID, headings, cur_dty_count, dtg_id); // create additional separators
+                    }else{
+                        that._addNewFields(rty_ID, headings); // move forward with adding tabs
+                    }
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+
+            });
+
+    },
+
+    /**
+     * @brief Adds selected default tab separators to a new record type's structure.
+     * @memberof heurist.manageDefRecTypes
+     * @private
+     * @param {number} rty_ID The ID of the record type.
+     * @param {?Array&lt;string>} tab_headings An array of chosen tab headings. If null or empty, no tabs are added.
+     * @description Constructs a request to add separator fields (Detail Types of type 'separator')
+     * to the record type structure with the specified headings.
+     * After successful addition, opens the structure editor for the record type.
+     */
+    _addNewFields: function(rty_ID, tab_headings){
+      
+		this._selected_fields = {};
+		
+		this._selected_fields['fields'] = [];
+		this._selected_fields['values'] = {};
+		
+		let that = this;
+
+        if(!window.hWin.HEURIST4.util.isempty(tab_headings)){
+    		
+            let i = 0;
+    		$Db.dty().each(function(dty_ID, rec){
+    		    if($Db.dty(dty_ID,'dty_Type')=='separator'){
+
+                    if(i == 0){
+                        that._selected_fields['fields'].unshift(dty_ID);
+                        that._selected_fields['values'][dty_ID] = {dty_Name: tab_headings[i], rst_DefaultValue: 'tabs'};
+                    }else{                    
+                        that._selected_fields['fields'].push(dty_ID);
+                        that._selected_fields['values'][dty_ID] = {dty_Name: tab_headings[i], rst_DefaultValue: 'tabs'};
+                    }
+                    i++;
+
+                    if(i >= tab_headings.length) return false;
+    		    } 
+    		});
+        }
+
+        window.hWin.HEURIST4.msg.bringCoverallToFront();
+        window.hWin.HEURIST4.msg.coverallKeep = true;
+        window.hWin.HEURIST4.msg.showMsgFlash('loading structure', false);
+                   
+		let request = {};
+		request['a']        = 'action'; //batch action
+		request['entity']   = 'defRecStructure';
+		request['rtyID']    = rty_ID;
+		request['newfields']  = that._selected_fields;
+		request['request_id'] = window.hWin.HEURIST4.util.random();
+		
+		window.hWin.HAPI4.EntityMgr.doRequest(request, 
+			function(response){
+                
+				if(response.status == window.hWin.ResponseStatus.OK){
+					
+                    //@todo since it adds only separators - we may update local definitions without request for full update
+                    
+					//refresh local defs and show edit structure popup
+					window.hWin.HAPI4.EntityMgr.getEntityData('defRecStructure', true,
+					function(){
+                        //open edit structurre
+						that._onActionListener(null, {recID:rty_ID, action:'editstr'} );
+					});
+					
+				}else{
+					window.hWin.HEURIST4.msg.showMsgErr(response);      
+				}
+			}
+		);
+    },
+
+    /**
+     * @brief Updates the record type count for a group.
+     * @memberof heurist.manageDefRecTypes
+     * @param {number} rtg_ID The ID of the record type group.
+     * @param {number} delta The change in count (e.g., +1 or -1).
+     * @description This method appears to be commented out in the source and thus non-functional.
+     * It was likely intended to update `rtg_RtCount` and trigger a refresh.
+     */
+    updateGroupCount:function(rtg_ID,  delta){
+    /*
+        if(rtg_ID>0){
+            let cnt = parseInt($Db.rtg(rtg_ID,'rtg_RtCount'));
+            cnt = (isNaN(cnt)?0:cnt)+delta;
+            if(cnt&lt;0) cnt = 0;
+            $Db.rtg(rtg_ID,'rtg_RtCount',cnt);
+            this._triggerRefresh('rtg');
+        }
+    */
+    },    
+    
+    /**
+     * @brief Retrieves UI preferences for this widget.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @returns {object} The user preferences object, using `defaultPrefs` if none are saved.
+     */
+    getUiPreferences:function(){
+        this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
+        return this.usrPreferences;
+    },
+    
+    /**
+     * @brief Saves UI preferences, specifically the visible fields configuration.
+     * @memberof heurist.manageDefRecTypes
+     * @override
+     * @param {?object} new_params If provided, contains the new 'fields' array to save.
+     * @description Saves the `fields` array (which columns are visible and their order)
+     * to user preferences unless in 'select_multi' or 'select_single' mode.
+     */
+    saveUiPreferences:function(new_params){
+
+        if(this.options.select_mode=='select_multi' || this.options.select_mode=='select_single') return;
+        
+        if(new_params){
+            let params = this.getUiPreferences();
+            
+            params['fields'] = new_params['fields']; 
+        
+            window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);
+            
+            this.usrPreferences = params;
+        }
+    },
+    
+    /**
+     * @brief Handles UI changes, such as column visibility or order.
+     * @memberof heurist.manageDefRecTypes
+     * @param {?Event} event The event that triggered the UI change (can be null).
+     * @param {object} params Parameters describing the UI change, typically includes a 'fields' array.
+     * @description If `event` is present, saves the new UI preferences.
+     * Updates `this.options.ui_params` and refreshes the record list.
+     */
+    changeUI: function( event, params ){
+        
+        if(this.options.edit_mode=='editonly') return;
+
+        if(event) this.saveUiPreferences( params );
+        
+        this.options.ui_params = window.hWin.HEURIST4.util.cloneJSON( this.usrPreferences);
+        
+        //refresh result list
+        this.recordList.resultList('applyViewMode','list', true);
+        this.recordList.resultList('refreshPage');
+        
+    },
+    
+    
+    /**
+     * @brief Duplicates a record type.
+     * @memberof heurist.manageDefRecTypes
+     * @private
+     * @param {number} rectypeID The ID of the record type to duplicate.
+     * @description Prompts for confirmation, then sends a request to the server
+     * to duplicate the record type. Refreshes data upon success.
+     */
+    _duplicateType: function (rectypeID) {
+
+        window.hWin.HEURIST4.msg.showMsgDlg(
+        window.hWin.HR('manageDefRectypes_duplicate_warn')+$Db.rty(rectypeID,'rty_Name')+'?'
+        , function(){ 
+                
+        
+                function _editAfterDuplicate(response) {
+
+                    if(response.status == window.hWin.ResponseStatus.OK){
+
+                        let rty_ID = Number(response.data.id);
+                        if(rty_ID>0){   
+                            //refresh the local heurist
+                            window.hWin.HAPI4.EntityMgr.refreshEntityData('rty,rst',function(){
+                                 window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+                            }); 
+
+                        }
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }                                        
+                }
+                
+                //@todo change to sys_structure controller
+                let baseurl = window.hWin.HAPI4.baseURL + "hserv/structure/edit/duplicateRectype.php";
+                window.hWin.HEURIST4.util.sendRequest(baseurl, { rtyID:rectypeID }, null, _editAfterDuplicate);
+
+        }, {title:'Confirm',yes:'Continue',no:'Cancel'},
+        {default_palette_class:this.options.default_palette_class});
+    },
+
+
+    /**
+     * @brief Changes the group assignment for a record type.
+     * @memberof heurist.manageDefRecTypes
+     * @param {object} params Object containing `rty_ID` and `rty_RecTypeGroupID`.
+     * @description Saves the record type with the new group ID and refreshes the UI.
+     */
+    changeRectypeGroup: function(params){                                    
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
+
+        let that = this;
+        this._saveEditAndClose( params ,
+            function(){
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                that.searchForm.searchDefRecTypes('startSearch');
+                that._triggerRefresh('rty');
+                /*
+                window.hWin.HAPI4.EntityMgr.refreshEntityData('rtg',
+                    function(){
+                        that._triggerRefresh('rtg');
+                    }
+                )*/
+        });
+    },
+
+    /**
+     * @brief Initiates the process of importing Record Types from a CSV file.
+     * @memberof heurist.manageDefRecTypes
+     * @description Opens a dialog for importing record types. After import, it reloads data,
+     * displays a report, and triggers a refresh of record type data.
+     */
+    importRecordTypes: function(){
+
+        const that = this;
+
+        let sURL = `${window.hWin.HAPI4.baseURL}import/delimited/importDefRecTypes.php?db=${window.hWin.HAPI4.database}&amp;rtg_ID=${this.options.rtg_ID}`;
+
+        window.hWin.HAPI4.SystemMgr.user_log('imp_RecordTypes');
+
+        window.hWin.HEURIST4.msg.showDialog(sURL, {
+            default_palette_class: 'ui-heurist-design',
+            'close-on-blur': false,
+            'no-resize': false,                  
+            title: 'Import Record types by CSV',
+            height: 800,
+            width: 1000,
+            context_help: 'defRecTypes #import',
+            callback: function(context){ 
+
+                if(context &amp;&amp; context.result){
+
+                    that._loadData(false);
+
+                    let msg = context.result;
+                    if(Array.isArray(context.result) || context.result.refresh_terms){
+
+                        msg = '&lt;strong>Definitions imported&lt;/strong>, report:&lt;br>&lt;br>';
+                        msg += context.result.join('&lt;br>');    
+                    }
+
+                    window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 'Record types imported',
+                        {default_palette_class:that.options.default_palette_class});
+
+                    that._triggerRefresh('rty');
+                }
+            }
+        });
+    }
+
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="HEURIST4.dbs.html">dbs</a></li><li><a href="HEURIST4.geo.html">geo</a></li><li><a href="HEURIST4.msg.html">msg</a></li><li><a href="HEURIST4.query.html">query</a></li><li><a href="HEURIST4.util.html">util</a></li><li><a href="NodeSelection.html">NodeSelection</a></li><li><a href="heurist.buttonsMenu.html">buttonsMenu</a></li><li><a href="heurist.controlPanel.html">controlPanel</a></li><li><a href="heurist.dbAction.html">dbAction</a></li><li><a href="heurist.dbVerify.html">dbVerify</a></li><li><a href="heurist.dbVerifyURLs.html">dbVerifyURLs</a></li><li><a href="heurist.editTranslations.html">editTranslations</a></li><li><a href="heurist.editing_input.html">editing_input</a></li><li><a href="heurist.navigation.html">navigation</a></li><li><a href="heurist.recordAccess.options.html">options</a></li><li><a href="heurist.recordAction.options.html">options</a></li><li><a href="heurist.recordAdd.options.html">options</a></li><li><a href="heurist.recordAddButton.options.html">options</a></li><li><a href="heurist.recordAddLink.options.html">options</a></li><li><a href="heurist.recordAddLinkMatch.options.html">options</a></li><li><a href="heurist.recordArchive.options.html">options</a></li><li><a href="heurist.recordBookmark.options.html">options</a></li><li><a href="heurist.recordDataTable.options.html">options</a></li><li><a href="heurist.recordDelete.options.html">options</a></li><li><a href="heurist.recordExport.options.html">options</a></li><li><a href="heurist.recordExportCSV.options.html">options</a></li><li><a href="heurist.recordFindDuplicates.options.html">options</a></li><li><a href="heurist.recordImportAnnotations.options.html">options</a></li><li><a href="heurist.recordNotify.options.html">options</a></li><li><a href="heurist.recordRate.options.html">options</a></li><li><a href="heurist.recordTag.options.html">options</a></li><li><a href="heurist.recordTemplate.options.html">options</a></li><li><a href="heurist.recordTitles.options.html">options</a></li><li><a href="heurist.recordUploadedFilesIndex.options.html">options</a></li><li><a href="heurist.selectFile.html">selectFile</a></li><li><a href="heurist.slidersMenu.html">slidersMenu</a></li></ul><h3>Classes</h3><ul><li><a href="ActionHandler.html">ActionHandler</a></li><li><a href="CmsManager.html">CmsManager</a></li><li><a href="Color.html">Color</a></li><li><a href="CrosstabsAnalysis.html">CrosstabsAnalysis</a></li><li><a href="EditorCodeMirror.html">EditorCodeMirror</a></li><li><a href="HEditing.html">HEditing</a></li><li><a href="HLayout.html">HLayout</a></li><li><a href="HLayoutMgr.html">HLayoutMgr</a></li><li><a href="HMapLayer.html">HMapLayer</a></li><li><a href="HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRapidFieldAdditions.HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRecordSearch.html">HRecordSearch</a></li><li><a href="HRecordSet.html">HRecordSet</a></li><li><a href="HSystemMgr.html">HSystemMgr</a></li><li><a href="HintDiv.html">HintDiv</a></li><li><a href="JapaneseCalendar.html">JapaneseCalendar</a></li><li><a href="L.Control.Help.html">Help</a></li><li><a href="L.Control.Manager.html">Manager</a></li><li><a href="L.Control.Publish.html">Publish</a></li><li><a href="Solver.html">Solver</a></li><li><a href="TDuration.html">TDuration</a></li><li><a href="Temporal.html">Temporal</a></li><li><a href="hAPI.html">hAPI</a></li><li><a href="hAPI-HRecordMgr.html">HRecordMgr</a></li><li><a href="window.TDate.html">TDate</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HPublishDialog">HPublishDialog</a></li><li><a href="global.html#HSvsEdit">HSvsEdit</a></li><li><a href="global.html#SelectLinkField">SelectLinkField</a></li><li><a href="global.html#_addInput">_addInput</a></li><li><a href="global.html#_checkStructureFromSource">_checkStructureFromSource</a></li><li><a href="global.html#_checkYear">_checkYear</a></li><li><a href="global.html#_closeDialog">_closeDialog</a></li><li><a href="global.html#_create">_create</a></li><li><a href="global.html#_destroy">_destroy</a></li><li><a href="global.html#_detectHeurist">_detectHeurist</a></li><li><a href="global.html#_doSave">_doSave</a></li><li><a href="global.html#_fromDataToUI">_fromDataToUI</a></li><li><a href="global.html#_getActionButtons">_getActionButtons</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_initControls">_initControls</a></li><li><a href="global.html#_initDialog">_initDialog</a></li><li><a href="global.html#_initInnerHeader">_initInnerHeader</a></li><li><a href="global.html#_initModal">_initModal</a></li><li><a href="global.html#_initOffcanvas">_initOffcanvas</a></li><li><a href="global.html#_japaneseYearToGregorian">_japaneseYearToGregorian</a></li><li><a href="global.html#_loadParentLookup">_loadParentLookup</a></li><li><a href="global.html#_popupDialog">_popupDialog</a></li><li><a href="global.html#_preImportCheck">_preImportCheck</a></li><li><a href="global.html#_processSPARQLRow">_processSPARQLRow</a></li><li><a href="global.html#_refresh">_refresh</a></li><li><a href="global.html#_refreshCaptcha">_refreshCaptcha</a></li><li><a href="global.html#_setOption">_setOption</a></li><li><a href="global.html#_showRecordViewPopup">_showRecordViewPopup</a></li><li><a href="global.html#_switchToDataMode">_switchToDataMode</a></li><li><a href="global.html#_theme_editing_symbology">_theme_editing_symbology</a></li><li><a href="global.html#_updatePanels">_updatePanels</a></li><li><a href="global.html#_validateFromGregorian">_validateFromGregorian</a></li><li><a href="global.html#addAssoctoAssigned">addAssoctoAssigned</a></li><li><a href="global.html#addBackgroundCircles">addBackgroundCircles</a></li><li><a href="global.html#addContainer">addContainer</a></li><li><a href="global.html#addForce">addForce</a></li><li><a href="global.html#addForegroundCircles">addForegroundCircles</a></li><li><a href="global.html#addIcons">addIcons</a></li><li><a href="global.html#addKeyword">addKeyword</a></li><li><a href="global.html#addLabels">addLabels</a></li><li><a href="global.html#addLevel">addLevel</a></li><li><a href="global.html#addLines">addLines</a></li><li><a href="global.html#addMarkerDefinitions">addMarkerDefinitions</a></li><li><a href="global.html#addNodes">addNodes</a></li><li><a href="global.html#addPrevtoAssigned">addPrevtoAssigned</a></li><li><a href="global.html#addSelectionBox">addSelectionBox</a></li><li><a href="global.html#addTitles">addTitles</a></li><li><a href="global.html#applyRules">applyRules</a></li><li><a href="global.html#autofill_login">autofill_login</a></li><li><a href="global.html#browseRecords">browseRecords</a></li><li><a href="global.html#calculateImageExtentFromWorldFile">calculateImageExtentFromWorldFile</a></li><li><a href="global.html#changeDisplay">changeDisplay</a></li><li><a href="global.html#changeViewMode">changeViewMode</a></li><li><a href="global.html#checkAllOptions">checkAllOptions</a></li><li><a href="global.html#checkStoredSettings">checkStoredSettings</a></li><li><a href="global.html#clearContent">clearContent</a></li><li><a href="global.html#close">close</a></li><li><a href="global.html#closeDialog">closeDialog</a></li><li><a href="global.html#commonCodeInit">commonCodeInit</a></li><li><a href="global.html#commonOnAdd">commonOnAdd</a></li><li><a href="global.html#compareIndexes">compareIndexes</a></li><li><a href="global.html#correctionOfInvalidTerm">correctionOfInvalidTerm</a></li><li><a href="global.html#createOverlay">createOverlay</a></li><li><a href="global.html#currentNode">currentNode</a></li><li><a href="global.html#daysInMonth">daysInMonth</a></li><li><a href="global.html#determineColour">determineColour</a></li><li><a href="global.html#disableUpdateBtn">disableUpdateBtn</a></li><li><a href="global.html#doAction">doAction</a></li><li><a href="global.html#doAuthentication">doAuthentication</a></li><li><a href="global.html#doImport">doImport</a></li><li><a href="global.html#doRegister">doRegister</a></li><li><a href="global.html#doSamlLogin">doSamlLogin</a></li><li><a href="global.html#doSearchByID">doSearchByID</a></li><li><a href="global.html#drag_link_line">drag_link_line</a></li><li><a href="global.html#drag_link_source_id">drag_link_source_id</a></li><li><a href="global.html#drag_link_target_id">drag_link_target_id</a></li><li><a href="global.html#drag_link_timer">drag_link_timer</a></li><li><a href="global.html#dragend">dragend</a></li><li><a href="global.html#dragmove">dragmove</a></li><li><a href="global.html#dragstart">dragstart</a></li><li><a href="global.html#editCMS2">editCMS2</a></li><li><a href="global.html#editCMS_ElementCfg">editCMS_ElementCfg</a></li><li><a href="global.html#editCMS_SelectElement">editCMS_SelectElement</a></li><li><a href="global.html#editCMS_SiteMenu">editCMS_SiteMenu</a></li><li><a href="global.html#editCMS_WidgetCfg">editCMS_WidgetCfg</a></li><li><a href="global.html#editSymbology">editSymbology</a></li><li><a href="global.html#editTheme">editTheme</a></li><li><a href="global.html#enable_register">enable_register</a></li><li><a href="global.html#executeFormula">executeFormula</a></li><li><a href="global.html#f">f</a></li><li><a href="global.html#first_level_rty_ID">first_level_rty_ID</a></li><li><a href="global.html#fixCalendarPickerCMDs">fixCalendarPickerCMDs</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#formatGregJulian">formatGregJulian</a></li><li><a href="global.html#fromJD">fromJD</a></li><li><a href="global.html#fromJSDate">fromJSDate</a></li><li><a href="global.html#fset">fset</a></li><li><a href="global.html#getAllChecked">getAllChecked</a></li><li><a href="global.html#getClass">getClass</a></li><li><a href="global.html#getContainer">getContainer</a></li><li><a href="global.html#getDataFromServer">getDataFromServer</a></li><li><a href="global.html#getEntityRadius">getEntityRadius</a></li><li><a href="global.html#getEraFromGregorian">getEraFromGregorian</a></li><li><a href="global.html#getEraFromJapaneseStr">getEraFromJapaneseStr</a></li><li><a href="global.html#getEraLimits">getEraLimits</a></li><li><a href="global.html#getEras">getEras</a></li><li><a href="global.html#getGephiFormat">getGephiFormat</a></li><li><a href="global.html#getKeywords">getKeywords</a></li><li><a href="global.html#getKeywordsNextStep">getKeywordsNextStep</a></li><li><a href="global.html#getLineLength">getLineLength</a></li><li><a href="global.html#getLineWidth">getLineWidth</a></li><li><a href="global.html#getMarkerWidth">getMarkerWidth</a></li><li><a href="global.html#getNodeDataById">getNodeDataById</a></li><li><a href="global.html#getRecentKeywords">getRecentKeywords</a></li><li><a href="global.html#getRecordOverlayData">getRecordOverlayData</a></li><li><a href="global.html#getRelationOverlayData">getRelationOverlayData</a></li><li><a href="global.html#getRulesArray">getRulesArray</a></li><li><a href="global.html#getSelected">getSelected</a></li><li><a href="global.html#getSelection">getSelection</a></li><li><a href="global.html#getSetting">getSetting</a></li><li><a href="global.html#getURL">getURL</a></li><li><a href="global.html#gregorianToJapaneseStr">gregorianToJapaneseStr</a></li><li><a href="global.html#hMapDocument">hMapDocument</a></li><li><a href="global.html#hRecordAction">hRecordAction</a></li><li><a href="global.html#handleNodeAction">handleNodeAction</a></li><li><a href="global.html#handleSettingsInUI">handleSettingsInUI</a></li><li><a href="global.html#hexToFilter">hexToFilter</a></li><li><a href="global.html#hexportMenu">hexportMenu</a></li><li><a href="global.html#imgFilter">imgFilter</a></li><li><a href="global.html#initProfilePreferences">initProfilePreferences</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isA">isA</a></li><li><a href="global.html#isAssocKeyword">isAssocKeyword</a></li><li><a href="global.html#isMonthSpan">isMonthSpan</a></li><li><a href="global.html#isRecentKeyword">isRecentKeyword</a></li><li><a href="global.html#isTemporal">isTemporal</a></li><li><a href="global.html#isValid">isValid</a></li><li><a href="global.html#japaneseToGregorian">japaneseToGregorian</a></li><li><a href="global.html#japaneseToGregorianStr">japaneseToGregorianStr</a></li><li><a href="global.html#keywordLookup">keywordLookup</a></li><li><a href="global.html#loadHtmlContent">loadHtmlContent</a></li><li><a href="global.html#log10">log10</a></li><li><a href="global.html#login_dialog">login_dialog</a></li><li><a href="global.html#lookupEditions">lookupEditions</a></li><li><a href="global.html#lookupGoogle">lookupGoogle</a></li><li><a href="global.html#lookupHathiTrust">lookupHathiTrust</a></li><li><a href="global.html#lookupKarlsruhePortal">lookupKarlsruhePortal</a></li><li><a href="global.html#lookupWorldCat">lookupWorldCat</a></li><li><a href="global.html#mapIds">mapIds</a></li><li><a href="global.html#menuActionHandler">menuActionHandler</a></li><li><a href="global.html#mergeArraysUnique">mergeArraysUnique</a></li><li><a href="global.html#msgToConsole">msgToConsole</a></li><li><a href="global.html#newDate">newDate</a></li><li><a href="global.html#onAdd">onAdd</a></li><li><a href="global.html#onAuthentication">onAuthentication</a></li><li><a href="global.html#onNodeClick">onNodeClick</a></li><li><a href="global.html#onPageInit">onPageInit</a></li><li><a href="global.html#onRecordNodeClick">onRecordNodeClick</a></li><li><a href="global.html#onRemove">onRemove</a></li><li><a href="global.html#onTermSaveError">onTermSaveError</a></li><li><a href="global.html#open">open</a></li><li><a href="global.html#openRecordInTab">openRecordInTab</a></li><li><a href="global.html#openSearchMenu">openSearchMenu</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#popupDialog">popupDialog</a></li><li><a href="global.html#prevSessionExists">prevSessionExists</a></li><li><a href="global.html#project_keywords">project_keywords</a></li><li><a href="global.html#putSetting">putSetting</a></li><li><a href="global.html#removeAssocByID">removeAssocByID</a></li><li><a href="global.html#removeKeyword">removeKeyword</a></li><li><a href="global.html#removeOverlay">removeOverlay</a></li><li><a href="global.html#removeOverlays">removeOverlays</a></li><li><a href="global.html#removeSetting">removeSetting</a></li><li><a href="global.html#renderAssocKeywods">renderAssocKeywods</a></li><li><a href="global.html#renderContent">renderContent</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#saveRules">saveRules</a></li><li><a href="global.html#selectRecord">selectRecord</a></li><li><a href="global.html#setFormulaMode">setFormulaMode</a></li><li><a href="global.html#setGravity">setGravity</a></li><li><a href="global.html#setLinkMode">setLinkMode</a></li><li><a href="global.html#setSelected">setSelected</a></li><li><a href="global.html#setSelection">setSelection</a></li><li><a href="global.html#setValue">setValue</a></li><li><a href="global.html#setupAssocKeywords">setupAssocKeywords</a></li><li><a href="global.html#setupCaptcha">setupCaptcha</a></li><li><a href="global.html#setupRecentWorks">setupRecentWorks</a></li><li><a href="global.html#setupResetPin">setupResetPin</a></li><li><a href="global.html#show">show</a></li><li><a href="global.html#showEditions">showEditions</a></li><li><a href="global.html#showHelp">showHelp</a></li><li><a href="global.html#showKeyword">showKeyword</a></li><li><a href="global.html#showLoginDialog">showLoginDialog</a></li><li><a href="global.html#showNodeInformation">showNodeInformation</a></li><li><a href="global.html#showSearchBuilder">showSearchBuilder</a></li><li><a href="global.html#showSearchFacetedWizard">showSearchFacetedWizard</a></li><li><a href="global.html#showWarningAboutTermUsage">showWarningAboutTermUsage</a></li><li><a href="global.html#simplePointsToWKT">simplePointsToWKT</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#startRecentWork">startRecentWork</a></li><li><a href="global.html#temporalSimplifyDate">temporalSimplifyDate</a></li><li><a href="global.html#temporalToHumanReadableString">temporalToHumanReadableString</a></li><li><a href="global.html#tick">tick</a></li><li><a href="global.html#toJD">toJD</a></li><li><a href="global.html#toJSDate">toJSDate</a></li><li><a href="global.html#translationFromUI">translationFromUI</a></li><li><a href="global.html#translationSupport">translationSupport</a></li><li><a href="global.html#translationToUI">translationToUI</a></li><li><a href="global.html#truncateText">truncateText</a></li><li><a href="global.html#unselectAssoc">unselectAssoc</a></li><li><a href="global.html#updateAssocDisplay">updateAssocDisplay</a></li><li><a href="global.html#updateAssocList">updateAssocList</a></li><li><a href="global.html#updateCircles">updateCircles</a></li><li><a href="global.html#updateCurvedLines">updateCurvedLines</a></li><li><a href="global.html#updateLabels">updateLabels</a></li><li><a href="global.html#updateNodes">updateNodes</a></li><li><a href="global.html#updateRecentKeywordDisplay">updateRecentKeywordDisplay</a></li><li><a href="global.html#updateRectangles">updateRectangles</a></li><li><a href="global.html#updateRuleBuilder">updateRuleBuilder</a></li><li><a href="global.html#updateStatus">updateStatus</a></li><li><a href="global.html#updateStraightLines">updateStraightLines</a></li><li><a href="global.html#validateResetPin">validateResetPin</a></li><li><a href="global.html#visualizeData">visualizeData</a></li><li><a href="global.html#visualizeSelection">visualizeSelection</a></li><li><a href="global.html#weekDay">weekDay</a></li><li><a href="global.html#weekOfYear">weekOfYear</a></li><li><a href="global.html#zoomed">zoomed</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Jul 24 2025 18:09:15 GMT+0400 (GMT+04:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

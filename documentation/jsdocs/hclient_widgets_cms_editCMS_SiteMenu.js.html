@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: hclient/widgets/cms/editCMS_SiteMenu.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: hclient/widgets/cms/editCMS_SiteMenu.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file editCMS_SiteMenu.js
+ * @brief Manages the website structure and navigation menu configuration within the CMS editor.
+ * @fileOverview This file defines the 'editCMS_SiteMenu' function, which is responsible for
+ *               rendering and managing the website's navigation menu tree in the CMS editor. It allows
+ *               users to view the site structure, add new menu items (pages), edit existing ones (rename, change record properties),
+ *               reorder menu items via drag-and-drop, and delete menu entries. It interacts with the main
+ *               CMS editor (editCMS2) for page loading and refreshing the main menu display.
+ * @project     Heurist academic knowledge management system
+ *
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov &lt;osmakov@gmail.com>
+ * @author Ian Johnson &lt;ian.johnson.heurist@gmail.com>
+ * @since 6.0
+ */
+
+/**
+ * Initializes and manages the website structure/menu editor within the provided container.
+ * It uses Fancytree to display and interact with the website's menu hierarchy.
+ *
+ * @param {jQuery} $container - The jQuery object representing the container element where the site menu tree will be rendered.
+ * @param {Object} editCMS2 - An instance of the main CMS editor (editCMS2.js), used for callbacks and accessing shared data.
+ * @returns {Object} An object with public methods for controlling the site menu editor.
+ *
+ * @property {string} _className - Internal class name identifier.
+ * @property {number} RT_CMS_MENU - Record Type ID for CMS Menu.
+ * @property {number} DT_NAME - Detail Type ID for Name.
+ * @property {number} DT_EXTENDED_DESCRIPTION - Detail Type ID for Extended Description.
+ * @property {number} DT_CMS_TOP_MENU - Detail Type ID for CMS Top Menu (links from CMS Home to menu items).
+ * @property {number} DT_CMS_MENU - Detail Type ID for CMS Menu (links from menu items to sub-menu items).
+ * @property {number} DT_CMS_PAGETITLE - Detail Type ID for CMS Page Title visibility.
+ * @property {number} DT_CMS_PAGETYPE - Detail Type ID for CMS Page Type.
+ * @property {boolean} isVersion3 - Flag to indicate if it's operating in a Heurist v3 like environment (based on editCMS2 properties).
+ * @property {number} home_page_record_id - The record ID of the website's home page.
+ */
+function editCMS_SiteMenu( $container, editCMS2 ){
+
+    const _className = 'editCMS_SiteMenu';
+    
+    const RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
+        DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
+        DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
+        DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'],
+        DT_CMS_MENU  = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
+        DT_CMS_PAGETITLE   = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'],
+        DT_CMS_PAGETYPE   = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETYPE'];
+        
+    let isVersion3 = false;
+    let home_page_record_id;
+
+    /**
+     * Initializes the site menu editor by calling _initControls.
+     * @private
+     */
+    function _init(){
+
+        /*not used as dialog 
+        var buttons= [
+            {text:window.hWin.HR('Cancel'), 
+                class:'btnCancel',
+                css:{'float':'right','margin-left':'30px','margin-right':'20px'}, 
+                click: function() { 
+                    $dlg.dialog( "close" );
+            }},
+            {text:window.hWin.HR('Apply'), 
+                class:'ui-button-action btnDoAction',
+                //disabled:'disabled',
+                css:{'float':'right'}, 
+                click: function() { 
+                        var config = _getValues();
+                        main_callback.call(this, config);
+                        $dlg.dialog( "close" );    
+        }}];
+        */
+        
+        /*
+        $container.empty().load(window.hWin.HAPI4.baseURL
+                +'hclient/widgets/cms/editCMS_ElementCfg.html',
+                _initControls
+            );
+        */
+        
+        _initControls();
+    }
+    
+    /**
+     * Gets the current page ID from the main editCMS2 instance or the global window object.
+     * @private
+     * @returns {number|undefined} The ID of the current page being edited.
+     */
+    function _currentPageId(){
+        if(isVersion3){
+            return editCMS2.page_id;
+        }else{
+            return window.hWin.current_page_id;            
+        }
+    }
+    
+    /**
+     * Initializes or reloads the Fancytree instance for the website menu.
+     * Sets up tree options, including drag-and-drop for reordering, and node rendering.
+     * @private
+     */
+    function _initControls(){
+
+        let tree_element = $container;        
+        
+        //get treedata from main menu
+        let treedata;
+        if(window.hWin.HEURIST4.util.isJSON(editCMS2.menuContentJSON)){
+            isVersion3 = true;
+            treedata = editCMS2.menuContentJSON;
+            home_page_record_id = editCMS2.website_id;
+
+            //stub
+            if(!window.hWin.page_cache) window.hWin.page_cache = {};
+
+        }else{
+            home_page_record_id = window.hWin.home_page_record_id
+            treedata = $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('getMenuContent','treeview');
+        }
+        
+        //add node for home page
+/*
+0:
+children: (3) [{…}, {…}, {…}]
+expanded: false
+has_access: true
+key: "3"
+page_id: "3"
+page_showtitle: 1
+page_target: null
+parent_id: 7
+title: "Overview"
+*/
+        if(tree_element.fancytree('instance')){
+            
+            let tree = $.ui.fancytree.getTree( tree_element );
+
+            //keep_expanded_nodes
+            let keep_expanded_nodes = [];
+            tree.visit(function(node){
+                    if(node.isExpanded()){
+                        keep_expanded_nodes.push(node.key)
+                    }});
+            
+            tree.reload(treedata);
+            
+            tree.visit(function(node){
+                    if(keep_expanded_nodes.indexOf(node.key)>=0){
+                        node.setExpanded(true);
+                    }
+                    node.setSelected((node.data.page_id==_currentPageId()));
+            });
+
+        }else{
+
+            let fancytree_options =
+            {
+                checkbox: false,
+                //titlesTabbable: false,     // Add all node titles to TAB chain
+                source: treedata,
+                quicksearch: false, //true,
+                selectMode: 1, //1:single, 2:multi, 3:multi-hier (default: 2)
+                renderNode: function(event, data) {
+                    
+                        let item = data.node;
+                        _defineActionIcons( item );
+                    
+                },
+                extensions:["edit", "dnd"],
+                dnd:{
+                    preventVoidMoves: true,
+                    preventRecursiveMoves: true,
+                    autoExpandMS: 400,
+                    dragStart: function(node, data) {
+                        return true; //data.has_access;
+                    },
+                    dragEnter: function(node, data) {
+                        //data.otherNode - dragging node
+                        //node - target node
+                        return true;
+                    },
+                    dragDrop: function(node, data) {
+                        //data.otherNode - dragging node
+                        //node - target node
+                        let source_parent = data.otherNode.parent.data.page_id;
+                        if(!(source_parent>0))
+                            source_parent = home_page_record_id;
+
+                        data.otherNode.moveTo(node, data.hitMode);
+
+                        let target_parent = data.otherNode.parent.data.page_id;
+                        if(!(target_parent>0))
+                            target_parent = home_page_record_id;
+                        data.otherNode.data.parent_id = target_parent;
+
+                        let request = {actions:[]};
+                        if(source_parent!=target_parent){
+                            //remove from source
+                            request.actions.push(
+                                {a: 'delete',
+                                    recIDs: source_parent,
+                                    dtyID: source_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
+                                    sVal:data.otherNode.data.page_id}); 
+
+                        }
+                       
+                        //change order in target
+                        
+                        //at first - remove all current children
+                        request.actions.push(
+                            {a: 'delete',
+                                recIDs: target_parent,
+                                dtyID: target_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU});
+
+                        //add children in new order        
+                        for (let i=0; i&lt;data.otherNode.parent.children.length; i++){
+
+                            let menu_node = data.otherNode.parent.children[i];
+                            request.actions.push(
+                                {a: 'add',
+                                    recIDs: target_parent,
+                                    dtyID: target_parent==home_page_record_id?DT_CMS_TOP_MENU:DT_CMS_MENU,
+                                    val:menu_node.data.page_id}                                                   
+                            );
+                        }                    
+
+                        //window.hWin.HEURIST4.msg.bringCoverallToFront(edit_dialog.parents('.ui-dialog')); 
+                        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+                            
+                            if(response.status == window.hWin.ResponseStatus.OK){
+                                window.hWin.HEURIST4.msg.showMsgFlash('saved');
+                                //reload main menu
+                                _refreshMainMenu( false ); //after DnD
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }
+                        });             
+
+                    }
+                },
+                activate: function(event, data) { 
+                    //loads another page
+                    let page_id = data.node.data.page_id;
+
+                    if(page_id>0){
+                        _refreshCurrentPage(page_id);
+                        data.node.setActive( false );
+
+                        editCMS2.switchMode('page');
+
+                        if(!isVersion3){
+                            $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('highlightTopItem', data.node.key);
+                        }
+                    }
+                },
+                edit:{
+                    triggerStart: ["clickActive", "dblclick", "f2", "mac+enter", "shift+click"],
+                    close: function(event, data){
+                        // Editor was removed
+                        if( data.save ) {
+                            // Since we started an async request, mark the node as preliminary
+                            $(data.node.span).addClass("pending");
+                        }
+                    },                                    
+                    save:function(event, data){
+                        if(''!=data.input.val()){
+                            let new_name = data.input.val();
+                            _renameMenuEntry(data.node.data.page_id, new_name, function(){
+                                
+                            });
+                        }else{
+                            $(data.node.span).removeClass("pending");    
+                        }
+                    }
+                }
+            };
+
+            tree_element.fancytree(fancytree_options).addClass('tree-cms');
+            
+            let tree = $.ui.fancytree.getTree( tree_element );
+            tree.visit(function(node){
+                node.setExpanded(true);
+            });            
+            
+        }        
+        
+        setTimeout(_highlightCurrentPage, 1000);
+    }  
+   
+   
+    /**
+     * Defines and attaches action icons (add, edit, delete) to a menu item in the Fancytree.
+     * @private
+     * @param {Fancytree.FancytreeNode} item - The Fancytree node representing a menu item.
+     */
+    function _defineActionIcons(item)
+    {
+        
+        let tree_element = $container;
+        
+        let item_li = $(item.li), 
+        menu_id = item.data.page_id,
+
+        is_top = (item.data.parent_id==home_page_record_id);
+
+        if($(item).find('.svs-contextmenu3').length==0){
+
+            let parent_span = item_li.children('span.fancytree-node');
+
+            //add,edit menu,edit page,remove
+            let actionspan = $('&lt;div class="svs-contextmenu3" style="padding: 0px 20px 0px 0px;" data-parentid="'
+                +item.data.parent_id+'" data-menuid="'+menu_id+'">'
+                //since 12-05 +'&lt;span class="ui-icon ui-icon-structure" title="Edit page">&lt;/span>'
+                +'&lt;span class="ui-icon ui-icon-plus" title="Add new page/menu item">&lt;/span>'
+                +'&lt;span class="ui-icon ui-icon-pencil" title="Edit menu record">&lt;/span>'
+                //+'&lt;span class="ui-icon ui-icon-document" title="Edit page record">&lt;/span>'
+                +'&lt;span class="ui-icon ui-icon-trash" '
+                +'" title="Remove menu entry from website">&lt;/span>'
+                +'&lt;/div>').appendTo(parent_span);
+
+            $('&lt;div class="svs-contextmenu4">&lt;/div>').appendTo(parent_span); //progress icon
+
+            actionspan.find('.ui-icon').on('click', function(event){
+                let ele = $(event.target);
+                window.hWin.HEURIST4.util.stopEvent(event);
+                
+                let parent_span = ele.parents('span.fancytree-node');
+                
+                function __in_progress(){
+                    parent_span.find('.svs-contextmenu4').show();
+                    parent_span.find('.svs-contextmenu3').hide();
+                }
+
+                //timeout need to activate current node    
+                setTimeout(function(){                         
+                    let ele2 = ele.parents('.svs-contextmenu3');
+                    let menuid = ele2.attr('data-menuid');
+                    let parent_id = ele2.attr('data-parentid');
+
+                    if(ele.hasClass('ui-icon-plus')){ //add new menu to 
+
+                        _selectMenuRecord(menuid);
+
+                    }else if(ele.hasClass('ui-icon-pencil')){ //edit menu record
+
+                        function __editPageRecord(record_id){
+                            __in_progress();
+                            //edit menu item
+                            window.hWin.HEURIST4.ui.openRecordEdit(record_id, null,
+                                {selectOnSave:true,
+                                    onClose: function(){ 
+                                        parent_span.find('.svs-contextmenu4').hide();
+                                    },
+                                    onselect:function(event, data){
+                                        if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                                            
+                                            let recordset = data.selection;
+                                            let page_id = recordset.getOrder()[0];
+                                            window.hWin.page_cache[page_id] = null; //remove from cache
+                                            delete window.hWin.page_cache[page_id];
+                                            
+                                            if(page_id == _currentPageId()){
+                                                _refreshCurrentPage(page_id);
+                                            }
+
+                                            // Update website tree and in site menu
+                                            let new_name = recordset.fld(recordset.getFirstRecord(), DT_NAME);
+                                            let refresh_menus = false;
+
+                                            if(window.hWin.page_cache[page_id]) window.hWin.page_cache[page_id][DT_NAME] = new_name;
+
+                                            // Update tree nodes
+                                            $.ui.fancytree.getTree( $container ).visit((node) => {
+
+                                                let old_name = node.title;
+                                                if(node.data.page_id == page_id){
+
+                                                    if(old_name == new_name){ return false; } // name wasn't updated
+
+                                                    node.setTitle( new_name );
+                                                    _defineActionIcons(node);
+                                                    refresh_menus = true;
+                                                }
+
+                                            });
+
+                                            if(refresh_menus){ _refreshMainMenu(false); } // update menu
+                                        }
+                                    }
+                                }
+                            );
+                        }
+                        
+                        if( (menuid == _currentPageId())
+                            &amp;&amp; editCMS2.warningOnExit(function(){ __editPageRecord(menuid) }))
+                        {                                    
+                                return;
+                        }else{
+                                __editPageRecord(menuid);
+                        }
+
+                    }
+                    else if(ele.hasClass('ui-icon-structure')){ //not used - now any click on tree opens edit page
+
+                        editCMS2.switchMode('page');
+                        //open page structure 
+                        if( menuid != _currentPageId() ){
+                            _refreshCurrentPage( menuid );
+                        }
+
+                    }else 
+                        if(ele.hasClass('ui-icon-trash')){    //remove menu entry
+
+                            function __doRemove(){
+                                let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                let isDelete = $dlg.find('#del_menu').is(':checked');
+                                $dlg.dialog( "close" );
+
+                                let to_del = [];
+                                item.visit(function(node){
+                                    to_del.push(node.data.page_id);
+                                },true);
+
+                                if(!isDelete){ // Check if the menu and related records are to be deleted, or just removed
+                                    to_del = null;
+                                }
+                                
+                                if(!isVersion3){
+                                    editCMS2.resetModified();
+                                }
+                                
+                                _removeMenuEntry(parent_id, menuid, to_del, function(){
+                                    item.remove();    
+                                    
+                                    //after deletion select home page
+                                    _refreshMainMenu( false, home_page_record_id); //after delete
+                                });
+                            }
+
+                            let menu_title = ele.parents('.fancytree-node').find('.fancytree-title')[0].innerText; // Get menu title
+                            
+                            let buttons = {};
+                            buttons[window.hWin.HR('Remove menu entry and sub-menus (if any)')]  = function() {
+                                __doRemove();
+                            };
+                            buttons[window.hWin.HR('Cancel')]  = function() {
+                                let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                                $dlg.dialog( "close" );
+                            };
+
+                            window.hWin.HEURIST4.msg.showMsgDlg(
+                                'This removes the menu entry from the website, as well as all sub-menus of this menu (if any).&lt;br>&lt;br>'
+                                + 'To avoid removing sub-menus, move them out of this menu before removing it.&lt;br>&lt;br>'
+                                + '&lt;input type="checkbox" id="del_menu">'
+                                + '&lt;label for="del_menu" style="display: inline-flex;">If you want to delete the actual web pages from the database, not simply remove&lt;br>'
+                                + 'the menu entreis from this website, check this box. Note that this is not reversible.&lt;/label>', buttons,
+                                'Remove "'+ menu_title +'" Menu');
+
+                        }
+
+                },500);
+            });
+
+            //hide icons on mouse exit
+            function _onmouseexit(event){
+                let node;
+                if($(event.target).is('li')){
+                    node = $(event.target).find('.fancytree-node');
+                }else if($(event.target).hasClass('fancytree-node')){
+                    node =  $(event.target);
+                }else{
+                    //hide icon for parent 
+                    node = $(event.target).parents('.fancytree-node');
+                    if(node) node = $(node[0]);
+                }
+                let ele = node.find('.svs-contextmenu3');
+                ele.hide();
+            }               
+
+            function _onmouseenter(event){
+                let node;
+                if($(event.target).hasClass('fancytree-node')){
+                    node =  $(event.target);
+                }else{
+                    node = $(event.target).parents('.fancytree-node');
+                }
+                if(! ($(node).hasClass('fancytree-loading') || $(node).find('.svs-contextmenu4').is(':visible')) ){
+                    let ele = $(node).find('.svs-contextmenu3');
+                    ele.css({'display':'inline-block'});
+                }
+            }
+
+            $(parent_span).on('mouseenter',
+                _onmouseenter
+            ).on('mouseleave',
+                _onmouseexit
+            );                                                  
+            
+        }
+    } //end _defineActionIcons
+
+    
+    /**
+     * Renames a menu entry (CMS Menu record) by updating its DT_NAME detail.
+     * Refreshes the tree and main menu upon success.
+     * @private
+     * @param {number} rec_id - The record ID of the menu item to rename.
+     * @param {string} newvalue - The new name for the menu item.
+     * @param {function} [callback] - Optional callback function to execute after renaming.
+     */
+    function _renameMenuEntry(rec_id, newvalue, callback){
+
+        let request = {a: 'replace',
+            recIDs: rec_id,
+            dtyID:  DT_NAME,
+            rVal:    newvalue};
+
+        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+            if(response.status == window.hWin.ResponseStatus.OK){
+                //refresh treeview
+                if($container.fancytree('instance')){                                 
+                    let node = $.ui.fancytree.getTree( $container ).getNodeByKey(''+rec_id);
+                    if(node){
+                        $(node.span).removeClass("pending");
+                        node.setTitle( newvalue ); 
+                        _defineActionIcons( node );   
+                    }
+                }                                
+                if(window.hWin.page_cache[rec_id]) window.hWin.page_cache[rec_id][DT_NAME] = newvalue;
+                _refreshMainMenu( false ); //after Rename   
+                
+                
+                if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });                                        
+
+    }
+    
+    /**
+     * Highlights the currently active page in the site menu tree.
+     * @private
+     */
+    function _highlightCurrentPage(){
+        
+        if(_currentPageId()==home_page_record_id){
+            $('.btn-website-homepage').css({'text-decoration':'underline'});
+        }else
+        if( $container.fancytree('instance')){
+                let tree = $.ui.fancytree.getTree( $container );
+                
+                $('.btn-website-homepage').css({'text-decoration':'none'});
+                
+                tree.visit(function(node){
+                    if(node.data.page_id==_currentPageId()){
+                        $(node.li).find('.fancytree-title').css({'text-decoration':'underline'});    
+                    }else{
+                        $(node.li).find('.fancytree-title').css({'text-decoration':'none'});
+                    }
+                });            
+        }
+    }
+
+    /**
+     * Creates a new CMS Menu record, typically based on a template, and then adds it to the menu structure.
+     * @private
+     * @param {number} parent_id - The record ID of the parent menu item (or home page ID for top-level items).
+     * @param {string} pageName - The name for the new page/menu item.
+     * @param {string} templateName - The name of the template to use for the page content (e.g., 'default', 'blog').
+     * @param {function(number):void} [callback] - Optional callback function, receives the new page ID. Defaults to refreshing the main menu.
+     * @param {jQuery} [$dlg_element] - Optional jQuery dialog element to close after creation.
+     */
+    function _createMenuRecord(parent_id, pageName, templateName, callback, $dlg_element){
+        
+        if($dlg_element &amp;&amp; $dlg_element.dialog('instance') !== undefined){
+            $dlg_element.dialog( "close" );
+        }
+                
+        let details = {};
+        details['t:'+DT_NAME] = [ pageName ];
+        details['t:'+DT_CMS_PAGETYPE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE_MENUITEM'] ];
+        if(DT_CMS_PAGETITLE>0 &amp;&amp; window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO']){
+            details['t:'+DT_CMS_PAGETITLE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'] ];
+        }
+
+        //if callback is not defined, it is _refreshMainMenu
+        if(!window.hWin.HEURIST4.util.isFunction(callback)){
+                callback = function(new_page_id){
+                    _refreshMainMenu(true, new_page_id); //after addition of new page
+                };
+        }
+
+        function ___continue_addition(pageContent){
+            
+            if(typeof pageContent !== 'string'){
+                pageContent = JSON.stringify(pageContent);
+            }
+            
+            let details = {};
+            details['t:'+DT_NAME] = [ pageName ];
+            details['t:'+DT_CMS_PAGETYPE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE_MENUITEM'] ];
+            if(DT_CMS_PAGETITLE>0 &amp;&amp; window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO']){
+                details['t:'+DT_CMS_PAGETITLE] = [ window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'] ];
+            }                
+            details['t:'+DT_EXTENDED_DESCRIPTION] = [ pageContent ];
+            //add new record
+            let request = {a: 'save', 
+                ID:0, //new record
+                RecTypeID: RT_CMS_MENU,
+                details: details };     
+
+            window.hWin.HAPI4.RecordMgr.saveRecord(request, 
+                function(response){
+                    let  success = (response.status == window.hWin.ResponseStatus.OK);
+                    if(success){
+                        let newMenuId = response.data;
+                        if(newMenuId > 0){
+                            _addMenuEntry(parent_id, newMenuId, callback)
+                        }
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                }
+            );
+        } //___continue_addition        
+        
+        if(templateName=='landing' || templateName=='about'){ //special page templates for  v3
+        
+            let request = {website:home_page_record_id, raw:1, ver:3, webtemplate:templateName};
+            
+            window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL, request, null, (response)=>{
+            
+                if(response?.message){
+                    ___continue_addition( response?.message );
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: `Template ${templateName} not found`,
+                        error_title: 'Failed to load template'
+                    });
+                }
+            });
+        }else{
+
+            let sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+templateName+'.json';
+            $.getJSON(sURL, (templateJSON)=>{
+                
+                    if(templateName=='blog'){
+                        window.hWin.HAPI4.layoutMgr.prepareTemplate(templateJSON, ___continue_addition);
+                    }else{
+                        ___continue_addition( templateJSON );
+                    }
+                  
+            });
+            
+        }
+
+    }
+
+    /**
+     * Opens a simple dialog to get a name and select a content template for a new page.
+     * Calls _createMenuRecord upon submission.
+     * @private
+     * @param {number} parent_id - The parent menu item ID.
+     * @param {function(number):void} callback - Callback for _createMenuRecord.
+     */
+    function _defineMenuRecordSimple(parent_id, callback){
+        
+        let $dlg;
+        
+        let buttons= [
+            {text:window.hWin.HR('Cancel'), 
+                id:'btnCancel',
+                css:{'float':'right','margin-left':'30px','margin-right':'20px'}, 
+                click: function() { 
+                    $dlg.dialog( "close" );
+            }},
+            {text:window.hWin.HR('Select'), 
+                id:'btnSelect',
+                css:{'float':'right','margin-left':'30px','margin-right':'20px'}, 
+                click: function() { 
+                    $dlg.dialog( "close" );
+                    _defineMenuRecord(parent_id, callback);
+            }},
+            {text:window.hWin.HR('Insert'), 
+                id:'btnDoAction',
+                class:'ui-button-action',
+                disabled:'disabled',
+                css:{'float':'right'}, 
+                click: function() { 
+                    _createMenuRecord(parent_id, $dlg.find('#pageName').val(), $dlg.find('#pageContent').val(), callback, $('#cms-add-widget-popup'));
+                }
+            }
+        ];
+    
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
+            +"hclient/widgets/cms/editCMS_AddPage.html?t="+(new Date().getTime()), 
+            buttons, window.hWin.HR('Define new web page'), 
+            {  container:'cms-add-widget-popup',
+                default_palette_class: 'ui-heurist-publish',
+                width: 600,
+                height: 250
+                , close: function(){
+                    $dlg.dialog('destroy');       
+                    $dlg.remove();
+                }
+                , open: function(){
+                    $dlg.find('#pageName').on('keyup', function(e){
+                        window.hWin.HEURIST4.util.setDisabled($dlg.parent().find('#btnDoAction'), $(e.taget).val()=='');
+                    } );
+                }
+        });
+        
+    }
+    
+    /**
+     * Opens a record selector dialog to allow the user to select an existing CMS Menu record
+     * or create a new one to be added to the site menu.
+     * @private
+     * @param {number} parent_id - The record ID of the parent menu item.
+     * @param {function(number):void} callback - Callback function passed to _addMenuEntry, receiving the new page ID.
+     */
+    function _defineMenuRecord(parent_id, callback)
+    {
+        let popup_options = {
+            select_mode: 'select_single', //select_multi
+            select_return_mode: 'recordset',
+            edit_mode: 'popup',
+            selectOnSave: true, //it means that select popup will be closed after add/edit is completed
+            title: window.hWin.HR('Select or create a website menu record'),
+            rectype_set: RT_CMS_MENU,
+            parententity: 0,
+            default_palette_class: 'ui-heurist-publish',
+            onselect:function(event, data){
+                if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                    let recordset = data.selection;
+                    let record = recordset.getFirstRecord();
+                    let menu_id = recordset.fld(record,'rec_ID');
+
+                    _addMenuEntry(parent_id, menu_id, callback)
+                }
+            }
+        };//popup_options
+
+
+        let usrPreferences = window.hWin.HAPI4.get_prefs_def('select_dialog_records', 
+            {width: null,  //null triggers default width within particular widget
+                height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
+
+        popup_options.width = Math.max(usrPreferences.width,710);
+        popup_options.height = usrPreferences.height;
+
+        window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
+    }
+
+    
+    
+    /**
+     * Initiates the process of adding a new menu item. It first checks for unsaved changes
+     * in the main editor and then calls _defineMenuRecordSimple to show the selection/creation dialog.
+     * @private
+     * @param {number} parent_id - The record ID of the parent menu item under which the new item will be added.
+     * @param {function(number):void} [callback] - Optional callback function, ultimately for _addMenuEntry.
+     */
+    function _selectMenuRecord(parent_id, callback){
+        
+        if(editCMS2.warningOnExit(function(){ _selectMenuRecord(parent_id, callback) })) return;
+        
+        if(!callback){
+                callback = function(new_page_id){
+                        _refreshMainMenu(true, new_page_id); //after addition of new page
+                };
+        }
+
+        _defineMenuRecordSimple(parent_id, callback);
+        
+    }
+        
+    /**
+     * Adds an existing CMS Menu record (`menu_id`) as a child to another menu item (`parent_id`)
+     * or as a top-level item if `parent_id` is the home page ID.
+     * Updates the database by adding a detail to the parent record.
+     * @private
+     * @param {number} parent_id - The record ID of the parent menu item or home page.
+     * @param {number} menu_id - The record ID of the menu item to add.
+     * @param {function(number):void} [callback] - Optional callback, receives `menu_id`.
+     */
+    function _addMenuEntry(parent_id, menu_id, callback){
+
+        let request = {a: 'add',
+            recIDs: parent_id,
+            dtyID:  (parent_id==home_page_record_id)?DT_CMS_TOP_MENU:DT_CMS_MENU,
+            val:    menu_id};
+
+        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+            if(response.status == window.hWin.ResponseStatus.OK){
+                //refresh treeview
+                if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call( this, menu_id );
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });                                        
+
+    }
+
+    /**
+     * Removes a menu entry from its parent. Optionally deletes the menu record and its children.
+     * @private
+     * @param {number} parent_id - The record ID of the parent menu item.
+     * @param {number} menu_id - The record ID of the menu item to remove.
+     * @param {Array&lt;number>|null} records_to_del - An array of record IDs to delete (menu item and its descendants). If null, only removes from menu.
+     * @param {function} [callback] - Optional callback function after removal.
+     */
+    function _removeMenuEntry(parent_id, menu_id, records_to_del, callback){
+
+        //delete detail from parent menu
+        let request = {a: 'delete',
+            recIDs: parent_id,
+            dtyID:  (parent_id==home_page_record_id)?DT_CMS_TOP_MENU:DT_CMS_MENU,
+            sVal:   menu_id};
+
+        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+            if(response.status == window.hWin.ResponseStatus.OK){
+                if(records_to_del &amp;&amp; records_to_del.length>0){
+
+                    //delete children 
+                    window.hWin.HAPI4.RecordMgr.remove({ids:records_to_del},
+                        function(response){
+                            if(response.status == window.hWin.ResponseStatus.OK){
+                                //refresh treeview
+                                if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                            }
+                        }      
+                    );
+
+                }else{
+                    //refresh treeview
+                    if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call();
+                }
+            }else{                                                     
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });                                        
+
+    }
+    
+    /**
+     * Refreshes the main navigation menu display in the CMS.
+     * For Heurist v3, it calls `editCMS2.loadWebSite`. Otherwise, it calls the global `window.hWin.initMainMenu`.
+     * @private
+     * @param {boolean} [need_refresh_tree=false] - If true, also re-initializes the site menu tree control.
+     * @param {number} [new_page_id] - Optional page ID to focus or load after refreshing.
+     */
+    function _refreshMainMenu( need_refresh_tree, new_page_id ){
+        
+        if(isVersion3){
+            editCMS2.loadWebSite(new_page_id); //reload entire website
+            /*
+            if(new_page_id>0){
+            }else{
+                //reload header only
+            }
+            */
+        }else{
+            //call global function from websiteScriptAndStyles
+            window.hWin.initMainMenu( function(){
+                if(need_refresh_tree!==false){
+                    _initControls();
+                }
+                _refreshCurrentPage(new_page_id);
+            });  
+        }
+    }
+
+    
+    /**
+     * Reloads the content for the current page or a specified page ID in the main CMS editor.
+     * @private
+     * @param {number} [page_id] - The ID of the page to refresh. Defaults to the current page.
+     */
+    function _refreshCurrentPage(page_id){
+
+        if(!window.hWin.HEURIST4.util.isPositiveInt(page_id)) page_id = _currentPageId();
+        
+        if(isVersion3){
+            editCMS2.loadPageContent(page_id);
+        }else{
+            //call global function from websiteScriptAndStyles
+            window.hWin.loadPageContent(page_id); 
+        }
+        
+    
+    }
+
+    /**
+     * Reloads the entire website editor interface.
+     * For Heurist v3, calls `editCMS2.loadWebSite`. Otherwise, reloads the window.
+     * @private
+     */
+    function _refreshWebsite(){
+        if(isVersion3){
+            editCMS2.loadWebSite();
+        }else{
+            window.hWin.location.reload();
+        }
+    }
+
+    /**
+     * Gets the parent page ID for a given page ID from the Fancytree data.
+     * @private
+     * @param {number|string} page_id - The ID of the page whose parent is sought.
+     * @returns {number|string} The parent page ID, or the home page ID if it's a top-level item or not found.
+     */
+    function _getParentPage(page_id){
+
+        if(window.hWin.HEURIST4.util.isempty(page_id) || page_id &lt;= 0 || home_page_record_id == page_id){
+            return page_id;
+        }
+
+        let tree = $.ui.fancytree.getTree( $container );
+        let page_node = tree.getNodeByKey(''+page_id);
+        let parent_id = home_page_record_id;
+
+        if(page_node == null){
+            tree.visit((node) => {
+                if(node.data.page_id == page_id){
+                    parent_id = node.data.parent_id; //node.parent.data.page_id
+                    return false;
+                }
+            });
+        }else{
+            parent_id = page_node.data.parent_id; //page_node.parent.data.page_id
+        }
+
+        return parent_id;
+    }
+        
+
+    //public members
+    let that = {
+
+        /**
+         * Gets the class name of this editor instance.
+         * @returns {string} The class name.
+         * @public
+         */
+        getClass: function () {
+            return _className;
+        },
+
+        /**
+         * Checks if the instance is of a given class name.
+         * @param {string} strClass - The class name to check against.
+         * @returns {boolean} True if it is an instance of the class, false otherwise.
+         * @public
+         */
+        isA: function (strClass) {
+            return (strClass === _className);
+        },
+        
+        /**
+         * Public method to highlight the current page in the menu tree.
+         * @public
+         */
+        highlightCurrentPage: function(){
+            _highlightCurrentPage();
+        },
+        
+        /**
+         * Public method to initiate adding a new menu record.
+         * @param {number} parent_id - The parent menu item ID.
+         * @param {function(number):void} [callback] - Optional callback.
+         * @public
+         */
+        selectMenuRecord: function(parent_id, callback){
+            _selectMenuRecord(parent_id, callback);
+        },
+        
+        /**
+         * Public method to rename a menu entry.
+         * @param {number} rec_id - Record ID of the menu item.
+         * @param {string} newvalue - New name for the menu item.
+         * @param {function} [callback] - Optional callback.
+         * @public
+         */
+        renameMenuEntry: function (rec_id, newvalue, callback){
+            _renameMenuEntry(rec_id, newvalue, callback);
+        },
+        
+        /**
+         * Public method to refresh the entire website editor.
+         * @public
+         */
+        refreshWebsite: function(){
+            _refreshWebsite();
+        },
+
+        /**
+         * Public method to initialize/re-initialize the menu tree controls.
+         * @public
+         */
+        initControls: function(){
+            _initControls();
+        },
+
+        /**
+         * Public method to create a new menu record.
+         * @param {number} parent_id - Parent menu item ID.
+         * @param {string} page_name - Name for the new page.
+         * @param {string} template_name - Template to use for the page content.
+         * @param {function(number):void} [callback] - Optional callback.
+         * @public
+         */
+        createMenuRecord: function(parent_id, page_name, template_name, callback){
+            _createMenuRecord(parent_id, page_name, template_name, callback);
+        },
+
+        /**
+         * Public method to get the parent page ID.
+         * @param {number|string} page_id - The ID of the page.
+         * @returns {number|string} The parent page ID.
+         * @public
+         */
+        getParentPage: function(page_id){
+            return _getParentPage(page_id);
+        }
+
+    }
+
+    _init();
+    
+    return that;
+}
+
+
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="HEURIST4.dbs.html">dbs</a></li><li><a href="HEURIST4.geo.html">geo</a></li><li><a href="HEURIST4.msg.html">msg</a></li><li><a href="HEURIST4.query.html">query</a></li><li><a href="HEURIST4.util.html">util</a></li><li><a href="NodeSelection.html">NodeSelection</a></li><li><a href="heurist.buttonsMenu.html">buttonsMenu</a></li><li><a href="heurist.controlPanel.html">controlPanel</a></li><li><a href="heurist.dbAction.html">dbAction</a></li><li><a href="heurist.dbVerify.html">dbVerify</a></li><li><a href="heurist.dbVerifyURLs.html">dbVerifyURLs</a></li><li><a href="heurist.editTranslations.html">editTranslations</a></li><li><a href="heurist.editing_input.html">editing_input</a></li><li><a href="heurist.navigation.html">navigation</a></li><li><a href="heurist.recordAccess.options.html">options</a></li><li><a href="heurist.recordAction.options.html">options</a></li><li><a href="heurist.recordAdd.options.html">options</a></li><li><a href="heurist.recordAddButton.options.html">options</a></li><li><a href="heurist.recordAddLink.options.html">options</a></li><li><a href="heurist.recordAddLinkMatch.options.html">options</a></li><li><a href="heurist.recordArchive.options.html">options</a></li><li><a href="heurist.recordBookmark.options.html">options</a></li><li><a href="heurist.recordDataTable.options.html">options</a></li><li><a href="heurist.recordDelete.options.html">options</a></li><li><a href="heurist.recordExport.options.html">options</a></li><li><a href="heurist.recordExportCSV.options.html">options</a></li><li><a href="heurist.recordFindDuplicates.options.html">options</a></li><li><a href="heurist.recordImportAnnotations.options.html">options</a></li><li><a href="heurist.recordNotify.options.html">options</a></li><li><a href="heurist.recordRate.options.html">options</a></li><li><a href="heurist.recordTag.options.html">options</a></li><li><a href="heurist.recordTemplate.options.html">options</a></li><li><a href="heurist.recordTitles.options.html">options</a></li><li><a href="heurist.recordUploadedFilesIndex.options.html">options</a></li><li><a href="heurist.selectFile.html">selectFile</a></li><li><a href="heurist.slidersMenu.html">slidersMenu</a></li></ul><h3>Classes</h3><ul><li><a href="ActionHandler.html">ActionHandler</a></li><li><a href="CmsManager.html">CmsManager</a></li><li><a href="Color.html">Color</a></li><li><a href="CrosstabsAnalysis.html">CrosstabsAnalysis</a></li><li><a href="EditorCodeMirror.html">EditorCodeMirror</a></li><li><a href="HEditing.html">HEditing</a></li><li><a href="HLayout.html">HLayout</a></li><li><a href="HLayoutMgr.html">HLayoutMgr</a></li><li><a href="HMapLayer.html">HMapLayer</a></li><li><a href="HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRapidFieldAdditions.HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRecordSearch.html">HRecordSearch</a></li><li><a href="HRecordSet.html">HRecordSet</a></li><li><a href="HSystemMgr.html">HSystemMgr</a></li><li><a href="HintDiv.html">HintDiv</a></li><li><a href="JapaneseCalendar.html">JapaneseCalendar</a></li><li><a href="L.Control.Help.html">Help</a></li><li><a href="L.Control.Manager.html">Manager</a></li><li><a href="L.Control.Publish.html">Publish</a></li><li><a href="Solver.html">Solver</a></li><li><a href="TDuration.html">TDuration</a></li><li><a href="Temporal.html">Temporal</a></li><li><a href="hAPI.html">hAPI</a></li><li><a href="hAPI-HRecordMgr.html">HRecordMgr</a></li><li><a href="window.TDate.html">TDate</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HPublishDialog">HPublishDialog</a></li><li><a href="global.html#HSvsEdit">HSvsEdit</a></li><li><a href="global.html#SelectLinkField">SelectLinkField</a></li><li><a href="global.html#_addInput">_addInput</a></li><li><a href="global.html#_checkStructureFromSource">_checkStructureFromSource</a></li><li><a href="global.html#_checkYear">_checkYear</a></li><li><a href="global.html#_closeDialog">_closeDialog</a></li><li><a href="global.html#_create">_create</a></li><li><a href="global.html#_destroy">_destroy</a></li><li><a href="global.html#_detectHeurist">_detectHeurist</a></li><li><a href="global.html#_doSave">_doSave</a></li><li><a href="global.html#_fromDataToUI">_fromDataToUI</a></li><li><a href="global.html#_getActionButtons">_getActionButtons</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_initControls">_initControls</a></li><li><a href="global.html#_initDialog">_initDialog</a></li><li><a href="global.html#_initInnerHeader">_initInnerHeader</a></li><li><a href="global.html#_initModal">_initModal</a></li><li><a href="global.html#_initOffcanvas">_initOffcanvas</a></li><li><a href="global.html#_japaneseYearToGregorian">_japaneseYearToGregorian</a></li><li><a href="global.html#_loadParentLookup">_loadParentLookup</a></li><li><a href="global.html#_popupDialog">_popupDialog</a></li><li><a href="global.html#_preImportCheck">_preImportCheck</a></li><li><a href="global.html#_processSPARQLRow">_processSPARQLRow</a></li><li><a href="global.html#_refresh">_refresh</a></li><li><a href="global.html#_refreshCaptcha">_refreshCaptcha</a></li><li><a href="global.html#_setOption">_setOption</a></li><li><a href="global.html#_showRecordViewPopup">_showRecordViewPopup</a></li><li><a href="global.html#_switchToDataMode">_switchToDataMode</a></li><li><a href="global.html#_theme_editing_symbology">_theme_editing_symbology</a></li><li><a href="global.html#_updatePanels">_updatePanels</a></li><li><a href="global.html#_validateFromGregorian">_validateFromGregorian</a></li><li><a href="global.html#addAssoctoAssigned">addAssoctoAssigned</a></li><li><a href="global.html#addBackgroundCircles">addBackgroundCircles</a></li><li><a href="global.html#addContainer">addContainer</a></li><li><a href="global.html#addForce">addForce</a></li><li><a href="global.html#addForegroundCircles">addForegroundCircles</a></li><li><a href="global.html#addIcons">addIcons</a></li><li><a href="global.html#addKeyword">addKeyword</a></li><li><a href="global.html#addLabels">addLabels</a></li><li><a href="global.html#addLevel">addLevel</a></li><li><a href="global.html#addLines">addLines</a></li><li><a href="global.html#addMarkerDefinitions">addMarkerDefinitions</a></li><li><a href="global.html#addNodes">addNodes</a></li><li><a href="global.html#addPrevtoAssigned">addPrevtoAssigned</a></li><li><a href="global.html#addSelectionBox">addSelectionBox</a></li><li><a href="global.html#addTitles">addTitles</a></li><li><a href="global.html#applyRules">applyRules</a></li><li><a href="global.html#autofill_login">autofill_login</a></li><li><a href="global.html#browseRecords">browseRecords</a></li><li><a href="global.html#calculateImageExtentFromWorldFile">calculateImageExtentFromWorldFile</a></li><li><a href="global.html#changeDisplay">changeDisplay</a></li><li><a href="global.html#changeViewMode">changeViewMode</a></li><li><a href="global.html#checkAllOptions">checkAllOptions</a></li><li><a href="global.html#checkStoredSettings">checkStoredSettings</a></li><li><a href="global.html#clearContent">clearContent</a></li><li><a href="global.html#close">close</a></li><li><a href="global.html#closeDialog">closeDialog</a></li><li><a href="global.html#commonCodeInit">commonCodeInit</a></li><li><a href="global.html#commonOnAdd">commonOnAdd</a></li><li><a href="global.html#compareIndexes">compareIndexes</a></li><li><a href="global.html#correctionOfInvalidTerm">correctionOfInvalidTerm</a></li><li><a href="global.html#createOverlay">createOverlay</a></li><li><a href="global.html#currentNode">currentNode</a></li><li><a href="global.html#daysInMonth">daysInMonth</a></li><li><a href="global.html#determineColour">determineColour</a></li><li><a href="global.html#disableUpdateBtn">disableUpdateBtn</a></li><li><a href="global.html#doAction">doAction</a></li><li><a href="global.html#doAuthentication">doAuthentication</a></li><li><a href="global.html#doImport">doImport</a></li><li><a href="global.html#doRegister">doRegister</a></li><li><a href="global.html#doSamlLogin">doSamlLogin</a></li><li><a href="global.html#doSearchByID">doSearchByID</a></li><li><a href="global.html#drag_link_line">drag_link_line</a></li><li><a href="global.html#drag_link_source_id">drag_link_source_id</a></li><li><a href="global.html#drag_link_target_id">drag_link_target_id</a></li><li><a href="global.html#drag_link_timer">drag_link_timer</a></li><li><a href="global.html#dragend">dragend</a></li><li><a href="global.html#dragmove">dragmove</a></li><li><a href="global.html#dragstart">dragstart</a></li><li><a href="global.html#editCMS2">editCMS2</a></li><li><a href="global.html#editCMS_ElementCfg">editCMS_ElementCfg</a></li><li><a href="global.html#editCMS_SelectElement">editCMS_SelectElement</a></li><li><a href="global.html#editCMS_SiteMenu">editCMS_SiteMenu</a></li><li><a href="global.html#editCMS_WidgetCfg">editCMS_WidgetCfg</a></li><li><a href="global.html#editSymbology">editSymbology</a></li><li><a href="global.html#editTheme">editTheme</a></li><li><a href="global.html#enable_register">enable_register</a></li><li><a href="global.html#executeFormula">executeFormula</a></li><li><a href="global.html#f">f</a></li><li><a href="global.html#first_level_rty_ID">first_level_rty_ID</a></li><li><a href="global.html#fixCalendarPickerCMDs">fixCalendarPickerCMDs</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#formatGregJulian">formatGregJulian</a></li><li><a href="global.html#fromJD">fromJD</a></li><li><a href="global.html#fromJSDate">fromJSDate</a></li><li><a href="global.html#fset">fset</a></li><li><a href="global.html#getAllChecked">getAllChecked</a></li><li><a href="global.html#getClass">getClass</a></li><li><a href="global.html#getContainer">getContainer</a></li><li><a href="global.html#getDataFromServer">getDataFromServer</a></li><li><a href="global.html#getEntityRadius">getEntityRadius</a></li><li><a href="global.html#getEraFromGregorian">getEraFromGregorian</a></li><li><a href="global.html#getEraFromJapaneseStr">getEraFromJapaneseStr</a></li><li><a href="global.html#getEraLimits">getEraLimits</a></li><li><a href="global.html#getEras">getEras</a></li><li><a href="global.html#getGephiFormat">getGephiFormat</a></li><li><a href="global.html#getKeywords">getKeywords</a></li><li><a href="global.html#getKeywordsNextStep">getKeywordsNextStep</a></li><li><a href="global.html#getLineLength">getLineLength</a></li><li><a href="global.html#getLineWidth">getLineWidth</a></li><li><a href="global.html#getMarkerWidth">getMarkerWidth</a></li><li><a href="global.html#getNodeDataById">getNodeDataById</a></li><li><a href="global.html#getRecentKeywords">getRecentKeywords</a></li><li><a href="global.html#getRecordOverlayData">getRecordOverlayData</a></li><li><a href="global.html#getRelationOverlayData">getRelationOverlayData</a></li><li><a href="global.html#getRulesArray">getRulesArray</a></li><li><a href="global.html#getSelected">getSelected</a></li><li><a href="global.html#getSelection">getSelection</a></li><li><a href="global.html#getSetting">getSetting</a></li><li><a href="global.html#getURL">getURL</a></li><li><a href="global.html#gregorianToJapaneseStr">gregorianToJapaneseStr</a></li><li><a href="global.html#hMapDocument">hMapDocument</a></li><li><a href="global.html#hRecordAction">hRecordAction</a></li><li><a href="global.html#handleNodeAction">handleNodeAction</a></li><li><a href="global.html#handleSettingsInUI">handleSettingsInUI</a></li><li><a href="global.html#hexToFilter">hexToFilter</a></li><li><a href="global.html#hexportMenu">hexportMenu</a></li><li><a href="global.html#imgFilter">imgFilter</a></li><li><a href="global.html#initProfilePreferences">initProfilePreferences</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isA">isA</a></li><li><a href="global.html#isAssocKeyword">isAssocKeyword</a></li><li><a href="global.html#isMonthSpan">isMonthSpan</a></li><li><a href="global.html#isRecentKeyword">isRecentKeyword</a></li><li><a href="global.html#isTemporal">isTemporal</a></li><li><a href="global.html#isValid">isValid</a></li><li><a href="global.html#japaneseToGregorian">japaneseToGregorian</a></li><li><a href="global.html#japaneseToGregorianStr">japaneseToGregorianStr</a></li><li><a href="global.html#keywordLookup">keywordLookup</a></li><li><a href="global.html#loadHtmlContent">loadHtmlContent</a></li><li><a href="global.html#log10">log10</a></li><li><a href="global.html#login_dialog">login_dialog</a></li><li><a href="global.html#lookupEditions">lookupEditions</a></li><li><a href="global.html#lookupGoogle">lookupGoogle</a></li><li><a href="global.html#lookupHathiTrust">lookupHathiTrust</a></li><li><a href="global.html#lookupKarlsruhePortal">lookupKarlsruhePortal</a></li><li><a href="global.html#lookupWorldCat">lookupWorldCat</a></li><li><a href="global.html#mapIds">mapIds</a></li><li><a href="global.html#menuActionHandler">menuActionHandler</a></li><li><a href="global.html#mergeArraysUnique">mergeArraysUnique</a></li><li><a href="global.html#msgToConsole">msgToConsole</a></li><li><a href="global.html#newDate">newDate</a></li><li><a href="global.html#onAdd">onAdd</a></li><li><a href="global.html#onAuthentication">onAuthentication</a></li><li><a href="global.html#onNodeClick">onNodeClick</a></li><li><a href="global.html#onPageInit">onPageInit</a></li><li><a href="global.html#onRecordNodeClick">onRecordNodeClick</a></li><li><a href="global.html#onRemove">onRemove</a></li><li><a href="global.html#onTermSaveError">onTermSaveError</a></li><li><a href="global.html#open">open</a></li><li><a href="global.html#openRecordInTab">openRecordInTab</a></li><li><a href="global.html#openSearchMenu">openSearchMenu</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#popupDialog">popupDialog</a></li><li><a href="global.html#prevSessionExists">prevSessionExists</a></li><li><a href="global.html#project_keywords">project_keywords</a></li><li><a href="global.html#putSetting">putSetting</a></li><li><a href="global.html#removeAssocByID">removeAssocByID</a></li><li><a href="global.html#removeKeyword">removeKeyword</a></li><li><a href="global.html#removeOverlay">removeOverlay</a></li><li><a href="global.html#removeOverlays">removeOverlays</a></li><li><a href="global.html#removeSetting">removeSetting</a></li><li><a href="global.html#renderAssocKeywods">renderAssocKeywods</a></li><li><a href="global.html#renderContent">renderContent</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#saveRules">saveRules</a></li><li><a href="global.html#selectRecord">selectRecord</a></li><li><a href="global.html#setFormulaMode">setFormulaMode</a></li><li><a href="global.html#setGravity">setGravity</a></li><li><a href="global.html#setLinkMode">setLinkMode</a></li><li><a href="global.html#setSelected">setSelected</a></li><li><a href="global.html#setSelection">setSelection</a></li><li><a href="global.html#setValue">setValue</a></li><li><a href="global.html#setupAssocKeywords">setupAssocKeywords</a></li><li><a href="global.html#setupCaptcha">setupCaptcha</a></li><li><a href="global.html#setupRecentWorks">setupRecentWorks</a></li><li><a href="global.html#setupResetPin">setupResetPin</a></li><li><a href="global.html#show">show</a></li><li><a href="global.html#showEditions">showEditions</a></li><li><a href="global.html#showHelp">showHelp</a></li><li><a href="global.html#showKeyword">showKeyword</a></li><li><a href="global.html#showLoginDialog">showLoginDialog</a></li><li><a href="global.html#showNodeInformation">showNodeInformation</a></li><li><a href="global.html#showSearchBuilder">showSearchBuilder</a></li><li><a href="global.html#showSearchFacetedWizard">showSearchFacetedWizard</a></li><li><a href="global.html#showWarningAboutTermUsage">showWarningAboutTermUsage</a></li><li><a href="global.html#simplePointsToWKT">simplePointsToWKT</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#startRecentWork">startRecentWork</a></li><li><a href="global.html#temporalSimplifyDate">temporalSimplifyDate</a></li><li><a href="global.html#temporalToHumanReadableString">temporalToHumanReadableString</a></li><li><a href="global.html#tick">tick</a></li><li><a href="global.html#toJD">toJD</a></li><li><a href="global.html#toJSDate">toJSDate</a></li><li><a href="global.html#translationFromUI">translationFromUI</a></li><li><a href="global.html#translationSupport">translationSupport</a></li><li><a href="global.html#translationToUI">translationToUI</a></li><li><a href="global.html#truncateText">truncateText</a></li><li><a href="global.html#unselectAssoc">unselectAssoc</a></li><li><a href="global.html#updateAssocDisplay">updateAssocDisplay</a></li><li><a href="global.html#updateAssocList">updateAssocList</a></li><li><a href="global.html#updateCircles">updateCircles</a></li><li><a href="global.html#updateCurvedLines">updateCurvedLines</a></li><li><a href="global.html#updateLabels">updateLabels</a></li><li><a href="global.html#updateNodes">updateNodes</a></li><li><a href="global.html#updateRecentKeywordDisplay">updateRecentKeywordDisplay</a></li><li><a href="global.html#updateRectangles">updateRectangles</a></li><li><a href="global.html#updateRuleBuilder">updateRuleBuilder</a></li><li><a href="global.html#updateStatus">updateStatus</a></li><li><a href="global.html#updateStraightLines">updateStraightLines</a></li><li><a href="global.html#validateResetPin">validateResetPin</a></li><li><a href="global.html#visualizeData">visualizeData</a></li><li><a href="global.html#visualizeSelection">visualizeSelection</a></li><li><a href="global.html#weekDay">weekDay</a></li><li><a href="global.html#weekOfYear">weekOfYear</a></li><li><a href="global.html#zoomed">zoomed</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Jul 24 2025 18:09:14 GMT+0400 (GMT+04:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

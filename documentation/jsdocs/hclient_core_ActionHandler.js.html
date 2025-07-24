@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: hclient/core/ActionHandler.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: hclient/core/ActionHandler.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file ActionHandler.js
+ * @brief Manages lists of menu actions, loads them from JSON, and executes them.
+ * @fileOverview The ActionHandler class is responsible for managing a list of actions, typically used for menus within the Heurist system.
+ * It can load these actions from a JSON file or be initialized with an array of action objects.
+ * Key functionalities include executing actions by their ID, handling verifications (like password prompts),
+ * managing actions that open URLs or dialogs, and orchestrating complex operations such as importing users
+ * or performing database management tasks. It integrates with other parts of the HAPI (Heurist API)
+ * and UI components to provide a cohesive user experience for invoking system commands.
+ * 
+ * @project     Heurist academic knowledge management system
+ *
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov &lt;osmakov@gmail.com>
+ * @author Ian Johnson &lt;ian.johnson.heurist@gmail.com>
+ * @since 6.0
+ */
+
+/* global CmsManager */
+
+/**
+ * Class: ActionHandler
+ * 
+ * The ActionHandler class is responsible for managing a list of actions (menu actions) fetched from a remote JSON file or provided directly as an array. 
+ * It offers methods for executing actions based on their ID and performing verification tasks where necessary.
+ */
+class ActionHandler {
+    
+    
+    // Flags loading of a simple guided tour based on https://introjs.com/
+    isGuidedTourLoaded = false;
+
+    /**
+     * Initializes the ActionHandler instance.
+     * If `arg` is an array, it sets the `actions` property directly.
+     * Otherwise, it initializes `actions` to null, expecting `loadActionsFromFile` to be called.
+     *
+     * @param {(Array&lt;Object>|String|undefined)} arg - Can be an array of action objects,
+     * a string URL to fetch actions from, or undefined (in which case a default URL will be used later or actions loaded manually).
+     */
+    constructor(arg) {
+        if(Array.isArray(arg)){
+            this.actions = arg;
+        } else {
+            this.actions = null;
+        }
+    }
+    
+    /**
+     * Fetches actions from the given URL (or a default URL if not provided) in JSON format and sets the `actions` property.
+     *
+     * @async
+     * @param {string} [url] - The URL to fetch actions from. Defaults to `hclient/core/actions.json` relative to `window.hWin.HAPI4.baseURL`.
+     * @returns {Promise&lt;void>} A promise that resolves when actions are loaded and set, or rejects on error.
+     * @throws {Error} If the fetch operation fails or the response is not OK.
+     */
+    async loadActionsFromFile(url) {
+        try {
+            const path = url || (window.hWin.HAPI4.baseURL + 'hclient/core/actions.json');
+            const response = await fetch(path);
+            if (!response.ok) {
+                throw new Error(`Failed to load actions from ${url}: ${response.statusText}`);
+            }
+            this.actions = await response.json();
+        } catch (error) {
+            console.error("Error loading actions:", error);
+        }
+    }
+    
+    /**
+     * Returns the currently loaded actions.
+     *
+     * @returns {Array&lt;Object>|null} The array of action objects, or null if actions haven't been loaded.
+     */
+    getActions() {
+        return this.actions;
+        /*console.log("Available actions:");
+        this.actions.forEach(action => {
+            console.log(`ID: ${action.id}, Text: ${action.text}`);
+        });*/
+    }
+
+    /**
+     * Finds and returns an action object by its ID.
+     *
+     * @param {string} id - The ID of the action to find.
+     * @returns {Object|undefined} The action object if found, otherwise `undefined`.
+     */
+    findActionById(id) {
+        return this.actions.find(action => action.id === id);
+    }
+
+    /**
+     * Handles the verification process for an action, typically involving password and/or permission checks.
+     * If verification is required and not yet passed, it initiates the verification flow.
+     * Upon successful verification, it re-executes the original action with `verification_passed` set to true.
+     *
+     * @private
+     * @param {Object} action - The action object being executed.
+     * @param {Object} dialog_options - Options for the dialog, potentially modified during verification.
+     * @returns {boolean} Returns `true` if verification was initiated (halting further execution of the current call),
+     * or `false` if no verification was needed or if action data is missing.
+     */
+    #handleVerification(action, dialog_options) {
+        
+        let adata = action.data;            
+        
+        if(!adata){
+            return false;
+        }
+        
+        // Handle password and permission verification
+        let action_passworded = adata.pwd;
+        if (!action_passworded &amp;&amp; !window.hWin.HAPI4.has_access(2)) { // is datbase owner
+            action_passworded = adata['pwd-nonowner'];
+        }
+        
+        let action_admin_level = adata['user-admin-status'];
+        let action_member_level = adata['user-member-status'];
+        let action_user_permissions = adata['user-permissions']; 
+        let requiredLevel = (action_admin_level == -1 || action_admin_level >= 0) ? action_admin_level : 0;
+        
+        if(!(action_passworded || requiredLevel > 0)){ 
+            return false;                
+        }
+        
+        if (action_member_level > 0) {
+            requiredLevel += ';' + action_member_level;
+        }
+        
+        window.hWin.HAPI4.SystemMgr.verify_credentials((entered_password) => {
+            dialog_options.entered_password = entered_password;
+            dialog_options.verification_passed = true;
+            this.executeActionById(action.id, dialog_options); // Re-execute action after successful verification
+        },
+        requiredLevel, action_passworded, null, action_user_permissions);
+            
+        return true; // Indicates verification was initiated
+    }    
+    
+    /**
+     * Handles actions that involve opening a URL (e.g., hyperlink, mailto).
+     * It constructs the final URL, handles special cases like 'menu-help-emailadmin',
+     * and opens the URL in a new window/tab or a dialog.
+     *
+     * @private
+     * @param {Object} action - The action object, containing href, target, id, and text.
+     * @param {Object} popup_dialog_options - Options for displaying the content in a dialog if not opening in a new tab/window.
+     * @returns {boolean} Returns `true` if the href action was handled, `false` otherwise (e.g. empty href).
+     */
+    #handleHrefAction(action, popup_dialog_options) {
+
+        let href = action.href;
+        const target = action?.target;
+
+        if (action.id === 'menu-help-emailadmin') {
+            href = `mailto:${window.hWin.HAPI4.sysinfo.sysadmin_email}`;
+        } else if (window.hWin.HEURIST4.util.isempty(href) || href == '#') {
+            return false;
+        }
+
+        if (href.startsWith('mailto:')) {
+            window.open(href, 'emailWindow');
+            return true; // Assuming it was handled
+        }
+
+        if (!(href.startsWith('http://') || href.startsWith('https://'))) {
+            href = window.hWin.HAPI4.baseURL + href + (href.indexOf('?') >= 0 ? '&amp;' : '?') + 'db=' + window.hWin.HAPI4.database;
+        }
+
+        if (target) {
+            window.open(href, target);
+        } else {
+            if (!popup_dialog_options.title) {
+                popup_dialog_options.title = action.text;
+            }
+            let options = $.extend(popup_dialog_options, { width: 800, height: 600 });
+
+            window.hWin.HEURIST4.msg.showDialog(href, options);
+        }
+        return true;
+    }
+
+    /**
+     * Prepares and standardizes dialog options for an action.
+     * It determines the container for the dialog, sets the title (checking for translations),
+     * and merges action-specific data with provided dialog_options.
+     *
+     * @private
+     * @param {Object} action - The action object, containing id, data, and text.
+     * @param {Object} dialog_options - Initial dialog options provided to `executeActionById`.
+     * @returns {Object} The fully prepared popup dialog options.
+     */
+    #prepareDialogOptions(action, dialog_options){        
+         let actionid = action.id;
+         let adata = action.data;
+         let action_container = adata?.container;
+
+         let container, menu_container;
+
+         if (dialog_options.container) {
+             container = dialog_options['container'];
+         } else if (action_container) {
+             let section = action_container;
+             
+             $('.ui-menu6').slidersMenu('switchContainer', section, true);
+             container = $('.ui-menu6 > .ui-menu6-widgets.ui-heurist-'+section);
+             container.removeClass('ui-suppress-border-and-shadow');
+
+             menu_container = $('.ui-menu6 > .ui-menu6-section.ui-heurist-' + section);
+             menu_container.find('li').removeClass('ui-state-active');
+             menu_container.find('li[data-action="' + actionid + '"]').addClass('ui-state-active');
+         }
+
+         let popup_dialog_options = {
+             isdialog: !container,
+             innerTitle: true,
+             menu_container: menu_container,
+             container: container,
+
+             isFrontUI: true,
+             is_h6style: true,
+             resizable: false,
+             draggable: false,
+             position: dialog_options.position || null,
+             maximize: true,
+             ...dialog_options
+         };
+
+         const title_key = actionid+'-header';
+         if (window.hWin.HR(title_key) == title_key) { //translation not found
+             popup_dialog_options.title = window.hWin.HR(adata?.header || action.text);
+         }else{
+             popup_dialog_options.title = window.hWin.HR(title_key);
+         }
+         
+         return popup_dialog_options;
+    }
+    
+    /**
+     * Handles the multi-step process of importing users from another database.
+     * Step 1: Select the source database.
+     * Step 2: Select users from the source database.
+     * Step 3: Allocate selected users to work groups in the current database.
+     * @todo TO BE REMOVED TO SEPARATE CLASS
+     * @param {Object} [entity_dialog_options] - Initial configuration options for the entity dialogs used in the import process.
+     * Defaults to an empty object if not provided. These options can be extended internally for each step.
+     * @returns {void}
+     */
+    importUsers(entity_dialog_options) {
+        if (!entity_dialog_options) entity_dialog_options = {};
+        
+        let that = this;
+        let auto_select = '';
+        
+        let options = $.extend(entity_dialog_options, {
+            subtitle: 'Step 1. Select database with users to be imported',
+            title: 'Import users', 
+            select_mode: 'select_single',
+            pagesize: 300,
+            edit_mode: 'none',
+            use_cache: true,
+            except_current: true,
+            keep_visible_on_selection: true,
+            onselect: function(event, data){
+                if (!data?.selection || data.selection.length == 0) {
+                    return;
+                }
+
+                let selected_database = data.selection[0];
+                if(selected_database.indexOf(window.hWin.HAPI4.sysinfo.database_prefix) === 0){
+                    selected_database = selected_database.substring(window.hWin.HAPI4.sysinfo.database_prefix.length);
+                }
+
+                let options2 = $.extend(entity_dialog_options, {
+                    subtitle: `Step 2. Select users in ${selected_database} to be imported`,
+                    title: 'Import users', 
+                    database: selected_database,
+                    select_mode: 'select_multi',
+                    edit_mode: 'none',
+                    keep_visible_on_selection: true,
+                    onInitFinished: function(){
+                        setTimeout((mngUsers, rec_id) => { mngUsers.recordList.find(`[recid="${rec_id}"]`).trigger('click'); }, 500, this, auto_select);
+                        auto_select = '';
+                    },
+                    onselect: function(event, data){
+
+                        if (!data?.selection || data.selection.length == 0) {
+                            return;
+                        }
+
+                        let selected_users = data.selection;
+                        let options3 = $.extend(entity_dialog_options, {
+                            subtitle: 'Step 3. Allocate imported users to work groups',
+                            title: 'Import users', 
+                            select_mode: 'select_roles',
+                            selectbutton_label: 'Allocate roles',
+                            sort_type_int: 'recent',
+                            edit_mode: 'none',
+                            keep_visible_on_selection: false,
+                            onselect: function(event, data){
+                                that.importUsersComplete(data, selected_users, selected_database);
+                            }
+                        });
+
+                        window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', options3);
+                    }
+                });
+
+                if(!window.hWin.HEURIST4.util.isempty(data.email)){
+                    
+                    let request = {
+                        a: 'search',
+                        entity: 'sysUsers',
+                        details: 'id',
+                        ugr_eMail: data.email,
+                        db: selected_database
+                    };
+
+                    window.hWin.HAPI4.EntityMgr.doRequest(request, (response) => {
+
+                        if(response.status === window.hWin.ResponseStatus.OK &amp;&amp; response.data.reccount === 1){
+                            auto_select = response.data.records[0];
+                        }
+
+                        window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options2);
+                    });
+
+                }else{
+                    window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options2);
+                }
+
+            }
+            
+        });
+        window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
+    }    
+    
+    /**
+     * Completes the user import process after users and roles have been selected.
+     * It sends a request to the server to add the selected users from the source database
+     * to the specified roles in the current database.
+     * Displays a success or error message based on the server response.
+     *
+     * @private
+     * @param {Object} data - Data from the role selection dialog, containing `data.selection` (selected roles).
+     * @param {Array&lt;string>} selected_users - An array of user IDs to be imported.
+     * @param {string} selected_database - The name of the database from which users are being imported.
+     * @returns {void}
+     */ 
+    importUsersComplete(data, selected_users, selected_database){
+
+        if (!data || $.isEmptyObject(data.selection)){
+            return;
+        }
+
+        let request = {
+            a: 'action',
+            entity: 'sysUsers',
+            roles: data.selection,
+            userIDs: selected_users,
+            sourceDB: selected_database
+        };
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
+            if (response.status == window.hWin.ResponseStatus.OK) {
+                window.hWin.HEURIST4.msg.showMsgDlg(response.data);
+            } else {
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });
+        
+    }
+    
+    /**
+     * Executes an action based on its ID.
+     * This method finds the action, handles any necessary verification (like password prompts),
+     * prepares dialog options, and then delegates to specific handlers or opens URLs
+     * based on the action's configuration.
+     *
+     * @param {string} id - The ID of the action to execute.
+     * @param {Object} [dialog_options] - Optional parameters for dialog customization. Defaults to an empty object if not provided.
+     * These options can include `verification_passed` to bypass verification if already done.
+     * @returns {boolean} Returns `true` if the action was found and an attempt was made to handle it (even if handling later fails or is asynchronous).
+     * Returns `false` if the action with the given ID is not found or if the action is marked as disabled (`ext == 1`).
+     */
+    executeActionById(id, dialog_options) {
+        const action = this.findActionById(id);
+        
+        if (!action) {
+            console.warn(`Action with ID "${id}" not found.`);
+            return false;
+        }
+        
+        let adata = action.data;
+    
+        // If action is disabled (external/extension action not implemented), return early
+        if (adata?.ext == 1) {
+            console.log(`Action with ID "${id}" is marked as 'ext' and is not handled.`);
+            return false;
+        }
+        
+        if(!dialog_options){
+            dialog_options = {};
+        }
+
+        // If verification is required and not already passed, #handleVerification will initiate it and return true.
+        // In that case, current execution should stop, as verification callback will re-trigger executeActionById.        
+        if(!dialog_options?.verification_passed &amp;&amp; 
+            this.#handleVerification(action, dialog_options))
+        {
+            return true;
+        }
+
+        let actionid = action.id;
+        let action_log = adata?.logaction; 
+        
+        if (action_log) {
+            window.hWin.HAPI4.SystemMgr.user_log(action_log);
+        }
+        
+        if (actionid == 'data-heurist-pageid') {
+            
+            if(window.hWin.webSite){
+                window.hWin.webSite.loadPage( dialog_options );
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr('Web Page can not be loaded. CMS is not inited for this instance of Heurist');
+            }
+            return true;
+        }
+        
+        if (actionid.indexOf('menu-cms') == 0) {
+            if (!this.cmsManager) {
+                this.cmsManager = new CmsManager();
+            }
+            this.cmsManager.executeAction(actionid);
+            return true;
+        }
+
+        let popup_dialog_options = this.#prepareDialogOptions(action, dialog_options);
+        
+        let is_supported = true;
+        let contentURL;
+        
+        switch (actionid) {
+            case "search-saved-filter":
+            
+            
+                break;
+            case "menu-database-create":
+            case "menu-database-restore":
+            case "menu-database-delete":
+            case "menu-database-clear":
+            case "menu-database-rename":
+            case "menu-database-clone":
+            case "menu-database-register":
+            case "menu-database-verify":
+            case "menu-database-verifyURLs":{
+                const s = actionid.slice(actionid.lastIndexOf('-') + 1);
+                const actionName = 'db' + s.charAt(0).toUpperCase() + s.slice(1);
+                window.hWin.HEURIST4.ui.showRecordActionDialog(actionName, popup_dialog_options);
+                break;
+            }
+            case "menu-lookup-config":
+                popup_dialog_options['classes'] = {"ui-dialog": "ui-heurist-design", "ui-dialog-titlebar": "ui-heurist-design"};
+                popup_dialog_options['service_config'] = window.hWin.HAPI4.sysinfo['service_config'];
+                popup_dialog_options['title'] = window.hWin.HR('Lookup service configuration');
+                popup_dialog_options['path'] = 'widgets/lookup/';
+                window.hWin.HEURIST4.ui.showRecordActionDialog('lookupConfig', popup_dialog_options);
+                break;
+            case "menu-repository-config":
+                popup_dialog_options['classes'] = {"ui-dialog": "ui-heurist-design", "ui-dialog-titlebar": "ui-heurist-design"};
+                popup_dialog_options['service_config'] = window.hWin.HAPI4.sysinfo['repository_config'];
+                popup_dialog_options['title'] = window.hWin.HR('Repository service configuration');
+                popup_dialog_options['path'] = 'widgets/admin/';
+                window.hWin.HEURIST4.ui.showRecordActionDialog('repositoryConfig', popup_dialog_options);
+                break;
+            case "menu-statistics-cms":{
+                let d = new Date();
+                d.setDate(d.getDate() - 1);
+                let yesterday = d.toISOString().split('T')[0];
+                let url = `https://${window.hWin.HAPI4.sysinfo.matomo_url}/index.php?module=CoreHome&amp;action=index&amp;idSite=${window.hWin.HAPI4.sysinfo.matomo_siteid}&amp;period=day&amp;date=yesterday&amp;updated=1#?period=week&amp;date=${yesterday}&amp;segment=pageUrl%3D%40%2F${window.hWin.HAPI4.database}&amp;idSite=1&amp;category=Dashboard_Dashboard&amp;subcategory=1`;
+                window.open(url, "_blank");
+                break;
+            }
+            case "menu-files-index":
+                window.hWin.HEURIST4.ui.showRecordActionDialog('recordUploadedFilesIndex', popup_dialog_options);
+                break;
+            case "menu-files-annotations":
+                window.hWin.HEURIST4.ui.showRecordActionDialog('recordImportAnnotations', popup_dialog_options);
+                break;
+            case "menu-records-archive": // not used
+                window.hWin.HEURIST4.ui.showRecordActionDialog('recordArchive');
+                break;
+            case "menu-import-add-record": // hidden action at the moment (for dashboard)
+                window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd');
+                break;
+            case "menu-structure-duplicates":
+                window.hWin.HEURIST4.ui.showRecordActionDialog('recordFindDuplicates', popup_dialog_options);
+                break;
+            case "menu-import-get-template":
+                popup_dialog_options['path'] = 'widgets/entity/popups/';
+                window.hWin.HEURIST4.ui.showRecordActionDialog('rectypeTemplate', popup_dialog_options);
+                break;
+            case "menu-structure-refresh":
+                window.hWin.HAPI4.EntityMgr.emptyEntityData(null);
+                window.hWin.HAPI4.SystemMgr.get_defs_all( true, window.hWin.document);
+                break;
+                
+            case "menu-profile-admin":{
+            
+                let url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database;
+                window.open(url)
+                break;
+            } 
+            case "menu-profile-info":
+                popup_dialog_options['edit_mode'] = 'editonly';
+                popup_dialog_options['rec_ID'] = window.hWin.HAPI4.user_id();
+                 // fall through
+            case "menu-database-properties":
+            case "menu-structure-rectypes":
+            case "menu-structure-fieldtypes":
+            case "menu-structure-vocabterms":
+            case "menu-structure-workflowstages":
+            case "menu-structure-mimetypes":
+            case "menu-help-bugreport":
+            case "menu-profile-tags":
+            case "menu-profile-reminders":
+            case "menu-profile-files":
+            case "menu-profile-groups":
+            case "menu-profile-users":
+                window.hWin.HEURIST4.ui.showEntityDialog(adata.entity, popup_dialog_options);
+                break;
+            case "menu-manage-dashboards":
+                popup_dialog_options['isViewMode'] = false;
+                popup_dialog_options['is_iconlist_mode'] = false;
+                popup_dialog_options['onClose'] = function(){
+                    setTimeout('$(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE)',1000);
+                }; 
+                window.hWin.HEURIST4.ui.showEntityDialog(adata.entity, popup_dialog_options);
+                break;
+            case "menu-database-browse":
+                popup_dialog_options['select_mode'] = 'select_single';
+                popup_dialog_options['onselect'] = function(event, data) {
+                        if (data?.selection &amp;&amp; data.selection.length === 1) {
+                            let db = data.selection[0];
+                            if(db.indexOf(window.hWin.HAPI4.sysinfo.database_prefix)==0){
+                                db = db.substring(window.hWin.HAPI4.sysinfo.database_prefix.length);
+                            }
+                            window.open(window.hWin.HAPI4.baseURL + '?db=' + db, '_blank');
+                        }
+                    };
+                window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', popup_dialog_options);
+                break;
+            case "menu-structure-import":
+                window.hWin.HEURIST4.ui.showWidgetDialog('importStructure', popup_dialog_options);
+                break;
+            case "menu-profile-preferences":
+                popup_dialog_options['path'] = 'widgets/profile/';
+                window.hWin.HEURIST4.ui.showRecordActionDialog('profilePreferences', popup_dialog_options);
+                break;
+            case "menu-profile-import":
+                this.importUsers( popup_dialog_options );
+                break;
+            case "menu-profile-login":
+                window.hWin.HEURIST4.ui.checkAndLogin( false ); 
+                break;
+            case "menu-profile-logout":
+                window.hWin.HAPI4.SystemMgr.logout();
+                break;
+            case "menu-admin-server":                                       
+                popup_dialog_options['path'] = 'widgets/admin/';
+                window.hWin.HEURIST4.ui.showRecordActionDialog('manageServer', popup_dialog_options);
+                break;
+            case "menu-help-quick-tips":
+                contentURL = window.hWin.HRes('quickTips');
+                window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Tips', {isPopupDlg:true, width:500, height:500});
+                break;
+            case "menu-help-tour":
+                
+                
+                // A simple guided tour based on https://introjs.com/ which pops up a series of windows attached 
+                // to elements of the interface. Configure the tour in /documentation/guidedIntroTour.js
+                if(this.isGuidedTourLoaded &amp;&amp; typeof startIntroTour === 'function'){
+                  
+                    startIntroTour()
+                    //startDriverTour(); // This is an alternative tour, better features but seems unstable
+    
+                }else if(!this.isGuidedTourLoaded){
+                    
+                    this.isGuidedTourLoaded = true;
+                    let that = this;
+                    $.getScript(window.hWin.HAPI4.baseURL+'documentation/guidedIntroTour.js', function(){
+                            startIntroTour();
+                    }); 
+                }
+                
+                break;
+            case "menu-subset-set":{ //see menu Explore
+                let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
+                if(widget){
+                    widget.resultList('callResultListMenu', 'menu-subset-set');
+                }
+                break;
+            }
+            case "menu-help-acknowledgements":
+                contentURL = window.hWin.HRes('acknowledgementsHeurist');
+                window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Acknowledgements', {isPopupDlg:true, width:500, height:500});
+                break;
+            case "menu-help-about":
+                contentURL = window.hWin.HRes('aboutHeurist');
+                window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'About', {isPopupDlg:true, width:500, height:390,
+                    open: function( event, ui ) {
+                        let $dlg = window.hWin.HEURIST4.msg.getPopupDlg();
+                        $dlg.find('.version').text('version '+window.hWin.HAPI4.sysinfo['version']);
+                        
+                        if(window.hWin.HAPI4.sysinfo.host_logo){
+                            $('&lt;div style="height:40px;padding-left:4px;float:right">&lt;a href="'
+                                +(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
+                                +'" target="_blank" style="text-decoration:none;color:black;">'
+                                +'&lt;label>at: &amp;nbsp;&lt;/label>'
+                                +'&lt;img src="'+window.hWin.HAPI4.sysinfo.host_logo+'" height="35" align="center">&lt;/a>&lt;/div>')
+                            .appendTo($dlg.find('div.host_info'));
+                        }                       
+                    }                
+                });
+                break;
+            case "menu-help-online":
+                action.href = window.hWin.HAPI4.sysinfo.referenceServerURL+'?website&amp;db='+window.hWin.HAPI4.sysinfo.referenceServerHelpDatabase;
+                 // fall through
+            default:
+                is_supported = this.#handleHrefAction(action, popup_dialog_options);
+                break;
+        }
+        return is_supported;
+    }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="HEURIST4.dbs.html">dbs</a></li><li><a href="HEURIST4.geo.html">geo</a></li><li><a href="HEURIST4.msg.html">msg</a></li><li><a href="HEURIST4.query.html">query</a></li><li><a href="HEURIST4.util.html">util</a></li><li><a href="NodeSelection.html">NodeSelection</a></li><li><a href="heurist.buttonsMenu.html">buttonsMenu</a></li><li><a href="heurist.controlPanel.html">controlPanel</a></li><li><a href="heurist.dbAction.html">dbAction</a></li><li><a href="heurist.dbVerify.html">dbVerify</a></li><li><a href="heurist.dbVerifyURLs.html">dbVerifyURLs</a></li><li><a href="heurist.editTranslations.html">editTranslations</a></li><li><a href="heurist.editing_input.html">editing_input</a></li><li><a href="heurist.navigation.html">navigation</a></li><li><a href="heurist.recordAccess.options.html">options</a></li><li><a href="heurist.recordAction.options.html">options</a></li><li><a href="heurist.recordAdd.options.html">options</a></li><li><a href="heurist.recordAddButton.options.html">options</a></li><li><a href="heurist.recordAddLink.options.html">options</a></li><li><a href="heurist.recordAddLinkMatch.options.html">options</a></li><li><a href="heurist.recordArchive.options.html">options</a></li><li><a href="heurist.recordBookmark.options.html">options</a></li><li><a href="heurist.recordDataTable.options.html">options</a></li><li><a href="heurist.recordDelete.options.html">options</a></li><li><a href="heurist.recordExport.options.html">options</a></li><li><a href="heurist.recordExportCSV.options.html">options</a></li><li><a href="heurist.recordFindDuplicates.options.html">options</a></li><li><a href="heurist.recordImportAnnotations.options.html">options</a></li><li><a href="heurist.recordNotify.options.html">options</a></li><li><a href="heurist.recordRate.options.html">options</a></li><li><a href="heurist.recordTag.options.html">options</a></li><li><a href="heurist.recordTemplate.options.html">options</a></li><li><a href="heurist.recordTitles.options.html">options</a></li><li><a href="heurist.recordUploadedFilesIndex.options.html">options</a></li><li><a href="heurist.selectFile.html">selectFile</a></li><li><a href="heurist.slidersMenu.html">slidersMenu</a></li></ul><h3>Classes</h3><ul><li><a href="ActionHandler.html">ActionHandler</a></li><li><a href="CmsManager.html">CmsManager</a></li><li><a href="Color.html">Color</a></li><li><a href="CrosstabsAnalysis.html">CrosstabsAnalysis</a></li><li><a href="EditorCodeMirror.html">EditorCodeMirror</a></li><li><a href="HEditing.html">HEditing</a></li><li><a href="HLayout.html">HLayout</a></li><li><a href="HLayoutMgr.html">HLayoutMgr</a></li><li><a href="HMapLayer.html">HMapLayer</a></li><li><a href="HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRapidFieldAdditions.HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRecordSearch.html">HRecordSearch</a></li><li><a href="HRecordSet.html">HRecordSet</a></li><li><a href="HSystemMgr.html">HSystemMgr</a></li><li><a href="HintDiv.html">HintDiv</a></li><li><a href="JapaneseCalendar.html">JapaneseCalendar</a></li><li><a href="L.Control.Help.html">Help</a></li><li><a href="L.Control.Manager.html">Manager</a></li><li><a href="L.Control.Publish.html">Publish</a></li><li><a href="Solver.html">Solver</a></li><li><a href="TDuration.html">TDuration</a></li><li><a href="Temporal.html">Temporal</a></li><li><a href="hAPI.html">hAPI</a></li><li><a href="hAPI-HRecordMgr.html">HRecordMgr</a></li><li><a href="window.TDate.html">TDate</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HPublishDialog">HPublishDialog</a></li><li><a href="global.html#HSvsEdit">HSvsEdit</a></li><li><a href="global.html#SelectLinkField">SelectLinkField</a></li><li><a href="global.html#_addInput">_addInput</a></li><li><a href="global.html#_checkStructureFromSource">_checkStructureFromSource</a></li><li><a href="global.html#_checkYear">_checkYear</a></li><li><a href="global.html#_closeDialog">_closeDialog</a></li><li><a href="global.html#_create">_create</a></li><li><a href="global.html#_destroy">_destroy</a></li><li><a href="global.html#_detectHeurist">_detectHeurist</a></li><li><a href="global.html#_doSave">_doSave</a></li><li><a href="global.html#_fromDataToUI">_fromDataToUI</a></li><li><a href="global.html#_getActionButtons">_getActionButtons</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_initControls">_initControls</a></li><li><a href="global.html#_initDialog">_initDialog</a></li><li><a href="global.html#_initInnerHeader">_initInnerHeader</a></li><li><a href="global.html#_initModal">_initModal</a></li><li><a href="global.html#_initOffcanvas">_initOffcanvas</a></li><li><a href="global.html#_japaneseYearToGregorian">_japaneseYearToGregorian</a></li><li><a href="global.html#_loadParentLookup">_loadParentLookup</a></li><li><a href="global.html#_popupDialog">_popupDialog</a></li><li><a href="global.html#_preImportCheck">_preImportCheck</a></li><li><a href="global.html#_processSPARQLRow">_processSPARQLRow</a></li><li><a href="global.html#_refresh">_refresh</a></li><li><a href="global.html#_refreshCaptcha">_refreshCaptcha</a></li><li><a href="global.html#_setOption">_setOption</a></li><li><a href="global.html#_showRecordViewPopup">_showRecordViewPopup</a></li><li><a href="global.html#_switchToDataMode">_switchToDataMode</a></li><li><a href="global.html#_theme_editing_symbology">_theme_editing_symbology</a></li><li><a href="global.html#_updatePanels">_updatePanels</a></li><li><a href="global.html#_validateFromGregorian">_validateFromGregorian</a></li><li><a href="global.html#addAssoctoAssigned">addAssoctoAssigned</a></li><li><a href="global.html#addBackgroundCircles">addBackgroundCircles</a></li><li><a href="global.html#addContainer">addContainer</a></li><li><a href="global.html#addForce">addForce</a></li><li><a href="global.html#addForegroundCircles">addForegroundCircles</a></li><li><a href="global.html#addIcons">addIcons</a></li><li><a href="global.html#addKeyword">addKeyword</a></li><li><a href="global.html#addLabels">addLabels</a></li><li><a href="global.html#addLevel">addLevel</a></li><li><a href="global.html#addLines">addLines</a></li><li><a href="global.html#addMarkerDefinitions">addMarkerDefinitions</a></li><li><a href="global.html#addNodes">addNodes</a></li><li><a href="global.html#addPrevtoAssigned">addPrevtoAssigned</a></li><li><a href="global.html#addSelectionBox">addSelectionBox</a></li><li><a href="global.html#addTitles">addTitles</a></li><li><a href="global.html#applyRules">applyRules</a></li><li><a href="global.html#autofill_login">autofill_login</a></li><li><a href="global.html#browseRecords">browseRecords</a></li><li><a href="global.html#calculateImageExtentFromWorldFile">calculateImageExtentFromWorldFile</a></li><li><a href="global.html#changeDisplay">changeDisplay</a></li><li><a href="global.html#changeViewMode">changeViewMode</a></li><li><a href="global.html#checkAllOptions">checkAllOptions</a></li><li><a href="global.html#checkStoredSettings">checkStoredSettings</a></li><li><a href="global.html#clearContent">clearContent</a></li><li><a href="global.html#close">close</a></li><li><a href="global.html#closeDialog">closeDialog</a></li><li><a href="global.html#commonCodeInit">commonCodeInit</a></li><li><a href="global.html#commonOnAdd">commonOnAdd</a></li><li><a href="global.html#compareIndexes">compareIndexes</a></li><li><a href="global.html#correctionOfInvalidTerm">correctionOfInvalidTerm</a></li><li><a href="global.html#createOverlay">createOverlay</a></li><li><a href="global.html#currentNode">currentNode</a></li><li><a href="global.html#daysInMonth">daysInMonth</a></li><li><a href="global.html#determineColour">determineColour</a></li><li><a href="global.html#disableUpdateBtn">disableUpdateBtn</a></li><li><a href="global.html#doAction">doAction</a></li><li><a href="global.html#doAuthentication">doAuthentication</a></li><li><a href="global.html#doImport">doImport</a></li><li><a href="global.html#doRegister">doRegister</a></li><li><a href="global.html#doSamlLogin">doSamlLogin</a></li><li><a href="global.html#doSearchByID">doSearchByID</a></li><li><a href="global.html#drag_link_line">drag_link_line</a></li><li><a href="global.html#drag_link_source_id">drag_link_source_id</a></li><li><a href="global.html#drag_link_target_id">drag_link_target_id</a></li><li><a href="global.html#drag_link_timer">drag_link_timer</a></li><li><a href="global.html#dragend">dragend</a></li><li><a href="global.html#dragmove">dragmove</a></li><li><a href="global.html#dragstart">dragstart</a></li><li><a href="global.html#editCMS2">editCMS2</a></li><li><a href="global.html#editCMS_ElementCfg">editCMS_ElementCfg</a></li><li><a href="global.html#editCMS_SelectElement">editCMS_SelectElement</a></li><li><a href="global.html#editCMS_SiteMenu">editCMS_SiteMenu</a></li><li><a href="global.html#editCMS_WidgetCfg">editCMS_WidgetCfg</a></li><li><a href="global.html#editSymbology">editSymbology</a></li><li><a href="global.html#editTheme">editTheme</a></li><li><a href="global.html#enable_register">enable_register</a></li><li><a href="global.html#executeFormula">executeFormula</a></li><li><a href="global.html#f">f</a></li><li><a href="global.html#first_level_rty_ID">first_level_rty_ID</a></li><li><a href="global.html#fixCalendarPickerCMDs">fixCalendarPickerCMDs</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#formatGregJulian">formatGregJulian</a></li><li><a href="global.html#fromJD">fromJD</a></li><li><a href="global.html#fromJSDate">fromJSDate</a></li><li><a href="global.html#fset">fset</a></li><li><a href="global.html#getAllChecked">getAllChecked</a></li><li><a href="global.html#getClass">getClass</a></li><li><a href="global.html#getContainer">getContainer</a></li><li><a href="global.html#getDataFromServer">getDataFromServer</a></li><li><a href="global.html#getEntityRadius">getEntityRadius</a></li><li><a href="global.html#getEraFromGregorian">getEraFromGregorian</a></li><li><a href="global.html#getEraFromJapaneseStr">getEraFromJapaneseStr</a></li><li><a href="global.html#getEraLimits">getEraLimits</a></li><li><a href="global.html#getEras">getEras</a></li><li><a href="global.html#getGephiFormat">getGephiFormat</a></li><li><a href="global.html#getKeywords">getKeywords</a></li><li><a href="global.html#getKeywordsNextStep">getKeywordsNextStep</a></li><li><a href="global.html#getLineLength">getLineLength</a></li><li><a href="global.html#getLineWidth">getLineWidth</a></li><li><a href="global.html#getMarkerWidth">getMarkerWidth</a></li><li><a href="global.html#getNodeDataById">getNodeDataById</a></li><li><a href="global.html#getRecentKeywords">getRecentKeywords</a></li><li><a href="global.html#getRecordOverlayData">getRecordOverlayData</a></li><li><a href="global.html#getRelationOverlayData">getRelationOverlayData</a></li><li><a href="global.html#getRulesArray">getRulesArray</a></li><li><a href="global.html#getSelected">getSelected</a></li><li><a href="global.html#getSelection">getSelection</a></li><li><a href="global.html#getSetting">getSetting</a></li><li><a href="global.html#getURL">getURL</a></li><li><a href="global.html#gregorianToJapaneseStr">gregorianToJapaneseStr</a></li><li><a href="global.html#hMapDocument">hMapDocument</a></li><li><a href="global.html#hRecordAction">hRecordAction</a></li><li><a href="global.html#handleNodeAction">handleNodeAction</a></li><li><a href="global.html#handleSettingsInUI">handleSettingsInUI</a></li><li><a href="global.html#hexToFilter">hexToFilter</a></li><li><a href="global.html#hexportMenu">hexportMenu</a></li><li><a href="global.html#imgFilter">imgFilter</a></li><li><a href="global.html#initProfilePreferences">initProfilePreferences</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isA">isA</a></li><li><a href="global.html#isAssocKeyword">isAssocKeyword</a></li><li><a href="global.html#isMonthSpan">isMonthSpan</a></li><li><a href="global.html#isRecentKeyword">isRecentKeyword</a></li><li><a href="global.html#isTemporal">isTemporal</a></li><li><a href="global.html#isValid">isValid</a></li><li><a href="global.html#japaneseToGregorian">japaneseToGregorian</a></li><li><a href="global.html#japaneseToGregorianStr">japaneseToGregorianStr</a></li><li><a href="global.html#keywordLookup">keywordLookup</a></li><li><a href="global.html#loadHtmlContent">loadHtmlContent</a></li><li><a href="global.html#log10">log10</a></li><li><a href="global.html#login_dialog">login_dialog</a></li><li><a href="global.html#lookupEditions">lookupEditions</a></li><li><a href="global.html#lookupGoogle">lookupGoogle</a></li><li><a href="global.html#lookupHathiTrust">lookupHathiTrust</a></li><li><a href="global.html#lookupKarlsruhePortal">lookupKarlsruhePortal</a></li><li><a href="global.html#lookupWorldCat">lookupWorldCat</a></li><li><a href="global.html#mapIds">mapIds</a></li><li><a href="global.html#menuActionHandler">menuActionHandler</a></li><li><a href="global.html#mergeArraysUnique">mergeArraysUnique</a></li><li><a href="global.html#msgToConsole">msgToConsole</a></li><li><a href="global.html#newDate">newDate</a></li><li><a href="global.html#onAdd">onAdd</a></li><li><a href="global.html#onAuthentication">onAuthentication</a></li><li><a href="global.html#onNodeClick">onNodeClick</a></li><li><a href="global.html#onPageInit">onPageInit</a></li><li><a href="global.html#onRecordNodeClick">onRecordNodeClick</a></li><li><a href="global.html#onRemove">onRemove</a></li><li><a href="global.html#onTermSaveError">onTermSaveError</a></li><li><a href="global.html#open">open</a></li><li><a href="global.html#openRecordInTab">openRecordInTab</a></li><li><a href="global.html#openSearchMenu">openSearchMenu</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#popupDialog">popupDialog</a></li><li><a href="global.html#prevSessionExists">prevSessionExists</a></li><li><a href="global.html#project_keywords">project_keywords</a></li><li><a href="global.html#putSetting">putSetting</a></li><li><a href="global.html#removeAssocByID">removeAssocByID</a></li><li><a href="global.html#removeKeyword">removeKeyword</a></li><li><a href="global.html#removeOverlay">removeOverlay</a></li><li><a href="global.html#removeOverlays">removeOverlays</a></li><li><a href="global.html#removeSetting">removeSetting</a></li><li><a href="global.html#renderAssocKeywods">renderAssocKeywods</a></li><li><a href="global.html#renderContent">renderContent</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#saveRules">saveRules</a></li><li><a href="global.html#selectRecord">selectRecord</a></li><li><a href="global.html#setFormulaMode">setFormulaMode</a></li><li><a href="global.html#setGravity">setGravity</a></li><li><a href="global.html#setLinkMode">setLinkMode</a></li><li><a href="global.html#setSelected">setSelected</a></li><li><a href="global.html#setSelection">setSelection</a></li><li><a href="global.html#setValue">setValue</a></li><li><a href="global.html#setupAssocKeywords">setupAssocKeywords</a></li><li><a href="global.html#setupCaptcha">setupCaptcha</a></li><li><a href="global.html#setupRecentWorks">setupRecentWorks</a></li><li><a href="global.html#setupResetPin">setupResetPin</a></li><li><a href="global.html#show">show</a></li><li><a href="global.html#showEditions">showEditions</a></li><li><a href="global.html#showHelp">showHelp</a></li><li><a href="global.html#showKeyword">showKeyword</a></li><li><a href="global.html#showLoginDialog">showLoginDialog</a></li><li><a href="global.html#showNodeInformation">showNodeInformation</a></li><li><a href="global.html#showSearchBuilder">showSearchBuilder</a></li><li><a href="global.html#showSearchFacetedWizard">showSearchFacetedWizard</a></li><li><a href="global.html#showWarningAboutTermUsage">showWarningAboutTermUsage</a></li><li><a href="global.html#simplePointsToWKT">simplePointsToWKT</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#startRecentWork">startRecentWork</a></li><li><a href="global.html#temporalSimplifyDate">temporalSimplifyDate</a></li><li><a href="global.html#temporalToHumanReadableString">temporalToHumanReadableString</a></li><li><a href="global.html#tick">tick</a></li><li><a href="global.html#toJD">toJD</a></li><li><a href="global.html#toJSDate">toJSDate</a></li><li><a href="global.html#translationFromUI">translationFromUI</a></li><li><a href="global.html#translationSupport">translationSupport</a></li><li><a href="global.html#translationToUI">translationToUI</a></li><li><a href="global.html#truncateText">truncateText</a></li><li><a href="global.html#unselectAssoc">unselectAssoc</a></li><li><a href="global.html#updateAssocDisplay">updateAssocDisplay</a></li><li><a href="global.html#updateAssocList">updateAssocList</a></li><li><a href="global.html#updateCircles">updateCircles</a></li><li><a href="global.html#updateCurvedLines">updateCurvedLines</a></li><li><a href="global.html#updateLabels">updateLabels</a></li><li><a href="global.html#updateNodes">updateNodes</a></li><li><a href="global.html#updateRecentKeywordDisplay">updateRecentKeywordDisplay</a></li><li><a href="global.html#updateRectangles">updateRectangles</a></li><li><a href="global.html#updateRuleBuilder">updateRuleBuilder</a></li><li><a href="global.html#updateStatus">updateStatus</a></li><li><a href="global.html#updateStraightLines">updateStraightLines</a></li><li><a href="global.html#validateResetPin">validateResetPin</a></li><li><a href="global.html#visualizeData">visualizeData</a></li><li><a href="global.html#visualizeSelection">visualizeSelection</a></li><li><a href="global.html#weekDay">weekDay</a></li><li><a href="global.html#weekOfYear">weekOfYear</a></li><li><a href="global.html#zoomed">zoomed</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Jul 24 2025 18:09:14 GMT+0400 (GMT+04:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

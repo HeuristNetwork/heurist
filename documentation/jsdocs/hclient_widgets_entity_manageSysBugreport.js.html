@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: hclient/widgets/entity/manageSysBugreport.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: hclient/widgets/entity/manageSysBugreport.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+* @file manageSysBugreport.js
+* @brief Manages System Bug Report entities.
+* @fileOverview Provides a UI for users to submit bug reports and for administrators to manage them. Includes fields for bug description, reproduction steps, severity, status, etc.
+* @project     Heurist academic knowledge management system
+*
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov &lt;osmakov@gmail.com>
+* @author      Ian Johnson &lt;ian.johnson.heurist@gmail.com>
+* @since       6.6.5
+*/
+
+
+
+//
+// there is no search, select mode for bug report - only add and send by email
+//
+
+/**
+ * @widget heurist.manageSysBugreport
+ * @brief Widget for managing System Bug Reports.
+ * @extends $.heurist.manageEntity
+ * @description This widget provides a specialized interface for submitting bug reports.
+ * It operates in 'editonly' mode, meaning it directly presents a form for a new bug report.
+ *
+ * @property {string} title Overridden to 'Heurist feedback'. Defines the title for the widget's dialog.
+ * @property {string} edit_mode Set to 'editonly', so the widget opens directly into the edit form for a new bug report.
+ * @property {string} select_mode Set to 'manager'. Although typically for list management, in this context, combined with 'editonly', it means no list view is presented.
+ * @property {string} layout_mode Set to 'editonly', further reinforcing that only the editing interface is shown.
+ * @property {number} width Default width of the widget dialog, set to 900 pixels.
+ * @property {number} height Default height of the widget dialog, set to 932 pixels.
+ */
+$.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
+   
+    _entityName:'sysBugreport',
+    
+    //keep to refresh after modifications
+    _keepRequest:null,
+
+    _checkDescription: true, // check if bug description is over 20 characters long
+
+    _program_area: null,
+
+    /**
+     * @brief Initializes the widget.
+     * @override
+     * @memberof heurist.manageSysBugreport
+     * Sets default options for title, edit_mode, select_mode, layout_mode, width, and height
+     * to tailor the widget for bug report submission.
+     */
+    _init: function() {
+        
+        this.options.title = 'Heurist feedback';
+        this.options.edit_mode = 'editonly';
+        this.options.select_mode = 'manager';
+        this.options.layout_mode = 'editonly';
+        this.options.width = 900;
+        this.options.height = 932;
+
+        this._super();
+    },
+    
+    //  
+    /**
+     * @brief Initializes the controls for the widget.
+     * @override
+     * @memberof heurist.manageSysBugreport
+     * @returns {boolean} Returns false if the parent `_initControls` fails, otherwise true.
+     * Sets the default palette class and then calls the parent's `_initControls`.
+     * Since this widget is 'editonly', it immediately calls `addEditRecord(-1)` to present
+     * a form for a new bug report.
+     */
+    _initControls: function() {
+
+        this.options.default_palette_class = 'ui-heurist-admin';
+
+        if(!this._super()){
+            return false;
+        }
+
+        // always new report
+        this.addEditRecord(-1);
+
+        return true;
+    },
+    
+    /**
+     * @brief Customizes the buttons for the edit dialog.
+     * @override
+     * @memberof heurist.manageSysBugreport
+     * @returns {Array&lt;object>} An array of button definition objects.
+     * It retrieves the default buttons from the parent widget and then modifies the "Save"
+     * button's text to "Send to heurist development team".
+     */
+    _getEditDialogButtons: function(){
+        let btns = this._super();
+        
+        for(let idx in btns){
+            if(btns[idx].class.indexOf('btnRecSave')>=0){
+                btns[idx].text = window.hWin.HR('Send to heurist development team');
+                break;
+            }
+        }
+        
+        return btns;
+    },
+
+    /**
+     * @brief Validates the form values before submission.
+     * @override
+     * @memberof heurist.manageSysBugreport
+     * @returns {?object} The validated field values, or null if validation fails.
+     * Retrieves values from the parent widget. It then checks if the bug description
+     * (`bug_Description`) has a minimum word count (20 words) if `_checkDescription` is true.
+     * If the description is too short, it shows a dialog prompting the user for more details
+     * or to proceed as-is. It also processes uploaded images for the `bug_Image` field.
+     */
+    _getValidatedValues: function(){
+
+        let that = this;
+        let res = this._super();
+
+        if(!res){
+            return null;
+        }
+
+        // Check for a usable description (a min of 20 words) or the inclusion of steps to reproduce
+        let desc = res['bug_Description'];
+        if(this._checkDescription &amp;&amp; desc.split(' ').length &lt; 20){
+
+            let $dlg;
+            let msg = 'In order for bugs to be found and fixed as quickly as possible, the team requires as many details about the issue you are encountering.&lt;br>'
+                + 'Providing the steps that has lead you to this issue will also greatly speed up the initial stages of fixing this issue.&lt;br>&lt;br>'
+                + 'Otherwise, you can click \'Proceed as-is\' if you feel that there are no more details you can provided about this issue.';
+
+            let btns = {};
+            btns[window.hWin.HR('Proceed as-is')] = () => {
+
+                that._checkDescription = false;
+                $dlg.dialog('close');
+
+                that._saveEditAndClose();
+            }
+            btns[window.hWin.HR('Close')] = () => {
+                $dlg.dialog('close');
+            };
+
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'More information recommended'}, {default_palette_class: 'ui-heurist-admin'});
+
+            return null;
+        }
+
+        res['bug_Image'] = [];
+        let $img_div = this._editing.getFieldByName('bug_Image');
+        $img_div.find('img').each((idx, img) => {
+            let matches = img.src.match(/~\d{10}(?:%20%28\d+%29)?\.(?:png|gif|jpg)/);
+            if(matches?.length == 1){
+                res['bug_Image'].push(matches[0]);
+            }
+        });
+
+        return res;
+    },
+    
+//---------------------------------------------------------------------------------- 
+    /**
+     * @brief Handles the event after a bug report is successfully saved (sent).
+     * @override
+     * @memberof heurist.manageSysBugreport
+     * @param {string} message The success message from the server (usually confirmation).
+     * Displays a confirmation dialog titled "Bug report sent" and then closes the main widget dialog.
+     */
+    _afterSaveEventHandler: function(message){
+        window.hWin.HEURIST4.msg.showMsgDlg(message, null, {title: 'Bug report sent'}, {default_palette_class: 'ui-heurist-admin'});
+        this.closeDialog(true); //force to avoid warning
+    },
+    
+    /**
+     * @brief Performs actions after the edit form is initialized.
+     * @override
+     * @memberof heurist.manageSysBugreport
+     * Calls the parent's `_afterInitEditForm`. Then, it sets up the file uploader's paste zone
+     * to cover the entire dialog for easy screenshot pasting.
+     * It pre-fills the `bug_URL` field with the current page URL.
+     * Adds introductory help text and formats the `bug_Type` and `bug_Image` fields.
+     * Finally, it calls `_setupProgramArea` to initialize the program area dropdown.
+     */
+    _afterInitEditForm: function(){
+
+        this._super();
+
+        //find file uploader and make entire dialogue as a paste zone - to catch Ctrl+V globally
+        let ele = this._as_dialog.find('input[type=file]');
+        if(ele.length>0){
+            ele.fileupload('option', 'pasteZone', this._as_dialog);
+        }
+
+        // Add default values to url
+        this._editing.setFieldValueByName('bug_URL', location.href, false);
+
+		// Add spacing between fields, and give textarea's larger height
+        let eles = this._editing.getAllFields();
+        let help = '';
+        for(const ele of eles){ // ignore last element (image field)
+
+            let $ele = $(ele);
+
+            if($ele.find('textarea,input.text,.fileupload').length != 0){
+                $ele.css({'padding-top': '10px', 'display': 'block'});
+            }else if($ele.attr('data-dtid') == 'bug_Type'){
+                $ele.find('.header').hide();
+
+            }
+            
+            if(help === ''){
+
+                let padding = `padding: 0px 15px 20px;`;
+                help = 'We value your feedback and do our best to fix bugs rapidly and to incorporate your suggestions into our development process.&lt;br>'
+                     + 'Please don\'t hesitate to let us know about anything which annoys you or which you feel could be improved.&lt;br>&lt;br>'
+                     + 'We pop this form up monthly to encourage your feedback. It is accessible at any time through Help > Feedback / bug report.&lt;br>'
+                     + 'You can also paste an image which will be added to the screenshots.';
+
+                // add extra info at top
+				$('&lt;div>', {
+                    html: help,
+                    style: `${padding} display: block;font-size: 12px;`
+                }).insertBefore($ele);
+            }
+        }
+
+        ele = this._editing.getFieldByName('bug_Image');
+        let padding = `padding: 10px 15px 20px;`;
+        $('&lt;div>', {
+            html: 'It is very helpful if you can provide a screen capture for annoyances and bug reports,&lt;br>'
+                + 'or an annotated screen capture or drawing for feature requests.',
+            style: `${padding} display: block;font-size: 12px;`
+        }).insertBefore($(ele));
+
+        this._formatBugTypeField();
+        this._formatBugImageField();
+
+        this._setupProgramArea();
+    },
+
+    /**
+     * @brief Sets up the 'Program Area' (bug_Location) dropdown field.
+     * @memberof heurist.manageSysBugreport
+     * This field allows users to specify which part of Heurist the bug relates to.
+     * If the program area terms (`this._program_area`) haven't been loaded yet,
+     * it fetches them from the reference Heurist database (specified in sysinfo).
+     * Once terms are available, it converts the standard text input for `bug_Location`
+     * into an hSelect dropdown populated with these terms, including hierarchical grouping.
+     */
+    _setupProgramArea: function(){
+
+        let ele = this._editing.getFieldByName('bug_Location');
+        if(!ele || ele.length == 0){
+            return;
+        }
+
+        let $input = ele.find('input');
+
+        if(this._program_area === null){
+
+            let request = {
+                terms: '6988',
+                mode: 2,
+                remote: `${window.hWin.HAPI4.sysinfo.referenceServerURL}?db=${window.hWin.HAPI4.sysinfo.referenceServerBugreportDatabase}`
+            };
+
+            window.hWin.HAPI4.SystemMgr.get_defs(request, (response) => {
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+
+                    this._program_area = false;
+
+                    $input.val('7105');
+                    ele.hide();
+
+                    return;
+                }
+
+                this._bugDBTerms = response.data.terms;
+                this._program_area = [{key: '', title: 'Please select...'}];
+
+                this._processProgramArea(6988);
+                this._setupProgramArea();
+            });
+
+            return;
+        }
+
+        let $select = $('&lt;select>').insertAfter($input);
+
+        window.hWin.HEURIST4.ui.createSelector($select[0], this._program_area);
+        window.hWin.HEURIST4.ui.initHSelect($select, false, null, {
+            onSelectMenu: (e) => {
+                $input.val($select.val()).trigger('change');
+            }
+        });
+        $select.hSelect('option', { groupings: true, groupingsType: 'other' });
+
+        $input.hide();
+    },
+
+    /**
+     * @brief Recursively processes terms for the 'Program Area' dropdown.
+     * @memberof heurist.manageSysBugreport
+     * @param {number|string} parent_term_id The ID of the parent term whose children are to be processed.
+     * @param {number} [depth=0] The current depth in the term hierarchy, used for indentation in the dropdown.
+     * This function populates `this._program_area` with term objects suitable for `hSelect`.
+     * It sorts terms by `trm_OrderInBranch` and then alphabetically.
+     * For each term, it adds an object `{key: trm_ID, title: trm_Label, depth: depth}` to `this._program_area`.
+     * If a term has children, it calls itself recursively for that term.
+     */
+    _processProgramArea: function(parent_term_id, depth = 0){
+
+        let that = this;
+        let trm_Label_idx = this._bugDBTerms.fieldNamesToIndex.trm_Label;
+        let trm_Order_idx = this._bugDBTerms.fieldNamesToIndex.trm_OrderInBranch;
+
+        function sortProgramArea(a, b){
+
+            let a_name = that._bugDBTerms.termsByDomainLookup.enum[a][trm_Label_idx].toLocaleUpperCase();
+            let b_name = that._bugDBTerms.termsByDomainLookup.enum[b][trm_Label_idx].toLocaleUpperCase();
+            let a_order = parseInt(that._bugDBTerms.termsByDomainLookup.enum[a][trm_Order_idx], 10);
+            let b_order = parseInt(that._bugDBTerms.termsByDomainLookup.enum[b][trm_Order_idx], 10);
+    
+            a_order = (!a_order || a_order &lt; 1 || isNaN(a_order)) ? null : a_order;
+            b_order = (!b_order || b_order &lt; 1 || isNaN(b_order)) ? null : b_order;
+    
+            if(a_order == null &amp;&amp; b_order == null){ // alphabetic
+                return a_name.localeCompare(b_name);
+            }else if(a_order == null || b_order == null){ // null is first
+                return a_order == null;
+            }else{ // branch order
+                return (a_order - b_order);
+            }
+        }
+
+        let terms = this._bugDBTerms.trm_Links[parent_term_id];
+
+        terms.sort(sortProgramArea);
+
+        for(let trm_ID of terms){
+
+            let term = this._bugDBTerms.termsByDomainLookup.enum[trm_ID];
+
+            this._program_area.push({key: trm_ID, title: term[trm_Label_idx], depth: depth});
+
+            if(window.hWin.HEURIST4.util.isArrayNotEmpty(this._bugDBTerms.trm_Links[trm_ID])){
+                this._processProgramArea(trm_ID, depth + 1);
+            }
+        }
+    },
+
+    /**
+     * @brief Formats the 'Bug Type' (bug_Type) enum field for better layout.
+     * @memberof heurist.manageSysBugreport
+     * This method adjusts the styling of the radio buttons (or similar enum inputs)
+     * for the `bug_Type` field. It arranges them, typically into multiple columns,
+     * by setting specific widths for the label elements. It also bolds the text
+     * and hides the default field header.
+     */
+    _formatBugTypeField: function(){
+
+        // Format widths
+        let ele = this._editing.getFieldByName('bug_Type');
+        $.each(ele.find('label.enum_input'), (idx, label) => {
+
+            label = $(label);
+            let width = idx % 3 === 0 ? '17' : '25';
+            width = idx % 3 === 2 ? '23' : width;
+
+            label.css({
+                width: `${width}em`,
+                'min-width': `${width}em`,
+                'max-width': '',
+                'margin-right': ''
+            });
+        });
+
+        // Bold values
+        ele.find('.input-div').css('font-weight', 'bold');
+
+        // Hide field name
+        ele.find('.header').hide();
+    },
+
+    /**
+     * @brief Formats the 'Screenshot' (bug_Image) file upload field.
+     * @memberof heurist.manageSysBugreport
+     * Adjusts styling for the file input area, ensuring the input div is displayed
+     * as inline-block and removes the "move" button typically associated with multi-file uploads.
+     */
+    _formatBugImageField: function(){
+
+        let ele = this._editing.getFieldByName('bug_Image');
+
+        if(!ele){
+            return;
+        }
+
+        ele.find('.input-div').css({
+            display: 'inline-block',
+            'padding-right': '30px'
+        });
+
+        ele.find('.btn_input_move').remove();
+    },
+
+    /**
+     * @brief Handles changes to form elements.
+     * @override
+     * @memberof heurist.manageSysBugreport
+     * @param {object} [changed_element] The element that triggered the change, if available.
+     * Calls the parent `onEditFormChange`. Additionally, if the `bug_Type` field changed (enum buttons),
+     * it re-applies formatting via `_formatBugTypeField`. If a file field changed, it calls `_formatBugImageField`.
+     */
+    onEditFormChange: function(changed_element){
+
+        this._super(changed_element);
+
+        if(changed_element?.enum_buttons !== null){
+            this._formatBugTypeField();
+        }else if(changed_element?.detailType === 'file'){
+            this._formatBugImageField();
+        }
+    },
+
+    /**
+     * @brief Handles the event when a new input is added to a multi-value field.
+     * @override
+     * @memberof heurist.manageSysBugreport
+     * @param {object} [added_element] Details about the added input element.
+     * If a new file input is added (e.g., for another screenshot), it calls
+     * `_formatBugImageField` to ensure consistent styling.
+     */
+    onEditFormNewInput: function(added_element){
+
+        if(added_element?.detailType === 'file'){
+            this._formatBugImageField();
+        }
+    }
+    
+});
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="HEURIST4.dbs.html">dbs</a></li><li><a href="HEURIST4.geo.html">geo</a></li><li><a href="HEURIST4.msg.html">msg</a></li><li><a href="HEURIST4.query.html">query</a></li><li><a href="HEURIST4.util.html">util</a></li><li><a href="NodeSelection.html">NodeSelection</a></li><li><a href="heurist.buttonsMenu.html">buttonsMenu</a></li><li><a href="heurist.controlPanel.html">controlPanel</a></li><li><a href="heurist.dbAction.html">dbAction</a></li><li><a href="heurist.dbVerify.html">dbVerify</a></li><li><a href="heurist.dbVerifyURLs.html">dbVerifyURLs</a></li><li><a href="heurist.editTranslations.html">editTranslations</a></li><li><a href="heurist.editing_input.html">editing_input</a></li><li><a href="heurist.navigation.html">navigation</a></li><li><a href="heurist.recordAccess.options.html">options</a></li><li><a href="heurist.recordAction.options.html">options</a></li><li><a href="heurist.recordAdd.options.html">options</a></li><li><a href="heurist.recordAddButton.options.html">options</a></li><li><a href="heurist.recordAddLink.options.html">options</a></li><li><a href="heurist.recordAddLinkMatch.options.html">options</a></li><li><a href="heurist.recordArchive.options.html">options</a></li><li><a href="heurist.recordBookmark.options.html">options</a></li><li><a href="heurist.recordDataTable.options.html">options</a></li><li><a href="heurist.recordDelete.options.html">options</a></li><li><a href="heurist.recordExport.options.html">options</a></li><li><a href="heurist.recordExportCSV.options.html">options</a></li><li><a href="heurist.recordFindDuplicates.options.html">options</a></li><li><a href="heurist.recordImportAnnotations.options.html">options</a></li><li><a href="heurist.recordNotify.options.html">options</a></li><li><a href="heurist.recordRate.options.html">options</a></li><li><a href="heurist.recordTag.options.html">options</a></li><li><a href="heurist.recordTemplate.options.html">options</a></li><li><a href="heurist.recordTitles.options.html">options</a></li><li><a href="heurist.recordUploadedFilesIndex.options.html">options</a></li><li><a href="heurist.selectFile.html">selectFile</a></li><li><a href="heurist.slidersMenu.html">slidersMenu</a></li></ul><h3>Classes</h3><ul><li><a href="ActionHandler.html">ActionHandler</a></li><li><a href="CmsManager.html">CmsManager</a></li><li><a href="Color.html">Color</a></li><li><a href="CrosstabsAnalysis.html">CrosstabsAnalysis</a></li><li><a href="EditorCodeMirror.html">EditorCodeMirror</a></li><li><a href="HEditing.html">HEditing</a></li><li><a href="HLayout.html">HLayout</a></li><li><a href="HLayoutMgr.html">HLayoutMgr</a></li><li><a href="HMapLayer.html">HMapLayer</a></li><li><a href="HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRapidFieldAdditions.HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRecordSearch.html">HRecordSearch</a></li><li><a href="HRecordSet.html">HRecordSet</a></li><li><a href="HSystemMgr.html">HSystemMgr</a></li><li><a href="HintDiv.html">HintDiv</a></li><li><a href="JapaneseCalendar.html">JapaneseCalendar</a></li><li><a href="L.Control.Help.html">Help</a></li><li><a href="L.Control.Manager.html">Manager</a></li><li><a href="L.Control.Publish.html">Publish</a></li><li><a href="Solver.html">Solver</a></li><li><a href="TDuration.html">TDuration</a></li><li><a href="Temporal.html">Temporal</a></li><li><a href="hAPI.html">hAPI</a></li><li><a href="hAPI-HRecordMgr.html">HRecordMgr</a></li><li><a href="window.TDate.html">TDate</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HPublishDialog">HPublishDialog</a></li><li><a href="global.html#HSvsEdit">HSvsEdit</a></li><li><a href="global.html#SelectLinkField">SelectLinkField</a></li><li><a href="global.html#_addInput">_addInput</a></li><li><a href="global.html#_checkStructureFromSource">_checkStructureFromSource</a></li><li><a href="global.html#_checkYear">_checkYear</a></li><li><a href="global.html#_closeDialog">_closeDialog</a></li><li><a href="global.html#_create">_create</a></li><li><a href="global.html#_destroy">_destroy</a></li><li><a href="global.html#_detectHeurist">_detectHeurist</a></li><li><a href="global.html#_doSave">_doSave</a></li><li><a href="global.html#_fromDataToUI">_fromDataToUI</a></li><li><a href="global.html#_getActionButtons">_getActionButtons</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_initControls">_initControls</a></li><li><a href="global.html#_initDialog">_initDialog</a></li><li><a href="global.html#_initInnerHeader">_initInnerHeader</a></li><li><a href="global.html#_initModal">_initModal</a></li><li><a href="global.html#_initOffcanvas">_initOffcanvas</a></li><li><a href="global.html#_japaneseYearToGregorian">_japaneseYearToGregorian</a></li><li><a href="global.html#_loadParentLookup">_loadParentLookup</a></li><li><a href="global.html#_popupDialog">_popupDialog</a></li><li><a href="global.html#_preImportCheck">_preImportCheck</a></li><li><a href="global.html#_processSPARQLRow">_processSPARQLRow</a></li><li><a href="global.html#_refresh">_refresh</a></li><li><a href="global.html#_refreshCaptcha">_refreshCaptcha</a></li><li><a href="global.html#_setOption">_setOption</a></li><li><a href="global.html#_showRecordViewPopup">_showRecordViewPopup</a></li><li><a href="global.html#_switchToDataMode">_switchToDataMode</a></li><li><a href="global.html#_theme_editing_symbology">_theme_editing_symbology</a></li><li><a href="global.html#_updatePanels">_updatePanels</a></li><li><a href="global.html#_validateFromGregorian">_validateFromGregorian</a></li><li><a href="global.html#addAssoctoAssigned">addAssoctoAssigned</a></li><li><a href="global.html#addBackgroundCircles">addBackgroundCircles</a></li><li><a href="global.html#addContainer">addContainer</a></li><li><a href="global.html#addForce">addForce</a></li><li><a href="global.html#addForegroundCircles">addForegroundCircles</a></li><li><a href="global.html#addIcons">addIcons</a></li><li><a href="global.html#addKeyword">addKeyword</a></li><li><a href="global.html#addLabels">addLabels</a></li><li><a href="global.html#addLevel">addLevel</a></li><li><a href="global.html#addLines">addLines</a></li><li><a href="global.html#addMarkerDefinitions">addMarkerDefinitions</a></li><li><a href="global.html#addNodes">addNodes</a></li><li><a href="global.html#addPrevtoAssigned">addPrevtoAssigned</a></li><li><a href="global.html#addSelectionBox">addSelectionBox</a></li><li><a href="global.html#addTitles">addTitles</a></li><li><a href="global.html#applyRules">applyRules</a></li><li><a href="global.html#autofill_login">autofill_login</a></li><li><a href="global.html#browseRecords">browseRecords</a></li><li><a href="global.html#calculateImageExtentFromWorldFile">calculateImageExtentFromWorldFile</a></li><li><a href="global.html#changeDisplay">changeDisplay</a></li><li><a href="global.html#changeViewMode">changeViewMode</a></li><li><a href="global.html#checkAllOptions">checkAllOptions</a></li><li><a href="global.html#checkStoredSettings">checkStoredSettings</a></li><li><a href="global.html#clearContent">clearContent</a></li><li><a href="global.html#close">close</a></li><li><a href="global.html#closeDialog">closeDialog</a></li><li><a href="global.html#commonCodeInit">commonCodeInit</a></li><li><a href="global.html#commonOnAdd">commonOnAdd</a></li><li><a href="global.html#compareIndexes">compareIndexes</a></li><li><a href="global.html#correctionOfInvalidTerm">correctionOfInvalidTerm</a></li><li><a href="global.html#createOverlay">createOverlay</a></li><li><a href="global.html#currentNode">currentNode</a></li><li><a href="global.html#daysInMonth">daysInMonth</a></li><li><a href="global.html#determineColour">determineColour</a></li><li><a href="global.html#disableUpdateBtn">disableUpdateBtn</a></li><li><a href="global.html#doAction">doAction</a></li><li><a href="global.html#doAuthentication">doAuthentication</a></li><li><a href="global.html#doImport">doImport</a></li><li><a href="global.html#doRegister">doRegister</a></li><li><a href="global.html#doSamlLogin">doSamlLogin</a></li><li><a href="global.html#doSearchByID">doSearchByID</a></li><li><a href="global.html#drag_link_line">drag_link_line</a></li><li><a href="global.html#drag_link_source_id">drag_link_source_id</a></li><li><a href="global.html#drag_link_target_id">drag_link_target_id</a></li><li><a href="global.html#drag_link_timer">drag_link_timer</a></li><li><a href="global.html#dragend">dragend</a></li><li><a href="global.html#dragmove">dragmove</a></li><li><a href="global.html#dragstart">dragstart</a></li><li><a href="global.html#editCMS2">editCMS2</a></li><li><a href="global.html#editCMS_ElementCfg">editCMS_ElementCfg</a></li><li><a href="global.html#editCMS_SelectElement">editCMS_SelectElement</a></li><li><a href="global.html#editCMS_SiteMenu">editCMS_SiteMenu</a></li><li><a href="global.html#editCMS_WidgetCfg">editCMS_WidgetCfg</a></li><li><a href="global.html#editSymbology">editSymbology</a></li><li><a href="global.html#editTheme">editTheme</a></li><li><a href="global.html#enable_register">enable_register</a></li><li><a href="global.html#executeFormula">executeFormula</a></li><li><a href="global.html#f">f</a></li><li><a href="global.html#first_level_rty_ID">first_level_rty_ID</a></li><li><a href="global.html#fixCalendarPickerCMDs">fixCalendarPickerCMDs</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#formatGregJulian">formatGregJulian</a></li><li><a href="global.html#fromJD">fromJD</a></li><li><a href="global.html#fromJSDate">fromJSDate</a></li><li><a href="global.html#fset">fset</a></li><li><a href="global.html#getAllChecked">getAllChecked</a></li><li><a href="global.html#getClass">getClass</a></li><li><a href="global.html#getContainer">getContainer</a></li><li><a href="global.html#getDataFromServer">getDataFromServer</a></li><li><a href="global.html#getEntityRadius">getEntityRadius</a></li><li><a href="global.html#getEraFromGregorian">getEraFromGregorian</a></li><li><a href="global.html#getEraFromJapaneseStr">getEraFromJapaneseStr</a></li><li><a href="global.html#getEraLimits">getEraLimits</a></li><li><a href="global.html#getEras">getEras</a></li><li><a href="global.html#getGephiFormat">getGephiFormat</a></li><li><a href="global.html#getKeywords">getKeywords</a></li><li><a href="global.html#getKeywordsNextStep">getKeywordsNextStep</a></li><li><a href="global.html#getLineLength">getLineLength</a></li><li><a href="global.html#getLineWidth">getLineWidth</a></li><li><a href="global.html#getMarkerWidth">getMarkerWidth</a></li><li><a href="global.html#getNodeDataById">getNodeDataById</a></li><li><a href="global.html#getRecentKeywords">getRecentKeywords</a></li><li><a href="global.html#getRecordOverlayData">getRecordOverlayData</a></li><li><a href="global.html#getRelationOverlayData">getRelationOverlayData</a></li><li><a href="global.html#getRulesArray">getRulesArray</a></li><li><a href="global.html#getSelected">getSelected</a></li><li><a href="global.html#getSelection">getSelection</a></li><li><a href="global.html#getSetting">getSetting</a></li><li><a href="global.html#getURL">getURL</a></li><li><a href="global.html#gregorianToJapaneseStr">gregorianToJapaneseStr</a></li><li><a href="global.html#hMapDocument">hMapDocument</a></li><li><a href="global.html#hRecordAction">hRecordAction</a></li><li><a href="global.html#handleNodeAction">handleNodeAction</a></li><li><a href="global.html#handleSettingsInUI">handleSettingsInUI</a></li><li><a href="global.html#hexToFilter">hexToFilter</a></li><li><a href="global.html#hexportMenu">hexportMenu</a></li><li><a href="global.html#imgFilter">imgFilter</a></li><li><a href="global.html#initProfilePreferences">initProfilePreferences</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isA">isA</a></li><li><a href="global.html#isAssocKeyword">isAssocKeyword</a></li><li><a href="global.html#isMonthSpan">isMonthSpan</a></li><li><a href="global.html#isRecentKeyword">isRecentKeyword</a></li><li><a href="global.html#isTemporal">isTemporal</a></li><li><a href="global.html#isValid">isValid</a></li><li><a href="global.html#japaneseToGregorian">japaneseToGregorian</a></li><li><a href="global.html#japaneseToGregorianStr">japaneseToGregorianStr</a></li><li><a href="global.html#keywordLookup">keywordLookup</a></li><li><a href="global.html#loadHtmlContent">loadHtmlContent</a></li><li><a href="global.html#log10">log10</a></li><li><a href="global.html#login_dialog">login_dialog</a></li><li><a href="global.html#lookupEditions">lookupEditions</a></li><li><a href="global.html#lookupGoogle">lookupGoogle</a></li><li><a href="global.html#lookupHathiTrust">lookupHathiTrust</a></li><li><a href="global.html#lookupKarlsruhePortal">lookupKarlsruhePortal</a></li><li><a href="global.html#lookupWorldCat">lookupWorldCat</a></li><li><a href="global.html#mapIds">mapIds</a></li><li><a href="global.html#menuActionHandler">menuActionHandler</a></li><li><a href="global.html#mergeArraysUnique">mergeArraysUnique</a></li><li><a href="global.html#msgToConsole">msgToConsole</a></li><li><a href="global.html#newDate">newDate</a></li><li><a href="global.html#onAdd">onAdd</a></li><li><a href="global.html#onAuthentication">onAuthentication</a></li><li><a href="global.html#onNodeClick">onNodeClick</a></li><li><a href="global.html#onPageInit">onPageInit</a></li><li><a href="global.html#onRecordNodeClick">onRecordNodeClick</a></li><li><a href="global.html#onRemove">onRemove</a></li><li><a href="global.html#onTermSaveError">onTermSaveError</a></li><li><a href="global.html#open">open</a></li><li><a href="global.html#openRecordInTab">openRecordInTab</a></li><li><a href="global.html#openSearchMenu">openSearchMenu</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#popupDialog">popupDialog</a></li><li><a href="global.html#prevSessionExists">prevSessionExists</a></li><li><a href="global.html#project_keywords">project_keywords</a></li><li><a href="global.html#putSetting">putSetting</a></li><li><a href="global.html#removeAssocByID">removeAssocByID</a></li><li><a href="global.html#removeKeyword">removeKeyword</a></li><li><a href="global.html#removeOverlay">removeOverlay</a></li><li><a href="global.html#removeOverlays">removeOverlays</a></li><li><a href="global.html#removeSetting">removeSetting</a></li><li><a href="global.html#renderAssocKeywods">renderAssocKeywods</a></li><li><a href="global.html#renderContent">renderContent</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#saveRules">saveRules</a></li><li><a href="global.html#selectRecord">selectRecord</a></li><li><a href="global.html#setFormulaMode">setFormulaMode</a></li><li><a href="global.html#setGravity">setGravity</a></li><li><a href="global.html#setLinkMode">setLinkMode</a></li><li><a href="global.html#setSelected">setSelected</a></li><li><a href="global.html#setSelection">setSelection</a></li><li><a href="global.html#setValue">setValue</a></li><li><a href="global.html#setupAssocKeywords">setupAssocKeywords</a></li><li><a href="global.html#setupCaptcha">setupCaptcha</a></li><li><a href="global.html#setupRecentWorks">setupRecentWorks</a></li><li><a href="global.html#setupResetPin">setupResetPin</a></li><li><a href="global.html#show">show</a></li><li><a href="global.html#showEditions">showEditions</a></li><li><a href="global.html#showHelp">showHelp</a></li><li><a href="global.html#showKeyword">showKeyword</a></li><li><a href="global.html#showLoginDialog">showLoginDialog</a></li><li><a href="global.html#showNodeInformation">showNodeInformation</a></li><li><a href="global.html#showSearchBuilder">showSearchBuilder</a></li><li><a href="global.html#showSearchFacetedWizard">showSearchFacetedWizard</a></li><li><a href="global.html#showWarningAboutTermUsage">showWarningAboutTermUsage</a></li><li><a href="global.html#simplePointsToWKT">simplePointsToWKT</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#startRecentWork">startRecentWork</a></li><li><a href="global.html#temporalSimplifyDate">temporalSimplifyDate</a></li><li><a href="global.html#temporalToHumanReadableString">temporalToHumanReadableString</a></li><li><a href="global.html#tick">tick</a></li><li><a href="global.html#toJD">toJD</a></li><li><a href="global.html#toJSDate">toJSDate</a></li><li><a href="global.html#translationFromUI">translationFromUI</a></li><li><a href="global.html#translationSupport">translationSupport</a></li><li><a href="global.html#translationToUI">translationToUI</a></li><li><a href="global.html#truncateText">truncateText</a></li><li><a href="global.html#unselectAssoc">unselectAssoc</a></li><li><a href="global.html#updateAssocDisplay">updateAssocDisplay</a></li><li><a href="global.html#updateAssocList">updateAssocList</a></li><li><a href="global.html#updateCircles">updateCircles</a></li><li><a href="global.html#updateCurvedLines">updateCurvedLines</a></li><li><a href="global.html#updateLabels">updateLabels</a></li><li><a href="global.html#updateNodes">updateNodes</a></li><li><a href="global.html#updateRecentKeywordDisplay">updateRecentKeywordDisplay</a></li><li><a href="global.html#updateRectangles">updateRectangles</a></li><li><a href="global.html#updateRuleBuilder">updateRuleBuilder</a></li><li><a href="global.html#updateStatus">updateStatus</a></li><li><a href="global.html#updateStraightLines">updateStraightLines</a></li><li><a href="global.html#validateResetPin">validateResetPin</a></li><li><a href="global.html#visualizeData">visualizeData</a></li><li><a href="global.html#visualizeSelection">visualizeSelection</a></li><li><a href="global.html#weekDay">weekDay</a></li><li><a href="global.html#weekOfYear">weekOfYear</a></li><li><a href="global.html#zoomed">zoomed</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Jul 24 2025 18:09:15 GMT+0400 (GMT+04:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

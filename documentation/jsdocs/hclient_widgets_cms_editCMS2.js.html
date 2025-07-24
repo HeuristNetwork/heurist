@@ -1,0 +1,2400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: hclient/widgets/cms/editCMS2.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: hclient/widgets/cms/editCMS2.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file editCMS2.js
+ * @brief Provides the core functionality for the Heurist CMS editor interface.
+ * @fileOverview This file initializes and manages the CMS editing environment. It handles the layout of the editor, including the page structure tree, website menu tree, and property viewers. It integrates with TinyMCE for rich text editing and manages element configurations, creation, and modification within a CMS page or website structure. It also includes functionality for saving changes, handling navigation warnings, and switching between page and website editing modes.
+ * 
+ * @project     Heurist academic knowledge management system
+ *
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov &lt;osmakov@gmail.com>
+ * @author Ian Johnson &lt;ian.johnson.heurist@gmail.com>
+ * @since 6.0
+ */
+
+// global variables defined in websiteScriptAndStyles
+
+/* global tinymce, isCMS_InHeuristUI, isWebPage, current_page_id, home_page_record_id, page_cache, 
+    editCMS_instance2, editCMS_SiteMenu, editCMS_ElementCfg, editCMS_SelectElement, 
+    website_languages, default_language,current_language*/
+
+/**
+ * Initializes and manages the CMS editor interface within a given website document.
+ * This function sets up the editing panels, toolbars, and event handlers necessary
+ * for modifying CMS pages and website structures.
+ *
+ * @param {HTMLDocument} website_document - The document object of the website being edited.
+ * @returns {Object} An object with public methods for controlling the editor (e.g., startCMS, closeCMS).
+ *
+ * @property {string} _className - Internal class name identifier.
+ * @property {boolean} _lockDefaultEdit - Flag to lock default editing actions.
+ * @property {jQuery|null} _panel_treePage - jQuery object for the page structure tree panel.
+ * @property {jQuery|null} _panel_treeWebSite - jQuery object for the website structure/menu tree panel.
+ * @property {jQuery|null} _panel_propertyView - jQuery object for the element property view panel.
+ * @property {Object|null} _edit_Element - Instance of editCMS_ElementCfg for the currently edited element.
+ * @property {jQuery|null} _toolbar_WebSite - jQuery object for the website editing toolbar.
+ * @property {jQuery|null} _toolbar_Page - jQuery object for the page editing toolbar.
+ * @property {jQuery|null} _tabControl - jQuery object for the main tabs (Site/Page).
+ * @property {Array|Object|string|null} _layout_content - JSON configuration of the current page's layout.
+ * @property {jQuery|null} _layout_container - jQuery object for the main content area where CMS content is rendered.
+ * @property {string} default_palette_class - Default CSS class for Heurist palettes.
+ * @property {boolean} page_was_modified - Flag indicating if the current page has unsaved changes.
+ * @property {number} delay_onmove - Delay timer for mouse move events.
+ * @property {number} __timeout - General purpose timeout ID.
+ * @property {string} current_edit_mode - Current editing mode ('page' or 'website').
+ * @property {Object|null} _editCMS_SiteMenu - Instance of editCMS_SiteMenu.
+ * @property {number} _keep_EditPanelWidth - Stores the width of the edit panel before resizing.
+ * @property {jQuery|null} _editor_panel - jQuery object for the main editor panel.
+ * @property {HTMLDocument} _ws_doc - Reference to the website document.
+ * @property {jQuery} _ws_body - jQuery object for the body of the website document.
+ * @property {number} RT_CMS_HOME - Record Type ID for CMS Home.
+ * @property {number} DT_NAME - Detail Type ID for Name.
+ * @property {number} DT_CMS_HEADER - Detail Type ID for CMS Header.
+ * @property {number} DT_EXTENDED_DESCRIPTION - Detail Type ID for Extended Description (page content).
+ * @property {number} DT_CMS_LANGUAGES - Detail Type ID for CMS Languages.
+ * @property {number} DT_CMS_PAGETITLE - Detail Type ID for CMS Page Title.
+ * @property {number} TRM_NO - Term ID for 'No'.
+ * @property {Object} dim - Dimensions of the website body.
+ * @property {Object} options - Options passed to the editor, including record_id, content, container.
+ * @property {boolean} isCMS_NewWebsiteWarning - Flag to control display of new website warning.
+ */
+function editCMS2(website_document){
+
+    const _className = "EditCMS2";
+
+    let _lockDefaultEdit = false;
+    
+    let _panel_treePage,     // panel with treeview for current page 
+        _panel_treeWebSite,  // panel with tree menu - website structure
+        _panel_propertyView, // panel with selected element properties
+        _edit_Element = null,  //instance of edit element class editCMS_ElementCfg
+        _toolbar_WebSite,
+        _toolbar_Page,
+        _tabControl,
+                
+        _layout_content,   // JSON config 
+        _layout_container; // main-content with CMS content
+
+    let default_palette_class = 'ui-heurist-publish';
+        
+    let page_was_modified = false;
+    let delay_onmove = 0, __timeout = 0;
+    
+    let current_edit_mode = 'page', //or website
+        _editCMS_SiteMenu = null; 
+        
+    let _keep_EditPanelWidth = 0;  
+    
+    let _editor_panel = null,
+        _ws_doc = website_document, //website document
+        _ws_body = $(website_document).find('body');
+    
+    const RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
+    
+    //     DT_CMS_THEME = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_THEME'],
+    DT_NAME       = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
+    DT_CMS_HEADER = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'],
+    DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
+    DT_CMS_LANGUAGES = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_LANGUAGES'],
+    DT_CMS_PAGETITLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'],
+    TRM_NO = window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO'];
+
+    let dim = {h:_ws_body.innerHeight(), w:_ws_body.innerWidth()};
+    dim.h = (window.hWin?window.hWin.innerHeight:window.innerHeight);
+    
+    let options;
+    
+    let isCMS_NewWebsiteWarning = true;
+    
+    /**
+     * Loads the TinyMCE editor script into the website document.
+     * @private
+     * @param {function} callback - Function to execute once TinyMCE is loaded.
+     */
+    function _loadTinyMCE(callback) {
+       const tinyMCEPath = window.hWin.HAPI4.baseURL+'external/tinymce5/tinymce.min.js';
+       const script = _ws_doc.createElement('script');
+       script.id = 'tiny-mce-script';
+       script.onload = function(){  //() => 
+         // tinymce is loaded at this point
+        
+         callback.call(this);
+       };
+       script.src = tinyMCEPath;
+       _ws_doc.head.appendChild(script);
+    }    
+    /**
+     * Starts or restarts the CMS editor with the given options.
+     * Initializes the editor panel, layout, and loads page content.
+     * Handles warnings for unsaved changes if a page is already loaded.
+     * @private
+     * @param {Object} _options - Configuration options for the CMS session.
+     * @param {number} _options.record_id - The ID of the page/website record to load.
+     * @param {string} _options.container - jQuery selector for the content container.
+     * @param {Object} [_options.content] - Preloaded content data for the page.
+     * @param {string} [_options.editor_pos='west'] - Position of the editor panel ('west' or 'east').
+     * @param {boolean} [_options.isCMS_NewWebsite] - Flag indicating if this is a newly created website.
+     * @returns {void|boolean} Returns `undefined` or `true` if it exits due to a warning.
+     */
+    function _startCMS(_options){
+        
+        if (_warningOnExit(function(){_startCMS(_options);} )) return;                           
+        
+        options = _options;
+        options.editor_pos = 'west'; //or east
+            
+        //
+        // add edit layout - top most .ent_wrapper/.heurist-website becomes content of ui-layout-center
+        // editor panel is on ui-layout-west
+        //
+        if(!_editor_panel){ //$(this.document).find('.editStructure').length==0
+            
+            //add tinymce and codemirror
+            if(typeof tinymce === 'undefined'){
+                _loadTinyMCE(function(){_startCMS(_options)});
+                return;
+            }
+            
+            if(_options.isCMS_NewWebsite &amp;&amp; isCMS_NewWebsiteWarning){
+
+                isCMS_NewWebsiteWarning = false;
+                
+                let $dlg;
+                let button = {};
+                button[window.hWin.HR('OK')] = function(){
+                    let search_param = window.location.search.replace('&amp;newlycreated', '');
+                    window.history.pushState({}, document.title, window.location.pathname + search_param);
+                    $dlg.dialog('close');
+                };
+
+                $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
+                            +'hclient/widgets/cms/editCMS_NewSiteMsg.html', button);
+            }
+            
+            window.onbeforeunload = _onbeforeunload;
+                
+            
+                let new_ele = $('&lt;div class="ui-layout-center">&lt;/div>');
+                                             
+                _ws_body.children().appendTo(new_ele);
+                
+                new_ele.appendTo(_ws_body);
+                
+                
+                _editor_panel = $('&lt;div class="ui-layout-'+options.editor_pos+'">'
+                        +'&lt;div class="ent_wrapper editStructure" id="tabsEditCMS">&lt;div class="ent_header" style="height:5.5em">' 
+
+                            +(!isWebPage ? '&lt;div class="btn-website-edit" style="font-weight:normal !important; width: fit-content;margin:0.7em 0px;">Website layout / properties&lt;/div>' : '')
+                            +`&lt;div style="line-height: 1em;font-size: smaller;">&lt;span class="btn-website-url" style="display:inline-block;color:black;padding-right:5px;">Website URL&lt;/span>`
+                            +`&lt;a href="#" class="website-url truncate" style="color: blue;display: inline-block;width: ${isWebPage ? '65' : '70'}%;vertical-align: -1px;">&lt;/a>&lt;/div>`
+
+                            +'&lt;span style="position:absolute;top: 0.3em; width: 1em; height: 1em; font-size: 3em; cursor: pointer;'
+                                        +(options.editor_pos=='west'?'right:0.05em':'')+'" '
+                            +'class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'w':'e')+'">&lt;/span>'
+
+                            +'&lt;/div>&lt;div class="ent_content_full" style="top:5.5em">'
+                            
+                            +'&lt;ul style="margin-'+(options.editor_pos=='west'?'right':'left')+':40px;font-size:9px;">'
+                                +'&lt;li>&lt;a href="#treeWebSite">Site&lt;/a>&lt;/li>&lt;li>&lt;a href="#treePage">Page&lt;/a>&lt;/li>'
+                            +'&lt;/ul>'      
+
+                            +'&lt;div id="treeWebSite" style="display:none;top:2.5em" class="ent_wrapper ui-cms-mainmenu">'
+                                +'&lt;div class="toolbarWebSite ent_header" style="height:85px;padding-top:15px;">'
+
+                                    +'&lt;span style="display:block;border-top:1px solid gray;padding:4px 8px;margin:4px 0px;">&lt;/span>'
+
+                                    +'&lt;span style="display:inline-block;padding-top:7px" class="heurist-helper1" '
+                                        +'title="Select menu item and Dblclick (or F2) to edit menu title in place. Drag and drop to reorder menu">'
+                                        +'Drag menu items to re-order&lt;/span>&lt;br>'
+                                    +'&lt;span style="display:inline-block;padding-top:3px" class="heurist-helper1">'
+                                        +'Click to edit the page&lt;/span>'
+
+                                    +'&lt;div style="padding:10px 8px;">'
+                                        +'&lt;a href="#" title="Edit website home page" '
+                                            +'class="btn-website-homepage" style="text-decoration:none;">'
+                                            +'&lt;span class="ui-icon ui-icon-home">&lt;/span>&amp;nbsp;Home page&lt;/a>'
+                                        +'&lt;span  title="Add top level menu" class="btn-website-addpage ui-icon ui-icon-plus" '
+                                            +'style="display:none;float:right;cursor:pointer;color:black;margin-top:0px">&lt;/span>'
+                                    +'&lt;/div>'     
+                                        
+                                +'&lt;/div>'
+                                
+                                +'&lt;div class="treeWebSite ent_content_full" style="top:80px;padding:3px 10px;">&lt;/div>' //treeview - edit website menu
+                            +'&lt;/div>'                                   //
+                            +`&lt;div id="treePage" style="font-size:0.9em;top:${isWebPage ? '0' : '2.5'}em;" class="ent_wrapper ui-widget-content">`
+                            
+                                +'&lt;div class="treePageHeader ent_header" style="height:85px;line-height:normal;">'
+                                    
+                                    +(isWebPage
+                                    ?('&lt;div style="font-size: 10px; display: inline-block;">&lt;a href="#" class="btn-website-edit">'
+                                        +'&lt;span class="ui-icon ui-icon-pencil">&lt;/span>&amp;nbsp;Configure webpage&lt;/a>&lt;/div>')
+                                    :'&lt;h3 class="truncate" style="margin-block-start: 0.3em; margin-block-end: 0.7em; font-size: 10px; font-family: revert; max-width: 85%; display: inline-block">&lt;/h3>')
+                                    +'&lt;span style="float: right; font-size: 10px;" class="heurist-helper1 element_edit">'
+                                        +'&lt;a href="'+window.hWin.HAPI4.sysinfo.referenceServerURL
+                                        +'?db='+window.hWin.HAPI4.sysinfo.referenceServerHelpDatabase
+                                        +'&amp;website=39&amp;pageid=708" target="_blank">website help&lt;/a>'
+                                    +'&lt;/span>'
+                                        
+                                +'&lt;/div>'
+                            
+                                +'&lt;div class="treePage ent_content_full" style="top: 20px; padding: 0px 10px 5px; border-top: 1px solid gray; line-height: normal; font-size: 10px;">&lt;/div>' //treeview - edit page
+                                +'&lt;div class="propertyView ent_content_full ui-widget-content-gray" '
+                                    +' style="top:190px;padding:10px 0px;display:none;">&lt;/div>' //edit properties for element
+                                
+                            +'&lt;/div>'
+                            +'&lt;/div>'
+                        +'&lt;/div>&lt;/div>').appendTo(_ws_body);
+           
+                    let layout_opts =  {
+                        applyDefaultStyles: true,
+                        maskContents:       true,  //alows resize over iframe
+                        //togglerContent_open:    '&amp;nbsp;',
+                        //togglerContent_closed:  '&amp;nbsp;',
+                        center:{
+                            minWidth:400,
+                            contentSelector: '.heurist-website', //@todo !!!! for particule template heurist-website can be missed
+                            //pane_name, pane_element, pane_state, pane_options, layout_name
+                            onresize_end : function(){
+                                //that.handleTabsResize();                            
+                            }    
+                        }
+                    };
+                    
+                    layout_opts[options.editor_pos] = {
+                        size: 230, //@todo this.usrPreferences.structure_width,
+                        maxWidth:800,
+                        minWidth:230,
+                        spacing_open:6,
+                        spacing_closed:40,  
+                        togglerAlign_open:'center',
+                        //togglerAlign_closed:'top',
+                        togglerAlign_closed:16,   //top position   
+                        togglerLength_closed:80,  //height of toggler button
+                        initHidden: false, //!this.options.edit_structure,   //show structure list at once 
+                        initClosed: false, //!this.options.edit_structure &amp;&amp; (this.usrPreferences.structure_closed!=0),
+                        slidable:false,  //otherwise it will be over center and autoclose
+                        enableCursorHotkey: false,
+                        contentSelector: '.editStructure',   
+                        onopen_start : function( ){ 
+                            let tog = _ws_body.find('.ui-layout-toggler-'+options.editor_pos);
+                            tog.removeClass('prominent-cardinal-toggler togglerVertical');
+                            tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').hide();
+                        },
+                        onclose_end : function( ){ 
+                            let tog = _ws_body.find('.ui-layout-toggler-'+options.editor_pos);
+                            tog.addClass('prominent-cardinal-toggler togglerVertical');
+
+                            if(tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').length > 0){
+                                tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').show();
+                            }else{
+
+                                let margin = (options.editor_pos=='west') ? 'margin-top:270px;' : '';
+                                $('&lt;span class="heurist-helper2 '+options.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Menu structure and page content&lt;/span>').appendTo(tog);
+                            }
+                        },
+                        onresize_end: function(){
+                            let width = _ws_body.layout().state['west']['outerWidth'] &lt;= 215 ? '60%' : '70%';
+                            _editor_panel.find('a.website-url').css('width', width);
+                        },
+                        togglerContent_open:    '&lt;div class="ui-icon ui-icon-triangle-1-'+(options.editor_pos=='west'?'w':'e')+'">&lt;/div>',
+                        togglerContent_closed:  '&lt;div class="ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'e':'w')+'">&lt;/div>',
+                    };
+
+                    _ws_body.layout(layout_opts); //.addClass('ui-heurist-bg-light')
+
+                    let tog = _ws_body.find('.ui-layout-toggler-'+options.editor_pos);
+                    tog.addClass('prominent-cardinal-toggler togglerVertical');
+
+                    if(tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').length > 0){
+                        tog.find('.heurist-helper2.'+options.editor_pos+'TogglerVertical').show();
+                    }else{
+
+                        let margin = (options.editor_pos=='west') ? 'margin-top:270px;' : '';
+                        $('&lt;span class="heurist-helper2 '+options.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Menu structure and page content&lt;/span>').appendTo(tog);
+                    }
+                    
+            _initEditControls(false);
+           
+        }//editor frame already inited
+        
+        
+        _ws_body.layout().show(options.editor_pos, true );
+        
+        //load content for current page from DT_EXTENDED_DESCRIPTION
+        if(!options){
+            options.record_id = 0;
+            options.container = '#main-content';
+            options.content = null;
+        }
+        
+        _layout_container = _ws_body.find(options.container);
+        
+        if(options.content)
+        {
+           _layout_content = options.content[DT_EXTENDED_DESCRIPTION];
+           _initPage();
+            
+        }else if (options.record_id>0 ){
+            
+            window.hWin.current_page_id = options.record_id;
+            
+            _layout_content = page_cache[options.record_id][DT_EXTENDED_DESCRIPTION];
+        }
+        
+        //swtich to page tab automatically
+        _layout_container.on('click',function(event){
+            if(current_edit_mode!='page'){
+                //switch to page mode                
+                _switchMode('page');
+            }
+        });
+        
+        _initPage();
+        
+    }    
+
+    /**
+     * Initializes the main editing controls in the editor panel.
+     * Sets up buttons for home page editing, website properties, adding pages,
+     * viewing website URL, and hiding the panel.
+     * @private
+     * @param {boolean} need_callback - If true, calls _startCMS(options) after initializing controls.
+     */
+    function _initEditControls(need_callback){
+
+        _editor_panel.find('.btn-website-homepage').on('click',_editHomePage);
+
+        _editor_panel.find('.btn-website-edit').on('click', _editHomePageRecord);
+        if(!isWebPage){
+            _editor_panel.find('.btn-website-edit')
+                         .button({classes:{'ui-button': 'ui-button-action'}})
+                         .css({'padding':'5px','font-size':'smaller'});
+        }
+
+        _editor_panel.find('.btn-website-addpage').on('click',_addNewRootMenu); // button({icon:'ui-icon-plus'}).
+
+        let url = window.hWin.HEURIST4.ui.getCmsLink({version:2, websiteid:home_page_record_id});
+        
+        _editor_panel.find('.website-url').text(url).attr('title', `Click to copy ${url} to clipboard`).on('click', function(){ // save website url to clipboard
+            window.hWin.HEURIST4.util.copyStringToClipboard(`${url}`);
+            window.hWin.HEURIST4.msg.showMsgFlash('Website URL saved to clipboard', 3000);
+        });
+
+        _editor_panel.find('.btn-website-homepage').parent()
+        .addClass('fancytree-node')
+        .on( 'mouseenter', function(event){ 
+            _editor_panel.find('.btn-website-addpage').show();
+        } )
+        .on( 'mouseleave', function(event){
+            _editor_panel.find('.btn-website-addpage').hide();
+        } );
+        
+        _editor_panel.find('.bnt-website-menu').button({icon:'ui-icon-menu'}).on('click',_showWebSiteMenu);
+        
+        _editor_panel.find('.bnt-cms-hidepanel').on('click', function(){ _ws_body.layout().close(options.editor_pos); } );
+     
+        _panel_propertyView = _editor_panel.find('.propertyView');
+        _panel_treeWebSite = _editor_panel.find('.treeWebSite');
+        
+        _toolbar_WebSite = _editor_panel.find('.toolbarWebSite');
+
+        _tabControl = _editor_panel.find('#tabsEditCMS');
+
+        _tabControl.tabs({
+            activate: function( event, ui ){
+                _switchMode();
+                //ui.newTab
+            },
+            beforeActivate: function( event, ui ){
+
+                if(current_edit_mode=='page' &amp;&amp; _warningOnExit(function(){ _switchMode( 'website' ) })) {
+                    return false;  
+                }else{
+                    return true;
+                }
+            }
+        });
+        
+        _tabControl.addClass('ui-heurist-publish');
+        _tabControl.find('.ui-tabs-nav')[0].style.setProperty('background', 'none', 'important');
+        _tabControl.find('.ui-tabs-nav')[0].style.setProperty('padding', '0px', 'important');
+        
+        if(isWebPage){
+            _tabControl.find('.ui-tabs-tab[aria-controls="treeWebSite"]').hide();
+        }
+                
+        if(need_callback!==false) _startCMS(options);
+    }
+    
+    /**
+     * Loads the content of the website's home page for editing.
+     * Handles unsaved changes warning.
+     * @private
+     */
+    function _editHomePage(){
+
+        if(_warningOnExit( _editHomePage )) return;                           
+        
+        _switchMode('page');        
+        //call global function from websiteScriptAndStyles
+        window.hWin.loadPageContent( home_page_record_id );
+    }
+    
+    
+    /**
+     * Opens the record editor for the website's home page record (RT_CMS_HOME).
+     * Handles unsaved changes warning.
+     * @private
+     */
+    function _editHomePageRecord(){
+
+        if(_warningOnExit( _editHomePageRecord )) return;
+
+        if(!_editCMS_SiteMenu &amp;&amp; !isWebPage)
+            _editCMS_SiteMenu = editCMS_SiteMenu( _panel_treeWebSite, that );
+        
+        //edit menu item
+        window.hWin.HEURIST4.ui.openRecordEdit(home_page_record_id, null,
+            {selectOnSave:true, 
+                edit_obstacle: false, 
+                onClose: function(){ 
+                   
+                },
+                onselect:function(event, data){
+                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                        //reload entire site
+                        _editCMS_SiteMenu ? _editCMS_SiteMenu.refreshWebsite() : window.hWin.location.reload();
+                    }
+        }});
+    }
+    
+    /**
+     * Triggers the process to add a new root menu item via the _editCMS_SiteMenu instance.
+     * @private
+     */
+    function _addNewRootMenu(){
+        if(_editCMS_SiteMenu) {
+            _editCMS_SiteMenu.selectMenuRecord(home_page_record_id);
+        }
+    }
+
+    /**
+     * Handles the window's beforeunload event to warn about unsaved changes.
+     * @private
+     * @returns {string|void} A warning message if there are unsaved changes, otherwise undefined.
+     */
+    function _onbeforeunload() {
+
+        if(page_was_modified || (_edit_Element &amp;&amp; _edit_Element.isModified())){
+            return 'Page was changed. Are you sure you wish to exit and lose all modifications?';
+        }
+    }
+    
+    /**
+     * Checks for unsaved changes (either in page layout or active element editor)
+     * and prompts the user to save or discard them before proceeding.
+     * @private
+     * @param {function} callback - The function to call if the user decides to proceed (after saving or discarding).
+     * @returns {boolean} True if a warning was shown and execution should pause, false otherwise.
+     */
+    function _warningOnExit(callback){
+        
+        //at first check if element editor is active
+        if(_edit_Element &amp;&amp; _edit_Element.warningOnExit(function(){
+            if(page_was_modified){
+                _saveLayoutCfg(callback);
+            }
+        })) return true;
+        
+        if(page_was_modified){
+            
+            let $dlg;
+            let _buttons = [
+                {text:window.hWin.HR('Save'), 
+                    click: function(){_saveLayoutCfg(callback);$dlg.dialog('close');}
+                },
+                {text:window.hWin.HR('Leave unchanged'), 
+                    click: function(){
+                        _toolbar_Page.hide();
+                        page_was_modified = false; 
+                        $dlg.dialog('close'); 
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
+                    }
+                },
+                {text:window.hWin.HR('Cancel'), 
+                    click: function(){$dlg.dialog('close');}
+                }
+            ];            
+            
+            let sMsg = '"'+ _editor_panel.find('.treePageHeader > h3').text() +'" '+window.hWin.HR('page has been modified');
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, _buttons, {title:window.hWin.HR('Page changed')}, 
+                            {appendTo: 'body', default_palette_class:default_palette_class});
+
+            return true;     
+        }else{
+            return false;     
+        }
+        
+    }
+    
+    /**
+     * Closes the CMS editor interface.
+     * Handles unsaved changes warning, hides the editor panel, and restores normal page view.
+     * @private
+     */
+    function _closeCMS(){
+
+        if(_warningOnExit( _closeCMS )) return;
+        
+        // 1. close control panel
+        _ws_body.layout().hide(options.editor_pos);
+        
+        //2. reload content
+        window.hWin.HAPI4.layoutMgr.setEditMode(false);
+        window.hWin.HAPI4.layoutMgr.layoutInit(_layout_content, _layout_container, {rec_ID:home_page_record_id, lang:current_language});
+
+        // Display cms editor button
+        _ws_body.find('#btnOpenCMSeditor').show().html('website editor');
+
+        if(window.hWin.HEURIST4.util.isFunction(options.close)){
+            options.close.call();
+        }
+    }
+    
+    /**
+     * Initializes the page display and editing tree for the current page.
+     * Loads page content, converts old formats if necessary, and sets up the layout manager.
+     * @private
+     * @param {boolean} [supress_conversion=false] - If true, suppresses conversion of old CMS format.
+     */
+    function _initPage( supress_conversion ){
+        
+        if(tinymce) tinymce.remove('.tinymce-body'); //detach
+        
+        if(window.hWin.HAPI4.layoutMgr){
+            window.hWin.HAPI4.layoutMgr.setEditMode(true);
+        }else {
+            return;
+        }
+        let opts = {};
+        if(page_cache[options.record_id]){
+            opts = {page_name:window.hWin.HAPI4.getTranslation(page_cache[options.record_id][DT_NAME], current_language)};  
+            //call global function from websiteScriptAndStyles
+            window.hWin.assignPageTitle(options.record_id)
+        } 
+        opts.rec_ID = home_page_record_id;
+        
+        let was_converted_to_new_format = false;
+        
+        if(supress_conversion!==true &amp;&amp; typeof _layout_content === 'string' &amp;&amp;
+            _layout_content.indexOf('data-heurist-app-id')>0){ //old format with some widgets
+
+                            const res = window.hWin.HAPI4.layoutMgr.convertOldCmsFormat(_layout_content, _layout_container);
+                            if(res!==false){
+                                was_converted_to_new_format = true;
+                                _layout_content = res;
+ 
+const sMsg = '&lt;p>The internal storage format of web pages has changed for greater efficiency and stability.&lt;/p>'
++'&lt;p>The page has been converted to the new format and you can modify it. In order to save the converted page, hit &lt;b>Save&lt;/b> on page exit.&lt;/p>'
++'&lt;p>For backward compatibility we can display, &lt;u>but not edit&lt;/u>, the old format. You may therefore leave the page in the old format by hitting &lt;b>Leave unchanged&lt;/b>.&lt;/p>'
++'&lt;p>We recommend saving in the new format&lt;/p>';
+                                
+                                window.hWin.HEURIST4.msg.showMsg(sMsg,{title:'New format', default_palette_class: default_palette_class});
+                            }
+             
+        }
+        
+        opts.keep_top_config = true;
+        opts.lang = current_language;
+        const res = window.hWin.HAPI4.layoutMgr.layoutInitFromJSON(_layout_content, _layout_container, opts);
+      
+//console.log(res);      
+        
+        if(res===false){
+            window.hWin.HEURIST4.msg.showMsgFlash('Old format. Edit in Heurist interface', 3000);
+            //clear treeview
+            _initTreePage([]);
+        }else{
+            _layout_content = res;
+            _initTreePage(_layout_content);
+        }
+        _editor_panel.find('.treePageHeader > h3')
+                .text( options.record_id==home_page_record_id ? window.hWin.HR('Home Page') :opts.page_name );
+        
+        if(_editCMS_SiteMenu) _editCMS_SiteMenu.highlightCurrentPage();
+        
+        if(was_converted_to_new_format){
+            page_was_modified = was_converted_to_new_format;
+        }
+    }
+
+    /**
+     * Initializes or re-initializes TinyMCE instances for editable text areas on the page.
+     * Configures TinyMCE with custom formats, plugins, and event handlers.
+     * @private
+     * @param {string|number} [key] - Optional key to target a specific TinyMCE instance by its `data-hid` attribute.
+     *                                If not provided, initializes all elements with class '.tinymce-body'.
+     */
+    function _initTinyMCE( key ){
+
+        if(!Object.hasOwn(window.hWin.HAPI4.dbSettings, 'TinyMCE_formats')){ // retrieve custom formatting
+
+            window.hWin.HAPI4.SystemMgr.get_tinymce_formats({a: 'get_tinymce_formats'}, function(response){
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HAPI4.dbSettings['TinyMCE_formats'] = {};
+                }else if(!window.hWin.HEURIST4.util.isObject(response.data)){
+                    window.hWin.HAPI4.dbSettings['TinyMCE_formats'] = {};
+                }else{
+                    window.hWin.HAPI4.dbSettings['TinyMCE_formats'] = response.data;
+                }
+
+                _initTinyMCE(key);
+            });
+
+            return;
+        }
+      
+        tinymce.remove('.tinymce-body'); //detach
+        _layout_container.find('.lid-actionmenu').remove();
+        
+        let selector = '.tinymce-body';
+        if(key>0){
+            selector = selector + '[data-hid='+key+']';
+        }
+
+        let custom_formatting = window.hWin.HAPI4.dbSettings.TinyMCE_formats;
+
+        let style_formats = Object.hasOwn(custom_formatting, 'style_formats') &amp;&amp; custom_formatting.style_formats.length > 0 
+                                ? [ { title: 'Custom styles', items: custom_formatting.style_formats } ] : [];
+
+        if(Object.hasOwn(custom_formatting, 'block_formats') &amp;&amp; custom_formatting.block_formats.length > 0){
+            style_formats.push({ title: 'Custom blocks', items: custom_formatting.block_formats });
+        }
+
+        let inlineConfig = {
+            selector: selector,
+            menubar: false,
+            inline: true,
+            
+            branding: false,
+            elementpath: false,
+            
+            relative_urls : true,
+            remove_script_host: false,
+            //document_base_url : window.hWin.HAPI4.baseURL,
+            urlconverter_callback : 'tinymceURLConverter',
+
+            entity_encoding:'raw',
+            inline_styles: true,
+            content_style: "body {font-family: Helvetica,Arial,sans-serif;} " + custom_formatting.content_style,
+            
+            plugins: [
+                'advlist autolink lists link image media preview', //anchor charmap print 
+                'searchreplace visualblocks code fullscreen',
+                'media table  paste help noneditable '   //contextmenu textcolor - in core for v5
+            ],      
+
+            toolbar: ['styleselect | fontselect fontsizeselect | bold italic forecolor backcolor customClear customHRtag | customHeuristRecordAddLink customHeuristMedia link | align | bullist numlist outdent indent | table | help' ],  
+
+            content_css: [
+                '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
+            ],
+            
+            //valid_elements: 'p[style],strong,em,span[style],a[href],ul,ol,li',
+            //valid_styles: {'*': 'font-size,font-family,color,text-decoration,text-align'},
+            powerpaste_word_import: 'clean',
+            powerpaste_html_import: 'clean',
+
+            default_link_target: "_blank", // default to new tab
+
+            formats: custom_formatting.formats,
+            style_formats_merge: true,
+            style_formats: style_formats,
+
+            image_caption: true,
+
+            setup:function(editor) {
+
+                // ----- Event handles -----
+                editor.on('change', function(e) {
+                    if(tinymce.activeEditor &amp;&amp; tinymce.activeEditor.targetElm){
+                        let key = $(tinymce.activeEditor.targetElm).attr('data-hid');
+                        //update in _layout_content
+                        let l_cfg = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, key);
+                        if(l_cfg){
+                            let new_content = tinymce.activeEditor.getContent();
+                            page_was_modified = (page_was_modified || l_cfg.content!=new_content);
+
+                            _onPageChange();
+                            
+                            let lang = $(tinymce.activeEditor.targetElm).attr('data-lang');
+                            if(lang==default_language || lang=='def' || window.hWin.HEURIST4.util.isempty(lang)){
+                                lang = '';
+                            }
+                            l_cfg['content'+lang] = new_content;    
+                            
+                            //update in editCMS_ElementCfg                            
+                            if(_edit_Element){
+                                _edit_Element.updateContent(new_content, lang);
+                            }
+                            
+                            
+                        }else{
+                            page_was_modified = false;
+                        }
+                       
+                    }
+                });
+
+                editor.on('click', function (e) {
+                    //adjust tinymce toolbar
+                    let $toolbar = _ws_body.find('.tox-toolbar-dock-transition'); //$('body')
+                    if($toolbar.length > 0 &amp;&amp; $toolbar.width() &lt; 400){
+                        $toolbar.css('width', '400px');
+                    }
+
+                    let $link_btn = $toolbar.find('.tox-tbtn[title="Insert/edit link"]');
+                    if($link_btn.length > 0 &amp;&amp; $link_btn.find('.tox-tbtn__select-label').length == 0){
+                        let html = '&lt;span class="tox-tbtn__select-label">URL&lt;/span>';
+                        $link_btn.append(html);
+                    }
+
+                    $toolbar.find('.tox-split-button[title="Background color"]').attr('title', 'Highlight text');
+                });
+                    
+                editor.on('focus', function (e) {
+                    if(current_edit_mode=='page'){
+
+                        _layout_container.find('.lid-actionmenu').hide();
+                        _layout_container.find('div[data-hid]').removeClass('cms-element-active');  
+
+                        _layout_container.find('.cms-element-overlay').css('visibility','hidden');
+
+                        //highlight editing element in tree
+                        let key = $(tinymce.activeEditor.targetElm).attr('data-hid');
+                        let node = $.ui.fancytree.getTree( _panel_treePage ).getNodeByKey(key);
+                        _panel_treePage.find('.fancytree-active').removeClass('fancytree-active');
+                        $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
+                    
+                    }
+
+                    $(editor.bodyElement).css('padding-left', '5px'); // add space between content and body outline
+                });
+                editor.on('blur', function (e) { 
+                    $(editor.bodyElement).css('padding-left', ''); // remove space
+                });
+
+                // ----- Custom buttons -----
+                // Insert Heurist media
+                editor.ui.registry.addButton('customHeuristMedia', {
+                    icon: 'image',
+                    text: 'Add Media',
+                    onAction: function (_) {  //since v5 onAction in v4 onclick
+                        __addHeuristMedia();
+                    }
+                });
+                
+                // Insert Add Heurist record link
+                editor.ui.registry.addButton('customHeuristRecordAddLink', {
+                    icon: 'comment-add',
+                    text: 'Add Rec',
+                    onAction: function (_) {  //since v5 onAction in v4 onclick
+                        __addHeuristRecordAddLink();
+                    }
+                });
+                
+                // Insert horizontal rule
+                editor.ui.registry.addButton('customHRtag', {
+                    text: '&amp;lt;hr&amp;gt;',
+                    onAction: function (_) {  //since v5 onAction in v4 onclick
+                        tinymce.activeEditor.insertContent( '&lt;hr>' );
+                    }
+                });
+                // Clear text formatting - to replace the original icon
+                editor.ui.registry.addIcon('clear-formatting', `&lt;img style="padding-left: 5px;" src="${window.hWin.HAPI4.baseURL}hclient/assets/clear_formatting.svg" />`)
+                editor.ui.registry.addButton('customClear', {
+                    text: '',
+                    icon: 'clear-formatting',
+                    tooltip: 'Clear formatting',
+                    onAction: function (_) {
+                        tinymce.activeEditor.execCommand('RemoveFormat');
+                    }
+                });
+            },
+            paste_preprocess: function(plugin, args){
+
+                let content = args.content;
+
+                if(content.indexOf('&lt;img') === 0){
+                    // Tell user to use the 'Insert media' tool instead
+                    args.content = '';
+
+                    let msg = 'Please use the "Add media" tool located within the toolbar to added images';
+                    window.hWin.HEURIST4.msg.showMsgFlash(msg, 3000);
+                }else if(content.search(/https?|ftps?|mailto/) == 0){
+                    // Trigger 'Insert link' dialog
+                    
+                    let href = args.content;
+                    href = href.replaceAll(/&amp;amp;/g, '&amp;');
+
+                    const org_href = href;
+                    args.content = '';
+
+                    href += `_${window.hWin.HEURIST4.util.random()}`;
+
+                    tinymce.activeEditor.execCommand('mceInsertLink', false, href);
+
+                    let $link = $(tinymce.activeEditor.selection.getNode());
+                    if(!$link.is('a')){
+                        $link = $link.find(`a[href="${href}"]`);
+                    }
+                    if($link.length == 0){
+                        $link = $(tinymce.activeEditor.contentDocument).find(`a[href="${href}"]`);
+                    }
+
+                    $link.attr({
+                        'href': org_href,
+                        'data-mce-href': org_href,
+                        'target': '_blank'
+                    }).text(org_href);
+                }
+            }
+        };
+
+        tinymce.init(inlineConfig);
+
+        // Correct image and embedded urls
+        _layout_container.find('img, embed').each(function(i,ele){window.hWin.HEURIST4.util.restoreRelativeURL(ele);});
+    }
+    
+    /**
+     * Handles changes made to the page content or layout.
+     * Shows or hides the save/discard toolbar based on modification state.
+     * @private
+     */
+    function _onPageChange(){
+            
+        if(page_was_modified){
+
+            if(_edit_Element==null){
+                //show toolbar with Save/Discard
+                _toolbar_Page.show();
+            }else{
+                //activate save buttons
+                _edit_Element.onContentChange();
+            }
+            
+        }else{
+             _toolbar_Page.hide();
+        }
+
+    }     
+    
+    /**
+     * Opens a dialog to configure and insert a link that allows adding a new Heurist record.
+     * Integrates with TinyMCE to insert the generated link.
+     * @private
+     */
+    function __addHeuristRecordAddLink(){
+
+        window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd',{
+            title: 'Select type and other parameters for new record',
+            height: 520, width: 540,
+            get_params_only: true,
+            onClose: function(context){
+                if(context &amp;&amp; !window.hWin.HEURIST4.util.isempty(context.RecAddLink)){
+                   
+                    tinymce.activeEditor.execCommand('mceLink');
+                                                            
+                    setTimeout(()=>{
+                    const dlg = $('.tox-dialog__body-content');
+                    //dig down to the first input text field (being the URL)
+                    const urlTextField = dlg.find('.tox-control-wrap .tox-textfield');                    
+                    
+                    urlTextField.val(context.RecAddLink+'&amp;guest_data=1');
+
+                    },500);    
+                }
+            },
+            default_palette_class: default_palette_class                                        
+            }
+        );    
+
+        
+    }
+    
+    /**
+     * Opens a dialog to browse and select Heurist uploaded files/resources.
+     * Inserts the selected media (image, etc.) into the active TinyMCE editor,
+     * optionally with a caption.
+     * @private
+     */
+    function __addHeuristMedia(){
+
+        let popup_options = {
+            isdialog: true,
+            select_mode: 'select_single',
+            edit_addrecordfirst: false, //show editor atonce
+            selectOnSave: true,
+            select_return_mode:'recordset', //ids or recordset(for files)
+            filter_group_selected:null,
+            //filter_groups: this.configMode.filter_group,
+            onselect:function(event, data){
+
+                if(data){
+
+                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                        let recordset = data.selection;
+                        let record = recordset.getFirstRecord();
+
+                        //always add media as reference to production version of heurist code (not dev version)
+                        let thumbURL = window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database
+                        +"&amp;thumb="+recordset.fld(record,'ulf_ObfuscatedFileID');
+
+                        let playerTag = recordset.fld(record,'ulf_PlayerTag');
+
+                        let $dlg;
+                        let msg = 'Enter a caption below (optional):&lt;br>&lt;br>'
+                            + '&lt;textarea rows="6" cols="65" id="figcap">&lt;/textarea>';
+                        
+                        let btns = {};
+                        btns['Add caption'] = () => {
+                            let caption = $dlg.find('#figcap').val();
+
+                            if(!window.hWin.HEURIST4.util.isempty(caption)){
+                                playerTag = '&lt;figure>'+ playerTag +'&lt;figcaption>'+ caption +'&lt;/figcaption>&lt;/figure>';   
+                            }
+
+                            tinymce.activeEditor.insertContent( playerTag );
+                            $dlg.dialog('close');
+                        };
+                        btns['No caption'] = () => {
+                            tinymce.activeEditor.insertContent( playerTag );
+                            $dlg.dialog('close');
+                        };
+
+                        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
+                            {title: 'Adding caption to media', yes: 'Add caption', no: 'No caption'}, 
+                            { default_palette_class: 'ui-heurist-populate', appendTo: 'body' }
+                        );
+                    }
+
+                }//data
+
+            }
+        };//popup_options        
+
+        window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_options);
+    }
+    
+    
+    /**
+     * Initializes or reloads the Fancytree instance for displaying the page structure.
+     * Sets up tree options, including drag-and-drop functionality for reordering elements.
+     * @private
+     * @param {Array&lt;Object>} treeData - The hierarchical data for the page structure.
+     */
+    function _initTreePage( treeData ){
+        
+        if(_panel_treePage){
+            
+            $.ui.fancytree.getTree( _panel_treePage ).reload(treeData);
+            
+        }else{
+        
+        //init treeview
+        let fancytree_options =
+        {
+            checkbox: false,
+            //titlesTabbable: false,     // Add all node titles to TAB chain
+            focusOnSelect:true,
+            source: treeData,
+            quicksearch: true,
+            
+            click: function(event, data){
+
+                if(data.targetType=='title'){
+                    if(data.node.isActive()){
+                        window.hWin.HEURIST4.util.stopEvent(event);
+                        ///  that._saveEditAndClose(null, 'close'); //close editor on second click
+                    }
+                    if(data.node.key>0){
+                        _ws_body.layout().open(options.editor_pos);
+                        _layoutEditElement(data.node.key);
+                    }
+                
+                }
+                
+            }
+            //,activate: function(event, data) { }
+        };
+
+        
+        fancytree_options['extensions'] = ["dnd"]; //, "filter", "edit"
+        fancytree_options['dnd'] = {
+                autoExpandMS: 400,
+                preventRecursiveMoves: true, // Prevent dropping nodes on own descendants
+                preventVoidMoves: true, // Prevent moving nodes 'before self', etc.
+                dragStart: function(node, data) {
+
+                    let is_last_root = node.getParent().isRootNode() &amp;&amp; node.getParent().countChildren(false) == 1;
+                    let is_cardinal = (node.type=='north' || node.type=='south' || 
+                               node.type=='east' || node.type=='west' || node.type=='center');
+                    
+                    return !(is_last_root || is_cardinal);
+                },
+                dragEnter: function(node, data) {
+                    if(node.type=='cardinal'){
+                        return false;
+                    }else{
+                        return (node.folder) ?true :["before", "after"];
+                    }
+                },
+                dragDrop: function(node, data) {
+                    // data.otherNode - dragging node
+                    // node - target
+                   
+                    let is_cardinal = (node.type=='north' || node.type=='south' || 
+                               node.type=='east' || node.type=='west' || node.type=='center');
+                    let hitMode = (is_cardinal)?'child' :data.hitMode;                    
+                    
+                    data.otherNode.moveTo(node, hitMode);    
+                    //change layout content and redraw page
+                    _layoutChangeParent(data.otherNode.key);
+                }
+            };
+
+            //create tree
+            _panel_treePage = _editor_panel.find('.treePage').addClass('tree-rts')
+                                .fancytree(fancytree_options); //was recordList
+                                
+            $('&lt;div class="toolbarPage" style="padding:10px;font-size:0.9em;text-align:center;">'
+                                    +'&lt;button title="Discard all changed and restore old version of page" class="btn-page-restore">Discard&lt;/button>'
+                                    + '&lt;button title="Save changes for current page" class="btn-page-save ui-button-action">Save&lt;/button>'
+                                    + (true!==isCMS_InHeuristUI
+                                        ?'&lt;button title="Exit/Close content editor" class="bnt-cms-exit">Close&lt;/button>'
+                                        :'')
+                                +'&lt;/div>').appendTo(_panel_treePage);
+            
+            _toolbar_Page = _editor_panel.find('.toolbarPage').hide();
+                                
+                    _panel_treePage.find('.btn-page-save').button().css({'border-radius':'4px','margin-right':'5px'}).on('click',_saveLayoutCfg)
+                    _panel_treePage.find('.btn-page-restore').button().css({'border-radius':'4px','margin-right':'5px'}).on('click',
+                        function(){
+                            _startCMS({record_id:options.record_id, container:'#main-content', content:null});
+                        }
+                    );
+                    _panel_treePage.find('.bnt-cms-exit').button().css({'border-radius':'4px'}).on('click',_closeCMS); //{icon:'ui-icon-close'}
+
+        }
+        
+        _switchMode(current_edit_mode);
+        
+    }
+
+    /**
+     * Hides the action menu (context menu) within the page structure tree.
+     * @private
+     */
+    function _hideMenuInTree(){
+        let ele = _panel_treePage.find('.lid-actionmenu');
+        ele.hide(); //menu icon
+        ele.find('span[data-action]').hide(); //popup menu
+    }        
+    
+    /**
+     * Hides the element property view panel and restores the tree view to its normal state.
+     * Resets any active element editing states.
+     * @private
+     */
+    function _hidePropertyView(){
+        
+        _edit_Element = null;
+        _initTinyMCE();
+    
+        _layout_container.find('div[data-hid]').removeClass('cms-element-editing headline marching-ants marching');                        
+        
+        _panel_treePage.find('span.fancytree-title').css({'font-style':'normal', 'text-decoration':'none'});
+        _panel_treePage.find('.fancytree-node').removeClass('fancytree-active');
+        
+        _hideMenuInTree();
+
+        function __restoreTree(){
+            if(_keep_EditPanelWidth>0){
+                _ws_body.layout().sizePane('west', _keep_EditPanelWidth);    
+            }
+            _keep_EditPanelWidth = 0;
+
+            _editor_panel.find('.page_tree').show();
+            
+            _onPageChange();
+            
+            _panel_treePage[0].style.removeProperty('height');
+        }
+        
+        _panel_propertyView.hide();
+        __restoreTree();
+    }
+
+    /**
+     * Switches the editor between 'page' editing mode and 'website' (menu) editing mode.
+     * Updates UI elements, toolbars, and initializes/detaches TinyMCE as needed.
+     * @private
+     * @param {string} [mode] - The mode to switch to ('page' or 'website'). If not provided, determined by active tab.
+     * @param {boolean} [init_tinymce=true] - Whether to initialize TinyMCE when switching to 'page' mode.
+     */
+    function _switchMode( mode, init_tinymce )
+    {
+
+        if(!mode){
+            if(_tabControl.tabs('option','active')==0){
+                mode='website';           
+            }else{
+                mode='page';
+            }
+        }else{
+            let activePage = (mode=='page')?1:0;
+            if(_tabControl.tabs('option','active')!=activePage){
+                _tabControl.tabs({active:activePage});
+                return;    
+            }
+        }
+        
+        current_edit_mode = mode;
+        
+        if(mode=='page'){
+
+            _tabControl.find('li[aria-controls="treeWebSite"]')
+                .removeClass('ui-cms-mainmenu');
+                                
+            _hidePropertyView();
+            
+            _toolbar_WebSite.hide();
+        
+           
+           
+            if(init_tinymce!==false){
+                $.ui.fancytree.getTree( _panel_treePage ).visit(function(node){
+                    node.setSelected(false); //reset
+                    node.setExpanded(true);
+                });            
+                _updateActionIcons(500);//it inits tinyMCE also
+            } //_initTinyMCE
+            
+        }else{
+
+            _tabControl.find('li[aria-controls="treeWebSite"]')
+                .removeClass('ui-state-active') //ui-tabs-active 
+                .addClass('ui-cms-mainmenu');
+                                
+            _hidePropertyView();
+            
+            _toolbar_Page.hide();
+            _toolbar_WebSite.show();
+
+            //remove highlights
+            _layout_container.find('.lid-actionmenu').hide();
+            _layout_container.find('div[data-hid]').removeClass('cms-element-active');                        
+            _layout_container.find('.cms-element-overlay').css('visibility','hidden');            
+            
+            if(tinymce) tinymce.remove('.tinymce-body');
+            
+            //load website menu treeview
+            if(!_editCMS_SiteMenu)
+            _editCMS_SiteMenu = editCMS_SiteMenu( _panel_treeWebSite, that );
+            
+           
+           
+        }
+        
+    }
+
+    /**
+     * Adds or updates action icons (edit, delete, drag, insert) for elements in the
+     * page structure tree and directly on the page layout elements.
+     * Initializes TinyMCE after a delay.
+     * @private
+     * @param {number} [delay=1] - Delay in milliseconds before executing.
+     */
+    function _updateActionIcons(delay){ 
+
+        if(!(delay>0)) delay = 1;
+
+        setTimeout(function(){
+            $.each( _panel_treePage.find('.fancytree-node'), function( idx, item ){
+                
+                let ele_ID = $(item).find('span[data-lid]').attr('data-lid');
+
+                _defineActionIcons(item, ele_ID, 'position:absolute;right:8px;margin-top:1px;');
+            });
+
+            _initTinyMCE();
+            
+            // find all dragable elements - text and widgets
+            _layout_container.find('div.brick').each(function(i, item){   //
+                let ele_ID = $(item).attr('data-hid');
+                
+                _defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
+            });
+            
+            }, delay);
+    }
+
+    /**
+     * Defines and attaches action icons/menus to a specific page element or tree node.
+     * @private
+     * @param {HTMLElement|jQuery} item - The DOM element (tree node or page element) to attach icons to.
+     * @param {string|number} ele_ID - The unique key/ID of the element.
+     * @param {string} style_pos - CSS styling for the icon container's position.
+     */
+    function _defineActionIcons(item, ele_ID, style_pos){ 
+        if($(item).find('.lid-actionmenu').length==0){ //no one defined
+
+            ele_ID = ''+ele_ID;
+            let node = $.ui.fancytree.getTree( _panel_treePage ).getNodeByKey(ele_ID);
+
+            if(node==null){
+                return;
+            }
+            let is_intreeview = $(item).hasClass('fancytree-node');
+            if(is_intreeview &amp;&amp; !$(item).hasClass('fancytree-hide')){       
+                $(item).css('display','block');   
+            }
+
+            let is_folder = node.folder;  //$(item).hasClass('fancytree-folder'); 
+            let is_last_root = node.getParent().isRootNode() &amp;&amp; node.getParent().countChildren(false) == 1;
+            let is_cardinal = (node.type=='north' || node.type=='south' || 
+                node.type=='east' || node.type=='west' || node.type=='center');
+                
+            let actionspan = '&lt;div class="lid-actionmenu mceNonEditable" '
+            +' style="'+style_pos+';display:none;z-index:999;color:black;background: rgba(201, 194, 249, 1) !important;'
+            +'font-size:'+(is_intreeview?'12px;right:13px':'16px')
+            +';font-weight:normal;text-transform:none;cursor:pointer" data-lid="'+ele_ID+'">' 
+            //+ ele_ID
+            + (is_intreeview?'&lt;span class="ui-icon ui-icon-menu" style="width:20px">&lt;/span>'
+                            :'&lt;span class="ui-icon ui-icon-gear" style="width:30px;height: 30px;font-size: 26px;margin-top: 0px;" title="Edit style and properties 2">&lt;/span>')
+            //+ (true || is_root || is_cardinal?'':
+            + ('&lt;span data-action="drag" style="display:block;padding:4px" title="Drag to reposition">' //
+                    + '&lt;span class="ui-icon ui-icon-arrow-4" style="font-weight:normal">&lt;/span>Drag&lt;/span>')
+                                   
+            + '&lt;span data-action="edit" style="display:block;padding:4px" title="Edit style and properties 3">'
+            +'&lt;span class="ui-icon ui-icon-pencil">&lt;/span>Style&lt;/span>';               
+            
+            //hide element for cardinal and delete for its panes                     
+            if(node.type!='cardinal'){
+                actionspan += '&lt;span data-action="element" style="display:block;padding:4px" title="Add a new element/widget">&lt;span class="ui-icon ui-icon-plus">&lt;/span>Insert&lt;/span>';
+            }
+            if(!is_cardinal){
+                actionspan += ('&lt;span data-action="delete" style="display:block;padding:4px" title="Remove element from layout">&lt;span class="ui-icon ui-icon-close" title="'
+                    +'Remove element from layout">&lt;/span>Delete&lt;/span>');
+            }else if(is_last_root){ // display delete, but block action
+                actionspan += ('&lt;span data-action="none" style="display:block;padding:4px" title="Cannot have an empty tree">'
+                    +'&lt;span class="ui-icon ui-icon-delete">&lt;/span>Delete&lt;/span>');
+            }
+
+            if(node.type=='text'){
+                let stitle = 'To enable multilanguage support define more than one language for web home parameter "Languages"';
+                let codes = '';
+                if(website_languages!=''){
+                    let langs = website_languages.split(',');
+                    if(langs.length>0){
+                        stitle = 'Define translation for this text element';
+                        for(let i=0;i&lt;langs.length;i++){
+                            codes = codes
+                            +'&lt;span data-action="translate" data-lang="'+langs[i]
+                                    +'" style="display:block;padding:4px;text-align:right">'
+                            +langs[i]+'&lt;/span>';
+                        }
+                    }
+                }
+                actionspan = actionspan + '&lt;span data-action="translate_header" style="display:block;padding:4px" title="'
+                        +stitle+'">&lt;span class="ui-icon ui-icon-translate">&lt;/span>Translate&lt;/span>'
+                        +codes;
+                        
+            }
+
+            actionspan += '&lt;/div>';
+            actionspan = $( actionspan );
+
+            if(is_intreeview){   //in treeview
+                actionspan.appendTo(item);
+                
+                actionspan.find('span[data-action]').hide();
+                actionspan.find('span.ui-icon-menu').on('click', function(event){
+                    let ele = $(event.target);
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    ele.hide();
+                    ele.parent().find('span[data-action]').show();
+                });
+                
+            }else{ 
+
+                actionspan.insertAfter(item); //in main-content
+
+                actionspan.find('span[data-action]').hide();
+                actionspan.find('span.ui-icon-gear').on('click', function(event){ // edit widget
+
+                    let ele = $(event.target);
+                    window.hWin.HEURIST4.util.stopEvent(event);
+                    ele.hide();
+                    
+                    let is_widget = ele.parent().prev().hasClass('heurist-widget');
+                    
+                    if(is_widget){
+                        ele.parent().find('span[data-action="edit"]').trigger('click');
+                    }else{
+                        if(ele.parent().hasClass('lid-actionmenu')){
+                            ele.parent().show();    
+                        }
+                        ele.parent().find('span[data-action]').show();                        
+                    }
+                });
+
+                //actionspan.appendTo(body);    
+                //actionspan.position({ my: "left top", at: "left top", of: $(item) })
+            }
+
+            //
+            // menu for action span
+            //
+            actionspan.find('span[data-action]').on('click', function(event){
+                let ele = $(event.target);
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+
+                _lockDefaultEdit = true;
+                //timeout need to activate current node    
+                setTimeout(function(){
+                    _lockDefaultEdit = false;
+
+                    let ele_ID = ele.parents('.lid-actionmenu').attr('data-lid');
+                    _layout_container.find('.lid-actionmenu[data-lid='+ele_ID+']').hide();
+
+                    let action = ele.attr('data-action');
+                    if(!action) action = ele.parent().attr('data-action');
+                    if(action=='element'){
+
+                        //add new element or widget
+                        editCMS_SelectElement(function(selected_element, selected_name){
+                            _layoutInsertElement(ele_ID, selected_element, selected_name);    
+                        })
+
+                    }else if(action=='translate'){
+                       
+                       //reload the only text element in different language
+                       let lang = ele.attr('data-lang');
+                        
+                       //change or add content of specified language
+                       _layoutTranslateElement(ele_ID, lang)
+                       
+/*                        
+                        //define new translation - show popup to select language
+                        window.hWin.HEURIST4.msg.showPrompt('&lt;p>Select language to translate content: '
++"&lt;select id=\'dlg-prompt-value\' class=\'text ui-corner-all\'"
++" style=\'max-width: 250px; min-width: 10em; width: 250px; margin-left:0.2em\' autocomplete=\'off\'>"
++ window.hWin.HEURIST4.ui.createLanguageSelect() //returns content for language selector
++"&lt;/select>&lt;/p>",
+function(value){
+    if(value){
+        //change or add content of specified language
+        _ws_body.layout().open(options.editor_pos);    
+    }            
+},
+'Select language for content',{default_palette_class: default_palette_class});
+*/                        
+                        
+                    }else if(action=='edit'){
+
+                        //add new group/separator
+                        _ws_body.layout().open(options.editor_pos);
+                        _layoutEditElement(ele_ID);
+
+                    }else if(action=='delete'){
+                        //different actions for separator and field
+                        let node = $.ui.fancytree.getTree( _panel_treePage ).getNodeByKey(''+ele_ID);
+                        $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+                            'Are you sure you wish to delete element "'+node.title+'"?', 
+                        function(){ _layoutRemoveElement(ele_ID); }, 
+                            {title:'Warning',yes:'Proceed',no:'Cancel'},
+                            {default_palette_class: default_palette_class});        
+
+                    }
+                    },100); 
+
+                return false;
+            });
+
+            /*
+            $('&lt;span class="ui-icon ui-icon-pencil">&lt;/span>')                                                                
+            .on('click', function(event){ 
+            //tree.contextmenu("open", $(event.target) ); 
+
+            ).appendTo(actionspan);
+            */
+
+            //hide gear icon and overlay on mouse exit
+            function __onmouseexit(event){
+                
+                if(_panel_propertyView.is(':visible')) return;
+
+                let el = document.elementFromPoint(event.pageX, event.pageY);
+                if($(el).hasClass('ui-icon-gear')) return;
+
+                let node;
+                if($(event.target).hasClass('brick')){ 
+                    //cms element
+                    
+                    node =  $(event.target);
+
+                    _layout_container.find('.lid-actionmenu[data-lid='+node.attr('data-hid')+']').hide();
+                    _layout_container.find('div[data-lid]').removeClass('cms-element-active');
+                    
+                    if(!_panel_propertyView.is(':visible'))
+                        _layout_container.find('.cms-element-overlay').css('visibility','hidden');
+                    /*
+                    if(__timeout==0){
+                    __timeout = setTimeout(function(){$('.cms-element-overlay').css('visibility','hidden');},500);  
+                    }
+                    */ 
+                }else{
+                    //in tree
+                    if($(event.target).is('li')){
+                        node = $(event.target).find('.fancytree-node');
+                    }else if($(event.target).hasClass('fancytree-node')){
+                        node =  $(event.target);
+                    }else{
+                        //hide icon for parent 
+                        node = $(event.target).parents('.fancytree-node:first');
+                        if(node) node = $(node[0]);
+                    }
+                    if(node){
+                       
+                        
+                        let ele = node.find('.lid-actionmenu');
+                        ele.find('span[data-action]').hide();
+                        ele.find('span.ui-icon-menu').show();
+                        ele.hide();
+                        
+                       
+                       $(node).removeClass('fancytree-hover');
+                        
+                        //remove heighlight
+                        _layout_container.find('div[data-hid]').removeClass('cms-element-active');
+                        _layout_container.find('.lid-actionmenu').hide();
+                        
+                        if(!_panel_propertyView.is(':visible'))
+                            _layout_container.find('.cms-element-overlay').css('visibility','hidden');
+                    }
+                    
+                }
+            };             
+
+            function __onmouseenter(event){
+
+                    if (current_edit_mode != 'page') return;
+                    if(_panel_propertyView.is(':visible')) return;
+
+                    
+                    let node, ele_ID;
+
+                    if(__timeout>0) clearTimeout(__timeout);
+                    __timeout = 0;
+
+                    if($(event.target).hasClass('.lid-actionmenu') || $(event.target).parents('div.lid-actionmenu').length>0){
+                        if(delay_onmove>0) clearTimeout(delay_onmove);
+                        delay_onmove = 0;
+                        return;
+                    }
+
+                    let is_in_page = ($(event.target).hasClass('brick') || $(event.target).parents('div.brick:first').length>0);
+
+                    if( is_in_page ){
+                        //div.editable in container 
+                        if($(event.target).hasClass('brick')){
+                            node = $(event.target);
+                        }else{
+                            node = $(event.target).parents('div.brick:first');
+                        } 
+
+                        //tinymce is active - do not show toolbar
+                        if(_layout_container.find('div.mce-edit-focus').length>0){  //node.hasClass('mce-edit-focus')){
+                            return;   
+                        }
+
+                       
+                        let ele_id = node.attr('data-hid');
+                        _layout_container.find('.lid-actionmenu[data-lid!='+ele_id+']').hide(); //find other
+                        let ele = _layout_container.find('.lid-actionmenu[data-lid='+ele_id+']');
+
+                        let parent = node.parents('div.ui-layout-pane:first');
+                        if(parent.length==0 || parent.parents('div[data-hid]').length==0){
+                            parent = _layout_container;  
+                        }
+                        let pos = node.position();
+                        let margin_top = parseInt(node.css('margin-top'));
+                        if(!(margin_top>0)) margin_top = 2;
+                        let margin_left = parseInt(node.css('margin-left'));
+                        if(!(margin_left>0)) margin_left = 2;
+                        
+                        ele.find('span[data-action]').hide();  
+                        ele.find('span.ui-icon-gear').show();  
+                        ele.css({
+                            top:(pos.top&lt;0?0:pos.top)+ margin_top +'px',
+                            left:(pos.left&lt;0?0:pos.left)+margin_left+'px'});
+                        ele.show();
+                        
+                        ele_ID = $(node).attr('data-hid');
+
+                    }else {
+                        //node in treeview
+
+
+                        if($(event.target).hasClass('fancytree-node')){
+                            node =  $(event.target);
+                        }else{
+                            node = $(event.target).parents('.fancytree-node:first');
+                        }
+                        if(node){
+                            $(node).addClass('fancytree-hover');
+                            
+                            node = $(node).find('.lid-actionmenu');
+                            node.css('display','inline-block');
+                        }
+                        ele_ID = $(node).attr('data-lid');
+                    }
+
+                    if(ele_ID>0){
+                        
+                        if(is_in_page){
+                            //highlight in preview/page
+                            node = $.ui.fancytree.getTree( _panel_treePage ).getNodeByKey(ele_ID);
+                            if(node) node.setActive(true);
+
+                            _layout_container.find('div[data-hid]').removeClass('cms-element-active'); //remove from all
+                            _layout_container.find('div[data-hid='+ele_ID+']').addClass('cms-element-active');
+
+                        }else                            
+                        {   
+                            //highlight in treeview
+                            //separate overlay div - visible when mouse over tree
+                            if(!_panel_propertyView.is(':visible')){
+                                _panel_treePage.find('.fancytree-active').removeClass('fancytree-active');
+                                _showOverlayForElement(ele_ID);
+                            }
+                                    
+                        }
+
+                    }
+
+            };
+                
+            $(item).on( "mouseenter", __onmouseenter ).on( "mouseleave", __onmouseexit );
+
+            /*                            
+            $(item).on('mouseleave',
+
+            );
+            */
+        }
+    }
+
+    /**
+     * Shows a visual overlay on a page element, typically used when interacting
+     * with the element via the tree view.
+     * @private
+     * @param {string|number} ele_ID - The key/ID of the element to overlay.
+     */
+    function _showOverlayForElement( ele_ID ){
+        if(ele_ID>0){
+            let cms_ele = _layout_container.find('div[data-hid='+ele_ID+']');
+            
+            if(cms_ele.hasClass('cms-element-editing')) return;
+            
+            let pos = cms_ele.offset(); //realtive to document
+            let pos2 = _layout_container.offset();
+            let overlay_ele = $('.cms-element-overlay');
+            if(overlay_ele.length==0){
+                overlay_ele = $('&lt;div>').addClass('cms-element-overlay').appendTo(_layout_container); //attr('data-lid',ele_ID).insertAfter
+            }
+            if(pos &amp;&amp; pos2){
+                overlay_ele.attr('data-lid',ele_ID)
+                .css({top:((pos.top-pos2.top)+'px'),
+                    left:((pos.left-pos2.left)+'px'),width:cms_ele.width(),height:cms_ele.height()});
+                overlay_ele.css('visibility','visible');
+            }
+        }
+    }
+
+
+    /**
+     * Removes an element from the page layout and its corresponding node from the tree.
+     * Updates the internal layout configuration (_layout_content).
+     * @private
+     * @param {string|number} ele_id - The key/ID of the element to remove.
+     */
+    function _layoutRemoveElement(ele_id){
+
+        let tree = $.ui.fancytree.getTree( _panel_treePage );
+        let node = tree.getNodeByKey(''+ele_id);
+        let parentnode = node.getParent();
+        let parent_container, parent_children, parent_element;
+        
+        if(parentnode.isRootNode() &amp;&amp; parentnode.countChildren(false) == 1){
+            //cannot remove root element
+            window.hWin.HEURIST4.msg.showMsgFlash('It is not possible to remove the last root element');
+            return;    
+            
+        }else if(parentnode.isRootNode()){
+            parent_children = _layout_content;
+            parent_container = _layout_container;
+        }else{
+
+            //remove child
+            parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
+            parent_children = parent_element.children;
+            parent_container = _layout_container.find('div[data-hid='+parentnode.key+']');
+            
+        }
+
+        tinymce.remove('.tinymce-body'); //detach
+        _layout_container.find('.lid-actionmenu').remove();
+        //find index in _layout_content
+        let idx = -1;
+        for(let i=0; i&lt;parent_children.length; i++){
+          if(parent_children[i].key==ele_id){
+              idx = i;
+              break;
+          }   
+        }        
+        //from json
+        parent_children.splice(idx, 1); //remove from children
+
+        //from tree
+        node.remove();
+        
+        //recreate parent element
+        if(parent_element &amp;&amp; parent_element.type=='accordion'){
+            window.hWin.HAPI4.layoutMgr.layoutInitAccordion(parent_element, parent_container)
+        }else if(parent_element &amp;&amp; parent_element.type=='tabs'){
+            window.hWin.HAPI4.layoutMgr.layoutInitTabs(parent_element, parent_container)
+        }else{
+            window.hWin.HAPI4.layoutMgr.layoutInit(parent_children, parent_container, {rec_ID:home_page_record_id, lang:current_language}); 
+        }
+        
+        page_was_modified = true;
+        _onPageChange();
+        
+        _updateActionIcons(200); //it inits tinyMCE also
+        
+    }
+    
+    /**
+     * Handles changes to an element's parent due to drag-and-drop in the tree.
+     * Updates the internal layout configuration and redraws the page.
+     * @private
+     * @param {string|number} ele_id - The key/ID of the element whose parent changed.
+     */
+    function _layoutChangeParent(ele_id){
+
+        tinymce.remove('.tinymce-body'); //detach
+        _layout_container.find('.lid-actionmenu').remove();
+        
+        let affected_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, ele_id);
+        
+
+        let oldparent = window.hWin.HAPI4.layoutMgr.layoutContentFindParent(_layout_content, ele_id);
+        let parent_children;
+        
+        //remove from old parent -----------
+        if(oldparent=='root'){
+            parent_children = _layout_content;
+        }else{
+            parent_children = oldparent.children;
+        }
+        let idx = -1;
+        for(let i=0; i&lt;parent_children.length; i++){
+          if(parent_children[i].key==ele_id){
+              idx = i;
+              break;
+          }   
+        }        
+        parent_children.splice(idx, 1); //remove from children
+        
+        //add to new parent  ---------------
+        let tree = $.ui.fancytree.getTree( _panel_treePage );
+        let node = tree.getNodeByKey(''+ele_id);
+        let prevnode = node.getPrevSibling();
+        let parentnode = node.getParent();
+        let parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
+        parent_children = parent_element ? parent_element.children : _layout_content;
+        
+        if(prevnode==null){
+            idx = 0;
+        }else{
+            for(let i=0; i&lt;parent_children.length; i++){
+              if(parent_children[i].key==prevnode.key){
+                  idx = i+1;
+                  break;
+              }   
+            }        
+        }
+        if(idx==parent_children.length){
+            parent_children.push(affected_element);
+        }else{
+            parent_children.splice(idx, 0, affected_element);    
+        }
+        
+        //redraw page
+        window.hWin.HAPI4.layoutMgr.layoutInit(_layout_content, _layout_container, {rec_ID:home_page_record_id, lang:current_language});
+        _updateActionIcons(200); //it inits tinyMCE also
+        
+        page_was_modified = true;
+        _onPageChange();
+    }
+
+    /**
+     * Switches the content of a text element to a specified language version or
+     * prepares it for new translation.
+     * @private
+     * @param {string|number} ele_id - The key/ID of the text element.
+     * @param {string} lang_id - The language code (e.g., 'en', 'fr') to switch to or create.
+     */
+    function _layoutTranslateElement(ele_id, lang_id){
+        
+        let affected_ele = _layout_container.find('div[data-hid="'+ele_id+'"]');
+        let lang = window.hWin.HAPI4.getLangCode3(lang_id, 'def');
+        
+        //need switch
+        if(affected_ele.attr('data-lang')==lang || (current_language==lang &amp;&amp; !affected_ele.attr('data-lang'))){
+            return;
+        }
+
+        let affected_cfg = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, ele_id);
+
+        let content = 'content';
+        if(default_language!=lang &amp;&amp; lang!='def' &amp;&amp; !window.hWin.HEURIST4.util.isempty(lang)){
+            content = content + lang;
+            if(!affected_cfg[content]){ //if not found -  add new content
+                affected_cfg[content] = 'Translate content to '+lang+'!' + affected_cfg['content'];
+            }
+        }
+                       
+        affected_ele.html(affected_cfg[content]);
+        affected_ele.attr('data-lang', lang);
+                       
+        //_ws_body.layout().open(options.editor_pos);    
+    }
+
+    
+    /**
+     * Opens the property editor (editCMS_ElementCfg) for a given page element.
+     * Handles saving of previously edited element if any. Manages UI state for editing.
+     * @private
+     * @param {string|number} ele_id - The key/ID of the element to edit.
+     */
+    function _layoutEditElement(ele_id){
+
+        if(_edit_Element){ //already opened - save previous
+            
+            if(_layout_container.find('div.cms-element-editing').attr('data-hid')==ele_id) return; //same
+            
+            //save previous element
+            if(_edit_Element.warningOnExit(function(){_layoutEditElement(ele_id);})) return;
+            
+            _layout_container.find('div[data-hid]').removeClass('cms-element-editing headline marching-ants marching');                        
+        }
+
+      
+        //1. show div with properties over treeview
+        let h = _panel_treePage.find('ul.fancytree-container').height() + 10;
+
+        h = (h&lt;175)?h:175; 
+        _panel_treePage.css('height',h+'px');
+        _panel_propertyView.css('top',(h+20)+'px');
+        _editor_panel.find('.page_tree').hide();
+        _toolbar_Page.hide();
+        
+        _panel_propertyView.fadeIn(500);
+        if(_ws_body.layout().state['west']['outerWidth']&lt;450){
+            _keep_EditPanelWidth = _ws_body.layout().state['west']['outerWidth'];
+            _ws_body.layout().sizePane('west', 450);    
+        }
+
+        //scroll tree that selected element will be visible
+        let node = $.ui.fancytree.getTree( _panel_treePage ).getNodeByKey(ele_id);
+        let top1 = $(node.li).position().top;
+        _panel_treePage.animate({scrollTop: $(node.li).offset().top}, 1);
+        _panel_treePage.find('span.fancytree-title').css({'font-style':'normal','text-decoration':'none'});
+        $(node.li).find('.fancytree-node').removeClass('fancytree-active');
+        $(node.li).find('span.fancytree-title:first').css({'font-style':'italic','text-decoration':'underline'}); //
+        $(node.li).find('.fancytree-node:first').addClass('fancytree-active');
+        
+        _hideMenuInTree();
+        
+        _layout_container.find('.cms-element-overlay').css('visibility','hidden'); //hide overlay above editing element
+        _layout_container.find('div[data-hid]').removeClass('cms-element-active');                        
+        
+        let ele = _layout_container.find('div[data-hid="'+ele_id+'"]').addClass('cms-element-editing');
+
+        if(!ele.css('background-image') || ele.css('background-image')=='none'){
+            ele.addClass('headline marching-ants marching');
+        }
+        
+        let element_cfg = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
+        
+        let is_cardinal = (element_cfg.type=='north' || element_cfg.type=='south' || 
+                element_cfg.type=='east' || element_cfg.type=='west' || element_cfg.type=='center');
+            
+        if(is_cardinal){
+             //find parent
+             const node = $.ui.fancytree.getTree( _panel_treePage ).getNodeByKey(''+ele_id);
+             const parentnode = node.getParent();
+             ele_id = parentnode.key;
+             element_cfg = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, ele_id);
+        }
+        
+        //show overlay for editing element
+        _showOverlayForElement( ele_id );
+        
+        _initTinyMCE( ele_id );
+
+        //
+        // mode - 0       take values from _edit_Element without saving in db
+        //        'save'  save entire page in db
+        //
+        _edit_Element = editCMS_ElementCfg(element_cfg, _layout_content, _layout_container, _panel_propertyView, function(new_cfg, mode){
+
+                    //save
+                    if(new_cfg){
+                        
+                        window.hWin.HAPI4.layoutMgr.layoutContentSaveElement(_layout_content, new_cfg); //replace element to new one
+
+                        //update treeview                    
+                        let node = $.ui.fancytree.getTree( _panel_treePage ).getNodeByKey(''+new_cfg.key);
+                        node.setTitle(new_cfg.title);
+                        _defineActionIcons($(node.li).find('span.fancytree-node:first'), new_cfg.key, 
+                                    'position:absolute;right:8px;padding:2px;margin-top:0px;');
+                               
+                        if(new_cfg.type=='cardinal'){
+                            //recreate cardinal layout
+                            window.hWin.HAPI4.layoutMgr.layoutInitCardinal(new_cfg, _layout_container);
+                        }
+                        
+                        //save page
+                        _saveLayoutCfg(); 
+                        page_was_modified = false;
+                        
+                        _onPageChange();
+                    }
+                    
+                    if(mode!='save'){
+                        //close element config
+                        _hidePropertyView();
+                    }
+
+                    // find all dragable elements - text and widgets
+                    _layout_container.find('div.brick').each(function(i, item){   //
+                        let ele_ID = $(item).attr('data-hid');
+                        
+                        _defineActionIcons(item, ele_ID, 'position:absolute;z-index:999;');   //left:2px;top:2px;         
+                    });
+
+                    
+                }, page_was_modified );
+    }
+    
+    
+    /**
+     * Inserts a new element (text, group, widget, or template) into the page layout.
+     * Handles creation of different element types and templates.
+     * @private
+     * @param {string|number} ele_id - The key/ID of the element relative to which the new element is inserted (parent or sibling).
+     * @param {string} widget_type - The type of the element/widget to insert (e.g., 'text', 'group', 'heurist_SearchInput', 'tpl_default').
+     * @param {string} widget_name - The display name for the new element/widget.
+     */
+    function _layoutInsertElement(ele_id, widget_type, widget_name){
+        
+       
+        
+        let new_ele = {name:'Text', type:'text', css:{'border':'1px dotted gray','border-radius':'4px','margin':'4px'}, content:"&lt;p>Lorem ipsum dolor sit amet ...&lt;/p>"};
+        
+        if(widget_type=='group'){
+            new_ele = {name:'Group', type:'group', css:{'border':'1px dotted gray','border-radius':'4px','margin':'4px'}, children:[ new_ele ]};
+        }else if(widget_type=='tabs'){
+            
+            new_ele = {name:'TabControl', type:'tabs', css:{}, children:[ 
+                {name:'Tab 1', type:'group', css:{}, children:[ new_ele ]},
+                {name:'Tab 2', type:'group', css:{}, children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]}
+            ]};
+        }else if(widget_type=='accordion'){    
+            new_ele = {name:'Accordion', type:'accordion', css:{}, children:[ 
+                {name:'Panel 1', type:'group', css:{}, children:[ new_ele ]}
+            ]};
+        }else if(widget_type=='cardinal'){    
+            
+            new_ele = {name:'Cardinal', type:'cardinal', css:{position:'relative',
+                        'min-height':'300px','min-width':'300px',
+                        'height':'500px','width':'800px',flex:'0 1 auto'},  //,'width':'100%'
+            children:[
+            {name:'Center', type:'center', children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
+            {name:'North', type:'north', options:{size:80}, children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
+            {name:'South', type:'south', options:{size:80}, children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
+            {name:'West', type:'west', children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
+            {name:'East', type:'east', children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]}
+            ]};
+          
+        }else if(widget_type.indexOf('heurist_')===0){
+            
+            //btn_visible_newrecord, btn_entity_filter, search_button_label, search_input_label
+            new_ele = {appid:widget_type, name:widget_name, css:{}, options:{}};
+            
+        }
+        else if(widget_type=='group_2'){
+            
+            new_ele = {name:'2 columns', type:'group', css:{display:'flex', 'justify-content':'center'},
+                children:[
+                    {name:'Column 1', type:'group', css:{flex:'1 1 auto'}, children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]},
+                    {name:'Column 2', type:'group', css:{flex:'1 1 auto'}, children:[ window.hWin.HEURIST4.util.cloneJSON(new_ele) ]}
+                ]
+            };
+            
+        }
+        else if(widget_type=='text_media'){
+            
+            new_ele = {name:'Media and text', type:'group', css:{display:'flex', 'justify-content':'center'},
+                children:[
+                {name:'Media', type:'text', css:{flex:'0 1 auto'}, 
+                    content:"&lt;p>&lt;img src=\""+window.hWin.HAPI4.sysinfo.referenceServerURL+"hclient/assets/v6/logo.png\" width=\"300\"&lt;/p>"},
+                {name:'Text', type:'text', css:{flex:'1 1 auto'}, 
+                    content:"&lt;p>Lorem ipsum dolor sit amet ...&lt;/p>"}
+                ]
+            };
+            
+        }
+        else if(widget_type=='text_banner'){
+
+            let imgs = [
+ 'https://images.unsplash.com/photo-1524623243236-187b50e18f9f?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1228&amp;q=80',
+ 'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1170&amp;q=80',
+ //'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-1.2.1&amp;ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;auto=format&amp;fit=crop&amp;w=1171&amp;q=80',
+ 'https://images.unsplash.com/photo-1529998274859-64a3872a3706?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1170&amp;q=80',
+ 'https://images.unsplash.com/40/whtXWmDGTTuddi1ncK5v_IMG_0097.jpg?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&amp;ixlib=rb-1.2.1&amp;auto=format&amp;fit=crop&amp;w=1171&amp;q=80'];
+ 
+            let k = Math.floor(Math.random() * 4); //select one of 4 banners in example set
+            
+            new_ele = {name:'Banner', type:'group', 
+                    css:{display:'flex', 'justify-content':'center', 'align-items': 'center', 'min-height':'300px',
+                    'background-image': 'url('+imgs[k]+')', 'bg-image': imgs[k], 
+                    'background-size':'auto', 'background-repeat': 'no-repeat',
+                    'background-position': 'center'},
+                children:[
+                    new_ele
+                ]
+            };
+            
+            
+        }
+        else if(widget_type=='text_2'){
+            
+            new_ele = {name:'2 columns', type:'group', css:{display:'flex', 'justify-content':'center'},
+                children:[]
+            };
+            
+            let child = {name:'Column 1', type:'text', css:{flex:'1 1 auto'}, content:"&lt;p>Lorem ipsum dolor sit amet ...&lt;/p>"};
+            new_ele.children.push(child);
+            
+            child = window.hWin.HEURIST4.util.cloneJSON(child);
+            child.name = 'Column 2';
+            new_ele.children.push(child);
+            
+        }
+        else if(widget_type=='text_3'){
+            
+            new_ele = {name:'3 columns', type:'group', css:{display:'flex', 'justify-content':'center'},
+                children:[]
+            };
+            
+            let child = {name:'Column 1', type:'text', css:{flex:'1 1 auto'}, content:"&lt;p>Lorem ipsum dolor sit amet ...&lt;/p>"};
+            new_ele.children.push(child);
+            child = window.hWin.HEURIST4.util.cloneJSON(child);
+            child.name = 'Column 2';
+            new_ele.children.push(child);
+            child = window.hWin.HEURIST4.util.cloneJSON(child);
+            child.name = 'Column 3';
+            new_ele.children.push(child);
+
+        }
+        else if(widget_type.indexOf('new_tpl_')==0){
+
+            if(!_editCMS_SiteMenu)
+            _editCMS_SiteMenu = editCMS_SiteMenu( _panel_treeWebSite, that );
+
+            widget_type = widget_type.substring(8); // remove 'new_tpl_'
+
+            // Get parent page id
+            let parent_page_id = _editCMS_SiteMenu.getParentPage(window.hWin.current_page_id);
+            parent_page_id = (parent_page_id == null || parent_page_id &lt;= 0) ? window.hWin.current_page_id : parent_page_id;
+
+            _editCMS_SiteMenu.createMenuRecord(parent_page_id, widget_name, widget_type);
+            return;
+        }
+        else if(widget_type.indexOf('tpl_')==0){
+            
+            _prepareTemplate(ele_id, widget_type);
+            return;
+        }
+        
+        _layoutInsertElement_continue(ele_id, new_ele);
+    }       
+    
+    /**
+     * Continues the element insertion process after the new element's JSON configuration is prepared.
+     * Updates the layout configuration, tree view, and redraws relevant parts of the page.
+     * @private
+     * @param {string|number} ele_id - The key/ID of the element relative to which insertion occurs.
+     * @param {Object|Array&lt;Object>} new_element_json - The JSON configuration for the new element(s).
+     */
+    function _layoutInsertElement_continue(ele_id, new_element_json){
+
+        let tree = $.ui.fancytree.getTree( _panel_treePage );
+        let parentnode = tree.getNodeByKey(ele_id);
+        let parent_container, parent_children, parent_element;
+
+        tinymce.remove('.tinymce-body'); //detach
+        _layout_container.find('.lid-actionmenu').remove();
+
+        if(parentnode.folder){
+            //add child
+
+            parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
+            parent_container = _layout_container.find('div[data-hid='+parentnode.key+']');
+            parent_children = parent_element.children;
+
+        }else{
+            //add sibling
+            if(parentnode.parent.isRootNode()){
+                parent_element = null;
+                parent_container = _layout_container;
+                parent_children = _layout_content;
+            }else{
+                parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, parentnode.parent.key);
+                parent_container = _layout_container.find('div[data-hid='+parentnode.parent.key+']');
+                parent_children = parent_element.children;
+            }
+        }
+
+        if(Array.isArray(new_element_json) &amp;&amp; new_element_json.length==1){
+            new_element_json = new_element_json[0];
+        }
+
+        parent_children.push(new_element_json);
+        window.hWin.HAPI4.layoutMgr.layoutInitKey(parent_children, parent_children.length-1);
+
+        //recreate
+        if(parent_element &amp;&amp; parent_element.type=='accordion'){
+            window.hWin.HAPI4.layoutMgr.layoutInitAccordion(parent_element, parent_container)
+        }else if(parent_element &amp;&amp; parent_element.type=='tabs'){
+            window.hWin.HAPI4.layoutMgr.layoutInitTabs(parent_element, parent_container)
+            //window.hWin.HAPI4.layoutMgr.layoutInit(_layout_content, _layout_container);    
+        }else{
+            window.hWin.HAPI4.layoutMgr.layoutInit(parent_children, parent_container, {rec_ID:home_page_record_id, lang:current_language});
+        }   
+
+
+        //update tree
+        if(parentnode.folder){
+            parentnode.addChildren(new_element_json);    
+           
+        }else{
+            let beforenode = parentnode.getNextSibling();
+            parentnode = parentnode.getParent();
+            parentnode.addChildren(new_element_json, beforenode);    
+           
+        }
+
+        setTimeout(function(){
+            parentnode.visit(function(node){
+                node.setExpanded(true);
+            });
+            _updateActionIcons(200);
+            },300);
+
+        page_was_modified = true;
+        if(_edit_Element==null) _toolbar_Page.show();
+        /*        
+        [{name:'Layout', type:'group', //or cardinal
+        children:[
+        {name:'Text', type:'text', css:{}, content:'&lt;p>Text element&lt;/p>'}
+        ] 
+        }];        
+        */        
+    }
+
+    /**
+     * Loads a predefined template JSON and inserts it into the page.
+     * @private
+     * @param {string|number} ele_id - The key/ID of the element to insert the template relative to.
+     * @param {string} template_name - The name of the template to load (e.g., 'tpl_default', 'tpl_blog').
+     */
+    function _prepareTemplate(ele_id, template_name){
+    
+        if(template_name.indexOf('tpl_')==0){
+            template_name = template_name.substring(4);
+        }
+        
+        // 1. load template files
+        let sURL = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/'+template_name+'.json';
+
+        // 2. Loads template json
+        $.getJSON(sURL, 
+        function( new_element_json ){
+            
+            if(template_name=='default'){
+                new_element_json = new_element_json.children[0];
+            }else if(template_name=='blog'){
+                window.hWin.HAPI4.layoutMgr.prepareTemplate(new_element_json, function(updated_json){
+                    _layoutInsertElement_continue( ele_id, updated_json );
+                });
+                return;
+            }
+            
+            _layoutInsertElement_continue( ele_id, new_element_json );
+        }); //on template json load
+        
+    }
+    
+    
+    /**
+     * Saves the current page layout configuration (_layout_content) to the database.
+     * Cleans the layout JSON before saving.
+     * @private
+     * @param {function} [callback] - Optional function to call after saving is complete.
+     */
+    function _saveLayoutCfg( callback ){
+        
+        if(!(options.record_id>0)) return;
+        
+        window.hWin.HEURIST4.msg.bringCoverallToFront();
+        
+        let newval = window.hWin.HEURIST4.util.cloneJSON(_layout_content);
+        let contents = [];
+        
+        //@todo remove keys and titles,  extract "content" into separate set of values
+        // each content:lang value will be saved in separate detail
+        function __cleanLayout(items){
+            
+            for(let i=0; i&lt;items.length; i++){
+                items[i].key = null;
+                delete items[i].key;
+                items[i].title = null;
+                delete items[i].title;
+                
+                if(items[i].children){
+                    __cleanLayout(items[i].children);    
+                }
+            }
+        }
+        __cleanLayout(newval);
+
+        let newname = newval[0].name;
+        
+        // if page consist one group and one text without css - save only content of this text
+        // it allows edit content in standard record edit
+        /*if(newval[0].children &amp;&amp; newval[0].children.length==1 &amp;&amp; newval[0].children[0].type=='text'){
+            newval = newval[0].children[0].content;
+        }else{
+            newval = JSON.stringify(newval);    
+        }*/
+        
+        newval = JSON.stringify(newval);
+        
+        let request = {a: 'addreplace',
+                        recIDs: options.record_id,
+                        dtyID: DT_EXTENDED_DESCRIPTION,
+                        rVal: newval,
+                        needSplit: true};
+        
+        
+        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    if(response.data.errors==1){
+                        let errs = response.data.errors_list;
+                        let errMsg = errs[Object.keys(errs)[0]];
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: errMsg,
+                            error_title: 'Failed to save configuration'
+                        });
+                    }else
+                    if(response.data.noaccess==1){
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: 'It appears you do not have enough rights (logout/in to refresh) to edit this record',
+                            status: window.hWin.ResponseStatus.REQUEST_DENIED
+                        });
+                    }else{
+                        _toolbar_Page.hide();
+                        page_was_modified = false;
+                        page_cache[options.record_id][DT_EXTENDED_DESCRIPTION] = newval; //update in cache
+                        
+                        
+
+                        /* 2022-01-04 IJ does not want direct name of web page title
+                        if(_editCMS_SiteMenu &amp;&amp; newname!=page_cache[options.record_id][DT_NAME]) {
+                            body.find('.treePageHeader > h2').text( newname ); 
+                            _editCMS_SiteMenu.renameMenuEntry(options.record_id, newname);
+                        }
+                        */
+                        
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
+                    }
+                    
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+        });         
+    }
+    
+    /**
+     * Switches the editor to 'website' mode to show the website menu/structure editor.
+     * @private
+     */
+    function _showWebSiteMenu(){
+        _switchMode('website');
+    }
+
+    //public members
+    let that = {
+
+        /**
+         * Gets the class name of the editor instance.
+         * @returns {string} The class name.
+         * @public
+         */
+        getClass: function () {
+            return _className;
+        },
+
+        /**
+         * Checks if the instance is of a given class name.
+         * @param {string} strClass - The class name to check against.
+         * @returns {boolean} True if it is an instance of the class, false otherwise.
+         * @public
+         */
+        isA: function (strClass) {
+            return (strClass === _className);
+        },
+        
+        /**
+         * Public method to insert an element into the layout. Delegates to _layoutInsertElement.
+         * @param {string|number} insert_ele_id - The ID of the element to insert relative to.
+         * @param {string} selected_element - The type of element to insert.
+         * @public
+         */
+        layoutInsertElement: function(insert_ele_id, selected_element){
+            _layoutInsertElement(insert_ele_id, selected_element);
+        },
+        
+        /**
+         * Public method to start the CMS editor. Delegates to _startCMS.
+         * @param {Object} _options - Configuration options for the CMS session. See _startCMS for details.
+         * @returns {void|boolean} See _startCMS return value.
+         * @public
+         */
+        startCMS: function(_options){
+            return _startCMS( _options );    
+        },
+        
+        /**
+         * Public method to close the CMS editor. Delegates to _closeCMS.
+         * @public
+         */
+        closeCMS: function(){
+            _closeCMS();            
+        },
+        
+        /**
+         * Public method to switch the editor mode. Delegates to _switchMode.
+         * @param {string} mode - The mode to switch to ('page' or 'website').
+         * @public
+         */
+        switchMode: function(mode){
+            _switchMode(mode);            
+        },
+        
+        /**
+         * Public method to handle warnings on exit. Delegates to _warningOnExit.
+         * @param {function} callback - The function to call if the user proceeds.
+         * @returns {boolean} See _warningOnExit return value.
+         * @public
+         */
+        warningOnExit: function(callback){
+            return _warningOnExit(callback)
+        },
+        
+        /**
+         * Public method to reset the modified state of the page.
+         * @public
+         */
+        resetModified: function(){
+            page_was_modified = false;    
+        }
+    }
+    
+    return that;
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="HEURIST4.dbs.html">dbs</a></li><li><a href="HEURIST4.geo.html">geo</a></li><li><a href="HEURIST4.msg.html">msg</a></li><li><a href="HEURIST4.query.html">query</a></li><li><a href="HEURIST4.util.html">util</a></li><li><a href="NodeSelection.html">NodeSelection</a></li><li><a href="heurist.buttonsMenu.html">buttonsMenu</a></li><li><a href="heurist.controlPanel.html">controlPanel</a></li><li><a href="heurist.dbAction.html">dbAction</a></li><li><a href="heurist.dbVerify.html">dbVerify</a></li><li><a href="heurist.dbVerifyURLs.html">dbVerifyURLs</a></li><li><a href="heurist.editTranslations.html">editTranslations</a></li><li><a href="heurist.editing_input.html">editing_input</a></li><li><a href="heurist.navigation.html">navigation</a></li><li><a href="heurist.recordAccess.options.html">options</a></li><li><a href="heurist.recordAction.options.html">options</a></li><li><a href="heurist.recordAdd.options.html">options</a></li><li><a href="heurist.recordAddButton.options.html">options</a></li><li><a href="heurist.recordAddLink.options.html">options</a></li><li><a href="heurist.recordAddLinkMatch.options.html">options</a></li><li><a href="heurist.recordArchive.options.html">options</a></li><li><a href="heurist.recordBookmark.options.html">options</a></li><li><a href="heurist.recordDataTable.options.html">options</a></li><li><a href="heurist.recordDelete.options.html">options</a></li><li><a href="heurist.recordExport.options.html">options</a></li><li><a href="heurist.recordExportCSV.options.html">options</a></li><li><a href="heurist.recordFindDuplicates.options.html">options</a></li><li><a href="heurist.recordImportAnnotations.options.html">options</a></li><li><a href="heurist.recordNotify.options.html">options</a></li><li><a href="heurist.recordRate.options.html">options</a></li><li><a href="heurist.recordTag.options.html">options</a></li><li><a href="heurist.recordTemplate.options.html">options</a></li><li><a href="heurist.recordTitles.options.html">options</a></li><li><a href="heurist.recordUploadedFilesIndex.options.html">options</a></li><li><a href="heurist.selectFile.html">selectFile</a></li><li><a href="heurist.slidersMenu.html">slidersMenu</a></li></ul><h3>Classes</h3><ul><li><a href="ActionHandler.html">ActionHandler</a></li><li><a href="CmsManager.html">CmsManager</a></li><li><a href="Color.html">Color</a></li><li><a href="CrosstabsAnalysis.html">CrosstabsAnalysis</a></li><li><a href="EditorCodeMirror.html">EditorCodeMirror</a></li><li><a href="HEditing.html">HEditing</a></li><li><a href="HLayout.html">HLayout</a></li><li><a href="HLayoutMgr.html">HLayoutMgr</a></li><li><a href="HMapLayer.html">HMapLayer</a></li><li><a href="HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRapidFieldAdditions.HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRecordSearch.html">HRecordSearch</a></li><li><a href="HRecordSet.html">HRecordSet</a></li><li><a href="HSystemMgr.html">HSystemMgr</a></li><li><a href="HintDiv.html">HintDiv</a></li><li><a href="JapaneseCalendar.html">JapaneseCalendar</a></li><li><a href="L.Control.Help.html">Help</a></li><li><a href="L.Control.Manager.html">Manager</a></li><li><a href="L.Control.Publish.html">Publish</a></li><li><a href="Solver.html">Solver</a></li><li><a href="TDuration.html">TDuration</a></li><li><a href="Temporal.html">Temporal</a></li><li><a href="hAPI.html">hAPI</a></li><li><a href="hAPI-HRecordMgr.html">HRecordMgr</a></li><li><a href="window.TDate.html">TDate</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HPublishDialog">HPublishDialog</a></li><li><a href="global.html#HSvsEdit">HSvsEdit</a></li><li><a href="global.html#SelectLinkField">SelectLinkField</a></li><li><a href="global.html#_addInput">_addInput</a></li><li><a href="global.html#_checkStructureFromSource">_checkStructureFromSource</a></li><li><a href="global.html#_checkYear">_checkYear</a></li><li><a href="global.html#_closeDialog">_closeDialog</a></li><li><a href="global.html#_create">_create</a></li><li><a href="global.html#_destroy">_destroy</a></li><li><a href="global.html#_detectHeurist">_detectHeurist</a></li><li><a href="global.html#_doSave">_doSave</a></li><li><a href="global.html#_fromDataToUI">_fromDataToUI</a></li><li><a href="global.html#_getActionButtons">_getActionButtons</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_initControls">_initControls</a></li><li><a href="global.html#_initDialog">_initDialog</a></li><li><a href="global.html#_initInnerHeader">_initInnerHeader</a></li><li><a href="global.html#_initModal">_initModal</a></li><li><a href="global.html#_initOffcanvas">_initOffcanvas</a></li><li><a href="global.html#_japaneseYearToGregorian">_japaneseYearToGregorian</a></li><li><a href="global.html#_loadParentLookup">_loadParentLookup</a></li><li><a href="global.html#_popupDialog">_popupDialog</a></li><li><a href="global.html#_preImportCheck">_preImportCheck</a></li><li><a href="global.html#_processSPARQLRow">_processSPARQLRow</a></li><li><a href="global.html#_refresh">_refresh</a></li><li><a href="global.html#_refreshCaptcha">_refreshCaptcha</a></li><li><a href="global.html#_setOption">_setOption</a></li><li><a href="global.html#_showRecordViewPopup">_showRecordViewPopup</a></li><li><a href="global.html#_switchToDataMode">_switchToDataMode</a></li><li><a href="global.html#_theme_editing_symbology">_theme_editing_symbology</a></li><li><a href="global.html#_updatePanels">_updatePanels</a></li><li><a href="global.html#_validateFromGregorian">_validateFromGregorian</a></li><li><a href="global.html#addAssoctoAssigned">addAssoctoAssigned</a></li><li><a href="global.html#addBackgroundCircles">addBackgroundCircles</a></li><li><a href="global.html#addContainer">addContainer</a></li><li><a href="global.html#addForce">addForce</a></li><li><a href="global.html#addForegroundCircles">addForegroundCircles</a></li><li><a href="global.html#addIcons">addIcons</a></li><li><a href="global.html#addKeyword">addKeyword</a></li><li><a href="global.html#addLabels">addLabels</a></li><li><a href="global.html#addLevel">addLevel</a></li><li><a href="global.html#addLines">addLines</a></li><li><a href="global.html#addMarkerDefinitions">addMarkerDefinitions</a></li><li><a href="global.html#addNodes">addNodes</a></li><li><a href="global.html#addPrevtoAssigned">addPrevtoAssigned</a></li><li><a href="global.html#addSelectionBox">addSelectionBox</a></li><li><a href="global.html#addTitles">addTitles</a></li><li><a href="global.html#applyRules">applyRules</a></li><li><a href="global.html#autofill_login">autofill_login</a></li><li><a href="global.html#browseRecords">browseRecords</a></li><li><a href="global.html#calculateImageExtentFromWorldFile">calculateImageExtentFromWorldFile</a></li><li><a href="global.html#changeDisplay">changeDisplay</a></li><li><a href="global.html#changeViewMode">changeViewMode</a></li><li><a href="global.html#checkAllOptions">checkAllOptions</a></li><li><a href="global.html#checkStoredSettings">checkStoredSettings</a></li><li><a href="global.html#clearContent">clearContent</a></li><li><a href="global.html#close">close</a></li><li><a href="global.html#closeDialog">closeDialog</a></li><li><a href="global.html#commonCodeInit">commonCodeInit</a></li><li><a href="global.html#commonOnAdd">commonOnAdd</a></li><li><a href="global.html#compareIndexes">compareIndexes</a></li><li><a href="global.html#correctionOfInvalidTerm">correctionOfInvalidTerm</a></li><li><a href="global.html#createOverlay">createOverlay</a></li><li><a href="global.html#currentNode">currentNode</a></li><li><a href="global.html#daysInMonth">daysInMonth</a></li><li><a href="global.html#determineColour">determineColour</a></li><li><a href="global.html#disableUpdateBtn">disableUpdateBtn</a></li><li><a href="global.html#doAction">doAction</a></li><li><a href="global.html#doAuthentication">doAuthentication</a></li><li><a href="global.html#doImport">doImport</a></li><li><a href="global.html#doRegister">doRegister</a></li><li><a href="global.html#doSamlLogin">doSamlLogin</a></li><li><a href="global.html#doSearchByID">doSearchByID</a></li><li><a href="global.html#drag_link_line">drag_link_line</a></li><li><a href="global.html#drag_link_source_id">drag_link_source_id</a></li><li><a href="global.html#drag_link_target_id">drag_link_target_id</a></li><li><a href="global.html#drag_link_timer">drag_link_timer</a></li><li><a href="global.html#dragend">dragend</a></li><li><a href="global.html#dragmove">dragmove</a></li><li><a href="global.html#dragstart">dragstart</a></li><li><a href="global.html#editCMS2">editCMS2</a></li><li><a href="global.html#editCMS_ElementCfg">editCMS_ElementCfg</a></li><li><a href="global.html#editCMS_SelectElement">editCMS_SelectElement</a></li><li><a href="global.html#editCMS_SiteMenu">editCMS_SiteMenu</a></li><li><a href="global.html#editCMS_WidgetCfg">editCMS_WidgetCfg</a></li><li><a href="global.html#editSymbology">editSymbology</a></li><li><a href="global.html#editTheme">editTheme</a></li><li><a href="global.html#enable_register">enable_register</a></li><li><a href="global.html#executeFormula">executeFormula</a></li><li><a href="global.html#f">f</a></li><li><a href="global.html#first_level_rty_ID">first_level_rty_ID</a></li><li><a href="global.html#fixCalendarPickerCMDs">fixCalendarPickerCMDs</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#formatGregJulian">formatGregJulian</a></li><li><a href="global.html#fromJD">fromJD</a></li><li><a href="global.html#fromJSDate">fromJSDate</a></li><li><a href="global.html#fset">fset</a></li><li><a href="global.html#getAllChecked">getAllChecked</a></li><li><a href="global.html#getClass">getClass</a></li><li><a href="global.html#getContainer">getContainer</a></li><li><a href="global.html#getDataFromServer">getDataFromServer</a></li><li><a href="global.html#getEntityRadius">getEntityRadius</a></li><li><a href="global.html#getEraFromGregorian">getEraFromGregorian</a></li><li><a href="global.html#getEraFromJapaneseStr">getEraFromJapaneseStr</a></li><li><a href="global.html#getEraLimits">getEraLimits</a></li><li><a href="global.html#getEras">getEras</a></li><li><a href="global.html#getGephiFormat">getGephiFormat</a></li><li><a href="global.html#getKeywords">getKeywords</a></li><li><a href="global.html#getKeywordsNextStep">getKeywordsNextStep</a></li><li><a href="global.html#getLineLength">getLineLength</a></li><li><a href="global.html#getLineWidth">getLineWidth</a></li><li><a href="global.html#getMarkerWidth">getMarkerWidth</a></li><li><a href="global.html#getNodeDataById">getNodeDataById</a></li><li><a href="global.html#getRecentKeywords">getRecentKeywords</a></li><li><a href="global.html#getRecordOverlayData">getRecordOverlayData</a></li><li><a href="global.html#getRelationOverlayData">getRelationOverlayData</a></li><li><a href="global.html#getRulesArray">getRulesArray</a></li><li><a href="global.html#getSelected">getSelected</a></li><li><a href="global.html#getSelection">getSelection</a></li><li><a href="global.html#getSetting">getSetting</a></li><li><a href="global.html#getURL">getURL</a></li><li><a href="global.html#gregorianToJapaneseStr">gregorianToJapaneseStr</a></li><li><a href="global.html#hMapDocument">hMapDocument</a></li><li><a href="global.html#hRecordAction">hRecordAction</a></li><li><a href="global.html#handleNodeAction">handleNodeAction</a></li><li><a href="global.html#handleSettingsInUI">handleSettingsInUI</a></li><li><a href="global.html#hexToFilter">hexToFilter</a></li><li><a href="global.html#hexportMenu">hexportMenu</a></li><li><a href="global.html#imgFilter">imgFilter</a></li><li><a href="global.html#initProfilePreferences">initProfilePreferences</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isA">isA</a></li><li><a href="global.html#isAssocKeyword">isAssocKeyword</a></li><li><a href="global.html#isMonthSpan">isMonthSpan</a></li><li><a href="global.html#isRecentKeyword">isRecentKeyword</a></li><li><a href="global.html#isTemporal">isTemporal</a></li><li><a href="global.html#isValid">isValid</a></li><li><a href="global.html#japaneseToGregorian">japaneseToGregorian</a></li><li><a href="global.html#japaneseToGregorianStr">japaneseToGregorianStr</a></li><li><a href="global.html#keywordLookup">keywordLookup</a></li><li><a href="global.html#loadHtmlContent">loadHtmlContent</a></li><li><a href="global.html#log10">log10</a></li><li><a href="global.html#login_dialog">login_dialog</a></li><li><a href="global.html#lookupEditions">lookupEditions</a></li><li><a href="global.html#lookupGoogle">lookupGoogle</a></li><li><a href="global.html#lookupHathiTrust">lookupHathiTrust</a></li><li><a href="global.html#lookupKarlsruhePortal">lookupKarlsruhePortal</a></li><li><a href="global.html#lookupWorldCat">lookupWorldCat</a></li><li><a href="global.html#mapIds">mapIds</a></li><li><a href="global.html#menuActionHandler">menuActionHandler</a></li><li><a href="global.html#mergeArraysUnique">mergeArraysUnique</a></li><li><a href="global.html#msgToConsole">msgToConsole</a></li><li><a href="global.html#newDate">newDate</a></li><li><a href="global.html#onAdd">onAdd</a></li><li><a href="global.html#onAuthentication">onAuthentication</a></li><li><a href="global.html#onNodeClick">onNodeClick</a></li><li><a href="global.html#onPageInit">onPageInit</a></li><li><a href="global.html#onRecordNodeClick">onRecordNodeClick</a></li><li><a href="global.html#onRemove">onRemove</a></li><li><a href="global.html#onTermSaveError">onTermSaveError</a></li><li><a href="global.html#open">open</a></li><li><a href="global.html#openRecordInTab">openRecordInTab</a></li><li><a href="global.html#openSearchMenu">openSearchMenu</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#popupDialog">popupDialog</a></li><li><a href="global.html#prevSessionExists">prevSessionExists</a></li><li><a href="global.html#project_keywords">project_keywords</a></li><li><a href="global.html#putSetting">putSetting</a></li><li><a href="global.html#removeAssocByID">removeAssocByID</a></li><li><a href="global.html#removeKeyword">removeKeyword</a></li><li><a href="global.html#removeOverlay">removeOverlay</a></li><li><a href="global.html#removeOverlays">removeOverlays</a></li><li><a href="global.html#removeSetting">removeSetting</a></li><li><a href="global.html#renderAssocKeywods">renderAssocKeywods</a></li><li><a href="global.html#renderContent">renderContent</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#saveRules">saveRules</a></li><li><a href="global.html#selectRecord">selectRecord</a></li><li><a href="global.html#setFormulaMode">setFormulaMode</a></li><li><a href="global.html#setGravity">setGravity</a></li><li><a href="global.html#setLinkMode">setLinkMode</a></li><li><a href="global.html#setSelected">setSelected</a></li><li><a href="global.html#setSelection">setSelection</a></li><li><a href="global.html#setValue">setValue</a></li><li><a href="global.html#setupAssocKeywords">setupAssocKeywords</a></li><li><a href="global.html#setupCaptcha">setupCaptcha</a></li><li><a href="global.html#setupRecentWorks">setupRecentWorks</a></li><li><a href="global.html#setupResetPin">setupResetPin</a></li><li><a href="global.html#show">show</a></li><li><a href="global.html#showEditions">showEditions</a></li><li><a href="global.html#showHelp">showHelp</a></li><li><a href="global.html#showKeyword">showKeyword</a></li><li><a href="global.html#showLoginDialog">showLoginDialog</a></li><li><a href="global.html#showNodeInformation">showNodeInformation</a></li><li><a href="global.html#showSearchBuilder">showSearchBuilder</a></li><li><a href="global.html#showSearchFacetedWizard">showSearchFacetedWizard</a></li><li><a href="global.html#showWarningAboutTermUsage">showWarningAboutTermUsage</a></li><li><a href="global.html#simplePointsToWKT">simplePointsToWKT</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#startRecentWork">startRecentWork</a></li><li><a href="global.html#temporalSimplifyDate">temporalSimplifyDate</a></li><li><a href="global.html#temporalToHumanReadableString">temporalToHumanReadableString</a></li><li><a href="global.html#tick">tick</a></li><li><a href="global.html#toJD">toJD</a></li><li><a href="global.html#toJSDate">toJSDate</a></li><li><a href="global.html#translationFromUI">translationFromUI</a></li><li><a href="global.html#translationSupport">translationSupport</a></li><li><a href="global.html#translationToUI">translationToUI</a></li><li><a href="global.html#truncateText">truncateText</a></li><li><a href="global.html#unselectAssoc">unselectAssoc</a></li><li><a href="global.html#updateAssocDisplay">updateAssocDisplay</a></li><li><a href="global.html#updateAssocList">updateAssocList</a></li><li><a href="global.html#updateCircles">updateCircles</a></li><li><a href="global.html#updateCurvedLines">updateCurvedLines</a></li><li><a href="global.html#updateLabels">updateLabels</a></li><li><a href="global.html#updateNodes">updateNodes</a></li><li><a href="global.html#updateRecentKeywordDisplay">updateRecentKeywordDisplay</a></li><li><a href="global.html#updateRectangles">updateRectangles</a></li><li><a href="global.html#updateRuleBuilder">updateRuleBuilder</a></li><li><a href="global.html#updateStatus">updateStatus</a></li><li><a href="global.html#updateStraightLines">updateStraightLines</a></li><li><a href="global.html#validateResetPin">validateResetPin</a></li><li><a href="global.html#visualizeData">visualizeData</a></li><li><a href="global.html#visualizeSelection">visualizeSelection</a></li><li><a href="global.html#weekDay">weekDay</a></li><li><a href="global.html#weekOfYear">weekOfYear</a></li><li><a href="global.html#zoomed">zoomed</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Jul 24 2025 18:09:14 GMT+0400 (GMT+04:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

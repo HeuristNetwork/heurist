@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: hclient/widgets/lookup/lookupBase.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: hclient/widgets/lookup/lookupBase.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file lookupBase.js
+ * @brief Base widget for all lookup widgets in Heurist.
+ *
+ * @fileOverview
+ * This file defines the `heurist.lookupBase` jQuery UI widget.
+ * This widget provides a base for all lookup widgets in the Heurist system.
+ * It handles the common functionality for searching external services,
+ * displaying results, and mapping selected data to Heurist record fields.
+ *
+ * @project     Heurist academic knowledge management system
+ *
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Brandon McKay &lt;blmckay13@gmail.com>
+ * @author      Ian Johnson &lt;ian.johnson.heurist@gmail.com>
+ * @since       6.0
+ */
+
+/* global stringifyMultiWKT */
+
+/**
+ * Base widget for all lookup widgets.
+ * Inherits from `$.heurist.recordAction`.
+ *
+ * @widget heurist.lookupBase
+ * @extends $.heurist.recordAction
+ */
+$.widget( "heurist.lookupBase", $.heurist.recordAction, {
+
+    /**
+     * Default options for the widget.
+     * These options can be overridden during widget initialization.
+     * Options from `$.heurist.recordAction` are also available.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @property {Object} options
+     * @property {number} [options.height=700] - The height of the dialog.
+     * @property {number} [options.width=800] - The width of the dialog.
+     * @property {boolean} [options.modal=true] - Whether the dialog is modal.
+     * @property {string} [options.title="External lookup"] - The title of the dialog.
+     * @property {string} [options.htmlContent='lookupBase.html'] - The HTML content file for the dialog, located in `hclient/widgets/lookup`.
+     * @property {?string} [options.helpContent=null] - The help content file for the dialog, located in `documentation/context_help`.
+     * @property {?Object} options.mapping - Configuration from `record_lookup_config.json`. Defines how external data fields map to Heurist fields.
+     *   @property {number} options.mapping.rty_ID - The Heurist record type ID for the mapping.
+     *   @property {string} options.mapping.service_id - The ID of the external service.
+     *   @property {Object} options.mapping.fields - An object mapping external field names to Heurist data type IDs (dty_ID).
+     * @property {?Object} options.edit_fields - Realtime values from the edit form fields.
+     * @property {boolean|HRecordSet} [options.edit_record=false] - The recordset of the current record being edited, or `false` if not applicable.
+     * @property {boolean} [options.add_new_record=false] - If `true`, creates a new record upon selection.
+     * @property {Object} options.resultList - Options for the result list widget.
+     *   @property {string} [options.resultList.recordDivEvenClass='recordDiv_blue'] - CSS class for even record divs.
+     *   @property {boolean} [options.resultList.eventbased=false] - If `false`, the result list will not listen to global events.
+     *   @property {boolean} [options.resultList.multiselect=false] - If `false`, allows only one record to be selected.
+     *   @property {string} [options.resultList.select_mode='select_single'] - Selection mode. Typically 'select_single'.
+     *   @property {string} [options.resultList.selectbutton_label='select!!'] - Label for the select button (not currently used).
+     *   @property {string} [options.resultList.view_mode='list'] - Default view mode for the result list (e.g., 'list', 'icon', 'thumb').
+     *   @property {boolean} [options.resultList.show_viewmode=false] - Whether to show view mode selection controls.
+     *   @property {number} [options.resultList.pagesize=20] - Number of records to display per page.
+     *   @property {string} [options.resultList.entityName='Lookups'] - Name of the entity being listed (e.g., "Lookups", "Records").
+     *   @property {string} [options.resultList.empty_remark='&lt;div style="padding:1em 0 1em 0">No records match the search&lt;/div>'] - HTML displayed when no results are found.
+     *   @property {?Array&lt;Object>} [options.resultList.action_buttons] - Additional action buttons to display within each record row. Handler is `resultlistonaction`.
+     */
+    options: {
+
+        height: 700,
+        width:  800,
+        modal:  true,
+        
+        title:  "External lookup",
+        
+        htmlContent: 'lookupBase.html', // in hclient/widgets/lookup folder
+        helpContent: null, // in documentation/context_help folder
+
+        mapping: null, // configuration from record_lookup_config.json
+        edit_fields: null, // realtime values from edit form fields
+        edit_record: false, // recordset of the current record being edited
+
+        add_new_record: false, // if true it creates new record on selection
+
+        resultList: {
+
+            recordDivEvenClass: 'recordDiv_blue',
+            eventbased: false,  //do not listent global events
+
+            multiselect: false, // allow only one record to be selected
+            select_mode: 'select_single', // only accept one record for selection
+            selectbutton_label: 'select!!', // not used
+
+            view_mode: 'list', // result list viewing mode [list, icon, thumb]
+            show_viewmode: false,
+            pagesize: 20, // number of records to display per page,
+
+            entityName: 'Lookups',
+
+            empty_remark: '&lt;div style="padding:1em 0 1em 0">No records match the search&lt;/div>' // For empty results
+
+            //action_buttons - additional buttons within each record row, handler is resultlistonaction
+        }
+    },
+
+    /**
+     * The base URL for the external lookup service.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {string}
+     */
+    baseURL: '',
+
+    /**
+     * The name of the external service.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {string}
+     */
+    serviceName: '',
+
+    /**
+     * Reference to the jQuery UI resultList widget instance.
+     * Used for displaying search results.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {?jQuery}
+     */
+    recordList: null,
+
+    /**
+     * Label for the main action button in the dialog (e.g., "Select").
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {string}
+     */
+    action_button_label: 'Select',
+
+    /**
+     * jQuery object representing the search button(s).
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {?jQuery}
+     */
+    search_buttons: null,
+
+    /**
+     * Selector used to find the search button(s) in the dialog.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {string}
+     */
+    search_button_selector: '#btnStartSearch',
+
+    /**
+     * jQuery object representing the button for saving extra settings/options.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {?jQuery}
+     */
+    save_settings: null,
+
+    /**
+     * Flag to control dialog closing behavior. If true, skips saving additional mapping and closes the dialog.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @type {boolean}
+     */
+    _forceClose: true,
+
+    /**
+     * jQuery object representing the tabs container, used to separate query and results sections.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {?jQuery}
+     */
+    tabs_container: null,
+
+    /**
+     * Index of the tab that displays the result list.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @type {number}
+     */
+    results_tab: 1,
+
+    /**
+     * Object to manage timeouts for certain actions.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @property {?number} timeout.action_timeout - Timeout ID for actions like mapping values.
+     * @property {string} timeout.field_name - Name of the field associated with the timeout.
+     * @property {string|Object|Array} timeout.value - Value associated with the timeout.
+     * @type {Object}
+     */
+    timeout: {
+        action_timeout: null, // Timeout for certain actions
+        field_name: '',
+        value: ''
+    },
+
+    /**
+     * Initializes the widget. Calls the parent's `_init` method.
+     * Note: HTML and dialog are not yet loaded at this stage.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     */
+    _init: function(){
+        this._super(); // whatever you do before this bare in mind that the html and dialog haven't been loaded yet
+    },
+
+    /**
+     * Initialises various UI elements; buttons, selects, result list, etc.
+     * This method is called after the dialog HTML is loaded.
+     * It sets up the result list, tabs, search buttons, save settings button,
+     * and event handlers for user interactions.
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @returns {void} Calls `this._super()`.
+     */
+    _initControls: function(){
+
+        // Init record list
+        this.recordList = this.element.find('#div_result');
+        if(this.recordList.length > 0){
+
+            let context = this;
+
+            // Record render function, is called on resultList updateResultSet
+            this.options.resultList['renderer'] = (recordset, record) => { return context._rendererResultList(recordset, record); };
+
+            this.recordList.resultList(this.options.resultList);
+            this.recordList.resultList('option', 'pagesize', this.options.resultList.pagesize); // so the pagesize doesn't get set to a different value
+
+            // Init select &amp; double click events for result list
+            this._on( this.recordList, {
+                resultlistonselect: (event, selected_recs) => {
+                    this.$H.setDisabled(
+                        this.element.parents('.ui-dialog').find('.btnDoAction'),
+                        selected_recs &amp;&amp; selected_recs.length() &lt; 1
+                    );
+                },
+                resultlistondblclick: (event, selected_recs) => {
+                    if(selected_recs &amp;&amp; selected_recs.length()==1){
+                        this.doAction();
+                    }
+                }
+                /**
+                 * resultlistonpagerender - on loading the result list
+                 * resultlistonaction - on clicking an action button within the record row (action buttons are defined in option action_buttons)
+                 */
+            });
+        }
+
+        // Init tabs
+        if(this.element.find('#tabs-cont').length > 0){
+            this.tabs_container = this.element.find('#tabs-cont').tabs();
+        }
+
+        // Init search button(s)
+        this.search_buttons = this.element.find(this.search_button_selector);
+        if(this.search_buttons.length > 0){
+
+            // Action button styling
+            this.search_buttons.addClass("ui-button-action").button();
+
+            // Handling for 'Search' button
+            this._on(this.search_buttons, {
+                click: this._doSearch
+            });
+
+            // Set search button status based on the existence of input
+            this._on(this.element.find('input, select, .search-input'), {
+                keyup: () => {
+                    let $inputs_with_value = this.element.find('input, select, .search-input').filter((idx, ele) => { 
+                        return !this.$H.isempty($(ele).val());
+                    });
+                    this.$H.setDisabled(this.search_buttons, $inputs_with_value.length == 0);
+                },
+                change: () => {
+                    let $inputs_with_value = this.element.find('input, select, .search-input').filter((idx, ele) => { 
+                        return !this.$H.isempty($(ele).val());
+                    });
+                    this.$H.setDisabled(this.search_buttons, $inputs_with_value.length == 0);
+                }
+            });
+            this.$H.setDisabled(this.search_buttons, true);
+        }
+
+        // Init save settings button
+        this.save_settings = this.element.find('#save-settings');
+        if(this.save_settings.length > 0){
+
+            this.save_settings.button();
+
+            this._on(this.save_settings, {
+                click: () => {
+                    this._saveExtraSettings(true, false);
+                }
+            });
+        }
+
+        // For capturing the 'Enter' key while typing
+        this._on(this.element.find('input.search_on_enter'), {
+            keypress: this.startSearchOnEnterPress
+        });
+
+        // Save extra settings before exiting
+        this._on(this._as_dialog, {
+            dialogbeforeclose: () => {
+                if(!this._forceClose){
+                    this._forceClose = true;
+                    this._saveExtraSettings(true, true);
+                    return false;
+                }
+            }
+        });
+
+        // Setup settings tab
+        this._setupSettings();
+
+        // By default action button is disabled
+        this.$H.setDisabled(this.element.parents('.ui-dialog').find('.btnDoAction'), true);
+
+        return this._super();
+    },
+
+    /**
+     * Handles the 'Enter' key press event on input fields with the class `search_on_enter`.
+     * If 'Enter' is pressed, it prevents the default action, stops event propagation,
+     * and triggers the `_doSearch` method.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {jQuery.Event} event - The keypress event object.
+     */
+    startSearchOnEnterPress: function(event){
+        if(event.key === 'Enter' || event.key === 'NumpadEnter'){
+            this.$H.stopEvent(event);
+            event.preventDefault();
+            this._doSearch();
+        }
+    },
+
+    /**
+     * Gets and customizes the dialog buttons for the bottom bar.
+     * This method overrides the `_getActionButtons` from `$.heurist.recordAction`.
+     * It retrieves the default buttons (typically "Cancel" and "Go") and
+     * customizes the "Go" button's text using `this.action_button_label`.
+     *
+     * The button array structure is typically:
+     * - `buttons[0]`: Cancel/Close button (closes the dialog).
+     * - `buttons[1]`: Go/Select button (calls `doAction`).
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @returns {Array&lt;Object>} An array of dialog button objects, each with properties like `text` and `click`.
+     * @see $.heurist.recordAction#_getActionButtons
+     */
+    _getActionButtons: function(){
+
+        let buttons = this._super(); // setup and retrieve default dialog buttons
+
+        buttons[1].text = window.hWin.HR(this.action_button_label);
+
+        return buttons;
+    },
+
+    /**
+     * Renders the HTML representation for a single record in the result list.
+     * This function is typically passed as a callback to the `resultList` widget.
+     * It constructs HTML displaying the record's icon, title, and ID.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {HRecordSet} recordset - The complete record set containing the record.
+     * @param {Array} record - The individual record object (row) from the recordset to be rendered.
+     *                         This is an array where indices correspond to field positions.
+     * @returns {string} HTML string representing the formatted record for display.
+     */
+    _rendererResultList: function(recordset, record){
+
+        const rec_ID = recordset.fld(record, 'rec_ID');
+        const rec_Title = recordset.fld(record, 'rec_Title');
+        const rec_RecTypeID = recordset.fld(record, 'rec_RecTypeID');
+        const rec_Icon = this.HAPI.iconBaseURL + rec_RecTypeID;
+
+        const thumb = `&lt;div class="recTypeThumb" style="background-image: url(&amp;quot;${rec_Icon}&amp;version=thumb&amp;quot;);">&lt;/div>`;
+
+        const html = `&lt;div class="recordDiv" id="rd${rec_ID}" recid="${rec_ID}" rectype="${rec_RecTypeID}">`
+                    + thumb
+                    + '&lt;div class="recordIcons">'
+                        + `&lt;img src="${this.HAPI.baseURL}hclient/assets/16x16.gif" class="rt-icon" `
+                        +   `style="background-image: url(&amp;quot;${rec_Icon}&amp;quot;)" />`
+                    + '&lt;/div>'
+                    + rec_Title
+                + '&lt;/div>';
+
+        return html;
+    },
+
+    /**
+     * Processes the user's selection from the result list.
+     * This method is typically called when the main action button (e.g., "Select") is clicked.
+     * It retrieves the selected record, prepares the values for Heurist mapping using `prepareValues`,
+     * and then calls `closingAction` to pass the data back and close the dialog.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {string} [url_fld=''] - The field key from the selected record that contains an external URL, if applicable.
+     *                                If provided and the field exists, its value will be added to the `ext_url` property
+     *                                of the response object.
+     * @returns {void}
+     */
+    doAction: function(url_fld = ''){
+
+        this.$Hmsg.bringCoverallToFront(this._as_dialog.parent());
+
+        let [recset, record] = this._getSelection(true);
+        if(recset?.length() &lt; 0 || !record){
+            return;
+        }
+
+        let res = {};
+
+        if(!this.$H.isempty(url_fld) &amp;&amp; recset.getFields().indexOf(url_fld) !== -1){
+            res['ext_url'] = recset.fld(record, url_fld);
+        }else if(!this.$H.isempty(url_fld) &amp;&amp; url_fld.startsWith('http')){
+            res['ext_url'] = url_fld;
+        }
+
+        res = this.prepareValues(recset, record, res);
+
+        this.closingAction(res);
+    },
+
+    /**
+     * Prepares the selected record's field values for Heurist mapping.
+     * It iterates over the fields defined in `this.options.mapping.fields`,
+     * retrieves the corresponding values from the selected record,
+     * processes them using `prepareValue`, and organizes them into a
+     * response object. The response object maps Heurist data type IDs (dty_ID)
+     * to their respective values.
+     *
+     * For multi-value fields, the dty_ID will map to an array of values.
+     *
+     * To trigger a record pointer selection/creation popup in Heurist,
+     * a value for a record pointer field should be an array `[dty_ID, default_searching_value]`.
+     *
+     * An external URL can be included in the response by adding an `ext_url` property
+     * to `dlg_response`. This URL will be displayed in the record pointer guiding popup.
+     * Example: `dlg_response['ext_url'] = '&lt;a href="www.example.com" target="_blank">Link to Example&lt;/a>';`
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {HRecordSet} recordset - The HRecordSet containing the selected record.
+     * @param {Array} record - The selected record object (row) from the recordset.
+     * @param {Object} [dlg_response={}] - An initial response object to which mapped values will be added.
+     * @param {Object} [extra_settings={}] - Additional settings that might be used by `prepareValue` (e.g., for term code checking).
+     * @returns {Object} An object containing the mapped field values, where keys are dty_IDs and
+     *                   values are the corresponding processed data.
+     */
+    prepareValues: function(recordset, record, dlg_response = {}, extra_settings = {}){
+
+        if(!this.$H.isObject(dlg_response)){
+            dlg_response = {};
+        }
+
+        let map_flds = Object.keys(this.options.mapping.fields); // mapped fields names, to access fields of rec
+
+        // Assign individual field values, here you would perform any additional processing for selected values (example. get ids for vocabulrary/terms and record pointers)
+        for(let fld_Name of map_flds){
+
+            let dty_ID = this.options.mapping.fields[fld_Name];
+            if(dty_ID &lt; 1){
+                continue;
+            }
+
+            let values = recordset.fld(record, fld_Name);
+
+            this.prepareValue(values, dty_ID, extra_settings);
+
+            // Check that values is valid, add to response object
+            if(this.$H.isempty(values)){
+                continue;
+            }
+            if(!Object.hasOwn(dlg_response, dty_ID)){
+                dlg_response[dty_ID] = [];
+            }
+            dlg_response[dty_ID] = dlg_response[dty_ID].concat(values);
+        }
+
+        return dlg_response;
+    },
+
+    /**
+     * Processes a single field's value(s) based on its Heurist field type (dty_Type).
+     * This method is called by `prepareValues` for each mapped field.
+     * It converts the input `values` to an array, and then, based on the `dty_Type`
+     * (e.g., 'enum', 'resource', 'relmarker'), it may perform specific processing:
+     * - For 'enum' (vocabulary/term) fields: It can check term codes using `_getTermByCode` if `extra_settings.check_term_codes` is provided.
+     * - For 'resource' (record pointer) or 'relmarker' (relationship marker) fields: It processes values using `_processRecordFields`.
+     * - For other field types: It processes values using `_processValues` (typically trimming strings).
+     *
+     * The `values` parameter is modified in place by the processing methods.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {string|Object|Array&lt;*>} values - The value or values to be processed for the field.
+     *                                        This will be converted into an array.
+     * @param {number} dty_ID - The Heurist data type ID of the field. Used to determine the field type.
+     * @param {Object} extra_settings - Additional settings that may influence processing (e.g., `check_term_codes` for 'enum' fields).
+     * @returns {void}
+     */
+    prepareValue: function(values, dty_ID, extra_settings){
+
+        values = this.valueToArray(values);
+
+        if(this.$H.isempty(values)){
+            return;
+        }
+
+        const field_type = $Db.dty(dty_ID, 'dty_Type');
+
+        switch(field_type){
+            case 'enum':
+                // Match term labels with val, need to return the term's id to properly save its value
+                if(Object.hasOwn(extra_settings, 'check_term_codes')){
+                    this._getTermByCode(extra_settings.check_term_codes, dty_ID, values);
+                }
+                break;
+
+            case 'resource':
+            case 'relmarker':
+                this._processRecordFields(values);
+                break;
+
+            default:
+                this._processValues(values);
+                break;
+        }
+    },
+
+    /**
+     * Performs final actions before closing the lookup dialog.
+     * This includes clearing any active timeout (`this.timeout.action_timeout`),
+     * ensuring the `dlg_response` is an object, optionally filtering out empty
+     * values from the response, hiding the loading coverall, and finally,
+     * setting `this._context_on_close` to the `dlg_response` and closing the dialog.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {Object|boolean} dlg_response - The object containing mapped values to be returned to the calling context.
+     *                                      If `false`, an empty object is typically returned.
+     * @param {boolean} [check_for_empty=true] - If `true`, iterates through the `dlg_response` properties.
+     *                                         If a property's value is an array, it filters out empty values from that array.
+     *                                         It also ensures all property values are arrays.
+     * @returns {void}
+     */
+    closingAction: function(dlg_response, check_for_empty = true){
+
+        if(this.timeout.action_timeout){
+            clearTimeout(this.timeout.action_timeout); // clear timeout
+        }
+
+        if(dlg_response !== false &amp;&amp; this.$H.isempty(dlg_response)){
+            dlg_response = {};
+        }
+
+        if(check_for_empty){
+
+            for(const ID in dlg_response){
+
+                if(!Array.isArray(dlg_response[ID])){
+                    dlg_response[ID] = [dlg_response[ID]];
+                    continue;
+                }
+
+                dlg_response[ID] = dlg_response[ID].filter((value) => !this.$H.isempty(value));
+            }
+        }
+
+        this.$Hmsg.sendCoverallToBack(true);
+
+        // Pass mapped values back and close dialog
+        this._context_on_close = dlg_response;
+        this._as_dialog.dialog('close');
+    },
+
+    /**
+     * Displays the search results using the Heurist `resultList` widget.
+     * It handles different states of the `data` received:
+     * - If `data` is invalid or indicates an error, it clears the result list and shows an error message.
+     * - If `data` is `null` (e.g. no results from a non-erroring query), it clears the result list.
+     * - If `data` is valid, it creates an `HRecordSet` (either from raw data or if `is_record_set` is true)
+     *   and updates the `resultList` widget with this recordset.
+     * It also ensures the results tab is active if tabs are used.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {Object|boolean|null} data - The data to display.
+     *                                   - If `is_record_set` is `false`, `data` should be an object with `fields`, `order`, and `records` properties.
+     *                                   - If `is_record_set` is `true`, `data` should be an object suitable for `new HRecordSet(data)`.
+     *                                   - Can be `false` or `null` to indicate errors or no data.
+     * @param {boolean} [is_record_set=false] - Whether the provided `data` is already in `HRecordSet` constructor format
+     *                                          (typically a response from a Heurist API endpoint).
+     * @returns {void}
+     */
+    _onSearchResult: function(data, is_record_set=false){
+
+        this.recordList.show();
+
+        let invalid_data = data === false 
+            || !this.$H.isObject(data) 
+            || (!is_record_set &amp;&amp; (!Object.hasOwn(data, 'fields') || !Object.hasOwn(data, 'order') || !Object.hasOwn(data, 'records')));
+
+        if(invalid_data &amp;&amp; data !== null){
+
+            this.recordList.resultList('updateResultSet', null);
+            this.$Hmsg.showMsgErr({
+                message: 'Service did not return data in an appropriate format',
+                error_title: 'No valid data'
+            });
+
+            return;
+        }else if(!data){
+            this.recordList.resultList('updateResultSet', null);
+            return;
+        }
+
+        let res_recordset = null;
+        if(!is_record_set){
+
+            let fields = data.fields;
+            let orders = data.order;
+            let records = data.records;
+
+            res_recordset = new HRecordSet({
+                count: orders.length,
+                offset: 0,
+                fields: fields,
+                rectypes: [this.options.mapping.rty_ID],
+                records: records,
+                order: orders,
+                mapenabled: true
+            });
+        }else{
+            res_recordset = new HRecordSet(data);
+        }
+
+        this.recordList.resultList('updateResultSet', res_recordset);
+
+        if(this.tabs_container &amp;&amp; this.tabs_container.tabs('instance') !== undefined){
+            this.tabs_container.tabs('option', 'active', this.results_tab);
+        }
+    },
+
+    /**
+     * Placeholder method for loading extra settings or options.
+     * This method is intended to be overridden by specific lookup widgets
+     * if they need to load or initialize any specific settings in the UI,
+     * particularly within a settings tab.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @returns {void}
+     */
+    _setupSettings: function(){
+        return;
+    },
+
+    /**
+     * Saves extra settings for the lookup service.
+     * These settings are typically specific to the external service being used
+     * and are stored in the `sysIdentification` record's `sys_ExternalReferenceLookups` field
+     * as a JSON string.
+     *
+     * If `settings` is provided and is an object, it updates the service configuration
+     * for the current `service_id` (from `this.options.mapping.service_id`) and saves it.
+     * After a successful save, it updates `this.HAPI.sysinfo['service_config']`
+     * and `this.options.mapping` with the new configuration.
+     *
+     * If `close_dlg` is true, the dialog will be closed after the operation,
+     * regardless of whether settings were actually saved (e.g., if `settings` was not provided).
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {Object|boolean} [settings] - An object containing the extra settings to be saved for the service.
+     *                                   If `false` or not an object, no settings are saved, but the dialog might still close if `close_dlg` is true.
+     * @param {boolean} [close_dlg=false] - Whether to close the dialog after attempting to save settings (or if no settings were provided to save).
+     * @returns {void}
+     */
+    _saveExtraSettings: function(settings, close_dlg = false){
+
+        let services = this.$H.isJSON(this.HAPI.sysinfo['service_config']);
+
+        if(services !== false &amp;&amp; this.$H.isObject(settings)){
+
+            let service_id = this.options.mapping.service_id;
+            services[service_id]['options'] = settings;
+
+            let fields = {
+                'sys_ID': 1,
+                'sys_ExternalReferenceLookups': JSON.stringify(services)
+            };
+    
+            // Update sysIdentification record
+            let request = {
+                'a': 'save',
+                'entity': 'sysIdentification',
+                'request_id': this.$H.random(),
+                'isfull': 0,
+                'fields': fields
+            };
+    
+            this.HAPI.EntityMgr.doRequest(request, (response) => {
+    
+                if(response.status != window.hWin.ResponseStatus.OK){
+                    this.$Hmsg.showMsgErr(response);
+                    return;
+                }
+
+                this.HAPI.sysinfo['service_config'] = this.$H.cloneJSON(services); // update global copy
+
+                if(close_dlg === true){
+                    this._saveExtraSettings(false, true);
+                    return;
+                }
+
+                this.options.mapping = this.$H.cloneJSON(services[service_id]);
+                this.$Hmsg.showMsgFlash('Extra lookup settings saved...', 3000);
+            });
+
+            return;
+        }
+
+        if(close_dlg === true){
+            this._forceClose = true;
+            this._as_dialog.dialog('close');
+        }
+    },
+
+    /**
+     * Retrieves the current settings for dumping the raw BnF record data.
+     * It checks the state of UI elements in the settings tab:
+     * - `input[name="dump_record"]`: A checkbox to enable/disable record dumping.
+     * - `input[name="dump_field"]`: Radio buttons to select the dump target (either 'rec_ScratchPad' or 'dty_ID' for a specific field).
+     * - `#rty_flds`: A select dropdown for the specific field ID if 'dty_ID' is chosen.
+     *
+     * @memberof heurist.lookupBnF
+     * @instance
+     * @private
+     * @returns {Array&lt;boolean, string>} An array where:
+     *          - The first element (`boolean`) is `true` if record dumping is enabled, `false` otherwise.
+     *          - The second element (`string`) is the target field for dumping:
+     *            - 'rec_ScratchPad' if dumping to ScratchPad.
+     *            - The selected dty_ID (as a string) if dumping to a specific field.
+     *            - An empty string if record dumping is disabled.
+     */
+    _getRecDumpSetting: function(){
+
+        if(this.element.find('input[name="dump_record"]').length === 0){
+            return;
+        }
+
+        const get_recdump = this.element.find('input[name="dump_record"]').is(':checked');
+        let recdump_fld = '';
+        
+        if(get_recdump){
+
+            recdump_fld = this.element.find('input[name="dump_field"]:checked').val();
+            if(recdump_fld === 'dty_ID'){
+                recdump_fld = this.element.find('#rty_flds').val();
+            }
+        }
+
+        return [ get_recdump, recdump_fld ];
+    },
+
+    /**
+     * Creates a new Heurist record.
+     * This method is typically used when `this.options.add_new_record` is true and a selection
+     * from the lookup should result in a new record being created in Heurist.
+     * It sends a 'save' request to `this.HAPI.RecordMgr.saveRecord` with the provided
+     * record type ID and details.
+     * After a successful save, it closes the lookup dialog.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {number} rec_RecTypeID - The Heurist record type ID (rty_ID) for the new record.
+     * @param {Object} details - An object containing the field details for the new record.
+     *                           The keys should be dty_IDs and values the data to be saved.
+     * @returns {void}
+     */
+    _addNewRecord: function(rec_RecTypeID, details){
+
+        this.$Hmsg.bringCoverallToFront(this._as_dialog.parent());
+
+        let request = {
+            a: 'save',
+            ID: 0,
+            RecTypeID: rec_RecTypeID,
+            details: details
+        };
+
+        this.HAPI.RecordMgr.saveRecord(request, (response) => {
+
+            this.$Hmsg.sendCoverallToBack();
+
+            if(response.status != window.hWin.ResponseStatus.OK){
+                this.$Hmsg.showMsgErr(response);
+                return;
+            }
+
+            // ... Complete final tasks, then
+            this._as_dialog.dialog('close'); // close dialog
+        });
+    },
+
+    /**
+     * Retrieves the user's selection(s) from the `resultList` widget.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {boolean} [get_first=true] - If `true`, the method will return both the full selected recordset
+     *                                     and the first record from that set. If `false`, it will only return
+     *                                     the full selected recordset (the second element in the returned array will be `null`).
+     * @returns {Array&lt;HRecordSet|Array|null>} An array containing two elements:
+     *                                       - `[0]`: The `HRecordSet` of selected records. `null` if no selection or error.
+     *                                       - `[1]`: The first record (as an array/object) from the selected set if `get_first` is true. `null` otherwise or if no selection.
+     *                                       If no records are selected, it shows a flash message and returns `[null, null]`.
+     */
+    _getSelection: function(get_first = true){
+
+        // get selected recordset
+        let recset = this.recordList.resultList('getSelected', false);
+        if(!recset || recset.length() &lt; 0){
+            this.$Hmsg.showMsgFlash('Please make a selection first...', 3000);
+            return [null, null];
+        }
+
+        if(!get_first){
+            return [recset, null];
+        }
+
+        let record = recset.getFirstRecord(); // get selected record
+
+        return [recset, record];
+    },
+
+    /**
+     * Converts term codes (numbers) in an array of values to their corresponding term IDs.
+     * This method is used for 'enum' (vocabulary/term) fields to ensure that
+     * numeric codes from an external source are mapped to the correct Heurist term IDs.
+     *
+     * It iterates through the `values` array. If a value is a number (or a string representing a number),
+     * it attempts to find an existing term in the specified vocabulary (`vocab_ID`) that has this number as its code.
+     * If a matching term is found, the value in the array is replaced with the term's ID.
+     *
+     * If `vocab_ID` is not provided or invalid, it tries to get a backup vocabulary ID
+     * from the field's definition (`$Db.dty(dty_ID, 'dty_JsonTermIDTree')`).
+     *
+     * The `values` array is modified in place.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {number} vocab_ID - The ID of the vocabulary to check against.
+     * @param {number} dty_ID - The data type ID of the field; used to get a backup vocabulary ID if `vocab_ID` is invalid.
+     * @param {Array&lt;string|number>} values - An array of values to process. Numeric values or numeric strings are checked as term codes.
+     * @returns {Array&lt;string|number>} The modified `values` array, where term codes may have been replaced by term IDs.
+     */
+    _getTermByCode: function(vocab_ID, dty_ID, values){
+
+        if(!vocab_ID || !$Db.trm(vocab_ID)){
+            vocab_ID = $Db.dty(dty_ID, 'dty_JsonTermIDTree');
+        }
+
+        if(vocab_ID &lt; 1){
+            return values;
+        }
+
+        for(let idx = 0; idx &lt; values.length; idx++){
+
+            if(!Number.isInteger(+values[idx])){
+                continue;
+            }
+
+            let existing_term = $Db.getTermByCode(vocab_ID, +values[idx]);
+            if(existing_term !== null){
+                values[idx] = existing_term;
+            }
+        }
+
+        return values;
+    },
+
+    /**
+     * Processes values intended for record pointer ('resource') or relationship marker ('relmarker') fields.
+     * It iterates through the input `values` array and prepares them for Heurist:
+     * - If a value is not a number, it's wrapped in an object: `{value: originalValue, search: originalValue, relation: null}`.
+     *   This structure is suitable for triggering a search popup in Heurist if the record pointer doesn't exist.
+     * - If a value is a number and greater than zero, it's assumed to be a direct Heurist record ID and is kept as is.
+     * - Other numeric values (e.g., 0 or negative) are effectively filtered out as they don't result in a push to `new_values`.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {Array&lt;*>} values - An array of values to be processed.
+     * @returns {Array&lt;number|Object>} A new array containing processed values suitable for record pointer or relationship marker fields.
+     *                                 Record IDs are numbers, and values that need to trigger a search are objects.
+     */
+    _processRecordFields: function(values){
+
+        let new_values = [];
+
+        for(const idx in values){
+
+            if(!this.$H.isNumber(values[idx])){
+                new_values.push({value: values[idx], search: values[idx], relation: null});
+                continue;
+            }
+
+            if(parseInt(values[idx]) > 0){
+                new_values.push(values[idx]);
+            }
+        }
+
+        return new_values;
+    },
+
+    /**
+     * Performs generic processing on an array of values.
+     * It iterates through the `values` array:
+     * - Trims leading and trailing whitespace if the value is a string.
+     * - Removes the value from the array if it becomes empty after trimming (or was initially empty).
+     *
+     * The `values` array is modified in place.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {Array&lt;*>} values - An array of values to process.
+     * @returns {void}
+     */
+    _processValues: function(values){
+
+        for(let idx = 0; idx &lt; values.length; idx++){
+
+            let value = values[idx];
+            value = typeof value === 'string' ? value.trim() : value;
+
+            !this.$H.isempty(value) || values.splice(idx, 1);
+        }
+    },
+
+    /**
+     * Sets up a timeout to handle potential issues during the value mapping process.
+     * If the mapping process (which might involve asynchronous operations or complex transformations
+     * for certain lookup types, e.g., BnF Bib lookup) takes too long, this timeout
+     * will trigger an error message.
+     *
+     * The timeout is set to 20 seconds. If it elapses, it:
+     * - Hides the loading coverall.
+     * - Constructs an error message detailing the problematic field and value.
+     * - Displays the error message using `this.$Hmsg.showMsgErr`.
+     *
+     * The timeout ID is stored in `this.timeout.action_timeout`.
+     * `this.timeout.field_name` and `this.timeout.value` should be set before or when
+     * this function is called to provide context in the error message.
+     * This function is typically called before a potentially long mapping operation.
+     * The timeout should be cleared using `clearTimeout(this.timeout.action_timeout)`
+     * if the operation completes successfully within the time limit (see `closingAction`).
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @returns {void}
+     */
+    setupTimeout: function(){
+
+        this.timeout.action_timeout = setTimeout(() => {
+
+            this.$Hmsg.sendCoverallToBack();
+
+            let field = this.timeout.field_name;
+            let value = this.timeout.value;
+            let dty_ID = this.options.mapping.fields[field];
+
+            if(Array.isArray(value) || this.$H.isObject(value)){
+                value = JSON.stringify(value);
+            }
+
+            this.$Hmsg.showMsgErr({
+                message: 'An error has occurred with mapping values to their respective fields,&lt;br>'
+                        + 'please report this by using the bug reporter under Help at the top right of the main screen or,&lt;br>'
+                        + 'via email directly to support@heuristnetwork.org so we can fix this quickly.&lt;br>&lt;br>'
+                        + 'Invalid field details:&lt;br>'
+                        + `Response field - "${field}"&lt;br>`
+                        + `Record field - "${$Db.rst(this.options.mapping.rty_ID, dty_ID, 'rst_DisplayName')}" (&lt;em>${$Db.dty(dty_ID, 'dty_Type')}&lt;/em>)&lt;br>`
+                        + `Value to insert - "${value}"&lt;br>`,
+                error_title: 'Saving selection canceled',
+                status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+            });
+        }, 20000); // set timeout to 20 seconds
+    },
+
+    /**
+     * Checks if the number of results (`result_size`) exceeds a specified maximum (`max_size`).
+     * If it does, a dialog message is displayed to the user, informing them that
+     * only the first `max_size` records are shown and advising them to narrow their search.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {number} result_size - The total number of results obtained from the search.
+     * @param {number} max_size - The maximum number of results that are displayed or processed.
+     * @returns {void}
+     */
+    checkResultSize: function(result_size, max_size){
+
+        if(result_size > max_size){
+            this.$Hmsg.showMsgDlg(
+                `There are ${result_size} records satisfying these criteria, only the first ${max_size} are shown.&lt;br>Please narrow your search.`
+            );
+        }
+    },
+
+    /**
+     * Converts a given country name or existing code to a standardized two-letter country code.
+     * This method primarily handles specific cases where country names or codes might be
+     * inconsistent or require mapping to a standard ISO 3166-1 alpha-2 code.
+     *
+     * It first checks if the input `country_code` is empty and returns an empty string if so.
+     * It then attempts to retrieve term information (label and code) if the input is a term ID.
+     *
+     * A switch statement handles known special cases:
+     * - 'Iran' -> 'IR'
+     * - 'Kyrgistan' (misspelling of Kyrgyzstan) -> 'KG'
+     * - 'Syria' -> 'SY'
+     * - 'Taiwan' -> 'TW'
+     * - 'UAE' (United Arab Emirates) -> 'AE'
+     * - 'UK' (United Kingdom) -> 'GB'
+     * - 'USA' (United States of America) -> 'US'
+     * - 'Vietnam' -> 'VN'
+     *
+     * If no special case matches, the original (potentially term-derived) code is returned.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {string|number} country_code - The country name, existing code, or term ID to be converted.
+     * @returns {string} The standardized two-letter country code, or the original code if no mapping is applied,
+     *                   or an empty string if the input is empty.
+     */
+    _getCountryCode: function(country_code){
+
+        if(this.$H.isempty(country_code)){
+            return '';
+        }
+
+        let term_label = $Db.trm(country_code, 'trm_Label');
+        let _countryCode = $Db.trm(country_code, 'trm_Code');
+
+        if(typeof term_label === 'object' || typeof _countryCode === 'object'){
+            return '';
+        }
+
+        switch (term_label) {
+            case 'Iran':
+                _countryCode = 'IR';
+                break;
+            case 'Kyrgistan': // Kyrgzstan
+                _countryCode = 'KG';
+                break;
+            case 'Syria':
+                _countryCode = 'SY';
+                break;
+            case 'Taiwan':
+                _countryCode = 'TW';
+                break;
+            case 'UAE':
+                _countryCode = 'AE';
+                break;
+            case 'UK':
+                _countryCode = 'GB';
+                break;
+            case 'USA':
+                _countryCode = 'US';
+                break;
+            case 'Vietnam':
+                _countryCode = 'VN';
+                break;
+            default:
+                break;
+        }
+
+        return _countryCode;
+    },
+
+    /**
+     * Retrieves a value from a nested object structure using an array of keys (path parts).
+     * This function traverses the `value` object according to the sequence of keys in `fld_Names`.
+     *
+     * Example:
+     * `fld_Names = ['location', 'address', 'street']`
+     * `value = { location: { address: { street: 'Main St' } } }`
+     * Result: `'Main St'`
+     *
+     * If at any point a key does not exist or the current `value` becomes undefined,
+     * the traversal stops.
+     * There's a special case: if a part is 'count' and the path up to that point is invalid,
+     * it returns 0 (intended for getting counts of potentially non-existent arrays).
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {Array&lt;string>} fld_Names - An array of strings representing the path (sequence of keys) to the desired value.
+     * @param {Object|Array&lt;*>} value - The object or array from which to retrieve the nested value.
+     * @returns {*} The retrieved nested value. If the path is invalid or any intermediate key
+     *              is not found, it returns the value at the point of failure (which might be `undefined`).
+     *              Returns `0` if 'count' is accessed on an invalid path. Returns the original `value` if it's initially empty.
+     */
+    getValueByParts: function(fld_Names, value){
+
+        if(this.$H.isempty(value)){
+            return value;
+        }
+
+        for(const part of fld_Names){
+            if(value &amp;&amp; !this.$H.isempty(value[part])){
+                value = value[part];
+            }else if(part == 'count'){
+                value = 0;
+            }
+        }
+
+        return value;
+    },
+
+    /**
+     * Translates a GeoJSON geometry object into a Well-Known Text (WKT) string,
+     * prefixed with a Heurist geometry type code.
+     *
+     * The input `value` is expected to be a GeoJSON geometry object (e.g., Point, Polygon).
+     * It's first wrapped into a GeoJSON Feature object: `{type: 'Feature', geometry: value}`.
+     * Then, `stringifyMultiWKT` (a global function) is used to convert this Feature to a WKT string.
+     *
+     * Based on the WKT string content, a Heurist-specific type code is prepended:
+     * - 'm ' (multi): If WKT contains 'GEOMETRYCOLLECTION' or 'MULTI'.
+     * - 'l ' (line): If WKT contains 'LINESTRING' (and not multi).
+     * - 'pl' (polygon): If WKT contains 'POLYGON' (and not multi or line).
+     * - 'p ' (point): Default for other geometry types (e.g., Point).
+     *
+     * If the resulting WKT string is empty, an empty string is returned.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {Object} value - A GeoJSON geometry object (e.g., `{ type: "Point", coordinates: [lon, lat] }`).
+     * @returns {string} The WKT string representation of the geometry, prefixed with a Heurist type code (e.g., "p POINT(10 20)").
+     *                   Returns an empty string if the WKT conversion results in an empty string.
+     */
+    createGeoFeature: function(value){
+
+        value = {type: 'Feature', geometry: value};
+
+        let wkt = stringifyMultiWKT(value);    
+
+        if(this.$H.isempty(wkt)){
+            return '';
+        }
+
+        let typeCode = 'm';
+        if(wkt.indexOf('GEOMETRYCOLLECTION')&lt;0 &amp;&amp; wkt.indexOf('MULTI')&lt;0){
+            if(wkt.indexOf('LINESTRING')>=0){
+                typeCode = 'l';
+            }else if(wkt.indexOf('POLYGON')>=0){
+                typeCode = 'pl';
+            }else {
+                typeCode = 'p';
+            }
+        }
+
+        return `${typeCode} ${wkt}`;
+    },
+
+    /**
+     * Constructs a WKT POINT string from longitude and latitude values,
+     * prefixed with the Heurist point type code 'p '.
+     *
+     * If either `long` or `lat` is empty (as determined by `this.$H.isempty`),
+     * an empty string is returned.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {number|string} long - The longitude value.
+     * @param {number|string} lat - The latitude value.
+     * @returns {string} A WKT POINT string formatted as "p POINT(longitude latitude)" (e.g., "p POINT(151.2093 -33.8688)"),
+     *                   or an empty string if either longitude or latitude is empty.
+     */
+    constructLocation: function(long, lat){
+
+        return !this.$H.isempty(long) &amp;&amp; !this.$H.isempty(lat)
+                ? `p POINT(${long} ${lat})`
+                : '';
+    },
+
+    /**
+     * Extracts a start or end time from a GeoJSON-T `when` object's `timespans` array.
+     *
+     * The `fld_Names` array is expected to indicate the desired part of the timespan.
+     * Specifically, `fld_Names[0]` should start with 'when' (e.g., 'when', 'when.start', 'when.end'),
+     * and `fld_Names[2]` should indicate 'start' or 'end'.
+     *
+     * If these conditions are met and the `value` object has a `timespans` array,
+     * it attempts to extract:
+     * - `value.timespans[0].start` if `fld_Names[2]` starts with 'start'.
+     * - `value.timespans[0].end` if `fld_Names[2]` starts with 'end'.
+     *
+     * If the conditions are not met or the structure is not as expected, the original `value` is returned.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {Array&lt;string>} fld_Names - An array of field name parts, typically derived from splitting a complex field name.
+     *                                  Expected structure: `['when', &lt;anything>, 'start'|'end', ...]`
+     * @param {Object} value - The GeoJSON-T `when` object, expected to have a `timespans` property
+     *                         if start/end times are to be extracted.
+     *                         Example: `{ timespans: [{ start: "2023-01-01", end: "2023-12-31" }] }`
+     * @returns {string|Object} The extracted start or end time string if successful, otherwise the original `value` object.
+     */
+    getTimespan: function(fld_Names, value){
+
+        if(!fld_Names[0].startsWith('when') || this.$H.isempty(value)){
+            return value;
+        }
+
+        if(fld_Names[2].startsWith('start') &amp;&amp; value['timespans']){
+            value = value['timespans'][0]['start'];
+        }else if(fld_Names[2].startsWith('end') &amp;&amp; value['timespans']){
+            value = value['timespans'][0]['end'];
+        }
+
+        return value;
+    },
+
+    /**
+     * Performs the search operation by sending a request to the Heurist server-side lookup handler.
+     * It constructs the full URL for the external service using `this.baseURL` and the provided `parameters`.
+     * If `parameters` are empty or result in an empty query string, it shows an error and returns.
+     *
+     * The actual request to the external service is proxied through a Heurist PHP script
+     * (`/heurist/hserv/controller/record_lookup.php`) via `this.HAPI.RecordMgr.lookup_external_service`.
+     *
+     * Before sending the request, it shows a loading coverall.
+     * On receiving a response:
+     * - It hides the loading coverall.
+     * - Parses the response as JSON.
+     * - If the response indicates an error (e.g., `response.status != window.hWin.ResponseStatus.OK`), it shows an error message.
+     * - If the response is not valid JSON or an unexpected format, it shows an error message.
+     * - On a successful and valid response, it calls `this._handleSearchResult(response)` to process and display the results.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {Object} parameters - An object containing key-value pairs to be converted into URL query parameters for the external service.
+     * @param {Object} [request={}] - Additional parameters to be passed to the `lookup_external_service` HAPI call.
+     *                                This can be used to customize the request to the Heurist proxy.
+     *                                It's extended with `service` (the full external URL) and `serviceType` (`this.serviceName`).
+     * @returns {void}
+     */
+    _doSearch: function(parameters, request = {}){
+
+        // Prepare URL
+        let full_url = this.baseURL;
+        if(!full_url.endsWith('?') &amp;&amp; !full_url.endsWith('&amp;')){
+            full_url += full_url.indexOf('?') === false ? '?' : '&amp;';
+        }
+
+        // Process + Add parameters
+        let has_params = false;
+        if(!this.$H.isempty(parameters) &amp;&amp; this.$H.isObject(parameters)){
+            let params = {};
+            for(let key in parameters){
+                if(Object.hasOwn(parameters, key) &amp;&amp; !this.$H.isempty(parameters[key])){
+                    params[key] = parameters[key];
+                }
+            }
+            has_params = Object.keys(params).length > 0;
+            full_url += has_params ? new URLSearchParams(params).toString() : '';
+        }
+
+        if(!has_params){
+            this.$Hmsg.showMsgErr({
+                status: window.hWin.ResponseStatus.ACTION_BLOCKED,
+                message: 'Please enter a value into one of the input fields'
+            });
+            return;
+        }
+
+        request = $.extend({
+            service: full_url,
+            serviceType: this.serviceName
+        }, request);
+
+        this.$Hmsg.bringCoverallToFront(this.element);
+
+        // calls /heurist/hserv/controller/record_lookup.php
+        this.HAPI.RecordMgr.lookup_external_service(request, (response) => {
+
+            this.$Hmsg.sendCoverallToBack(); // hide loading cover
+
+            response = this.$H.isJSON(response);
+
+            if(Object.hasOwn(response, 'status') &amp;&amp; response.status != window.hWin.ResponseStatus.OK){ // Error return
+                this.$Hmsg.showMsgErr(response);
+                return;
+            }else if(!response){
+                this.$Hmsg.showMsgErr({
+                    status: window.hWin.ResponseStatus.UNKNOWN_ERROR,
+                    message: 'Service data was returned in an unhandled format.'
+                });
+                return;
+            }
+
+            this._handleSearchResult(response);
+        });
+    },
+
+    /**
+     * Handles the response from the server-side search (`_doSearch`).
+     * In this base implementation, it directly calls `this._onSearchResult(response)`
+     * to process and display the results.
+     *
+     * This method can be overridden by specific lookup widgets if they need
+     * to perform intermediate processing on the response before displaying it.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @private
+     * @param {Object} response - The JSON response object received from the Heurist server-side lookup handler.
+     * @returns {void}
+     */
+    _handleSearchResult: function(response){
+        this._onSearchResult(response);
+    },
+
+    /**
+     * Transforms a given input value into an array and filters out any empty values.
+     * This utility method is used to ensure that values being prepared for Heurist fields,
+     * especially multi-value fields, are consistently in array format.
+     *
+     * - If `values` is an object, it's converted to an array of its values (`Object.values(values)`).
+     * - If `values` is not an array (e.g., a string or number), it's wrapped in a single-element array.
+     *   Empty initial values (as per `this.$H.isempty`) result in an array with an empty string `['']`,
+     *   which is then filtered.
+     * - Finally, it filters the resulting array to remove any values that are considered empty
+     *   by `this.$H.isempty`.
+     *
+     * @memberof heurist.lookupBase
+     * @instance
+     * @param {string|Object|Array&lt;*>} values - The input value(s) to be transformed.
+     * @returns {Array&lt;*>} An array of values, with empty values removed.
+     */
+    valueToArray: function(values){
+
+        if(this.$H.isObject(values)){
+            values = Object.values(values);
+        }
+        if(!Array.isArray(values)){
+            values = this.$H.isempty(values) ? '' : values;
+            values = [values];
+        }
+
+        values = values.filter((val) => !this.$H.isempty(val));
+
+        return values;
+    }
+});</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="HEURIST4.dbs.html">dbs</a></li><li><a href="HEURIST4.geo.html">geo</a></li><li><a href="HEURIST4.msg.html">msg</a></li><li><a href="HEURIST4.query.html">query</a></li><li><a href="HEURIST4.util.html">util</a></li><li><a href="NodeSelection.html">NodeSelection</a></li><li><a href="heurist.buttonsMenu.html">buttonsMenu</a></li><li><a href="heurist.controlPanel.html">controlPanel</a></li><li><a href="heurist.dbAction.html">dbAction</a></li><li><a href="heurist.dbVerify.html">dbVerify</a></li><li><a href="heurist.dbVerifyURLs.html">dbVerifyURLs</a></li><li><a href="heurist.editTranslations.html">editTranslations</a></li><li><a href="heurist.editing_input.html">editing_input</a></li><li><a href="heurist.navigation.html">navigation</a></li><li><a href="heurist.recordAccess.options.html">options</a></li><li><a href="heurist.recordAction.options.html">options</a></li><li><a href="heurist.recordAdd.options.html">options</a></li><li><a href="heurist.recordAddButton.options.html">options</a></li><li><a href="heurist.recordAddLink.options.html">options</a></li><li><a href="heurist.recordAddLinkMatch.options.html">options</a></li><li><a href="heurist.recordArchive.options.html">options</a></li><li><a href="heurist.recordBookmark.options.html">options</a></li><li><a href="heurist.recordDataTable.options.html">options</a></li><li><a href="heurist.recordDelete.options.html">options</a></li><li><a href="heurist.recordExport.options.html">options</a></li><li><a href="heurist.recordExportCSV.options.html">options</a></li><li><a href="heurist.recordFindDuplicates.options.html">options</a></li><li><a href="heurist.recordImportAnnotations.options.html">options</a></li><li><a href="heurist.recordNotify.options.html">options</a></li><li><a href="heurist.recordRate.options.html">options</a></li><li><a href="heurist.recordTag.options.html">options</a></li><li><a href="heurist.recordTemplate.options.html">options</a></li><li><a href="heurist.recordTitles.options.html">options</a></li><li><a href="heurist.recordUploadedFilesIndex.options.html">options</a></li><li><a href="heurist.selectFile.html">selectFile</a></li><li><a href="heurist.slidersMenu.html">slidersMenu</a></li></ul><h3>Classes</h3><ul><li><a href="ActionHandler.html">ActionHandler</a></li><li><a href="CmsManager.html">CmsManager</a></li><li><a href="Color.html">Color</a></li><li><a href="CrosstabsAnalysis.html">CrosstabsAnalysis</a></li><li><a href="EditorCodeMirror.html">EditorCodeMirror</a></li><li><a href="HEditing.html">HEditing</a></li><li><a href="HLayout.html">HLayout</a></li><li><a href="HLayoutMgr.html">HLayoutMgr</a></li><li><a href="HMapLayer.html">HMapLayer</a></li><li><a href="HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRapidFieldAdditions.HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRecordSearch.html">HRecordSearch</a></li><li><a href="HRecordSet.html">HRecordSet</a></li><li><a href="HSystemMgr.html">HSystemMgr</a></li><li><a href="HintDiv.html">HintDiv</a></li><li><a href="JapaneseCalendar.html">JapaneseCalendar</a></li><li><a href="L.Control.Help.html">Help</a></li><li><a href="L.Control.Manager.html">Manager</a></li><li><a href="L.Control.Publish.html">Publish</a></li><li><a href="Solver.html">Solver</a></li><li><a href="TDuration.html">TDuration</a></li><li><a href="Temporal.html">Temporal</a></li><li><a href="hAPI.html">hAPI</a></li><li><a href="hAPI-HRecordMgr.html">HRecordMgr</a></li><li><a href="window.TDate.html">TDate</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HPublishDialog">HPublishDialog</a></li><li><a href="global.html#HSvsEdit">HSvsEdit</a></li><li><a href="global.html#SelectLinkField">SelectLinkField</a></li><li><a href="global.html#_addInput">_addInput</a></li><li><a href="global.html#_checkStructureFromSource">_checkStructureFromSource</a></li><li><a href="global.html#_checkYear">_checkYear</a></li><li><a href="global.html#_closeDialog">_closeDialog</a></li><li><a href="global.html#_create">_create</a></li><li><a href="global.html#_destroy">_destroy</a></li><li><a href="global.html#_detectHeurist">_detectHeurist</a></li><li><a href="global.html#_doSave">_doSave</a></li><li><a href="global.html#_fromDataToUI">_fromDataToUI</a></li><li><a href="global.html#_getActionButtons">_getActionButtons</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_initControls">_initControls</a></li><li><a href="global.html#_initDialog">_initDialog</a></li><li><a href="global.html#_initInnerHeader">_initInnerHeader</a></li><li><a href="global.html#_initModal">_initModal</a></li><li><a href="global.html#_initOffcanvas">_initOffcanvas</a></li><li><a href="global.html#_japaneseYearToGregorian">_japaneseYearToGregorian</a></li><li><a href="global.html#_loadParentLookup">_loadParentLookup</a></li><li><a href="global.html#_popupDialog">_popupDialog</a></li><li><a href="global.html#_preImportCheck">_preImportCheck</a></li><li><a href="global.html#_processSPARQLRow">_processSPARQLRow</a></li><li><a href="global.html#_refresh">_refresh</a></li><li><a href="global.html#_refreshCaptcha">_refreshCaptcha</a></li><li><a href="global.html#_setOption">_setOption</a></li><li><a href="global.html#_showRecordViewPopup">_showRecordViewPopup</a></li><li><a href="global.html#_switchToDataMode">_switchToDataMode</a></li><li><a href="global.html#_theme_editing_symbology">_theme_editing_symbology</a></li><li><a href="global.html#_updatePanels">_updatePanels</a></li><li><a href="global.html#_validateFromGregorian">_validateFromGregorian</a></li><li><a href="global.html#addAssoctoAssigned">addAssoctoAssigned</a></li><li><a href="global.html#addBackgroundCircles">addBackgroundCircles</a></li><li><a href="global.html#addContainer">addContainer</a></li><li><a href="global.html#addForce">addForce</a></li><li><a href="global.html#addForegroundCircles">addForegroundCircles</a></li><li><a href="global.html#addIcons">addIcons</a></li><li><a href="global.html#addKeyword">addKeyword</a></li><li><a href="global.html#addLabels">addLabels</a></li><li><a href="global.html#addLevel">addLevel</a></li><li><a href="global.html#addLines">addLines</a></li><li><a href="global.html#addMarkerDefinitions">addMarkerDefinitions</a></li><li><a href="global.html#addNodes">addNodes</a></li><li><a href="global.html#addPrevtoAssigned">addPrevtoAssigned</a></li><li><a href="global.html#addSelectionBox">addSelectionBox</a></li><li><a href="global.html#addTitles">addTitles</a></li><li><a href="global.html#applyRules">applyRules</a></li><li><a href="global.html#autofill_login">autofill_login</a></li><li><a href="global.html#browseRecords">browseRecords</a></li><li><a href="global.html#calculateImageExtentFromWorldFile">calculateImageExtentFromWorldFile</a></li><li><a href="global.html#changeDisplay">changeDisplay</a></li><li><a href="global.html#changeViewMode">changeViewMode</a></li><li><a href="global.html#checkAllOptions">checkAllOptions</a></li><li><a href="global.html#checkStoredSettings">checkStoredSettings</a></li><li><a href="global.html#clearContent">clearContent</a></li><li><a href="global.html#close">close</a></li><li><a href="global.html#closeDialog">closeDialog</a></li><li><a href="global.html#commonCodeInit">commonCodeInit</a></li><li><a href="global.html#commonOnAdd">commonOnAdd</a></li><li><a href="global.html#compareIndexes">compareIndexes</a></li><li><a href="global.html#correctionOfInvalidTerm">correctionOfInvalidTerm</a></li><li><a href="global.html#createOverlay">createOverlay</a></li><li><a href="global.html#currentNode">currentNode</a></li><li><a href="global.html#daysInMonth">daysInMonth</a></li><li><a href="global.html#determineColour">determineColour</a></li><li><a href="global.html#disableUpdateBtn">disableUpdateBtn</a></li><li><a href="global.html#doAction">doAction</a></li><li><a href="global.html#doAuthentication">doAuthentication</a></li><li><a href="global.html#doImport">doImport</a></li><li><a href="global.html#doRegister">doRegister</a></li><li><a href="global.html#doSamlLogin">doSamlLogin</a></li><li><a href="global.html#doSearchByID">doSearchByID</a></li><li><a href="global.html#drag_link_line">drag_link_line</a></li><li><a href="global.html#drag_link_source_id">drag_link_source_id</a></li><li><a href="global.html#drag_link_target_id">drag_link_target_id</a></li><li><a href="global.html#drag_link_timer">drag_link_timer</a></li><li><a href="global.html#dragend">dragend</a></li><li><a href="global.html#dragmove">dragmove</a></li><li><a href="global.html#dragstart">dragstart</a></li><li><a href="global.html#editCMS2">editCMS2</a></li><li><a href="global.html#editCMS_ElementCfg">editCMS_ElementCfg</a></li><li><a href="global.html#editCMS_SelectElement">editCMS_SelectElement</a></li><li><a href="global.html#editCMS_SiteMenu">editCMS_SiteMenu</a></li><li><a href="global.html#editCMS_WidgetCfg">editCMS_WidgetCfg</a></li><li><a href="global.html#editSymbology">editSymbology</a></li><li><a href="global.html#editTheme">editTheme</a></li><li><a href="global.html#enable_register">enable_register</a></li><li><a href="global.html#executeFormula">executeFormula</a></li><li><a href="global.html#f">f</a></li><li><a href="global.html#first_level_rty_ID">first_level_rty_ID</a></li><li><a href="global.html#fixCalendarPickerCMDs">fixCalendarPickerCMDs</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#formatGregJulian">formatGregJulian</a></li><li><a href="global.html#fromJD">fromJD</a></li><li><a href="global.html#fromJSDate">fromJSDate</a></li><li><a href="global.html#fset">fset</a></li><li><a href="global.html#getAllChecked">getAllChecked</a></li><li><a href="global.html#getClass">getClass</a></li><li><a href="global.html#getContainer">getContainer</a></li><li><a href="global.html#getDataFromServer">getDataFromServer</a></li><li><a href="global.html#getEntityRadius">getEntityRadius</a></li><li><a href="global.html#getEraFromGregorian">getEraFromGregorian</a></li><li><a href="global.html#getEraFromJapaneseStr">getEraFromJapaneseStr</a></li><li><a href="global.html#getEraLimits">getEraLimits</a></li><li><a href="global.html#getEras">getEras</a></li><li><a href="global.html#getGephiFormat">getGephiFormat</a></li><li><a href="global.html#getKeywords">getKeywords</a></li><li><a href="global.html#getKeywordsNextStep">getKeywordsNextStep</a></li><li><a href="global.html#getLineLength">getLineLength</a></li><li><a href="global.html#getLineWidth">getLineWidth</a></li><li><a href="global.html#getMarkerWidth">getMarkerWidth</a></li><li><a href="global.html#getNodeDataById">getNodeDataById</a></li><li><a href="global.html#getRecentKeywords">getRecentKeywords</a></li><li><a href="global.html#getRecordOverlayData">getRecordOverlayData</a></li><li><a href="global.html#getRelationOverlayData">getRelationOverlayData</a></li><li><a href="global.html#getRulesArray">getRulesArray</a></li><li><a href="global.html#getSelected">getSelected</a></li><li><a href="global.html#getSelection">getSelection</a></li><li><a href="global.html#getSetting">getSetting</a></li><li><a href="global.html#getURL">getURL</a></li><li><a href="global.html#gregorianToJapaneseStr">gregorianToJapaneseStr</a></li><li><a href="global.html#hMapDocument">hMapDocument</a></li><li><a href="global.html#hRecordAction">hRecordAction</a></li><li><a href="global.html#handleNodeAction">handleNodeAction</a></li><li><a href="global.html#handleSettingsInUI">handleSettingsInUI</a></li><li><a href="global.html#hexToFilter">hexToFilter</a></li><li><a href="global.html#hexportMenu">hexportMenu</a></li><li><a href="global.html#imgFilter">imgFilter</a></li><li><a href="global.html#initProfilePreferences">initProfilePreferences</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isA">isA</a></li><li><a href="global.html#isAssocKeyword">isAssocKeyword</a></li><li><a href="global.html#isMonthSpan">isMonthSpan</a></li><li><a href="global.html#isRecentKeyword">isRecentKeyword</a></li><li><a href="global.html#isTemporal">isTemporal</a></li><li><a href="global.html#isValid">isValid</a></li><li><a href="global.html#japaneseToGregorian">japaneseToGregorian</a></li><li><a href="global.html#japaneseToGregorianStr">japaneseToGregorianStr</a></li><li><a href="global.html#keywordLookup">keywordLookup</a></li><li><a href="global.html#loadHtmlContent">loadHtmlContent</a></li><li><a href="global.html#log10">log10</a></li><li><a href="global.html#login_dialog">login_dialog</a></li><li><a href="global.html#lookupEditions">lookupEditions</a></li><li><a href="global.html#lookupGoogle">lookupGoogle</a></li><li><a href="global.html#lookupHathiTrust">lookupHathiTrust</a></li><li><a href="global.html#lookupKarlsruhePortal">lookupKarlsruhePortal</a></li><li><a href="global.html#lookupWorldCat">lookupWorldCat</a></li><li><a href="global.html#mapIds">mapIds</a></li><li><a href="global.html#menuActionHandler">menuActionHandler</a></li><li><a href="global.html#mergeArraysUnique">mergeArraysUnique</a></li><li><a href="global.html#msgToConsole">msgToConsole</a></li><li><a href="global.html#newDate">newDate</a></li><li><a href="global.html#onAdd">onAdd</a></li><li><a href="global.html#onAuthentication">onAuthentication</a></li><li><a href="global.html#onNodeClick">onNodeClick</a></li><li><a href="global.html#onPageInit">onPageInit</a></li><li><a href="global.html#onRecordNodeClick">onRecordNodeClick</a></li><li><a href="global.html#onRemove">onRemove</a></li><li><a href="global.html#onTermSaveError">onTermSaveError</a></li><li><a href="global.html#open">open</a></li><li><a href="global.html#openRecordInTab">openRecordInTab</a></li><li><a href="global.html#openSearchMenu">openSearchMenu</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#popupDialog">popupDialog</a></li><li><a href="global.html#prevSessionExists">prevSessionExists</a></li><li><a href="global.html#project_keywords">project_keywords</a></li><li><a href="global.html#putSetting">putSetting</a></li><li><a href="global.html#removeAssocByID">removeAssocByID</a></li><li><a href="global.html#removeKeyword">removeKeyword</a></li><li><a href="global.html#removeOverlay">removeOverlay</a></li><li><a href="global.html#removeOverlays">removeOverlays</a></li><li><a href="global.html#removeSetting">removeSetting</a></li><li><a href="global.html#renderAssocKeywods">renderAssocKeywods</a></li><li><a href="global.html#renderContent">renderContent</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#saveRules">saveRules</a></li><li><a href="global.html#selectRecord">selectRecord</a></li><li><a href="global.html#setFormulaMode">setFormulaMode</a></li><li><a href="global.html#setGravity">setGravity</a></li><li><a href="global.html#setLinkMode">setLinkMode</a></li><li><a href="global.html#setSelected">setSelected</a></li><li><a href="global.html#setSelection">setSelection</a></li><li><a href="global.html#setValue">setValue</a></li><li><a href="global.html#setupAssocKeywords">setupAssocKeywords</a></li><li><a href="global.html#setupCaptcha">setupCaptcha</a></li><li><a href="global.html#setupRecentWorks">setupRecentWorks</a></li><li><a href="global.html#setupResetPin">setupResetPin</a></li><li><a href="global.html#show">show</a></li><li><a href="global.html#showEditions">showEditions</a></li><li><a href="global.html#showHelp">showHelp</a></li><li><a href="global.html#showKeyword">showKeyword</a></li><li><a href="global.html#showLoginDialog">showLoginDialog</a></li><li><a href="global.html#showNodeInformation">showNodeInformation</a></li><li><a href="global.html#showSearchBuilder">showSearchBuilder</a></li><li><a href="global.html#showSearchFacetedWizard">showSearchFacetedWizard</a></li><li><a href="global.html#showWarningAboutTermUsage">showWarningAboutTermUsage</a></li><li><a href="global.html#simplePointsToWKT">simplePointsToWKT</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#startRecentWork">startRecentWork</a></li><li><a href="global.html#temporalSimplifyDate">temporalSimplifyDate</a></li><li><a href="global.html#temporalToHumanReadableString">temporalToHumanReadableString</a></li><li><a href="global.html#tick">tick</a></li><li><a href="global.html#toJD">toJD</a></li><li><a href="global.html#toJSDate">toJSDate</a></li><li><a href="global.html#translationFromUI">translationFromUI</a></li><li><a href="global.html#translationSupport">translationSupport</a></li><li><a href="global.html#translationToUI">translationToUI</a></li><li><a href="global.html#truncateText">truncateText</a></li><li><a href="global.html#unselectAssoc">unselectAssoc</a></li><li><a href="global.html#updateAssocDisplay">updateAssocDisplay</a></li><li><a href="global.html#updateAssocList">updateAssocList</a></li><li><a href="global.html#updateCircles">updateCircles</a></li><li><a href="global.html#updateCurvedLines">updateCurvedLines</a></li><li><a href="global.html#updateLabels">updateLabels</a></li><li><a href="global.html#updateNodes">updateNodes</a></li><li><a href="global.html#updateRecentKeywordDisplay">updateRecentKeywordDisplay</a></li><li><a href="global.html#updateRectangles">updateRectangles</a></li><li><a href="global.html#updateRuleBuilder">updateRuleBuilder</a></li><li><a href="global.html#updateStatus">updateStatus</a></li><li><a href="global.html#updateStraightLines">updateStraightLines</a></li><li><a href="global.html#validateResetPin">validateResetPin</a></li><li><a href="global.html#visualizeData">visualizeData</a></li><li><a href="global.html#visualizeSelection">visualizeSelection</a></li><li><a href="global.html#weekDay">weekDay</a></li><li><a href="global.html#weekOfYear">weekOfYear</a></li><li><a href="global.html#zoomed">zoomed</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Jul 24 2025 18:09:15 GMT+0400 (GMT+04:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

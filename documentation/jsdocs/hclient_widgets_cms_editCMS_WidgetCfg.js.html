@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: hclient/widgets/cms/editCMS_WidgetCfg.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: hclient/widgets/cms/editCMS_WidgetCfg.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file editCMS_WidgetCfg.js
+ * @brief Provides a configuration dialog for Heurist widgets within the CMS editor.
+ * @fileOverview This file defines the 'editCMS_WidgetCfg' function. This function is responsible
+ *               for creating and managing a configuration dialog or panel that allows users to set
+ *               specific options for various Heurist widgets (e.g., SearchInput, ResultList, Map, StoryMap).
+ *               The dialog's content and available fields adapt based on the type of widget being configured.
+ *               It can be displayed as a standalone popup or integrated into a container provided by
+ *               another component like 'editCMS_ElementCfg.js'.
+ * @project     Heurist academic knowledge management system
+ *
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov &lt;osmakov@gmail.com>
+ * @author Ian Johnson &lt;ian.johnson.heurist@gmail.com>
+ * @since 4.0
+ */
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
+/**
+ * Initializes and manages a configuration dialog/panel for a Heurist widget's properties.
+ * The specific UI fields and options presented are tailored to the `widget_cfg.appid`.
+ *
+ * @param {Object} widget_cfg - The JSON configuration of the widget to be edited.
+ *      Must contain `appid` (widget type) and `options` (current widget settings).
+ * @param {Array&lt;Object>} _layout_content - The full layout JSON of the current page,
+ *      used for context (e.g., finding related map widgets for StoryMap).
+ * @param {jQuery} [$dlg] - Optional jQuery object of the container where this editor panel will be rendered.
+ *      If not provided, the editor is shown in a new modal dialog.
+ * @param {function(Object):void} [main_callback] - Callback function executed when changes are applied (only if shown as a dialog).
+ *      Receives the updated widget options object.
+ * @param {function():void} [on_change=jQuery.noop] - Callback function executed whenever a value in the form changes.
+ * @returns {Object} An object with public methods for the widget configuration editor.
+ *
+ * @property {string} _className - Internal class name identifier.
+ * @property {Object} _def_labels - Default label/placeholder text for certain widgets.
+ * @property {boolean} _using_dialog - True if the editor is running in a standalone dialog, false if in a provided container.
+ */
+function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on_change = null ){
+
+    const _className = 'editCMS_WidgetCfg';
+
+    const _def_labels = {
+        heurist_SearchInput: {
+            placeholder_def: 'filter_placeholder',
+            empty_remark_def: 'No default'
+        },
+        heurist_resultList: {
+            placeholder_def: 'No default',
+            empty_remark_def: 'resultList_empty_remark'
+        },
+        heurist_resultListExt: {
+            placeholder_def: 'resultListExt_placeholder_text',
+            empty_remark_def: 'resultListExt_empty_remark'
+        },
+        heurist_resultListDataTable: {
+            placeholder_def: 'No default',
+            empty_remark_def: 'No default'
+        },
+        heurist_StoryMap: {
+            placeholder_def: 'Please select a story in the list',
+            elementsPlaceholder_def: 'There are no story elements to display for the selected item',
+            elementsPlaceholderSub_def: 'Story elements may exist but not be publicly visible'
+        }
+    };
+
+    let _using_dialog = !$dlg || $dlg.length == 0;
+    
+    /**
+     * Initializes the widget configuration editor.
+     * Determines if it should run as a dialog or in a container, then loads the HTML structure.
+     * @private
+     */
+    function _init(){
+
+        let buttons= [
+            {text:window.hWin.HR('Cancel'), 
+                class:'btnCancel',
+                css:{'float':'right','margin-left':'30px','margin-right':'20px'}, 
+                click: function() { 
+                    $dlg.dialog( "close" );
+            }},
+            {text:window.hWin.HR('Apply'), 
+                class:'ui-button-action btnDoAction',
+                //disabled:'disabled',
+                css:{'float':'right'}, 
+                click: function() { 
+                        let config = _getValues();
+                        if(config!==false){
+                            main_callback.call(this, config);
+                            $dlg.dialog( "close" );    
+                        }
+        }}];
+
+        if(!window.hWin.HEURIST4.util.isFunction(on_change)){
+            on_change = $.noop();
+        }
+        
+        if($dlg &amp;&amp; $dlg.length>0){
+            //container provided
+
+            $dlg.empty().load(window.hWin.HAPI4.baseURL
+                +'hclient/widgets/cms/editCMS_WidgetCfg.html',
+                _initControls
+            );
+
+        }else{
+            //open as popup
+
+            let height = 700;
+            let width = 800;
+            if(widget_cfg.appid == 'heurist_StoryMap'){
+                height = 900;
+            }else if(widget_cfg.appid == 'heurist_resultList'){
+                height = 850;
+                width = 850;
+            }else if(widget_cfg.appid == 'heurist_resultListExt'){
+                height = 710;
+            }
+
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
+                +"hclient/widgets/cms/editCMS_WidgetCfg.html?t="+(new Date().getTime()), 
+                buttons, `Modify ${widget_cfg.name ? widget_cfg.name : 'Widget'} Properties`, 
+                {  container:'cms-add-widget-popup',
+                    default_palette_class: 'ui-heurist-publish',
+                    width: width,
+                    height: height,
+                    close: function(){
+                        $dlg.dialog('destroy');       
+                        $dlg.remove();
+                    },
+                    open: _initControls
+            });
+
+        }
+
+
+
+    }
+    
+    /**
+     * Initializes the UI controls within the widget configuration panel after its HTML is loaded.
+     * Sets up tabs, hides/shows sections relevant to the current widget type, populates fields
+     * with current widget options, and initializes special UI elements like record selectors,
+     * symbology editors, and template selectors based on the widget type.
+     * @private
+     */
+    function _initControls(){
+        
+        let widget_name = widget_cfg.appid;
+        let opts = window.hWin.HEURIST4.util.isJSON(widget_cfg.options);
+
+        if(_using_dialog){
+
+            $dlg.find('.header').css('width', '160px');
+
+            $dlg.find('.cms-widget-config').parent()
+                .addClass('ent_content_full')
+                .css({
+                    top: '0px',
+                    'overflow-x': 'hidden'
+                });
+        }
+
+        $dlg.find('.cms-widget-config').tabs();
+
+        let disabled_tabs = [];
+        let active_idx = null;
+
+        let last_idx = $dlg.find('.ui-tabs-panel').length - 1; // Connections tab, all widgets have connection field(s)
+
+        $dlg.find('.ui-tabs-panel').each(function(idx, ele){
+            if($(ele).find(`div.${widget_name}`).length == 0 &amp;&amp; idx != last_idx){
+                disabled_tabs.push(idx);
+            }else if(active_idx == null){
+                active_idx = idx;
+            }
+        });
+        active_idx = active_idx == null ? 0 : active_idx;
+
+        $dlg.find('.cms-widget-config').tabs('option', 'disabled', disabled_tabs);
+        $dlg.find('.cms-widget-config').tabs('option', 'active', active_idx);
+
+        $dlg.find('div[class^="heurist_"], hr[class^="heurist_"]').hide(); //hide all
+        $dlg.find('div.'+widget_name+', hr.'+widget_name).show();
+        
+        //fill page list
+        let selPage = $dlg.find('select[name="search_page"]');
+        
+        let main_menu = $('#main-menu > div[widgetid="heurist_Navigation"]');
+        
+        if(main_menu.length>0 &amp;&amp; widget_name!='heurist_StoryMap'){
+            let pages = main_menu.navigation('getMenuContent','list');
+            if(!pages){
+                selPage.parent().hide();
+            }else{
+                pages.unshift({key:'',title:''});   
+                window.hWin.HEURIST4.ui.createSelector(selPage[0], pages);
+            }
+           
+        }else{
+           
+            selPage.parent().hide();
+        }
+        
+        if(opts!==false){
+            
+            //find map widget on this page
+            if(widget_name=='heurist_StoryMap'){
+                if(!opts.map_widget_id){
+                    const ele =  window.hWin.HAPI4.layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_Map');
+                    
+                    if(ele &amp;&amp; ele.options.search_realm=='' &amp;&amp; ele.dom_id){
+                        opts.map_widget_id = ele.dom_id;
+                    }
+                }
+            }
+            
+            //find and assign prevail search group (except heurist_Map if heurist_StoryMap exists)
+            if(!opts.search_realm){ //not defined yet
+            
+                if(!(widget_name=='heurist_Map' &amp;&amp;  window.hWin.HAPI4.layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_StoryMap')!=null)){
+                    let sg =  window.hWin.HAPI4.layoutMgr.layoutContentFindMainRealm(_layout_content);    
+                    if(sg=='') sg = 'search_group_1';
+                    opts.search_realm = sg;
+                }
+            }
+            
+        
+            
+            if(opts.search_page) {
+                $(selPage).val(opts.search_page);        
+               
+            }
+            $dlg.find('input[name="search_realm"]').val(opts.search_realm);    
+            $dlg.find('input[name="widget_id"]').val(opts.widget_id);    
+
+            if(widget_name=='heurist_Map'){
+                //special behaviour for map widget
+                if(!opts.layout_params){
+                    opts.layout_params = {};
+                }
+                
+                //map symbology editor            
+                window.hWin.HEURIST4.ui.initEditSymbologyControl($dlg.find('#map_default_style'), opts.layout_params.style);
+                window.hWin.HEURIST4.ui.initEditSymbologyControl($dlg.find('#map_select_style'), opts.layout_params.selection_style );
+
+                if(opts.layout_params){
+                    
+                    $dlg.find("#use_timeline").prop('checked', !opts.layout_params.notimeline);    
+                    $dlg.find("#map_rollover").prop('checked', opts.layout_params.map_rollover);    
+                    $dlg.find("#use_cluster").prop('checked', !opts.layout_params.nocluster);    
+                    $dlg.find("#editstyle").prop('checked', opts.layout_params.editstyle);    
+                    $dlg.find("#smooth_zoom").prop('checked', opts.layout_params.smooth_zoom);    
+                    $dlg.find("#zoom_delta").val(opts.layout_params.zoom_delta>0?opts.layout_params.zoom_delta:1);    
+                    $dlg.find("#zoom_to_selected").prop('checked', opts.layout_params.zoom_to_selected);    
+
+                    let ctrls = (opts.layout_params.controls)?opts.layout_params.controls.split(','):[];
+                    $dlg.find('input[name="controls"]').each(
+                        function(idx,item){$(item).prop('checked',ctrls.indexOf($(item).val())>=0);}
+                    );
+                                                                
+                    let legend = (opts.layout_params.legend)?opts.layout_params.legend.split(','):[];
+                    if(legend.length>0){
+
+                        $dlg.find('input[name="legend_exp2"]').prop('checked',legend.indexOf('off')&lt;0); //expand on start
+
+                        $.each(legend, function(i, val){
+                            if(parseInt(val)>0){
+                                $dlg.find('input[name="legend_width"]').val(val);        
+                            }else if(val!='off'){
+                                let is_exp = (val[0]!='-')
+                                if (!is_exp) legend[i] = val.substring(1);
+                                $dlg.find('input[name="legend_exp"][value="'+legend[i]+'"]').prop('checked',is_exp);
+                            }
+                        });
+
+                        if(legend.indexOf('basemap')>=0 || legend.indexOf('mapdocs')>=0 || legend.indexOf('search')>=0){
+                            $dlg.find('input[name="legend"]').each(
+                                function(idx,item){
+                                    $(item).prop('checked',legend.indexOf($(item).val())>=0);
+                                }
+                            );
+                        }else{
+                            $dlg.find('input[name="legend"]').prop('checked', true);    
+                        }
+                        
+                        
+
+                    }
+                    if(opts.layout_params['template']){
+                        $dlg.find('select[name="map_template"]').attr('data-template', opts.layout_params['template']);        
+                    }
+                    let popup = 'standard';
+                    if(opts.layout_params['template']=='none'){
+                        popup = 'none';
+                    }else if(opts.layout_params['popup']) {
+                        popup = opts.layout_params['popup'];
+                    }
+                    $dlg.find('input[name="map_popup"][value="'+popup+'"]').prop('checked', true);        
+                    
+                    if(opts.layout_params['basemap']){
+                        $dlg.find('select[name="map_basemap"]').attr('data-basemap', opts.layout_params['basemap']);    
+                    }
+                    if(opts.layout_params['basemap_filter']){
+                        $dlg.find('input[name="map_basemap_filter"]').val(opts.layout_params['basemap_filter']);        
+                    }
+
+                    if(opts.layout_params['popup_behaviour']){
+                        $dlg.find('input[name="popup_behaviour"][value="'+ opts.layout_params['popup_behaviour'] +'"]').prop('checked', true);
+
+                        if(opts.layout_params['popup_behaviour'] == 'scale'){
+                            $dlg.find('span#pw_label').text('Max width:');
+                        }
+                        if(opts.layout_params['popup_behaviour'] == 'scale' || opts.layout_params['popup_behaviour'] == 'fixed_width'){
+                            $dlg.find('span#ph_label').text('Max length:');
+                        }
+                    }
+                    if(opts.layout_params['popup_width']){
+
+                        let value = opts.layout_params['popup_width'];
+                        const unit = value.endsWith('%') ? value.slice(-1) : value.slice(-2);
+                        value = value.endsWith('%') ? value.slice(0, -1) : value.slice(0, -2);
+
+                        $dlg.find('input[name="popup_width"]').val(value); // first index
+                        $dlg.find('select[name="popup_wunit"]').val(unit); // second index
+                    }
+                    if(opts.layout_params['popup_height']){
+
+                        let value = opts.layout_params['popup_height'];
+                        const unit = value.endsWith('%') ? value.slice(-1) : value.slice(-2);
+                        value = value.endsWith('%') ? value.slice(0, -1) : value.slice(0, -2);
+
+                        $dlg.find('input[name="popup_height"]').val(value); // first index
+                        $dlg.find('select[name="popup_hunit"]').val(unit); // second index
+                    }
+                    if(opts.layout_params['popup_resizing']){
+                        $dlg.find('input[name="popup_resizing"]').prop('checked', false); //opts.layout_params['popup_resizing']
+                    }
+                    
+                    $dlg.find('input[name="ignore_mapdoc_zoom"]').prop('checked', false);
+                    if(opts.layout_params['ignore_mapdoc_zoom']){
+                        $dlg.find('input[name="ignore_mapdoc_zoom"]').prop('checked', opts.layout_params['ignore_mapdoc_zoom']);
+                    }
+                    if(opts.layout_params['maxzoom']>0){
+                        $dlg.find('input[name="map_maxzoom"]').val(opts.layout_params['maxzoom']);        
+                    }
+                    if(opts.layout_params['minzoom']>0){
+                        $dlg.find('input[name="map_minzoom"]').val(opts.layout_params['minzoom']);        
+                    }
+                    if(opts.layout_params['pntzoom']>0){
+                        $dlg.find('input[name="map_pntzoom"]').val(opts.layout_params['pntzoom']);        
+                    }
+                    if(opts.layout_params['mapdocuments']){
+                        $dlg.find('input[name="mapdocuments"]').attr('data-mapdocuments', opts.layout_params['mapdocuments']);        
+                    }
+                    if(opts.layout_params['basemaps']){
+                        $dlg.find('input[name="basemaps"]').val(opts.layout_params['basemaps']);        
+                    }
+                }
+                if(opts['mapdocument']>0){
+                    $dlg.find('select[name="mapdocument"]').attr('data-mapdocument', opts['mapdocument']);        
+                }
+                
+                if(opts['custom_links']){
+                    $dlg.find('textarea[name="custom_links"]').val(opts['custom_links']);    
+                }
+                if(opts['current_search_filter']){
+                    $dlg.find('input[name="current_search_filter"]').val(opts['current_search_filter']);    
+                }
+                if(opts['showCurrentResults']){
+                    $dlg.find('input[name="showCurrentResults"]').prop('checked', opts['showCurrentResults']);
+                }
+
+                $dlg.find('button[name="basemap_filter"]')
+                    .button()
+                    .css('font-size','0.7em')
+                    .on( { click: function(){
+                        let cfg = window.hWin.HEURIST4.util.isJSON($dlg.find('input[name="map_basemap_filter"]').val());
+                        if(!cfg) cfg = null;
+                        window.hWin.HEURIST4.ui.showImgFilterDialog(cfg, function(filter){
+                            $dlg.find('input[name="map_basemap_filter"]').val( JSON.stringify(filter) );
+                        });   
+                    }});
+                $dlg.find('button[name="basemap_filter_reset"]')
+                    .button()
+                    .css('font-size','0.7em')
+                    .on( { click: function(){
+                        $dlg.find('input[name="map_basemap_filter"]').val('');
+                    }});
+                
+            }else{
+
+                $dlg.find('div.'+widget_name+' input').each(function(idx, item){
+                    item = $(item);
+                    if(item.attr('name')){
+                        if(item.attr('type')=='checkbox'){
+                            item.prop('checked', opts[item.attr('name')]===true || opts[item.attr('name')]=='true');
+                        }else if(item.attr('type')=='radio'){
+                            item.prop('checked', item.val()== String(opts[item.attr('name')]));
+                        }else {
+                            item.val( opts[item.attr('name')] );
+                        }
+                    }
+                });
+                $dlg.find('div.'+widget_name+' select').each(function(idx, item){
+                    item = $(item);
+                    item.val( opts[item.attr('name')] );
+                });
+
+                //
+                // assign paramters
+                //
+                if(widget_name=='heurist_resultListExt'){ // custom report
+                    if(opts['template']){
+                        $dlg.find('select[name="rep_template"]').attr('data-template', opts['template']);        
+                    }
+                    
+                    $dlg.find('#empty_remark').val(opts['empty_remark']?opts['empty_remark']:opts['emptysetmessage']); //for empty selection
+                    $dlg.find('#placeholder_text').val(opts['placeholder_text']); //for empty result
+
+                    if(!opts['selection_mode']){
+
+                        if(opts['is_single_selection']){
+                            opts['selection_mode'] = 'is_single_selection';
+                        }else{
+                            opts['selection_mode'] = 'show_all';
+                        }
+
+                        $dlg.find(`input[value="${opts['selection_mode']}"]`).prop('checked', true);
+                    }
+                }else if(widget_name=='heurist_resultList'){ // standard result list
+                    if(opts['rendererExpandDetails']){
+                        $dlg.find('select[name="rendererExpandDetails"]').attr('data-template', opts['rendererExpandDetails']);        
+                    }
+                    $dlg.find('#empty_remark').val(opts['empty_remark']);
+                    $dlg.find('#placeholder_text').val(opts['placeholder_text']);
+                    if(opts['field_for_ext_classes']){
+                        $dlg.find('select[name="field_for_ext_classes"]').attr('fld-id', opts['field_for_ext_classes']);
+                    }
+                    if(opts['recview_dimensions']){
+
+                        let popup_dims = opts['recview_dimensions'];
+
+                        let h_unit = popup_dims.height.endsWith('%') ? '%' : popup_dims.height.slice(-2);
+                        let w_unit = popup_dims.width.endsWith('%') ? '%' : popup_dims.width.slice(-2);
+                        let l_unit = popup_dims.left.endsWith('%') ? '%' : popup_dims.left.slice(-2);
+                        let t_unit = popup_dims.top.endsWith('%') ? '%' : popup_dims.top.slice(-2);
+
+                        $dlg.find('[name="dialog_hunit"]').val(h_unit);
+                        $dlg.find('[name="dialog_wunit"]').val(w_unit);
+                        $dlg.find('[name="dialog_lunit"]').val(l_unit);
+                        $dlg.find('[name="dialog_tunit"]').val(t_unit);
+
+                        let h_val = popup_dims.height.replace(/\D+/, '');
+                        let w_val = popup_dims.width.replace(/\D+/, '');
+                        let l_val = popup_dims.left.replace(/\D+/, '');
+                        let t_val = popup_dims.top.replace(/\D+/, '');
+
+                        $dlg.find('[name="dialog_height"]').val(h_val);
+                        $dlg.find('[name="dialog_width"]').val(w_val);
+                        $dlg.find('[name="dialog_left"]').val(l_val);
+                        $dlg.find('[name="dialog_top"]').val(t_val);
+                    }
+
+                    $dlg.find('[name="field_for_ext_classes"]').prev().css('width', '210px');
+                }else if(widget_name=='heurist_resultListDataTable'){ // datatable
+                    $dlg.find('#dataTableParams').val(opts['dataTableParams']);
+                    $dlg.find('#empty_remark').val(opts['emptyTableMsg']);
+                    $dlg.find('#placeholder_text').val(opts['placeholder_text']);
+                }else if(widget_name=='heurist_SearchInput'){
+                    $dlg.find('#si_placeholder_text').val(opts['placeholder_text']);
+                }else if(widget_name=='heurist_StoryMap'){
+                    window.hWin.HEURIST4.ui.initEditSymbologyControl($dlg.find('#def_map_symbology'), opts.def_map_symbology);
+                    window.hWin.HEURIST4.ui.initEditSymbologyControl($dlg.find('#def_story_symbology'), opts.def_story_symbology);
+                    $dlg.find('#placeholder_text').val(opts['storyPlaceholder']);
+                    $dlg.find('#elementsPlaceholder').val(opts['elementsPlaceholder']);
+                }
+
+                if(_def_labels[widget_name]){ // fill in default labels
+
+                    let def_placeholder = window.hWin.HR(_def_labels[widget_name]['placeholder_def']);
+
+                    let def_remark = window.hWin.HR(_def_labels[widget_name]['empty_remark_def']);
+
+                    $dlg.find(`.${widget_name} #placeholder_def`).text(def_placeholder).attr('title', def_placeholder);
+                    $dlg.find(`.${widget_name} #empty_remark_def`).text(def_remark).attr('title', def_remark);
+
+                    if(widget_name == 'heurist_StoryMap'){
+                        let label = window.HR(_def_labels[widget_name]['elementsPlaceholder_def']);
+                        $dlg.find('#elementsPlaceholder_def').text(label).attr('title', label);
+                    }
+                }
+
+                if(opts['blank_placeholder'] || $dlg.find('#placeholder_text').val() == 'def'){ // replace 'def' with a blank
+                    $dlg.find('#placeholder_text').val('');
+                }
+                if(opts['si_blank_placeholder'] || $dlg.find('#si_placeholder_text').val() == 'def'){ // replace 'def' with a blank
+                    $dlg.find('#si_placeholder_text').val('');
+                }
+                if(opts['blank_empty_remark'] || $dlg.find('#empty_remark').val() == 'def'){ // replace 'def' with a blank
+                    $dlg.find('#empty_remark').val('');
+                }
+                if(widget_name == 'heurist_StoryMap' &amp;&amp; 
+                    (opts['blank_elementsPlaceholder'] || $dlg.find('#elementsPlaceholder').val() == 'def')){ // replace 'def' with a blank
+                    $dlg.find('#elementsPlaceholder').val('');
+                }
+
+                if(opts['export_options']){
+
+                    let export_options = [];
+                    
+                    if(opts['export_options']===true){
+                        opts['export_options'] = 'all';
+                    }
+
+                    if(!window.hWin.HEURIST4.util.isempty(opts['export_options']) &amp;&amp; opts['export_options'] != 'all'){
+                        export_options = opts['export_options'].split(',');
+                    }else{
+                        export_options = 'all';
+                    }
+
+                    $.each($dlg.find(`.${widget_name} input[name="export_options"]`), function(idx, ele){
+                        let is_checked = export_options.indexOf($(ele).val()) !== -1;
+                        $(ele).prop('checked', is_checked);
+                    });
+                }
+            }
+
+            
+            // init special edit elements            
+            if(widget_name=='heurist_Navigation'){
+
+                let rval = $dlg.find('input[name="menu_recIDs"]').val();
+                rval =  rval?rval.split(','):[];
+
+                let ele = $dlg.find('#menu_recIDs');
+
+                if(!ele.editing_input('instance')){
+
+                    const ed_options = {
+                        recID: -1,                                                                                       
+                        dtID: ele.attr('id'), //'group_selector',
+                        //show_header: false,
+                        values: rval,
+                        readonly: false,
+                        showclear_button: true,
+                        dtFields:{
+                            dty_Type:"resource", rst_MaxValues:0,
+                            rst_DisplayName: 'Top level menu items', rst_DisplayHelpText:'',
+                            rst_PtrFilteredIDs: [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
+                                window.hWin.HAPI4.sysinfo['dbconst']['RT_WEB_CONTENT']],
+                            rst_FieldConfig: {entity:'records', csv:false}
+                        },
+                        change: on_change
+                    };
+
+                    ele.editing_input(ed_options);
+                    ele.parent().css('display','block');
+                }
+
+                $dlg.find('select[name="orientation"]')
+                .on('change', function(e){
+
+                    let is_horiz = ($(e.target).val()=='horizontal');
+                    let is_vertical = ($(e.target).val()=='vertical');
+
+                    if($(e.target).val()=='treeview'){
+                        $dlg.find('#expandLevels').show();
+                    }else{
+                        $dlg.find('#expandLevels').hide();
+                    }
+
+                    if($dlg.find('#widgetCss').length>0){
+                        let vals = $dlg.find('#widgetCss').val().split(';');
+                        for (let i=0; i&lt;vals.length; i++){
+                            let vs = vals[i].split(':');
+                            if(vs &amp;&amp; vs.length==2){
+                                vs[0] = vs[0].trim();
+                                if(is_horiz){
+                                    if(vs[0]=='width'){
+                                        vals[i] = ('\nwidth: 100%');
+                                    }else if(vs[0]=='height'){
+                                        vals[i] = ('\nheight:50px');
+                                    }
+                                }else if(is_vertical){
+                                    if(vs[0]=='width'){
+                                        vals[i] = ('\nwidth: 50px');
+                                    }else if(vs[0]=='height'){
+                                        vals[i] = ('\nheight:100%');
+                                    }
+                                }else{
+                                    if(vs[0]=='width'){
+                                        vals[i] = ('\nwidth: 200px');
+                                    }else if(vs[0]=='height'){
+                                        vals[i] = ('\nheight:300px');
+                                    }
+                                }
+                            }
+                        }
+
+                        $dlg.find('#widgetCss').val( vals.join(';'));
+                    }
+                });
+
+
+
+            }else 
+            if (widget_name=='heurist_recordAddButton'){
+
+                    let ele = $dlg.find('button[name="add_record_cfg"]');
+
+                    if(!ele.button('instance')){
+                        
+                        function __human_readble(){
+                            
+                            const rty_ID = $dlg.find('input[name="RecTypeID"]').val();
+                            if(rty_ID>0){
+                                $('#add_record_desc').html(
+                                '&amp;nbsp;&amp;nbsp;&lt;i>Record type: &lt;/i>'+$Db.rty(rty_ID,'rty_Name')
+                                //+' &lt;i>editable by user/group# &lt;/i>'+$dlg.find('input[name="OwnerUGrpID"]').val()
+                                //+' &lt;i>viewable by: &lt;/i>'+$dlg.find('input[name="NonOwnerVisibility"]').val()
+                                );                                
+                            }else{
+                                $('#add_record_desc').html('');
+                            }
+                        }
+
+                        ele.button().on('click',
+                            function(){
+                                window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd',{
+                                    title: 'Select type and other parameters for new record',
+                                    height: 520, width: 540,
+                                    get_params_only: true,
+                                    onClose: function(context){
+                                        if(context &amp;&amp; context.RecTypeID>0){
+                                            $dlg.find('input[name="RecTypeID"]').val(context.RecTypeID);
+                                            $dlg.find('input[name="OwnerUGrpID"]').val(context.OwnerUGrpID);
+                                            $dlg.find('input[name="NonOwnerVisibility"]').val(context.NonOwnerVisibility);
+                                            __human_readble();
+
+                                            $dlg.find('input[name="RecTypeID"], input[name="OwnerUGrpID"], input[name="NonOwnerVisibility"]').trigger('input');
+                                        }
+
+                                    },
+                                    default_palette_class: 'ui-heurist-publish'                                        
+                                    }
+                                );    
+                            }
+                        );
+                        __human_readble();
+                    }
+
+            }else
+            if(widget_name=='heurist_SearchTree'){
+
+                let ele_rb = $dlg.find('input[name="searchTreeMode"]')
+                .on('change', function(e){
+
+                    let selval = __getSearchTreeMode();
+
+                    $dlg.find('#simple_search_header').parent().css('display','none');
+                    $dlg.find('#simple_search_text').parent().css('display','none');
+
+                    if(selval==0){
+                        //buttons
+                        $dlg.find('#allowed_UGrpID').css('display','table-row');
+                        $dlg.find('#allowed_svsIDs').css('display','table-row');
+                        $dlg.find('#allowed_UGrpID').editing_input('setDisabled', false);
+                        $dlg.find('#allowed_svsIDs').editing_input('setDisabled', false);
+
+                        let is_vis = $dlg.find('input[name="simple_search_allowed"]').is(':checked');
+                        if(is_vis){
+                            $dlg.find('#simple_search_header').parent().css('display','table-row');
+                            $dlg.find('#simple_search_text').parent().css('display','table-row');
+                        }else{
+                            $dlg.find('#simple_search_header').parent().css('display','none');
+                            $dlg.find('#simple_search_text').parent().css('display','none');
+                        }
+                    }else if(selval==1){
+                        //tree
+                        $dlg.find('#allowed_UGrpID').css('display','table-row');
+                        $dlg.find('#allowed_svsIDs').css('display','none');
+                        $dlg.find('#allowed_UGrpID').editing_input('setDisabled', false);
+                        $dlg.find('#allowed_svsIDs').editing_input('setDisabled', true);
+                        $dlg.find('input[name="allowed_svsIDs"]').val('');
+                    }else{
+                        //full
+                        $dlg.find('#allowed_UGrpID').css('display','none');
+                        $dlg.find('#allowed_svsIDs').css('display','none');
+                        $dlg.find('#allowed_UGrpID').editing_input('setDisabled', true);
+                        $dlg.find('#allowed_svsIDs').editing_input('setDisabled', true);
+                        $dlg.find('input[name="allowed_UGrpID"]').val('');
+                        $dlg.find('input[name="allowed_svsIDs"]').val('');
+                    }
+                });
+
+                let selval = __getSearchTreeMode();
+                if(window.hWin.HEURIST4.util.isempty(selval)
+                    || !(selval==0 || selval==1 || selval==2)){
+                    selval = 0;
+                    $dlg.find('#heurist_SearchTreeMode1').prop('checked',true);
+                }
+
+                //visible for buttons and tree mode
+                let ele = $dlg.find('#allowed_UGrpID');
+                if(!ele.editing_input('instance')){
+
+                    let init_val = $dlg.find('input[name="allowed_UGrpID"]').val();
+                    if(init_val=='' &amp;&amp; selval!=2 &amp;&amp; $dlg.find('input[name="allowed_svsIDs"]').val()==''){
+                        init_val = 5;//web search  by default
+                    }
+
+                    const ed_options = {
+                        recID: -1,
+                        dtID: ele.attr('id'), 
+                        values: [init_val], 
+                        readonly: false,
+                        showclear_button: true,
+                        dtFields:{
+                            dty_Type:"resource", rst_MaxValues:1,
+                            rst_DisplayName: 'EITHER Show all filters in these workgroups', 
+                            rst_DisplayHelpText:'',
+                            rst_FieldConfig: {entity:'sysGroups', csv:true}
+                        },
+                        change:function(){
+                            $dlg.find('#allowed_svsIDs').editing_input('setValue','');
+                            $dlg.find('#init_svsID').editing_input('setValue','');
+                            __restFilterForInitSearch();
+                            on_change();
+                        }
+                    };
+
+                    ele.editing_input(ed_options);
+                    ele.parent().css('display','block');
+                    ele.find('.header').addClass('header_wide');
+                }
+
+                //visible for buttons mode only
+                ele = $dlg.find('#allowed_svsIDs');
+                if(!ele.editing_input('instance')){
+
+                    const ed_options = {
+                        recID: -1,
+                        dtID: ele.attr('id'), 
+                        values: [$dlg.find('input[name="allowed_svsIDs"]').val()],
+                        readonly: false,
+                        showclear_button: true,
+                        dtFields:{
+                            dty_Type:"resource", rst_MaxValues:1,
+                            rst_DisplayName: 'OR Choose specific filters', rst_DisplayHelpText:'',
+                            rst_FieldConfig: {entity:'usrSavedSearches', csv:true}
+                        },
+                        change:function(){
+                            $dlg.find('#allowed_UGrpID').editing_input('setValue','');
+                            $dlg.find('#init_svsID').editing_input('setValue','');
+                            __restFilterForInitSearch();
+                            on_change();
+                        }
+                    };
+
+                    ele.editing_input(ed_options);
+                    ele.parent().css('display','block');
+                    ele.find('.header').addClass('header_wide');
+                }
+
+                ele = $dlg.find('#init_svsID');
+                if(!ele.editing_input('instance')){
+
+                    const ed_options = {
+                        recID: -1,
+                        dtID: ele.attr('id'), 
+                        values: [$dlg.find('input[name="init_svsID"]').val()],
+                        readonly: false,
+                        showclear_button: true,
+                        dtFields:{
+                            dty_Type:"resource", rst_MaxValues:1,
+                            rst_DisplayName: 'Trigger this filter on page load', rst_DisplayHelpText:'',
+                            rst_FieldConfig: {entity:'usrSavedSearches', csv:false} 
+                        },
+                        change: on_change
+                    };
+
+
+                    ele.editing_input(ed_options);
+                    ele.parent().css('display','block');
+                    ele.find('.header').addClass('header_wide');
+                }
+
+                function __getSearchTreeMode(){
+                    let ele_rb = $dlg.find('input[name="searchTreeMode"]')
+                    let selval = '';
+                    $.each(ele_rb, function(idx, item){
+                        item = $(item);
+                        if(item.is(':checked')){
+                            selval = item.prop('value');
+                            return false;
+                        }
+                    });
+                    return selval
+                }
+
+                function __restFilterForInitSearch(){
+
+                    let ifilter = null; 
+                    let val = $dlg.find('#allowed_svsIDs').editing_input('getValues');
+                   
+                    if(!window.hWin.HEURIST4.util.isempty(val) &amp;&amp; val[0]!=''){
+                        if(Array.isArray(val)) val = val.join(',');
+                        ifilter = {svs_ID:val};
+                    }else{
+                        val = $dlg.find('#allowed_UGrpID').editing_input('getValues');
+                       
+                        if(!window.hWin.HEURIST4.util.isempty(val) &amp;&amp; val[0]!=''){
+                            if(Array.isArray(val)) val = val.join(',');
+                            ifilter = {svs_UGrpID:val};
+                        }
+                    }
+
+
+                    ele.editing_input({
+                        dtFields:{
+                            dty_Type:"resource", rst_MaxValues:1,
+                            rst_DisplayName: 'Initial filter', rst_DisplayHelpText:'',
+                            rst_FieldConfig: {entity:'usrSavedSearches', csv:false,
+                                initial_filter:ifilter, search_form_visible:(ifilter==null)    
+                            } 
+                        },
+                        change: on_change
+                    }); 
+                }
+
+                __restFilterForInitSearch();
+
+                ele_rb.trigger('change');
+
+                $dlg.find('input[name="simple_search_allowed"]').on('change', function(){
+                    let is_vis = $dlg.find('input[name="simple_search_allowed"]').is(':checked');
+                    if(is_vis){
+                        $dlg.find('#simple_search_header').parent().css('display','table-row');
+                        $dlg.find('#simple_search_text').parent().css('display','table-row');
+                    }else{
+                        $dlg.find('#simple_search_header').parent().css('display','none');
+                        $dlg.find('#simple_search_text').parent().css('display','none');
+                    }
+                });
+
+                let is_vis = $dlg.find('input[name="simple_search_allowed"]').is(':checked');
+                if(is_vis){
+                    $dlg.find('#simple_search_header').parent().css('display','table-row');
+                    $dlg.find('#simple_search_text').parent().css('display','table-row');
+                }else{
+                    $dlg.find('#simple_search_header').parent().css('display','none');
+                    $dlg.find('#simple_search_text').parent().css('display','none');
+                }
+            }else
+            if(widget_name=='heurist_Map' &amp;&amp; 
+                $dlg.find('select[name="mapdocument"]').find('options').length==0){
+                    
+                let allMapDocuments = [];
+                
+                let $selectedDocuments =  $('input[name="mapdocuments"]');
+                let $selectedBasemaps =  $('input[name="basemaps"]');
+                
+                function __assignMapDocNames(newsel){
+                    if(newsel){
+                        newsel = newsel.split(';');
+                        let newsel_names = [];
+                        $.each(allMapDocuments, function(i,item){
+                            if(newsel.indexOf(item.key)>=0){
+                                newsel_names.push(item.title)    
+                            }
+                        });
+                        $selectedDocuments.val(newsel_names.join(';'));
+                    }else{
+                        $selectedDocuments.val('');
+                    }
+                }
+
+                let $selectMapDoc = $dlg.find('select[name="mapdocument"]');
+                //fill list of mapdpcuments
+                let request = {
+                    q: 't:'+window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'],w: 'a',
+                    detail: 'header',
+                    source: 'cms_edit'};
+                //perform filter
+                window.hWin.HAPI4.RecordMgr.search(request,
+                    function(response){
+
+						if(response.status == window.hWin.ResponseStatus.OK){
+
+							let resdata = new HRecordSet(response.data);
+							let idx, records = resdata.getRecords(), opts = [{key:'',title:'none'}];
+							for(idx in records){
+								if(idx)
+								{
+									let record = records[idx];
+									opts.push({key:resdata.fld(record, 'rec_ID'), title:resdata.fld(record, 'rec_Title')});
+								}
+							}//for
+
+							window.hWin.HEURIST4.ui.fillSelector($selectMapDoc[0], opts);
+							if($selectMapDoc.attr('data-mapdocument')>0){
+								$selectMapDoc.val( $selectMapDoc.attr('data-mapdocument') );
+							}
+							window.hWin.HEURIST4.ui.initHSelect($selectMapDoc[0], false, null, null, {menu_parent: $dlg});
+
+                            allMapDocuments = opts;
+                            allMapDocuments.splice(0,1); //remove none
+                            
+                            __assignMapDocNames($selectedDocuments.attr('data-mapdocuments'));
+                            
+						}else {
+							window.hWin.HEURIST4.msg.showMsgErr(response);
+						}
+                    }
+                );
+                
+                let $gicon = $('&lt;span>').addClass('ui-icon ui-icon-gear')
+                    .css({position:'absolute',margin:'7px 0 0 0px',cursor:'hand'})
+                    .insertBefore($selectedDocuments);
+                let $select_documents_dlg = $('&lt;div/>').hide().appendTo( $selectedDocuments.parent() );
+                
+                $gicon.on({ click: function(){                                 
+                       $select_documents_dlg.selectMultiValues({
+                       onselect:function(newsel){
+                            if(newsel){
+                                newsel = newsel.join(';');
+                                $selectedDocuments.attr('data-mapdocuments', newsel);
+                                __assignMapDocNames(newsel);
+                            }
+                        }, 
+                       allValues: allMapDocuments,
+                       selectedValues: $selectedDocuments.attr('data-mapdocuments'), 
+                       multiselect: true});
+                    }} );                
+                
+                //======================================
+
+                let $selectMapTemplate = $dlg.find('select[name="map_template"]'); 
+
+                window.hWin.HEURIST4.ui.createTemplateSelector( $selectMapTemplate
+                    ,[{key:'',title:'Standard popup template'}], $selectMapTemplate.attr('data-template')
+                    , {extraOptions: {menu_parent: $dlg}});
+                    //,{key:'none',title:'Disable popup'}
+
+                //======================================
+                    
+                let $selectBaseMap = $dlg.find('select[name="map_basemap"]');
+
+                const baseMapOptions = [
+                    {key:'OpenStreetMap', title:'OpenStreetMap'},
+                    {key:'OpenTopoMap', title:'OpenTopoMap'},
+                    {key:'MapBox.StreetMap', title:'MapBox.StreetMap'},
+                    {key:'MapBox.Satellite', title:'MapBox.Satellite'},
+                    {key:'MapBox.Combined',title:'MapBox.Combined'},
+                    {key:'MapBox.Relief', title:'MapBox.Relief'},
+                    {key:'Esri.WorldStreetMap', title:'Esri.WorldStreetMap'},
+                    {key:'Esri.WorldTopoMap', title:'Esri.WorldTopoMap'},
+                    {key:'Esri.WorldImagery', title:'Esri.WorldImagery'},
+                    {key:'Esri.WorldShadedRelief', title:'Esri.WorldShadedRelief'},
+                    {key:'Stamen.Toner', title:'Stamen.Toner'},
+                    {key:'Stamen.TerrainBackground', title:'Stamen.TerrainBackground'},
+                    {key:'Esri.NatGeoWorldMap',title:'Esri.NatGeoWorldMap'},
+                    {key:'Esri.WorldGrayCanvas',title:'Esri.WorldGrayCanvas'},
+                    {key:'MapTilesAPI.OSMEnglish',title:'MapTilesAPI.OSMEnglish'}
+                ];
+
+                window.hWin.HEURIST4.ui.fillSelector($selectBaseMap[0], baseMapOptions);
+                
+                if($selectBaseMap.attr('data-basemap') != null){
+                    $selectBaseMap.val($selectBaseMap.attr('data-basemap'));
+                }
+                $selectBaseMap = window.hWin.HEURIST4.ui.initHSelect($selectBaseMap[0], false, null, null, {menu_parent: $dlg});
+                
+                if($selectBaseMap.hSelect('instance') != undefined){
+                    $selectBaseMap.hSelect('widget').css('width', '200px');
+                }
+                
+                $gicon = $('&lt;span>').addClass('ui-icon ui-icon-gear')
+                    .css({position:'absolute',margin:'7px 0 0 0px',cursor:'hand'})
+                    .insertBefore($selectedBasemaps);
+                let $select_basemaps_dlg = $('&lt;div/>').hide().appendTo( $selectedBasemaps.parent() );
+                
+                $gicon.on({ click: function(){                                 
+                       $select_basemaps_dlg.selectMultiValues({
+                       onselect:function(newsel){
+                            if(newsel){
+                                newsel = newsel.join(';');
+                                $selectedBasemaps.val(newsel);
+                            }
+                        }, 
+                       allValues: baseMapOptions,
+                       selectedValues: $selectedBasemaps.val().split(';'), 
+                       multiselect: true});
+                    }} );
+                    
+                //======================================================
+                    
+                $dlg.find('input[name="popup_behaviour"]')
+                    .on('change', function(event){
+
+                        let val = $dlg.find('input[name="popup_behaviour"]:checked').val();
+
+                        if(val == 'scale'){
+                            $dlg.find('span#pw_label').text('Max width:');
+                        }else{
+                            $dlg.find('span#pw_label').text('Width:');
+                        }
+
+                        if(val == 'scale' || val == 'fixed_width'){
+                            $dlg.find('span#ph_label').text('Max length:');
+                        }else{
+                            $dlg.find('span#ph_label').text('Length:');
+                        }
+                    });
+            }else
+            if(widget_name=='heurist_StoryMap'){
+                
+                if(!opts['reportOverviewMode']) opts['reportOverviewMode'] = 'inline';
+                if(!opts['reportEndPageMode']) opts['reportEndPageMode'] = 'inline';
+                if(!opts['reportElementMode']) opts['reportElementMode'] = 'vertical';
+                if(!opts['reportElementMapMode']) opts['reportElementMapMode'] = 'linked';
+
+                
+                if(!opts['elementsPlaceholder']) opts['elementsPlaceholder'] = '&lt;br>&lt;br>There are no story elements to display for the selected item';
+                if(!opts['elementsPlaceholderSub']) opts['elementsPlaceholderSub'] = '&lt;i>Story elements may exist but not be publicly visible&lt;/i>';
+
+                $dlg.find('input[name="elementsPlaceholder"]').val(opts['elementsPlaceholder']);
+                $dlg.find('input[name="elementsPlaceholderSub"]').val(opts['elementsPlaceholderSub']);
+                
+                $dlg.find('select[name="reportOverviewMode"]').val(opts['reportOverviewMode']);
+                $dlg.find('select[name="reportEndPageMode"]').val(opts['reportEndPageMode']);
+                
+                let $selectTemplate = $dlg.find('select[name="reportOverview"]'); 
+
+                window.hWin.HEURIST4.ui.createTemplateSelector( $selectTemplate
+                    ,[{key:'',title:'Standard record view'}], opts['reportOverview'], {extraOptions: {menu_parent: $dlg}});
+                    
+                $selectTemplate = $dlg.find('select[name="reportEndPage"]'); 
+
+                window.hWin.HEURIST4.ui.createTemplateSelector( $selectTemplate
+                    ,[{key:'',title:'Standard record view'}], opts['reportEndPage'], {extraOptions: {menu_parent: $dlg}});
+                    
+                $selectTemplate = $dlg.find('select[name="reportElement"]'); 
+
+                window.hWin.HEURIST4.ui.createTemplateSelector( $selectTemplate
+                    ,[{key:'',title:'Standard record view'}], opts['reportElement'], {extraOptions: {menu_parent: $dlg}});
+
+                    
+                let $elementOrder = $dlg.find('select[name="elementOrder"]'); 
+
+                window.hWin.HEURIST4.ui.createRectypeDetailSelect( $elementOrder[0], null, ['date','year','integer']
+                    ,[{key:'',title:'As is (order in record)'},{key:'def',title:'Common date fields (##9,10,11)'}]
+                    ,{selectedValue:opts['elementOrder']});
+                    
+                /*
+                var selectFields = $dlg.find('select[name="storyFields"]'); 
+                window.hWin.HEURIST4.ui.createRectypeDetailSelect(selectFields[0], 
+                        null, 'resource', 
+                        [{key:'',title:''}], {selectedValue:opts['storyFields']});
+                */
+                let defValue = $dlg.find('input[name="storyFields"]').val();
+                
+                if(window.hWin.HEURIST4.util.isempty(defValue)){
+                    let DT_STORY_FIELD = $Db.getLocalID('dty','1414-1089');// Story element field    
+                    if(DT_STORY_FIELD>0) defValue = DT_STORY_FIELD;
+                }
+                
+                
+                let ele = $dlg.find('#storyFields');
+
+                const ed_options = {
+                        recID: -1,
+                        dtID: ele.attr('id'), 
+                        values: [defValue],
+                        readonly: false,
+                        showclear_button: true,
+                        dtFields:{
+                            dty_Type:"resource", rst_MaxValues:1,
+                            rst_DisplayName: 'Story element fields', 
+                            rst_DisplayHelpText: 'Defines the field that points to story element records (such as Life event, Ocuppation etc)',
+                            rst_FieldConfig: {entity:'defDetailTypes', csv:true, filters:{types:['resource']}}
+                        },
+                        change: on_change
+                    };
+
+                ele.editing_input(ed_options);
+                ele.parent().css('display','block');
+                
+                //----------------
+                /*
+                ele = $dlg.find('#storyRectypes');
+
+                var ed_options = {
+                        recID: -1,
+                        dtID: ele.attr('id'), 
+                        values: [$dlg.find('input[name="storyRectypes"]').val()],
+                        readonly: false,
+                        showclear_button: true,
+                        dtFields:{
+                            dty_Type:"resource", rst_MaxValues:1,
+                            rst_DisplayName: 'Story element record types', rst_DisplayHelpText:'',
+                            rst_FieldConfig: {entity:'defRecTypes', csv:true}
+                        },
+                        change:function(){
+                        }
+                    };
+
+                ele.editing_input(ed_options);
+                ele.parent().css('display','block');
+                ele.find('.header').css({'width':'150px','text-align':'right'});
+                */
+                
+                $dlg.find('select[name="reportElementMode"]')
+                .on('change', function(e){
+
+                    $dlg.find('select[name="reportElementSlideEffect"]').parent().hide();
+                    $dlg.find('select[name="reportElementDistinct"]').parent().hide();
+                    
+                    if($(e.target).val()=='vertical'){
+                        $dlg.find('select[name="reportElementDistinct"]').parent().show();
+                    }else if($(e.target).val()=='slide'){
+                        $dlg.find('select[name="reportElementSlideEffect"]').parent().show();
+                    }
+                    
+                })
+                .val(opts['reportElementMode']).trigger('change');
+
+                $dlg.find('select[name="reportElementMapMode"]')
+                .on('change', function(e){
+
+                    if($(e.target).val()=='filtered'){
+                        $dlg.find('input[name="reportElementMapFilter"]').parent().show();
+                    }else{
+                        $dlg.find('input[name="reportElementMapFilter"]').parent().hide();
+                    }
+                    
+                })
+                .val(opts['reportElementMapMode']).trigger('change');
+                
+                
+            }else
+            if(widget_name=='heurist_resultListExt' &amp;&amp; 
+                $dlg.find('select[name="rep_template"]').find('options').length==0){
+
+                    let $select3 = $dlg.find('select[name="rep_template"]'); 
+
+                    window.hWin.HEURIST4.ui.createTemplateSelector( $select3 
+                        ,[{key:'',title:'Standard record view template'}], $select3.attr('data-template'), {extraOptions: {menu_parent: $dlg}});
+
+                     $dlg.find('#is_popup_report').on('change', function(e){
+                        if($dlg.find('#is_popup_report').is(':checked')){
+                            $dlg.find('#popup_report_position').parent().show();       
+
+                            $dlg.find('#is_popup_report').parent().find('.header').removeClass('row-spacing');
+                        }else{
+                            $dlg.find('#popup_report_position').parent().hide();
+
+                            $dlg.find('#is_popup_report').parent().find('.header').addClass('row-spacing');
+                        }    
+                     });
+                     $dlg.find('#is_popup_report').prop('checked', opts['is_popup']).trigger('change');
+                     $dlg.find('#popup_report_position').val(opts['popup_position']);
+
+            }else 
+            if(widget_name=='heurist_resultList'){
+
+                if($dlg.find('select[name="rendererExpandDetails"]').find('options').length==0){
+                    let $select4 = $dlg.find('select[name="rendererExpandDetails"]'); 
+
+                    window.hWin.HEURIST4.ui.createTemplateSelector( $select4
+                        ,[{key:'',title:'Standard record view template'}], $select4.attr('data-template'), {extraOptions: {menu_parent: $dlg}});
+                }
+
+                if($dlg.find('select[name="field_for_ext_classes"]').find('options').length==0){ // list of record fields that are enum
+                    let $select5 = $dlg.find('select[name="field_for_ext_classes"]');
+
+                    window.hWin.HEURIST4.ui.createRectypeDetailSelect($select5[0], null, ['enum'], [{key: 0, title: 'None'}], 
+                        {'selectedValue': $select5.attr('fld-id')}, {extraOptions: {menu_parent: $dlg}});
+                }
+            }
+
+            $dlg.find(`div.${widget_name} select`).on('change', on_change);
+            $dlg.find(`div.${widget_name} input, div.${widget_name} textarea`).on('input', on_change);
+        }
+    }
+    
+   
+    /**
+     * Retrieves the current configuration values from the UI input fields for the widget.
+     * Performs widget-specific validation (e.g., for SearchTree, Navigation).
+     * @private
+     * @returns {Object|false} The updated widget options object, or `false` if validation fails.
+     */
+    function _getValues(){
+        
+        
+        function __prepareVal(val){
+            if(val==='false'){
+                val = false;
+            }else if(val==='true'){
+                val = true;
+            }
+            return val;
+        }
+        
+        
+        let widget_name = widget_cfg.appid;
+
+        let opts = {};
+
+        if(widget_name=='heurist_Map'){
+
+            let layout_params = {};//special option for leaflet mapping
+            //parameters for controls
+            layout_params['notimeline'] = !$dlg.find("#use_timeline").is(':checked');
+            layout_params['nocluster'] = !$dlg.find("#use_cluster").is(':checked');
+            layout_params['editstyle'] = $dlg.find("#editstyle").is(':checked');
+            layout_params['map_rollover'] = $dlg.find("#map_rollover").is(':checked');
+            layout_params['smooth_zoom'] = $dlg.find("#smooth_zoom").is(':checked');
+            layout_params['zoom_to_selected'] = $dlg.find("#zoom_to_selected").is(':checked');
+            layout_params['zoom_delta'] = $dlg.find("#zoom_delta").val();
+
+            let ctrls = [];
+            $dlg.find('input[name="controls"]:checked').each(
+                function(idx,item){ctrls.push($(item).val());}
+            );
+            if(ctrls.length>0){
+                layout_params['controls'] = ctrls.join(',');    
+            }else{
+                layout_params['controls'] = 'none';
+            }
+            if(ctrls.indexOf('legend')>=0){ //legend is visible
+                ctrls = [];
+                $dlg.find('input[name="legend"]').each( //visible section in legend
+                    function(idx,item){
+                        if($(item).is(':checked')){
+                            let is_exp = $dlg.find('input[name="legend_exp"][value="'+$(item).val()+'"]').is(':checked')?'':'-'
+                            ctrls.push(is_exp+$(item).val());
+                        }
+                    }
+                );
+                if(ctrls.length>0){
+                    layout_params['legend'] = ctrls.join(',');    
+                    if(!$dlg.find('input[name="legend_exp2"]').is(':checked')){
+                        layout_params['legend'] += ',off';    
+                    }
+                    let w = $dlg.find('input[name="legend_width"]').val();
+                    if(w>100 &amp;&amp; w&lt;600){
+                        layout_params['legend'] += (','+w);
+                    }
+                } 
+            }
+            
+            layout_params['published'] = 1;
+            layout_params['template'] = $dlg.find('select[name="map_template"]').val();
+            layout_params['basemap'] = $dlg.find('select[name="map_basemap"]').val();
+            layout_params['basemaps'] = $dlg.find('input[name="basemaps"]').val();
+            layout_params['basemap_filter'] = $dlg.find('input[name="map_basemap_filter"]').val();
+
+            layout_params['popup_behaviour'] = $dlg.find('input[name="popup_behaviour"]:checked').val();
+            layout_params['popup_width'] = $dlg.find('input[name="popup_width"]').val() + $dlg.find('select[name="popup_wunit"]').val();
+            layout_params['popup_height'] = $dlg.find('input[name="popup_height"]').val() + $dlg.find('select[name="popup_hunit"]').val();
+            layout_params['popup_resizing'] = false;//$dlg.find('input[name="popup_resizing"]').is(':checked')
+            
+            if($dlg.find('input[name="ignore_mapdoc_zoom"]').is(':checked')){
+                layout_params['ignore_mapdoc_zoom'] = $dlg.find('input[name="ignore_mapdoc_zoom"]').is(':checked');
+            }
+            if($dlg.find('input[name="map_maxzoom"]').val()>0){
+                layout_params['maxzoom'] = $dlg.find('input[name="map_maxzoom"]').val();
+            }
+            if($dlg.find('input[name="map_minzoom"]').val()>0){
+                layout_params['minzoom'] = $dlg.find('input[name="map_minzoom"]').val();
+            }
+            if($dlg.find('input[name="map_pntzoom"]').val()>0){
+                layout_params['pntzoom'] = $dlg.find('input[name="map_pntzoom"]').val();
+            }
+
+  
+//  use_timeline use_cluster editstyle map_rollover controls legend legend_exp legend_exp2 map_popup  mapdocument      
+//  map_template map_basemap_filter  map_template
+  
+            let popup = $dlg.find('input[name="map_popup"]:checked').val();
+            if(popup!='standard'){
+                layout_params['popup'] = popup;
+            }
+
+            let mapdoc_id = $dlg.find('select[name="mapdocument"]').val();
+            if(mapdoc_id>0) {opts['mapdocument'] = mapdoc_id;}
+
+            if($dlg.find('input[name="mapdocuments"]').attr('data-mapdocuments')){
+                layout_params['mapdocuments'] = $dlg.find('input[name="mapdocuments"]').attr('data-mapdocuments');    
+            }
+
+            if($dlg.find('input[name="basemaps"]').val()){
+                layout_params['basemaps'] = $dlg.find('input[name="basemaps"]').val();    
+            }
+
+            opts['showCurrentResults'] = $dlg.find('input[name="showCurrentResults"]').is(':checked');
+
+            opts['custom_links'] = $dlg.find('textarea[name="custom_links"]').val(); 
+            opts['current_search_filter'] = $dlg.find('input[name="current_search_filter"]').val();   
+
+            layout_params['style'] = $dlg.find('#map_default_style').val();   
+            layout_params['selection_style'] = $dlg.find('#map_select_style').val();   
+            
+            opts['layout_params'] = layout_params;
+            opts['leaflet'] = true;
+        }//heurist_Map
+
+        let cont = $dlg.find('div.'+widget_name);
+
+        if(widget_name=='heurist_SearchTree'){
+            cont.find('input[name="allowed_UGrpID"]').val( 
+                cont.find('#allowed_UGrpID').editing_input('getValues') );
+            cont.find('input[name="allowed_svsIDs"]').val( 
+                cont.find('#allowed_svsIDs').editing_input('getValues') );
+            cont.find('input[name="init_svsID"]').val( 
+                cont.find('#init_svsID').editing_input('getValues') );
+        }else 
+        if(widget_name=='heurist_Navigation'){
+            let menu_recIDs = cont.find('#menu_recIDs').editing_input('getValues');
+            if(window.hWin.HEURIST4.util.isempty(menu_recIDs) || 
+                (Array.isArray(menu_recIDs)&amp;&amp; (menu_recIDs.length==0||window.hWin.HEURIST4.util.isempty(menu_recIDs[0]))))
+            {
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Please set at least one top level menu item',
+                    error_title: 'Missing required setting'
+                });
+                return false;   
+            }
+            cont.find('input[name="menu_recIDs"]').val( menu_recIDs );
+        }else
+        if(widget_name=='heurist_StoryMap')
+        {
+            let storyFields = cont.find('#storyFields').editing_input('getValues');
+            cont.find('input[name="storyFields"]').val( storyFields );
+            
+            if(window.hWin.HEURIST4.util.isempty(storyFields) || 
+                (Array.isArray(storyFields)&amp;&amp; (storyFields.length==0||window.hWin.HEURIST4.util.isempty(storyFields[0]))))
+            {
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'Please set at least one story field',
+                    error_title: 'Missing story field'
+                });                     
+                return false;   
+            }
+        }
+        
+//controls":false,"legend":true,"legend_width":"250","legend_exp":false,"legend_exp2":false,
+        //find INPUT elements and fill opts with values
+        cont.find('input').each(function(idx, item){
+            item = $(item);
+            if(item.attr('name') &amp;&amp; item.parents('.heurist_Map').length==0){ //item.attr('name').indexOf('map')&lt;0){
+                if(item.attr('type')=='checkbox'){
+                    opts[item.attr('name')] = item.is(':checked');    
+                }else if(item.attr('type')=='radio'){
+                    if(item.is(':checked')) opts[item.attr('name')] = __prepareVal(item.val());    
+                }else if(item.val()!=''){
+                    opts[item.attr('name')] = __prepareVal(item.val());    
+                }
+            }
+        });
+        //find SELECT
+        $dlg.find('div.'+widget_name+' select').each(function(idx, item){
+            item = $(item);
+            if(item.parents('.heurist_Map').length==0){
+                opts[item.attr('name')] = item.val();     
+            }
+        });
+
+        let empty_remark = $dlg.find('#empty_remark').val();
+        if(window.hWin.HEURIST4.util.isempty(empty_remark) &amp;&amp; !opts['blank_empty_remark']){
+            empty_remark = 'def';
+        }else if(opts['blank_empty_remark']){
+            empty_remark = '';
+        }
+
+        let placeholder = $dlg.find('#placeholder_text').val();
+        if(window.hWin.HEURIST4.util.isempty(placeholder) &amp;&amp; !opts['blank_placeholder']){
+            placeholder = 'def';
+        }else if(opts['blank_placeholder']){
+            placeholder = '';
+        }
+
+        if(widget_name=='heurist_resultListExt'){
+            opts['template'] = $dlg.find('select[name="rep_template"]').val();
+            opts['reload_for_recordset'] = true;
+            opts['emptysetmessage'] = empty_remark; //to remove
+            opts['empty_remark'] = empty_remark;
+
+            let selection_mode = opts['selection_mode'];
+
+            opts['is_single_selection'] = false;
+            opts['is_multi_selection'] = false;
+            opts['show_all'] = false;
+
+            opts[selection_mode] = true;
+
+            if(opts['template'] != ''){
+                opts['url'] = '?template='+encodeURIComponent(opts['template'])
+                +'&amp;emptysetmessage='+encodeURIComponent(opts['empty_remark'])
+                +'&amp;[query]';
+            }else{
+                opts['url'] = 'viewers/record/renderRecordData.php?db=[dbname]&amp;recID=[recID]';
+                opts['is_single_selection'] = true; // force single selection
+            }
+
+            opts['placeholder_text'] = placeholder;
+            opts['is_popup'] = $dlg.find('#is_popup_report').is(':checked');
+            opts['popup_position'] = $dlg.find('#popup_report_position').val();
+
+        }else if(widget_name=='heurist_resultList'){
+            opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode'] || opts['show_export_button'] || opts['support_collection'];
+            if(window.hWin.HEURIST4.util.isempty(opts['recordview_onselect'])){
+                opts['recordview_onselect']  = 'inline'; //default value    
+            }
+            opts['empty_remark'] = empty_remark;
+            opts['placeholder_text'] = placeholder;
+
+            let h_unit = opts['dialog_height'] > 0 ? opts['dialog_hunit'] : '';
+            let w_unit = opts['dialog_width'] > 0 ? opts['dialog_wunit'] : '';
+            let l_unit = opts['dialog_left'] > 0 ? opts['dialog_lunit'] : '';
+            let t_unit = opts['dialog_top'] > 0 ? opts['dialog_tunit'] : '';
+
+            opts['recview_dimensions'] = {
+                height: `${opts['dialog_height']}${h_unit}`,
+                width: `${opts['dialog_width']}${w_unit}`,
+                left: `${opts['dialog_left']}${l_unit}`,
+                top: `${opts['dialog_top']}${t_unit}`
+            };
+
+            // Remove un-needed keys
+            delete opts['dialog_height'];
+            delete opts['dialog_hunit'];
+            delete opts['dialog_width'];
+            delete opts['dialog_wunit'];
+            delete opts['dialog_left'];
+            delete opts['dialog_lunit'];
+            delete opts['dialog_top'];
+            delete opts['dialog_tunit'];
+
+        }else if(widget_name=='heurist_resultListDataTable'){
+            opts['dataTableParams'] = $dlg.find('#dataTableParams').val();
+            opts['emptyTableMsg'] = empty_remark;
+            opts['placeholder_text'] = placeholder;
+        }else if(widget_name=='heurist_SearchInput'){
+            
+            placeholder = $dlg.find('#si_placeholder_text').val();
+            if(window.hWin.HEURIST4.util.isempty(placeholder) &amp;&amp; !opts['si_blank_placeholder']){
+                placeholder = 'def';
+            }else if(opts['si_blank_placeholder']){
+                placeholder = '';
+            }
+            
+            opts['placeholder_text'] = placeholder;
+        }else if(widget_name=='heurist_StoryMap'){
+
+            opts['storyPlaceholder'] = placeholder;
+            delete opts['placeholder_text'];
+
+            opts['elementsPlaceholder'] = $dlg.find('#elementsPlaceholder').val();
+            if(window.hWin.HEURIST4.util.isempty(opts['elementsPlaceholder']) &amp;&amp; !opts['blank_elementsPlaceholder']){
+                // replace with default
+                opts['elementsPlaceholder'] = 'def';
+            }
+        }
+
+        if($dlg.find(`.${widget_name} input[name="export_options"]`).is(':visible')){
+
+            let export_options = [];
+            $.each($dlg.find(`.${widget_name} input[name="export_options"]`), function(idx, ele){
+                if($(ele).is(':checked')){
+                    export_options.push($(ele).val());
+                }
+            });
+
+            if(export_options.length > 0){
+                opts['export_options'] = export_options.join(',');
+            }else{
+                opts['export_options'] = 'all';
+            }
+        }
+
+        let selval = opts.searchTreeMode;
+        if(window.hWin.HEURIST4.util.isempty(opts.allowed_UGrpID)){ //groups are not defined
+
+            if(selval==1){
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'For "tree" mode you have to select groups to be displayed',
+                    error_title: 'Missing required setting'
+                });
+                return false;
+            }else if (window.hWin.HEURIST4.util.isempty(opts.allowed_svsIDs) &amp;&amp; selval==0) { //individual filters are not defined
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: 'For "button" mode you must select either workgroups or filters individually',
+                    error_title: 'Missing required setting(s)'
+                });
+                return false;
+            }
+        }
+
+        opts['init_at_once'] = true;
+        opts['search_realm'] = $dlg.find('input[name="search_realm"]').val();
+        opts['search_page'] = $dlg.find('select[name="search_page"]').val();
+        opts['widget_id'] = $dlg.find('input[name="widget_id"]').val();
+
+        return opts;
+    }//_getValues
+
+
+
+    //public members
+    let that = {
+
+        /**
+         * Gets the class name identifier of this component.
+         * @returns {string} The class name "editCMS_WidgetCfg".
+         * @public
+         */
+        getClass: function () {
+            return _className;
+        },
+
+        /**
+         * Checks if this component's class name matches the provided string.
+         * @param {string} strClass - The class name to compare against.
+         * @returns {boolean} True if `strClass` is "editCMS_WidgetCfg", false otherwise.
+         * @public
+         */
+        isA: function (strClass) {
+            return (strClass === _className);
+        },
+
+        /**
+         * Public method to retrieve the current configuration values from the UI.
+         * Delegates to the private _getValues method.
+         * @returns {Object|false} The updated widget options object, or `false` if validation fails.
+         * @public
+         */
+        getValues: function(){
+            return _getValues();
+        }
+    }
+
+    _init();
+    
+    return that;
+}
+
+
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="HEURIST4.dbs.html">dbs</a></li><li><a href="HEURIST4.geo.html">geo</a></li><li><a href="HEURIST4.msg.html">msg</a></li><li><a href="HEURIST4.query.html">query</a></li><li><a href="HEURIST4.util.html">util</a></li><li><a href="NodeSelection.html">NodeSelection</a></li><li><a href="heurist.buttonsMenu.html">buttonsMenu</a></li><li><a href="heurist.controlPanel.html">controlPanel</a></li><li><a href="heurist.dbAction.html">dbAction</a></li><li><a href="heurist.dbVerify.html">dbVerify</a></li><li><a href="heurist.dbVerifyURLs.html">dbVerifyURLs</a></li><li><a href="heurist.editTranslations.html">editTranslations</a></li><li><a href="heurist.editing_input.html">editing_input</a></li><li><a href="heurist.navigation.html">navigation</a></li><li><a href="heurist.recordAccess.options.html">options</a></li><li><a href="heurist.recordAction.options.html">options</a></li><li><a href="heurist.recordAdd.options.html">options</a></li><li><a href="heurist.recordAddButton.options.html">options</a></li><li><a href="heurist.recordAddLink.options.html">options</a></li><li><a href="heurist.recordAddLinkMatch.options.html">options</a></li><li><a href="heurist.recordArchive.options.html">options</a></li><li><a href="heurist.recordBookmark.options.html">options</a></li><li><a href="heurist.recordDataTable.options.html">options</a></li><li><a href="heurist.recordDelete.options.html">options</a></li><li><a href="heurist.recordExport.options.html">options</a></li><li><a href="heurist.recordExportCSV.options.html">options</a></li><li><a href="heurist.recordFindDuplicates.options.html">options</a></li><li><a href="heurist.recordImportAnnotations.options.html">options</a></li><li><a href="heurist.recordNotify.options.html">options</a></li><li><a href="heurist.recordRate.options.html">options</a></li><li><a href="heurist.recordTag.options.html">options</a></li><li><a href="heurist.recordTemplate.options.html">options</a></li><li><a href="heurist.recordTitles.options.html">options</a></li><li><a href="heurist.recordUploadedFilesIndex.options.html">options</a></li><li><a href="heurist.selectFile.html">selectFile</a></li><li><a href="heurist.slidersMenu.html">slidersMenu</a></li></ul><h3>Classes</h3><ul><li><a href="ActionHandler.html">ActionHandler</a></li><li><a href="CmsManager.html">CmsManager</a></li><li><a href="Color.html">Color</a></li><li><a href="CrosstabsAnalysis.html">CrosstabsAnalysis</a></li><li><a href="EditorCodeMirror.html">EditorCodeMirror</a></li><li><a href="HEditing.html">HEditing</a></li><li><a href="HLayout.html">HLayout</a></li><li><a href="HLayoutMgr.html">HLayoutMgr</a></li><li><a href="HMapLayer.html">HMapLayer</a></li><li><a href="HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRapidFieldAdditions.HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRecordSearch.html">HRecordSearch</a></li><li><a href="HRecordSet.html">HRecordSet</a></li><li><a href="HSystemMgr.html">HSystemMgr</a></li><li><a href="HintDiv.html">HintDiv</a></li><li><a href="JapaneseCalendar.html">JapaneseCalendar</a></li><li><a href="L.Control.Help.html">Help</a></li><li><a href="L.Control.Manager.html">Manager</a></li><li><a href="L.Control.Publish.html">Publish</a></li><li><a href="Solver.html">Solver</a></li><li><a href="TDuration.html">TDuration</a></li><li><a href="Temporal.html">Temporal</a></li><li><a href="hAPI.html">hAPI</a></li><li><a href="hAPI-HRecordMgr.html">HRecordMgr</a></li><li><a href="window.TDate.html">TDate</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HPublishDialog">HPublishDialog</a></li><li><a href="global.html#HSvsEdit">HSvsEdit</a></li><li><a href="global.html#SelectLinkField">SelectLinkField</a></li><li><a href="global.html#_addInput">_addInput</a></li><li><a href="global.html#_checkStructureFromSource">_checkStructureFromSource</a></li><li><a href="global.html#_checkYear">_checkYear</a></li><li><a href="global.html#_closeDialog">_closeDialog</a></li><li><a href="global.html#_create">_create</a></li><li><a href="global.html#_destroy">_destroy</a></li><li><a href="global.html#_detectHeurist">_detectHeurist</a></li><li><a href="global.html#_doSave">_doSave</a></li><li><a href="global.html#_fromDataToUI">_fromDataToUI</a></li><li><a href="global.html#_getActionButtons">_getActionButtons</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_initControls">_initControls</a></li><li><a href="global.html#_initDialog">_initDialog</a></li><li><a href="global.html#_initInnerHeader">_initInnerHeader</a></li><li><a href="global.html#_initModal">_initModal</a></li><li><a href="global.html#_initOffcanvas">_initOffcanvas</a></li><li><a href="global.html#_japaneseYearToGregorian">_japaneseYearToGregorian</a></li><li><a href="global.html#_loadParentLookup">_loadParentLookup</a></li><li><a href="global.html#_popupDialog">_popupDialog</a></li><li><a href="global.html#_preImportCheck">_preImportCheck</a></li><li><a href="global.html#_processSPARQLRow">_processSPARQLRow</a></li><li><a href="global.html#_refresh">_refresh</a></li><li><a href="global.html#_refreshCaptcha">_refreshCaptcha</a></li><li><a href="global.html#_setOption">_setOption</a></li><li><a href="global.html#_showRecordViewPopup">_showRecordViewPopup</a></li><li><a href="global.html#_switchToDataMode">_switchToDataMode</a></li><li><a href="global.html#_theme_editing_symbology">_theme_editing_symbology</a></li><li><a href="global.html#_updatePanels">_updatePanels</a></li><li><a href="global.html#_validateFromGregorian">_validateFromGregorian</a></li><li><a href="global.html#addAssoctoAssigned">addAssoctoAssigned</a></li><li><a href="global.html#addBackgroundCircles">addBackgroundCircles</a></li><li><a href="global.html#addContainer">addContainer</a></li><li><a href="global.html#addForce">addForce</a></li><li><a href="global.html#addForegroundCircles">addForegroundCircles</a></li><li><a href="global.html#addIcons">addIcons</a></li><li><a href="global.html#addKeyword">addKeyword</a></li><li><a href="global.html#addLabels">addLabels</a></li><li><a href="global.html#addLevel">addLevel</a></li><li><a href="global.html#addLines">addLines</a></li><li><a href="global.html#addMarkerDefinitions">addMarkerDefinitions</a></li><li><a href="global.html#addNodes">addNodes</a></li><li><a href="global.html#addPrevtoAssigned">addPrevtoAssigned</a></li><li><a href="global.html#addSelectionBox">addSelectionBox</a></li><li><a href="global.html#addTitles">addTitles</a></li><li><a href="global.html#applyRules">applyRules</a></li><li><a href="global.html#autofill_login">autofill_login</a></li><li><a href="global.html#browseRecords">browseRecords</a></li><li><a href="global.html#calculateImageExtentFromWorldFile">calculateImageExtentFromWorldFile</a></li><li><a href="global.html#changeDisplay">changeDisplay</a></li><li><a href="global.html#changeViewMode">changeViewMode</a></li><li><a href="global.html#checkAllOptions">checkAllOptions</a></li><li><a href="global.html#checkStoredSettings">checkStoredSettings</a></li><li><a href="global.html#clearContent">clearContent</a></li><li><a href="global.html#close">close</a></li><li><a href="global.html#closeDialog">closeDialog</a></li><li><a href="global.html#commonCodeInit">commonCodeInit</a></li><li><a href="global.html#commonOnAdd">commonOnAdd</a></li><li><a href="global.html#compareIndexes">compareIndexes</a></li><li><a href="global.html#correctionOfInvalidTerm">correctionOfInvalidTerm</a></li><li><a href="global.html#createOverlay">createOverlay</a></li><li><a href="global.html#currentNode">currentNode</a></li><li><a href="global.html#daysInMonth">daysInMonth</a></li><li><a href="global.html#determineColour">determineColour</a></li><li><a href="global.html#disableUpdateBtn">disableUpdateBtn</a></li><li><a href="global.html#doAction">doAction</a></li><li><a href="global.html#doAuthentication">doAuthentication</a></li><li><a href="global.html#doImport">doImport</a></li><li><a href="global.html#doRegister">doRegister</a></li><li><a href="global.html#doSamlLogin">doSamlLogin</a></li><li><a href="global.html#doSearchByID">doSearchByID</a></li><li><a href="global.html#drag_link_line">drag_link_line</a></li><li><a href="global.html#drag_link_source_id">drag_link_source_id</a></li><li><a href="global.html#drag_link_target_id">drag_link_target_id</a></li><li><a href="global.html#drag_link_timer">drag_link_timer</a></li><li><a href="global.html#dragend">dragend</a></li><li><a href="global.html#dragmove">dragmove</a></li><li><a href="global.html#dragstart">dragstart</a></li><li><a href="global.html#editCMS2">editCMS2</a></li><li><a href="global.html#editCMS_ElementCfg">editCMS_ElementCfg</a></li><li><a href="global.html#editCMS_SelectElement">editCMS_SelectElement</a></li><li><a href="global.html#editCMS_SiteMenu">editCMS_SiteMenu</a></li><li><a href="global.html#editCMS_WidgetCfg">editCMS_WidgetCfg</a></li><li><a href="global.html#editSymbology">editSymbology</a></li><li><a href="global.html#editTheme">editTheme</a></li><li><a href="global.html#enable_register">enable_register</a></li><li><a href="global.html#executeFormula">executeFormula</a></li><li><a href="global.html#f">f</a></li><li><a href="global.html#first_level_rty_ID">first_level_rty_ID</a></li><li><a href="global.html#fixCalendarPickerCMDs">fixCalendarPickerCMDs</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#formatGregJulian">formatGregJulian</a></li><li><a href="global.html#fromJD">fromJD</a></li><li><a href="global.html#fromJSDate">fromJSDate</a></li><li><a href="global.html#fset">fset</a></li><li><a href="global.html#getAllChecked">getAllChecked</a></li><li><a href="global.html#getClass">getClass</a></li><li><a href="global.html#getContainer">getContainer</a></li><li><a href="global.html#getDataFromServer">getDataFromServer</a></li><li><a href="global.html#getEntityRadius">getEntityRadius</a></li><li><a href="global.html#getEraFromGregorian">getEraFromGregorian</a></li><li><a href="global.html#getEraFromJapaneseStr">getEraFromJapaneseStr</a></li><li><a href="global.html#getEraLimits">getEraLimits</a></li><li><a href="global.html#getEras">getEras</a></li><li><a href="global.html#getGephiFormat">getGephiFormat</a></li><li><a href="global.html#getKeywords">getKeywords</a></li><li><a href="global.html#getKeywordsNextStep">getKeywordsNextStep</a></li><li><a href="global.html#getLineLength">getLineLength</a></li><li><a href="global.html#getLineWidth">getLineWidth</a></li><li><a href="global.html#getMarkerWidth">getMarkerWidth</a></li><li><a href="global.html#getNodeDataById">getNodeDataById</a></li><li><a href="global.html#getRecentKeywords">getRecentKeywords</a></li><li><a href="global.html#getRecordOverlayData">getRecordOverlayData</a></li><li><a href="global.html#getRelationOverlayData">getRelationOverlayData</a></li><li><a href="global.html#getRulesArray">getRulesArray</a></li><li><a href="global.html#getSelected">getSelected</a></li><li><a href="global.html#getSelection">getSelection</a></li><li><a href="global.html#getSetting">getSetting</a></li><li><a href="global.html#getURL">getURL</a></li><li><a href="global.html#gregorianToJapaneseStr">gregorianToJapaneseStr</a></li><li><a href="global.html#hMapDocument">hMapDocument</a></li><li><a href="global.html#hRecordAction">hRecordAction</a></li><li><a href="global.html#handleNodeAction">handleNodeAction</a></li><li><a href="global.html#handleSettingsInUI">handleSettingsInUI</a></li><li><a href="global.html#hexToFilter">hexToFilter</a></li><li><a href="global.html#hexportMenu">hexportMenu</a></li><li><a href="global.html#imgFilter">imgFilter</a></li><li><a href="global.html#initProfilePreferences">initProfilePreferences</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isA">isA</a></li><li><a href="global.html#isAssocKeyword">isAssocKeyword</a></li><li><a href="global.html#isMonthSpan">isMonthSpan</a></li><li><a href="global.html#isRecentKeyword">isRecentKeyword</a></li><li><a href="global.html#isTemporal">isTemporal</a></li><li><a href="global.html#isValid">isValid</a></li><li><a href="global.html#japaneseToGregorian">japaneseToGregorian</a></li><li><a href="global.html#japaneseToGregorianStr">japaneseToGregorianStr</a></li><li><a href="global.html#keywordLookup">keywordLookup</a></li><li><a href="global.html#loadHtmlContent">loadHtmlContent</a></li><li><a href="global.html#log10">log10</a></li><li><a href="global.html#login_dialog">login_dialog</a></li><li><a href="global.html#lookupEditions">lookupEditions</a></li><li><a href="global.html#lookupGoogle">lookupGoogle</a></li><li><a href="global.html#lookupHathiTrust">lookupHathiTrust</a></li><li><a href="global.html#lookupKarlsruhePortal">lookupKarlsruhePortal</a></li><li><a href="global.html#lookupWorldCat">lookupWorldCat</a></li><li><a href="global.html#mapIds">mapIds</a></li><li><a href="global.html#menuActionHandler">menuActionHandler</a></li><li><a href="global.html#mergeArraysUnique">mergeArraysUnique</a></li><li><a href="global.html#msgToConsole">msgToConsole</a></li><li><a href="global.html#newDate">newDate</a></li><li><a href="global.html#onAdd">onAdd</a></li><li><a href="global.html#onAuthentication">onAuthentication</a></li><li><a href="global.html#onNodeClick">onNodeClick</a></li><li><a href="global.html#onPageInit">onPageInit</a></li><li><a href="global.html#onRecordNodeClick">onRecordNodeClick</a></li><li><a href="global.html#onRemove">onRemove</a></li><li><a href="global.html#onTermSaveError">onTermSaveError</a></li><li><a href="global.html#open">open</a></li><li><a href="global.html#openRecordInTab">openRecordInTab</a></li><li><a href="global.html#openSearchMenu">openSearchMenu</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#popupDialog">popupDialog</a></li><li><a href="global.html#prevSessionExists">prevSessionExists</a></li><li><a href="global.html#project_keywords">project_keywords</a></li><li><a href="global.html#putSetting">putSetting</a></li><li><a href="global.html#removeAssocByID">removeAssocByID</a></li><li><a href="global.html#removeKeyword">removeKeyword</a></li><li><a href="global.html#removeOverlay">removeOverlay</a></li><li><a href="global.html#removeOverlays">removeOverlays</a></li><li><a href="global.html#removeSetting">removeSetting</a></li><li><a href="global.html#renderAssocKeywods">renderAssocKeywods</a></li><li><a href="global.html#renderContent">renderContent</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#saveRules">saveRules</a></li><li><a href="global.html#selectRecord">selectRecord</a></li><li><a href="global.html#setFormulaMode">setFormulaMode</a></li><li><a href="global.html#setGravity">setGravity</a></li><li><a href="global.html#setLinkMode">setLinkMode</a></li><li><a href="global.html#setSelected">setSelected</a></li><li><a href="global.html#setSelection">setSelection</a></li><li><a href="global.html#setValue">setValue</a></li><li><a href="global.html#setupAssocKeywords">setupAssocKeywords</a></li><li><a href="global.html#setupCaptcha">setupCaptcha</a></li><li><a href="global.html#setupRecentWorks">setupRecentWorks</a></li><li><a href="global.html#setupResetPin">setupResetPin</a></li><li><a href="global.html#show">show</a></li><li><a href="global.html#showEditions">showEditions</a></li><li><a href="global.html#showHelp">showHelp</a></li><li><a href="global.html#showKeyword">showKeyword</a></li><li><a href="global.html#showLoginDialog">showLoginDialog</a></li><li><a href="global.html#showNodeInformation">showNodeInformation</a></li><li><a href="global.html#showSearchBuilder">showSearchBuilder</a></li><li><a href="global.html#showSearchFacetedWizard">showSearchFacetedWizard</a></li><li><a href="global.html#showWarningAboutTermUsage">showWarningAboutTermUsage</a></li><li><a href="global.html#simplePointsToWKT">simplePointsToWKT</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#startRecentWork">startRecentWork</a></li><li><a href="global.html#temporalSimplifyDate">temporalSimplifyDate</a></li><li><a href="global.html#temporalToHumanReadableString">temporalToHumanReadableString</a></li><li><a href="global.html#tick">tick</a></li><li><a href="global.html#toJD">toJD</a></li><li><a href="global.html#toJSDate">toJSDate</a></li><li><a href="global.html#translationFromUI">translationFromUI</a></li><li><a href="global.html#translationSupport">translationSupport</a></li><li><a href="global.html#translationToUI">translationToUI</a></li><li><a href="global.html#truncateText">truncateText</a></li><li><a href="global.html#unselectAssoc">unselectAssoc</a></li><li><a href="global.html#updateAssocDisplay">updateAssocDisplay</a></li><li><a href="global.html#updateAssocList">updateAssocList</a></li><li><a href="global.html#updateCircles">updateCircles</a></li><li><a href="global.html#updateCurvedLines">updateCurvedLines</a></li><li><a href="global.html#updateLabels">updateLabels</a></li><li><a href="global.html#updateNodes">updateNodes</a></li><li><a href="global.html#updateRecentKeywordDisplay">updateRecentKeywordDisplay</a></li><li><a href="global.html#updateRectangles">updateRectangles</a></li><li><a href="global.html#updateRuleBuilder">updateRuleBuilder</a></li><li><a href="global.html#updateStatus">updateStatus</a></li><li><a href="global.html#updateStraightLines">updateStraightLines</a></li><li><a href="global.html#validateResetPin">validateResetPin</a></li><li><a href="global.html#visualizeData">visualizeData</a></li><li><a href="global.html#visualizeSelection">visualizeSelection</a></li><li><a href="global.html#weekDay">weekDay</a></li><li><a href="global.html#weekOfYear">weekOfYear</a></li><li><a href="global.html#zoomed">zoomed</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Jul 24 2025 18:09:14 GMT+0400 (GMT+04:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

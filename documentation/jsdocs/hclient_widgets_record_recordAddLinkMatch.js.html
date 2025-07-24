@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: hclient/widgets/record/recordAddLinkMatch.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: hclient/widgets/record/recordAddLinkMatch.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+* @file recordAddLinkMatch.js
+* @brief Provides a widget to create links between records by matching values in specified fields (Foreign Key matching).
+* @fileOverview This file defines the `recordAddLinkMatch` widget. It allows users to establish links
+* (record pointers) from a set of source records to target records by matching the content of a
+* specified text field in the source records with a text field in the target records. This is useful
+* for automating the creation of links based on existing data that acts like a foreign key. The
+* widget provides UI to select source scope, source and target record types, the fields to match,
+* and the pointer field in the source to update.
+*
+* @project     Heurist academic knowledge management system
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @author      Artem Osmakov   &lt;osmakov@gmail.com>
+* @author      Ian Johnson &lt;ian.johnson.heurist@gmail.com>
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @since       4.0
+*/
+
+
+
+/**
+ * @widget heurist.recordAddLinkMatch
+ * @extends $.heurist.recordAction
+ * @description jQuery widget for creating links between records by matching field values.
+ * This widget facilitates a "foreign key" style linking mechanism. It matches values
+ * from a specified text field in source records against values in a text field of
+ * target records (of a selected type). If a match is found, it updates a specified
+ * record pointer field in the source record to link to the matched target record.
+ *
+ * @param {object} options - Configuration options for the widget.
+ * @param {number} [options.height=520] - The height of the dialog.
+ * @param {number} [options.width=800] - The width of the dialog.
+ * @param {boolean} [options.modal=true] - Whether the dialog is modal.
+ * @param {string} [options.init_scope='selected'] - Initial scope for source record selection.
+ * @param {string} [options.title='Foreign Key matching. Add links between records by matching field values'] - Title of the dialog.
+ * @param {string} [options.htmlContent='recordAddLinkMatch.html'] - The HTML file for the widget's content.
+ * @param {?any} options.relationtype - (Inherited but seems unused in this widget's core logic, could be for future extension or specific configurations not shown).
+ */
+$.widget( "heurist.recordAddLinkMatch", $.heurist.recordAction, {
+
+    /**
+     * @namespace options
+     * @memberof heurist.recordAddLinkMatch
+     * @type {object}
+     * @property {number} [height=520] - Dialog height.
+     * @property {number} [width=800] - Dialog width.
+     * @property {boolean} [modal=true] - Is dialog modal.
+     * @property {string} [init_scope='selected'] - Initial source scope.
+     * @property {string} [title='Foreign Key matching. Add links between records by matching field values'] - Dialog title.
+     * @property {string} [htmlContent='recordAddLinkMatch.html'] - HTML content file.
+     * @property {?any} relationtype - Inherited option, potential for future use.
+     */
+    options: {
+    
+        height: 520,
+        width:  800,
+        modal:  true,
+        init_scope: 'selected',
+        title:  'Foreign Key matching. Add links between records by matching field values',
+        
+        htmlContent: 'recordAddLinkMatch.html',
+        
+        relationtype: null
+        
+    },
+
+    /**
+     * @member {?number} source_RecTypeID
+     * @memberof heurist.recordAddLinkMatch
+     * @description The record type ID of the source records.
+     */
+    source_RecTypeID:null, 
+    /**
+     * @member {?number} target_RecTypeID
+     * @memberof heurist.recordAddLinkMatch
+     * @description The record type ID of the target records to match against.
+     */
+    target_RecTypeID:null,
+    /**
+     * @member {string} sSourceName
+     * @memberof heurist.recordAddLinkMatch
+     * @description Placeholder for source name (seems unused in this file).
+     */
+    sSourceName:'',
+    /**
+     * @member {string} sTargetName
+     * @memberof heurist.recordAddLinkMatch
+     * @description Placeholder for target name (seems unused in this file).
+     */
+    sTargetName:'',
+    /**
+     * @member {?jQuery} targetRtySelect
+     * @memberof heurist.recordAddLinkMatch
+     * @description jQuery object for the target record type selector dropdown.
+     */
+    targetRtySelect: null,
+    
+    /**
+     * @function _getActionButtons
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Gets action buttons for the dialog, setting the main action button text to 'Create links'.
+     * @returns {Array&lt;object>} Array of button definition objects.
+     */
+    _getActionButtons: function(){
+        let res = this._super();
+        res[1].text = window.hWin.HR('Create links');
+        return res;
+    },
+
+    /**
+     * @function _fillSelectRecordScope
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Populates the source record scope selector. Enforces that the current query or selection
+     * contains only a single record type to avoid accidental errors.
+     * @returns {boolean|undefined} True if successful, false if mixed record types prevent operation.
+     */
+    _fillSelectRecordScope: function (){
+        
+        this._$('select').css({width:'30em','max-width':'35em'});
+
+        let scope_types = this.options.scope_types;
+        this.selectRecordScope.empty();
+        
+        if(scope_types=='none'){
+            this.selectRecordScope.parent().hide();
+            return;    
+        }
+
+        let selScope = this.selectRecordScope.get(0); //selector
+
+        let rty_ID = 0;
+        let rectype_Ids = this._currentRecordset.getRectypes();
+        
+        if(rectype_Ids.length==1){
+
+            rty_ID = rectype_Ids[0];
+            this.source_RecTypeID = rty_ID;
+            
+            window.hWin.HEURIST4.ui.addoption(selScope,
+                'all', 'All records: ' + $Db.rty(rty_ID,'rty_Plural'));
+                
+            if(this._currentRecordsetSelIds.length>0){
+                window.hWin.HEURIST4.ui.addoption(selScope,
+                    'selected', 'Selected records: ' + $Db.rty(rty_ID,'rty_Plural'));
+            }
+        }
+          
+        if(!(rty_ID>0)){
+            window.hWin.HEURIST4.msg.showMsgDlg(
+        '&lt;b>Mixed record types&lt;/b>'
+        +'&lt;p>The current query must contain only a single record type (this is enforced to avoid accidental errors).&lt;/p>' 
+        +'&lt;p>Please select records of a single type, either by individual selection or a revised filter, and repeat this action. &lt;/p>');
+
+            return false;
+        }
+            
+        
+        this._on( this.selectRecordScope, { change: this._onRecordScopeChange} );        
+        //this.selectRecordScope.val(rty_ID);    
+        if(selScope.selectedIndex&lt;0) selScope.selectedIndex=0;
+        
+        window.hWin.HEURIST4.ui.initHSelect(this.selectRecordScope, false);
+        
+        this._onRecordScopeChange();
+        
+        this.selectRecordScope.parent().hide();
+        
+        return true;
+    },
+
+    /**
+     * @function _onRecordScopeChange
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Handles changes in the source record scope. Calls `_fillSelectFieldTypes` for the source.
+     * This is an override of the parent widget's method.
+     */
+    _onRecordScopeChange: function () 
+    {
+        this._fillSelectFieldTypes('source', this.source_RecTypeID);
+    },
+ 
+    /**
+     * @function _fillSelectFieldTypes
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Populates dropdowns for selecting fields.
+     * For the 'source' party: populates a dropdown (`#sel_pointer_field`) with available record pointer fields
+     * (resource type fields) that can be updated with matched record IDs. Also populates a dropdown
+     * (`#sel_fieldtype_source`) with text fields from the source record type to be used for matching.
+     * For the 'target' party: populates a dropdown (`#sel_fieldtype_target`) with text fields from the target
+     * record type to be used for matching.
+     * @param {string} party - 'source' or 'target'.
+     * @param {number} recRecTypeID - The record type ID for which to list fields.
+     */
+    _fillSelectFieldTypes: function (party, recRecTypeID) {
+
+        // create matching field
+        let fieldSelect = $('#sel_fieldtype_'+party);
+        
+        let details = $Db.rst(recRecTypeID);
+        if(details)
+        {   
+
+        if(party=='source')
+        {
+            
+            let fieldPointerSel = this._$('#sel_pointer_field');
+            fieldPointerSel.empty();
+
+            let that = this;
+            let has_fields = false;
+            // get structures for both record types and filter out link and relation maker fields for links
+            //                                      and text and numeric fields for matching             
+            details.each2(function(dtyID, detail) {
+            
+                let field_type = $Db.dty(dtyID, 'dty_Type');
+                let req_type  = detail['rst_RequirementType'];
+                
+                //|| field_type=='relmarker')
+                if ( (field_type!='resource') || req_type=='forbidden' ) {
+                     return true;//continue
+                }
+                
+                //get name, contraints
+                let dtyName = detail['rst_DisplayName'];
+                if(!has_fields){
+                    window.hWin.HEURIST4.ui.addoption(fieldPointerSel.get(0), 0, window.hWin.HR('select'));    
+                }
+                window.hWin.HEURIST4.ui.addoption(fieldPointerSel.get(0), dtyID, dtyName);
+                has_fields = true;
+            });//for fields
+            
+            if(!has_fields){
+                //There are no record pointer fields in current query record type into which matched record IDs can be inserted
+                window.hWin.HEURIST4.ui.addoption(fieldPointerSel.get(0), 0, 'There are no record pointer fields');
+            }
+        
+            this._on( fieldPointerSel, { change: that._fillTargetRecordTypes} );        
+            window.hWin.HEURIST4.ui.initHSelect(fieldPointerSel, false);
+            fieldPointerSel.trigger('change');
+            
+        }//for source 
+        
+        window.hWin.HEURIST4.ui.createRectypeDetailSelect(fieldSelect.get(0), recRecTypeID, 
+                                    ['freetext','blocktext'], window.hWin.HR('select'));
+                    
+        if(fieldSelect.find('option').length==1){
+            fieldSelect.empty();
+            window.hWin.HEURIST4.ui.addoption(fieldSelect.get(0), 0, 'There are no text fields');
+        }
+                     
+        window.hWin.HEURIST4.ui.initHSelect(fieldSelect, false);
+        this._on(fieldSelect,{change:this._findMatchesCount});
+        fieldSelect.trigger('change');
+        
+        }else{
+            fieldSelect.empty();
+            if(fieldSelect.hSelect("instance")!=undefined){
+                fieldSelect.hSelect("destroy"); 
+            }
+        }
+    },  
+
+    /**
+     * @function _findMatchesCount
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Event handler typically triggered when a source or target matching field is selected.
+     * If the source field changes, it fetches and displays the total and unique value counts for that field
+     * within the current source scope.
+     * If both source and target matching fields are selected, it fetches and displays the number of potential
+     * matches between the source and target records based on these fields. Enables the action button if matches are found.
+     * @param {Event} event - The change event object from the field selector.
+     */
+    _findMatchesCount: function(event){
+        
+        let fieldSelect = $(event.target);
+        
+        window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('.btnDoAction'), true);
+        
+        if(fieldSelect.attr('id')=='sel_fieldtype_source'){
+
+            let cnt_info = this._$('#count_source_unique').text('');
+            
+            if(fieldSelect.val()>0){
+                cnt_info.addClass('ui-icon ui-icon-loading-status-balls rotate')
+            
+                //search all and unique detail values
+                window.HAPI4.RecordMgr.get_aggregations({a:'count_details',
+                    rec_IDs: this._getRecordsScope().join(','),
+                    rty_ID:this.source_RecTypeID, 
+                    dty_ID:fieldSelect.val()}, 
+                function(response){     
+                    cnt_info.removeClass('ui-icon ui-icon-loading-status-balls rotate')
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        cnt_info.text(response.data.total+' values ('+response.data.unique+' unique)');                
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+            }
+        }
+        
+        if(this.target_RecTypeID>0){
+
+            let fieldSelectTrg = this._$('#sel_fieldtype_target');
+            let fieldSelectSrc = this._$('#sel_fieldtype_source');
+
+            let cnt_info2 = this._$('#count_target_matches').text('');
+            
+            if(fieldSelectSrc.val()>0 &amp;&amp; fieldSelectTrg.val()>0){
+                cnt_info2.addClass('ui-icon ui-icon-loading-status-balls rotate')
+                
+                let that = this;
+            
+                window.HAPI4.RecordMgr.get_aggregations({a:'count_matches',
+                                rec_IDs: this._getRecordsScope().join(','),
+                                rty_src:this.source_RecTypeID, 
+                                dty_src:fieldSelectSrc.val(),
+                                rty_trg:this.target_RecTypeID, 
+                                dty_trg:fieldSelectTrg.val()
+                                                        }, 
+                function(response){     
+                    cnt_info2.removeClass('ui-icon ui-icon-loading-status-balls rotate')
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        cnt_info2.text(response.data+' matches');                
+                        that._enableActionButton();
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+            }
+        }
+        
+    },
+    
+    /**
+     * @function _fillTargetRecordTypes
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Event handler triggered when a source pointer field (`#sel_pointer_field`) is selected.
+     * It populates the target record type selector (`#target_record_type`) with record types that are valid
+     * targets for the selected pointer field (based on its constraints).
+     * @param {Event} event - The change event object from the source pointer field selector.
+     */
+    _fillTargetRecordTypes: function(event){
+
+        let dtID = $(event.target).val();
+        
+        if(!(dtID>0)) return;
+        
+        let rt_constraints = (dtID>0)?$Db.dty(dtID, 'dty_PtrTargetRectypeIDs'):'';
+        
+        if(!Array.isArray(rt_constraints)){
+            if(window.hWin.HEURIST4.util.isempty(rt_constraints)){
+                rt_constraints = [];
+            }else{
+                rt_constraints = rt_constraints.split(',');        
+            }
+        }
+        
+        this.targetRtySelect = $('#target_record_type');
+        window.hWin.HEURIST4.ui.createRectypeSelectNew(this.targetRtySelect.get(0), 
+            {rectypeList:rt_constraints, useHtmlSelect:true, useCounts:true});
+        
+        this._on( this.targetRtySelect, {
+                change: this._onTargetRtySelectChange} );        
+        
+        window.hWin.HEURIST4.ui.initHSelect(this.targetRtySelect, false);
+        
+        this._onTargetRtySelectChange();
+        
+    },
+    
+    /**
+     * @function _onTargetRtySelectChange
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Event handler for when the target record type selector (`#target_record_type`) changes.
+     * Updates `this.target_RecTypeID`, displays the count of records for the selected target type,
+     * and calls `_fillSelectFieldTypes` to populate the target matching field selector.
+     * Clears target field selectors if no records exist for the selected type.
+     */
+    _onTargetRtySelectChange: function(){
+        this._$('#count_target_rty').text('');
+        this.target_RecTypeID = this.targetRtySelect.val();
+        if(this.target_RecTypeID>0){
+            let rty_usage_cnt = $Db.rty(this.target_RecTypeID,'rty_RecCount');
+            if(rty_usage_cnt>0){
+                this._$('#count_target_rty').text( rty_usage_cnt + ' records' );
+            }
+        }
+        this._fillSelectFieldTypes('target', this.target_RecTypeID);
+        if(this._$('#count_target_rty').text()==''){
+            this._$('#sel_fieldtype_target').empty();
+            this._$('#count_target_matches').empty();
+            this._enableActionButton();
+        }
+
+    },
+
+    /**
+     * @function getFieldValue
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Retrieves the value from an `editing_input` widget by its ID.
+     * (Note: This function appears to be a copy from another widget and is not used in this file,
+     * as `editing_input` is not the primary mechanism for field selection here. Standard jQuery `val()` is used on `&lt;select>`s.)
+     * @param {string} input_id - The ID of the `editing_input` container.
+     * @returns {?any} The first value from the `editing_input`, or null if not found or no value.
+     */
+    getFieldValue: function (input_id) {
+        let ele =  this._$('#'+input_id);
+        if(ele.length>0){
+            let sel = ele.editing_input('getValues');
+            if(sel &amp;&amp; sel.length>0){
+                return sel[0];
+            }
+        }
+        return null;
+    },
+
+    
+    /**
+     * @function _enableActionButton
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Enables or disables the main 'Create links' action button.
+     * The button is enabled if the number of target matches found (displayed in `#count_target_matches`) is greater than 0.
+     * It also checks (though the logic for `sel_field` seems incomplete/vestigial here) if a relation type is selected for relmarkers,
+     * but this widget primarily deals with direct resource pointers.
+     */
+    _enableActionButton: function (){
+        
+        let isEnabled = (parseInt($('#count_target_matches').text())>0);
+        
+        if(isEnabled){
+            let sel_field  = this._$('input[type="radio"][name="link_field"]:checked');
+            
+            if(sel_field.attr('data-type')=='relmarker'){
+                //in case relmarker check if reltype selected
+                let dtyID = sel_field.val()
+                let termID = this.getFieldValue('rt_source_sel_'+dtyID);        
+                isEnabled = (termID>0);
+            }                
+        }  
+        window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('.btnDoAction'), !isEnabled );
+    }, 
+    
+    /**
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Determines the array of source record IDs to be processed based on the
+     * selection in the `selectRecordScope` dropdown ('selected' or 'all' within the current recordset).
+     * @returns {Array&lt;number>} An array of source record IDs.
+     */
+    _getRecordsScope: function()
+    {
+        let isSelection = (this.selectRecordScope.val()=='selected');
+        let currentScope = isSelection?this._currentRecordsetSelIds:this._currentRecordset.getIds();
+        return currentScope;
+
+    },
+
+    /**
+     * @function doAction
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Performs the action of creating links by matching or displays unmatched values.
+     * If the 'Show unmatched values' option is selected, it fetches and displays records from the source scope
+     * that do not have a match in the target records.
+     * Otherwise, it initiates the batch process to add links:
+     * It gathers parameters (source/target record types, source/target matching fields, pointer field to update, scope of records).
+     * It then calls the `HAPI4.RecordMgr.batch_details` API with `a: 'add_links_by_matching'`.
+     * Shows progress and displays results (records updated, links added/existing).
+     */
+    doAction: function(){
+        
+        if(this._$('#div_result').is(':visible')){
+            this._setBtnLabels(false);
+            this._$('#div_result').hide();
+            this._$('#div_fieldset').show();
+            return;
+        }
+
+        let dty_ID = this._$('#sel_pointer_field').val();
+        /*
+        let ele = this._$('input[type="radio"][name="link_field"]:checked');
+        let dty_ID = ele.val();
+        let trm_ID = 0;
+        let data_type = ele.attr('data-type');   //resource (record pointer) or relmarker
+        if(data_type!='resource'){
+            trm_ID = this.getFieldValue('rt_source_sel_'+dty_ID);
+        }*/
+        
+        let currentScope = this._getRecordsScope();
+        
+        
+        let div_res = this._$('#div_result');
+        div_res.empty();
+        let that = this;
+        
+        if ($('input[name="to_replace"]:checked').val()=='nonmatch') {
+                window.HAPI4.RecordMgr.get_aggregations({a:'count_matches',
+                                nonmatch: 1,
+                                rec_IDs: this._getRecordsScope().join(','),
+                                rty_src:this.source_RecTypeID, 
+                                dty_src:$('#sel_fieldtype_source').val(),
+                                rty_trg:this.target_RecTypeID, 
+                                dty_trg:$('#sel_fieldtype_target').val()
+                                                        }, 
+                function(response){     
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        that.element.find('#div_fieldset').hide();
+                        let csv_res = '&lt;div style="padding:10px;height:100%;overflow:auto;">UNMATCHED VALUES&lt;br>&lt;pre>H-ID&amp;#9;Value&amp;#9;Record title&lt;br>';
+                        for(let idx in response.data){
+                            let row = response.data[idx];
+                            for(let idx2 in row){
+                                row[idx2] = window.hWin.HEURIST4.util.stripTags(row[idx2]).trim();
+                            }
+                            csv_res = csv_res + row.join("&amp;#9;")+"&lt;br>";
+                        }
+                        div_res.html(csv_res+'&lt;/pre>&lt;/div>').show();
+                        that._setBtnLabels(true);
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+        }else{
+            
+            let session_id = Math.round((new Date()).getTime()/1000);
+        
+            let request = {a: 'add_links_by_matching',
+                                session: session_id,
+                                dty_ID:  dty_ID,
+                                //trm_ID: trm_ID,
+                                rec_IDs: currentScope.join(','),
+                                rty_src:  this.source_RecTypeID,
+                                dty_src: $('#sel_fieldtype_source').val(),
+                                rty_trg: this.target_RecTypeID,
+                                dty_trg: $('#sel_fieldtype_target').val(),
+                                replace: ($('input[name="to_replace"]:checked').val()=='replace'?1:0)
+                        };
+
+            this._showProgress( session_id, false, 1000 );
+            
+            window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+                
+                that._hideProgress();
+                
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    
+                    that.element.find('#div_fieldset').hide();
+                    div_res.html(
+    '&lt;div style="padding:10px;display:table">'
+    +`&lt;span class="table-cell">Records passed to process&lt;/span>&lt;span class="table-cell">&amp;nbsp;&amp;nbsp;${currentScope.length}&lt;/span>&lt;br>&lt;br>`
+    +`&lt;span class="table-cell">Records updated&lt;/span>&lt;span class="table-cell">&amp;nbsp;&amp;nbsp;${response.data['records_updated']}&lt;/span>&lt;br>&lt;br>`
+    +`&lt;span class="table-cell">Links added&lt;/span>&lt;span class="table-cell">&amp;nbsp;&amp;nbsp;${response.data['added']}&lt;/span>&lt;br>&lt;br>`
+    +`&lt;span class="table-cell">Links already exist&lt;/span>&lt;span class="table-cell">&amp;nbsp;&amp;nbsp;${response.data['exist']}&lt;/span>&lt;/div>`)
+                    .show();
+                    
+                    that._setBtnLabels(true);
+                    
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response); 
+                }
+            });
+            
+        }
+    },
+    
+    /**
+     * @function _setBtnLabels
+     * @memberof heurist.recordAddLinkMatch
+     * @private
+     * @description Sets the labels of the main action button and the cancel button
+     * depending on whether the action is done or pending.
+     * @param {boolean} is_done - If true, sets labels to 'New Action' and 'Done'.
+     *                           If false, sets labels to 'Create links' and 'Cancel'.
+     */
+    _setBtnLabels: function(is_done){
+        let lab1, lab2;
+        if(is_done){
+            lab1 = 'New Action';
+            lab2 = 'Done';
+        }else{
+            lab1 = 'Create links';
+            lab2 = 'Cancel';
+        }
+        this.element.parents('.ui-dialog').find('.btnDoAction').button({label:window.hWin.HR(lab1)});
+        this.element.parents('.ui-dialog').find('.btnCancel').button({label:window.hWin.HR(lab2)});
+    }
+        
+});
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="HEURIST4.dbs.html">dbs</a></li><li><a href="HEURIST4.geo.html">geo</a></li><li><a href="HEURIST4.msg.html">msg</a></li><li><a href="HEURIST4.query.html">query</a></li><li><a href="HEURIST4.util.html">util</a></li><li><a href="NodeSelection.html">NodeSelection</a></li><li><a href="heurist.buttonsMenu.html">buttonsMenu</a></li><li><a href="heurist.controlPanel.html">controlPanel</a></li><li><a href="heurist.dbAction.html">dbAction</a></li><li><a href="heurist.dbVerify.html">dbVerify</a></li><li><a href="heurist.dbVerifyURLs.html">dbVerifyURLs</a></li><li><a href="heurist.editTranslations.html">editTranslations</a></li><li><a href="heurist.editing_input.html">editing_input</a></li><li><a href="heurist.navigation.html">navigation</a></li><li><a href="heurist.recordAccess.options.html">options</a></li><li><a href="heurist.recordAction.options.html">options</a></li><li><a href="heurist.recordAdd.options.html">options</a></li><li><a href="heurist.recordAddButton.options.html">options</a></li><li><a href="heurist.recordAddLink.options.html">options</a></li><li><a href="heurist.recordAddLinkMatch.options.html">options</a></li><li><a href="heurist.recordArchive.options.html">options</a></li><li><a href="heurist.recordBookmark.options.html">options</a></li><li><a href="heurist.recordDataTable.options.html">options</a></li><li><a href="heurist.recordDelete.options.html">options</a></li><li><a href="heurist.recordExport.options.html">options</a></li><li><a href="heurist.recordExportCSV.options.html">options</a></li><li><a href="heurist.recordFindDuplicates.options.html">options</a></li><li><a href="heurist.recordImportAnnotations.options.html">options</a></li><li><a href="heurist.recordNotify.options.html">options</a></li><li><a href="heurist.recordRate.options.html">options</a></li><li><a href="heurist.recordTag.options.html">options</a></li><li><a href="heurist.recordTemplate.options.html">options</a></li><li><a href="heurist.recordTitles.options.html">options</a></li><li><a href="heurist.recordUploadedFilesIndex.options.html">options</a></li><li><a href="heurist.selectFile.html">selectFile</a></li><li><a href="heurist.slidersMenu.html">slidersMenu</a></li></ul><h3>Classes</h3><ul><li><a href="ActionHandler.html">ActionHandler</a></li><li><a href="CmsManager.html">CmsManager</a></li><li><a href="Color.html">Color</a></li><li><a href="CrosstabsAnalysis.html">CrosstabsAnalysis</a></li><li><a href="EditorCodeMirror.html">EditorCodeMirror</a></li><li><a href="HEditing.html">HEditing</a></li><li><a href="HLayout.html">HLayout</a></li><li><a href="HLayoutMgr.html">HLayoutMgr</a></li><li><a href="HMapLayer.html">HMapLayer</a></li><li><a href="HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRapidFieldAdditions.HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRecordSearch.html">HRecordSearch</a></li><li><a href="HRecordSet.html">HRecordSet</a></li><li><a href="HSystemMgr.html">HSystemMgr</a></li><li><a href="HintDiv.html">HintDiv</a></li><li><a href="JapaneseCalendar.html">JapaneseCalendar</a></li><li><a href="L.Control.Help.html">Help</a></li><li><a href="L.Control.Manager.html">Manager</a></li><li><a href="L.Control.Publish.html">Publish</a></li><li><a href="Solver.html">Solver</a></li><li><a href="TDuration.html">TDuration</a></li><li><a href="Temporal.html">Temporal</a></li><li><a href="hAPI.html">hAPI</a></li><li><a href="hAPI-HRecordMgr.html">HRecordMgr</a></li><li><a href="window.TDate.html">TDate</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HPublishDialog">HPublishDialog</a></li><li><a href="global.html#HSvsEdit">HSvsEdit</a></li><li><a href="global.html#SelectLinkField">SelectLinkField</a></li><li><a href="global.html#_addInput">_addInput</a></li><li><a href="global.html#_checkStructureFromSource">_checkStructureFromSource</a></li><li><a href="global.html#_checkYear">_checkYear</a></li><li><a href="global.html#_closeDialog">_closeDialog</a></li><li><a href="global.html#_create">_create</a></li><li><a href="global.html#_destroy">_destroy</a></li><li><a href="global.html#_detectHeurist">_detectHeurist</a></li><li><a href="global.html#_doSave">_doSave</a></li><li><a href="global.html#_fromDataToUI">_fromDataToUI</a></li><li><a href="global.html#_getActionButtons">_getActionButtons</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_initControls">_initControls</a></li><li><a href="global.html#_initDialog">_initDialog</a></li><li><a href="global.html#_initInnerHeader">_initInnerHeader</a></li><li><a href="global.html#_initModal">_initModal</a></li><li><a href="global.html#_initOffcanvas">_initOffcanvas</a></li><li><a href="global.html#_japaneseYearToGregorian">_japaneseYearToGregorian</a></li><li><a href="global.html#_loadParentLookup">_loadParentLookup</a></li><li><a href="global.html#_popupDialog">_popupDialog</a></li><li><a href="global.html#_preImportCheck">_preImportCheck</a></li><li><a href="global.html#_processSPARQLRow">_processSPARQLRow</a></li><li><a href="global.html#_refresh">_refresh</a></li><li><a href="global.html#_refreshCaptcha">_refreshCaptcha</a></li><li><a href="global.html#_setOption">_setOption</a></li><li><a href="global.html#_showRecordViewPopup">_showRecordViewPopup</a></li><li><a href="global.html#_switchToDataMode">_switchToDataMode</a></li><li><a href="global.html#_theme_editing_symbology">_theme_editing_symbology</a></li><li><a href="global.html#_updatePanels">_updatePanels</a></li><li><a href="global.html#_validateFromGregorian">_validateFromGregorian</a></li><li><a href="global.html#addAssoctoAssigned">addAssoctoAssigned</a></li><li><a href="global.html#addBackgroundCircles">addBackgroundCircles</a></li><li><a href="global.html#addContainer">addContainer</a></li><li><a href="global.html#addForce">addForce</a></li><li><a href="global.html#addForegroundCircles">addForegroundCircles</a></li><li><a href="global.html#addIcons">addIcons</a></li><li><a href="global.html#addKeyword">addKeyword</a></li><li><a href="global.html#addLabels">addLabels</a></li><li><a href="global.html#addLevel">addLevel</a></li><li><a href="global.html#addLines">addLines</a></li><li><a href="global.html#addMarkerDefinitions">addMarkerDefinitions</a></li><li><a href="global.html#addNodes">addNodes</a></li><li><a href="global.html#addPrevtoAssigned">addPrevtoAssigned</a></li><li><a href="global.html#addSelectionBox">addSelectionBox</a></li><li><a href="global.html#addTitles">addTitles</a></li><li><a href="global.html#applyRules">applyRules</a></li><li><a href="global.html#autofill_login">autofill_login</a></li><li><a href="global.html#browseRecords">browseRecords</a></li><li><a href="global.html#calculateImageExtentFromWorldFile">calculateImageExtentFromWorldFile</a></li><li><a href="global.html#changeDisplay">changeDisplay</a></li><li><a href="global.html#changeViewMode">changeViewMode</a></li><li><a href="global.html#checkAllOptions">checkAllOptions</a></li><li><a href="global.html#checkStoredSettings">checkStoredSettings</a></li><li><a href="global.html#clearContent">clearContent</a></li><li><a href="global.html#close">close</a></li><li><a href="global.html#closeDialog">closeDialog</a></li><li><a href="global.html#commonCodeInit">commonCodeInit</a></li><li><a href="global.html#commonOnAdd">commonOnAdd</a></li><li><a href="global.html#compareIndexes">compareIndexes</a></li><li><a href="global.html#correctionOfInvalidTerm">correctionOfInvalidTerm</a></li><li><a href="global.html#createOverlay">createOverlay</a></li><li><a href="global.html#currentNode">currentNode</a></li><li><a href="global.html#daysInMonth">daysInMonth</a></li><li><a href="global.html#determineColour">determineColour</a></li><li><a href="global.html#disableUpdateBtn">disableUpdateBtn</a></li><li><a href="global.html#doAction">doAction</a></li><li><a href="global.html#doAuthentication">doAuthentication</a></li><li><a href="global.html#doImport">doImport</a></li><li><a href="global.html#doRegister">doRegister</a></li><li><a href="global.html#doSamlLogin">doSamlLogin</a></li><li><a href="global.html#doSearchByID">doSearchByID</a></li><li><a href="global.html#drag_link_line">drag_link_line</a></li><li><a href="global.html#drag_link_source_id">drag_link_source_id</a></li><li><a href="global.html#drag_link_target_id">drag_link_target_id</a></li><li><a href="global.html#drag_link_timer">drag_link_timer</a></li><li><a href="global.html#dragend">dragend</a></li><li><a href="global.html#dragmove">dragmove</a></li><li><a href="global.html#dragstart">dragstart</a></li><li><a href="global.html#editCMS2">editCMS2</a></li><li><a href="global.html#editCMS_ElementCfg">editCMS_ElementCfg</a></li><li><a href="global.html#editCMS_SelectElement">editCMS_SelectElement</a></li><li><a href="global.html#editCMS_SiteMenu">editCMS_SiteMenu</a></li><li><a href="global.html#editCMS_WidgetCfg">editCMS_WidgetCfg</a></li><li><a href="global.html#editSymbology">editSymbology</a></li><li><a href="global.html#editTheme">editTheme</a></li><li><a href="global.html#enable_register">enable_register</a></li><li><a href="global.html#executeFormula">executeFormula</a></li><li><a href="global.html#f">f</a></li><li><a href="global.html#first_level_rty_ID">first_level_rty_ID</a></li><li><a href="global.html#fixCalendarPickerCMDs">fixCalendarPickerCMDs</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#formatGregJulian">formatGregJulian</a></li><li><a href="global.html#fromJD">fromJD</a></li><li><a href="global.html#fromJSDate">fromJSDate</a></li><li><a href="global.html#fset">fset</a></li><li><a href="global.html#getAllChecked">getAllChecked</a></li><li><a href="global.html#getClass">getClass</a></li><li><a href="global.html#getContainer">getContainer</a></li><li><a href="global.html#getDataFromServer">getDataFromServer</a></li><li><a href="global.html#getEntityRadius">getEntityRadius</a></li><li><a href="global.html#getEraFromGregorian">getEraFromGregorian</a></li><li><a href="global.html#getEraFromJapaneseStr">getEraFromJapaneseStr</a></li><li><a href="global.html#getEraLimits">getEraLimits</a></li><li><a href="global.html#getEras">getEras</a></li><li><a href="global.html#getGephiFormat">getGephiFormat</a></li><li><a href="global.html#getKeywords">getKeywords</a></li><li><a href="global.html#getKeywordsNextStep">getKeywordsNextStep</a></li><li><a href="global.html#getLineLength">getLineLength</a></li><li><a href="global.html#getLineWidth">getLineWidth</a></li><li><a href="global.html#getMarkerWidth">getMarkerWidth</a></li><li><a href="global.html#getNodeDataById">getNodeDataById</a></li><li><a href="global.html#getRecentKeywords">getRecentKeywords</a></li><li><a href="global.html#getRecordOverlayData">getRecordOverlayData</a></li><li><a href="global.html#getRelationOverlayData">getRelationOverlayData</a></li><li><a href="global.html#getRulesArray">getRulesArray</a></li><li><a href="global.html#getSelected">getSelected</a></li><li><a href="global.html#getSelection">getSelection</a></li><li><a href="global.html#getSetting">getSetting</a></li><li><a href="global.html#getURL">getURL</a></li><li><a href="global.html#gregorianToJapaneseStr">gregorianToJapaneseStr</a></li><li><a href="global.html#hMapDocument">hMapDocument</a></li><li><a href="global.html#hRecordAction">hRecordAction</a></li><li><a href="global.html#handleNodeAction">handleNodeAction</a></li><li><a href="global.html#handleSettingsInUI">handleSettingsInUI</a></li><li><a href="global.html#hexToFilter">hexToFilter</a></li><li><a href="global.html#hexportMenu">hexportMenu</a></li><li><a href="global.html#imgFilter">imgFilter</a></li><li><a href="global.html#initProfilePreferences">initProfilePreferences</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isA">isA</a></li><li><a href="global.html#isAssocKeyword">isAssocKeyword</a></li><li><a href="global.html#isMonthSpan">isMonthSpan</a></li><li><a href="global.html#isRecentKeyword">isRecentKeyword</a></li><li><a href="global.html#isTemporal">isTemporal</a></li><li><a href="global.html#isValid">isValid</a></li><li><a href="global.html#japaneseToGregorian">japaneseToGregorian</a></li><li><a href="global.html#japaneseToGregorianStr">japaneseToGregorianStr</a></li><li><a href="global.html#keywordLookup">keywordLookup</a></li><li><a href="global.html#loadHtmlContent">loadHtmlContent</a></li><li><a href="global.html#log10">log10</a></li><li><a href="global.html#login_dialog">login_dialog</a></li><li><a href="global.html#lookupEditions">lookupEditions</a></li><li><a href="global.html#lookupGoogle">lookupGoogle</a></li><li><a href="global.html#lookupHathiTrust">lookupHathiTrust</a></li><li><a href="global.html#lookupKarlsruhePortal">lookupKarlsruhePortal</a></li><li><a href="global.html#lookupWorldCat">lookupWorldCat</a></li><li><a href="global.html#mapIds">mapIds</a></li><li><a href="global.html#menuActionHandler">menuActionHandler</a></li><li><a href="global.html#mergeArraysUnique">mergeArraysUnique</a></li><li><a href="global.html#msgToConsole">msgToConsole</a></li><li><a href="global.html#newDate">newDate</a></li><li><a href="global.html#onAdd">onAdd</a></li><li><a href="global.html#onAuthentication">onAuthentication</a></li><li><a href="global.html#onNodeClick">onNodeClick</a></li><li><a href="global.html#onPageInit">onPageInit</a></li><li><a href="global.html#onRecordNodeClick">onRecordNodeClick</a></li><li><a href="global.html#onRemove">onRemove</a></li><li><a href="global.html#onTermSaveError">onTermSaveError</a></li><li><a href="global.html#open">open</a></li><li><a href="global.html#openRecordInTab">openRecordInTab</a></li><li><a href="global.html#openSearchMenu">openSearchMenu</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#popupDialog">popupDialog</a></li><li><a href="global.html#prevSessionExists">prevSessionExists</a></li><li><a href="global.html#project_keywords">project_keywords</a></li><li><a href="global.html#putSetting">putSetting</a></li><li><a href="global.html#removeAssocByID">removeAssocByID</a></li><li><a href="global.html#removeKeyword">removeKeyword</a></li><li><a href="global.html#removeOverlay">removeOverlay</a></li><li><a href="global.html#removeOverlays">removeOverlays</a></li><li><a href="global.html#removeSetting">removeSetting</a></li><li><a href="global.html#renderAssocKeywods">renderAssocKeywods</a></li><li><a href="global.html#renderContent">renderContent</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#saveRules">saveRules</a></li><li><a href="global.html#selectRecord">selectRecord</a></li><li><a href="global.html#setFormulaMode">setFormulaMode</a></li><li><a href="global.html#setGravity">setGravity</a></li><li><a href="global.html#setLinkMode">setLinkMode</a></li><li><a href="global.html#setSelected">setSelected</a></li><li><a href="global.html#setSelection">setSelection</a></li><li><a href="global.html#setValue">setValue</a></li><li><a href="global.html#setupAssocKeywords">setupAssocKeywords</a></li><li><a href="global.html#setupCaptcha">setupCaptcha</a></li><li><a href="global.html#setupRecentWorks">setupRecentWorks</a></li><li><a href="global.html#setupResetPin">setupResetPin</a></li><li><a href="global.html#show">show</a></li><li><a href="global.html#showEditions">showEditions</a></li><li><a href="global.html#showHelp">showHelp</a></li><li><a href="global.html#showKeyword">showKeyword</a></li><li><a href="global.html#showLoginDialog">showLoginDialog</a></li><li><a href="global.html#showNodeInformation">showNodeInformation</a></li><li><a href="global.html#showSearchBuilder">showSearchBuilder</a></li><li><a href="global.html#showSearchFacetedWizard">showSearchFacetedWizard</a></li><li><a href="global.html#showWarningAboutTermUsage">showWarningAboutTermUsage</a></li><li><a href="global.html#simplePointsToWKT">simplePointsToWKT</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#startRecentWork">startRecentWork</a></li><li><a href="global.html#temporalSimplifyDate">temporalSimplifyDate</a></li><li><a href="global.html#temporalToHumanReadableString">temporalToHumanReadableString</a></li><li><a href="global.html#tick">tick</a></li><li><a href="global.html#toJD">toJD</a></li><li><a href="global.html#toJSDate">toJSDate</a></li><li><a href="global.html#translationFromUI">translationFromUI</a></li><li><a href="global.html#translationSupport">translationSupport</a></li><li><a href="global.html#translationToUI">translationToUI</a></li><li><a href="global.html#truncateText">truncateText</a></li><li><a href="global.html#unselectAssoc">unselectAssoc</a></li><li><a href="global.html#updateAssocDisplay">updateAssocDisplay</a></li><li><a href="global.html#updateAssocList">updateAssocList</a></li><li><a href="global.html#updateCircles">updateCircles</a></li><li><a href="global.html#updateCurvedLines">updateCurvedLines</a></li><li><a href="global.html#updateLabels">updateLabels</a></li><li><a href="global.html#updateNodes">updateNodes</a></li><li><a href="global.html#updateRecentKeywordDisplay">updateRecentKeywordDisplay</a></li><li><a href="global.html#updateRectangles">updateRectangles</a></li><li><a href="global.html#updateRuleBuilder">updateRuleBuilder</a></li><li><a href="global.html#updateStatus">updateStatus</a></li><li><a href="global.html#updateStraightLines">updateStraightLines</a></li><li><a href="global.html#validateResetPin">validateResetPin</a></li><li><a href="global.html#visualizeData">visualizeData</a></li><li><a href="global.html#visualizeSelection">visualizeSelection</a></li><li><a href="global.html#weekDay">weekDay</a></li><li><a href="global.html#weekOfYear">weekOfYear</a></li><li><a href="global.html#zoomed">zoomed</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Jul 24 2025 18:09:15 GMT+0400 (GMT+04:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

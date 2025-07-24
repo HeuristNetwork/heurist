@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: hclient/widgets/report/reportEditor.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: hclient/widgets/report/reportEditor.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+* @file reportEditor.js
+* @brief Provides a widget for editing Smarty report templates.
+* @fileOverview Provides a widget for editing Smarty report templates. This widget allows users to create, modify, and test Smarty templates
+*
+* used for generating reports within the Heurist system. It integrates
+* CodeMirror for template editing and provides tools for inserting
+* template variables and patterns, as well as a test environment
+* to preview the report output with actual data.
+*
+* @project     Heurist academic knowledge management system
+*
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   &lt;osmakov@gmail.com>
+* @author      Ian Johnson &lt;ian.johnson.heurist@gmail.com>
+* @since       6.0
+*/
+
+/* global CodeMirror */
+
+/**
+ * @widget heurist.reportEditor
+ * @extends $.heurist.baseAction
+ * @description
+ * jQuery UI widget for editing Smarty report templates.
+ * Provides an interface with a CodeMirror editor, tools for inserting
+ * template variables and patterns, and a test environment.
+ */
+$.widget( "heurist.reportEditor", $.heurist.baseAction, {
+
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @property {Object} options - Default options for the widget.
+     * @property {number} options.height - Default height of the editor dialog.
+     * @property {number} options.width - Default width of the editor dialog.
+     * @property {string} options.title - Default title of the editor dialog.
+     * @property {string} options.default_palette_class - CSS class for the default palette.
+     * @property {string} options.actionName - Name of the action.
+     * @property {string} options.htmlContent - HTML file for the widget's content.
+     * @property {string} options.path - Path to the widget's resources.
+     * @property {?number} options.rty_ID - Record Type ID.
+     * @property {boolean} options.listAllRecTypes - Flag to list all record types.
+     * @property {boolean} options.keep_instance - Flag to keep the widget instance.
+     * @property {?string} options.template - The name of the template to load.
+     * @property {?function} options.onChange - Callback function triggered on editor content change.
+     */
+    options: {
+        height: 640,
+        width:  1000,
+        title:  'Edit Report Template',
+        default_palette_class: 'ui-heurist-populate',
+        actionName: 'reportEditor',
+        htmlContent: 'reportEditor.html',
+        path: 'widgets/report/',
+
+        isWidgetTemplate: false,
+        isCalcFieldTemplate: false,
+        
+        rty_ID:null, 
+        listAllRecTypes: false,
+        
+        keep_instance: true,
+        template: null,  //path to smarty tpl
+        template_body: null, // template text 
+        template_css: null,  // css file to be added to html output
+        
+        onChange: null
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @property {Object} usrPreferences - User-specific preferences for layout.
+     * @property {number} usrPreferences.insertForm_width - Width of the insert form panel.
+     * @property {boolean} usrPreferences.insertForm_closed - Initial state of the insert form panel.
+     * @property {number} usrPreferences.testForm_width - Width of the test form panel.
+     * @property {boolean} usrPreferences.testForm_closed - Initial state of the test form panel.
+     * @property {number} usrPreferences.width - User-preferred width of the dialog.
+     * @property {number} usrPreferences.height - User-preferred height of the dialog.
+     */
+    usrPreferences:{
+            insertForm_width:300, 
+            insertForm_closed:false, 
+            testForm_width:400, 
+            testForm_closed:false,
+            width:(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
+            height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @property {string} _keepTemplateValue - Stores the initial template content to check for modifications.
+     */
+    _keepTemplateValue:'',
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @property {?Object} codeEditor - CodeMirror editor instance.
+     */
+    codeEditor: null,
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @property {string} _currentTemplate - Name of the currently loaded template.
+     */
+    _currentTemplate: '',
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @property {?jQuery} _addVariableDlg - Dialog for inserting variables.
+     */
+    _addVariableDlg: null,
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @property {?jQuery} _tempForm - Temporary form used for testing templates.
+     */
+    _tempForm: null,
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @property {?string} _last_disabled_message - Stores the last warning message about disabled functions.
+     */
+    _last_disabled_message: null,
+
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @property {boolean} is_snippet_editor - Flag indicating if it's a snippet editor.
+     */
+     is_snippet_editor: false,
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Widget creation method. Initializes options and sets up beforeClose behavior.
+     */
+    _create: function() {
+        this._super();
+        
+        this.is_snippet_editor = this.options.isWidgetTemplate || this.options.isCalcFieldTemplate;
+        
+        if(this.options.isCalcFieldTemplate){
+            this.options.width  = (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.7
+            this.options.height = (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.7
+           
+        }else{
+            this.options.height = this.usrPreferences.height;
+            this.options.width = this.usrPreferences.width;
+        }
+        
+        let that = this;
+        this.options.beforeClose = function(){
+            return that._beforeClose();
+        };
+
+    }, //end _create
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Widget initialization method. Loads the template if already initialized.
+     */
+    _init: function() {
+        
+        this._super();
+        
+        if( this._is_inited ){
+            this._loadTemplate();
+        }
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Widget destruction method. Removes the temporary test form.
+     */
+    _destroy: function() {
+        if(this._tempForm){
+            this._tempForm.remove();
+        }
+    },
+
+   
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Initializes controls after HTML content is loaded. Sets up layout, CodeMirror, and event handlers.
+     * @returns {boolean} False if superclass initialization fails, otherwise true.
+     */
+    _initControls: function(){
+        
+        let res  = this._super();
+        if(!res) return false;
+        
+        this.editSmarty = this._$('.editSmarty');
+        
+        let that = this;
+        
+                let layout_opts =  {
+                    applyDefaultStyles: true,
+                    maskContents: true,
+                    enableCursorHotkey: false,
+                    //togglerContent_open:    '&amp;nbsp;',
+                    //togglerContent_closed:  '&amp;nbsp;',
+                    west:{
+                        size: this.usrPreferences.insertForm_width,
+                        maxWidth:500,
+                        minWidth:300,
+                        spacing_open:6,
+                        spacing_closed:40,  
+                        togglerAlign_open:'center',
+                        //togglerAlign_closed:'top',
+                        togglerAlign_closed:16,   //top position   
+                        togglerLength_closed:80,  //height of toggler button
+                        initHidden: false,   //show structure list at once 
+                        initClosed: this.usrPreferences.insertForm_closed,
+                        slidable:false,  //otherwise it will be over center and autoclose
+                        contentSelector: '.insertForm',   
+                        onopen_start : function( ){ 
+                            let tog = that.editSmarty.find('.ui-layout-toggler-west');
+                            tog.removeClass('prominent-cardinal-toggler togglerVertical');
+                            tog.find('.heurist-helper2.westTogglerVertical').hide();
+                        },
+                        onclose_end : function( ){ 
+                            let tog = that.editSmarty.find('.ui-layout-toggler-west');
+                            tog.addClass('prominent-cardinal-toggler togglerVertical');
+
+                            if(tog.find('.heurist-helper2.westTogglerVertical').length > 0){
+                                tog.find('.heurist-helper2.westTogglerVertical').show();
+                            }else{
+                                $('&lt;span class="heurist-helper2 westTogglerVertical" style="width:200px;margin-top:220px;">Insert Patterns / Variables&lt;/span>').appendTo(tog);
+                            }
+                        },
+                        onresize_end: function(){
+                            //
+                        },
+                        togglerContent_open:    '&lt;div class="ui-icon ui-icon-triangle-1-w">&lt;/div>',
+                        togglerContent_closed:  '&lt;div class="ui-icon ui-icon-carat-2-e">&lt;/div>',
+                    },
+                    east:{
+                        size: this.usrPreferences.testForm_width,
+                        minWidth:400,
+                        maxWidth:800,
+                        spacing_open:6,
+                        spacing_closed:40,  
+                        togglerAlign_open:'center',
+                        //togglerAlign_closed:'top',
+                        togglerAlign_closed:16,   //top position   
+                        togglerLength_closed:40,  //height of toggler button
+                        initClosed: this.usrPreferences.testForm_closed,
+                        slidable:false,  //otherwise it will be over center and autoclose
+                        contentSelector: '.testForm',   
+                        onopen_start : function(){ 
+                            let tog = that.editSmarty.find('.ui-layout-toggler-east');
+                            tog.removeClass('prominent-cardinal-toggler togglerVertical');
+                            tog.find('.heurist-helper2.eastTogglerVertical').hide();
+                        },
+                        onclose_end : function(){ 
+                            let tog = that.editSmarty.find('.ui-layout-toggler-east');
+                            tog.addClass('prominent-cardinal-toggler togglerVertical');
+
+                            if(tog.find('.heurist-helper2.eastTogglerVertical').length > 0){
+                                tog.find('.heurist-helper2.eastTogglerVertical').show();
+                            }else{
+                                $('&lt;span class="heurist-helper2 eastTogglerVertical" style="width:200px;">Test Area&lt;/span>').appendTo(tog);
+                            }
+                        },
+                        togglerContent_open:    '&lt;div class="ui-icon ui-icon-triangle-1-e">&lt;/div>',
+                        togglerContent_closed:  '&lt;div class="ui-icon ui-icon-carat-2-w">&lt;/div>',
+                    },
+                    center:{
+                        minWidth:400,
+                        contentSelector: '.editForm',
+                        //pane_name, pane_element, pane_state, pane_options, layout_name
+                        onresize_end : function(){
+                            //that.handleTabsResize();                            
+                        }    
+                    }
+                };
+
+        this.editSmarty.layout(layout_opts); //.addClass('ui-heurist-bg-light')
+        
+        this._on(this._$('.closeInsertForm'), {click:()=>{this.editSmarty.layout().close("west");}});
+        this._on(this._$('.closeTestForm'), {click:()=>{this.editSmarty.layout().close("east");}});
+
+        //init Insert Pattern controls
+        let rtSelect = this._$('#rectype_selector');
+        let $rec_select = window.hWin.HEURIST4.ui.createRectypeSelect( rtSelect.get(0), 
+                                        this.options.listAllRecTypes ? null : this.options.rty_ID,
+                                        this.options.rty_ID>0?null:window.hWin.HR('select record type'), true );
+        this._on($rec_select,{change: function(){
+           this._loadRecordTypeTreeView();
+           const rty_ID = this._$('#rectype_selector').val();
+           this._loadTestRecords( rty_ID );
+        }});
+        if(!this.options.rty_ID &amp;&amp; this.is_snippet_editor){
+            rtSelect.val(rtSelect.find('option').get(1).value);
+            rtSelect.trigger('change');
+        }else if(this.options.rty_ID){
+            rtSelect.val(this.options.rty_ID).trigger('change');
+        }
+        
+      
+        this._on(this._$('#btnInsertPattern').button(), {click:this._insertPattern});
+
+        //init test panel
+        this._on(this._$('.btnStartTest').button({icon: 'ui-icon-circle-arrow-s'}), 
+            {click:()=>{this._doTest();}});
+        
+
+        if(this.is_snippet_editor){
+            this._$('.editForm').css({top:'90px'});
+            this._$('.insertForm > .ent_content_full').css({top:'50px'});
+            this._$('.hide-for-snippet').hide();
+            this._$('.show-for-snippet').show();
+            
+            this._loadRecordTypeTreeView();
+            this._loadTestRecords();
+        }
+        
+        if(this.options.isCalcFieldTemplate){ 
+            //snippet for calculation field
+            this._initEditor(this.options.template_body);
+        }else{
+            //template for widget
+            this._$('.editForm').css({top:'0px'});
+            //init editor (load codeMirror)
+            this._loadTemplate();
+        }        
+
+        
+        
+        return true;
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Executes the report test. Prepares request, submits it, and displays results.
+     */
+    _doTest:function(){
+
+        let template_body = this.codeEditor.getValue();
+
+        if(template_body?.length&lt;=10){
+            window.hWin.HEURIST4.msg.showMsgFlash('Nothing to execute. Define code');
+            return;            
+        }
+
+        let recset;
+        let request = {db:window.hWin.HAPI4.database, 
+                       action: 'execute', 
+                       recordset: 1,
+                       template_body:1};
+
+        if(this.is_snippet_editor){
+                let rec_ID = this._$('#listRecords').val();
+                if(!window.hWin.HEURIST4.util.isPositiveInt(rec_ID)){
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'Select record to test on',
+                        error_title: 'Missing record'
+                    });
+                    return;
+                }
+                request['publish'] = this.options.template?0:4;
+                recset = {records:[rec_ID], reccount:1}; //JSON.stringify(
+                
+        }else if(window.hWin.HAPI4.currentRecordset?.length()==0){
+            window.hWin.HEURIST4.msg.showMsgFlash('Perform search to get record set to test against');
+            return;
+        }else{
+        
+            let debug_limit = document.getElementById('cbDebugReportLimit').value;
+            if(debug_limit&lt;0){
+                debug_limit = 2000;
+            }
+            
+            recset = {recIDs:window.hWin.HAPI4.currentRecordset.getIds().slice(0, debug_limit-1)};
+        }
+
+        let replevel = document.getElementById('cbErrorReportLevel').value;
+        if(replevel&lt;0) {
+            document.getElementById('cbErrorReportLevel').value = 0;
+            replevel = 0;
+        }
+        request['replevel'] = replevel;
+        if(this.options.isWidgetTemplate){
+            request['testwidget'] = 1;
+        }
+        
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this._$('.testForm'));
+        
+        let inputs = '';
+        for (let [key, value] of Object.entries(request)) {
+            inputs += `&lt;input type="hidden" name="${key}" value="${value}"/>`;
+        }       
+        
+        if(this._tempForm){
+            this._tempForm.empty();
+        }else{
+            const url = window.hWin.HAPI4.baseURL+'hserv/controller/index.php';
+            this._tempForm = $(`&lt;form target="test_container_frame" action="${url}" method="post">&lt;/form>`)
+                .appendTo(this.element);
+                
+            this._on(this._$('#test_container_frame'),{load:()=>{
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                this._showWarningAboutDisabledFunction();
+            }});
+        }
+
+        this._tempForm.html(inputs);
+        this._tempForm.find('input[name="recordset"]').val(JSON.stringify(recset));
+        this._tempForm.find('input[name="template_body"]').val(template_body);
+        this._tempForm.trigger('submit');
+        
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Shows a warning if a disabled PHP function is used in the template.
+     */
+    _showWarningAboutDisabledFunction: function(){    
+        
+        let txt = this._$('#test_container_frame')[0].contentDocument.body.innerHTML;
+        
+        if(this._last_disabled_message != txt &amp;&amp; 
+            window.hWin.HEURIST4.msg.showWarningAboutDisabledFunction(txt)){
+            this._last_disabled_message = txt;
+        }
+        
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Loads the Smarty template content into the editor.
+     *              If it's a snippet editor, it uses `options.template_body`.
+     *              Otherwise, it fetches the template from the server.
+     */
+    _loadTemplate: function(){    
+        
+        if(this.options.isCalcFieldTemplate){
+            //for calculation field
+            this._initEditor(this.options.template_body);
+        }else
+        // null means new template
+        if(this._currentTemplate!=this.options.template){
+            
+            window.hWin.HAPI4.SystemMgr.user_log('cms_EditSmarty');            
+            
+            this._currentTemplate = this.options.template;
+
+            let that = this;
+            window.hWin.HAPI4.SystemMgr.reportAction({action:'get', template:this._currentTemplate}, 
+                function(response){
+                    that._initEditor(response.message);
+            });
+           
+            this.changeTitle();
+        }
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Changes the title of the editor dialog.
+     * @param {string} [new_title] - The new title. If not provided, a default title is generated.
+     */
+    changeTitle: function( new_title ){
+        if(!new_title){
+           new_title = window.hWin.HR('Edit Report Template')+': '+
+                    (this._currentTemplate?this._currentTemplate:'new template');
+        }
+        this._super(new_title);
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Initializes the CodeMirror editor with the given content.
+     *              Loads CodeMirror library if not already loaded.
+     * @param {string} content - The template content to load into the editor.
+     */
+    _initEditor: function(content){
+    
+        let that = this;
+        
+        if(this.codeEditor==null){
+            
+            //!window.hWin.HEURIST4.util.isFunction($(document.body)['CodeMirror'])
+            if(typeof CodeMirror !== 'function' )
+            {
+                
+                let path = window.hWin.HAPI4.baseURL + 'external/codemirror-5.61.0/';
+                let scripts = [ 
+                                'lib/codemirror.js',
+                                'mode/xml/xml.js',
+                                'mode/javascript/javascript.js',
+                                'mode/css/css.js',
+                                'mode/htmlmixed/htmlmixed.js',
+                                'mode/smarty/smarty.js',
+                                'mode/smartymixed/smartymixed.js'
+                ];
+                
+                $.getMultiScripts2(scripts, path)
+                .then(function() {  //OK! widget script js has been loaded
+                    that._initEditor( content );
+                }).catch(function(error) {
+                    window.hWin.HEURIST4.msg.showMsg_ScriptFail();
+                });
+                
+                return;
+            }
+
+                this._$('.editForm').empty().css({padding:0});
+            
+                this.codeEditor = CodeMirror( this._$('.editForm')[0], {
+                    mode           : "smartymixed",
+                    tabSize        : 2,
+                    indentUnit     : 2,
+                    indentWithTabs : false,
+                    lineNumbers    : true,
+                    smartyVersion  : 5,
+                    matchBrackets  : true,
+                    smartIndent    : true,
+                    extraKeys: {
+                        "Enter": function(e){
+                            that._insertAtCursor('');
+                        }
+                    }
+                    //onFocus:function(){},
+                    //onBlur:function(){},
+                });
+                
+                if(window.hWin.HEURIST4.util.isFunction(this.options.onChange)){
+                    this.codeEditor.on('change', (args) => { 
+                        if(that.isModified()){
+                            that.options.onChange(that.codeEditor.getValue());
+                        }
+                    } )    
+                }
+                
+                
+        }//codeMirror init
+
+        let using_default = false;
+        if(window.hWin.HEURIST4.util.isempty(content)){
+            //if(this._currentTemplate!=this.options.template){
+            //      this._loadTemplate();
+            //      return;
+            //}
+            
+            content = "{ }";
+            using_default = true;
+        }
+
+        this.codeEditor.setValue(content);
+        this._keepTemplateValue = content;
+
+        setTimeout(function(){
+            $('div.CodeMirror').css('height','100%').show();
+            $('div.CodeMirror .CodeMirror-scroll').css('padding-top', '5px');
+            that.codeEditor.refresh();
+            //that._keepTemplateValue = that.codeEditor.getValue();
+
+            if(using_default){
+                that.codeEditor.setCursor({line: 0, char: 0});
+            }
+        },1000);
+    },
+    
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Generates a Smarty `if` condition for a specific record type.
+     * @param {Object} _nodep - The node object from the Fancytree representing the field/element.
+     * @param {string} parent - The parent variable name in the Smarty template.
+     * @param {string|number} rectypeId - The record type ID to check against.
+     * @returns {string} The generated Smarty `if` block.
+     */
+    _insertPatternRectypeIf: function(_nodep, parent, rectypeId){
+        
+        let _remark = '{* ' + this._getRemark(_nodep) + ' *}';
+        
+        return '{if ($'+parent+'.recTypeID=="'+rectypeId+'")}'+_remark+ ' \n  \n{/if}'+ _remark +' \n';  
+
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Generates a Smarty `if` condition for a variable.
+     * @param {Object} _nodep - The node object from Fancytree.
+     * @param {string} varname - The variable name to check.
+     * @param {string} [language_handle=''] - Optional language handle for translated content.
+     * @param {string} [file_handle=''] - Optional file handle for file-specific content.
+     * @returns {string} The generated Smarty `if` block.
+     */
+    _insertPatternIfOperator: function(_nodep, varname, language_handle = '', file_handle = ''){
+        let _remark = '{* ' + this._getRemark(_nodep) + ' *}';
+        let inner_val = language_handle !== '' ? language_handle : "{$"+varname+"}";
+        inner_val = file_handle !== '' ? file_handle : inner_val;
+        return "\n{if ($"+varname+")}"+_remark+"\n\n   "+inner_val+" \n\n{/if}\n"+_remark+" {* you can also add {/else} before {/if}} *}\n";
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Generates a Smarty `foreach` loop for a variable.
+     * @param {Object} _nodep - The node object from Fancytree.
+     * @param {string} varname - The variable name to loop over.
+     * @param {string} [language_handle=''] - Optional language handle for translated content within the loop.
+     * @param {string} [file_handle=''] - Optional file handle for file-specific content within the loop.
+     * @returns {string} The generated Smarty `foreach` block.
+     */
+    _insertPatternMagicLoop: function(_nodep, varname, language_handle = '', file_handle = ''){
+        
+        let _remark = '{* ' + this._getRemark(_nodep) + ' *}';
+        
+        let codes = varname.split('.');
+        let field = codes[codes.length-1];
+        
+        let loopname = (_nodep.parent?.type=='enum')?'ptrloop':'valueloop';
+        let getrecord = (_nodep.parent?.type=='resource')? ('{$'+field+'=$heurist->getRecord($'+field+')}') :'';
+
+        if(!window.hWin.HEURIST4.util.isempty(language_handle)){
+            language_handle = '\n\t' + language_handle.replace('replace_id', field) + '\n';
+        }
+        if(!window.hWin.HEURIST4.util.isempty(file_handle)){
+            file_handle = '\n\t' + file_handle.replace('replace_id', field) + '\n';
+        }
+        
+        if(codes[1]=='Relationship'){
+            this._insertGetRelatedRecords();
+            
+            return '{foreach $r.Relationships as $Relationship name='+loopname+'}'+_remark +'\n\n{/foreach}'+_remark;
+            
+        }else{
+            
+            if(varname.indexOf('_originalvalue')&lt;0){
+                varname = varname+'s';
+            }else if(field.indexOf('_originalvalue')>0){
+                field = field.substring(0, field.length-14);
+            }
+            
+            return '{foreach $'+varname+' as $'+field+' name='+loopname+'}'+_remark
+                    +'\n\t'+getrecord+'\n'  //' {* '+_remark + '*}'
+                    + language_handle
+                    + file_handle
+                    +'\n{/foreach} '+_remark;
+        }
+
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Generates a remark (comment) string for a Fancytree node.
+     * @param {Object} _nodep - The node object from Fancytree.
+     * @returns {string} The remark string.
+     */
+    _getRemark: function(_nodep){
+
+        let s = _nodep.title;
+        let key = _nodep.key;
+
+        if(key=='label' || key=='term' || key=='code' || key=='conceptid' || key=='internalid' || key=='desc'){
+            s = _nodep.parent.title + '.' + s;
+        }
+
+        s =  window.hWin.HEURIST4.util.stripTags(s);
+        if(_nodep.parent?.data.codes ){ //!_nodep.parent.isRootNode()
+            s = window.hWin.HEURIST4.util.stripTags(_nodep.parent.title) + ' >> ' + s;
+        }
+        return s;
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Generates the Smarty code for inserting a variable.
+     * @param {Object} _nodep - The node object from Fancytree.
+     * @param {string} varname - The variable name.
+     * @param {number} insertMode - The insertion mode (0 for variable only, 1 for label+field, other for wrap function).
+     * @param {boolean} inLoop - Whether the variable is inside a loop.
+     * @param {string} [language_handle=''] - Optional language handle.
+     * @param {string} [file_handle=''] - Optional file handle.
+     * @returns {string} The generated Smarty code for the variable.
+     */
+    _insertPatternVariable: function(_nodep, varname, insertMode, inLoop, language_handle = '', file_handle = ''){
+        
+        let res= '';
+        
+        let remark = this._getRemark(_nodep);
+
+        if(insertMode==0){ //variable only
+
+            let inner_val = language_handle !== '' ? language_handle : "{$"+varname+"}";
+            inner_val = file_handle !== '' ? file_handle : inner_val;
+            res = inner_val + " {*" +  remark + "*}";
+
+        }else if (insertMode==1){ //label+field
+
+            res = _nodep.title+": {$"+varname+"}";  //not used
+
+        }else if(_nodep){ // insert with 'wrap' function which provides URL and image handling
+            let dtype = _nodep.type;
+            res = '{wrap var=$'+varname;
+            if(!(_nodep.data.code &amp;&amp; _nodep.data.code.indexOf('Relationship')==0))
+            {
+                const origvalue = inLoop?'':'_originalvalue';
+                
+                if(_nodep.parent?.type!='enum' &amp;&amp; (window.hWin.HEURIST4.util.isempty(dtype) || _nodep.key === 'recURL')){
+                    res = res + ' dt="url"';
+                }else if(dtype === 'geo'){
+                    res = res + origvalue+' dt="'+dtype+'"';
+                }else if(dtype === 'date'){
+                    res = res + origvalue+' dt="date" mode="0" calendar="native"';
+                    
+                    remark = remark+' mode: 0-simple,1-full,2-all fields; calendar: native,gregorian,both';
+                    
+                }else if(dtype === 'file'){
+                    res = res + origvalue+' dt="'+dtype+'"';
+                    res = res + ' width="300" height="auto" auto_play="0" show_artwork="0"';
+                }
+            }
+            res = res +'}{*' +  remark + '*}';
+        }
+
+        return (res+((insertMode==0)?' ':'\n'));
+    },
+
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Checks if a token exists in the lines above the cursor, up to the first `if` or `for` statement.
+     * @param {string} token - The token to search for.
+     * @returns {boolean} True if the token is found, false otherwise.
+     */
+    _findAboveCursor: function(token) {
+        
+        //for codemirror
+        let crs = this.codeEditor.getCursor();
+        //calculate required indent
+        let l_no = crs.line;
+        let line = "";
+        
+        token = token.trim();
+        
+        while (l_no>0){
+            line = this.codeEditor.getLine(l_no);
+            l_no--;
+            if(line.trim()=='') continue;
+
+            if(line.indexOf(token)>=0){
+                return true;   
+            }
+        
+            if(line.indexOf("{if")>=0 || line.indexOf("{foreach")>=0){
+                return false;   
+            }
+        }
+        
+        return false;   
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Inserts the Smarty code to get related records if not already present.
+     */
+    _insertGetRelatedRecords: function(){
+        
+        //find main loop and {$r = $heurist->getRecord($r)}
+        let l_count = this.codeEditor.lineCount();
+        let l_no = 0, k = -1;
+            
+        while (l_no&lt;l_count){
+            let line = this.codeEditor.getLine(l_no);
+            if(line.indexOf('$heurist->getRelatedRecords($r)}')>0){
+                return;//already inserted
+            }
+            l_no++;
+        }
+        
+        l_no = 0;    
+        while (l_no&lt;l_count){
+            let line = this.codeEditor.getLine(l_no);
+            k = line.indexOf('$heurist->getRecord($r)}');
+            if(k>=0){
+                
+                let s = '\n{$r.Relationships = $heurist->getRelatedRecords($r)}\n'+
+                '{$Relationship = (count($r.Relationships)>0)?$r.Relationships[0]:array()}\n';
+                
+                this.codeEditor.replaceRange(s, {line:l_no, ch:k+24}, {line:l_no, ch:k+24});
+                
+                break;
+            }
+            l_no++;
+        }
+    },
+   
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Inserts a predefined Smarty pattern into the editor based on user selection.
+     */
+    _insertPattern: function(){
+        
+        let pattern_id = Number(this._$('#selInsertPattern').val());
+    
+        this._closeInsertPopup();
+        
+        let _text = '';
+        let that = this;        
+
+        // Update these patterns in synch with pulldown 
+        switch(pattern_id) {
+
+            case 1: // Heading for record type
+                _text= "{* Section heading *} \n" +
+                "\n{* Make sure your search results are sorted by record type. \n" +
+                "   Move the following instruction near the top of the file: {$lastRecordType = 0}\n" +
+                "   Modify the sorting variable and the test according to your needs.*} \n\n" +
+
+                "{if $lastRecordType != $r.recTypeID} {$lastRecordType = $r.recTypeID}\n" +
+                "      &lt;hr> \n" +
+                "      &lt;p/> \n" +
+                "      &lt;h1>{$r.recTypeName}&lt;/h1> {* Replace this with whatever you want as a heading *} \n" +
+                "{/if} {* end of section heading *} " +
+                "\n\n";
+                break;
+
+            case 2: // simple table
+                _text='\n\n{* Put narrow specified-width columns at the start and any long text columns at the end *} \n' +
+                '&lt;table style="text-align:left;margin-left:20px;margin-top:2px;" border="0" cellpadding="2"> \n' +
+                '   &lt;tr> \n' +
+                '      &lt;td style="width: 50px"> {$r.recID}    &lt;/td> \n' +
+                '      &lt;td style="width:400px"> {$r.recTitle} &lt;/td> \n' +
+                '      &lt;td style=" "> &lt;/td> \n' +
+                '      &lt;td style=" "> &lt;/td> \n' +
+                '      &lt;td style=" "> &lt;/td> \n' +
+                '   &lt;/tr> \n' +
+                '&lt;/table>' +
+                '\n\n';
+                break;
+
+            case 3: // information on first element of a loop
+                _text='\n\n{* Information before first element of a loop (nothing output if loop is empty). \n' +
+                '   Place this before the fields output in the loop. Replace \'valueloop\' with the name of the loop. *}\n\n' +
+                '{if $smarty.foreach.valueloop.first}\n' +
+                ' \n' +
+                ' {* Add the information you want output before the first iteration here *}}\n' +
+                ' \n' +
+                '{/if}' +
+                '\n\n';
+                break;
+
+            case 4: // information on first element of a loop
+                _text='\n\n{* Information after last element of a loop (nothing output if loop is empty). \n' +
+                '   Place this after the fields output in the loop. Replace \'valueloop\' with the name of the loop. *}\n' +
+                '{if $smarty.foreach.valueloop.last}\n' +
+                ' \n' +
+                ' {* Add the information you want output after the last iternation here *}}\n' +
+                ' \n' +
+                '{/if}' +
+                '\n\n';
+                break;
+
+            case 5: // using a div to control spacing
+                _text=  '\n\n{* You can use style= on divs, spans, table rows and cells etc. to control spacing *} \n' +
+                '&lt;div style="padding-top:5px; margin-left:10px;"> \n' +
+                '   {* Put content here *} \n' +
+                '&lt;/div>' +
+                '\n\n';
+                break;
+
+            case 6: //
+                _text='\n\n   TO DO   ' +
+                ' content to add here ' +
+                '\n\n';
+                break;
+
+
+            case 99: // outer records loop
+                _text=  '\n\n{*------------------------------------------------------------*} \n' +
+                '{foreach $results as $r} {* Start records loop, do not remove *} \n' +
+                '{$r = $heurist->getRecord($r)}\n'+
+                '{*------------------------------------------------------------*} \n' +
+                ' \n\n' +
+                '  {* put the data you want output for each record here - insert the *} \n' +
+                '  {* fields using the tree of record types and fields on the right *} \n' +
+                ' \n' +
+                '&lt;br> {* line break between each record *} \n' +
+                ' \n' +
+                '{*------------------------------------------------------------*} \n' +
+                '{/foreach} {* end records loop, do not remove *} \n' +
+                '{*------------------------------------------------------------*} ' +
+                '\n\n';
+                break;
+
+            case 98: // add record link
+                window.hWin.HEURIST4.ui.showRecordActionDialog('recordAdd',{
+                    title: 'Select type and other parameters for new record',
+                    height: 520, width: 540,
+                    get_params_only: true,
+                    onClose: function(context){
+                        if(context &amp;&amp; !window.hWin.HEURIST4.util.isempty(context.RecAddLink)){
+                            _text = '\n&lt;a href="'+context.RecAddLink+'&amp;guest_data=1" target="_blank">Add Record&lt;/a>\n';
+                            that._insertAtCursor(_text); // insert text into editor
+                        }
+                    },
+                    default_palette_class: 'ui-heurist-publish'                                        
+                    }
+                );    
+                
+                return;
+                
+            default:
+                _text = 'It appears that this choice has not been implemented. Please ask the Heurist team to add the required pattern';
+        }
+
+        this._insertAtCursor(_text); // insert text into editor
+        
+    },
+
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Loads the Fancytree for selecting record types and fields.
+     */
+    _loadRecordTypeTreeView: function(){
+        
+        let rty_ID = this._$('#rectype_selector').val();
+
+        //load treeview
+        let treediv = this._$('.rtt-tree');
+        if(!treediv.is(':empty') &amp;&amp; treediv.fancytree("instance")){
+            treediv.fancytree("destroy");
+        }
+        
+        if(!window.hWin.HEURIST4.util.isPositiveInt(rty_ID)){
+            treediv.text('Please select a record type from the pulldown above');
+            return;
+        }
+        
+        treediv.empty();
+        
+        //generate treedata from rectype structure
+        let treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 7, rty_ID, 
+                        ['ID','title','typeid','typename','modified','url','tags','all','parent_link'] );
+
+        treedata[0].expanded = true; //first expanded
+
+        if(this.is_snippet_editor){
+            //hide root - record type title
+            treedata = treedata[0];
+        }
+        
+        let that = this;
+
+        treediv.fancytree({
+            checkbox: false,
+            selectMode: 1,  // single
+            source: treedata,
+            beforeSelect: function(event, data){
+                // A node is about to be selected: prevent this, for folder-nodes:
+                if( data.node.hasChildren() ){
+                    return false;
+                }
+            },
+            lazyLoad: function(event, data){
+                let node = data.node;
+                let parentcode = node.data.code; 
+                let rectypes = node.data.rt_ids;
+
+                let res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 7, 
+                    rectypes, ['ID','title','typeid','typename','modified','url','tags','all'], parentcode );
+
+                if(res.length>1){
+                    data.result = res;
+                }else{
+                    data.result = res[0].children;
+                }
+
+                return data;                                                   
+            },
+            loadChildren: function(e, data){
+            },
+            select: function(e, data) {
+            },
+            click: function(e, data){
+
+                if(data.node.type == 'separator'){
+                    return false;
+                }
+
+                let ele = $(e.originalEvent.target);
+                if(ele.is('a')){
+                    
+                    if(ele.text()=='insert'){
+
+                        let code = data.node.data.code;
+                        let parts = code.split(':');
+                        let multival = $Db.rst(parts[parts.length - 2], parts[parts.length - 1], 'rst_MaxValues') != 1;
+
+                        if(that.is_snippet_editor &amp;&amp; !multival){
+                            that._insertSelectedVars2(data.node, 0, false, 0);
+                        }else{
+                            //insert-popup
+                            that._showInsertPopup2( data.node, ele );
+                        }
+                    }else{
+                        that._closeInsertPopup();
+                        
+                        if(ele.text()=='repeat'){
+                            that._insertSelectedVars2( data.node, 1, false );
+                        }else if(ele.text()=='if'){
+                            that._insertSelectedVars2( data.node, 0, true );
+                        }
+                    }
+                }
+                
+               
+                /*
+                if($(e.originalEvent.target).is('span') &amp;&amp; data.node.children &amp;&amp; data.node.children.length>0){
+                    data.node.setExpanded(!data.node.isExpanded());
+                    //treediv.find('.fancytree-expander').hide();
+
+                }else if( data.node.lazy) {
+                    data.node.setExpanded( true );
+                }
+                */
+            },
+            renderNode: function(event, data) {
+                // Optionally tweak data.node.span
+                let node = data.node;
+
+                let $span = $(node.span);
+                let new_title = node.title;//debug + '('+node.data.code+'  key='+node.key+  ')';
+
+                if(data.node.type == 'separator'){
+                    $(data.node.span).attr('style', 'background: none !important;color: black !important;'); //stop highlighting
+                    $(data.node.span.childNodes[1]).hide(); //checkbox for separators
+                }else if(node.type!='enum' &amp;&amp; node.data.is_rec_fields == null &amp;&amp; node.data.is_generic_fields == null){
+                    let op = '';
+                    if(node.type=='resource' || node.title=='Relationship'){ //resource (record pointer)
+                        op = 'repeat';
+                    }else if(node.children){
+                        op = 'if';
+                    }else{
+                        op = 'insert';
+                    }
+                    if(op){
+                        new_title = new_title + ' (&lt;a href="#">'+op+'&lt;/a>)'; 
+                    }
+                }
+
+                if(data.node.parent &amp;&amp; data.node.parent.type == 'resource' || data.node.parent.type == 'relmarker'){ // add left border+margin
+                    $(data.node.li).attr('style', 'border-left: black solid 1px !important;margin-left: 9px;');
+                }
+                
+                $span.find("> span.fancytree-title").html(new_title);
+            }            
+        });
+        
+        
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Inserts text at the current cursor position in the CodeMirror editor, maintaining indentation.
+     * @param {string} myValue - The text to insert.
+     */
+    _insertAtCursor: function(myValue){
+
+        
+        //for codemirror
+        let crs = this.codeEditor.getCursor();
+        //calculate required indent
+        let l_no = crs.line;
+        let line = "";
+        let indent = 0;
+
+        while (line=="" &amp;&amp; l_no>0){
+            line = this.codeEditor.getLine(l_no);
+
+            l_no--;
+            if(line=="") continue;
+
+            indent = CodeMirror.countColumn(line, null, this.codeEditor.getOption("tabSize"));
+
+            if(line.indexOf("{if")>=0 || line.indexOf("{foreach")>=0){
+                indent = indent + 2;
+            }
+        }
+
+        let off = new Array(indent + 1).join(' ');
+
+        myValue = "\n" + myValue;
+        myValue = myValue.replace(/\n/g, "\n"+off);
+
+        this.codeEditor.replaceSelection(myValue);
+
+        if(myValue.indexOf("{if")>=0 || myValue.indexOf("{foreach")>=0){
+            crs.line = crs.line+2;
+            crs.ch = indent + 2;
+            //crs.ch = 0;
+        }else{
+            crs = this.codeEditor.getCursor();
+        }
+
+        this.codeEditor.setCursor(crs);
+        let that = this;
+        setTimeout(function(){that.codeEditor.focus();},200);
+        
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Inserts selected Smarty variables/patterns into the editor based on Fancytree node selection and options.
+     * @param {Object} _nodep - The Fancytree node object.
+     * @param {number} inloop - Loop insertion mode (0: outside loop, 1: insert loop operator, 2: inside loop).
+     * @param {boolean} isif - Whether to insert an `if` condition.
+     * @param {number} _insertMode - Variable insertion mode.
+     * @param {string} [language_code] - Language code for translation.
+     * @param {string} [file_field] - Specific field for file data.
+     */
+    _insertSelectedVars2: function( _nodep, inloop, isif, _insertMode, language_code, file_field ){
+
+        let _text = "",
+        _varname = '',
+        rectypeId = 0,
+        key = '',
+        _getrec = '',
+        language_handle = '',
+        file_handle = '';
+        
+        if(_nodep){
+            
+            key = _nodep.key;
+/*            
+code:  rt:dtid   like   10:lt134:12:ids3
+key 
+
+id            : "r.f15.f26.term"
+labelonly     : "Term"
+parent_full_id: "r.f15.f26"
+parent_id     : "f26"
+this_id       : "term"          
+
+  
+*/
+
+                
+                _varname = '';
+                
+                    let codes = _nodep.data.code;
+                    if(!codes) codes = key;
+                    
+                    let prefix = 'r';
+                    
+                        codes = codes.split(':');
+                        
+                        if(key.startsWith('rec_')){
+                            _varname = key.replace('_','');
+                        }
+                        
+                        if(codes[0]=='Relationship'){ //_nodep.type == 'relationship'){
+                            this._insertGetRelatedRecords();
+                            prefix = '';
+                            if(_varname!='') {
+                                if(inloop!=1) inloop = 2; //Relationship will be without prefix $r
+                            }else if(codes[1]){
+                                _varname = codes[1];
+                            }
+
+                            if(Number.isInteger(+_varname)){
+                                _varname = `relationRecord.f${_varname}`;
+                            }
+
+                            _varname = codes[0]+(_varname!=''?('.'+_varname):'');
+                        }else{
+
+                            let offset = 3;
+                            let lastcode = codes[codes.length-1];
+                                                
+                            if(_nodep.type == 'rectype'){
+                                rectypeId = _nodep.data.rtyID_local;
+                                _varname = '';
+                            }else if(!key.startsWith('rec_'))
+                            {
+                                if(key=='label' || key=='term' || key=='code' || key=='conceptid' || key=='internalid' || key=='desc'){ //terms
+                                    if( inloop!=1 ){
+                                        _varname = ('.'+key);
+                                    }
+                                    offset = 4;
+                                    lastcode = codes[codes.length-2];
+                                }else if (lastcode.indexOf('lt')==0) {
+                                    lastcode = lastcode.substring(2);
+                                }
+                                
+                                if(inloop==1 &amp;&amp; (_nodep.type == 'date' || _nodep.type == 'geo' || _nodep.type == 'file')){
+                                    _varname = '_originalvalue'; //for loop it contains all value
+                                }
+                                
+                                _varname = 'f'+lastcode+_varname;    
+                            }
+/*
+0: "5"   rt
+1: "lt15"   -5
+2: "10"  rt
+3: "lt240"  -3
+4: "48"  rt
+5: "title"
+
+0: "5"
+1: "lt15"  -4
+2: "10"
+3: "263"
+4: "Term"
+*/                            
+                            if(codes.length>3){ //second level (isif &amp;&amp; codes.length==2) || 
+                                
+                                let parent_key = '';
+                                let pkeys = [];
+                                while(codes.length-offset>0){
+                                    let pkey = codes[codes.length-offset];
+                                    if(pkey.indexOf('lt')==0){ //resource
+                                        pkey = 'f'+pkey.substring(2);
+                                    }else{
+                                        pkey = 'f'+pkey;
+                                    }
+                                    offset = offset + 2;
+                                    //prefix = prefix + '.' + pkey;
+                                    
+                                    pkeys.unshift(pkey);
+                                    
+                                    if(!parent_key) parent_key = pkey;
+                                    if(pkeys.length==2) break;
+                                }
+                                if(pkeys.length&lt;2) pkeys.unshift(prefix);
+                                prefix = pkeys.join('.');
+                                //prefix = prefix + '.' + pkey;
+                                //prefix = parent_key; 
+                                
+                                if( inloop&lt;2 ){
+                                    
+                                    //r.
+                                    _getrec = '{$' + parent_key + '=$heurist->getRecord($'+prefix+')}\n';
+                                    let _getrec2 = '{$' + parent_key + '=$heurist->getRecord($'+parent_key+')}\n';
+                                    //find if above cursor code already has such line             
+                                    if(this._findAboveCursor(_getrec) || this._findAboveCursor(_getrec2)) {
+                                            _getrec = '';
+                                    }
+                                    
+                                    //_getrec = _getrec+''+_getrec2;
+                                    
+                                    
+                                    _varname = parent_key +  (_varname?('.' + _varname):'');
+                                }
+                                prefix = '';
+                            }
+                        }
+                    
+                    // 0 - outside loop
+                    // 1 - insert loop operator
+                    // 2 - in loop
+                    if( inloop&lt;2 ){
+                        _varname = prefix + ((prefix &amp;&amp; _varname)?'.':'') + _varname;
+
+                        if(language_code &amp;&amp; language_code != '' &amp;&amp; (key == 'term' || key == 'desc')){
+
+                            let id_fld = _varname.replace(`.${key}`, '.id');
+                            let fld = (inloop==1) ? 'replace_id.id' : id_fld;
+                            let trm_fld = key == 'term' ? 'label' : 'desc';
+
+                            language_handle = `{$translated_label = $heurist->getTranslation("trm", $${fld}, "${trm_fld}", "${language_code}")} {* Get translated label *}\n\n`
+                                + (inloop==1 ? '\n\t' : '') + `{$translated_label} {* Print translated label *}`;
+                        }else if(file_field &amp;&amp; _nodep.type == 'file'){
+
+                            let fld = (inloop==1) ? 'replace_id' : _varname;
+                            file_handle = `{$file_details = $${fld}_originalvalue|file_data:${file_field}} {* Get the requested field *}\n\n`
+                                + (inloop==1 ? '\n\t' : '') + `{$file_details} {* Print the field *}`;
+                        }
+                    }
+                    
+                    _nodep.data.varname = _varname;
+                    //_nodep.data.key = _varname;
+                
+            if( inloop==1 ){
+                
+                //** _getrec = '';
+                _text = this._insertPatternMagicLoop(_nodep, _varname, language_handle, file_handle);
+                
+            }else if(isif){
+                
+                if(rectypeId>0){
+                    _text = this._insertPatternRectypeIf(_nodep, _varname, rectypeId);
+                }else{
+                    _text = this._insertPatternIfOperator(_nodep, _varname, language_handle, file_handle);    
+                }
+                
+                
+            }else{
+                _text = this._insertPatternVariable(_nodep, _varname, _insertMode, (inloop==2), language_handle, file_handle);
+            }
+        
+        
+            if(_text!=='')    {
+                _text = _getrec + _text;
+                this._insertAtCursor(_text);
+            }
+        }
+    },
+
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Closes the insert variable/pattern popup dialog if it's open.
+     */
+    _closeInsertPopup: function(){
+        if(this._addVariableDlg?.dialog('instance')){
+            this._addVariableDlg.dialog('close');
+        }
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Shows the popup dialog for inserting variables/patterns with various options.
+     * @param {Object} _nodep - The Fancytree node object for which to show the popup.
+     * @param {jQuery} elt - The jQuery element that triggered the popup, used for positioning.
+     */
+    _showInsertPopup2: function( _nodep, elt ){
+        
+        let that = this;
+
+        // show hide         
+        let no_loop = (_nodep.type=='enum' || _nodep.key.indexOf('rec_')==0 || 
+                    (_nodep.data.code &amp;&amp; _nodep.data.code.indexOf('Relationship')==0));
+        let show_languages = _nodep.key=='term' || _nodep.key=='desc';
+        let show_file_data = _nodep.type=='file';
+        let h;
+        if(no_loop){
+            h = 260;
+        }else{
+            h = 360;
+        }
+
+        let field_name = _nodep.data.name;
+        if(window.hWin.HEURIST4.util.isempty(field_name)){
+            let codes = _nodep.data.code.split(':');
+
+            if(codes.length >= 3){
+                let rtyid = codes[codes.length-3];
+                let dtyid = codes[codes.length-2];
+
+                field_name = $Db.rst(rtyid, dtyid, 'rst_DisplayName');
+            }
+        }
+        if(window.hWin.HEURIST4.util.isempty(field_name)){
+            field_name = 'field';
+        }
+        
+        if(this._addVariableDlg?.dialog('instance')){
+            this._addVariableDlg.dialog('close');
+        }
+        
+        function __on_add(event){
+
+            let $ele = $(event.target);
+            if($ele.is('strong')){
+                $ele = $ele.parent();
+            }
+
+            let $dlg2 = $ele.parents('.ui-dialog-content');
+            let insertMode = $dlg2.find("#selInsertMode").val();
+            let language = $dlg2.find('#selLanguage').val();
+            let file_data = $dlg2.find('#selFileData').val();
+            
+            let bid = $ele.attr('id');
+            let inloop = 0;
+            
+            if(bid=='btn_insert_loop'){
+                inloop = 1;
+            }else if(bid.indexOf('_loop')>0){
+                inloop = 2;
+            }
+            
+            that._insertSelectedVars2(_nodep, inloop, bid.indexOf('_if')>0, insertMode, language, file_data);
+            //this._addVariableDlg.dialog('close');
+        }
+        
+        
+        function __on_add2(event){
+
+            let $dlg2 = $(event.target).parents('.ui-dialog-content');
+            let sel = $dlg2.find("#selInsertModifiers")
+            let modname = sel.val();
+
+            if(modname !== ''){
+                that._insertAtCursor("|"+modname);
+            }
+
+            sel.val('');
+        }           
+        // init buttons
+        let $ele_popup = $('#insert-popup');
+        $ele_popup.find('#btn_insert_var').attr('onclick',null).button()
+            .off('click')
+            .on('click', __on_add);
+        $ele_popup.find('#btn_insert_if').attr('onclick',null).button()
+            .off('click')
+            .on('click', __on_add);
+            
+        $ele_popup.find('#btn_insert_loop').attr('onclick',null).button()
+            .off('click')
+            .on('click', __on_add);
+        $ele_popup.find('#btn_insert_loop_var').attr('onclick',null).button()
+            .off('click')
+            .on('click', __on_add);
+        $ele_popup.find('#btn_insert_loop_if').attr('onclick',null).button()
+            .off('click')
+            .on('click', __on_add);
+            
+        $ele_popup.find('#selInsertModifiers').attr('onchange',null)
+            .off('change')
+            .on('change', __on_add2);
+
+        let $langSel = $ele_popup.find('#selLanguage');
+        if($langSel.find('option').length == 1){ // fill select with available languages
+
+            let lang_opts = window.hWin.HEURIST4.ui.createLanguageSelect();
+            $langSel.html($langSel.html() + lang_opts);
+        }
+        $langSel.val(''); // reset
+        h = !show_languages &amp;&amp; !show_file_data ? h - 10 : h;
+        
+        this._addVariableDlg = window.hWin.HEURIST4.msg.showElementAsDialog(   
+            {element: $ele_popup[0],
+            modal: false,
+            width:450,
+            height:h,
+            resizable: false,
+            title:`Insert ${field_name}`,
+            buttons:null,
+            open: null,
+            beforeClose:null,
+            close:function(){
+                return true; //remove
+            },
+            position:{my:'top left',at:'bottom left', of: elt},
+            borderless: false,
+            default_palette_class:null});
+
+        let grid_temp_cols = (!show_languages &amp;&amp; !show_file_data ? '' : '75px ') + '130px 180px'
+
+        this._addVariableDlg.find('.insert-field-grid').css({'display': 'grid', 'grid-template-columns': '100%'});
+        this._addVariableDlg.find('.insert-field-grid > div:not(.header)').css({'display': 'grid', 'grid-template-columns': grid_temp_cols, 'margin': '5px 0'});
+        this._addVariableDlg.find('.insert-field-grid > div.header').css({'display': 'grid', 'grid-template-columns': grid_temp_cols, 'margin': '15px 0 5px'});
+
+        this._addVariableDlg.find('button').css({
+            'padding': '0px', 
+            'width': '100px', 
+            'height': '25px'
+        });
+        this._addVariableDlg.find('button').not('#btn_insert_var, #btn_insert_loop_var').css('margin-left', '10px');
+        this._addVariableDlg.find('#btn_insert_var, #btn_insert_loop_var').css('width', '110px');
+
+        if(no_loop){
+            this._addVariableDlg.find('.ins_isloop').hide();
+        }else{
+            this._addVariableDlg.find('.ins_isloop').show();
+        }
+
+        if(show_languages){
+
+            this._addVariableDlg.find('.language_row, .empty_ele').show();
+            this._addVariableDlg.find('.file_row').hide();
+        }else if(show_file_data){
+
+            this._addVariableDlg.find('.language_row').hide();
+            this._addVariableDlg.find('.file_row, .empty_ele').show();
+        }else{
+
+            this._addVariableDlg.find('.language_row, .file_row, .empty_ele').hide();
+        }
+        
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @description Checks if the template content has been modified since it was last loaded or saved.
+     * @returns {boolean} True if modified, false otherwise.
+     */
+    isModified: function(){
+        return (this._keepTemplateValue &amp;&amp; this._keepTemplateValue!=this.codeEditor.getValue());  
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Handles the beforeClose event of the dialog. Prompts the user to save if there are modifications.
+     * @returns {boolean} False if there are unsaved changes and the user chooses to cancel closing, true otherwise.
+     */
+    _beforeClose: function() {
+        if(this.isModified()){
+            
+            const isSaveAs = this.options.isWidgetTemplate &amp;&amp; this.options.template.indexOf('def/')===0;
+      
+            window.hWin.HEURIST4.msg.showMsgOnExit(window.hWin.HR('Warn_Lost_Data'),
+                ()=>{this.doAction(isSaveAs, true);}, //save
+                ()=>{this._keepTemplateValue=false; this.closeDialog();}); //ignore and close
+           
+            return false;
+        }else{
+            return true;
+        }
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Gets the action buttons for the dialog (Close, Save, Save As).
+     * @returns {Array&lt;Object>} Array of button definition objects.
+     */
+    _getActionButtons: function(){
+        let res = this._super();
+
+        let that = this;
+        
+        res[0].text = window.hWin.HR('Close');
+        
+        res[1].text = window.hWin.HR('Save');
+        if(this.options.isWidgetTemplate &amp;&amp; this.options.template.indexOf('def/')==0){
+            res[1].disabled = true;
+        }else{
+            res[1].disabled = null;
+        }
+        
+        if(!this.options.isCalcFieldTemplate)
+        {
+            res.splice(1,0,{text:window.hWin.HR('Save As'),
+                        class:'ui-button-action btnDoAction2',
+                        css:{'float':'right'},  
+                        click: function() { 
+                                that.doAction(true); 
+                        }}
+                        );
+        }
+        
+        if(this.options.isWidgetTemplate){
+
+            res.splice(2,0,{text:window.hWin.HR('Delete'),
+                        class:'ui-button-action btnDoAction3',
+                        css:{'float':'left','margin-right':'150px'},  
+                        click: function() { 
+                                that._onTemplateDelete(); 
+                        }}
+                        );
+            
+            if(this.options.template.indexOf('def/')&lt;0){
+                res[2].disabled = null;
+            }else{
+                res[2].disabled = true;
+            }
+        }
+        
+        return res;
+    },
+
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @description Saves the current template. Handles "Save As" functionality and prompts for a name if needed.
+     * @param {boolean} [is_save_as=false] - If true, prompts for a new template name.
+     * @param {boolean} [need_close=false] - If true, closes the dialog after saving.
+     */
+    doAction: function(is_save_as, need_close){
+
+        let that = this;
+        
+        if(this.options.isCalcFieldTemplate)
+        {
+            //snippet for calculation field
+            if(this.isModified()){
+                this._context_on_close = this.codeEditor.getValue();    
+            }
+            this._keepTemplateValue=false;
+            this.closeDialog();
+            return;    
+        }
+
+        if(!this._currentTemplate || is_save_as){
+
+            setTimeout(()=>{    
+            window.hWin.HEURIST4.msg.showPrompt('Please enter template name', function(tmp_name){
+                if(!window.hWin.HEURIST4.util.isempty(tmp_name)){
+                    that._currentTemplate = tmp_name;
+                    that._context_on_close = true; //to update list in parent window
+                    that.doAction(false);
+                }
+                }, {title:'Save template as',yes:'Save as',no:"Cancel"});
+            }, is_save_as?10:500);
+            return;
+        }
+
+        window.hWin.HAPI4.SystemMgr.reportAction({action:'save', 
+            template: this._currentTemplate, 
+            template_body: this.codeEditor.getValue()
+            }, 
+            function(response){
+                if (response.status == window.hWin.ResponseStatus.OK) {
+                    that._keepTemplateValue = that.codeEditor.getValue()
+                    that.changeTitle();
+                    window.hWin.HEURIST4.msg.showMsgFlash('Report template has been saved');
+                    if(need_close){
+                        that.closeDialog();
+                    }else{
+                        window.hWin.HEURIST4.util.setDisabled( that.element.parents('.ui-dialog').find('.btnDoAction'), false); 
+                    }
+                } else {
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+        });
+
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Loads a list of records of a given record type for testing the template (snippet editor only).
+     * @param {?number} rty_ID - The Record Type ID. If not provided, uses `this.options.rty_ID`.
+     */
+    _loadTestRecords: function( rty_ID )
+    {
+        if(!this.is_snippet_editor){
+            return;
+        }
+        
+        let selector = this._$('#listRecords')[0];
+        selector.innerHTML = '';
+        //load list of records for testing 
+        rty_ID = rty_ID??this.options.rty_ID
+        if(rty_ID>0){
+            
+                const server_request = {
+                    q: 't:'+rty_ID,
+                    restapi: 1,
+                    columns: ['rec_ID', 'rec_Title'],
+                    limit:10,
+                    zip: 1,
+                    format:'json'};
+                    
+                
+                //search for record type
+                window.hWin.HAPI4.RecordMgr.search_new(server_request, function(response){
+
+                    if(window.hWin.HEURIST4.util.isJSON(response)) {
+                        let options = [];
+                        response.records.forEach((item) => {
+                            let rec_Title = window.hWin.HEURIST4.util.stripTags(item.rec_Title);
+                            rec_Title = rec_Title.length > 60 ? `${rec_Title.slice(0, 60)}...` : rec_Title;
+                            options.push({ key: item.rec_ID, title: rec_Title });
+                        });
+                        window.hWin.HEURIST4.ui.createSelector(selector, options);
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });            
+        }
+    },
+    
+    //
+    //
+    //
+    _onTemplateDelete: function(unconditionally) {
+
+        let that = this;
+        
+        if(!this.options.template || this.options.template.indexOf('def/')===0){
+            return;
+        }
+
+        if(unconditionally===true){
+
+            window.hWin.HAPI4.SystemMgr.reportAction({action:'delete', template:this.options.template}, 
+                function(response){
+                    if (response.status == window.hWin.ResponseStatus.OK) {
+                        that._context_on_close = true;
+                        that.closeDialog();                        
+                    } else {
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+            });
+
+        }else{
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'Are you sure you wish to delete template "'+this.options.template+'"?', 
+                function(){ that._onTemplateDelete(true) }, 
+                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+        }
+    },
+
+        
+
+        
+});
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="HEURIST4.dbs.html">dbs</a></li><li><a href="HEURIST4.geo.html">geo</a></li><li><a href="HEURIST4.msg.html">msg</a></li><li><a href="HEURIST4.query.html">query</a></li><li><a href="HEURIST4.util.html">util</a></li><li><a href="NodeSelection.html">NodeSelection</a></li><li><a href="heurist.buttonsMenu.html">buttonsMenu</a></li><li><a href="heurist.controlPanel.html">controlPanel</a></li><li><a href="heurist.dbAction.html">dbAction</a></li><li><a href="heurist.dbVerify.html">dbVerify</a></li><li><a href="heurist.dbVerifyURLs.html">dbVerifyURLs</a></li><li><a href="heurist.editTranslations.html">editTranslations</a></li><li><a href="heurist.editing_input.html">editing_input</a></li><li><a href="heurist.navigation.html">navigation</a></li><li><a href="heurist.recordAccess.options.html">options</a></li><li><a href="heurist.recordAction.options.html">options</a></li><li><a href="heurist.recordAdd.options.html">options</a></li><li><a href="heurist.recordAddButton.options.html">options</a></li><li><a href="heurist.recordAddLink.options.html">options</a></li><li><a href="heurist.recordAddLinkMatch.options.html">options</a></li><li><a href="heurist.recordArchive.options.html">options</a></li><li><a href="heurist.recordBookmark.options.html">options</a></li><li><a href="heurist.recordDataTable.options.html">options</a></li><li><a href="heurist.recordDelete.options.html">options</a></li><li><a href="heurist.recordExport.options.html">options</a></li><li><a href="heurist.recordExportCSV.options.html">options</a></li><li><a href="heurist.recordFindDuplicates.options.html">options</a></li><li><a href="heurist.recordImportAnnotations.options.html">options</a></li><li><a href="heurist.recordNotify.options.html">options</a></li><li><a href="heurist.recordRate.options.html">options</a></li><li><a href="heurist.recordTag.options.html">options</a></li><li><a href="heurist.recordTemplate.options.html">options</a></li><li><a href="heurist.recordTitles.options.html">options</a></li><li><a href="heurist.recordUploadedFilesIndex.options.html">options</a></li><li><a href="heurist.selectFile.html">selectFile</a></li><li><a href="heurist.slidersMenu.html">slidersMenu</a></li></ul><h3>Classes</h3><ul><li><a href="ActionHandler.html">ActionHandler</a></li><li><a href="CmsManager.html">CmsManager</a></li><li><a href="Color.html">Color</a></li><li><a href="CrosstabsAnalysis.html">CrosstabsAnalysis</a></li><li><a href="EditorCodeMirror.html">EditorCodeMirror</a></li><li><a href="HEditing.html">HEditing</a></li><li><a href="HLayout.html">HLayout</a></li><li><a href="HLayoutMgr.html">HLayoutMgr</a></li><li><a href="HMapLayer.html">HMapLayer</a></li><li><a href="HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRapidFieldAdditions.HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRecordSearch.html">HRecordSearch</a></li><li><a href="HRecordSet.html">HRecordSet</a></li><li><a href="HSystemMgr.html">HSystemMgr</a></li><li><a href="HintDiv.html">HintDiv</a></li><li><a href="JapaneseCalendar.html">JapaneseCalendar</a></li><li><a href="L.Control.Help.html">Help</a></li><li><a href="L.Control.Manager.html">Manager</a></li><li><a href="L.Control.Publish.html">Publish</a></li><li><a href="Solver.html">Solver</a></li><li><a href="TDuration.html">TDuration</a></li><li><a href="Temporal.html">Temporal</a></li><li><a href="hAPI.html">hAPI</a></li><li><a href="hAPI-HRecordMgr.html">HRecordMgr</a></li><li><a href="window.TDate.html">TDate</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HPublishDialog">HPublishDialog</a></li><li><a href="global.html#HSvsEdit">HSvsEdit</a></li><li><a href="global.html#SelectLinkField">SelectLinkField</a></li><li><a href="global.html#_addInput">_addInput</a></li><li><a href="global.html#_checkStructureFromSource">_checkStructureFromSource</a></li><li><a href="global.html#_checkYear">_checkYear</a></li><li><a href="global.html#_closeDialog">_closeDialog</a></li><li><a href="global.html#_create">_create</a></li><li><a href="global.html#_destroy">_destroy</a></li><li><a href="global.html#_detectHeurist">_detectHeurist</a></li><li><a href="global.html#_doSave">_doSave</a></li><li><a href="global.html#_fromDataToUI">_fromDataToUI</a></li><li><a href="global.html#_getActionButtons">_getActionButtons</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_initControls">_initControls</a></li><li><a href="global.html#_initDialog">_initDialog</a></li><li><a href="global.html#_initInnerHeader">_initInnerHeader</a></li><li><a href="global.html#_initModal">_initModal</a></li><li><a href="global.html#_initOffcanvas">_initOffcanvas</a></li><li><a href="global.html#_japaneseYearToGregorian">_japaneseYearToGregorian</a></li><li><a href="global.html#_loadParentLookup">_loadParentLookup</a></li><li><a href="global.html#_popupDialog">_popupDialog</a></li><li><a href="global.html#_preImportCheck">_preImportCheck</a></li><li><a href="global.html#_processSPARQLRow">_processSPARQLRow</a></li><li><a href="global.html#_refresh">_refresh</a></li><li><a href="global.html#_refreshCaptcha">_refreshCaptcha</a></li><li><a href="global.html#_setOption">_setOption</a></li><li><a href="global.html#_showRecordViewPopup">_showRecordViewPopup</a></li><li><a href="global.html#_switchToDataMode">_switchToDataMode</a></li><li><a href="global.html#_theme_editing_symbology">_theme_editing_symbology</a></li><li><a href="global.html#_updatePanels">_updatePanels</a></li><li><a href="global.html#_validateFromGregorian">_validateFromGregorian</a></li><li><a href="global.html#addAssoctoAssigned">addAssoctoAssigned</a></li><li><a href="global.html#addBackgroundCircles">addBackgroundCircles</a></li><li><a href="global.html#addContainer">addContainer</a></li><li><a href="global.html#addForce">addForce</a></li><li><a href="global.html#addForegroundCircles">addForegroundCircles</a></li><li><a href="global.html#addIcons">addIcons</a></li><li><a href="global.html#addKeyword">addKeyword</a></li><li><a href="global.html#addLabels">addLabels</a></li><li><a href="global.html#addLevel">addLevel</a></li><li><a href="global.html#addLines">addLines</a></li><li><a href="global.html#addMarkerDefinitions">addMarkerDefinitions</a></li><li><a href="global.html#addNodes">addNodes</a></li><li><a href="global.html#addPrevtoAssigned">addPrevtoAssigned</a></li><li><a href="global.html#addSelectionBox">addSelectionBox</a></li><li><a href="global.html#addTitles">addTitles</a></li><li><a href="global.html#applyRules">applyRules</a></li><li><a href="global.html#autofill_login">autofill_login</a></li><li><a href="global.html#browseRecords">browseRecords</a></li><li><a href="global.html#calculateImageExtentFromWorldFile">calculateImageExtentFromWorldFile</a></li><li><a href="global.html#changeDisplay">changeDisplay</a></li><li><a href="global.html#changeViewMode">changeViewMode</a></li><li><a href="global.html#checkAllOptions">checkAllOptions</a></li><li><a href="global.html#checkStoredSettings">checkStoredSettings</a></li><li><a href="global.html#clearContent">clearContent</a></li><li><a href="global.html#close">close</a></li><li><a href="global.html#closeDialog">closeDialog</a></li><li><a href="global.html#commonCodeInit">commonCodeInit</a></li><li><a href="global.html#commonOnAdd">commonOnAdd</a></li><li><a href="global.html#compareIndexes">compareIndexes</a></li><li><a href="global.html#correctionOfInvalidTerm">correctionOfInvalidTerm</a></li><li><a href="global.html#createOverlay">createOverlay</a></li><li><a href="global.html#currentNode">currentNode</a></li><li><a href="global.html#daysInMonth">daysInMonth</a></li><li><a href="global.html#determineColour">determineColour</a></li><li><a href="global.html#disableUpdateBtn">disableUpdateBtn</a></li><li><a href="global.html#doAction">doAction</a></li><li><a href="global.html#doAuthentication">doAuthentication</a></li><li><a href="global.html#doImport">doImport</a></li><li><a href="global.html#doRegister">doRegister</a></li><li><a href="global.html#doSamlLogin">doSamlLogin</a></li><li><a href="global.html#doSearchByID">doSearchByID</a></li><li><a href="global.html#drag_link_line">drag_link_line</a></li><li><a href="global.html#drag_link_source_id">drag_link_source_id</a></li><li><a href="global.html#drag_link_target_id">drag_link_target_id</a></li><li><a href="global.html#drag_link_timer">drag_link_timer</a></li><li><a href="global.html#dragend">dragend</a></li><li><a href="global.html#dragmove">dragmove</a></li><li><a href="global.html#dragstart">dragstart</a></li><li><a href="global.html#editCMS2">editCMS2</a></li><li><a href="global.html#editCMS_ElementCfg">editCMS_ElementCfg</a></li><li><a href="global.html#editCMS_SelectElement">editCMS_SelectElement</a></li><li><a href="global.html#editCMS_SiteMenu">editCMS_SiteMenu</a></li><li><a href="global.html#editCMS_WidgetCfg">editCMS_WidgetCfg</a></li><li><a href="global.html#editSymbology">editSymbology</a></li><li><a href="global.html#editTheme">editTheme</a></li><li><a href="global.html#enable_register">enable_register</a></li><li><a href="global.html#executeFormula">executeFormula</a></li><li><a href="global.html#f">f</a></li><li><a href="global.html#first_level_rty_ID">first_level_rty_ID</a></li><li><a href="global.html#fixCalendarPickerCMDs">fixCalendarPickerCMDs</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#formatGregJulian">formatGregJulian</a></li><li><a href="global.html#fromJD">fromJD</a></li><li><a href="global.html#fromJSDate">fromJSDate</a></li><li><a href="global.html#fset">fset</a></li><li><a href="global.html#getAllChecked">getAllChecked</a></li><li><a href="global.html#getClass">getClass</a></li><li><a href="global.html#getContainer">getContainer</a></li><li><a href="global.html#getDataFromServer">getDataFromServer</a></li><li><a href="global.html#getEntityRadius">getEntityRadius</a></li><li><a href="global.html#getEraFromGregorian">getEraFromGregorian</a></li><li><a href="global.html#getEraFromJapaneseStr">getEraFromJapaneseStr</a></li><li><a href="global.html#getEraLimits">getEraLimits</a></li><li><a href="global.html#getEras">getEras</a></li><li><a href="global.html#getGephiFormat">getGephiFormat</a></li><li><a href="global.html#getKeywords">getKeywords</a></li><li><a href="global.html#getKeywordsNextStep">getKeywordsNextStep</a></li><li><a href="global.html#getLineLength">getLineLength</a></li><li><a href="global.html#getLineWidth">getLineWidth</a></li><li><a href="global.html#getMarkerWidth">getMarkerWidth</a></li><li><a href="global.html#getNodeDataById">getNodeDataById</a></li><li><a href="global.html#getRecentKeywords">getRecentKeywords</a></li><li><a href="global.html#getRecordOverlayData">getRecordOverlayData</a></li><li><a href="global.html#getRelationOverlayData">getRelationOverlayData</a></li><li><a href="global.html#getRulesArray">getRulesArray</a></li><li><a href="global.html#getSelected">getSelected</a></li><li><a href="global.html#getSelection">getSelection</a></li><li><a href="global.html#getSetting">getSetting</a></li><li><a href="global.html#getURL">getURL</a></li><li><a href="global.html#gregorianToJapaneseStr">gregorianToJapaneseStr</a></li><li><a href="global.html#hMapDocument">hMapDocument</a></li><li><a href="global.html#hRecordAction">hRecordAction</a></li><li><a href="global.html#handleNodeAction">handleNodeAction</a></li><li><a href="global.html#handleSettingsInUI">handleSettingsInUI</a></li><li><a href="global.html#hexToFilter">hexToFilter</a></li><li><a href="global.html#hexportMenu">hexportMenu</a></li><li><a href="global.html#imgFilter">imgFilter</a></li><li><a href="global.html#initProfilePreferences">initProfilePreferences</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isA">isA</a></li><li><a href="global.html#isAssocKeyword">isAssocKeyword</a></li><li><a href="global.html#isMonthSpan">isMonthSpan</a></li><li><a href="global.html#isRecentKeyword">isRecentKeyword</a></li><li><a href="global.html#isTemporal">isTemporal</a></li><li><a href="global.html#isValid">isValid</a></li><li><a href="global.html#japaneseToGregorian">japaneseToGregorian</a></li><li><a href="global.html#japaneseToGregorianStr">japaneseToGregorianStr</a></li><li><a href="global.html#keywordLookup">keywordLookup</a></li><li><a href="global.html#loadHtmlContent">loadHtmlContent</a></li><li><a href="global.html#log10">log10</a></li><li><a href="global.html#login_dialog">login_dialog</a></li><li><a href="global.html#lookupEditions">lookupEditions</a></li><li><a href="global.html#lookupGoogle">lookupGoogle</a></li><li><a href="global.html#lookupHathiTrust">lookupHathiTrust</a></li><li><a href="global.html#lookupKarlsruhePortal">lookupKarlsruhePortal</a></li><li><a href="global.html#lookupWorldCat">lookupWorldCat</a></li><li><a href="global.html#mapIds">mapIds</a></li><li><a href="global.html#menuActionHandler">menuActionHandler</a></li><li><a href="global.html#mergeArraysUnique">mergeArraysUnique</a></li><li><a href="global.html#msgToConsole">msgToConsole</a></li><li><a href="global.html#newDate">newDate</a></li><li><a href="global.html#onAdd">onAdd</a></li><li><a href="global.html#onAuthentication">onAuthentication</a></li><li><a href="global.html#onNodeClick">onNodeClick</a></li><li><a href="global.html#onPageInit">onPageInit</a></li><li><a href="global.html#onRecordNodeClick">onRecordNodeClick</a></li><li><a href="global.html#onRemove">onRemove</a></li><li><a href="global.html#onTermSaveError">onTermSaveError</a></li><li><a href="global.html#open">open</a></li><li><a href="global.html#openRecordInTab">openRecordInTab</a></li><li><a href="global.html#openSearchMenu">openSearchMenu</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#popupDialog">popupDialog</a></li><li><a href="global.html#prevSessionExists">prevSessionExists</a></li><li><a href="global.html#project_keywords">project_keywords</a></li><li><a href="global.html#putSetting">putSetting</a></li><li><a href="global.html#removeAssocByID">removeAssocByID</a></li><li><a href="global.html#removeKeyword">removeKeyword</a></li><li><a href="global.html#removeOverlay">removeOverlay</a></li><li><a href="global.html#removeOverlays">removeOverlays</a></li><li><a href="global.html#removeSetting">removeSetting</a></li><li><a href="global.html#renderAssocKeywods">renderAssocKeywods</a></li><li><a href="global.html#renderContent">renderContent</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#saveRules">saveRules</a></li><li><a href="global.html#selectRecord">selectRecord</a></li><li><a href="global.html#setFormulaMode">setFormulaMode</a></li><li><a href="global.html#setGravity">setGravity</a></li><li><a href="global.html#setLinkMode">setLinkMode</a></li><li><a href="global.html#setSelected">setSelected</a></li><li><a href="global.html#setSelection">setSelection</a></li><li><a href="global.html#setValue">setValue</a></li><li><a href="global.html#setupAssocKeywords">setupAssocKeywords</a></li><li><a href="global.html#setupCaptcha">setupCaptcha</a></li><li><a href="global.html#setupRecentWorks">setupRecentWorks</a></li><li><a href="global.html#setupResetPin">setupResetPin</a></li><li><a href="global.html#show">show</a></li><li><a href="global.html#showEditions">showEditions</a></li><li><a href="global.html#showHelp">showHelp</a></li><li><a href="global.html#showKeyword">showKeyword</a></li><li><a href="global.html#showLoginDialog">showLoginDialog</a></li><li><a href="global.html#showNodeInformation">showNodeInformation</a></li><li><a href="global.html#showSearchBuilder">showSearchBuilder</a></li><li><a href="global.html#showSearchFacetedWizard">showSearchFacetedWizard</a></li><li><a href="global.html#showWarningAboutTermUsage">showWarningAboutTermUsage</a></li><li><a href="global.html#simplePointsToWKT">simplePointsToWKT</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#startRecentWork">startRecentWork</a></li><li><a href="global.html#temporalSimplifyDate">temporalSimplifyDate</a></li><li><a href="global.html#temporalToHumanReadableString">temporalToHumanReadableString</a></li><li><a href="global.html#tick">tick</a></li><li><a href="global.html#toJD">toJD</a></li><li><a href="global.html#toJSDate">toJSDate</a></li><li><a href="global.html#translationFromUI">translationFromUI</a></li><li><a href="global.html#translationSupport">translationSupport</a></li><li><a href="global.html#translationToUI">translationToUI</a></li><li><a href="global.html#truncateText">truncateText</a></li><li><a href="global.html#unselectAssoc">unselectAssoc</a></li><li><a href="global.html#updateAssocDisplay">updateAssocDisplay</a></li><li><a href="global.html#updateAssocList">updateAssocList</a></li><li><a href="global.html#updateCircles">updateCircles</a></li><li><a href="global.html#updateCurvedLines">updateCurvedLines</a></li><li><a href="global.html#updateLabels">updateLabels</a></li><li><a href="global.html#updateNodes">updateNodes</a></li><li><a href="global.html#updateRecentKeywordDisplay">updateRecentKeywordDisplay</a></li><li><a href="global.html#updateRectangles">updateRectangles</a></li><li><a href="global.html#updateRuleBuilder">updateRuleBuilder</a></li><li><a href="global.html#updateStatus">updateStatus</a></li><li><a href="global.html#updateStraightLines">updateStraightLines</a></li><li><a href="global.html#validateResetPin">validateResetPin</a></li><li><a href="global.html#visualizeData">visualizeData</a></li><li><a href="global.html#visualizeSelection">visualizeSelection</a></li><li><a href="global.html#weekDay">weekDay</a></li><li><a href="global.html#weekOfYear">weekOfYear</a></li><li><a href="global.html#zoomed">zoomed</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Jul 24 2025 18:09:15 GMT+0400 (GMT+04:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

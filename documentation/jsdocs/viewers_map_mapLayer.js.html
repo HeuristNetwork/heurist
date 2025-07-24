@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: viewers/map/mapLayer.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: viewers/map/mapLayer.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * mapLayer.js - Interface between Heurist layer/datasource and Leaflet layers.
+ *
+ * @fileOverview This script defines the HMapLayer class, which acts as an intermediary
+ * between Heurist's data representation of map layers and data sources, and their
+ * visual representation using the Leaflet library. It handles the loading, styling,
+ * and interaction with various types of map layers, including query-based layers,
+ * tiled images, GeoTIFFs, KML/CSV files, and SHP files.
+ * @project     Heurist academic knowledge management system
+ *
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author      Artem Osmakov &lt;osmakov@gmail.com>
+ * @author      Ian Johnson ian.johnson.heurist@gmail.com
+ * @since       4
+ */
+
+/**
+ * Represents a map layer, acting as an interface between Heurist data and a Leaflet layer.
+ *
+ * This constructor initializes a map layer based on the provided options, which can include
+ * Heurist record data for layers and data sources, or a direct record ID to load.
+ * It handles different types of data sources (queries, tiled images, GeoTIFF, KML, SHP, etc.)
+ * and adds them to the Leaflet map via the `mapwidget`.
+ *
+ * @constructor
+ * @param {object} _options - Configuration options for the map layer.
+ * @param {object} _options.mapwidget - Reference to the main mapping widget (mapping.js instance).
+ * @param {number} [_options.record_id] - ID of a Heurist layer record to load (used for basemap image layers, etc.).
+ * @param {HRecordSet} [_options.mapdoc_recordset] - Recordset containing data for `rec_layer` and `rec_datasource`.
+ * @param {object} [_options.rec_layer] - Heurist record object for the map layer (RT_MAP_LAYER).
+ *                                        Used for symbology, thematic mapping, and zoom levels.
+ * @param {object} [_options.rec_datasource] - Heurist record object for the data source.
+ * @param {boolean} [_options.not_init_atonce=false] - If true, the layer is not immediately added to the map.
+ *                                                  Visibility can be controlled by DT_IS_VISIBLE field if present.
+ * @param {number} [_options.mapdocument_id] - ID of the parent map document.
+ * @param {boolean} [_options.is_current_search=false] - If true, requests GeoJSON as separate objects (no GeometryCollection).
+ * @param {boolean} [_options.preserveViewport=true] - If false, the map will zoom to this layer upon adding.
+ * @param {HRecordSet} [_options.recordset] - A pre-loaded HRecordSet to be added directly (converted to GeoJSON).
+ * @returns {object} An HMapLayer instance with methods to control the layer.
+ */
+function HMapLayer( _options ) {
+    const _className = "MapLayer",
+    _version   = "0.4";
+
+    const RT_MAP_LAYER = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'],
+          DT_DATA_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE'];
+
+    let options = {
+        // mapwidget:        refrence to mapping.js      
+        // record_id  - loads arbitrary layer (not from mapdocument) (used for basemap image layer)
+        
+        // mapdoc_recordset: // recordset to retrieve values from rec_layer and rec_datasource
+        
+        // rec_layer:       // record of type Heurist layer, it is needed 
+                            // for symbology (DT_SYMBOLOGY), thematic map (DT_MAP_THEMATIC) and min/max zoom
+        // rec_datasource:  // record of type map datasource
+        
+        // not_init_atonce  - if true don't add to nativemap
+        // mapdocument_id
+        // is_current_search - if true it requests geojson as separate objects (do not create GeometryCollection for heurist record)
+        preserveViewport: true   //if false zoom to this layer
+    };
+
+    let _record,     //datasource record
+        _recordset,  //referense to map document recordset
+        _parent_mapdoc = null; //map document id
+        
+    let _nativelayer_id = 0,
+        _dataset_type = null,
+        _geojson_ids = null,  //all record ids in geojson response
+        _geojson_dty_ids = null; //all dty_ID in geojson response (for current search only) 
+    
+    let is_inited = false,
+        is_visible = false,
+        is_outof_range = null;
+        
+    let _max_zoom_level = 0;
+    
+    let _has_zoom_setting_per_record = 0;//1 - it does, -1 it doesn't, 0 - not checked yet
+    let _has_zoom_setting_per_layer = 0;//1 - it does, -1 it doesn't, 0 - not checked yet
+
+    //
+    //
+    //
+    function _init( _options ){
+
+        options = $.extend(options, _options);
+
+        if(options.record_id>0){
+            //search record on server side
+            _searchLayerRecord( options.record_id );
+            
+            options.record_id = -1;
+        }else{
+            
+
+            _recordset = options.mapdoc_recordset;
+            _record = options.rec_datasource;
+            _parent_mapdoc = options.mapdocument_id;
+
+            if(typeof options.not_init_atonce === 'undefined'){
+                if(window.hWin.HAPI4.sysinfo['dbconst']['DT_IS_VISIBLE']>0 &amp;&amp; options.rec_layer){
+                    let is_initailly_visible = _recordset.fld(options.rec_layer, 
+                        window.hWin.HAPI4.sysinfo['dbconst']['DT_IS_VISIBLE']);
+                        
+                    options.not_init_atonce = (is_initailly_visible==window.hWin.HAPI4.sysinfo['dbconst']['TRM_NO']);
+                }
+            }
+
+            if(options.not_init_atonce) return;
+            
+            _addLayerToMap();
+        
+        }
+        
+    }
+    
+    //
+    //
+    //    
+    function _searchLayerRecord(record_id){
+        
+            let request = {
+                        q: {"ids":record_id},  
+                        rules:[{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE}], //data sources linked to layers
+                        w: 'a',
+                        detail: 'detail',
+                        source: 'map_document'};
+                        
+            //perform search        
+            window.hWin.HAPI4.RecordMgr.search(request,
+                function(response){
+                    
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        let resdata = new HRecordSet(response.data);
+                        
+                        // detect map layer record                        
+                        resdata.each(function(recID, record){
+                                    
+                                    if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER)
+                                    {
+                                        let datasource_recID = resdata.fld(record, DT_DATA_SOURCE);    
+                                        let datasource_record = resdata.getById( datasource_recID );
+                                        
+                                        //creates and add layer to nativemap
+                                        //returns mapLayer object
+                                        _init({rec_layer: record, 
+                                               rec_datasource: datasource_record, 
+                                               mapdoc_recordset: resdata, //need to get fields
+                                               mapwidget: options.mapwidget});
+                                    }
+                        });
+                        
+                    }else {
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+
+                }
+            );           
+        
+    }
+    
+    //
+    //
+    //
+    function _addLayerToMap()
+    {
+        is_inited = true;
+        is_visible = true;
+        
+        //detect layer type
+        let rectypeID = _recordset.fld(_record, 'rec_RecTypeID');
+
+        if(rectypeID == RT_MAP_LAYER 
+            || rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TLCMAP_DATASET']
+            || rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
+               
+               
+             if(options.recordset){
+                _addRecordSet(); //convert recordset to geojson    
+             }else{
+                _addQueryLayer();     
+             }  
+
+        }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']){
+
+            _addTiledImage();
+            
+            setTimeout(function(){ _triggerLayerStatus( 'visible' ); },200);
+
+        }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){ //RT_IMAGE_SOURCE
+
+            _addImage();                              
+            setTimeout(function(){ _triggerLayerStatus( 'visible' ); },200);
+            
+        }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE'] ||
+                 rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_FILE_SOURCE']){  //csv
+
+            _addFileSource();
+            
+        }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_SHP_SOURCE']){
+            _addSHP();
+        }
+        
+        
+    }
+
+    //
+    // add tiled image
+    //
+    function _addTiledImage( layer_url ) {
+
+        if(window.hWin.HEURIST4.util.isempty(layer_url)){
+            
+             //obfuscated file id
+             let file_info = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
+             
+             if(Array.isArray(file_info)){
+             
+                 let url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&amp;mode=url&amp;file='+
+                            file_info[0];
+                            
+                 window.hWin.HEURIST4.util.sendRequest(url, {}, null, 
+                    function (response) {
+                        if(response.status == window.hWin.ResponseStatus.OK &amp;&amp; response.data){
+                            _addTiledImage( response.data );
+                        }
+                    });
+                 return;                           
+                 
+             }else{
+                 //backward capability - value contains url to tiled image stack
+                 layer_url = file_info;
+             }
+        }
+        
+        // Source is a directory that contains folders in the following format: zoom / x / y eg. 12/2055/4833.png
+        if(!window.hWin.HEURIST4.util.isempty(layer_url)) {
+
+            let tilingSchema = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_LAYER_SCHEMA']);
+            let mimeType = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MIME_TYPE']);
+            //in basemap zoom levels (1-19)
+            let minZoom = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MINIMUM_ZOOM_LEVEL']); 
+            let maxZoom = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_ZOOM_LEVEL']);
+            
+            let tileUrlFunc = null; 
+            
+            let ccode1 = $Db.getConceptID('trm', tilingSchema);
+            let ccode2 = $Db.getConceptID('trm', mimeType);
+            let ext = (ccode2 == '2-540'? ".png" : (ccode2 == '2-537'?'.jpg':".gif"));
+
+            let layer_options = {minZoom:minZoom , maxZoom:maxZoom, extension:ext};
+            
+            if(layer_url.indexOf('/info.json')>0){  //IIIF image
+                
+                //IIIF layer can work as a basemap for CRS.Simple
+                layer_options['IIIF'] = true;
+            
+            }else
+            if(ccode1=='2-549'){ //virtual earth
+                
+                layer_options['BingLayer'] = true;
+
+                if(layer_url.indexOf('{q}')&lt;0){
+                    layer_url = layer_url + '{q}';
+                }
+                
+            }else if(tilingSchema &amp;&amp; ccode1=='2-548'){ // tilingSchema[idx_ccode]
+
+                layer_options['TMS'] = true;
+
+                if(layer_url.indexOf('{q}')&lt;0 &amp;&amp; layer_url.indexOf('{x}')&lt;0){
+                    layer_url = layer_url 
+                                + (layer_url[layer_url.length-1]=='/'?'':'/') + '{q}'
+                                + ext;
+                }
+                
+            }else{
+                //GoogleMap/OSM
+                layer_options['OSM'] = true;
+                
+                if(layer_url.indexOf('{q}')&lt;0 &amp;&amp; layer_url.indexOf('{x}')&lt;0){
+                    layer_url = layer_url 
+                                + (layer_url[layer_url.length-1]=='/'?'':'/') + '{z}/{x}/{y}'
+                                + ext;
+                }
+                /* Blocked because of possible Remote file disclosure
+                if(layer_url.indexOf('http://')===0 &amp;&amp; layer_url.indexOf('http://127.0.0.1')&lt;0){
+                    
+                    let mimetype = 'image/'+ext;
+                    
+                    //load via proxy
+                    layer_url = window.hWin.HAPI4.baseURL 
+                            + '?db=' + window.hWin.HAPI4.database 
+                            + '&amp;mimetype=' + mimetype
+                            + '&amp;rurl=' + layer_url; //encodeURIComponent(layer_url);
+                }
+                */    
+            }
+            
+            layer_options._extent = _getBoundingBox();
+
+            let layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+
+            if(layer_style){
+                layer_style = window.hWin.HEURIST4.util.isJSON(layer_style);
+                if(layer_style){
+                    options.imageFilter = layer_options.imageFilter = layer_style;
+                    options.className = layer_options.className = 'heurist-imageoverlay-'+_recordset.fld(options.rec_layer, 'rec_ID');
+                }
+            }
+           
+            _nativelayer_id = options.mapwidget.mapping('addTileLayer', 
+                                                        layer_url, 
+                                                        layer_options, 
+                                                        _recordset.fld(_record, 'rec_Title') );
+            
+            
+            if(options.imageFilter){
+                    options.mapwidget.mapping('applyImageMapFilter', options.className, options.imageFilter);
+             }
+            
+        }
+    }
+    
+    //
+    // loads geotiff plugin
+    //
+    function _getGeoRasterScripts(){
+        
+        let path = window.hWin.HAPI4.baseURL + 'external/leaflet.plugins/georaster/';
+        let scripts = [
+                        'proj4-src.js',
+                        'georaster.browser.bundle.min.js',
+                        'georaster-layer-for-leaflet.min.js'
+                        ];
+        let  that = this;
+        $.getMultiScripts2(scripts, path)
+        .then(function() {  //OK! js has been loaded
+            _addImage();
+        }).catch(function(error) {
+            window.hWin.HEURIST4.msg.showMsg_ScriptFail();
+        });
+                
+    }    
+    
+    //
+    // add image
+    //
+    function _addImage(){
+
+        //obfuscated file id
+        let file_info = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
+        
+        if(!file_info){
+            let error = {message: 'Cant add image layer. File resource is missed or invalid'};
+            window.hWin.HEURIST4.msg.showMsgErr(error);
+            return;
+        }
+
+        let image_url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&amp;file='+
+                file_info[0];
+                
+        if(file_info[1]=='tif' || file_info[1]=='tiff'){
+        
+            if(typeof GeoRasterLayer !== 'function'){
+                 _getGeoRasterScripts();
+                 return;
+            }
+            
+            _nativelayer_id = options.mapwidget.mapping('addGeoTiffImageOverlay', 
+                                                        image_url, 
+                                                        (layer_id)=>{_nativelayer_id=layer_id} );
+            return;
+        }
+                
+
+        let worldFileData = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']);
+
+        let image_extent = null; 
+
+        if(image_extent==null){
+            image_extent = _getBoundingBox();  //get wkt bbox from DT_GEO_OBJECT 
+        }
+
+        if(image_extent==null){
+            //error
+            _triggerLayerStatus( 'error' );
+
+            let error = {message: 'Cant add image layer. Extent of image is not defined.', error_title: 'Unable to add image layer'};
+            window.hWin.HEURIST4.msg.showMsgErr(error);
+        }else{
+
+            let layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+
+            if(layer_style){
+                layer_style = window.hWin.HEURIST4.util.isJSON(layer_style);
+                if(layer_style){
+                    options.imageFilter = layer_style;
+                    options.className = 'heurist-imageoverlay-'+_recordset.fld(options.rec_layer, 'rec_ID');
+                }
+            }
+
+            _nativelayer_id = options.mapwidget.mapping('addImageOverlay', 
+                                                        image_url, 
+                                                        image_extent, 
+                                                        _recordset.fld(_record, 'rec_Title'),
+                                                        options.className );
+
+            if(options.imageFilter){
+                options.mapwidget.mapping('applyImageMapFilter', options.className, options.imageFilter);
+            }
+        }
+    }
+
+    //
+    // parses shp+dbf files and converts them to geojson 
+    //
+    function _addSHP() {
+        
+        let layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+        let rec_ID = _recordset.fld(_record, 'rec_ID');
+                    
+        const request = {recID:rec_ID};             
+        //perform loading kml as geojson
+        window.hWin.HAPI4.RecordMgr.load_shp_as_geojson(request,
+            function(response){
+                if(response){
+                    let dataset_name = _recordset.fld(options.rec_layer || _record, 'rec_Title');
+                    
+                    if(response.status &amp;&amp; response.status != window.hWin.ResponseStatus.OK){
+                        _triggerLayerStatus( 'error' );
+                        
+                        if(!window.hWin.HEURIST4.util.isempty(response.message)){
+                            response.message = 'Layer : '+dataset_name+'&lt;br>&lt;br>'+response.message;
+                        }
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }else{
+                        
+                        _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
+                                {geojson_data: response,
+                                timeline_data: null,
+                                layer_style: layer_style,
+                                dataset_name:dataset_name,
+                                dataset_type:'shp',
+                                preserveViewport:options.preserveViewport });
+                                
+                        is_outof_range = null;
+                        _setVisibilityForZoomRange();   
+                    }
+                    
+                }
+            }
+        );          
+    }
+    
+    
+    //
+    // add kml, csv, tsv or dbf files
+    // 
+    // or kmlSnippet
+    //
+    function _addFileSource() {
+
+        let layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+        const rec_ID = _recordset.fld(_record, 'rec_ID');
+            
+        //let url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_map_source.php?db='
+        //            +window.hWin.HAPI4.database+'&amp;format=geojson&amp;recID='+rec_ID;
+                    
+        const request = {recID:rec_ID};             
+        //perform loading kml as geojson
+        window.hWin.HAPI4.RecordMgr.load_kml_as_geojson(request,
+            function(response){
+                if(response){
+                    let dataset_name = _recordset.fld(options.rec_layer || _record, 'rec_Title');
+                    
+                    if(response.status &amp;&amp; response.status != window.hWin.ResponseStatus.OK){
+                        _triggerLayerStatus( 'error' );
+                        
+                        
+                        if(!window.hWin.HEURIST4.util.isempty(response.message)){
+                            response.message = 'Layer : '+dataset_name+'&lt;br>&lt;br>'+response.message;
+                        }
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }else{
+                        
+                        let geojson_data = null;
+                        let timeline_data = [];
+                        if(response['geojson'] &amp;&amp; response['timeline']){
+                            geojson_data = response['geojson'];
+                            timeline_data = response['timeline'];   
+                        }else{
+                            geojson_data = response;
+                        }
+
+                        if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) 
+                            || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
+                        {
+                                                             
+                            _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
+                                        {geojson_data: geojson_data,
+                                        timeline_data: timeline_data,
+                                        layer_style: layer_style,
+                                        //popup_template: layer_popup_template,
+                                        //origination_db: null,
+                                        dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
+                                        dataset_type:'kml',
+                                        preserveViewport:options.preserveViewport });
+                                                             
+                            is_outof_range = null;                        
+                            _setVisibilityForZoomRange();   
+                        }else{
+                            response = $.isPlainObject(response) ? response : {message: response, error_title: 'Unable to add file source'};
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                            _triggerLayerStatus( 'error' );
+                        }
+                        
+                    }
+                }
+            }
+        );          
+    }
+
+
+    //
+    // query layer
+    //
+    function _addQueryLayer(){
+
+        let layer_popup_template = _recordset.fld(options.rec_layer || _record, 
+                                    window.hWin.HAPI4.sysinfo['dbconst']['DT_SMARTY_TEMPLATE']);
+
+        let layer_geofields = [];
+        let layer_timefields = _recordset.fld(options.rec_layer || _record, 
+                        window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']);
+        let layer_default_style = null;
+        if(window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']>0){
+            let layer_themes = _recordset.fld(options.rec_layer || _record, 
+                                        window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+  
+/*            
+        {   //additional filter and default layer symbol
+            "geofield": "2-134"//2-134 (birth) or 1161-254 (death) Field id for pointer to Place, optional    
+            "symbol":{"iconType":"circle","stroke":"1","color":"#ff0000","weight":"2","fill":"1","fillColor":"#0000FF","iconSize":"8"},
+        },  
+        OR "symbol":{"geofield":...., }
+        {
+            "title": "First theme ever",
+            "symbol":{"iconType":"circle","stroke":"1","color":"#ff0000","weight":"2","fill":"1","fillColor":"#0000FF","iconSize":"8"},
+            "rules": {}, //find records linked to place
+            "fields": []
+        }
+        
+{
+            "title": "Death",
+            "symbol":{"iconType":"circle","stroke":"1","color":"#ff0000","weight":"2","fill":"1","fillColor":"#000000","iconSize":"6"}
+}        
+*/            
+           
+            //find "geofield" in thematic maps - download geodata from these fields only
+            layer_themes = window.hWin.HEURIST4.util.isJSON(layer_themes);
+            
+            if(layer_themes){
+                
+                if($.isPlainObject(layer_themes)){
+                    layer_themes = [layer_themes];
+                }
+
+                $.each(layer_themes, function(i,item){
+                    if(item.geofield){
+                        //geo field can be 2 types
+                        //1. code request (rt:dt:rt:dt) that alows to drill for geo values in linked records
+                        //2. dty_ID - record pointer/resource field 
+                        let geofields = item.geofield.split(',');
+                        for(let k=0; k&lt;geofields.length; k++){
+                            let geofield = geofields[k];
+                            if(geofield.indexOf(':')>0){
+                                //1. code request
+                                let field = window.hWin.HEURIST4.query.createFacetQuery(geofield, true, false);
+                                if(field['facet'] &amp;&amp; field['facet']=='$IDS'){
+                                    layer_geofields.push({id:field['id']}); //in main record
+                                }else{
+                                    layer_geofields.push({id:field['id'],q:field['facet']}); //in linked records
+                                }
+                            }else{
+                                //2. pointer field
+                                layer_geofields.push(geofield);    
+                            }
+                        }
+                        
+                        layer_default_style = item.symbol?item.symbol:item;
+                        return false;       
+                    }else if(!item.fields){
+                        layer_default_style = item.symbol?item.symbol:item;
+                    }
+                });
+
+            }
+        }
+        if(layer_geofields.length==0) layer_geofields = null;
+        if(Array.isArray(layer_timefields) &amp;&amp; layer_timefields.length==0) layer_timefields = null;
+                                    
+        let origination_db = null;
+        
+        let query = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING']);
+        let request = window.hWin.HEURIST4.query.parseHeuristQuery(query);
+
+        if(request.q){
+            
+             let server_request = {
+                q: request.q,
+                rules: request.rules,
+                w: request.w,
+                geofields: layer_geofields,   //additional filter - get geodata from specified fields only
+                timefields: layer_timefields, //additional filter - get datetime from specified fields only
+                //returns strict geojson and timeline data as two separate arrays, withoud details, only header fields rec_ID, RecTypeID, rec_Title and rec_MinZoom, rec_MaxZoom
+                leaflet: 1, 
+                simplify: 1, //simplify paths with more than 1000 vertices
+                separate: (options.is_current_search===true)?1:0, //if true do not create GeometryCollection for heurist record
+                zip: 1,
+                format:'geojson'};
+
+            let MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
+            if(MAXITEMS>0){
+                server_request['limit'] = MAXITEMS;
+            }
+                
+            //dataset origination db can be different from map heurist instance    
+            if(!window.hWin.HEURIST4.util.isempty(request.db) &amp;&amp; request.db!=window.hWin.HAPI4.database){
+                server_request.db = request.db;
+                origination_db = request.db;
+            }
+                
+            //perform search see record_output.php       
+            window.hWin.HAPI4.RecordMgr.search_new(server_request,
+                function(response){
+
+                    let geojson_data = null;
+                    let timeline_data = [];
+                    let layers_ids = [];
+                    let timeline_dty_ids = [];
+                    if(response['geojson'] &amp;&amp; response['timeline']){
+                        geojson_data = response['geojson'];
+                        timeline_data = response['timeline'];   
+                        
+                        if(response['timeline_dty_ids']) timeline_dty_ids = response['timeline_dty_ids'];
+                        if(response['layers_ids']) layers_ids = response['layers_ids']; //layers records from clearinghouse  
+                    }else{
+                        geojson_data = response;
+                    }
+
+                    if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) 
+                        || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
+                    {
+                         
+                        _geojson_ids = response['geojson_ids']; //all record ids to be plotted on map
+                        if(options.is_current_search &amp;&amp; response['geojson_dty_ids']){
+                            _geojson_dty_ids = response['geojson_dty_ids'];    
+                            
+                            let _geojson_rty_ids = response['geojson_rty_ids'];
+                            //dynamic thematic map for current search
+                            let thematic_map = [];
+                            for(let i=0; i&lt;_geojson_dty_ids.length; i++)
+                            {
+                                let dty_ID = _geojson_dty_ids[i];
+
+                                let title = [];                                
+                                if(dty_ID=='Path'){
+                                    title = 'Path';                                   
+                                }else if (typeof dty_ID === 'string' &amp;&amp; dty_ID.indexOf('relation:')===0){
+                                    title = $Db.trm(dty_ID.substring(9),'trm_Label');
+                                    if(!title) title = dty_ID;
+                                }else{
+                                    for(let j=0; j&lt;_geojson_rty_ids.length; j++){
+                                        let t1 = $Db.rst(_geojson_rty_ids[j], dty_ID, 'rst_DisplayName');
+                                        if(!window.hWin.HEURIST4.util.isempty(t1)) title.push(t1);
+                                    }
+                                    if(title.length>1){
+                                        //let t1 = $Db.dty(dty_ID, 'dty_Name');
+                                        //(window.hWin.HEURIST4.util.isempty(t1)?'':t1)
+                                        title = title.join(' | ');
+                                    }else if (title.length==1){
+                                        title = title[0];    
+                                    }else{
+                                        title = 'Field: '+_geojson_rty_ids[0]; //not found
+                                    }
+                                }
+                                
+                                //special thematic map - filter by geo fields
+                                thematic_map.push(
+                                {
+                                    "title": title,
+                                    "active":true,
+                                    "fields": [{"code":"rec_GeoField","ranges":[{"value": _geojson_dty_ids[i]}]}]
+                                }
+                                );
+                            }//for
+                            
+                            _recordset.setFld(_record, 
+                                        window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY'],
+                                        JSON.stringify(thematic_map)
+                                            );
+                        }
+                        
+                        
+                        _dataset_type = 'db';
+                        _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
+                                    {geojson_data: geojson_data,
+                                    timeline_data: timeline_data,
+                                    timeline_dty_ids: timeline_dty_ids,
+                                    layer_style: layer_default_style,
+                                    popup_template: layer_popup_template,
+                                    origination_db: origination_db,
+                                    dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
+                                    dataset_type:'db',
+                                    preserveViewport:options.preserveViewport });
+                                       
+                                       
+                        //_triggerLayerStatus( 'visible' );
+                        is_outof_range = null;                        
+                        _setVisibilityForZoomRange();   
+                        
+                    }else {
+                        response = $.isPlainObject(response) ? response : {message: response, error_title: 'Unable to add query layer'};
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                        _triggerLayerStatus( 'error' );
+                    }
+                    
+                    //check if there are layers and tlcmapdatasets among result set
+                    if( _parent_mapdoc==0 ){ // &amp;&amp; window.hWin.HEURIST4.util.isArrayNotEmpty(layers_ids)
+                        options.mapwidget.mapping('getMapManager').addLayerRecords( layers_ids );
+                    } 
+
+                }
+            );          
+        }
+
+    }
+
+    
+    //
+    // recordset layer
+    //
+    function _addRecordSet(){
+        
+        let layer_style = _recordset.fld(options.rec_layer || _record, 
+                    window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
+        let layer_popup_template = _recordset.fld(options.rec_layer || _record, 
+                    window.hWin.HAPI4.sysinfo['dbconst']['DT_SMARTY_TEMPLATE']);
+                    
+        const MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');    
+        
+        let data = options.recordset.toGeoJSON(null,0,MAXITEMS);
+
+        let geojson_data = data['geojson'];
+        let timeline_data = data['timeline'];   
+
+        if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) 
+            || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
+        {
+                         
+            _geojson_ids = data['geojson_ids']; //simpify {all: data['geojson_ids']}; //all record ids to be plotted on map
+            let timeline_dty_ids = window.hWin.HEURIST4.util.isArrayNotEmpty(data['timeline_dty_ids'])
+                                    ?data['timeline_dty_ids']
+                                    :[];                    
+            
+            _dataset_type = 'db';
+            _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
+                        {geojson_data: geojson_data,
+                        timeline_data: timeline_data,
+                        timeline_dty_ids: timeline_dty_ids,
+                        layer_style: layer_style,
+                        popup_template: layer_popup_template,
+                        dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
+                        dataset_type: 'db',
+                        preserveViewport:options.preserveViewport });
+                                      
+            is_outof_range = null;                        
+            _setVisibilityForZoomRange();   
+        }else {
+            _triggerLayerStatus( 'error' );
+            window.hWin.HEURIST4.msg.showMsgErr({
+                message: 'Can not add recordset layer. Spatial and time data are empty',
+                error_title: 'Unable to add recordset layer'
+            });
+        }
+    }
+
+
+    function _getMaxZoomLevel(){
+        let layer_maxzoom = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_ZOOM_LEVEL']);
+        return layer_maxzoom;
+    }
+    
+    //
+    // return extent in leaflet format (for tiler and image layers)
+    //
+    function _getBoundingBox(){
+
+        let ext = window.hWin.HEURIST4.geo.getWktBoundingBox(
+            _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'])
+        );
+        
+        if(options.mapwidget.mapping('getCurrentCRS')=='Simple'){
+            let maxzoom = _getMaxZoomLevel();
+            
+            if(Array.isArray(ext) &amp;&amp; ext.length==2){
+            
+                let max_dim = Math.max(ext[1][0]-ext[0][0], ext[1][1]-ext[0][1]);
+                
+                if(!(maxzoom>1) &amp;&amp; max_dim>512){
+                    //@todo 
+                    maxzoom =  Math.ceil(
+                        Math.log(
+                            max_dim /
+                            256
+                        ) / Math.log(2)
+                    );        
+                }
+                
+                if(maxzoom>0 &amp;&amp; max_dim>512){
+                    //convert pixels to lat/long
+                    let nativemap = options.mapwidget.mapping('getNativeMap');
+                    let latlong1 = nativemap.unproject([ext[0][1],ext[0][0]], maxzoom);
+                    let latlong2 = nativemap.unproject([ext[1][1],ext[1][0]], maxzoom);
+                    
+                    ext = [latlong1, latlong2];
+                }          
+            }
+            _max_zoom_level = maxzoom;
+        }
+        
+        return ext;
+    }
+
+
+    //
+    // trigger callback (to update status in legend)
+    //
+    function _triggerLayerStatus( status ){
+
+        if(status!=null){
+            let layer_ID = 0;
+            if(options.rec_layer){
+                layer_ID = _recordset.fld(options.rec_layer, 'rec_ID');
+            }
+            if(layer_ID>0){
+                options.mapwidget.mapping('onLayerStatus', layer_ID, status);
+            }
+        }
+    }
+    
+    //
+    // active_themes - array of active themes
+    //
+    // 1. get all fields that are used in active_themes
+    // 2. request server for field values and assign values to feature.properties.details
+    //      using mapping.eachLayerFeature 
+    // 3. if values are already obtained use mapping.eachLayerFeature to assign symbols to 
+    //      layer.feature.thematic_style
+    //        
+    function _applyThematicMap( active_themes ){    
+        
+        //sample of thematic map configuration
+        /*
+        theme = 
+        [
+        {"geofield": "2-134","iconType":"circle","stroke":"1","color":"#ff0000","weight":"2","fill":"1","fillColor":"#0000FF","iconSize":"8"},
+        {
+            "title": "First theme ever",
+            "symbol":{"iconType":"circle","stroke":"1","color":"#ff0000","weight":"2","fill":"1","fillColor":"#0000FF","iconSize":"8"},
+            "rules": {}, //find records linked to place
+            "fields": [
+                {"code":1109,"title":"Population","ranges":[
+                    {"value":"1", "symbol":{"iconSize":10 } },
+                    {"value":"2&lt;>3", "symbol":{"iconSize":20 } },
+                    {"value":"4,5", "symbol":{"iconSize":30, "fillColor":"#00ff50" } }
+                ]}
+                //{"code":133,"title":"Place Type"}
+            ]
+        }];
+        */
+
+        //feature.properties.rec_ID
+        // _geojson_ids - list of heurist records in layer, if it is empty layer is not loaded or empty
+        if(_dataset_type!='db' || _geojson_ids==null || _geojson_ids.length==0) return;
+        
+        //theme = window.hWin.HEURIST4.util.isJSON(theme);
+  
+        if(active_themes==null || active_themes.length==0){
+            //switch off current theme
+            options.mapwidget.mapping('eachLayerFeature', _nativelayer_id, 
+                function(layer){
+                    //reset active thematic map symbol symbol
+                    layer.feature.thematic_style = null;
+                }
+            );
+            that.applyStyle(null, true);
+            return;
+        }
+        
+        // 1. get all fields that are used in active_themes and prepare ranges
+        let theme_fields = {};
+        let theme_queries = {};
+
+        for(let j=0; j&lt;active_themes.length; j++){
+            let theme = active_themes[j];
+            
+            $.each(theme.fields, function(i, ftheme){
+                
+                if(ftheme.code!='rec_GeoField'){
+                
+                    let field = window.hWin.HEURIST4.query.createFacetQuery(ftheme.code, true, false);
+                    
+                    //field.code - code without last dty_ID
+                    
+                    if(theme_fields[field.code]){ //query already defined
+                        theme_fields[field.code].push(field.id);
+                    }else{
+                    
+                        let query;
+                        if( (typeof field['facet'] === 'string') &amp;&amp; (field['facet'] == '$IDS') ){ //this is field form target record type
+                            query = '$IDS'; //'ids:'+_geojson_ids.join(',');//maplayer_query;
+
+                        }else{
+                            
+                            query = window.hWin.HEURIST4.util.cloneJSON(field['facet']); //clone 
+                            //change $IDS for current set of target record type
+                            // it will be done on server side__fillQuery(query);                
+                        }
+                        
+                        theme_queries[field.code] = query;
+                        theme_fields[field.code] = [field.id];
+                    }
+                }
+                
+                /*
+                if(typeof tfield == 'string' &amp;&amp; tfield.indexOf(':')>0){
+                    let codes = tfield.split(':');
+                    tfield = codes[codes.length-1];
+                }
+                if(theme_fields.indexOf(tfield)&lt;0){
+                    theme_fields.push(tfield);    
+                }
+                */
+                
+                let isNumeric = true;
+                //prepare ranges
+                for(let j=0; j&lt;ftheme.ranges.length; j++){
+                    let range = ftheme.ranges[j].value;
+                    if(typeof range==='string'){
+                        let values = range.split(',');
+                        if(values.length>=2){
+                            ftheme.ranges[j].value = values;
+                        }else{
+                            values = range.split('&lt;>');
+                            if(values.length==2){
+                                if(window.hWin.HEURIST4.util.isNumber(values[0])){
+                                    ftheme.ranges[j].min = Number(values[0]);    
+                                }else{
+                                    ftheme.ranges[j].min = values[0];
+                                    isNumeric = false;    
+                                }
+                                if(window.hWin.HEURIST4.util.isNumber(values[1])){
+                                    ftheme.ranges[j].max = Number(values[1]);    
+                                }else{
+                                    ftheme.ranges[j].max = values[1];    
+                                    isNumeric = false;
+                                }
+                            }
+                        }
+                    }
+                    if(!ftheme.ranges[j].symbol){
+                        ftheme.ranges[j].symbol = {};  
+                    } 
+                }
+                ftheme.isNumeric = isNumeric;
+            });
+        }
+        
+        // 3. request for values. if there are not fields to request then assign symbols
+        if(Object.keys(theme_queries).length>0)
+        {
+            
+            let query_codes = Object.keys(theme_queries);
+            
+            function __executeQuery(query_idx){
+                
+                let code = query_codes[query_idx];
+            
+                //find values
+                let server_request = {
+                    q: theme_queries[code],
+                    //rules: theme.rules,  search for linked records
+                    a: 'links_details',
+                    ids: _geojson_ids.join(','),
+                    w: 'a',
+                    zip: 1,
+                    detail:theme_fields[code].join(',')  //request detail fields   'rec_RecTypeID,'+
+                };
+                
+                //_new  format:'json'
+                window.hWin.HAPI4.RecordMgr.search(server_request,
+                    function(response){
+                        
+
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            //let resdata = new HRecordSet(response.data);
+                            //assign symbol for each element of layer
+                            options.mapwidget.mapping('eachLayerFeature', _nativelayer_id, 
+                                function(layer){
+                                    //get record from result set and assign field values
+                                    let id = layer.feature.properties.rec_ID; 
+                                    let record = response.data[id];
+                                    for (let k=0; k&lt;theme_fields[code].length; k++){
+                                        let dty_ID = theme_fields[code][k];
+                                        //get first value from array
+                                        for (let dtl_ID in record[dty_ID]){
+                                            layer.feature.properties[code+':'+dty_ID] = record[dty_ID][dtl_ID];    
+                                            break;
+                                        }
+                                    }
+
+                                    /*
+                                    let record = resdata.getRecord(id);
+                                    for (let k=0; k&lt;theme_fields[code].length; k++){
+                                        let dty_ID = theme_fields[code][k];
+                                        layer.feature.properties[code+':'+dty_ID] = resdata.fld(record, dty_ID);
+                                    }
+                                    */
+                                }
+                            );
+                            
+                            if(query_idx+1==query_codes.length){
+                                //define thematic map symbol symbol
+                                options.mapwidget.mapping('eachLayerFeature', _nativelayer_id, 
+                                    function(layer){
+                                        layer.feature.thematic_style = _defineThematicMapSymbol(layer.feature.properties, active_themes);
+                                });
+                                that.applyStyle(null, true);    
+                            }else{
+                                __executeQuery(query_idx+1);    
+                            }
+
+                        }else {
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+
+                });
+            } //__executeQuery
+
+            __executeQuery(0);
+            
+        }else{ 
+            //all fields are already loaded
+            options.mapwidget.mapping('eachLayerFeature', _nativelayer_id, 
+                function(layer){
+                    //define thematic map symbol symbol
+                    layer.feature.thematic_style = _defineThematicMapSymbol(layer.feature.properties, active_themes);
+                }
+            );
+            that.applyStyle(null, true);
+        }
+        
+        
+    }
+    
+    //
+    // show/hide the entire layer depends on DT_MINIMUM_ZOOM_LEVEL,DT_MAXIMUM_ZOOM_LEVEL
+    //
+    function _setVisibilityForZoomRange(current_zoom){
+
+        if(is_inited){
+            
+            if(!(current_zoom>=0)){
+                let nativemap = options.mapwidget.mapping('getNativeMap');
+                current_zoom = nativemap.getZoom();
+            }
+            
+            let _rec = options.rec_layer || _record;
+            if(_has_zoom_setting_per_layer&lt;0 &amp;&amp; _has_zoom_setting_per_record&lt;0) return; //not set
+
+            let is_in_range = true;
+
+            if(_has_zoom_setting_per_layer>0){ //already defined
+                
+                is_in_range = (_rec['maxzoom']==-1 || _rec['maxzoom']>=current_zoom)
+                        &amp;&amp; (_rec['minzoom']==-1 || current_zoom>=_rec['minzoom']);
+                
+            }else if(_has_zoom_setting_per_layer==0)
+            {
+                _rec['maxzoom'] = -1;
+                _rec['minzoom'] = -1;
+                if(_rec['layer']){
+                    
+                    // in basemap zoom levels (0-19)
+                    let dty_id_min = window.hWin.HAPI4.sysinfo['dbconst']['DT_MINIMUM_ZOOM_LEVEL'],
+                        dty_id_max = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_ZOOM_LEVEL'];
+                        
+                    if(dty_id_min>0){
+                        const val = parseInt(_recordset.fld(_rec, dty_id_min));
+                        if(val>=0){
+                            _rec['minzoom'] = val;
+                        }
+                    }
+                    if(dty_id_max>0){
+                        const val = parseInt(_recordset.fld(_rec, dty_id_max));
+                        if(val>0){
+                            _rec['maxzoom'] = val;
+                        }
+                    }
+                    
+                    if(!(_rec['maxzoom']>0 || _rec['minzoom']>=0)){ //already defined
+                    
+                        // in kilometers
+                        let dty_id = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAXIMUM_ZOOM'];
+                        let layer_bnd = (_rec['layer']).getBounds();
+                        
+                        if(dty_id>0){
+                            const val = parseFloat(_recordset.fld(_rec, dty_id));
+                            if(val>0){ 
+                                _rec['maxzoom'] = 32;
+                                if(val>0.0001){ //0.1 meter
+                                    _rec['maxzoom'] = options.mapwidget.mapping('convertZoomToNative', val, layer_bnd);
+                                }
+                            }
+                        }
+                        dty_id = window.hWin.HAPI4.sysinfo['dbconst']['DT_MINIMUM_ZOOM'];
+                        if(dty_id>0){
+                            const val = parseFloat(_recordset.fld(_rec, dty_id));
+                            if(val>0 &amp;&amp; val!=20 &amp;&amp; val!=90){ //old default value
+                                _rec['minzoom'] = options.mapwidget.mapping('convertZoomToNative', val, layer_bnd);
+                            }
+                        }
+                    }
+                }
+                
+                if(_rec['maxzoom']>0 || _rec['minzoom']>=0){
+                    _has_zoom_setting_per_layer = 1;    
+                }else{
+                    //not defined
+                    _has_zoom_setting_per_layer = -1;    
+                }
+                
+                _setVisibilityForZoomRange( current_zoom );
+                return;
+            }
+        
+        
+            let status = null;
+            if(is_in_range){
+                if(is_outof_range!==false){
+                    is_outof_range = false;
+                    status =  (is_visible)?'visible':'hidden';
+                    options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, is_visible);
+                }
+                
+                //visibility per record
+                if(_dataset_type=='db' &amp;&amp; _has_zoom_setting_per_record>=0){
+                
+                    let show_rec_ids = [], hide_rec_ids = [];
+                    
+                    _has_zoom_setting_per_record = -1;
+                    
+                    options.mapwidget.mapping('eachLayerFeature', _nativelayer_id, 
+                        function(layer){
+                            
+                            //get record from result set and assign field values
+                            if(layer.feature.properties.rec_MinZoom>=0 || layer.feature.properties.rec_MaxZoom>0){
+                                
+                                let is_in_range = (!(layer.feature.properties.rec_MaxZoom>0) || layer.feature.properties.rec_MaxZoom>=current_zoom)
+                                                  &amp;&amp; (!(layer.feature.properties.rec_MinZoom>=0) || current_zoom>=layer.feature.properties.rec_MinZoom);
+                                if(is_in_range){
+                                    show_rec_ids.push(layer.feature.properties.rec_ID);    
+                                }else{
+                                    hide_rec_ids.push(layer.feature.properties.rec_ID);
+                                }
+                                
+                                _has_zoom_setting_per_record = 1;
+                            }
+                        });
+                                        
+                    
+                    options.mapwidget.mapping('setFeatureVisibility', show_rec_ids, true, 1);
+                    options.mapwidget.mapping('setFeatureVisibility', hide_rec_ids, false, 1);
+
+                }
+                
+            }else if(!is_outof_range) {
+                status = 'out';
+                is_outof_range = true;
+                options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, false);
+            }
+            
+            //trigger callback
+            if(status!=null){
+                _triggerLayerStatus( status );    
+            }
+            
+        }//inited
+        
+        
+    }
+                         
+    
+    //
+    // find what theme fit for given feature
+    //
+    function _defineThematicMapSymbol(feature, themes){
+        
+        let recID = feature.rec_ID;
+        let new_symbol = false;
+        
+        for(let k=0; k&lt;themes.length; k++)
+            for(let i=0; i&lt;themes[k].fields.length; i++)
+            {
+                
+                let theme = themes[k];
+                let ftheme = theme.fields[i];
+                
+                let tfield = ftheme.code;
+                /*
+                if(typeof tfield == 'string' &amp;&amp; tfield.indexOf(':')>0){
+                    let codes = tfield.split(':');
+                    tfield = codes[codes.length-1];
+                }
+                */
+                
+                let value = feature[tfield];
+                if(ftheme.isNumeric &amp;&amp; window.hWin.HEURIST4.util.isNumber(feature[tfield])){
+                    value = Number(feature[tfield]);
+                }
+
+                let fsymb = null;
+
+                if(ftheme.range_type=='equal' || ftheme.range_type=='log'){
+                    //@todo find min and max value
+                }else{
+                    for(let j=0; j&lt;ftheme.ranges.length; j++){
+                        let range = ftheme.ranges[j];
+                        if(Array.isArray(range.value))
+                        {
+                            if(window.hWin.HEURIST4.util.findArrayIndex(value, range.value)>-1){
+                                fsymb = range.symbol;       
+                                break;
+                            }
+                        }else if(!window.hWin.HEURIST4.util.isnull(range.min) &amp;&amp; 
+                            !window.hWin.HEURIST4.util.isnull(range.max)){
+
+                                if(value>=range.min &amp;&amp; value&lt;=range.max){
+                                    fsymb = range.symbol;
+                                    break;
+                                }
+                            }else if(value==range.value){
+                                fsymb = range.symbol;
+                                break;
+                            }
+                    }//for
+                    if(fsymb!=null){
+                        //if theme.symbol is not defined it takes def_layer_style)
+                        if(new_symbol){
+                            new_symbol = _mergeThematicSymbol(new_symbol, fsymb);
+                        }else{
+                            new_symbol = _mergeThematicSymbol(theme.symbol?theme.symbol:that.getStyle(), fsymb);
+                        }
+                    }
+                }
+            }
+            
+        return new_symbol;        
+        
+    }
+    
+    //
+    //
+    //
+    function _mergeThematicSymbol(basesymbol, fsymb){
+        
+            let use_style = window.hWin.HEURIST4.util.cloneJSON( basesymbol );
+        
+            let keys = Object.keys(fsymb);
+            for(let j=0; j&lt;keys.length; j++){
+                use_style[keys[j]] = fsymb[keys[j]];
+            }
+            
+            return use_style;
+    }    
+    
+    //public members
+    let that = {
+        getClass: function () {return _className;},
+        isA: function (strClass) {return (strClass === _className);},
+        getVersion: function () {return _version;},
+
+        isVisible: function(){
+            return is_visible;
+            /* it works
+            return is_inited
+                 &amp;&amp; _nativelayer_id>0 &amp;&amp; 
+                 options.mapwidget.mapping('isLayerVisibile', _nativelayer_id);
+            */                 
+        },
+        
+        //
+        // visiblity_set true,false or array of ids
+        // if visiblity_set is array of ids it allows to show only certain objects for this layer
+        //
+        setVisibility: function(visiblity_set){
+            
+            
+            let was_invisible = !is_visible;
+            is_visible = (window.hWin.HEURIST4.util.isArrayNotEmpty(visiblity_set) || visiblity_set === true);
+
+            if(is_outof_range) return;
+            
+            let status = null;
+            
+            if(is_inited){
+                if(_nativelayer_id>0){
+                    status =  (is_visible)?'visible':'hidden';
+                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(visiblity_set)){   
+                        //switch the layer on                         
+                        if(was_invisible) options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, true);
+                        //
+                        options.mapwidget.mapping('setVisibilityAndZoom', {native_id:_nativelayer_id}, visiblity_set, false);
+                    }else{        
+                        //show/hide entire layer
+                        options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, is_visible);
+                    }
+                }
+                
+                if(is_visible &amp;&amp; options.imageFilter){
+                    options.mapwidget.mapping('applyImageMapFilter', options.className, options.imageFilter);
+                }
+                
+            }else if(is_visible) {
+                status = 'loading'
+                _addLayerToMap();    
+            }
+            
+            
+            //trigger callback
+            if(status!=null){
+                _triggerLayerStatus( status );
+            }
+        },
+        
+        //
+        //
+        //
+        setVisibilityForZoomRange:function(current_zoom){
+            
+            _setVisibilityForZoomRange(current_zoom);
+            
+        },
+        
+        //
+        //  sends request for map data (json, kml or shp) and text file with links (to record view and hml) 
+        //
+        getMapData: function(){
+            
+            //detect datasource type 
+            let rectypeID = _recordset.fld(_record, 'rec_RecTypeID');
+            let request = {}, url = null;
+            let layerName = _recordset.fld(_record, 'rec_Title');
+            
+            let layer_ID = 0;
+            let dataset_ID = _recordset.fld(_record, 'rec_ID');
+            if(options.rec_layer){
+                layer_ID = _recordset.fld(options.rec_layer, 'rec_ID');
+            }
+
+            if(rectypeID == RT_MAP_LAYER 
+                || rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TLCMAP_DATASET']
+                || rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
+                   
+                let sQuery;
+                if(options.recordset){ 
+                    sQuery = '?q=ids:'+options.recordset.getIds()
+                        + '&amp;db=' + window.hWin.HAPI4.database;
+                }else{
+                    let query = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING']);
+                    let params = window.hWin.HEURIST4.query.parseHeuristQuery(query);
+                    sQuery = window.hWin.HEURIST4.query.composeHeuristQuery2(params, true);
+                    sQuery = sQuery + '&amp;db=' + (params.db?params.db:window.hWin.HAPI4.database);
+                }
+                sQuery = sQuery + '&amp;format=geojson'; //(layer_ID>0?layer_ID:dataset_ID); //layerName; //zip=1&amp;
+                
+                //@todo: attach hml for dataset record
+                sQuery = sQuery + '&amp;metadata='+window.hWin.HAPI4.database+'-'+dataset_ID; 
+                 
+                url = window.hWin.HAPI4.baseURL 
+                        + 'hserv/controller/record_output.php'+ sQuery;
+                                                                  
+                window.open(url, '_blank');
+
+            }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']){
+                
+                let layer_url = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
+                
+                let sMsg = '&lt;p>This dataset is a tiled image running on a server. '
+                +'Tiled images should be accessed via their URL which delivers the appropriate tiles for the area being mapped&lt;/p>'
+                +layer_url
+                +'&lt;p>Link to metadata :'
+                +window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&amp;recID='+dataset_ID+'&lt;/p>';
+                
+                window.hWin.HEURIST4.msg.showMsgDlg(sMsg);
+
+            }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
+
+                let imageFile = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);                
+                
+                url = window.hWin.HAPI4.baseURL+'?db='+ window.hWin.HAPI4.database 
+                        +'&amp;metadata='+dataset_ID+'&amp;file='+imageFile;
+                                                                  
+                window.open(url, '_blank');
+
+            }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE'] ||
+                     rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_FILE_SOURCE']){  //csv
+
+                url = window.hWin.HAPI4.baseURL 
+                        + 'hserv/controller/record_map_source.php?db='+ window.hWin.HAPI4.database
+                        + '&amp;format=rawfile&amp;recID='+dataset_ID
+                        + '&amp;metadata='+dataset_ID+(layer_ID>0?(','+layer_ID):'');
+
+                window.open(url, '_blank');
+                
+            }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_SHP_SOURCE']){
+                
+                url = window.hWin.HAPI4.baseURL 
+                        + 'hserv/controller/record_shp.php?db='+ window.hWin.HAPI4.database
+                        + '&amp;format=rawfile&amp;recID='+dataset_ID
+                        + '&amp;metadata='+dataset_ID+(layer_ID>0?(','+layer_ID):'');
+
+                window.open(url, '_blank');
+            }
+            
+        },
+        
+        //
+        //
+        //
+        zoomToLayer: function(){
+            
+            if(_nativelayer_id>0){
+                options.mapwidget.mapping('zoomToLayer', _nativelayer_id);
+            }
+
+        },
+        
+        //
+        // For images
+        //
+        getMaxZoomLevel: function(){
+            return _max_zoom_level; 
+        },
+        
+        //
+        //
+        //
+        getBounds: function (format){
+
+            let bnd = options.mapwidget.mapping('getBounds', _nativelayer_id);
+            
+            if(!(bnd &amp;&amp; bnd.isValid())) return null;
+
+            if(format=='wkt'){
+                let aCoords = [];
+                let sw = bnd.getSouthWest();
+                let nw = bnd.getNorthEast();
+
+                //move go util_geo?
+                function __formatPntWKT(pnt, d){
+                    if(isNaN(d)) d = 7;
+                    let lat = pnt.lat;
+                    lat = lat.toFixed(d);
+                    let lng = pnt.lng;
+                    lng = lng.toFixed(d);
+                    return lng + ' ' + lat;               
+                }            
+
+                aCoords.push(__formatPntWKT(sw));  
+                aCoords.push(__formatPntWKT( {lat:nw.lat, lng:sw.lng} ));  
+                aCoords.push(__formatPntWKT(nw));  
+                aCoords.push(__formatPntWKT( {lat:sw.lat, lng:nw.lng} ));  
+                aCoords.push(__formatPntWKT(sw));  
+                return "POLYGON ((" + aCoords.join(",") + "))"
+            }else{
+                return bnd;
+            }
+        },
+
+        //
+        //
+        //
+        removeLayer: function(){
+            if(_nativelayer_id>0)
+                options.mapwidget.mapping('removeLayer', _nativelayer_id);
+        },
+        
+        applyStyle: function( newStyle, newTheme ){
+            if(_nativelayer_id>0){
+                options.mapwidget.mapping('applyStyle', _nativelayer_id, newStyle, newTheme);
+                options.imageFilter = newStyle;
+            }
+        },
+
+        getStyle: function(){
+            if(_nativelayer_id>0){
+                return options.mapwidget.mapping('getStyle', _nativelayer_id);
+            }else{
+                return options.mapwidget.mapping('setStyleDefaultValues');
+            }
+        },
+        
+        getNativeId: function(){
+            return _nativelayer_id;
+        },
+        
+        
+        //
+        // loop trough all elements of top_layer (record ids)
+        // 1. find detail field values and assign them to feature.properties.details
+        // 2. select the appropriate value style (part values)
+        // 3. generate fully defined style object (base style+value style
+        // 4. assign it to feature.theme[name]
+        //
+        // theme - json with thematic map configuration
+        applyThematicMap: function(theme){
+            _applyThematicMap(theme);
+        }
+    }
+
+    _init( _options );
+    return that;  //returns object
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="HEURIST4.dbs.html">dbs</a></li><li><a href="HEURIST4.geo.html">geo</a></li><li><a href="HEURIST4.msg.html">msg</a></li><li><a href="HEURIST4.query.html">query</a></li><li><a href="HEURIST4.util.html">util</a></li><li><a href="NodeSelection.html">NodeSelection</a></li><li><a href="heurist.buttonsMenu.html">buttonsMenu</a></li><li><a href="heurist.controlPanel.html">controlPanel</a></li><li><a href="heurist.dbAction.html">dbAction</a></li><li><a href="heurist.dbVerify.html">dbVerify</a></li><li><a href="heurist.dbVerifyURLs.html">dbVerifyURLs</a></li><li><a href="heurist.editTranslations.html">editTranslations</a></li><li><a href="heurist.editing_input.html">editing_input</a></li><li><a href="heurist.navigation.html">navigation</a></li><li><a href="heurist.recordAccess.options.html">options</a></li><li><a href="heurist.recordAction.options.html">options</a></li><li><a href="heurist.recordAdd.options.html">options</a></li><li><a href="heurist.recordAddButton.options.html">options</a></li><li><a href="heurist.recordAddLink.options.html">options</a></li><li><a href="heurist.recordAddLinkMatch.options.html">options</a></li><li><a href="heurist.recordArchive.options.html">options</a></li><li><a href="heurist.recordBookmark.options.html">options</a></li><li><a href="heurist.recordDataTable.options.html">options</a></li><li><a href="heurist.recordDelete.options.html">options</a></li><li><a href="heurist.recordExport.options.html">options</a></li><li><a href="heurist.recordExportCSV.options.html">options</a></li><li><a href="heurist.recordFindDuplicates.options.html">options</a></li><li><a href="heurist.recordImportAnnotations.options.html">options</a></li><li><a href="heurist.recordNotify.options.html">options</a></li><li><a href="heurist.recordRate.options.html">options</a></li><li><a href="heurist.recordTag.options.html">options</a></li><li><a href="heurist.recordTemplate.options.html">options</a></li><li><a href="heurist.recordTitles.options.html">options</a></li><li><a href="heurist.recordUploadedFilesIndex.options.html">options</a></li><li><a href="heurist.selectFile.html">selectFile</a></li><li><a href="heurist.slidersMenu.html">slidersMenu</a></li></ul><h3>Classes</h3><ul><li><a href="ActionHandler.html">ActionHandler</a></li><li><a href="CmsManager.html">CmsManager</a></li><li><a href="Color.html">Color</a></li><li><a href="CrosstabsAnalysis.html">CrosstabsAnalysis</a></li><li><a href="EditorCodeMirror.html">EditorCodeMirror</a></li><li><a href="HEditing.html">HEditing</a></li><li><a href="HLayout.html">HLayout</a></li><li><a href="HLayoutMgr.html">HLayoutMgr</a></li><li><a href="HMapLayer.html">HMapLayer</a></li><li><a href="HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRapidFieldAdditions.HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRecordSearch.html">HRecordSearch</a></li><li><a href="HRecordSet.html">HRecordSet</a></li><li><a href="HSystemMgr.html">HSystemMgr</a></li><li><a href="HintDiv.html">HintDiv</a></li><li><a href="JapaneseCalendar.html">JapaneseCalendar</a></li><li><a href="L.Control.Help.html">Help</a></li><li><a href="L.Control.Manager.html">Manager</a></li><li><a href="L.Control.Publish.html">Publish</a></li><li><a href="Solver.html">Solver</a></li><li><a href="TDuration.html">TDuration</a></li><li><a href="Temporal.html">Temporal</a></li><li><a href="hAPI.html">hAPI</a></li><li><a href="hAPI-HRecordMgr.html">HRecordMgr</a></li><li><a href="window.TDate.html">TDate</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HPublishDialog">HPublishDialog</a></li><li><a href="global.html#HSvsEdit">HSvsEdit</a></li><li><a href="global.html#SelectLinkField">SelectLinkField</a></li><li><a href="global.html#_addInput">_addInput</a></li><li><a href="global.html#_checkStructureFromSource">_checkStructureFromSource</a></li><li><a href="global.html#_checkYear">_checkYear</a></li><li><a href="global.html#_closeDialog">_closeDialog</a></li><li><a href="global.html#_create">_create</a></li><li><a href="global.html#_destroy">_destroy</a></li><li><a href="global.html#_detectHeurist">_detectHeurist</a></li><li><a href="global.html#_doSave">_doSave</a></li><li><a href="global.html#_fromDataToUI">_fromDataToUI</a></li><li><a href="global.html#_getActionButtons">_getActionButtons</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_initControls">_initControls</a></li><li><a href="global.html#_initDialog">_initDialog</a></li><li><a href="global.html#_initInnerHeader">_initInnerHeader</a></li><li><a href="global.html#_initModal">_initModal</a></li><li><a href="global.html#_initOffcanvas">_initOffcanvas</a></li><li><a href="global.html#_japaneseYearToGregorian">_japaneseYearToGregorian</a></li><li><a href="global.html#_loadParentLookup">_loadParentLookup</a></li><li><a href="global.html#_popupDialog">_popupDialog</a></li><li><a href="global.html#_preImportCheck">_preImportCheck</a></li><li><a href="global.html#_processSPARQLRow">_processSPARQLRow</a></li><li><a href="global.html#_refresh">_refresh</a></li><li><a href="global.html#_refreshCaptcha">_refreshCaptcha</a></li><li><a href="global.html#_setOption">_setOption</a></li><li><a href="global.html#_showRecordViewPopup">_showRecordViewPopup</a></li><li><a href="global.html#_switchToDataMode">_switchToDataMode</a></li><li><a href="global.html#_theme_editing_symbology">_theme_editing_symbology</a></li><li><a href="global.html#_updatePanels">_updatePanels</a></li><li><a href="global.html#_validateFromGregorian">_validateFromGregorian</a></li><li><a href="global.html#addAssoctoAssigned">addAssoctoAssigned</a></li><li><a href="global.html#addBackgroundCircles">addBackgroundCircles</a></li><li><a href="global.html#addContainer">addContainer</a></li><li><a href="global.html#addForce">addForce</a></li><li><a href="global.html#addForegroundCircles">addForegroundCircles</a></li><li><a href="global.html#addIcons">addIcons</a></li><li><a href="global.html#addKeyword">addKeyword</a></li><li><a href="global.html#addLabels">addLabels</a></li><li><a href="global.html#addLevel">addLevel</a></li><li><a href="global.html#addLines">addLines</a></li><li><a href="global.html#addMarkerDefinitions">addMarkerDefinitions</a></li><li><a href="global.html#addNodes">addNodes</a></li><li><a href="global.html#addPrevtoAssigned">addPrevtoAssigned</a></li><li><a href="global.html#addSelectionBox">addSelectionBox</a></li><li><a href="global.html#addTitles">addTitles</a></li><li><a href="global.html#applyRules">applyRules</a></li><li><a href="global.html#autofill_login">autofill_login</a></li><li><a href="global.html#browseRecords">browseRecords</a></li><li><a href="global.html#calculateImageExtentFromWorldFile">calculateImageExtentFromWorldFile</a></li><li><a href="global.html#changeDisplay">changeDisplay</a></li><li><a href="global.html#changeViewMode">changeViewMode</a></li><li><a href="global.html#checkAllOptions">checkAllOptions</a></li><li><a href="global.html#checkStoredSettings">checkStoredSettings</a></li><li><a href="global.html#clearContent">clearContent</a></li><li><a href="global.html#close">close</a></li><li><a href="global.html#closeDialog">closeDialog</a></li><li><a href="global.html#commonCodeInit">commonCodeInit</a></li><li><a href="global.html#commonOnAdd">commonOnAdd</a></li><li><a href="global.html#compareIndexes">compareIndexes</a></li><li><a href="global.html#correctionOfInvalidTerm">correctionOfInvalidTerm</a></li><li><a href="global.html#createOverlay">createOverlay</a></li><li><a href="global.html#currentNode">currentNode</a></li><li><a href="global.html#daysInMonth">daysInMonth</a></li><li><a href="global.html#determineColour">determineColour</a></li><li><a href="global.html#disableUpdateBtn">disableUpdateBtn</a></li><li><a href="global.html#doAction">doAction</a></li><li><a href="global.html#doAuthentication">doAuthentication</a></li><li><a href="global.html#doImport">doImport</a></li><li><a href="global.html#doRegister">doRegister</a></li><li><a href="global.html#doSamlLogin">doSamlLogin</a></li><li><a href="global.html#doSearchByID">doSearchByID</a></li><li><a href="global.html#drag_link_line">drag_link_line</a></li><li><a href="global.html#drag_link_source_id">drag_link_source_id</a></li><li><a href="global.html#drag_link_target_id">drag_link_target_id</a></li><li><a href="global.html#drag_link_timer">drag_link_timer</a></li><li><a href="global.html#dragend">dragend</a></li><li><a href="global.html#dragmove">dragmove</a></li><li><a href="global.html#dragstart">dragstart</a></li><li><a href="global.html#editCMS2">editCMS2</a></li><li><a href="global.html#editCMS_ElementCfg">editCMS_ElementCfg</a></li><li><a href="global.html#editCMS_SelectElement">editCMS_SelectElement</a></li><li><a href="global.html#editCMS_SiteMenu">editCMS_SiteMenu</a></li><li><a href="global.html#editCMS_WidgetCfg">editCMS_WidgetCfg</a></li><li><a href="global.html#editSymbology">editSymbology</a></li><li><a href="global.html#editTheme">editTheme</a></li><li><a href="global.html#enable_register">enable_register</a></li><li><a href="global.html#executeFormula">executeFormula</a></li><li><a href="global.html#f">f</a></li><li><a href="global.html#first_level_rty_ID">first_level_rty_ID</a></li><li><a href="global.html#fixCalendarPickerCMDs">fixCalendarPickerCMDs</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#formatGregJulian">formatGregJulian</a></li><li><a href="global.html#fromJD">fromJD</a></li><li><a href="global.html#fromJSDate">fromJSDate</a></li><li><a href="global.html#fset">fset</a></li><li><a href="global.html#getAllChecked">getAllChecked</a></li><li><a href="global.html#getClass">getClass</a></li><li><a href="global.html#getContainer">getContainer</a></li><li><a href="global.html#getDataFromServer">getDataFromServer</a></li><li><a href="global.html#getEntityRadius">getEntityRadius</a></li><li><a href="global.html#getEraFromGregorian">getEraFromGregorian</a></li><li><a href="global.html#getEraFromJapaneseStr">getEraFromJapaneseStr</a></li><li><a href="global.html#getEraLimits">getEraLimits</a></li><li><a href="global.html#getEras">getEras</a></li><li><a href="global.html#getGephiFormat">getGephiFormat</a></li><li><a href="global.html#getKeywords">getKeywords</a></li><li><a href="global.html#getKeywordsNextStep">getKeywordsNextStep</a></li><li><a href="global.html#getLineLength">getLineLength</a></li><li><a href="global.html#getLineWidth">getLineWidth</a></li><li><a href="global.html#getMarkerWidth">getMarkerWidth</a></li><li><a href="global.html#getNodeDataById">getNodeDataById</a></li><li><a href="global.html#getRecentKeywords">getRecentKeywords</a></li><li><a href="global.html#getRecordOverlayData">getRecordOverlayData</a></li><li><a href="global.html#getRelationOverlayData">getRelationOverlayData</a></li><li><a href="global.html#getRulesArray">getRulesArray</a></li><li><a href="global.html#getSelected">getSelected</a></li><li><a href="global.html#getSelection">getSelection</a></li><li><a href="global.html#getSetting">getSetting</a></li><li><a href="global.html#getURL">getURL</a></li><li><a href="global.html#gregorianToJapaneseStr">gregorianToJapaneseStr</a></li><li><a href="global.html#hMapDocument">hMapDocument</a></li><li><a href="global.html#hRecordAction">hRecordAction</a></li><li><a href="global.html#handleNodeAction">handleNodeAction</a></li><li><a href="global.html#handleSettingsInUI">handleSettingsInUI</a></li><li><a href="global.html#hexToFilter">hexToFilter</a></li><li><a href="global.html#hexportMenu">hexportMenu</a></li><li><a href="global.html#imgFilter">imgFilter</a></li><li><a href="global.html#initProfilePreferences">initProfilePreferences</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isA">isA</a></li><li><a href="global.html#isAssocKeyword">isAssocKeyword</a></li><li><a href="global.html#isMonthSpan">isMonthSpan</a></li><li><a href="global.html#isRecentKeyword">isRecentKeyword</a></li><li><a href="global.html#isTemporal">isTemporal</a></li><li><a href="global.html#isValid">isValid</a></li><li><a href="global.html#japaneseToGregorian">japaneseToGregorian</a></li><li><a href="global.html#japaneseToGregorianStr">japaneseToGregorianStr</a></li><li><a href="global.html#keywordLookup">keywordLookup</a></li><li><a href="global.html#loadHtmlContent">loadHtmlContent</a></li><li><a href="global.html#log10">log10</a></li><li><a href="global.html#login_dialog">login_dialog</a></li><li><a href="global.html#lookupEditions">lookupEditions</a></li><li><a href="global.html#lookupGoogle">lookupGoogle</a></li><li><a href="global.html#lookupHathiTrust">lookupHathiTrust</a></li><li><a href="global.html#lookupKarlsruhePortal">lookupKarlsruhePortal</a></li><li><a href="global.html#lookupWorldCat">lookupWorldCat</a></li><li><a href="global.html#mapIds">mapIds</a></li><li><a href="global.html#menuActionHandler">menuActionHandler</a></li><li><a href="global.html#mergeArraysUnique">mergeArraysUnique</a></li><li><a href="global.html#msgToConsole">msgToConsole</a></li><li><a href="global.html#newDate">newDate</a></li><li><a href="global.html#onAdd">onAdd</a></li><li><a href="global.html#onAuthentication">onAuthentication</a></li><li><a href="global.html#onNodeClick">onNodeClick</a></li><li><a href="global.html#onPageInit">onPageInit</a></li><li><a href="global.html#onRecordNodeClick">onRecordNodeClick</a></li><li><a href="global.html#onRemove">onRemove</a></li><li><a href="global.html#onTermSaveError">onTermSaveError</a></li><li><a href="global.html#open">open</a></li><li><a href="global.html#openRecordInTab">openRecordInTab</a></li><li><a href="global.html#openSearchMenu">openSearchMenu</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#popupDialog">popupDialog</a></li><li><a href="global.html#prevSessionExists">prevSessionExists</a></li><li><a href="global.html#project_keywords">project_keywords</a></li><li><a href="global.html#putSetting">putSetting</a></li><li><a href="global.html#removeAssocByID">removeAssocByID</a></li><li><a href="global.html#removeKeyword">removeKeyword</a></li><li><a href="global.html#removeOverlay">removeOverlay</a></li><li><a href="global.html#removeOverlays">removeOverlays</a></li><li><a href="global.html#removeSetting">removeSetting</a></li><li><a href="global.html#renderAssocKeywods">renderAssocKeywods</a></li><li><a href="global.html#renderContent">renderContent</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#saveRules">saveRules</a></li><li><a href="global.html#selectRecord">selectRecord</a></li><li><a href="global.html#setFormulaMode">setFormulaMode</a></li><li><a href="global.html#setGravity">setGravity</a></li><li><a href="global.html#setLinkMode">setLinkMode</a></li><li><a href="global.html#setSelected">setSelected</a></li><li><a href="global.html#setSelection">setSelection</a></li><li><a href="global.html#setValue">setValue</a></li><li><a href="global.html#setupAssocKeywords">setupAssocKeywords</a></li><li><a href="global.html#setupCaptcha">setupCaptcha</a></li><li><a href="global.html#setupRecentWorks">setupRecentWorks</a></li><li><a href="global.html#setupResetPin">setupResetPin</a></li><li><a href="global.html#show">show</a></li><li><a href="global.html#showEditions">showEditions</a></li><li><a href="global.html#showHelp">showHelp</a></li><li><a href="global.html#showKeyword">showKeyword</a></li><li><a href="global.html#showLoginDialog">showLoginDialog</a></li><li><a href="global.html#showNodeInformation">showNodeInformation</a></li><li><a href="global.html#showSearchBuilder">showSearchBuilder</a></li><li><a href="global.html#showSearchFacetedWizard">showSearchFacetedWizard</a></li><li><a href="global.html#showWarningAboutTermUsage">showWarningAboutTermUsage</a></li><li><a href="global.html#simplePointsToWKT">simplePointsToWKT</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#startRecentWork">startRecentWork</a></li><li><a href="global.html#temporalSimplifyDate">temporalSimplifyDate</a></li><li><a href="global.html#temporalToHumanReadableString">temporalToHumanReadableString</a></li><li><a href="global.html#tick">tick</a></li><li><a href="global.html#toJD">toJD</a></li><li><a href="global.html#toJSDate">toJSDate</a></li><li><a href="global.html#translationFromUI">translationFromUI</a></li><li><a href="global.html#translationSupport">translationSupport</a></li><li><a href="global.html#translationToUI">translationToUI</a></li><li><a href="global.html#truncateText">truncateText</a></li><li><a href="global.html#unselectAssoc">unselectAssoc</a></li><li><a href="global.html#updateAssocDisplay">updateAssocDisplay</a></li><li><a href="global.html#updateAssocList">updateAssocList</a></li><li><a href="global.html#updateCircles">updateCircles</a></li><li><a href="global.html#updateCurvedLines">updateCurvedLines</a></li><li><a href="global.html#updateLabels">updateLabels</a></li><li><a href="global.html#updateNodes">updateNodes</a></li><li><a href="global.html#updateRecentKeywordDisplay">updateRecentKeywordDisplay</a></li><li><a href="global.html#updateRectangles">updateRectangles</a></li><li><a href="global.html#updateRuleBuilder">updateRuleBuilder</a></li><li><a href="global.html#updateStatus">updateStatus</a></li><li><a href="global.html#updateStraightLines">updateStraightLines</a></li><li><a href="global.html#validateResetPin">validateResetPin</a></li><li><a href="global.html#visualizeData">visualizeData</a></li><li><a href="global.html#visualizeSelection">visualizeSelection</a></li><li><a href="global.html#weekDay">weekDay</a></li><li><a href="global.html#weekOfYear">weekOfYear</a></li><li><a href="global.html#zoomed">zoomed</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Jul 24 2025 18:09:14 GMT+0400 (GMT+04:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

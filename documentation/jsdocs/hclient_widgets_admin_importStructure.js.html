@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: hclient/widgets/admin/importStructure.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: hclient/widgets/admin/importStructure.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+* importStructure.js - Widget to browse template databases, select record types,
+* individual fields, or individual vocabularies, and import them into the current database.
+*
+* @todo Use HBaseView as a parent.
+*
+* @project     Heurist academic knowledge management system
+*
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   &lt;osmakov@gmail.com>
+* @author      Ian Johnson     &lt;ian.johnson.heurist@gmail.com>
+* @since       4
+*/
+$.widget( "heurist.importStructure", {
+    
+// TODOs:
+// 0. Do not show current DB in the list of source databases.
+// 1. Show/hide record types that are already in the current database.
+// 2. Show/hide fields in the tree view based on whether they are already in the current database.
+// 3. Form structures to add terms, fields, structure, record type.
+// 4. Use functions from saveStructureLib.
+
+    /**
+     * @typedef {object} heurist.importStructure.options
+     * @property {boolean} [isdialog=false] - If true, the widget is displayed as a dialog.
+     *                                        See {@link heurist.importStructure#_initDialog},
+     *                                        {@link heurist.importStructure#popupDialog},
+     *                                        {@link heurist.importStructure#closeDialog}.
+     * @property {number} [height=600] - Height of the dialog.
+     * @property {number} [width=1100] - Width of the dialog.
+     * @property {boolean} [modal=true] - If true, the dialog is modal.
+     * @property {string} [title='Import definitions into current database'] - Title of the dialog.
+     * @property {number} [source_database_id=0] - Predefined source database ID. If > 0, skips the database list selection.
+     * @property {number} [pagesize=2000] - Page size for the resultList of databases.
+     * @property {function|null} [onClose=null] - Callback function executed when the dialog closes.
+     * @property {string} [innerTitle] - If provided, an inner title bar will be displayed. (Implicit option, used in _init)
+     * @property {object} [entity] - Entity configuration, typically `window.hWin.entityRecordCfg`. (Implicit option, used in _init)
+     */
+    options: {
+        isdialog: false,
+        height: 600,
+        width:  1100,
+        modal:  true,
+        title:  'Import definitions into current database',
+        source_database_id: 0,
+        pagesize: 2000,
+        onClose:null
+    },
+
+    /**
+     * Cached HRecordSet of databases retrieved from the master index.
+     * @private
+     * @type {HRecordSet|null}
+     */
+    _cachedRecordset_dbs:null,
+
+    /**
+     * Flag indicating whether to rename target entities during import.
+     * @private
+     * @type {boolean}
+     */
+    _is_rename_target: false,
+
+    /**
+     * Flag indicating whether to perform a conservative import (e.g., only new record types).
+     * @private
+     * @type {boolean}
+     */
+    _is_conservative: false,
+
+    /**
+     * Registration ID of the currently selected source database.
+     * @private
+     * @type {number|null}
+     */
+    _selectedDB:null,
+
+    /**
+     * Flag to ensure local definitions are initialized only once.
+     * @private
+     * @type {boolean}
+     */
+    _init_local_defs_once:true,
+
+    /**
+     * The widget's constructor.
+     * @private
+     */
+    _create: function() {
+        // prevent double click to select text
+    }, //end _create
+
+    /**
+     * Initializes the widget, sets up the layout, loads data, and initializes controls.
+     * This is the main initialization function.
+     * @private
+     */
+    _init: function() {
+
+        const that = this;  
+
+        if(this.options.isdialog){  //show this widget as popup dialog
+            this._initDialog();
+        }
+
+        let layout, sTop = '0';
+        if(this.options.innerTitle){
+            layout = ('&lt;div class="ui-heurist-header">'+this.options['title']+'&lt;/div>');
+            sTop = '38px';
+        }
+        
+        this._selectedDB = null;
+        this._init_local_defs_once = true;
+        
+        //init layout
+        layout = layout + 
+        '&lt;div class="ent_wrapper" style="top:'+sTop+'">' //;min-width:1000px
+        
+        //1. database selector
+        +'&lt;div class="ent_wrapper" id="panel_dbs">'
+        +    '&lt;div class="ent_header searchForm">&lt;/div>'     
+        +    '&lt;div class="ent_content_full recordList">&lt;/div>'
+        +'&lt;/div>'
+        
+        //2. List of record types to be imported
+        +'&lt;div class="ent_wrapper" id="panel_defs" style="display:none;margin-left:15px;">'
+
+        +'&lt;div class="ent_header" style="padding:4px;">'
+        +'&lt;div style="position:absolute;right:225px;left:0">' //450px
+        +'&lt;h4 style="margin:0;padding:4 0 0 4" id="h_source">&lt;/h4>'
+        +'&lt;/div>'
+
+        //+'&lt;div style="border-left:1px solid lightgray;position:absolute;right:225px;width:224px;height:2.8em">'
+        //     +'&lt;h4 style="margin:0;padding:4 0 0 4">Entity to be imported&lt;/h4>'
+        //+'&lt;/div>'
+        +'&lt;div style="border-left:1px solid lightgray;position:absolute;right:0px;width:223px;height:2.8em;">'
+        +'&lt;h4 style="margin:0;padding:4 0 0 4">Current entities in database&lt;/h4>'
+        +'&lt;/div>'
+        +'&lt;/div>'
+
+        +'&lt;div class="ent_wrapper" id="search_elements" style="top:2.8em;right:225px;border-right:1px solid lightgray;">'
+            +'&lt;div id="btn_back_to_databases" style="margin-right: 15px">&lt;/div>'
+            +'&lt;label>Filter&lt;input id="search_names" class="text ui-widget-content ui-corner-all" style="width: 10em; margin-right:15px;margin-left:10px;">&lt;/label>' // general search
+            +'&lt;label>&lt;input id="show_all" class="text ui-widget-content ui-corner-all" style="margin-left:10px;vertical-align:-2px;" type="checkbox"> Show All (include items already in database)&lt;/label>' // show all
+        +'&lt;/div>'
+
+        //left - source                                
+        +'&lt;div class="ent_wrapper" id="entity_wrapper" style="top:6.8em;bottom:1em;right:225px;border-right:1px solid lightgray;">' //450px
+            + '&lt;ul>'
+                + '&lt;li>&lt;a href="#rty_container">Record / entity types&lt;/a>&lt;/li>'
+                + '&lt;li>&lt;a href="#dty_container">Individual fields&lt;/a>&lt;/li>'
+                + '&lt;li>&lt;a href="#trm_container">Individual vocabularies&lt;/a>&lt;/li>'
+            + '&lt;/ul>'
+            + '&lt;div id="trm_container" style="background:transparent;">'
+                + '&lt;div class="ui-heurist-bg-light" style="padding:5px 0px 0px 15px;">&amp;#10003; shows terms already in database&lt;/div>'
+                + '&lt;div class="ent_content_full" id="panel_trm_list" style="position:relative;top:0px;height:97.25%;">&lt;/div>'
+            + '&lt;/div>'
+            + '&lt;div id="dty_container" style="background:transparent;">'
+                + '&lt;div class="ent_content_full" id="panel_dty_list" style="position:relative;top:0px;height:100%;">&lt;/div>'
+            + '&lt;/div>'
+            + '&lt;div id="rty_container"style="background:transparent;">'
+                + '&lt;div class="ent_content_full" id="panel_rty_list" style="position:relative;top:0px;height:100%;">&lt;/div>'
+            + '&lt;/div>'
+        +'&lt;/div>'
+
+        //target
+        +'&lt;div id="panel_def_list_target" '
+        +'style="position:absolute; top:2.8em;bottom:0;right:0px; overflow:hidden;width:225px;">'
+        +'&lt;select id="select_rty_list_target" size="500" style="width:100%;height:100%;border:lightgray 1px solid">&lt;/select>'
+        +'&lt;select id="select_dty_list_target" size="500" style="width:100%;height:100%;border:lightgray 1px solid;display:none;">&lt;/select>'
+        +'&lt;div id="select_trm_list_target" style="width:100%;height:100%;border:lightgray 1px solid;display:none;">'
+            + 'Due to the potentially numerous amount of vocabulary and terms,&lt;br>existing local vocabulary and terms are not displayed here'
+        +'&lt;/div>'
+        +'&lt;/div>'
+
+        +'&lt;/div>'
+
+        //3. report after completion of import
+        +'&lt;div class="ent_wrapper" id="panel_report" style="display:none">'
+        +    '&lt;div class="ent_content_full" style="bottom:2.8em;top:0;padding:10px">&lt;/div>'
+        +    '&lt;div class="ent_footer" style="text-align:center">&lt;div id="btn_close_panel_report">&lt;/div>&lt;/div>'
+        +'&lt;/div>'
+
+        +'&lt;/div>';
+        
+        $(layout).appendTo(this.element);
+
+        this.panel_defs = this.element.find('#panel_defs');
+        this.panel_def_list_target = this.element.find('#panel_def_list_target');
+
+        this.panel_report = this.element.find('#panel_report');
+        this.entity_wrapper = this.element.find('#entity_wrapper');
+        this.general_search = this.element.find('#search_names');
+        this.show_all = this.element.find('#show_all');
+
+        this.panel_rty_list = this.element.find('#panel_rty_list');
+        this.panel_dty_list = this.element.find('#panel_dty_list');
+        this.panel_trm_list = this.element.find('#panel_trm_list');
+
+        this.select_rty_list_target = this.element.find('#select_rty_list_target');
+        this.select_dty_list_target = this.element.find('#select_dty_list_target');
+        this.select_trm_list_target = this.element.find('#select_trm_list_target');
+
+        this.panel_report.find('#btn_close_panel_report')
+        .button({icon: 'ui-icon-carat-1-w', iconPosition:'right', label:'Back to Record Type List'})
+        //.css({'line-height': '0.9em'})
+        .on('click', function(){
+            that.panel_report.hide();
+            if(!window.hWin.HEURIST4.remote){
+                return;
+            }
+            
+            that.panel_defs.show();
+            //refresh source
+            that.panel_rty_list.manageDefRecTypes('getRecordsetFromStructure', window.hWin.HEURIST4.remote.rectypes );
+            that.panel_dty_list.manageDefDetailTypes('getRecordsetFromRemote', window.hWin.HEURIST4.remote.detailtypes );
+            that.panel_trm_list.manageDefTerms('getRecordsetFromRemote', window.hWin.HEURIST4.remote.terms );
+            
+            
+
+            //refresh target
+            window.hWin.HEURIST4.ui.createRectypeSelect(that.select_rty_list_target[0],null,null,true);
+            window.hWin.HEURIST4.ui.createRectypeDetailSelect(that.select_dty_list_target[0], null, null, null, {useHtmlSelect: true});
+
+            // refresh filter
+            that._filterEntities();
+        });
+
+        this.entity_wrapper.tabs({
+            heightStyle: 'fill',
+            beforeActivate: function(event, ui){ // correct panel height
+
+                let panel = ui.newPanel;
+                let parent_height = panel.parent().height();
+                panel.height(parent_height - 38);
+            },
+            activate: function(event, ui){
+
+                let panel = ui.newPanel;
+                let entity = panel.attr('id');
+
+                that.panel_def_list_target.find('select').hide();
+                window.hWin.HEURIST4.util.setDisabled(that.show_all, false);
+
+                if(entity == 'dty_container'){
+                    that.select_dty_list_target.show();
+
+                    that.show_all.prop('checked', false);
+                    window.hWin.HEURIST4.util.setDisabled(that.show_all, true);
+                }else if(entity == 'trm_container'){
+                    that.select_trm_list_target.show();
+
+                    that.show_all.prop('checked', true);
+                    window.hWin.HEURIST4.util.setDisabled(that.show_all, true);
+                }else{
+                    that.select_rty_list_target.show();
+                }
+
+                that._filterEntities();
+            }
+        });
+
+        let ele = this.element.find('#btn_back_to_databases')
+        .button({label:'&lt;&lt; Back to Databases'});
+        if(that.options.source_database_id>0){
+            ele.hide();
+        }else{
+            this._on( ele, {'click':this._backToDatabases} );    
+        }
+
+        this._on(this.element.find('#show_all'), {
+            change: this._filterEntities
+        });
+        this._on(this.element.find('#search_names'), {
+            keyup: this._filterEntities
+        });
+
+        //find 3 elements searchForm, recordList+recordList_toolbar, editForm+editForm_toolbar
+        this.recordList_dbs = this.element.find('#panel_dbs .recordList');
+        this.searchForm_dbs = this.element.find('#panel_dbs .searchForm');
+
+        //init record list for dbs and rty
+        this.recordList_dbs
+        .resultList({
+            eventbased: false, //do not listen global events
+            multiselect: false,
+            select_mode: 'select_single', // none
+
+            entityName: 'Records',
+            view_mode: 'list',
+            show_viewmode: false,
+
+            recordDivEvenClass: 'recordDiv_blue',
+
+            pagesize: (this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
+            empty_remark: '&lt;div style="padding:1em 0 1em 0">No registered databases found&lt;/div>',
+
+            groupByField: 'rec_RecTypeID',
+            rendererGroupHeader: function(grp_val){
+                if(grp_val==0){
+                   
+                    return '&lt;div style="border-bottom:1px solid lightgray">'
+                    +'&lt;div style="padding:24px 0 4px 40px;">&lt;h2 style="margin:0">Curated templates&lt;/h2>'
+                    +'&lt;div style="padding-top:4px;">&lt;i>Databases curated by the Heurist team as a source of useful entity types for new databases&lt;/i>&lt;/div>&lt;/div>&lt;/div>';
+                }else{
+                    return '&lt;div style="width:100%;border-bottom:1px solid lightgray">'
+                    +'&lt;div style="padding:24px 0 4px 40px;">'
+                    +'&lt;h2 style="margin:0">User databases&lt;/h2>'
+                    +'&lt;div style="padding-top:4px">&lt;i>Databases registered by Heurist users - use with care, look for entity types with good internal documentation&lt;/i>&lt;/div>&lt;/div>&lt;/div>';
+                }
+
+
+            },
+
+            rendererHeader:  function(){
+                let sHeader = '&lt;div style="width:62px">Reg#&lt;/div>&lt;div style="width:23em">Database Name&lt;/div>'
+                +'&lt;div style="width:2em">&amp;nbsp;&lt;/div>'
+                +'&lt;div style="width:52em">Description&lt;/div>';
+               
+                return sHeader;
+            },
+            renderer:
+            function(recordset, record){ 
+                return that._recordListItemRenderer_dbs(recordset, record); 
+            }
+        });     
+
+        this._on( this.recordList_dbs, {
+            "resultlistonselect": function(event, selected_recs){
+                // show list of record types for selected database
+                that._loadDefinitionsForDb( selected_recs );
+
+            },
+            "resultlistonaction": this._onActionListener        
+        });
+
+        //help text
+        $('&lt;div>')
+        .text('Please select a database in the list below to see entity (record) '
+            +'types which you might wish to import. Rollover description for full details.')
+        .addClass('heurist-helper1')
+        .css({padding:'7px 30px'})
+        .appendTo(this.recordList_dbs.find('.div-result-list-toolbar'));
+
+
+
+        //init search panel
+        this.searchForm_dbs.load(window.hWin.HAPI4.baseURL
+            +'hclient/widgets/entity/searchSysDatabases.html?t='
+            +window.hWin.HEURIST4.util.random(), 
+            function(response, status, xhr){
+
+                //init buttons
+                that.btn_search_start = that.searchForm_dbs.find('#btn_search_start')
+                .show()
+                //.css({'width':'6em'})
+                .button({label: window.hWin.HR("Start search"), showLabel:false, 
+                    icon:"ui-icon-search", iconPosition:'end'});
+
+
+                //this is default search field - define it in your instance of html            
+                that.input_search = that.searchForm_dbs.find('.input_search');
+
+                that._on( that.input_search, { keypress: that.startSearchOnEnterPress });
+               
+                that._on( that.btn_search_start, { click: that.startSearch_dbs });            
+
+               
+                that.input_search_type = that.searchForm_dbs.find('#input_search_type2');
+                that._on(that.input_search_type,  { change:that.startSearch_dbs });
+
+                that.input_sort_type = that.searchForm_dbs.find('#input_sort_type');
+                that.input_sort_type.val('register');
+                that._on(that.input_sort_type,  { change:that.startSearch_dbs });
+
+        });
+
+
+        //----------------------       
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element);
+
+        this.options.entity = window.hWin.entityRecordCfg;
+
+        //retrieve all template databases from master index server
+        let query_request = {remote:'master', detail: 'header'};
+        if(that.options.source_database_id>0){
+            query_request['q'] = 'ids:'+that.options.source_database_id;
+        }
+
+        window.hWin.HAPI4.RecordMgr.search(query_request, 
+            function( response ){
+
+                if(response.status == window.hWin.ResponseStatus.OK){
+
+                    response.data.fields.push('rec_ScratchPad');
+
+                    that._cachedRecordset_dbs = new HRecordSet(response.data);
+
+                    //prepare recordset - extract database name and transfer title to notes
+                    that._cachedRecordset_dbs.each(function(recID, record){
+
+                        let recURL  = this.fld(record, 'rec_URL');
+                        let recDesc = this.fld(record, 'rec_Title');
+                        let dbURL = '';
+                        let dbName = 'Broken registration (Db URL is not defined)';
+                        
+                        if(recURL){
+                            let splittedURL = recURL.split('?');
+                            if(splittedURL &amp;&amp; splittedURL.length>0){
+                                dbURL = splittedURL[0];
+                                let matches = recURL.match(/db=([^&amp;]{1,65}).*$/);
+                                dbName = (matches &amp;&amp; matches.length>1)?matches[1]:'';
+                            }
+                        }
+                        let url_Error = this.fld(record, 'rec_URLErrorMessage');
+                        if( !window.hWin.HEURIST4.util.isempty( url_Error ) ){
+                            dbName = dbName + ' (unavailable)';
+                            dbURL = '';
+                        }
+                        
+                        this.setFld(record, 'rec_URL', dbURL);
+                        this.setFld(record, 'rec_Title', dbName);
+                        this.setFld(record, 'rec_ScratchPad', recDesc);
+                        this.setFld(record, 'rec_RecTypeID', recID&lt;1000?0:1);
+                    });
+
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                    if(that.options.source_database_id>0){
+                        let selected_recs = that._cachedRecordset_dbs.getSubSetByIds( [that.options.source_database_id] );
+                        that._loadDefinitionsForDb( selected_recs );
+                    }else{
+                        that.startSearch_dbs();
+                    }
+
+                }else{
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            }
+        );
+
+        //----------------------------                
+        //show dialog if required 
+        if(this.options.isdialog){
+            this.popupDialog();
+            this._fixWidth();
+        }
+
+        window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.element); 
+
+    },
+
+    //
+    //
+    //    
+    startSearchOnEnterPress: function(e){
+
+        let code = (e.keyCode ? e.keyCode : e.which);
+        if (code == 13) {
+            window.hWin.HEURIST4.util.stopEvent(e);
+            e.preventDefault();
+            this.startSearch_dbs();
+        }
+
+    },
+
+    startSearch_dbs: function(){
+        let request = {};
+        
+        if(!this.input_search) return;
+
+        if(this.input_search.val()!=''){
+            request['rec_Title'] = this.input_search.val();
+        }
+
+        if(this.input_search_type.val()!=''){
+            if(this.input_search_type.val()=='curated'){
+                request['rec_ID'] = '&lt;1000';
+            }else if(this.input_search_type.val()=='user'){
+                request['rec_ID'] = '>999';
+            }
+        }
+
+        if(window.hWin.HAPI4.sysinfo['db_registeredid']>0){
+            request['rec_ID'] = ('!='+window.hWin.HAPI4.sysinfo['db_registeredid']);    
+        }
+
+        if(this.input_sort_type.val()=='name'){
+            request['sort:rec_Title'] = 1;
+        }else if(this.input_sort_type.val()=='register'){
+            request['sort:rec_ID'] = 1;
+        }else  if(this.input_sort_type.val()=='url'){
+            request['sort:rec_URL'] = -1;
+        }
+
+        this._selectedDB = null;
+        
+        this.filterRecordList_dbs(request);
+    },
+
+    //
+    // init manageDefRecTypes, manageDefDetailTypes, and manageDefTerms widgets on individual panels
+    //
+    _loadDefinitionsForDb: function(db_ids, skip_pass){
+
+        const that = this;
+        let panel_dbs = this.element.find('#panel_dbs');
+
+        let record = db_ids.getFirstRecord();
+
+        let sDB_ID = db_ids.fld(record, 'rec_ID');
+        let sURL  = db_ids.fld(record, 'rec_URL');
+        let sDB   = db_ids.fld(record, 'rec_Title');
+        
+        if(!sURL) return; //missed
+
+        if(this._selectedDB != sDB_ID){
+            
+            if(sDB_ID==99 &amp;&amp; skip_pass!==true){ //special case - password protect db 99 - heurist construction site
+                window.hWin.HAPI4.SystemMgr.verify_credentials( 
+                    function(){that._loadDefinitionsForDb( db_ids, true )},1,'ServerFunctions'); //db admin and pwd protected
+               return;     
+            }
+
+            this._selectedDB = sDB_ID;
+
+            this.element.find('#h_source').text('Entities available in '+sDB_ID+':'+sDB);
+
+            let rty_options = {
+                isdialog: false,
+                container: '#panel_rty_list',
+                select_mode: 'select_single',
+                groupsPresentation: 'none',
+
+                simpleSearch: true,
+
+                import_structure:{
+                    database: sDB,      //database name
+                    databaseURL: sURL,
+                    database_url:  (sURL+'?db='+sDB),
+                    load_detailstypes: false  // will be loaded later
+                },
+
+                onaction:function(event, action){
+
+                    let recID;     
+                    if(action &amp;&amp; action.action){
+                        recID =  action.recID;
+                        action = action.action;
+                    }
+                    if(recID>0){
+                        if(action=='expand'){
+                            window.hWin.HEURIST4.remote._selectedRtyID
+                            = (window.hWin.HEURIST4.remote._selectedRtyID == recID)?null:recID;
+                            that.panel_rty_list.manageDefRecTypes('refreshRecordList');                     
+                        }else if(action=='import'){
+                            that._preImportCheck('rectype', recID);   
+                        }
+                    }
+
+                },
+
+                recordList:{
+                    show_toolbar: false,
+                    pagesize: 4999, 
+                    view_mode:'list',
+                    simpleSearch:true,
+                    groupByField:'rty_RecTypeGroupID',
+                    groupOnlyOneVisible: true,
+                    groupByCss:'0 1.5em',
+                    rendererGroupHeader: function(grp_val, is_expanded){
+
+                        let rectypes = window.hWin.HEURIST4.remote.rectypes;
+                        let idx = rectypes.groups.groupIDToIndex[grp_val];
+
+                        return rectypes.groups[idx]?('&lt;div data-grp="'+grp_val
+                            +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
+                            +'&lt;span style="display:inline-block;vertical-align:top;padding-top:15px;font-size:20px;" '
+                            +'class="expand_button ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'">&lt;/span>'
+                            +'&lt;div style="display:inline-block;width:70%">'
+                            +'&lt;h2 style="margin:0">'+grp_val+'  '+rectypes.groups[idx].name+'&lt;/h2>' //+grp_val+' '
+                            +'&lt;div style="padding-top:4px;">&lt;i>'
+                            +(window.hWin.HEURIST4.util.isempty(rectypes.groups[idx].description)?'':rectypes.groups[idx].description)+'&lt;/i>&lt;/div>&lt;/div>&lt;/div>'):'';
+                    },
+                    renderer: this._recordtypeListItemRenderer
+                }
+            };
+
+            this.panel_rty_list.empty();
+            
+            //open list of record types from the remote database
+            window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', rty_options);
+
+            let dty_options = {
+                isdialog: false,
+                container: '#panel_dty_list',
+                select_mode: 'select_single',
+                groupsPresentation: 'none',
+
+                simpleSearch: true,
+
+                import_structure:{
+                    database: sDB,      //database name
+                    databaseURL: sURL,
+                    database_url:  (sURL+'?db='+sDB)
+                },
+
+                onselect:function(event, data){
+                    //show treeview
+                },
+                onaction:function(event, action){
+
+                    let recID;     
+                    if(action &amp;&amp; action.action){
+                        recID =  action.recID;
+                        action = action.action;
+                    }
+                    if(recID>0){
+                        if(action=='expand'){
+                            window.hWin.HEURIST4.remote._selectedDtyID
+                            = (window.hWin.HEURIST4.remote._selectedDtyID == recID)?null:recID;
+                            that.panel_dty_list.manageDefDetailTypes('refreshRecordList');                     
+                        }else if(action=='import'){
+                            that._preImportCheck('detailtype', recID);
+                        }
+                    }
+
+                },
+
+                recordList:{
+                    show_toolbar: false,
+                    pagesize: 4999, 
+                    view_mode:'list',
+                    simpleSearch:true,
+                    groupByField:'dty_DetailTypeGroupID',
+                    groupOnlyOneVisible: true,
+                    groupByCss:'0 1.5em',
+                    rendererGroupHeader: function(grp_val, is_expanded){
+
+                        let detailtypes = window.hWin.HEURIST4.remote.detailtypes;
+                        let idx = detailtypes.groups.groupIDToIndex[grp_val];
+
+                        let output = '';
+
+                        if(detailtypes.groups[idx]){
+                            output = '&lt;div data-grp="'+grp_val
+                            +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
+                            +'&lt;span style="display:inline-block;vertical-align:top;padding-top:15px;font-size:20px;" '
+                            +'class="expand_button ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'">&lt;/span>'
+                            +'&lt;div style="display:inline-block;width:70%">'
+                            +'&lt;h2 style="margin:0">'+grp_val+' '+detailtypes.groups[idx].name+'&lt;/h2>'
+                            +'&lt;div style="padding-top:4px;">&lt;i>'
+                            +(window.hWin.HEURIST4.util.isempty(detailtypes.groups[idx].description)?'':detailtypes.groups[idx].description)
+                            +'&lt;/i>&lt;/div>&lt;/div>&lt;/div>';
+                        }
+
+                        return output;
+                    },
+                    renderer: this._detailtypeListItemRenderer
+                }
+            };
+
+            this.panel_dty_list.empty();
+            
+            //open list of detail types from the remote database
+            window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', dty_options);
+
+            let trm_options = {
+                isdialog: false,
+                container: '#panel_trm_list',
+                select_mode: 'select_single',
+                groupsPresentation: 'none',
+                hide_searchForm: true,
+
+                simpleSearch: true,
+
+                import_structure:{
+                    database: sDB,      //database name
+                    databaseURL: sURL,
+                    database_url:  (sURL+'?db='+sDB)
+                },
+
+                onselect:function(event, data){
+                    //show treeview
+                },
+                onaction:function(event, action){
+
+                    let recID;     
+                    if(action &amp;&amp; action.action){
+                        recID =  action.recID;
+                        action = action.action;
+                    }
+                    if(recID>0){
+                        if(action=='expand'){
+                            window.hWin.HEURIST4.remote._selectedTrmID
+                            = (window.hWin.HEURIST4.remote._selectedTrmID == recID)?null:recID;
+                            that.panel_trm_list.manageDefTerms('refreshRecordList');                     
+                        }else if(action=='import'){
+                            that._preImportCheck('term', recID);
+                        }
+                    }
+
+                },
+
+                recordList:{
+                    show_toolbar: false,
+                    pagesize: 4999, 
+                    view_mode:'list',
+                    simpleSearch:true,
+                    groupByField:'trm_VocabularyGroupID',
+                    groupOnlyOneVisible: true,
+                    groupByCss:'0 1.5em',
+                    rendererGroupHeader: function(grp_val, is_expanded){
+
+                        let terms = window.hWin.HEURIST4.remote.terms;
+
+                        return terms.groups[grp_val]?('&lt;div data-grp="'+grp_val
+                            +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
+                            +'&lt;span style="display:inline-block;vertical-align:top;padding-top:15px;font-size:20px;" '
+                            +'class="expand_button ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'">&lt;/span>'
+                            +'&lt;div style="display:inline-block;width:70%">'
+                            +'&lt;h2 style="margin:0">'+grp_val+'  '+terms.groups[grp_val].vcg_Name+'&lt;/h2>' //+grp_val+' '
+                            +'&lt;div style="padding-top:4px;">&lt;i>'
+                            +(window.hWin.HEURIST4.util.isempty(terms.groups[grp_val].vcg_Description)?'':terms.groups[grp_val].vcg_Description)
+                            +'&lt;/i>&lt;/div>&lt;/div>&lt;/div>'):'';
+                    },
+                    renderer: this._termsListItemRenderer
+                }
+            };
+
+            this.panel_trm_list.empty();
+            
+            //open list of vocabularies from the remote database
+            window.hWin.HEURIST4.ui.showEntityDialog('defTerms', trm_options);
+
+        }
+        panel_dbs.hide();
+        this.panel_defs.show();
+
+        if( this._init_local_defs_once ){
+
+            this._init_local_defs_once = false;
+
+            window.hWin.HEURIST4.ui.createRectypeSelect(that.select_rty_list_target[0],null,null,true);
+            window.hWin.HEURIST4.ui.createRectypeDetailSelect(that.select_dty_list_target[0], null, null, null, {useHtmlSelect: true});
+        }
+        
+
+    },
+
+    _backToDatabases: function(){
+        this.panel_defs.hide();
+        this.element.find('#panel_dbs').show();
+    },
+
+
+    //Called whenever the option() method is called
+    //Overriding this is useful if you can defer processor-intensive changes for multiple option change
+    _setOptions: function( ) {
+        this._superApply( arguments );
+    },
+
+    /* 
+    * private function 
+    * show/hide buttons depends on current login status
+    */
+    _refresh: function(){
+
+    },
+    // 
+    // custom, widget-specific, cleanup.
+    _destroy: function() {
+        // remove generated elements
+        if(this.searchForm_dbs) this.searchForm_dbs.remove();
+        if(this.recordList_dbs) this.recordList_dbs.remove();
+    },
+
+    //----------------------
+    //
+    // listener of action button/menu clicks - central listener for action events
+    //
+    _onActionListener:function(event, action){
+        if(action=='select-and-close'){
+           
+            return true;
+        } else {
+            let recID = 0;
+            if(action &amp;&amp; action.action){
+                recID =  action.recID;
+                action = action.action;
+            }
+
+            let record = this._cachedRecordset_dbs.getById(recID);
+            let dbName = this._cachedRecordset_dbs.fld(record, 'rec_Title');
+            let recURL = this._cachedRecordset_dbs.fld(record, 'rec_URL');
+
+            if(action=='open'){
+                
+                //show intermediate warn
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                    'These links are intended only as a shortcut for the owner of this database and '
+                    +'would require you to be able to log into the database. '
+                    +'Please use download or clone links on the left if you are not the owner of the database.', 
+                    function(){ window.open(recURL+'?db='+dbName,'_blank'); }, 
+                    {title:'Info',yes:'Proceed',no:'Cancel'});        
+
+            }else if(action=='clone'){
+                if(!recURL) return;
+
+                this._selectedDB = recID;
+                this._preImportCheck('all', 'all');
+            }
+
+        }
+        return false;
+    },
+
+    //
+    // DBS: renderer of item for resultlist - list of databases
+    //
+    _recordListItemRenderer_dbs:function(recordset, record){
+
+        function fld(fldname){
+            return recordset.fld(record, fldname);
+        }
+
+        let recID = fld('rec_ID');
+        
+        let dbName = fld('rec_Title');
+        let recTitle = window.hWin.HEURIST4.util.stripTags(fld('rec_ScratchPad'), "u, i, b, strong, em");
+
+        let rtIcon = window.hWin.HAPI4.getImageUrl('sysDatabases', 0, 'icon');
+        let recThumb = window.hWin.HAPI4.getImageUrl('sysDatabases', recID, 'thumb');
+
+        let html_thumb = '&lt;div class="recTypeThumb" style="background-image: url(&amp;quot;'+recThumb+'&amp;quot;);opacity:1">'
+        +'&lt;/div>';
+        
+        let w = this.recordList_dbs.width()-550;
+        if(w&lt;150) w = 150;
+        
+            let url_Error = fld('rec_URLErrorMessage');
+            if(!window.hWin.HEURIST4.util.isempty(url_Error)){
+                url_Error = 'The indexed database is currently inaccessible. It returned '
+                                +window.hWin.HEURIST4.util.htmlEscape(url_Error);
+            }else{
+                url_Error = '';
+            }
+
+        let recTitleContent = '&lt;div class="item" style="width:3em">'+recID+'&lt;/div>'
+        +'&lt;div class="item" style="width:25em;'+(recID&lt;1000?'font-weight:bold;':'')+ (url_Error?'color:lightgray':'') + '"'
+        + ' title="' + url_Error + '"'
+        + '>'+dbName+'&lt;/div>'
+        +'&lt;div class="item" style="width:6.5em">'
+        +   '&lt;span data-key="clone" style="cursor:pointer;text-decoration:underline">add template&lt;/span>'
+        +'&lt;/div>'
+        +'&lt;div class="item" style="width:'+w+'px"  title="'+recTitle+'">'+recTitle+'&lt;/div>';  //  description
+
+        let html = '&lt;div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+        + html_thumb
+        + '&lt;div class="recordSelector">&lt;input type="checkbox" />&lt;/div>'
+        + '&lt;div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+        +     '&lt;img alt src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+        +     '" style="background-image: url(&amp;quot;'+rtIcon+'&amp;quot;);">'
+        + '&lt;/div>'
+        + '&lt;div style="left:40px !important" class="recordTitle">'
+        +     recTitleContent 
+        + '&lt;/div>&lt;div class="action-button-container">';
+        
+        
+        let usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+        if(usr_exp_level==0){ //advanced
+            html = html
+            + '&lt;div title="Click to open database in new window" '
+            + 'class="rec_edit_link_ext ui-button action-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
+            + 'role="button" aria-disabled="false" data-key="open">'
+            + '&lt;span class="ui-button-icon-primary ui-icon ui-icon-extlink">&lt;/span>&lt;span class="ui-button-text">&lt;/span>'
+            + '&lt;/div>';
+        }
+
+        html = html + '&lt;/div>&lt;/div>';
+
+        return html;
+
+    },
+
+    //
+    // init dialog widget 
+    //
+    _initDialog: function(){
+
+        let options = this.options,
+        position = null;
+        
+        const that = this;
+
+
+        if(position==null) position = { my: "center", at: "center", of: window };
+        let maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
+        if(options['width']>maxw) options['width'] = maxw*0.95;
+        let maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
+        if(options['height']>maxh) options['height'] = maxh*0.95;
+
+       
+        this.element.addClass('ui-heurist-bg-light');
+
+        let $dlg = this.element.dialog({
+            autoOpen: false ,
+            //element: this.element[0],
+            height: options['height'],
+            width:  options['width'],
+            modal:  (options['modal']!==false),
+            title: window.hWin.HEURIST4.util.isempty(options['title'])?'':options['title'], //title will be set in  initControls as soon as entity config is loaded
+            position: position,
+            resizeStop: function(){ that._fixWidth(); },
+            close:function(){
+
+                if(window.hWin.HEURIST4.util.isFunction(that.options.onClose)){
+                    //that.options.onClose(that._currentEditRecordset);  
+                    that.options.onClose.call();
+                } 
+
+                $dlg.parent().remove(); 
+                that.element.remove();
+            }
+        }); 
+        this._as_dialog = $dlg; 
+    },
+
+    //
+    // adjust width according to width of parent dialog
+    //
+    _fixWidth: function() {//fix bug
+        let correctWidth = this.element.parent().width()-24;
+        this.element.css({overflow: 'none !important','width':correctWidth });
+
+        /*this.panel_rty_list.css({'width': correctWidth/2});
+        this.panel_rty_list_target.css({'left': correctWidth/2+1});*/
+    },
+
+    //
+    // show itself as popup dialog
+    //
+    popupDialog: function(){
+        if(this.options.isdialog){
+
+            this._as_dialog.dialog("open");
+
+            let helpURL = window.hWin.HRes( 'importStructure.html' )+' #content';
+
+            window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog,
+                null,
+                helpURL, false);
+
+        }
+    },
+
+    //--------------- WORK WITH LIST
+    //
+    // listener of onfilter event generated by search
+    //
+    filterRecordList_dbs: function(request){
+        let subset = null;
+        if(this._cachedRecordset_dbs){
+            subset = this._cachedRecordset_dbs.getSubSetByRequest(request, this.options.entity.fields);
+            if(this.recordList_dbs.resultList('instance'))
+                this.recordList_dbs.resultList('updateResultSet', subset, request);   
+        }
+        return subset;
+    },
+
+    //
+    //  MAIN METHOD
+    //
+    startImport: function(id, type){
+
+        if(!id || id &lt; 1 || !type){
+            return;
+        }
+
+        const that = this;
+
+        const style = {'font-size': '16px', 'background-color': '#FFF', 'opacity': 1};
+        let msg = 'Downloading complete database structure...&lt;br>&lt;br>'
+                + 'This may take several minutes if the source database is not on your server and if there are a large number of definitions.&lt;br>';
+
+        if(type == 'rectype'){
+
+            msg = 'Downloading structure...&lt;br>&lt;br>'
+                + 'This may take a couple of minutes if there are a number of record type linked to the one requested.&lt;br>';
+        }else if(type == 'detailtype'){
+
+            msg = 'Downloading base field...&lt;br>&lt;br>'
+                + 'This may take a couple of minutes if there are a number of record type linked to the requested field.&lt;br>';
+        }else if(type == 'term'){
+
+            msg = 'Downloading vocabulary...&lt;br>&lt;br>';
+        }
+
+        msg += 'This is a very complex procedure and sensitive to errors in the configuration of the source database.&lt;br>&lt;br>'
+                + 'Please report a bug if it fails (either with or without a message)&lt;br>'
+                + 'including the database and the definition(s) you are trying to download, so that we can investigate and fix.';
+
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, style, msg);
+
+        /*
+             _selectedDB - source database 
+             id - array of Rectype ids or Concept Codes to be imported
+             _is_rename_target - should rectype/concept labels be overwritten with labels imported from the source database
+             type - entity - what is being imported? {rectype|detailtype|term}
+        */
+        window.hWin.HAPI4.SystemMgr.import_definitions(this._selectedDB, id, type,
+            this._is_rename_target, this._is_conservative,
+            function(response){    
+
+                window.hWin.HEURIST4.msg.sendCoverallToBack(); 
+
+                if(response.status == window.hWin.ResponseStatus.OK){
+
+                    if(type == 'all'){
+                        that._processCloneResponse(response);
+                        return;
+                    }
+
+                    that.panel_report.find('#btn_close_panel_report').trigger('click');
+
+                    let report = '';
+
+                    let entities = type == 'detailtype' ? 'dty' : '';
+                    entities = type == 'term' ? 'trm' : entities;
+                    entities = type == 'rectype' ? 'rty,trm,dty,rst' : entities;
+
+                    let add_trm = false, add_rty = false;
+
+                    if(response.report){
+                    
+                        if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.added) ){
+                            report = 'Added: ';
+                            for(const idx in response.report.added){
+
+                                const id = response.report.added[idx];
+                                let label = '';
+
+                                if(type == 'detailtype'){
+                                    label = $Db.dty(id,'dty_Name');
+                                    add_trm = add_trm || $Db.dty(id, 'dty_Type') == 'enum' || $Db.dty(id, 'dty_Type') == 'relmarker';
+                                    add_rty = add_rty || $Db.dty(id, 'dty_Type') == 'resource' || $Db.dty(id, 'dty_Type') == 'relmarker';
+                                }else if(type == 'term'){
+                                    label = $Db.trm(id,'trm_Label');
+                                }else{
+                                    label = $Db.rty(id,'rty_Name');
+                                }
+
+                                if(response.report.translations &amp;&amp; response.report.translations[type]){
+                                    label += (response.report.translations[type].indexOf(id) !== false) 
+                                                ? ' (translations retrieved)' : '';
+                                }
+                                report += (label+', ');    
+                            }
+                            report = report.slice(0, -2)+'&lt;br>';
+                        }
+                        if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.updated) ){
+                            report += '&lt;br>Updated: ';
+                            for(const idx in response.report.updated){
+
+                                const id = response.report.updated[idx];
+                                let label = '';
+
+                                if(type == 'detailtype'){
+                                    label = $Db.dty(id,'dty_Name');
+                                    add_trm = add_trm || $Db.dty(id, 'dty_Type') == 'enum' || $Db.dty(id, 'dty_Type') == 'relmarker';
+                                    add_rty = add_rty || $Db.dty(id, 'dty_Type') == 'resource' || $Db.dty(id, 'dty_Type') == 'relmarker';
+                                }else if(type == 'term'){
+                                    label = $Db.trm(id,'trm_Label');
+                                }else{
+                                    label = $Db.rty(id,'rty_Name');
+                                }
+
+                                if(response.report.translations &amp;&amp; response.report.translations[type]){
+                                    label += (response.report.translations[type].indexOf(id) !== false) 
+                                                ? ' (translations retrieved)' : '';
+                                }
+                                report += (label+', ');    
+                            }
+                            report = report.slice(0, -2);
+                        }
+                        if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.broken_terms) ){
+                            
+                            report += ('&lt;p>'+response.report.broken_terms.length
+                                +' terms were not properly imported.'
+                                +' Error report has been sent to Heurist support.&lt;ul>');
+                            
+                            for(let i=0; i&lt;response.report.broken_terms.length; i++){
+                                report += ('&lt;li>'+response.report.broken_terms[i][0]+'&lt;/li>');    
+                                if(i>10){
+                                    report += '...';
+                                    break;
+                                }
+                            }
+                            
+                            report += ('&lt;/ul>&lt;/p>');
+                        }
+
+                        if(add_rty){ entities += ',rty,rst'; }
+                        if(add_trm){ entities += ',trm'; }
+                    }
+
+                    if(report!=''){ 
+
+                        //modal report
+                        window.hWin.HEURIST4.msg.showMsgDlg('&lt;br>'+report,null,
+                                {title:'Import templates report'},
+                                {default_palette_class:'ui-heurist-design'});
+
+                        window.hWin.HAPI4.EntityMgr.refreshEntityData(entities, null);
+
+                    }else{
+                        report = 'Nothing imported. '+
+                        'The definition you selected to be imported is already in this database';
+
+                        window.hWin.HEURIST4.msg.showMsgDlg(report);
+                    }
+
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+
+            }
+        );
+        
+    },
+
+    _recordtypeListItemRenderer: function( recordset, record ){
+
+        function fld(fldname){
+            return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
+        }
+        function fld2(fldname, col_width){
+            let swidth = '';
+            if(!window.hWin.HEURIST4.util.isempty(col_width)){
+                swidth = ' style="width:'+col_width+'"';
+            }
+            return '&lt;div class="item" '+swidth+'>'+fld(fldname)+'&lt;/div>';
+        }
+
+        let dbs = window.hWin.HEURIST4.remote;
+        let recID = fld('rty_ID');
+
+        let btn_actions = '&lt;div style="width:60px;">'
+        + '&lt;div title="Click to show details" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="expand" '
+        + ' style="display:inline-block;height:16px;">'
+        +     '&lt;span style="padding-top: 6px;" class="ui-button-icon-primary ui-icon ui-icon-carat-'
+        + ((dbs._selectedRtyID==recID)?'d':'r')+'">&lt;/span>&lt;span class="ui-button-text">&lt;/span>'
+        + '&lt;/div>'
+        + '&lt;div title="Click to import this record type" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="import" '
+        + ' style="display:inline-block;height:16px;vertical-align:bottom;font-size:1.4em;padding-left:20px">'
+        +     '&lt;span class="ui-button-icon-primary ui-icon ui-icon-arrowthick-1-s" style="cursor:pointer">&lt;/span>&lt;span class="ui-button-text">&lt;/span>'
+        + '&lt;/div>&lt;/div>';
+
+        let info = '';
+        if(dbs._selectedRtyID==recID){
+            let rts = dbs.rectypes.typedefs[recID];
+
+            info = '&lt;div style="border:2px solid blue;padding:10px 4px;margin-top:10px">&lt;i>' + fld('rty_Description') + "&lt;/i>&lt;br>&lt;br>";   //description
+            info += '&lt;table style="text-align: left;font-size:0.9em; font-color:darkgray;width:100%">&lt;tr>';
+            info += '&lt;th  style="padding-left:10px;" class="status">&lt;b>Already in DB?&lt;/b>&lt;/th>';
+            info += '&lt;th style="padding-left:10px;">&lt;b>Field name (used for this record type)&lt;/b>&lt;/th>';
+            info += '&lt;th style="padding-left:10px;">&lt;b>Base field name (shared across record types)&lt;/b>&lt;/th>';
+            info += '&lt;th style="width:100px; padding-left:10px;">&lt;b>Field data type&lt;/b>&lt;/th>&lt;/tr>';
+
+
+            let idx_rst_Name  = dbs.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayName;
+            let idx_rst_Type  = dbs.rectypes.typedefs.dtFieldNamesToIndex.dty_Type;
+            let idx_rst_ccode = dbs.rectypes.typedefs.dtFieldNamesToIndex.dty_ConceptID;
+
+            let dty;
+            for (dty in rts.dtFields) {
+
+                let rst_fld = rts.dtFields[dty];
+
+                //find in local defintions by concept code - if found - it is already imported
+                let local_id = $Db.getLocalID( 'dty', rst_fld[idx_rst_ccode]);  
+
+                info += "&lt;tr"+ (local_id>0? ' style="background-color:#CCCCCC;"' : "") +
+                "&lt;/td>&lt;td style='padding-left:20px;'>" + (local_id>0 == 1? "yes" : "NEW") +
+                "&lt;td style='padding-left:10px; font-weight:bold'>" + rst_fld[idx_rst_Name] +
+                "&lt;/td>&lt;td style='padding-left:10px;'>" + 
+                ((dbs.detailtypes)?dbs.detailtypes.names[dty]:'') +
+                "&lt;/td>&lt;td style='padding-left:10px;'>" + $Db.baseFieldType[rst_fld[idx_rst_Type]] +
+                "&lt;/td>&lt;/tr>";
+            }//for
+            info += "&lt;/table>&lt;/div>";    
+        }    
+
+        let recTitle = fld2('rty_Name','15em');
+
+        //find all dependent record types on first level
+
+        let linked_rts = $Db.getLinkedRecordTypes(recID, dbs);
+
+        let name_rts = [];
+        for(let i=0;i&lt;linked_rts.length;i++){
+            name_rts.push(dbs.rectypes.names[linked_rts[i]]);
+        }
+        let linkedto = '';
+        if(linked_rts.length>0){
+            linkedto = 'Links to: '+ window.hWin.HEURIST4.util.htmlEscape(name_rts.join(','));
+        }
+        recTitle = recTitle + '&lt;div class="item" style="font-style:italic;width:45em" title="Linked record types">'
+        + linkedto +'&lt;/div>';
+
+
+        let html = '&lt;div class="recordDiv" style="min-height:16px"'
+        +' id="rd'+recID+'" recid="'+recID+'">'
+        + btn_actions
+        + '&lt;div class="recordTitle recordTitle2" title="'+fld('rty_Description')
+        +'" style="right:10px;left:94px">'
+        +     recTitle
+        + '&lt;/div>'
+        + info
+        + '&lt;/div>';
+
+        return html;
+    },
+
+    _detailtypeListItemRenderer: function(recordset, record){
+
+        function fld(fldname){
+            return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
+        }
+        function fld2(fldname, col_width, left_padding){
+
+            let value = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
+
+            let swidth = !window.hWin.HEURIST4.util.isempty(col_width) ? 'width:auto;max-width:' + col_width + ';' : '';
+            let spadding = !window.hWin.HEURIST4.util.isempty(left_padding) ? 'padding-left:' + left_padding + ';' : '';
+            let styling = !window.hWin.HEURIST4.util.isempty(swidth) || !window.hWin.HEURIST4.util.isempty(spadding) ? 'style="' + swidth + spadding + '"' : '';
+
+            return '&lt;div class="item" title="'+ value +'" '+styling+'>'+ value +'&lt;/div>';
+        }
+
+        let recID = fld('dty_ID');
+
+        let btn_actions = '&lt;div style="width:30px;">'
+        + '&lt;div title="Click to show details" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="expand" '
+        + ' style="display:inline-block;height:16px;">&lt;span class="ui-button-text">&lt;/span>'
+        + '&lt;/div>'
+        + '&lt;div title="Click to import this base field" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="import" '
+        + ' style="display:inline-block;height:16px;vertical-align:bottom;font-size:1.4em;">'
+        +     '&lt;span class="ui-button-icon-primary ui-icon ui-icon-arrowthick-1-s" style="cursor:pointer">&lt;/span>&lt;span class="ui-button-text">&lt;/span>'
+        + '&lt;/div>&lt;/div>';
+
+        let name = fld2('dty_Name', '20em', '');
+        let concept_code = fld2('dty_ConceptID', '60px', '15px');
+        let type = fld2('dty_Type', '60px', '10px');
+        let help_text = fld2('dty_HelpText', '50em', '10px');
+
+        let html = '&lt;div class="recordDiv" style="min-height:16px"'
+        +' id="rd'+recID+'" recid="'+recID+'">'
+        + btn_actions
+        + '&lt;div class="recordTitle recordTitle2" title="'+fld('dty_HelpText')
+        +'" style="right:10px;left:35px;">'
+        +     name
+        +     concept_code
+        +     type
+        +     help_text
+        + '&lt;/div>&lt;/div>';
+
+        return html;
+    },
+
+    _termsListItemRenderer: function(recordset, record){
+
+        function fld(fldname){
+            return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
+        }
+        function fld2(fldname, col_width, left_padding){
+
+            let value = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
+
+            let swidth = !window.hWin.HEURIST4.util.isempty(col_width) ? 'width:' + col_width + ';' : '';
+            let spadding = !window.hWin.HEURIST4.util.isempty(left_padding) ? 'padding-left:' + left_padding + ';' : '';
+            let styling = !window.hWin.HEURIST4.util.isempty(swidth) || !window.hWin.HEURIST4.util.isempty(spadding) ? 'style="' + swidth + spadding + '"' : '';
+
+            return '&lt;div class="item" title="'+ value +'" '+styling+'>'+ value +'&lt;/div>';
+        }
+
+        let dbs = window.hWin.HEURIST4.remote;
+        let recID = fld('trm_ID');
+
+        let btn_actions = '&lt;div style="width:60px;">'
+        + '&lt;div title="Click to show details" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="expand" '
+        + ' style="display:inline-block;height:16px;">'
+        +     '&lt;span style="padding-top: 6px;" class="ui-button-icon-primary ui-icon ui-icon-carat-'
+        + ((dbs._selectedTrmID==recID)?'d':'r')+'">&lt;/span>&lt;span class="ui-button-text">&lt;/span>'
+        + '&lt;/div>'
+        + '&lt;div title="Click to import this base field" Xclass="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="import" '
+        + ' style="display:inline-block;height:16px;vertical-align:bottom;font-size:1.4em;padding-left:20px">'
+        +     '&lt;span class="ui-button-icon-primary ui-icon ui-icon-arrowthick-1-s" style="cursor:pointer">&lt;/span>&lt;span class="ui-button-text">&lt;/span>'
+        + '&lt;/div>&lt;/div>';
+
+        let info = '';
+        if(dbs._selectedTrmID==recID){
+
+            let child_terms = '&lt;table style="text-align: left;font-size:0.9em; margin: 10px 0px 15px 25px;width:95%">'
+                + '&lt;colgroup>'
+                    + '&lt;col style="width: 150px;max-width: 150px;">&lt;col style="width: 15px;">&lt;col style="width: 50px;">&lt;col style="width: 600px;">'
+                + '&lt;/colgroup>';
+
+            let child_count = 0;
+
+            let idx_label = dbs.terms.fieldNamesToIndex.trm_Label;
+            let idx_parent_terms = dbs.terms.fieldNamesToIndex.trm_ParentTermID;
+            let idx_desc = dbs.terms.fieldNamesToIndex.trm_Description;
+            let idx_code = dbs.terms.fieldNamesToIndex.trm_Code;
+            let idx_ccode = dbs.terms.fieldNamesToIndex.trm_ConceptID;
+            let idx_semantic = dbs.terms.fieldNamesToIndex.trm_SemanticReferenceURL;
+
+            // list child terms (labels + decription)
+            for(const id in dbs.terms.termsByDomainLookup.enum){
+
+                if(id &lt;= 0 || !dbs.terms.termsByDomainLookup.enum[id]){
+                    continue;
+                }
+
+                let parent_terms = dbs.terms.termsByDomainLookup.enum[id][idx_parent_terms];
+                if(parent_terms == null || parent_terms == '0'){
+                    continue;
+                }
+
+                parent_terms = parent_terms.split(',');
+                if(parent_terms.indexOf(recID) &lt; 0){
+                    continue;
+                }
+
+                if(child_count == 40){
+                    child_terms += '&lt;tr>&lt;td>...&lt;/td>&lt;/tr>';
+                    break;
+                }
+
+                let child_Label = dbs.terms.termsByDomainLookup.enum[id][idx_label];
+                let child_Description = dbs.terms.termsByDomainLookup.enum[id][idx_desc];
+                let child_Code = dbs.terms.termsByDomainLookup.enum[id][idx_code];
+                let child_ccode = dbs.terms.termsByDomainLookup.enum[id][idx_ccode];
+                let child_semanticuri = dbs.terms.termsByDomainLookup.enum[id][idx_semantic];
+                let has_term = ($Db.getLocalID('trm', child_ccode) > 0) ? '&amp;#10003;' : '&amp;#10005;';
+
+                let extra_dtls = '';
+                if(!window.hWin.HEURIST4.util.isempty(child_Description) || !window.hWin.HEURIST4.util.isempty(child_Code)){
+                    extra_dtls = window.hWin.HEURIST4.util.isempty(child_Description) ? child_Code : 
+                        (window.hWin.HEURIST4.util.isempty(child_Code) ? child_Description : child_Code +' : '+ child_Description);
+                }
+
+                child_terms += '&lt;tr>'
+                    + '&lt;td class="truncate" style="max-width: 150px;padding-top: 5px;" title="'+ child_Label +'">'+ child_Label +'&lt;/td>'
+                    + '&lt;td style="padding:0px 5px;">'+ has_term +'&lt;/td>'
+                    + '&lt;td>'+ child_ccode +'&lt;/td>'
+                    + '&lt;td class="truncate" style="max-width: 600px;" title="'+ extra_dtls +'">'+ extra_dtls +'&lt;/td>'
+                + '&lt;/tr>';
+
+                if(!window.hWin.HEURIST4.util.isempty(child_semanticuri)){
+                    child_terms += '&lt;tr>&lt;td colspan=4>'+child_semanticuri+'&lt;/td>&lt;/tr>';
+                }
+
+                child_count++;
+            }
+
+            info += (child_terms == '') ? '' : (child_terms + '&lt;/table>');
+        }    
+
+        let label = fld2('trm_Label', '10em');
+        let concept_code = fld2('trm_ConceptID', '60px', '15px');
+        let domain = fld('trm_Domain') == 'relation' ? '&lt;div class="item" style="width: 100px;">Can use for relations&lt;/div>' : '';
+
+        let html = '&lt;div class="recordDiv" style="min-height:16px"'
+        +' id="rd'+recID+'" recid="'+recID+'">'
+        + btn_actions
+        + '&lt;div class="recordTitle recordTitle2" title="'+fld('dty_HelpText')
+        +'" style="right:10px;left:75px">'
+        +     label
+        +     concept_code
+        +     domain
+        + '&lt;/div>'
+        + info
+        + '&lt;/div>';
+
+        return html;
+    },
+
+    // Apply filter values
+    _filterEntities: function(){
+
+        let cur_acc = this.entity_wrapper.tabs('option', 'active');
+
+        let state = this.show_all.is(':checked');
+        let search = this.general_search.val();
+        let ent = 'rty';
+        
+        if(cur_acc == 2){ // trm
+            ent = 'trm';
+            state = true;// always show all
+        }else if(cur_acc == 1){ // dty
+            ent = 'dty';
+            state = false;// always hide those already in db
+        }
+        let pnl = this.element.find(`#${ent}_container`);
+        ent = `panel_${ent}_list`;
+
+        this[ent].find('.searchForm #input_search').val(search);
+        this[ent].find('.searchForm #chb_show_already_in_db').prop('checked', state).trigger('change');
+
+        let parent_height = pnl.parent().height();
+        pnl.height(parent_height - 38);
+    },
+
+    /**
+     * 
+     * 
+     * @param {string} type - import type {rectype, detailtype, term, all}
+     * @param {int} id - definition ID to be imported
+     */
+    _preImportCheck: function(type, id){
+
+        const that = this;
+
+        let $dlg;
+        let msg = '';
+        let btns = {};
+        let title = "Downloading structure";
+
+        if(type == 'rectype' || type == 'all'){
+
+            let points = '';
+            if(type == 'rectype'){
+                points = '&lt;li>the selected record type, any fields, and vocabularies that are not yet in the database.&lt;/li>'
+                + '&lt;li>any unrecognised record types (and their fields and vocabularies) connected to the selected record type.&lt;/li>'
+                + '&lt;li>'
+                    + 'additional fields and vocabularies defined for record types already in your database which are connected&lt;br>'
+                    + 'to any of the record types above (the fields will be added to the end of the record type and may be removed or&lt;br>'
+                    + 'customised as desired; they will have no effect on existing data).'
+                + '&lt;/li>'
+            }else{
+                points = '&lt;li>&lt;strong>ALL&lt;/strong> record types, fields and vocabularies/terms not yet in your database&lt;/li>'
+                + '&lt;li>additional fields may be added to existing record types - they will be added at the end and may be removed or customised as required&lt;/li>'
+                + '&lt;li>additional terms may be added to existing vocabularies&lt;/li>';
+            }
+
+            msg = 'If you proceed with download, Heurist will download three types of structural information:&lt;br>'
+            + '&lt;ol>'
+                + `${points}`
+            + '&lt;/ol>'
+            +'&lt;p style="font-size:smaller">'
+                +'&lt;input type="checkbox" id="rename_target_entities" style="vertical-align: top;" />'
+                +'&lt;label for="rename_target_entities" style="display: inline-block;width: 62em;padding-left: 10px;">Check this box'
+                +' if you wish the record type names, field names and description, and term '
+                +' labels to be replaced by the names and labels being imported. Use with care as this can overwrite existing '
+                +'customisation with names which may be quite different and out-of-context with existing data. '
+                +'If this is not a new database, we suggest cancelling and making a clone first (please' 
+                +' delete the clone once you are happy with the result of the import).&lt;/label>'
+            +'&lt;/p>';
+            
+            if(type == 'all'){
+                msg += '&lt;p style="font-size:smaller">'
+                    +'&lt;input type="checkbox" id="import_new_rectypes_only" style="vertical-align: top;" checked="checked" />'
+                    +'&lt;label for="import_new_rectypes_only" style="display: inline-block;width: 62em;padding-left: 10px;">Check this box'
+                    +'  if you wish to import record types not yet in this database which are connected to the '
+                    +' imported record type through record pointer or relationship marker fields.&lt;/label>'
+                +'&lt;/p>';
+            }
+        }else if(type == 'detailtype'){
+
+            title = "Downloading base field";
+            let idx_Type = window.hWin.HEURIST4.remote.detailtypes.typedefs.fieldNamesToIndex.dty_Type;
+            let record = window.hWin.HEURIST4.remote.detailtypes.typedefs[id]['commonFields'];
+
+            msg = '&lt;p style="font-size:smaller">'
+                +'&lt;label>&lt;input type="checkbox" id="rename_target_entities"/>&amp;nbsp;Check this box&lt;/label> '
+                +' if you wish the field names and description '
+                +' to be replaced by the names being imported. Use with care as this can overwrite existing '
+                +'customisation with names which may be quite different and out-of-context with existing data. '
+                +'If this is not a new database, we suggest cancelling and making a clone first (please' 
+                +' delete the clone once you are happy with the result of the import).&lt;/p>';
+
+            if(record[idx_Type] == 'resource' || record[idx_Type] == 'enum' || record[idx_Type] == 'relmarker'){
+
+                let extra = record[idx_Type] == 'resource' ? 'record type(s)' : (record[idx_Type] == 'enum' ? 'term(s)' : 'term(s) and record type(s)')
+                msg = `If you proceed with the download, Heurist will also download missing related ${extra} for the selected field.&lt;br>${msg}`;
+            }
+        }else{
+
+            title = "Downloading vocabulary";
+
+            msg = "If you proceed with the download, Heurist will download the selected vocabulary and any child terms within&lt;br>"
+                + "Do you wish to continue?";
+        }
+
+        btns['Proceed'] = () => {
+
+            that._is_rename_target = $dlg.find('#rename_target_entities').is(':checked');
+            that._is_conservative = type == 'all' || !$dlg.find('#import_new_rectypes_only').is(':checked');
+            if(that._is_rename_target){
+
+                let $dlg2, btn2 = {};
+
+                btn2['Yes, overwrite'] = function(){
+                    $dlg2.dialog('close');
+                    that.startImport(id, type);
+                };
+                btn2['Get me out of here'] = function(){
+                    $dlg2.dialog('close');
+                };
+
+                $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
+                    'Are you sure you want to overwrite existing record type names, field names and term labels?',
+                    btn2, {title: 'Warning'},
+                    { default_palette_class: 'ui-heurist-design' }
+                );
+            }else{
+                that.startImport(id, type);
+            }
+
+            $dlg.dialog('close');
+        };
+
+        btns['Cancel'] = () => {
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
+            {title: title, yes:'Proceed', no:'Cancel'}, 
+            {default_palette_class: 'ui-heurist-design', dialogId: 'pre-import-warning', removeOnClose:true}
+        );
+
+        let show_warning = true;
+
+        this._on($dlg.find('#import_new_rectypes_only'), {
+            change: () => {
+
+                if(!show_warning){
+                    return;
+                }
+
+                let is_checked = $dlg.find('#import_new_rectypes_only').is(':checked');
+                if(!is_checked){
+
+                    $dlg.find('#import_new_rectypes_only').prop('checked', true).trigger('change');
+
+                    let $wdlg;
+                    let msg = 'We &lt;strong>STRONGLY&lt;/strong> recommend downloading all connected record types&lt;br>'
+                            + 'otherwise record pointer fields and relationship marker fields will lack the appropriate target types&lt;br>'
+                            + 'and may allow connection to any record type, whether it makes sense or not.&lt;br>&lt;br>'
+                            + '&lt;label for="confirm_choice">&lt;input id="confirm_choice" type="checkbox"> I understand and wish to proceed&lt;/label>';
+
+                    let btns = {};
+                    btns[window.hWin.HR('Continue')] = () => {
+                        show_warning = false;
+                        $dlg.find('#import_new_rectypes_only').prop('checked', false).trigger('change');
+                        $wdlg.dialog('close');
+                    };
+
+                    btns[window.hWin.HR('Cancel')] = () => {
+                        $wdlg.dialog('close');
+                    };
+
+                    $wdlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns,
+                        {yes: window.hWin.HR('Continue'), no: window.hWin.HR('Cancel'), title: 'Warning about record type targets'},
+                        { default_palette_class: 'ui-heurist-design', dialogId: 'rectype-import-warning' }
+                    );
+
+                    let $continue = $wdlg.parent().find('.ui-dialog-buttonset button').first();
+                    window.hWin.HEURIST4.util.setDisabled($continue, true);
+
+                    let $chkbox = $wdlg.find('input');
+                    that._on($chkbox, {
+                        change: () => {
+                            window.hWin.HEURIST4.util.setDisabled($continue, !$chkbox.is(':checked'));
+                        }
+                    });
+                }
+            }
+        });
+    },
+
+    _processCloneResponse: function(response){
+
+        this.panel_report.hide();
+        
+        this._selectedDB = null;
+
+        if(!response.report){
+            window.hWin.HEURIST4.msg.showMsgDlg('No definitions imported.&lt;br>All definitions available from the source database already exist in this database.');
+            return;
+        }
+
+        let msg = (!window.hWin.HEURIST4.util.isempty(response.report.rectypes) ? `&lt;div id="rty" style="height: 455px;">&lt;h3>Record types:&lt;/h3>&lt;br>&lt;table>${response.report.rectypes}&lt;/table>&lt;br>&lt;/div>` : '')
+                + (!window.hWin.HEURIST4.util.isempty(response.report.detailtypes) ? `&lt;div id="dty" style="height: 455px;">&lt;h3>Base fields:&lt;/h3>&lt;br>&lt;table>${response.report.detailtypes}&lt;/table>&lt;br>&lt;/div>` : '')
+                + (!window.hWin.HEURIST4.util.isempty(response.report.terms) ? `&lt;div id="trm" style="height: 455px;">&lt;h3>Terms:&lt;/h3>&lt;br>&lt;table>${response.report.terms}&lt;/table>&lt;br>&lt;/div>` : '')
+                + (!window.hWin.HEURIST4.util.isempty(response.report.translations) ? `&lt;div id="translation" style="height: 455px;">&lt;h3>Translations:&lt;/h3>&lt;br>&lt;table>${response.report.translations}&lt;/table>&lt;br>&lt;/div>` : '');
+
+        msg = '&lt;div id="handled-defs">'
+                    + '&lt;div>'
+                        + '&lt;ul>'
+                            + (!window.hWin.HEURIST4.util.isempty(response.report.rectypes) ? `&lt;li>&lt;a href="#rty">Record types&lt;/a>&lt;/li>` : '')
+                            + (!window.hWin.HEURIST4.util.isempty(response.report.detailtypes) ? `&lt;li>&lt;a href="#dty">Base fields&lt;/a>&lt;/li>` : '')
+                            + (!window.hWin.HEURIST4.util.isempty(response.report.terms) ? `&lt;li>&lt;a href="#trm">Terms&lt;/a>&lt;/li>` : '')
+                            + (!window.hWin.HEURIST4.util.isempty(response.report.translations) ? `&lt;li>&lt;a href="#translation">Translations&lt;/a>&lt;/li>` : '')
+                        + '&lt;/ul>'
+                    + '&lt;/div>'
+                    + msg
+                + '&lt;/div>';
+
+        let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, null, {title: 'Importing template results'}, 
+            {default_palette_class: 'ui-heurist-design', height:600, dialogId:'import-result-dialog', removeOnClose:true});
+
+        $dlg.find('#handled-defs').tabs();
+        $('#import-result-dialog').css({'padding':'0px','overflow':'hidden'});
+
+        window.hWin.HAPI4.EntityMgr.refreshEntityData('rty,trm,dty,rst', null);
+    }
+});</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="HEURIST4.dbs.html">dbs</a></li><li><a href="HEURIST4.geo.html">geo</a></li><li><a href="HEURIST4.msg.html">msg</a></li><li><a href="HEURIST4.query.html">query</a></li><li><a href="HEURIST4.util.html">util</a></li><li><a href="NodeSelection.html">NodeSelection</a></li><li><a href="heurist.buttonsMenu.html">buttonsMenu</a></li><li><a href="heurist.controlPanel.html">controlPanel</a></li><li><a href="heurist.dbAction.html">dbAction</a></li><li><a href="heurist.dbVerify.html">dbVerify</a></li><li><a href="heurist.dbVerifyURLs.html">dbVerifyURLs</a></li><li><a href="heurist.editTranslations.html">editTranslations</a></li><li><a href="heurist.editing_input.html">editing_input</a></li><li><a href="heurist.navigation.html">navigation</a></li><li><a href="heurist.recordAccess.options.html">options</a></li><li><a href="heurist.recordAction.options.html">options</a></li><li><a href="heurist.recordAdd.options.html">options</a></li><li><a href="heurist.recordAddButton.options.html">options</a></li><li><a href="heurist.recordAddLink.options.html">options</a></li><li><a href="heurist.recordAddLinkMatch.options.html">options</a></li><li><a href="heurist.recordArchive.options.html">options</a></li><li><a href="heurist.recordBookmark.options.html">options</a></li><li><a href="heurist.recordDataTable.options.html">options</a></li><li><a href="heurist.recordDelete.options.html">options</a></li><li><a href="heurist.recordExport.options.html">options</a></li><li><a href="heurist.recordExportCSV.options.html">options</a></li><li><a href="heurist.recordFindDuplicates.options.html">options</a></li><li><a href="heurist.recordImportAnnotations.options.html">options</a></li><li><a href="heurist.recordNotify.options.html">options</a></li><li><a href="heurist.recordRate.options.html">options</a></li><li><a href="heurist.recordTag.options.html">options</a></li><li><a href="heurist.recordTemplate.options.html">options</a></li><li><a href="heurist.recordTitles.options.html">options</a></li><li><a href="heurist.recordUploadedFilesIndex.options.html">options</a></li><li><a href="heurist.selectFile.html">selectFile</a></li><li><a href="heurist.slidersMenu.html">slidersMenu</a></li></ul><h3>Classes</h3><ul><li><a href="ActionHandler.html">ActionHandler</a></li><li><a href="CmsManager.html">CmsManager</a></li><li><a href="Color.html">Color</a></li><li><a href="CrosstabsAnalysis.html">CrosstabsAnalysis</a></li><li><a href="EditorCodeMirror.html">EditorCodeMirror</a></li><li><a href="HEditing.html">HEditing</a></li><li><a href="HLayout.html">HLayout</a></li><li><a href="HLayoutMgr.html">HLayoutMgr</a></li><li><a href="HMapLayer.html">HMapLayer</a></li><li><a href="HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRapidFieldAdditions.HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRecordSearch.html">HRecordSearch</a></li><li><a href="HRecordSet.html">HRecordSet</a></li><li><a href="HSystemMgr.html">HSystemMgr</a></li><li><a href="HintDiv.html">HintDiv</a></li><li><a href="JapaneseCalendar.html">JapaneseCalendar</a></li><li><a href="L.Control.Help.html">Help</a></li><li><a href="L.Control.Manager.html">Manager</a></li><li><a href="L.Control.Publish.html">Publish</a></li><li><a href="Solver.html">Solver</a></li><li><a href="TDuration.html">TDuration</a></li><li><a href="Temporal.html">Temporal</a></li><li><a href="hAPI.html">hAPI</a></li><li><a href="hAPI-HRecordMgr.html">HRecordMgr</a></li><li><a href="window.TDate.html">TDate</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HPublishDialog">HPublishDialog</a></li><li><a href="global.html#HSvsEdit">HSvsEdit</a></li><li><a href="global.html#SelectLinkField">SelectLinkField</a></li><li><a href="global.html#_addInput">_addInput</a></li><li><a href="global.html#_checkStructureFromSource">_checkStructureFromSource</a></li><li><a href="global.html#_checkYear">_checkYear</a></li><li><a href="global.html#_closeDialog">_closeDialog</a></li><li><a href="global.html#_create">_create</a></li><li><a href="global.html#_destroy">_destroy</a></li><li><a href="global.html#_detectHeurist">_detectHeurist</a></li><li><a href="global.html#_doSave">_doSave</a></li><li><a href="global.html#_fromDataToUI">_fromDataToUI</a></li><li><a href="global.html#_getActionButtons">_getActionButtons</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_initControls">_initControls</a></li><li><a href="global.html#_initDialog">_initDialog</a></li><li><a href="global.html#_initInnerHeader">_initInnerHeader</a></li><li><a href="global.html#_initModal">_initModal</a></li><li><a href="global.html#_initOffcanvas">_initOffcanvas</a></li><li><a href="global.html#_japaneseYearToGregorian">_japaneseYearToGregorian</a></li><li><a href="global.html#_loadParentLookup">_loadParentLookup</a></li><li><a href="global.html#_popupDialog">_popupDialog</a></li><li><a href="global.html#_preImportCheck">_preImportCheck</a></li><li><a href="global.html#_processSPARQLRow">_processSPARQLRow</a></li><li><a href="global.html#_refresh">_refresh</a></li><li><a href="global.html#_refreshCaptcha">_refreshCaptcha</a></li><li><a href="global.html#_setOption">_setOption</a></li><li><a href="global.html#_showRecordViewPopup">_showRecordViewPopup</a></li><li><a href="global.html#_switchToDataMode">_switchToDataMode</a></li><li><a href="global.html#_theme_editing_symbology">_theme_editing_symbology</a></li><li><a href="global.html#_updatePanels">_updatePanels</a></li><li><a href="global.html#_validateFromGregorian">_validateFromGregorian</a></li><li><a href="global.html#addAssoctoAssigned">addAssoctoAssigned</a></li><li><a href="global.html#addBackgroundCircles">addBackgroundCircles</a></li><li><a href="global.html#addContainer">addContainer</a></li><li><a href="global.html#addForce">addForce</a></li><li><a href="global.html#addForegroundCircles">addForegroundCircles</a></li><li><a href="global.html#addIcons">addIcons</a></li><li><a href="global.html#addKeyword">addKeyword</a></li><li><a href="global.html#addLabels">addLabels</a></li><li><a href="global.html#addLevel">addLevel</a></li><li><a href="global.html#addLines">addLines</a></li><li><a href="global.html#addMarkerDefinitions">addMarkerDefinitions</a></li><li><a href="global.html#addNodes">addNodes</a></li><li><a href="global.html#addPrevtoAssigned">addPrevtoAssigned</a></li><li><a href="global.html#addSelectionBox">addSelectionBox</a></li><li><a href="global.html#addTitles">addTitles</a></li><li><a href="global.html#applyRules">applyRules</a></li><li><a href="global.html#autofill_login">autofill_login</a></li><li><a href="global.html#browseRecords">browseRecords</a></li><li><a href="global.html#calculateImageExtentFromWorldFile">calculateImageExtentFromWorldFile</a></li><li><a href="global.html#changeDisplay">changeDisplay</a></li><li><a href="global.html#changeViewMode">changeViewMode</a></li><li><a href="global.html#checkAllOptions">checkAllOptions</a></li><li><a href="global.html#checkStoredSettings">checkStoredSettings</a></li><li><a href="global.html#clearContent">clearContent</a></li><li><a href="global.html#close">close</a></li><li><a href="global.html#closeDialog">closeDialog</a></li><li><a href="global.html#commonCodeInit">commonCodeInit</a></li><li><a href="global.html#commonOnAdd">commonOnAdd</a></li><li><a href="global.html#compareIndexes">compareIndexes</a></li><li><a href="global.html#correctionOfInvalidTerm">correctionOfInvalidTerm</a></li><li><a href="global.html#createOverlay">createOverlay</a></li><li><a href="global.html#currentNode">currentNode</a></li><li><a href="global.html#daysInMonth">daysInMonth</a></li><li><a href="global.html#determineColour">determineColour</a></li><li><a href="global.html#disableUpdateBtn">disableUpdateBtn</a></li><li><a href="global.html#doAction">doAction</a></li><li><a href="global.html#doAuthentication">doAuthentication</a></li><li><a href="global.html#doImport">doImport</a></li><li><a href="global.html#doRegister">doRegister</a></li><li><a href="global.html#doSamlLogin">doSamlLogin</a></li><li><a href="global.html#doSearchByID">doSearchByID</a></li><li><a href="global.html#drag_link_line">drag_link_line</a></li><li><a href="global.html#drag_link_source_id">drag_link_source_id</a></li><li><a href="global.html#drag_link_target_id">drag_link_target_id</a></li><li><a href="global.html#drag_link_timer">drag_link_timer</a></li><li><a href="global.html#dragend">dragend</a></li><li><a href="global.html#dragmove">dragmove</a></li><li><a href="global.html#dragstart">dragstart</a></li><li><a href="global.html#editCMS2">editCMS2</a></li><li><a href="global.html#editCMS_ElementCfg">editCMS_ElementCfg</a></li><li><a href="global.html#editCMS_SelectElement">editCMS_SelectElement</a></li><li><a href="global.html#editCMS_SiteMenu">editCMS_SiteMenu</a></li><li><a href="global.html#editCMS_WidgetCfg">editCMS_WidgetCfg</a></li><li><a href="global.html#editSymbology">editSymbology</a></li><li><a href="global.html#editTheme">editTheme</a></li><li><a href="global.html#enable_register">enable_register</a></li><li><a href="global.html#executeFormula">executeFormula</a></li><li><a href="global.html#f">f</a></li><li><a href="global.html#first_level_rty_ID">first_level_rty_ID</a></li><li><a href="global.html#fixCalendarPickerCMDs">fixCalendarPickerCMDs</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#formatGregJulian">formatGregJulian</a></li><li><a href="global.html#fromJD">fromJD</a></li><li><a href="global.html#fromJSDate">fromJSDate</a></li><li><a href="global.html#fset">fset</a></li><li><a href="global.html#getAllChecked">getAllChecked</a></li><li><a href="global.html#getClass">getClass</a></li><li><a href="global.html#getContainer">getContainer</a></li><li><a href="global.html#getDataFromServer">getDataFromServer</a></li><li><a href="global.html#getEntityRadius">getEntityRadius</a></li><li><a href="global.html#getEraFromGregorian">getEraFromGregorian</a></li><li><a href="global.html#getEraFromJapaneseStr">getEraFromJapaneseStr</a></li><li><a href="global.html#getEraLimits">getEraLimits</a></li><li><a href="global.html#getEras">getEras</a></li><li><a href="global.html#getGephiFormat">getGephiFormat</a></li><li><a href="global.html#getKeywords">getKeywords</a></li><li><a href="global.html#getKeywordsNextStep">getKeywordsNextStep</a></li><li><a href="global.html#getLineLength">getLineLength</a></li><li><a href="global.html#getLineWidth">getLineWidth</a></li><li><a href="global.html#getMarkerWidth">getMarkerWidth</a></li><li><a href="global.html#getNodeDataById">getNodeDataById</a></li><li><a href="global.html#getRecentKeywords">getRecentKeywords</a></li><li><a href="global.html#getRecordOverlayData">getRecordOverlayData</a></li><li><a href="global.html#getRelationOverlayData">getRelationOverlayData</a></li><li><a href="global.html#getRulesArray">getRulesArray</a></li><li><a href="global.html#getSelected">getSelected</a></li><li><a href="global.html#getSelection">getSelection</a></li><li><a href="global.html#getSetting">getSetting</a></li><li><a href="global.html#getURL">getURL</a></li><li><a href="global.html#gregorianToJapaneseStr">gregorianToJapaneseStr</a></li><li><a href="global.html#hMapDocument">hMapDocument</a></li><li><a href="global.html#hRecordAction">hRecordAction</a></li><li><a href="global.html#handleNodeAction">handleNodeAction</a></li><li><a href="global.html#handleSettingsInUI">handleSettingsInUI</a></li><li><a href="global.html#hexToFilter">hexToFilter</a></li><li><a href="global.html#hexportMenu">hexportMenu</a></li><li><a href="global.html#imgFilter">imgFilter</a></li><li><a href="global.html#initProfilePreferences">initProfilePreferences</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isA">isA</a></li><li><a href="global.html#isAssocKeyword">isAssocKeyword</a></li><li><a href="global.html#isMonthSpan">isMonthSpan</a></li><li><a href="global.html#isRecentKeyword">isRecentKeyword</a></li><li><a href="global.html#isTemporal">isTemporal</a></li><li><a href="global.html#isValid">isValid</a></li><li><a href="global.html#japaneseToGregorian">japaneseToGregorian</a></li><li><a href="global.html#japaneseToGregorianStr">japaneseToGregorianStr</a></li><li><a href="global.html#keywordLookup">keywordLookup</a></li><li><a href="global.html#loadHtmlContent">loadHtmlContent</a></li><li><a href="global.html#log10">log10</a></li><li><a href="global.html#login_dialog">login_dialog</a></li><li><a href="global.html#lookupEditions">lookupEditions</a></li><li><a href="global.html#lookupGoogle">lookupGoogle</a></li><li><a href="global.html#lookupHathiTrust">lookupHathiTrust</a></li><li><a href="global.html#lookupKarlsruhePortal">lookupKarlsruhePortal</a></li><li><a href="global.html#lookupWorldCat">lookupWorldCat</a></li><li><a href="global.html#mapIds">mapIds</a></li><li><a href="global.html#menuActionHandler">menuActionHandler</a></li><li><a href="global.html#mergeArraysUnique">mergeArraysUnique</a></li><li><a href="global.html#msgToConsole">msgToConsole</a></li><li><a href="global.html#newDate">newDate</a></li><li><a href="global.html#onAdd">onAdd</a></li><li><a href="global.html#onAuthentication">onAuthentication</a></li><li><a href="global.html#onNodeClick">onNodeClick</a></li><li><a href="global.html#onPageInit">onPageInit</a></li><li><a href="global.html#onRecordNodeClick">onRecordNodeClick</a></li><li><a href="global.html#onRemove">onRemove</a></li><li><a href="global.html#onTermSaveError">onTermSaveError</a></li><li><a href="global.html#open">open</a></li><li><a href="global.html#openRecordInTab">openRecordInTab</a></li><li><a href="global.html#openSearchMenu">openSearchMenu</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#popupDialog">popupDialog</a></li><li><a href="global.html#prevSessionExists">prevSessionExists</a></li><li><a href="global.html#project_keywords">project_keywords</a></li><li><a href="global.html#putSetting">putSetting</a></li><li><a href="global.html#removeAssocByID">removeAssocByID</a></li><li><a href="global.html#removeKeyword">removeKeyword</a></li><li><a href="global.html#removeOverlay">removeOverlay</a></li><li><a href="global.html#removeOverlays">removeOverlays</a></li><li><a href="global.html#removeSetting">removeSetting</a></li><li><a href="global.html#renderAssocKeywods">renderAssocKeywods</a></li><li><a href="global.html#renderContent">renderContent</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#saveRules">saveRules</a></li><li><a href="global.html#selectRecord">selectRecord</a></li><li><a href="global.html#setFormulaMode">setFormulaMode</a></li><li><a href="global.html#setGravity">setGravity</a></li><li><a href="global.html#setLinkMode">setLinkMode</a></li><li><a href="global.html#setSelected">setSelected</a></li><li><a href="global.html#setSelection">setSelection</a></li><li><a href="global.html#setValue">setValue</a></li><li><a href="global.html#setupAssocKeywords">setupAssocKeywords</a></li><li><a href="global.html#setupCaptcha">setupCaptcha</a></li><li><a href="global.html#setupRecentWorks">setupRecentWorks</a></li><li><a href="global.html#setupResetPin">setupResetPin</a></li><li><a href="global.html#show">show</a></li><li><a href="global.html#showEditions">showEditions</a></li><li><a href="global.html#showHelp">showHelp</a></li><li><a href="global.html#showKeyword">showKeyword</a></li><li><a href="global.html#showLoginDialog">showLoginDialog</a></li><li><a href="global.html#showNodeInformation">showNodeInformation</a></li><li><a href="global.html#showSearchBuilder">showSearchBuilder</a></li><li><a href="global.html#showSearchFacetedWizard">showSearchFacetedWizard</a></li><li><a href="global.html#showWarningAboutTermUsage">showWarningAboutTermUsage</a></li><li><a href="global.html#simplePointsToWKT">simplePointsToWKT</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#startRecentWork">startRecentWork</a></li><li><a href="global.html#temporalSimplifyDate">temporalSimplifyDate</a></li><li><a href="global.html#temporalToHumanReadableString">temporalToHumanReadableString</a></li><li><a href="global.html#tick">tick</a></li><li><a href="global.html#toJD">toJD</a></li><li><a href="global.html#toJSDate">toJSDate</a></li><li><a href="global.html#translationFromUI">translationFromUI</a></li><li><a href="global.html#translationSupport">translationSupport</a></li><li><a href="global.html#translationToUI">translationToUI</a></li><li><a href="global.html#truncateText">truncateText</a></li><li><a href="global.html#unselectAssoc">unselectAssoc</a></li><li><a href="global.html#updateAssocDisplay">updateAssocDisplay</a></li><li><a href="global.html#updateAssocList">updateAssocList</a></li><li><a href="global.html#updateCircles">updateCircles</a></li><li><a href="global.html#updateCurvedLines">updateCurvedLines</a></li><li><a href="global.html#updateLabels">updateLabels</a></li><li><a href="global.html#updateNodes">updateNodes</a></li><li><a href="global.html#updateRecentKeywordDisplay">updateRecentKeywordDisplay</a></li><li><a href="global.html#updateRectangles">updateRectangles</a></li><li><a href="global.html#updateRuleBuilder">updateRuleBuilder</a></li><li><a href="global.html#updateStatus">updateStatus</a></li><li><a href="global.html#updateStraightLines">updateStraightLines</a></li><li><a href="global.html#validateResetPin">validateResetPin</a></li><li><a href="global.html#visualizeData">visualizeData</a></li><li><a href="global.html#visualizeSelection">visualizeSelection</a></li><li><a href="global.html#weekDay">weekDay</a></li><li><a href="global.html#weekOfYear">weekOfYear</a></li><li><a href="global.html#zoomed">zoomed</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Jul 24 2025 18:09:14 GMT+0400 (GMT+04:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

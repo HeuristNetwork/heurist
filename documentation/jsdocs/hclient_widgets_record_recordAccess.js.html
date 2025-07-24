@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: hclient/widgets/record/recordAccess.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: hclient/widgets/record/recordAccess.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+* @file recordAccess.js
+* @brief Provides a widget for managing record ownership and access rights.
+* @fileOverview This file defines the `recordAccess` widget, which allows users to modify the
+* ownership and access permissions of records within the Heurist system. It integrates with
+* the Heurist API and provides a user interface for these operations.
+*
+* @project     Heurist academic knowledge management system
+*
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Artem Osmakov   &lt;osmakov@gmail.com>
+* @author      Ian Johnson &lt;ian.johnson.heurist@gmail.com>
+* @since       4.0
+*/
+
+/**
+ * @widget heurist.recordAccess
+ * @extends $.heurist.recordAction
+ * @description jQuery widget for managing record access and ownership.
+ * Provides functionality to change who owns a record and what level of access
+ * (e.g., public, viewable, hidden) other users or groups have.
+ *
+ * @param {object} options - Configuration options for the widget.
+ * @param {number} [options.height=520] - The height of the dialog.
+ * @param {number} [options.width=520] - The width of the dialog.
+ * @param {boolean} [options.modal=true] - Whether the dialog is modal.
+ * @param {string} [options.init_scope='selected'] - Initial scope for record selection.
+ * @param {string} [options.title='Change Record Access and Ownership'] - Title of the dialog.
+ * @param {number} [options.currentOwner=0] - The ID of the current owner. 0 for 'Any logged-in user'.
+ * @param {?string} options.currentAccess - The current access level (e.g., 'public', 'viewable', 'hidden').
+ * @param {?string} options.currentAccessGroups - Comma-separated string of group IDs for access control.
+ * @param {boolean} [options.show_modes=false] - Whether to show operation modes (e.g., change ownership, change access, or both).
+ * @param {string} [options.htmlContent='recordAccess.html'] - The HTML file to load for the widget's content.
+ * @param {boolean|string} [options.helpContent=false] - Help content or URL for the widget.
+ */
+$.widget( "heurist.recordAccess", $.heurist.recordAction, {
+
+    /**
+     * @namespace options
+     * @memberof heurist.recordAccess
+     * @type {object}
+     * @property {number} [height=520] - The height of the dialog.
+     * @property {number} [width=520] - The width of the dialog.
+     * @property {boolean} [modal=true] - Whether the dialog is modal.
+     * @property {string} [init_scope='selected'] - Initial scope for record selection.
+     * @property {string} [title='Change Record Access and Ownership'] - Title of the dialog.
+     * @property {number} [currentOwner=0] - The ID of the current owner. 0 for 'Any logged-in user'.
+     * @property {?string} currentAccess - The current access level (e.g., 'public', 'viewable', 'hidden').
+     * @property {?string} currentAccessGroups - Comma-separated string of group IDs for access control.
+     * @property {boolean} [show_modes=false] - Whether to show operation modes (e.g., change ownership, change access, or both).
+     * @property {string} [htmlContent='recordAccess.html'] - The HTML file to load for the widget's content.
+     * @property {boolean|string} [helpContent=false] - Help content or URL for the widget.
+     */
+    options: {
+    
+        height: 520,
+        width:  520,
+        modal:  true,
+        init_scope: 'selected',
+        title:  'Change Record Access and Ownership',
+        currentOwner: 0,
+        currentAccess: null,
+        currentAccessGroups: null,
+        show_modes: false,
+        
+        htmlContent: 'recordAccess.html',
+        helpContent: false
+    },
+
+    /**
+     * @function _initControls
+     * @memberof heurist.recordAccess
+     * @private
+     * @description Initializes the controls within the widget. Sets up event listeners and populates access control elements.
+     * @returns {boolean|undefined} Returns `false` if the current user is not available, otherwise proceeds with initialization.
+     */
+    _initControls:function(){
+
+        if(!window.hWin.HAPI4.currentUser){
+            return false;
+        }
+        
+        let that = this;
+        
+        if(this.options.scope_types=='none'){
+            this._$('#hr_sel_record_scope').hide();
+        }
+        
+        that.fillAccessControls();
+        
+        
+        //window.hWin.HAPI4.addEventListener(this, 
+        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
+            function(e, data) { 
+                that.fillAccessControls();
+        });
+        
+        return this._super();
+    },
+    
+    
+    //
+    // events bound via _on are removed automatically
+    // revert other modifications here
+    /**
+     * @function _destroy
+     * @memberof heurist.recordAccess
+     * @private
+     * @description Cleans up the widget before it is removed. Unbinds event listeners.
+     */
+    _destroy: function() {
+        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS);
+        return this._super();
+    },
+    
+    /**
+     * @function fillAccessControls
+     * @memberof heurist.recordAccess
+     * @description Populates and configures the access control UI elements, such as ownership and access group selectors.
+     * Fetches user groups and sets up event handlers for UI interactions.
+     */
+    fillAccessControls: function(){
+
+        let that = this;
+        let groups = window.hWin.HAPI4.is_admin() ? 'all_users_and_groups' : null;
+
+        let fieldSelect = this._$('#sel_Ownership');
+        window.hWin.HEURIST4.ui.createUserGroupsSelect(fieldSelect[0], groups,
+            [{key:0, title:'Any logged-in user'}, {key:'current_user', title:'Current user'}], () => {
+
+                fieldSelect = window.hWin.HEURIST4.ui.initHSelect(fieldSelect, false);
+                
+                that._off(fieldSelect,'change');
+                that._off( that.element.find('input[name="rb_Owner"]'),'change');
+                that._off( that.element.find('input[name="rb_Access"]'),'change');
+
+                that._on(fieldSelect,{change:
+                    function(){
+                        if(fieldSelect.val()==0){
+                            that.element.find('.access-hidden').hide();   
+                            if(!that.element.find('#rb_Access-public').is(':checked'))
+                                that.element.find('#rb_Access-viewable').prop('checked', true); 
+                        }else{
+                            that.element.find('.access-hidden').show();    
+                        }
+                        that._onRecordScopeChange();
+                        
+                    }
+                });
+                
+                //define group selector for edit
+                let ele = that.element.find('#sel_OwnerGroups');
+                /*
+                if(!ele.editing_input('instance')){
+                    ele.empty();
+                    this._createGroupSelectorElement('sel_OwnerGroups', null);    
+                }
+                */
+                ele.hide();    
+                
+                
+                //define group selector for access
+                ele = that.element.find('#sel_AccessGroups');
+                if(ele.length==0 || !ele.editing_input('instance')){
+                    ele.empty();
+                    that._createGroupSelectorElement('sel_AccessGroups', that.options.currentAccessGroups);    
+                }
+                //ele.hide();    
+
+                if(!window.hWin.HEURIST4.util.isempty(that.options.currentOwner) || that.options.currentOwner==0){
+                    
+                    fieldSelect.val(that.options.currentOwner);
+                    if( fieldSelect.val()==null &amp;&amp; that.options.currentOwner){
+                        let editors = that.options.currentOwner.split(',');
+                        fieldSelect.val(editors[0]);
+                    }
+                    if( fieldSelect.val()==null ){
+                        fieldSelect.val( window.hWin.HAPI4.currentUser['ugr_ID'] );
+                    }
+                    
+                    /* multigroup edit option
+                    if(this.options.currentOwner==0){
+                        this._$('#rb_Owner-everyone').prop('checked', true);    
+                    }else if(this.options.currentOwner == window.hWin.HAPI4.currentUser['ugr_ID']){
+                        this._$('#rb_Owner-user').prop('checked', true);    
+                    }else{
+                        this._$('#rb_Owner-group').prop('checked', true);    
+                        this._$('#sel_OwnerGroups').show().editing_input('setValue', [this.options.currentOwner]);
+                    }
+                    */
+                }
+                fieldSelect.hSelect('refresh');
+
+                
+                if(that.options.currentAccess){
+                   
+                    
+                    if( that.options.currentAccess=='hidden' || that.options.currentAccessGroups){
+                        that.element.find('#rb_Access-hidden').prop('checked', true); //was viewable-group
+                        that.element.find('#div_AccessGroups').show();
+                        that._adjustHeight();
+                    }else{
+                        that.element.find('#rb_Access-'+that.options.currentAccess).prop('checked', true);
+                        
+                    }
+                }
+                
+                that._on( that.element.find('input[name="rb_Owner"]'),{change:function(){
+                    
+                    if(that.element.find('#rb_Owner-group').prop('checked')){
+                        that.element.find('#sel_OwnerGroups').show();
+                    }else{
+                        that.element.find('#sel_OwnerGroups').hide();
+                    }
+                    
+                    that._onRecordScopeChange();
+                    
+                }});
+                
+                that._on( that.element.find('input[name="rb_Access"]'), {change:function(){
+                    
+                    if(that.element.find('#rb_Access-hidden').prop('checked')){ //was viewable-group
+                        that.element.find('#div_AccessGroups').show();
+                    }else{
+                        that.element.find('#div_AccessGroups').hide();
+                    }
+                    
+                    that._adjustHeight();
+                   
+                    that._onRecordScopeChange();
+                }});
+
+                that._onRecordScopeChange();
+            }
+        );
+
+        if(this.options.show_modes){
+            this._$('#div_operation_mode').show();
+
+            this._on(this._$('#div_operation_mode input[type="radio"]'), {
+                change: (event) => {
+                    let mode = $(event.target).val();
+
+                    that.element.find('#div_sel_ownership, #sel_OwnerGroups, #div_sel_access, #div_sel_access2, #div_sel_access3').hide();
+                    if(mode == 0 || mode == 1){
+                        that.element.find('#div_sel_ownership, #sel_OwnerGroups').show();
+                    }
+                    if(mode == 0 || mode == 2){
+                        that.element.find('#div_sel_access, #div_sel_access2, #div_sel_access3').show();
+                    }
+
+                    that._onRecordScopeChange();
+                }
+            });
+        }else{
+            this._$('#div_operation_mode').hide();
+        }
+    },
+    
+    /**
+     * @function _adjustHeight
+     * @memberof heurist.recordAccess
+     * @private
+     * @description Adjusts the height of the dialog.
+     * (Currently not implemented)
+     */
+    _adjustHeight: function(){
+        
+    },
+
+    /**
+     * @function _getActionButtons
+     * @memberof heurist.recordAccess
+     * @private
+     * @description Gets the action buttons for the dialog. Modifies the text of the 'Apply' button.
+     * @returns {Array&lt;object>} An array of button definition objects.
+     */
+    _getActionButtons: function(){
+        let res = this._super();
+        res[1].text = window.hWin.HR('Apply');
+        return res;
+    },    
+
+    /**
+     * @function _createGroupSelectorElement
+     * @memberof heurist.recordAccess
+     * @private
+     * @description Creates and initializes a group selector element using the `editing_input` widget.
+     * @param {string} input_id - The ID of the HTML element to transform into a group selector.
+     * @param {?string} init_value - The initial value for the group selector (comma-separated group IDs).
+     */
+    _createGroupSelectorElement: function(input_id, init_value){
+        
+        if(window.hWin.HEURIST4.util.isnull(init_value)) init_value = '';
+        
+        let that = this;
+
+        let ed_options = {
+            recID: -1,
+            dtID: input_id, //'group_selector',
+            //rectypeID: rectypeID,
+            values: [init_value],
+            readonly: false,
+            showclear_button: true,
+            dtFields:{
+                dty_Type:"resource",
+                rst_DisplayName:'Select Groups:', rst_DisplayHelpText:'',
+                rst_FieldConfig: {entity:'sysGroups', csv:true}
+            },
+            change: function(){ that._onRecordScopeChange(); }
+            //change:_onAddRecordChange
+        };
+
+        /*
+        $("&lt;div>").attr('id','group_selector').editing_input(ed_options).appendTo($.find(input_id));
+        var ele = $('#group_selector');
+        ele.css('display','table');
+        ele.find('.header').css({'min-width':'150px','text-align':'right'})
+        */
+        
+        let ele = this._$('#'+input_id);
+        ele.editing_input(ed_options);
+        ele.find('.editint-inout-repeat-button').hide();
+        ele.find('.header').css({'padding-right':'16px', 'padding-top':'4px', display:'inline-block'});
+        ele.find('.input-cell').css({display:'inline-block'});
+        
+        ele.find('.entity_selector').css('max-width',200);
+        
+    },
+    
+    /**
+     * @function getSelectedParameters
+     * @memberof heurist.recordAccess
+     * @description Retrieves the selected ownership and access parameters from the UI controls.
+     * Updates the widget's options with these parameters.
+     * @param {boolean} showWarning - If true, displays a warning message if required parameters are missing.
+     * @returns {boolean} True if all required parameters are selected, false otherwise.
+     */
+    getSelectedParameters: function( showWarning ){
+       
+        /* option for many groups edit 
+        var ownership = this._$('input[type="radio"][name="rb_Owner"]:checked').val();
+                    
+        if(ownership=='everyone') {
+            ownership = 0;
+        } else if(ownership=='user') {
+            ownership = window.hWin.HAPI4.currentUser['ugr_ID'];
+        } else {
+            ownership = $('#sel_OwnerGroups').editing_input('getValues');
+            if(ownership &amp;&amp; ownership.length>0){
+                ownership = ownership[0];
+            }
+            if(!ownership){
+                if(showWarning)
+                    window.hWin.HEURIST4.msg.showMsgFlash('Select group with edit permission');
+                return false;
+            }
+        }
+        */
+
+        let mode = this.options.show_modes ? this._$('#div_operation_mode [name="mode"]:checked').val() : 0;
+        let ownership = this._$('#sel_Ownership').val();
+        
+        let visibility = this._$('input[type="radio"][name="rb_Access"]:checked').val();
+        if(!visibility &amp;&amp; (mode == 0 || mode == 2)){
+            if(showWarning)
+                window.hWin.HEURIST4.msg.showMsgFlash('Select access permission');
+            return false;
+        }
+        
+        let visibility_groups = '';
+        
+        if(ownership==0 &amp;&amp; visibility!='public'){
+            
+            visibility='viewable';
+            
+        }else if(visibility=='hidden' &amp;&amp; this._$('#sel_AccessGroups').editing_input('instance')){
+            let sel = this._$('#sel_AccessGroups').editing_input('getValues');
+
+            if(sel &amp;&amp; sel.length>0 &amp;&amp; sel[0]!=''){
+                visibility = 'viewable';
+                visibility_groups = sel.join(',');
+            }
+        }
+            
+        this.options.currentOwner = ownership;           
+        this.options.currentAccess = visibility;
+        this.options.currentAccessGroups = visibility_groups;
+        
+        return true;
+    },
+    
+    /**
+     * @function doAction
+     * @memberof heurist.recordAccess
+     * @description Performs the action of updating record access and ownership based on the selected parameters.
+     * It determines the scope of records to be affected and makes an API call to HAPI4.RecordMgr.access.
+     * Displays progress and result messages.
+     */
+    doAction: function(){
+
+            let scope_val = (this.options.scope_types=='none' || !this.selectRecordScope)?'any':this.selectRecordScope.val();
+            
+            if(window.hWin.HEURIST4.util.isempty(scope_val)) return; 
+    
+            if(!this.getSelectedParameters(true)) return;
+            
+        
+            if(this.options.scope_types=='none'){
+                //return values as context
+                this._context_on_close = {
+                'OwnerUGrpID': this.options.currentOwner,
+                'NonOwnerVisibility': this.options.currentAccess,
+                'NonOwnerVisibilityGroups':this.options.currentAccessGroups,
+                };
+                
+                this.closeDialog();
+                return;
+            }
+            
+            let scope = [], 
+            rec_RecTypeID = 0;
+            
+            if(scope_val == 'selected'){
+                scope = this._currentRecordsetSelIds;
+            }else { //(scope_val == 'current'
+                scope = this._currentRecordset.getIds();
+                if(scope_val  >0 ){
+                    rec_RecTypeID = scope_val;
+                }   
+            }
+            
+            //unique session id    
+            let session_id = Math.round((new Date()).getTime()/1000);
+            this._showProgress( session_id, false, 1000 );
+            
+            let request = {
+                request_id : window.hWin.HEURIST4.util.random(),
+                ids  : scope.join(','),
+                session: session_id
+            };
+
+            if(this.options.show_modes){
+                let mode = this._$('#div_operation_mode [name="mode"]:checked').val();
+                if(mode == 0 || mode == 1){
+                    request['OwnerUGrpID'] = this.options.currentOwner;
+                }
+                if(mode == 0 || mode == 2){
+                    request['NonOwnerVisibility'] = this.options.currentAccess;
+                    request['NonOwnerVisibilityGroups'] = this.options.currentAccessGroups;
+                }
+            }else{
+
+                request['OwnerUGrpID'] = this.options.currentOwner;
+                request['NonOwnerVisibility'] = this.options.currentAccess;
+                request['NonOwnerVisibilityGroups'] = this.options.currentAccessGroups;
+            }
+
+            if(rec_RecTypeID>0){
+                request['rec_RecTypeID'] = rec_RecTypeID;
+            }
+                
+                let that = this;                                                
+                
+                window.hWin.HAPI4.RecordMgr.access(request, 
+                    function(response){
+            
+                        that._hideProgress();
+            
+                        if(response.status == window.hWin.ResponseStatus.OK){
+
+                            that._context_on_close = (response.data.updated>0);
+                            
+                            that.closeDialog();
+                            
+                            let msg = 'Processed : '+response.data.processed + ' record'
+                                + (response.data.processed>1?'s':'') +'. Updated: '
+                                + response.data.updated  + ' record'
+                                + (response.data.updated>1?'s':'');
+                           if(response.data.noaccess>0){
+                               msg += ('&lt;br>&lt;br>Not enough rights (logout/in to refresh) for '+response.data.noaccess+
+                                        ' record' + (response.data.noaccess>1?'s':''));
+                           }     
+                            
+                            window.hWin.HEURIST4.msg.showMsgFlash(msg, 2000);
+                            
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    });
+        
+    },
+    
+    /**
+     * @function _onRecordScopeChange
+     * @memberof heurist.recordAccess
+     * @private
+     * @description Handles changes in the record scope selection.
+     * Enables or disables the 'Apply' button based on whether a valid scope and parameters are selected.
+     * This method is an override of the parent widget's method.
+     */
+    _onRecordScopeChange: function () 
+    {
+        
+        let scope_val = (this.options.scope_types=='none' || !this.selectRecordScope)?'any':this.selectRecordScope.val();
+        let isdisabled = !(scope_val!='' &amp;&amp; this.getSelectedParameters(false))
+            
+        window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('.btnDoAction'), isdisabled );
+    }
+  
+});
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="HEURIST4.dbs.html">dbs</a></li><li><a href="HEURIST4.geo.html">geo</a></li><li><a href="HEURIST4.msg.html">msg</a></li><li><a href="HEURIST4.query.html">query</a></li><li><a href="HEURIST4.util.html">util</a></li><li><a href="NodeSelection.html">NodeSelection</a></li><li><a href="heurist.buttonsMenu.html">buttonsMenu</a></li><li><a href="heurist.controlPanel.html">controlPanel</a></li><li><a href="heurist.dbAction.html">dbAction</a></li><li><a href="heurist.dbVerify.html">dbVerify</a></li><li><a href="heurist.dbVerifyURLs.html">dbVerifyURLs</a></li><li><a href="heurist.editTranslations.html">editTranslations</a></li><li><a href="heurist.editing_input.html">editing_input</a></li><li><a href="heurist.navigation.html">navigation</a></li><li><a href="heurist.recordAccess.options.html">options</a></li><li><a href="heurist.recordAction.options.html">options</a></li><li><a href="heurist.recordAdd.options.html">options</a></li><li><a href="heurist.recordAddButton.options.html">options</a></li><li><a href="heurist.recordAddLink.options.html">options</a></li><li><a href="heurist.recordAddLinkMatch.options.html">options</a></li><li><a href="heurist.recordArchive.options.html">options</a></li><li><a href="heurist.recordBookmark.options.html">options</a></li><li><a href="heurist.recordDataTable.options.html">options</a></li><li><a href="heurist.recordDelete.options.html">options</a></li><li><a href="heurist.recordExport.options.html">options</a></li><li><a href="heurist.recordExportCSV.options.html">options</a></li><li><a href="heurist.recordFindDuplicates.options.html">options</a></li><li><a href="heurist.recordImportAnnotations.options.html">options</a></li><li><a href="heurist.recordNotify.options.html">options</a></li><li><a href="heurist.recordRate.options.html">options</a></li><li><a href="heurist.recordTag.options.html">options</a></li><li><a href="heurist.recordTemplate.options.html">options</a></li><li><a href="heurist.recordTitles.options.html">options</a></li><li><a href="heurist.recordUploadedFilesIndex.options.html">options</a></li><li><a href="heurist.selectFile.html">selectFile</a></li><li><a href="heurist.slidersMenu.html">slidersMenu</a></li></ul><h3>Classes</h3><ul><li><a href="ActionHandler.html">ActionHandler</a></li><li><a href="CmsManager.html">CmsManager</a></li><li><a href="Color.html">Color</a></li><li><a href="CrosstabsAnalysis.html">CrosstabsAnalysis</a></li><li><a href="EditorCodeMirror.html">EditorCodeMirror</a></li><li><a href="HEditing.html">HEditing</a></li><li><a href="HLayout.html">HLayout</a></li><li><a href="HLayoutMgr.html">HLayoutMgr</a></li><li><a href="HMapLayer.html">HMapLayer</a></li><li><a href="HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRapidFieldAdditions.HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRecordSearch.html">HRecordSearch</a></li><li><a href="HRecordSet.html">HRecordSet</a></li><li><a href="HSystemMgr.html">HSystemMgr</a></li><li><a href="HintDiv.html">HintDiv</a></li><li><a href="JapaneseCalendar.html">JapaneseCalendar</a></li><li><a href="L.Control.Help.html">Help</a></li><li><a href="L.Control.Manager.html">Manager</a></li><li><a href="L.Control.Publish.html">Publish</a></li><li><a href="Solver.html">Solver</a></li><li><a href="TDuration.html">TDuration</a></li><li><a href="Temporal.html">Temporal</a></li><li><a href="hAPI.html">hAPI</a></li><li><a href="hAPI-HRecordMgr.html">HRecordMgr</a></li><li><a href="window.TDate.html">TDate</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HPublishDialog">HPublishDialog</a></li><li><a href="global.html#HSvsEdit">HSvsEdit</a></li><li><a href="global.html#SelectLinkField">SelectLinkField</a></li><li><a href="global.html#_addInput">_addInput</a></li><li><a href="global.html#_checkStructureFromSource">_checkStructureFromSource</a></li><li><a href="global.html#_checkYear">_checkYear</a></li><li><a href="global.html#_closeDialog">_closeDialog</a></li><li><a href="global.html#_create">_create</a></li><li><a href="global.html#_destroy">_destroy</a></li><li><a href="global.html#_detectHeurist">_detectHeurist</a></li><li><a href="global.html#_doSave">_doSave</a></li><li><a href="global.html#_fromDataToUI">_fromDataToUI</a></li><li><a href="global.html#_getActionButtons">_getActionButtons</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_initControls">_initControls</a></li><li><a href="global.html#_initDialog">_initDialog</a></li><li><a href="global.html#_initInnerHeader">_initInnerHeader</a></li><li><a href="global.html#_initModal">_initModal</a></li><li><a href="global.html#_initOffcanvas">_initOffcanvas</a></li><li><a href="global.html#_japaneseYearToGregorian">_japaneseYearToGregorian</a></li><li><a href="global.html#_loadParentLookup">_loadParentLookup</a></li><li><a href="global.html#_popupDialog">_popupDialog</a></li><li><a href="global.html#_preImportCheck">_preImportCheck</a></li><li><a href="global.html#_processSPARQLRow">_processSPARQLRow</a></li><li><a href="global.html#_refresh">_refresh</a></li><li><a href="global.html#_refreshCaptcha">_refreshCaptcha</a></li><li><a href="global.html#_setOption">_setOption</a></li><li><a href="global.html#_showRecordViewPopup">_showRecordViewPopup</a></li><li><a href="global.html#_switchToDataMode">_switchToDataMode</a></li><li><a href="global.html#_theme_editing_symbology">_theme_editing_symbology</a></li><li><a href="global.html#_updatePanels">_updatePanels</a></li><li><a href="global.html#_validateFromGregorian">_validateFromGregorian</a></li><li><a href="global.html#addAssoctoAssigned">addAssoctoAssigned</a></li><li><a href="global.html#addBackgroundCircles">addBackgroundCircles</a></li><li><a href="global.html#addContainer">addContainer</a></li><li><a href="global.html#addForce">addForce</a></li><li><a href="global.html#addForegroundCircles">addForegroundCircles</a></li><li><a href="global.html#addIcons">addIcons</a></li><li><a href="global.html#addKeyword">addKeyword</a></li><li><a href="global.html#addLabels">addLabels</a></li><li><a href="global.html#addLevel">addLevel</a></li><li><a href="global.html#addLines">addLines</a></li><li><a href="global.html#addMarkerDefinitions">addMarkerDefinitions</a></li><li><a href="global.html#addNodes">addNodes</a></li><li><a href="global.html#addPrevtoAssigned">addPrevtoAssigned</a></li><li><a href="global.html#addSelectionBox">addSelectionBox</a></li><li><a href="global.html#addTitles">addTitles</a></li><li><a href="global.html#applyRules">applyRules</a></li><li><a href="global.html#autofill_login">autofill_login</a></li><li><a href="global.html#browseRecords">browseRecords</a></li><li><a href="global.html#calculateImageExtentFromWorldFile">calculateImageExtentFromWorldFile</a></li><li><a href="global.html#changeDisplay">changeDisplay</a></li><li><a href="global.html#changeViewMode">changeViewMode</a></li><li><a href="global.html#checkAllOptions">checkAllOptions</a></li><li><a href="global.html#checkStoredSettings">checkStoredSettings</a></li><li><a href="global.html#clearContent">clearContent</a></li><li><a href="global.html#close">close</a></li><li><a href="global.html#closeDialog">closeDialog</a></li><li><a href="global.html#commonCodeInit">commonCodeInit</a></li><li><a href="global.html#commonOnAdd">commonOnAdd</a></li><li><a href="global.html#compareIndexes">compareIndexes</a></li><li><a href="global.html#correctionOfInvalidTerm">correctionOfInvalidTerm</a></li><li><a href="global.html#createOverlay">createOverlay</a></li><li><a href="global.html#currentNode">currentNode</a></li><li><a href="global.html#daysInMonth">daysInMonth</a></li><li><a href="global.html#determineColour">determineColour</a></li><li><a href="global.html#disableUpdateBtn">disableUpdateBtn</a></li><li><a href="global.html#doAction">doAction</a></li><li><a href="global.html#doAuthentication">doAuthentication</a></li><li><a href="global.html#doImport">doImport</a></li><li><a href="global.html#doRegister">doRegister</a></li><li><a href="global.html#doSamlLogin">doSamlLogin</a></li><li><a href="global.html#doSearchByID">doSearchByID</a></li><li><a href="global.html#drag_link_line">drag_link_line</a></li><li><a href="global.html#drag_link_source_id">drag_link_source_id</a></li><li><a href="global.html#drag_link_target_id">drag_link_target_id</a></li><li><a href="global.html#drag_link_timer">drag_link_timer</a></li><li><a href="global.html#dragend">dragend</a></li><li><a href="global.html#dragmove">dragmove</a></li><li><a href="global.html#dragstart">dragstart</a></li><li><a href="global.html#editCMS2">editCMS2</a></li><li><a href="global.html#editCMS_ElementCfg">editCMS_ElementCfg</a></li><li><a href="global.html#editCMS_SelectElement">editCMS_SelectElement</a></li><li><a href="global.html#editCMS_SiteMenu">editCMS_SiteMenu</a></li><li><a href="global.html#editCMS_WidgetCfg">editCMS_WidgetCfg</a></li><li><a href="global.html#editSymbology">editSymbology</a></li><li><a href="global.html#editTheme">editTheme</a></li><li><a href="global.html#enable_register">enable_register</a></li><li><a href="global.html#executeFormula">executeFormula</a></li><li><a href="global.html#f">f</a></li><li><a href="global.html#first_level_rty_ID">first_level_rty_ID</a></li><li><a href="global.html#fixCalendarPickerCMDs">fixCalendarPickerCMDs</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#formatGregJulian">formatGregJulian</a></li><li><a href="global.html#fromJD">fromJD</a></li><li><a href="global.html#fromJSDate">fromJSDate</a></li><li><a href="global.html#fset">fset</a></li><li><a href="global.html#getAllChecked">getAllChecked</a></li><li><a href="global.html#getClass">getClass</a></li><li><a href="global.html#getContainer">getContainer</a></li><li><a href="global.html#getDataFromServer">getDataFromServer</a></li><li><a href="global.html#getEntityRadius">getEntityRadius</a></li><li><a href="global.html#getEraFromGregorian">getEraFromGregorian</a></li><li><a href="global.html#getEraFromJapaneseStr">getEraFromJapaneseStr</a></li><li><a href="global.html#getEraLimits">getEraLimits</a></li><li><a href="global.html#getEras">getEras</a></li><li><a href="global.html#getGephiFormat">getGephiFormat</a></li><li><a href="global.html#getKeywords">getKeywords</a></li><li><a href="global.html#getKeywordsNextStep">getKeywordsNextStep</a></li><li><a href="global.html#getLineLength">getLineLength</a></li><li><a href="global.html#getLineWidth">getLineWidth</a></li><li><a href="global.html#getMarkerWidth">getMarkerWidth</a></li><li><a href="global.html#getNodeDataById">getNodeDataById</a></li><li><a href="global.html#getRecentKeywords">getRecentKeywords</a></li><li><a href="global.html#getRecordOverlayData">getRecordOverlayData</a></li><li><a href="global.html#getRelationOverlayData">getRelationOverlayData</a></li><li><a href="global.html#getRulesArray">getRulesArray</a></li><li><a href="global.html#getSelected">getSelected</a></li><li><a href="global.html#getSelection">getSelection</a></li><li><a href="global.html#getSetting">getSetting</a></li><li><a href="global.html#getURL">getURL</a></li><li><a href="global.html#gregorianToJapaneseStr">gregorianToJapaneseStr</a></li><li><a href="global.html#hMapDocument">hMapDocument</a></li><li><a href="global.html#hRecordAction">hRecordAction</a></li><li><a href="global.html#handleNodeAction">handleNodeAction</a></li><li><a href="global.html#handleSettingsInUI">handleSettingsInUI</a></li><li><a href="global.html#hexToFilter">hexToFilter</a></li><li><a href="global.html#hexportMenu">hexportMenu</a></li><li><a href="global.html#imgFilter">imgFilter</a></li><li><a href="global.html#initProfilePreferences">initProfilePreferences</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isA">isA</a></li><li><a href="global.html#isAssocKeyword">isAssocKeyword</a></li><li><a href="global.html#isMonthSpan">isMonthSpan</a></li><li><a href="global.html#isRecentKeyword">isRecentKeyword</a></li><li><a href="global.html#isTemporal">isTemporal</a></li><li><a href="global.html#isValid">isValid</a></li><li><a href="global.html#japaneseToGregorian">japaneseToGregorian</a></li><li><a href="global.html#japaneseToGregorianStr">japaneseToGregorianStr</a></li><li><a href="global.html#keywordLookup">keywordLookup</a></li><li><a href="global.html#loadHtmlContent">loadHtmlContent</a></li><li><a href="global.html#log10">log10</a></li><li><a href="global.html#login_dialog">login_dialog</a></li><li><a href="global.html#lookupEditions">lookupEditions</a></li><li><a href="global.html#lookupGoogle">lookupGoogle</a></li><li><a href="global.html#lookupHathiTrust">lookupHathiTrust</a></li><li><a href="global.html#lookupKarlsruhePortal">lookupKarlsruhePortal</a></li><li><a href="global.html#lookupWorldCat">lookupWorldCat</a></li><li><a href="global.html#mapIds">mapIds</a></li><li><a href="global.html#menuActionHandler">menuActionHandler</a></li><li><a href="global.html#mergeArraysUnique">mergeArraysUnique</a></li><li><a href="global.html#msgToConsole">msgToConsole</a></li><li><a href="global.html#newDate">newDate</a></li><li><a href="global.html#onAdd">onAdd</a></li><li><a href="global.html#onAuthentication">onAuthentication</a></li><li><a href="global.html#onNodeClick">onNodeClick</a></li><li><a href="global.html#onPageInit">onPageInit</a></li><li><a href="global.html#onRecordNodeClick">onRecordNodeClick</a></li><li><a href="global.html#onRemove">onRemove</a></li><li><a href="global.html#onTermSaveError">onTermSaveError</a></li><li><a href="global.html#open">open</a></li><li><a href="global.html#openRecordInTab">openRecordInTab</a></li><li><a href="global.html#openSearchMenu">openSearchMenu</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#popupDialog">popupDialog</a></li><li><a href="global.html#prevSessionExists">prevSessionExists</a></li><li><a href="global.html#project_keywords">project_keywords</a></li><li><a href="global.html#putSetting">putSetting</a></li><li><a href="global.html#removeAssocByID">removeAssocByID</a></li><li><a href="global.html#removeKeyword">removeKeyword</a></li><li><a href="global.html#removeOverlay">removeOverlay</a></li><li><a href="global.html#removeOverlays">removeOverlays</a></li><li><a href="global.html#removeSetting">removeSetting</a></li><li><a href="global.html#renderAssocKeywods">renderAssocKeywods</a></li><li><a href="global.html#renderContent">renderContent</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#saveRules">saveRules</a></li><li><a href="global.html#selectRecord">selectRecord</a></li><li><a href="global.html#setFormulaMode">setFormulaMode</a></li><li><a href="global.html#setGravity">setGravity</a></li><li><a href="global.html#setLinkMode">setLinkMode</a></li><li><a href="global.html#setSelected">setSelected</a></li><li><a href="global.html#setSelection">setSelection</a></li><li><a href="global.html#setValue">setValue</a></li><li><a href="global.html#setupAssocKeywords">setupAssocKeywords</a></li><li><a href="global.html#setupCaptcha">setupCaptcha</a></li><li><a href="global.html#setupRecentWorks">setupRecentWorks</a></li><li><a href="global.html#setupResetPin">setupResetPin</a></li><li><a href="global.html#show">show</a></li><li><a href="global.html#showEditions">showEditions</a></li><li><a href="global.html#showHelp">showHelp</a></li><li><a href="global.html#showKeyword">showKeyword</a></li><li><a href="global.html#showLoginDialog">showLoginDialog</a></li><li><a href="global.html#showNodeInformation">showNodeInformation</a></li><li><a href="global.html#showSearchBuilder">showSearchBuilder</a></li><li><a href="global.html#showSearchFacetedWizard">showSearchFacetedWizard</a></li><li><a href="global.html#showWarningAboutTermUsage">showWarningAboutTermUsage</a></li><li><a href="global.html#simplePointsToWKT">simplePointsToWKT</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#startRecentWork">startRecentWork</a></li><li><a href="global.html#temporalSimplifyDate">temporalSimplifyDate</a></li><li><a href="global.html#temporalToHumanReadableString">temporalToHumanReadableString</a></li><li><a href="global.html#tick">tick</a></li><li><a href="global.html#toJD">toJD</a></li><li><a href="global.html#toJSDate">toJSDate</a></li><li><a href="global.html#translationFromUI">translationFromUI</a></li><li><a href="global.html#translationSupport">translationSupport</a></li><li><a href="global.html#translationToUI">translationToUI</a></li><li><a href="global.html#truncateText">truncateText</a></li><li><a href="global.html#unselectAssoc">unselectAssoc</a></li><li><a href="global.html#updateAssocDisplay">updateAssocDisplay</a></li><li><a href="global.html#updateAssocList">updateAssocList</a></li><li><a href="global.html#updateCircles">updateCircles</a></li><li><a href="global.html#updateCurvedLines">updateCurvedLines</a></li><li><a href="global.html#updateLabels">updateLabels</a></li><li><a href="global.html#updateNodes">updateNodes</a></li><li><a href="global.html#updateRecentKeywordDisplay">updateRecentKeywordDisplay</a></li><li><a href="global.html#updateRectangles">updateRectangles</a></li><li><a href="global.html#updateRuleBuilder">updateRuleBuilder</a></li><li><a href="global.html#updateStatus">updateStatus</a></li><li><a href="global.html#updateStraightLines">updateStraightLines</a></li><li><a href="global.html#validateResetPin">validateResetPin</a></li><li><a href="global.html#visualizeData">visualizeData</a></li><li><a href="global.html#visualizeSelection">visualizeSelection</a></li><li><a href="global.html#weekDay">weekDay</a></li><li><a href="global.html#weekOfYear">weekOfYear</a></li><li><a href="global.html#zoomed">zoomed</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Jul 24 2025 18:09:15 GMT+0400 (GMT+04:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

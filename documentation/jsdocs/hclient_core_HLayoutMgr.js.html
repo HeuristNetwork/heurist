@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: hclient/core/HLayoutMgr.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: hclient/core/HLayoutMgr.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @file HLayoutMgr.js
+ * @brief Web page generator based on JSON configuration.
+ * @fileOverview The HLayoutMgr class is responsible for dynamically generating and managing web page layouts
+ * based on JSON configurations. It handles the initialization of various layout types such as groups, tabs,
+ * accordions, and cardinal layouts (multi-pane). It also initializes and manages Heurist widgets embedded
+ * within these layouts, loading their scripts if necessary. The manager supports converting older HTML-based
+ * layout formats to the new JSON structure and can also render layouts into a human-readable HTML format
+ * for storage or editing. It provides utilities for finding elements and widgets within the layout
+ * configuration, handling different languages, and preparing layout templates.
+ * @project     Heurist academic knowledge management system
+ *
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov &lt;osmakov@gmail.com>
+ * @author Ian Johnson &lt;ian.johnson.heurist@gmail.com>
+ * @since 4.0
+ */
+/* global cfg_widgets, prepareTemplateBlog, layoutMgr, cfg_layouts */
+
+/**
+ * Manages the generation and initialization of web page layouts from JSON configurations.
+ * It supports various layout structures like tabs, accordions, cardinal panes, and groups,
+ * and handles the embedding and initialization of Heurist widgets within these layouts.
+ */
+class HLayoutMgr {
+    
+    pnl_counter;
+    body;
+    _supp_options = {};
+    _isEditMode = false;
+    _main_layout_cfg = null;
+    
+    /**
+     * Initializes a new instance of the HLayoutMgr.
+     * Sets up initial properties like panel counter, body reference, edit mode status,
+     * supplementary options, and main layout configuration.
+     */
+  constructor() {
+
+    this.pnl_counter = 1;
+    this.body = $(document).find("body");
+    this._isEditMode = false;
+    this._supp_options = {};
+    this._main_layout_cfg = null;
+  }
+
+  /**
+   * Assigns a unique key to a layout element if it doesn't already have one.
+   * Also sets a default title and folder status based on children.
+   * This key is used internally for managing layout elements.
+   *
+   * @param {Array&lt;Object>} layout_array - The array of layout configuration objects.
+   * @param {number} i - The index of the element in the layout array to process.
+   * @returns {void}
+   */
+  #layoutInitKey(layout, i) {
+      
+    if(Array.isArray(layout) &amp;&amp; i>=0){
+        layout = layout[i];
+    }  
+      
+    if (!layout.key) {
+      layout.key = this.pnl_counter;
+      layout.title = `&lt;span data-lid="${this.pnl_counter}">${layout.name}&lt;/span>`;
+      layout.folder = layout.children?.length > 0;
+      this.pnl_counter++;
+    }
+  }
+
+  /**
+  * Not fully implemented
+  * At the moment it 
+  * 1) Creates page tree (json) (convertHTMLtoJSON)
+  * 2) Inits widgets only
+  * 
+   * Initializes a layout by parsing existing HTML content within a container.
+   * It looks for elements with `data-heurist-widget` or `data-heurist-app-id` attributes
+   * to identify and initialize widgets.
+   *
+   * @param {(jQuery|HTMLElement|string)} container - The container element whose HTML content will be parsed.
+   * @param {Object} [supp_options] - Supplementary options for widget parameters.
+   * @returns {void} This method primarily has side effects (initializing widgets).
+   */  
+  layoutInitFromHTML( container, supp_options )
+  {
+
+      this._supp_options = supp_options || {};
+
+      container = $(container);
+      
+      let pageTreeData;
+      
+      if(this._isEditMode){
+            pageTreeData = this.convertHTMLtoJSON(container, 0);
+      }
+
+      //****************************
+      //find all elements with data-heurist-cms
+      $.each(container.find('[data-heurist-cms]'), (idx, ele) => {
+          ele = $(ele);
+          
+          let widget_cfg = this.#convertWidgetHTMLtoJSON(ele);
+          if(widget_cfg &amp;&amp; widget_cfg.appid){
+               //widget_cfg.key = this.pnl_counter;
+               //this.pnl_counter++;
+               ele.attr('data-hid', widget_cfg.key);
+               this.#layoutInitWidget(widget_cfg, ele);
+          }
+      });
+      
+      //find all elements with data-heurist-app-id
+      if (container.find('[data-heurist-app-id]').length>0) {
+            //old format v1: html with some widgets
+            window.hWin.HAPI4.LayoutMgr.appInitFromContainer(null, container, this._supp_options);
+      }
+      
+      return pageTreeData;
+  }
+  
+  //
+  //
+  //
+  #layoutInitFromJSON(layout, container, forStorage, isFirstLevel) {
+    
+    if (container == null) {
+      container = document.createElement("div");
+    }
+    container = $(container);
+
+    if (layout == null) {
+      layout = container.text();
+    }
+
+    container.empty();
+
+    const res = layout!==null &amp;&amp; window.hWin.HEURIST4.util.isJSON(layout);
+    if (res === false) 
+    {
+        if (forStorage) {
+            return layout;
+        } else if (typeof layout === "string" &amp;&amp; layout.indexOf("data-heurist-app-id") > 0) {
+            
+            //old format v1: html with some widgets
+            container.html(layout);
+            window.hWin.HAPI4.LayoutMgr.appInitFromContainer(null, container, this._supp_options);
+            return false;
+        }
+
+        layout = [
+            {
+                name: "Page",
+                type: "group",
+                children: [{ name: "Content", type: "text", css: {}, content: layout }],
+            },
+        ];
+    } else {
+        layout = res; //json array
+    }
+
+    if (!Array.isArray(layout)) {
+      layout = [layout];
+    }
+
+    if (isFirstLevel === true) {
+      if (this._supp_options.page_name) {
+        layout[0].name = "Page";
+      }
+      if (this._supp_options.keep_top_config &amp;&amp; this._isEditMode) {
+        this._main_layout_cfg = layout;
+      }
+      layout[0].isPage = true;
+    }
+
+    for (let i = 0; i &lt; layout.length; i++) {
+      this.#layoutInitKey(layout, i);
+
+      const ele = layout[i];
+      switch (ele.type) {
+        case "cardinal":
+          this.layoutInitCardinal(ele, container, forStorage);
+          break;
+        case "tabs":
+          this.layoutInitTabs(ele, container, forStorage);
+          break;
+        case "accordion":
+          this.layoutInitAccordion(ele, container, forStorage);
+          break;
+        default:
+          if (ele.children &amp;&amp; ele.children.length > 0) {
+            this.layoutInitGroup(ele, container, forStorage);
+          } else if ((ele.type &amp;&amp; ele.type.indexOf("text") === 0) || ele.content) {
+            this.#layoutInitText(ele, container, forStorage);
+          } else if (ele.type === "widget" || ele.appid) {
+            this.#layoutAddWidget(ele, container, forStorage);
+          }
+      }
+    }
+
+    if (forStorage) {
+      return container.html();
+    } else {
+      if (isFirstLevel &amp;&amp; this._supp_options &amp;&amp; !this._supp_options.heurist_isJsAllowed) {
+//remove all javascript event attributes
+        this.#layoutSanitize(container);
+      }
+      return layout;
+    }
+  }
+
+  #layoutSanitize(container) {
+    
+    if(!container || container.length==0){
+        return;
+    }  
+      
+    $.each(container.children(), (idx, ele) => {
+      ele = $(ele);
+      this.#layoutSanitize(ele);
+    });
+
+    const ele2 = container.get(0);
+    for (let i = 0; i &lt; ele2.attributes.length; i++) {
+      if (ele2.attributes[i].name.indexOf("on") === 0) {
+        ele2.removeAttribute(ele2.attributes[i].name);
+      }
+    }
+  }
+
+  //  cms-widget - for widgets
+  //  cms-group  - for containers: group,flex,cardinal,tabs,accordion
+  //  cms-content - for content/text
+  //
+  #layoutCreateDiv(layout, classes, forStorage) {
+      
+      if (layout.dom_id &amp;&amp; layout.dom_id.indexOf('cms-group-') === 0) {
+          //id is reassigned on every page reload
+          layout.dom_id = `cms-group-${layout.key}`;
+      }
+
+      let $d;
+
+      if (forStorage) {
+          //attributes
+          // key - unique id withing edit session - it is assigned every time layout recreated in edit mode   
+          // dom_id - unique html id                                                                          
+          // css - css   
+          // bsClasses
+          
+          // appid, type, name
+          // layout.classes - user classes
+          // layout.options - widget options
+          let opts = layout.options?window.hWin.HEURIST4.util.cloneJSON(layout.options):{};
+          if(layout.appid){
+              opts.appid = layout.appid;
+          }else if(layout.type){
+              opts.type = layout.type;
+          }
+          if(layout.name){
+              opts.name = layout.name;
+          }
+          if(layout.classes){
+             opts.classes = layout.classes;
+          }
+          $d = $(`&lt;div id="${layout.dom_id}">&lt;/div>`);
+          opts = JSON.stringify(opts);
+          $d[0].setAttribute('data-heurist-cms', opts);
+          //$d.data('heurist-cms', opts);
+          
+      } else {
+          $d = $(document.createElement("div"));
+
+          if (!layout.dom_id) {
+              
+              do {
+                  let uid = "" + window.hWin.HEURIST4.util.random();
+                  uid = uid.substring(0,4);
+                  
+                  layout.dom_id = layout.appid
+                  ? `cms-widget-${uid}`
+                  : `cms-content-${uid}`;
+              } while (this.body.find(`#${layout.dom_id}`).length > 0);
+          }
+
+          $d.attr("id", layout.dom_id).attr("data-hid", layout.key);
+
+          if (classes) {
+              $d.addClass(classes);
+          }
+      }
+
+      if (layout.classes) { //adds publisher's classes
+              $d.addClass(layout.classes);
+      }
+
+      return $d;
+  }
+  
+  /*
+  
+  */
+  #layoutSetCssAndClasses(layout, element){
+    if (!layout.css) layout.css = {};
+    if (layout.css &amp;&amp; !$.isEmptyObject(layout.css)) {
+      element.css(layout.css);
+    }
+    if (layout.bsClasses){
+        element.addClass(layout.bsClasses);
+    }
+  }
+  
+  /*
+  
+  */
+  layoutInitGroup(layout, container, forStorage) {
+      
+        if(!layout.dom_id) layout.dom_id = 'cms-group-'+layout.key;
+        
+        let $d = this.#layoutCreateDiv(layout, !forStorage &amp;&amp; this._isEditMode?'cms-element brick':'', forStorage);
+        
+        this.#layoutReplaceGroupDiv(container, $d)
+        
+        this.#layoutSetCssAndClasses(layout, $d);
+
+        this.#layoutInitFromJSON(layout.children, $d, forStorage);
+        
+        return $d;
+  }
+
+  /*
+  * assign text content to element
+  */
+  #layoutInitText(layout, container, forStorage) {
+
+        const $d = this.#layoutCreateDiv(
+            layout,
+            !forStorage &amp;&amp; this._isEditMode ? 'tinymce-body cms-element brick' : '', //later need to use either cms-element or brick
+            forStorage
+        );
+        $d.appendTo(container);
+
+        this.#layoutSetCssAndClasses(layout, $d);
+
+        let content = "content";
+        if (forStorage) {
+            const aLangs = Object.keys(layout).filter((key) =>
+                key.indexOf("content") === 0
+            );
+            //save all localizations
+            if (aLangs.length > 1) {
+                aLangs.forEach((lang) => {
+                    const lang_code = lang.substring(7) || 'def';
+                    $(
+                        `&lt;div css="${lang_code === 'def' ? '' : 'display:none'}" data-lang="${lang_code}">${layout[lang]}&lt;/div>`
+                    ).appendTo($d);
+                });
+            } else {
+                $d.html(layout[aLangs[0]]);
+            }
+        } else {
+            //assign text content to element
+            let lang = window.hWin.HAPI4.getLangCode3(this._supp_options['lang'], 'def');
+            content = window.hWin.HAPI4.getContentTranslation(layout, lang);
+
+            if(lang) $d.attr('data-lang', lang);
+
+            
+//TBD - call smarty to perform replaces                     
+/*
+console.log(content);
+            if(content.indexOf('{$')>=0 &amp;&amp; this._supp_options['page']  || this._supp_options['website']){
+                content = content.replace('{$website.title}', this._supp_options.website?.title);
+                content = content.replace('{$website.description}', this._supp_options.website?.description)
+                content = content.replace('{$page.title}', this._supp_options.page?.title)
+                content = content.replace('{$page.description}', this._supp_options.$page?.description)
+            }
+*/            
+            $d.html(content);
+        }
+  }
+  
+  /**
+   * Adds a widget to the layout.
+   *
+   * @param {Object} layout - The JSON configuration for the widget.
+   * @param {jQuery} container - The container to add the widget to.
+   * @returns {void}
+   */
+ #layoutAddWidget(layout, container, forStorage){
+
+        let $d = this.#layoutCreateDiv(layout, !forStorage &amp;&amp; this._isEditMode?'heurist-widget cms-element brick':'');
+
+        //remove previous one
+        let old_widget = container.find('div[data-hid='+layout.key+']');
+        if(old_widget.length>0){
+            $d.insertBefore(old_widget);
+            old_widget.remove();
+        }else{
+            $d.appendTo(container);    
+        }
+        
+        if(!layout.css){
+            layout.css  = {};    
+            layout.css['minHeight'] = '100px';
+           
+        } 
+        if(!layout.css['position']) layout.css['position'] = 'relative';
+        
+        //default values for various widgets
+        /*
+        if(layout.appid=='heurist_Map' ||  layout.appid=='heurist_SearchTree' || 
+           layout.appid=='heurist_resultList' || layout.appid=='heurist_resultListExt'){
+        }
+        
+        if(layout.appid=='heurist_Search'){
+            if(layout.css['display']!='flex'){
+               
+            }
+            if(!layout.css['width']){
+               
+            }
+        }else if(layout.appid=='heurist_Map'){
+            if(!layout.css['height']){
+               
+            }
+        }*/
+
+        
+        //default min-height position depends on widget
+        let app = this.#getWidgetById(layout.appid);
+        if(app.minw>0 &amp;&amp; !layout.css['minWidth']){
+            layout.css['minWidth'] = app.minw;
+        }
+        if(app.minh>0 &amp;&amp; !layout.css['minHeight']){
+            layout.css['minHeight'] = app.minh;
+        }
+
+        if(layout.css &amp;&amp; !$.isEmptyObject(layout)){
+            
+            $d.removeAttr('style');
+            $d.css( layout.css );    
+        }
+        
+        if(!forStorage){
+            this.#layoutInitWidget(layout, container.find('div[data-hid='+layout.key+']'));
+        }
+
+    }
+    
+    //
+    // returns widget descrition/definitions from cfg_widgets
+    // this object contains name of widget, path to js, some default options
+    //
+    #getWidgetById(id){
+
+        let i;
+        for(i=0; i&lt;window.hWin.cfg_widgets.length; i++){
+            if(window.hWin.cfg_widgets[i].id==id){
+                return window.hWin.cfg_widgets[i];
+            }
+        }
+        return null;
+    }
+    
+    //
+    //
+    //
+    #layoutInitWidget(layout, container){
+
+        let app = this.#getWidgetById(layout.appid); //find in app array (appid is heurist_Search for example)
+
+        if(!layout.options) layout.options = {};
+
+        let widgetOptions = window.hWin.HEURIST4.util.cloneJSON(layout.options);
+         
+        if(layout.appid=='heurist_Map'){
+            widgetOptions['leaflet'] = true;
+            widgetOptions['init_at_once'] = true;
+        }
+        
+        if(this._supp_options[layout.appid]){
+            widgetOptions = $.extend(widgetOptions, this._supp_options[layout.appid]);        
+            
+            if(layout.appid=='heurist_Navigation'){
+                //keep supp_options separately for Navigation - since they are required for page init 
+                widgetOptions['supp_options'] = this._supp_options;
+            }
+        }
+        
+        //lang,siteId,isEditMode
+        
+        if(this._supp_options['lang']){
+            // xx - means it will use current language
+            widgetOptions['language'] = window.hWin.HAPI4.getLangCode3(this._supp_options['lang'],'def');    
+        }
+        if(this._supp_options['siteId']){
+            widgetOptions['siteId'] = this._supp_options['siteId'];
+        }
+        widgetOptions['isEditMode'] = this._supp_options['isEditMode'];
+        
+        if (app &amp;&amp; app.script &amp;&amp; app.widgetname) { //widgetname - function name to init widget
+
+            if(window.hWin.HEURIST4.util.isFunction($('body')[app.widgetname])){ //OK! widget script js has been loaded            
+
+                container[app.widgetname]( widgetOptions );   //call function
+                
+                container.attr('data-widgetname',app.widgetname);
+
+            }else{
+
+                $.getScript( window.hWin.HAPI4.baseURL + app.script, function() {  //+'?t='+(new Date().getTime())
+                    if(window.hWin.HEURIST4.util.isFunction(container[app.widgetname])){
+                        container[app.widgetname]( widgetOptions );   //call function
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: `Widget ${app.widgetname} not loaded. Verify your configuration`,
+                            error_title: 'Widget loading failed',
+                            status: window.hWin.ResponseStatus.UNKNOWN_ERROR
+                        });
+                    }
+                });
+
+            }
+
+        }
+        
+
+    }
+  
+    /*
+    *
+    */
+    #layoutReplaceGroupDiv(container, new_element){
+
+        const dom_id = new_element.attr('id');
+        
+        //find old one
+        let old_element;
+        if(container.attr('id')==dom_id){
+            old_element = container;    
+        }else{
+            old_element = container.find('#'+dom_id);
+        }
+        
+        //replace old one
+        if(old_element.length>0){
+            new_element.insertBefore(old_element);
+            old_element.remove();
+        }else{
+            new_element.appendTo(container);
+        }
+        
+        //remove old header (for tabs)
+        //$('#'+dom_id+'-header').remove();
+    }    
+    
+  
+/**
+   * Initializes or reinitializes a cardinal (multi-pane) layout structure within the given container.
+   * Allows for defining regions like north, south, east, west, and center.
+   *
+   * @param {Object} layout - The JSON configuration object for the cardinal layout.
+   * @param {jQuery} container - The jQuery object representing the container element for the cardinal layout.
+   * @returns {void}
+   */
+    layoutInitCardinal(layout, container, forStorage){
+
+        if(!layout.dom_id) layout.dom_id = 'cms-group-'+layout.key;
+        
+        let $parent = this.#layoutCreateDiv(layout, '', forStorage);
+        
+        this.#layoutReplaceGroupDiv(container, $parent)
+        
+        if( layout.css &amp;&amp; !$.isEmptyObject(layout.css) ){
+            $parent.css( layout.css );
+        }
+        
+        let layout_opts = {applyDefaultStyles: true, maskContents: true, enableCursorHotkey: false};
+    
+        for(let i=0; i&lt;layout.children.length; i++){
+            
+            this.#layoutInitKey(layout.children, i);
+            
+            let lpane = layout.children[i];
+            let pos = lpane.type;
+            
+            let opts = lpane.options;
+            if(!opts) opts = {};
+            
+            if(!$.isEmptyObject(opts)){
+            
+                if(opts.init){
+                    layout_opts[pos+'__initHidden'] = (opts.init=='hidden');
+                    layout_opts[pos+'__initClosed'] = (opts.init=='closed');
+                }
+                
+                if(opts.size){
+                    layout_opts[pos+'__size'] = opts.size;
+                }
+                if(window.hWin.HEURIST4.util.isnull(opts.resizable) || opts.resizable ){
+                    if(opts.minSize){
+                        layout_opts[pos+'__minSize'] = opts.minSize;
+                    }
+                    if(opts.maxSize){
+                        layout_opts[pos+'__maxSize'] = opts.maxSize;
+                    }
+                    layout_opts[pos+'__resizable'] = true;
+                }else{
+                    layout_opts[pos+'__spacing_open'] = 0;
+                    layout_opts[pos+'__resizable'] = false;
+                }
+            }
+            
+            let $d2;
+
+            if(forStorage){
+                
+                $d2 = this.#layoutCreateDiv( layout.children[i], '', forStorage )
+            
+                if(!$.isEmptyObject(layout.children[i].options)){
+                    $d2.attr('data-cms-options',JSON.stringify(layout.children[i].options));
+                }
+            
+                $d2.appendTo($parent);
+            }else{
+                //create cardinal div
+                let $d = $(document.createElement('div'));
+            
+                $d.addClass('ui-layout-'+pos)
+                  .appendTo($parent);
+
+                if(layout.children[i].children.length>1){
+                  
+                    if(!layout.dom_id) lpane.dom_id = 'cms-group-'+lpane.key;
+                    //@todo additional container for children>1        
+                    layout_opts[pos+'__contentSelector'] = '#'+lpane.dom_id;
+                    
+                    $d2 = this.#layoutCreateDiv(lpane, 'ui-layout-content2');  
+                    $d2.appendTo($d);
+                
+                }else if(layout.children[i].children.length>0){
+                    
+                    let dom_id = layout.children[i].children[0].dom_id;
+                    if(!dom_id){
+                        dom_id = 'cms-group-'+lpane.key;
+                        layout.children[i].children[0].dom_id = dom_id;
+                    }
+                    if(!layout.children[i].children[0].classes){
+                        layout.children[i].children[0].classes = '';
+                    }
+                    layout.children[i].children[0].classes += ' ui-layout-content2';
+                    
+                    layout_opts[pos+'__contentSelector'] =  '#'+dom_id;
+                    $d2 = $d;
+                }     
+            }
+                    
+            //init                    
+            this.#layoutInitFromJSON(layout.children[i].children, $d2, forStorage);
+                    
+        }//for
+    
+        if(!forStorage){
+            $parent.layout( layout_opts );
+        }
+      
+  }
+  
+  /**
+   * Initializes or reinitializes a tabbed layout structure within the given container.
+   * This is typically used during layout editing or dynamic updates.
+   *
+   * @param {Object} layout - The JSON configuration object for the tabs layout.
+   * @param {jQuery} container - The jQuery object representing the container element for the tabs.
+   * @returns {void}
+   */
+  layoutInitTabs(layout, container, forStorage){
+
+        if(!layout.dom_id) layout.dom_id = 'cms-group-'+layout.key;
+        
+        let $d = this.#layoutCreateDiv(layout, !forStorage &amp;&amp; this._isEditMode?'cms-element brick':'', forStorage);
+                                          
+        this.#layoutReplaceGroupDiv(container, $d)
+        this.#layoutSetCssAndClasses(layout, $d);     
+        
+        //adds tab panels    
+        this.#layoutInitFromJSON(layout.children, $d, forStorage);
+        
+        if(!forStorage) {
+            //adds tab header
+            let groupTabHeader = $('&lt;ul>').attr('id',layout.dom_id+'-header');
+
+            for(let i=0; i&lt;layout.children.length; i++){
+                $('&lt;li>').html('&lt;a href="#'+layout.children[i].dom_id
+                                    +'">&lt;span style="font-weight:bold">'
+                                    +layout.children[i].name+'&lt;/span>&lt;/a>')
+                            .appendTo(groupTabHeader);
+            }
+            
+            if(!layout.options?.nav_type){
+                if(!layout.options) layout.options = {};
+                layout.options.nav_type='nav-jquery';
+            }
+            
+            if(layout.options?.nav_type!='nav-jquery'){
+                //d-flex align-items-start
+                
+                //move all children to tabContent
+                let tabContent = $('&lt;div>').addClass('tab-content');
+                $d.children().appendTo(tabContent);
+                
+                tabContent.prependTo($d);
+                groupTabHeader.prependTo($d);
+                
+                // adds bootstrap classes
+                groupTabHeader.addClass('nav');
+                groupTabHeader.addClass(layout.options.nav_type);
+                
+                if(layout.options?.nav_dir=='nav-col'){
+                    groupTabHeader.addClass('flex-column');
+                    $d.addClass('d-flex align-items-start');
+                }
+                groupTabHeader.find('li').addClass('nav-item');
+                groupTabHeader.find('li>a').addClass('nav-link')
+                    .attr('data-bs-toggle','tab');
+
+                $(groupTabHeader.find('li>a')[0]).addClass('active');
+                    
+                tabContent.children().addClass('tab-pane fade');
+                $(tabContent.children()[0]).addClass('show active');
+                
+            }else{
+                groupTabHeader.prependTo($d); //adds as a first child
+                $d.tabs();        
+            }
+        }
+        
+        return $d;
+        
+    }
+    
+  /**
+   * Initializes or reinitializes an accordion layout structure within the given container.
+   * Useful for layout editing or dynamic content updates.
+   *
+   * @param {Object} layout - The JSON configuration object for the accordion layout.
+   * @param {jQuery} container - The jQuery object representing the container element for the accordion.
+   * @returns {void}
+   */
+    layoutInitAccordion(layout, container, forStorage){
+       
+        if(!layout.dom_id) layout.dom_id = 'cms-group-'+layout.key;
+        
+        let $d = this.#layoutCreateDiv(layout, !forStorage &amp;&amp; this._isEditMode?'cms-element brick':'', forStorage);
+        
+        this.#layoutReplaceGroupDiv(container, $d)
+        this.#layoutSetCssAndClasses(layout, $d);    
+       
+        //accordion panels    
+        this.#layoutInitFromJSON(layout.children, $d, forStorage);
+
+
+        if(!forStorage) {
+            
+            if(layout.options?.acc_type=='acc-bs'){
+                // adds bootstrap classes
+                $d.addClass('accordion');
+                
+                const isBtnCollapsed = layout.options?.acc_collapse?'collapsed':'';
+                const isItemShow = layout.options?.acc_collapse?'':'show';
+
+                for(let i=0; i&lt;layout.children.length; i++){
+              
+                    let $child = $d.find('#'+layout.children[i].dom_id);
+                    
+      let $item = $(`&lt;div class="accordion-item">
+        &lt;h2 class="accordion-header">
+          &lt;button class="accordion-button ${isBtnCollapsed}" type="button" data-bs-toggle="collapse" data-bs-target="#${layout.children[i].dom_id}">
+            ${layout.children[i].name}
+          &lt;/button>
+        &lt;/h2>
+      &lt;/div>`);
+      $d.append($item);
+      $child.addClass(`accordion-collapse collapse accordion-body ${isItemShow}`).attr('data-bs-parent',`#${layout.dom_id}`);
+      $item.append($child);
+      
+    /*
+        &lt;div id="${layout.children[i].dom_id}" class="accordion-collapse collapse show" data-bs-parent="#${layout.dom_id}">
+          &lt;div class="accordion-body">
+
+          &lt;/div>
+        &lt;/div>
+    */                            
+                }//for children
+                
+            }else{
+                
+                //accordion headers
+                for(let i=0; i&lt;layout.children.length; i++){
+                    const child_dom_id = '#'+layout.children[i].dom_id;
+                    $('&lt;h2>').html( layout.children[i].name )
+                             .insertBefore(child_dom_id);
+                }
+                
+                $d.accordion({heightStyle: "content", 
+                      active: false,
+                      //active:(currGroupType == 'expanded')?0:false,
+                      collapsible: layout.options?.acc_collapse!==false });        
+            }
+        }
+        
+        return $d;
+    }
+    
+    //
+    // Find configuration for element in array by internal key property
+    //
+    #layoutContentFindElement(content, ele_key){
+
+        if(!Array.isArray(content)){
+            if(content.key==ele_key){
+                return content;    
+            }
+            if(content.children &amp;&amp; content.children.length>0){
+                return this.#layoutContentFindElement(content.children, ele_key);    
+            }else{
+                return null;
+            }
+        }
+        
+        for(let i=0; i&lt;content.length; i++){
+            if(content[i].key == ele_key){
+                return  content[i];
+            }else if(content[i].children &amp;&amp; content[i].children.length>0){
+                let res = this.#layoutContentFindElement(content[i].children, ele_key);    
+                if(res) return res;
+            }
+        }
+        return null; //not found
+    }
+    
+    //
+    // Find widget by application/widget name in cfg_widgets such as "heurist_SearchInput"
+    //
+    #layoutContentFindWidget(content, widget_name){
+        
+        if(!Array.isArray(content)){
+            if(content.children &amp;&amp; content.children.length>0){
+                return this.#layoutContentFindWidget(content.children, widget_name);    
+            }else{
+                return null;
+            }
+        }
+        
+        for(let i=0; i&lt;content.length; i++){
+            if(content[i].appid == widget_name){
+                return  content[i];
+            }else if(content[i].children &amp;&amp; content[i].children.length>0){
+                let res = this.#layoutContentFindWidget(content[i].children, widget_name);    
+                if(res) return res;
+            }
+        }
+        return null; //not found
+    }
+
+    //
+    //
+    //
+    #layoutContentFindAllWidget(content){
+
+        let res = [];
+        
+        if(!Array.isArray(content)){
+            if(content.children &amp;&amp; content.children.length>0){
+                let res2 =  this.#layoutContentFindAllWidget(content.children);    
+                if(res2) res = res.concat(res2);
+            }else{
+                return null;
+            }
+        }
+        
+        for(let i=0; i&lt;content.length; i++){
+            if(content[i].appid){
+                res.push(content[i]);
+            }else if(content[i].children &amp;&amp; content[i].children.length>0){
+                let res2 = this.#layoutContentFindAllWidget(content[i].children);    
+                if(res2) res = res.concat(res2);
+            }
+        }
+        return res;
+    }
+    
+    //
+    // Finds most used realm id 
+    //
+    #layoutContentFindMainRealm(content){
+        //find all widgets on page
+        let res = {};
+        let widgets = this.#layoutContentFindAllWidget(content);
+        for(let i=0; i&lt;widgets.length; i++){
+            if(!widgets[i].options.search_page &amp;&amp; widgets[i].options.search_realm){
+                if(res[widgets[i].options.search_realm]>0){
+                    res[widgets[i].options.search_realm]++;
+                }else{
+                    res[widgets[i].options.search_realm]=1;
+                }
+            }
+        }
+        //find max usage
+        let max_usage = 0; 
+        let max_sg = ''
+        widgets = Object.keys(res);
+        for(let i=0; i&lt;widgets.length; i++){
+            if(res[widgets[i]]>max_usage){
+                max_usage = res[widgets[i]];
+                max_sg = widgets[i];
+            }
+        }
+        return max_sg;
+    }
+
+    //
+    // Find parent element for given key
+    //
+    #layoutContentFindParent(parent, ele_key){
+        
+        let children;
+        if(Array.isArray(parent)){
+            children = parent;
+            parent = 'root';
+        }else{
+            children = parent.children;    
+        }
+        
+        for(let i=0; i&lt;children.length; i++){
+            if(children[i].key == ele_key){
+                return  parent;
+            }else if(children[i].children &amp;&amp; children[i].children.length>0){
+                let res = this.#layoutContentFindParent(children[i], ele_key);    
+                if(res) return res;
+            }
+        }
+        return false; //not found
+    }
+    
+    //
+    // Replace element
+    //    
+    #layoutContentSaveElement(content, new_cfg){
+            
+        let ele_key = new_cfg.key;
+        
+        for(let i=0; i&lt;content.length; i++){
+            if(content[i].key == ele_key){
+                if(new_cfg.type &amp;&amp; new_cfg.type.indexOf('text')==0){
+                   content[i].content = new_cfg.content;
+                }
+                content[i] = new_cfg;
+                return true 
+            }else if(content[i].children &amp;&amp; content[i].children.length>0){
+                if (this.#layoutContentSaveElement(content[i].children, new_cfg)){
+                    return true;
+                }
+            }
+        }
+
+        return false;            
+    }
+    
+    //
+    //
+    //
+    #prepareTemplate(layout, callback){ 
+       
+        if(layout.template=='default'){
+        
+           callback.call(this, layout.children[0]); 
+            
+        }else if(layout.template=='blog'){
+            
+           let ele = this.#layoutContentFindWidget(layout, 'heurist_SearchTree');
+           if (ele &amp;&amp; ele.options.init_svsID=='????') {
+                layout.template = null;
+
+                try{
+                
+                let that = this;                    
+                    
+                let sURL2 = window.hWin.HAPI4.baseURL+'hclient/widgets/cms/templates/snippets/blog.js';
+                // 3. Execute template script to replace template variables, adds filters and smarty templates
+                    $.getScript(sURL2, function(data, textStatus, jqxhr){ //it will trigger oncomplete
+                          //function in blog.js
+                          prepareTemplateBlog(that, layout, callback);
+                          
+                    }).fail(function( jqxhr, settings, exception ) {
+                        console.error( 'Error in template script: '+exception );
+                    });
+                    
+                    return true;    
+                    
+                }catch{
+                    alert('Error in blog template script');
+                }
+           }
+        }
+    }
+        
+    
+    //
+    // Converts html to layout json
+    //
+    convertHTMLtoJSON(container, lvl){
+
+        let res = [];
+        let children = container.children();
+        let that = this;
+        
+
+        if(lvl==0 &amp;&amp; container.find('div[data-heurist-app-id]').length==0 &amp;&amp; container.find('div[data-heurist-cms]').length==0){
+
+            let ele;
+            if(children.length==1){
+                ele = $(children[0]);
+            }else{
+                ele = $('&lt;div>');
+                if(children.length>0){
+                    container.children().appendTo(ele);
+                }
+                ele.appendTo( container );
+            }
+            
+            res.push({name:'Content', type:"text",  content: ele[0].outerHTML });
+            if(this._isEditMode){
+                this.#layoutInitKey(res, 0);
+                ele.attr('data-hid', res[0].key);
+                ele.addClass('tinymce-body cms-element brick');
+            }
+            
+        }else{
+            
+        $.each(children, function(idx, ele){
+
+            ele = $(ele);
+            
+            let child;
+            
+            let cmsClasses = 'cms-element brick';
+            
+            let widget_cfg = that.#convertWidgetHTMLtoJSON(ele);
+            /*
+            if(ele.attr('data-heurist-app-id')){
+                //this is widget
+                let opts = window.hWin.HEURIST4.util.isJSON(ele.text());
+
+                child = {appid: ele.attr('data-heurist-app-id'),
+                    options: opts};
+
+                if(opts.__widget_name){
+                    child.name = opts.__widget_name.replaceAll('=','').trim();
+                }
+                if(!child.name) child.name = "Widget "+lvl+'.'+idx;
+            */
+            if(widget_cfg &amp;&amp; widget_cfg.appid){
+                
+                child = widget_cfg;
+                //widget_cfg.key = this.pnl_counter;
+                //this.pnl_counter++;
+                if(!child.name) child.name = `Widget ${lvl}.${idx}`;
+                
+            }else if(widget_cfg &amp;&amp; widget_cfg.type!='text') {
+                //publisher defined GROUP|tabs|accordion|cardinal
+                child = widget_cfg;
+                if(!child.name) child.name = `Group ${lvl}.${idx}`;
+                child.children = that.convertHTMLtoJSON(ele, lvl+1);
+                
+            }else if(widget_cfg?.type=='text' || ele.find('div[data-heurist-app-id]').length==0 &amp;&amp; ele.find('div[data-heurist-cms]').length==0){
+                
+                //no widgets among children - convert to content
+                child = widget_cfg?widget_cfg:{type: 'text'};
+                
+                if(!child.name) child.name = `Content ${lvl}.${idx}`;
+                child.content = ele[0].innerHTML;
+                cmsClasses = 'tinymce-body '+cmsClasses;
+
+            }else{
+                //assume these is a group of mixed unstructured content
+                child = {name:`Group ${lvl}.${idx}`, type:'group', folder:true};
+                
+                child.children = that.convertHTMLtoJSON(ele, lvl+1);
+                /*                
+                cmsClasses = 'tinymce-body '+cmsClasses;
+                //find all elements with data-heurist-cms
+                $.each(ele.find('[data-heurist-cms]'), (idx, ele2) => {
+                      ele2 = $(ele2);
+                      let widget_cfg = that.#convertWidgetHTMLtoJSON(ele2);
+                      that.#layoutInitKey( widget_cfg );
+                      if(widget_cfg){
+                          widget_cfg.mixed = true;
+                          res.push(widget_cfg);
+                      }
+                });
+                */
+            }
+
+            if(child){
+                if(ele.attr('style') &amp;&amp; !child['css']){
+                    child['css'] = that.#css2json(ele.attr('style'));    
+                }
+                if(ele.attr('class')){
+                    if(!child['classes']) child['classes'] = '';
+                    child['classes'] += ele.attr('class');
+                }
+                
+                if(this._isEditMode){
+                    that.#layoutInitKey(child);
+                    ele.attr('data-hid', child.key);
+                    ele.addClass(cmsClasses);
+                }
+
+                res.push(child);
+            }
+        }); //each children
+        
+        }
+
+        if(lvl == 0){ //PAGE wrapper for root level
+            let root_css = {};
+            let root_cfg = that.#convertWidgetHTMLtoJSON(container);
+            if(!root_cfg){
+                root_cfg = {name:'Page', type:'group', folder:true, isPage:true, children:res};
+            }else if(root_cfg.type=='group'){
+                root_cfg['children'] = res; 
+            }
+            if(container.attr('style')){
+                root_css = that.#css2json(container.attr('style'));    
+                root_cfg['css'] = root_css;
+            }
+            if(container.attr('class')){
+                if(!root_cfg['classes']) root_cfg['classes'] = '';
+                root_cfg['classes'] += container.attr('class');
+            }
+            
+            res = root_cfg;
+            this.#layoutInitKey(res, 0);
+            container.attr('data-hid', res.key).addClass('cms-element');
+        }
+
+        return res;
+  }
+
+    
+  /*
+  * Converts element with widget config to JSON configuration
+  *  data-heurist-cms="{appid: , type: }"
+  */ 
+  #convertWidgetHTMLtoJSON(element){
+
+      let widgetId = element.attr('data-heurist-cms');
+      
+      if(!widgetId){ //old version
+          widgetId = element.attr('data-heurist-app-id');
+      }
+
+      if(!widgetId || widgetId=='text'){
+          //widget is not defined
+          return null;    
+      }
+
+      //widget configuration is value of attribute      
+      let widget_cfg = window.hWin.HEURIST4.util.isJSON(widgetId);
+
+      if(widget_cfg){ //attribute value is valid json
+          widgetId = widget_cfg.appid || widget_cfg.type;
+          if(widgetId=='text' || widgetId?.type=='text'){
+               return widget_cfg;    
+          }
+      }else{          
+         //take configuration from content of div
+         widget_cfg = window.hWin.HEURIST4.util.isJSON(element.text());
+         if(widget_cfg){
+             element.empty();
+             if(widgetId=='app'){
+                widgetId = widget_cfg.appid;
+             }
+         }
+      }
+      
+      if(!widget_cfg) widget_cfg = {};
+      if(!widget_cfg.options){
+            widget_cfg.options = window.hWin.HEURIST4.util.cloneJSON(widget_cfg);
+            //except appid, name, type, classes
+            delete widget_cfg.options.appid;
+            delete widget_cfg.options.name;
+            delete widget_cfg.options.type;
+            delete widget_cfg.options.classes;
+      }
+      
+      if(widgetId=='group' || widgetId=='tabs' || widgetId=='accordion'){
+
+          widget_cfg.type = widgetId;
+          widget_cfg.folder = true;
+          
+      }else{
+          if(!widget_cfg.appid) widget_cfg.appid = widgetId;
+          let app = this.#getWidgetById(widget_cfg.appid);
+
+          if(!widget_cfg.name){
+            const defName = app?app.name:'Widget not defined';
+            widget_cfg.name = defName;
+          }
+      }
+      
+      widget_cfg.dom_id = element.attr('id');
+      
+      if(element.attr('style') &amp;&amp; !widget_cfg['css']){
+        widget_cfg['css'] = this.#css2json(element.attr('style'));    
+      }
+      
+      return widget_cfg;
+  }
+    
+    //
+    //
+    //
+    #css2json(css) {
+        let s = {};
+        if (!css) return s;
+        if (css instanceof CSSStyleDeclaration) {
+            for (let i in css) {
+                if ((css[i]).toLowerCase()) {
+                    s[(css[i]).toLowerCase()] = (css[css[i]]);
+                }        
+            }
+        } else if (typeof css == "string") {
+            css = css.split(';');
+            for (let i in css) {
+                let vs = css[i].split(':');
+                const key = String(vs.shift()).trim();
+                const val = vs.join(':').trim();
+                s[key.toLowerCase()] = val;
+            }
+        }
+        return s;
+    }    
+
+
+  //============================================================================
+  // Public methods
+
+    
+    // NEW 
+    // Convert from JSON to human readable HTML string (to store in record page)
+    // (without widget initialization)
+    // 
+    //  &lt;div data-heurist-cms='cardinal|tabs|accordion|text'>
+    //  &lt;div data-heurist-cms='{"type":"cardinal|tabs|accordion|text","options":...}'
+    //  &lt;div data-heurist-cms='{"appid":"HRecordList","searchDomain":"sr1","viewMode": "offcanvas-start"}'
+    //  &lt;div data-heurist-cms='{"appid":"HRecordList","searchDomain":"sr1","viewMode": "offcanvas-start"}'
+    //  &lt;div data-heurist-cms="HRecordList">{options}&lt;/div>
+    //
+  /**
+   * Converts a JSON layout configuration into a human-readable HTML string representation.
+   * This HTML can be used for storage or for display in contexts where live widgets are not needed.
+   * The private version also performs a round-trip conversion (JSON -> HTML -> JSON) for debugging.
+   *
+   * @param {(Array&lt;Object>|Object)} content - The JSON layout configuration.
+   * @returns {Array&lt;Object>|Object} The result of converting the generated HTML back to JSON (primarily for debugging from the private method).
+   */
+   convertJSONtoHTML(content) {
+        
+        //from json
+        //to html for storage        forStorage = true
+        let res = this.#layoutInitFromJSON(content, null, true, true);
+        
+        //TEST PURPOSE and back to json
+        //res = this.convertHTMLtoJSON(res, 0);
+        
+        console.log(res);
+        
+        return res;
+    }
+      
+  
+  /**
+   * Converts an older v1 HTML-based CMS layout format to the current JSON configuration format.
+   * In the v1 format, widget configurations are embedded within HTML elements using `data-heurist-app-id`.
+   *
+   * @param {string} layout_html - The HTML string of the old layout format.
+   * @param {(jQuery|HTMLElement|string)} container_element - The container element where the old layout HTML will be temporarily rendered for parsing.
+   * @returns {Array&lt;Object>} The page configuration in the new JSON format.
+   */
+  convertOldCmsFormat(layout, container) {
+    container = $(container);
+    container.empty();
+    container.html(layout);
+    return this.convertHTMLtoJSON(container, 0);
+  }
+  
+  /**
+   * Assigns a unique key to a layout element if it doesn't already have one.
+   * Also sets a default title and folder status based on children.
+   * This key is used internally for managing layout elements.
+   *
+   * @param {Array&lt;Object>} layout_array - The array of layout configuration objects.
+   * @param {number} i - The index of the element in the layout array to process.
+   * @returns {void}
+   */
+    layoutInitKey(layout, i) {
+        this.#layoutInitKey(layout, i);
+    }
+
+  /**
+   * Finds a specific layout element within a layout configuration tree by its internal key.
+   *
+   * @param {(Array&lt;Object>|Object)} layout_cfg - The layout configuration (or a part of it) to search within.
+   * @param {(string|number)} ele_key - The unique key of the element to find.
+   * @returns {Object|null} The found layout element configuration, or null if not found.
+   */
+   layoutContentFindElement(layout_cfg, ele_key) {
+    return this.#layoutContentFindElement(layout_cfg, ele_key);
+   }
+
+
+  /**
+   * Finds the parent configuration object of a layout element specified by its key.
+   *
+   * @param {(Array&lt;Object>|Object)} parent_config - The layout configuration (or a part of it, or 'root' for the top level) to search within.
+   * @param {(string|number)} ele_key - The key of the element whose parent is to be found.
+   * @returns {Object|string|false} The parent configuration object, 'root' if the element is at the top level, or false if not found.
+   */
+   layoutContentFindParent(parent_config, ele_key) {
+    return this.#layoutContentFindParent(parent_config, ele_key);
+  }
+
+
+  /**
+   * Finds a widget configuration within a layout tree by its application ID (e.g., "heurist_SearchInput").
+   *
+   * @param {(Array&lt;Object>|Object)} layout_cfg - The layout configuration to search within.
+   * @param {string} widget_name - The `appid` of the widget to find.
+   * @returns {Object|null} The found widget configuration object, or null if not found.
+   */
+   layoutContentFindWidget(layout_cfg, widget_name) {
+    return this.#layoutContentFindWidget(layout_cfg, widget_name);
+  }
+
+
+  /**
+   * Finds the most frequently used `search_realm` ID among widgets in the layout configuration.
+   * This can be used to determine a default or primary realm for the page.
+   *
+   * @param {(Array&lt;Object>|Object)} layout_cfg - The layout configuration to analyze.
+   * @returns {string} The `search_realm` ID that appears most often, or an empty string if none are found.
+   */
+   layoutContentFindMainRealm(layout_cfg) {
+    return this.#layoutContentFindMainRealm(layout_cfg);
+  }
+
+
+  /**
+   * Updates an element within the layout configuration JSON with new values.
+   * The element is identified by its `key` property in `new_cfg`.
+   *
+   * @param {Array&lt;Object>} layout_cfg - The layout configuration array to update.
+   * @param {Object} new_cfg - The new configuration for the element, including its `key`.
+   * @returns {boolean} True if the element was found and updated, false otherwise.
+   */
+   layoutContentSaveElement(layout_cfg, new_cfg) {
+    return this.#layoutContentSaveElement(layout_cfg, new_cfg);
+  }
+
+
+  /**
+   * Sets the edit mode for the layout manager.
+   *
+   * @param {boolean} newmode - True to enable edit mode, false to disable.
+   * @returns {void}
+   */
+   setEditMode(newmode) {
+    this.isEditMode = newmode;
+  }
+
+   /**
+   * Prepares a layout template, potentially loading additional scripts or modifying the configuration.
+   * For example, for a 'blog' template, it might load specific scripts and then invoke a callback.
+   *
+   * @param {Object} layout_config - The layout configuration object, which may include a `template` property.
+   * @param {function} callback - A callback function to be executed after template preparation.
+   * It's called with `this` set to the HLayoutMgr instance and the relevant part of the layout as an argument.
+   * @returns {boolean|undefined} True if an asynchronous operation (like script loading) was initiated, otherwise undefined.
+   */
+    prepareTemplate(layout_config, callback) {
+        return this.#prepareTemplate(layout_config, callback); // Added return
+      }
+
+
+  /**
+   * Checks if all Heurist widgets currently in the document body have completed their initialization.
+   *
+   * @returns {boolean} True if all widgets are initialized, false otherwise.
+   */
+ layoutCheckWidgets() {
+    const widgets = this.body.find("div[data-widgetname]");
+    let are_all_widgets_inited = true;
+
+    $.each(widgets, (i, item) => {
+      const widgetname = $(item).attr("data-widgetname");
+      if (widgetname) {
+        const is_inited =
+          $(item)[widgetname]("instance") &amp;&amp;
+          $(item)[widgetname]("option", "init_completed");
+          
+        if (is_inited === false) {
+          are_all_widgets_inited = false;
+          return false;
+        }
+      }
+    });
+    return are_all_widgets_inited;
+ }
+  
+  /**
+   * Finds a predefined layout configuration by its ID from a global `cfg_layouts` array.
+   *
+   * @param {string} id - The ID of the predefined layout to find.
+   * @returns {Object|null} The layout configuration object if found, otherwise null.
+   */
+  layoutGetById(id){
+        if(id){
+            id = id.toLowerCase();
+            for(let i=0; i&lt;window.hWin.cfg_layouts.length; i++){
+                if(window.hWin.cfg_layouts[i].id.toLowerCase()==id){
+                    return window.hWin.cfg_layouts[i];
+                }
+            }
+        }
+        return null;
+  }    
+
+
+  /**
+   * Main method to initialize a layout. It generates HTML from the given layout configuration
+   * (which can be JSON, HTML string, or sourced from the container itself) and initializes any widgets.
+   *
+   * @param {(Object|Array&lt;Object>|string|null)} layout - The page layout configuration.
+   * Can be a JSON object/array, an HTML string, or null/undefined to infer from the container's content.
+   * @param {(jQuery|HTMLElement|string)} container - The container element to render the layout into.
+   * @param {Object} [supp_options] - Supplementary options that can override or extend widget parameters
+   * defined in the main layout configuration.
+   * @returns {Object|Array&lt;Object>|false|void} The processed layout configuration (if from JSON),
+   * false if old v1 HTML format was processed, or void if initialized from existing HTML.
+   */
+  layoutInit(layout, container, supp_options, isEditMode) 
+  {
+//console.log(layout, supp_options);  
+    this._supp_options = supp_options || {};
+    this._isEditMode = isEditMode;
+  
+    //main content
+    if(layout &amp;&amp; window.hWin.HEURIST4.util.isJSON(layout)){ //init from json
+        return this.#layoutInitFromJSON(layout, container, false, true);
+    }
+    
+    //not json, assing html to container and init widgets
+    if(layout){
+        $(container).html(layout);
+    }
+    
+    return this.layoutInitFromHTML(container);
+  }
+  
+  /**
+   * Initializes a layout specifically from a JSON configuration.
+   *
+   * @param {(Object|Array&lt;Object>)} layout_json - The page layout configuration in JSON format.
+   * @param {(jQuery|HTMLElement|string)} container_element - The container element to render the layout into.
+   * @param {Object} [supp_options] - Supplementary options for widget parameters.
+   * @returns {Object|Array&lt;Object>|false} The processed layout configuration, or false if an error/specific condition met in private method.
+   */
+  layoutInitFromJSON(layout_json, container_element, supp_options, isFirstLevel)
+  {
+    isFirstLevel = (isFirstLevel!==false);
+    this._supp_options = supp_options || {};
+    return this.#layoutInitFromJSON(layout_json, container_element, false, true);
+  }
+  
+  /*
+  *
+  */
+  executeWidgetMethod( element, widgetname, method, params ){
+      
+      let app = $(element);
+      if(app &amp;&amp; window.hWin.HEURIST4.util.isFunction($(app)[widgetname]) &amp;&amp; $(app)[widgetname]('instance')){
+          
+          if(!Array.isArray(params)){
+              params = [params];
+          }
+          
+          $(app)[widgetname](method, ...params);
+      
+      }else if(!app){
+            console.log('widget not found');
+      }else if(!window.hWin.HEURIST4.util.isFunction($(app)[widgetname])){
+            console.log('widget '+widgetname+' not loaded');
+      }
+    } 
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="HEURIST4.dbs.html">dbs</a></li><li><a href="HEURIST4.geo.html">geo</a></li><li><a href="HEURIST4.msg.html">msg</a></li><li><a href="HEURIST4.query.html">query</a></li><li><a href="HEURIST4.util.html">util</a></li><li><a href="NodeSelection.html">NodeSelection</a></li><li><a href="heurist.buttonsMenu.html">buttonsMenu</a></li><li><a href="heurist.controlPanel.html">controlPanel</a></li><li><a href="heurist.dbAction.html">dbAction</a></li><li><a href="heurist.dbVerify.html">dbVerify</a></li><li><a href="heurist.dbVerifyURLs.html">dbVerifyURLs</a></li><li><a href="heurist.editTranslations.html">editTranslations</a></li><li><a href="heurist.editing_input.html">editing_input</a></li><li><a href="heurist.navigation.html">navigation</a></li><li><a href="heurist.recordAccess.options.html">options</a></li><li><a href="heurist.recordAction.options.html">options</a></li><li><a href="heurist.recordAdd.options.html">options</a></li><li><a href="heurist.recordAddButton.options.html">options</a></li><li><a href="heurist.recordAddLink.options.html">options</a></li><li><a href="heurist.recordAddLinkMatch.options.html">options</a></li><li><a href="heurist.recordArchive.options.html">options</a></li><li><a href="heurist.recordBookmark.options.html">options</a></li><li><a href="heurist.recordDataTable.options.html">options</a></li><li><a href="heurist.recordDelete.options.html">options</a></li><li><a href="heurist.recordExport.options.html">options</a></li><li><a href="heurist.recordExportCSV.options.html">options</a></li><li><a href="heurist.recordFindDuplicates.options.html">options</a></li><li><a href="heurist.recordImportAnnotations.options.html">options</a></li><li><a href="heurist.recordNotify.options.html">options</a></li><li><a href="heurist.recordRate.options.html">options</a></li><li><a href="heurist.recordTag.options.html">options</a></li><li><a href="heurist.recordTemplate.options.html">options</a></li><li><a href="heurist.recordTitles.options.html">options</a></li><li><a href="heurist.recordUploadedFilesIndex.options.html">options</a></li><li><a href="heurist.selectFile.html">selectFile</a></li><li><a href="heurist.slidersMenu.html">slidersMenu</a></li></ul><h3>Classes</h3><ul><li><a href="ActionHandler.html">ActionHandler</a></li><li><a href="CmsManager.html">CmsManager</a></li><li><a href="Color.html">Color</a></li><li><a href="CrosstabsAnalysis.html">CrosstabsAnalysis</a></li><li><a href="EditorCodeMirror.html">EditorCodeMirror</a></li><li><a href="HEditing.html">HEditing</a></li><li><a href="HLayout.html">HLayout</a></li><li><a href="HLayoutMgr.html">HLayoutMgr</a></li><li><a href="HMapLayer.html">HMapLayer</a></li><li><a href="HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRapidFieldAdditions.HRapidFieldAdditions.html">HRapidFieldAdditions</a></li><li><a href="HRecordSearch.html">HRecordSearch</a></li><li><a href="HRecordSet.html">HRecordSet</a></li><li><a href="HSystemMgr.html">HSystemMgr</a></li><li><a href="HintDiv.html">HintDiv</a></li><li><a href="JapaneseCalendar.html">JapaneseCalendar</a></li><li><a href="L.Control.Help.html">Help</a></li><li><a href="L.Control.Manager.html">Manager</a></li><li><a href="L.Control.Publish.html">Publish</a></li><li><a href="Solver.html">Solver</a></li><li><a href="TDuration.html">TDuration</a></li><li><a href="Temporal.html">Temporal</a></li><li><a href="hAPI.html">hAPI</a></li><li><a href="hAPI-HRecordMgr.html">HRecordMgr</a></li><li><a href="window.TDate.html">TDate</a></li></ul><h3>Global</h3><ul><li><a href="global.html#HPublishDialog">HPublishDialog</a></li><li><a href="global.html#HSvsEdit">HSvsEdit</a></li><li><a href="global.html#SelectLinkField">SelectLinkField</a></li><li><a href="global.html#_addInput">_addInput</a></li><li><a href="global.html#_checkStructureFromSource">_checkStructureFromSource</a></li><li><a href="global.html#_checkYear">_checkYear</a></li><li><a href="global.html#_closeDialog">_closeDialog</a></li><li><a href="global.html#_create">_create</a></li><li><a href="global.html#_destroy">_destroy</a></li><li><a href="global.html#_detectHeurist">_detectHeurist</a></li><li><a href="global.html#_doSave">_doSave</a></li><li><a href="global.html#_fromDataToUI">_fromDataToUI</a></li><li><a href="global.html#_getActionButtons">_getActionButtons</a></li><li><a href="global.html#_init">_init</a></li><li><a href="global.html#_initControls">_initControls</a></li><li><a href="global.html#_initDialog">_initDialog</a></li><li><a href="global.html#_initInnerHeader">_initInnerHeader</a></li><li><a href="global.html#_initModal">_initModal</a></li><li><a href="global.html#_initOffcanvas">_initOffcanvas</a></li><li><a href="global.html#_japaneseYearToGregorian">_japaneseYearToGregorian</a></li><li><a href="global.html#_loadParentLookup">_loadParentLookup</a></li><li><a href="global.html#_popupDialog">_popupDialog</a></li><li><a href="global.html#_preImportCheck">_preImportCheck</a></li><li><a href="global.html#_processSPARQLRow">_processSPARQLRow</a></li><li><a href="global.html#_refresh">_refresh</a></li><li><a href="global.html#_refreshCaptcha">_refreshCaptcha</a></li><li><a href="global.html#_setOption">_setOption</a></li><li><a href="global.html#_showRecordViewPopup">_showRecordViewPopup</a></li><li><a href="global.html#_switchToDataMode">_switchToDataMode</a></li><li><a href="global.html#_theme_editing_symbology">_theme_editing_symbology</a></li><li><a href="global.html#_updatePanels">_updatePanels</a></li><li><a href="global.html#_validateFromGregorian">_validateFromGregorian</a></li><li><a href="global.html#addAssoctoAssigned">addAssoctoAssigned</a></li><li><a href="global.html#addBackgroundCircles">addBackgroundCircles</a></li><li><a href="global.html#addContainer">addContainer</a></li><li><a href="global.html#addForce">addForce</a></li><li><a href="global.html#addForegroundCircles">addForegroundCircles</a></li><li><a href="global.html#addIcons">addIcons</a></li><li><a href="global.html#addKeyword">addKeyword</a></li><li><a href="global.html#addLabels">addLabels</a></li><li><a href="global.html#addLevel">addLevel</a></li><li><a href="global.html#addLines">addLines</a></li><li><a href="global.html#addMarkerDefinitions">addMarkerDefinitions</a></li><li><a href="global.html#addNodes">addNodes</a></li><li><a href="global.html#addPrevtoAssigned">addPrevtoAssigned</a></li><li><a href="global.html#addSelectionBox">addSelectionBox</a></li><li><a href="global.html#addTitles">addTitles</a></li><li><a href="global.html#applyRules">applyRules</a></li><li><a href="global.html#autofill_login">autofill_login</a></li><li><a href="global.html#browseRecords">browseRecords</a></li><li><a href="global.html#calculateImageExtentFromWorldFile">calculateImageExtentFromWorldFile</a></li><li><a href="global.html#changeDisplay">changeDisplay</a></li><li><a href="global.html#changeViewMode">changeViewMode</a></li><li><a href="global.html#checkAllOptions">checkAllOptions</a></li><li><a href="global.html#checkStoredSettings">checkStoredSettings</a></li><li><a href="global.html#clearContent">clearContent</a></li><li><a href="global.html#close">close</a></li><li><a href="global.html#closeDialog">closeDialog</a></li><li><a href="global.html#commonCodeInit">commonCodeInit</a></li><li><a href="global.html#commonOnAdd">commonOnAdd</a></li><li><a href="global.html#compareIndexes">compareIndexes</a></li><li><a href="global.html#correctionOfInvalidTerm">correctionOfInvalidTerm</a></li><li><a href="global.html#createOverlay">createOverlay</a></li><li><a href="global.html#currentNode">currentNode</a></li><li><a href="global.html#daysInMonth">daysInMonth</a></li><li><a href="global.html#determineColour">determineColour</a></li><li><a href="global.html#disableUpdateBtn">disableUpdateBtn</a></li><li><a href="global.html#doAction">doAction</a></li><li><a href="global.html#doAuthentication">doAuthentication</a></li><li><a href="global.html#doImport">doImport</a></li><li><a href="global.html#doRegister">doRegister</a></li><li><a href="global.html#doSamlLogin">doSamlLogin</a></li><li><a href="global.html#doSearchByID">doSearchByID</a></li><li><a href="global.html#drag_link_line">drag_link_line</a></li><li><a href="global.html#drag_link_source_id">drag_link_source_id</a></li><li><a href="global.html#drag_link_target_id">drag_link_target_id</a></li><li><a href="global.html#drag_link_timer">drag_link_timer</a></li><li><a href="global.html#dragend">dragend</a></li><li><a href="global.html#dragmove">dragmove</a></li><li><a href="global.html#dragstart">dragstart</a></li><li><a href="global.html#editCMS2">editCMS2</a></li><li><a href="global.html#editCMS_ElementCfg">editCMS_ElementCfg</a></li><li><a href="global.html#editCMS_SelectElement">editCMS_SelectElement</a></li><li><a href="global.html#editCMS_SiteMenu">editCMS_SiteMenu</a></li><li><a href="global.html#editCMS_WidgetCfg">editCMS_WidgetCfg</a></li><li><a href="global.html#editSymbology">editSymbology</a></li><li><a href="global.html#editTheme">editTheme</a></li><li><a href="global.html#enable_register">enable_register</a></li><li><a href="global.html#executeFormula">executeFormula</a></li><li><a href="global.html#f">f</a></li><li><a href="global.html#first_level_rty_ID">first_level_rty_ID</a></li><li><a href="global.html#fixCalendarPickerCMDs">fixCalendarPickerCMDs</a></li><li><a href="global.html#formatDate">formatDate</a></li><li><a href="global.html#formatGregJulian">formatGregJulian</a></li><li><a href="global.html#fromJD">fromJD</a></li><li><a href="global.html#fromJSDate">fromJSDate</a></li><li><a href="global.html#fset">fset</a></li><li><a href="global.html#getAllChecked">getAllChecked</a></li><li><a href="global.html#getClass">getClass</a></li><li><a href="global.html#getContainer">getContainer</a></li><li><a href="global.html#getDataFromServer">getDataFromServer</a></li><li><a href="global.html#getEntityRadius">getEntityRadius</a></li><li><a href="global.html#getEraFromGregorian">getEraFromGregorian</a></li><li><a href="global.html#getEraFromJapaneseStr">getEraFromJapaneseStr</a></li><li><a href="global.html#getEraLimits">getEraLimits</a></li><li><a href="global.html#getEras">getEras</a></li><li><a href="global.html#getGephiFormat">getGephiFormat</a></li><li><a href="global.html#getKeywords">getKeywords</a></li><li><a href="global.html#getKeywordsNextStep">getKeywordsNextStep</a></li><li><a href="global.html#getLineLength">getLineLength</a></li><li><a href="global.html#getLineWidth">getLineWidth</a></li><li><a href="global.html#getMarkerWidth">getMarkerWidth</a></li><li><a href="global.html#getNodeDataById">getNodeDataById</a></li><li><a href="global.html#getRecentKeywords">getRecentKeywords</a></li><li><a href="global.html#getRecordOverlayData">getRecordOverlayData</a></li><li><a href="global.html#getRelationOverlayData">getRelationOverlayData</a></li><li><a href="global.html#getRulesArray">getRulesArray</a></li><li><a href="global.html#getSelected">getSelected</a></li><li><a href="global.html#getSelection">getSelection</a></li><li><a href="global.html#getSetting">getSetting</a></li><li><a href="global.html#getURL">getURL</a></li><li><a href="global.html#gregorianToJapaneseStr">gregorianToJapaneseStr</a></li><li><a href="global.html#hMapDocument">hMapDocument</a></li><li><a href="global.html#hRecordAction">hRecordAction</a></li><li><a href="global.html#handleNodeAction">handleNodeAction</a></li><li><a href="global.html#handleSettingsInUI">handleSettingsInUI</a></li><li><a href="global.html#hexToFilter">hexToFilter</a></li><li><a href="global.html#hexportMenu">hexportMenu</a></li><li><a href="global.html#imgFilter">imgFilter</a></li><li><a href="global.html#initProfilePreferences">initProfilePreferences</a></li><li><a href="global.html#initialize">initialize</a></li><li><a href="global.html#isA">isA</a></li><li><a href="global.html#isAssocKeyword">isAssocKeyword</a></li><li><a href="global.html#isMonthSpan">isMonthSpan</a></li><li><a href="global.html#isRecentKeyword">isRecentKeyword</a></li><li><a href="global.html#isTemporal">isTemporal</a></li><li><a href="global.html#isValid">isValid</a></li><li><a href="global.html#japaneseToGregorian">japaneseToGregorian</a></li><li><a href="global.html#japaneseToGregorianStr">japaneseToGregorianStr</a></li><li><a href="global.html#keywordLookup">keywordLookup</a></li><li><a href="global.html#loadHtmlContent">loadHtmlContent</a></li><li><a href="global.html#log10">log10</a></li><li><a href="global.html#login_dialog">login_dialog</a></li><li><a href="global.html#lookupEditions">lookupEditions</a></li><li><a href="global.html#lookupGoogle">lookupGoogle</a></li><li><a href="global.html#lookupHathiTrust">lookupHathiTrust</a></li><li><a href="global.html#lookupKarlsruhePortal">lookupKarlsruhePortal</a></li><li><a href="global.html#lookupWorldCat">lookupWorldCat</a></li><li><a href="global.html#mapIds">mapIds</a></li><li><a href="global.html#menuActionHandler">menuActionHandler</a></li><li><a href="global.html#mergeArraysUnique">mergeArraysUnique</a></li><li><a href="global.html#msgToConsole">msgToConsole</a></li><li><a href="global.html#newDate">newDate</a></li><li><a href="global.html#onAdd">onAdd</a></li><li><a href="global.html#onAuthentication">onAuthentication</a></li><li><a href="global.html#onNodeClick">onNodeClick</a></li><li><a href="global.html#onPageInit">onPageInit</a></li><li><a href="global.html#onRecordNodeClick">onRecordNodeClick</a></li><li><a href="global.html#onRemove">onRemove</a></li><li><a href="global.html#onTermSaveError">onTermSaveError</a></li><li><a href="global.html#open">open</a></li><li><a href="global.html#openRecordInTab">openRecordInTab</a></li><li><a href="global.html#openSearchMenu">openSearchMenu</a></li><li><a href="global.html#options">options</a></li><li><a href="global.html#popupDialog">popupDialog</a></li><li><a href="global.html#prevSessionExists">prevSessionExists</a></li><li><a href="global.html#project_keywords">project_keywords</a></li><li><a href="global.html#putSetting">putSetting</a></li><li><a href="global.html#removeAssocByID">removeAssocByID</a></li><li><a href="global.html#removeKeyword">removeKeyword</a></li><li><a href="global.html#removeOverlay">removeOverlay</a></li><li><a href="global.html#removeOverlays">removeOverlays</a></li><li><a href="global.html#removeSetting">removeSetting</a></li><li><a href="global.html#renderAssocKeywods">renderAssocKeywods</a></li><li><a href="global.html#renderContent">renderContent</a></li><li><a href="global.html#resetPassword">resetPassword</a></li><li><a href="global.html#saveRules">saveRules</a></li><li><a href="global.html#selectRecord">selectRecord</a></li><li><a href="global.html#setFormulaMode">setFormulaMode</a></li><li><a href="global.html#setGravity">setGravity</a></li><li><a href="global.html#setLinkMode">setLinkMode</a></li><li><a href="global.html#setSelected">setSelected</a></li><li><a href="global.html#setSelection">setSelection</a></li><li><a href="global.html#setValue">setValue</a></li><li><a href="global.html#setupAssocKeywords">setupAssocKeywords</a></li><li><a href="global.html#setupCaptcha">setupCaptcha</a></li><li><a href="global.html#setupRecentWorks">setupRecentWorks</a></li><li><a href="global.html#setupResetPin">setupResetPin</a></li><li><a href="global.html#show">show</a></li><li><a href="global.html#showEditions">showEditions</a></li><li><a href="global.html#showHelp">showHelp</a></li><li><a href="global.html#showKeyword">showKeyword</a></li><li><a href="global.html#showLoginDialog">showLoginDialog</a></li><li><a href="global.html#showNodeInformation">showNodeInformation</a></li><li><a href="global.html#showSearchBuilder">showSearchBuilder</a></li><li><a href="global.html#showSearchFacetedWizard">showSearchFacetedWizard</a></li><li><a href="global.html#showWarningAboutTermUsage">showWarningAboutTermUsage</a></li><li><a href="global.html#simplePointsToWKT">simplePointsToWKT</a></li><li><a href="global.html#sleep">sleep</a></li><li><a href="global.html#startRecentWork">startRecentWork</a></li><li><a href="global.html#temporalSimplifyDate">temporalSimplifyDate</a></li><li><a href="global.html#temporalToHumanReadableString">temporalToHumanReadableString</a></li><li><a href="global.html#tick">tick</a></li><li><a href="global.html#toJD">toJD</a></li><li><a href="global.html#toJSDate">toJSDate</a></li><li><a href="global.html#translationFromUI">translationFromUI</a></li><li><a href="global.html#translationSupport">translationSupport</a></li><li><a href="global.html#translationToUI">translationToUI</a></li><li><a href="global.html#truncateText">truncateText</a></li><li><a href="global.html#unselectAssoc">unselectAssoc</a></li><li><a href="global.html#updateAssocDisplay">updateAssocDisplay</a></li><li><a href="global.html#updateAssocList">updateAssocList</a></li><li><a href="global.html#updateCircles">updateCircles</a></li><li><a href="global.html#updateCurvedLines">updateCurvedLines</a></li><li><a href="global.html#updateLabels">updateLabels</a></li><li><a href="global.html#updateNodes">updateNodes</a></li><li><a href="global.html#updateRecentKeywordDisplay">updateRecentKeywordDisplay</a></li><li><a href="global.html#updateRectangles">updateRectangles</a></li><li><a href="global.html#updateRuleBuilder">updateRuleBuilder</a></li><li><a href="global.html#updateStatus">updateStatus</a></li><li><a href="global.html#updateStraightLines">updateStraightLines</a></li><li><a href="global.html#validateResetPin">validateResetPin</a></li><li><a href="global.html#visualizeData">visualizeData</a></li><li><a href="global.html#visualizeSelection">visualizeSelection</a></li><li><a href="global.html#weekDay">weekDay</a></li><li><a href="global.html#weekOfYear">weekOfYear</a></li><li><a href="global.html#zoomed">zoomed</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Thu Jul 24 2025 18:09:14 GMT+0400 (GMT+04:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
