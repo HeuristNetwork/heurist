@@ -16,11 +16,11 @@
 * @since       4.0
 */
 
-
-
 /**
- * @widget heurist.recordAdd
- * @augments $.heurist.recordAccess
+ * @class recordAdd
+ * @augments {recordAction}
+ * @memberof Widgets.Records
+ * 
  * @description jQuery widget for adding new records.
  * This widget provides UI for selecting a record type and optionally setting
  * default ownership, access permissions, and tags for the new record.
@@ -28,28 +28,11 @@
  * for more detailed configuration.
  *
  * @param {object} options - Configuration options for the widget.
- * @param {boolean} [options.is_h6style=false] - Whether to use H6 styling (custom layout).
- * @param {number} [options.width=520] - The width of the dialog in expanded mode.
- * @param {number} [options.height=800] - The height of the dialog in expanded mode.
- * @param {string} [options.title='Add Record'] - Title of the dialog.
- * @param {object} [options.currentRecordset={}] - Stub for recordset compatibility, not actively used for record selection by this widget.
- * @param {number} [options.currentRecType=0] - The ID of the currently selected record type for the new record.
- * @param {?string} options.currentRecTags - Comma-separated string of tags to be applied to the new record.
- * @param {string} [options.scope_types='none'] - Scope types inherited from recordAccess, usually 'none' for recordAdd.
- * @param {boolean} [options.isExpanded=false] - If true, shows the expanded preferences dialog; otherwise, shows the list of record types.
- * @param {boolean} [options.allowExpanded=true] - Whether the expanded view for setting permissions is allowed.
- * @param {boolean} [options.get_params_only=false] - If true, the widget only gathers parameters and returns them via `_context_on_close` instead of opening the record edit form.
- * @param {number} [options.RecTypeID] - Initial Record Type ID, if provided.
- * @param {number} [options.OwnerUGrpID] - Initial Owner User Group ID, if provided.
- * @param {string} [options.NonOwnerVisibility] - Initial Non-Owner Visibility, if provided.
- * @param {string} [options.RecTags] - Initial Record Tags, if provided.
- * @param {string} [options.NonOwnerVisibilityGroups] - Initial Non-Owner Visibility Groups, if provided.
  */
 $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
 
     /**
-     * @namespace options
-     * @memberof heurist.recordAdd
+     * @memberof Widgets.Records.recordAdd
      * @type {object}
      * @property {boolean} [is_h6style=false] - Whether to use H6 styling (custom layout).
      * @property {number} [width=520] - The width of the dialog in expanded mode.
@@ -87,40 +70,40 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     
     /**
      * @member {?jQuery} rectype_list
-     * @memberof heurist.recordAdd
+     * @memberof Widgets.Records.recordAdd
      * @description jQuery object for the `<ul>` element that lists record types when `is_h6style` is true and not expanded.
      */
     rectype_list:null,
     /**
      * @member {?jQuery} _toolbar
-     * @memberof heurist.recordAdd
+     * @memberof Widgets.Records.recordAdd
      * @private
      * @description jQuery object for the toolbar containing action buttons in `is_h6style`.
      */
     _toolbar: null,
     /**
      * @member {?jQuery} _innerTitle
-     * @memberof heurist.recordAdd
+     * @memberof Widgets.Records.recordAdd
      * @private
      * @description jQuery object for the title bar div in `is_h6style`.
      */
     _innerTitle: null,
     /**
      * @member {?jQuery} closeBtn
-     * @memberof heurist.recordAdd
+     * @memberof Widgets.Records.recordAdd
      * @description jQuery object for the close button in `is_h6style`.
      */
     closeBtn: null,
     /**
      * @member {?jQuery} expandBtn
-     * @memberof heurist.recordAdd
+     * @memberof Widgets.Records.recordAdd
      * @description jQuery object for the expand/settings button in `is_h6style`.
      */
     expandBtn: null,
 
     /**
      * @function _initControls
-     * @memberof heurist.recordAdd
+     * @memberof Widgets.Records.recordAdd
      * @private
      * @description Initializes the controls for the recordAdd widget.
      * Sets up UI elements based on options (e.g., `is_h6style`, `get_params_only`).
@@ -308,7 +291,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     
     /**
      * @function _destroy
-     * @memberof heurist.recordAdd
+     * @memberof Widgets.Records.recordAdd
      * @private
      * @description Cleans up the widget. Unbinds event listeners for structure and credential changes.
      * Calls the parent widget's `_destroy` method.
@@ -324,7 +307,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     
     /**
      * @function _adjustHeight
-     * @memberof heurist.recordAdd
+     * @memberof Widgets.Records.recordAdd
      * @private
      * @description Adjusts the height of the 'add link' text area based on available space in the dialog.
      * This is typically called when expanding options or when the dialog layout changes.
@@ -344,7 +327,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     
     /**
      * @function doExpand
-     * @memberof heurist.recordAdd
+     * @memberof Widgets.Records.recordAdd
      * @description Toggles the widget's view between a simple list of record types and an expanded
      * dialog for setting record creation preferences (ownership, access, tags).
      * This is primarily used when `options.is_h6style` is true.
@@ -403,7 +386,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
 
     /**
      * @function _getActionButtons
-     * @memberof heurist.recordAdd
+     * @memberof Widgets.Records.recordAdd
      * @private
      * @description Gets the action buttons for the dialog. Overrides the parent method
      * to change the text of the main action button based on `options.get_params_only`.
@@ -417,7 +400,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
 
     /**
      * @function getSelectedParameters
-     * @memberof heurist.recordAdd
+     * @memberof Widgets.Records.recordAdd
      * @description Retrieves and validates the selected parameters for adding a record,
      * including record type, ownership, and access settings.
      * Overrides the parent method to include selection of the record type.
@@ -440,7 +423,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     
     /**
      * @function doAction
-     * @memberof heurist.recordAdd
+     * @memberof Widgets.Records.recordAdd
      * @description Performs the primary action of the widget based on the current settings and the button clicked.
      * If `options.get_params_only` is true, it gathers the parameters and sets them in `_context_on_close`.
      * Otherwise, it saves the selected parameters as user preferences and either opens the record edit
@@ -501,7 +484,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
 
     /**
      * @function _fillSelectRecordTypes
-     * @memberof heurist.recordAdd
+     * @memberof Widgets.Records.recordAdd
      * @private
      * @description Populates the record type selector dropdown (`#sel_recordtype`).
      * It also populates the `rectype_list` (ul element for `is_h6style`) if it exists.
@@ -608,7 +591,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     
     /**
      * @function _onRecordScopeChange
-     * @memberof heurist.recordAdd
+     * @memberof Widgets.Records.recordAdd
      * @private
      * @description Handles changes that affect the state of action buttons (e.g., Add Record, Add in New Window).
      * It enables/disables these buttons based on whether valid parameters are selected.

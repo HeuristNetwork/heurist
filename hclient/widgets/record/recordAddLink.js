@@ -18,31 +18,20 @@
 */
 
 /**
- * @widget heurist.recordAddLink
- * @augments $.heurist.recordAction
+ * @class recordAddLink
+ * @augments recordAction
+ * @memberof Widgets.Records
  * @description jQuery widget for creating links or relationships between records.
  * It supports linking a single source record to a target, or a scope of source records to a single target.
  * It can also create new relationship records.
  *
  * @param {object} options - Configuration options for the widget.
- * @param {number} [options.height=520] - The height of the dialog.
- * @param {number} [options.width=800] - The width of the dialog.
- * @param {boolean} [options.modal=true] - Whether the dialog is modal.
- * @param {string} [options.init_scope='selected'] - Initial scope for source record selection if `source_ID` is not provided.
- * @param {string} [options.title='Add new link or create a relationship between records'] - Title of the dialog.
- * @param {string} [options.htmlContent='recordAddLink.html'] - The HTML file for the widget's content.
- * @param {?number} options.source_ID - The ID of the source record. If null, a scope selector is shown.
- * @param {?number} options.target_ID - The ID of the target record. If null, a record selector is shown.
- * @param {?number} options.relmarker_dty_ID - If provided, specifies the relation marker detail type ID to be used, restricting linking to this specific relationship type.
- * @param {?string} options.source_AllowedTypes - Comma-separated string of record type IDs allowed for the source if `source_ID` is null and `relmarker_dty_ID` is set (for inward relations).
- * @param {boolean} [options.onlyReverse=false] - (Not explicitly used in provided code snippet, but listed as an option) Potentially for forcing reverse link creation.
- * @param {?string|number} options.relationtype - The term ID or label of the relation type to pre-select or use when creating a relationship.
+ * 
  */
 $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
 
     /**
-     * @namespace options
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @type {object}
      * @property {number} [height=520] - Dialog height.
      * @property {number} [width=800] - Dialog width.
@@ -79,31 +68,31 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
 
     /**
      * @member {?number} source_RecTypeID
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @description The record type ID of the source record or selected scope.
      */
     source_RecTypeID:null, 
     /**
      * @member {?number} target_RecTypeID
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @description The record type ID of the target record.
      */
     target_RecTypeID:null,
     /**
      * @member {string} sSourceName
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @description The title of the source record.
      */
     sSourceName:'',
     /**
      * @member {string} sTargetName
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @description The title of the target record.
      */
     sTargetName:'',
     /**
      * @member {boolean} _openRelationRecordEditor
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @private
      * @description Flag to indicate if the relation record editor should be opened after creating a single relationship.
      */
@@ -111,7 +100,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     
     /**
      * @function _initControls
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @private
      * @description Initializes controls after HTML content is loaded. Sets up UI for source and target record selection
      * based on whether `options.source_ID` and `options.target_ID` are provided.
@@ -157,7 +146,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
 
     /**
      * @function _getActionButtons
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @private
      * @description Gets action buttons for the dialog. Modifies the main action button text
      * and adds an 'Edit attributes' button if creating a single relationship.
@@ -188,7 +177,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
 
     /**
      * @function _fillSelectRecordScope
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @private
      * @description Populates the source record scope selector if `options.source_ID` is not set.
      * Filters options to a single record type if multiple are present in the selection,
@@ -263,7 +252,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     
     /**
      * @function _fillSelectRecordScope_byRty
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @private
      * @description Alternative method to populate the source record scope selector, grouping by record type.
      * (Note: Appears to be a more detailed version or an alternative not fully switched over from `_fillSelectRecordScope`).
@@ -366,7 +355,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
  
     /**
      * @function _onRecordScopeChange
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @private
      * @description Handles changes in the source record scope selector. Updates `this.source_RecTypeID`
      * and calls `_fillSelectFieldTypes` to populate available link/relationship fields for the selected source type.
@@ -383,7 +372,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
  
     /**
      * @function _fillSelectFieldTypes
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @private
      * @description Populates the list of available fields (pointer or relation markers) for linking/relating records.
      * This is called for the specified `party` ('source' or 'target').
@@ -517,7 +506,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     
     /**
      * @function _enableActionButton
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @private
      * @description Enables or disables the main action button(s) ('Create link', 'Edit attributes')
      * based on whether a valid target record and link/relationship field are selected.
@@ -544,7 +533,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     
     /**
      * @function _createInputElement_RecordSelector
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @private
      * @description Creates a record selector input element (using `editing_input` widget) for the specified `party`.
      * Used when `options.source_ID` or `options.target_ID` is not provided initially, or for inward relations.
@@ -606,7 +595,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
   
     /**
      * @function _createInputElement
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @private
      * @description Creates the target record selector input element when a source field is selected.
      * This is triggered by the change event on the source field radio buttons.
@@ -664,7 +653,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     
     /**
      * @function _createInputElement_Relation
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @private
      * @description Creates an input element (using `editing_input`) for selecting the relation type (term from a vocabulary)
      * when a relation marker field (`dty_Type: 'relmarker'`) is chosen.
@@ -746,7 +735,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     
     /**
      * @function getFieldValue
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @description Retrieves the value from an `editing_input` widget by its ID.
      * @param {string} input_id - The ID of the `editing_input` container.
      * @returns {?any} The first value from the `editing_input`, or null if not found or no value.
@@ -764,7 +753,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
 
     /**
      * @function getRecordValue
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @description Fetches and displays details (title, record type) for a given record ID.
      * Updates UI elements for the specified `party` ('source' or 'target').
      * Calls `_fillSelectFieldTypes` to populate compatible fields based on the fetched record type.
@@ -846,7 +835,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
 
     /**
      * @function doAction
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @description Performs the link or relationship creation. Gathers selected source(s), target, field, and relation type.
      * Constructs request objects for the Heurist API (either batch detail update for pointers or new record creation for relations).
      * Calls `addLinkOrRelation` to process the requests.
@@ -971,7 +960,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     
     /**
      * @function addLinkOrRelation
-     * @memberof heurist.recordAddLink
+     * @memberof Widgets.Records.recordAddLink
      * @description Recursively processes a list of API requests to create links or relationships.
      * Handles responses and either continues with the next request or closes the dialog upon completion.
      * If `_openRelationRecordEditor` is true for a single relationship, it opens the record editor for the new relation record.

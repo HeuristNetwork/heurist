@@ -19,26 +19,20 @@
 
 
 /**
- * @widget heurist.recordBookmark
- * @augments $.heurist.recordAction
+ * @class recordBookmark
+ * @augments recordAction
+ * @memberof Widgets.Records
  * @description jQuery widget for removing bookmarks and detaching personal tags from a selection of records.
  * This widget allows users to unbookmark records based on a selected scope (e.g., selected records,
  * current search results). The action removes the bookmark entry from `usrBookmarks` and,
  * as a consequence, any personal tags linked through that bookmark for the user.
  *
  * @param {object} options - Configuration options for the widget.
- * @param {number} [options.height=300] - The height of the dialog.
- * @param {number} [options.width=540] - The width of the dialog.
- * @param {boolean} [options.modal=true] - Whether the dialog is modal.
- * @param {string} [options.init_scope='selected'] - Initial scope for record selection.
- * @param {string} [options.title='Unbookmark selected records'] - Title of the dialog.
- * @param {string} [options.htmlContent='recordAction.html'] - Default HTML content file (as this widget doesn't have its own specific HTML file listed).
  */
 $.widget( "heurist.recordBookmark", $.heurist.recordAction, {
 
     /**
-     * @namespace options
-     * @memberof heurist.recordBookmark
+     * @memberof Widgets.Records.recordBookmark
      * @type {object}
      * @property {number} [height=300] - Dialog height.
      * @property {number} [width=540] - Dialog width.
@@ -57,7 +51,7 @@ $.widget( "heurist.recordBookmark", $.heurist.recordAction, {
     
     /**
      * @function _initControls
-     * @memberof heurist.recordBookmark
+     * @memberof Widgets.Records.recordBookmark
      * @private
      * @description Initializes controls after HTML content is loaded.
      * Sets a help message specific to unbookmarking and updates the action button label.
@@ -77,7 +71,7 @@ $.widget( "heurist.recordBookmark", $.heurist.recordAction, {
     
     /**
      * @function doAction
-     * @memberof heurist.recordBookmark
+     * @memberof Widgets.Records.recordBookmark
      * @private
      * @description Performs the unbookmarking action.
      * Determines the scope of records to be affected based on the `selectRecordScope` selection.

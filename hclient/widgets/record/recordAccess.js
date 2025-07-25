@@ -16,30 +16,20 @@
 */
 
 /**
- * @widget heurist.recordAccess
- * @augments $.heurist.recordAction
+ * @class recordAccess
+ * @augments recordAction
+ * @memberof Widgets.Records
+ * 
  * @description jQuery widget for managing record access and ownership.
  * Provides functionality to change who owns a record and what level of access
  * (e.g., public, viewable, hidden) other users or groups have.
  *
  * @param {object} options - Configuration options for the widget.
- * @param {number} [options.height=520] - The height of the dialog.
- * @param {number} [options.width=520] - The width of the dialog.
- * @param {boolean} [options.modal=true] - Whether the dialog is modal.
- * @param {string} [options.init_scope='selected'] - Initial scope for record selection.
- * @param {string} [options.title='Change Record Access and Ownership'] - Title of the dialog.
- * @param {number} [options.currentOwner=0] - The ID of the current owner. 0 for 'Any logged-in user'.
- * @param {?string} options.currentAccess - The current access level (e.g., 'public', 'viewable', 'hidden').
- * @param {?string} options.currentAccessGroups - Comma-separated string of group IDs for access control.
- * @param {boolean} [options.show_modes=false] - Whether to show operation modes (e.g., change ownership, change access, or both).
- * @param {string} [options.htmlContent='recordAccess.html'] - The HTML file to load for the widget's content.
- * @param {boolean|string} [options.helpContent=false] - Help content or URL for the widget.
  */
 $.widget( "heurist.recordAccess", $.heurist.recordAction, {
 
     /**
-     * @namespace options
-     * @memberof heurist.recordAccess
+     * @memberof Widgets.Records.recordAccess
      * @type {object}
      * @property {number} [height=520] - The height of the dialog.
      * @property {number} [width=520] - The width of the dialog.
@@ -71,7 +61,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
 
     /**
      * @function _initControls
-     * @memberof heurist.recordAccess
+     * @memberof Widgets.Records.recordAccess
      * @private
      * @description Initializes the controls within the widget. Sets up event listeners and populates access control elements.
      * @returns {boolean|undefined} Returns `false` if the current user is not available, otherwise proceeds with initialization.
@@ -106,7 +96,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     // revert other modifications here
     /**
      * @function _destroy
-     * @memberof heurist.recordAccess
+     * @memberof Widgets.Records.recordAccess
      * @private
      * @description Cleans up the widget before it is removed. Unbinds event listeners.
      */
@@ -117,7 +107,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     
     /**
      * @function fillAccessControls
-     * @memberof heurist.recordAccess
+     * @memberof Widgets.Records.recordAccess
      * @description Populates and configures the access control UI elements, such as ownership and access group selectors.
      * Fetches user groups and sets up event handlers for UI interactions.
      */
@@ -261,7 +251,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     
     /**
      * @function _adjustHeight
-     * @memberof heurist.recordAccess
+     * @memberof Widgets.Records.recordAccess
      * @private
      * @description Adjusts the height of the dialog.
      * (Currently not implemented)
@@ -272,7 +262,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
 
     /**
      * @function _getActionButtons
-     * @memberof heurist.recordAccess
+     * @memberof Widgets.Records.recordAccess
      * @private
      * @description Gets the action buttons for the dialog. Modifies the text of the 'Apply' button.
      * @returns {Array<object>} An array of button definition objects.
@@ -285,7 +275,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
 
     /**
      * @function _createGroupSelectorElement
-     * @memberof heurist.recordAccess
+     * @memberof Widgets.Records.recordAccess
      * @private
      * @description Creates and initializes a group selector element using the `editing_input` widget.
      * @param {string} input_id - The ID of the HTML element to transform into a group selector.
@@ -332,7 +322,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     
     /**
      * @function getSelectedParameters
-     * @memberof heurist.recordAccess
+     * @memberof Widgets.Records.recordAccess
      * @description Retrieves the selected ownership and access parameters from the UI controls.
      * Updates the widget's options with these parameters.
      * @param {boolean} showWarning - If true, displays a warning message if required parameters are missing.
@@ -394,7 +384,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     
     /**
      * @function doAction
-     * @memberof heurist.recordAccess
+     * @memberof Widgets.Records.recordAccess
      * @description Performs the action of updating record access and ownership based on the selected parameters.
      * It determines the scope of records to be affected and makes an API call to HAPI4.RecordMgr.access.
      * Displays progress and result messages.
@@ -495,7 +485,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     
     /**
      * @function _onRecordScopeChange
-     * @memberof heurist.recordAccess
+     * @memberof Widgets.Records.recordAccess
      * @private
      * @description Handles changes in the record scope selection.
      * Enables or disables the 'Apply' button based on whether a valid scope and parameters are selected.

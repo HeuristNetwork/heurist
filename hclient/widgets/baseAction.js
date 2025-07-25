@@ -24,12 +24,30 @@
  *
  * @param {object} options - Configuration options for the widget.
  */
-$.widget( "heurist.baseAction", {
+ $.widget( "heurist.baseAction", {
 
     /**
      * @memberof Widgets.baseAction
      * @instance
      * @type {object}
+     * @property {string} actionName - The name of the action.
+     * @property {string} path - Non-default path to HTML content.
+     * @property {string} htmlContent - General layout HTML content.
+     * @property {?string} helpContent - If false, help button is hidden. If null, it sets the name of the help file to the widgetName. Help file must be in documentation/context_help folder.
+     * @property {string} default_palette_class - The default palette class.
+     * @property {boolean} isdialog - Show as dialog.
+     * @property {boolean} supress_dialog_title - Hide dialog title bar.
+     * @property {number} height - The height of the dialog.
+     * @property {number} width - The width of the dialog.
+     * @property {object} position - The position of the dialog.
+     * @property {boolean} modal - If true, the dialog will be modal.
+     * @property {string} title - The title of the dialog.
+     * @property {boolean} innerTitle - Show title as top panel.
+     * @property {?function} onInitFinished - Event listener when dialog is fully initialized.
+     * @property {?function} beforeClose - To show warning before close.
+     * @property {?function} onClose - Event listener when dialog is closed.
+     * @property {boolean} keep_instance - Keep instance after close.
+     * @property {?object} hapi - The Heurist API object.
      */
     options: {
 
@@ -63,22 +81,93 @@ $.widget( "heurist.baseAction", {
         hapi: null
     },
 
+    /**
+     * @memberof Widgets.baseAction
+     * @instance
+     * @type {jQuery}
+     * @description Shorthand for this.element.find.
+     */
     _$: $, // shorthand for this.element.find
+    /**
+     * @memberof Widgets.baseAction
+     * @instance
+     * @type {object}
+     * @description HEURIST4.utils.
+     */
     $H: window.hWin.HEURIST4?.util, // HEURIST4.utils
+    /**
+     * @memberof Widgets.baseAction
+     * @instance
+     * @type {object}
+     * @description HEURIST4.msg.
+     */
     $Hmsg: window.hWin.HEURIST4?.msg, // HEURIST4.msg
+    /**
+     * @memberof Widgets.baseAction
+     * @instance
+     * @type {object}
+     * @description HEURIST4.ui.
+     */
     $Hui: window.hWin.HEURIST4?.ui, // HEURIST4.ui
+    /**
+     * @memberof Widgets.baseAction
+     * @instance
+     * @type {?object}
+     * @description The Heurist API object.
+     */
     HAPI: null,
     
+    /**
+     * @memberof Widgets.baseAction
+     * @instance
+     * @private
+     * @type {?object}
+     * @description Reference to itself as dialog.
+     * @see Widgets.baseAction#options.isdialog
+     */
     _as_dialog:null, //reference to itself as dialog (see options.isdialog)
+    /**
+     * @memberof Widgets.baseAction
+     * @instance
+     * @type {?object}
+     * @description The toolbar object.
+     */
     _toolbar:null,
     
+    /**
+     * @memberof Widgets.baseAction
+     * @instance
+     * @private
+     * @type {boolean}
+     * @description Flag to indicate if the widget is initialized.
+     */
     _is_inited: false,
     
+    /**
+     * @memberof Widgets.baseAction
+     * @instance
+     * @private
+     * @type {boolean}
+     * @description Flag to indicate if the content needs to be loaded.
+     */
     _need_load_content:true, //flag 
     
+    /**
+     * @memberof Widgets.baseAction
+     * @instance
+     * @private
+     * @type {boolean}
+     * @description Variable to be passed to options.onClose event listener.
+     */
     _context_on_close:false, //variable to be passed to options.onClose event listener
     
-    // the widget's constructor
+    /**
+     * @function _create
+     * @memberof Widgets.baseAction
+     * @instance
+     * @private
+     * @description The widget's constructor.
+     */
     _create: function() {
         // prevent double click to select text
 
@@ -87,9 +176,13 @@ $.widget( "heurist.baseAction", {
         this.HAPI = this.options.hapi ?? window.hWin.HAPI4;
     }, //end _create
     
-    //
-    //  load configuration and call _initControls
-    //
+    /**
+     * @function _init
+     * @memberof Widgets.baseAction
+     * @instance
+     * @private
+     * @description Load configuration and call _initControls.
+     */
     _init: function() {
         
         if(this.options.keep_instance && this._is_inited){
@@ -145,9 +238,14 @@ $.widget( "heurist.baseAction", {
     },
     
      
-    //  
-    // invoked from _init after loading of html content
-    //
+    /**
+     * @function _initControls
+     * @memberof Widgets.baseAction
+     * @instance
+     * @private
+     * @description Invoked from _init after loading of html content.
+     * @returns {boolean} - True if successful.
+     */
     _initControls:function(){
         
         let that = this;
@@ -212,14 +310,14 @@ $.widget( "heurist.baseAction", {
         return true;
     },
 
-    //----------------------
-    //
-    // array of button defintions
-    //
-    // id is not applicable since buttons with the same id can be in different popup dialogs
-    // in this case jquery handles events wrong
-    // we indetify buttons by class name: btnDoAction, btnCancel etc
-    //
+    /**
+     * @function _getActionButtons
+     * @memberof Widgets.baseAction
+     * @instance
+     * @private
+     * @description Returns an array of button definitions.
+     * @returns {Array<object>} - An array of button definitions.
+     */
     _getActionButtons: function(){
         
         let that = this;        
@@ -240,6 +338,13 @@ $.widget( "heurist.baseAction", {
                  ];
     },
     
+    /**
+     * @function changeTitle
+     * @memberof Widgets.baseAction
+     * @instance
+     * @description Changes the title of the dialog.
+     * @param {string} new_title - The new title.
+     */
     changeTitle: function(new_title){
         
        //this.options.title = new_title; 
@@ -252,9 +357,15 @@ $.widget( "heurist.baseAction", {
         
     },
 
-    //
-    // define action buttons for edit toolbar
-    //
+    /**
+     * @function _defineActionButton2
+     * @memberof Widgets.baseAction
+     * @instance
+     * @private
+     * @description Defines action buttons for the edit toolbar.
+     * @param {object} options - The button options.
+     * @param {jQuery} container - The container to append the button to.
+     */
     _defineActionButton2: function(options, container){        
         
         //for dialog buttons jquery still uses "text"
@@ -280,10 +391,15 @@ $.widget( "heurist.baseAction", {
     },
     
     
-    //
-    // init dialog widget
-    // see also popupDialog, closeDialog 
-    //
+    /**
+     * @function _initDialog
+     * @memberof Widgets.baseAction
+     * @instance
+     * @private
+     * @description Initializes the dialog widget.
+     * @see Widgets.baseAction#popupDialog
+     * @see Widgets.baseAction#closeDialog
+     */
     _initDialog: function(){
         
             let options = this.options,
@@ -329,9 +445,12 @@ $.widget( "heurist.baseAction", {
             
     },
     
-    //
-    // show itself as popup dialog
-    //
+    /**
+     * @function popupDialog
+     * @memberof Widgets.baseAction
+     * @instance
+     * @description Shows itself as a popup dialog.
+     */
     popupDialog: function(){
         if(this.options.isdialog){
 
@@ -363,9 +482,13 @@ $.widget( "heurist.baseAction", {
         }
     },
     
-    //
-    // close dialog
-    //
+    /**
+     * @function closeDialog
+     * @memberof Widgets.baseAction
+     * @instance
+     * @description Closes the dialog.
+     * @param {boolean} [is_force=false] - If true, the `beforeClose` event will not be triggered.
+     */
     closeDialog: function(is_force){
 
         if(this._as_dialog && this._as_dialog.length > 0 && this._as_dialog.dialog('instance') !== undefined){
@@ -390,21 +513,27 @@ $.widget( "heurist.baseAction", {
         }
     },
 
-    //
-    //
-    //
+    /**
+     * @function doAction
+     * @memberof Widgets.baseAction
+     * @instance
+     * @description Performs the action.
+     */
     doAction: function(){
         return;
     },
 
-    //  -----------------------------------------------------
-    //
-    //  after action event handler
-    //
+    /**
+     * @function _afterActionEventHandler
+     * @memberof Widgets.baseAction
+     * @instance
+     * @private
+     * @description After action event handler.
+     * @param {object} response - The response from the action.
+     */
     _afterActionEventHandler: function( response ){
        return; 
     },
 
   
 });
-

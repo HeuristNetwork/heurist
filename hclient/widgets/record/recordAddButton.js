@@ -19,26 +19,19 @@
 
 
 /**
- * @widget heurist.recordAddButton
+ * @class recordAddButton
+ * @memberof Widgets.Records
  * @description jQuery widget that creates a button to add a new record.
  * This widget is typically used to embed a button in a page (e.g., CMS)
  * that allows users to quickly add a new Heurist record.
  * Default parameters for the new record can be pre-configured.
  *
  * @param {object} options - Configuration options for the widget.
- * @param {?string} options.add_record_label - The label for the button. If not provided, it defaults to "Add [Record Type Name]" or "Add Record".
- * @param {number} [options.RecTypeID=0] - The ID of the record type for the new record.
- * @param {number} [options.OwnerUGrpID=0] - The ID of the user or group to own the new record. Defaults to current user if 0.
- * @param {?string} options.NonOwnerVisibility - The visibility setting for non-owners (e.g., 'public', 'viewable', 'hidden').
- * @param {?string} options.RecTags - Comma-separated string of tags to be applied to the new record.
- * @param {?string} options.NonOwnerVisibilityGroups - Comma-separated string of group IDs for 'hidden' visibility.
- * @param {?string} options.search_realm - An identifier for a search realm, used to trigger a search refresh after adding a record.
  */
 $.widget( "heurist.recordAddButton",{
 
     /**
-     * @namespace options
-     * @memberof heurist.recordAddButton
+     * @memberof Widgets.Records.recordAddButton
      * @type {object}
      * @property {?string} add_record_label - The label for the button. If not provided, it defaults to "Add [Record Type Name]" or "Add Record".
      * @property {number} [RecTypeID=0] - The ID of the record type for the new record.
@@ -62,7 +55,7 @@ $.widget( "heurist.recordAddButton",{
     
     /**
      * @function _init
-     * @memberof heurist.recordAddButton
+     * @memberof Widgets.Records.recordAddButton
      * @private
      * @description Initializes the recordAddButton widget.
      * Creates a button element, sets its label based on options or record type,

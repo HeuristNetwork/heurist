@@ -17,28 +17,20 @@
 */
 
 /**
- * @widget heurist.recordArchive
- * @augments $.heurist.recordAction
+ * @class recordArchive
+ * @augments recordAction
+ * @memberof Widgets.Records
  * @description jQuery widget for looking up and restoring records from the system archive.
  * This widget provides a UI to search the `sysArchive` entity based on criteria like
  * record ID, user, date, and content type (deleted/updated). Search results are displayed,
  * and users can select an archived record version to potentially restore.
  *
  * @param {object} options - Configuration options for the widget.
- * @param {number} [options.height=520] - The height of the dialog.
- * @param {number} [options.width=800] - The width of the dialog.
- * @param {boolean} [options.modal=true] - Whether the dialog is modal.
- * @param {string} [options.title='Lookup and restore archive records'] - Title of the dialog.
- * @param {string} [options.htmlContent='recordArchive.html'] - The HTML file for the widget's content.
- * @param {?object} options.mapping - (Seems unused in the provided snippet) Potentially for mapping external fields if restoring into a new record with transformation.
- * @param {boolean} [options.add_new_record=false] - (Seems unused in the provided snippet) If true, implies creating a new record on selection/restore rather than overwriting.
- * @param {object} [options.resultList={}] - Options to be passed to the `resultList` widget used for displaying search results.
  */
 $.widget( "heurist.recordArchive", $.heurist.recordAction, {
 
     /**
-     * @namespace options
-     * @memberof heurist.recordArchive
+     * @memberof Widgets.Records.recordArchive
      * @type {object}
      * @property {number} [height=520] - Dialog height.
      * @property {number} [width=800] - Dialog width.
@@ -66,14 +58,14 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
     
     /**
      * @member {?jQuery} recordList
-     * @memberof heurist.recordArchive
+     * @memberof Widgets.Records.recordArchive
      * @description jQuery object for the `div` element that hosts the `resultList` widget, used to display archive search results.
      */
     recordList:null,
 
     /**
      * @function _initControls
-     * @memberof heurist.recordArchive
+     * @memberof Widgets.Records.recordArchive
      * @private
      * @description Initializes controls after HTML content is loaded. Sets up search input fields (record ID, user, date, state),
      * the datepicker for the date field, the search button, and the `resultList` widget for displaying results.
@@ -151,8 +143,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
     
     /**
      * @function startSearchOnEnterPress
-     * @memberof heurist.recordArchive
-     * @private
+     * @memberof Widgets.Records.recordArchive
      * @description Event handler for keypress events on input fields. If the Enter key is pressed,
      * it triggers the `_doSearch` method.
      * @param {Event} e - The keypress event object.
@@ -170,7 +161,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
     
     /**
      * @function _recordListHeaderRenderer
-     * @memberof heurist.recordArchive
+     * @memberof Widgets.Records.recordArchive
      * @private
      * @description Renderer function for the header of the `resultList` widget.
      * Defines the column headers for the archive search results.
@@ -194,7 +185,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
 
     /**
      * @function _rendererResultList
-     * @memberof heurist.recordArchive
+     * @memberof Widgets.Records.recordArchive
      * @private
      * @description Renderer function for each item/row in the `resultList` widget.
      * Formats and displays the details of an archived record entry.
@@ -248,7 +239,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
 
     /**
      * @function _getActionButtons
-     * @memberof heurist.recordArchive
+     * @memberof Widgets.Records.recordArchive
      * @private
      * @description Gets action buttons for the dialog, setting the main action button text to 'Restore'.
      * @returns {Array<object>} Array of button definition objects.
@@ -262,8 +253,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
 
     /**
      * @function doAction
-     * @memberof heurist.recordArchive
-     * @private
+     * @memberof Widgets.Records.recordArchive
      * @description Handles the action when the 'Restore' button is clicked.
      * It checks if a single record is selected in the `resultList`.
      * If so, it currently shows a confirmation dialog "Are you sure?".
@@ -296,7 +286,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
     
     /**
      * @function _doSearch
-     * @memberof heurist.recordArchive
+     * @memberof Widgets.Records.recordArchive
      * @private
      * @description Performs the search for archived records based on the criteria entered in the input fields.
      * Validates that either record ID or user, and either record ID or date are provided.
@@ -354,7 +344,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
 
     /**
      * @function _onSearchResult
-     * @memberof heurist.recordArchive
+     * @memberof Widgets.Records.recordArchive
      * @private
      * @description Callback function to handle the results of an archive search.
      * Updates the `resultList` widget with the received `recordset`.
@@ -444,7 +434,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
 
     /**
      * @function _addNewRecord
-     * @memberof heurist.recordArchive
+     * @memberof Widgets.Records.recordArchive
      * @private
      * @description Placeholder function, intended to handle creating a new record from an archived entry.
      * (Currently not implemented in the provided snippet).
