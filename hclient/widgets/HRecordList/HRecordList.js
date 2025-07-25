@@ -1,49 +1,39 @@
 /**
-* RecordList - widget for presentation of the set of records
-* 
-* Content:
-*     Initial content can be defined via:
-* 
-* - A Heurist query (as initial filter to be applied at start) 
-* - Programmatically (via method setRecordSet) 
-* - Smarty template output 
-* - Html or csv content of widget element. 
-* 
-* For smarty and html cases, html elements which are considered as record cards/table rows must have an attribute  data-heurist-rec="nnn"  where nnn is the record ID.
-* 
-* For csv input, the value in the column H-ID is considered as the Heurist record ID.
-* 
-* Appearance/Presentation:
-* The list can be split into pages (via a parameter in the widget properties). In any case, record cards/rows are rendered incrementally (only in visible viewport), so pagination is useful for quick navigation or for very large recordsets (> 10K entries).
-* 
-* The publisher of the recordset can define two kinds of messages: for the initial state and where there are no data (empty search result).
-* 
-* Each record card/row can be rendered with:
-* 
-* - Built-in renderer (function within widget) corresponding with the standard views in previous versions of Heurist
-* - One of four sample built-in smarty templates 
-* - The publisher’s smarty template.  
-* - Programmatically it can be defined as a function in options.rendererCard or it can overwrite method _renderRecord if you use HRecordView as a template for a new widget.
-* When creating a smarty template for this purpose, each record card or row (html element) must be specified with attribute  data-heurist-rec="nnn".
-* 
-* Record cards can be presented in four view modes: grid, horizontal, vertical list or as a table. For table mode, the publisher’s smarty template should generate <tr><td> for records. Otherwise the appearance will look like a vertical list.
-* 
-* Interaction with other widgets:
-* If a search group property is specified, HRecordList accepts ON_REC_SEARCHSTART, ON_REC_SEARCH_FINISH, ON_REC_SELECT and triggers ON_REC_SELECT events. So it can accept search result events from HFilter or selection events from other HRecordSet widgets.
-* 
-* The widget has a built-in HRecordView widget. It handles view action (on record card click, or action link click). See HRecordView for details.
-* 
-* Record card/rows can have html elements: links or buttons (to be specified in smarty template) that can trigger an arbitrary or record-specific action. For this purpose they must have an attribute data-heurist-action.  
-* For example  <a href=”#” data-heurist-action=”record-edit”>Edit</a> will open the record edit dialog.
-* 
-*
-* @project     Heurist academic knowledge management system
-*
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @version     7.0
-*/
+ * @file HRecordList.js
+ * @brief widget for presentation of the set of records
+ * @fileOverview Content:
+ * Initial content can be defined via:
+ * - A Heurist query (as initial filter to be applied at start)
+ * - Programmatically (via method setRecordSet)
+ * - Smarty template output
+ * - Html or csv content of widget element.
+ * For smarty and html cases, html elements which are considered as record cards/table rows must have an attribute  data-heurist-rec="nnn"  where nnn is the record ID.
+ * For csv input, the value in the column H-ID is considered as the Heurist record ID.
+ *
+ * Appearance/Presentation:
+ * The list can be split into pages (via a parameter in the widget properties). In any case, record cards/rows are rendered incrementally (only in visible viewport), so pagination is useful for quick navigation or for very large recordsets (> 10K entries).
+ * The publisher of the recordset can define two kinds of messages: for the initial state and where there are no data (empty search result).
+ * Each record card/row can be rendered with:
+ * - Built-in renderer (function within widget) corresponding with the standard views in previous versions of Heurist
+ * - One of four sample built-in smarty templates
+ * - The publisher’s smarty template.
+ * - Programmatically it can be defined as a function in options.rendererCard or it can overwrite method _renderRecord if you use HRecordView as a template for a new widget.
+ * When creating a smarty template for this purpose, each record card or row (html element) must be specified with attribute  data-heurist-rec="nnn".
+ * Record cards can be presented in four view modes: grid, horizontal, vertical list or as a table. For table mode, the publisher’s smarty template should generate <tr><td> for records. Otherwise the appearance will look like a vertical list.
+ *
+ * Interaction with other widgets:
+ * If a search group property is specified, HRecordList accepts ON_REC_SEARCHSTART, ON_REC_SEARCH_FINISH, ON_REC_SELECT and triggers ON_REC_SELECT events. So it can accept search result events from HFilter or selection events from other HRecordSet widgets.
+ * The widget has a built-in HRecordView widget. It handles view action (on record card click, or action link click). See HRecordView for details.
+ * Record card/rows can have html elements: links or buttons (to be specified in smarty template) that can trigger an arbitrary or record-specific action. For this purpose they must have an attribute data-heurist-action.
+ * For example  <a href=”#” data-heurist-action=”record-edit”>Edit</a> will open the record edit dialog.
+ * @project     Heurist academic knowledge management system
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @author      Artem Osmakov   <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @since       7.0
+ */
 
 /*
 * HBaseWidget->HBaseList->HRecordList ( TBD HRecordCards, HRecordMap, HRecordNetwork)
@@ -71,7 +61,13 @@ import './HRecordView.js';
 import '../HBase/HBaseList.js';
 import '../HRecordList/HRecordListOpts.js';
 
-
+/**
+ * @class HRecordList
+ * @augments {HBaseList}
+ * @memberof Widgets.UI
+ * @description widget for presentation of the set of records
+ * @param {object} options - Configuration options for the widget.
+ */
 $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
 
     //roles in content heurist-role-*
@@ -80,7 +76,29 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     // recordList-content
     // recordList-selection
     
-    // default options
+    /**
+     * @memberof Widgets.UI.HRecordList
+     * @type {object}
+     * @property {string} resourcePath - The path to the widget's resources.
+     * @property {string} searchDomain - The search domain.
+     * @property {string} searchInitial - The initial search query.
+     * @property {boolean} showCounter - Whether to show the counter.
+     * @property {boolean} selectFirstRecord - Whether to select the first record.
+     * @property {number} pageSize - The page size.
+     * @property {boolean} supportCollection - Whether to support collections.
+     * @property {boolean} showMediaViewer - Whether to show the media viewer.
+     * @property {string} selectAction - The select action.
+     * @property {string} selectMode - The select mode.
+     * @property {string} viewMode - The view mode.
+     * @property {string} viewRecordMode - The view record mode.
+     * @property {string} editRecordMode - The edit record mode.
+     * @property {function} rendererCard - The custom card renderer.
+     * @property {string} templateCard - The template for the card.
+     * @property {string} templateView - The template for the view.
+     * @property {boolean} placeholderEmptyBlank - Whether the empty placeholder is blank.
+     * @property {string} placeholderEmpty - The empty placeholder.
+     * @property {string} placeholderEmptyDef - The default empty placeholder.
+     */
     options: {
 
         resourcePath: 'hclient/widgets/HRecordList/HRecordList', //relative path+filename to resources: html, css and localization
@@ -152,6 +170,11 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     _cashedItem:{},
     _lastSelectedIndex: null,
 
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description Initializes the widget.
+     */
     _init: function() {
 
         this.record_id_attr = `data-heurist-${this.options.entityType}`;
@@ -166,10 +189,12 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         this._super();
     },
     
-    /*
-    * Use it a) to add event listeners for subelements of this widget
-    *        b) perform some default actions (intial search for example) 
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description Use it a) to add event listeners for subelements of this widget
+     * b) perform some default actions (intial search for example)
+     */
     _initControls:function(){
 
         //TBD
@@ -210,9 +235,12 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         this._super();
     },
     
-    /*
-    *
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description Handles the closing of the option editor.
+     * @param {object} newOptions - The new options.
+     */
     onCloseOptionEditor: function(newOptions){
         if(newOptions){
             
@@ -229,26 +257,33 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         }
     },
     
-    /* 
-    * Cleanup. Removes generated elements and off event listeners
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description Cleanup. Removes generated elements and off event listeners
+     */
     _destroy: function() {
         // remove generated elements
         this.clearContent();
         this._clearMultiselect();       
     },
     
-    /*
-    * Returns element with atribute data-heurist-rec=recID (this.record_id_attr)
-    */
+    /**
+     * @memberof Widgets.UI.HRecordList
+     * @description Returns element with atribute data-heurist-rec=recID (this.record_id_attr)
+     * @param {number} recID - The record ID.
+     * @returns {HTMLElement} The record card element.
+     */
     getRecordCard(recID){
         
         return this.div_content[0].querySelector(`${this.options.viewMode=='table'?'tr':'div'}[${this.record_id_attr}="${recID}"]`);
     },
     
-    /*
-    * Returns array of elements atribute data-heurist-rec (this.record_id_attr)
-    */
+    /**
+     * @memberof Widgets.UI.HRecordList
+     * @description Returns array of elements atribute data-heurist-rec (this.record_id_attr)
+     * @returns {jQuery} The record card elements.
+     */
     getRecordCardAll(){
         let searchFor = `${this.options.viewMode=='table'?'tr':'div'}[${this.record_id_attr}]`;
         
@@ -256,10 +291,11 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     },
     
     
-    /*
-    * Removes all record elements
-    *  overwrites parent's method
-    */
+    /**
+     * @memberof Widgets.UI.HRecordList
+     * @description Removes all record elements
+     * overwrites parent's method
+     */
     clearContent: function(){
         
         if(!this._initCompleted) return;
@@ -275,10 +311,12 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         this._clearPagination();
     },
 
-    /*
-    * Adds notification/placeholder message (init, error or for empty result)
-    * overwrites parent's method
-    */
+    /**
+     * @memberof Widgets.UI.HRecordList
+     * @description Adds notification/placeholder message (init, error or for empty result)
+     * overwrites parent's method
+     * @param {string} msg - The message to render.
+     */
     renderMessage: function(msg){
     
         this.clearContent();
@@ -290,9 +328,10 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         
     },
     
-    /*
-    * overwrites parent's method
-    */
+    /**
+     * @memberof Widgets.UI.HRecordList
+     * @description overwrites parent's method
+     */
     renderConent: function(){
 
         this._cashedItem = {}; //reset
@@ -310,9 +349,10 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     },
     
     /**
-    * selection - HRecordSet or array of record Ids or 'all'
+    * @memberof Widgets.UI.HRecordList
+    * @description selection - HRecordSet or array of record Ids or 'all'
     *
-    * @param selection - record ids
+    * @param {Array|string} selection - record ids
     */
     setSelection: function(selection){
         
@@ -344,9 +384,11 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
 
     //------------------ methods defined in HRecordList
 
-    //
-    //
-    //    
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description Clears the pagination.
+     */
     _clearPagination: function(){
         if(this.div_pagination){
             //off events for pagination buttons
@@ -360,9 +402,12 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         this.div_counter?.text('');
     },  
 
-    //
-    // recreates pagination buttons and/or dropdown
-    //  
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description recreates pagination buttons and/or dropdown
+     * @param {boolean} refreshMenuOnly - Whether to refresh only the menu.
+     */
     _renderPagination: function(refreshMenuOnly){
         
         let total_inquery = (this.recordSet!=null)?this.recordSet.count_total():0;
@@ -482,16 +527,20 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         
     },
 
-    //
-    // off listeners
-    //    
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description off listeners
+     */
     _clearMultiselect: function(){
 
     },    
     
-    //
-    //
-    //    
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description Sets the page style.
+     */
     _setPageStyle: function(){
         //grid - move to renderPage
         if(this.options.viewMode=='row'){
@@ -520,9 +569,12 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         
     },
     
-    //
-    //
-    //
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description Renders the page.
+     * @param {number} pageno - The page number.
+     */
     _renderPage: function( pageno ){
 
         let html = ''; //result html for content
@@ -607,6 +659,11 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
 
     },
     
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description Creates the intersection observer.
+     */
     _createIntersectionObserver: function () {
 
           let options = {
@@ -620,6 +677,13 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
           this.observer = new IntersectionObserver((entries, observer)=>that._handleIntersect(entries, observer), options);
     },
     
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description Handles the intersection of the observer.
+     * @param {Array} entries - The entries.
+     * @param {IntersectionObserver} observer - The observer.
+     */
     _handleIntersect: function(entries, observer){
          
          let that = this;
@@ -637,9 +701,12 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
                 
     },
     
-    //
-    // Loads record details for page
-    //
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description Loads record details for page
+     * @param {Array} rec_toload - The records to load.
+     */
     _loadRecordsDetails: function( rec_toload ){
         
         let that = this;
@@ -705,9 +772,13 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         
     },
     
-    //
-    //
-    //
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description Handles the response of getting record details.
+     * @param {object} response - The response.
+     * @param {Array} rec_toload - The records to load.
+     */
     _onGetRecordsDetails: function(response, rec_toload){
         
         if(!this.recordSet) return;
@@ -740,6 +811,12 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         
     },
     
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description Replaces the stub with content.
+     * @param {number} recID - The record ID.
+     */
     _replaceStubWithContent(recID){
         
         //get stub
@@ -757,9 +834,13 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         
     },
 
-    //
-    // Stub while loading the entire data
-    //    
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description Stub while loading the entire data
+     * @param {number} recID - The record ID.
+     * @returns {string} The HTML for the stub.
+     */
     _renderRecordStub: function(recID){
         
         if(this.options.viewMode=='table'){
@@ -770,9 +851,13 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         
     },
     
-    //
-    // General renderer for any entity type 
-    //    
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description General renderer for any entity type
+     * @param {number} recID - The record ID.
+     * @returns {string} The HTML for the record.
+     */
     _renderRecord: function(recID){
 
         let html = '';
@@ -820,9 +905,12 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
     },
     
     
-    //
-    //
-    //
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description Handles the click on a record div.
+     * @param {Event} event - The event object.
+     */
     _recordDivOnClick: function(event){
 
         if($(event.target).is('a')) return; // || $(event.target).parents('a')
@@ -937,9 +1025,13 @@ $.widget( 'heurist.HRecordList', $.heurist.HBaseList, {
         
     },
     
-    /*
-    *
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordList
+     * @description Scrolls to the record div.
+     * @param {HTMLElement|number} selected - The selected element or record ID.
+     * @param {boolean} to_top_of_viewport - Whether to scroll to the top of the viewport.
+     */
     _scrollToRecordDiv: function(selected, to_top_of_viewport){
         
         let rdiv = null;

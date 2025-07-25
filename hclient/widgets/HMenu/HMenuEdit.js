@@ -1,22 +1,38 @@
 /**
-* HMenuEdit - extension for HMenu to compose its content. It is used in CMS editor
-*
-* @project     Heurist academic knowledge management system
-*
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @version     7.0
-*/
+ * @file HMenuEdit.js
+ * @brief extension for HMenu to compose its content. It is used in CMS editor
+ * @fileOverview
+ * @project     Heurist academic knowledge management system
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @author      Artem Osmakov   <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @since       7.0
+ */
 //import '../HBase/HBaseWidget.js';
 import './HMenu.js';
 import './HMenuOpts.js';
 
 /* global selectEntity, browseRecords */
 
+/**
+ * @class HMenuEdit
+ * @augments {HMenu}
+ * @memberof Widgets.UI
+ * @description extension for HMenu to compose its content. It is used in CMS editor
+ * @param {object} options - Configuration options for the widget.
+ */
 $.widget( 'heurist.HMenuEdit', $.heurist.HMenu, {
 
-    // default options
+    /**
+     * @memberof Widgets.UI.HMenuEdit
+     * @type {object}
+     * @property {string} viewMode - The view mode.
+     * @property {boolean} isEditMode - Whether the menu is in edit mode.
+     * @property {number} expandLevels - The number of levels to expand.
+     * @property {function} onStructureChanged - The function to call when the structure changes.
+     */
     options: {
         viewMode: 'treeview',
         isEditMode: true,
@@ -28,6 +44,11 @@ $.widget( 'heurist.HMenuEdit', $.heurist.HMenu, {
     _browseFunction: null, //function that opens menu items selector popup
 
     
+    /**
+     * @private
+     * @memberof Widgets.UI.HMenuEdit
+     * @description Initializes the widget.
+     */
     _init: function(){
         /*             
         this.options.viewMode = 'treeview';
@@ -102,9 +123,12 @@ console.log(data.hitMode, node.data.isFolder);
             };
     },
     
-    /*
-    *  render actions buttons for edit mode
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HMenuEdit
+     * @description render actions buttons for edit mode
+     * @param {object} item - The item to render.
+     */
     _defineActionIcons: function(item){
         
         let tree_element = this.element;
@@ -201,9 +225,13 @@ console.log(data.hitMode, node.data.isFolder);
         }
     }, //end _defineActionIcons
 
-    /*
-    * Converts treeview strucuture to json {id1:{}   }
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HMenuEdit
+     * @description Converts treeview strucuture to json {id1:{}   }
+     * @param {object} struct - The structure to convert.
+     * @returns {object} The converted structure.
+     */
     _getMenuStructure: function( struct ){
         
         let isRoot = false;
@@ -239,9 +267,13 @@ console.log(item);
         return item;
     },
     
-    /*
-    *
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HMenuEdit
+     * @description Verifies that the menu keys are unique.
+     * @param {object} menuData - The menu data.
+     * @returns {Array} The duplicate keys.
+     */
     _verifyUniqueMenuKeys(menuData){
         
         let tree = $.ui.fancytree.getTree( this.element );
@@ -265,9 +297,11 @@ console.log(item);
         return duplications;
     },
     
-    /*
-    *
-    */
+    /**
+     * @memberof Widgets.UI.HMenuEdit
+     * @description Adds a menu entry.
+     * @param {string} parentNodeKey - The key of the parent node.
+     */
     addMenuEntry: function( parentNodeKey ){
         
             if(this._selectorInput!=null){
@@ -341,9 +375,11 @@ console.log(item);
             this._browseFunction();
     },
     
-    /*
-    *  Adds submenu (folder)
-    */ 
+    /**
+     * @memberof Widgets.UI.HMenuEdit
+     * @description Adds submenu (folder)
+     * @param {string} parentNodeKey - The key of the parent node.
+     */
     addMenuFolder: function( parentNodeKey ){
         
         let that = this;
@@ -370,9 +406,11 @@ console.log(item);
         
     },
     
-    /*
-    * Add saved filter as menu entry
-    */
+    /**
+     * @memberof Widgets.UI.HMenuEdit
+     * @description Add saved filter as menu entry
+     * @param {string} parentNodeKey - The key of the parent node.
+     */
     addMenuFilterEntry: function( parentNodeKey ){
             
             let that = this;
@@ -406,9 +444,13 @@ console.log(item);
             );
     },
 
-    /*
-    *  Find parent node for new menu entry
-    */    
+    /**
+     * @private
+     * @memberof Widgets.UI.HMenuEdit
+     * @description Find parent node for new menu entry
+     * @param {string} parentNodeKey - The key of the parent node.
+     * @returns {object} The parent node.
+     */
     _getParentNode: function( parentNodeKey ){
 
         const tree = $.ui.fancytree.getTree( this.element );
@@ -428,9 +470,11 @@ console.log(item);
         return parentNode; 
     },
     
-    /*
-    *
-    */
+    /**
+     * @memberof Widgets.UI.HMenuEdit
+     * @description Edits a menu entry.
+     * @param {string} menuId - The ID of the menu to edit.
+     */
     editMenuEntry: function(menuId){
         
         let that = this;
@@ -454,9 +498,12 @@ console.log(item);
         }
     },
     
-    /*
-    *
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HMenuEdit
+     * @description Edits a page record.
+     * @param {number} record_id - The ID of the record to edit.
+     */
     _editPageRecord: function (record_id){
             let that = this;
             //edit menu item

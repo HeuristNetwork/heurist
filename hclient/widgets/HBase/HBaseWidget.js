@@ -1,21 +1,39 @@
 /**
-* HBaseWidget - Base (abstract) widget for all Heurist UI widgets
-*
-* This widget handles the initialization process:
-*  1) Loads resources (CSS, HTML, localization) from `options.resourcePath` or `options.htmlContent`
-*  2) Calls `_initControls` after loading content, then triggers `options.onInitFinished`
-*
-* @project     Heurist academic knowledge management system
-*
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @version     7.0
-*/
+ * @file HBaseWidget.js
+ * @brief Base (abstract) widget for all Heurist UI widgets
+ * @fileOverview This widget handles the initialization process:
+ * 1) Loads resources (CSS, HTML, localization) from `options.resourcePath` or `options.htmlContent`
+ * 2) Calls `_initControls` after loading content, then triggers `options.onInitFinished`
+ * @project     Heurist academic knowledge management system
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @author      Artem Osmakov   <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @since       7.0
+ */
 
+/**
+ * @class HBaseWidget
+ * @memberof Widgets.UI
+ * @description Base (abstract) widget for all Heurist UI widgets.
+ * This widget handles the initialization process:
+ * 1) Loads resources (CSS, HTML, localization) from `options.resourcePath` or `options.htmlContent`
+ * 2) Calls `_initControls` after loading content, then triggers `options.onInitFinished`
+ *
+ * @param {object} options - Configuration options for the widget.
+ */
 $.widget( 'heurist.HBaseWidget', {
     
-    // Default options for the widget
+    /**
+     * @memberof Widgets.UI.HBaseWidget
+     * @type {object}
+     * @property {object} hapi - HAPI instance
+     * @property {string} resourcePath - Path to resources (HTML, CSS, localization)
+     * @property {string} htmlContent - Custom content (if provided, overrides `resourcePath`)
+     * @property {string} uiLibrary - UI framework: 'bootstrap' or 'jqueryui'
+     * @property {function} onInitFinished - Event listener callback when initialization is complete
+     */
     options: {
         hapi: null, // HAPI instance
         
@@ -43,7 +61,9 @@ $.widget( 'heurist.HBaseWidget', {
     _optionsEditor: null, //container for options editor
     
     /**
-     * Widget constructor: Initializes the component.
+     * @private
+     * @memberof Widgets.UI.HBaseWidget
+     * @description Widget constructor: Initializes the component.
      */
     _create: function() {
         
@@ -67,7 +87,9 @@ $.widget( 'heurist.HBaseWidget', {
     },
 
     /**
-     * Initializes the widget. Called automatically when the widget is created.
+     * @private
+     * @memberof Widgets.UI.HBaseWidget
+     * @description Initializes the widget. Called automatically when the widget is created.
      */
     _init: function() {
         let that = this;
@@ -106,8 +128,8 @@ $.widget( 'heurist.HBaseWidget', {
     },    
     
     /**
-     * Loads HTML content into the target container.
-     * 
+     * @memberof Widgets.UI.HBaseWidget
+     * @description Loads HTML content into the target container.
      * @param {jQuery} target - The element to load content into.
      * @param {string} url - The URL to fetch content from.
      * @param {Function} callback - The function to call after content is loaded.
@@ -129,7 +151,9 @@ $.widget( 'heurist.HBaseWidget', {
 
     
     /**
-     * Initializes UI controls and event listeners after content is loaded.
+     * @private
+     * @memberof Widgets.UI.HBaseWidget
+     * @description Initializes UI controls and event listeners after content is loaded.
      */
     _initControls: function() {
         // Example: Add an event listener for a button
@@ -144,7 +168,9 @@ $.widget( 'heurist.HBaseWidget', {
     },
     
     /**
-     * Refreshes the widget, updating UI elements based on login status.
+     * @private
+     * @memberof Widgets.UI.HBaseWidget
+     * @description Refreshes the widget, updating UI elements based on login status.
      */
     _refresh: function() {
         if (!this._initCompleted) return;
@@ -158,7 +184,9 @@ $.widget( 'heurist.HBaseWidget', {
     },
     
     /**
-     * Cleanup function. Removes generated elements and event listeners.
+     * @private
+     * @memberof Widgets.UI.HBaseWidget
+     * @description Cleanup function. Removes generated elements and event listeners.
      */
     _destroy: function() {
         // Implement cleanup logic here if necessary
@@ -167,9 +195,13 @@ $.widget( 'heurist.HBaseWidget', {
         }
     },
     
-    /*
-    * Opens options editor popup
-    */
+    /**
+     * @memberof Widgets.UI.HBaseWidget
+     * @description Opens options editor popup
+     * @param {jQuery} container - The element to load content into.
+     * @param {Function} onChange - The function to call after content is loaded.
+     * @param {jQuery} menuParent - The element to load content into.
+     */
     openOptionsEditor: function(container, onChange, menuParent){
         
         const optEditor = this.widgetName+'Opts';
@@ -193,9 +225,11 @@ $.widget( 'heurist.HBaseWidget', {
         }
     },
     
-    /*
-    *
-    */
+    /**
+     * @memberof Widgets.UI.HBaseWidget
+     * @description The function to call after the option editor is closed.
+     * @param {Object} newOptions - The new options from the editor.
+     */
     onCloseOptionEditor: function(newOptions){
         
     }

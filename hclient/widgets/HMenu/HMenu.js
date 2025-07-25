@@ -1,33 +1,55 @@
 /**
-* HMenu - widget for page navigation, actions and saved filters links
-* 
-* Content:
-* Content of the menu widget can be defined via the widget property form in the CMS editor which provinces a treeview that consists of menu and submenu items. Each menu item refers to a “CMS page” record, a Saved filter (usrSavedSearches) or an Action (sysDashboard). The Submenu (folder) structure implies no difference in the pages, it exists solely to create a hierarchy within the menu. Technically the CMS page and saved filter can be defined via an action.
-* * An alternative (advanced) way is to define an html snippet with buttons and/or links with one of  the attributes: data-heurist-action, data-heurist-pageid or data-heurist-search.  
-* 
-* Appearance/Presentation:
-* If the content is defined via json or html, snippet elements have attributes that define their role (eg. data-heurist-role="menu-dropdown"). It is possible to define the appearance of the menu via the widget property form. Menus can be vertical, horizontal or treeview. They can be bootstrap or jquery (tbd). They can be collapsable.
-* 
-* Interaction:
-* On menu selection, the widget executes the specified action, loads the web page or starts the saved filter. It also triggers the ON_ACTION event. HMenu has a built-in HFilter widget. It handles Saved Filters. 
-* 
-* If Saved Filter has entries to be defined by the website visitor (faceted search), HMenu opens the Filter form. The appearance of this form is similar to HRecordView for HRecordList. It can be inline (over menu), in a floating popup, in a modal dialog, in an offcanvas (side slide panel).  If the publisher prefers to specify their own HForm, it can be connected to HMenu via the search group.
-*
-* @project     Heurist academic knowledge management system
-*
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @version     7.0
-*/
+ * @file HMenu.js
+ * @brief widget for page navigation, actions and saved filters links
+ * @fileOverview Content:
+ * Content of the menu widget can be defined via the widget property form in the CMS editor which provinces a treeview that consists of menu and submenu items. Each menu item refers to a “CMS page” record, a Saved filter (usrSavedSearches) or an Action (sysDashboard). The Submenu (folder) structure implies no difference in the pages, it exists solely to create a hierarchy within the menu. Technically the CMS page and saved filter can be defined via an action.
+ * An alternative (advanced) way is to define an html snippet with buttons and/or links with one of  the attributes: data-heurist-action, data-heurist-pageid or data-heurist-search.
+ *
+ * Appearance/Presentation:
+ * If the content is defined via json or html, snippet elements have attributes that define their role (eg. data-heurist-role="menu-dropdown"). It is possible to define the appearance of the menu via the widget property form. Menus can be vertical, horizontal or treeview. They can be bootstrap or jquery (tbd). They can be collapsable.
+ *
+ * Interaction:
+ * On menu selection, the widget executes the specified action, loads the web page or starts the saved filter. It also triggers the ON_ACTION event. HMenu has a built-in HFilter widget. It handles Saved Filters.
+ *
+ * If Saved Filter has entries to be defined by the website visitor (faceted search), HMenu opens the Filter form. The appearance of this form is similar to HRecordView for HRecordList. It can be inline (over menu), in a floating popup, in a modal dialog, in an offcanvas (side slide panel).  If the publisher prefers to specify their own HForm, it can be connected to HMenu via the search group.
+ * @project     Heurist academic knowledge management system
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @author      Artem Osmakov   <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @since       7.0
+ */
 import '../HBase/HBaseWidget.js';
 import '../HFilter/HFilter.js';
 
 /* global bootstrap */
 
+/**
+ * @class HMenu
+ * @augments {HBaseWidget}
+ * @memberof Widgets.UI
+ * @description widget for page navigation, actions and saved filters links
+ *
+ * @param {object} options - Configuration options for the widget.
+ */
 $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
 
-    // default options
+    /**
+     * @memberof Widgets.UI.HMenu
+     * @type {object}
+     * @property {string} resourcePath - The path to the widget's resources.
+     * @property {Array} menuItems - The menu items.
+     * @property {string} viewMode - The view mode of the menu.
+     * @property {string} styleMode - The style mode of the menu.
+     * @property {number} expandLevels - The number of levels to expand in the tree view.
+     * @property {string} viewFilterMode - The view mode for the filter.
+     * @property {string} searchDomain - The search domain.
+     * @property {function} customActionHandler - The custom action handler.
+     * @property {function} onBeforeAction - The function to call before an action.
+     * @property {function} onActionComplete - The function to call after an action is complete.
+     * @property {boolean} isEditMode - Whether the menu is in edit mode.
+     */
     options: {
         resourcePath: 'hclient/widgets/HMenu/HMenu',
         
@@ -68,6 +90,11 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
     _fancytreeOptionsEdit: null,    
     filterView: null,
 
+    /**
+     * @private
+     * @memberof Widgets.UI.HMenu
+     * @description Initializes the widget.
+     */
     _init: function(){
         
         this._super();
@@ -79,7 +106,9 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
 
     
     /**
-     * Initializes UI controls and event listeners after content is loaded.
+     * @private
+     * @memberof Widgets.UI.HMenu
+     * @description Initializes UI controls and event listeners after content is loaded.
      */
     _initControls:function(){
         let that = this;
@@ -188,9 +217,14 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         this._super();
     },
     
-    /*
-    *
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HMenu
+     * @description Gets the UI element from the event.
+     * @param {Event} event - The event object.
+     * @param {object} ui - The UI object from the event.
+     * @returns {jQuery} The UI element.
+     */
     getUiEle: function(event, ui){
         
         let ele;
@@ -216,7 +250,11 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
     },
     
     /**
-     * Initializes UI controls and event listeners after content is loaded.
+     * @private
+     * @memberof Widgets.UI.HMenu
+     * @description Initializes UI controls and event listeners after content is loaded.
+     * @param {Event} event - The event object.
+     * @param {object} ui - The UI object from the event.
      */
     menuActionHandler: function(event, ui) {
 
@@ -250,9 +288,12 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         this.executeAction(action_id, opts);    
     },
      
-    /*
-    *
-    */
+    /**
+     * @memberof Widgets.UI.HMenu
+     * @description Executes the action.
+     * @param {string} action_id - The ID of the action to execute.
+     * @param {object} opts - The options for the action.
+     */
     executeAction: function(action_id, opts){
 
         if(this.$H.isFunction(this.options.onBeforeAction)){
@@ -282,9 +323,11 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         }
     },
 
-    /*
-    *
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HMenu
+     * @description Destroys the widget.
+     */
     _destroy: function() {
         // remove generated elements
         if(this._events){
@@ -295,9 +338,10 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         this._super();   
     },
 
-    /*
-    * Removes content
-    */
+    /**
+     * @memberof Widgets.UI.HMenu
+     * @description Removes content
+     */
     clearContent: function(){
         
         if(!this._initCompleted) return;   
@@ -313,9 +357,13 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         
     },
     
-    /*
-    *
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HMenu
+     * @description Handles events.
+     * @param {Event} e - The event object.
+     * @param {object} data - The data from the event.
+     */
     eventHandler: function(e, data){
         if(e.type == this.HAPI.Event.ON_CREDENTIALS)
         {
@@ -323,16 +371,22 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         } 
     },
     
-    /*
-    * Show/hide elements on menu depends on current credentials
-    */    
+    /**
+     * @private
+     * @memberof Widgets.UI.HMenu
+     * @description Show/hide elements on menu depends on current credentials
+     * @param {object} data - The data from the event.
+     */
     onChangeCredentials: function(data){
         
     },
     
-    /*
-    *
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HMenu
+     * @description Handles the closing of the option editor.
+     * @param {object} newOptions - The new options.
+     */
     onCloseOptionEditor: function(newOptions){
         if(newOptions){
             
@@ -367,9 +421,11 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         }
     },
     
-    //
-    //find menu contents by top level ids    
-    //
+    /**
+     * @private
+     * @memberof Widgets.UI.HMenu
+     * @description find menu contents by top level ids
+     */
     reloadMenuData:function(){
         
         //find menu contents by top level ids    
@@ -421,9 +477,12 @@ console.log( that._menuData );
         
     },
 
-    /*
-    *
-    */    
+    /**
+     * @private
+     * @memberof Widgets.UI.HMenu
+     * @description Adds an error message to the element.
+     * @param {string} message - The error message.
+     */
     addErrorMessage: function(message){
         
             if(!message){
@@ -438,9 +497,14 @@ console.log( that._menuData );
         
     },
     
-    /*
-    *
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HMenu
+     * @description Generates the menu.
+     * @param {Array} menuItems - The menu items.
+     * @param {number} lvl - The level of the menu.
+     * @returns {string} The HTML for the menu.
+     */
     generateMenu: function( menuItems, lvl ){
         
         
@@ -552,9 +616,11 @@ console.log( that._menuData );
         return res;
     },
     
-    /*
-    *
-    */
+    /**
+     * @memberof Widgets.UI.HMenu
+     * @description Executes a saved search.
+     * @param {object} opts - The options for the search.
+     */
     executeSavedSearch: function(opts){
         
         if(this.$H.isPositiveInt(opts)){
