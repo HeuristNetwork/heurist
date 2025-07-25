@@ -7,7 +7,7 @@
 *               It uses HTML templates for welcome emails and includes attachments.
 *
 * @project     Heurist academic knowledge management system
-* @package Admin/dboperations
+* @package Admin\Dboperations
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @author      Artem Osmakov   <osmakov@gmail.com>
