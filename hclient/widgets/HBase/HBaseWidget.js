@@ -14,6 +14,11 @@
  */
 
 /**
+ * @namespace Widgets.UI
+ * @description User Interface widgets for v7. They use bootstrap for styling.
+ */
+
+/** 
  * @class HBaseWidget
  * @memberof Widgets.UI
  * @description Base (abstract) widget for all Heurist UI widgets.

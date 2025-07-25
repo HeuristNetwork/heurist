@@ -17,6 +17,7 @@
 
 /**
  * @namespace Widgets.Records
+ * @description widgets for actions performed on a scope of records
  */
 
 /**

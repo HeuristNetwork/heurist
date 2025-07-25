@@ -19,26 +19,19 @@
 
 
 /**
- * @widget heurist.recordDataTable
- * @augments $.heurist.recordAction
+ * @class recordDataTable
+ * @augments {recordAction}
+ * @memberof Widgets.Records
  * @description jQuery widget for configuring columns to be displayed in a DataTable for a specific record type.
  * Users can select fields from a tree view of the record type's structure (including fields from linked records)
  * and set visibility and width for these columns. Configurations can be saved and loaded using the `configEntity` widget.
  *
  * @param {object} options - Configuration options for the widget.
- * @param {number} [options.height=780] - The height of the dialog.
- * @param {number} [options.width=800] - The width of the dialog.
- * @param {boolean} [options.modal=true] - Whether the dialog is modal.
- * @param {string} [options.title='Configure DataTable columns'] - Title of the dialog.
- * @param {string} [options.htmlContent='recordDataTable.html'] - The HTML file for the widget's content.
- * @param {?object} options.initial_cfg - An initial configuration object to load when the widget starts.
- *                                      Expected to have `cfg_name` and `rty_ID`, `fields`, `columns`.
  */
 $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
     /**
-     * @namespace options
-     * @memberof heurist.recordDataTable
+     * @memberof Widgets.Records.recordDataTable
      * @type {object}
      * @property {number} [height=780] - Dialog height.
      * @property {number} [width=800] - Dialog width.
@@ -63,21 +56,21 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
     /**
      * @member {?Array<string>} selectedFields
-     * @memberof heurist.recordDataTable
+     * @memberof Widgets.Records.recordDataTable
      * @description An array of codes for fields selected in the Fancytree.
      *              These codes represent the path to the field (e.g., '3:lt134:12:id').
      */
     selectedFields:null,
     /**
      * @member {?Array<object>} selectedColumns
-     * @memberof heurist.recordDataTable
+     * @memberof Widgets.Records.recordDataTable
      * @description An array of column definition objects for the DataTable,
      *              derived from `selectedFields` and user adjustments (visibility, width).
      */
     selectedColumns:null,
     /**
      * @member {?number} _selectedRtyID
-     * @memberof heurist.recordDataTable
+     * @memberof Widgets.Records.recordDataTable
      * @private
      * @description Stores the currently selected Record Type ID for which columns are being configured.
      */
@@ -85,7 +78,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
     
     /**
      * @function _initControls
-     * @memberof heurist.recordDataTable
+     * @memberof Widgets.Records.recordDataTable
      * @private
      * @description Initializes controls after HTML content is loaded.
      * Ensures `configEntity.js` is loaded. Sets up the `configEntity` widget for loading/saving configurations.
@@ -182,7 +175,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
     /**
      * @function setSettings
-     * @memberof heurist.recordDataTable
+     * @memberof Widgets.Records.recordDataTable
      * @description Applies a given configuration settings object to the widget.
      * Populates `this.selectedFields` and `this.selectedColumns` from the settings.
      * Reloads and updates the Fancytree to reflect the selected fields and their order/visibility in the column list.
@@ -227,7 +220,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
     
     /**
      * @function _assignSelectedFields
-     * @memberof heurist.recordDataTable
+     * @memberof Widgets.Records.recordDataTable
      * @private
      * @description Updates the Fancytree and the sortable list of selected columns based on
      * `this.selectedFields` and `this.selectedColumns`. Marks fields as selected in the tree
@@ -272,7 +265,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
     /**
      * @function _addSelectedColumn
-     * @memberof heurist.recordDataTable
+     * @memberof Widgets.Records.recordDataTable
      * @private
      * @description Adds a field (column) to the sortable list of selected columns on the right.
      * This is typically called when a field is selected in the Fancytree.
@@ -343,7 +336,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
   
     /**
      * @function _getActionButtons
-     * @memberof heurist.recordDataTable
+     * @memberof Widgets.Records.recordDataTable
      * @private
      * @description Gets action buttons for the dialog, setting labels to 'Apply' and 'Close'.
      * @returns {Array<object>} Array of button definition objects.
@@ -357,7 +350,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
         
     /**
      * @function _fillSelectRecordScope
-     * @memberof heurist.recordDataTable
+     * @memberof Widgets.Records.recordDataTable
      * @private
      * @description Populates the record type selector dropdown.
      * Uses record types from the current recordset and any from `options.initial_cfg`.
@@ -409,7 +402,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             
     /**
      * @function doAction
-     * @memberof heurist.recordDataTable
+     * @memberof Widgets.Records.recordDataTable
      * @private
      * @description Handles the 'Apply' action. Retrieves the current settings using `getSettings()`.
      * If the configuration has changed, it prompts to save the settings via the `configEntity` widget.
@@ -446,7 +439,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
     // mode_action true - returns columns for DataTable, false - returns codes of selected nodes
     /**
      * @function getSettings
-     * @memberof heurist.recordDataTable
+     * @memberof Widgets.Records.recordDataTable
      * @description Retrieves the current DataTable column configuration from the UI.
      * Collects selected fields from the Fancytree and column properties (visibility, width, order)
      * from the sortable list. Ensures 'rec_ID' and 'typename' are included if not already.
@@ -532,7 +525,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
     /**
      * @function _onRecordScopeChange
-     * @memberof heurist.recordDataTable
+     * @memberof Widgets.Records.recordDataTable
      * @private
      * @description Handles changes in the record type selector.
      * Reloads the Fancytree with the structure for the newly selected record type.
@@ -571,7 +564,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
     
     /**
      * @function _loadRecordTypesTreeView
-     * @memberof heurist.recordDataTable
+     * @memberof Widgets.Records.recordDataTable
      * @private
      * @description Loads or reloads the Fancytree with the field structure for the given `rtyID`.
      * It generates tree data using `window.hWin.HEURIST4.dbs.createRectypeStructureTree`.

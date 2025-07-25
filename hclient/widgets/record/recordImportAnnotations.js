@@ -19,8 +19,9 @@
 
 
 /**
- * @widget heurist.recordImportAnnotations
- * @augments $.heurist.recordAction
+ * @class recordImportAnnotations
+ * @augments {recordAction}
+ * @memberof Widgets.Records
  * @description jQuery widget for importing annotations from registered IIIF manifests.
  * This widget provides a user interface to trigger the import process for annotations
  * associated with IIIF manifests stored in the system. It communicates with a server-side
@@ -28,17 +29,11 @@
  * summarizing the import results.
  *
  * @param {object} options - Configuration options for the widget.
- * @param {number} [options.height=780] - The height of the dialog.
- * @param {number} [options.width=800] - The width of the dialog.
- * @param {boolean} [options.modal=true] - Whether the dialog is modal.
- * @param {string} [options.title='Import annotations from registered IIIF manifests'] - Title for the dialog.
- * @param {string} [options.htmlContent='recordImportAnnotations'] - Base name for the HTML file ('.html' will be appended).
  */
 $.widget( "heurist.recordImportAnnotations", $.heurist.recordAction, {
 
     /**
-     * @namespace options
-     * @memberof heurist.recordImportAnnotations
+     * @memberof Widgets.Records.recordImportAnnotations
      * @type {object}
      * @property {number} [height=780] - Dialog height.
      * @property {number} [width=800] - Dialog width.
@@ -58,7 +53,7 @@ $.widget( "heurist.recordImportAnnotations", $.heurist.recordAction, {
     
     /**
      * @function _init
-     * @memberof heurist.recordImportAnnotations
+     * @memberof Widgets.Records.recordImportAnnotations
      * @private
      * @description Initializes the widget. Appends '.html' to `options.htmlContent`.
      * Calls the parent widget's `_init` method.
@@ -71,7 +66,7 @@ $.widget( "heurist.recordImportAnnotations", $.heurist.recordAction, {
     
     /**
      * @function _initControls
-     * @memberof heurist.recordImportAnnotations
+     * @memberof Widgets.Records.recordImportAnnotations
      * @private
      * @description Initializes controls after HTML content is loaded.
      * Makes action buttons jQuery UI buttons and attaches click handlers.
@@ -90,7 +85,7 @@ $.widget( "heurist.recordImportAnnotations", $.heurist.recordAction, {
     
     /**
      * @function _getActionButtons
-     * @memberof heurist.recordImportAnnotations
+     * @memberof Widgets.Records.recordImportAnnotations
      * @private
      * @description Gets action buttons for the dialog, setting labels to 'Proceed' and 'Close'.
      * @returns {Array<object>} Array of button definition objects.
@@ -104,7 +99,7 @@ $.widget( "heurist.recordImportAnnotations", $.heurist.recordAction, {
     
     /**
      * @function _renderReport
-     * @memberof heurist.recordImportAnnotations
+     * @memberof Widgets.Records.recordImportAnnotations
      * @private
      * @description Renders the import report in the UI using data received from the server.
      * Displays counts for total, processed, missed, added, updated, and retained annotations,
@@ -170,7 +165,7 @@ $.widget( "heurist.recordImportAnnotations", $.heurist.recordAction, {
         
     /**
      * @function doAction
-     * @memberof heurist.recordImportAnnotations
+     * @memberof Widgets.Records.recordImportAnnotations
      * @private
      * @description Performs the annotation import action.
      * Constructs a request to a server-side controller ('ImportAnnotations').

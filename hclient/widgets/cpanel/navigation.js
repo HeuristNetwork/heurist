@@ -1,62 +1,51 @@
 /**
-* navigation.js - Menu widget
-* 
-* Menu based on RT_CMS_MENU records it is used for CMS.
+* @file navigation.js
+* @brief Menu widget
+* @fileOverview 
 *
-* @todo - replace with HMenu
-* 
 * @project     Heurist academic knowledge management system
 *
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @since       6.0
 */
 
 /**
- * jQuery UI Widget: heurist.navigation
- *
- * This widget creates a navigation menu based on Heurist RT_CMS_MENU records.
+* @class navigation
+* @memberof Widgets.Navigation
+* @description This widget creates a navigation menu based on Heurist RT_CMS_MENU records.
  * It is primarily used for Content Management System (CMS) navigation.
  * The menu can be horizontal, vertical, or a tree view.
  * It handles fetching menu data, rendering the menu, and actions upon menu item selection.
  *
- * @namespace heurist.navigation
  * @property {object} options - Configuration options for the widget.
- * @property {Array<number|string>} options.menu_recIDs - Array of record IDs for the top-level menu items.
- * @property {boolean} options.main_menu - If true, searches for RT_CMS_HOME as the root of the menu (default: false).
- * @property {string} options.orientation - Orientation of the menu: 'horizontal', 'vertical', or 'treeview' (default: 'horizontal').
- * @property {string} options.target - Target for menu actions: 'inline' (loads content into '#page-content' or '#main-content'),
- *                                     'popup', or a specific element ID (default: 'inline').
- * @property {boolean} options.use_next_level - If true and the top level consists of a single entry, uses the next level of menus as the top (default: false).
- * @property {?Function} options.onmenuselect - Callback function triggered when a menu item is selected.
- *                                            Primarily for CMS edit mode. Passes `page_id` as an argument. (default: null).
- * @property {boolean} options.selectable_if_submenu - If true, a menu item with a submenu is still selectable by default (default: true).
- * @property {?Function} options.aftermenuselect - Callback function triggered after a menu item action (like loading content) is completed.
- *                                               Passes `document` and `page_id` as arguments. (default: null).
- * @property {?object} options.toplevel_css - CSS object to apply to top-level menu items (default: null).
- * @property {number} options.expand_levels - Number of levels to initially expand in 'treeview' orientation (default: 0).
- * @property {?Function} options.onInitComplete - Callback function triggered after the menu is fully initialized.
- *                                                Passes `first_not_empty_page_id` as an argument. (default: null).
- * @property {string} options.language - Language code for menu item text (e.g., 'en', 'fr'). 'def' uses the default language (default: 'def').
- * @property {?object} options.supp_options - Supplementary options to pass when initializing page content after load (default: null).
- *
- * @property {?HRecordSet} menuData - Stores the Heurist record set containing the menu data once fetched.
- * @property {object} pageStyles - Stores CSS styles associated with menu page IDs. `{[page_id]: cssObject}`.
- * @property {object} pageStyles_original - Stores original jQuery cloned elements to restore styles when navigating away. `{[target_selector]: jQueryElement}`.
- * @property {object} ids_cached_entries - Caches generated HTML or tree node data for menu items to avoid redundant processing. `{[page_id]: htmlStringOrNodeObject}`.
- * @property {object} ids_menu_entries - Stores an object mapping parent page IDs to an array of their child menu item IDs. Used for recursion detection. `{[page_id]: [child_page_id, ...]}`.
- * @property {Array<number|string>} ids_recurred - Stores page IDs that were detected as part of a recursive menu structure.
- * @property {object} menu_item_urls - Stores external URLs associated with menu items. `{[page_id]: urlString}`.
- * @property {number|string} first_not_empty_page_id - The ID of the first menu item encountered that has content.
- * @property {string} _current_query_string - Internal property, seems unused. TODO: Verify and remove if unused.
- * @property {?jQuery} divMainMenu - jQuery object for the main menu container div, if not treeview.
- * @property {?jQuery} divMainMenuItems - jQuery object for the `<ul>` element containing main menu items, if not treeview.
  */
 $.widget( "heurist.navigation", {
 
+    /**
+    * @memberof Widgets.Navigation.navigation
+    * @type {object}
+    * @property {Array<number|string>} menu_recIDs - Array of record IDs for the top-level menu items.
+    * @property {boolean} main_menu - If true, searches for RT_CMS_HOME as the root of the menu (default: false).
+    * @property {string} orientation - Orientation of the menu: 'horizontal', 'vertical', or 'treeview' (default: 'horizontal').
+    * @property {string} target - Target for menu actions: 'inline' (loads content into '#page-content' or '#main-content'),
+    *                                     'popup', or a specific element ID (default: 'inline').
+    * @property {boolean} use_next_level - If true and the top level consists of a single entry, uses the next level of menus as the top (default: false).
+    * @property {?Function} onmenuselect - Callback function triggered when a menu item is selected.
+    *                                            Primarily for CMS edit mode. Passes `page_id` as an argument. (default: null).
+    * @property {boolean} selectable_if_submenu - If true, a menu item with a submenu is still selectable by default (default: true).
+    * @property {?Function} aftermenuselect - Callback function triggered after a menu item action (like loading content) is completed.
+    *                                               Passes `document` and `page_id` as arguments. (default: null).
+    * @property {?object} toplevel_css - CSS object to apply to top-level menu items (default: null).
+    * @property {number} expand_levels - Number of levels to initially expand in 'treeview' orientation (default: 0).
+    * @property {?Function} onInitComplete - Callback function triggered after the menu is fully initialized.
+    *                                                Passes `first_not_empty_page_id` as an argument. (default: null).
+    * @property {string} language - Language code for menu item text (e.g., 'en', 'fr'). 'def' uses the default language (default: 'def').
+    * @property {?object} supp_options - Supplementary options to pass when initializing page content after load (default: null).
+    */
     options: {
        menu_recIDs:[],
        main_menu: false,
@@ -73,25 +62,59 @@ $.widget( "heurist.navigation", {
        supp_options: null
     },
 
+
+    /** 
+     * @memberof Widgets.Navigation.navigation
+     * @property {?HRecordSet} menuData - Stores the Heurist record set containing the menu data once fetched.*/
     menuData: null,
 
+    /** 
+     * @memberof Widgets.Navigation.navigation
+     * @property {object} pageStyles - Stores CSS styles associated with menu page IDs. `{[page_id]: cssObject}`.*/
     pageStyles:{},
+    /** 
+     * @memberof Widgets.Navigation.navigation
+     * @property {object} pageStyles_original - Stores original jQuery cloned elements to restore styles when navigating away. `{[target_selector]: jQueryElement}`.*/
     pageStyles_original:{},
 
+    /** 
+     * @memberof Widgets.Navigation.navigation
+     * @property {object} ids_cached_entries - Caches generated HTML or tree node data for menu items to avoid redundant processing. `{[page_id]: htmlStringOrNodeObject}`.*/
     ids_cached_entries: {},
+    /** 
+     * @memberof Widgets.Navigation.navigation
+     * @property {object} ids_menu_entries - Stores an object mapping parent page IDs to an array of their child menu item IDs. Used for recursion detection. `{[page_id]: [child_page_id, ...]}`.*/
     ids_menu_entries: {},
+    /** 
+     * @memberof Widgets.Navigation.navigation
+     * @property {Array<number|string>} ids_recurred - Stores page IDs that were detected as part of a recursive menu structure.*/
     ids_recurred: [],
 
+    /** 
+     * @memberof Widgets.Navigation.navigation
+     * @property {object} menu_item_urls - Stores external URLs associated with menu items. `{[page_id]: urlString}`.*/
     menu_item_urls: {},
 
+    /** 
+     * @memberof Widgets.Navigation.navigation
+     * @property {number|string} first_not_empty_page_id - The ID of the first menu item encountered that has content.*/
     first_not_empty_page_id:0,
+
+    /** 
+     * @memberof Widgets.Navigation.navigation
+     * @property {?jQuery} divMainMenu - jQuery object for the main menu container div, if not treeview.*/
+    divMainMenu: null,
+    /** 
+     * @memberof Widgets.Navigation.navigation
+     * @property {?jQuery} divMainMenuItems - jQuery object for the `<ul>` element containing main menu items, if not treeview.*/
+    divMainMenuItems: null,
 
     /**
      * The widget's constructor. Initializes the menu element, sets up styles,
      * and prepares for either Fancytree (for 'treeview' orientation) or jQuery UI Menu.
      * Calls `reloadMenuData` to fetch and build the menu.
      * This method is called by jQuery UI when the widget is created.
-     * @memberof heurist.navigation
+     * @memberof Widgets.Navigation.navigation
      * @private
      */
     _create: function() {
@@ -159,7 +182,7 @@ $.widget( "heurist.navigation", {
      * It makes an AJAX request to fetch CMS menu records.
      * On success, it populates `this.menuData` with an `HRecordSet` and calls `_onGetMenuData` to render the menu.
      * On failure, it displays an error message.
-     * @memberof heurist.navigation
+     * @memberof Widgets.Navigation.navigation
      */
     reloadMenuData:function(){
 
@@ -196,7 +219,7 @@ $.widget( "heurist.navigation", {
 
     /**
      * Checks if a given record ID corresponds to a valid menu item in the current `menuData`.
-     * @memberof heurist.navigation
+     * @memberof Widgets.Navigation.navigation
      * @param {number|string} rec_id - The record ID to check.
      * @returns {boolean} True if it's a valid menu item, false otherwise.
      */
@@ -218,7 +241,7 @@ $.widget( "heurist.navigation", {
      * Detects and flags recursive menu structures.
      * Caches generated menu items in `this.ids_cached_entries`.
      *
-     * @memberof heurist.navigation
+     * @memberof Widgets.Navigation.navigation
      * @param {?string} orientation - The desired orientation ('treeview', 'horizontal', 'vertical', 'list'). Defaults to `this.options.orientation`.
      * @param {string|number} parent_id - The ID of the parent menu item. '0' for top level.
      * @param {Array<number|string>} menuitems - Array of record IDs for the current level of menu items. Defaults to `this.options.menu_recIDs`.
@@ -514,7 +537,7 @@ $.widget( "heurist.navigation", {
      * Applies custom CSS and event handlers for jQuery UI Menu.
      * Calls `options.onInitComplete` callback if provided.
      * 
-     * @memberof heurist.navigation
+     * @memberof Widgets.Navigation.navigation
      * @private
      */
     _onGetMenuData:function(){
@@ -635,7 +658,7 @@ $.widget( "heurist.navigation", {
      * If an external URL is associated with the item, it opens it in a new tab.
      * Otherwise, if selectable and has content (or an `onmenuselect` callback is defined),
      * it calls `highlightTopItem` and `_onMenuItemAction`.
-     * @memberof heurist.navigation
+     * @memberof Widgets.Navigation.navigation
      * @private
      * @param {Event} event - The jQuery click event object.
      */
@@ -706,7 +729,7 @@ $.widget( "heurist.navigation", {
      * Highlights the top-most parent menu item for a given page ID path.
      * It removes the 'selected' class from all menu items and adds it to the
      * appropriate top-level item. Also collapses other menu branches.
-     * @memberof heurist.navigation
+     * @memberof Widgets.Navigation.navigation
      * @param {string} page_id_path - A comma-separated string representing the path of page IDs from parent to child.
      */
     highlightTopItem: function(page_id_path){
@@ -751,7 +774,7 @@ $.widget( "heurist.navigation", {
      * Handles applying page-specific CSS and restoring original styles.
      * Triggers `onexitpage` event on the target element before loading new content if the event is bound.
      * After content is loaded, it initializes layout and calls `options.aftermenuselect`.
-     * @memberof heurist.navigation
+     * @memberof Widgets.Navigation.navigation
      * @private
      * @param {object} data - An object containing details about the selected menu item.
      * @param {string|number} data.page_id - The ID of the selected page/menu item.
@@ -941,7 +964,7 @@ $.widget( "heurist.navigation", {
     * Handles option changes for the widget.
     * This method is called by jQuery UI when `option()` is called on the widget.
     * It calls `_superApply` to apply the changed options.
-    * @memberof heurist.navigation
+    * @memberof Widgets.Navigation.navigation
     * @private
     */
    _setOptions: function( ) {
@@ -953,7 +976,7 @@ $.widget( "heurist.navigation", {
     * Cleans up the widget when it is destroyed.
     * Removes the main menu container (`divMainMenu`) if it exists.
     * This method is called by jQuery UI when the widget is destroyed.
-    * @memberof heurist.navigation
+    * @memberof Widgets.Navigation.navigation
     * @private
     */
    _destroy: function() {
@@ -969,7 +992,7 @@ $.widget( "heurist.navigation", {
    /**
     * Retrieves the ID of the first menu item found that has content.
     * This value is populated during the menu generation process.
-    * @memberof heurist.navigation
+    * @memberof Widgets.Navigation.navigation
     * @returns {number|string} The record ID of the first contentful page, or 0 if none found.
     */
    getFirstPageWithContent: function(){

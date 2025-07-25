@@ -18,28 +18,19 @@
 
 
 /**
- * @widget heurist.recordTemplate
- * @augments $.heurist.recordAction
+ * @class recordTemplate
+ * @augments {recordAction}
+ * @memberof Widgets.Records
  * @description jQuery widget for creating downloadable CSV template files (header row only) for a specific record type.
  * Users select fields from the record type's structure via a Fancytree, and the widget generates
  * a CSV header row for these fields, which can then be downloaded.
  *
  * @param {object} options - Configuration options for the widget.
- * @param {number} [options.height=520] - The height of the dialog.
- * @param {number} [options.width=800] - The width of the dialog.
- * @param {boolean} [options.modal=true] - Whether the dialog is modal.
- * @param {string} [options.title='Create comma separated template files'] - Title for the dialog.
- * @param {string} [options.htmlContent='recordTemplate.html'] - The HTML file for the widget's content.
- * @param {number} [options.recordType=0] - The ID of the record type for which to generate the template.
- * @param {any} [options.currentOwner=0] - Inherited, likely unused.
- * @param {any} [options.currentAccess=null] - Inherited, likely unused.
- * @param {any} [options.currentAccessGroups=null] - Inherited, likely unused.
  */
 $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
 
     /**
-     * @namespace options
-     * @memberof heurist.recordTemplate
+     * @memberof Widgets.Records.recordTemplate
      * @type {object}
      * @property {number} [height=520] - Dialog height.
      * @property {number} [width=800] - Dialog width.
@@ -68,7 +59,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
 
     /**
      * @function _getActionButtons
-     * @memberof heurist.recordTemplate
+     * @memberof Widgets.Records.recordTemplate
      * @private
      * @description Gets action buttons for the dialog, setting labels to 'Download' and 'Close'.
      * @returns {Array<object>} Array of button definition objects.
@@ -82,7 +73,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
         
     /**
      * @function doAction
-     * @memberof heurist.recordTemplate
+     * @memberof Widgets.Records.recordTemplate
      * @private
      * @description Performs the action of generating and downloading the CSV template file.
      * It retrieves the selected fields from the Fancytree, constructs a request object
@@ -181,7 +172,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
     
     /**
      * @function _initControls
-     * @memberof heurist.recordTemplate
+     * @memberof Widgets.Records.recordTemplate
      * @private
      * @description Initializes controls after HTML content is loaded.
      * Displays the name of the target record type (`options.recordType`).
@@ -224,7 +215,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
     
     /**
      * @function _loadRecordTypesTreeView
-     * @memberof heurist.recordTemplate
+     * @memberof Widgets.Records.recordTemplate
      * @private
      * @description Loads or reloads the Fancytree with the field structure for the `options.recordType`.
      * It generates tree data using `window.hWin.HEURIST4.dbs.createRectypeStructureTree`,

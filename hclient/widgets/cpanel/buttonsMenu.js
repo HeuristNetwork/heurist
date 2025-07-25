@@ -1,22 +1,7 @@
 /**
-* buttonsMenu.js - UI Widget: heurist.buttonsMenu
-* 
-* Dropdown menu grouped in buttons
-* 
-* This widget creates a horizontal menu with buttons and optional submenus. It includes customizable styles,
-* content loading from external sources, and menu item action handling.
-* 
-* @todo use new HMenu
-*
-* @namespace heurist.buttonsMenu
-* @property {object} options - Configuration options for the widget.
-* @property {?string} options.menu_class - Additional CSS class for the menu container (default: null).
-* @property {?string} options.menuContent - HTML snippet to populate the menu content. If undefined, the element's HTML is used (default: null).
-* @property {?Function} options.manuActionHandler - Callback function for menu item actions (default: null).
-*
-* @property {?jQuery} divMainMenuItems - Stores the main `<ul>` container for menu items.
-* @property {Array<jQuery>} menuBtns - Stores references to the top-level menu buttons.
-* @property {Array<jQuery>} menuSubs - Stores submenus linked to the top-level buttons.
+* @file buttonsMenu.js
+* @brief UI Widget: heurist.buttonsMenu.
+* @fileOverview Dropdown menu grouped in buttons
 *
 * @project     Heurist academic knowledge management system
 *
@@ -24,12 +9,33 @@
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @since       6.0
+*/
+
+/**
+ * @namespace Widgets.Navigation
+ * @description Menu and Navbar widgets
+ */
+
+/**
+* @class buttonsMenu
+* @memberof Widgets.Navigation
+* @description Dropdown menu grouped in buttons
+* This widget creates a horizontal menu with buttons and optional submenus. It includes customizable styles,
+* content loading from external sources, and menu item action handling.
+*
+* @property {object} options - Configuration options for the widget.
 */
 $.widget( "heurist.buttonsMenu", {
 
-    // default options
+    /**
+    * @memberof Widgets.Navigation.buttonsMenu
+    * @type {object}
+    * @property {?string} menu_class - Additional CSS class for the menu container (default: null).
+    * @property {?string} menuContent - HTML snippet to populate the menu content. If undefined, the element's HTML is used (default: null).
+    * @property {?Function} manuActionHandler - Callback function for menu item actions (default: null).
+    */
     options: {
         menu_class:null,
 
@@ -39,15 +45,24 @@ $.widget( "heurist.buttonsMenu", {
         manuActionHandler: null // Callback for handling menu actions
     },
 
+    /** 
+     * @memberof Widgets.Navigation.buttonsMenu
+     * @property {?jQuery} divMainMenuItems - Stores the main `<ul>` container for menu items. */
     divMainMenuItems: null, // Parent UL
+    /**
+     * @memberof Widgets.Navigation.buttonsMenu 
+     * @property {Array<jQuery>} menuBtns - Stores references to the top-level menu buttons. */
     menuBtns: [], // Array of menu buttons
+    /**
+     * @memberof Widgets.Navigation.buttonsMenu 
+     * @property {Array<jQuery>} menuSubs - Stores submenus linked to the top-level buttons. */
     menuSubs: [], // Array of submenu elements
 
     /**
      * Initializes the widget, setting up the menu's DOM structure and handling.
      * It fetches menu content if needed and prepares the buttons and submenus.
      * This method is called by jQuery UI when the widget is created.
-     * @memberof heurist.buttonsMenu
+     * @memberof Widgets.Navigation.buttonsMenu
      * @private
      */
     _create: function() {
@@ -90,7 +105,7 @@ $.widget( "heurist.buttonsMenu", {
      * Placeholder method for refreshing the widget.
      * Can be implemented later to reflect current level of credentials.
      * This method is called by jQuery UI.
-     * @memberof heurist.buttonsMenu
+     * @memberof Widgets.Navigation.buttonsMenu
      * @private
      */
     _refresh: function() {
@@ -101,7 +116,7 @@ $.widget( "heurist.buttonsMenu", {
      * Cleans up the widget by removing all menu buttons and submenus.
      * Empties the `menuBtns` and `menuSubs` arrays.
      * This method is called by jQuery UI when the widget is destroyed.
-     * @memberof heurist.buttonsMenu
+     * @memberof Widgets.Navigation.buttonsMenu
      * @private
      */
     _destroy: function() {
@@ -120,7 +135,7 @@ $.widget( "heurist.buttonsMenu", {
     /**
      * Initializes the menu structure and loads content if provided.
      * Builds the main menu and submenus from either static HTML or a content file.
-     * @memberof heurist.buttonsMenu
+     * @memberof Widgets.Navigation.buttonsMenu
      * @private
      * @param {Function} callback - Function to be executed after the menu is initialized.
      */
@@ -253,7 +268,7 @@ $.widget( "heurist.buttonsMenu", {
      * Creates a top-level menu button.
      * It extracts attributes like ID, title, label, style, and icons from the provided `top_level` jQuery element,
      * constructs the button HTML, appends it to the main menu, and stores a reference in `this.menuBtns`.
-     * @memberof heurist.buttonsMenu
+     * @memberof Widgets.Navigation.buttonsMenu
      * @private
      * @param {jQuery} top_level - The jQuery object representing the `<ul>` element for this menu button.
      * @returns {string} The name of the menu, derived from its title.
@@ -299,7 +314,7 @@ $.widget( "heurist.buttonsMenu", {
     /**
      * Callback function triggered when a menu item is clicked or selected.
      * It retrieves the `data-action` attribute or the element's ID and passes it to the provided action handler.
-     * @memberof heurist.buttonsMenu
+     * @memberof Widgets.Navigation.buttonsMenu
      * @param {Event} event - The jQuery event object for the click or select event.
      * @param {object} [ui] - The jQuery UI object, present if the event is from a jQuery UI menu selection.
      * @param {jQuery} [ui.item] - The selected menu item.
@@ -335,7 +350,7 @@ $.widget( "heurist.buttonsMenu", {
      * It appends an anchor (`<a>`) to each `<li>` item with the appropriate label, icon, and hint,
      * based on the `data-action` attribute.
      * 
-     * @memberof heurist.buttonsMenu
+     * @memberof Widgets.Navigation.buttonsMenu
      * @private
      * @param {number} idx - The index of the submenu item in the collection (unused).
      * @param {HTMLElement} item - The DOM element of the submenu list item (`<li>`).

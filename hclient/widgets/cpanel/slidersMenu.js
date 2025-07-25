@@ -1,5 +1,7 @@
 /**
-* slidersMenu.js - Menu for Heurist admin interface with sections as popup sliders
+* @file slidersMenu.js
+* @brief Menu for Heurist admin interface with sections as popup sliders
+* @fileOverview 
 *
 * @project     Heurist academic knowledge management system
 *
@@ -14,34 +16,18 @@
 /* global HSvsEdit */
 
 /**
-* jQuery UI Widget: heurist.slidersMenu
-*
-* This widget creates a side menu with sections that expand as popup sliders.
+* @class slidersMenu
+* @memberof Widgets.Navigation
+* @description This widget creates a side menu with sections that expand as popup sliders.
 * It loads HTML content for each section (e.g., design, populate, explore) and initializes actions
 * based on `core/actions.json` via `window.hWin.HAPI4.actionHandler`.
 * The menu handles user interactions, manages different states (expanded, collapsed, locked),
 * and integrates with other Heurist components like saved searches (SVS) and faceted search.
 *
-* @namespace heurist.slidersMenu
-* @property {object} options - Configuration options for the widget. Currently empty.
-*
 * @property {Array<string>} sections - Defines the names of the menu sections (e.g., 'design', 'populate').
 * @property {object} menues - Stores jQuery objects for each section's menu panel. `{[sectionName]: jQueryElement}`.
 * @property {object} containers - Stores jQuery objects for each section's main content container. `{[sectionName]: jQueryElement}`.
 * @property {object} introductions - Stores jQuery objects for each section's introductory/help panel. `{[sectionName]: jQueryElement}`.
-* @property {number} _myTimeoutId - Timeout ID for delaying main menu panel collapse.
-* @property {number} _myTimeoutId2 - Timeout ID for delaying explore popup menu close.
-* @property {number} _myTimeoutId3 - Timeout ID for delaying explore popup menu show.
-* @property {number} _myTimeoutId5 - Timeout ID for preventing main menu expansion (e.g., after search).
-* @property {number} _delayOnCollapseMainMenu - Delay in ms for collapsing the main menu.
-* @property {number} _delayOnCollapse_ExploreMenu - Delay in ms for collapsing the explore menu popup.
-* @property {number} _delayOnShow_ExploreMenu - Delay in ms for showing the explore menu popup.
-* @property {number} _delayOnShow_AddRecordMenu - Delay in ms for showing the 'Add Record' related popup.
-* @property {number} _widthMenu - Width in pixels of the expanded main menu.
-* @property {boolean} _is_prevent_expand_mainmenu - Flag to temporarily prevent main menu expansion.
-* @property {boolean} _explorer_menu_locked - Flag indicating if the explore menu popup is locked open (e.g., due to an open selectmenu).
-* @property {?string} _active_section - Name of the currently active/visible main section.
-* @property {?string} _current_explore_action - Name of the currently active action within the explore popup (e.g., 'searchBuilder').
 * @property {?jQuery} divMainMenu - jQuery object for the main collapsible side menu container.
 * @property {?object} currentSearch - Stores the last search query object, used for "Save Filter".
 * @property {boolean} reset_svs_edit - Flag to indicate if the saved search edit dialog should be reset.
@@ -51,9 +37,6 @@
 * @property {?jQuery} menues_explore_gap - jQuery object for a small gap element, possibly for styling or event handling.
 * @property {?jQuery} search_faceted - jQuery object for the faceted search container.
 * @property {?HSvsEdit} edit_svs_dialog - Instance of the HSvsEdit class for managing saved search editing.
-* @property {number} _left_position - Base left position for the main menu (collapsed state), adjusted for language (e.g., German).
-* @property {boolean} _show_quick_tips - Flag to control showing quick tips on first interaction with explore menu.
-* @property {object} _menu_colours - Defines background colors for different sections. `{[sectionName]: colorString}`.
 */
 $.widget( "heurist.slidersMenu", {
 
@@ -1806,9 +1789,10 @@ $.widget( "heurist.slidersMenu", {
         that.reset_svs_edit = false;
     },
     
-    //
-    //
-    //
+    /**
+     * Shows help info
+     * @memberof Widgets.Navigation.controlPanel
+     */
     initHelpDiv: function(){
         this.helper_div = $('<div>').addClass('ui-helper-popup').hide().appendTo(this.element);
         
@@ -1901,9 +1885,10 @@ $.widget( "heurist.slidersMenu", {
     }
     },
 
-    //
-    // Landing Page when not loading the Welcome page - change to widgets/admin/databaseOverview
-    //
+    /**
+     * Shows Database Overview info (landing info)
+     * @memberof Widgets.Navigation.controlPanel
+     */
     showDatabaseOverview: function(){
 
         let that = this;
@@ -2272,9 +2257,10 @@ $.widget( "heurist.slidersMenu", {
         );
     },
 
-    //
-    // Hide landing Page
-    //
+    /**
+     * Hides landing info
+     * @memberof Widgets.Navigation.controlPanel
+     */
     hideDatabaseOverview: function(){
 
         if(this.containers['explore'].find('div#db_overview').length > 0){
@@ -2374,6 +2360,11 @@ $.widget( "heurist.slidersMenu", {
         this.containers[section].hide();
     },
 
+    /**
+     * Clears and hides container div for goven section
+     * @memberof Widgets.Navigation.controlPanel
+     * @param {string} section - name of section.
+     */
     closeContainer: function(section){
         this.containers[section].empty().hide();
     }

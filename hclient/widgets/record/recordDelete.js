@@ -19,8 +19,9 @@
 
 
 /**
- * @widget heurist.recordDelete
- * @augments $.heurist.recordAction
+ * @class recordDelete
+ * @augments {recordAction}
+ * @memberof Widgets.Records
  * @description jQuery widget for deleting records.
  * This widget manages the process of deleting a selected scope of records.
  * It provides UI confirmations, especially for potentially harmful deletions
@@ -29,20 +30,11 @@
  * for the deletion process, including progress display.
  *
  * @param {object} options - Configuration options for the widget.
- * @param {?number} options.map_document_id - Special case: if provided, the widget will also find and list content related to this map document for deletion.
- * @param {number} [options.height=340] - The height of the dialog.
- * @param {number} [options.width=640] - The width of the dialog.
- * @param {boolean} [options.modal=true] - Whether the dialog is modal.
- * @param {string} [options.init_scope='selected'] - Initial scope for record selection.
- * @param {boolean} [options.hide_scope=true] - If true, hides the standard record scope selector.
- * @param {string} [options.title='Delete Records'] - Title of the dialog.
- * @param {string} [options.htmlContent='recordDelete.html'] - The HTML file for the widget's content.
  */
 $.widget( "heurist.recordDelete", $.heurist.recordAction, {
 
     /**
-     * @namespace options
-     * @memberof heurist.recordDelete
+     * @memberof Widgets.Records.recordDelete
      * @type {object}
      * @property {?number} map_document_id - If set, lists content of this map document for deletion.
      * @property {number} [height=340] - Dialog height.
@@ -67,20 +59,20 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     
     /**
      * @member {?jQuery} header_div
-     * @memberof heurist.recordDelete
+     * @memberof Widgets.Records.recordDelete
      * @description jQuery object for the header `div` element which displays informational messages.
      */
     header_div:null,
     /**
      * @member {?jQuery} recordList
-     * @memberof heurist.recordDelete
+     * @memberof Widgets.Records.recordDelete
      * @description jQuery object for the `div` that hosts the `resultList` widget, used to display records selected for deletion.
      */
     recordList:null,
 
     /**
      * @function _initControls
-     * @memberof heurist.recordDelete
+     * @memberof Widgets.Records.recordDelete
      * @private
      * @description Initializes controls after HTML content is loaded.
      * Displays informational messages based on the number of selected records and admin status.
@@ -179,7 +171,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     
     /**
      * @function _findMapDocumentContent
-     * @memberof heurist.recordDelete
+     * @memberof Widgets.Records.recordDelete
      * @private
      * @description If `options.map_document_id` is provided, this function searches for records
      * linked to the specified map document (layers, datasets) and updates the `recordList`
@@ -278,7 +270,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     
     /**
      * @function _onLinkedCount
-     * @memberof heurist.recordDelete
+     * @memberof Widgets.Records.recordDelete
      * @private
      * @description (Currently not implemented/commented out)
      * Intended to calculate and display information about how many other records
@@ -294,7 +286,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     
     /**
      * @function _getActionButtons
-     * @memberof heurist.recordDelete
+     * @memberof Widgets.Records.recordDelete
      * @private
      * @description Gets action buttons for the dialog, setting the main action button text to 'Delete Records'.
      * @returns {Array<object>} Array of button definition objects.
@@ -307,7 +299,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     
     /**
      * @function doAction
-     * @memberof heurist.recordDelete
+     * @memberof Widgets.Records.recordDelete
      * @private
      * @description Performs the record deletion process.
      * It first checks if a confirmation is needed (e.g., if deleting CMS records or if it's the first attempt).

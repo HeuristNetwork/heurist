@@ -19,26 +19,19 @@
 
 
 /**
- * @widget heurist.recordExport
- * @augments $.heurist.recordAction
+ * @class recordExport
+ * @augments {recordAction}
+ * @memberof Widgets.Records
  * @description jQuery widget for exporting records to various formats (XML, JSON, KML, HML).
  * This widget prepares and initiates a download of record data based on the current
  * recordset and selected export format.
  *
  * @param {object} options - Configuration options for the widget.
- * @param {number} [options.height=780] - The height of the dialog/widget area.
- * @param {number} [options.width=800] - The width of the dialog/widget area.
- * @param {boolean} [options.modal=true] - Whether the dialog is modal (if applicable).
- * @param {string} [options.title='Export records to '] - Base title for the dialog; format is appended.
- * @param {string} [options.format='xml'] - The export format (e.g., 'xml', 'json', 'kml', 'hml', 'iiif').
- * @param {string} [options.htmlContent='recordExport.html'] - The HTML file for the widget's content.
- * @param {boolean} [options.isdialog=true] - Indicates if the widget is presented as a dialog. If false, it might render inline and create its own toolbar.
  */
 $.widget( "heurist.recordExport", $.heurist.recordAction, {
 
     /**
-     * @namespace options
-     * @memberof heurist.recordExport
+     * @memberof Widgets.Records.recordExport
      * @type {object}
      * @property {number} [height=780] - Widget/dialog height.
      * @property {number} [width=800] - Widget/dialog width.
@@ -62,14 +55,14 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
 
     /**
      * @member {?jQuery} toolbar
-     * @memberof heurist.recordExport
+     * @memberof Widgets.Records.recordExport
      * @description jQuery object for the dynamically created toolbar when `options.isdialog` is false.
      */
     toolbar: null,
 
     /**
      * @function _initControls
-     * @memberof heurist.recordExport
+     * @memberof Widgets.Records.recordExport
      * @private
      * @description Initializes controls after HTML content is loaded.
      * Appends the export format to the title. If not in dialog mode (`!options.isdialog`),
@@ -131,7 +124,7 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
     
     /**
      * @function _getActionButtons
-     * @memberof heurist.recordExport
+     * @memberof Widgets.Records.recordExport
      * @private
      * @description Gets action buttons for the dialog/toolbar, setting labels to 'Download' and 'Close'.
      * @returns {Array<object>} Array of button definition objects.
@@ -145,7 +138,7 @@ $.widget( "heurist.recordExport", $.heurist.recordAction, {
         
     /**
      * @function doAction
-     * @memberof heurist.recordExport
+     * @memberof Widgets.Records.recordExport
      * @private
      * @description Performs the export action.
      * Determines the scope of records (currently defaults to 'current' recordset).

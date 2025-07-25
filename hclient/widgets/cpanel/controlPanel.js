@@ -1,28 +1,25 @@
 /**
-* controlPanel.js - UI Widget: heurist.controlPanel - main UI widget for admin interface
-* 
-* This widget creates a control panel for the Heurist application. It handles menu creation, login actions,
-* version checks, and user notifications. It also initializes the main `actionHandler` object for the application.
+* @file controlPanel.js
+* @brief main UI widget for admin interface
+* @fileOverview 
 *
-* @namespace heurist.controlPanel
-* @property {object} options - Configuration options for the widget.
-* @property {?string} options.host_logo - Path to the host logo (default: null). Not currently used.
-* @property {boolean} options.login_inforced - If true, forces the user to log in (default: true).
-*
-* @property {object} menues - Stores references to various menu instances created within the control panel.
-* @property {?object} actionHandler - Reference to `window.hWin.HAPI4.actionHandler`. Handles actions related to menu items and user actions.
-* @property {boolean} _initial_search_already_executed - Tracks whether the initial search (e.g., from URL parameters) has been performed.
-* @property {boolean} _retrieved_notifications - Tracks whether user notifications have been retrieved.
-* @property {?(jQuery|boolean)} version_message - Stores the jQuery element for the version message or `true` if initialized.
-* 
 * @project     Heurist academic knowledge management system
 *
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @author      Artem Osmakov   <osmakov@gmail.com>
-* @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>
 * @since       6.0
+*/
+
+/**
+* @class controlPanel
+* @memberof Widgets.Navigation
+* @description This widget creates a control panel for the Heurist application. It handles menu creation, login actions,
+* version checks, and user notifications. It also initializes the main `actionHandler` object for the application.
+*
+* @property {object} options - Configuration options for the widget.
 */
 $.widget( "heurist.controlPanel", {
 
@@ -49,19 +46,33 @@ $.widget( "heurist.controlPanel", {
     menu-database-clone-header#
 */
 
-    // default options
+    /**
+    * @memberof Widgets.Navigation.controlPanel
+    * @type {object}
+    * @property {?string} host_logo - Path to the host logo (default: null). Not currently used.
+    * @property {boolean} login_inforced - If true, forces the user to log in (default: true).
+    */
     options: {
         host_logo:null, // TODO: This option is not currently used in the widget code.
         login_inforced: true,
     },
 
+    /** 
+    * @memberof Widgets.Navigation.controlPanel
+    * @property {object} menues - Stores references to various menu instances created within the control panel. */
     menues:{}, // Stores references to menu widgets
+    /**
+     * @memberof Widgets.Navigation.controlPanel
+     *  @property {?object} actionHandler - Reference to `window.hWin.HAPI4.actionHandler`. Handles actions related to menu items and user actions.*/
     actionHandler: null,
 
     //flags
     _initial_search_already_executed: false,
     _retrieved_notifications: false,
 
+    /** 
+     * @memberof Widgets.Navigation.controlPanel
+     * @property {?(jQuery|boolean)} version_message - Stores the jQuery element for the version message or `true` if initialized.*/
     version_message: null, // container for message about available alpha/stable version
 
     /**
@@ -69,7 +80,7 @@ $.widget( "heurist.controlPanel", {
      * Loads the HTML content for the panel from a predefined URL and then calls `_initControls`
      * to set up the interactive elements once the content is loaded.
      * This method is called by jQuery UI when the widget is created.
-     * @memberof heurist.controlPanel
+     * @memberof Widgets.Navigation.controlPanel
      * @private
      */
     _init: function() {
@@ -104,7 +115,7 @@ $.widget( "heurist.controlPanel", {
      * This includes setting up the logo, version information, database selection dropdown,
      * and the main profile/help menu. It also binds necessary event listeners.
      * 
-     * @memberof heurist.controlPanel
+     * @memberof Widgets.Navigation.controlPanel
      * @private
      */
     _initControls:function(){
@@ -342,7 +353,7 @@ $.widget( "heurist.controlPanel", {
      * If login is enforced and the user is not logged in, it initiates the login process.
      * Otherwise, it shows version messages, performs any initial search tasks, and gets user notifications.
      * This method is called by jQuery UI and internally when user state changes.
-     * @memberof heurist.controlPanel
+     * @memberof Widgets.Navigation.controlPanel
      * @private
      */
     _refresh: function(){
@@ -362,7 +373,7 @@ $.widget( "heurist.controlPanel", {
      * Cleans up the control panel widget when it is destroyed.
      * Removes event listeners and DOM elements associated with the control panel.
      * This method is called by jQuery UI when the widget is destroyed.
-     * @memberof heurist.controlPanel
+     * @memberof Widgets.Navigation.controlPanel
      * @private
      */
     _destroy: function() {
@@ -387,7 +398,7 @@ $.widget( "heurist.controlPanel", {
      * If login is successful, it updates the UI with the user's name and proceeds to show version messages,
      * perform initial search, and get user notifications.
      * If login is not successful and `options.login_inforced` is true, it redirects to the base URL (login page).
-     * @memberof heurist.controlPanel
+     * @memberof Widgets.Navigation.controlPanel
      */
     doLogin: function(){
 
@@ -414,7 +425,7 @@ $.widget( "heurist.controlPanel", {
      * This can include executing a command (`cmd`), loading a saved search (`svs`), or performing a general search (`q`).
      * If no specific action is dictated by URL parameters, it may execute a default search or initialize the dashboard.
      * It ensures that this initial action is performed only once.
-     * @memberof heurist.controlPanel
+     * @memberof Widgets.Navigation.controlPanel
      * @private
      */
     _performInitialSearch: function(){
@@ -497,7 +508,7 @@ $.widget( "heurist.controlPanel", {
      * Depending on user preferences (`prefs_sysDashboard`), it can show the dashboard as a popup dialog
      * or as a ribbon of shortcuts at the bottom of the control panel.
      * It also handles the creation and removal of the shortcuts ribbon (`this.divShortcuts`).
-     * @memberof heurist.controlPanel
+     * @memberof Widgets.Navigation.controlPanel
      * @private
      * @param {boolean} is_startup - Flag indicating if this is being called during the initial startup sequence.
      *                               This affects whether a full dashboard popup might be shown.
@@ -544,7 +555,7 @@ $.widget( "heurist.controlPanel", {
      * Adjusts the height of the layout panes (`#north_pane` and `#center_pane`)
      * based on whether the shortcuts ribbon (`this.divShortcuts`) is visible.
      * It then triggers a resize of the overall layout.
-     * @memberof heurist.controlPanel
+     * @memberof Widgets.Navigation.controlPanel
      * @private
      */
      _adjustHeight: function(){
@@ -579,7 +590,7 @@ $.widget( "heurist.controlPanel", {
      * - If on an alpha version, provides information and an option to switch to the standard version,
      *   including a dialog prompting for bug reports before switching.
      * Ensures this setup is performed only once.
-     * @memberof heurist.controlPanel
+     * @memberof Widgets.Navigation.controlPanel
      * @private
      */
     _showVersionMessage: function(){
@@ -734,7 +745,7 @@ $.widget( "heurist.controlPanel", {
      * Retrieves and handles user-specific notifications from the server.
      * Currently, if a 'bug_report' notification is received, it triggers the bug report dialog.
      * Ensures this is done only once per widget instance.
-     * @memberof heurist.controlPanel
+     * @memberof Widgets.Navigation.controlPanel
      * @private
      * @returns {void}
      */

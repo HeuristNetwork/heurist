@@ -18,26 +18,20 @@
 
 
 /**
- * @widget heurist.recordNotify
- * @augments $.heurist.recordAction
+ * @class recordNotify
+ * @augments {recordAction}
+ * @memberof Widgets.Records
  * @description jQuery widget for sending email notifications about a set of records.
  * This widget allows a user to select a scope of records and then compose an email
  * notification to share these records with other users. It embeds and uses the
  * `usrReminders` widget/dialog for handling the email composition and recipient selection.
  *
  * @param {object} options - Configuration options for the widget.
- * @param {number} [options.height=500] - The height of the dialog.
- * @param {number} [options.width=700] - The width of the dialog.
- * @param {boolean} [options.modal=true] - Whether the dialog is modal.
- * @param {string} [options.init_scope='selected'] - Initial scope for record selection.
- * @param {string} [options.title='Notification'] - Title for the dialog.
- * @param {boolean|string} [options.helpContent=false] - Help content or URL for the widget.
  */
 $.widget( "heurist.recordNotify", $.heurist.recordAction, {
 
     /**
-     * @namespace options
-     * @memberof heurist.recordNotify
+     * @memberof Widgets.Records.recordNotify
      * @type {object}
      * @property {number} [height=500] - Dialog height.
      * @property {number} [width=700] - Dialog width.
@@ -58,14 +52,14 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
 
     /**
      * @member {?jQuery} _reminderWidgetContainer
-     * @memberof heurist.recordNotify
+     * @memberof Widgets.Records.recordNotify
      * @private
      * @description jQuery object for the div that contains the embedded `usrReminders` widget.
      */
     _reminderWidgetContainer:null,
     /**
      * @member {?object} _reminderWidget
-     * @memberof heurist.recordNotify
+     * @memberof Widgets.Records.recordNotify
      * @private
      * @description Instance of the `usrReminders` widget used for composing the notification.
      */
@@ -73,7 +67,7 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
     
     /**
      * @function _initControls
-     * @memberof heurist.recordNotify
+     * @memberof Widgets.Records.recordNotify
      * @private
      * @description Initializes controls after HTML content is loaded.
      * Sets a header message. Embeds and initializes the `usrReminders` widget
@@ -118,7 +112,7 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
     
     /**
      * @function _destroy
-     * @memberof heurist.recordNotify
+     * @memberof Widgets.Records.recordNotify
      * @private
      * @description Cleans up the widget. Removes the embedded `_reminderWidget` if it exists.
      * Calls the parent widget's `_destroy` method.
@@ -130,7 +124,7 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
     
     /**
      * @function _getActionButtons
-     * @memberof heurist.recordNotify
+     * @memberof Widgets.Records.recordNotify
      * @private
      * @description Gets action buttons for the dialog, setting the main action button text to 'Notify'.
      * @returns {Array<object>} Array of button definition objects.
@@ -143,7 +137,7 @@ $.widget( "heurist.recordNotify", $.heurist.recordAction, {
     
     /**
      * @function doAction
-     * @memberof heurist.recordNotify
+     * @memberof Widgets.Records.recordNotify
      * @private
      * @description Performs the notification sending action.
      * Retrieves validated field values (recipients, subject, message) from the embedded `usrReminders` widget.

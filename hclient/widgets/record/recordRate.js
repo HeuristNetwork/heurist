@@ -18,26 +18,20 @@
 
 
 /**
- * @widget heurist.recordRate
- * @augments $.heurist.recordAction
+ * @class recordRate
+ * @augments {recordAction}
+ * @memberof Widgets.Records
  * @description jQuery widget for assigning a star rating to a scope of records.
  * This widget allows users to select a rating (0-5 stars) and apply it
  * to records within a specified scope (e.g., selected records). The rating
  * is stored via the `usrBookmarks` entity.
  *
  * @param {object} options - Configuration options for the widget.
- * @param {number} [options.height=300] - The height of the dialog.
- * @param {number} [options.width=540] - The width of the dialog.
- * @param {boolean} [options.modal=true] - Whether the dialog is modal.
- * @param {string} [options.init_scope='selected'] - Initial scope for record selection.
- * @param {string} [options.title='Set Record Rating'] - Title for the dialog.
- * @param {string|boolean} [options.helpContent='recordBookmark'] - Help content identifier or URL.
  */
 $.widget( "heurist.recordRate", $.heurist.recordAction, {
 
     /**
-     * @namespace options
-     * @memberof heurist.recordRate
+     * @memberof Widgets.Records.recordRate
      * @type {object}
      * @property {number} [height=300] - Dialog height.
      * @property {number} [width=540] - Dialog width.
@@ -58,7 +52,7 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
 
     /**
      * @function _initControls
-     * @memberof heurist.recordRate
+     * @memberof Widgets.Records.recordRate
      * @private
      * @description Initializes controls after HTML content is loaded.
      * Dynamically creates radio buttons for selecting a rating (0-5 stars)
@@ -83,7 +77,7 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
     
     /**
      * @function _getActionButtons
-     * @memberof heurist.recordRate
+     * @memberof Widgets.Records.recordRate
      * @private
      * @description Gets action buttons for the dialog, setting the main action button text to 'Set Rating'.
      * @returns {Array<object>} Array of button definition objects.
@@ -96,7 +90,7 @@ $.widget( "heurist.recordRate", $.heurist.recordAction, {
     
     /**
      * @function doAction
-     * @memberof heurist.recordRate
+     * @memberof Widgets.Records.recordRate
      * @private
      * @description Performs the action of setting the record rating.
      * Retrieves the selected rating value and the scope of records.
