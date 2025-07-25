@@ -5,7 +5,7 @@
       "excludePattern": "(^|\\/|\\\\)_"
     },
     "opts": {
-      "destination": "../heurist_docs/jsdocs",
+      "destination": "../JSdoc/",
       "recurse": true,
       "template": "templates/default"
     },

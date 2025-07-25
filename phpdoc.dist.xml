@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<phpdocumentor>
+<!-- Run phpdoc init from HEURIST/h7 -->
+
+    <parser>
+        <default-package-name>heurist</default-package-name>
+        <target>../PHPdoc/</target>
+    </parser>
+
+   <title>Heurist academic knowledge management system</title>
+
+    <transformer>
+        <target>../PHPdoc/</target>
+    </transformer>
+    <files>
+        <directory>.</directory>
+        <ignore>admin/**/*</ignore>
+        <ignore>hclient/**/*</ignore>
+        <ignore>startup/**/*</ignore>
+        <ignore>documenation/**/*</ignore>
+        <ignore>node_modules/**/*</ignore>
+        <ignore>external/**/*</ignore>
+        <ignore>vendor/**/*</ignore>
+    </files>
+    <transformations>
+        <template name="default" />
+    </transformations>
+</phpdocumentor>
