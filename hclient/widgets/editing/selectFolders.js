@@ -19,11 +19,11 @@
  */
 
 /**
- * @widget heurist.selectFolders
- * @alias selectFolders
- * @augments $.heurist.selectMultiValues
+ * @class selectFolders
+ * @memberof Widgets.Editing
+ * @augments selectMultiValues
  * @description A jQuery UI widget for selecting one or more folders from a hierarchical tree,
- * typically displayed using the Fancytree plugin. It extends {@link $.heurist.selectMultiValues}
+ * typically displayed using the Fancytree plugin. It extends {@link selectMultiValues}
  * to provide folder-specific interactions, including optional folder creation and deletion.
  *
  * The folder data is expected to be an array of objects suitable for Fancytree,
@@ -53,35 +53,21 @@
 $.widget( "heurist.selectFolders", $.heurist.selectMultiValues, {
 
     /**
-     * @options
+     * @memberof Widgets.Editing.selectFolders
+     * @type {object}
+     * @instance
      * @description Options for the selectFolders widget. Inherits options from
-     * {@link $.heurist.selectMultiValues#options}, such as `currentValues`, `allValues` (used for Fancytree data),
+     * {@link selectMultiValues#options}, such as `currentValues`, `allValues` (used for Fancytree data),
      * `isDialog`, `onOk`, `onCancel`, `root_dir` (can be used in `_initList` when fetching folders).
+     * @property {string} [title='Select Folders'] - The title for the dialog window
+     * @property {string} [emptyMessage='No folders found'] - Message displayed when no folders are found or returned from the server.
+     * @property {boolean} [allowEdit='true'] - If true, displays UI buttons for creating new folders/subfolders and deleting folders.
+     * These operations interact with the Fancytree instance (expected to be part of the parent widget's `_treeview`)
+     * and make HAPI calls to `HAPI4.SystemMgr.get_sysfolders` with appropriate 'operation' parameters.
      */
     options: {
-        /**
-         * The title for the dialog window if the widget is displayed as a dialog (i.e., `options.isDialog` is true).
-         * This text is processed by `window.hWin.HR()` for internationalization.
-         * @option {string}
-         * @default 'Select Folders'
-         */
         title: 'Select Folders',
-        
-        /**
-         * Message displayed when no folders are found or returned from the server.
-         * This text is processed by `window.hWin.HR()` for internationalization.
-         * @option {string}
-         * @default 'No folders found'
-         */
         emptyMessage: 'No folders found',
-        
-        /**
-         * If true, displays UI buttons for creating new folders/subfolders and deleting folders.
-         * These operations interact with the Fancytree instance (expected to be part of the parent widget's `_treeview`)
-         * and make HAPI calls to `HAPI4.SystemMgr.get_sysfolders` with appropriate 'operation' parameters.
-         * @option {boolean}
-         * @default true
-         */
         allowEdit: true
     },
     

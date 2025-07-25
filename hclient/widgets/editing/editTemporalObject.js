@@ -1,5 +1,6 @@
 /**
-* editTemporalObject.js - Dialog to define complex date (range, approximate)
+* @file editTemporalObject.js
+* @brief Dialog to define complex date (range, approximate)
 *
 * @project     Heurist academic knowledge management system
 *
@@ -1013,13 +1014,6 @@ let TemporalPopup = (function () {
 			},
 			cancel : function () {
 				window.close(that.originalInputString);
-			},
-			getClass : function () {
-				return _className;
-			},
-			isA: function(strClass) {
-				if(strClass === _className) return true;
-				return false;
 			}
 	};
 

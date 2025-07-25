@@ -275,23 +275,6 @@ function HRecordSearch() {
     let that = {
 
         /**
-         * Gets the class name.
-         * @returns {string} The class name "HRecordSearch".
-         */
-        getClass: function () {return _className;},
-        /**
-         * Checks if the provided string matches the class name.
-         * @param {string} strClass - The class name to compare.
-         * @returns {boolean} True if `strClass` is "HRecordSearch", false otherwise.
-         */
-        isA: function (strClass) {return (strClass === _className);},
-        /**
-         * Gets the version of this search manager.
-         * @returns {string} The version number.
-         */
-        getVersion: function () {return _version;},
-
-        /**
          * Public method to perform a search and handle results with a callback.
          * Wraps `_doSearchWithCallback`.
          * @param {Object} request - The search request object.

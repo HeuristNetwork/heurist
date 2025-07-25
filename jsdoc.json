@@ -5,8 +5,15 @@
       "excludePattern": "(^|\\/|\\\\)_"
     },
     "opts": {
-      "destination": "documentation/jsdocs",
+      "destination": "../heurist_docs/jsdocs",
       "recurse": true,
       "template": "templates/default"
-    }
+    },
+    "templates": {
+      "cleverLinks": false,
+      "monospaceLinks": false,
+      "default": {
+        "outputSourceFiles": false
+      }
+    }    
 }

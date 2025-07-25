@@ -946,25 +946,6 @@ title: "Overview"
     let that = {
 
         /**
-         * Gets the class name of this editor instance.
-         * @returns {string} The class name.
-         * @public
-         */
-        getClass: function () {
-            return _className;
-        },
-
-        /**
-         * Checks if the instance is of a given class name.
-         * @param {string} strClass - The class name to check against.
-         * @returns {boolean} True if it is an instance of the class, false otherwise.
-         * @public
-         */
-        isA: function (strClass) {
-            return (strClass === _className);
-        },
-        
-        /**
          * Public method to highlight the current page in the menu tree.
          * @public
          */

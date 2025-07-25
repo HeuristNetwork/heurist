@@ -1104,25 +1104,6 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
     let that = {
 
         /**
-         * Gets the class name of this editor instance.
-         * @returns {string} The class name.
-         * @public
-         */
-        getClass: function () {
-            return _className;
-        },
-
-        /**
-         * Checks if the instance is of a given class name.
-         * @param {string} strClass - The class name to check against.
-         * @returns {boolean} True if it is an instance of the class, false otherwise.
-         * @public
-         */
-        isA: function (strClass) {
-            return (strClass === _className);
-        },
-        
-        /**
          * Public method to handle warnings on exit. Delegates to _warningOnExit.
          * @param {function(boolean):void} callback - Function to call after user interaction.
          * @returns {boolean} See _warningOnExit return value.

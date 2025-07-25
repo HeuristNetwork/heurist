@@ -1323,10 +1323,6 @@ function HMapManager( _options )
 
     //public members
     let that = {
-        getClass: function () {return _className;},
-        isA: function (strClass) {return (strClass === _className);},
-        getVersion: function () {return _version;},
-
         /*
         // data - layer name and reference
         // 

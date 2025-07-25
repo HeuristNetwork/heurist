@@ -1,6 +1,6 @@
 /**
- * editing_exts.js - Additional functions for editing_input.
- *
+ * @file editing_exts.js
+ * @brief Additional functions for editing_input.
  * @fileOverview This file provides a collection of extension functions primarily designed to
  *              enhance or work with the `editing_input` jQuery widget and `HEditing` class.
  *              These functions offer specialized dialogs for editing symbology, selecting
@@ -20,7 +20,8 @@
 /* global HEditing */
 
 /**
- * Opens a dialog for editing map symbology properties.
+ * @memberof Widgets.Editing
+ * @description  Opens a dialog for editing map symbology properties.
  * The dialog's content and behavior are determined by the `mode_edit` parameter.
  * It uses an `HEditing` instance internally to manage the form fields.
  *
@@ -777,6 +778,7 @@ function editSymbology(current_value, mode_edit, callback){
  * Calculates the geographic extent (bounding box) of an image based on its dimensions and an associated world file.
  * This function is typically triggered from within an HEditing form context.
  *
+ * @memberof Widgets.Editing
  * @param {HEditing} _editing - The HEditing instance managing the form that contains the image and world file fields.
  *                              This instance is used to get and set field values (e.g., image file, world file parameters, bounding box).
  * @param {string} [ulf_ID=null] - The obfuscated file ID (ulf_ObfuscatedFileID) of the image.
@@ -902,6 +904,7 @@ function calculateImageExtentFromWorldFile(_editing, ulf_ID = null){
  * Enhances a jQuery hSelect dropdown menu with live search/filter capabilities and other UI improvements.
  * This function is typically called from within an `editing_input` widget context.
  *
+ * @memberof Widgets.Editing
  * @param {object} that - The context object, usually an instance of an `editing_input` jQuery widget.
  *                        It's used to manage event bindings (`_on`) and access field configurations (`f`).
  * @param {jQuery} $select - The jQuery object representing the `<select>` element that has been initialized with `hSelect`.
@@ -1290,6 +1293,7 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
  * can open a detailed record selection dialog or a dropdown list based on configuration
  * and cached data.
  * 
+ * @memberof Widgets.Editing
  * @uses window.hWin.HEURIST4.browseRecordCache
  *  
  * @param {object} _editing_input - The instance of the `editing_input` widget this browser is for.
@@ -1800,9 +1804,17 @@ function browseRecords(_editing_input, $input, popupTitle){
     }
 }
 
-//
-// Creates selectmenu that is common for input elements of editing_input
-//
+/**
+ * Provides functionality to browse and select enumerations (terms)
+ * 
+ * @memberof Widgets.Editing
+ * @param {object} _editing_input - The instance of the `editing_input` widget this browser is for.
+ *                                  Provides context and configuration for the record selection.
+ * @param {jQuery} $input - The jQuery element (typically a `<div>` or `<span>`) that displays
+ *                          the currently selected record's title and acts as a trigger for opening
+ *                          the browser/dropdown.
+ * @param {string|int} value - Current term value
+ */
 function browseTerms(_editing_input, $input, value){
     
     let that = _editing_input;
@@ -2124,6 +2136,7 @@ function browseTerms(_editing_input, $input, value){
  * Opens a popup dialog for defining translations for field values.
  * It dynamically loads the `editTranslations` widget if not already available.
  *
+ * @memberof Widgets.Editing
  * @param {object|Array<string>} _input_or_values - If an object, it's assumed to be an `editing_input` instance
  *                                                  from which current values and field type are derived.
  *                                                  If an array, it's treated as an array of initial translation strings
@@ -2192,12 +2205,13 @@ function translationSupport(_input_or_values, is_text_area, callback){
  * 'def' indicates the default language (no language suffix in the key).
  * Other values for `data-lang` are used as suffixes (e.g., keyname:eng).
  *
+ * @memberof Widgets.Editing
  * @param {Object<string, string>} params - The object to be populated with translation strings.
  *                                          Existing relevant translation keys will be cleared first.
  * @param {jQuery} $container - The jQuery object representing the container of the input/textarea elements.
  * @param {string} keyname - The base key name to use in the `params` object for translations.
  * @param {string} name - The `name` attribute of the input/textarea elements to scan.
- * @param {boolean} is_text_area - True if the elements are `<textarea>`, false if `<input>`.
+ * @param {boolean} is_text_area - True if the elements are textarea, false if input.
  */
 function translationFromUI(params, $container, keyname, name, is_text_area){
     
@@ -2235,12 +2249,13 @@ function translationFromUI(params, $container, keyname, name, is_text_area){
  * It creates input elements for each language found in `params` (e.g., keyname:eng, keyname:fra)
  * and sets up a button to launch the `translationSupport` dialog.
  *
+ * @memberof Widgets.Editing
  * @param {Object<string, string>} params - An object containing translation strings, where keys are typically `keyname`
  *                                          for the default language and `keyname:<code>` for others.
  * @param {jQuery} $container - The jQuery object representing the container where input elements will be managed/created.
  * @param {string} keyname - The base key name used in `params` for the default translation.
  * @param {string} name - The `name` attribute to assign to the created input/textarea elements.
- * @param {boolean} is_text_area - True to create `<textarea>` elements, false for `<input>`.
+ * @param {boolean} is_text_area - True to create textarea elements, false for input.
  */
 function translationToUI(params, $container, keyname, name, is_text_area){
     
@@ -2358,6 +2373,7 @@ function translationToUI(params, $container, keyname, name, is_text_area){
 /**
  * Opens a generic Heurist record selection dialog.
  *
+ * @memberof Widgets.Editing
  * @param {object} [options] - Optional parameters to customize the record selection dialog.
  *                             These options are passed to `window.hWin.HEURIST4.ui.showEntityDialog`.
  *                             Common options include:
@@ -2402,9 +2418,11 @@ function selectRecord(options, callback)
 }
 
 
-//
-// Select arbitrary entity record 
-//
+/**
+ * Opens a Entity (user, field, recordtype...) selection dialog.
+ *
+ * @memberof Widgets.Editing
+ */
 function selectEntity(options, callback)
 {
     

@@ -1,5 +1,6 @@
 /**
- * selectMultiValues.js - Widget to select values from a multiselection list or tree.
+ * @file selectMultiValues.js 
+ * @brief Widget to select values from a multiselection list or tree.
  *
  * @fileOverview Defines the `heurist.selectMultiValues` jQuery UI widget.
  *               This widget serves as a base for creating UI components that allow users to select
@@ -19,8 +20,8 @@
  */
 
 /**
- * @widget heurist.selectMultiValues
- * @alias selectMultiValues
+ * @class heurist.selectMultiValues
+ * @memberof Widgets.Editing
  * @description A base jQuery UI widget for selecting multiple hierarchical values using a tree view,
  * typically implemented with Fancytree. It handles dialog creation, tree population,
  * and returning selected values. This widget is often extended for specific use cases
@@ -34,74 +35,37 @@ $.widget( "heurist.selectMultiValues", {
     /**
      * @options
      * @description Default options for the selectMultiValues widget.
+     * @property {boolean} [is_dialog='true'] - If true, the widget will be displayed as a modal dialog. If false, it will be embedded within the element it's initialized on.
+     * @property {string} [title='Select Values'] - The title for the dialog window
+     * @property {string} [emptyMessage='No values found'] - Message displayed by `_initList` if `options.allValues` is empty or not provided, and no data is fetched to populate it.
+     * @property {boolean} [multiselect='true'] - If true, allows multiple items to be selected in the tree.
+    * This influences the Fancytree `selectMode` option (typically 3 for multi-hier).
+    * If false, selection might be restricted (though Fancytree `selectMode:1` would be needed).
+    * 
+    * REMARK: The Fancytree `selectMode` is hardcoded to `3` in `_initTreeView`, implying multiselect is always hierarchical.
+    * This option's direct effect on Fancytree configuration might need review if single selection is desired.
+    * @property {function(Object):void|null} [onselect='null'] - Callback function executed when the user confirms their selection (e.g., by clicking "Select" in dialog mode).
+    * The function is called with the widget instance as `this` and one argument:
+     * an array of strings representing the selected values (typically node keys or paths from Fancytree).
+     * @property {Array<Object>} [source='assets'] - Specifies the source from which to load files. Can be 'assets' (for general image library), 'uploaded_tilestacks',
+or a numeric string representing the ID of an archive folder.
+     * @property {Array<Object>} [allValues=[]] - An array of data objects used to populate the tree view (Fancytree).
+     * Each object should conform to Fancytree's node data format
+     * (e.g., `{title: "Node Title", key: "node_key", folder: true, children: [...]}`).
+     * If this array is empty or not provided, inheriting widgets might attempt to fetch data,
+     * or `_initList` will show `options.emptyMessage`.
+     * @property {Array<Object>} [selectedValues=[]] - An array of strings representing the initially selected values (node keys or paths) in the tree.
+     * Can also be provided as a semicolon-separated string, which will be parsed into an array in `_initTreeView`.
+     * These values are used in `_initTreeView` to pre-select nodes in the Fancytree.
      */
     options: {
-        /**
-         * If true, the widget will be displayed as a modal dialog.
-         * If false, it will be embedded within the element it's initialized on.
-         * @option {boolean}
-         * @default true
-         */
         isdialog: true, //show in dialog or embedded
-        
-        /**
-         * The title for the dialog window if `isdialog` is true.
-         * Text is processed by `window.hWin.HR()` for internationalization.
-         * @option {string}
-         * @default 'Select Values'
-         */
         title: 'Select Values',
-        
-        /**
-         * Message displayed by `_initList` if `options.allValues` is empty or not provided,
-         * and no data is fetched to populate it.
-         * Text is processed by `window.hWin.HR()` for internationalization.
-         * @option {string}
-         * @default 'No values found'
-         */
         emptyMessage: 'No values found',
-
-        /**
-         * If true, allows multiple items to be selected in the tree.
-         * This influences the Fancytree `selectMode` option (typically 3 for multi-hier).
-         * If false, selection might be restricted (though Fancytree `selectMode:1` would be needed).
-         * 
-         * REMARK: The Fancytree `selectMode` is hardcoded to `3` in `_initTreeView`, implying multiselect is always hierarchical.
-         * This option's direct effect on Fancytree configuration might need review if single selection is desired.
-         * @option {boolean}
-         * @default true
-         */
         multiselect: true, 
-        
-        /**
-         * Callback function executed when the user confirms their selection (e.g., by clicking "Select" in dialog mode).
-         * The function is called with the widget instance as `this` and one argument:
-         * an array of strings representing the selected values (typically node keys or paths from Fancytree).
-         * @option {function(string[]):void|null}
-         * @default null
-         */
         onselect: null,
-        
-        /**
-         * An array of data objects used to populate the tree view (Fancytree).
-         * Each object should conform to Fancytree's node data format
-         * (e.g., `{title: "Node Title", key: "node_key", folder: true, children: [...]}`).
-         * If this array is empty or not provided, inheriting widgets might attempt to fetch data,
-         * or `_initList` will show `options.emptyMessage`.
-         * @option {Array<Object>}
-         * @default []
-         */
         allValues: [],
-        
-        /**
-         * An array of strings representing the initially selected values (node keys or paths) in the tree.
-         * Can also be provided as a semicolon-separated string, which will be parsed into an array in `_initTreeView`.
-         * These values are used in `_initTreeView` to pre-select nodes in the Fancytree.
-         * @option {Array<string>|string}
-         * @default []
-         */
         selectedValues: [] //array or semicolon separated list
-        
     },
     
     /**

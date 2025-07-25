@@ -1,7 +1,8 @@
 /**
-* publishDialog.js - publish/embed dialogue 
+* @file publishDialog.js 
+* @brief publish/embed dialogue 
 * 
-* Used for map, mapspace, saved filter, smarty, visualization graph.
+* @fileOverview Used for map, mapspace, saved filter, smarty, visualization graph.
 * 
 * @todo - converts to widget based on HBaseView
 *
@@ -16,8 +17,9 @@
 */
 
 /**
- * Constructor for the HPublishDialog object.
- * This dialog provides users with URLs and embed codes for various Heurist views.
+ * @class HPublishDialog
+ * @memberof Widgets.Admin
+ * @description The dialog that provides users with URLs and embed codes for various Heurist views.
  *
  * @param {object} [_options] - Initial options for the dialog. These are typically
  *                              overridden or extended when `openPublishDialog` is called.
@@ -292,22 +294,6 @@ function HPublishDialog( _options )
 
     //public members
     let that = {
-        /**
-         * Gets the class name of this module.
-         * @returns {string} The class name "PublishDialog".
-         */
-        getClass: function () {return _className;},
-        /**
-         * Checks if the given string matches the class name of this module.
-         * @param {string} strClass - The class name to check.
-         * @returns {boolean} True if `strClass` is "PublishDialog", false otherwise.
-         */
-        isA: function (strClass) {return (strClass === _className);},
-        /**
-         * Gets the version of this module.
-         * @returns {string} The version number.
-         */
-        getVersion: function () {return _version;},
 
         /**
          * Opens or re-initializes the publish dialog with new options.
@@ -315,6 +301,7 @@ function HPublishDialog( _options )
          * then loads the dialog content from `publishDialog.html`.
          * After the content is loaded, `_initControls` is called to set up the UI.
          *
+         * @memberof Widgets.Admim.HPublishDialog
          * @param {object} new_options - The options to configure the dialog.
          * @param {string} new_options.mode - The operational mode (e.g., 'mapspace', 'smarty').
          * @param {string} new_options.url - The base URL to be published/embedded.
@@ -377,6 +364,7 @@ function HPublishDialog( _options )
         
         /**
          * Closes and cleans up the publish dialog if it is currently open.
+         * @memberof Widgets.Admim.HPublishDialog
          */
         closePublishDialog: function(){
             if(popupdialog && typeof popupdialog.dialog === 'function' && popupdialog.dialog('instance')){

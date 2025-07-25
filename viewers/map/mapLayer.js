@@ -1291,9 +1291,6 @@ function HMapLayer( _options ) {
     
     //public members
     let that = {
-        getClass: function () {return _className;},
-        isA: function (strClass) {return (strClass === _className);},
-        getVersion: function () {return _version;},
 
         isVisible: function(){
             return is_visible;

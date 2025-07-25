@@ -809,21 +809,12 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     let that = {
 
         /**
-         * Gets the class name of the HRecordSet instance.
-         * @returns {string} The class name, "HRecordSet".
-         */
-        getClass: function () {return _className;},
-        /**
          * Checks if the instance is of a given class name.
          * @param {string} strClass - The class name to check against.
          * @returns {boolean} True if `strClass` is "HRecordSet" or "hRecordSet".
          */
         isA: function (strClass) {return (strClass === _className || strClass === 'hRecordSet');},
-        /**
-         * Gets the version of the HRecordSet.
-         * @returns {string} The version string.
-         */
-        getVersion: function () {return _version;},
+
         /**
          * @property {string} entityName - The name of the entity type for this recordset (e.g., "Records").
          * Initialized during `_init`.

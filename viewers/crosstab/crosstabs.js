@@ -3264,23 +3264,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
     let that = {
 
         /**
-         * Gets the class name.
-         * @returns {string} The class name 'CrosstabsAnalysis'.
-         */
-        getClass: function () {
-            return _className;
-        },
-
-        /**
-         * Checks if this object is an instance of a given class name.
-         * @param {string} strClass - The class name to check against.
-         * @returns {boolean} True if it's an instance of CrosstabsAnalysis, false otherwise.
-         */
-        isA: function (strClass) {
-            return (strClass === _className);
-        },
-
-        /**
          * Public method to change the aggregation mode and trigger data retrieval.
          */
         changeAggregationMode: function(){

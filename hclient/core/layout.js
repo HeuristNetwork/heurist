@@ -1341,9 +1341,6 @@ console.error('Cardinal layout widget does not have proper options');
     //public members
     let that = {
 
-        getClass: function () {return _className;},
-        isA: function (strClass) {return (strClass === _className);},
-        getVersion: function () {return _version;},
 
         //WRONG USAGE, TO REMOVE: used to obtain instance of widget
         /**

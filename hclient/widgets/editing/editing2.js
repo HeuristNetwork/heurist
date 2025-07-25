@@ -1,5 +1,6 @@
 /**
- * editing2.js - Defines the HEditing class for dynamic form generation and management.
+ * @file editing2.js
+ * @brief Defines the HEditing class for dynamic form generation and management.
  *
  * @fileOverview Defines the HEditing class, a powerful tool for dynamically generating
  *              and managing complex data entry forms within the Heurist system. It handles
@@ -20,11 +21,23 @@
  */
 
 /**
- * Constructs an HEditing instance to manage a dynamic form.
+ * @namespace Widgets.Editing
+ * @description Edit forms and input widgets
+ */
+
+/**
+ * @class HEditing
+ * @memberof Widgets.Editing
+ * @classdesc  The HEditing class is responsible for rendering and managing dynamic data entry forms.
+ * It supports complex layouts with nested groups (tabs, accordions, simple groups), various field types
+ * (freetext, blocktext, geo, etc., via `editing_input` jQuery plugin), data validation,
+ * and communication of changes. It integrates with TinyMCE for rich text editing.
+ * 
+ * @constructor
+ * @description Constructs an HEditing instance to manage a dynamic form.
  * This class takes a structure definition and data, then renders an interactive form
  * with various input types, groupings (tabs, accordions), and handles data manipulation.
- *
- * @constructor
+ * 
  * @param {object} _options - Configuration options for the HEditing instance.
  * @param {string|jQuery} _options.container - The DOM element (or its ID) where the form will be rendered.
  * @param {object} [_options.entity] - Configuration object for the entity type being edited.
@@ -36,10 +49,6 @@
  * @param {function} [_options.oninit] - Callback function triggered after the HEditing instance is fully initialized.
  * @param {string} [_options.className] - An optional CSS class name to apply to the main form container.
  *
- * @classdesc The HEditing class is responsible for rendering and managing dynamic data entry forms.
- * It supports complex layouts with nested groups (tabs, accordions, simple groups), various field types
- * (freetext, blocktext, geo, etc., via `editing_input` jQuery plugin), data validation,
- * and communication of changes. It integrates with TinyMCE for rich text editing.
  */
 function HEditing(_options) {
      const _className = "Editing";
@@ -976,25 +985,17 @@ function HEditing(_options) {
          * 0: Not modified (initial state).
          * 1: Modified by user.
          * 2: Finalized (e.g., after save, considered not modified for further checks).
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @type {number}
          */
         wasModified: 0,
 
         /**
-         * Gets the class name of this instance.
-         * @returns {string} The class name "Editing".
-         */
-        getClass: function () {return _className;},
-        /**
-         * Checks if this instance is of a specific class.
-         * @param {string} strClass - The class name to compare against.
-         * @returns {boolean} True if `strClass` is "Editing", false otherwise.
-         */
-        isA: function (strClass) {return (strClass === _className);},
-
-        /**
          * Reloads the form with new data. Assumes the form structure remains the same.
          * (Marked as NOT USED in original source comments).
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @param {HRecordSet} _recdata - The new HRecordSet data to populate the form.
          */
         reload: function(_recdata){
@@ -1003,6 +1004,8 @@ function HEditing(_options) {
 
         /**
          * Validates all fields in the form.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @returns {boolean} True if all fields are valid, false otherwise.
          */
         validate: function(){
@@ -1011,6 +1014,8 @@ function HEditing(_options) {
 
         /**
          * Placeholder save function. Currently alerts 'save'.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @returns {void}
          */
         save: function(){
@@ -1020,6 +1025,8 @@ function HEditing(_options) {
         /**
          * Initializes or re-initializes the editing form with a given structure and data.
          * This will clear any existing form content in the container.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @param {Array<object>} _recstructure - The structure definition for the form.
          * @param {HRecordSet} _recdata - The HRecordSet data to populate the form.
          * @param {boolean} [_is_insert=false] - Flag indicating if the form is for creating a new record.
@@ -1030,6 +1037,8 @@ function HEditing(_options) {
         
         /**
          * Gets the value(s) of a specific field by its dtID.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @param {string|number} dtID - The ID of the data type field.
          * @returns {Array<any>|null} An array of values for the field. Returns null if the field is not found or has no values.
          */
@@ -1039,6 +1048,8 @@ function HEditing(_options) {
         
         /**
          * Gets all values from the form as an object.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @param {boolean} [needArrays=false] - If true, all field values are returned as arrays,
          *                                       even if they are single values. If false or omitted,
          *                                       single values are returned directly, while multi-value fields
@@ -1051,6 +1062,8 @@ function HEditing(_options) {
         
         /**
          * Gets the visibility settings for all fields in the form.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @returns {Object<string, Array<number>>} An object where keys are field dtIDs
          *                                          and values are arrays representing visibility states (e.g., [1,0,1]).
          */
@@ -1060,6 +1073,8 @@ function HEditing(_options) {
         
         /**
          * Sets the visibility of fields in the form based on data from a recordset.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @param {HRecordSet} vals - The HRecordSet containing visibility information.
          *                          Typically, this information is stored in a specific part of the record.
          */
@@ -1070,6 +1085,8 @@ function HEditing(_options) {
         /**
          * Assigns the current values from the form fields back to the HRecordSet instance
          * that was provided during initialization or via `reload`.
+         * @instance
+         * @memberof Widgets.Editing.HEditing
          */
         assignValuesIntoRecord:function(){
             _assignValuesIntoRecord();
@@ -1077,6 +1094,8 @@ function HEditing(_options) {
         
         /**
          * Gets the jQuery wrapper for the specified field.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @param {string|number} fieldName - The dtID of the field.
          * @returns {jQuery|null} The jQuery object for the field's container, or null if not found.
          */
@@ -1086,6 +1105,8 @@ function HEditing(_options) {
 
         /**
          * Sets the value of a field by its name (dtID). The field's input element(s) might be recreated.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @param {string|number} fieldName - The dtID of the field.
          * @param {any|Array<any>} value - The value or array of values to set.
          * @param {boolean} [is_changed=true] - If true (default), marks the field as changed and triggers the onChange callback.
@@ -1106,6 +1127,8 @@ function HEditing(_options) {
         /**
          * Sets the value of a field by its name (dtID) directly into the first input element.
          * The input element will NOT be recreated. This is a more direct manipulation.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @param {string|number} fieldName - The dtID of the field.
          * @param {any} value - The value to set in the first input element of the field.
          * @param {boolean} [is_changed=true] - If true (default), marks the field as changed and triggers the onChange callback.
@@ -1128,6 +1151,8 @@ function HEditing(_options) {
         
         /**
          * Gets all jQuery wrappers for the input fields managed by this HEditing instance.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @returns {Array<jQuery>} An array of jQuery objects, each wrapping an `editing_input`.
          */
         getAllFields: function(){
@@ -1136,6 +1161,8 @@ function HEditing(_options) {
         
         /**
          * Gets the actual HTML input/textarea/select DOM element(s) for a given field.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @param {string|number} fieldName - The dtID of the field.
          * @returns {Array<HTMLElement>|undefined} An array of DOM elements, or undefined if the field is not found.
          */
@@ -1145,6 +1172,8 @@ function HEditing(_options) {
         
         /**
          * Finds input elements based on a sub-property of their `editing_input` configuration.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @param {string} fieldName - The name of the configuration property on the `editing_input` widget.
          * @param {any} value - The value to match. Use `'[not empty]'` to find fields where this property is not empty.
          * @returns {Array<jQuery>} An array of jQuery objects for matching field containers.
@@ -1155,6 +1184,8 @@ function HEditing(_options) {
         
         /**
          * Finds input elements that have a specific CSS class.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @param {string} className - The CSS class to search for.
          * @returns {Array<jQuery>} An array of jQuery objects for matching field containers.
          */
@@ -1164,6 +1195,8 @@ function HEditing(_options) {
         
         /**
          * Checks if the form has been modified.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @returns {boolean} True if modified, false otherwise.
          */
         isModified: function(){
@@ -1172,6 +1205,8 @@ function HEditing(_options) {
         
         /**
          * Sets the modification state of the form.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @param {boolean|number} val - If `0` or `false`, resets all fields to unchanged and sets `wasModified` to 0 or 2 respectively.
          *                               If `true` or `1`, sets `wasModified` to 1.
          */
@@ -1195,6 +1230,8 @@ function HEditing(_options) {
         
         /**
          * Gets the main jQuery container element for this HEditing instance.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @returns {jQuery} The jQuery object for the container.
          */
         getContainer: function(){
@@ -1203,6 +1240,8 @@ function HEditing(_options) {
         
         /**
          * Sets the disabled state for all input fields in the form.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @param {boolean} mode - True to disable fields, false to enable them.
          */
         setDisabled: function(mode){
@@ -1211,6 +1250,8 @@ function HEditing(_options) {
         
         /**
          * Sets focus to the first focusable input element in the form.
+         * @instance
+         * @memberof Widgets.Editing.HEditing
          */
         setFocus: function(){
             _setFocus();
@@ -1218,6 +1259,8 @@ function HEditing(_options) {
         
         /**
          * Gets or sets the structure editing mode flag.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @param {boolean} [value] - If provided, sets the flag. True for edit structure mode, false otherwise.
          * @returns {boolean|undefined} If `value` is not provided, returns the current state of the flag. Otherwise, undefined.
          */
@@ -1231,6 +1274,8 @@ function HEditing(_options) {
         
         /**
          * Gets the options object that was used to initialize this HEditing instance.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @returns {object} The options object.
          */
         getOptions: function (){
@@ -1240,6 +1285,8 @@ function HEditing(_options) {
         /**
          * Displays validation errors for the specified fields.
          * Errors are typically sourced from the `record.errors` property of the HRecordSet.
+         * @memberof Widgets.Editing.HEditing
+         * @instance
          * @param {string|Array<string>} fieldNames - A single field name (dtID) or an array of field names for which to display errors.
          */
         displayValueErrors: function(fieldNames){

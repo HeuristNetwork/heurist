@@ -813,22 +813,6 @@ function hImportRecords(_max_upload_size) {
     //public members
     let that = {
 
-        /**
-         * Gets the class name.
-         * @return {string} The class name.
-         */
-        getClass: function () {return _className;},
-        /**
-         * Checks if the given class name matches this class's name.
-         * @param {string} strClass - The class name to check.
-         * @return {boolean} True if it's a match, false otherwise.
-         */
-        isA: function (strClass) {return (strClass === _className);},
-        /**
-         * Gets the version of this module.
-         * @return {string} The version string.
-         */
-        getVersion: function () {return _version;},
     }
 
     _init(_max_upload_size );

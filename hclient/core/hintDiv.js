@@ -299,21 +299,6 @@ function HintDiv(_id, _width, _height, _initcontent) {
 		close: function(){
 			needHideTip = true;
 			_hideToolTip();
-		},
-		/**
-		 * Gets the class name of this component.
-		 * @returns {string} The class name "HintDiv".
-		 */
-		getClass: function () {
-			return _className;
-		},
-		/**
-		 * Checks if the provided string matches the class name of this component.
-		 * @param {string} strClass - The class name to compare.
-		 * @returns {boolean} True if `strClass` is "HintDiv", false otherwise.
-		 */
-		isA: function (strClass) {
-			return (strClass === _className);
 		}
 	};
 

@@ -21,20 +21,18 @@
 /* global translationToUI, translationFromUI, showSearchFacetedWizard */
 
 /**
- * Factory function to create an SvsEdit instance.
+ * @namespace Widgets.Filters
+ * @description Saved filter widgets and managers
+ */
+
+/**
+ * @class HSvsEdit
+ * @description Factory function to create an SvsEdit instance.
  * This instance provides methods to manage the dialog for editing and saving
  * various types of saved searches and visualizations.
  *
- * @function HSvsEdit
+ * @memberof Widgets.Filters
  * @param {Object} [args] - Arguments for the SvsEdit instance (currently not used, but reserved for future extension).
- * @returns {Object} An object with methods to manage saved search editing.
- * @property {function} getClass Returns the class name.
- * @property {function} isA Checks if the instance is of a given class.
- * @property {function} getVersion Returns the version of the SvsEdit module.
- * @property {function} remove Removes the edit dialog from the DOM.
- * @property {function} isModified Checks if the content of the edit dialog has been modified.
- * @property {function} closeEditDialog Closes the edit dialog.
- * @property {function} showSavedFilterEditDialog Shows the dialog for editing/creating a saved filter or visualization.
  */
 function HSvsEdit(args) {
     const _className = "SvsEdit",
@@ -778,34 +776,8 @@ function HSvsEdit(args) {
     let that = {
 
         /**
-         * Gets the class name of the SvsEdit instance.
-         * @memberof HSvsEdit
-         * @instance
-         * @function getClass
-         * @returns {string} The class name "SvsEdit".
-         */
-        getClass: function () {return _className;},
-        /**
-         * Checks if the instance is of a specific class type.
-         * @memberof HSvsEdit
-         * @instance
-         * @function isA
-         * @param {string} strClass - The class name to compare against.
-         * @returns {boolean} True if `strClass` is "SvsEdit", false otherwise.
-         */
-        isA: function (strClass) {return (strClass === _className);},
-        /**
-         * Gets the version of the SvsEdit module.
-         * @memberof HSvsEdit
-         * @instance
-         * @function getVersion
-         * @returns {string} The version number.
-         */
-        getVersion: function () {return _version;},
-
-        /**
          * Removes the edit dialog from the DOM and performs necessary cleanup.
-         * @memberof HSvsEdit
+         * @memberof Widgets.Filters.HSvsEdit
          * @instance
          * @function remove
          */
@@ -820,7 +792,7 @@ function HSvsEdit(args) {
         
         /**
          * Checks if the currently open edit dialog has been modified since it was loaded.
-         * @memberof HSvsEdit
+         * @memberof Widgets.Filters.HSvsEdit
          * @instance
          * @function isModified
          * @returns {boolean} True if the dialog is open and modified, false otherwise.
@@ -837,7 +809,7 @@ function HSvsEdit(args) {
 
         /**
          * Closes the edit dialog if it is currently open.
-         * @memberof HSvsEdit
+         * @memberof Widgets.Filters.HSvsEdit
          * @instance
          * @function closeEditDialog
          */
@@ -851,7 +823,7 @@ function HSvsEdit(args) {
          * Shows the dialog for creating or editing a saved filter, rule set, or faceted search.
          * This is the main public method to display and interact with the SvsEdit functionality.
          *
-         * @memberof HSvsEdit
+         * @memberof Widgets.Filters.HSvsEdit
          * @instance
          * @function showSavedFilterEditDialog
          * @param {string} mode - The mode of operation:

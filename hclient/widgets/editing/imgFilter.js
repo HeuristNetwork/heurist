@@ -35,10 +35,6 @@
  * @param {jQuery} [$container=null] - Optional. A jQuery object representing the container where the
  *                                     dialog UI should be loaded. If null or not provided,
  *                                     the dialog will be shown as a popup managed by `window.hWin.HEURIST4.msg.showMsgDlgUrl`.
- * @returns {{getClass: function(): string, isA: function(string): boolean}} An object containing
- *          utility methods:
- *          - `getClass()`: Returns the string 'imgFilter'.
- *          - `isA(string)`: Checks if the provided string matches 'imgFilter'.
  */
 function imgFilter( current_cfg, main_callback, $container=null ){
 
@@ -217,26 +213,6 @@ function imgFilter( current_cfg, main_callback, $container=null ){
      */
     let that = {
 
-        /**
-         * Returns the class name of this component.
-         * @public
-         * @function getClass
-         * @returns {string} The class name, which is 'imgFilter'.
-         */
-        getClass: function () {
-            return _className;
-        },
-
-        /**
-         * Checks if the provided class name matches this component's class name.
-         * @public
-         * @function isA
-         * @param {string} strClass - The class name to compare against.
-         * @returns {boolean} True if `strClass` is 'imgFilter', false otherwise.
-         */
-        isA: function (strClass) {
-            return (strClass === _className);
-        },
     }
 
     _init(); // Initialize the component

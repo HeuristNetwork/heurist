@@ -1121,10 +1121,6 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
     //public members
     let that = {
-        getClass: function () {return _className;},
-        isA: function (strClass) {return (strClass === _className);},
-        getVersion: function () {return _version;},
-
     }
 
     

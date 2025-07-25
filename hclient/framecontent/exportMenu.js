@@ -716,22 +716,6 @@ function hexportMenu( container ) {
      
     //public members
     let that = {
-        /**
-         * Gets the class name of this module.
-         * @returns {string} The class name "exportMenu".
-         */
-        getClass: function () {return _className;},
-        /**
-         * Checks if the given string matches the class name of this module.
-         * @param {string} strClass - The class name to check.
-         * @returns {boolean} True if `strClass` is "exportMenu", false otherwise.
-         */
-        isA: function (strClass) {return (strClass === _className);},
-        /**
-         * Gets the version of this module.
-         * @returns {string} The version number.
-         */
-        getVersion: function () {return _version;},
         
         /**
          * Sets dialog options that might be used by functions within this module

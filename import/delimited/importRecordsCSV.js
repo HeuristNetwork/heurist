@@ -5307,23 +5307,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     let that = {
 
         /**
-         * Gets the class name.
-         * @return {string} The class name.
-         */
-        getClass: function () {return _className;},
-        /**
-         * Checks if the given class name matches this class's name.
-         * @param {string} strClass - The class name to check.
-         * @return {boolean} True if it's a match, false otherwise.
-         */
-        isA: function (strClass) {return (strClass === _className);},
-        /**
-         * Gets the version of this module.
-         * @return {string} The version string.
-         */
-        getVersion: function () {return _version;},
-
-        /**
          * Displays records in a popup based on the mode (e.g., disambiguation, errors, warnings).
          * @param {string} mode - The mode to display ('disamb', 'error', 'warning').
          * @return {void}

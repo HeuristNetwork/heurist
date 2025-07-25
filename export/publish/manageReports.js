@@ -368,24 +368,7 @@ function ReportManager(_isFilterMode, _isWindowMode) { // _isFilterMode is not u
                  */
                 deleteReport: function(recID) {
                     _onDeleteRecord(recID);
-                },
-
-                /**
-                 * Gets the class name.
-                 * @returns {string} The class name "ReportManager".
-                 */
-				getClass: function () {
-					return _className;
-				},
-
-                /**
-                 * Checks if the object is an instance of the given class name.
-                 * @param {string} strClass - The class name to check against.
-                 * @returns {boolean} True if `strClass` matches "ReportManager", false otherwise.
-                 */
-				isA: function (strClass) {
-					return (strClass === _className);
-				}
+                }
 	};
 
 	_init();  // Initialize the manager when a new instance is created.

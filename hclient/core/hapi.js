@@ -1516,12 +1516,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         currentRecordsetSelection: [],  //selected record ids - main assignment in lister of resultListMenu
 
-
-        getClass: function () { return _className; },
-        isA: function (strClass) { return (strClass === _className); },
-        getVersion: function () { return _version; },
-
-
         //UserMgr: new hUserMgr(),
 
         SystemMgr: null,

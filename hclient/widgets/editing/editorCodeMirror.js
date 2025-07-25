@@ -1,5 +1,6 @@
 /**
- * editorCodeMirror.js - Provides a wrapper class `EditorCodeMirror` to integrate the CodeMirror editor.
+ * @file editorCodeMirror.js
+ * @brief Provides a wrapper class `EditorCodeMirror` to integrate the CodeMirror editor.
  *
  * @fileOverview Provides a wrapper class `EditorCodeMirror` to integrate the CodeMirror editor
  *               with a textarea element for enhanced text/code editing capabilities.
@@ -20,6 +21,7 @@
       
 /**
  * @class EditorCodeMirror
+ * @memberof Widgets.Editing
  * @classdesc A wrapper class to replace a standard HTML textarea with a CodeMirror editor instance,
  * providing enhanced code and text editing features. It handles the dynamic loading of
  * CodeMirror library and modes, and manages the editor's lifecycle and interaction
@@ -30,7 +32,7 @@ class EditorCodeMirror {
     /**
      * The original HTML textarea element (as a jQuery object) that this CodeMirror instance is attached to.
      * Its value is kept in sync with the editor content.
-     * @public
+     * @private
      * @type {jQuery}
      */
     input;  
@@ -38,7 +40,7 @@ class EditorCodeMirror {
     /**
      * The parent div of the input textarea, typically with class 'input-div'.
      * Used for UI manipulations like finding switcher buttons.
-     * @public
+     * @private
      * @type {jQuery|null}
      */
     inputdiv;
@@ -53,7 +55,7 @@ class EditorCodeMirror {
 
     /**
      * The CodeMirror editor instance. Null until `showEditor` successfully initializes it.
-     * @public
+     * @private
      * @type {CodeMirror.Editor|null}
      */
     codeEditor = null;

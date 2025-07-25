@@ -2272,25 +2272,6 @@ function(value){
     let that = {
 
         /**
-         * Gets the class name of the editor instance.
-         * @returns {string} The class name.
-         * @public
-         */
-        getClass: function () {
-            return _className;
-        },
-
-        /**
-         * Checks if the instance is of a given class name.
-         * @param {string} strClass - The class name to check against.
-         * @returns {boolean} True if it is an instance of the class, false otherwise.
-         * @public
-         */
-        isA: function (strClass) {
-            return (strClass === _className);
-        },
-        
-        /**
          * Public method to insert an element into the layout. Delegates to _layoutInsertElement.
          * @param {string|number} insert_ele_id - The ID of the element to insert relative to.
          * @param {string} selected_element - The type of element to insert.

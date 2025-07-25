@@ -1,5 +1,6 @@
 /**
- * selectFile.js - Widget to select image files or tiled images from various sources.
+ * @file selectFile.js
+ * @brief Widget to select image files or tiled images from various sources.
  *
  * @fileOverview Defines the `heurist.selectFile` jQuery UI widget.
  *               This widget provides a UI for selecting files, primarily images (for thumbnails/icons)
@@ -18,8 +19,8 @@
  */
 
 /**
- * @widget heurist.selectFile
- * @namespace heurist.selectFile
+ * @class selectFile
+ * @memberof Widgets.Editing
  * @description A jQuery UI widget for selecting files (images, mbtiles) from different sources.
  * It can operate as a dialog or be embedded. It features filtering and uses a `resultList`
  * for displaying files.
@@ -40,73 +41,28 @@
 $.widget( "heurist.selectFile", {
 
     /**
-     * @options
+     * @type {object}
+     * @instance
+     * @memberof Widgets.Editing.selectFile
      * @description Default options for the selectFile widget.
+     * @property {boolean} [showFilter='false'] - Whether to display a simple filter input field for filtering files by name.
+     * @property {boolean} [is_dialog='true'] - If true, the widget will be displayed as a modal dialog. If false, it will be embedded within the element it's initialized on.
+     * @property {function(Object):void|null} [onselect='null'] - Callback function executed when a file is selected. The function is called with the widget instance as `this` and one argument:
+an object containing details of the selected file (`{ filename: string, url: string, path: string }`).
+     * @property {string} [source='assets'] - Specifies the source from which to load files. Can be 'assets' (for general image library), 'uploaded_tilestacks',
+or a numeric string representing the ID of an archive folder.
+     * @property {string|null} [extensions=null] - comma separated list of allowed extensions
+     * @property {string} [title='Select Image'] - The title for the dialog window
+     * @property {boolean} [keep_dialogue='false'] - If true and `isdialog` is true the dialog will be just hidden on close
      */
     options: {
-        /**
-         * Whether to display a simple filter input field for filtering files by name.
-         * @option {boolean}
-         * @default false
-         */
         showFilter: false, //simple filter by name
-        
-        /**
-         * If true, the widget will be displayed as a modal dialog.
-         * If false, it will be embedded within the element it's initialized on.
-         * @option {boolean}
-         * @default true
-         */
         isdialog: true, //show in dialog or embedded
-
-        /**
-         * Callback function executed when a file is selected.
-         * The function is called with the widget instance as `this` and one argument:
-         * an object containing details of the selected file (`{ filename: string, url: string, path: string }`).
-         * @option {function(Object):void|null}
-         * @default null
-         */
         onselect: null,
-        
-        /**
-         * Specifies the source from which to load files.
-         * Can be 'assets' (for general image library), 'uploaded_tilestacks',
-         * or a numeric string representing the ID of an archive folder.
-         * @option {string}
-         * @default 'assets'
-         */
         source:'assets', //or uploaded_tilestacks or id of archive folder
-        
-        /**
-         * A comma-separated string of file extensions to filter by (e.g., "jpg,jpeg,png").
-         * If null or empty, may show all files depending on the source.
-         * @option {string|null}
-         * @default null
-         */
         extensions: null, //string comma separated list of exts
-        
-        /**
-         * The title for the dialog window if `isdialog` is true.
-         * Text is processed by `window.hWin.HR()` for internationalization.
-         * @option {string}
-         * @default 'Select Image'
-         */
         title: 'Select Image',
-        
-        /**
-         * The size (height) for thumbnails when displaying image assets.
-         * @option {number}
-         * @default 64
-         */
-        size: 64,
-        
-        /**
-         * If true and `isdialog` is true the dialog is just hidden,
-         * If false it calls `that._as_dialog.remove()`, which destroys it.
-         * 
-         * @option {boolean}
-         * @default false
-         */
+        size: 64, //The size (height) for thumbnails when displaying image assets.
         keep_dialogue: false
     },
     
@@ -323,6 +279,10 @@ $.widget( "heurist.selectFile", {
         }
     },
     
+    /**
+     * @memberof Widgets.Editing.selectFile
+     * @instance
+     */
     open: function(){
         this._init();  
     },
@@ -333,6 +293,8 @@ $.widget( "heurist.selectFile", {
      * This method is typically called as a 'keyup' event handler.
      * It performs a client-side filter on the `_cachedRecordset` by matching filenames
      * and then updates the `recordList` with the filtered subset.
+     * 
+     * @memberof Widgets.Editing.selectFile
      * @private
      * @param {jQuery.Event} event - The keyup event object from the filter input field.
      */

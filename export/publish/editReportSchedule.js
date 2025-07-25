@@ -23,10 +23,10 @@
  * This is typically instantiated when the pop-up dialog is shown.
  *
  * @constructor
- * @returns {object} An object with public methods `save`, `cancel`, `getClass`, and `isA`.
+ * @returns {object} An object with public methods `save`, `cancel`.
  */
 function ReportScheduleEditor() {
-    /** @private @const {string} _className - The name of this class, used by `getClass` and `isA`. */
+    /** @private @const {string} _className - The name of this class */
     const _className = "ReportScheduleEditor";
     /** @private {?Array} _entity - Holds the current report schedule data being edited. Populated from AJAX response.
      *                         Format is an array where indices correspond to field names in `_reports.fieldNames`.
@@ -350,23 +350,7 @@ function ReportScheduleEditor() {
                 } else {
                     window.close(null);
                 }
-            },
-
-            /**
-             * Gets the class name.
-             * @returns {string} The class name "ReportScheduleEditor".
-             */
-            getClass: function () {
-                return _className;
-            },
-
-            /**
-             * Checks if the object is an instance of the given class name.
-             * @param {string} strClass - The class name to check against.
-             * @returns {boolean} True if `strClass` matches "ReportScheduleEditor", false otherwise.
-             */
-            isA: function (strClass) {
-                return (strClass === _className);
+            }
         }
     };
 

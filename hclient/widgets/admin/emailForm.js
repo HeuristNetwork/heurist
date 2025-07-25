@@ -19,7 +19,7 @@
 
 /**
  * @namespace Widgets.Admin
- * @description Admin and Db management widgets
+ * @description Admin and Db widgets
  */
 
 /**

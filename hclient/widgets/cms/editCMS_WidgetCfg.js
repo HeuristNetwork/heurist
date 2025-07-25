@@ -1523,25 +1523,6 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
     let that = {
 
         /**
-         * Gets the class name identifier of this component.
-         * @returns {string} The class name "editCMS_WidgetCfg".
-         * @public
-         */
-        getClass: function () {
-            return _className;
-        },
-
-        /**
-         * Checks if this component's class name matches the provided string.
-         * @param {string} strClass - The class name to compare against.
-         * @returns {boolean} True if `strClass` is "editCMS_WidgetCfg", false otherwise.
-         * @public
-         */
-        isA: function (strClass) {
-            return (strClass === _className);
-        },
-
-        /**
          * Public method to retrieve the current configuration values from the UI.
          * Delegates to the private _getValues method.
          * @returns {Object|false} The updated widget options object, or `false` if validation fails.

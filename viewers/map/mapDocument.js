@@ -761,10 +761,6 @@ console.log(treedata);
     
     //public members
     let that = {
-        getClass: function () {return _className;},
-        isA: function (strClass) {return (strClass === _className);},
-        getVersion: function () {return _version;},
-
         //
         // Loads list of map documents
         //

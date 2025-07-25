@@ -1,5 +1,6 @@
 /**
-* editTranslations.js - Widget for editing multi-language translations
+* @file editTranslations.js
+* @brief Widget for editing multi-language translations
 * 
 * @description A jQuery UI widget for editing translations of a text field into multiple languages.
 *              It supports manual entry and an optional automatic translation feature if configured.
@@ -16,7 +17,8 @@
 */
 
 /**
- * @namespace heurist.editTranslations
+ * @class editTranslations
+ * @memberof Widgets.Editing
  * @description Creates an editor for managing text translations in multiple languages.
  * The editor allows adding new language entries, inputting translations,
  * and optionally using an automatic translation service.
@@ -43,43 +45,22 @@
  */
 $.widget( "heurist.editTranslations", {
 
-    // default options
+    /**
+    * @memberof Widgets.Editing.editTranslations
+    * @type {object}
+    * @instance
+    * 
+    * @property {boolean} [is_dialog='true'] - Determines if the widget is displayed within a modal dialog or embedded directly into the target element.
+    * @property {string} [fieldtype='freetext'] - Specifies the type of input field to use for translations. 'freetext' renders a single-line input; 'blocktext' renders a multi-line textarea.
+    * @property {Array<string>} [values=[""]] - An array of initial translation strings. Each string can be a simple text (considered default language) or prefixed with a language code (e.g., "eng:Hello", "fra:Bonjour"). ISO639-1 (2-letter) or ISO639-2 (3-letter) codes are supported.
+    * @property {function(Array<string>):void|null} [onclose=null] - A callback function executed when the "Apply" button is clicked in dialog mode, or when changes are intended to be saved.
+    * The callback receives an array of strings representing the current translations, formatted with language prefixes where applicable (e.g., "fra:Bonjour").
+    */
     options: {
-        /**
-         * Determines if the widget is displayed within a modal dialog or embedded directly into the target element.
-         * @type {boolean}
-         * @default true
-         */
         is_dialog: true,
-        
-        /**
-         * Specifies the type of input field to use for translations.
-         * 'freetext' renders a single-line input.
-         * 'blocktext' renders a multi-line textarea.
-         * @type {string}
-         * @default "freetext"
-         */
         fieldtype: 'freetext',
-
-        /**
-         * An array of initial translation strings.
-         * Each string can be a simple text (considered default language) or prefixed with a language code
-         * (e.g., "eng:Hello", "fra:Bonjour"). ISO639-1 (2-letter) or ISO639-2 (3-letter) codes are supported.
-         * @type {Array<string>}
-         * @default [""]
-         */
         values: [''],
-        
-        /**
-         * A callback function executed when the "Apply" button is clicked in dialog mode,
-         * or when changes are intended to be saved.
-         * The callback receives an array of strings representing the current translations,
-         * formatted with language prefixes where applicable (e.g., "fra:Bonjour").
-         * @type {function(Array<string>):void|null}
-         * @default null
-         */
         onclose: null
-        
     },
     
     /**
