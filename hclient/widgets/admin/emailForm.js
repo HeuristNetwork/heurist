@@ -18,29 +18,39 @@
 */
 
 /**
+ * @namespace Widgets.Admin
+ * @description Admin and Db management widgets
+ */
+
+/**
 * @class emailForm
-* @memberof Widgets.Navigation
+* @memberof Widgets.Admin
 * @description either creates form or uses a given one.
 *
 * @property {object} options - Configuration options for the widget.
-* @property {string} [options.default_palette_class='ui-heurist-admin'] - Default CSS class for the widget palette.
-* @property {boolean} [options.isdialog=false] - If true, the widget is displayed as a dialog. See {@link Widgets.Navigation.emailForm#_initDialog}, {@link Widgets.Navigation.emailForm#popupDialog}, {@link Widgets.Navigation.emailForm#closeDialog}.
-* @property {boolean} [options.supress_dialog_title=false] - If true, hides the dialog title bar (applicable if `isdialog` is true).
-* @property {number} [options.height=400] - Height of the popup dialog.
-* @property {number} [options.width=760] - Width of the popup dialog.
-* @property {object|null} [options.position=null] - Position of the dialog. See jQuery UI dialog position option.
-* @property {string} [options.title=''] - Title of the dialog.
-* @property {string|null} [options.element_id=null] - HTML ID of the form element. If `isdialog` is false, the form is loaded into this element.
-* @property {string} [options.htmlContent='emailForm.html'] - Path to the HTML file for the form content.
-* @property {string|null} [options.helpContent=null] - Path to the help content.
-* @property {number|null} [options.website_record_id=null] - Record ID of the website home page containing the email address.
-* @property {boolean} [options.useCaptcha=true] - If true, uses CAPTCHA for form submission.
-* @property {function|null} [options.onInitFinished=null] - Callback function executed when the dialog is fully initialized.
-* @property {function|null} [options.beforeClose=null] - Callback function executed before the dialog closes. Can be used to show a warning.
-* @property {function|null} [options.onClose=null] - Callback function executed when the dialog closes.
-* @property {string} [options.language='def'] - Language code for localization.
 */
 $.widget( "heurist.emailForm", {
+
+    /**
+     * @memberof Widgets.Admin.emailForm
+     * @type {object}
+     * @property {string} [default_palette_class='ui-heurist-admin'] - Default CSS class for the widget palette.
+     * @property {boolean} [isdialog=false] - If true, the widget is displayed as a dialog. See {@link heurist.emailForm#_initDialog}, {@link heurist.emailForm#popupDialog}, {@link heurist.emailForm#closeDialog}.
+     * @property {boolean} [supress_dialog_title=false] - If true, hides the dialog title bar (applicable if `isdialog` is true).
+     * @property {number} [height=400] - Height of the popup dialog.
+     * @property {number} [width=760] - Width of the popup dialog.
+     * @property {object|null} [position=null] - Position of the dialog. See jQuery UI dialog position option.
+     * @property {string} [title=''] - Title of the dialog.
+     * @property {string|null} [element_id=null] - HTML ID of the form element. If `isdialog` is false, the form is loaded into this element.
+     * @property {string} [htmlContent='emailForm.html'] - Path to the HTML file for the form content.
+     * @property {string|null} [helpContent=null] - Path to the help content.
+     * @property {number|null} [website_record_id=null] - Record ID of the website home page containing the email address.
+     * @property {boolean} [useCaptcha=true] - If true, uses CAPTCHA for form submission.
+     * @property {function|null} [onInitFinished=null] - Callback function executed when the dialog is fully initialized.
+     * @property {function|null} [beforeClose=null] - Callback function executed before the dialog closes. Can be used to show a warning.
+     * @property {function|null} [onClose=null] - Callback function executed when the dialog closes.
+     * @property {string} [language='def'] - Language code for localization.
+     */
     options: {
         default_palette_class: 'ui-heurist-admin',
         isdialog: false,
@@ -106,7 +116,7 @@ $.widget( "heurist.emailForm", {
     /**
      * @function _create
      * @description The widget's constructor. Prevents double-click text selection.
-     * @memberof Widgets.Navigation.emailForm
+     * @memberof Widgets.Admin.emailForm
      * @private
      */
     _create: function() {
@@ -116,7 +126,7 @@ $.widget( "heurist.emailForm", {
     /**
      * @function _init
      * @description Initializes the widget, loads configuration, and calls `_initControls`.
-     * @memberof Widgets.Navigation.emailForm
+     * @memberof Widgets.Admin.emailForm
      * @private
      */
     _init: function() {
@@ -182,7 +192,7 @@ $.widget( "heurist.emailForm", {
     /**
      * @function _destroy
      * @description Destroys the widget, removing elements and cleaning up.
-     * @memberof Widgets.Navigation.emailForm
+     * @memberof Widgets.Admin.emailForm
      * @private
      */
     _destroy: function() {
@@ -196,7 +206,7 @@ $.widget( "heurist.emailForm", {
      * @function _initControls
      * @description Initializes controls after HTML content is loaded.
      * Verifies that the form has all required elements and sets up event handlers.
-     * @memberof Widgets.Navigation.emailForm
+     * @memberof Widgets.Admin.emailForm
      * @private
      * @returns {boolean} True if initialization is successful, false otherwise.
      */
@@ -239,7 +249,7 @@ $.widget( "heurist.emailForm", {
     /**
      * @function _getActionButtons
      * @description Gets the action buttons for the dialog.
-     * @memberof Widgets.Navigation.emailForm
+     * @memberof Widgets.Admin.emailForm
      * @private
      * @returns {Array<object>} Array of button definitions for jQuery UI dialog.
      *                          Each object can have `text`, `class`, `css`, and `click` properties.
@@ -266,7 +276,7 @@ $.widget( "heurist.emailForm", {
     /**
      * @function _defineActionButton2
      * @description Defines action buttons if `isdialog` is false. (NOT CURRENTLY USED)
-     * @memberof Widgets.Navigation.emailForm
+     * @memberof Widgets.Admin.emailForm
      * @private
      * @param {object} options - Button options.
      * @param {string} [options.label] - Button label.
@@ -302,7 +312,7 @@ $.widget( "heurist.emailForm", {
      * @function _initDialog
      * @description Initializes the dialog widget.
      * Sets up dialog options, buttons, and event handlers.
-     * @memberof Widgets.Navigation.emailForm
+     * @memberof Widgets.Admin.emailForm
      * @private
      * @see Widgets.Navigation.emailForm#popupDialog
      * @see Widgets.Navigation.emailForm#closeDialog
@@ -355,7 +365,7 @@ $.widget( "heurist.emailForm", {
      * @description Shows the widget as a popup dialog.
      * This method is called when `options.isdialog` is true.
      * It opens the jQuery UI dialog and applies necessary styling and help content.
-     * @memberof Widgets.Navigation.emailForm
+     * @memberof Widgets.Admin.emailForm
      */
     popupDialog: function(){
         if(this.options.isdialog){
@@ -389,7 +399,7 @@ $.widget( "heurist.emailForm", {
      * @description Closes the dialog or handles the close action for an inline form.
      * Clears the form fields and refreshes CAPTCHA.
      * @param {boolean} [is_force=false] - If true, forces the dialog to close without triggering `beforeClose`.
-     * @memberof Widgets.Navigation.emailForm
+     * @memberof Widgets.Admin.emailForm
      */
     closeDialog: function(is_force){
         //clear form
@@ -422,7 +432,7 @@ $.widget( "heurist.emailForm", {
      * Validates form fields, including CAPTCHA.
      * If validation passes, it sends the email data to the server.
      * Displays success or error messages accordingly.
-     * @memberof Widgets.Navigation.emailForm
+     * @memberof Widgets.Admin.emailForm
      */
     doAction: function(){
         let that = this;
@@ -513,7 +523,7 @@ $.widget( "heurist.emailForm", {
      * @function _refreshCaptcha
      * @description Refreshes the CAPTCHA image or text.
      * Clears the CAPTCHA input field and loads a new CAPTCHA.
-     * @memberof Widgets.Navigation.emailForm
+     * @memberof Widgets.Admin.emailForm
      * @private
      */
     _refreshCaptcha: function(){

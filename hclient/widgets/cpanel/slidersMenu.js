@@ -101,7 +101,7 @@ $.widget( "heurist.slidersMenu", {
      * @description The widget's constructor. Initializes the slidersMenu widget, sets up the main menu container,
      * loads section menus, and binds event handlers for user interactions.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _create: function() {
 
@@ -307,7 +307,7 @@ $.widget( "heurist.slidersMenu", {
      * @param {Event} e - The event object.
      * @param {object} data - The event data.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _onPreferencesChange: function (e, data){
 
@@ -327,7 +327,7 @@ $.widget( "heurist.slidersMenu", {
      * Hides the cover overlay, updates the "Save Filter" button, and refreshes the subset sign.
      * @param {object} data - The event data containing search results and request info.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _onSearchFinish: function (data){
 
@@ -351,7 +351,7 @@ $.widget( "heurist.slidersMenu", {
      * and switching to the explore container.
      * @param {object} data - The event data containing the search query.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _onSearchStart: function (data){
         //not need to check realm since this widget the only per instance
@@ -387,7 +387,7 @@ $.widget( "heurist.slidersMenu", {
      * @description Checks if the current explore action is one of the filter-related actions.
      * @returns {boolean} - True if the current action is for filtering, otherwise false.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _isCurrentActionFilter: function(){
             return (this._current_explore_action=='searchBuilder' ||
@@ -400,7 +400,7 @@ $.widget( "heurist.slidersMenu", {
      * @description Updates the state and appearance of the "Save Filter" button.
      * @param {number} mode - The mode to set for the button: 0 (disabled), 1 (in progress), 2 (ready to save).
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _updateSaveFilterButton: function( mode ){
         
@@ -448,7 +448,7 @@ $.widget( "heurist.slidersMenu", {
      * Also toggles the visibility of the bookmarks section.
      * @param {Array<number>} [preferences] - The user's preferences for the default record type. If not provided, it's fetched from `window.hWin.HAPI4.get_prefs`.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _updateDefaultAddRectype: function( preferences ){
 
@@ -514,7 +514,7 @@ $.widget( "heurist.slidersMenu", {
      * @function _refresh
      * @description Placeholder for the widget's refresh method. Currently does nothing.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _refresh: function(){
     },
@@ -523,7 +523,7 @@ $.widget( "heurist.slidersMenu", {
      * @function _destroy
      * @description Cleans up the widget, removing elements and unbinding events.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _destroy: function() {
         
@@ -545,7 +545,7 @@ $.widget( "heurist.slidersMenu", {
      * The menu is locked if a dropdown is open, a modal dialog is visible, or the `_explorer_menu_locked` flag is set.
      * @returns {boolean} - True if the explorer menu is locked, otherwise false.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _isExplorerMenu_locked: function(){
         
@@ -562,7 +562,7 @@ $.widget( "heurist.slidersMenu", {
      * @param {boolean} [is_instant=false] - If true, the collapse is immediate.
      * @param {number} [is_forcefully] - If provided, prevents the menu from expanding for a specified duration.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _collapseMainMenuPanel: function(is_instant, is_forcefully) {
 
@@ -624,7 +624,7 @@ $.widget( "heurist.slidersMenu", {
      * @description Expands the main menu panel when the mouse enters the explore section.
      * @param {Event} e - The mouse event.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _expandMainMenuPanel: function(e) {
 
@@ -667,7 +667,7 @@ $.widget( "heurist.slidersMenu", {
      * @description Handles mouse leaving a section menu. Closes the explore popup if not locked.
      * @param {Event} e - The mouse event.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _mouseout_SectionMenu: function(e) {
 
@@ -708,7 +708,7 @@ $.widget( "heurist.slidersMenu", {
      * @function _resetCloseTimers
      * @description Resets the timers responsible for closing menus, preventing them from closing prematurely.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _resetCloseTimers: function(){
 
@@ -722,7 +722,7 @@ $.widget( "heurist.slidersMenu", {
      * Shows the explore menu popup if not locked.
      * @param {Event} e - The mouse event.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _mousein_ExploreMenu: function(e) {
 
@@ -768,7 +768,7 @@ $.widget( "heurist.slidersMenu", {
      * @param {jQuery} menu_item - The menu item element.
      * @returns {number} - The delay in milliseconds.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _getDelay: function getDelay(action_name, menu_item) {
         return action_name === 'recordAdd' && menu_item?.attr('data-id') > 0
@@ -783,7 +783,7 @@ $.widget( "heurist.slidersMenu", {
      * @param {string} [action_name] - If provided, returns null.
      * @returns {?jQuery} - The menu item element or null.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _getMenuItem: function (e, action_name) {
         if (!action_name) {
@@ -800,7 +800,7 @@ $.widget( "heurist.slidersMenu", {
      * @param {Event} e - The event that triggered the menu display.
      * @param {string} [action_name] - The name of the action to be displayed.
      * @param {object} [position] - The position to display the menu at.
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     show_ExploreMenu: function(e, action_name, position) {
         
@@ -906,7 +906,7 @@ $.widget( "heurist.slidersMenu", {
      * @param {object} [position] - An optional position object.
      * @returns {object} - An object with `explore_top`, `explore_left`, `explore_height`, and `explore_width`.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _getMenuPosition: function(menu_item, action_name, position){
       
@@ -961,7 +961,7 @@ $.widget( "heurist.slidersMenu", {
      * @param {jQuery} cont - The container element for the widget.
      * @param {boolean} expandRecordAddSetting - Flag to expand the record add settings.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _handleActionInit: function(action_name, cont, expandRecordAddSetting){
         
@@ -1053,7 +1053,7 @@ $.widget( "heurist.slidersMenu", {
      * @description Populates the list of user's favorite filters in the explore menu.
      * @param {Array<Array<string>>} [favourite_filters] - An array of favorite filters. If not provided, it's fetched from user preferences.
      * @param {boolean} [resize_only=false] - If true, only resizes the container without repopulating the list.
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     populateFavouriteFilters: function(favourite_filters, resize_only = false){
 
@@ -1242,7 +1242,7 @@ $.widget( "heurist.slidersMenu", {
      * @param {jQuery} cont - The container element for the SVS list.
      * @param {number} mode - The filter mode: 0 (all), 1 (filters only), 2 (rules only).
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _init_SvsList: function(cont, mode){  //, group_ID
         
@@ -1339,7 +1339,7 @@ $.widget( "heurist.slidersMenu", {
      * @description Switches the SVS list between different locations. Currently returns without action.
      * @param {number} mode - The mode for switching (0 or 1).
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _switch_SvsList: function( mode ){
         
@@ -1351,7 +1351,7 @@ $.widget( "heurist.slidersMenu", {
      * @function getSvsList
      * @description Gets or creates the saved searches (SVS) list widget.
      * @returns {jQuery} The SVS list widget instance.
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     getSvsList: function(){
         
@@ -1370,7 +1370,7 @@ $.widget( "heurist.slidersMenu", {
      * @description Handles the closing of the faceted search view.
      * Triggers a search reset and hides the faceted search container.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _onCloseSearchFaceted: function(){
         if(window.hWin.HEURIST4.ui.isVisible( this.search_faceted )){
@@ -1384,7 +1384,7 @@ $.widget( "heurist.slidersMenu", {
      * @function _closeExploreMenuPopup
      * @description Closes the explore menu popup and resets related state variables.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _closeExploreMenuPopup: function(){
 
@@ -1411,7 +1411,7 @@ $.widget( "heurist.slidersMenu", {
      * @description Closes a specific section menu.
      * @param {string} section - The name of the section to close.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _closeSectionMenu: function( section ){
         
@@ -1433,7 +1433,7 @@ $.widget( "heurist.slidersMenu", {
      * @param {Event} e - The mouse event.
      * @returns {?string} - The name of the section or null.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _getSectionName: function(e){
         
@@ -1466,7 +1466,7 @@ $.widget( "heurist.slidersMenu", {
      * @description Opens a section menu permanently and switches to its container.
      * @param {Event} e - The click event.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _openSectionMenu: function(e){
         
@@ -1483,7 +1483,7 @@ $.widget( "heurist.slidersMenu", {
      * @description Loads the content of a section menu from an HTML file and initializes it.
      * @param {string} section - The name of the section to load.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _loadSectionMenu: function( section ){
         
@@ -1571,7 +1571,7 @@ $.widget( "heurist.slidersMenu", {
      * @description Initializes the explore section menu with its specific behaviors,
      * such as handling mouse events for popups and setting up search actions.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _initSectionMenuExplore: function(){
         
@@ -1627,7 +1627,7 @@ $.widget( "heurist.slidersMenu", {
      * assigns icons and labels from the action handler, and sets up click event listeners.
      * @param {string} section - The name of the section to initialize.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _initSectionMenu: function( section ){
 
@@ -1788,7 +1788,7 @@ $.widget( "heurist.slidersMenu", {
      * @param {string} section - The name of the new section that will become active.
      * @param {boolean} [force_show=false] - If true, forces the new section's container to be shown.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _closeActiveSection:function(section, force_show){
 
@@ -1828,7 +1828,7 @@ $.widget( "heurist.slidersMenu", {
      * @description Switches the visible container to the specified section.
      * @param {string} section - The name of the section to switch to.
      * @param {boolean} [force_show=false] - If true, forces the container to be shown.
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     switchContainer: function( section, force_show ){
 
@@ -1874,7 +1874,7 @@ $.widget( "heurist.slidersMenu", {
     /**
      * @function closeSavedSearch
      * @description Closes the saved search edit dialog if it is open.
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     closeSavedSearch: function(){
         if(this.edit_svs_dialog){
@@ -1885,7 +1885,7 @@ $.widget( "heurist.slidersMenu", {
     /**
      * @function closeFacetedWizard
      * @description Closes the faceted search wizard dialog if it is open.
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     closeFacetedWizard: function(){
         let faceted_search_wiz = $('#heurist-search-faceted-dialog');
@@ -1901,7 +1901,7 @@ $.widget( "heurist.slidersMenu", {
      * @param {boolean} [is_modal=true] - Whether the dialog should be modal.
      * @param {number} [left_position] - The left position of the dialog.
      * @param {number} [top_position] - The top position of the dialog.
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     addSavedSearch: function( mode, is_modal, left_position, top_position ){
 
@@ -1982,7 +1982,7 @@ $.widget( "heurist.slidersMenu", {
     /**
      * @function initHelpDiv
      * @description Initializes a help popup div.
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     initHelpDiv: function(){
         this.helper_div = $('<div>').addClass('ui-helper-popup').hide().appendTo(this.element);
@@ -2008,7 +2008,7 @@ $.widget( "heurist.slidersMenu", {
      * @function _refreshSubsetSign
      * @description Refreshes the indicator for the current record subset, showing the count and a clear button if a subset is active.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _refreshSubsetSign: function(){
 
@@ -2052,7 +2052,7 @@ $.widget( "heurist.slidersMenu", {
      * @description Initializes the introductory/help panel for a given section.
      * @param {string} section - The name of the section.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _initIntroductory: function( section ){
         
@@ -2086,7 +2086,7 @@ $.widget( "heurist.slidersMenu", {
     /**
      * @function showDatabaseOverview
      * @description Shows the Database Overview information panel, which serves as a landing page for the explore section.
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     showDatabaseOverview: function(){
 
@@ -2459,7 +2459,7 @@ $.widget( "heurist.slidersMenu", {
     /**
      * @function hideDatabaseOverview
      * @description Hides the Database Overview information panel.
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     hideDatabaseOverview: function(){
 
@@ -2473,7 +2473,7 @@ $.widget( "heurist.slidersMenu", {
      * @description Loads and displays the introductory guide for the active section.
      * @param {Event} e - The click event.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _loadIntroductoryGuide: function(e){
         
@@ -2518,7 +2518,7 @@ $.widget( "heurist.slidersMenu", {
      * @description Loads the startup hints and welcome content into the introductory panel.
      * @param {Event} e - The click event.
      * @private
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     _loadStartHints: function(e){
 
@@ -2575,7 +2575,7 @@ $.widget( "heurist.slidersMenu", {
      * @function closeContainer
      * @description Clears and hides the container div for a given section.
      * @param {string} section - Name of the section.
-     * @memberof Widgets.Navigation
+     * @memberof Widgets.Navigation.slidersMenu
      */
     closeContainer: function(section){
         this.containers[section].empty().hide();

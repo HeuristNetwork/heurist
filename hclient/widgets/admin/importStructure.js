@@ -18,24 +18,11 @@
 
 /**
 * @class importStructure
-* @memberof Widgets.Navigation
+* @memberof Widgets.Admin
 * @description Widget to browse template databases, select record types,
 * individual fields, or individual vocabularies, and import them into the current database.
 *
 * @property {object} options - Configuration options for the widget.
-* @property {boolean} [options.isdialog=false] - If true, the widget is displayed as a dialog.
-*                                        See {@link Widgets.Navigation.importStructure#_initDialog},
-*                                        {@link Widgets.Navigation.importStructure#popupDialog},
-*                                        {@link Widgets.Navigation.importStructure#closeDialog}.
-* @property {number} [options.height=600] - Height of the dialog.
-* @property {number} [options.width=1100] - Width of the dialog.
-* @property {boolean} [options.modal=true] - If true, the dialog is modal.
-* @property {string} [options.title='Import definitions into current database'] - Title of the dialog.
-* @property {number} [options.source_database_id=0] - Predefined source database ID. If > 0, skips the database list selection.
-* @property {number} [options.pagesize=2000] - Page size for the resultList of databases.
-* @property {function|null} [options.onClose=null] - Callback function executed when the dialog closes.
-* @property {string} [options.innerTitle] - If provided, an inner title bar will be displayed. (Implicit option, used in _init)
-* @property {object} [options.entity] - Entity configuration, typically `window.hWin.entityRecordCfg`. (Implicit option, used in _init)
 */
 $.widget( "heurist.importStructure", {
     
@@ -46,6 +33,23 @@ $.widget( "heurist.importStructure", {
 // 3. Form structures to add terms, fields, structure, record type.
 // 4. Use functions from saveStructureLib.
 
+    /**
+     * @memberof Widgets.Admin.importStructure
+     * @type {object}
+     * @property {boolean} [isdialog=false] - If true, the widget is displayed as a dialog.
+     *                                        See {@link heurist.importStructure#_initDialog},
+     *                                        {@link heurist.importStructure#popupDialog},
+     *                                        {@link heurist.importStructure#closeDialog}.
+     * @property {number} [height=600] - Height of the dialog.
+     * @property {number} [width=1100] - Width of the dialog.
+     * @property {boolean} [modal=true] - If true, the dialog is modal.
+     * @property {string} [title='Import definitions into current database'] - Title of the dialog.
+     * @property {number} [source_database_id=0] - Predefined source database ID. If > 0, skips the database list selection.
+     * @property {number} [pagesize=2000] - Page size for the resultList of databases.
+     * @property {function|null} [onClose=null] - Callback function executed when the dialog closes.
+     * @property {string} [innerTitle] - If provided, an inner title bar will be displayed. (Implicit option, used in _init)
+     * @property {object} [entity] - Entity configuration, typically `window.hWin.entityRecordCfg`. (Implicit option, used in _init)
+     */
     options: {
         isdialog: false,
         height: 600,
@@ -95,7 +99,7 @@ $.widget( "heurist.importStructure", {
     /**
      * @function _create
      * @description The widget's constructor.
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      * @private
      */
     _create: function() {
@@ -106,7 +110,7 @@ $.widget( "heurist.importStructure", {
      * @function _init
      * @description Initializes the widget, sets up the layout, loads data, and initializes controls.
      * This is the main initialization function.
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      * @private
      */
     _init: function() {
@@ -469,7 +473,7 @@ $.widget( "heurist.importStructure", {
      * @function startSearchOnEnterPress
      * @description Initiates a search when the Enter key is pressed in the search input field.
      * @param {Event} e - The keypress event object.
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      */
     startSearchOnEnterPress: function(e){
 
@@ -521,7 +525,7 @@ $.widget( "heurist.importStructure", {
      * @description init manageDefRecTypes, manageDefDetailTypes, and manageDefTerms widgets on individual panels
      * @param {object} db_ids
      * @param {boolean} skip_pass
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      * @private
      */
     _loadDefinitionsForDb: function(db_ids, skip_pass){
@@ -780,7 +784,7 @@ $.widget( "heurist.importStructure", {
     /**
      * @function _setOptions
      * @description Called whenever the option() method is called. Overriding this is useful if you can defer processor-intensive changes for multiple option changes.
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      * @private
      */
     _setOptions: function( ) {
@@ -790,7 +794,7 @@ $.widget( "heurist.importStructure", {
     /**
      * @function _refresh
      * @description private function. show/hide buttons depends on current login status
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      * @private
      */
     _refresh: function(){
@@ -800,7 +804,7 @@ $.widget( "heurist.importStructure", {
     /**
      * @function _destroy
      * @description custom, widget-specific, cleanup.
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      * @private
      */
     _destroy: function() {
@@ -814,7 +818,7 @@ $.widget( "heurist.importStructure", {
      * @description listener of action button/menu clicks - central listener for action events
      * @param {Event} event
      * @param {object} action
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      * @private
      */
     _onActionListener:function(event, action){
@@ -858,7 +862,7 @@ $.widget( "heurist.importStructure", {
      * @description DBS: renderer of item for resultlist - list of databases
      * @param {object} recordset
      * @param {object} record
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      * @private
      */
     _recordListItemRenderer_dbs:function(recordset, record){
@@ -929,7 +933,7 @@ $.widget( "heurist.importStructure", {
     /**
      * @function _initDialog
      * @description init dialog widget
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      * @private
      */
     _initDialog: function(){
@@ -975,7 +979,7 @@ $.widget( "heurist.importStructure", {
     /**
      * @function _fixWidth
      * @description adjust width according to width of parent dialog
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      * @private
      */
     _fixWidth: function() {//fix bug
@@ -989,7 +993,7 @@ $.widget( "heurist.importStructure", {
     /**
      * @function popupDialog
      * @description show itself as popup dialog
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      */
     popupDialog: function(){
         if(this.options.isdialog){
@@ -1009,7 +1013,7 @@ $.widget( "heurist.importStructure", {
      * @function filterRecordList_dbs
      * @description listener of onfilter event generated by search
      * @param {object} request
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      * @private
      */
     filterRecordList_dbs: function(request){
@@ -1027,7 +1031,7 @@ $.widget( "heurist.importStructure", {
      * @description  MAIN METHOD
      * @param {number} id
      * @param {string} type
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      */
     startImport: function(id, type){
 
@@ -1192,7 +1196,7 @@ $.widget( "heurist.importStructure", {
      * @description renderer of item for resultlist - list of record types
      * @param {object} recordset
      * @param {object} record
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      * @private
      */
     _recordtypeListItemRenderer: function( recordset, record ){
@@ -1293,7 +1297,7 @@ $.widget( "heurist.importStructure", {
      * @description renderer of item for resultlist - list of detail types
      * @param {object} recordset
      * @param {object} record
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      * @private
      */
     _detailtypeListItemRenderer: function(recordset, record){
@@ -1347,7 +1351,7 @@ $.widget( "heurist.importStructure", {
      * @description renderer of item for resultlist - list of terms
      * @param {object} recordset
      * @param {object} record
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      * @private
      */
     _termsListItemRenderer: function(recordset, record){
@@ -1499,7 +1503,7 @@ $.widget( "heurist.importStructure", {
      * @description
      * @param {string} type - import type {rectype, detailtype, term, all}
      * @param {int} id - definition ID to be imported
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      * @private
      */
     _preImportCheck: function(type, id){
@@ -1668,7 +1672,7 @@ $.widget( "heurist.importStructure", {
      * @function _processCloneResponse
      * @description process clone response
      * @param {object} response
-     * @memberof Widgets.Navigation.importStructure
+     * @memberof Widgets.Admin.importStructure
      * @private
      */
     _processCloneResponse: function(response){

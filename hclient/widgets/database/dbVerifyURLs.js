@@ -15,7 +15,7 @@
 
 /**
  * @class dbVerifyURLs
- * @augments $.heurist.dbAction
+ * @augments dbAction
  * @memberof Widgets.Admin
  * @description This widget handles the verification of URLs within database records (both in record headers and specific fields).
  * It allows users to start a new verification process, continue a previous one, or resume an interrupted session.
@@ -26,9 +26,6 @@
  */
 $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
 
-    /**
-     * @property {boolean} [prevSessionExists=false] - True if a previous verification session's data is found.
-     */
     prevSessionExists: false,
 
     /**

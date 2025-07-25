@@ -15,19 +15,22 @@
 
 /**
 * @class repositoryConfig
-* @augments $.heurist.baseConfig
-* @memberof Widgets.Navigation
+* @augments baseConfig
+* @memberof Widgets.Admin
 * @description configuration for external repositories
 *
 * @property {object} options - Configuration options for the widget.
-* @property {string} [options.title='External repositories configuration'] - The title displayed for the widget dialog.
-* @property {string} [options.htmlContent='repositoryConfig.html'] - The path to the HTML template file for the widget.
-* @property {string|null} [options.helpContent=null] - The path to the help content file.
-* @property {string} [options.type='repository'] - The type of configuration.
 */
 $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
 
-    // default options
+    /**
+    * @memberof Widgets.Admin.repositoryConfig
+    * @type {object} Extends {@link baseConfig.options}.
+    * @property {string} [title='External repositories configuration'] - The title displayed for the widget dialog.
+    * @property {string} [htmlContent='repositoryConfig.html'] - The path to the HTML template file for the widget.
+    * @property {string|null} [helpContent=null] - The path to the help content file.
+    * @property {string} [type='repository'] - The type of configuration.
+    */    
     options: {
         title: 'External repositories configuration',
         htmlContent: 'repositoryConfig.html',
@@ -39,7 +42,7 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
     /**
      * @function _init
      * @description load configuration and call _initControls
-     * @memberof Widgets.Navigation.repositoryConfig
+     * @memberof Widgets.Admin.repositoryConfig
      * @private
      */
     _init: function() {
@@ -64,7 +67,7 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
     /**
      * @function _initControls
      * @description invoked from _init after loading of html content
-     * @memberof Widgets.Navigation.repositoryConfig
+     * @memberof Widgets.Admin.repositoryConfig
      * @private
      */
     _initControls:function(){
@@ -101,7 +104,7 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
      * @function getConfigurations
      * @description get configurations from server for current user
      * @param {function} callback
-     * @memberof Widgets.Navigation.repositoryConfig
+     * @memberof Widgets.Admin.repositoryConfig
      */
     getConfigurations: function(callback){
 
@@ -135,7 +138,7 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
     /**
      * @function saveConfigrations
      * @description save on server
-     * @memberof Widgets.Navigation.repositoryConfig
+     * @memberof Widgets.Admin.repositoryConfig
      */
     saveConfigrations: function(){
 
@@ -170,7 +173,7 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
      * @description fill in contents of right panel
      * @param {string} service_id
      * @param {object} cfg0 - {service_id:'nakala_0', service:'nakala', usr_ID:0, params:{readApiKey:,readUser:,readPwd...}}
-     * @memberof Widgets.Navigation.repositoryConfig
+     * @memberof Widgets.Admin.repositoryConfig
      * @private
      */
     _fillConfigForm: function( service_id, cfg0 ){
@@ -223,7 +226,7 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
     /**
      * @function _updateStatus
      * @description set _is_modified flag
-     * @memberof Widgets.Navigation.repositoryConfig
+     * @memberof Widgets.Admin.repositoryConfig
      * @private
      */
     _updateStatus: function(){
@@ -305,7 +308,7 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
      * @function _changeService
      * @description prepare form for service type change
      * @param {string} service_name
-     * @memberof Widgets.Navigation.repositoryConfig
+     * @memberof Widgets.Admin.repositoryConfig
      * @private
      */
     _changeService: function( service_name ){
@@ -318,7 +321,7 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
     /**
      * @function _onUserGroupChange
      * @description create map fields dropdowns
-     * @memberof Widgets.Navigation.repositoryConfig
+     * @memberof Widgets.Admin.repositoryConfig
      * @private
      */
     _onUserGroupChange: function(){
@@ -350,7 +353,7 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
     /**
      * @function _applyConfig
      * @description save current service details
-     * @memberof Widgets.Navigation.repositoryConfig
+     * @memberof Widgets.Admin.repositoryConfig
      * @private
      */
     _applyConfig: function(){
@@ -426,7 +429,7 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
      * @function _removeConfig
      * @description Remove service's details, thus removing it completely
      * @param {string} service_id
-     * @memberof Widgets.Navigation.repositoryConfig
+     * @memberof Widgets.Admin.repositoryConfig
      * @private
      */
     _removeConfig: function(service_id){

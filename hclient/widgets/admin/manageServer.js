@@ -18,19 +18,25 @@
 
 /**
 * @class manageServer
-* @augments $.heurist.baseAction
-* @memberof Widgets.Navigation
+* @augments baseAction
+* @memberof Widgets.Admin
 * @description Provides a list of server management actions.
 *
 * @property {object} options - Configuration options for the widget.
-* @property {number} [options.height=620] - The height of the widget (dialog).
-* @property {number} [options.width=400] - The width of the widget (dialog).
-* @property {string} [options.title='Server manager'] - The title displayed for the widget dialog.
-* @property {string} [options.default_palette_class='ui-heurist-admin'] - Default CSS class for the widget's palette.
-* @property {string} [options.actionName='manageServer'] - The name of the action, used for baseAction.
-* @property {string} [options.entered_password] - An optional password that can be pre-filled into the form. (Implicit option from usage in _initControls)
 */
 $.widget( "heurist.manageServer", $.heurist.baseAction, {
+
+
+    /**
+     * @memberof Widgets.Admin.manageServer
+     * @type {object} Extends {@link baseAction.options}.
+     * @property {number} [height=620] - The height of the widget (dialog).
+     * @property {number} [width=400] - The width of the widget (dialog).
+     * @property {string} [title='Server manager'] - The title displayed for the widget dialog.
+     * @property {string} [default_palette_class='ui-heurist-admin'] - Default CSS class for the widget's palette.
+     * @property {string} [actionName='manageServer'] - The name of the action, used for baseAction.
+     * @property {string} [entered_password] - An optional password that can be pre-filled into the form. (Implicit option from usage in _initControls)
+     */
     options: {
         height: 620,
         width:  400,
@@ -46,7 +52,7 @@ $.widget( "heurist.manageServer", $.heurist.baseAction, {
      * It sets styles for list items, resolves hrefs for action links, and sets up click handlers
      * to submit a hidden form (`#mainForm`) to the respective action URL.
      * The form includes the current database name and an optional password.
-     * @memberof Widgets.Navigation.manageServer
+     * @memberof Widgets.Admin.manageServer
      * @private
      * @override
      * @returns {boolean} Returns the result of the parent widget's `_initControls` method.
@@ -96,7 +102,7 @@ $.widget( "heurist.manageServer", $.heurist.baseAction, {
      * @description Retrieves the action buttons for the widget's dialog.
      * This method overrides the parent's `_getActionButtons` to customize the dialog buttons.
      * It changes the text of the first button to "Close" and removes any subsequent buttons.
-     * @memberof Widgets.Navigation.manageServer
+     * @memberof Widgets.Admin.manageServer
      * @private
      * @override
      * @returns {Array<object>} An array containing a single button definition object for the "Close" button.

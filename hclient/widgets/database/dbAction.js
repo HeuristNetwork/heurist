@@ -15,7 +15,7 @@
 
 /**
  * @class dbAction
- * @augments $.heurist.baseAction
+ * @augments baseAction
  * @memberof Widgets.Admin
  * @description This widget provides a dialog or inline interface for performing various database-level actions
  * such as creating, renaming, cloning, deleting, clearing, restoring, or registering a database.
@@ -23,11 +23,6 @@
  * and displays progress and final results/reports.
  *
  * @property {object} options - Configuration options for the widget.
- * @property {string} options.actionName - The name of the database action to perform (e.g., 'dbCreate', 'dbClone').
- *                                        This is transformed internally (e.g., 'dbCreate' becomes 'create').
- * @property {string} [options.default_palette_class='ui-heurist-admin'] - Default CSS class for theming.
- * @property {string} [options.path='widgets/database/'] - Path to HTML template files for actions.
- * @property {string} [options.entered_password=''] - Pre-filled password, if any (e.g., for actions requiring re-authentication).
  *
  * @property {number} _progressInterval - Interval ID for progress polling.
  * @property {number} _session_id - Unique session ID for the current action, used for progress tracking.
@@ -35,7 +30,16 @@
  */
 $.widget( "heurist.dbAction", $.heurist.baseAction, {
 
-    // default options
+    /**
+    * @memberof Widgets.Admin.dbAction
+    * @type {object} Extends {@link baseAction.options}.
+    * 
+    * @property {string} actionName - The name of the database action to perform (e.g., 'dbCreate', 'dbClone').
+    *                                        This is transformed internally (e.g., 'dbCreate' becomes 'create').
+    * @property {string} [options.default_palette_class='ui-heurist-admin'] - Default CSS class for theming.
+    * @property {string} [options.path='widgets/database/'] - Path to HTML template files for actions.
+    * @property {string} [options.entered_password=''] - Pre-filled password, if any (e.g., for actions requiring re-authentication).
+    */
     options: {
         actionName: '',
         default_palette_class: 'ui-heurist-admin',

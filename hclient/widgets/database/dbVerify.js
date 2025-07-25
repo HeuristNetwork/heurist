@@ -15,7 +15,7 @@
 
 /**
  * @class dbVerify
- * @augments $.heurist.dbAction
+ * @augments dbAction
  * @memberof Widgets.Admin
  * @description This widget provides an interface for performing database verification checks.
  * It extends `$.heurist.dbAction` and specializes it for verification tasks.
