@@ -1,36 +1,37 @@
 /**
-* HBaseList - template widget to represent set of record
-*
-* @project     Heurist academic knowledge management system
-*
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @version     7.0
-*/
-
-/*
-* HBaseWidget->HBaseList->HRecordList, TBD: HRecordMap, HRecordNetwork
-*
-* setRecordSet - sets new recordset to this record list
-* doSearch, _onGetRecords - Search for initial search or on search domain event
-* clearContent 
-* renderMessage - adds notification/placeholder message (init, error or for empty result)
-* renderContent 
-
-* setSelection
-* getSelection
-* triggerLoadAnimation
-* eventHandler
-* onSearchStart
-* onSearchFinish
-* onSelect
-*/
+ * @file HBaseList.js
+ * @brief template widget to represent set of record
+ * @fileOverview
+ * @project     Heurist academic knowledge management system
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @author      Artem Osmakov   <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @since       7.0
+ */
 import './HBaseWidget.js';
 
+/**
+ * @class HBaseList
+ * @augments {HBaseWidget}
+ * @memberof Widgets.UI
+ * @description template widget to represent set of record
+ * @param {object} options - Configuration options for the widget.
+ */
 $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
 
-    // default options
+    /**
+     * @memberof Widgets.UI.HBaseList
+     * @type {object}
+     * @property {string} entityType - The type of entity.
+     * @property {string} searchDomain - The search domain.
+     * @property {string} searchInitial - The initial search query.
+     * @property {HRecordSet} recordSet - The initial recordset.
+     * @property {boolean} placeholderInitBlank - Whether the initial placeholder is blank.
+     * @property {string} placeholderInit - The initial placeholder.
+     * @property {string} placeholderInitDef - The default initial placeholder.
+     */
     options: {
         entityType: 'rec', //'rec' by default
 
@@ -53,9 +54,11 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
     
     _events:null,
     
-    /*
-    * 
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HBaseList
+     * @description Initializes the widget.
+     */
     _init: function(){
         
         this._super();
@@ -71,9 +74,11 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
         }
     },
     
-    /*
-    * 
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HBaseList
+     * @description Destroys the widget.
+     */
     _destroy: function(){
         
         this._super();
@@ -83,10 +88,12 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
         }
     },
     
-    /*
-    * Use it a) to add event listeners for subelements of this widget
-    *        b) perform some default actions (intial search for example) 
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HBaseList
+     * @description Use it a) to add event listeners for subelements of this widget
+     * b) perform some default actions (intial search for example)
+     */
     _initControls:function(){
     
         this._super();
@@ -101,17 +108,20 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
         }
     },
 
-    //
-    // Removes generated elements
-    //
+    /**
+     * @memberof Widgets.UI.HBaseList
+     * @description Removes generated elements
+     */
     clearContent: function(){
         this.element.innerHTML = '';
         this.setSelection(null); //clear selection
     },
 
-    /*
-    * Sets new recordset to this record list
-    */
+    /**
+     * @memberof Widgets.UI.HBaseList
+     * @description Sets new recordset to this record list
+     * @param {HRecordSet} recordset - The new recordset.
+     */
     setRecordSet: function( recordset ){
 
         if(!this._initCompleted) return;
@@ -122,9 +132,11 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
         this.renderConent();
     },
     
-    /*
-    * Search for initial search or on search domain event
-    */
+    /**
+     * @memberof Widgets.UI.HBaseList
+     * @description Search for initial search or on search domain event
+     * @param {string} query - The search query.
+     */
     doSearch: function( query ){
 
         let that = this;
@@ -152,9 +164,13 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
         }
     },
 
-    /*
-    * Response handler for search request
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HBaseList
+     * @description Response handler for search request
+     * @param {string} query - The search query.
+     * @param {object} response - The response from the server.
+     */
     _onGetRecords: function(query, response){
         
         if(response.status != window.hWin.ResponseStatus.OK){
@@ -175,9 +191,11 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
         }
     },
     
-    /*
-    * Adds notification/placeholder message (init, error or for empty result)
-    */
+    /**
+     * @memberof Widgets.UI.HBaseList
+     * @description Adds notification/placeholder message (init, error or for empty result)
+     * @param {string} msg - The message to display.
+     */
     renderMessage: function(msg){
     
         this.clearContent();
@@ -189,9 +207,10 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
         
     },
     
-    /*
-    *
-    */
+    /**
+     * @memberof Widgets.UI.HBaseList
+     * @description Renders the content.
+     */
     renderConent: function(){
 
         if(this.recordSet==null || this.recordSet.count_total()==0){
@@ -204,7 +223,10 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
     
     
     /**
-    * return HRecordSet or array of ids of selected records
+    * @memberof Widgets.UI.HBaseList
+    * @description return HRecordSet or array of ids of selected records
+    * @param {boolean} idsonly - If true, returns only the IDs of the selected records.
+    * @returns {HRecordSet|Array|null} The selected records.
     */
     getSelection: function( idsonly ){
 
@@ -218,9 +240,10 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
     },
 
     /**
-    * selection - HRecordSet or array of record Ids or 'all'
+    * @memberof Widgets.UI.HBaseList
+    * @description selection - HRecordSet or array of record Ids or 'all'
     *
-    * @param selection - record ids
+    * @param {HRecordSet|Array|string} selection - record ids
     */
     setSelection: function(selection){
         //get ids that are in current recordset    
@@ -230,9 +253,11 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
         }
     },
 
-    /*
-    * Show/hide loading amimation
-    */    
+    /**
+     * @memberof Widgets.UI.HBaseList
+     * @description Show/hide loading amimation
+     * @param {boolean} show - If true, shows the loading animation.
+     */
     triggerLoadAnimation: function(show){
         if(show){
             //this.div_loading.show();
@@ -245,9 +270,13 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
     },
     
     
-    /*
-    *
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HBaseList
+     * @description Handles events.
+     * @param {Event} e - The event object.
+     * @param {object} data - The event data.
+     */
     eventHandler: function(e, data){
         
         //accept events from the same domain and from other elements only
@@ -270,6 +299,11 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
         } 
     },
     
+    /**
+     * @memberof Widgets.UI.HBaseList
+     * @description Handles the start of a search.
+     * @param {object} data - The event data.
+     */
     onSearchStart(data){
         
             this.clearContent();
@@ -282,6 +316,11 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
             }
     },
 
+    /**
+     * @memberof Widgets.UI.HBaseList
+     * @description Handles the end of a search.
+     * @param {object} data - The event data.
+     */
     onSearchFinish(data){
         
             this.triggerLoadAnimation(false);
@@ -294,6 +333,11 @@ $.widget( 'heurist.HBaseList', $.heurist.HBaseWidget, {
             }
     },
 
+    /**
+     * @memberof Widgets.UI.HBaseList
+     * @description Handles the selection of a record.
+     * @param {object} data - The event data.
+     */
     onSelect(data){
     
 

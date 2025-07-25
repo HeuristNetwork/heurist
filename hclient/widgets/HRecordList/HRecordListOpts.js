@@ -1,23 +1,40 @@
 /**
-* HRecordListOpts - form to modify HRecordList options
-*
-* @project     Heurist academic knowledge management system
-*
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @version     7.0
-*/
-
+ * @file HRecordListOpts.js
+ * @brief form to modify HRecordList options
+ * @fileOverview
+ * @project     Heurist academic knowledge management system
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @author      Artem Osmakov   <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @since       7.0
+ */
 import '../HBase/HBaseOpts.js';
 
+/**
+ * @class HRecordListOpts
+ * @augments {HBaseOpts}
+ * @memberof Widgets.UI
+ * @description form to modify HRecordList options
+ * @param {object} options - Configuration options for the widget.
+ */
 $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseOpts, {
     
-    // default options
+    /**
+     * @memberof Widgets.UI.HRecordListOpts
+     * @type {object}
+     * @property {string} resourcePath - The path to the widget's resources.
+     */
     options: {
         resourcePath: 'hclient/widgets/HRecordList/HRecordListOpts',
     },
     
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordListOpts
+     * @description Fills the controls.
+     */
     _fillControls: function(){
         
         this._super();
@@ -37,9 +54,12 @@ $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseOpts, {
 
     },
 
-    //
-    // Show popup with template editor
-    //
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordListOpts
+     * @description Show popup with template editor
+     * @param {Event} event - The event object.
+     */
     _onTemplateEdit: function(event) {
         
         const btn = ($(event.target).is('button'))?$(event.target):$(event.target).parents('button');
@@ -64,9 +84,13 @@ $.widget( 'heurist.HRecordListOpts', $.heurist.HBaseOpts, {
         window.hWin.HEURIST4.ui.showRecordActionDialog('reportEditor', popupDialogOptions);
     },
     
-    /*
-    *
-    */ 
+    /**
+     * @private
+     * @memberof Widgets.UI.HRecordListOpts
+     * @description Updates the templates list.
+     * @param {string} templateType - The type of the template.
+     * @param {string} currentTemplate - The current template.
+     */
     _updateTemplatesList: function(templateType, currentTemplate) {
  
         const selector = this._$(`select[name="${templateType}"]`);       

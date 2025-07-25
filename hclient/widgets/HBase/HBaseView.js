@@ -1,25 +1,50 @@
 /**
-* HBaseView - A container widget for displaying popups using:
-* 
-* - jQuery Dialog (popup)
-* - Bootstrap Modal
-* - Bootstrap Offcanvas
-* or inline (it may add header and footer)
-*
-* @project     Heurist academic knowledge management system
-*
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @version     7.0
-*/
+ * @file HBaseView.js
+ * @brief A container widget for displaying popups using jQuery Dialog, Bootstrap Modal, Bootstrap Offcanvas, or inline.
+ * @fileOverview A container widget for displaying popups using:
+ * - jQuery Dialog (popup)
+ * - Bootstrap Modal
+ * - Bootstrap Offcanvas
+ * or inline (it may add header and footer)
+ * @project     Heurist academic knowledge management system
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @author      Artem Osmakov   <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @since       7.0
+ */
 import './HBaseWidget.js';
 
 /* global bootstrap */
 
+/**
+ * @class HBaseView
+ * @augments {HBaseWidget}
+ * @memberof Widgets.UI
+ * @description A container widget for displaying popups using jQuery Dialog, Bootstrap Modal, Bootstrap Offcanvas, or inline.
+ * @param {object} options - Configuration options for the widget.
+ */
 $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
 
-    // Default options
+    /**
+     * @memberof Widgets.UI.HBaseView
+     * @type {object}
+     * @property {string} viewMode - The view mode.
+     * @property {boolean} showMargin - Whether to show the margin.
+     * @property {string} default_palette_class - The default palette class.
+     * @property {number} height - The height of the view.
+     * @property {number} width - The width of the view.
+     * @property {object} position - The position of the view.
+     * @property {boolean} modal - Whether the view is modal.
+     * @property {string} title - The title of the view.
+     * @property {string} helpContent - The help content.
+     * @property {boolean} isTitleVisible - Whether the title is visible.
+     * @property {boolean} isHeaderVisible - Whether the header is visible.
+     * @property {function} beforeClose - The function to call before closing.
+     * @property {function} onClose - The function to call after closing.
+     * @property {boolean} keepInstance - Whether to keep the instance.
+     */
     options: {
         // View mode: Determines how the content is displayed
         viewMode: 'popup', // Options: 'offcanvas-*', 'modal-*', 'popup' (jQuery dialog), 'inline', 'full' (over main), 'container' (by dom id)
@@ -55,7 +80,9 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
     _contextOnClose:false, 
     
     /**
-     * Initialize the widget.
+     * @private
+     * @memberof Widgets.UI.HBaseView
+     * @description Initialize the widget.
      */
     _init: function() {
         if (this.options.viewMode === 'inline') {
@@ -83,7 +110,9 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
     },
         
     /**
-     * Destroy the widget and clean up modal/dialog instances.
+     * @private
+     * @memberof Widgets.UI.HBaseView
+     * @description Destroy the widget and clean up modal/dialog instances.
      */
     _destroy: function() {
         if (this.bsModal) this.bsModal.dispose();
@@ -95,7 +124,9 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
     },
     
     /**
-     * Initializes UI elements and event listeners.
+     * @private
+     * @memberof Widgets.UI.HBaseView
+     * @description Initializes UI elements and event listeners.
      */
     _initControls: function() {
         if (this.options.viewMode.startsWith('modal')) {
@@ -112,7 +143,9 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
     },
     
     /**
-     * Returns the container element.
+     * @memberof Widgets.UI.HBaseView
+     * @description Returns the container element.
+     * @returns {HTMLElement} The container element.
      */
     getContainer: function() {
         //for inline and jquery popup this is this.element
@@ -120,7 +153,8 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
     },
 
     /**
-     * Opens the widget in the appropriate display mode.
+     * @memberof Widgets.UI.HBaseView
+     * @description Opens the widget in the appropriate display mode.
      */
     show: function() {
         if (this.bsModal) {
@@ -133,7 +167,8 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
     },
 
     /**
-     * Closes the widget.
+     * @memberof Widgets.UI.HBaseView
+     * @description Closes the widget.
      * @param {boolean} isForce - Whether to force close without confirmation.
      */
     close: function(isForce) {
@@ -164,7 +199,9 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
     
     
     /**
-     * Initializes Bootstrap modal.
+     * @private
+     * @memberof Widgets.UI.HBaseView
+     * @description Initializes Bootstrap modal.
      */
     _initModal: function() {
         let modal = this._$('[data-heurist-role="container-modal"]')[0];
@@ -188,7 +225,9 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
     },
 
     /**
-     * Initializes Bootstrap offcanvas.
+     * @private
+     * @memberof Widgets.UI.HBaseView
+     * @description Initializes Bootstrap offcanvas.
      */
     _initOffcanvas: function() {
         let offcanvas = this._$('[data-heurist-role="container-offcanvas"]')[0];
@@ -227,7 +266,9 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
 
     
     /**
-     * Initializes jQuery dialog.
+     * @private
+     * @memberof Widgets.UI.HBaseView
+     * @description Initializes jQuery dialog.
      */
     _initDialog: function(){
         
@@ -270,7 +311,9 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
     },
 
     /**
-     * Opens the jQuery dialog.
+     * @private
+     * @memberof Widgets.UI.HBaseView
+     * @description Opens the jQuery dialog.
      */
     _popupDialog: function(){
 
@@ -310,7 +353,9 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
     
 
     /**
-     * Closes the jQuery dialog.
+     * @private
+     * @memberof Widgets.UI.HBaseView
+     * @description Closes the jQuery dialog.
      * @param {boolean} isForce - Whether to force close without confirmation.
      */
     _closeDialog: function(isForce){
@@ -324,7 +369,9 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
     },
     
     /**
-     * Adds/hides an inner header for inline mode.
+     * @private
+     * @memberof Widgets.UI.HBaseView
+     * @description Adds/hides an inner header for inline mode.
      */
     _initInnerHeader: function() {
         if (!this.options.isHeaderVisible) {
@@ -334,8 +381,11 @@ $.widget( 'heurist.HBaseView', $.heurist.HBaseWidget, {
     },
 
     /**
-     * Returns action buttons for jQuery dialogs.
+     * @private
+     * @memberof Widgets.UI.HBaseView
+     * @description Returns action buttons for jQuery dialogs.
      * If function returns an empty array - buttons panel will be hidden
+     * @returns {Array} The action buttons.
      */
     _getActionButtons: function() {
         return [{

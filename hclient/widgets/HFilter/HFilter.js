@@ -1,24 +1,38 @@
 /**
-* HFilter - widget for search form and execution of filters
-* 
-* HFilter generates a search form to define a search query. At the moment it uses the search_faceted widget.
-* 
-* As a descendant of HBaseView the search form can be presented in the provided container (inline div), float or modal popup or offcanvas(side slide panel).
-* 
-* This widget is integrated with HMenu and its properties can be defined along with its property editor. For standalone mode, the saved filter ID can be obtained from HMenu (via search group link ON_ACTION event) or defined as a widget property.
-* 
-* @project     Heurist academic knowledge management system
-*
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @version     7.0
-*/
+ * @file HFilter.js
+ * @brief widget for search form and execution of filters
+ * @fileOverview HFilter generates a search form to define a search query. At the moment it uses the search_faceted widget.
+ * As a descendant of HBaseView the search form can be presented in the provided container (inline div), float or modal popup or offcanvas(side slide panel).
+ * This widget is integrated with HMenu and its properties can be defined along with its property editor. For standalone mode, the saved filter ID can be obtained from HMenu (via search group link ON_ACTION event) or defined as a widget property.
+ * @project     Heurist academic knowledge management system
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @author      Artem Osmakov   <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @since       7.0
+ */
 import '../HBase/HBaseView.js';
 
+/**
+ * @class HFilter
+ * @augments {HBaseView}
+ * @memberof Widgets.UI
+ * @description widget for search form and execution of filters
+ * HFilter generates a search form to define a search query. At the moment it uses the search_faceted widget.
+ * As a descendant of HBaseView the search form can be presented in the provided container (inline div), float or modal popup or offcanvas(side slide panel).
+ * This widget is integrated with HMenu and its properties can be defined along with its property editor. For standalone mode, the saved filter ID can be obtained from HMenu (via search group link ON_ACTION event) or defined as a widget property.
+ *
+ * @param {object} options - Configuration options for the widget.
+ */
 $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
 
-    // Default options
+    /**
+     * @memberof Widgets.UI.HFilter
+     * @type {object}
+     * @property {number} svsID - Saved Filter ID to display
+     * @property {string} searchDomain - reference to entity HSearchDomains
+     */
     options: {
         svsID: 0,  //Saved Filter ID to display
         searchDomain: null // reference to entity HSearchDomains
@@ -28,7 +42,9 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
     _savedFilters: {},  //cache
     
     /**
-     * Cleanup function. Removes generated elements and event listeners.
+     * @private
+     * @memberof Widgets.UI.HFilter
+     * @description Cleanup function. Removes generated elements and event listeners.
      */
     _destroy: function() {
         // remove generated elements
@@ -36,7 +52,9 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
     },
     
     /**
-     * Initializes controls and triggers rendering.
+     * @private
+     * @memberof Widgets.UI.HFilter
+     * @description Initializes controls and triggers rendering.
      */    
     _initControls:function(){
         this._super();
@@ -44,7 +62,8 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
     },
     
     /**
-     * Clears the content inside the container.
+     * @memberof Widgets.UI.HFilter
+     * @description Clears the content inside the container.
      */
     clearContent: function(){
         
@@ -55,7 +74,8 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
     },
 
     /**
-     * Gets saved filter parameters and calls doSearch
+     * @memberof Widgets.UI.HFilter
+     * @description Gets saved filter parameters and calls doSearch
      * @param {number} svsID - Saved filter ID
      */
     doSearchByID: function(svsID){
@@ -91,9 +111,12 @@ $.widget( 'heurist.HFilter', $.heurist.HBaseView, {
         }
     },
     
-    //
-    //
-    //
+    /**
+     * @memberof Widgets.UI.HFilter
+     * @description Executes a search based on the provided query.
+     * @param {number} svsID - Saved filter ID
+     * @param {string} qsearch - The search query.
+     */
     doSearch: function( svsID, qsearch ){
 
             if ( !qsearch ) return;

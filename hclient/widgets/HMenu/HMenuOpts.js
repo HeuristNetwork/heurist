@@ -1,28 +1,42 @@
 /**
-* HMenuOpts - Widget for HMenu's property editor form, used for configuring HMenu instances, within CMS editor.
-*
-* @project     Heurist academic knowledge management system
-*
-* @link        https://HeuristNetwork.org
-* @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-* @author      Artem Osmakov   <osmakov@gmail.com>
-* @version     7.0
-*/
-
+ * @file HMenuOpts.js
+ * @brief Widget for HMenu's property editor form, used for configuring HMenu instances, within CMS editor.
+ * @fileOverview
+ * @project     Heurist academic knowledge management system
+ * @link        https://HeuristNetwork.org
+ * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @author      Artem Osmakov   <osmakov@gmail.com>
+ * @author      Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @since       7.0
+ */
 import '../HBase/HBaseOpts.js';
 import './HMenuEdit.js';
 
+/**
+ * @class HMenuOpts
+ * @augments {HBaseOpts}
+ * @memberof Widgets.UI
+ * @description Widget for HMenu's property editor form, used for configuring HMenu instances, within CMS editor.
+ * @param {object} options - Configuration options for the widget.
+ */
 $.widget( 'heurist.HMenuOpts', $.heurist.HBaseOpts, {
     
-    // default options
+    /**
+     * @memberof Widgets.UI.HMenuOpts
+     * @type {object}
+     * @property {string} resourcePath - The path to the widget's resources.
+     */
     options: {
         resourcePath: 'hclient/widgets/HMenu/HMenuOpts',
         
     },
     
-    /*
-    *
-    */
+    /**
+     * @private
+     * @memberof Widgets.UI.HMenuOpts
+     * @description Initializes the controls.
+     */
     _initControls:function(){
         
         this._super();
