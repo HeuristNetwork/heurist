@@ -1,6 +1,8 @@
 /**
-* importStructure.js - Widget to browse template databases, select record types,
+* @file importStructure.js
+* @brief Widget to browse template databases, select record types,
 * individual fields, or individual vocabularies, and import them into the current database.
+* @fileOverview
 *
 * @todo Use HBaseView as a parent.
 *
@@ -13,6 +15,28 @@
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @since       4
 */
+
+/**
+* @class importStructure
+* @memberof Widgets.Navigation
+* @description Widget to browse template databases, select record types,
+* individual fields, or individual vocabularies, and import them into the current database.
+*
+* @property {object} options - Configuration options for the widget.
+* @property {boolean} [options.isdialog=false] - If true, the widget is displayed as a dialog.
+*                                        See {@link Widgets.Navigation.importStructure#_initDialog},
+*                                        {@link Widgets.Navigation.importStructure#popupDialog},
+*                                        {@link Widgets.Navigation.importStructure#closeDialog}.
+* @property {number} [options.height=600] - Height of the dialog.
+* @property {number} [options.width=1100] - Width of the dialog.
+* @property {boolean} [options.modal=true] - If true, the dialog is modal.
+* @property {string} [options.title='Import definitions into current database'] - Title of the dialog.
+* @property {number} [options.source_database_id=0] - Predefined source database ID. If > 0, skips the database list selection.
+* @property {number} [options.pagesize=2000] - Page size for the resultList of databases.
+* @property {function|null} [options.onClose=null] - Callback function executed when the dialog closes.
+* @property {string} [options.innerTitle] - If provided, an inner title bar will be displayed. (Implicit option, used in _init)
+* @property {object} [options.entity] - Entity configuration, typically `window.hWin.entityRecordCfg`. (Implicit option, used in _init)
+*/
 $.widget( "heurist.importStructure", {
     
 // TODOs:
@@ -22,22 +46,6 @@ $.widget( "heurist.importStructure", {
 // 3. Form structures to add terms, fields, structure, record type.
 // 4. Use functions from saveStructureLib.
 
-    /**
-     * @typedef {object} heurist.importStructure.options
-     * @property {boolean} [isdialog=false] - If true, the widget is displayed as a dialog.
-     *                                        See {@link heurist.importStructure#_initDialog},
-     *                                        {@link heurist.importStructure#popupDialog},
-     *                                        {@link heurist.importStructure#closeDialog}.
-     * @property {number} [height=600] - Height of the dialog.
-     * @property {number} [width=1100] - Width of the dialog.
-     * @property {boolean} [modal=true] - If true, the dialog is modal.
-     * @property {string} [title='Import definitions into current database'] - Title of the dialog.
-     * @property {number} [source_database_id=0] - Predefined source database ID. If > 0, skips the database list selection.
-     * @property {number} [pagesize=2000] - Page size for the resultList of databases.
-     * @property {function|null} [onClose=null] - Callback function executed when the dialog closes.
-     * @property {string} [innerTitle] - If provided, an inner title bar will be displayed. (Implicit option, used in _init)
-     * @property {object} [entity] - Entity configuration, typically `window.hWin.entityRecordCfg`. (Implicit option, used in _init)
-     */
     options: {
         isdialog: false,
         height: 600,
@@ -85,7 +93,9 @@ $.widget( "heurist.importStructure", {
     _init_local_defs_once:true,
 
     /**
-     * The widget's constructor.
+     * @function _create
+     * @description The widget's constructor.
+     * @memberof Widgets.Navigation.importStructure
      * @private
      */
     _create: function() {
@@ -93,8 +103,10 @@ $.widget( "heurist.importStructure", {
     }, //end _create
 
     /**
-     * Initializes the widget, sets up the layout, loads data, and initializes controls.
+     * @function _init
+     * @description Initializes the widget, sets up the layout, loads data, and initializes controls.
      * This is the main initialization function.
+     * @memberof Widgets.Navigation.importStructure
      * @private
      */
     _init: function() {
@@ -453,9 +465,12 @@ $.widget( "heurist.importStructure", {
 
     },
 
-    //
-    //
-    //    
+    /**
+     * @function startSearchOnEnterPress
+     * @description Initiates a search when the Enter key is pressed in the search input field.
+     * @param {Event} e - The keypress event object.
+     * @memberof Widgets.Navigation.importStructure
+     */
     startSearchOnEnterPress: function(e){
 
         let code = (e.keyCode ? e.keyCode : e.which);
@@ -501,9 +516,14 @@ $.widget( "heurist.importStructure", {
         this.filterRecordList_dbs(request);
     },
 
-    //
-    // init manageDefRecTypes, manageDefDetailTypes, and manageDefTerms widgets on individual panels
-    //
+    /**
+     * @function _loadDefinitionsForDb
+     * @description init manageDefRecTypes, manageDefDetailTypes, and manageDefTerms widgets on individual panels
+     * @param {object} db_ids
+     * @param {boolean} skip_pass
+     * @memberof Widgets.Navigation.importStructure
+     * @private
+     */
     _loadDefinitionsForDb: function(db_ids, skip_pass){
 
         const that = this;
@@ -757,31 +777,46 @@ $.widget( "heurist.importStructure", {
     },
 
 
-    //Called whenever the option() method is called
-    //Overriding this is useful if you can defer processor-intensive changes for multiple option change
+    /**
+     * @function _setOptions
+     * @description Called whenever the option() method is called. Overriding this is useful if you can defer processor-intensive changes for multiple option changes.
+     * @memberof Widgets.Navigation.importStructure
+     * @private
+     */
     _setOptions: function( ) {
         this._superApply( arguments );
     },
 
-    /* 
-    * private function 
-    * show/hide buttons depends on current login status
-    */
+    /**
+     * @function _refresh
+     * @description private function. show/hide buttons depends on current login status
+     * @memberof Widgets.Navigation.importStructure
+     * @private
+     */
     _refresh: function(){
 
     },
-    // 
-    // custom, widget-specific, cleanup.
+
+    /**
+     * @function _destroy
+     * @description custom, widget-specific, cleanup.
+     * @memberof Widgets.Navigation.importStructure
+     * @private
+     */
     _destroy: function() {
         // remove generated elements
         if(this.searchForm_dbs) this.searchForm_dbs.remove();
         if(this.recordList_dbs) this.recordList_dbs.remove();
     },
 
-    //----------------------
-    //
-    // listener of action button/menu clicks - central listener for action events
-    //
+    /**
+     * @function _onActionListener
+     * @description listener of action button/menu clicks - central listener for action events
+     * @param {Event} event
+     * @param {object} action
+     * @memberof Widgets.Navigation.importStructure
+     * @private
+     */
     _onActionListener:function(event, action){
         if(action=='select-and-close'){
            
@@ -818,9 +853,14 @@ $.widget( "heurist.importStructure", {
         return false;
     },
 
-    //
-    // DBS: renderer of item for resultlist - list of databases
-    //
+    /**
+     * @function _recordListItemRenderer_dbs
+     * @description DBS: renderer of item for resultlist - list of databases
+     * @param {object} recordset
+     * @param {object} record
+     * @memberof Widgets.Navigation.importStructure
+     * @private
+     */
     _recordListItemRenderer_dbs:function(recordset, record){
 
         function fld(fldname){
@@ -886,9 +926,12 @@ $.widget( "heurist.importStructure", {
 
     },
 
-    //
-    // init dialog widget 
-    //
+    /**
+     * @function _initDialog
+     * @description init dialog widget
+     * @memberof Widgets.Navigation.importStructure
+     * @private
+     */
     _initDialog: function(){
 
         let options = this.options,
@@ -929,9 +972,12 @@ $.widget( "heurist.importStructure", {
         this._as_dialog = $dlg; 
     },
 
-    //
-    // adjust width according to width of parent dialog
-    //
+    /**
+     * @function _fixWidth
+     * @description adjust width according to width of parent dialog
+     * @memberof Widgets.Navigation.importStructure
+     * @private
+     */
     _fixWidth: function() {//fix bug
         let correctWidth = this.element.parent().width()-24;
         this.element.css({overflow: 'none !important','width':correctWidth });
@@ -940,9 +986,11 @@ $.widget( "heurist.importStructure", {
         this.panel_rty_list_target.css({'left': correctWidth/2+1});*/
     },
 
-    //
-    // show itself as popup dialog
-    //
+    /**
+     * @function popupDialog
+     * @description show itself as popup dialog
+     * @memberof Widgets.Navigation.importStructure
+     */
     popupDialog: function(){
         if(this.options.isdialog){
 
@@ -957,10 +1005,13 @@ $.widget( "heurist.importStructure", {
         }
     },
 
-    //--------------- WORK WITH LIST
-    //
-    // listener of onfilter event generated by search
-    //
+    /**
+     * @function filterRecordList_dbs
+     * @description listener of onfilter event generated by search
+     * @param {object} request
+     * @memberof Widgets.Navigation.importStructure
+     * @private
+     */
     filterRecordList_dbs: function(request){
         let subset = null;
         if(this._cachedRecordset_dbs){
@@ -971,9 +1022,13 @@ $.widget( "heurist.importStructure", {
         return subset;
     },
 
-    //
-    //  MAIN METHOD
-    //
+    /**
+     * @function startImport
+     * @description  MAIN METHOD
+     * @param {number} id
+     * @param {string} type
+     * @memberof Widgets.Navigation.importStructure
+     */
     startImport: function(id, type){
 
         if(!id || id < 1 || !type){
@@ -1132,6 +1187,14 @@ $.widget( "heurist.importStructure", {
         
     },
 
+    /**
+     * @function _recordtypeListItemRenderer
+     * @description renderer of item for resultlist - list of record types
+     * @param {object} recordset
+     * @param {object} record
+     * @memberof Widgets.Navigation.importStructure
+     * @private
+     */
     _recordtypeListItemRenderer: function( recordset, record ){
 
         function fld(fldname){
@@ -1225,6 +1288,14 @@ $.widget( "heurist.importStructure", {
         return html;
     },
 
+    /**
+     * @function _detailtypeListItemRenderer
+     * @description renderer of item for resultlist - list of detail types
+     * @param {object} recordset
+     * @param {object} record
+     * @memberof Widgets.Navigation.importStructure
+     * @private
+     */
     _detailtypeListItemRenderer: function(recordset, record){
 
         function fld(fldname){
@@ -1271,6 +1342,14 @@ $.widget( "heurist.importStructure", {
         return html;
     },
 
+    /**
+     * @function _termsListItemRenderer
+     * @description renderer of item for resultlist - list of terms
+     * @param {object} recordset
+     * @param {object} record
+     * @memberof Widgets.Navigation.importStructure
+     * @private
+     */
     _termsListItemRenderer: function(recordset, record){
 
         function fld(fldname){
@@ -1416,10 +1495,12 @@ $.widget( "heurist.importStructure", {
     },
 
     /**
-     * 
-     * 
+     * @function _preImportCheck
+     * @description
      * @param {string} type - import type {rectype, detailtype, term, all}
      * @param {int} id - definition ID to be imported
+     * @memberof Widgets.Navigation.importStructure
+     * @private
      */
     _preImportCheck: function(type, id){
 
@@ -1583,6 +1664,13 @@ $.widget( "heurist.importStructure", {
         });
     },
 
+    /**
+     * @function _processCloneResponse
+     * @description process clone response
+     * @param {object} response
+     * @memberof Widgets.Navigation.importStructure
+     * @private
+     */
     _processCloneResponse: function(response){
 
         this.panel_report.hide();

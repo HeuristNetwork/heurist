@@ -1,5 +1,7 @@
 /**
-* dbVerifyURLs.js - Verifies URLs in record headers and fields
+* @file dbVerifyURLs.js
+* @brief Verifies URLs in record headers and fields
+* @fileOverview
 *
 * @project     Heurist academic knowledge management system
 *
@@ -12,15 +14,12 @@
 */
 
 /**
- * jQuery UI Widget: heurist.dbVerifyURLs
- *
- * This widget handles the verification of URLs within database records (both in record headers and specific fields).
+ * @class dbVerifyURLs
+ * @augments $.heurist.dbAction
+ * @memberof Widgets.Admin
+ * @description This widget handles the verification of URLs within database records (both in record headers and specific fields).
  * It allows users to start a new verification process, continue a previous one, or resume an interrupted session.
  * Results, including problematic URLs, can be displayed and exported.
- * It extends `$.heurist.dbAction`.
- *
- * @namespace heurist.dbVerifyURLs
- * @augments $.heurist.dbAction
  *
  * @property {boolean} prevSessionExists - Flag indicating if a previous, potentially incomplete,
  *                                         URL verification session exists for the current database.
@@ -33,10 +32,11 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
     prevSessionExists: false,
 
     /**
-     * Initializes controls for the URL verification widget.
+     * @function _initControls
+     * @description Initializes controls for the URL verification widget.
      * Checks for a previous verification session and then calls the superclass's `_initControls`.
      * This method is called by `_init` (via `_super()`) after HTML content is loaded.
-     * @memberof heurist.dbVerifyURLs
+     * @memberof Widgets.Admin.dbVerifyURLs
      * @private
      */
     _initControls:function(){
@@ -45,10 +45,11 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
     },
 
     /**
-     * Checks with the server if a previous URL verification session exists for the current database.
+     * @function _checkPreviousSession
+     * @description Checks with the server if a previous URL verification session exists for the current database.
      * Updates the UI to show options for continuing, restarting, or viewing previous results based on the server response.
      * If a session is currently in progress, it will resume showing progress for that session.
-     * @memberof heurist.dbVerifyURLs
+     * @memberof Widgets.Admin.dbVerifyURLs
      * @private
      */
     _checkPreviousSession: function(){
@@ -93,9 +94,10 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
     },
 
     /**
-     * Initiates a download of the previous URL verification session's results as a CSV file.
+     * @function _getPreviousSessionAsCSV
+     * @description Initiates a download of the previous URL verification session's results as a CSV file.
      * Opens a new window/tab pointing to the server-side script that generates the CSV.
-     * @memberof heurist.dbVerifyURLs
+     * @memberof Widgets.Admin.dbVerifyURLs
      * @private
      */
     _getPreviousSessionAsCSV: function(){
@@ -109,9 +111,10 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
     },
 
     /**
-     * Gathers parameters (limit, mode) and starts the URL verification process by calling `_sendRequest`.
+     * @function doAction
+     * @description Gathers parameters (limit, mode) and starts the URL verification process by calling `_sendRequest`.
      * The 'mode' determines if it's a new scan, a continuation, or a re-check of bad URLs.
-     * @memberof heurist.dbVerifyURLs
+     * @memberof Widgets.Admin.dbVerifyURLs
      */
     doAction: function(){
         let limit = this._$('#selCheckURLsLimit').val();
@@ -122,9 +125,10 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
     },
 
     /**
-     * Overrides the baseAction `_showProgress` to use a more specific progress display method
+     * @function _showProgress
+     * @description Overrides the baseAction `_showProgress` to use a more specific progress display method
      * from `window.hWin.HEURIST4.msg.showProgress`.
-     * @memberof heurist.dbVerifyURLs
+     * @memberof Widgets.Admin.dbVerifyURLs
      * @private
      * @param {number} session_id - The session ID for the current action.
      * @param {boolean} is_autohide - Whether the progress should hide automatically on completion (not directly used by `msg.showProgress`).
@@ -141,9 +145,10 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
 
 
     /**
-     * Hides the progress indicator and restores the main form/header view.
+     * @function _hideProgress
+     * @description Hides the progress indicator and restores the main form/header view.
      * Uses `window.hWin.HEURIST4.msg.hideProgress`.
-     * @memberof heurist.dbVerifyURLs
+     * @memberof Widgets.Admin.dbVerifyURLs
      * @private
      */
     _hideProgress: function (){
@@ -155,11 +160,12 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
 
 
     /**
-     * Handles the server response after a URL verification action (or part of it) is completed.
+     * @function _afterActionEventHandler
+     * @description Handles the server response after a URL verification action (or part of it) is completed.
      * Updates the UI with statistics (total checked, bad URLs, processed counts per type)
      * and provides links to view problematic records. Manages UI state based on whether
      * the verification process is fully finished.
-     * @memberof heurist.dbVerifyURLs
+     * @memberof Widgets.Admin.dbVerifyURLs
      * @private
      * @param {object} response_data - The `data` part of the server response.
      * @param {string|object} termination_message - Message or error object if the process was terminated or encountered an issue.

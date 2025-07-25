@@ -1,5 +1,7 @@
 /**
-* dbVerify.js - popup dialog for database verification actions
+* @file dbVerify.js
+* @brief popup dialog for database verification actions
+* @fileOverview
 *
 * @project     Heurist academic knowledge management system
 *
@@ -12,14 +14,12 @@
 */
 
 /**
- * jQuery UI Widget: heurist.dbVerify
- *
- * This widget provides an interface for performing database verification checks.
+ * @class dbVerify
+ * @augments $.heurist.dbAction
+ * @memberof Widgets.Admin
+ * @description This widget provides an interface for performing database verification checks.
  * It extends `$.heurist.dbAction` and specializes it for verification tasks.
  * Users can select various checks to perform, and the widget displays the results.
- *
- * @namespace heurist.dbVerify
- * @augments $.heurist.dbAction
  *
  * @property {object} _verification_actions - An object mapping verification action keys (used in requests)
  *                                            to their display names and properties (e.g., `slow:1`).
@@ -63,10 +63,11 @@ $.widget( "heurist.dbVerify", $.heurist.dbAction, {
     },
 
     /**
-     * Initializes controls specific to the dbVerify widget.
+     * @function _initControls
+     * @description Initializes controls specific to the dbVerify widget.
      * Calls `_initVerification` to set up the verification checklist and then calls the superclass method.
      * This method is called by `_init` (via `_super()`) after HTML content is loaded.
-     * @memberof heurist.dbVerify
+     * @memberof Widgets.Admin.dbVerify
      * @private
      */
     _initControls:function(){
@@ -75,9 +76,10 @@ $.widget( "heurist.dbVerify", $.heurist.dbAction, {
     },
 
     /**
-     * Gathers selected verification actions and sends a request to the server to perform them.
+     * @function doAction
+     * @description Gathers selected verification actions and sends a request to the server to perform them.
      * Updates the progress display with the list of actions being performed.
-     * @memberof heurist.dbVerify
+     * @memberof Widgets.Admin.dbVerify
      */
     doAction: function(){
         let request;
@@ -111,10 +113,11 @@ $.widget( "heurist.dbVerify", $.heurist.dbAction, {
 
 
     /**
-     * Handles the server response after a verification action is completed.
+     * @function _afterActionEventHandler
+     * @description Handles the server response after a verification action is completed.
      * Displays the results, including any termination messages.
      * Calls `_initVerificationResponse` to process and display the detailed verification report.
-     * @memberof heurist.dbVerify
+     * @memberof Widgets.Admin.dbVerify
      * @private
      * @param {object} response_data - The `data` part of the server response containing verification results.
      * @param {string|object} termination_message - A message or error object from the server about the action's outcome.
@@ -135,10 +138,11 @@ $.widget( "heurist.dbVerify", $.heurist.dbAction, {
     },
 
     /**
-     * Initializes the list of available verification actions in the UI.
+     * @function _initVerification
+     * @description Initializes the list of available verification actions in the UI.
      * Dynamically creates checkboxes for each action defined in `_verification_actions`.
      * Sets up event handlers for "Mark all" checkboxes and buttons for slow checks.
-     * @memberof heurist.dbVerify
+     * @memberof Widgets.Admin.dbVerify
      * @private
      */
     _initVerification: function(){
@@ -188,10 +192,11 @@ $.widget( "heurist.dbVerify", $.heurist.dbAction, {
     },
 
     /**
-     * Initializes and displays the response from a database verification action.
+     * @function _initVerificationResponse
+     * @description Initializes and displays the response from a database verification action.
      * Formats the results into a tabbed interface, where each tab represents a verification check.
      * Sets up "Fix" buttons and "Mark all" / "Show selected/all" links within the results.
-     * @memberof heurist.dbVerify
+     * @memberof Widgets.Admin.dbVerify
      * @private
      * @param {object} response - The data object received from the server, where keys are action names
      *                            and values are objects containing `status` and `message` (HTML report).

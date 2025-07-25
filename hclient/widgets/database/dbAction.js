@@ -1,5 +1,7 @@
 /**
-* dbAction.js - Dialog for performing various database-level actions
+* @file dbAction.js
+* @brief Dialog for performing various database-level actions
+* @fileOverview
 *
 * @project     Heurist academic knowledge management system
 *
@@ -12,16 +14,14 @@
 */
 
 /**
- * jQuery UI Widget: heurist.dbAction
- *
- * This widget provides a dialog or inline interface for performing various database-level actions
+ * @class dbAction
+ * @augments $.heurist.baseAction
+ * @memberof Widgets.Admin
+ * @description This widget provides a dialog or inline interface for performing various database-level actions
  * such as creating, renaming, cloning, deleting, clearing, restoring, or registering a database.
  * It handles user input for action parameters, sends requests to the server,
  * and displays progress and final results/reports.
- * It extends `$.heurist.baseAction`.
  *
- * @namespace heurist.dbAction
- * @augments $.heurist.baseAction
  * @property {object} options - Configuration options for the widget.
  * @property {string} options.actionName - The name of the database action to perform (e.g., 'dbCreate', 'dbClone').
  *                                        This is transformed internally (e.g., 'dbCreate' becomes 'create').
@@ -49,10 +49,11 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
 
 
     /**
-     * Initializes the widget. Sets up HTML content path based on `actionName` and calls the superclass `_init`.
+     * @function _init
+     * @description Initializes the widget. Sets up HTML content path based on `actionName` and calls the superclass `_init`.
      * Transforms `actionName` (e.g., 'dbCreate' to 'create').
      * This method is called by jQuery UI when the widget is created.
-     * @memberof heurist.dbAction
+     * @memberof Widgets.Admin.dbAction
      * @private
      */
     _init: function() {
@@ -71,10 +72,11 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     },
 
     /**
-     * Initializes controls within the widget's HTML structure after it has been loaded.
+     * @function _initControls
+     * @description Initializes controls within the widget's HTML structure after it has been loaded.
      * Sets up buttons, event handlers, and pre-fills form elements based on the specific action.
      * This method is called by `_init` (via `_super()`) after HTML content is loaded.
-     * @memberof heurist.dbAction
+     * @memberof Widgets.Admin.dbAction
      * @private
      * @returns {void}
      */
@@ -168,8 +170,9 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     },
 
     /**
-     * Custom widget-specific cleanup. Called when the widget is destroyed.
-     * @memberof heurist.dbAction
+     * @function _destroy
+     * @description Custom widget-specific cleanup. Called when the widget is destroyed.
+     * @memberof Widgets.Admin.dbAction
      * @private
      */
     _destroy: function() {
@@ -185,9 +188,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     },
 
     /**
-     * Defines the buttons to be displayed in the dialog (if this widget is used in a dialog context).
+     * @function _getActionButtons
+     * @description Defines the buttons to be displayed in the dialog (if this widget is used in a dialog context).
      * Typically overridden by `baseAction` or its parent.
-     * @memberof heurist.dbAction
+     * @memberof Widgets.Admin.dbAction
      * @private
      * @returns {Array<object>|null} An array of button definition objects, or null if handled by base.
      */
@@ -196,9 +200,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     },
 
     /**
-     * Performs the database action based on `options.actionName`.
+     * @function doAction
+     * @description Performs the database action based on `options.actionName`.
      * Gathers required parameters from the form, validates them, and calls `_sendRequest`.
-     * @memberof heurist.dbAction
+     * @memberof Widgets.Admin.dbAction
      */
     doAction: function(){
         let request = {}; // Initialize with an empty object
@@ -283,10 +288,11 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     },
 
     /**
-     * Sends the prepared request to the server via `HAPI4.SystemMgr.databaseAction`.
+     * @function _sendRequest
+     * @description Sends the prepared request to the server via `HAPI4.SystemMgr.databaseAction`.
      * Shows progress indicator before sending and hides it after completion or error.
      * Calls `_afterActionEventHandler` on successful completion.
-     * @memberof heurist.dbAction
+     * @memberof Widgets.Admin.dbAction
      * @private
      * @param {object} request - The request object to send to the server.
      */
@@ -313,9 +319,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     },
 
     /**
-     * For 'clone' action, checks if the source database contains new definitions
+     * @function _checkNewDefinitions
+     * @description For 'clone' action, checks if the source database contains new definitions
      * that might require a password for cloning. Shows a warning if necessary.
-     * @memberof heurist.dbAction
+     * @memberof Widgets.Admin.dbAction
      * @private
      */
     _checkNewDefinitions: function(){
@@ -334,9 +341,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     },
 
     /**
-     * For 'restore' action, opens a file selection dialog to choose a database archive (.zip or .bz2).
+     * @function _selectArchive
+     * @description For 'restore' action, opens a file selection dialog to choose a database archive (.zip or .bz2).
      * Populates the selected filename and suggests a database name based on the archive name.
-     * @memberof heurist.dbAction
+     * @memberof Widgets.Admin.dbAction
      * @private
      */
     _selectArchive: function(){
@@ -382,9 +390,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
 
 
     /**
-     * Handles the server response after a database action is successfully completed.
+     * @function _afterActionEventHandler
+     * @description Handles the server response after a database action is successfully completed.
      * Displays results, warnings, and appropriate messages or redirects based on the action performed.
-     * @memberof heurist.dbAction
+     * @memberof Widgets.Admin.dbAction
      * @private
      * @param {object} response_data - The `data` part of the server response.
      * @param {string} termination_message - A general message from the server about the action's outcome.
@@ -437,10 +446,11 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     },
 
     /**
-     * Shows a progress indicator for long-running database actions.
+     * @function _showProgress
+     * @description Shows a progress indicator for long-running database actions.
      * Displays a loading animation and periodically polls the server for progress updates.
      * Updates a list of steps or a percentage based on server response.
-     * @memberof heurist.dbAction
+     * @memberof Widgets.Admin.dbAction
      * @private
      * @param {number} session_id - The session ID for the current action, used to fetch progress.
      * @param {boolean} is_autohide - If true, hides progress automatically when server reports termination.
@@ -535,9 +545,10 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     },
 
     /**
-     * Hides the progress indicator and restores the UI.
+     * @function _hideProgress
+     * @description Hides the progress indicator and restores the UI.
      * Clears the progress polling interval and resets the cursor.
-     * @memberof heurist.dbAction
+     * @memberof Widgets.Admin.dbAction
      * @private
      */
     _hideProgress: function (){
