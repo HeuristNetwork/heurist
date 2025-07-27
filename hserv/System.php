@@ -1096,7 +1096,7 @@ class System {
      * it calls `treatSeriousError` to log it and format the message.
      * Otherwise, it stores the error details directly.
      *
-     * @param int $status The Heurist error status code (e.g., `HEURIST_ERROR`, `HEURIST_INVALID_REQUEST`).
+     * @param int|string $status The Heurist error status code (e.g., `HEURIST_ERROR`, `HEURIST_INVALID_REQUEST`).
      * @param string $message Optional. The user-friendly error message. Defaults to an empty string.
      * @param string|null $sysmsg Optional. A technical system message or additional details.
      *                            If status is `HEURIST_REQUEST_DENIED` and sysmsg is null, current user ID is used.

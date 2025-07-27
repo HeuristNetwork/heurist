@@ -489,7 +489,7 @@ class UArchive {
     }
 
     /**
-     * @return true or error message
+     * @return true|string or error message
      * @param string $in - filename to be compressed
      * @param string $out - name of archive if not set it renames $in with bz2 ext and place in the same folder
      * @desc compressing the file with the bzip2-extension

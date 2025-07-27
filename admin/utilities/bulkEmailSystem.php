@@ -479,7 +479,9 @@ class BulkEmailSystem {
 
         ksort($this->user_details, SORT_FLAG_CASE);
 
-        count($this->user_details) > 1000 ? set_time_limit(1800) : set_time_limit(900); // temporary, to implement staggering/staged system
+        $seconds = count($this->user_details) > 3000 ? 2700 : 900;
+        $seconds = count($this->user_details) > 1000 ? 1800 : $seconds;
+        set_time_limit($seconds); // temporary, to implement staggering/staged system when possible
 
         $this->printMessage('Done<br>');
 

@@ -933,7 +933,7 @@ function afterPageLoad(document, pageid, eventdata){
             let operator = '/?';
             
             if(handle_query){
-                surl += `{operator}q=${eventdata.q}`;
+                surl += `${operator}q=${eventdata.q}`;
                 operator = '&';
             }
 
