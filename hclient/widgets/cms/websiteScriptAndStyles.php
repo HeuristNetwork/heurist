@@ -478,7 +478,8 @@ function loadPageContent(pageid, eventdata){
     // this is not website page, this is ordinary record - show it in main-recordview or popup
     if(window.hWin.HEURIST4.util.isNumber(pageid) &&  !page_cache[pageid]){
 
-       if (! ((topmenu &&  topmenu.navigation('instance') && topmenu.navigation('isMenuItem',pageid))
+       if (! ((typeof navigation === 'function' && 
+               topmenu && topmenu.navigation('instance') && topmenu.navigation('isMenuItem',pageid))
               ||
               (eventdata && eventdata['isMenuItem'])) )
        {

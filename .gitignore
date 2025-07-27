@@ -221,6 +221,7 @@ help/
 external/
 node_modules/
 tests/
+descriptors/
 
 *.mjs
 package.json

@@ -1636,7 +1636,7 @@ function inIframe() {
 function refreshButton() {
     if(window.location !== window.parent.location){ // handle iframe
 
-        let query = settings.request ? settings.request : window.hWin.HEURIST4.current_query_request;
+        let query =  (settings && settings.request) ? settings.request : window.hWin.HEURIST4.current_query_request;
         query = window.hWin.HEURIST4.query.composeHeuristQuery2(query, false);
         query = query + ((query == '?') ? '' : '&') + 'db=' + window.hWin.HAPI4.database;
 

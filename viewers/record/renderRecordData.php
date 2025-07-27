@@ -1245,6 +1245,13 @@ elseif(!$is_map_popup){
                         +':'+(''+date.getMinutes()).padStart(2, "0")
                         +':'+(''+date.getSeconds()).padStart(2, "0");
             }
+            
+            //
+            // stub
+            //
+            function link_open(link, is_record_viewer = true) {
+                return true;
+            }          
 
 </script>
 <?php

@@ -348,7 +348,13 @@ $.widget( "heurist.resultList", {
                                     window.hWin.HAPI4.SystemMgr.ssearch_get( {svsIDs:[svs_ID]},
                                         function(response){
                                             if(response.status == window.hWin.ResponseStatus.OK){
-                                                that._currentSavedFilterID = data.qname;
+                                               
+                                                if(!response.data || !response.data[svs_ID]){
+                                                    that.setHeaderText('');
+                                                    return;
+                                                }
+                                                
+                                                that._currentSavedFilterID = svs_ID;
                                                 
                                                 if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){
                                                     window.hWin.HAPI4.currentUser.usr_SavedSearch = {};

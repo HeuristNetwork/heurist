@@ -622,6 +622,11 @@ $.widget( "heurist.search_faceted_wiz", {
 
             }
             else if(this.step==0 && newstep==1){ //select record types
+            
+                if(!this.select_main_rectype){ //not inited 
+                    //this.navigateWizard();
+                    return;
+                }
 
                 //MAIN RECORD TYPE
                 if(!(this.select_main_rectype.val()>0)){

@@ -2277,6 +2277,10 @@ window.hWin.HEURIST4.ui = {
         window.hWin.HAPI4.SystemMgr.reportAction(params, 
             function(response){
                 if (response.status == window.hWin.ResponseStatus.OK) {
+                    
+                    if(!($select && $select[0])){
+                        return; //selector can be removed already on time of response
+                    }
 
                     let context = response.data;
                     

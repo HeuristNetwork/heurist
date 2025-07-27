@@ -200,7 +200,7 @@ class HCmsEditor {
             },
             beforeActivate: function( event, ui ){
 
-                if(that.current_edit_mode=='page' && that._cmsEditorPage.warningOnExit(function(){ that.switchMode( 'website' ) })) {
+                if(that.current_edit_mode=='page' && that._cmsEditorPage && that._cmsEditorPage.warningOnExit(function(){ that.switchMode( 'website' ) })) {
                     return false;  
                 }else{
                     return true;

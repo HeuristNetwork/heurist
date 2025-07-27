@@ -5091,6 +5091,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     }
                 },
                 blur: (event) => { // Remove node focus
+                
+                    if(!(that.options.rts_editor && that.options.rts_editor.manageDefRecStructure('instance'))){
+                        return;
+                    }
 
                     let $target_ele = $(event.target);
 
