@@ -1154,8 +1154,14 @@ window.hWin.HEURIST4.dbs = {
         }
 
         let res = [];
-
-        rectypeids = (!Array.isArray(rectypeids)?rectypeids.split(','):rectypeids);    
+        
+        if(typeof rectypeids === 'string'){
+            rectypeids = rectypeids.split(',');
+        }else if(window.hWin.HEURIST4.util.isPositiveInt(rectypeids)){
+            rectypeids = [rectypeids];
+        }else if(!Array.isArray(rectypeids)){
+            rectypeids = [];
+        }
 
         let is_multi_constrained = parentcode?rectypeids?.length:0;
         let pointer_field_id = null;
