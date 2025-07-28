@@ -762,6 +762,11 @@ class BulkEmailSystem {
             $email_rtn = $this->sendUsingPHPMailer($email, $title, $body, $mailer);
         }
 
+        if(stripos(HEURIST_BASE_URL, 'heuristref') !== false){
+            // IJ 2025 - add artificial wait to avoid overwhelming the email server on HeuristRef
+            sleep(1);
+        }
+
         $this->logEmailStatus($email_rtn, $details, $email, $db_listed, $records_listed, $lastmod_listed, $body);
         $mailer->clearAddresses();
 
