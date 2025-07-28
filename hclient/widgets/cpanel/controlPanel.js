@@ -598,6 +598,7 @@ $.widget( "heurist.controlPanel", {
         const SPIN_INTERVAL = 30000; // how often to spin - 30 seconds (not 5 minutes as per old comment)
         const SPIN_DURATION = 1000; // how long the spin takes - 1 second
 
+        const newestVersion = 7;
         const isAlpha = window.hWin.HAPI4.baseURL.match(/h\d+-alpha|alpha/);
         const isVersion7 = window.hWin.HAPI4.baseURL.match(/h7-alpha|heurist2025/); // @todo: remove once version 7 is standard
 
@@ -609,7 +610,7 @@ $.widget( "heurist.controlPanel", {
          * Check whether the newest version of heurist is available, e.g. version 7
          * @param {string|int} version - newest version to check for 
          */
-        function checkVersion(version = 7){
+        function checkVersion(version = newestVersion){
 
             window.hWin.HAPI4.SystemMgr.check_for_version({a:'check_for_version', ver: version}, (response) => {
 
@@ -623,6 +624,8 @@ $.widget( "heurist.controlPanel", {
                     html: `<a style="cursor: pointer;text-decoration: underline;" href="${response.data}?db=${window.hWin.HAPI4.database}" id="lnk_Newest">
                     Try version ${version}</a> (compatible)`
                 }).appendTo(this.version_message);
+
+                this.version_message.css('width', '55em');
             });
         }
 
@@ -635,7 +638,8 @@ $.widget( "heurist.controlPanel", {
             'margin-top': '0.9em',
             'margin-left': '2em',
             display: 'flex',
-            'align-items': 'center'
+            'align-items': 'center',
+            width: '45em'
         };
 
         this.version_message = $('<div>', {id: 'heuristVersionSwapper'})
@@ -685,14 +689,15 @@ $.widget( "heurist.controlPanel", {
                 }).appendTo(this.version_message);
 
                 if(!isVersion7){
-                    checkVersion.call(this, 7);
+                    checkVersion.call(this, newestVersion);
                 }
             });
         }else{ // currently on alpha
 
+            const width = navigator.userAgent.indexOf('Firefox') >= 0 ? '24.5' : '24';
             $('<span>', {
                 title: 'Go to standard version',
-                style: 'flex: 0 0 24em; padding-right: 1em;',
+                style: `flex: 0 0 ${width}em; padding-right: 1em;`,
                 html: `This is the latest (alpha) version. If you are blocked by a new bug you can switch to the 
                 <a style="cursor: pointer;text-decoration: underline;" href="#" id="lnk_Change">standard version</a>`
             }).appendTo(this.version_message);
@@ -736,7 +741,7 @@ $.widget( "heurist.controlPanel", {
             });
 
             if(!isVersion7){
-                checkVersion.call(this, 7);
+                checkVersion.call(this, newestVersion);
             }
         }
     },
