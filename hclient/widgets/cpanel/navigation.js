@@ -185,7 +185,6 @@ $.widget( "heurist.navigation", {
      * @memberof Widgets.Navigation.navigation
      */
     reloadMenuData:function(){
-
         //find menu contents by top level ids
         let ids = this.options.menu_recIDs;
         if(ids==null){
@@ -312,7 +311,7 @@ $.widget( "heurist.navigation", {
                     parent_ids.filter((id) => this.ids_menu_entries[page_id].indexOf(id));
                 }*/
                 if(parent_ids.includes(page_id)){
-                    this.ids_recurred.push(page_id);
+                    this.ids_recurred.push(parent_id+','+page_id);
                     continue;
                 }
             }
@@ -550,22 +549,68 @@ $.widget( "heurist.navigation", {
 
         //get either treedata or html for jquery menu
         let menu_content = this.getMenuContent(null, 0, this.options.menu_recIDs, 0);
-        let DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
+        const DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
 
         if(this.ids_recurred.length>0 && window.hWin.HAPI4.has_access()){
+            
+            const DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'];
+            const DT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'];
+            
             let s = [];
+            let request = [];
+            
             for(let i=0;i<this.ids_recurred.length;i++){
-                s.push(this.ids_recurred[i]+' '
-                    +this.menuData.fld(this.menuData.getById(this.ids_recurred[i]), DT_NAME));
+                let s2 = [];
+                let ids = this.ids_recurred[i].split(',');
+                for(let k=0;k<ids.length;k++){
+                    let s3 = this.menuData.fld(this.menuData.getById(ids[k]), DT_NAME)+' ('+ids[k]+')';
+                    if(ids[k]==[ids[ids.length-1]]){
+                        s3 = '<b>'+s3+'</b>';
+                    }
+                    s2.push(s3);
+                }
+                request.push({'a':'delete',
+                                recIDs: ids[ids.length-2],
+                                dtyID: (ids.length==2)?DT_CMS_TOP_MENU:DT_CMS_MENU,
+                                sVal:ids[ids.length-1]});
+                
+                s.push(s2.join('=>'));
             }
+
+
+            window.hWin.HEURIST4.msg.bringCoverallToFront();
+            
+            request = {actions:request};
+            
+            let that = this;
+            window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+'Some menu items are recursive references to a menu containing themselves. <br>'                        
++'Such a structure is not permissible for obvious reasons.<br>'                        
++'Heurist has deleted these wrong links (pages content are intact, only the extra references in the menu).<br>'                        
++'The following chains have been fixed (the last link has been removed): <div style="margin: 10px 0px">'+(s.join('<br>'))+'</div>'
+                    ,null,null,{close:()=>{
+                                    const layout = $(document).find('body').layout('instance');
+                                    if(layout) layout.resizeAll();    
+                    }});
+
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+            });
+
+/*
             window.hWin.HEURIST4.msg.showMsgDlg('Some menu items are recursive references to a menu containing themselves. <br>'
             +'Such a structure is not permissible for obvious reasons. Ask website author to fix this issue. <div style="margin: 10px 0px">'
             +(s.join('<br>'))
             +'</div>If you are the author, simply edit the CMS Home record through the website editor (Site tab, then the Edit website layout/properties button), and delete duplicates (this will not delete the page content, only the extra reference to the menu entry)'
             +'<p>If you can\'t fix this problem yourself, please send a bug report and we will take care of it.</p>'
             ,null,null,{dialogId:'dialog-common-messages222',removeOnClose:true});
-
+*/
         }
+
 
 
         if(this.options.orientation=='treeview'){

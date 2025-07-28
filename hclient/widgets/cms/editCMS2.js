@@ -869,6 +869,7 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
 
         // Correct image and embedded urls
         _layout_container.find('img, embed').each(function(i,ele){window.hWin.HEURIST4.util.restoreRelativeURL(ele);});
+        
     }
     
     /**
