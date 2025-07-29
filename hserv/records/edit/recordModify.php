@@ -701,101 +701,13 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     //END HEADER SAVE
 
     //ADD DETAILS
-    $addedByImport = ($modeImport?1:0);
-
-
-    $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID, dtl_Geo, dtl_HideFromPublic) '.
-    "VALUES ($recID, ?, ?, $addedByImport, ?, ST_GeomFromText(?), ?)";
-    $stmt = $mysqli->prepare($query);
-
-    /* $query_geo = "INSERT INTO recDetails ".
-    "(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_Geo) ".
-    "VALUES ($recID, ?, ?, $addedByImport, ST_GeomFromText(?) )";
-    $stmt_geo = $mysqli->prepare($query2);*/
-
-    //
-
-
-    if ($stmt) {
-
-        // $stmt->bind_param('isis', $dtyID, $dtl_Value, $dtl_UploadedFileID, $dtl_Geo);
-        foreach ($detailValues as $idx=>$values) {
-
-            $dtyID = $values['dtl_DetailTypeID'];
-            $dtl_Value = @$values['dtl_Value'];
-            if($dtl_Value) {$dtl_Value = super_trim($dtl_Value);}//including &nbsp; and &xef; (BOM)
-            $dtl_UploadedFileID = @$values['dtl_UploadedFileID'];
-            $dtl_Geo = @$values['dtl_Geo'];
-            $dtl_HideFromPublic = @$values['dtl_HideFromPublic'];
-
-            $stmt->bind_param('isisi', $dtyID, $dtl_Value, $dtl_UploadedFileID, $dtl_Geo, $dtl_HideFromPublic);
-            if(!$stmt->execute()){
-                $syserror = $mysqli->error;
-                if($use_transaction){
-                    $mysqli->rollback();
-                    if($keep_autocommit===true) {$mysqli->autocommit(true);}
-                }
-
-                return $system->addError(HEURIST_DB_ERROR, 'Cannot save value - possibly bad encoding or invalid date format (System error: '.$syserror.').', $syserror);
-
-            }
-
-            //add reverce field "Parent Entity" (#247) in child resource record
-            if(defined('DT_PARENT_ENTITY') && !$suppress_parent_child){
-                if(@$values['dtl_ParentChild']==true){
-
-                    // $dtl_Value  is id of child record
-                    $res = addReverseChildToParentPointer($mysqli, $dtl_Value, $recID, $addedByImport, false);
-
-                    if($res<0){
-                        $syserror = $mysqli->error;
-                        if($use_transaction){
-                            $mysqli->rollback();
-                            if($keep_autocommit===true) {$mysqli->autocommit(true);}
-                        }
-                        return $system->addError(HEURIST_DB_ERROR,
-                            'Cannot save value. Cannot insert reverse pointer for child record', $syserror);
-                    }elseif($res!=0){
-                        //update record title for child record
-                        list($child_rectype, $child_title) = mysql__select_row($mysqli,
-                            'SELECT rec_RecTypeID, rec_Title FROM Records WHERE rec_ID='
-                            .intval($dtl_Value));
-                        recordUpdateTitle($system, $dtl_Value, $child_rectype, $child_title); //update for child records
-                    }
-
-                }elseif($dtyID == DT_PARENT_ENTITY){
-
-                    $res = addParentToChildPointer($mysqli, $recID, $rectype, $dtl_Value, null, $addedByImport);
-                    if($res<0){
-                        $syserror = $mysqli->error;
-                        if($use_transaction){
-                            $mysqli->rollback();
-                            if($keep_autocommit===true) {$mysqli->autocommit(true);}
-                        }
-                        return $system->addError(HEURIST_DB_ERROR,
-                            'Cannot save value. Cannot insert pointer for parent record', $syserror);
-                    }elseif($res!=0){
-                        //update record title for parent record
-                        list($parent_rectype, $parent_title) = mysql__select_row($mysqli,
-                            'SELECT rec_RecTypeID, rec_Title FROM Records WHERE rec_ID='
-                            .intval($dtl_Value));
-                        recordUpdateTitle($system, $dtl_Value, $parent_rectype, $parent_title); //update for parent record
-                    }
-
-                }
-            }
-
-        }
-        $stmt->close();
-        //$stmt_geo->close();
-
-    }else{
-        $syserror = $mysqli->error;
+    $isSuccess = detailsInsert($system, $recID, $rectype, $detailValues, $modeImport, $suppress_parent_child);
+    if(!$isSuccess){
         if($use_transaction){
             $mysqli->rollback();
             if($keep_autocommit===true) {$mysqli->autocommit(true);}
         }
-        return $system->addError(HEURIST_DB_ERROR, 'Cannot save details(3)', $syserror);
+        return $system->getError();
     }
 
     $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['Title']); //for main record on save
@@ -936,6 +848,83 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     "structures"=>$rectype_structures));
     */
 }//recordSave
+
+
+/**
+* Update record - it is used in import csv
+* 
+* @param mixed $system
+* @param mixed $record
+*/
+function recordUpdate($system, $record){
+    
+    $mysqli = $system->getMysqli();
+    
+    $recID = intval($record['ID']);
+    $rectype = intval($record['RecTypeID']);
+    $rec_mod = date(DATE_8601);
+    $modeImport = @$record['AddedByImport']?intval($record['AddedByImport']):0;
+
+    $params = array('s', $rec_mod);
+    $query = 'UPDATE Records set rec_Modified=? ';
+
+    $rec_url = USanitize::sanitizeURL(@$record['URL']);
+    if($rec_url){
+        $params[0] = $params[0].'s';
+        $params[] = $rec_url;
+        $query = $query.', rec_URL=?';
+    }
+    $rec_spad = @$record['ScratchPad'];
+    if($rec_spad){
+        $params[0] = $params[0].'s';
+        $params[] = $rec_spad;
+        $query = $query.', rec_ScratchPad=?';
+    }
+
+    $query = $query.' where rec_ID='.$recID;
+
+    $stmt = $mysqli->prepare($query);
+
+    //Call the $stmt->bind_param() method with atrguments (string $types, mixed &...$vars)
+    call_user_func_array(array($stmt, 'bind_param'), referenceValues($params));
+
+    if(!$stmt->execute()){
+        $syserror = $mysqli->error;
+        $stmt->close();
+        return $system->addError(HEURIST_DB_ERROR, 'Cannot update record', $syserror);
+    }
+    $stmt->close();
+    
+    $detailValues = _prepareDetails($system, $rectype, $record, 0, $recID, 1);
+    if(!$detailValues){
+        return $system->getError();
+    }
+    
+    $newTitle = '';
+    
+    if(count($detailValues)>0){
+        $dtyIDs = array_unique(array_column($detailValues, 'dtl_DetailTypeID'));
+        //delete only affected details    
+        $query = "DELETE FROM recDetails WHERE dtl_RecID=$recID AND dtl_DetailTypeID IN (".implode(',',$dtyIDs).")";
+        if(!$mysqli->query($query)){
+            return $system->addError(HEURIST_DB_ERROR, 'Cannot delete old details', $mysqli->error);
+        }
+
+        $isSuccess = detailsInsert($system, $recID, $rectype, $detailValues, 1, false); //modeImport and suppress_parent
+        if(!$isSuccess){
+            return $system->getError();
+        }
+
+        $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['Title']); //for main record on save
+
+    }
+
+    return [
+        'status' => HEURIST_OK,
+        'data' => intval($recID),
+        'rec_Title' => $newTitle
+    ];
+}
 
 
 /**
@@ -2741,6 +2730,7 @@ function prepareRecordForUpdate($system, $record, $detailValuesNew, $update_mode
 *                     Returns `false` if any validation errors occur (and errors are added to `$system->addError()`).
 *                     Also returns `false` if required fields are missing (after attempting to apply defaults) or if no valid details are produced.
 */
+
 function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $modeImport)
 {
     global $terms, $useNewTemporalFormatInRecDetails;
@@ -4502,4 +4492,87 @@ function bugreportUpdate($system, $recID){
 
     sendPHPMailer(null, 'Bug report updater', ['to' => $to], "Heurist tracker #{$recID}: {$title}", $updateEmail, null, true);
 }
+
+/**
+* Insert record details
+* 
+* @param mixed $system
+* @param mixed $detailValues
+* @param mixed $modeImport
+*/
+function detailsInsert($system, $recID, $rectype, $detailValues, $modeImport, $suppress_parent_child){    
+    
+    $mysqli = $system->getMysqli();
+    $addedByImport = ($modeImport?1:0);
+
+    $query = 'INSERT INTO recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID, dtl_Geo, dtl_HideFromPublic) '.
+    "VALUES ($recID, ?, ?, $addedByImport, ?, ST_GeomFromText(?), ?)";
+    $stmt = $mysqli->prepare($query);
+
+    if ($stmt) {
+
+        // $stmt->bind_param('isis', $dtyID, $dtl_Value, $dtl_UploadedFileID, $dtl_Geo);
+        foreach ($detailValues as $idx=>$values) {
+
+            $dtyID = $values['dtl_DetailTypeID'];
+            $dtl_Value = @$values['dtl_Value'];
+            if($dtl_Value) {$dtl_Value = super_trim($dtl_Value);}//including &nbsp; and &xef; (BOM)
+            $dtl_UploadedFileID = @$values['dtl_UploadedFileID'];
+            $dtl_Geo = @$values['dtl_Geo'];
+            $dtl_HideFromPublic = @$values['dtl_HideFromPublic'];
+
+            $stmt->bind_param('isisi', $dtyID, $dtl_Value, $dtl_UploadedFileID, $dtl_Geo, $dtl_HideFromPublic);
+            if(!$stmt->execute()){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot save value - possibly bad encoding or invalid date format (System error: '.$mysqli->error.').', $mysqli->error);
+                return false;
+            }
+
+            //add reverce field "Parent Entity" (#247) in child resource record
+            if(defined('DT_PARENT_ENTITY') && !$suppress_parent_child){
+                if(@$values['dtl_ParentChild']==true){
+
+                    // $dtl_Value  is id of child record
+                    $res = addReverseChildToParentPointer($mysqli, $dtl_Value, $recID, $addedByImport, false);
+
+                    if($res<0){
+                        $system->addError(HEURIST_DB_ERROR,
+                            'Cannot save value. Cannot insert reverse pointer for child record', $mysqli->error);                            
+                        return false;
+                    }elseif($res!=0){
+                        //update record title for child record
+                        list($child_rectype, $child_title) = mysql__select_row($mysqli,
+                            'SELECT rec_RecTypeID, rec_Title FROM Records WHERE rec_ID='
+                            .intval($dtl_Value));
+                        recordUpdateTitle($system, $dtl_Value, $child_rectype, $child_title); //update for child records
+                    }
+
+                }elseif($dtyID == DT_PARENT_ENTITY){
+
+                    $res = addParentToChildPointer($mysqli, $recID, $rectype, $dtl_Value, null, $addedByImport);
+                    if($res<0){
+                        $system->addError(HEURIST_DB_ERROR,
+                            'Cannot save value. Cannot insert pointer for parent record', $mysqli->error);
+                        return false;
+                    }elseif($res!=0){
+                        //update record title for parent record
+                        list($parent_rectype, $parent_title) = mysql__select_row($mysqli,
+                            'SELECT rec_RecTypeID, rec_Title FROM Records WHERE rec_ID='
+                            .intval($dtl_Value));
+                        recordUpdateTitle($system, $dtl_Value, $parent_rectype, $parent_title); //update for parent record
+                    }
+
+                }
+            }
+
+        }//for
+        $stmt->close();
+        //$stmt_geo->close();
+
+    }else{
+        $system->addError(HEURIST_DB_ERROR, 'Cannot save details(3)', $mysqli->error);
+        return false;
+    }
+    
+    return true;
+}//detailsInsert
 ?>

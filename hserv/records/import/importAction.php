@@ -2639,10 +2639,20 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
 
     $increment_update = true;
     if($updating_record){
-        $increment_update = self::_isRecordUpdating($recordId, $record);
+        //AO $increment_update = self::_isRecordUpdating($recordId, $record);
+        $increment_update = count($record['details'])>1;
+        if($increment_update){
+            $out = recordUpdate(self::$system, $record);//see recordModify.php    
+        }else{
+            //fake result 
+            $out = ['status'=>HEURIST_OK, 'data'=>$recordId];
+        }
+    }else{
+        $out = recordSave(self::$system, $record, false, false, 0, $record_count);//see recordModify.php    
     }
+        
 
-    $out = recordSave(self::$system, $record, false, false, 0, $record_count);//see recordModify.php
+    
 
     $new_recordID = null;
 
@@ -3149,7 +3159,8 @@ public static function performImport($params, $mode_output){
                             }else{
                                 // record found - update detail according TO settings
                                 $recordId = $recordId_in_import;
-                                $details = $details_orig;
+                                //2025-07-29 update mapped fields only 
+                                //$details = $details_orig;
                             }
 
                         }elseif($ignore_rectype == 1){ // no insert when ignoring rectype
@@ -3508,6 +3519,10 @@ public static function performImport($params, $mode_output){
                                     }
 
                                 }elseif($params['sa_upd']==0 || $params['sa_upd']==3){ //add distinct only
+                                
+                                    if(@$details_orig["t:".$field_type] && !@$details["t:".$field_type]){
+                                        $details["t:".$field_type] = $details_orig["t:".$field_type];
+                                    }
 
                                     $need_add = true; //retain existing and add new distinct one
                                 }
@@ -3968,27 +3983,19 @@ public static function insertNewColumns($params){
 }
 
 /**
- * Checks if the record is actually being updated with new values
+ * Checks if the incoming record data would actually result in an update to an existing record.
  *
- * @param integer $rec_ID - record ID
- * @param array $record The incoming record data intended for saving (must contain a 'details' key).
- * @return bool True if the incoming data differs from the existing record's data or if header fields
- *              (URL, ScratchPad) are different, false otherwise. Also true if the existing record has no details.
+ * Compares the header fields (URL, ScratchPad) and all detail values of the incoming `$record`
+ * data with the current data of the Heurist record identified by `$rec_ID`.
+ * This is used to prevent counting an import operation as an "update" if the submitted data
+ * is identical to what's already stored.
+ *
+ * @param int $rec_ID The ID of the existing Heurist record.
+ * @param array $record An array containing the new data to be potentially saved, structured
+ *                      similarly to how `recordSave` expects it (especially the 'details' part).
+ * @return bool True if differences are found (i.e., an update would occur), false otherwise.
+ *              Returns true if the existing record has no details (implying any new details are an update).
  */
-    /**
-     * Checks if the incoming record data would actually result in an update to an existing record.
-     *
-     * Compares the header fields (URL, ScratchPad) and all detail values of the incoming `$record`
-     * data with the current data of the Heurist record identified by `$rec_ID`.
-     * This is used to prevent counting an import operation as an "update" if the submitted data
-     * is identical to what's already stored.
-     *
-     * @param int $rec_ID The ID of the existing Heurist record.
-     * @param array $record An array containing the new data to be potentially saved, structured
-     *                      similarly to how `recordSave` expects it (especially the 'details' part).
-     * @return bool True if differences are found (i.e., an update would occur), false otherwise.
-     *              Returns true if the existing record has no details (implying any new details are an update).
-     */
 private static function _isRecordUpdating($rec_ID, $record){
 
     $existing_record = recordSearchByID(self::$system, $rec_ID, false);
