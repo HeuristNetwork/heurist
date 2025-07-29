@@ -144,14 +144,14 @@ $defaultRootFileUploadURL = '';
 // [server]                 
 // enter the server name or IP address of your Web server, null will pull SERVER_NAME from the request header
 // you may set this value if several domains point to your server. It will unify urls across links, web pages, reports
-// for example $serverName = "heuristscholar.org";  Be sure to include the port if not port 80
+// for example $serverName = "heurist.huma-num.fr";  Be sure to include the port if not port 80
 $serverName = null; // if not 'null', overrides default taken from request header SERVER_NAME
 $mailDomain = null; // set mail domain if it does not use server domain
 
 // if base $heuristBaseURL is null, heurist detects it automatically 
 // Although it may differ from desired url you wish to see (because web server settings: aliases, rewrite rules etc)
 // Set this value explicitely to avoid possible issues
-$heuristBaseURL = null;     // base url ( ie server url+optional folder https://heuristscholar.org/h6-alpha )  
+$heuristBaseURL = null;     // base url ( ie server url+optional folder https://heurist.huma-num.fr/h7-alpha )  
 // if you have several heurist instances of heurist, set this value to production instance
 //
 // if $heuristBaseURL is set and $heuristBaseURL_pro is null, then production version is the same as $heuristBaseURL

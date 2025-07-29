@@ -36,7 +36,7 @@ do
   sudo mysql --login-path=$connection -N -B -e "
 	SELECT ugr_eMail,ugr_FirstName,ugr_LastName
 	  FROM sysUGrps 
-	  WHERE ugr_Type='user' AND NOT ugr_email='guest@null' AND NOT ugr_email='info@heuristscholar.org'
+	  WHERE ugr_Type='user' AND NOT ugr_email='guest@null' AND NOT ugr_email='info@heuristscholar.org' AND NOT ugr_email='info@heuristnetwork.org'
 	" $db >> $respath/cumulative_list_of_users_unique_temp.tsv;  
 
 done

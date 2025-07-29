@@ -37,7 +37,7 @@ if [ -z $1 ]
 # This file copies all necessary Heurist distribution files and support files from the current directory
 # (any Heurist hx-xx program directory) to a temporary directory in the heurist-build directory in /var/www/html/HEURIST.
 # Make sure the current directory is the up-to-date version you want to package.
-# The script is set up for the HeuristScholar server and may require modification for other directory layouts
+# The script is set up for the HeuristRef.net server and may require modification for other directory layouts
 
 # RUN THIS FILE FROM AN hx-xx DIRECTORY CONTAINING DESIRED HEURIST CODE
 
