@@ -38,7 +38,7 @@
 // [server url]                 
 // enter the server name or IP address of your Web server, null will pull SERVER_NAME from the request header
 // you may set this value if several domains point to your server. It will unify urls across links, web pages, reports
-// for example $serverName = "heuristscholar.org";  Be sure to include the port if not port 80
+// for example $serverName = "heurist.huma-num.fr";  Be sure to include the port if not port 80
 if (!@$serverName) {$serverName = null;} // if not 'null', overrides default taken from request header SERVER_NAME
 if (!@$mailDomain) {$mailDomain = null;} // set mail domain if it does not use server domain
 
@@ -54,7 +54,7 @@ if (!@$heuristBaseURL_pro) {$heuristBaseURL_pro = null;}
 
 // [database]
 // enter the host name or IP address of your MySQL server, blank --> localhost
-// for example $dbHost = "heuristscholar.org";  will cause the code to use mysql on the server at heuristscholar.org
+// for example $dbHost = "heuristdb.huma-num.fr";  will cause the code to use mysql on the server at heuristdb.huma-num.fr
 // Can be used to specify a separate database server in a tiered setup
 if (!@$dbHost) {$dbHost= "";}// Optional, blank = localhost for single tier, or set IP of MySQL server
 

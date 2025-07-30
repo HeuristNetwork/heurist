@@ -1378,7 +1378,7 @@ function recordUpdateOwnerAccess($system, $params){
         $fields = ['rec_Modified=?'];
         $data = [$rec_mod];
         $types = 's';
-        if(!empty($main_owner)){
+        if($main_owner && $main_owner >= 0){
             $fields[] = 'rec_OwnerUGrpID=?';
             $data[] = $main_owner;
             $types .= 'i';
