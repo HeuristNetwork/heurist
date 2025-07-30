@@ -322,7 +322,7 @@ function downloadFileReferences($system, $ids){
         exit;
     }
 
-    $sep = "\t";
+    $seperator = "\t";
 
     // retrieve file details
     $mysqli = $system->getMysqli();
@@ -355,7 +355,7 @@ function downloadFileReferences($system, $ids){
     // return setup
 
     // write results
-    fputcsv($fd, array("Uploaded_File_ID", "Name", "Path", "Obfuscated URL", "Description", "Caption", "Copyright", "Copy Owner", "File Type", "File Size (in KB)", "Checksum", "Uploaded By", "Added On", "Last Modified", "Original file name", "Referenced by", "New ref H-IDs"), $sep);
+    fputcsv($fd, ["Uploaded_File_ID", "Name", "Path", "Obfuscated URL", "Description", "Caption", "Copyright", "Copy Owner", "File Type", "File Size (in KB)", "Checksum", "Uploaded By", "Added On", "Last Modified", "Original file name", "Referenced by", "New ref H-IDs"], $seperator);
 
     /*
         [0] => File Name
@@ -378,19 +378,20 @@ function downloadFileReferences($system, $ids){
         $id = array_shift($details);
 
         $name = !empty($details[0]) ? $details[0] : $details[1];
-        $path = !empty($details[3]) ? $details[3] . $name : 'External Source';
+        $path = !empty($details[3]) ? "{$details[3]}{$name}" : 'External Source';
         $obf_url = empty($details[2]) ? 'missing' : HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME . '&file=' . $details[2];
         $file_size = $details[6] == 0 ? 'remote' : $details[6];
 
         $fullpath = !empty($details[0]) ? resolveFilePath( $details[3].$details[0] ) : '';
         $checksum = empty($fullpath) ? 'remote' : md5_file($fullpath);
 
-        $usage_query = 'SELECT dtl_RecID FROM recDetails WHERE dtl_UploadedFileID = ' . $id;
+        $usage_query = "SELECT dtl_RecID FROM recDetails WHERE dtl_UploadedFileID = $id";
         $recs = mysql__select_list2($mysqli, $usage_query);
-        if(!$recs || empty($recs)){
-            $recs = array(0);
+        if(empty($recs)){
+            $recs = [0];
         }
-        fputcsv($fd, array($id, $name, $path, $obf_url, $details[4], $details[11], $details[12], $details[13], $details[5], $file_size, $checksum, $details[7], $details[8], $details[9], $details[10], implode('|', $recs), ""), $sep);
+
+        fputcsv($fd, [$id, $name, $path, $obf_url, $details[4], $details[11], $details[12], $details[13], $details[5], $file_size, $checksum, $details[7], $details[8], $details[9], $details[10], implode('|', $recs), ""], $seperator, "\"", "\\", "\n");
     }
     $res_files->close();
 
