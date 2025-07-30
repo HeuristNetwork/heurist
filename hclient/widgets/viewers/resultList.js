@@ -666,7 +666,7 @@ $.widget( "heurist.resultList", {
         .css({'overflow-y':'auto'})
         .appendTo( this.element );
         
-        if(this.element.css('position')=='relative' && this.element[0].style.height=='100%'){
+        if(this.options.isRelative || (this.element.css('position')=='relative' && this.element[0].style.height=='100%')){
             this.div_content.css('height','100%');
         }else{                                          
             this.div_content.addClass('ent_content_full');    
@@ -1019,6 +1019,7 @@ $.widget( "heurist.resultList", {
         }
 
         let override_option = this.options.support_collection || (this.options.show_export_button && this.export_button.is(':visible'));
+   
         if(this.options.show_toolbar || override_option){
             this.div_toolbar.css({'top':(top-1)+'px', height:'auto'});
             this.div_toolbar.show();

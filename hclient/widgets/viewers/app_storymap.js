@@ -196,6 +196,8 @@ $.widget( "heurist.app_storymap", {
     /** @memberof heurist.app_storymap @instance @private @property {?jQuery} pnlStory - jQuery panel containing the story elements list/viewer. */
     pnlStory: null,
     
+    _isRelative: false,
+    
     /**
      * @memberof heurist.app_storymap
      * @instance
@@ -227,6 +229,8 @@ $.widget( "heurist.app_storymap", {
             this.options.elementsPlaceholder = '<br><br>There are no story elements to display for the selected item';
         }
         
+        this._isRelative = this.element.css('position')=='relative';
+
         let layout = [{"name":"StoryMap","type":"group","css":{}, //"position":"relative","height":"100%"
             "children":
             [{"name":"TabControl","type": ((this.options.reportOverviewMode=='tab' || this.options.reportEndPageMode=='tab')?"tabs":"group"),
@@ -234,8 +238,10 @@ $.widget( "heurist.app_storymap", {
                 [{"name":top.HR('Overview'),"type":"group","css":cssOverview,"folder":true,
                     "children":[{"name":"Overview content","type":"text","css":{},"content":"","dom_id":"pnlOverview"}]},
                  {"name":top.HR('Story'),"type":"group","css":{},"folder":true,
-                        "children":[{"appid":"heurist_resultList","name":"Story list","css":{"position":"relative","minWidth":150}, //"minHeight":400
+                        "children":[{"appid":"heurist_resultList","name":"Story list","css":
+                                    {"position":"absolute","minWidth":150,"height":'100%',"width":'100%'}, //"minHeight":400
                             "options":{
+                                "isRelative": this._isRelative,    
                                 "select_mode": "none",
                                 "support_collection":false,
                                 "support_reorder":false,
@@ -292,7 +298,7 @@ $.widget( "heurist.app_storymap", {
             ? '<br><h3 class="not-found" style="color:teal;display:inline-block">Please select a story in the list</h3>' : placeholder;
         
         this._initial_div_message = 
-        $(`<div class="ent_wrapper" style="padding: 1em;background: white;">${placeholder}</div>`)
+        $(`<div class="ent_wrapper" style="padding: 1em;background: white; overflow-y:auto">${placeholder}</div>`)
         .appendTo(this.element);
         
         
@@ -306,6 +312,8 @@ $.widget( "heurist.app_storymap", {
         //add end page panel
         this.pnlEndPage = this.element.find('#pnlEndPage');
 
+        //if(typeof resultList !== 'function') return;
+        
         this._resultList.resultList('option', 'language', this.options.language);
         this._resultList.resultList('option', 'allow_record_content_view', true);
         this._resultList.resultList('applyViewMode', 'record_content', true);
@@ -339,7 +347,11 @@ $.widget( "heurist.app_storymap", {
             });
             
         }else{  //INLINE
-            this.pnlStory.css({'position':'absolute',top:0, bottom:'0px', left:0, right:0});
+            if(this._isRelative){
+                
+            }else{
+                this.pnlStory.css({'position':'absolute',top:0, bottom:'0px', left:0, right:0});    
+            }
             
             if(this.options.reportOverviewMode=='header'){
                 this.pnlOverview.height(cssOverview.height);
@@ -1744,9 +1756,10 @@ $.widget( "heurist.app_storymap", {
             this._stopAnimeAndClearMap();
 
             this._currentElementID = recID;
+
+console.log('rep', this.options.reportElement);
             
             if(this.options.reportElementMode=='slide'){   //one by one   
-
                 
                 let infoURL;
                 let isSmarty = false;

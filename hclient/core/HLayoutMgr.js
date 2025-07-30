@@ -472,7 +472,7 @@ console.log(content);
 
         if(!layout.options) layout.options = {};
 
-        let widgetOptions = window.hWin.HEURIST4.util.cloneJSON(layout.options);
+        let widgetOptions = $.extend({},layout.options); //window.hWin.HEURIST4.util.cloneJSON
          
         if(layout.appid=='heurist_Map'){
             widgetOptions['leaflet'] = true;

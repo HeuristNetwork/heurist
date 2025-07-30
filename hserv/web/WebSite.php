@@ -765,8 +765,8 @@ class WebSite
             $menuFormat = defined('DT_CMS_MENU_FORMAT')?$this->getValue($this->menuRecords[$pageId], DT_CMS_MENU_FORMAT):null;
             $menuIcon = $this->getFile($this->menuRecords[$pageId], DT_THUMBNAIL, '', 'thumb');
             
-            if($menuIcon && $menuFormat!=TRM_NAME_ONLY){
-                if($menuFormat==TRM_ICON_ONLY){
+            if($menuIcon && defined('TRM_NAME_ONLY') && $menuFormat!=TRM_NAME_ONLY){
+                if(defined('TRM_ICON_ONLY') && $menuFormat==TRM_ICON_ONLY){
                     $menu_title = '';
                 }
                 $menu_title = '<span><img src="'.$menuIcon.'" style="max-height:40px"></span>'.$menu_title;
