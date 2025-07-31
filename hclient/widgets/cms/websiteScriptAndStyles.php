@@ -1039,8 +1039,7 @@ function afterPageLoad(document, pageid, eventdata){
                         eventdata.event_type = window.hWin.HAPI4.Event.ON_REC_SEARCHSTART;
                         loadPageContent(new_pageid, eventdata);//on link or selection - execute search on different page
 
-                    }else{
-
+                    }else if($('#main-recordview').is(":visible")){
                         eventdata.search_page = 0;
                         $('#main-recordview').hide();
                         $('#main-content').show();
