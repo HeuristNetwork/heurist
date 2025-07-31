@@ -1006,9 +1006,9 @@ $.widget( "heurist.resultList", {
     },
 
     //adjust top,height according to visibility settings -----------
-    _adjustHeadersPos: function(){
+    _adjustHeadersPos: function(isForced){
 
-        if(!this.element.is(':visible')) return;
+        if(isForced!==true && !this.element.is(':visible')) return;
         
         let top = 0;    
         if(this.options.show_inner_header || !window.hWin.HEURIST4.util.isempty(this.options.title)){
@@ -3863,7 +3863,7 @@ $.widget( "heurist.resultList", {
         if(headercss){
             this.div_header.css(headercss);    
         }
-        this._adjustHeadersPos();
+        this._adjustHeadersPos( true );
         
         this.refreshSubsetSign();    
     },

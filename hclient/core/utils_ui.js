@@ -2625,9 +2625,9 @@ window.hWin.HEURIST4.ui = {
         }
         const isEdit = !window.hWin.HEURIST4.util.isempty(options.edit);
         
-        const use_redirect = options.use_redirect??window.hWin.HAPI4.sysinfo.use_redirect;
+        const use_redirect = version!=3 && (options.use_redirect??window.hWin.HAPI4.sysinfo.use_redirect);
         
-        let surl = window.hWin.HAPI4[(mode=='production')?'baseURL_pro':'baseURL'];
+        let surl = window.hWin.HAPI4[(mode=='production' && version!=3)?'baseURL_pro':'baseURL'];
         
         let params = [];
         

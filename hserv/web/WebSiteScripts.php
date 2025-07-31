@@ -45,6 +45,7 @@ if(!defined('PDIR')){
     <script type="module" src="<?php echo PDIR;?>hclient/widgets/HMenu/HMenu.js"></script>
     <script type="module" src="<?php echo PDIR;?>hclient/widgets/HMenu/HMenuPersonal.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/app_storymap.js"></script>
 
     <script type="text/javascript" src="<?php echo PDIR;?>layout_default.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/HLayoutMgr.js"></script>

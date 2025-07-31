@@ -1756,8 +1756,6 @@ $.widget( "heurist.app_storymap", {
             this._stopAnimeAndClearMap();
 
             this._currentElementID = recID;
-
-console.log('rep', this.options.reportElement);
             
             if(this.options.reportElementMode=='slide'){   //one by one   
                 

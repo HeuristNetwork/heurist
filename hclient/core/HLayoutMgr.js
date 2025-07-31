@@ -105,7 +105,7 @@ class HLayoutMgr {
           if(widget_cfg && widget_cfg.appid){
                //widget_cfg.key = this.pnl_counter;
                //this.pnl_counter++;
-               ele.attr('data-hid', widget_cfg.key);
+               ele.attr('data-hid', widget_cfg.key); //.addClass('cms-element');
                this.#layoutInitWidget(widget_cfg, ele);
           }
       });
@@ -1033,7 +1033,7 @@ console.log(content);
             res.push({name:'Content', type:"text",  content: ele[0].outerHTML });
             if(this._isEditMode){
                 this.#layoutInitKey(res, 0);
-                ele.attr('data-hid', res[0].key);
+                ele.attr('data-hid', res[0].key).addClass('cms-element');
                 ele.addClass('tinymce-body cms-element brick');
             }
             
@@ -1114,7 +1114,7 @@ console.log(content);
                 
                 if(this._isEditMode){
                     that.#layoutInitKey(child);
-                    ele.attr('data-hid', child.key);
+                    ele.attr('data-hid', child.key).addClass('cms-element');
                     ele.addClass(cmsClasses);
                 }
 

@@ -573,6 +573,8 @@ class HCmsEditor {
   // replace classes with given prefix with new classes
   //
   static replaceBsClasses(element, removeWithPrefix, newClasses){
+      
+      if(!element) return;
 
       let classes = Array.from(element.classList);
 
