@@ -2729,6 +2729,10 @@ console.log('rep', this.options.reportElement);
     //
     addStoryIDToPaths: function(newLayer){
 
+        if(!window.hWin.HEURIST4.util.isObject(newLayer?._layers)){
+            return;
+        }
+
         for(const topLayerID in newLayer._layers){
 
             if(!Object.hasOwn(newLayer._layers, topLayerID)){

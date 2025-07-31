@@ -31,7 +31,7 @@ use hserv\utilities\USanitize;
 use hserv\utilities\USystem;
 
     $glb_curl_code = null;
-    $glb_curl_error = null;
+    $glb_curl_error = '';
 
 
     /**
@@ -1700,9 +1700,9 @@ function isActionInProgress($action, $range_minutes, $db_name=''){
      */
 function uploadFileToNakala($system, $params) {
 
-        global $glb_curl_code, $glb_curl_error, $system; // $system is passed as param, also global.
+    global $glb_curl_code, $glb_curl_error, $system; // $system is passed as param, also global.
     $glb_curl_code = null;
-    $glb_curl_error = null;
+    $glb_curl_error = '';
 
     $herror = HEURIST_ACTION_BLOCKED;
 

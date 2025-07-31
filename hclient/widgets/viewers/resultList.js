@@ -4568,7 +4568,7 @@ $.widget( "heurist.resultList", {
 
         }else{
             this._isCollectionUsed = false;
-            this._currentRecordset = this._fullRecordset;
+            this._currentRecordset = this._fullRecordset ?? this._currentRecordset;
         }
 
         const query = this._currentRecordset.length() > 0 ? `ids:${this._currentRecordset.getIds().join(',')}` : '';

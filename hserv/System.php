@@ -936,7 +936,7 @@ class System {
      * Closes the database connection before exiting.
      *
      * @param string|null $message Optional. The error message. If provided, an error with this message will be added.
-     * @param int|null $error_code Optional. The Heurist error code. Defaults to `HEURIST_INVALID_REQUEST` if a message is provided.
+     * @param int|string|null $error_code Optional. The Heurist error code. Defaults to `HEURIST_INVALID_REQUEST` if a message is provided.
      * @param bool $is_api Optional. If true (default), sets CORS headers and HTTP status codes appropriate for an API.
      *                     If false, behaves more like `errorExit` but still uses the error structure.
      * @return void This function calls `exit`.

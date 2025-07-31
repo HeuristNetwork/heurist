@@ -363,7 +363,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
         let selScope = this.selectRecordScope.get(0);
 
         let rectype_Ids = this._currentRecordset.getRectypes();
-        let init_rectype = rectype_Ids.length > 1 ? this.options.initial_cfg.rty_ID : rectype_Ids[0];
+        let init_rectype = rectype_Ids.length > 1 && this.options.initial_cfg ? this.options.initial_cfg.rty_ID : rectype_Ids[0];
 
         if(rectype_Ids.length>0 && 
            this.options.initial_cfg && 
