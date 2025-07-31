@@ -1305,7 +1305,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 layout_params['basemaps'] = $dlg.find('input[name="basemaps"]').val();    
             }
 
-            opts['showCurrentResults'] = $dlg.find('input[name="showCurrentResults"]').is(':checked');
+            opts['showCurrentResults'] = $dlg.find('#showCurrentResults').is(':checked');
 
             opts['custom_links'] = $dlg.find('textarea[name="custom_links"]').val(); 
             opts['current_search_filter'] = $dlg.find('input[name="current_search_filter"]').val();   

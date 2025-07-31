@@ -184,7 +184,7 @@ $.widget( "heurist.app_timemap", {
         .appendTo( this.framecontent );
           
         this.loadanimation(true);
-          
+        
         if(this.options.eventbased){
 
             this._events = window.hWin.HAPI4.Event.ON_CREDENTIALS

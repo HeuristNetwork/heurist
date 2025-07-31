@@ -75,6 +75,7 @@ if($useOldCode){
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/recordListExt.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultListCollection.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/app_storymap.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/app_timemap.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/buttonsMenu.js"></script>
     
     
