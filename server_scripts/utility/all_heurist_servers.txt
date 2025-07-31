@@ -1,0 +1,30 @@
+# This file is only needed on HeuristRef.net
+# It is created and updated by /srv/scripts/list_all_servers.sh  
+
+# This file lists all known server IP addresses extracted from /var/log/httpd/access_log* and ssl_access_log*
+# by looking for /admin/setup/dbproperties/getCurrentVersion.php in the logs.
+# That is a call made back to HeuristRef.net to check current code version
+
+# The file is cumulative - existing comments are left in place, new IP addresses are added 
+# and date of last access is updated for existing IP addresses
+
+# TGIR Huma-Num
+134.158.33.199 31/Jul/2025
+
+# Neuilly-sur-seine Proxad Free Sas
+82.66.110.111 08/Jul/2025
+
+# Greece Patra University Of Patras
+150.140.141.249 18/Jul/2025
+
+# Switzerland Lausanne University Of Lausanne
+130.223.1.12 22/Jul/2025
+
+# Greece Athina Institution, GALLIKH ARXAIOLOGIKH, 6 DIDOTOU, 10680 Athens
+62.1.105.162 31/Jul/2025
+
+# Foundation of Research and Technology - Hellas, Institute of Computer Science
+139.91.235.21 30/Jun/2025
+
+# Further servers (IP Addresses) will be added by the script.
+# The organisation name will need to be researched and added manually
