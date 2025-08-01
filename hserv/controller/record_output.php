@@ -391,7 +391,7 @@ function downloadFileReferences($system, $ids){
             $recs = [0];
         }
 
-        fputcsv($fd, [$id, $name, $path, $obf_url, $details[4], $details[11], $details[12], $details[13], $details[5], $file_size, $checksum, $details[7], $details[8], $details[9], $details[10], implode('|', $recs), ""], $seperator, "\"", "\\", "\n");
+        fputcsv($fd, [$id, $name, $path, $obf_url, $details[4], $details[11], $details[12], $details[13], $details[5], $file_size, $checksum, $details[7], $details[8], $details[9], $details[10], implode('|', $recs), ""], $seperator, "\"", "\\"); //, "\n"
     }
     $res_files->close();
 
