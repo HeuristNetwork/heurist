@@ -1276,7 +1276,7 @@ $.widget( "heurist.editing_input", {
             .uniqueId()
             .val(value)
             .addClass('text ui-widget-content ui-corner-all')
-            .css({'overflow-x':'hidden'})
+            .css({'overflow-x':'hidden', resize:'both'})
             .on('keydown',function(e){
                 if (e.keyCode == 65 && e.ctrlKey) {
                     e.target.select();
@@ -1373,7 +1373,6 @@ $.widget( "heurist.editing_input", {
                             editorMode = {mode:'css'};
                         }
                     }
-                    
                     codeEditor = new EditorCodeMirror($input, editorMode);
                 }
                 

@@ -57,10 +57,9 @@ class HCmsConfig {
       this.element = this.cmsEditor.findInWebSite('.cms-element[data-hid="'+this.element_cfg.key+'"]'); //element in main-content    
       $(this.element).removeClass('marching-ants marching');
       
-      let that = this;
       this.container.empty().load(window.hWin.HAPI4.baseURL
           +'hclient/widgets/cms/HCmsConfig.html',
-          ()=>that.initControls());
+          ()=>this.initControls());
   }
   
   /**
@@ -70,7 +69,6 @@ class HCmsConfig {
       
       const alreadyModified = this.isChanged;
       
-      let that = this;
       let cont = this.container;
       let l_cfg = this.l_cfg;
       
@@ -82,26 +80,26 @@ class HCmsConfig {
       
       cont.find('input[data-type="element-name"]').val(l_cfg.name);
       cont.find('input[data-type="element-id"]').val(l_cfg.dom_id); //duplication for options.widget_id
-      cont.find('input[data-type^="element"]').on('change',()=>that.onContentChange(true));
+      cont.find('input[data-type^="element"]').on('change',()=>this.onContentChange(true));
       
       //Listeners for inputs
-      cont.find('input[data-type="css"]').on('change', (e)=>that.#getCss(e));
-      cont.find('input[data-type="css"]').on('keyup', (e)=>that.#getCss(e));
+      cont.find('input[data-type="css"]').on('change', (e)=>this.#getCss(e));
+      cont.find('input[data-type="css"]').on('keyup', (e)=>this.#getCss(e));
       
       //Margin sync values
       cont.find('.cb_sync').parent().css({'font-size':'0.8em'});
-      cont.find('.cb_sync').on('change',(e)=>that.#onMarginSync(e));
-      cont.find('input[name^="bsMargin-"]').on('change',(e)=>that.#onMarginSyncVal(e));
+      cont.find('.cb_sync').on('change',(e)=>this.#onMarginSync(e));
+      cont.find('input[name^="bsMargin-"]').on('change',(e)=>this.#onMarginSyncVal(e));
       
       //Listeners for selects    
       cont.find('#properties_form select[data-type!="cardinal"]').each((i,selObj)=>{
             selObj = window.hWin.HEURIST4.ui.initHSelect(selObj);
-            selObj.on('change', (e)=>that.#getCss(e));
+            selObj.on('change', (e)=>this.#getCss(e));
       });
 
       //Listeneres for global border and bg checkboxes
-      cont.find('input[name="background"]').on('change',(e)=>that.#getCss(e) );
-      cont.find('input[name="border"]').on('change',(e)=>that.#getCss(e) );
+      cont.find('input[name="background"]').on('change',(e)=>this.#getCss(e) );
+      cont.find('input[name="border"]').on('change',(e)=>this.#getCss(e) );
 
       //init color pickers
       cont.find('input[name$="-color"]').colorpicker({
@@ -114,12 +112,24 @@ class HCmsConfig {
           l_cfg.bsClasses = HCmsEditor.getBsClassesAsString(this.element, this.allAffectedBsClasses);
       }
       
+      //init file picker
+      cont.find('input[name="background-image"]')
+      .on('click', ()=>this.#selecHeuristMedia());
+      cont.find('#btn-background-image').button()
+      .css({'font-size':'0.7em'})
+      .on('click', ()=>this.#selecHeuristMedia());
+
+      cont.find('#btn-background-image-clear')
+      .button() //{icon:'ui-icon-close',showLabel:false})
+      .css({'font-size':'0.7em'})
+      .on('click', ()=>this.#clearBgImage());      
+      
       this.setCssToUI();
       this.assignCssTextArea();
 
       //direct editor        
       let textAreaCss = cont.find('textarea[name="elementCss"]');
-      textAreaCss.on('change',function(){
+      textAreaCss.on('change',()=>{
 
           let vals = textAreaCss.val();
 
@@ -136,43 +146,41 @@ class HCmsConfig {
               }
           }
 
-          $(that.element).removeAttr('style');
-          $(that.element).css(new_css);
-          that.l_cfg.css = new_css;
+          $(this.element).removeAttr('style');
+          $(this.element).css(new_css);
+          this.l_cfg.css = new_css;
 
-          that.setCssToUI();
-          that.#getCss();
-          
-          //that.onContentChange(true);
+          this.setCssToUI();
+          this.#getCss();
       });
-      cont.find('textarea[name="elementClasses"]').on('change',()=>that.#applyUserClasses());
+      cont.find('textarea[name="elementClasses"]').on('change',()=>this.#applyUserClasses());
       
       //direct content editor
       let btnDirectEdit = cont.find('div.btn-html-edit');
-      btnDirectEdit.button().on('click', ()=>that.#showCodeEditor());
+      btnDirectEdit.button().on('click', ()=>this.#showCodeEditor());
       
       let btnConvert = cont.find('div.btn-css-convert');
-      btnConvert.button().on('click', ()=>that.#convertUserStyles());
+      btnConvert.button().on('click', ()=>this.#convertUserStyles());
       
         
       //SAVE AND CANCEL BUTTONS      
       //save entire page (in background) 
-      cont.find('.btn-save-and-close').button().css('border-radius','4px').on('click', function(){
-          that.getCfgFromUI();
-          that.onClose.call(this, that.l_cfg, 'close');
+      cont.find('.btn-save-and-close').button().css('border-radius','4px').on('click', ()=>{
+          this.getCfgFromUI();
+          this.onClose.call(this, this.l_cfg, 'close');
       });
 
-      cont.find('.btn-save-only').button().css('border-radius','4px').on('click', function(){
-          that.getCfgFromUI();
-          that.onClose.call(this, that.l_cfg, 'save');
-          that.onContentChange( false );
+      cont.find('.btn-save-only').button().css('border-radius','4px').on('click', ()=>{
+          this.getCfgFromUI();
+          this.onClose.call(this, this.l_cfg, 'save');
+          this.onContentChange( false );
       });
-      cont.find('.btn-cancel').css('border-radius','4px').button().on('click', function(){
+      cont.find('.btn-cancel').css('border-radius','4px').button().on('click', ()=>{
           //restore old settings for classes, style and content
-          if(that.isChanged){
-              that.revertChanges();
+          if(this.isChanged){
+              this.revertChanges();
           }
-          that.onClose.call();      
+          this.onClose.call();      
       });
       
       this.onContentChange( alreadyModified );
@@ -262,10 +270,10 @@ class HCmsConfig {
   * Show HTML code editor
   */
   #showCodeEditor(){
-      let that = this;
+
       if(!this.codeEditor){
             this.codeEditor = this.container.find('#codemirror-container').HCmsCodeEditor({title: window.hWin.HR("Edit content of element"),
-                                                                          onClose:(context)=>that.onCodeEditorApply(context),
+                                                                          onClose:(context)=>this.onCodeEditorApply(context),
                                                                           helpContent: 'website_header_footer.htm',
                                                                           currentLanguage: this.cmsEditor.currentLanguage,
                                                                           allLanguages: this.cmsEditor.allLanguages });
@@ -376,7 +384,7 @@ class HCmsConfig {
   }
 
   /*
-  * Setter. Assigns values from l_cfg to UI
+  * Setter. Assigns values from l_cfg to UI controls
   */ 
   setCssToUI(){
 
@@ -470,19 +478,33 @@ class HCmsConfig {
 
           cont.find('select[data-type="bs"]').hSelect('refresh');
       }
+      
+      if(l_cfg.css){
+          cont.find('[data-type="css"]').each((i,inpt)=>{
+              let csskey = inpt.getAttribute('name');
+              if(csskey=='text-color'){csskey='color';}
+              if(l_cfg.css[csskey]){
+                  
+              $(inpt).val(l_cfg.css[csskey]);
+              
+              if(csskey=='color'){
+                  hasBackground = true;
+                  cont.find('select[name="textColor"]').val('');
+              }else if(csskey=='background-color'){
+                  cont.find('select[name="bgColor"]').val('');
+              }else if(csskey=='border-color'){
+                  cont.find('select[name="borderColor"]').val('');
+              }
+              if(csskey.indexOf('background')==0){
+                  hasBackground = true;
+              }
+              
+              }
+              
+          });
+      }
+      
 
-
-      //init file picker
-      cont.find('input[name="bg-image"]')
-      .on('click', this.#selecHeuristMedia);
-      cont.find('#btn-background-image').button()
-      .css({'font-size':'0.7em'})
-      .on('click', this.#selecHeuristMedia);
-
-      cont.find('#btn-background-image-clear')
-      .button() //{icon:'ui-icon-close',showLabel:false})
-      .css({'font-size':'0.7em'})
-      .on('click', this.#clearBgImage);      
 
       cont.find('input[name="background"]').prop('checked', hasBackground);
       cont.find('input[name="border"]').prop('checked', hasBorder);
@@ -522,9 +544,9 @@ class HCmsConfig {
                             //always add media as reference to production version of heurist code (not dev version)
                             sUrl = window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database
                             +"&file="+recordset.fld(record,'ulf_ObfuscatedFileID');
-                            that.container.find('input[name="bg-image"]').val(recordset.fld(record,'ulf_OrigFileName'));
+                            //that.container.find('input[name="bg-image"]').val(recordset.fld(record,'ulf_OrigFileName'));
                         }else{
-                            that.container.find('input[name="bg-image"]').val(sUrl);
+                            //that.container.find('input[name="bg-image"]').val(sUrl);
                         }
                         
                         sUrl = 'url(\'' + sUrl + '\')';
@@ -548,7 +570,7 @@ class HCmsConfig {
   */  
   #clearBgImage(){
         this.container.find('input[name="background-image"]').val('');
-        this.container.find('input[name="bg-image"]').val('');
+        //this.container.find('input[name="bg-image"]').val('');
         
         this.#getCss();
   }
@@ -622,7 +644,7 @@ class HCmsConfig {
             val = cont.find('input[name="background-image"]').val();
             if(val){
                 css['background-image'] = val;  
-                css['bg-image'] = cont.find('input[name="bg-image"]').val();
+                //css['bg-image'] = cont.find('input[name="bg-image"]').val();
                 val = cont.find('select[name="background-position"]').val();
                 css['background-position'] = val;  
                 val = cont.find('select[name="background-repeat"]').val();
@@ -729,7 +751,7 @@ class HCmsConfig {
             let old_css = this.l_cfg.css;
             //remove these parameters from css and assign new ones obtained from form
             let params = ['width','height',
-                'color','background','background-image','bg-image','background-repeat','background-position','background-size',
+                'color','background','background-color','background-image','bg-image','background-repeat','background-position','background-size',
                 '--bs-border-style','--bs-border-color'];
             if(!this.hasUserStyles){
                 params = params.concat(this.cssPaddingMarginBorder);
@@ -828,23 +850,23 @@ class HCmsConfig {
             let $dlg;
             let _buttons = [
                 {text:window.hWin.HR('Save'), 
-                    click: function(){
-                        that.container.find('.btn-save-only').trigger('click');
+                    click: ()=>{
+                        this.container.find('.btn-save-only').trigger('click');
                         $dlg.dialog('close');
-                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that, 'save');
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this, 'save');
                     }
                 },
                 {text:window.hWin.HR('Discard'), 
-                    click: function(){
-                        that.container.find('.btn-cancel').trigger('click');
+                    click: ()=>{
+                        this.container.find('.btn-cancel').trigger('click');
                         $dlg.dialog('close');
-                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that, 'discard');
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this, 'discard');
                     }
                 },
                 {text:window.hWin.HR('Cancel'), 
-                    click: function(){
+                    click: ()=>{
                         $dlg.dialog('close');
-                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(that, 'cancel');
+                        if(window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this, 'cancel');
                     }
                 }
             ];            

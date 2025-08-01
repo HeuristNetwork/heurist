@@ -204,7 +204,7 @@ class EditorCodeMirror {
             .attr("id", editor_id)
             .css({'overflow':'auto',resize:'both',width:iwidth}) // Make it resizable and scrollable
             .insertAfter(this.input) ; // Insert after the original textarea
-            this.editorContainer.hide(); // Hide initially
+            //!! this.editorContainer.hide(); // Hide initially
         }
 
         // Initialize CodeMirror instance if it doesn't exist
