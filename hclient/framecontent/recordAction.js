@@ -92,8 +92,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         let request = {
             serviceType: 'nakala',
-            service: 'nakala_get_metadata',
-            type: 'licenses'
+            metadata: 'licenses'
         };
 
         window.hWin.HEURIST4.msg.bringCoverallToFront($('body'), null, 'Retrieving available licenses...');

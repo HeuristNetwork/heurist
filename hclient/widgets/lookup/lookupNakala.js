@@ -79,7 +79,7 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
 
         let request = {
             serviceType: 'nakala',
-            service: 'nakala_get_metadata' // file types used by Nakala
+            metadata: 'all'
         };
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (data) => {
 
@@ -269,13 +269,13 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent()); // show loading cover
 
-        // for record_lookup.php
+        // for LookupController.php
         let request = {
             service: sURL, // request url
             serviceType: 'nakala' // requesting service, otherwise the request will result in an error
         };
 
-        // calls /heurist/hserv/controller/record_lookup.php
+        // calls /heurist/hserv/controller/LookupController.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
 
             window.hWin.HEURIST4.msg.sendCoverallToBack(); // hide loading cover

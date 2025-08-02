@@ -59,7 +59,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
      * @property {string} [options.title="Super Book (Work) Classification Tool for MPCE Project"]
      *           - The title of the dialog.
      * @property {string} [options.htmlContent="lookupMPCE.html"] - The HTML content file for the dialog.
-     * @property {Object} options.mapping - Configuration from `record_lookup_config.json`,
+     * @property {Object} options.mapping - Configuration from `LookupConfigs.json`,
      *                                    used by `mapIds` to set up `id_map`.
      *   @property {Object} options.mapping.fields - Field mappings from the service configuration.
      *   @property {number} options.mapping.rty_ID - The Record Type ID of the main Work record being classified.

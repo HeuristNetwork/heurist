@@ -190,13 +190,13 @@ $.widget( "heurist.lookupNakalaAuthor", $.heurist.lookupBase, {
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent()); // show loading cover
 
-        // for record_lookup.php
+        // for LookupController.php
         let request = {
             service: sURL, // request url
             serviceType: 'nakala_author' // requesting service, otherwise the request will result in an error
         };
 
-        // calls /heurist/hserv/controller/record_lookup.php
+        // calls /heurist/hserv/controller/LookupController.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
 
             window.hWin.HEURIST4.msg.sendCoverallToBack(); // hide loading cover

@@ -300,7 +300,7 @@ class System {
 
     /**
      * Retrieves the configuration for third-party web services and their mapping to Heurist record types and fields.
-     * The configuration is read from `controller/record_lookup_config.json`.
+     * The configuration is read from `controller/LookupConfigs.json`.
      *
      * @return array|null An array of web service configurations, or null if the config file doesn't exist or is invalid.
      *                    Each configuration includes 'rty_ID' and 'fields' mapping.
@@ -308,7 +308,7 @@ class System {
     private function getWebServiceConfigs(){
 
         //read service_mapping.json from setting folder
-        $config_file = dirname(__FILE__).'/controller/record_lookup_config.json';
+        $config_file = dirname(__FILE__).'/controller/LookupConfigs.json';
 
         if(!file_exists($config_file)){
             return null;

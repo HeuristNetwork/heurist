@@ -53,7 +53,7 @@ $.widget( "heurist.lookup_Template", $.heurist.lookupBase, {
      * @property {boolean} [options.modal=true] - Whether the dialog is modal.
      * @property {string} [options.title="Template lookup"] - Example dialog title.
      * @property {string} [options.htmlContent='lookup_Template.html'] - Path to the HTML file for the dialog UI.
-     * @property {?Object} options.mapping - Configuration from `record_lookup_config.json` defining
+     * @property {?Object} options.mapping - Configuration from `LookupConfigs.json` defining
      *                                     field mappings. This is used by `lookupBase.prepareValues`.
      * @property {boolean} [options.add_new_record=false] - If true, `doAction` might trigger creation of new Heurist records.
      * @property {Object} options.resultList - Options for the `resultList` widget.

@@ -56,7 +56,7 @@ $.widget("heurist.lookupESTC", $.heurist.lookupBase, {
      * @property {string} options.htmlContent - The name of the HTML file for the dialog's content.
      *                                        This is dynamically set in `_init` to 'lookupLRC18C.html' (for editions)
      *                                        or 'lookupESTC_works.html' (for works).
-     * @property {Object} options.mapping - Configuration from `record_lookup_config.json`.
+     * @property {Object} options.mapping - Configuration from `LookupConfigs.json`.
      *   @property {string} options.mapping.service - The specific ESTC service type (e.g., 'ESTC_works', 'ESTC').
      */
     options: {

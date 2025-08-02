@@ -11,7 +11,7 @@
  * The configuration data is ultimately stored in the `sys_ExternalReferenceLookups`
  * field of the `sysIdentification` record (sys_ID 1). The initial available services
  * and their definitions are typically loaded from a server-side configuration file
- * (e.g., historically `hserv/controller/record_lookup_config.json`, now more likely
+ * (e.g., historically `hserv/controller/LookupConfigs.json`, now more likely
  * managed via `HAPI4.sysinfo['services_list']` and `HAPI4.sysinfo['service_config']`).
  *
  * @project     Heurist academic knowledge management system

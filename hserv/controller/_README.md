@@ -18,12 +18,12 @@ This directory is responsible for handling incoming client requests, routing the
 - `importController.php`: Controller for CSV and KML parsing and import.
 - `index.php`: Main entry point for Heurist controllers; initializes and runs the FrontController.
 - `indexController.php`: Controller for requests to the Heurist_Reference_Index database.
+- `LookupConfigs.json`: Configuration for record lookup functionalities.
+- `LookupController.php`: Handler for third-party web service lookups (e.g., GeoName, TLCMap, BnF), acting as a proxy.
 - `progress.php`: Handles progress updates and termination for background processes.
 - `recordVerify.php`: Handler for the fix record duplication routine.
 - `record_batch.php`: Handler for batch updates on Heurist records (add/replace/delete details).
 - `record_edit.php`: Handler for CUD (Create, Update, Delete) actions for Heurist records.
-- `record_lookup.php`: Handler for third-party web service lookups (e.g., GeoName, TLCMap, BnF), acting as a proxy.
-- `record_lookup_config.json`: Configuration for record lookup functionalities.
 - `record_map_source.php`: Handler to produce GeoJSON from KML, CSV, DBF resources, or download original files, based on Datasource record ID.
 - `record_output.php`: Handler for record searches and exporting data in various formats (JSON, CSV, KML, etc.).
 - `record_search.php`: Handler for record searches, primarily outputting JSON for HRecordSet.

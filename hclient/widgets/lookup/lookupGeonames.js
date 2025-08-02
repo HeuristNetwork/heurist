@@ -47,7 +47,7 @@ $.widget("heurist.lookupGeonames", $.heurist.lookupBase, {
      *                                        This is dynamically set in `_init` based on whether the lookup
      *                                        is for postal codes ('lookupGN_postalCode.html') or general
      *                                        GeoNames search ('lookupGN.html').
-     * @property {Object} options.mapping - Configuration from `record_lookup_config.json`.
+     * @property {Object} options.mapping - Configuration from `LookupConfigs.json`.
      *   @property {string} options.mapping.service - The specific GeoNames service type (e.g., 'postalCodeSearch', 'geonames').
      */
     options: {

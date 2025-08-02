@@ -42,7 +42,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      * @property {string} [options.title="External lookup"] - The title of the dialog.
      * @property {string} [options.htmlContent='lookupBase.html'] - The HTML content file for the dialog, located in `hclient/widgets/lookup`.
      * @property {?string} [options.helpContent=null] - The help content file for the dialog, located in `documentation/context_help`.
-     * @property {?Object} options.mapping - Configuration from `record_lookup_config.json`. Defines how external data fields map to Heurist fields.
+     * @property {?Object} options.mapping - Configuration from `LookupConfigs.json`. Defines how external data fields map to Heurist fields.
      *   @property {number} options.mapping.rty_ID - The Heurist record type ID for the mapping.
      *   @property {string} options.mapping.service_id - The ID of the external service.
      *   @property {Object} options.mapping.fields - An object mapping external field names to Heurist data type IDs (dty_ID).
@@ -73,7 +73,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
         htmlContent: 'lookupBase.html', // in hclient/widgets/lookup folder
         helpContent: null, // in documentation/context_help folder
 
-        mapping: null, // configuration from record_lookup_config.json
+        mapping: null, // configuration from LookupConfigs.json
         edit_fields: null, // realtime values from edit form fields
         edit_record: false, // recordset of the current record being edited
 
@@ -1254,7 +1254,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
      * If `parameters` are empty or result in an empty query string, it shows an error and returns.
      *
      * The actual request to the external service is proxied through a Heurist PHP script
-     * (`/heurist/hserv/controller/record_lookup.php`) via `this.HAPI.RecordMgr.lookup_external_service`.
+     * (`/heurist/hserv/controller/LookupController.php`) via `this.HAPI.RecordMgr.lookup_external_service`.
      *
      * Before sending the request, it shows a loading coverall.
      * On receiving a response:
@@ -1309,7 +1309,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
 
         this.$Hmsg.bringCoverallToFront(this.element);
 
-        // calls /heurist/hserv/controller/record_lookup.php
+        // calls /heurist/hserv/controller/LookupController.php
         this.HAPI.RecordMgr.lookup_external_service(request, (response) => {
 
             this.$Hmsg.sendCoverallToBack(); // hide loading cover

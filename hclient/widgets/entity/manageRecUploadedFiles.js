@@ -1590,7 +1590,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
                 let request = {
                     serviceType: 'nakala',
-                    service: 'nakala_get_metadata' // file types used by Nakala
+                    metadata: 'all'
                 };
 
                 window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));

@@ -218,7 +218,7 @@ $.widget("heurist.lookupBnF", $.heurist.lookupBase, {
         let res_records = {}, res_orders = [];
 
         // Prepare fields for mapping
-        // the fields used here are defined within /heurist/hserv/controller/record_lookup_config.json where "service" = bnfLibrary
+        // the fields used here are defined within /heurist/hserv/controller/LookupConfigs.json where "service" = bnfLibrary
         let fields = ['rec_ID', 'rec_RecTypeID']; // added for record set
         let map_flds = Object.keys(this.options.mapping.fields);
         fields = fields.concat(map_flds, 'BnF_ID');

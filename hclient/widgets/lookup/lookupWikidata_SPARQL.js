@@ -46,7 +46,7 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
      * @instance
      * @property {Object} options
      * @property {string} [options.htmlContent='lookupWikidata_SPARQL.html'] - The HTML content file for the dialog.
-     * @property {Object} options.mapping - Configuration from `record_lookup_config.json`.
+     * @property {Object} options.mapping - Configuration from `LookupConfigs.json`.
      *   @property {number} options.mapping.rty_ID - Target Heurist record type ID for field mapping dropdowns.
      *   @property {Object} [options.mapping.options] - Saved options for this service instance, including
      *                                                 `dump_record`, `dump_field`, and `SPARQL_field_map`.

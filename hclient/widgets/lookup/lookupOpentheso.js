@@ -10,9 +10,9 @@
  *
  * The widget:
  *  1. Loads its UI from `lookupOpentheso.html`.
- *  2. Fetches a list of available Opentheso servers via a Heurist proxy endpoint (`opentheso_get_servers`).
- *  3. Dynamically fetches thesauruses for the selected server (`opentheso_get_thesauruses`).
- *  4. Dynamically fetches collections/groups for the selected thesaurus (`opentheso_get_collections`).
+ *  2. Fetches a list of available Opentheso servers via a Heurist proxy endpoint (`servers`).
+ *  3. Dynamically fetches thesauruses for the selected server (`thesauruses`).
+ *  4. Dynamically fetches collections/groups for the selected thesaurus (`collections`).
  *  5. Constructs search queries for the Opentheso API based on user input and selections.
  *  6. Displays search results (concepts) in a list.
  *  7. Allows users to select concepts for mapping to Heurist fields, with special handling
@@ -142,7 +142,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
      * Initializes UI controls for the Opentheso lookup widget.
      * - Applies specific CSS styling.
      * - Caches jQuery selectors for server, thesaurus, language, and group dropdowns in `this._sel_elements`.
-     * - Fetches the list of available Opentheso servers via HAPI (`opentheso_get_servers`).
+     * - Fetches the list of available Opentheso servers via HAPI (`servers`).
      *   - Populates the server dropdown (`#inpt_server`).
      *   - Attaches a change handler to the server dropdown to call `_displayThesauruses`.
      *   - Calls `_updateThesauruses` to fetch thesauruses for the initially selected/default server.
@@ -174,7 +174,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
         // ----- SERVER SELECT -----
         let request = {
             serviceType: 'opentheso',
-            service: 'opentheso_get_servers'
+            metadata: 'servers'
         };
 
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request, function(response){
@@ -260,7 +260,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
      * This can be triggered on initial load or when the refresh button is clicked.
      *
      * - Retrieves the selected server ID from `this._sel_elements['server']`.
-     * - Makes a HAPI call to `lookup_external_service` with service `opentheso_get_thesauruses`.
+     * - Makes a HAPI call to `lookup_external_service` with metadata `thesauruses`.
      *   - `params.servers`: Set to the current server ID if `is_refresh` is true, otherwise null (to fetch all initially).
      *   - `params.refresh`: Set to 1 if `is_refresh` is true, otherwise 0.
      * - On success, calls `_updateThesaurusList` to process the response and then `_displayThesauruses` to update the UI.
@@ -280,7 +280,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
         let ser_id = this._sel_elements['server'].val();
 
         let request = {
-            service: 'opentheso_get_thesauruses',
+            metadata: 'thesauruses',
             serviceType: 'opentheso',
             params: {
                 servers: is_refresh ? ser_id : null,
@@ -323,7 +323,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
      * @memberof heurist.lookupOpentheso
      * @instance
      * @private
-     * @param {Object} response - The JSON response from the `opentheso_get_thesauruses` HAPI call.
+     * @param {Object} response - The JSON response from the `thesauruses` HAPI call.
      *                            Expected to be an object where keys are server IDs and values are
      *                            arrays/objects of thesaurus information.
      * @param {boolean} is_refresh - Indicates if the update was due to a forced refresh.
@@ -401,7 +401,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
      * This can be triggered on thesaurus change or when the refresh button for collections is clicked.
      *
      * - Retrieves selected server ID and thesaurus ID. If thesaurus ID is empty, returns.
-     * - Makes a HAPI call to `lookup_external_service` with service `opentheso_get_collections`.
+     * - Makes a HAPI call to `lookup_external_service` with metadata `collections`.
      *   - `params.server`: Selected server ID.
      *   - `params.thesaurus`: Selected thesaurus ID.
      *   - `params.refresh`: Set to 1 if `is_refresh` is true, otherwise 0.
@@ -430,7 +430,7 @@ $.widget( "heurist.lookupOpentheso", $.heurist.lookupBase, {
         }
 
         let request = {
-            service: 'opentheso_get_collections', // requested metadata
+            metadata: 'collections', // requested metadata
             serviceType: 'opentheso', // requesting service
             params: {
                 server: ser_id,

@@ -49,7 +49,7 @@ $.widget( "heurist.lookupTLC", $.heurist.lookupBase, {
      * @property {string} [options.title='Lookup values for Heurist record'] - The title of the dialog.
      *           (Note: Original comment mentioned "Geoname service" which seems incorrect for TLCMap).
      * @property {string} [options.htmlContent='lookupTLC.html'] - The HTML content file for the dialog.
-     * @property {Object} options.mapping - Configuration from `record_lookup_config.json`.
+     * @property {Object} options.mapping - Configuration from `LookupConfigs.json`.
      *   @property {string} options.mapping.service - The service identifier (e.g., 'tlcmap', 'tlcmap_old').
      *   @property {number} options.mapping.rty_ID - Target Heurist record type ID for new records.
      * @property {boolean} [options.add_new_record=false] - If true, allows creation of new records from selection.

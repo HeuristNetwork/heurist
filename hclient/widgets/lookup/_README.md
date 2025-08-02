@@ -4,9 +4,9 @@ Directory: [```/hclient/widgets/lookup```](.)
 
 Overview: Perform requests to external sources to populate records
 
-Service requests are handled within [```hserv/controller/record_lookup.php```](/hserv/controller/record_lookup.php)
+Service requests are handled within [```hserv/controller/LookupController.php```](/hserv/controller/LookupController.php)
 
-New and existing service mapping is found at [```hserv/controller/record_lookup_config.json```](/hserv/controller/record_lookup_config.json)
+New and existing service mapping is found at [```hserv/controller/LookupConfigs.json```](/hserv/controller/LookupConfigs.json)
 
 Widget hierarchy:<br>
     1. baseAction [```hclient/widgets/baseAction.js```](../baseAction.js)<br>
