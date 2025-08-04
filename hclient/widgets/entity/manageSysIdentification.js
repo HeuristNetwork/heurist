@@ -81,21 +81,9 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                 that.updateRecordList(null, {recordset:response});
                 that.addEditRecord( response.getOrder()[0] );
             });
-        
-        if(!this.options.isdialog){
-            let fele = this.element.find('.ent_wrapper:first');
-            $(fele).on("mouseleave", function(e){
-                return; 
-                // @todo: Change implmentation (use same system for other similar functions, e.g. My preferences, External lookup, etc...)
-                // On Menu Change and On Menu Action
-                if($(e.target).is('button')){ return; } // for Rectype Select popup
-                
-                setTimeout(function(){ // Determine if user has switched tabs/minimised window
-                    if(document.hasFocus()){
-                        that.defaultBeforeClose();
-                    }
-                }, 200);
-            });
+
+        if(!this.options.isdialog && $('.ui-menu6').length > 0){
+            $('.ui-menu6').slidersMenu('manageSwitchHandler', 'design', this.options.entity.entityName, () => this.defaultBeforeClose());
         }
             
         return true;
@@ -157,14 +145,12 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         // Set allow registration and allow import user
         let status = this._cachedRecordset.fld(record, 'sys_AllowRegistration');
         let $ele = this._editing.getFieldByName('sys_AllowRegistration');
-        $ele.editing_input('setValue', [1 & status]);
-        
+        $ele.editing_input('setValue', [1 & status], true);
+
         $ele = this._editing.getFieldByName('sys_AllowUserImportAtLogin');
-        $ele.editing_input('setValue', [2 & status]);
+        $ele.editing_input('setValue', [2 & status], true);
 
         this._setupLanguages();
-
-        this._editing.setModified(0);
     },
 
     /**
@@ -200,7 +186,7 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         }
 
         let languageOpts = [];
-        $languages.editing_input('setValue', commonLanguages);
+        $languages.editing_input('setValue', commonLanguages, true);
         if(allLanguages.length === 0 && window.hWin.HEURIST4.util.isempty(commonLanguages)){
             return;
         }else if(allLanguages.length > 0){
@@ -285,7 +271,7 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                             return;
                         }
 
-                        $languages.editing_input('setValue', Object.keys(response.data).join(','));
+                        $languages.editing_input('setValue', Object.keys(response.data).join(','), false);
                         window.hWin.HAPI4.sysinfo.common_languages = response.data;
 
                         $dlg.dialog('close');
@@ -455,10 +441,14 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
 
             
         });
-        
-        
-        
-        
+
     },
+
+    closeDialog: function(){
+        this._super();
+        if(!this.options.isdialog && $('.ui-menu6').length > 0){
+            $('.ui-menu6').slidersMenu('manageSwitchHandler', 'remove', this.options.entity.entityName);
+        }
+    }
     
 });

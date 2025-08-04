@@ -96,6 +96,12 @@ $.widget( "heurist.slidersMenu", {
         publish: '#627E5D'
     },
 
+    _beforeSwitch: {
+        handler: null, // handler to call before switch action/menu
+        originator: '', // what function created this handler
+        menu: '' // which menu is this for
+    },
+
     /**
      * @function _create
      * @description The widget's constructor. Initializes the slidersMenu widget, sets up the main menu container,
@@ -1469,13 +1475,17 @@ $.widget( "heurist.slidersMenu", {
      * @memberof Widgets.Navigation.slidersMenu
      */
     _openSectionMenu: function(e){
-        
+
         let section = this._getSectionName(e);
 
+        if(window.hWin.HEURIST4.util.isFunction(this._beforeSwitch.handler) && this._beforeSwitch.menu !== section && !this._beforeSwitch.handler()){
+            return;
+        }
+        
         this.switchContainer( section );
         
         this._collapseMainMenuPanel(true, 200);
-        
+
     },
 
     /**
@@ -1697,6 +1707,11 @@ $.widget( "heurist.slidersMenu", {
         
         //execute menu on click           
         this._on(this.menues[section].find('li[data-action]'),{click:function(e){
+
+            if(window.hWin.HEURIST4.util.isFunction(this._beforeSwitch.handler) && !this._beforeSwitch.handler()){
+                return;
+            }
+
             let li = $(e.target);
             if(!li.is('li')) li = li.parents('li');
             
@@ -2579,5 +2594,35 @@ $.widget( "heurist.slidersMenu", {
      */
     closeContainer: function(section){
         this.containers[section].empty().hide();
+    },
+
+    /**
+     * @function manageSwitchHandler
+     * @description Sets up or removes a function call triggered before switching menus
+     * @param {string} forMenu - The function's menu, e.g. Manage DB properties is within the design menu
+     * @param {string} fromAction - Function's name
+     * @param {function} eventHandler - Function to be called
+     * @memberof Widgets.Navigation.slidersMenu
+     */
+    manageSwitchHandler: function(forMenu, fromAction, eventHandler){
+
+        if(forMenu === 'remove' && fromAction === this._beforeSwitch.originator){
+
+            this._beforeSwitch = {
+                menu: '',
+                originator: '',
+                handler: null
+            };
+
+            return;
+        }else if(!window.hWin.HEURIST4.util.isFunction(eventHandler) || (forMenu !== 'all' && !Object.hasOwn(this._menu_colours, forMenu))){
+            return;
+        }
+
+        this._beforeSwitch = {
+            menu: forMenu,
+            originator: fromAction,
+            handler: eventHandler
+        };
     }
 });

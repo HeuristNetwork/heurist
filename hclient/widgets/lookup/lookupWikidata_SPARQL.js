@@ -129,7 +129,7 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
         };
         this.$Hui.createRectypeDetailSelect($select[0], this.options.mapping.rty_ID, ['blocktext'], top_opt, sel_options);
 
-        if(typeof EditorCodeMirror === 'function'){
+        if(this.$H.isFunction(EditorCodeMirror)){
             this.codeEditor = new EditorCodeMirror(this._$('textarea#sparql-input'), {mode: 'sparql', lineNumbers: true});
             this.codeEditor.showEditor();
         }
