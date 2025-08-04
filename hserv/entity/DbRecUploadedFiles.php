@@ -2317,78 +2317,50 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
      *                         Otherwise, returns an array with 'files' (list of deletable files),
      *                         'cnt_in_use', and 'cnt_ref_recs'.
      */
-    private function deleteSelected()
-    {
+    private function deleteSelected(){
 
-            $ids = prepareIds($this->data['delete_selected']);
-            $mode = $this->data['mode'];
+        $ids = prepareIds($this->data['delete_selected']);
+        $mode = $this->data['mode'];
 
-            //find files with referencing records
-            $ulf_IDs_in_use = $this->getMediaRecords($ids, 'both', 'file_ids'); //returns file ids referenced in records
-            $cnt_in_use = count($ulf_IDs_in_use);
-            $cnt_ref_recs = $this->getMediaRecords($ids, 'both', 'rec_cnt');
+        //find files with referencing records
+        $ulf_IDs_in_use = $this->getMediaRecords($ids, 'both', 'file_ids'); //returns file ids referenced in records
+        $cnt_in_use = count($ulf_IDs_in_use);
+        $cnt_ref_recs = $this->getMediaRecords($ids, 'both', 'rec_cnt');
 
-            $to_delete = array();
-            $cnt_deleted = 0;
+        $to_delete = [];
+        $cnt_deleted = 0;
 
-            //exclude files in use from list of selected
-            $ids = array_diff($ids, $ulf_IDs_in_use);
+        //exclude files in use from list of selected
+        $ids = array_diff($ids, $ulf_IDs_in_use);
 
-            if(!empty($ids)){
+        if(!empty($ids)){
 
-                $mysqli = $this->system->getMysqli();
+            $mysqli = $this->system->getMysqli();
 
-                //, ulf_ObfuscatedFileID
-                $query = 'SELECT DISTINCT ulf_ID, ulf_OrigFileName as filename, ulf_ExternalFileReference as urls FROM '
-                            . $this->config['tableName']
-                            . SQL_WHERE
-                            . predicateId('ulf_ID',$ids);
+            //, ulf_ObfuscatedFileID
+            $query = 'SELECT DISTINCT ulf_ID, ulf_OrigFileName as filename, ulf_ExternalFileReference as urls FROM '
+                        . $this->config['tableName']
+                        . SQL_WHERE
+                        . predicateId('ulf_ID',$ids);
 
-                $to_delete = mysql__select_assoc($mysqli, $query);
+            $to_delete = mysql__select_assoc($mysqli, $query);
 
-                if(!empty($to_delete)){
+            if(!empty($to_delete) && $mode == 'delete' && !empty($to_delete)){ // delete files
 
-                    /* Check if Obfuscated ID is referenced in values
-                    foreach ($to_delete as $ulf_ID => $details) {
+                $to_delete = array_keys($to_delete);
 
-                        $ulf_ObfuscatedFileID = $details['ulf_ObfuscatedFileID'];
-
-                        if(!$ulf_ObfuscatedFileID){ // missing ulf_ObfuscatedFileID
-                            unset($to_delete[$ulf_ID]);
-                            continue;
-                        }
-
-                        $cnt_used = intval(mysql__select_value($mysqli, "SELECT count(dtl_ID) FROM recDetails WHERE dtl_Value LIKE '%". $ulf_ObfuscatedFileID ."%'"));
-                        if($cnt_used>0){
-                            $cnt_in_use++;
-                            $cnt_ref_values = $cnt_ref_values+$cnt_used;
-                            unset($to_delete[$ulf_ID]);
-                            continue;
-                        }
-                    }*/
-
-                    if($mode == 'delete' && !empty($to_delete)){ // delete files
-
-                        $to_delete = array_keys($to_delete);
-
-                        $this->data[$this->primaryField] = $to_delete;
-                        if($this->delete(false, false)){
-                            $cnt_deleted = count($to_delete);
-                        }else{
-                            $cnt_deleted = false;
-                        }
-                    }
-                }
+                $this->data[$this->primaryField] = $to_delete;
+                $cnt_deleted = $this->delete(false, false) ? count($to_delete) : false;
             }
+        }
 
-            if($mode == 'delete'){
-                $ret = $cnt_deleted;
-            }else{
-                $ret = array('files'=>$to_delete, 'cnt_in_use'=>$cnt_in_use,
-                                                        'cnt_ref_recs'=>$cnt_ref_recs);
-            }
+        if($mode == 'delete'){
+            $ret = $cnt_deleted;
+        }else{
+            $ret = ['files' => $to_delete, 'cnt_in_use' => $cnt_in_use, 'cnt_ref_recs' => $cnt_ref_recs];
+        }
 
-            return $ret;
+        return $ret;
 
     }
 

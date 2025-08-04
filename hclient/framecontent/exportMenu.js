@@ -504,7 +504,7 @@ function hexportMenu( container ) {
             preparedSessionID = await _preSendParameters(toStoreParams);
         }
         if(newURLParams.size > 0){
-            q = (q.startsWith('?') ? '' : '') + newURLParams.toString();
+            q = (q.startsWith('?') ? '&' : '') + newURLParams.toString();
         }else{
             q = '';
         }

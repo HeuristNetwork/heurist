@@ -1016,12 +1016,15 @@ function HMapLayer( _options ) {
                                     let id = layer.feature.properties.rec_ID; 
                                     let record = response.data[id];
                                     for (let k=0; k<theme_fields[code].length; k++){
+
                                         let dty_ID = theme_fields[code][k];
-                                        //get first value from array
-                                        for (let dtl_ID in record[dty_ID]){
-                                            layer.feature.properties[code+':'+dty_ID] = record[dty_ID][dtl_ID];    
-                                            break;
+
+                                        // get first value from array/object
+                                        let dtl_Value = window.hWin.HEURIST4.util.isObject(record[dty_ID]) ? Object.values(record[dty_ID])[0] : null;
+                                        if(window.hWin.HEURIST4.util.isArrayNotEmpty(record[dty_ID])){
+                                            dtl_Value = record[dty_ID].shift();
                                         }
+                                        layer.feature.properties[`${code}:${dty_ID}`] = dtl_Value;
                                     }
 
                                     /*

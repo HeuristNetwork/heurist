@@ -535,15 +535,6 @@ class WebSite
         if(@$this->params['raw']){
             return $template;
         }
-        
-        //    
-        $bgImage = $this->getFile($this->siteRecord, '99-951', ''); //DT_CMS_BANNER
-        if($bgImage!=null){
-            //$bgImage = 'background-image: url(&quot;'.$bgImage
-            //    .'&quot;) !important; background-repeat: repeat-x !important; background-size: auto;';
-        }else{
-            $bgImage = '';
-        }
 
         //backward capability with v2
         if(strpos($template,'id="main-logo"')>0){
@@ -618,7 +609,13 @@ class WebSite
         );
         
         if($isFull){
-        
+
+            // 
+            $bgImage = $this->getFile($this->siteRecord, '99-951', ''); //DT_CMS_BANNER
+            if($bgImage==null){
+                $bgImage = '';
+            }
+
             $webSiteOptionsExt = array(
                 'logo'=>$this->getFile($this->siteRecord, DT_FILE_RESOURCE), 
                 'logoAlt'=>$this->getFile($this->siteRecord, '2-926'), 

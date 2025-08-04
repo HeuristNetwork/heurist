@@ -771,8 +771,7 @@ $mysqli = $system->getMysqli();
                 <?php
                 if(!isEmptyArray($files_unused_local)){
                 ?>
-                <div id="unused_file_local" style="padding-top:20px">
-                    <a href="#unused_local"></a>
+                <div id="unused_local" style="padding-top:20px">
                     <h3>Unused local files</h3>
                     <div style="padding-bottom:10px;font-weight:bold"><?php echo count($files_unused_local);?> entries</div>
                     <div>These files are not referenced by a File field in any record in the database.
@@ -805,8 +804,7 @@ $mysqli = $system->getMysqli();
                 //------------------------------------------
                 if(!isEmptyArray($files_unused_remote)){
                 ?>
-                <div id="unused_file_remote" style="padding-top:20px">
-                    <a href="#unused_remote"></a>
+                <div id="unused_remote" style="padding-top:20px">
                     <h3>Unused remote files</h3>
                     <div style="padding-bottom:10px;font-weight:bold"><?php echo count($files_unused_remote);?> entries</div>
                     <div>These URLs are not referenced by any record in the database.
@@ -838,7 +836,6 @@ $mysqli = $system->getMysqli();
                 if(!isEmptyArray($files_notfound)){
                 ?>
                 <div id="files_notfound" style="padding-top:20px">
-                    <a href="#files_notfound"></a>
                     <h3>Missing registered files </h3>
                     <div style="padding-bottom:10px;font-weight:bold"><?php echo count($files_notfound);?> entries</div>
                     <div>Path specified in database is wrong and file cannot be found.
@@ -865,7 +862,6 @@ $mysqli = $system->getMysqli();
                 if(!isEmptyArray($files_notreg)){
                 ?>
                 <div id="files_notreg" style="padding-top:20px">
-                    <a href="#files_notreg"></a>
                     <h3>Non-registered files</h3>
                     <div style="padding-bottom:10px;font-weight:bold"><?php echo count($files_notreg);?> entries</div>
                     <div>

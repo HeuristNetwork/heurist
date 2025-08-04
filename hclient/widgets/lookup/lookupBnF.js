@@ -211,7 +211,7 @@ $.widget("heurist.lookupBnF", $.heurist.lookupBase, {
 
         json_data = window.hWin.HEURIST4.util.isJSON(json_data);
 
-        if(!json_data?.result){
+        if(!Array.isArray(json_data?.result)){
             this._super(false);
         }
 

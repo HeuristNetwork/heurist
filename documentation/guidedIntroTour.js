@@ -51,8 +51,7 @@ function startIntroTour() {
         position: 'right'
       }
     ],
-    
-    showProgress: true,
+
     scrollToElement: true,
     scrollTo: 'tooltip'  // or 'element'
   }).onbeforechange(function(targetElement) { // Hook before each step is shown
