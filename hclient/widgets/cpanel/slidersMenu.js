@@ -2339,7 +2339,7 @@ $.widget( "heurist.slidersMenu", {
         
         // Load Content
         // @later implement as widgets/admin/databaseOverview (on baseAction)
-        $ele.load(window.hWin.HAPI4.baseURL+'hclient/widgets/cpanel/database_overview.html',
+        $ele.load(`${window.hWin.HAPI4.baseURL}hclient/widgets/cpanel/databaseOverview.html`,
             function(){
 
                 // Section headers within Content
