@@ -4022,7 +4022,7 @@ $.widget( "heurist.resultList", {
 
                     $('<div class="ent_header">'
                         +'<span style="padding-top: 5px;display: inline-block;">'
-                            +window.hWin.HR('Drag records to position in list, drag into list to add them')+'</span>'
+                            +window.hWin.HR('ORDERED LIST : Drag records to position in list, search for more records, drag into list to add them.')+'</span>'
                         +'<button id="btn-clear" style="float:right">'+window.hWin.HR('Close')+'</button>'
                         +'<button id="btn-save-order" style="float:right">'+window.hWin.HR('Save')+'</button>'
                         +'</div>').appendTo(this.sortResultListDlg);
