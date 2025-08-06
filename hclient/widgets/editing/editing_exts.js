@@ -2046,7 +2046,8 @@ function browseTerms(_editing_input, $input, value){
                 defaultTermID:$input.val(), topOptions:topOptions, supressTermCode:true, 
                 useHtmlSelect:false, eventHandlers:events, language_code: lang_code});
 
-        that.selObj.hSelect('option', { groupings: true, groupingsType: 'trm' });
+        that.selObj.hSelect('option', { groupings: allTerms !== 'relation', groupingsType: 'trm' });
+
         $(that.selObj).hide(); //button will be hidden        
     }
     
