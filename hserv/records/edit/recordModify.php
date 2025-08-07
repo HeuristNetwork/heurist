@@ -4428,6 +4428,7 @@ function bugreportUpdate($system, $recID){
     $reporterEmailDtyID = ConceptCode::getDetailTypeLocalID('1317-242');
     $reporterNameDtyID = ConceptCode::getDetailTypeLocalID('1317-243');
     $databaseDtyID = ConceptCode::getDetailTypeLocalID('1623-993');
+    $resolutionDtyID = ConceptCode::getDetailTypeLocalID('1623-1066');
 
     // Get bug report details
     $record = ['rec_ID' => $recID];
@@ -4470,7 +4471,11 @@ function bugreportUpdate($system, $recID){
 
     $desc = array_key_exists($descDtyID, $details) ? $details[$descDtyID] : null;
     $desc = is_array($desc) ? array_pop($desc) : $desc;
-    $desc = !empty($desc) ? $desc : "Description is missing";
+    $desc = !empty($desc) ? $desc : 'Description is missing';
+
+    $resolution = isset($resolutionDtyID) && array_key_exists($resolutionDtyID, $details) ? $details[$resolutionDtyID] : null;
+    $resolution = is_array($resolution) ? array_pop($resolution) : $resolution;
+    $resolution = !empty($resolution) ? "Resolution:<br>$resolution<br><br>" : '';
 
     $url = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$recID";
 
@@ -4480,6 +4485,7 @@ function bugreportUpdate($system, $recID){
     Reporter: $reportersName<br>
     $database
     Title: $title<br>
+    $resolution
     Bug description:<br>
     $desc<br><br>
     When an issue is fixed and marked as DONE, the change will typically appear in the alpha version <br>
