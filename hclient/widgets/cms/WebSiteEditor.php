@@ -164,7 +164,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id, currentLanguage:$c
                 <div class="btn-website-edit" style="font-weight:normal !important; width: fit-content;margin:0.7em 0px;">Website layout / properties</div>
 
                 <div style="line-height: 1em;font-size: smaller;"><span class="btn-website-url" style="display:inline-block;color:black;padding-right:5px;">Website URL</span>
-                    <a href="#" class="website-url truncate" style="color: blue;display: inline-block;width:70%;vertical-align: -1px;"></a>
+                    <a href="#" class="website-url truncate" style="color: blue;display: inline-block;width:70%;vertical-align: -1px;" title=""></a>
                 </div>
 
                 <span style="position:absolute;top: 0.3em; width: 1em; height: 1em; font-size: 3em; cursor: pointer;right:0.05em"

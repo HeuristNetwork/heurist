@@ -4031,10 +4031,8 @@ $.widget( "heurist.resultList", {
                     
                     function __closeReorderTab(){
                         let tabs = $(that.sortResultListDlg.parent());
-                        tabs.find('a[href="#'
-                            +that.sortResultListDlg.attr('id')+'"]')
-                            .closest('li').hide();
-                        tabs.tabs('option','active',0);
+                        tabs.find(`a[href="#${that.sortResultListDlg.attr('id')}"]`).closest('li').hide();
+                        tabs.tabs('option', 'active', 0);
                         that._last_saved_set = 0;
                         that._sortResultList_need_fill = true;
                         that._sortResult_was_changed = false;
@@ -4126,11 +4124,9 @@ $.widget( "heurist.resultList", {
             this._sortResultList_need_fill = false;
             
             let tabs = $(this.sortResultListDlg.parent());
-            let num_tabs = tabs.find('ul li').length;
-            
-            tabs.find('a[href="#'
-                            +this.sortResultListDlg.attr('id')+'"]')
-                            .closest('li').show();
+            let num_tabs = tabs.find('ul li.ui-tabs-tab').length;
+
+            tabs.find(`a[href="#${this.sortResultListDlg.attr('id')}"]`).closest('li').show();
             tabs.tabs('option','active',num_tabs-1);
             
             this.sortResultList.css({top:'40px',bottom: '4px',position: 'absolute', width: '100%'});
