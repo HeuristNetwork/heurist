@@ -610,7 +610,7 @@ $.widget( "heurist.controlPanel", {
         
         
         let suggestion_txt = '';
-        let styling = {float:'left', 'margin-left':'25px', width:'360px', 'font-size':'0.85em', cursor:'default', display:'flex'};
+        let styling = {float:'left', 'margin-left':'20px', width:'360px', 'font-size':'0.85em', cursor:'default', display:'flex'};
 
         styling['margin-top'] = '0.9em';
 
@@ -670,7 +670,7 @@ $.widget( "heurist.controlPanel", {
             suggestion_txt = '<span>This is the latest (alpha) version. If you are blocked by a new bug you can switch to the '
                 + '<a style="cursor: pointer;text-decoration: underline;" href="#" id="lnk_change" title="Go to standard version">standard version</a></span>';
   
-            styling['width'] = !is_version7?'360px':'280px';
+            styling['width'] = !is_version7?'37em':'24em';
 
             // Store the jQuery object in this.version_message
             that.version_message = $("<div>")
