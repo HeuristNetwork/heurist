@@ -1119,7 +1119,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 }else if(action=='fields'){
                     //show selectmenu with list of fields
                     if(this.fieldSelectorLast!=recID){
-                        this.fieldSelectorLast   = recID;
+                        
                         let details = $Db.rst(recID); //get all fields for given rectype
                         if(!details) return;
                         let options = [];
@@ -1127,6 +1127,11 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                             if($Db.dty(dty_ID,'dty_Type')!='separator')
                                 options.push({key:dty_ID, title:detail['rst_DisplayName']});
                         });
+                        if(options.length==0){
+                            return;
+                        }
+                        
+                        this.fieldSelectorLast   = recID;
                         
                         if(!this.fieldSelector){
                             this.fieldSelectorOrig = document.createElement("select");    
@@ -1154,6 +1159,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                             window.hWin.HEURIST4.ui.fillSelector(this.fieldSelectorOrig, options);
                             this.fieldSelector.hSelect('refresh');
                         }
+                    }
+                    if(!this.fieldSelector){
+                        return; //empty list
                     }
                     this.fieldSelector.hSelect('open');
                     this.fieldSelector.hSelect('widget').hide(); //hide selector
