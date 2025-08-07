@@ -292,16 +292,6 @@ if(!$system->hasAccess()){
             }
 
             //
-            // for edit link
-            //
-            function sane_link_opener(link) {
-                if (window.frameElement  &&  window.frameElement.name == 'viewer') {
-                    top.location.href = link.href;
-                    return false;
-                }
-            }
-
-            //
             //
             //
             function no_access_message(ele){
@@ -1426,7 +1416,6 @@ function print_header_line($bib) {
         <?php if($system->hasAccess()){ ?>
 
             <span class="link"><a id=edit-link class="normal"
-                onClick="return sane_link_opener(this);"
                 target=_new href="<?php echo HEURIST_BASE_URL;?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $bib['rec_ID'] ?>">
                 <img class="rv-editpencil" src="<?php echo HEURIST_BASE_URL;?>hclient/assets/edit-pencil.png" alt="Edit record" title="Edit record" style="vertical-align: top"></a>
             </span>
@@ -2083,23 +2072,23 @@ function print_public_details($bib) {
 
     //2021-12-17 fancybox viewer is disabled IJ doesn't like it - Except iiif
     if(!($is_map_popup || $without_header)){
-        print '<script>';
+        print '<script>try{';
         foreach ($thumbs as $thumb) {
             if(strpos($thumb['orig_name'], ULF_IIIF)===0 || $thumb['mode_3d_viewer']!=''){
 
                 $to_array = 'rec_Files_IIIF_and_3D' . ($thumb['linked'] ? '_linked' : '');
                 print $to_array.'.push({rec_ID:'.$bib['rec_ID']
-                                            .', id:"'.$thumb['nonce']
-                                            .'",mimeType:"'.$thumb['mimeType']
+                                            .', id:"'.htmlspecialchars($thumb['nonce'])
+                                            .'",mimeType:"'.htmlspecialchars($thumb['mimeType'])
                                             .'",mode_3d_viewer:"'.$thumb['mode_3d_viewer']
                                             .'",filename:"'.htmlspecialchars($thumb['orig_name'])
                                             .'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
             }else{
-                print 'rec_Files.push({rec_ID:'.$bib['rec_ID'].', id:"'.$thumb['nonce'].'",mimeType:"'.$thumb['mimeType'].'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
+                print 'rec_Files.push({rec_ID:'.$bib['rec_ID'].', id:"'.htmlspecialchars($thumb['nonce']).'",mimeType:"'.htmlspecialchars($thumb['mimeType']).'",filename:"'.htmlspecialchars($thumb['orig_name']).'",external:"'.htmlspecialchars($thumb['external_url']).'"});';
             }
         }
-        print '</script>';
-    }
+        print '}catch(e){console.error("error fill rec_Files for record# '.$bib['rec_ID'].'")}</script>';
+    }           
     print '<div class="thumbnail2 main-media" style="text-align:center"></div>';
 
     $hasAudioVideo = '';

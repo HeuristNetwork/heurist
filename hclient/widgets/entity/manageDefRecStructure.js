@@ -2944,9 +2944,10 @@ console.log('onEditFormChange @todo check buttons!!!');
      * 'activate' event on the tree, which in turn opens the formlet for that field.
      */
     editField: function(recID){
+        if(!(this._tree && this._tree.getRootNode())) return;
         this._tree.getRootNode().setActive();
         let node = this._tree.getNodeByKey(String(recID));
-        node.setActive();
+        node?.setActive();
     },
     
     /**
@@ -3547,12 +3548,19 @@ console.log('onEditFormChange @todo check buttons!!!');
 
         // Setup details
         const that = this;
-
         const source_rtyid = this.options.rty_ID;
         const source_name = $Db.rty(source_rtyid, 'rty_Name');
         const sub_rec_fld = $Db.rst(source_rtyid, rstID, 'rst_DisplayName');
-        const target_rectypes = $Db.dty(rstID, 'dty_PtrTargetRectypeIDs').split(',');
+        let target_rectypes = $Db.dty(rstID, 'dty_PtrTargetRectypeIDs');
+        if(target_rectypes){
+            target_rectypes = target_rectypes.split(',');
+        } 
 
+        if(!Array.isArray(target_rectypes) || target_rectypes.length==0){
+            window.hWin.HEURIST4.msg.showMsgErr('Can not create sub records. Target record type is not defined for field '+sub_rec_fld);
+            return;
+        }
+        
         let cur_target_rtyid = target_rectypes[0];
         let cur_target_name = $Db.rty(cur_target_rtyid, 'rty_Name');
         let available_fields = $Db.rst(source_rtyid);
