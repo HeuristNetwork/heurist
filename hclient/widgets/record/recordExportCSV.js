@@ -839,7 +839,9 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                             }
                         }
                     }
-                    let selected_nodes = $.ui.fancytree.getTree( treediv ).getSelectedNodes();
+                    const tree = $.ui.fancytree.getTree( treediv );
+                    if(!tree) return;
+                    let selected_nodes = tree.getSelectedNodes();
                     for(let j = 0; j < selected_nodes.length; j++){
                         that._displayAdvOption(selected_nodes[j]['data']['code'], $(selected_nodes[j]['li']).is(':visible'), selected_nodes[j]['li']);
                     }

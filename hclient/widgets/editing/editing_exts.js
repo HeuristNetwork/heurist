@@ -2085,7 +2085,11 @@ function browseTerms(_editing_input, $input, value){
         if(!that.selObj || !that.selObj.hSelect('instance')){
 
             __recreateSelector();
-                
+            
+            //case for window.hWin.HEURIST4.util.isempty(lang_code) && lang_code != 'ALL' - it requests for translations
+            if(!that.selObj || !that.selObj.hSelect('instance')){
+                return;
+            }
         }else{
             that._off($(that.selObj), 'change');    
         }

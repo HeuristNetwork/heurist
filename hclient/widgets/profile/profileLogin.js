@@ -401,7 +401,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             updateStatus($dlg, saml_login_only ? -1 : 0, '');
 
         });//load html
-    }else{
+    }else if(login_dialog.dialog('instance')){
         //show dialogue
         login_dialog.dialog("open");
         login_dialog.parent().addClass('ui-dialog-heurist');

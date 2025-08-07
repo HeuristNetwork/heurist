@@ -439,7 +439,9 @@ $.widget( "heurist.searchBuilderItem", {
 
             if(field_type == 'relationtype'){ // replace dty ID with relmarker dty ID, to avoid loading ALL relation terms
                 let parts = this.options.code.split(':');
-                dty_ID = parts.length > 2 ? parts[parts.length - 3].replace(/\D/g, '') : dty_ID;
+                if(parts.length > 2 && parts[parts.length - 3]){
+                    dty_ID = parts[parts.length - 3].replace(/\D/g, '');    
+                }
             }
 
             if(this.options.rty_ID>0){
