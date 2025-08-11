@@ -1,0 +1,249 @@
+<?php
+declare(strict_types=1);
+
+/**
+* checkHeuristNetworkMembership.php - Checks to see if the user or database (eventually group) is a member of the association
+*
+* @fileOverview This is an independent function which compares a user email address and/or database name against a text file
+*               list of members (and databses owned by members) and returns whether the person is a memvber of the Heurist 
+*               Network association, either individually or because the database belong to a group which is a member.
+*               It also logs non-member requests except in specific situations (notably program startup or independent enquiry)
+*
+* @project     Heurist academic knowledge management system
+* @package     Admin
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>  specification
+* @author      ChatGPT 5 draft
+* @author      Artem Osmakov <osmakov@gmail.com> corrections
+* @since       7.0
+*/
+
+/**
+* Heurist Network — Membership Check
+* ----------------------------------
+*
+* Usage (include in any PHP page or API):
+*   require_once 'check_membership.php';
+*   $status = check_membership($email, $name, $database, $context);
+*   // $status is one of: "nonmember" or a pipe-joined list of: database|individual|group
+*
+* Behavior:
+*   - Parses /var/www/html/HEURIST/association_members.txt (cached in PHP session).
+*   - Recognizes three line formats:
+*       1) email, family name, first name      => individual member
+*       2) email, database name                => database-level membership
+*       3) email, project/lab/institution name => group (heuristic; not fully used yet)
+*   - Returns membership type(s). If none => 'nonmember'.
+*   - If 'nonmember', shows a modal popup (web SAPI only) with a 5s delayed Close button.
+*   - Logs nonmember checks (except when context === 'Initial sign-in') to membership_checkpoint.log
+*/
+
+// --- configuration ---
+const HN_MEMBERS_FILE = '/var/www/html/HEURIST/association_members.txt';
+const HN_LOG_FILE     = '/var/www/html/HEURIST/membership_checkpoint.log';
+const HN_TIMEZONE     = 'Europe/Paris';
+
+// --- session-backed cache loader ---
+function hn_load_membership_cache(): array {
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        // Try to start session without emitting warnings if headers already sent
+        if (!headers_sent()) { @session_start(); }
+    }
+
+    $cacheKey = 'hn_membership_cache';
+    $mtime = is_file(HN_MEMBERS_FILE) ? @filemtime(HN_MEMBERS_FILE) : null;
+
+    if (!isset($_SESSION[$cacheKey]) || !is_array($_SESSION[$cacheKey]) || ($_SESSION[$cacheKey]['mtime'] ?? null) !== $mtime) {
+        $data = [
+            'mtime' => $mtime,
+            'individual_emails' => [],    // email => ['last' => string, 'first' => string]
+            'db_names'          => [],    // strtolower(dbname) => email
+            'group_emails'      => [],    // email => group name (heuristic)
+        ];
+
+        if (is_file(HN_MEMBERS_FILE) && is_readable(HN_MEMBERS_FILE)) {
+            $lines = file(HN_MEMBERS_FILE, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+            foreach ($lines as $ln) {
+                $line = trim($ln);
+                if ($line === '' || str_starts_with(ltrim($line), '#')) { continue; }
+                $parts = array_map(static fn($v) => trim($v), explode(',', $line));
+                if (count($parts) >= 3) {
+                    // email, family, first => individual
+                    $email = strtolower($parts[0]);
+                    $data['individual_emails'][$email] = [
+                        'last'  => $parts[1] ?? '',
+                        'first' => $parts[2] ?? '',
+                    ];
+                } elseif (count($parts) === 2) {
+                    $email  = strtolower($parts[0]);
+                    $second = $parts[1];
+                    // Heuristic: if the second field contains spaces or non [A-Za-z0-9_-], treat as group name; else treat as database name.
+                    if (preg_match('/\s/', $second) || preg_match('/[^A-Za-z0-9_-]/', $second)) {
+                        $data['group_emails'][$email] = $second;      // group contact email
+                    } else {
+                        $data['db_names'][strtolower($second)] = $email; // db => contact email
+                    }
+                }
+            }
+        }
+
+        $_SESSION[$cacheKey] = $data;
+    }
+
+    return $_SESSION[$cacheKey];
+}
+
+// --- log helper ---
+function hn_log_nonmember(string $result, string $database, string $name, string $email, string $context): void {
+    if ($result !== 'nonmember') return;
+    if (in_array($context, ['Initial sign-in', ''], true)) return;  // do not log sign-in message or a call with no context
+
+    try {
+        $tz = new DateTimeZone(HN_TIMEZONE);
+        $now = (new DateTime('now', $tz))->format(DateTime::ATOM);
+    } catch (Throwable) {
+        $now = date('c');
+    }
+
+    $entry = json_encode([
+        'ts'      => $now,
+        'result'  => $result,
+        'database'=> $database,
+        'name'    => $name,
+        'email'   => $email,
+        'context' => $context,
+        'ip'      => $_SERVER['REMOTE_ADDR'] ?? null,
+        'ua'      => $_SERVER['HTTP_USER_AGENT'] ?? null,
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
+    if ($entry !== false) {
+        @file_put_contents(HN_LOG_FILE, $entry . PHP_EOL, FILE_APPEND | LOCK_EX);
+    }
+}
+
+// --- popup renderer (only in web SAPI) ---
+function hn_render_nonmember_popup(string $context): void {
+    if (PHP_SAPI === 'cli') return; // don't emit JS under CLI
+
+    $title = 'Heurist Network Association';
+    $firstSentence = 'The function you have requested was funded by the Heurist Network association and is only available to members (individuals, projects, research units or institutions).';
+
+    // Body content (with optional removal of first sentence)
+    $bodyIntro = ($context === 'Initial sign-in') ? '' : '<p style="margin-top:0">' . htmlspecialchars($firstSentence, ENT_QUOTES, 'UTF-8') . '</p>';
+
+    $bodyMain = <<<HTML
+    <p>Heurist Network is a non-profit association which supports the ongoing development and maintenance of Heurist and depends entirely on funding provided by membership subscriptions and consultancy related to Heurist. Please:</p>
+    <ul style="margin:0 0 0.75em 1.25em;">
+      <li>consider joining the association or ask your project, lab or institution to do so.</li>
+      <li>include funding to support Heurist in grant applications and annual budgets.</li>
+      <li>request a quote for any type of work associated with Heurist (database setup, website creation, new functionality),</li>
+    </ul>
+    <p>To discuss membership (including temporary membership while administrative wheels turn), special requirements or consultancy, please email <a href="mailto:support@heuristnetwork.org">support@heuristnetwork.org</a></p>
+    <p>If you believe that you or your project, lab or institution is a member, but you have not been correctly identified, please email us specifying your database name, user name and institutional affiliation (this may happen because a new database has been created and not yet identified as belonging to a group membership).</p>
+    <p style="margin-bottom:0.5em">Membership form: <a href="https://forms.gle/3nNQthZS4P9Ap1mg8" target="_blank" rel="noopener">https://forms.gle/3nNQthZS4P9Ap1mg8</a></p>
+    HTML;
+
+    $html = $bodyIntro . $bodyMain;
+
+    // Emit a single modal if not already present
+    echo '<script>(function(){
+    if (document.getElementById("hn-membership-modal")) return;
+    var overlay = document.createElement("div");
+    overlay.id = "hn-membership-modal";
+    overlay.setAttribute("role","dialog");
+    overlay.setAttribute("aria-modal","true");
+    overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:2147483000;display:flex;align-items:center;justify-content:center;";
+
+    var panel = document.createElement("div");
+    panel.style.cssText = "background:#fff;width:500px;max-width:90vw;border-radius:10px;box-shadow:0 10px 35px rgba(0,0,0,.3);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,sans-serif;overflow:hidden;";
+
+    var header = document.createElement("div");
+    header.style.cssText = "padding:14px 18px;border-bottom:1px solid #eee;font-weight:600;font-size:16px;";
+    header.textContent = " . json_encode($title) . ";
+
+    var body = document.createElement("div");
+    body.style.cssText = "padding:14px 18px;line-height:1.45;font-size:14px;max-height:70vh;overflow:auto;";
+    body.innerHTML = " . json_encode($html) . ";
+
+    var footer = document.createElement("div");
+    footer.style.cssText = "display:flex;justify-content:flex-end;gap:8px;padding:12px 18px;border-top:1px solid #eee;";
+
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.disabled = true;
+    btn.textContent = "Close (5)";
+    btn.style.cssText = "padding:8px 14px;border-radius:8px;border:1px solid #ccc;background:#f3f3f3;cursor:not-allowed;font-size:14px;";
+
+    var allowClose = false;
+    var allow = function(){ allowClose = true; btn.disabled = false; btn.textContent = "Close"; btn.style.cursor = "pointer"; };
+    var countdown = 5; var tick = function(){
+    if (countdown <= 1) { allow(); return; }
+    countdown--; btn.textContent = "Close ("+countdown+")"; setTimeout(tick, 1000);
+    }; setTimeout(tick, 1000);
+
+    btn.addEventListener("click", function(){ if(allowClose){ document.body.style.overflow = originalOverflow; overlay.remove(); }});
+
+    var originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden"; // prevent background scroll
+
+    footer.appendChild(btn);
+    panel.appendChild(header);
+    panel.appendChild(body);
+    panel.appendChild(footer);
+    overlay.appendChild(panel);
+    document.body.appendChild(overlay);
+    })();</script>';
+}
+
+/**
+* Main API: check_membership
+*
+* @param string      $email   User email address
+* @param string      $name    User display name (for logging)
+* @param null|string $database Database name (if empty, only email is checked)
+* @param string      $context Short string indicating where it is called from (e.g., 'LOD output', 'Initial sign-in')
+*
+* @return string One of: 'nonmember' OR a pipe-joined subset of {'database','individual','group'}
+*/
+function check_membership(string $email, string $name = '', ?string $database = null, string $context = ''): string {
+    $emailNorm = strtolower(trim($email));
+    $dbNorm    = $database !== null ? strtolower(trim($database)) : '';
+
+    $cache = hn_load_membership_cache();
+
+    $hits = [];
+
+    if ($dbNorm !== '' && isset($cache['db_names'][$dbNorm])) {
+        $hits[] = 'database';
+    }
+    if ($emailNorm !== '' && isset($cache['individual_emails'][$emailNorm])) {
+        $hits[] = 'individual';
+    }
+    if ($emailNorm !== '' && isset($cache['group_emails'][$emailNorm])) {
+        $hits[] = 'group';
+    }
+
+    $result = empty($hits) ? 'nonmember' : implode('|', $hits);
+
+    if ($result === 'nonmember') {
+        // Show popup (web only)
+        hn_render_nonmember_popup($context);
+        // Log (except initial sign-in)
+        hn_log_nonmember($result, $database ?? '', $name, $email, $context);
+    }
+
+    return $result;
+}
+
+// --- Optional: CLI test harness ---
+if (PHP_SAPI === 'cli' && basename(__FILE__) === basename($_SERVER['argv'][0] ?? '')) {
+    $email = $argv[1] ?? '';
+    $name  = $argv[2] ?? '';
+    $db    = $argv[3] ?? '';
+    $ctx   = $argv[4] ?? '';
+    fwrite(STDERR, "Checking membership for email='{$email}', name='{$name}', db='{$db}', context='{$ctx}'\n");
+    $res = check_membership($email, $name, $db, $ctx);
+    echo $res, PHP_EOL;
+}
