@@ -6,8 +6,9 @@ declare(strict_types=1);
 *
 * @fileOverview This is an independent function which compares a user email address and/or database name against a text file
 *               list of members (and databses owned by members) and returns whether the person is a memvber of the Heurist 
-*               Network association, either individually or because the database belong to a group which is a member.
-*               It also logs non-member requests except in specific situations (notably program startup or independent enquiry)
+*               Network association, either individually or because the database is authorised as belonging to a group which is a member.
+*               It also logs non-member requests except in specific situations (notably program startup or independent enquiry).
+*               This function is unique to the HeuristRef.net server which contains the membership list updated daily.
 *
 * @project     Heurist academic knowledge management system
 * @package     Admin
@@ -42,57 +43,71 @@ declare(strict_types=1);
 
 // --- configuration ---
 const HN_MEMBERS_FILE = '/var/www/html/HEURIST/association_members.txt';
-const HN_LOG_FILE     = '/var/www/html/HEURIST/membership_checkpoint.log';
-const HN_TIMEZONE     = 'Europe/Paris';
+const HN_LOG_FILE     = '/var/www/html/HEURIST/HEURIST_FILESTORE/_HEURISTNETWORK_membership_checkpoint.log';
+const HN_TIMEZONE     = 'Australia/Sydney';
+
+
+
+// --- lightweight session helpers for last-result caching ---
+function hn_session_start_if_needed(): void {
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        if (PHP_SAPI !== 'cli' && headers_sent()) { return; } // avoid warnings in web if headers sent
+        @session_start();
+    }
+}
+
+/**
+ * Store last successful (non-'nonmember') check in session so we can skip re-reading the file
+ * structure: ['email' => string, 'db' => string, 'result' => string]
+ */
+function hn_set_last_membership_check(string $email, string $db, string $result): void {
+    hn_session_start_if_needed();
+    $_SESSION['hn_last_membership_check'] = ['email' => $email, 'db' => $db, 'result' => $result];
+}
+
+/** Get last membership check from session or null */
+function hn_get_last_membership_check(): ?array {
+    hn_session_start_if_needed();
+    $v = $_SESSION['hn_last_membership_check'] ?? null;
+    return (is_array($v)) ? $v : null;
+}
 
 // --- session-backed cache loader ---
 function hn_load_membership_cache(): array {
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-        // Try to start session without emitting warnings if headers already sent
-        if (!headers_sent()) { @session_start(); }
-    }
+    // No longer stored in session; read fresh when invoked (only called when recompute is needed)
+    $data = [
+        'individual_emails' => [],    // email => ['last' => string, 'first' => string]
+        'db_names'          => [],    // strtolower(dbname) => email
+        'group_emails'      => [],    // email => group name (heuristic)
+    ];
 
-    $cacheKey = 'hn_membership_cache';
-    $mtime = is_file(HN_MEMBERS_FILE) ? @filemtime(HN_MEMBERS_FILE) : null;
-
-    if (!isset($_SESSION[$cacheKey]) || !is_array($_SESSION[$cacheKey]) || ($_SESSION[$cacheKey]['mtime'] ?? null) !== $mtime) {
-        $data = [
-            'mtime' => $mtime,
-            'individual_emails' => [],    // email => ['last' => string, 'first' => string]
-            'db_names'          => [],    // strtolower(dbname) => email
-            'group_emails'      => [],    // email => group name (heuristic)
-        ];
-
-        if (is_file(HN_MEMBERS_FILE) && is_readable(HN_MEMBERS_FILE)) {
-            $lines = file(HN_MEMBERS_FILE, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
-            foreach ($lines as $ln) {
-                $line = trim($ln);
-                if ($line === '' || str_starts_with(ltrim($line), '#')) { continue; }
-                $parts = array_map(static fn($v) => trim($v), explode(',', $line));
-                if (count($parts) >= 3) {
-                    // email, family, first => individual
-                    $email = strtolower($parts[0]);
-                    $data['individual_emails'][$email] = [
-                        'last'  => $parts[1] ?? '',
-                        'first' => $parts[2] ?? '',
-                    ];
-                } elseif (count($parts) === 2) {
-                    $email  = strtolower($parts[0]);
-                    $second = $parts[1];
-                    // Heuristic: if the second field contains spaces or non [A-Za-z0-9_-], treat as group name; else treat as database name.
-                    if (preg_match('/\s/', $second) || preg_match('/[^A-Za-z0-9_-]/', $second)) {
-                        $data['group_emails'][$email] = $second;      // group contact email
-                    } else {
-                        $data['db_names'][strtolower($second)] = $email; // db => contact email
-                    }
+    if (is_file(HN_MEMBERS_FILE) && is_readable(HN_MEMBERS_FILE)) {
+        $lines = file(HN_MEMBERS_FILE, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+        foreach ($lines as $ln) {
+            $line = trim($ln);
+            if ($line === '' || str_starts_with(ltrim($line), '#')) { continue; }
+            $parts = array_map(static fn($v) => trim($v), explode(',', $line));
+            if (count($parts) >= 3) {
+                // email, family, first => individual
+                $email = strtolower($parts[0]);
+                $data['individual_emails'][$email] = [
+                    'last'  => $parts[1] ?? '',
+                    'first' => $parts[2] ?? '',
+                ];
+            } elseif (count($parts) === 2) {
+                $email  = strtolower($parts[0]);
+                $second = $parts[1];
+                // Heuristic: if the second field contains spaces or non [A-Za-z0-9_-], treat as group name; else treat as database name.
+                if (preg_match('/\s/', $second) || preg_match('/[^A-Za-z0-9_-]/', $second)) {
+                    $data['group_emails'][$email] = $second;      // group contact email
+                } else {
+                    $data['db_names'][strtolower($second)] = $email; // db => contact email
                 }
             }
         }
-
-        $_SESSION[$cacheKey] = $data;
     }
 
-    return $_SESSION[$cacheKey];
+    return $data;
 }
 
 // --- log helper ---
@@ -208,10 +223,16 @@ function hn_render_nonmember_popup(string $context): void {
 * @return string One of: 'nonmember' OR a pipe-joined subset of {'database','individual','group'}
 */
 function check_membership(string $email, string $name = '', ?string $database = null, string $context = ''): string {
-    $emailNorm = strtolower(trim($email));
-    $dbNorm    = $database !== null ? strtolower(trim($database)) : '';
+    \1
 
-    $cache = hn_load_membership_cache();
+    // Fast path: reuse prior session result if it matches and was a member (not 'nonmember')
+    $last = hn_get_last_membership_check();
+    if ($last && ($last['email'] ?? '') === $emailNorm && ($last['db'] ?? '') === $dbNorm && ($last['result'] ?? 'nonmember') !== 'nonmember') {
+        // Keep session fresh for this pair
+        hn_set_last_membership_check($emailNorm, $dbNorm, $last['result']);
+        return $last['result'];
+    }
+$cache = hn_load_membership_cache();
 
     $hits = [];
 
@@ -233,17 +254,9 @@ function check_membership(string $email, string $name = '', ?string $database = 
         // Log (except initial sign-in)
         hn_log_nonmember($result, $database ?? '', $name, $email, $context);
     }
+    // Remember last check in session for fast path on subsequent calls
+    hn_set_last_membership_check($emailNorm, $dbNorm, $result);
 
     return $result;
-}
 
-// --- Optional: CLI test harness ---
-if (PHP_SAPI === 'cli' && basename(__FILE__) === basename($_SERVER['argv'][0] ?? '')) {
-    $email = $argv[1] ?? '';
-    $name  = $argv[2] ?? '';
-    $db    = $argv[3] ?? '';
-    $ctx   = $argv[4] ?? '';
-    fwrite(STDERR, "Checking membership for email='{$email}', name='{$name}', db='{$db}', context='{$ctx}'\n");
-    $res = check_membership($email, $name, $db, $ctx);
-    echo $res, PHP_EOL;
 }
