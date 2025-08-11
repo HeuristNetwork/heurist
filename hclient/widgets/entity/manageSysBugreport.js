@@ -52,7 +52,7 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
      */
     _init: function() {
         
-        this.options.title = 'Heurist feedback';
+        this.options.title = 'Heurist feedback / bug report / feature requests';
         this.options.edit_mode = 'editonly';
         this.options.select_mode = 'manager';
         this.options.layout_mode = 'editonly';
@@ -132,8 +132,8 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
 
             let $dlg;
             let msg = 'In order for bugs to be found and fixed as quickly as possible, the team requires as many details about the issue you are encountering.<br>'
-                + 'Providing the steps that has lead you to this issue will also greatly speed up the initial stages of fixing this issue.<br><br>'
-                + 'Otherwise, you can click \'Proceed as-is\' if you feel that there are no more details you can provided about this issue.';
+                + 'Providing the steps that have led you to an issue will greatly speed up the initial stages of fixing an issue.<br><br>'
+                + 'Otherwise, you can click \'Proceed as-is\' if you feel that there are no more details you need to provided.';
 
             let btns = {};
             btns[window.hWin.HR('Proceed as-is')] = () => {
@@ -219,8 +219,9 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
                 let padding = `padding: 0px 15px 20px;`;
                 help = 'We value your feedback and do our best to fix bugs rapidly and to incorporate your suggestions into our development process.<br>'
                      + 'Please don\'t hesitate to let us know about anything which annoys you or which you feel could be improved.<br><br>'
-                     + 'We pop this form up monthly to encourage your feedback. It is accessible at any time through Help > Feedback / bug report.<br>'
-                     + 'You can also paste an image which will be added to the screenshots.';
+                     + 'We pop this form up monthly to encourage your feedback. It is accessible at any time at the top of the Exlpore page'  
+                     + 'or through Help > Feedback / bug report.<br>'
+                     + 'You can paste an image from your clipboard which will be added to the screenshots.';
 
                 // add extra info at top
 				$('<div>', {
