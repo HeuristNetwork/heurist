@@ -83,33 +83,57 @@ function hn_load_membership_cache(): array {
 
     if (is_file(HN_MEMBERS_FILE) && is_readable(HN_MEMBERS_FILE)) {
         $lines = file(HN_MEMBERS_FILE, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [];
+        $firstLine = true;
+
         foreach ($lines as $ln) {
             $line = trim($ln);
-            if ($line === '' || str_starts_with(ltrim($line), '#')) { continue; }
-            $parts = array_map(static fn($v) => trim($v), explode(',', $line));
-            if (count($parts) >= 3) {
-                // email, family, first => individual
-                $email = strtolower($parts[0]);
-                $data['individual_emails'][$email] = [
-                    'last'  => $parts[1] ?? '',
-                    'first' => $parts[2] ?? '',
-                ];
-            } elseif (count($parts) === 2) {
-                $email  = strtolower($parts[0]);
-                $second = $parts[1];
-                // Heuristic: if the second field contains spaces or non [A-Za-z0-9_-], treat as group name; else treat as database name.
-                if (preg_match('/\s/', $second) || preg_match('/[^A-Za-z0-9_-]/', $second)) {
-                    $data['group_emails'][$email] = $second;      // group contact email
-                } else {
-                    $data['db_names'][strtolower($second)] = $email; // db => contact email
-                }
+            // Skip blank and commented lines (allow leading whitespace)
+            if ($line === '' || preg_match('/^\s*#/', $line)) { continue; }
+
+            // Strip UTF-8 BOM on the very first line if present
+            if ($firstLine) {
+                $line = ltrim($line, "\xEF\xBB\xBF");
+                $firstLine = false;
             }
+
+            // Robust CSV parsing with quotes and escapes
+            $parts = str_getcsv($line, ',', '"', '\\');
+            if (!$parts || count($parts) < 2) { continue; }
+
+            $type = strtoupper(trim($parts[0]));
+
+            if ($type === 'INDIVIDUAL') {
+                // INDIVIDUAL,email,"last name","firstname"
+                if (count($parts) < 4) { continue; }
+                $email = strtolower(trim($parts[1]));
+                $last  = trim($parts[2]);
+                $first = trim($parts[3]);
+                if ($email !== '') {
+                    $data['individual_emails'][$email] = ['last' => $last, 'first' => $first];
+                }
+                continue;
+            }
+
+            if ($type === 'PROJECT') {
+                // PROJECT,email,"server name",database
+                if (count($parts) < 4) { continue; }
+                $email  = strtolower(trim($parts[1]));
+                $server = trim($parts[2]);
+                $db     = strtolower(trim($parts[3]));
+                if ($db !== '') {
+                    // Treat as database-level membership for checking
+                    $data['db_names'][$db]   = $email;
+                    $data['db_servers'][$db] = $server; // optional meta
+                }
+                continue;
+            }
+
+            // Any other type is ignored
         }
-    }
 
     return $data;
 }
-
+    
 // --- log helper ---
 function hn_log_nonmember(string $result, string $database, string $name, string $email, string $context): void {
     if ($result !== 'nonmember') return;
