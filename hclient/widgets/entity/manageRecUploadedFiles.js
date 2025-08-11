@@ -170,8 +170,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         this._uploadFileAndRegister();
                         
                     }else if(action=='menu-file-add-ext'){ 
-                        this._additionMode='remote'; this.addEditRecord(-1);
-                        
+                        this._additionMode='remote';
+                        this.addEditRecord(-1);
+
                     }else if(action=='menu-file-import-csv'){ 
 
                         window.hWin.HAPI4.actionHandler.executeActionById('menu-files-data');
@@ -339,11 +340,14 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
             //add media viewer below edit form and load media content
             this.mediaviewer = $('<div>').addClass('media-content').css({
+                float: 'left',
+                width: '50em',
                 'text-align': 'center',
                 padding: '20px',
                 'background-color': 'lightgray',
                 'border-top': '1px solid lightgray',
-                margin: '10px'});
+                margin: '10px'
+            });
             this.editForm.append( this.mediaviewer );
             this.mediaviewer.mediaViewer({rec_Files:[{
                     id: this._editing.getValue('ulf_ObfuscatedFileID')[0], 
@@ -353,7 +357,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             //list of records that refer to this file    
             let relations = this._currentEditRecordset.getRelations();    
             if(relations?.direct?.length>0){
-                $('<div class="detailRowHeader">Records that refer this file</div>').appendTo(this.editForm);
+                let $container = $('<div>', { style: 'display: inline-block; width: 26em; margin-top: 1em;'}).appendTo(this.editForm)
+                $('<div class="detailRowHeader">Records that refer this file</div>').appendTo($container);
                 
                 let direct = relations.direct;
                 let headers = relations.headers;
@@ -366,7 +371,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         continue;                                            
                     }
                     
-                    window.hWin.HEURIST4.ui.createRecordLinkInfo(this.editForm, 
+                    window.hWin.HEURIST4.ui.createRecordLinkInfo($container, 
                                 {rec_ID: targetID, 
                                  rec_Title: headers[targetID][0], 
                                  rec_RecTypeID: headers[targetID][1]
