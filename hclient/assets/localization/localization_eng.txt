@@ -222,6 +222,7 @@
 #menu-help-emailadmin-hint#Send an email to the System Adminstrator for this installaton of Heurist - typically for probelms with this installation
 #menu-help-acknowledgements-hint#Acknowledgements
 #menu-help-about-hint#Version, Credits, Copyright, License
+#menu-magic-tool#Magic tool
 #menu-subset-set#Set as subset
 #menu-subset-set-hint#Make the current filter the active subset to which all subsequent actions are applied
 #Click to revert to whole database#

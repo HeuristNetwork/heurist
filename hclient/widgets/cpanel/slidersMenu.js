@@ -1688,6 +1688,10 @@ $.widget( "heurist.slidersMenu", {
                         if(!action_hint){
                             item.attr('title',action_hint);
                         }
+                        
+                        if(action.data?.is_association_member){
+                            item.css('background','rgb(132,135,184)');
+                        }
                     
                 
             });
@@ -1719,7 +1723,6 @@ $.widget( "heurist.slidersMenu", {
                 this.menues[section].find('li').removeClass('ui-state-active');
                 li.addClass('ui-state-active');
             }
-            
             
             if(section=='design'){    
                     $(this.containers[section])

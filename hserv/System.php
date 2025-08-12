@@ -1287,6 +1287,9 @@ class System {
 
             // Get list of recently logged-in databases (USystem::sessionRecentDatabases might be static or global)
             $dbrecent = USystem::sessionRecentDatabases($this->currentUser);
+            
+            // is current user or database is member of association
+            $is_association_member = USystem::checkAssociationMembership($this->currentUser, HEURIST_DOMAIN, $this->dbnameFull);
 
             // Get latest code version (USystem::getLastCodeAndDbVersion might be static or global)
             $lastCode_VersionOnServer = USystem::getLastCodeAndDbVersion();
@@ -1308,6 +1311,7 @@ class System {
                     "sysadmin_email" => HEURIST_MAIL_TO_ADMIN,
                     "db_total_records" => $this->settings->get('sys_RecordCount'),
                     "db_usergroups" => user_getAllWorkgroups($this->mysqli),
+                    "is_association_member" => $is_association_member,
                     "baseURL" => HEURIST_BASE_URL,
                     'baseURL_pro' => HEURIST_BASE_URL_PRO,
                     'database_prefix' => HEURIST_DB_PREFIX,
@@ -1609,7 +1613,7 @@ class System {
             return false;
         }
 
-        if (session_status() != PHP_SESSION_ACTIVE) {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
 
             session_name('heurist-sessionid');//set session name
             session_cache_limiter('none');
@@ -1619,7 +1623,7 @@ class System {
 
         $result = false;
 
-        if (session_status() == PHP_SESSION_ACTIVE)
+        if (session_status() === PHP_SESSION_ACTIVE)
         {
             if (@$_SESSION[$this->dbnameFull]['keepalive'] && !USystem::sessionUpdateCookies())
             {

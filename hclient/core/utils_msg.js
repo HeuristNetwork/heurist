@@ -1665,6 +1665,15 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             $dlg.attr('data-palette', null);
         }
         
+        if(options.enable_buttons_after>0){
+            const btns = $dlg.parent().find('.ui-dialog-buttonset > button');
+            window.hWin.HEURIST4.util.setDisabled(btns, true);
+            setTimeout(()=>{ window.hWin.HEURIST4.util.setDisabled(btns, false); }, options.enable_buttons_after)
+        }
+        if(options.noClose){
+            $dlg.parent().find('.ui-dialog-titlebar').find('.ui-icon-closethick').parent().hide();
+        }
+        
         return $dlg;
        
        

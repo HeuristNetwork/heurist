@@ -20,8 +20,6 @@
 * @since       3.1.0
 */
 
-
-
 use hserv\structure\ConceptCode;
 
 require_once dirname(__FILE__).'/../../../autoload.php';

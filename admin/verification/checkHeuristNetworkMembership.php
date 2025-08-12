@@ -1,11 +1,11 @@
 <?php
-declare(strict_types=1);
+            declare(strict_types=1);
 
 /**
 * checkHeuristNetworkMembership.php - Checks to see if the user or database (eventually group) is a member of the association
 *
 * @fileOverview This is an independent function which compares a user email address and/or database name against a text file
-*               list of members (and databses owned by members) and returns whether the person is a memvber of the Heurist 
+*               list of members (and databses owned by members) and returns whether the person is a member of the Heurist 
 *               Network association, either individually or because the database is authorised as belonging to a group which is a member.
 *               It also logs non-member requests except in specific situations (notably program startup or independent enquiry).
 *               This function is unique to the HeuristRef.net server which contains the membership list updated daily.
@@ -130,7 +130,7 @@ function hn_load_membership_cache(): array {
 
             // Any other type is ignored
         }
-
+    }
     return $data;
 }
     
@@ -247,7 +247,6 @@ function hn_render_nonmember_popup(string $context): void {
 * @return string One of: 'nonmember' OR a pipe-joined subset of {'database','individual','group'}
 */
 function check_membership(string $email, string $name = '', ?string $database = null, string $context = ''): string {
-    \1
 
     // Fast path: reuse prior session result if it matches and was a member (not 'nonmember')
     $last = hn_get_last_membership_check();
@@ -256,7 +255,7 @@ function check_membership(string $email, string $name = '', ?string $database = 
         hn_set_last_membership_check($emailNorm, $dbNorm, $last['result']);
         return $last['result'];
     }
-$cache = hn_load_membership_cache();
+    $cache = hn_load_membership_cache();
 
     $hits = [];
 

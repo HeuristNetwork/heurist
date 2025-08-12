@@ -507,16 +507,16 @@ class USystem {
      * Returns an array of database names where the current user was recently logged in.
      * Iterates through the $_SESSION global to find matching user IDs.
      *
-     * @param array|null $current_User An associative array representing the current user, must contain 'ugr_ID'.
+     * @param array|null $currentUser An associative array representing the current user, must contain 'ugr_ID'.
      * @return array An array of database names (without HEURIST_DB_PREFIX).
      */
-    public static function sessionRecentDatabases($current_User){
+    public static function sessionRecentDatabases($currentUser){
         $dbrecent = array();
-        if($current_User && @$current_User['ugr_ID']>0){
+        if($currentUser && @$currentUser['ugr_ID']>0){
             foreach ($_SESSION as $db=>$session){
 
                 $user_id = @$_SESSION[$db]['ugr_ID'];
-                if($user_id == $current_User['ugr_ID']){
+                if($user_id == $currentUser['ugr_ID']){
                     if(strpos($db, HEURIST_DB_PREFIX)===0){
                         $db = substr($db,strlen(HEURIST_DB_PREFIX));
                     }
@@ -526,6 +526,13 @@ class USystem {
         }
         return $dbrecent;
     }
+    
+    /**
+    * Requests heuristref.net membership for current user or server+database
+    */
+    public function isMemberOfAssociation(){
+        return false;
+    }    
 
     /**
      * Checks if the PHP session save path is configured, exists, and is writable.
@@ -802,6 +809,34 @@ class USystem {
             fileDelete($file);
         }
     }
+    
+    /**
+     *
+     * @return bool true is current user or database is a member of association
+     */    
+    public static function checkAssociationMembership($currentUser, $server, $database)
+    {
+       
+        // 1. Check the session first
+        if(!($currentUser && @$currentUser['ugr_ID']>0)){
+            return false;
+        }
+        
+        if(session_status() === PHP_SESSION_ACTIVE && isset($_SESSION[$database]['isAssociationMember'])){
+            return $_SESSION[$database]['isAssociationMember'];
+        }
+        
+        require_once dirname(__FILE__).'/../../admin/setup/dbproperties/checkMembership.php';
+        $isMember = checkHeuristNetworkMembership($currentUser['ugr_eMail'], $server, $database);
+        
+        if(session_status() === PHP_SESSION_ACTIVE){
+            @session_start();
+            $_SESSION[$database]['isAssociationMember'] = $isMember;
+        }
+        
+        return $isMember;
+        
+    }
 
     /**
      * Gets the latest Heurist code version from the main server and compares it with the local version.
@@ -843,8 +878,6 @@ class USystem {
 
         //send request to main server at HEURIST_INDEX_BASE_URL
         // HEURIST_INDEX_DATABASE is the refernece standard for current database version
-        // Maybe this should be changed to Heurist_Sandpit?. Note: sandpit no longer needed, or used, from late 2015
-
         if(strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===0){ //same domain
 
             $mysql_indexdb = mysql__init(HEURIST_INDEX_DATABASE);
