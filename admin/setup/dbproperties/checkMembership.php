@@ -7,11 +7,11 @@ declare(strict_types=1);
  * - Or include and call checkHeuristNetworkMembership($email, $host, $db, $context)
  */
  
-//const HN_MEMBERS_FILE = '/var/www/html/HEURIST/association_members.txt';
-//const HN_LOG_FILE     = '/var/www/html/HEURIST/HEURIST_FILESTORE/_HEURISTNETWORK_membership_checkpoint.log';
+const HN_MEMBERS_FILE = '/var/www/html/HEURIST/association_members.txt';
+const HN_LOG_FILE     = '/var/www/html/HEURIST/HEURIST_FILESTORE/_HEURISTNETWORK_membership_checkpoint.log';
 
-const HN_MEMBERS_FILE = 'c:/xampp/htdocs/association_members.txt';
-const HN_LOG_FILE     = 'c:/xampp/htdocs/HEURIST/HEURIST_FILESTORE/_HEURISTNETWORK_membership_checkpoint.log';
+//const HN_MEMBERS_FILE = 'c:/xampp/htdocs/association_members.txt';
+//const HN_LOG_FILE     = 'c:/xampp/htdocs/HEURIST/HEURIST_FILESTORE/_HEURISTNETWORK_membership_checkpoint.log';
 const HN_TIMEZONE     = 'Australia/Sydney';
 
 
@@ -29,6 +29,9 @@ if (php_sapi_name() !== 'cli') {
     $db    = isset($_GET['db'])    ? trim((string)$_GET['db'])    : '';
     $ctx   = isset($_GET['ctx'])   ? trim((string)$_GET['ctx'])   : '';
 
+    
+//error_log('ENTER checkMembership '.$email);
+    
     if ($email !== '' || ($host !== '' && $db !== '')) {
         header('Content-Type: text/plain; charset=UTF-8');
         echo checkHeuristNetworkMembership($email, $host, $db, $ctx);
@@ -47,8 +50,14 @@ if (php_sapi_name() !== 'cli') {
  */
 function checkHeuristNetworkMembership(string $email, string $host = '', ?string $database = null, string $context = ''): string
 {
-    $isMainServer = defined('HEURIST_INDEX_BASE_URL') && defined('HEURIST_SERVER_URL') &&
-        (strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===0);
+    if(defined('HEURIST_INDEX_BASE_URL') && defined('HEURIST_SERVER_URL')){
+        $isMainServer = (strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===0);    
+    }else{
+        $isMainServer = true;
+    }
+    
+//error_log('checkHeuristNetworkMembership ='.$isMainServer.'  '.$email);
+       
         
     if( $isMainServer ){ 
         return checkMembershipInFile($email, $host, $database, $context);
@@ -113,6 +122,7 @@ function checkMembershipInFile(string $email, string $host = '', ?string $databa
     $hits = [];
     $toCheck = 0;
     
+//error_log('checkMembershipInFile '.$email);
     //@todo verify email    
     $email = strtolower(trim($email));
     if ($email !== '') $toCheck++;
@@ -185,6 +195,7 @@ function checkMembershipInFile(string $email, string $host = '', ?string $databa
 
 // --- log helper ---
 function checkMembershipLogNonmember(string $result, string $database, string $host, string $email, string $context): void {
+   /*
     if ($result !== 'nonmember') return;
     if (in_array($context, ['Initial sign-in', ''], true)) return;  // do not log sign-in message or a call with no context
 
@@ -209,6 +220,7 @@ function checkMembershipLogNonmember(string $result, string $database, string $h
     if ($entry !== false) {
         @file_put_contents(HN_LOG_FILE, $entry . PHP_EOL, FILE_APPEND | LOCK_EX);
     }
+   */
 }
 
 function httpGet(string $url, int $timeout = 5): string

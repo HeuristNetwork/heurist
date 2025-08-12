@@ -194,7 +194,7 @@ use hserv\structure\ConceptCode;
 
         $res = null;
 
-        if(isEmptyStr($db_name)){
+        if( !isset($db_name) || $db_name === null || $db_name === '' ){
             $res = 'Database parameter not defined';
         }elseif(preg_match('/[^A-Za-z0-9_\$]/', $db_name)){ //validatate database name
             $res = 'Database name '.htmlspecialchars($db_name).' is invalid. Only letters, numbers and underscores (_) are allowed in the database name';

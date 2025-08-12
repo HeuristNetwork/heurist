@@ -828,7 +828,7 @@ class USystem {
         
         require_once dirname(__FILE__).'/../../admin/setup/dbproperties/checkMembership.php';
         $isMember = checkHeuristNetworkMembership($currentUser['ugr_eMail'], $server, $database);
-        
+        //$isMember = 'individual';
         if(session_status() === PHP_SESSION_ACTIVE){
             @session_start();
             $_SESSION[$database]['isAssociationMember'] = $isMember;
