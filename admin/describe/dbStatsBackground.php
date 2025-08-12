@@ -38,6 +38,7 @@ if(empty($databases)){
 }
 
 $req_params = USanitize::sanitizeInputArray();
+$sysadmin_pwd = USanitize::getAdminPwd();
 
 define('SERVER_NAME', !defined('HEURIST_SERVER_NAME') || empty(HEURIST_SERVER_NAME) ? gethostbyname(gethostname()) : HEURIST_SERVER_NAME);
 
@@ -46,6 +47,8 @@ if(!$isPublic || SERVER_NAME == 'localhost' || SERVER_NAME == '127.0.0.1' || SER
     $system->errorExitApi('Function is not for local setups', HEURIST_ACTION_BLOCKED);
     exit;
 }
+
+$forcedRefresh = !empty($sysadmin_pwd) && $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions);
 
 $is_main_server = strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false;
 
@@ -69,7 +72,7 @@ if(array_key_exists('refresh', $req_params)){
 
     $last_update = file_exists(DB_STATS_FILE) ? filemtime(DB_STATS_FILE) : false;
 
-    if(!$last_update || $last_update < strtotime('-1 month')){
+    if(!$last_update || $last_update < strtotime('-1 month') || $forcedRefresh){
         createStats();
         sendStatsToMain();
     }
