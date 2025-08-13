@@ -128,8 +128,8 @@ class HSystemMgr {
   * @param {string} [password_protected] - The name/key of a password-protected action. If set, this action requires an additional password,
   *                                       potentially a system administrator override password, regardless of `requiredLevel`.
   * @param {string} [password_entered] - The password entered by the user on the client-side for a password-protected action.
-  * @param {('add'|'delete'|'add delete')} [requiredPermission] - Specific permissions required for the action (e.g., 'add', 'delete').
-  *                                     This is checked server-side.
+  * @param {('add'|'delete'|'add delete')} [requiredPermission] - Specific permissions required for the action (e.g., 'add', 'delete'). This is checked on server-side.
+  * @param reqAssociationMembership                                    
   * @returns {void}
   */
   verify_credentials(callback, requiredLevel, password_protected, password_entered, requiredPermission, reqAssociationMembership) {

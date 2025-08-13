@@ -592,7 +592,7 @@ class USystem {
     //======================= daily actions =================================
     /**
      * Executes daily maintenance scripts/tasks.
-     * Uses a flag file (e.g., "flag_YYYY-MM-DD") in HEURIST_FILESTORE_ROOT to ensure tasks run only once per day.
+     * Uses a flag file (e.g., "once_per_day_YYYY-MM-DD") in HEURIST_FILESTORE_ROOT to ensure tasks run only once per day.
      * Removes flag files for previous days.
      * Tasks include sending daily error reports, checking Heurist version, and updating DeepL languages.
      *
@@ -601,7 +601,7 @@ class USystem {
     public static function executeScriptOncePerDay(){
 
         $now = getNow();
-        $flag_file = HEURIST_FILESTORE_ROOT.'flag_'.$now->format('Y-m-d');
+        $flag_file = HEURIST_FILESTORE_ROOT.'once_per_day_'.$now->format('Y-m-d');
 
         if(file_exists($flag_file)){
             return;
@@ -613,10 +613,14 @@ class USystem {
         for($i=1;$i<10;$i++){
             $d = getNow();
             $yesterday = $d->sub(new \DateInterval('P'.sprintf('%02d', $i).'D'));
-            $arc_flagfile = HEURIST_FILESTORE_ROOT.'flag_'.$yesterday->format('Y-m-d');
+            $arc_flagfile = HEURIST_FILESTORE_ROOT.'once_per_day_'.$yesterday->format('Y-m-d');
+            $arc_flagfile2 = HEURIST_FILESTORE_ROOT.'flag_'.$yesterday->format('Y-m-d');
             //if yesterday log file exists
             if(file_exists($arc_flagfile)){
                 unlink($arc_flagfile);
+            }
+            if(file_exists($arc_flagfile2)){
+                unlink($arc_flagfile2);
             }
         }
 
