@@ -364,7 +364,7 @@ $.widget( "heurist.slidersMenu", {
         if(data?.ispreview || data?.increment || data?.search_realm) return;
 
         // Check whether to block auto switch to explore menu
-        let move_to_explore = !data.no_menu_switch;
+        let move_to_explore = !data.no_menu_switch && this._active_section !== 'explore';
         if(Object.hasOwn(data, 'no_menu_switch')){
             delete data.no_menu_switch;
             delete window.hWin.HEURIST4.current_query_request.no_menu_switch;
