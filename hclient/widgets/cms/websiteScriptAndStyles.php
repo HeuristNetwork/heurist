@@ -411,7 +411,6 @@ function onPageInit(success)
 function initMainMenu( afterInitMainMenu ){
 
     var topmenu = $('#main-menu');
-
     var lopts = {
                 menu_recIDs: home_page_record_id,
                 main_menu: true, //search for RT_CMS_HOME as root
@@ -1422,7 +1421,7 @@ function initHeaderTitle(){
         // show shadow for title if there is header background image (banner)
         let bg_img = $('#main-header').css('background-image');
         let css_shadow = '';
-        if(!(bg_img=='' || bg_img=='none')){
+        if(!(bg_img=='' || bg_img=='none')&& !ele.css('textShadow')){
             css_shadow = ' style="text-shadow: 3px 3px 5px black"';
         }
 

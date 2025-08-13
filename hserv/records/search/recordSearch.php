@@ -1970,7 +1970,9 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
                     if(defined('DT_CMS_TOPMENUSELECTABLE')){
                         $details[] = DT_CMS_TOPMENUSELECTABLE;    
                     }
-
+                    if(defined('DT_CMS_MENU_HOME')){
+                        $details[] = DT_CMS_MENU_HOME;    
+                    }
                     return recordSearch($system, array('q'=>array('ids'=>$root_rec_id),
                         'detail'=>$details,
                         'w'=>'e', 'cms_cut_description'=>1));
@@ -2031,6 +2033,9 @@ function recordSearchMenuItems($system, $menuitems, &$result, $find_root_menu=fa
                     DT_CMS_TOP_MENU,DT_CMS_MENU,DT_THUMBNAIL);
             if(defined('DT_CMS_TOPMENUSELECTABLE')){
                 $details[] = DT_CMS_TOPMENUSELECTABLE;    
+            }
+            if(defined('DT_CMS_MENU_HOME')){
+                $details[] = DT_CMS_MENU_HOME;    
             }
             
             //return recordset

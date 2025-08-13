@@ -59,7 +59,8 @@ $.widget( "heurist.navigation", {
        expand_levels:0,
        onInitComplete: null,
        language: 'def',
-       supp_options: null
+       supp_options: null,
+       showHomeEntry: false
     },
 
 
@@ -287,14 +288,21 @@ $.widget( "heurist.navigation", {
         let resitems = [];
 
         //submenu selectable is taken from home page
+        let home_page_id = 0;
         if(parent_id==0 && menuitems.length==1){ //home page
-            let record = resdata.getById(menuitems[0]);
+            home_page_id = menuitems[0];
+            let record = resdata.getById(home_page_id);
             let selectable = resdata.fld(record, DT_CMS_TOPMENUSELECTABLE);
             if(selectable!==null){
                 this.options.selectable_if_submenu = (selectable!==TERM_NO && selectable!==TERM_NO_old);
             }
+            
+            if(window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU_HOME']>0){
+                const needShow = resdata.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU_HOME']);    
+                this.options.showHomeEntry = needShow && needShow !== TERM_NO && needShow !==TERM_NO_old;
+            }
         }
-
+        
         for(let i=0; i<menuitems.length; i++)
         {
             
@@ -370,9 +378,9 @@ $.widget( "heurist.navigation", {
 
             }else{
             
-                let menuName = resdata.fld(record, DT_NAME, this.options.language);
-                let menuTitle = resdata.fld(record, DT_SHORT_SUMMARY, this.options.language);
-                let menuIcon = resdata.fld(record, DT_THUMBNAIL);
+                let menuName = (home_page_id==page_id)?top.HR('Home'):resdata.fld(record, DT_NAME, this.options.language);
+                let menuTitle = (home_page_id==page_id)?'':resdata.fld(record, DT_SHORT_SUMMARY, this.options.language);
+                let menuIcon = (home_page_id==page_id)?null:resdata.fld(record, DT_THUMBNAIL);
 
                 let menuFormat = resdata.fld(record, DT_CMS_MENU_FORMAT);
 
@@ -488,6 +496,10 @@ $.widget( "heurist.navigation", {
                         //next level
                         let submenu_parent_id = parent_id != 0 ? parent_id + ',' + page_id : page_id;
                         subres = this.getMenuContent(orientation, submenu_parent_id, submenu, lvl+1);
+
+                        if(lvl==0 && menuitems.length==1 &&this.options.showHomeEntry){
+                            subres = res + subres;
+                        }
                         
                         if(orientation=='treeview'){
                             
@@ -516,7 +528,7 @@ $.widget( "heurist.navigation", {
                 
                 //if parent has the only child use next level - (for top menu only)
                 if(lvl==0 && menuitems.length==1 && this.options.use_next_level){
-                        return subres;    
+                    return subres;    
                 }
                 
             
