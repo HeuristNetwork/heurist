@@ -14,6 +14,7 @@
 * @since       4.0
 */
 use hserv\utilities\USanitize;
+use hserv\utilities\USystem;
 
 if(!defined('PDIR')) {define('PDIR','../../');}//need for js scripts
 
@@ -68,6 +69,15 @@ if(defined('LOGIN_REQUIRED') && !$system->hasAccess()){
     $message = $login_warning.' as Administrator of group \'Database Managers\'';
 }elseif(defined('OWNER_REQUIRED') && !$system->isDbOwner()){
     $message = $login_warning.' as Database Owner';
+}elseif(defined('ASSOC_MEMBERSHIP_REQUIRED') && ASSOC_MEMBERSHIP_REQUIRED==1 
+        && 'nonmember' == USystem::checkAssociationMembership($system)){
+        
+        $is_error = false;
+        $message = file_get_contents(dirname(__FILE__).'/../../movetoparent/association_membership.html');
+        if (preg_match('/<div id="content">(.*?)<\/div>/is', $message, $matches)) {
+                $message = $matches[0]; 
+        }
+    
 }else{
     $invalid_access = false;
 }

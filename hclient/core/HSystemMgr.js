@@ -136,23 +136,9 @@ class HSystemMgr {
       
       if(reqAssociationMembership && 'nonmember'==window.hWin.HAPI4.sysinfo['is_association_member']){
           
-          const title = 'Heurist Network Association';
-          const firstSentence = '<p style="margin-top:0">The function you have requested was funded by the Heurist Network association and is only available to members (individuals, projects, research units or institutions).</p>';
-
-          // Body content (with optional removal of first sentence)
-          //$bodyIntro = (context === 'Initial sign-in') ? '' : firstSentence;
-
-          const msg = firstSentence + '<p>Heurist Network is a non-profit association which supports the ongoing development and maintenance of Heurist and depends entirely on funding provided by membership subscriptions and consultancy related to Heurist. Please:</p>'
-+'<ul style="margin:0 0 0.75em 1.25em;">'
-      +'<li>consider joining the association or ask your project, lab or institution to do so.</li>'
-      +'<li>include funding to support Heurist in grant applications and annual budgets.</li>'
-      +'<li>request a quote for any type of work associated with Heurist (database setup, website creation, new functionality),</li>'
-    +'</ul>'
-    +'<p>To discuss membership (including temporary membership while administrative wheels turn), special requirements or consultancy,please email <a href="mailto:support@heuristnetwork.org">support@heuristnetwork.org</a></p>'
-    +'<p>If you believe that you or your project, lab or institution is a member, but you have not been correctly identified, please email us specifying your database name, user name and institutional affiliation (this may happen because a new database has been created and not yet identified as belonging to a group membership).</p>'
-    +'<p style="margin-bottom:0.5em">Membership form: <a href="https://forms.gle/3nNQthZS4P9Ap1mg8" target="_blank" rel="noopener">https://forms.gle/3nNQthZS4P9Ap1mg8</a></p>';
-
-        window.hWin.HEURIST4.msg.showMsgDlg(msg, null, title, {enable_buttons_after:5000, closeOnEscape:false, noClose:true});
+        window.hWin.HEURIST4.msg.showMsgDlgUrl(
+                      `${window.hWin.HAPI4.baseURL}?disclaimer=association_membership.html #content`,
+                       null, 'Heurist Network Association', {enable_buttons_after:5000, closeOnEscape:false, noClose:true});
         return;
       }
       

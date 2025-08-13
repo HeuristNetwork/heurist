@@ -814,8 +814,12 @@ class USystem {
      *
      * @return bool true is current user or database is a member of association
      */    
-    public static function checkAssociationMembership($currentUser, $server, $database)
+    public static function checkAssociationMembership($system)
     {
+        
+        $currentUser = $system->getCurrentUser();
+        $server = HEURIST_DOMAIN;
+        $database = $system->dbnameFull();
        
         // 1. Check the session first
         if(!($currentUser && @$currentUser['ugr_ID']>0)){

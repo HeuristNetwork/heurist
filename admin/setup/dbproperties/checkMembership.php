@@ -2,16 +2,45 @@
 declare(strict_types=1);
 
 /**
- * Heurist Network membership checker.
- * - Standalone service (GET): ?email=...&host=...&db=...
- * - Or include and call checkHeuristNetworkMembership($email, $host, $db, $context)
- */
- 
+* checkMembership.php - Checks to see if the user or database (eventually group) is a member of the association
+*
+* @fileOverview This is an independent function which compares a user email address and/or host+database name against a text file
+*               list of members (and databses owned by members) and returns whether the person is a member of the Heurist 
+*               Network association, either individually or because the database is authorised as belonging to a group which is a member.
+*               It also logs non-member requests except in specific situations (notably program startup or independent enquiry).
+*               This function is unique to the HeuristRef.net server which contains the membership list updated daily.
+*
+* - Standalone service (GET): ?email=...&host=...&db=...
+* - Or include and call checkHeuristNetworkMembership($email, $host, $db, $context)
+* 
+* To set this protection for particular function, the developer has to the following:
+* 
+* 1) Define ASSOC_MEMBERSHIP_REQUIRED constant for standalone page (ie for script that uses initPage.php or initPageMin.php)
+* define('ASSOC_MEMBERSHIP_REQUIRED', 1);
+* 
+* 2) For dynamic UI. IE for actions that called via main menu or dashboard  (eventually via ActionHandles.js)
+* need to define  "is_association_member": "1" for action entry in  actions.json - list of all heurist actions
+* Example:
+*   {
+*       "id": "menu-magic-tool",
+*       "text": "Magic tool",
+*       "data": {
+*         "is_association_member": "1",
+*         "icon": "ui-icon-lightning-explore"
+*       }
+*    }
+* 
+* @project     Heurist academic knowledge management system
+* @package     Admin
+* @link        https://HeuristNetwork.org
+* @copyright   (C) 2024 onwards Heurist Network
+* @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @author      Ian Johnson <ian.johnson.heurist@gmail.com>  specification
+* @author      Artem Osmakov <osmakov@gmail.com> corrections
+* @since       7.0
+*/
 const HN_MEMBERS_FILE = '/var/www/html/HEURIST/association_members.txt';
 const HN_LOG_FILE     = '/var/www/html/HEURIST/HEURIST_FILESTORE/_HEURISTNETWORK_membership_checkpoint.log';
-
-//const HN_MEMBERS_FILE = 'c:/xampp/htdocs/association_members.txt';
-//const HN_LOG_FILE     = 'c:/xampp/htdocs/HEURIST/HEURIST_FILESTORE/_HEURISTNETWORK_membership_checkpoint.log';
 const HN_TIMEZONE     = 'Australia/Sydney';
 
 
@@ -186,7 +215,7 @@ function checkMembershipInFile(string $email, string $host = '', ?string $databa
     $result = empty($hits) ? 'nonmember' : implode('|', array_keys($hits));
 
     if ($result === 'nonmember') {
-        checkMembershipLogNonmember($result, $dbName, $serverName, $email, $context);
+        checkMembershipLogNonmember($dbName, $serverName, $email, $context);
     } 
     
     return $result;
@@ -194,33 +223,38 @@ function checkMembershipInFile(string $email, string $host = '', ?string $databa
 
 
 // --- log helper ---
-function checkMembershipLogNonmember(string $result, string $database, string $host, string $email, string $context): void {
-   /*
-    if ($result !== 'nonmember') return;
-    if (in_array($context, ['Initial sign-in', ''], true)) return;  // do not log sign-in message or a call with no context
+function checkMembershipLogNonmember(string $database, string $host, string $email, string $context): void {
 
+    if (in_array($context, array('Initial sign-in', ''), true)) { return; }
+
+    // Time (avoid Throwable / typed exceptions for max compatibility)
     try {
-        $tz = new DateTimeZone(HN_TIMEZONE);
+        $tz  = new DateTimeZone(defined('HN_TIMEZONE') ? HN_TIMEZONE : 'UTC');
         $now = (new DateTime('now', $tz))->format(DateTime::ATOM);
-    } catch (Throwable) {
+    } catch (Exception $e) { // PHP 7.4-safe
         $now = date('c');
     }
 
-    $entry = json_encode([
-        'ts'      => $now,
-        'result'  => $result,
-        'database'=> $database,
-        'name'    => $host,
-        'email'   => $email,
-        'context' => $context,
-        'ip'      => $_SERVER['REMOTE_ADDR'] ?? null,
-        'ua'      => $_SERVER['HTTP_USER_AGENT'] ?? null,
-        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    $ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : null;
+    $ua = isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : null;
+
+    $entry = json_encode(
+        array(
+            'ts'       => $now,
+            'result'   => $result,
+            'database' => $database,
+            'name'     => $host,
+            'email'    => $email,
+            'context'  => $context,
+            'ip'       => $ip,
+            'ua'       => $ua,
+        ),
+        JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+    );
 
     if ($entry !== false) {
         @file_put_contents(HN_LOG_FILE, $entry . PHP_EOL, FILE_APPEND | LOCK_EX);
-    }
-   */
+    }    
 }
 
 function httpGet(string $url, int $timeout = 5): string

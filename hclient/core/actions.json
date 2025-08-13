@@ -870,7 +870,8 @@
         "is_association_member": "1",
         "icon": "ui-icon-lightning-explore"
       }
-    },    {
+    },    
+    {
       "id": "menu-extract-pdf",
       "text": "Extract text from PDF (experimental)",
       "title": "Extract text from PDF files",

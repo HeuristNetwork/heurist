@@ -20,6 +20,7 @@
 * @since       4.0
 */
 use hserv\utilities\USanitize;
+use hserv\utilities\USystem;
 
 require_once dirname(__FILE__).'/../../autoload.php';
 
@@ -142,23 +143,34 @@ $is_admin = $system->isAdmin();
 //
 // to limit access to particular page
 //
+$message = 'To perform this action you must be logged in ';
 if(defined('LOGIN_REQUIRED') && !$system->hasAccess()){
     //No Need to show error message when login is required, login popup will be shown
     //$message = $login_warning
     exit;
 }elseif(defined('MANAGER_MEMBER_REQUIRED') && 
         !($system->isDbOwner() || $system->isMember([$system->settings->get('sys_OwnerGroupID')]))){
-    $message = 'as member of group \'Database Managers\'';     
+    $message .= 'as member of group \'Database Managers\'';     
 }elseif(defined('MANAGER_REQUIRED') && !$is_admin){ //A member should also be able to create and open database
-    $message = 'as Administrator of group \'Database Managers\'';
+    $message .= 'as Administrator of group \'Database Managers\'';
 }elseif(defined('OWNER_REQUIRED') && !$system->isDbOwner()){
-    $message = 'as Database Owner';
+    $message .= 'as Database Owner';
+    
+}elseif(defined('ASSOC_MEMBERSHIP_REQUIRED') && ASSOC_MEMBERSHIP_REQUIRED==1
+        && 'nonmember' == USystem::checkAssociationMembership($system)){
+    
+        $is_error = false;
+        $message = file_get_contents(dirname(__FILE__).'/../../movetoparent/association_membership.html');
+        if (preg_match('/<div id="content">(.*?)<\/div>/is', $message, $matches)) {
+                $message = $matches[0]; 
+        }
+    
 }else{
+    $message = null;
     $invalid_access = false;
 }
 
 if($invalid_access){
-    $message = 'To perform this action you must be logged in '.$message;
     include_once ERROR_REDIR;
     exit;
 }

@@ -1289,7 +1289,7 @@ class System {
             $dbrecent = USystem::sessionRecentDatabases($this->currentUser);
             
             // is current user or database is member of association
-            $is_association_member = USystem::checkAssociationMembership($this->currentUser, HEURIST_DOMAIN, $this->dbnameFull);
+            $is_association_member = USystem::checkAssociationMembership($this); //->currentUser, HEURIST_DOMAIN, $this->dbnameFull);
 
             // Get latest code version (USystem::getLastCodeAndDbVersion might be static or global)
             $lastCode_VersionOnServer = USystem::getLastCodeAndDbVersion();

@@ -19,6 +19,7 @@
 */
 
 define('PDIR', '../../');//need for proper path to js and css
+//define('ASSOC_MEMBERSHIP_REQUIRED', 1);
 require_once dirname(__FILE__) . '/../../hclient/framecontent/initPage.php';
 ?>
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
