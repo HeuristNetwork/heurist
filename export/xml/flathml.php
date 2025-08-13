@@ -2009,6 +2009,45 @@ function check($text) {
     return true;
 }
 
+/**
+ * same function in record_output
+ * Retrieve previously saved parameters, this will not replace existing keys
+ *
+ * @param string $type Process type, e.g. 'export' or 'import'
+ * @param array $parameters Parameters array to be updated with stored parameters
+ * @return void
+ */
+function retrieveParameters2($type, &$parameters){
+
+    if(!is_numeric(@$parameters['preparedID'])){
+        return;
+    }
+
+    $id = intval($parameters['preparedID']);
+
+    $paramsFile = HEURIST_SCRATCH_DIR . "{$type}_{$id}.json";//yml
+
+    if(!file_exists($paramsFile)){
+        return;
+    }
+
+    $storedParameters = file_get_contents($paramsFile);
+
+    $storedParameters = json_decode($storedParameters, true);
+    $storedParameters = json_last_error() !== JSON_ERROR_NONE ? [] : $storedParameters;
+
+    foreach($storedParameters as $key => $value){
+        if(array_key_exists($key, $parameters)){
+            continue;
+        }
+        $parameters[$key] = $value;
+    }
+
+    fileDelete($paramsFile);
+
+    return;
+}
+
 //----------------------------------------------------------------------------//
 //  Turn off output buffering
 //----------------------------------------------------------------------------//
@@ -2047,6 +2086,11 @@ if (@$_REQUEST['filename']) {
 */
 
 $params = array();
+
+if(array_key_exists('preparedID', $_REQUEST)){
+    retrieveParameters2('export', $_REQUEST);
+}
+
 foreach($_REQUEST as $key=>$value) { $params[$key] = filter_var($value, FILTER_SANITIZE_STRING);}
 
 $params['q'] = @$_REQUEST['q'];
