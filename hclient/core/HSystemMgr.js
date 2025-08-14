@@ -124,7 +124,7 @@ class HSystemMgr {
   *   - `groupid` (number): User must be an admin of the specified group ID.
   *   - `1`: User must be a DB admin (admin of group #1, typically "Database Managers").
   *   - `2`: User must be the DB owner.
-  *   - String format `adminLevel;memberLevel` (e.g., "1;3"): User must meet `adminLevel` AND be a member of `memberLevel` group.
+  *   - String format `adminLevel;memberOfGroup` (e.g., "1;3"): User must meet `adminLevel` AND be a member of `memberOfGroup` group.
   * @param {string} [password_protected] - The name/key of a password-protected action. If set, this action requires an additional password,
   *                                       potentially a system administrator override password, regardless of `requiredLevel`.
   * @param {string} [password_entered] - The password entered by the user on the client-side for a password-protected action.
