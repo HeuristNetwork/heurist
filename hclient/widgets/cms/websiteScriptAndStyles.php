@@ -1421,7 +1421,7 @@ function initHeaderTitle(){
         // show shadow for title if there is header background image (banner)
         let bg_img = $('#main-header').css('background-image');
         let css_shadow = '';
-        if(!(bg_img=='' || bg_img=='none')&& !ele.css('textShadow')){
+        if(!(bg_img=='' || bg_img=='none')&& ele.css('textShadow')=='none'){
             css_shadow = ' style="text-shadow: 3px 3px 5px black"';
         }
 
