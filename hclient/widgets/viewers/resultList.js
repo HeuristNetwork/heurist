@@ -1959,19 +1959,19 @@ $.widget( "heurist.resultList", {
     //
     //
     _manageMultiSelection: function(recID, is_add){
+
         let idx = this._currentMultiSelection==null 
                     ? -1
-                    :window.hWin.HEURIST4.util.findArrayIndex(recID, this._currentMultiSelection);
-        if(is_add){
-              if(idx<0){
-                  if(this._currentMultiSelection==null){
-                      this._currentMultiSelection = [];
-                  }
-                  this._currentMultiSelection.push( recID );
-              }
-        }else if(idx>=0){
-            this._currentMultiSelection.splice(idx,1);
-        } 
+                    : window.hWin.HEURIST4.util.findArrayIndex(recID, this._currentMultiSelection);
+
+        if(!window.hWin.HEURIST4.util.isArray(this._currentMultiSelection)){
+            this._currentMultiSelection = window.hWin.HEURIST4.util.isPositiveInt(this._currentMultiSelection) ? [this._currentMultiSelection] : [];
+        }
+        if(is_add && idx < 0){
+            this._currentMultiSelection.push( recID );
+        }else if(!is_add && idx >= 0){
+            this._currentMultiSelection.splice(idx, 1);
+        }
     },
     
 
