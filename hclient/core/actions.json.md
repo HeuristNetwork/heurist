@@ -1,5 +1,14 @@
 # Actions JSON Schema Documentation
 
+`actions.json` is a list of system actions.  
+This configuration is loaded by the **ActionHandler** class and can be executed using the `executeActionById` method.
+
+Action `id` values can be referenced in menus and dashboards.  
+For example, in `slidersMenuAdmin.html`:
+
+```html
+<li data-action="menu-database-browse"/>
+
 This document describes the structure and meaning of keys in the `actions.json` configuration file.  
 Each element in the top-level array represents a single **action** in the system.
 
