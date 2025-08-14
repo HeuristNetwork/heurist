@@ -216,7 +216,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             //find map widget on this page
             if(widget_name=='heurist_StoryMap'){
                 if(!opts.map_widget_id){
-                    const ele =  window.hWin.HAPI4.layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_Map');
+                    const ele = window.hWin.HAPI4.layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_Map');
                     
                     if(ele && ele.options.search_realm=='' && ele.dom_id){
                         opts.map_widget_id = ele.dom_id;
@@ -227,8 +227,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             //find and assign prevail search group (except heurist_Map if heurist_StoryMap exists)
             if(!opts.search_realm){ //not defined yet
             
-                if(!(widget_name=='heurist_Map' &&  window.hWin.HAPI4.layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_StoryMap')!=null)){
-                    let sg =  window.hWin.HAPI4.layoutMgr.layoutContentFindMainRealm(_layout_content);    
+                if(!(widget_name=='heurist_Map' && window.hWin.HAPI4.layoutMgr.layoutContentFindWidget(_layout_content, 'heurist_StoryMap')!=null)){
+                    let sg = window.hWin.HAPI4.layoutMgr.layoutContentFindMainRealm(_layout_content);    
                     if(sg=='') sg = 'search_group_1';
                     opts.search_realm = sg;
                 }
@@ -685,13 +685,15 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                             $dlg.find('#simple_search_header').parent().css('display','none');
                             $dlg.find('#simple_search_text').parent().css('display','none');
                         }
+                        $dlg.find('#allowed_UGrpID').find('.header label').text('EITHER Show all filters in these workgroups');
                     }else if(selval==1){
                         //tree
                         $dlg.find('#allowed_UGrpID').css('display','table-row');
-                        $dlg.find('#allowed_svsIDs').css('display','none');
+                        $dlg.find('#allowed_svsIDs').css('display','table-row');
                         $dlg.find('#allowed_UGrpID').editing_input('setDisabled', false);
                         $dlg.find('#allowed_svsIDs').editing_input('setDisabled', true);
                         $dlg.find('input[name="allowed_svsIDs"]').val('');
+                        $dlg.find('#allowed_UGrpID').find('.header label').text('Show all filters in these workgroups');
                     }else{
                         //full
                         $dlg.find('#allowed_UGrpID').css('display','none');
@@ -727,7 +729,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         showclear_button: true,
                         dtFields:{
                             dty_Type:"resource", rst_MaxValues:1,
-                            rst_DisplayName: 'EITHER Show all filters in these workgroups', 
+                            rst_DisplayName: 'Show all filters in these workgroups', 
                             rst_DisplayHelpText:'',
                             rst_FieldConfig: {entity:'sysGroups', csv:true}
                         },

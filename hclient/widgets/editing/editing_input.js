@@ -2802,7 +2802,7 @@ $.widget( "heurist.editing_input", {
                 let sels = this.newvalues[$input.attr('id')];
 
                 if(!window.hWin.HEURIST4.util.isempty(sels)){
-                    popup_options.selection_on_init = sels.split(',');
+                    popup_options.selection_on_init = typeof sels === 'string' ? sels.split(',') : sels;
                 }else{
                     popup_options.selection_on_init = null;    
                 }                                
