@@ -498,7 +498,11 @@ $.widget( "heurist.navigation", {
                         subres = this.getMenuContent(orientation, submenu_parent_id, submenu, lvl+1);
 
                         if(lvl==0 && menuitems.length==1 &&this.options.showHomeEntry){
-                            subres = res + subres;
+                            if(orientation=='treeview'){
+                                subres.unshift( $.extend({},$res) );
+                            }else{
+                                subres = res + subres;
+                            }
                         }
                         
                         if(orientation=='treeview'){

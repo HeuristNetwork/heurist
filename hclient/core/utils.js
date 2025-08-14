@@ -212,6 +212,7 @@ window.hWin.HEURIST4.util = {
      * @returns {*|Array} The cloned data, or an empty array if cloning fails.
      */
     cloneJSON:function (data){
+        // need to use $.extend({},layout.options);
         try{
             return JSON.parse(JSON.stringify(data));
         }catch (ex2){
