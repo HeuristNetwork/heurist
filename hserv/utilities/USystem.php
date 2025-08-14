@@ -15,6 +15,8 @@
 */
 namespace hserv\utilities;
 
+require_once dirname(__FILE__).'/../../admin/setup/dbproperties/checkMembership.php';
+
 /**
 * Class USystem
 * 
@@ -818,7 +820,7 @@ class USystem {
      *
      * @return bool true is current user or database is a member of association
      */    
-    public static function checkAssociationMembership($system)
+    public static function checkAssociationMembership($system, $context=null)
     {
         
         $currentUser = $system->getCurrentUser();
@@ -831,11 +833,15 @@ class USystem {
         }
         
         if(session_status() === PHP_SESSION_ACTIVE && isset($_SESSION[$database]['isAssociationMember'])){
+            
+            if($context && 'nonmember'==$_SESSION[$database]['isAssociationMember']){
+                checkMembershipLogNonmember($context, $currentUser['ugr_eMail'], $server, $database);    
+            }
+            
             return $_SESSION[$database]['isAssociationMember'];
         }
         
-        require_once dirname(__FILE__).'/../../admin/setup/dbproperties/checkMembership.php';
-        $isMember = checkHeuristNetworkMembership($currentUser['ugr_eMail'], $server, $database);
+        $isMember = checkHeuristNetworkMembership($currentUser['ugr_eMail'], $server, $database, $context??'');
         //$isMember = 'individual';
         if(session_status() === PHP_SESSION_ACTIVE){
             @session_start();
@@ -843,6 +849,22 @@ class USystem {
         }
         
         return $isMember;
+        
+    }
+    
+    public static function logAssociationMembership($system, $context): void
+    {
+      
+        $currentUser = $system->getCurrentUser();
+        $server = HEURIST_DOMAIN;
+        $database = $system->dbnameFull();
+       
+        // 1. Check the session first
+        if(!($currentUser && @$currentUser['ugr_ID']>0)){
+            return;
+        }
+        
+        checkMembershipLogNonmember($currentUser['ugr_eMail'], $server, $database, $context);      
         
     }
 

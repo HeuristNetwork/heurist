@@ -16,7 +16,7 @@ declare(strict_types=1);
 * To set this protection for particular function, the developer has to the following:
 * 
 * 1) Define ASSOC_MEMBERSHIP_REQUIRED constant for standalone page (ie for script that uses initPage.php or initPageMin.php)
-* define('ASSOC_MEMBERSHIP_REQUIRED', 1);
+* define('ASSOC_MEMBERSHIP_REQUIRED', 'context');
 * 
 * 2) For dynamic UI. IE for actions that called via main menu or dashboard  (eventually via ActionHandles.js)
 * need to define  "is_association_member": "1" for action entry in  actions.json - list of all heurist actions
@@ -59,16 +59,35 @@ if (php_sapi_name() !== 'cli') {
     $ctx   = isset($_GET['ctx'])   ? trim((string)$_GET['ctx'])   : '';
 
     
-//error_log('ENTER checkMembership '.$email);
+//error_log('ENTER checkMembership '.$email.'  '.$host);
     
     if ($email !== '' || ($host !== '' && $db !== '')) {
+//error_log("!!!!!");        
         header('Content-Type: text/plain; charset=UTF-8');
-        echo checkHeuristNetworkMembership($email, $host, $db, $ctx);
+        if(isset($_GET['log']) && trim((string)$_GET['log'])==='1'){
+            checkMembershipLogNonmember($ctx, $email, $host, $db);
+            echo "ok";
+        }else{
+            echo checkHeuristNetworkMembership($email, $host, $db, $ctx);    
+        }
         exit;
     }
 }
 
 /* ------------------------ Public API ------------------------ */
+
+function getMainServerUrl(): ?string
+{
+error_log(" host ".@$_SERVER["SERVER_NAME"]);
+    $isMainServer = (@$_SERVER["SERVER_NAME"]=='heuristref.net');
+    
+    if($isMainServer){
+        return null;    
+    }
+    //hardcoded
+    $base = 'https://heuristref.net/h7-alpha/';
+    return $base;
+}
 
 /**
  * Returns:
@@ -77,37 +96,18 @@ if (php_sapi_name() !== 'cli') {
  *   'individual|database'  – if both match
  *   'nonmember'            – otherwise (also logs a line unless context indicates initial sign-in)
  */
-function checkHeuristNetworkMembership(string $email, string $host = '', ?string $database = null, string $context = ''): string
+function checkHeuristNetworkMembership(string $email, string $host = '', ?string $database = null, ?string $context = ''): string
 {
-    if(defined('HEURIST_INDEX_BASE_URL') && defined('HEURIST_SERVER_URL')){
-        $isMainServer = (strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===0);    
-    }else{
-        $isMainServer = true;
-    }
-    
-//error_log('checkHeuristNetworkMembership ='.$isMainServer.'  '.$email);
-       
-        
-    if( $isMainServer ){ 
+    $base = getMainServerUrl();
+    if( $base==null ){ 
         return checkMembershipInFile($email, $host, $database, $context);
-    }
-    
-    // Remote call fallback (works when included from other servers)
-    if(defined('HEURIST_BASE_URL') && defined('HEURIST_MAIN_SERVER')){
-        $isAlpha = (preg_match("/h\d+\-alpha|alpha\//", HEURIST_BASE_URL) === 1) ? true :false;
-        $base = ($isAlpha
-            ? HEURIST_MAIN_SERVER . '/h7-alpha/'
-            : HEURIST_INDEX_BASE_URL);
-    }else{
-        //hardcoded
-        $base = 'https://heuristref.net/h7-alpha/';
     }
 
     $url = $base . 'admin/setup/dbproperties/checkMembership.php'
         . '?email=' . rawurlencode($email)
         . '&host='  . rawurlencode($host)
         . '&db='    . rawurlencode((string)$database)
-        . '&ctx='   . rawurlencode($context);
+        . '&ctx='   . rawurlencode($context??'');
 
     $resp = httpGet($url);
     return $resp !== '' ? $resp : 'nonmember';
@@ -168,7 +168,7 @@ function checkMembershipInFile(string $email, string $host = '', ?string $databa
     }
       
     if (!is_file(HN_MEMBERS_FILE) || !is_readable(HN_MEMBERS_FILE)) {
-        checkMembershipLogNonmember('nonmember', $dbName, $serverName, $email, $context);
+        //checkMembershipLogNonmember($context, $email, $serverName, $dbName);
         return 'nonmember';
     }      
 
@@ -215,7 +215,7 @@ function checkMembershipInFile(string $email, string $host = '', ?string $databa
     $result = empty($hits) ? 'nonmember' : implode('|', array_keys($hits));
 
     if ($result === 'nonmember') {
-        checkMembershipLogNonmember($dbName, $serverName, $email, $context);
+        checkMembershipLogNonmember($context, $dbName, $serverName, $email);
     } 
     
     return $result;
@@ -223,9 +223,24 @@ function checkMembershipInFile(string $email, string $host = '', ?string $databa
 
 
 // --- log helper ---
-function checkMembershipLogNonmember(string $database, string $host, string $email, string $context): void {
+function checkMembershipLogNonmember(string $context, string $email, string $host='', string $database=''): void 
+{
+    if (!$context || in_array($context, array('Initial sign-in', ''), true)) { return; }
+    
+    $base = getMainServerUrl();
+    if( $base!=null ){ 
 
-    if (in_array($context, array('Initial sign-in', ''), true)) { return; }
+        $url = $base . 'admin/setup/dbproperties/checkMembership.php'
+            . '?email=' . rawurlencode($email)
+            . '&host='  . rawurlencode($host)
+            . '&db='    . rawurlencode((string)$database)
+            . '&ctx='   . rawurlencode($context)
+            . '&log=1';
+
+        httpGet($url);
+        return;
+    }
+    
 
     // Time (avoid Throwable / typed exceptions for max compatibility)
     try {
@@ -241,7 +256,6 @@ function checkMembershipLogNonmember(string $database, string $host, string $ema
     $entry = json_encode(
         array(
             'ts'       => $now,
-            'result'   => $result,
             'database' => $database,
             'name'     => $host,
             'email'    => $email,
