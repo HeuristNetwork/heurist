@@ -2960,10 +2960,15 @@ class HPredicate {
     private function _getRelationFieldConstraints(){
 
         global $mysqli;
-        if($this->field_id>0){
+        $several_ids = null;
+        if($this->field_id){
+            $several_ids = prepareIds($this->field_id);//getCommaSepIds - returns validated string
+        }
+        if(is_array($several_ids) && !empty($several_ids)){
+            
             list($vocab_id, $rty_constraints) = mysql__select_row($mysqli,
                     'SELECT dty_JsonTermIDTree, dty_PtrTargetRectypeIDs '
-                    .'FROM defDetailTypes WHERE dty_ID='.$this->field_id);
+                    .'FROM defDetailTypes WHERE '.predicateId('dty_ID', $several_ids));
             $reltypes = getTermChildrenAll($mysqli, $vocab_id);
             $rty_constraints = !empty($rty_constraints) ? explode(',',$rty_constraints) : null;
 
