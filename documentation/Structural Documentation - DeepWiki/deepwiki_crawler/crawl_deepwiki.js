@@ -2,7 +2,14 @@
 'use strict';
 
 /**
- * Deepwiki — Automated publish pipeline (menu-only)
+ * Deepwiki — Automated publish pipeline (menu-only) 13 Aug 2025
+ * 
+ * The crawler writes the documentation into:
+            /var/www/html/HEURIST/h7-alpha/documentation/Structural Documentation - DeepWiki
+            on the current server (it is run monthly on HeuristNetwork.org) and sends an email toi support@heuristnetwork.org. 
+            It should then be uploaded manually to gitHub in /documentation/Structural Documentation - DeepWiki
+            TODO: automate upload to gitHub
+            
  * -------------------------------------------------
  * Steps:
  *  1) Parse left menu on START_URL and build the list of pages (strictly under PATH_PREFIX)

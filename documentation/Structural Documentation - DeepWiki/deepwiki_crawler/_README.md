@@ -1,4 +1,4 @@
-Directory:	/documentation/Structural Documnetation - DeepWiki/deepwiki
+Directory:	/documentation/Structural Documnetation - DeepWiki/deepwiki_crawler
 
 Overview:	Crawler to download the latest deepwiki documentation version
 
