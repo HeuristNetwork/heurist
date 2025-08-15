@@ -140,7 +140,7 @@ class HSystemMgr {
                       `${window.hWin.HAPI4.baseURL}?disclaimer=association_membership.html #content`,
                        null, 'Heurist Network Association', {enable_buttons_after:5000, closeOnEscape:false, noClose:true});
                        
-        /*call logger
+        //call logger
         let request = {
                     db:  window.hWin.HAPI4.sysinfo.database_prefix + window.hWin.HAPI4.database,
                     host: window.location.hostname,
@@ -149,9 +149,10 @@ class HSystemMgr {
                     ctx: associationMembershipContext  // context
                 };  
 
-        window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL + 'admin/setup/dbproperties/checkMembership.php',
+                //window.hWin.HAPI4.baseURL + 
+        window.hWin.HEURIST4.util.sendRequest('https://heuristref.net/h7-alpha/admin/setup/dbproperties/checkMembership.php',
                     request, null, ()=>{}, 'auto');
-        */
+        
         return;
       }
       

@@ -52,11 +52,16 @@ const HOSTNAME_TO_SERVERNAME = [
 
 /* ------------------------ Standalone handler ------------------------ */
 if (php_sapi_name() !== 'cli') {
-    //$req_params = filter_input_array(INPUT_GET);
-    $email = isset($_GET['email']) ? trim((string)$_GET['email']) : '';
-    $host  = isset($_GET['host'])  ? trim((string)$_GET['host'])  : '';
-    $db    = isset($_GET['db'])    ? trim((string)$_GET['db'])    : '';
-    $ctx   = isset($_GET['ctx'])   ? trim((string)$_GET['ctx'])   : '';
+    if(@$_SERVER['REQUEST_METHOD']=='POST'){
+        $req_params = filter_input_array(INPUT_POST);
+    }else{
+        $req_params = filter_input_array(INPUT_GET);
+    }
+
+    $email = isset($req_params['email']) ? trim((string)$req_params['email']) : '';
+    $host  = isset($req_params['host'])  ? trim((string)$req_params['host'])  : '';
+    $db    = isset($req_params['db'])    ? trim((string)$req_params['db'])    : '';
+    $ctx   = isset($req_params['ctx'])   ? trim((string)$req_params['ctx'])   : '';
 
     
 //error_log('ENTER checkMembership '.$email.'  '.$host);
@@ -64,7 +69,7 @@ if (php_sapi_name() !== 'cli') {
     if ($email !== '' || ($host !== '' && $db !== '')) {
 //error_log("!!!!!");        
         header('Content-Type: text/plain; charset=UTF-8');
-        if(isset($_GET['log']) && trim((string)$_GET['log'])==='1'){
+        if(isset($req_params['log']) && trim((string)$req_params['log'])==='1'){
             checkMembershipLogNonmember($ctx, $email, $host, $db);
             echo "ok";
         }else{
