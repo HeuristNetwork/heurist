@@ -150,7 +150,7 @@ class HSystemMgr {
                 };  
 
                 //window.hWin.HAPI4.baseURL + 
-        window.hWin.HEURIST4.util.sendRequest('https://heuristref.net/h7-alpha/admin/setup/dbproperties/checkMembership.php',
+        window.hWin.HEURIST4.util.sendRequest('https://heuristref.net/h7-alpha/admin/utilities/checkMembership.php',
                     request, null, ()=>{}, 'auto');
         
         return;

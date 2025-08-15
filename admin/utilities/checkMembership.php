@@ -46,6 +46,7 @@ const HN_TIMEZONE     = 'Australia/Sydney';
 
 // map hostnames/URLs to the "server name" stored in the CSV (3rd column of DATABASE rows).
 const HOSTNAME_TO_SERVERNAME = [
+    'huma-num.fr'   => 'Fr Huma-Num',
     'heurist.huma-num.fr'   => 'Fr Huma-Num',
     'heurist2025.huma-num.fr'=> 'Fr Huma-Num',
 ];
@@ -59,21 +60,20 @@ if (php_sapi_name() !== 'cli') {
     }
 
     $email = isset($req_params['email']) ? trim((string)$req_params['email']) : '';
+    $lastName = isset($req_params['lastName']) ? trim((string)$req_params['lastName']) : '';
+    $firstName = isset($req_params['firstName']) ? trim((string)$req_params['firstName']) : '';
+    $email = isset($req_params['email']) ? trim((string)$req_params['email']) : '';
     $host  = isset($req_params['host'])  ? trim((string)$req_params['host'])  : '';
     $db    = isset($req_params['db'])    ? trim((string)$req_params['db'])    : '';
     $ctx   = isset($req_params['ctx'])   ? trim((string)$req_params['ctx'])   : '';
 
-    
-//error_log('ENTER checkMembership '.$email.'  '.$host);
-    
-    if ($email !== '' || ($host !== '' && $db !== '')) {
-//error_log("!!!!!");        
+    if ($email !== '' || ($firstName!=='' && $lastName!=='') || ($host !== '' && $db !== '')) {
         header('Content-Type: text/plain; charset=UTF-8');
         if(isset($req_params['log']) && trim((string)$req_params['log'])==='1'){
             checkMembershipLogNonmember($ctx, $email, $host, $db);
             echo "ok";
         }else{
-            echo checkHeuristNetworkMembership($email, $host, $db, $ctx);    
+            echo checkHeuristNetworkMembership($email, $host, $db, $ctx, $firstName, $lastName);    
         }
         exit;
     }
@@ -83,7 +83,6 @@ if (php_sapi_name() !== 'cli') {
 
 function getMainServerUrl(): ?string
 {
-error_log(" host ".@$_SERVER["SERVER_NAME"]);
     $isMainServer = (@$_SERVER["SERVER_NAME"]=='heuristref.net');
     
     if($isMainServer){
@@ -101,14 +100,14 @@ error_log(" host ".@$_SERVER["SERVER_NAME"]);
  *   'individual|database'  – if both match
  *   'nonmember'            – otherwise (also logs a line unless context indicates initial sign-in)
  */
-function checkHeuristNetworkMembership(string $email, string $host = '', ?string $database = null, ?string $context = ''): string
+function checkHeuristNetworkMembership(string $email, string $host = '', ?string $database = null, ?string $context = '', string $firstName = '', string $lastName = ''): string
 {
     $base = getMainServerUrl();
     if( $base==null ){ 
-        return checkMembershipInFile($email, $host, $database, $context);
+        return checkMembershipInFile($email, $host, $database, $context, $firstName, $lastName);
     }
 
-    $url = $base . 'admin/setup/dbproperties/checkMembership.php'
+    $url = $base . 'admin/utilities/checkMembership.php'
         . '?email=' . rawurlencode($email)
         . '&host='  . rawurlencode($host)
         . '&db='    . rawurlencode((string)$database)
@@ -135,9 +134,8 @@ function normalizeServerName(string $input): string
     $parts = explode('.', $raw);
     if (count($parts) > 1) {
         // Drop the first label (subdomain), keep the rest, reverse order
-        array_shift($parts);
         $parts = array_reverse($parts);
-        return implode(' ', $parts);
+        return implode(' ', array_splice($parts,0,2));
     }
 
     // Fallback: just return raw
@@ -151,15 +149,15 @@ function normalizeDbName(?string $database): string
     return (strpos($db, 'hdb_') === 0) ? substr($db, 4) : $db;
 }
 
-function checkMembershipInFile(string $email, string $host = '', ?string $database = null, string $context = ''): string
+function checkMembershipInFile(string $email, string $host = '', ?string $database = null, string $context = '', string $firstName = '', string $lastName = ''): string
 {
     $hits = [];
     $toCheck = 0;
     
-//error_log('checkMembershipInFile '.$email);
-    //@todo verify email    
     $email = strtolower(trim($email));
-    if ($email !== '') $toCheck++;
+    $firstName = strtolower(trim($firstName));
+    $lastName = strtolower(trim($lastName));
+    if ($email !== '' || ($firstName!=='' && $lastName!=='')) $toCheck++;
   
     $serverName = normalizeServerName($host);   // compare as case-insensitive server NAME
     $dbName     = normalizeDbName($database);
@@ -197,12 +195,24 @@ function checkMembershipInFile(string $email, string $host = '', ?string $databa
         
         $type = strtoupper(trim($parts[0]));
 
-        if ($type === 'INDIVIDUAL' && $email !== '') {
-            // INDIVIDUAL,email,"last name","firstname"
-            $email2 = strtolower(trim($parts[1]));
-            if ($email2 == $email) {
-                $hits['individual'] = true;    
+        if ($type === 'INDIVIDUAL'){
+            
+            if($email !== '') {
+                // INDIVIDUAL,email,"last name","firstname"
+                $email2 = strtolower(trim($parts[1]));
+                if ($email2 == $email) {
+                    $hits['individual'] = true;
+                }
             }
+            if (!isset($hits['individual']) && $firstName !== '' && $lastName !== '') {
+                // INDIVIDUAL,email,"last name","firstname"
+                $firstName2 = strtolower(trim($parts[3]));
+                $lastName2 = strtolower(trim($parts[2]));
+                if ($firstName2 == $firstName && $lastName2==$lastName) {
+                    $hits['individual'] = true;
+                }
+            }
+            
         } elseif ($type === 'DATABASE' && $serverName !== '' && $dbName !== '') {
             // DATABASE, contactEmail, ServerName, DbName
             $server = strtolower(trim($parts[2]));
@@ -235,7 +245,7 @@ function checkMembershipLogNonmember(string $context, string $email, string $hos
     $base = getMainServerUrl();
     if( $base!=null ){ 
 
-        $url = $base . 'admin/setup/dbproperties/checkMembership.php'
+        $url = $base . 'admin/utilities/checkMembership.php'
             . '?email=' . rawurlencode($email)
             . '&host='  . rawurlencode($host)
             . '&db='    . rawurlencode((string)$database)
