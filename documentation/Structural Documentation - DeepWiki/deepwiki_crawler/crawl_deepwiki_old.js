@@ -2,49 +2,32 @@
 'use strict';
 
 /**
- * Deepwiki — Automated publish pipeline (menu-only) 13 Aug 2025
- * 
- * The crawler writes the documentation into:
-            /var/www/html/HEURIST/h7-alpha/documentation/Structural Documentation - DeepWiki
-            on the current server (it is run monthly on HeuristNetwork.org) and sends an email toi support@heuristnetwork.org. 
-            It should then be uploaded manually to gitHub in /documentation/Structural Documentation - DeepWiki
-            TODO: automate upload to gitHub
-            
- * -------------------------------------------------
- * Steps:
- *  1) Parse left menu on START_URL and build the list of pages (strictly under PATH_PREFIX)
- *  2) If list length <= 20, abort (prints and emails report)
- *  3) Else, download:
- *     - Saves each page prefixless under OUTPUT_DIR (no hostname, no PATH_PREFIX)
- *     - Single shared _assets/ at OUTPUT_DIR/_assets
- *     - Rewrites internal links to prefixless relative paths
- *  4) Verify: number of saved page folders == number of pages to be downloaded (+ root)
- *  5) Email a report to support@example.org (date, count, list, warnings)
- *  6) If everything OK, copy OUTPUT_DIR -> PUBLISH_DIR
- *
+ * Deepwiki — Menu-only list-then-download (prefixless output + link rewrite)
+ * -------------------------------------------------------------------------
  * Usage:
- *   node crawl_deepwiki.js
+ *   node crawl_deepwiki7_patched.js            # list pages only (no download)
+ *   node crawl_deepwiki7_patched.js --download # list + download
+ *
+ * What changed:
+ *  - Output paths NO LONGER include hostname or /HeuristNetwork/heurist/.
+ *  - All internal links under that path are rewritten to relative, prefixless paths.
  */
 
 const fs = require('fs');
-const fsp = fs.promises;
 const path = require('path');
 const crypto = require('crypto');
-const { spawn } = require('child_process');
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
-const fetch = require('node-fetch'); // v2 (CommonJS)
+const fetch = require('node-fetch'); // v2
 
 // ======================= CONFIG ========================
-const START_URL   = 'https://deepwiki.com/HeuristNetwork/heurist';
-const PATH_PREFIX = '/HeuristNetwork/heurist';         // crawl scope
-const OUTPUT_DIR  = path.resolve('./deepwiki_download'); // build here
-const PUBLISH_DIR = '/var/www/html/HEURIST/h7-alpha/documentation/Structural Documentation - DeepWiki';            // publish here
-const EMAIL_TO    = 'support@heuristnetwork.org';
-const EMAIL_SUBJ  = 'Deepwiki crawl & publish report';
-const MIN_REQUIRED_PAGES = 21; // must be > 20
+const START_URL = 'https://deepwiki.com/HeuristNetwork/heurist';
+const OUTPUT_DIR = path.resolve('./deepwiki_download');
 
-// Left menu selectors
+// Crawl scope
+const PATH_PREFIX = '/HeuristNetwork/heurist'; // restrict to this exact path and its subpaths
+
+// Menu selector provided by the user; strict first, then fallbacks
 const MENU_SELECTOR = 'ul.flex-1.flex-shrink-0.space-y-1.overflow-y-auto.py-1 a[href]';
 const MENU_FALLBACKS = [
   'nav [role="navigation"] a[href^="/HeuristNetwork/heurist"]',
@@ -55,12 +38,13 @@ const MENU_FALLBACKS = [
 const PUP_ARGS = ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'];
 // =======================================================
 
+const SHOULD_DOWNLOAD = process.argv.includes('--download');
+
 function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 function hashName(u){ return crypto.createHash('sha1').update(u).digest('hex'); }
 function posixRel(from, to){ return path.relative(from, to).split(path.sep).join('/'); }
 function stripTrailingSlashes(s){ return s.replace(/\/+$/, ''); }
 function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-function nowIso(){ return new Date().toISOString(); }
 
 function extFromContentType(ct = ''){
   ct = String(ct || '').toLowerCase();
@@ -83,7 +67,7 @@ function extFromContentType(ct = ''){
 function getRootDir(){ return OUTPUT_DIR; }
 function getAssetsDir(){ return path.join(getRootDir(), '_assets'); }
 
-// Map URL -> local dir, stripping PATH_PREFIX
+// Return the dest directory for a given URL, with /HeuristNetwork/heurist/ stripped
 function makePathsFromUrl(u){
   const url = new URL(u);
   url.hash = '';
@@ -95,7 +79,7 @@ function makePathsFromUrl(u){
   const dir = path.join(OUTPUT_DIR, ...parts); // NO hostname, NO prefix
   const fileHtml = path.join(dir, 'index.html');
   const fileTxt  = path.join(dir, 'index.txt');
-  return { dir, fileHtml, fileTxt, relPath: (parts.join('/') || '') };
+  return { dir, fileHtml, fileTxt };
 }
 
 // Strict path filter: only exact prefix or subpath; allow dotted slugs; ignore anchors & obvious filetypes
@@ -199,7 +183,6 @@ function makeAssetPipeline(assetsDir){
       if (!res.ok) throw new Error('HTTP ' + res.status);
       let cssText = await res.text();
 
-      // @import recursion
       cssText = await replaceAsync(cssText,
         /@import\s+(?:url\(\s*)?['"]?([^'")\s]+)['"]?(?:\s*\))?([^;]*);/gi,
         async (_m, href, media) => {
@@ -211,7 +194,6 @@ function makeAssetPipeline(assetsDir){
         }
       );
 
-      // url(...) assets -> enqueue and rewrite to filename (same folder as CSS)
       cssText = await replaceAsync(cssText,
         /url\(\s*(['"]?)([^'")]+)\1\s*\)/gi,
         async (_m, _q, href) => {
@@ -265,8 +247,7 @@ async function expandNav(page){
       return clicks;
     });
     if (!clicked) break;
-    // wait a moment to let UI update
-    return 250;
+    await sleep(200);
   }
 }
 
@@ -358,7 +339,7 @@ function rewriteInternalLinks($, pageUrl, pageDir){
   });
 }
 
-// Save a single page with assets (using a shared pipeline instance). Returns the folder path saved.
+// Save a single page with assets (using a shared pipeline instance)
 async function saveSinglePage(browser, url, pipeline){
   const { dir, fileHtml, fileTxt } = makePathsFromUrl(url);
   fs.mkdirSync(dir, { recursive: true });
@@ -523,7 +504,7 @@ async function saveSinglePage(browser, url, pipeline){
     $(el).attr('style', newStyle);
   });
 
-  // Rewrite internal navigation links to drop PATH_PREFIX and be relative
+  // NEW: rewrite internal navigation links to drop PATH_PREFIX and be relative
   rewriteInternalLinks($, url, dir);
 
   const finalHtml = $.html();
@@ -535,134 +516,48 @@ async function saveSinglePage(browser, url, pipeline){
 
   await page.close();
   console.log(`✅ Saved ${fileHtml}`);
-  return dir;
-}
-
-// Email via local sendmail
-async function sendEmail(to, subject, body){
-  return new Promise((resolve, reject) => {
-    const proc = spawn('sendmail', ['-t']);
-    const msg = `To: ${to}\nSubject: ${subject}\nContent-Type: text/plain; charset=utf-8\n\n${body}\n`;
-    proc.stdin.write(msg);
-    proc.stdin.end();
-    proc.on('error', reject);
-    proc.on('close', code => {
-      if (code === 0) resolve(); else reject(new Error(`sendmail exited ${code}`));
-    });
-  });
-}
-
-// Recursively copy OUTPUT_DIR -> PUBLISH_DIR (no delete)
-async function copyTree(src, dst){
-  await fsp.mkdir(dst, { recursive: true });
-  const entries = await fsp.readdir(src, { withFileTypes: true });
-  for (const ent of entries){
-    const s = path.join(src, ent.name);
-    const d = path.join(dst, ent.name);
-    if (ent.isDirectory()){
-      await copyTree(s, d);
-    } else if (ent.isSymbolicLink()){
-      try {
-        const target = await fsp.readlink(s);
-        await fsp.symlink(target, d);
-      } catch {
-        await fsp.copyFile(s, d);
-      }
-    } else {
-      await fsp.copyFile(s, d);
-    }
-  }
-}
-
-async function rsyncPublish(srcDir, dstDir, { chownUserGroup } = {}) {
-  return new Promise((resolve, reject) => {
-    const args = [
-      '-a',                   // archive mode: perms, times, symlinks, etc.
-      '--delete',             // remove files not present in source
-      '--info=stats2,progress2',
-      // optional excludes:
-      '--exclude=deepwiki_crawler/',
-      '--exclude=_README.md',
-    ];
-
-    if (chownUserGroup) {
-      // works on rsync >= 3.1.0
-      args.push(`--chown=${chownUserGroup}`);
-    }
-
-    // IMPORTANT: trailing slashes mirror contents
-    args.push(srcDir.replace(/\/?$/, '/') , dstDir.replace(/\/?$/, '/'));
-
-    const child = spawn('rsync', args, { stdio: 'inherit' });
-    child.on('close', code => code === 0 ? resolve() : reject(new Error(`rsync exited ${code}`)));
-    child.on('error', reject);
-  });
 }
 
 // MAIN
 (async () => {
-    
-  const report = [];
-  const startTime = nowIso();
-  report.push(`Date: ${startTime}`);
-
-  // Prepare dirs
-  fs.mkdirSync(getRootDir(), { recursive: true });
-  fs.mkdirSync(getAssetsDir(), { recursive: true });
-
-  // 1) Parse menu
-  const browserParse = await puppeteer.launch({ headless: true, args: PUP_ARGS });
-  let items = [];
-  try {
-    console.log('⏳ Parsing menu on root page...');
-    items = await parseMenuLinks(browserParse);
-  } finally {
-    await browserParse.close();
-  }
-
-  // Show summary of pages (prefixless)
-  const listPretty = items.map(it => {
-    const p = stripTrailingSlashes(new URL(it.url).pathname);
-    const pp = stripTrailingSlashes(PATH_PREFIX);
-    const nice = stripTrailingSlashes(p.replace(new RegExp('^' + escapeRegex(pp) + '(?:/)?'), ''));
-    return `/${nice || ''}${it.text ? ' — ' + it.text : ''}`;
-  });
-
-  report.push(`Pages found in menu: ${items.length}`);
-  report.push('List:');
-  report.push(...listPretty);
-
-  if (items.length < MIN_REQUIRED_PAGES){
-    const warning = `ABORT: Only ${items.length} pages found (< ${MIN_REQUIRED_PAGES}). Not downloading.`;
-    console.log('\n' + warning);
-    report.push(warning);
-
-    // Save report file and try email
-    const reportPathAbort = path.join(OUTPUT_DIR, `report-${Date.now()}.txt`);
-    fs.writeFileSync(reportPathAbort, report.join('\n') + '\n', 'utf-8');
-    try {
-      await sendEmail(EMAIL_TO, EMAIL_SUBJ, report.join('\n'));
-      console.log(`📧 Email sent to ${EMAIL_TO}`);
-    } catch (e){
-      console.warn(`⚠️ Could not send email: ${e.message}`);
-      console.warn(`Report saved at: ${reportPathAbort}`);
-    }
-    process.exit(1);
-  }
-
-  // 2) Download (re-launch browser for the crawl)
   const browser = await puppeteer.launch({ headless: true, args: PUP_ARGS });
-  const pipeline = makeAssetPipeline(getAssetsDir());
-
-  const allUrls = [START_URL, ...items.map(it => it.url)];
-  const expectedCount = allUrls.length;
-  const savedDirs = new Set();
 
   try {
+    // 1) Parse the menu once
+    console.log('⏳ Parsing menu on root page...');
+    const items = await parseMenuLinks(browser);
+
+    if (!items.length){
+      console.log('⚠️  No menu links found under the provided selector(s).');
+      return;
+    }
+
+    // 2) Print the list (prefixless view)
+    console.log(`\nPages to download (${items.length}):`);
+    items.forEach((it, i) => {
+      const p = stripTrailingSlashes(new URL(it.url).pathname);
+      const pp = stripTrailingSlashes(PATH_PREFIX);
+      const nice = stripTrailingSlashes(p.replace(new RegExp('^' + escapeRegex(pp) + '(?:/)?'), ''));
+      console.log(`${String(i+1).padStart(3, ' ')}. /${nice || ''}${it.text ? ' — ' + it.text : ''}`);
+    });
+
+    if (!SHOULD_DOWNLOAD){
+      console.log('\nDRY RUN: pass --download to actually fetch pages and assets.');
+      return;
+    }
+
+    // 3) Prepare output dirs and single shared pipeline
+    fs.mkdirSync(getRootDir(), { recursive: true });
+    fs.mkdirSync(getAssetsDir(), { recursive: true });
+    const pipeline = makeAssetPipeline(getAssetsDir());
+
+    // Also include the START_URL itself first
+    const allUrls = [START_URL, ...items.map(it => it.url)];
+
+    // 4) Download pages sequentially (gentle)
     for (const url of allUrls){
       try {
-        const dir = await saveSinglePage(browser, url, pipeline);
-        savedDirs.add(dir);
+        await saveSinglePage(browser, url, pipeline);
       } catch (e){
         console.error(`❌ Failed ${url}: ${e.message}`);
       }
@@ -671,64 +566,4 @@ async function rsyncPublish(srcDir, dstDir, { chownUserGroup } = {}) {
   } finally {
     await browser.close();
   }
-
-  // 3) Verify
-  const actualCount = savedDirs.size;
-  const ok = actualCount === expectedCount;
-
-  report.push(`\nExpected pages (including root): ${expectedCount}`);
-  report.push(`Downloaded folders: ${actualCount}`);
-  if (!ok){
-    const warn = `WARNING: Missing ${expectedCount - actualCount} item(s).`;
-    console.log(warn);
-    report.push(warn);
-
-    // Compute which are missing by checking expected dirs
-    const missing = [];
-    for (const url of allUrls){
-      const { dir, relPath } = makePathsFromUrl(url);
-      if (!savedDirs.has(dir)) missing.push('/' + relPath);
-    }
-    if (missing.length){
-      report.push('Missing:');
-      report.push(...missing.map(m => ` - ${m || '/'}`));
-    }
-  } else {
-    report.push('All pages downloaded successfully.');
-  }
-
-  // Save report file
-  //const reportPath = path.join(OUTPUT_DIR, `report-${Date.now()}.txt`);
-  //fs.writeFileSync(reportPath, report.join('\n') + '\n', 'utf-8');
-
-  // 4) Email report
-  try {
-    await sendEmail(EMAIL_TO, EMAIL_SUBJ, report.join('\n'));
-    console.log(`📧 Email sent to ${EMAIL_TO}`);
-  } catch (e){
-    console.warn(`⚠️ Could not send email: ${e.message}`);
-    console.warn(`Report saved at: ${reportPath}`);
-  }
-
-  // 5) Publish if OK
-  if (ok){
-    try {
-      console.log(`\n📦 Publishing to ${PUBLISH_DIR} ...`);
-      //await copyTree(OUTPUT_DIR, PUBLISH_DIR);
-      await rsyncPublish(OUTPUT_DIR, PUBLISH_DIR, { chownUserGroup: 'osmakov:heurist' }); // adjust owner if needed
-
-      
-      console.log('✅ Publish complete.');
-    } catch (e){
-      const msg = `Publish failed: ${e.message}`;
-      console.error(msg);
-      // Try to send an updated email
-      try { await sendEmail(EMAIL_TO, EMAIL_SUBJ + ' (publish failed)', report.join('\n') + '\n' + msg); } catch {}
-      process.exit(2);
-    }
-  } else {
-    console.log('\n🚫 Skipping publish due to missing pages.');
-  }
-
-  console.log(`\nReport saved at: ${reportPath}`);
 })();
