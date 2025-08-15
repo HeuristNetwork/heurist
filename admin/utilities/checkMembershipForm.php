@@ -11,12 +11,18 @@
 * @author      Artem Osmakov <osmakov@gmail.com> corrections
 * @since       7.0
 */
-//$ENDPOINT = 'http://127.0.0.1/heurist/admin/utilities/checkMembership.php';
-$ENDPOINT = 'https://heuristref.net/h7-alpha/admin/utilities/checkMembership.php';
+require_once 'checkMembershipLib.php';
+$ENDPOINT = 'https://heuristref.net/h7-alpha/admin/utilities/checkMembershipApi.php';
 
 // ---------- helpers ----------
 function postToEndpoint(array $payload, string $endpoint): string
 {
+    $isMainServer = (@$_SERVER["SERVER_NAME"]=='heuristref.net');
+    
+    if($isMainServer){
+        return checkMembershipInFile($payload['email'], $payload['host'], $payload['db'], '', $payload['firstName'], $payload['lastName']);
+    }
+    
     $postFields = http_build_query($payload, '', '&');
 
     if (function_exists('curl_init')) {
@@ -58,7 +64,7 @@ $values = array(
     'email'         => '',
     'firstName'     => '',
     'lastName'      => '',
-    'server_sel'    => 'heuristref.net',
+    'server_sel'    => 'huma-num.fr',
     'server_custom' => '',
     'db'            => '',
 );
@@ -67,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $values['email']         = isset($_POST['email']) ? trim((string)$_POST['email']) : '';
     $values['firstName']     = isset($_POST['firstName']) ? trim((string)$_POST['firstName']) : '';
     $values['lastName']      = isset($_POST['lastName']) ? trim((string)$_POST['lastName']) : '';
-    $values['server_sel']    = isset($_POST['server_sel']) ? (string)$_POST['server_sel'] : 'heuristref.net';
+    $values['server_sel']    = isset($_POST['server_sel']) ? (string)$_POST['server_sel'] : 'huma-num.fr';
     $values['server_custom'] = isset($_POST['server_custom']) ? trim((string)$_POST['server_custom']) : '';
     $values['db']            = isset($_POST['db']) ? trim((string)$_POST['db']) : '';
 
@@ -154,6 +160,32 @@ function disableButtonsOnSubmit(form){
     checkBtn.textContent = 'Checking...';
     return true; // allow form submit
 }
+function clearForm(){
+  var form = document.forms[0];
+
+  // Manually clear text inputs
+  ['email','firstName','lastName','server_custom','db'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  // Reset server selector to default preset
+  var sel = document.getElementById('server_sel');
+  if (sel){
+    sel.value = 'huma-num.fr';
+    toggleCustomServer(sel); // will disable and fade the custom field
+  }
+
+  // Optionally clear any server response/status message
+  var status = document.querySelector('.status');
+  if (status){ status.textContent = ''; }
+
+  // Re-enable buttons and reset CHECK label if they were disabled
+  var checkBtn = document.getElementById('checkBtn');
+  var clearBtn = document.getElementById('clearBtn');
+  if (checkBtn){ checkBtn.disabled = false; checkBtn.textContent = 'CHECK'; }
+  if (clearBtn){ clearBtn.disabled = false; }
+}
 </script>
 </head>
 <body>
@@ -216,7 +248,7 @@ function disableButtonsOnSubmit(form){
 
       <div class="full actions">
         <button type="submit" class="primary" id="checkBtn">CHECK</button>
-        <button type="reset" id="clearBtn">Clear Form</button>
+        <button type="button" id="clearBtn" onclick="clearForm()">Clear Form</button>
       </div>
     </form>
   </div>

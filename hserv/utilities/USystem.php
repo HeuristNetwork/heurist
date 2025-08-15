@@ -15,7 +15,7 @@
 */
 namespace hserv\utilities;
 
-require_once dirname(__FILE__).'/../../admin/utilities/checkMembership.php';
+require_once dirname(__FILE__).'/../../admin/utilities/checkMembershipLib.php';
 
 /**
 * Class USystem

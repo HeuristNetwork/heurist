@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
-* checkMembership.php - Checks to see if the user or database (eventually group) is a member of the association
+* checkMembershipLib.php - Checks to see if the user or database (eventually group) is a member of the association
 *
 * @fileOverview This is an independent function which compares a user email address and/or host+database name against a text file
 *               list of members (and databses owned by members) and returns whether the person is a member of the Heurist 
@@ -51,36 +51,6 @@ const HOSTNAME_TO_SERVERNAME = [
     'heurist2025.huma-num.fr'=> 'Fr Huma-Num',
 ];
 
-/* ------------------------ Standalone handler ------------------------ */
-if (php_sapi_name() !== 'cli') {
-    if(@$_SERVER['REQUEST_METHOD']=='POST'){
-        $req_params = filter_input_array(INPUT_POST);
-    }else{
-        $req_params = filter_input_array(INPUT_GET);
-    }
-
-    $email = isset($req_params['email']) ? trim((string)$req_params['email']) : '';
-    $lastName = isset($req_params['lastName']) ? trim((string)$req_params['lastName']) : '';
-    $firstName = isset($req_params['firstName']) ? trim((string)$req_params['firstName']) : '';
-    $email = isset($req_params['email']) ? trim((string)$req_params['email']) : '';
-    $host  = isset($req_params['host'])  ? trim((string)$req_params['host'])  : '';
-    $db    = isset($req_params['db'])    ? trim((string)$req_params['db'])    : '';
-    $ctx   = isset($req_params['ctx'])   ? trim((string)$req_params['ctx'])   : '';
-
-    if ($email !== '' || ($firstName!=='' && $lastName!=='') || ($host !== '' && $db !== '')) {
-        header('Content-Type: text/plain; charset=UTF-8');
-        if(isset($req_params['log']) && trim((string)$req_params['log'])==='1'){
-            checkMembershipLogNonmember($ctx, $email, $host, $db);
-            echo "ok";
-        }else{
-            echo checkHeuristNetworkMembership($email, $host, $db, $ctx, $firstName, $lastName);    
-        }
-        exit;
-    }
-}
-
-/* ------------------------ Public API ------------------------ */
-
 function getMainServerUrl(): ?string
 {
     $isMainServer = (@$_SERVER["SERVER_NAME"]=='heuristref.net');
@@ -107,7 +77,7 @@ function checkHeuristNetworkMembership(string $email, string $host = '', ?string
         return checkMembershipInFile($email, $host, $database, $context, $firstName, $lastName);
     }
 
-    $url = $base . 'admin/utilities/checkMembership.php'
+    $url = $base . 'admin/utilities/checkMembershipApi.php'
         . '?email=' . rawurlencode($email)
         . '&host='  . rawurlencode($host)
         . '&db='    . rawurlencode((string)$database)
@@ -245,7 +215,7 @@ function checkMembershipLogNonmember(string $context, string $email, string $hos
     $base = getMainServerUrl();
     if( $base!=null ){ 
 
-        $url = $base . 'admin/utilities/checkMembership.php'
+        $url = $base . 'admin/utilities/checkMembershipApi.php'
             . '?email=' . rawurlencode($email)
             . '&host='  . rawurlencode($host)
             . '&db='    . rawurlencode((string)$database)
