@@ -41,7 +41,7 @@ const PATH_PREFIX = '/HeuristNetwork/heurist';         // crawl scope
 const OUTPUT_DIR  = path.resolve('./deepwiki_download'); // build here
 const PUBLISH_DIR = '/var/www/html/HEURIST/h7-alpha/documentation/Structural Documentation - DeepWiki';            // publish here
 const EMAIL_TO    = 'support@heuristnetwork.org';
-const EMAIL_SUBJ  = 'Deepwiki crawl & publish report';
+const EMAIL_SUBJ  = 'HEURIST: Deepwiki crawl report - please update gitHub';
 const MIN_REQUIRED_PAGES = 21; // must be > 20
 
 // Left menu selectors
@@ -730,5 +730,5 @@ async function rsyncPublish(srcDir, dstDir, { chownUserGroup } = {}) {
     console.log('\n🚫 Skipping publish due to missing pages.');
   }
 
-  console.log(`\nReport saved at: ${reportPath}`);
+  //console.log(`\nReport saved at: ${reportPath}`);
 })();
