@@ -4480,18 +4480,20 @@ function bugreportUpdate($system, $recID){
     $url = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$recID";
 
     $updateEmail = <<<EMAIL
-    The status of the following bug report has been completed, final status: <strong>$status</strong>.<br><br>
-    You can view the report here: <a href="$url">$url</a><br><br>
-    Reporter: $reportersName<br>
-    $database
-    Title: $title<br>
-    $resolution
-    Bug description:<br>
+    The status of the following ticket has been ùpdated to: <strong>$status</strong>.<br>
+       
+    $resolution <br>
+     
+    <hr>
     $desc<br><br>
+    Reporter: $reportersName <br>
+    Database: $database <br>
+    Ticket: <a href="$url">$url</a><br> <br>
+    <hr>
     When an issue is fixed and marked as DONE, the change will typically appear in the alpha version <br>
     (/h6-alpha/, /h7-alpha/, ...) within a couple of days on HeuristRef.net and any server which has <br>
     automated daily update of the alpha version, and a week or more on the Huma-Num server <br>
-    (due to new approval protocols from July 2025).
+    (due to new approval protocols from September 2025).
     EMAIL;
 
     $to = [$reportersEmail];
