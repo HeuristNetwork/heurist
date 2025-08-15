@@ -634,10 +634,11 @@ if (!defined('PDIR')){
         _showStep(8);
         _getDatabases( <?php echo (@$_REQUEST['list']==1)?'true':'false';?> );
 
-        <?php if(isset($_REQUEST['error']) && count($_REQUEST['error']) >= 1){
-
-            $_REQUEST['error']['message'] = '<br>' . $_REQUEST['error']['message'];
-            ?>
+        <?php if(is_array(@$_REQUEST['error']) && count($_REQUEST['error']) >= 1){
+            if(isset($_REQUEST['error']['message'])){
+                $_REQUEST['error']['message'] = '<br>' . $_REQUEST['error']['message'];
+            }
+        ?>
 
             window.hWin.HEURIST4.msg.showMsgErr(<?php echo json_encode($_REQUEST['error']);?>);
 

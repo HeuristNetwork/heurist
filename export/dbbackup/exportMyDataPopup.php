@@ -54,7 +54,7 @@
  * @var int
  */
 define('MANAGER_REQUIRED', 1);
-//define('ASSOC_MEMBERSHIP_REQUIRED', 1);
+//define('ASSOC_MEMBERSHIP_REQUIRED', 'menu-manage-archive');
 /**
  * Relative path to the parent directory, used for JS/CSS links.
  * @var string

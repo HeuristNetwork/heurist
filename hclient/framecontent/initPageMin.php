@@ -69,8 +69,8 @@ if(defined('LOGIN_REQUIRED') && !$system->hasAccess()){
     $message = $login_warning.' as Administrator of group \'Database Managers\'';
 }elseif(defined('OWNER_REQUIRED') && !$system->isDbOwner()){
     $message = $login_warning.' as Database Owner';
-}elseif(defined('ASSOC_MEMBERSHIP_REQUIRED') && ASSOC_MEMBERSHIP_REQUIRED==1 
-        && 'nonmember' == USystem::checkAssociationMembership($system)){
+}elseif(defined('ASSOC_MEMBERSHIP_REQUIRED') 
+        && 'nonmember' == USystem::checkAssociationMembership($system, ASSOC_MEMBERSHIP_REQUIRED)){
         
         $is_error = false;
         $message = file_get_contents(dirname(__FILE__).'/../../movetoparent/association_membership.html');

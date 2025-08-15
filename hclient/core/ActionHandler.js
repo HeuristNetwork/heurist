@@ -120,10 +120,10 @@ class ActionHandler {
         let action_admin_level = adata['user-admin-status'];
         let action_member_level = adata['user_member_status'];
         let action_user_permissions = adata['user-permissions'];
-        const is_association_member = adata['is_association_member']; 
+        const associationMembershipContext = adata['is_association_member']==1?action.id:null; 
         let requiredLevel = (action_admin_level == -1 || action_admin_level >= 0) ? action_admin_level : 0;
         
-        if(!(action_passworded || requiredLevel > 0 || is_association_member)){ 
+        if(!(action_passworded || requiredLevel > 0 || associationMembershipContext)){ 
             return false;                
         }
         
@@ -136,7 +136,7 @@ class ActionHandler {
             dialog_options.verification_passed = true;
             this.executeActionById(action.id, dialog_options); // Re-execute action after successful verification
         },
-        requiredLevel, action_passworded, null, action_user_permissions, is_association_member);
+        requiredLevel, action_passworded, null, action_user_permissions, associationMembershipContext);
             
         return true; // Indicates verification was initiated
     }    

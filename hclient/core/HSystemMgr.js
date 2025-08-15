@@ -129,16 +129,30 @@ class HSystemMgr {
   *                                       potentially a system administrator override password, regardless of `requiredLevel`.
   * @param {string} [password_entered] - The password entered by the user on the client-side for a password-protected action.
   * @param {('add'|'delete'|'add delete')} [requiredPermission] - Specific permissions required for the action (e.g., 'add', 'delete'). This is checked on server-side.
-  * @param reqAssociationMembership                                    
+  * @param associationMembershipContext - if not empty need to validate membership, value is context be logged on heuristref(main server)                                  
   * @returns {void}
   */
-  verify_credentials(callback, requiredLevel, password_protected, password_entered, requiredPermission, reqAssociationMembership) {
+  verify_credentials(callback, requiredLevel, password_protected, password_entered, requiredPermission, associationMembershipContext) {
       
-      if(reqAssociationMembership && 'nonmember'==window.hWin.HAPI4.sysinfo['is_association_member']){
+      if(associationMembershipContext && 'nonmember'==window.hWin.HAPI4.sysinfo['is_association_member']){
           
         window.hWin.HEURIST4.msg.showMsgDlgUrl(
                       `${window.hWin.HAPI4.baseURL}?disclaimer=association_membership.html #content`,
                        null, 'Heurist Network Association', {enable_buttons_after:5000, closeOnEscape:false, noClose:true});
+                       
+        //call logger
+        let request = {
+                    db:  window.hWin.HAPI4.sysinfo.database_prefix + window.hWin.HAPI4.database,
+                    host: window.location.hostname,
+                    email: this.hapi4.currentUser['ugr_eMail'],
+                    log: 1,
+                    ctx: associationMembershipContext  // context
+                };  
+
+                //window.hWin.HAPI4.baseURL + 
+        window.hWin.HEURIST4.util.sendRequest('https://heuristref.net/h7-alpha/admin/utilities/checkMembershipApi.php',
+                    request, null, ()=>{}, 'auto');
+        
         return;
       }
       
