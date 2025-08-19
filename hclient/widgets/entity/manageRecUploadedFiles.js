@@ -243,6 +243,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         
         let i_url = this.getEntityFieldIdx('ulf_HeuristURL');
         let i_url_ext = this.getEntityFieldIdx('ulf_ExternalFileReference');
+        let i_reupload = this.getEntityFieldIdx('ulf_ReuploadFile');
         let i_filename = this.getEntityFieldIdx('ulf_OrigFileName');
         let i_filesize = this.getEntityFieldIdx('ulf_FileSizeKB');
 
@@ -268,7 +269,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 +'<br>For uploaded tile stack this field will be filled automatically with name of selected stack (folder).';
             }
 
-            this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';            
+            this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';
+            this.options.entity.fields[i_reupload].dtFields['rst_Display'] = 'hidden';
             this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'hidden';
             this.options.entity.fields[i_filesize].dtFields['rst_Display'] = 'hidden';
             this.options.entity.fields[i_descr].dtFields['rst_Display'] = 'hidden';
@@ -284,13 +286,14 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                                                     + '?db=' + window.hWin.HAPI4.database 
                                                     + '&file='+this._getField('ulf_ObfuscatedFileID');
             this.options.entity.fields[i_url_ext].dtFields['rst_Display']  = 'hidden'; 
-            
+
             this.options.entity.fields[i_mime_ext].dtFields['rst_Display'] = 'hidden';
             this.options.entity.fields[i_descr].dtFields['rst_Display'] = 'visible';
             
             if(this._currentEditRecordset){
                 //edit
                 this.options.entity.fields[i_url].dtFields['rst_Display'] = 'readonly';
+                this.options.entity.fields[i_reupload].dtFields['rst_Display'] = 'readonly';
                 this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'readonly';
                 this.options.entity.fields[i_filesize].dtFields['rst_Display'] = 'readonly';
                 this.options.entity.fields[i_mime_loc].dtFields['rst_Display'] = 'readonly';
@@ -298,7 +301,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             }else{
                 //add new file
                 this.options.entity.fields[i_file_upl].dtFields['rst_Display'] = 'visible'; //show DnD zone
-                this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';            
+                this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';
+                this.options.entity.fields[i_reupload].dtFields['rst_Display'] = 'hidden';
                 this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'hidden';
                 this.options.entity.fields[i_filesize].dtFields['rst_Display'] = 'hidden';
                 this.options.entity.fields[i_mime_loc].dtFields['rst_Display'] = 'hidden';
@@ -308,7 +312,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             
             
         }else{ //remote
-            this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';  
+            this.options.entity.fields[i_url].dtFields['rst_Display'] = 'hidden';
+            this.options.entity.fields[i_reupload].dtFields['rst_Display'] = 'hidden';
 
             this.options.entity.fields[i_url_ext].dtFields['rst_Display']  = 'visible'; //edit url
             this.options.entity.fields[i_filename].dtFields['rst_Display'] = 'hidden';
@@ -340,8 +345,6 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
             //add media viewer below edit form and load media content
             this.mediaviewer = $('<div>').addClass('media-content').css({
-                float: 'left',
-                width: '50em',
                 'text-align': 'center',
                 padding: '20px',
                 'background-color': 'lightgray',
@@ -349,14 +352,20 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 margin: '10px'
             });
             this.editForm.append( this.mediaviewer );
-            this.mediaviewer.mediaViewer({rec_Files:[{
+            this.mediaviewer.mediaViewer({
+                rec_Files:[{
                     id: this._editing.getValue('ulf_ObfuscatedFileID')[0], 
                     filename: this._editing.getValue('ulf_OrigFileName')[0], 
-                    mimeType: this._editing.getValue('fxm_MimeType')[0]}]}); //nonce + memtype
+                    mimeType: this._editing.getValue('fxm_MimeType')[0]
+                }]
+            }); //nonce + memtype
                 
             //list of records that refer to this file    
             let relations = this._currentEditRecordset.getRelations();    
-            if(relations?.direct?.length>0){
+            if(relations?.direct?.length > 0){
+
+                this.mediaViewer.css({width: '50em', float: 'left'});
+
                 let $container = $('<div>', { style: 'display: inline-block; width: 26em; margin-top: 1em;'}).appendTo(this.editForm)
                 $('<div class="detailRowHeader">Records that refer this file</div>').appendTo($container);
                 
@@ -385,6 +394,11 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 // force option to public, without changes
                 let ele = this._editing.getFieldByName('ulf_WhoCanView');
                 ele.editing_input('setValue', 'viewable', true);
+            }
+
+            let ele = this._editing.getFieldByName('ulf_ReuploadFile');
+            if(isLocal && !window.hWin.HEURIST4.util.isempty(ele)){
+                this._setupReuploadButton();
             }
         }else{
             //new record
@@ -933,10 +947,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         }
         
         let recIcon = '';//@todo take default icon from extensions table and or for default image/audio/video
-        
-        let html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ 
-        window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&thumb='+
-                    fld('ulf_ObfuscatedFileID') + '&quot;);opacity:1"></div>';
+
+        let html_thumb = `<div class="recTypeThumb realThumb" style="background-image: 
+        url(&quot;${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&thumb=${fld('ulf_ObfuscatedFileID')}&t=${window.hWin.HEURIST4.util.random()}&quot;);opacity:1"></div>`;
             
         if(this.options.select_mode=='manager'){
         html_thumb = '<a href="'+            
@@ -2146,6 +2159,119 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                 }
             }
         };
-        $dlg = window.hWin.HEURIST4.ui.showRecordActionDialog('lookupNakalaAuthor', dlg_opts);
+        window.hWin.HEURIST4.ui.showRecordActionDialog('lookupNakalaAuthor', dlg_opts);
+    },
+
+    _setupReuploadButton: function(){
+
+        let $field = this._editing.getFieldByName('ulf_ReuploadFile');
+
+        let $btn_upload = $('<button>', {
+            title: 'Replace current file'
+        }).appendTo($field.find('div.input-div'));
+
+        let $hidden_uploadfile = $('<input>', {
+            type: 'file',
+            style: 'display: none;',
+            filename: ''
+        }).appendTo($field.find('div.input-div'));
+
+        $hidden_uploadfile.fileupload({
+            url: `${window.hWin.HAPI4.baseURL}hserv/controller/fileUpload.php`, 
+            formData: [
+                {name: 'db', value: window.hWin.HAPI4.database}, 
+                {name: 'entity', value: 'temp'},
+                {name: 'max_file_size', value: 1024*1024}
+            ],
+            autoUpload: true,
+            sequentialUploads:true,
+            dataType: 'json',
+            done: (e, response) => {
+
+                if(response.result){
+                    response = response.result;
+                }
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    return;
+                }
+
+                if(!window.hWin.HEURIST4.util.isArrayNotEmpty(response.data?.files)){
+                    return;
+                }
+
+                let filename = response.data.files[0].name;
+                let thumbnailName = response.data.files[0].thumbnailName;
+                this._updateLocalFile({[this._currentEditID]: {file: filename, thumbnail: thumbnailName}});
+            },
+            fail: function(e, response){
+                response = response.message ? response : {message: response, error_title: 'File upload error'};
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+        });
+
+        $btn_upload.button({label: 'Replace current file', icon: 'ui-icon-upload'});
+        this._on($btn_upload, {
+            click: () => {
+                $hidden_uploadfile.trigger('click');
+            }
+        });
+    },
+
+    _updateLocalFile: function(files){
+
+        if(!window.hWin.HEURIST4.util.isObject(files)){
+            return;
+        }
+
+        let request = {
+            a: 'batch',
+            entity: this.options.entity.entityName,
+            replace_local_files: files
+        };
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, (response) => {
+
+            if(response.status !== window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
+            }
+
+            let results = response.data;
+            if(results['skipped'].length > 0){
+                window.hWin.HEURIST4.msg.showMsgErr({
+                    message: `An error occurred while attempting to replace the existing file.<br>${results['skipped'][0]}`,
+                    error_title: 'Local file update error'
+                });
+                return;
+            }
+
+            let refreshURL = `${window.hWin.HAPI4.baseURL}hserv/controller/fileDownload.php`;
+            request = {
+                db: window.hWin.HAPI4.database,
+                thumb: this._getField('ulf_ObfuscatedFileID'),
+                refresh: 1
+            };
+            window.hWin.HEURIST4.util.sendRequest(refreshURL, request, null, (response) => {
+
+                if(response.message.startsWith('Error_')){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    return;
+                }
+
+                if(this.searchForm && this.searchForm.searchRecUploadedFiles('instance')){ // trigger search refresh
+                    //it was updated
+                    this.searchForm.searchRecUploadedFiles('searchRecent', 'local');
+                }
+    
+                window.hWin.HEURIST4.msg.showMsgFlash('File successfully updated', 3000);
+                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, {type: 'ulf'}); // refresh thumbnails
+    
+                if(this._currentEditID > 0){
+                    this.reloadEditForm(true);
+                }
+            });
+        });
     }
 });

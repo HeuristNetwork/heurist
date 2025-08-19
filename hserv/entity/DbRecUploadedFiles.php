@@ -270,9 +270,6 @@ class DbRecUploadedFiles extends DbEntityBase
 
     }
 
-    //
-    //
-    //
     /**
      * Validates if the current user has permission to modify/delete the specified file records.
      *
@@ -346,10 +343,6 @@ class DbRecUploadedFiles extends DbEntityBase
         return $ret;
     }
 
-
-    //
-    //
-    //
     /**
      * Prepares `recUploadedFiles` records before saving.
      *
@@ -736,6 +729,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         //copy thumbnail
                         if(@$record['ulf_TempFileThumb']){
                             $thumb_name = $scratch_dir.DIR_THUMBS.$record['ulf_TempFileThumb'];
+                            $thumb_name = file_exists($thumb_name) ? $thumb_name : "{$scratch_dir}thumbnail/{$record['ulf_TempFileThumb']}";
                             if(file_exists($thumb_name)){
                                 $new_name = $thumb_dir.'ulf_'.$ulf_ObfuscatedFileID.'.png';
                                 copy($thumb_name, $new_name);
@@ -757,18 +751,6 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         return $ret;
     }
 
-    //   Actions:
-    //   register URL/Path in batch
-    //   optionally: download URL and register locally
-    //
-    //    csv_import (with optional is_download)
-    //    delete_selected
-    //    regExternalFiles (with optional is_download)
-    //    merge_duplicates
-    //    get_media_records
-    //    create_media_records
-    //    bulk_reg_filestore
-    //    import_data
     /**
      * Performs batch actions on uploaded file records.
      *
@@ -782,6 +764,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
      * - `get_media_records`: Retrieves IDs of "Multi Media" records referencing specified files.
      * - `bulk_reg_filestore`: Bulk registers files found in predefined filestore subfolders.
      * - `import_data`: Imports metadata for existing files based on various ID types.
+     * - `replace_local_files`: Replace existing local files with new uploaded files.
      *
      * Most operations are performed within a database transaction.
      *
@@ -1004,6 +987,11 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             $ret = $this->bulkRegisterFiles();
 
         }
+        elseif(@$this->data['replace_local_files']){ // replace existing local files with temporary uploaded
+
+            $ret = $this->replaceLocalFiles();
+
+        }
         elseif(@$this->data['import_data']){ // importing file metadata
 
             $import_type = intval($this->data['import_data']);// import type; 1 - keep existing, 2 - append, 3 - replace
@@ -1151,9 +1139,6 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         return $ret;
     }
 
-    //
-    //
-    //
     /**
      * Deletes uploaded file records and their associated files.
      *
@@ -1259,10 +1244,6 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         return true;
     }
 
-
-    //
-    //  get information for information for uploaded file
-    //
     /**
      * Gathers information about a file to prepare it for registration in `recUploadedFiles`.
      *
@@ -1282,9 +1263,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
      */
     private function getFileInfoForReg($file, $newname){
 
-        if(!is_a($file, 'stdClass')){
+        $tmp_thumb = null;
 
-            $tmp_thumb = null;
+        if(!is_a($file, 'stdClass')){
 
             if(is_array($file)){
 
@@ -1329,29 +1310,29 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         $errorMsg = null;
         if(file_exists($tmp_name)){
 
-                $fields = array();
-                /* clean up the provided file name -- these characters shouldn't make it through anyway */
-                $name = $file->original_name;
-                $name = str_replace("\0", '', $name);
-                $name = str_replace('\\', '/', $name);
-                $name = preg_replace('!.*/!', '', $name);
+            /* clean up the provided file name -- these characters shouldn't make it through anyway */
+            $name = $file->original_name;
+            $name = str_replace("\0", '', $name);
+            $name = str_replace('\\', '/', $name);
+            $name = preg_replace('!.*/!', '', $name);
 
-                $extension = null;
-                if($file->type==null || $file->type=='application/octet-stream'){
-                    //need to be more specific - try ro save extension
-                    $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-                }
+            $extension = null;
+            if($file->type==null || $file->type=='application/octet-stream'){
+                //need to be more specific - try ro save extension
+                $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+            }
 
-                $ret = array(
+            $ret = array(
                 'ulf_OrigFileName' => $name,
                 'ulf_MimeExt' => $extension??$file->type, //extension or mimetype allowed
                 'ulf_FileSizeKB' => ($file->size<1024?1:intval($file->size/1024)),
                 'ulf_FilePath' => DIR_FILEUPLOADS,   //relative path to $this->system->getSysDir() - db root
-                'ulf_TempFile' => $tmp_name);//file in scratch to be copied
+                'ulf_TempFile' => $tmp_name
+            );//file in scratch to be copied
 
-                if(isset($file->thumbnailName)){
-                    $ret['ulf_TempFileThumb'] = $file->thumbnailName;
-                }
+            if(isset($file->thumbnailName)){
+                $ret['ulf_TempFileThumb'] = $file->thumbnailName;
+            }
 
         }else{
 
@@ -1596,9 +1577,6 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
     }
 
-    //
-    // $is_concatente - true, concatenate all unique values, otherwise takes first non empty
-    //
     /**
      * Merges a specific field's values from duplicate file records into a main record.
      *
@@ -1648,9 +1626,6 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
     }
 
-    //
-    // actions on set of files (called from butch_action)
-    //
     /**
      * Merges duplicate `recUploadedFiles` entries.
      *
@@ -1986,9 +1961,6 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
     }
 
-    //
-    //
-    //
     /**
      * Creates "Multi Media" type records for `recUploadedFiles` entries that don't already have one.
      *
@@ -2302,9 +2274,6 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         return $ret;
     }
 
-    //
-    //
-    //
     /**
      * Deletes selected `recUploadedFiles` entries if they are not currently in use.
      *
@@ -2364,9 +2333,6 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
     }
 
-    //
-    // Bulk register files from database folders
-    //
     /**
      * Bulk registers files found in pre-defined or specified Heurist filestore subfolders.
      *
@@ -2498,11 +2464,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             
             return $ret;
     }
-    
-    
-    //
-    // Bulk register base64 encoded (i.e. starts with data:image) images
-    //
+
     /**
      * Bulk registers base64 encoded images.
      *
@@ -2548,6 +2510,89 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         }
 
         return $rtn;
+    }
+
+    private function replaceLocalFiles(){
+
+        $mysqli = $this->system->getMysqli();
+        $files = @$this->data['replace_local_files'];
+
+        if(empty($files)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'No files have been provided');
+            return false;
+        }
+
+        $results = ['skipped' => [], 'replaced' => []];
+        foreach($files as $ulfID => $fileDetails){
+
+            if(!isPositiveInt($ulfID)){
+                $ulfID = htmlspecialchars($ulfID);
+                $results['skipped'][] = "Invalid file ID '{$ulfID}'";
+                continue;
+            }
+
+            $file = $fileDetails;
+            $thumbnail = $fileDetails;
+            if(is_array($fileDetails)){
+                $file = $fileDetails['file'];
+                $thumbnail = $fileDetails['thumbnail'];
+            }elseif(!is_string($fileDetails)){
+                continue;
+            }
+
+            $id = intval($ulfID);
+            $safeFile = htmlspecialchars($file);
+
+            if(empty($file) || preg_match("/\/|\\\\/", $file) === 1){
+                $msg = empty($file) ? 'Missing temporary file name' : "Invalid file name '{$safeFile}'";
+                $results['skipped'][] = "#{$id} - {$msg}";
+                continue;
+            }
+            if(strpos($file, '.') !== false){
+                $file = pathinfo($file, PATHINFO_BASENAME);
+            }
+
+            $fileDetails = [
+                0 => [
+                    'name' => $file,
+                    'original_name' => null,
+                    'thumbnailName' => $thumbnail
+                ]
+            ];
+            $fields = $this->getFileInfoForReg($fileDetails, null);
+            if(!$fields){
+                $results['skipped'][] = "#{$id} - Unable to find the file '{$safeFile}'";
+                continue;
+            }
+
+            $ulfObfID = mysql__select_value($mysqli, "SELECT ulf_ObfuscatedFileID FROM recUploadedFiles WHERE ulf_ID = ?", ['i', $id]);
+            if(!$ulfObfID){
+                $results['skipped'][] = "#{$id} - Unable to find the corresponding file record";
+                continue;
+            }
+
+            $orgFileDetails = mysql__select_row($mysqli, "SELECT ulf_FilePath, ulf_FileName FROM recUploadedFiles WHERE ulf_ID = ?", ['i', $id]);
+
+            // Prepare data - add ULF ID and Obfuscated ID to avoid creating a new record
+            $fields['ulf_ID'] = $id;
+            $fields['ulf_ObfuscatedFileID'] = $ulfObfID;
+            $fields['ulf_FileName'] = "ulf_{$id}_$file";
+            $fileinfo = ['entity' => 'recUploadedFiles', 'fields' => $fields];
+
+            $this->setData($fileinfo);
+            $res = $this->save(); // copies temp from scratch to file_upload it returns ulf_ID
+
+            if($res !== false){
+                $results['replaced'][] = $res;
+                $orgPath = resolveFilePath($orgFileDetails[0] . $orgFileDetails[1]);
+                fileDelete($orgPath);
+                continue;
+            }
+
+            $results['skipped'][] = "{$id} - Error: {$this->system->getErrorMsg()}";
+        }
+
+        return $results;
     }
 }
 ?>

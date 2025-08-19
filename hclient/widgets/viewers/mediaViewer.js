@@ -229,12 +229,10 @@ $.widget( "heurist.mediaViewer", {
                     if(!filetitle) filetitle = title;
                     if(!mimeType) mimeType = '';
 
-                    let fileURL = this.options.baseURL+'?db=' + this.options.database //+ (needplayer?'&player=1':'')
-                                 + '&file='+obf_recID;
+                    let randomNumber = window.hWin.HEURIST4.util.random();
 
-                    let thumbURL =  this.options.baseURL+'?db=' +  this.options.database 
-                                 + '&thumb='+obf_recID
-
+                    let fileURL = `${this.options.baseURL}?db=${this.options.database}&file=${obf_recID}&t=${randomNumber}`;
+                    let thumbURL = `${this.options.baseURL}?db=${this.options.database}&thumb=${obf_recID}&t=${randomNumber}`;
 
                     //thumbnail preview
                     let $alink = $('<a>')

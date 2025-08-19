@@ -56,6 +56,17 @@
                     }
                 },
                 {
+                    "dtID": "ulf_ReuploadFile",
+                    "dtFields":{
+                        "dty_Type": "freetext",
+                        "rst_DisplayName": "Reupload file:",
+                        "rst_DisplayWidth": 80,
+                        "rst_DisplayHelpText": "Reupload the file to replace the existing local file", 
+                        "rst_Display": "hidden",
+                        "dty_Role": "virtual"
+                    }
+                },
+                {
                     "dtID": "ulf_ExternalFileReference",
                     "dtFields":{
                         "dty_Type":"url",
