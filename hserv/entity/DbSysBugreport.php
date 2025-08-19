@@ -46,7 +46,7 @@ class DbSysBugreport extends DbEntityBase
     /** @var string Email template for bug report notifications. Placeholders like __LINK__, __DESC__ are replaced. */
     private $reportEmail = <<<EMAIL
     Your bug report has been successfully added to, or updated in, the Heurist Job tracker database.<br> <br>
-    
+
     If the bug is marked as DONE, please see the explanation below (generally at the top of the bug description).<br>
     You can test in the h6-alpha or h7-alpha version (it takes time for fixes to migrate to the stndard version).<br>
     If you are not running one of these, replace /heurist/ in the URL with /h6-alpha/ or /h7-alpha/<br><br>

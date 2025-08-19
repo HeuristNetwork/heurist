@@ -4451,7 +4451,7 @@ function bugreportUpdate($system, $recID){
     $reportersEmail = is_array($reportersEmail) ? array_pop($reportersEmail) : $reportersEmail;
 
     $reportersName = array_key_exists($reporterEmailDtyID, $details) ? $details[$reporterEmailDtyID] : null;
-    $reportersName = is_array($reportersEmail) ? array_pop($reportersEmail) : $reportersName;
+    $reportersName = is_array($reportersEmail) ? implode(' & ', $reportersName) : $reportersName;
     $reportersName = empty($reportersName) ? $reportersEmail : $reportersName;
 
     if(!$status || !$reportersEmail || !in_array($status, $terms)){
@@ -4499,6 +4499,7 @@ function bugreportUpdate($system, $recID){
     $to = [$reportersEmail];
 
     sendPHPMailer(null, 'Bug report updater', ['to' => $to], "Heurist tracker #{$recID}: {$title}", $updateEmail, null, true);
+    sendPHPMailer(null, 'Bug report updater', ['to' => 'support@HeuristNetwork.org'], "Heurist tracker #{$recID}: {$title}", $updateEmail, null, true);
 }
 
 /**
