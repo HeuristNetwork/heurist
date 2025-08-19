@@ -961,7 +961,7 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
         }elseif($dt_type == 'geo') {
             return count($res)." geographic object".(count($res)>1?"s":"");
         }else{
-            return implode(",", $res);
+            return implode(", ", $res);
         }
 
     }else{
