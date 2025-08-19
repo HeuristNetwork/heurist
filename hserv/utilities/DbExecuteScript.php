@@ -49,7 +49,7 @@
 // LAST CHANGES
 
 // *** First ideas about adding plugin interface
-// *** Fix // delimiter bug
+// *** Fix // delimiter bug            &nbsp;
 // *** Minor fix to avoid Undefined variable curfilename notice
 // *** Handle empty delimiter setting
 // *** New way to determine the upload directory
@@ -60,7 +60,8 @@ define ('TESTMODE', false);// Set to true to process the file without actually a
 //define ('VERSION','0.35b');
 //define ('BIGDUMP_DIR',dirname(__FILE__));
 //define ('PLUGIN_DIR',BIGDUMP_DIR.'/plugins/');
-define('CLOSE_P', "</p>\n");
+define('P_END','</p>');
+
 
 
 global $errorScriptExecution;
