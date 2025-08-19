@@ -60,7 +60,7 @@ define('CSS_HIDDEN', 'display:none;');
 define('NBSP','&nbsp; ');
 define('DIV_MAP_POPUP','<div class="map_popup">');
 
-define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br>');//for record title see output_chunker for other fields
+define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br><span>');//for record title see output_chunker for other fields
 //'<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img>'
 
 $noclutter = array_key_exists('noclutter', $_REQUEST);//like for map popup, but with header
@@ -1378,8 +1378,8 @@ function print_details($bib) {
 
         $system->userLogActivity('viewRec', $bib['rec_ID']);// log action
     }else{
-        $login_link = $system->hasAccess() ? '' : '<br><br><a onclick="window.hWin.HEURIST4.ui.checkAndLogin(true, () => {location.reload();})" href="#">Click here to login</a>';
-        print "Sorry, your group membership does not allow you to view the content of this record{$login_link}";
+        $login_link = $system->hasAccess() ? '' : '<br><br><a onclick="{window.hWin.HEURIST4.ui.checkAndLogin(true, ()=>location.reload() );}" href="#">Click here to login</a>';
+        print "Sorry, your group membership does not allow you to view the content of this record {$login_link}";
     }
 
 }
@@ -2352,7 +2352,7 @@ function print_public_details($bib) {
                     || ($bd['rst_NonOwnerVisibility'] != 'public' && $bd['rst_NonOwnerVisibility'] != 'pending')) ? ' grayed' : ' ';
 
         print '<span class="value'.$is_grayed_out.'"'.(@$bd['rollover']?' title="'.htmlspecialchars($bd['rollover']).'"':'')
-                .'>' . ($bd['val']) . '</span>';// add value
+                .'>' . strip_tags($bd['val'], ALLOWED_TAGS.'<p><a><em>') . '</span>';// add value
         $prevLbl = $bd['name'];
     }
 

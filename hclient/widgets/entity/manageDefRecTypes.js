@@ -357,8 +357,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             that.recordList.css({'top':iheight});     
             //!!!! that.changeUI(null, that.options.ui_params);    
         }
-        
-        this.searchForm.searchDefRecTypes(this.options);
+        if(this.searchForm && typeof searchDefRecTypes === 'function'){
+            this.searchForm.searchDefRecTypes(this.options);    
+        }
         
         if(this.options.use_cache){
            

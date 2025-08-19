@@ -1688,7 +1688,7 @@ $.widget( "heurist.slidersMenu", {
                         if(!action_hint){
                             item.attr('title',action_hint);
                         }
-                        
+                       
                         if(action.data?.is_association_member && window.hWin.HAPI4.sysinfo.is_association_member==='nonmember'){
                             item.css('color','rgb(132,135,184)');
                         }

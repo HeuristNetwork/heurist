@@ -1654,7 +1654,7 @@ $.widget( "heurist.manageEntity", {
                 return;
             }
             
-            if(this.options.list_mode=='default'){
+            if(this.options.list_mode=='default' && this.recordList.resultList('instance')){
                 //refresh list
                 let recset = this.recordList.resultList('getRecordSet');
                 recset.removeRecord(recID);

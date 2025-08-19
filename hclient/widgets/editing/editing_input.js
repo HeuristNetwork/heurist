@@ -1051,6 +1051,10 @@ $.widget( "heurist.editing_input", {
      * @returns {any|null} The value of the configuration property, or null if not found after checking all sources.
      */
     f: function(fieldname){
+        
+        if(!this.options['dtFields']){
+            return null;
+        }
 
         let val = this.options['dtFields'][fieldname]; //try get by name
         
@@ -6861,7 +6865,7 @@ $.widget( "heurist.editing_input", {
 
                                     gregorian_date = `${new_date.getYear()}-${month}-${day}`;
                                     new_date = __translateDate({'year': new_date.getYear(), 'month': month, 'day': day}, g_calendar, new_cal);
-                                    new_date = new_date.formatDate('yyyy-mm-dd', new_cal);
+                                    new_date = g_calendar.formatDate('yyyy-mm-dd', new_cal);
                                 }
 
                                 let cur_cal = $tinpt.calendarsPicker('option', 'calendar');

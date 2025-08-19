@@ -1744,6 +1744,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     }
 
                     let node = fieldIds[j].toDict();
+                    if(!node.data?  .code) continue;
                     node.data.code = allRectypesIds + node.data.code.slice(idx_replace); //was rectypes[i] 
 
                     //final_list.push(node);
