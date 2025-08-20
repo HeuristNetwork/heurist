@@ -146,6 +146,7 @@ $editor_options = "{website_id:$website_id, page_id:$page_id, currentLanguage:$c
         window.hWin.RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
         window.hWin.DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
         window.hWin.DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'];
+        window.hWin.DT_VERSION = window.hWin.HAPI4.sysinfo['dbconst']['DT_VERSION'];
         
         let editor_options = <?php echo $editor_options;?>;
         

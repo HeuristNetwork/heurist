@@ -91,9 +91,9 @@ class FrontController
 
         }elseif(array_key_exists('website', $this->req_params)){
 
-            $controller = new WebSite($this->system, $this->req_params);
+            $website = new WebSite($this->system, $this->req_params);
             
-            $controller->execute();    
+            $website->execute();    
             
         }elseif(@$this->req_params['controller'] == 'ImportAnnotations'){
             
@@ -108,4 +108,12 @@ class FrontController
             dataOutput($result);            
         }
     }
+    
+    public function getWebsiteVersion(){
+        
+        $website = new WebSite($this->system, $this->req_params);
+        
+        return $website->getWebSiteVersion();
+    }
+    
 }

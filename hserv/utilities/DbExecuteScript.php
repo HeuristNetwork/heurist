@@ -49,7 +49,7 @@
 // LAST CHANGES
 
 // *** First ideas about adding plugin interface
-// *** Fix // delimiter bug            &nbsp;
+// *** Fix // delimiter bug
 // *** Minor fix to avoid Undefined variable curfilename notice
 // *** Handle empty delimiter setting
 // *** New way to determine the upload directory

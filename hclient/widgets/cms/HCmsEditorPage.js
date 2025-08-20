@@ -1724,6 +1724,21 @@ function(value){
         }
         
         window.hWin.HEURIST4.msg.bringCoverallToFront();
+       
+        
+        if(this._cmsEditor.webSite.version!=3 && window.hWin.DT_VERSION>0){
+
+            this._cmsEditor.webSite.version = 3;
+            let request = {a: 'addreplace',
+                            recIDs: this._cmsEditor.page_id,
+                            dtyID: window.hWin.DT_VERSION,
+                            insert_new_values: 1,
+                            rVal: 3};
+            
+            window.hWin.HAPI4.RecordMgr.batch_details(request, response=>{this.#saveLayoutCfg( callback )});
+            return;
+        }
+               
         
         let newval = window.hWin.HEURIST4.util.cloneJSON(this._layout_content);
         
@@ -1765,7 +1780,7 @@ function(value){
         }else{
             newval = JSON.stringify(newval);    
         }*/
-        
+
         newval = JSON.stringify(newval);
         
         let request = {a: 'addreplace',

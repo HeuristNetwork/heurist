@@ -75,14 +75,27 @@ if( @$_REQUEST['isalive']==1){
     {
         $format = 'website';
 
-        if(@$_REQUEST['ver']==3){
+        $controller = new FrontController(isset($params)?$params:null);
+        
+        if(array_key_exists('ver', $_REQUEST)){
+            $websiteVersion = $_REQUEST['ver'];
+        }else{
+            //auto detect version of website
+            $websiteVersion = $controller->getWebsiteVersion();    
+            
+            if($websiteVersion==3 && @$_REQUEST['edit']){
+                $_REQUEST['edit'] = 'start';
+            }
+        }
+
+        if($websiteVersion==3){
             
             if(@$_REQUEST['edit']=='start'){
                 unset($_REQUEST['edit']);
                 if(!defined('PDIR')) {define('PDIR','');}
                 include_once dirname(__FILE__).'/hclient/widgets/cms/WebSiteEditor.php';
             }else{
-                $controller = new FrontController(isset($params)?$params:null);
+                //$controller = new FrontController(isset($params)?$params:null);
                 $controller->run();
             }
         }else{

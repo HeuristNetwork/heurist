@@ -572,7 +572,8 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_ACTION' => array(2, 1148),
     
 
-    'DT_WORKFLOW_STAGE' => array(2, 1080)
+    'DT_WORKFLOW_STAGE' => array(2, 1080),
+    'DT_VERSION' => array(2, 49)
 
 );
 

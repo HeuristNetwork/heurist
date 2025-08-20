@@ -105,6 +105,8 @@ class WebSite
         $this->system->defineConstant('DT_CMS_ACTION');
         $this->system->defineConstant('DT_QUERY_STRING');
         
+        $this->system->defineConstant('DT_VERSION');
+        
     }
     
     /**
@@ -136,7 +138,7 @@ class WebSite
     * 
     * return true is success
     */
-    private function verifyWebsiteIds(){
+    private function verifyWebsiteIds(): bool{
 
         $siteId = @$this->params['website']; //website id
         $pageId = @$this->params['pageid'];  //page id  
@@ -249,7 +251,7 @@ class WebSite
             $this->outputError();
         } 
         
-        if(array_key_exists('webmenu', $this->params)){
+        if(isset($this->params) && array_key_exists('webmenu', $this->params)){
             //returns menu content as array or html
             if($this->messageError){
                 $result = false;
@@ -288,6 +290,7 @@ class WebSite
             // Check if parameters are defined
             $this->outputError('Parameters for website are not defined');
         }elseif ($this->verifyWebsiteIds()) {
+            
             // Load website settings (details of CMS_HOME record): logo, title, langs, bg images, keywords
             $this->loadWebHomePage();
             
@@ -325,6 +328,25 @@ class WebSite
             $this->handleOutput($output);
         }
         
+    }
+    
+    public function getWebSiteVersion(){
+        
+        if(!(defined('DT_VERSION') && DT_VERSION>0)){
+            return 0;
+        }
+        
+        if (!isset($this->system) || !$this->system->isInited()) {
+            return 0;
+        }    
+        
+        if (!$this->verifyWebsiteIds()){
+             return 0;
+        }     
+        
+        $temp_rec = array('rec_ID' => intval($this->getSiteId()));
+        recordSearchDetails($this->system, $temp_rec, DT_VERSION, false);
+        return recordGetField($temp_rec, DT_VERSION);
     }
     
     /**
@@ -619,6 +641,7 @@ class WebSite
             $webSiteOptionsExt = array(
                 'logo'=>$this->getFile($this->siteRecord, DT_FILE_RESOURCE), 
                 'logoAlt'=>$this->getFile($this->siteRecord, '2-926'), 
+                'version'=>$this->getVal('2-49'),
                 
                 'title'=>$this->getVal(DT_NAME),
                 'description'=>$this->getVal(DT_SHORT_SUMMARY),
