@@ -194,16 +194,16 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
         
         //fill page list
         let selPage = $dlg.find('select[name="search_page"]');
-        
+
+        //note: version3 does not have main-menu > heurist_Navigation       
         let main_menu = $('#main-menu > div[widgetid="heurist_Navigation"]');
-        
         if(main_menu.length>0 && widget_name!='heurist_StoryMap'){
             let pages = main_menu.navigation('getMenuContent','list');
-            if(!pages){
-                selPage.parent().hide();
-            }else{
+            if(Array.isArray(pages)){
                 pages.unshift({key:'',title:''});   
                 window.hWin.HEURIST4.ui.createSelector(selPage[0], pages);
+            }else{
+                selPage.parent().hide();
             }
            
         }else{
