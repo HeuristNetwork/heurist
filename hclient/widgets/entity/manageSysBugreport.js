@@ -131,7 +131,7 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
         if(this._checkDescription && desc.split(' ').length < 20){
 
             let $dlg;
-            let msg = 'In order for bugs to be found and fixed as quickly as possible, the team requires as many details about the issue you are encountering.<br>'
+            let msg = 'In order for bugs to be found and fixed as quickly as possible, the team requires as many details about the issue you are encountering.<br><br>'
                 + 'Providing the steps that have led you to an issue will greatly speed up the initial stages of fixing an issue.<br><br>'
                 + 'Otherwise, you can click \'Proceed as-is\' if you feel that there are no more details you need to provided.';
 
