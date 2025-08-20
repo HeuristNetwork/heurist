@@ -1366,8 +1366,12 @@ $.widget( "heurist.mapping", {
                 // if no entries no need to redraw
                 return;
             }
-                
-            this.vistimeline.timeline('timelineRefresh', this.timeline_items, this.timeline_groups);          
+
+            try{
+                this.vistimeline.timeline('timelineRefresh', this.timeline_items, this.timeline_groups);              
+            }catch(e){
+                console.error('Unable refresh timeline',  e);
+            }                
             
             //this._updatePanels();
     },
@@ -1705,6 +1709,8 @@ $.widget( "heurist.mapping", {
                 
                 let zoom_params = $.extend({maxZoom: maxZoom}, this.options.map_margins);
 
+                try{
+
                 if(fly_params){
                     let duration = 5;
                     if(fly_params===true){
@@ -1731,7 +1737,12 @@ $.widget( "heurist.mapping", {
                     //paddingTopLeft:L.point(500,50),paddingBottomRight:L.point(50,0)});
                     //padding: L.point(50, 50)});  //padding - margins for map 
                     //this.nativemap.fitBounds(bounds, {maxZoom: 0});   
-                }             
+                }  
+                    
+                }catch(e){
+                    console.error('Can not zoom to bounds ', bounds.toBBoxString());
+                }
+                                           
             }
     },
 

@@ -349,7 +349,7 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
                 let recordset = this.getRecordSet();
                 let that = this;
                 window.hWin.HEURIST4.dbs.applyOrder(recordset, this._entityPrefix, function(res){
-                    that._toolbar.find('.btnApplyOrder').hide();
+                    if(that._toolbar) that._toolbar.find('.btnApplyOrder').hide();
                     that._triggerRefresh(this._entityPrefix);
                 });
                 

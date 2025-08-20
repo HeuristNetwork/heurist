@@ -6489,7 +6489,7 @@ $.widget( "heurist.editing_input", {
             }catch(e){
                 return date_keep;
             }
-        }
+        } //end function
 
         let defDate = $input.val();
         let $tinpt = $('<input type="hidden" data-picker="'+$input.attr('id')+'">')
@@ -6865,7 +6865,7 @@ $.widget( "heurist.editing_input", {
 
                                     gregorian_date = `${new_date.getYear()}-${month}-${day}`;
                                     new_date = __translateDate({'year': new_date.getYear(), 'month': month, 'day': day}, g_calendar, new_cal);
-                                    new_date = g_calendar.formatDate('yyyy-mm-dd', new_cal);
+                                    new_date = new_cal.formatDate('yyyy-mm-dd', new_date);
                                 }
 
                                 let cur_cal = $tinpt.calendarsPicker('option', 'calendar');

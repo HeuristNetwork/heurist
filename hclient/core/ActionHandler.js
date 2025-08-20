@@ -89,7 +89,7 @@ class ActionHandler {
      * @returns {Object|undefined} The action object if found, otherwise `undefined`.
      */
     findActionById(id) {
-        return this.actions.find(action => action.id === id);
+        return this.actions?this.actions.find(action => action.id === id):null;
     }
 
     /**

@@ -601,6 +601,9 @@ class HCmsEditor {
   // returns only classes started with the given prefix
   //
   static getBsClassesAsString(element, withPrefix){
+      if(!element?.classList){
+          return '';
+      }
       let classes = Array.from(element?.classList);
       let bsClasses = HCmsEditor.getBsClasses(classes, withPrefix);
       return bsClasses.join(' ').trim();
