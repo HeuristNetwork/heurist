@@ -1685,7 +1685,8 @@ function(value){
         }else if(parent_element && parent_element.type=='tabs'){
             window.hWin.HAPI4.layoutMgr.layoutInitTabs(parent_element, parent_container)
         }else{
-            window.hWin.HAPI4.layoutMgr.layoutInit(parent_children, parent_container, {rec_ID:home_page_record_id, lang:current_language}); 
+            window.hWin.HAPI4.layoutMgr.layoutInit(parent_children, parent_container, 
+                        {rec_ID:home_page_record_id, lang:current_language}, true, false); 
         }
         
         page_was_modified = true;
@@ -2104,7 +2105,8 @@ function(value){
             window.hWin.HAPI4.layoutMgr.layoutInitTabs(parent_element, parent_container)
             //window.hWin.HAPI4.layoutMgr.layoutInit(_layout_content, _layout_container);    
         }else{
-            window.hWin.HAPI4.layoutMgr.layoutInit(parent_children, parent_container, {rec_ID:home_page_record_id, lang:current_language}, true);
+            window.hWin.HAPI4.layoutMgr.layoutInit(parent_children, parent_container, 
+                    {rec_ID:home_page_record_id, lang:current_language}, true, false);
         }   
 
 

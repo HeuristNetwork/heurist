@@ -1182,7 +1182,7 @@ function(value){
             this.layoutMgr.layoutInitTabs(parent_element, parent_container)
         }else{
             this.layoutMgr.layoutInit(parent_children, parent_container, 
-                        {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language}, true); 
+                        {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language}, true, false); 
         }
         
         this.page_was_modified = true;
@@ -1245,7 +1245,7 @@ function(value){
         
         //redraw page
         this.layoutMgr.layoutInit(this._layout_content, this._layout_container, 
-                {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language}, true);
+                {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language}, true, true);
         this.#updateActionIcons(200); //it inits tinyMCE also
         
         this.page_was_modified = true;
@@ -1630,10 +1630,9 @@ function(value){
             this.layoutMgr.layoutInitAccordion(parent_element, parent_container)
         }else if(parent_element && parent_element.type=='tabs'){
             this.layoutMgr.layoutInitTabs(parent_element, parent_container)
-            //this.layoutMgr.layoutInit(this._layout_content, this._layout_container);    
         }else{
            this.layoutMgr.layoutInit(parent_children, parent_container, 
-                    {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language}, true);
+                    {rec_ID:this._cmsEditor.website_id, lang:this._cmsEditor.current_language}, true, false);
         }   
 
 

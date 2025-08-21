@@ -163,9 +163,9 @@ class HLayoutMgr {
       layout = [layout];
     }
 
-    if (isFirstLevel === true) {
+    if (isFirstLevel === true && layout.length>0) {
       if (this._supp_options.page_name) {
-        layout[0].name = "Page";
+        layout[0].name = 'Page';
       }
       if (this._supp_options.keep_top_config && this._isEditMode) {
         this._main_layout_cfg = layout;
@@ -201,7 +201,7 @@ class HLayoutMgr {
     if (forStorage) {
       return container.html();
     } else {
-      if (isFirstLevel && this._supp_options && !this._supp_options.heurist_isJsAllowed) {
+      if (isFirstLevel===true && this._supp_options && !this._supp_options.heurist_isJsAllowed) {
 //remove all javascript event attributes
         this.#layoutSanitize(container);
       }
@@ -1450,15 +1450,17 @@ console.log(content);
    * @returns {Object|Array<Object>|false|void} The processed layout configuration (if from JSON),
    * false if old v1 HTML format was processed, or void if initialized from existing HTML.
    */
- layoutInit(layout, container, supp_options, isEditMode) 
+ layoutInit(layout, container, supp_options, isEditMode, isFirstLevel) 
  {
 //console.log(layout, supp_options);  
     this._supp_options = supp_options || {};
     this._isEditMode = isEditMode;
+    
+    isFirstLevel = (isFirstLevel!==false); //first level by default
   
     //main content
     if(layout && window.hWin.HEURIST4.util.isJSON(layout)){ //init from json
-        return this.#layoutInitFromJSON(layout, container, false, true);
+        return this.#layoutInitFromJSON(layout, container, false, isFirstLevel);
     }
     
     //not json, assing html to container and init widgets
@@ -1481,7 +1483,7 @@ console.log(content);
   {
     isFirstLevel = (isFirstLevel!==false);
     this._supp_options = supp_options || {};
-    return this.#layoutInitFromJSON(layout_json, container_element, false, true);
+    return this.#layoutInitFromJSON(layout_json, container_element, false, isFirstLevel);
   }
   
   /*
