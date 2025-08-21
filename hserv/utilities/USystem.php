@@ -647,12 +647,17 @@ class USystem {
         $logs_to_be_emailed = array();
         $y1 = null;
         $y2 = null;
+        $logFileForYesterday = null;
 
         //1. check if log files for previous 30 days exist
         for($i=1;$i<31;$i++){
             $now = getNow();
             $yesterday = $now->sub(new \DateInterval('P'.sprintf('%02d', $i).'D'));
             $arc_logfile = 'errors_'.$yesterday->format('Y-m-d').'.log';
+            if($i==1){
+                $logFileForYesterday = $root_folder.$arc_logfile;
+            }
+            
             //if yesterday log file exists
             if(file_exists($root_folder.$arc_logfile)){
                 //2. copy to log archive folder
@@ -666,16 +671,18 @@ class USystem {
             }
         }
 
-        if(!empty($logs_to_be_emailed)){
-
+        if(empty($logs_to_be_emailed)){
+            $msgTitle = 'No error reports detected for '.HEURIST_SERVER_NAME;
+            $msg = $msgTitle . '<br> Expected log file: '.$logFileForYesterday;
+        }else{
             $msgTitle = 'Error report '.HEURIST_SERVER_NAME.' for '.$y1.($y2==$y1?'':(' ~ '.$y2));
             $msg = $msgTitle;
             foreach($logs_to_be_emailed as $log_file){
                 $msg = $msg.'<br>'.file_get_contents($log_file);
             }
-            //'Bug reporter',
-            sendEmail(HEURIST_MAIL_TO_BUG, $msgTitle, $msg, true);
         }
+        //'Bug reporter',
+        sendEmail(HEURIST_MAIL_TO_BUG, $msgTitle, $msg, true);
         
         // TODO: needs an else in case there are no logfiles corresponding with the expected path and name
         //       this code seems rather too fragile to be portable between systems
