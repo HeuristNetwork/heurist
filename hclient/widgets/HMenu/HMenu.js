@@ -249,6 +249,15 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         return ele;
     },
     
+    collapseMenu: function(){
+        //  data-bs-toggle="collapse" data-bs-target="#main-navbar"
+        if($('button.navbar-toggler').is(':visible')){
+            $('button.navbar-toggler').click();    
+        }
+        
+        
+    },
+    
     /**
      * @private
      * @memberof Widgets.UI.HMenu
@@ -259,6 +268,8 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
     menuActionHandler: function(event, ui) {
 
         event.preventDefault(); 
+        
+        this.collapseMenu();
         
         let ele = this.getUiEle(event, ui);
         
@@ -467,7 +478,7 @@ $.widget( 'heurist.HMenu', $.heurist.HBaseWidget, {
         this.$H.sendRequest(this.HAPI.baseURL, request, null, (response)=>{
             if(response.status == window.hWin.ResponseStatus.OK){
                 that._menuData = response.data;
-console.log( that._menuData );                
+//console.log( that._menuData );                
                 that._initControls();
             }else{
                 this.clearContent();
