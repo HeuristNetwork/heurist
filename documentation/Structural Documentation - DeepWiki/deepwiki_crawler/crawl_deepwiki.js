@@ -607,8 +607,8 @@ async function rsyncPublish(srcDir, dstDir, { chownUserGroup } = {}) {
   
     report.push(`Date: ${startTime}`);
 
-    report.push('In case you are satisfied with the result, you have to publish the documentation to code repository and  other Heurist servers.');
-    report.push('The downloaded documentaion is on heuristref.net server in folder /var/www/html/HEURIST/h7-alpha/documentation/Structural Documentation - DeepWiki.');
+    report.push('In case you are satisfied with the result, you have to publish the documentation to the code repository and  other Heurist servers.');
+    report.push('The downloaded documentation is on heuristref.net server in folder /var/www/html/HEURIST/h7-alpha/documentation/Structural Documentation - DeepWiki.');
     report.push('1) Please sync your local copy of code with this server');
     report.push('2) Create and push commit to current Heurist branch (h7dev)');
     report.push('3) Sync this folder with other Heurist servers you have the access to.');

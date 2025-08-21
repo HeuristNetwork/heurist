@@ -332,7 +332,6 @@ class HLayoutMgr {
   * assign text content to element
   */
   #layoutInitText(layout, container, forStorage) {
-
         const $d = this.#layoutCreateDiv(
             layout,
             !forStorage && this._isEditMode ? 'tinymce-body cms-element brick' : '', //later need to use either cms-element or brick
@@ -1306,9 +1305,9 @@ console.log(content);
    * @param {number} i - The index of the element in the layout array to process.
    * @returns {void}
    */
-    layoutInitKey(layout, i) {
+  layoutInitKey(layout, i) {
         this.#layoutInitKey(layout, i);
-    }
+  }
 
   /**
    * Finds a specific layout element within a layout configuration tree by its internal key.
@@ -1317,9 +1316,9 @@ console.log(content);
    * @param {(string|number)} ele_key - The unique key of the element to find.
    * @returns {Object|null} The found layout element configuration, or null if not found.
    */
-   layoutContentFindElement(layout_cfg, ele_key) {
+  layoutContentFindElement(layout_cfg, ele_key) {
     return this.#layoutContentFindElement(layout_cfg, ele_key);
-   }
+  }
 
 
   /**
@@ -1329,7 +1328,7 @@ console.log(content);
    * @param {(string|number)} ele_key - The key of the element whose parent is to be found.
    * @returns {Object|string|false} The parent configuration object, 'root' if the element is at the top level, or false if not found.
    */
-   layoutContentFindParent(parent_config, ele_key) {
+  layoutContentFindParent(parent_config, ele_key) {
     return this.#layoutContentFindParent(parent_config, ele_key);
   }
 
@@ -1341,7 +1340,7 @@ console.log(content);
    * @param {string} widget_name - The `appid` of the widget to find.
    * @returns {Object|null} The found widget configuration object, or null if not found.
    */
-   layoutContentFindWidget(layout_cfg, widget_name) {
+  layoutContentFindWidget(layout_cfg, widget_name) {
     return this.#layoutContentFindWidget(layout_cfg, widget_name);
   }
 
@@ -1353,7 +1352,7 @@ console.log(content);
    * @param {(Array<Object>|Object)} layout_cfg - The layout configuration to analyze.
    * @returns {string} The `search_realm` ID that appears most often, or an empty string if none are found.
    */
-   layoutContentFindMainRealm(layout_cfg) {
+  layoutContentFindMainRealm(layout_cfg) {
     return this.#layoutContentFindMainRealm(layout_cfg);
   }
 
@@ -1366,7 +1365,7 @@ console.log(content);
    * @param {Object} new_cfg - The new configuration for the element, including its `key`.
    * @returns {boolean} True if the element was found and updated, false otherwise.
    */
-   layoutContentSaveElement(layout_cfg, new_cfg) {
+  layoutContentSaveElement(layout_cfg, new_cfg) {
     return this.#layoutContentSaveElement(layout_cfg, new_cfg);
   }
 
@@ -1377,7 +1376,7 @@ console.log(content);
    * @param {boolean} newmode - True to enable edit mode, false to disable.
    * @returns {void}
    */
-   setEditMode(newmode) {
+  setEditMode(newmode) {
     this.isEditMode = newmode;
   }
 
@@ -1390,9 +1389,9 @@ console.log(content);
    * It's called with `this` set to the HLayoutMgr instance and the relevant part of the layout as an argument.
    * @returns {boolean|undefined} True if an asynchronous operation (like script loading) was initiated, otherwise undefined.
    */
-    prepareTemplate(layout_config, callback) {
+  prepareTemplate(layout_config, callback) {
         return this.#prepareTemplate(layout_config, callback); // Added return
-      }
+  }
 
 
   /**
@@ -1426,7 +1425,7 @@ console.log(content);
    * @param {string} id - The ID of the predefined layout to find.
    * @returns {Object|null} The layout configuration object if found, otherwise null.
    */
-  layoutGetById(id){
+ layoutGetById(id){
         if(id){
             id = id.toLowerCase();
             for(let i=0; i<window.hWin.cfg_layouts.length; i++){
@@ -1436,10 +1435,10 @@ console.log(content);
             }
         }
         return null;
-  }    
+ }    
 
 
-  /**
+ /**
    * Main method to initialize a layout. It generates HTML from the given layout configuration
    * (which can be JSON, HTML string, or sourced from the container itself) and initializes any widgets.
    *
@@ -1451,8 +1450,8 @@ console.log(content);
    * @returns {Object|Array<Object>|false|void} The processed layout configuration (if from JSON),
    * false if old v1 HTML format was processed, or void if initialized from existing HTML.
    */
-  layoutInit(layout, container, supp_options, isEditMode) 
-  {
+ layoutInit(layout, container, supp_options, isEditMode) 
+ {
 //console.log(layout, supp_options);  
     this._supp_options = supp_options || {};
     this._isEditMode = isEditMode;

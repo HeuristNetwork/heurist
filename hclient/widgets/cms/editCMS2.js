@@ -552,7 +552,8 @@ function editCMS2(website_document){
         
         //2. reload content
         window.hWin.HAPI4.layoutMgr.setEditMode(false);
-        window.hWin.HAPI4.layoutMgr.layoutInit(_layout_content, _layout_container, {rec_ID:home_page_record_id, lang:current_language});
+        window.hWin.HAPI4.layoutMgr.layoutInit(_layout_content, _layout_container, 
+                                        {rec_ID:home_page_record_id, lang:current_language}, false);
 
         // Display cms editor button
         _ws_body.find('#btnOpenCMSeditor').show().html('website editor');
@@ -607,7 +608,9 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
         
         opts.keep_top_config = true;
         opts.lang = current_language;
-        const res = window.hWin.HAPI4.layoutMgr.layoutInitFromJSON(_layout_content, _layout_container, opts);
+        const res = window.hWin.HAPI4.layoutMgr.layoutInit(_layout_content, _layout_container, opts, true)
+        //window.hWin.HAPI4.layoutMgr.setEditMode( true );
+        //const res = window.hWin.HAPI4.layoutMgr.layoutInitFromJSON(_layout_content, _layout_container, opts);
       
 //console.log(res);      
         
@@ -657,7 +660,6 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
 
             return;
         }
-      
         tinymce.remove('.tinymce-body'); //detach
         _layout_container.find('.lid-actionmenu').remove();
         
@@ -674,7 +676,6 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
         if(Object.hasOwn(custom_formatting, 'block_formats') && custom_formatting.block_formats.length > 0){
             style_formats.push({ title: 'Custom blocks', items: custom_formatting.block_formats });
         }
-
         let inlineConfig = {
             selector: selector,
             menubar: false,
@@ -1751,7 +1752,7 @@ function(value){
         }
         
         //redraw page
-        window.hWin.HAPI4.layoutMgr.layoutInit(_layout_content, _layout_container, {rec_ID:home_page_record_id, lang:current_language});
+        window.hWin.HAPI4.layoutMgr.layoutInit(_layout_content, _layout_container, {rec_ID:home_page_record_id, lang:current_language}, true);
         _updateActionIcons(200); //it inits tinyMCE also
         
         page_was_modified = true;
@@ -2103,7 +2104,7 @@ function(value){
             window.hWin.HAPI4.layoutMgr.layoutInitTabs(parent_element, parent_container)
             //window.hWin.HAPI4.layoutMgr.layoutInit(_layout_content, _layout_container);    
         }else{
-            window.hWin.HAPI4.layoutMgr.layoutInit(parent_children, parent_container, {rec_ID:home_page_record_id, lang:current_language});
+            window.hWin.HAPI4.layoutMgr.layoutInit(parent_children, parent_container, {rec_ID:home_page_record_id, lang:current_language}, true);
         }   
 
 
