@@ -1154,7 +1154,7 @@ function(value){
 
             //remove child
             parent_element = this.layoutMgr.layoutContentFindElement(this._layout_content, parentnode.key);
-            parent_children = parent_element.children;
+            parent_children = parent_element?parent_element.children:[];
             parent_container = this._layout_container.find('.cms-element[data-hid='+parentnode.key+']');
             
         }
@@ -1169,8 +1169,9 @@ function(value){
           }   
         }        
         //from json
-        parent_children.splice(idx, 1); //remove from children
-
+        if(idx>=0){
+            parent_children.splice(idx, 1); //remove from children
+        }
         //from tree
         node.remove();
         
@@ -1340,6 +1341,11 @@ function(value){
         }
         
         let element_cfg = this.layoutMgr.layoutContentFindElement(this._layout_content, ele_id);  //json
+        
+        if(!element_cfg){
+            //element not found
+            return;
+        }
         
         let is_cardinal = (element_cfg.type=='north' || element_cfg.type=='south' || 
                 element_cfg.type=='east' || element_cfg.type=='west' || element_cfg.type=='center');
