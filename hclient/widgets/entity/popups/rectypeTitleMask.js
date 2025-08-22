@@ -36,9 +36,9 @@ $.widget( "heurist.rectypeTitleMask", $.heurist.recordAction, {
 
     // default options
     options: {
-    
-        height: 700,
-        width:  800,
+
+        height: 800,
+        width:  875,
         modal:  true,
         title:  'Record Type Title Mask Edit',
         default_palette_class: 'ui-heurist-design', 
