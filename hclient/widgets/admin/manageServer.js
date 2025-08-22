@@ -38,8 +38,8 @@ $.widget( "heurist.manageServer", $.heurist.baseAction, {
      * @property {string} [entered_password] - An optional password that can be pre-filled into the form. (Implicit option from usage in _initControls)
      */
     options: {
-        height: 620,
-        width:  400,
+        height: 710,
+        width:  475,
         title:  'Server manager',
         default_palette_class: 'ui-heurist-admin',
         actionName: 'manageServer'
