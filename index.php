@@ -367,7 +367,7 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script type="text/javascript" src="<?php echo PDIR;?>external/js/platform.js"></script>
 
 <?php
-if(false && $isLocalHost){
+if($isLocalHost){
     ?>
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/js/datatable/datatables.min.css"/>
     <script type="text/javascript" src="<?php echo PDIR;?>external/js/datatable/datatables.min.js"></script>

@@ -431,8 +431,8 @@ console.log(content);
         if(app.minw>0 && !layout.css['minWidth']){
             layout.css['minWidth'] = app.minw;
         }
-        if(app.minh>0 && !layout.css['minHeight']){
- //           layout.css['minHeight'] = app.minh;
+        if(app.minh>0 && !layout.css['minHeight'] && !layout.css['min-height']){
+            layout.css['minHeight'] = app.minh;
         }
 
         if(layout.css && !$.isEmptyObject(layout)){
