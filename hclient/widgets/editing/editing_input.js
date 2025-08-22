@@ -6484,6 +6484,9 @@ $.widget( "heurist.editing_input", {
             that.onChange();
         }
 
+        //
+        // Returns formatted date converted to new calendar
+        //
         function __translateDate(date, from_calendar, to_calendar){
 
             if(!window.hWin.HEURIST4.util.isFunction($('body').calendarsPicker)){
@@ -6503,17 +6506,22 @@ $.widget( "heurist.editing_input", {
                     date['day'] = date_parts[2];
                 }
             }else{
+                //for fallback
                 date_keep = date['year']+'-'+date['month']+'-'+date['day'];
             }
-
+ 
             try{    
                 let new_cal = from_calendar.newDate(date['year'], date['month'], date['day']);
                 if(!new_cal){
                     return date_keep;
                 }
                 let julian_date = new_cal._calendar.toJD(Number(new_cal.year()), Number(new_cal.month()), Number(new_cal.day()));
-                return to_calendar.fromJD(julian_date);
+                let new_date = to_calendar.fromJD(julian_date);
+                
+                return to_calendar.formatDate('yyyy-mm-dd', new_date);
+                
             }catch(e){
+                console.error('Can not format date ',date_keep,to_calendar.local.name,e.message);
                 return date_keep;
             }
         } //end function
@@ -6891,8 +6899,12 @@ $.widget( "heurist.editing_input", {
                                     let g_calendar = $.calendars.instance('gregorian');
 
                                     gregorian_date = `${new_date.getYear()}-${month}-${day}`;
-                                    new_date = __translateDate({'year': new_date.getYear(), 'month': month, 'day': day}, g_calendar, new_cal);
-                                    new_date = new_cal.formatDate('yyyy-mm-dd', new_date);
+                                    
+                                    if(g_calendar.local.name.toLowerCase() == new_cal.local.name.toLowerCase()){
+                                        new_date = gregorian_date;
+                                    }else{
+                                        new_date = __translateDate({'year': new_date.getYear(), 'month': month, 'day': day}, g_calendar, new_cal);
+                                    }
                                 }
 
                                 let cur_cal = $tinpt.calendarsPicker('option', 'calendar');
