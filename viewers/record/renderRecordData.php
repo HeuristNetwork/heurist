@@ -1838,7 +1838,7 @@ function print_public_details($bib) {
                         function($matches){
                             global $system;
 
-                            return 'onclick="return link_open(this, false);" href="'
+                            return 'onclick="return (typeof link_open === \'function\')?link_open(this, false):true;" href="'
                                     .$system->recordLink($matches[1]).'"';
                         },
                         $bd['val']);
@@ -2789,7 +2789,7 @@ function composeRecLink($rec_ID, $rec_Title){
     global $system;
 
     return '<a target="_popup" href="'.$system->recordLink($rec_ID)
-                            .'" onclick="return link_open(this);">'
+                            .'" onclick="return (typeof link_open === \'function\')?link_open(this, false):true;">'
                             .USanitize::sanitizeString($rec_Title,ALLOWED_TAGS).'</a>';
 }
 

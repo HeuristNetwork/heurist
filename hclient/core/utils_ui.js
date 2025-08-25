@@ -3193,8 +3193,10 @@ window.hWin.HEURIST4.ui = {
   hidePlayer: function(id, container){
     //clear and hide player div
     let elem = container.querySelector('#player'+id);
-    elem.innerHTML = '';
-    elem.style.display = 'none';
+    if(elem){
+        elem.innerHTML = '';
+        elem.style.display = 'none';
+    }
 
     //hide show tumbnail link
     elem = (container.querySelector('#lnk'+id)) ? container.querySelector('#lnk'+id) : container.parentNode.querySelector('#lnk'+id);
@@ -3206,6 +3208,10 @@ window.hWin.HEURIST4.ui = {
     elem = container.querySelector('#img'+id);
     $(container).toggleClass("thumb_image fullSize");
 
+    if(!elem){
+        return;
+    }
+    
     elem.style.display = 'inline-block';
 
     //restore

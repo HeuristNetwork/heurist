@@ -364,7 +364,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             let relations = this._currentEditRecordset.getRelations();    
             if(relations?.direct?.length > 0){
 
-                this.mediaViewer.css({width: '50em', float: 'left'});
+                this.mediaviewer.css({width: '50em', float: 'left'});
 
                 let $container = $('<div>', { style: 'display: inline-block; width: 26em; margin-top: 1em;'}).appendTo(this.editForm)
                 $('<div class="detailRowHeader">Records that refer this file</div>').appendTo($container);
