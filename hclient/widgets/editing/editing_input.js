@@ -3075,8 +3075,15 @@ $.widget( "heurist.editing_input", {
                 // Image and Player (enalrged image) container
                 $input_img = $('<div>', {
                     class: 'image_input ui-widget-content ui-corner-all thumb_image',
-                    style: 'margin: 5px 0px; border: none; background: transparent;'
+                    style: 'margin: 5px 0px 1em; border: none; background: transparent; min-height: unset;'
                 }).appendTo($inputdiv).hide();
+
+                if(this.options?.values?.length > 1){
+                    $input_img.css({
+                        'border-bottom': '1px solid darkgrey',
+                        'padding-bottom': '1em'
+                    });
+                }
 
                 // Thumbnail container
                 $('<img>', {
@@ -3104,7 +3111,7 @@ $.widget( "heurist.editing_input", {
                 .insertAfter( $clear_container )
                 .hide();
 
-                // Add download and show thumbnail links
+                // Add download, show thumbnail and show in popup links
                 $('<a>', {
                     href: '#',
                     class: `mode_switcher`,
@@ -3118,8 +3125,16 @@ $.widget( "heurist.editing_input", {
                     id: `dwn${dtyID}_${f_id}`,
                     class: 'external-link image_tool',
                     title: 'Download image',
-                    style: 'display: inline-block; text-decoration: underline; color: blue;',
+                    style: 'display: inline-block; color: blue;',
                     html: '<span class="ui-icon ui-icon-download" />'
+                }).appendTo($img_controls);
+
+                $('<a>', {
+                    href: '#',
+                    class: 'popup_viewer',
+                    title: 'Full view in a popup',
+                    style: 'display: inline-block; text-decoration: underline; color: blue; padding-left: 5px;',
+                    html: '<span class="ui-icon ui-icon-popup" />popup'
                 }).appendTo($img_controls);
                 
                 // Edit file's metadata
@@ -3302,20 +3317,6 @@ $.widget( "heurist.editing_input", {
                 this._on($input, {mouseout:__hideImagePreview});
                 this._on($input_img, {mouseout:__hideImagePreview});
 
-                // Source has loaded
-                function __after_image_load(){
-                    setTimeout(() => {
-
-                        let $img = $input_img.find('img');
-
-                        let base_height = $img.outerHeight() > $img.outerHeight(true) ? $img.outerHeight() : $img.outerHeight(true);
-                        base_height = base_height <= 0 ? $img[0].height : base_height;
-
-                        base_height += 30;
-                        $input_img.css('min-height', `${base_height}px`);
-                    }, 500);
-                };
-
                 // Thumbnail's click handler
                 this._on($input_img, {
                     click: (event) => {
@@ -3340,12 +3341,6 @@ $.widget( "heurist.editing_input", {
 
                             $input_img.css('cursor', 'zoom-in');
 
-                            if($input_img.find('img')[0].complete){
-                                __after_image_load();
-                            }else{
-                                $input_img.find('img')[0].addEventListener('load', __after_image_load);
-                            }
-
                             window.hWin.HAPI4.save_pref('imageRecordEditor', 1);
                         }
                         else if(isClicked === 1){
@@ -3355,14 +3350,14 @@ $.widget( "heurist.editing_input", {
 
                                 $input_img.css('cursor', 'zoom-out');
 
-                                window.hWin.HEURIST4.ui.showPlayer($input_img.find('img')[0], $input_img[0], f_id, url);
+                                window.hWin.HEURIST4.ui.showPlayer($input_img.find('img')[0], $input_img[0], `${dtyID}_${f_id}`, url);
                             }
                             else{  // Srink Image, display thumbnail
 
                                 $input_img.css('cursor', 'zoom-in');
 
                                 if(elem.tagName !== 'IMG'){
-                                    window.hWin.HEURIST4.ui.hidePlayer(f_id, $input_img[0]);
+                                    window.hWin.HEURIST4.ui.hidePlayer(`${dtyID}_${f_id}`, $input_img[0]);
                                 }
                             }
 
@@ -3381,7 +3376,7 @@ $.widget( "heurist.editing_input", {
                 }).appendTo($img_controls).show();
 
                 this._on($hide_thumb, {
-                    click: () => {
+                    click: (event) => {
 
                         window.hWin.HEURIST4.util.stopEvent(event);
 
@@ -3401,7 +3396,7 @@ $.widget( "heurist.editing_input", {
                             $input_img.hide().css('cursor', 'pointer');
                         }
 
-                        window.hWin.HEURIST4.ui.hidePlayer(f_id, $input_img[0]);
+                        window.hWin.HEURIST4.ui.hidePlayer(`${dtyID}_${f_id}`, $input_img[0]);
                     }
                 });
 
@@ -3412,47 +3407,68 @@ $.widget( "heurist.editing_input", {
                         $input_img.trigger('click');
                     }
                 });
+
+                // 'popup' viewer handler
+                this._on($img_controls.find('.popup_viewer'), {
+                    click: (event) => {
+
+                        window.hWin.HEURIST4.util.stopEvent(event);
+
+                        let filename = $input.val();
+                        let url = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&file=${f_nonce}`;
+                        let msg = `<img src='${url}' alt='${filename.replace('"', '&quote;').replace("'", '&apos;')}' style='height:99%;width:99%;object-fit:contain' />`;
+                        let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                            msg, null, {title: filename}, {default_palette_class: 'ui-heurist-explore', resizable: true, width: 'auto', height: 'auto'}
+                        );
+                        $dlg.css('max-width', 'none');
+                    }
+                });
                 
                 let $mirador_link = $(`<a href="#" data-id="${f_nonce}" class="miradorViewer_link" style="color: blue;" title="Open in Mirador">`
                     +'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
                     +'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
                     +'"></span>&nbsp;Mirador</a>').insertBefore( $hide_thumb ).hide();
                     
-                this._on($mirador_link, {click:function(event){
-                    let ele = $(event.target)
+                this._on($mirador_link, {
+                    click:function(event){
 
-                    if(!ele.attr('data-id')){
-                        ele = ele.parents('[data-id]');
+                        window.hWin.HEURIST4.util.stopEvent(event);
+
+                        let ele = $(event.target)
+
+                        if(!ele.attr('data-id')){
+                            ele = ele.parents('[data-id]');
+                        }
+                        let obf_recID = ele.attr('data-id');
+                        let is_manifest = (ele.attr('data-manifest')==1);
+
+                        let url =  window.hWin.HAPI4.baseURL
+                        + 'hclient/widgets/viewers/miradorViewer.php?db=' 
+                        +  window.hWin.HAPI4.database
+                        + '&recID=' + that.options.recID
+                        + '&' + (is_manifest?'iiif':'iiif_image') + '=' + obf_recID;
+
+                        const show_mirador_in_popup = true;
+                        if(show_mirador_in_popup){
+                            //borderless:true, 
+                            window.hWin.HEURIST4.msg.showDialog(url, 
+                                {dialogid:'mirador-viewer',
+                                    //resizable:false, draggable: false, 
+                                    //maximize:true, 
+                                    default_palette_class: 'ui-heurist-explore',
+                                    width:'90%',height:'95%',
+                                    allowfullscreen:true,'padding-content':'0px'});   
+
+                            let $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
+
+                            $dlg.parent().css('top','50px');
+                        }else{
+                            window.open(url, '_blank');        
+                        }                      
+
+                        //data-id
                     }
-                    let obf_recID = ele.attr('data-id');
-                    let is_manifest = (ele.attr('data-manifest')==1);
-
-                    let url =  window.hWin.HAPI4.baseURL
-                    + 'hclient/widgets/viewers/miradorViewer.php?db=' 
-                    +  window.hWin.HAPI4.database
-                    + '&recID=' + that.options.recID
-                    + '&' + (is_manifest?'iiif':'iiif_image') + '=' + obf_recID;
-
-                    const show_mirador_in_popup = true;
-                    if(show_mirador_in_popup){
-                        //borderless:true, 
-                        window.hWin.HEURIST4.msg.showDialog(url, 
-                            {dialogid:'mirador-viewer',
-                                //resizable:false, draggable: false, 
-                                //maximize:true, 
-                                default_palette_class: 'ui-heurist-explore',
-                                width:'90%',height:'95%',
-                                allowfullscreen:true,'padding-content':'0px'});   
-
-                        let $dlg = $(window.hWin?window.hWin.document:document).find('body #mirador-viewer');
-
-                        $dlg.parent().css('top','50px');
-                    }else{
-                        window.open(url, '_blank');        
-                    }                      
-
-                    //data-id
-                }});
+                });
 
                 // Check User Preferences, displays thumbnail inline by default if set
                 if(window.hWin.HAPI4.get_prefs_def('imageRecordEditor', 0) != 0 && value.ulf_ID){
@@ -3463,12 +3479,6 @@ $.widget( "heurist.editing_input", {
                     $input_img.css('cursor', 'zoom-in');
 
                     $input.off("mouseout");
-
-                    if($input_img.find('img')[0].complete){
-                        __after_image_load();
-                    }else{
-                        $input_img.find('img')[0].addEventListener('load', __after_image_load);
-                    }
 
                     isClicked = 1;
                 }
