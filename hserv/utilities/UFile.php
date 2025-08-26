@@ -2079,4 +2079,89 @@ function getFileSize($file_path, $clear_stat_cache = false) {
     }
 }
 
+/**
+ * Saves the provided array data into a ini file
+ *
+ * @param string $file path to the ini file
+ * @param array<string> $data configuration data to be saved
+ * @param bool $keyAsSection whether the array keys are section headers
+ * @return bool whether the saving has been successful
+ */
+function saveIniFile($file, $data, $keyAsSection = false){
+
+    if(!is_array($data)){
+        return false;
+    }
+
+    if(array_key_exists('@comment', $data)){
+
+        $comments = $data['@comment'];
+        unset($data['@comment']);
+
+        if(is_array($comments)){
+            foreach($comments as $comment){
+    
+                $comment = preg_match('/(?:\r|\n)$/', $comment) === false ? $comment . PHP_EOL : $comment;
+                $comment = preg_match('/^(?:;|#)/', $comment) === false ? "; {$comment}" : $comment;
+                $size = fileAdd($comment, $file);
+    
+                if($size === 0 && !empty($comment)){
+                    return false;
+                }
+            }
+        }elseif(is_string($comments)){
+
+            $comments = preg_match('/(?:\r|\n)$/', $comments) === false ? $comments . PHP_EOL : $comments;
+            $comments = preg_match('/^(?:;|#)/', $comments) === false ? "; {$comments}" : $comments;
+            $size = fileAdd($comments, $file);
+
+            if($size === 0 && !empty($comment)){
+                return false;
+            }
+        }
+    }
+
+    $result = true;
+
+    if($keyAsSection){
+
+        foreach($data as $section => $sectionData){
+
+            if(!is_array($sectionData)){
+
+                $size = fileAdd("{$section}={$sectionData}" . PHP_EOL, $file);
+                if($size === 0){
+                    $result = false;
+                    break;
+                }
+
+                continue;
+            }
+
+            $size = fileAdd(PHP_EOL . "[{$section}]" . PHP_EOL, $file);
+            if($size === 0){
+                $result = false;
+                break;
+            }
+
+            $result = saveIniFile($file, $sectionData);
+            if($result === false){
+                break;
+            }
+        }
+    }else{
+
+        foreach($data as $key => $value){
+
+            $size = fileAdd("{$key}={$value}" . PHP_EOL, $file);
+            if($size === 0){
+                $result = false;
+                break;
+            }
+        }
+    }
+
+    return $result;
+}
+
 ?>
