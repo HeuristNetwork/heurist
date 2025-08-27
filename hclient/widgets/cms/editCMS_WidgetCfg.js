@@ -255,7 +255,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
                 if(opts.layout_params){
                     
-                    $dlg.find("#use_timeline").prop('checked', !opts.layout_params.notimeline);    
+                    $dlg.find("#use_map").prop('checked', Object.hasOwn(opts.layout_params, 'nomap') ? !opts.layout_params.nomap : true);
+                    $dlg.find("#use_timeline").prop('checked', !opts.layout_params.notimeline);
                     $dlg.find("#map_rollover").prop('checked', opts.layout_params.map_rollover);    
                     $dlg.find("#use_cluster").prop('checked', !opts.layout_params.nocluster);    
                     $dlg.find("#editstyle").prop('checked', opts.layout_params.editstyle);    
@@ -1224,6 +1225,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
             let layout_params = {};//special option for leaflet mapping
             //parameters for controls
+            layout_params['nomap'] = !$dlg.find("#use_map").is(':checked');
             layout_params['notimeline'] = !$dlg.find("#use_timeline").is(':checked');
             layout_params['nocluster'] = !$dlg.find("#use_cluster").is(':checked');
             layout_params['editstyle'] = $dlg.find("#editstyle").is(':checked');

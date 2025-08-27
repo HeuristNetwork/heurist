@@ -2591,8 +2591,10 @@ $.widget( "heurist.mapping", {
         if(layer.feature.properties.rec_ID>0){
             
             that.setFeatureSelection([layer.feature.properties.rec_ID], false, false, add_to_selection); //highlight without zoom
-            
-            if(!add_to_selection){
+
+            if(add_to_selection){
+                return;
+            }
 
             let info = layer.feature.properties.rec_Info; //popup info may be already prepared
             if(info){
@@ -2639,16 +2641,17 @@ $.widget( "heurist.mapping", {
             if(popupURL){
                 
                 if(that.options.map_popup_mode=='dialog'){
-                    
-                        let opts = { 
-                                is_h6style: true,
-                                modal: false,
-                                dialogid: 'recordview_popup',    
-                                //onmouseover: function(){that._clearTimeouts();},
-                                title:window.hWin.HR('Info')}                
-                    
-                        window.hWin.HEURIST4.msg.showDialog(popupURL, opts);
-                        
+
+                    let opts = { 
+                        is_h6style: true,
+                        modal: false,
+                        dialogid: 'recordview_popup',    
+                        //onmouseover: function(){that._clearTimeouts();},
+                        title:window.hWin.HR('Info')
+                    };                
+
+                    window.hWin.HEURIST4.msg.showDialog(popupURL, opts);
+
                 }else if(that.options.map_popup_mode!='none'){
                     $.get(popupURL, function(responseTxt, statusTxt, xhr){
                         if(statusTxt == "success"){
@@ -2659,9 +2662,7 @@ $.widget( "heurist.mapping", {
             }else{
                 __showPopup(info, latlng);
             }
-            
-            }  // !add_to_selection
-    
+
         }else{
             // show multiple selection
             let sText = '';    
@@ -2911,12 +2912,13 @@ $.widget( "heurist.mapping", {
                 }
                 this.highlightedMarkers.push(new_layer);
             }
-        }        
-          
-        //this.main_layer.remove();
-        //this.main_layer.addTo( this.nativemap );
+        }
+
         if (!(_from_timeline===true || this.notimeline)) {
             this.vistimeline.timeline('setSelection', this.selected_rec_ids);
+        }else if(_from_timeline && this.nomap && !add_to_selection){
+            this.options.map_popup_mode = 'dialog';
+            this._onLayerSelect(selected_markers.at(-1), false, false);
         }
         if(_need_zoom){    
             this.zoomToSelection();        

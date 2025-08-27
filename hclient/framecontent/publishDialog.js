@@ -196,6 +196,7 @@ function HPublishDialog( _options )
         params_search = params_search + (params_search=='?'?'':'&')+'db='+window.hWin.HAPI4.database;
         
         //parameters for controls
+        layout_params['nomap'] = !$(popupelement).find("#use_map").is(':checked');
         layout_params['notimeline'] = !$(popupelement).find("#use_timeline").is(':checked');
         layout_params['nocluster'] = !$(popupelement).find("#use_cluster").is(':checked');
         layout_params['editstyle'] = $(popupelement).find("#editstyle").is(':checked');
