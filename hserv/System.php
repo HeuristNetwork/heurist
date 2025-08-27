@@ -1070,7 +1070,7 @@ class System {
 
         if(defined('HEURIST_FILESTORE_ROOT')){
             $root_folder = HEURIST_FILESTORE_ROOT;
-            fileAdd($sTitle.'  '.$sMsg, $root_folder.$curr_logfile);
+            fileAdd($sTitle.'  '.$sMsg, $root_folder.'_LOGS/'.$curr_logfile);
         }
 
         $mysql_gone_away_error = $this->mysqli && $this->mysqli->errno==2006;

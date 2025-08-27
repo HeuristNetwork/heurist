@@ -644,6 +644,7 @@ class USystem {
         $root_folder = HEURIST_FILESTORE_ROOT;
         
         $archiveFolder = $root_folder."AAA_LOGS/";
+        $logFolder = $root_folder."_LOGS/";
         $logs_to_be_emailed = array();
         $y1 = null;
         $y2 = null;
@@ -655,14 +656,14 @@ class USystem {
             $yesterday = $now->sub(new \DateInterval('P'.sprintf('%02d', $i).'D'));
             $arc_logfile = 'errors_'.$yesterday->format('Y-m-d').'.log';
             if($i==1){
-                $logFileForYesterday = $root_folder.$arc_logfile;
+                $logFileForYesterday = $logFolder.$arc_logfile;
             }
             
             //if yesterday log file exists
-            if(file_exists($root_folder.$arc_logfile)){
+            if(file_exists($logFolder.$arc_logfile)){
                 //2. copy to log archive folder
-                fileCopy($root_folder.$arc_logfile, $archiveFolder.$arc_logfile);
-                unlink($root_folder.$arc_logfile);
+                fileCopy($logFolder.$arc_logfile, $archiveFolder.$arc_logfile);
+                unlink($logFolder.$arc_logfile);
 
                 $logs_to_be_emailed[] = $archiveFolder.$arc_logfile;
 
@@ -672,8 +673,8 @@ class USystem {
         }
 
         if(empty($logs_to_be_emailed)){
-            $msgTitle = 'No error reports detected for '.HEURIST_SERVER_NAME;
-            $msg = $msgTitle . '<br> Expected log file: '.$logFileForYesterday;
+            $msgTitle = 'No serious errors logged '.HEURIST_SERVER_NAME;
+            $msg = $msgTitle . '<br>('.$logFileForYesterday.' was not created)';
         }else{
             $msgTitle = 'Error report '.HEURIST_SERVER_NAME.' for '.$y1.($y2==$y1?'':(' ~ '.$y2));
             $msg = $msgTitle;
