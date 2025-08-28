@@ -379,7 +379,7 @@ if(!($max_size>0)) {$max_size = 0;}
                 <div style="color:green;display:inline-block;font-weight:bold;">No change</div>
               {% } %}
               {% if (!file.error) { %}
-                <div style="color:blue;display:inline-block;font-weight:bold;">Upload OK</div>
+                <div style="color:blue;display:inline-block;font-weight:bold;" data-uploaded="1">Upload OK</div>
               {% } %}
                 </td>
                 </tr>
@@ -419,13 +419,11 @@ if(!($max_size>0)) {$max_size = 0;}
 
             function closeCheck(event){
 
-                if($(event.target).is('span, a')) { return false; }
-
-                var files = $('tbody.files').find('a[data-gallery]');
+                var files = $('tbody.files [data-uploaded="1"]');
 
                 if(files.length > 0){
 
-                    var msg = "You have uploaded " + (files.length/2) + " new media files.<br><br>"
+                    var msg = `You have uploaded ${files.length} new media files.<br><br>`
                             + "They will not be visible as records in the database until you create media<br>records using Create media records.";
 
                     var btns = {};
@@ -435,13 +433,10 @@ if(!($max_size>0)) {$max_size = 0;}
                         var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                         $dlg.dialog('close');
 
-                        // Unbind mouseleave
-                        $(document).off('mouseleave');
-
                         //Cancel possible uploads and reset form
                         $('#btnCancel').trigger('click');
                         // Close Upload media window
-                        if($(event.target).is('button')) {
+                        if($(event?.target).is('button')) {
                             setTimeout(function(){ window.close();}, 100);
                         }
 
@@ -454,11 +449,8 @@ if(!($max_size>0)) {$max_size = 0;}
                         var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                         $dlg.dialog('close');
 
-                        // Unbind mouseleave
-                        $(document).off('mouseleave');
-
                         // Close Upload media window
-                        if($(event.target).is('button')) {
+                        if($(event?.target).is('button')) {
                             $('#btnCancel').trigger('click');//reset form
                             setTimeout(function(){ window.close();}, 100);
                         }
@@ -466,11 +458,14 @@ if(!($max_size>0)) {$max_size = 0;}
 
                     window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title:'Indexing Uploaded Media Files',
                         yes:window.hWin.HR('Create Media Records'), no:window.hWin.HR('Exit without Indexing')});
-                } else
-                if ($(event.target).is('button')){
-                        $('#btnCancel').trigger('click');
-                        setTimeout(function(){ window.close();}, 100);
+
+                    return false;
+                }else if($(event?.target).is('button')){
+                    $('#btnCancel').trigger('click');
+                    setTimeout(function(){ window.close();}, 100);
                 }
+
+                return true;
             }
 
             var max_file_size = <?php echo $max_size;?>;
@@ -546,8 +541,6 @@ if(!($max_size>0)) {$max_size = 0;}
                 'use strict';
 
                 window.hWin.HEURIST4.filesWereUploaded = false;
-
-                //ART 2021-09-17 $(document).on("mouseleave", closeCheck);
 
                 function __calculateTotalSizeToBeUploaded(){
                         //verify that all files are processed and show total size to be uploaded
@@ -814,6 +807,16 @@ if(!($max_size>0)) {$max_size = 0;}
                     }
                 });
 
+                let hMenu6 = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
+                if(hMenu6.length > 0){
+                    hMenu6.slidersMenu('manageSwitchHandler', 'populate', 'upload-files', () => {
+                        let res = closeCheck();
+                        if(res){
+                            hMenu6.slidersMenu('manageSwitchHandler', 'remove', 'upload-files');
+                        }
+                        return res;
+                    });
+                }
                 /*
                 $('#upload_folder').on('change', function(){
                     if($('#upload_folder').val()==''){
