@@ -883,7 +883,7 @@ class USystem {
      *
      * @return string The latest known code version from the main server (e.g., "4.1.0"), or "unknown" if fetching fails.
      */
-    public function getLastCodeAndDbVersion($getDatabaseVersion = false){
+    public static function getLastCodeAndDbVersion($getDatabaseVersion = false){
 
         $getAlpha = preg_match("/h\d+\-alpha|alpha\//", HEURIST_BASE_URL) === 1 ? true : false;
         $key = $getAlpha ? 'alpha' : 'stable';
