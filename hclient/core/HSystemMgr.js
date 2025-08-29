@@ -136,9 +136,12 @@ class HSystemMgr {
       
       if(associationMembershipContext && 'nonmember'==window.hWin.HAPI4.sysinfo['is_association_member']){
           
-        window.hWin.HEURIST4.msg.showMsgDlgUrl(
+        let $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(
                       `${window.hWin.HAPI4.baseURL}?disclaimer=association_membership.html #content`,
-                       null, 'Heurist Network Association', {enable_buttons_after:5000, closeOnEscape:false, noClose:true});
+                       null, 'Heurist Network Association', 
+                       {enable_buttons_after:3000, closeOnEscape:false, noClose:true,
+                       open:function(event, ui){$dlg.find('#noteAboutFunction').show()}
+                       });
                        
         //call logger
         let request = {

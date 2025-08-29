@@ -501,7 +501,22 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
                 //version is old
                 return;
             }
-
+            
+            if('nonmember'==window.hWin.HAPI4.sysinfo['is_association_member']){
+                
+                const lastcheck = window.hWin.HAPI4.get_prefs('association_teaset_last_shown');
+                const currdate =  new Date().toISOString().slice(0, 10);
+                if(lastcheck!=currdate){
+                
+                    window.hWin.HAPI4.save_pref('association_teaset_last_shown',  currdate);
+                
+                    window.hWin.HEURIST4.msg.showMsgDlgUrl(
+                              `${window.hWin.HAPI4.baseURL}?disclaimer=association_membership.html #content`,
+                               null, 'Heurist Network Association', 
+                               {enable_buttons_after:3000, closeOnEscape:false, noClose:true});
+                }
+            }
+                
 
             var editRecID = window.hWin.HEURIST4.util.getUrlParameter('edit_id', window.location.search);
             if(editRecID>0){
