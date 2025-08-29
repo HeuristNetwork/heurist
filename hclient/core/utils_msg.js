@@ -918,7 +918,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
             options.width = window.hWin.HEURIST4.msg._setDialogDimension(options, 'width');
             options.height = window.hWin.HEURIST4.msg._setDialogDimension(options, 'height');
-            
+         
             let opts = {
                 autoOpen: true,
                 width : options.width,
