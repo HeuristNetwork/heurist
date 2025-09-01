@@ -70,18 +70,20 @@ function getMainServerUrl(): ?string
  *   'individual|database'  – if both match
  *   'nonmember'            – otherwise (also logs a line unless context indicates initial sign-in)
  */
-function checkHeuristNetworkMembership(string $email, string $host = '', ?string $database = null, ?string $context = '', string $firstName = '', string $lastName = ''): string
+function checkHeuristNetworkMembership(string $dbowner_email, string $email, string $host = '', 
+            ?string $database = null, ?string $context = '', string $firstName = '', string $lastName = ''): string
 {
     $base = getMainServerUrl();
     if( $base==null ){ 
-        return checkMembershipInFile($email, $host, $database, $context, $firstName, $lastName);
+        return checkMembershipInFile($dbowner_email, $email, $host, $database, $context, $firstName, $lastName);
     }
 
     $url = $base . 'admin/utilities/checkMembershipApi.php'
         . '?email=' . rawurlencode($email)
         . '&host='  . rawurlencode($host)
         . '&db='    . rawurlencode((string)$database)
-        . '&ctx='   . rawurlencode($context??'');
+        . '&ctx='   . rawurlencode($context??'')
+        . '&dbo='   . rawurlencode($dbowner_email);
 
     $resp = httpGet($url);
     return $resp !== '' ? $resp : 'nonmember';
@@ -119,11 +121,12 @@ function normalizeDbName(?string $database): string
     return (strpos($db, 'hdb_') === 0) ? substr($db, 4) : $db;
 }
 
-function checkMembershipInFile(string $email, string $host = '', ?string $database = null, string $context = '', string $firstName = '', string $lastName = ''): string
+function checkMembershipInFile($dbowner_email, string $email, string $host = '', ?string $database = null, string $context = '', string $firstName = '', string $lastName = ''): string
 {
     $hits = [];
     $toCheck = 0;
     
+    $dbowner_email = strtolower(trim($dbowner_email));
     $email = strtolower(trim($email));
     $firstName = strtolower(trim($firstName));
     $lastName = strtolower(trim($lastName));
@@ -167,9 +170,16 @@ function checkMembershipInFile(string $email, string $host = '', ?string $databa
 
         if ($type === 'INDIVIDUAL'){
             
+            $email2 = strtolower(trim($parts[1]));
+            
+            if($dbowner_email !== ''){
+                if ($email2 == $dbowner_email) {
+                    $hits['viaowner'] = true;
+                }
+            }
+            
             if($email !== '') {
                 // INDIVIDUAL,email,"last name","firstname"
-                $email2 = strtolower(trim($parts[1]));
                 if ($email2 == $email) {
                     $hits['individual'] = true;
                 }

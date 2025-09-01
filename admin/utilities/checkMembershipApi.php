@@ -27,6 +27,7 @@ if (php_sapi_name() !== 'cli') {
     $host  = isset($req_params['host'])  ? trim((string)$req_params['host'])  : '';
     $db    = isset($req_params['db'])    ? trim((string)$req_params['db'])    : '';
     $ctx   = isset($req_params['ctx'])   ? trim((string)$req_params['ctx'])   : '';
+    $dbowner_email = isset($req_params['dbo']) ? trim((string)$req_params['dbo']) : '';
 
     if ($email !== '' || ($firstName!=='' && $lastName!=='') || ($host !== '' && $db !== '')) {
         header('Content-Type: text/plain; charset=UTF-8');
@@ -34,7 +35,7 @@ if (php_sapi_name() !== 'cli') {
             checkMembershipLogNonmember($ctx, $email, $host, $db);
             echo "ok";
         }else{
-            echo checkHeuristNetworkMembership($email, $host, $db, $ctx, $firstName, $lastName);    
+            echo checkHeuristNetworkMembership($dbowner_email, $email, $host, $db, $ctx, $firstName, $lastName);    
         }
     }
 }

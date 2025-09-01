@@ -1289,7 +1289,7 @@ class System {
             $dbrecent = USystem::sessionRecentDatabases($this->currentUser);
             
             // is current user or database is member of association
-            $is_association_member = USystem::checkAssociationMembership($this);
+            $associationMembershipStatus = USystem::checkAssociationMembership($this);
 
             // Get latest code version (USystem::getLastCodeAndDbVersion might be static or global)
             $lastCode_VersionOnServer = USystem::getLastCodeAndDbVersion();
@@ -1311,7 +1311,7 @@ class System {
                     "sysadmin_email" => HEURIST_MAIL_TO_ADMIN,
                     "db_total_records" => $this->settings->get('sys_RecordCount'),
                     "db_usergroups" => user_getAllWorkgroups($this->mysqli),
-                    "is_association_member" => $is_association_member,
+                    "associationMembershipStatus" => $associationMembershipStatus,
                     "baseURL" => HEURIST_BASE_URL,
                     'baseURL_pro' => HEURIST_BASE_URL_PRO,
                     'database_prefix' => HEURIST_DB_PREFIX,

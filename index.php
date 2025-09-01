@@ -502,18 +502,19 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
                 return;
             }
             
-            if('nonmember'==window.hWin.HAPI4.sysinfo['is_association_member']){
+            if('nonmember'==window.hWin.HAPI4.sysinfo['associationMembershipStatus'] 
+            || 'viaowner'==window.hWin.HAPI4.sysinfo['associationMembershipStatus']){
                 
-                const lastcheck = window.hWin.HAPI4.get_prefs('association_teaset_last_shown');
+                const lastcheck = window.hWin.HAPI4.get_prefs('association_teaser_last_shown');
                 const currdate =  new Date().toISOString().slice(0, 10);
                 if(lastcheck!=currdate){
                 
-                    window.hWin.HAPI4.save_pref('association_teaset_last_shown',  currdate);
+                    window.hWin.HAPI4.save_pref('association_teaser_last_shown',  currdate);
                 
                     window.hWin.HEURIST4.msg.showMsgDlgUrl(
                               `${window.hWin.HAPI4.baseURL}?disclaimer=association_membership.html #content`,
                                null, 'Heurist Network Association', 
-                               {enable_buttons_after:3000, closeOnEscape:false, noClose:true});
+                               {enable_buttons_after:5000, closeOnEscape:false, noClose:true});
                 }
             }
                 

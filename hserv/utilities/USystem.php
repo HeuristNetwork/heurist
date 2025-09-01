@@ -826,9 +826,9 @@ class USystem {
     
     /**
      *
-     * @return bool true is current user or database is a member of association
+     * @return string true if current user or database is a member of association
      */    
-    public static function checkAssociationMembership($system, $context=null)
+    public static function checkAssociationMembership($system, $context=null):string
     {
         
         $currentUser = $system->getCurrentUser();
@@ -849,14 +849,16 @@ class USystem {
             return $_SESSION[$database]['isAssociationMember'];
         }
         
-        $isMember = checkHeuristNetworkMembership($currentUser['ugr_eMail'], $server, $database, $context??'');
+        $dbowner = user_getDbOwner($system->getMysqli());
+        
+        $membershipStatus = checkHeuristNetworkMembership($dbowner['ugr_eMail'], $currentUser['ugr_eMail'], $server, $database, $context??'');
         //$isMember = 'individual';
         if(session_status() === PHP_SESSION_ACTIVE){
             @session_start();
-            $_SESSION[$database]['isAssociationMember'] = $isMember;
+            $_SESSION[$database]['isAssociationMember'] = $membershipStatus;
         }
         
-        return $isMember;
+        return $membershipStatus;
         
     }
     
