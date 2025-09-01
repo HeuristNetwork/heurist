@@ -1812,6 +1812,11 @@ function(value){
             _layout_container.find('div[data-hid]').removeClass('cms-element-editing headline marching-ants marching');                        
         }
 
+        let element_cfg = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
+        if(!element_cfg){
+            //element to be edited not found
+            return;
+        }
       
         //1. show div with properties over treeview
         let h = _panel_treePage.find('ul.fancytree-container').height() + 10;
@@ -1847,8 +1852,6 @@ function(value){
         if(!ele.css('background-image') || ele.css('background-image')=='none'){
             ele.addClass('headline marching-ants marching');
         }
-        
-        let element_cfg = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, ele_id);  //json
         
         let is_cardinal = (element_cfg.type=='north' || element_cfg.type=='south' || 
                 element_cfg.type=='east' || element_cfg.type=='west' || element_cfg.type=='center');
@@ -2094,7 +2097,9 @@ function(value){
         if(Array.isArray(new_element_json) && new_element_json.length==1){
             new_element_json = new_element_json[0];
         }
-
+        if(!Array.isArray(parent_children)){
+            parent_children = [];
+        }
         parent_children.push(new_element_json);
         window.hWin.HAPI4.layoutMgr.layoutInitKey(parent_children, parent_children.length-1);
 

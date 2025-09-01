@@ -305,8 +305,12 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         // change label for btn_add_record 
         //
         function __onSelectRecType(sel){
-
-            let is_any = sel.val().indexOf(',') !== -1;
+            
+            let is_any = false;
+            if(sel || sel.val()){
+                is_any = sel.val().indexOf(',') !== -1;
+            }
+        
             if(is_browse || is_any){
                 that.btn_add_record.hide();
             }else{

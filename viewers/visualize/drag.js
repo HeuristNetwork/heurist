@@ -250,11 +250,11 @@ function showNodeInformation(d){
         infoFrame.style('display', 'none');
         infoBox.style('display', 'block');
 
-        if(infoBox.attr("data-hid") == d.id){ // block retrival of last record in quick succession
+        let recType = $Db.rty(d.id);
+
+        if(infoBox.attr("data-hid") == d.id || !recType){ // block retrival of last record in quick succession
             return;
         }
-
-        let recType = $Db.rty(d.id);
 
         let icon_URL = window.hWin.HAPI4.getImageUrl('rty', recType.rty_ID, 'thumb', 2, window.hWin.HAPI4.database);
         let rty_Icon = `<img

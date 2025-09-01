@@ -1145,6 +1145,12 @@ window.hWin.HEURIST4.util = {
           }
     },
     
+    isFullyActive: function (s /* self */) {
+        return s.window !== null
+        && s.document === s.window.document
+        && (s.window.top === s.window || window.hWin.HEURIST4.util.isFullyActive(s.window.parent));
+    },
+    
     //constants for saved searches\
     _NAME: 0, 
     _QUERY: 1,

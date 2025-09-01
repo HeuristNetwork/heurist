@@ -4079,7 +4079,12 @@ $.widget( "heurist.mapping", {
             //status has been changed - action
             if(this.options.element_layout){
                 if(!this.is_timeline_disabled && !this.is_map_disabled){
-                    this.timeline_height = $(this.options.element_layout).find('.ui-layout-south').height() + 7;
+                    try{
+                        this.timeline_height = $(this.options.element_layout).find('.ui-layout-south').height() + 7;    
+                    }catch(e){
+                        this.timeline_height = 0;
+                    }
+                    
                     //this.timeline_height = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['south','layoutHeight']
                     //    , $(this.options.element_layout) );
                 }

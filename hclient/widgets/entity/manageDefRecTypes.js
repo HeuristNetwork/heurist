@@ -327,7 +327,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                 res = res.getIds();                     
                             }
                             
-                            if(res && Array.isArray(res) && res.length>0){
+                            if(res && Array.isArray(res) && res.length>0 && that.searchForm.searchDefRecTypes('instance')){
                                 that.options.rtg_ID = res[0];
                                 that.searchForm.searchDefRecTypes('option','rtg_ID', that.options.rtg_ID);
                             }
@@ -342,7 +342,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                 that.searchForm.find('#chb_show_all_groups').prop('checked', false);
                                 that.searchForm.find('#input_sort_type').val('name');
 
-                                that.searchForm.searchDefRecTypes('startSearch');
+                                if(that.searchForm.searchDefRecTypes('instance')){
+                                    that.searchForm.searchDefRecTypes('startSearch');    
+                                }
                             }
                         },
                         add_to_begin: true

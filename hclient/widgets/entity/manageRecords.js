@@ -1744,8 +1744,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
            function __getEditFieldValue(sField){
                let ele = that._editing.getFieldByName(sField);
-               let vals = ele.editing_input('getValues');
-               return vals[0];
+               if(ele && ele.editing_input('instance')){
+                   let vals = ele.editing_input('getValues');
+                   return vals[0];
+               }
+               return '';
            }
                     
            //

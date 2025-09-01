@@ -1690,7 +1690,7 @@ $.widget( "heurist.editing_input", {
                                 // check if editor is 'expanded'
                                 if(editor.settings.max_height != null){
                                     editor.settings.max_height = null;
-                                    tinyMCE.activeEditor.execCommand('mceAutoResize');
+                                    tinyMCE.activeEditor?.execCommand('mceAutoResize');
                                 }
 
                                 that.onChange();
@@ -1698,14 +1698,14 @@ $.widget( "heurist.editing_input", {
 
                             editor.on('focus', (e) => { // expand text area
                                 editor.settings.max_height = null;
-                                tinyMCE.activeEditor.execCommand('mceAutoResize');
+                                tinyMCE.activeEditor?.execCommand('mceAutoResize');
                             });
 
                             editor.on('blur', (e) => { // collapse text area
                                 is_blur = true;
                                 editor.settings.max_height = editor.settings.min_height;
                                 editor.settings.autoresize_min_height = null;
-                                tinyMCE.activeEditor.execCommand('mceAutoResize');
+                                tinyMCE.activeEditor?.execCommand('mceAutoResize');
                             });
 
                             editor.on('ResizeContent', (e) => {

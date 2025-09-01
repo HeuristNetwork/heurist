@@ -532,6 +532,10 @@ function HMapManager( _options )
                 },
                 loadChildren: function(e, data){
 
+                    if(!window.hWin.HEURIST4.util.isFullyActive(self)){
+                        return;
+                    }
+                    
                     setTimeout(function(){
                         
                         if(data.node.type=='mapdocument'){
