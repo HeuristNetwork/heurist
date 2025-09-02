@@ -250,22 +250,22 @@ function check_membership(string $email, string $name = '', ?string $database = 
 
     // Fast path: reuse prior session result if it matches and was a member (not 'nonmember')
     $last = hn_get_last_membership_check();
-    if ($last && ($last['email'] ?? '') === $emailNorm && ($last['db'] ?? '') === $dbNorm && ($last['result'] ?? 'nonmember') !== 'nonmember') {
+    if ($last && ($last['email'] ?? '') === $email && ($last['db'] ?? '') === $database && ($last['result'] ?? 'nonmember') !== 'nonmember') {
         // Keep session fresh for this pair
-        hn_set_last_membership_check($emailNorm, $dbNorm, $last['result']);
+        hn_set_last_membership_check($email, $database, $last['result']);
         return $last['result'];
     }
     $cache = hn_load_membership_cache();
 
     $hits = [];
 
-    if ($dbNorm !== '' && isset($cache['db_names'][$dbNorm])) {
+    if ($database !== '' && isset($cache['db_names'][$database])) {
         $hits[] = 'database';
     }
-    if ($emailNorm !== '' && isset($cache['individual_emails'][$emailNorm])) {
+    if ($email !== '' && isset($cache['individual_emails'][$email])) {
         $hits[] = 'individual';
     }
-    if ($emailNorm !== '' && isset($cache['group_emails'][$emailNorm])) {
+    if ($email !== '' && isset($cache['group_emails'][$email])) {
         $hits[] = 'group';
     }
 
@@ -278,7 +278,7 @@ function check_membership(string $email, string $name = '', ?string $database = 
         hn_log_nonmember($result, $database ?? '', $name, $email, $context);
     }
     // Remember last check in session for fast path on subsequent calls
-    hn_set_last_membership_check($emailNorm, $dbNorm, $result);
+    hn_set_last_membership_check($email, $database, $result);
 
     return $result;
 

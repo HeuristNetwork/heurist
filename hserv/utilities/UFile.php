@@ -2115,7 +2115,7 @@ function saveIniFile($file, $data, $keyAsSection = false){
             $comments = preg_match('/^(?:;|#)/', $comments) === false ? "; {$comments}" : $comments;
             $size = fileAdd($comments, $file);
 
-            if($size === 0 && !empty($comment)){
+            if($size === 0 && !empty($comments)){
                 return false;
             }
         }

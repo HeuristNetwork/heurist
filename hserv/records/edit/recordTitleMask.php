@@ -173,15 +173,11 @@ class TitleMask {
 /**
  * Fills a title mask with values from a specific record to generate the record's title.
  *
- * If `$mask` is not provided, it fetches the `rty_TitleMask` for the record's type.
  * It then calls `TitleMask::execute()` in mode 0 (fill coded mask with values) to substitute field placeholders
  * with actual values from the specified record.
  * The record's data is fetched (and cached) using `self::__get_record_value()`.
  *
  * @param int $rec_id The ID of the record for which the title is to be generated.
- * @param string|null $mask Optional. The title mask string to use.
- *                          If null, the function retrieves the `rty_TitleMask` defined for the record's type.
- *                          This mask is expected to be in the internal coded format.
  * @return string The generated title string with field placeholders replaced by values.
  *                Returns an error message string (e.g., "Title mask not generated. Record X not found",
  *                or `TITLEMASK_ERROR_MSG`) if the record is not found, the mask is empty/invalid,
@@ -189,14 +185,12 @@ class TitleMask {
  *                If all fields in the mask are blank for the record, a default "no data" message is returned
  *                (see `__get_forempty` and `TitleMask::execute` mode 0 handling).
  */
-public static function fill($rec_id, $mask=null){
+public static function fill($rec_id){
 
     self::initialize();
 
     $rec_value = self::__get_record_value($rec_id, true); //reset
     if($rec_value){
-        //if($mask==null){
-        //}
         $mask = $rec_value['rty_TitleMask'];
         $rt = $rec_value['rec_RecTypeID'];
         return self::execute($mask, $rt, 0, $rec_id, ERROR_REP_WARN);

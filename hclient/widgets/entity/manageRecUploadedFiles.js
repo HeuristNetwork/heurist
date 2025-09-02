@@ -1591,7 +1591,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
                 // Click handler for author search
                 $dlg.find('#lookup_author').on('click',() => {
-                    this._loadAuthorLookup();
+                    this._loadAuthorLookup($dlg);
                 });
 
                 // Hide dialog while getting license and type values
@@ -2115,15 +2115,15 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             }
         });
     },
-    
-    _loadAuthorLookup: function(){
+
+    _loadAuthorLookup: function($dialogForm){
 
         let that = this;
 
         if(!window.hWin.HEURIST4.util.isFunction($('body')['lookupBase'])){
 
             $.getScript(`${window.hWin.HAPI4.baseURL}hclient/widgets/lookup/lookupBase.js`, () => {
-                that._loadAuthorLookup();
+                that._loadAuthorLookup($dialogForm);
             }).fail(() => {
                 window.hWin.HEURIST4.msg.showMsgErr({
                     status: window.hWin.ResponseStatus.UNKNOWN_ERROR,
@@ -2134,7 +2134,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
             return;
         }
-        let $dlg;
+
         let dlg_opts = {
             mapping: {
                 dialog: 'lookupNakalaAuthor',
@@ -2151,11 +2151,11 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             }, 
             path: 'widgets/lookup/',
             onClose: (recset) => {
-                if(Object.keys(recset).length > 0){ // has response
-                    $dlg.find('#fcreator').val(recset[1]);
-                    $dlg.find('#lcreator').val(recset[2]);
-                    $dlg.find('#idcreator').val(recset[4]);
-                    $dlg.find('#orcid').val(recset[3]);
+                if($dialogForm instanceof jQuery && Object.keys(recset).length > 0){ // has response
+                    $dialogForm.find('#fcreator').val(recset[1]);
+                    $dialogForm.find('#lcreator').val(recset[2]);
+                    $dialogForm.find('#idcreator').val(recset[4]);
+                    $dialogForm.find('#orcid').val(recset[3]);
                 }
             }
         };
