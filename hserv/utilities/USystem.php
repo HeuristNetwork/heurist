@@ -825,7 +825,7 @@ class USystem {
     }
     
     /**
-     *
+     * $context if defined, it means it is called from initPage.php for standalone app (such as crosstabs)
      * @return string true if current user or database is a member of association
      */    
     public static function checkAssociationMembership($system, $context=null):string
@@ -840,6 +840,7 @@ class USystem {
             return false;
         }
         
+        // false && 
         if(session_status() === PHP_SESSION_ACTIVE && isset($_SESSION[$database]['isAssociationMember'])){
             
             if($context && 'nonmember'==$_SESSION[$database]['isAssociationMember']){

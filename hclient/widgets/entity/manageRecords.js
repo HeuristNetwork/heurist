@@ -6531,7 +6531,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                     let trm_label = $Db.trm($sel.val(), 'trm_Label');
 
-                    window.hWin.HEURIST4.msg.showMsgDlg(`Are you sure you wish to use ${trm_label} in place of ${org_label}?`, function(){
+                    window.hWin.HEURIST4.msg.showMsgDlg(`Are you sure you wish to use ${trm_label} in place of ${org_label}?`, 
+                    function(){
                         new_terms[cur_term[0]].push($sel.val());
                         $dlg.dialog('close');
                         that.processTermFields(completed_fields, new_terms);

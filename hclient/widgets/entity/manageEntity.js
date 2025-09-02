@@ -462,6 +462,9 @@ $.widget( "heurist.manageEntity", {
         
         if(this.options.list_mode=='default'){
             
+                let customRenderer = this.options.resultList?.renderer;
+                let customSearchfull = this.options.resultList?.searchfull;
+            
                 this.options.resultList = $.extend(this.options.resultList, 
                 {
                     recordDivEvenClass: 'recordDiv_blue',
@@ -494,7 +497,14 @@ $.widget( "heurist.manageEntity", {
                         that._onPageRender(); //event on loading record list/page
                     } : null,
                     field_for_ext_classes: 0
-                });                
+                });     
+                
+                if(customRenderer){
+                   this.options.resultList.renderer =  customRenderer;
+                }
+                if(customSearchfull){
+                   this.options.resultList.searchfull =  customSearchfull; 
+                }
 
                 //init record list
                 this.recordList.resultList( this.options.resultList );     

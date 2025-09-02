@@ -189,7 +189,7 @@ class CmsManager {
         let query_search_pages = { t: this.RT_CMS_MENU, sort: '-id' };
         query_search_pages['f:' + this.DT_CMS_PAGETYPE] = window.hWin.HAPI4.sysinfo['dbconst']['TRM_PAGETYPE_WEBPAGE'];
 
-        this.#openCMSlist(window.hWin.HR('Select Web page'), query_search_pages, is_view_mode);
+        this.#openCMSlist(window.hWin.HR('Select Web page'), query_search_pages, is_view_mode, false);
     }
 
     /**
@@ -248,7 +248,7 @@ class CmsManager {
 
         let query_search_sites = { t: this.RT_CMS_HOME, sort: '-id' };
 
-        this.#openCMSlist(window.hWin.HR('Select Website'), query_search_sites, is_view_mode);
+        this.#openCMSlist(window.hWin.HR('Select Website'), query_search_sites, is_view_mode, (action=='menu-cms-edit'));
 
         if (this.cms_home_counts.sMsgCmsPrivate != '') {
             window.hWin.HEURIST4.msg.showMsgDlg(this.cms_home_counts.sMsgCmsPrivate, null,
@@ -267,19 +267,20 @@ class CmsManager {
      * @param {Object} query_search - Search parameters for filtering the CMS items.
      * @param {boolean} is_view_mode - If true, items will be opened in view mode, otherwise edit mode.
      */
-    #openCMSlist(sTitle, query_search, is_view_mode) {
+    #openCMSlist(sTitle, query_search, is_view_mode, conversionAllowed) {
         let that = this;
         
         
         let layout = '<div class="ent_wrapper">'
                                 +    '<div class="searchForm" style="display:none;"></div>'
-+'<div class="ent_header" style="padding:0 5px"><label>Use CMS version 3 <input type="checkbox" id="useVersion3"></label>'
-+'&nbsp;&nbsp;&nbsp;&nbsp;Websites created in previous verion can be distored '+(is_view_mode?'':'if you save in')+' in new version</div>'    
-+'<div class="ent_content_full" style="top:30px">' 
+//+'<div class="ent_header" style="padding:0 5px"><label>Use CMS version 3 <input type="checkbox" id="useVersion3"></label>'
+//+'&nbsp;&nbsp;&nbsp;&nbsp;Websites created in previous verion can be distored '+(is_view_mode?'':'if you save in')+' in new version</div>'    
++'<div class="ent_content_full" style="top:0px">' 
                                 +    '<div class="ent_content_full recordList" style="top:0"></div></div>'
                      +'</div>';
         
-
+        let selDlg = null;
+        
         let popup_options = {
             select_mode: 'select_single',
             select_return_mode: 'recordset',
@@ -293,28 +294,115 @@ class CmsManager {
             default_palette_class: 'ui-heurist-publish',
             resultList: {
                 show_toolbar: false,
-                view_mode: 'icons',
+                view_mode: 'default', //'icons',
+                //show_action_buttons: false,
+                searchfull: function(arr_ids, pageno, callback){
+                    
+                    let ids = arr_ids.join(',');
+                    let request = { q: '{"ids":"'+ ids+'"}',
+                        w: 'a',
+                        detail: window.hWin.HAPI4.sysinfo['dbconst']['DT_VERSION'],
+                        id: window.hWin.HEURIST4.util.random(),
+                        pageno: pageno };
+
+                    window.hWin.HAPI4.RecordMgr.search(request, callback);
+                    
+                    
+                },
                 renderer: function(recordset, record) {
+                    
+                    const ver = conversionAllowed?recordset.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_VERSION']):3;
+                    const btnConvert = '<div data-key="cms-convert" '
+                    +'style="float:right;cursor:pointer;text-decoration:underline;color:blue">Convert to CMS v3</div>';
+                    
                     let recID = recordset.fld(record, 'rec_ID');
                     let recTitle = recordset.fld(record, 'rec_Title');
-                    let recTitle_strip_all = window.hWin.HEURIST4.util.htmlEscape(recTitle);
-                    let html = '<div class="recordDiv" id="rd' + recID + '" recid="' + recID + '">' + recTitle_strip_all + '</div>';
+                    let recTitle_strip_all = window.hWin.HEURIST4.util.stripTags(recTitle,'b');
+                    let html = '<div class="recordDiv" id="rd' + recID + '" recid="' + recID + '" '
+                             +'style="padding: 10px;font-size: 1.2em !important;">' 
+                             //+ (ver==3?'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;':'VER 2') + ' '
+                             + `<b>${recID}</b>&nbsp;&bull;&nbsp;`
+                             + recTitle_strip_all + (ver==3?'':btnConvert) +'</div>';
                     return html;
+                },
+                onaction: function(params){
+                    console.log(params);
+                    if(params.action=='cms-convert'){
+                        selDlg.dialog('close');
+                        that.#convertToVersion3( params.recID, false );
+                        return true;
+                    }
+                    return false;
                 }
             },
             onselect: function(event, data) {
                
                 if (window.hWin.HEURIST4.util.isRecordSet(data.selection)) {
-                    let version = data.useNewCmsVersion?'3':'2';
+                    //let version = data.useNewCmsVersion?'3':'2';
                     
                     let recordset = data.selection;
                     let rec_ID = recordset.getOrder()[0];
-                    that.#openCMS(rec_ID, is_view_mode ? '' : 'edit', version);
+                    that.#openCMS(rec_ID, is_view_mode ? '' : 'edit'); //, version
                 }
             }
         };
 
-        window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
+        selDlg = window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
+    }
+    
+    #convertToVersion3(recId, withoutConditions)
+    {
+        //1. association validation
+        if('nonmember'==window.hWin.HAPI4.sysinfo['associationMembershipStatus']){
+
+            let $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(
+                `${window.hWin.HAPI4.baseURL}?disclaimer=association_membership.html #content`,
+                null, 'Heurist Network Association', 
+                {enable_buttons_after:5000, closeOnEscape:false, noClose:true,
+                    open:function(event, ui){$dlg.find('#noteAboutFunction').show()}
+            });
+
+            //call logger
+            let request = {
+                db:  window.hWin.HAPI4.sysinfo.database_prefix + window.hWin.HAPI4.database,
+                host: window.location.hostname,
+                email: window.hWin.HAPI4.currentUser['ugr_eMail'],
+                log: 1,
+                ctx: 'cms v3 coversion'  // context
+            };  
+
+            window.hWin.HEURIST4.util.sendRequest('https://heuristref.net/h7-alpha/admin/utilities/checkMembershipApi.php',
+                request, null, ()=>{}, 'auto');
+            return false;
+        }
+
+        if(withoutConditions){
+            
+            //@todo create duplication for the existing website
+
+            let request = {a: 'addreplace',
+                recIDs: recId,
+                dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_VERSION'],
+                insert_new_values: 1,
+                rVal: 3};
+
+            window.hWin.HAPI4.RecordMgr.batch_details(request, response=>{
+                this.#openCMS(recId, 'edit', 3);
+            });        
+                          
+            return true;
+        }
+        //2. warning message
+        window.hWin.HEURIST4.msg.showMsgDlg(
+'<p>Conversion to V3 means that web site will be opened and edit in new environment that allows bootstrap and other new features.</p>'
++'<ul><li>It should not affect the appearance of website, unless there are heavily customized page header and footer.</li>'
++'<li>Anyway, follow the rule a thumb: MAKE A COPY for your current website (duplicate your CMS Home and Pages records -  record types:51,52).</li>'
++'<li>Your website configuration will  be not affected till first saving.</li>'
++'<li>In case you wish to rollback to v2 open CMS home record and change "Version" field to "2".</li></ul>',
+            ()=>this.#convertToVersion3(recId, true));
+
+        return true;
+
     }
 
     /**
@@ -349,16 +437,23 @@ class CmsManager {
             sMsg = 'Are you sure you want to create a site?';
         }
 
-        sMsg = sMsg + '<p>Check the box if you wish to keep your website private ' +
-            '<br><input type="checkbox"> hide website (can be changed later)</p>';
+        const disabled = ('nonmember'==window.hWin.HAPI4.sysinfo['associationMembershipStatus'])?'disabled':'';
+        
+        sMsg = sMsg 
+            + '<p>Check the box if you wish to keep your website private ' 
+            + '<br><input type="checkbox"> hide website (can be changed later)</p>'
+            + '<p>Choose the version for CMS  ' 
+            + '<br><input name="rbVer" type="radio" checked id="rbV2"/><label for="rbV2">v 2</label>'
+            + `<br><input name="rbVer" type="radio" id="rbV3" ${disabled}/><label for="rbV3">v 3 (for Heurist association members only)</label>`
+            +'</p>'
 
         let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg,
             function() {
                 let chb = $dlg.find('input[type="checkbox"]');
                 let is_private = chb.is(':checked');
-
-                let popup_options = { record_id: -1, webpage_private: is_private };
-
+                let version = $dlg.find('#rbV3').is(':checked')?3:2;
+                 
+                let popup_options = { record_id: -1, webpage_private: is_private, version:version };
                 that.#openCMSedit(popup_options);
             },
             window.hWin.HR('New website'),
@@ -580,7 +675,22 @@ console.log(sURL);
                     }
 
                     options.record_id = response.data.home_page_id > 0 ? response.data.home_page_id : response.data.ids[0];
-                    that.#openCMSedit(options);
+                    
+                    if(options.version==3){
+                        that.#convertToVersion3( options.record_id, true );
+                        /*
+                        let request = {a: 'addreplace',
+                                        recIDs: options.record_id,
+                                        dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_VERSION'],
+                                        insert_new_values: 1,
+                                        rVal: 3};
+                        
+                        window.hWin.HAPI4.RecordMgr.batch_details(request, response=>{that.#openCMSedit(options)});
+                        */
+                    }else{
+                        that.#openCMSedit(options);    
+                    }
+                    
                 }
             } else {
                 window.hWin.HEURIST4.msg.showMsgErr(response);

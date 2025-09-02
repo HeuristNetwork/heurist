@@ -295,11 +295,11 @@ class HCmsEditorPage {
 
         };
       
-        try{
-            this.tinymce.init(inlineConfig);
-        }catch(e){
-            console.log('Can not init tinymce. Selector: "'.selector.'". Found:'.$(selector).length);
-        }
+        
+        this.tinymce.init(inlineConfig);
+        //try{}catch(e){
+        //    console.log('Can not init tinymce. Selector: "'.selector.'". Found:'.$(selector).length);
+        //}
 
         // Correct image and embedded urls
         this._layout_container.find('img, embed').each(function(i,ele){window.hWin.HEURIST4.util.restoreRelativeURL(ele);});

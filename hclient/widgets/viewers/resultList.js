@@ -87,6 +87,7 @@ $.widget( "heurist.resultList", {
         renderer: null,    // custom renderer function to draw item
         rendererHeader: null,   // renderer function to draw header for list view-mode (for content)
         rendererGroupHeader: null,   // renderer function for group header (see groupByField)
+        onaction: null, //custom on action (if renderer is defined)
         
         recordDivClass: '', // additional class that modifies recordDiv appearance (see for example "public" or "outline_supress" in h4styles.css) 
                             // it is used if renderer is null
@@ -686,7 +687,8 @@ $.widget( "heurist.resultList", {
 
             this.action_buttons_div.css({'display':'inline-block', 'padding':'0 0 4px 1em'})
                 .hide().appendTo( this.div_toolbar );    
-            
+                
+                          
             for(let idx in this.options.action_buttons){
 
                 const key = this.options.action_buttons[idx].key;
@@ -2099,6 +2101,14 @@ $.widget( "heurist.resultList", {
         if(!window.hWin.HEURIST4.util.isempty(action)){ //action_btn && action_btn.length()>0){
             if(this.options.renderer){
                 //custom handler
+                if( window.hWin.HEURIST4.util.isFunction(this.options.onaction)
+                     && 
+                    this.options.onaction.call(this, {action:action, recID:selected_rec_ID, target:$target})){
+                            
+                        //custom on action
+                        return;
+                }
+                
                 this._trigger( "onaction", null, {action:action, recID:selected_rec_ID, target:$target});
                 return;
 
