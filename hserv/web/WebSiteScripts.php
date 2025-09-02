@@ -58,7 +58,6 @@ if(!defined('PDIR')){
 
     <link href="https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-2.1.6/b-3.1.2/b-html5-3.1.2/datatables.min.css" rel="stylesheet">
     <script src="https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-2.1.6/b-3.1.2/b-html5-3.1.2/datatables.min.js" integrity="sha384-naBmfwninIkPENReA9wreX7eukcSAc9xLJ8Kov28yBxFr8U5dzgoed1DHwFAef4y" crossorigin="anonymous"></script>
-    
 <?php    
 if($useOldCode){
     include_once dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php';
@@ -209,4 +208,6 @@ echo $this->getWebSiteInfo();
             
         }
     </script>
-    
+
+    <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h6styles.css" />
+ 
