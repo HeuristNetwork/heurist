@@ -992,6 +992,11 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             $ret = $this->replaceLocalFiles();
 
         }
+        elseif(@$this->data['create_scaled_images']){
+
+            $ret = $this->createScaledImages();
+
+        }
         elseif(@$this->data['import_data']){ // importing file metadata
 
             $import_type = intval($this->data['import_data']);// import type; 1 - keep existing, 2 - append, 3 - replace
@@ -2590,6 +2595,48 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             }
 
             $results['skipped'][] = "{$id} - Error: {$this->system->getErrorMsg()}";
+        }
+
+        return $results;
+    }
+
+    private function createScaledImages(){
+
+        $files = @$this->data['create_scaled_images'];
+        $files = $files === true ? true : prepareIds($files);
+        $localOnly = 'ulf_OrigFileName IS NOT NULL AND ulf_OrigFileName <> "_remote" AND ulf_OrigFileName NOT LIKE "' . ULF_IIIF . '%"';
+
+        if($files === true){
+            $files = mysql__select_assoc2($this->system->getMysqli(), "SELECT ulf_ID, ulf_ObfuscatedFileID FROM recUploadedFiles WHERE $localOnly");
+        }elseif(!empty($files)){
+            $fileCond = count($files) > 1 ? 'IN ('. implode(',', $files) .')' : "= {$files[0]}";
+            $files = mysql__select_assoc2($this->system->getMysqli(), "SELECT ulf_ID, ulf_ObfuscatedFileID FROM recUploadedFiles WHERE ulf_ID $fileCond AND $localOnly");
+        }
+
+        if(!is_array($files) || empty($files)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid files have been provided.');
+            return false;
+        }
+
+        $results = [
+            'error' => [],
+            'done' => []
+        ];
+        foreach($files as $ulfID => $ulfObfuscatedID){
+
+            $fileDetails = fileGetFullInfo($this->system, $ulfObfuscatedID);
+            if(!$fileDetails){
+                $results['error'][$ulfID] = $this->system->getErrorMsg();
+                continue;
+            }
+
+            $cachedPath = getWebImageCache($this->system, $fileDetails, false);
+            if(!$cachedPath){
+                $results['error'][$ulfID] = $this->system->getErrorMsg();
+                continue;
+            }
+
+            $results['done'][] = $ulfID;
         }
 
         return $results;

@@ -200,7 +200,7 @@ if(mysql__check_dbname($db)==null){
                             $blurred_url = getBlurredImage($system, $fileinfo);
                             $direct_url = !$blurred_url ? HEURIST_BASE_URL . 'hclient/assets/100x100-login-required.png' : $blurred_url;
 
-                        }elseif(@$req_params['fullres'] === '0'){ //$get_cached_image get web cached version
+                        }elseif(!array_key_exists('fullres', $req_params) || $req_params['fullres'] === '0'){ // get web cached version
 
                             $cache_url = getWebImageCache($system, $fileinfo, !$get_blurred_image);
                             if($cache_url){

@@ -91,6 +91,7 @@ $.widget( "heurist.searchRecUploadedFiles", $.heurist.searchEntity, {
                     +'<li id="menu-file-select-all"><a href="#">Select All</a></li>'
                     +'<li id="menu-file-select-none"><a href="#">Select None</a></li>'
                     +'<li>---------------</li>'
+                    +'<li id="menu-file-scaled-images"><a href="#">Optimise image sizes for selection</a></li>'
                     +'<li id="menu-file-export-csv"><a href="#">Download CSV of information for selection</a></li>'
                     +'<li id="menu-file-refrec-show"><a href="#">Show records referencing selection</a></li>'
                     +'<li id="menu-file-refrec-add"><a href="#">Create multimedia records for selection</a></li>'

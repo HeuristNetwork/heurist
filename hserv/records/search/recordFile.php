@@ -656,7 +656,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
 /**
  * Downloads a file along with metadata as a ZIP file.
  *
- * @param System $system - The system object to interact with the environment.
+ * @param hserv\System $system - The system object to interact with the environment.
  * @param array $fileinfo - Information about the file (obtained by fileGetFullInfo).
  * @param int $rec_ID - The record ID associated with the file.
  */
@@ -1026,7 +1026,7 @@ function isNotLocalFile($origName){
  *  Only performs this if the file is greater than 500 KB
  *  Also, scales the image down to at most 1000x1000 pixels
  *
- * @param System $system - initialised Heurist system object
+ * @param hserv\System $system - initialised Heurist system object
  * @param $fileinfo - data obtained by fileGetFullInfo
  * @param bool $return_url - return url to file instead of file path
  *

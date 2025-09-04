@@ -213,6 +213,10 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         
                         this._checkFiles();
                         
+                    }else if(action == 'menu-file-scaled-images'){
+
+                        this._createScaledImages();
+
                     }
                 },
                 "searchrecuploadedfilesonresult": this.updateRecordList
@@ -2272,6 +2276,40 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                     this.reloadEditForm(true);
                 }
             });
+        });
+    },
+
+    _createScaledImages: function(){
+
+        let ids = this._getSelected(5000);
+        if(!ids || ids.length === 0){
+            ids = true;
+        }
+
+        let request = {
+            a: 'batch',
+            entity: this.options.entity.entityName,
+            create_scaled_images: ids instanceof Array ? ids.join(',') : true
+        };
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, (response) => {
+
+            if(response.status !== window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+                return;
+            }
+
+            let message = `Scaled images created: ${response.data.done.length}<br>`;
+            if(response.data.error && Object.keys(response.data.error).length > 0){
+                message += `<br>The following errors occurred:<br>`;
+                for(const [ulfID, errorMsg] of Object.entries(response.data.error)){
+                    message += `<div style="display: grid; grid-template-columns: 4em 30em; margin: 5px;">
+                        <span style="font-weight: bold;">${ulfID}</span><span class="truncate" title="${errorMsg}">${errorMsg}</span>
+                    </div>`;
+                }
+            }
+
+            window.hWin.HEURIST4.msg.showMsgDlg(message);
         });
     }
 });
