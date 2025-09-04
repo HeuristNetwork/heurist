@@ -18,6 +18,7 @@ namespace hserv\entity;
 use hserv\entity\DbEntityBase;
 use hserv\System;
 use hserv\entity\DbRecUploadedFiles;
+use hserv\utilities\USystem;
 
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
@@ -58,9 +59,16 @@ class DbSysBugreport extends DbEntityBase
     For current and resolved issues list see: <a href="__DB_JOBTRAK__/web/64/1526">__DB_JOBTRAK__</a><br><br>
     <br>
     Reporter: __NAME__ [__EMAIL__]<br>
-    Database: __DBLINK__<br><br>
+    Database: __DBLINK__<br>
+    __MEMBER__<br>
     Bug description:__DESC__
     EMAIL;
+
+    /** @var string Message about membership for non-member emails, replaces __MEMBER__ within the report email. */
+    private $membershipString = <<<MEMBERSHIP
+    Priority is given to fixing critical bugs affecting many users and to tickets submitted by members<br>
+    of the <em>Heurist Network</em> association. Please consider <a href="https://forms.gle/xdAhjcZaSxpzkAsh9" target=_blank>joining the association</a> to support Heurist.<br>
+    MEMBERSHIP;
     
     /** @var int The Heurist Record Type ID for bug reports/tasks (typically 56). */
     private $bugReportType = 56;
@@ -289,6 +297,13 @@ class DbSysBugreport extends DbEntityBase
             }
         }
 
+        $memberString = '';
+        if($this->performLogout || USystem::checkAssociationMembership($this->system) !== 'nomember'){
+            $new_record['details']['1067'] = ['7643'];
+        }else{
+            $new_record['details']['1067'] = [];
+        }
+
         $res = false;
         if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false){ // on server with Heurist_Job_Tracker DB
             $res = $this->createBugReportRecord($new_record);
@@ -335,8 +350,13 @@ class DbSysBugreport extends DbEntityBase
 
                 $toAddresses = is_array($user_info) ? ['to' => [$user_email, HEURIST_MAIL_TO_BUG]] : $toAddresses;
 
-                $res = str_replace(['__LINK__', '__DESC__','__NAME__','__EMAIL__','__DBLINK__','__DB_JOBTRAK__','__EDIT__'],
-                    [$report_link, $record['details']['3'], $user_name, $user_email, $cur_url, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE,$report_edit],
+                $memberString = $this->membershipString;
+                if(!empty(@$new_record['details']['1067'])){
+                    $memberString = '';
+                }
+
+                $res = str_replace(['__LINK__', '__DESC__','__NAME__','__EMAIL__','__DBLINK__','__DB_JOBTRAK__','__EDIT__','__MEMBER__'],
+                    [$report_link, $record['details']['3'], $user_name, $user_email, $cur_url, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE,$report_edit,$memberString],
                     $this->reportEmail);
 
             }elseif(is_array($res)){
@@ -461,8 +481,13 @@ class DbSysBugreport extends DbEntityBase
 
             $db_link = is_array($record['details']['993']) ? $record['details']['993'][1] : $record['details']['993'];
 
-            $msg = str_replace(['__LINK__', '__DESC__', '__NAME__', '__EMAIL__','__DBLINK__','__DB_JOBTRAK__','__EDIT__'],
-             [$report_link, $record['details']['3'], $user_name, $user_email, $db_link,HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit],
+            $memberString = $this->membershipString;
+            if(!empty(@$record['details']['1067'])){
+                $memberString = '';
+            }
+
+            $msg = str_replace(['__LINK__', '__DESC__', '__NAME__', '__EMAIL__','__DBLINK__','__DB_JOBTRAK__','__EDIT__','__MEMBER__'],
+             [$report_link, $record['details']['3'], $user_name, $user_email, $db_link,HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
               $this->reportEmail);
 
             $user_query = "SELECT ugr_eMail FROM sysUsrGrpLinks LEFT JOIN sysUGrps ON ugr_ID = ugl_UserID WHERE ugl_GroupID = 1 AND ugl_Role='admin'";

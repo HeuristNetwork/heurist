@@ -52,7 +52,7 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
      */
     _init: function() {
         
-        this.options.title = 'Heurist feedback / bug report / feature requests';
+        this.options.title = 'Heurist ticket (feedback / bug report / feature requests)';
         this.options.edit_mode = 'editonly';
         this.options.select_mode = 'manager';
         this.options.layout_mode = 'editonly';
@@ -61,8 +61,7 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
 
         this._super();
     },
-    
-    //  
+
     /**
      * @brief Initializes the controls for the widget.
      * @override
@@ -209,24 +208,17 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
 
             if($ele.find('textarea,input.text,.fileupload').length != 0){
                 $ele.css({'padding-top': '10px', 'display': 'block'});
-            }else if($ele.attr('data-dtid') == 'bug_Type'){
-                $ele.find('.header').hide();
-
             }
             
             if(help === ''){
 
-                let padding = `padding: 0px 15px 20px;`;
                 help = 'We value your feedback and do our best to fix bugs rapidly and to incorporate your suggestions into our development process.<br>'
-                     + 'Please don\'t hesitate to let us know about anything which annoys you or which you feel could be improved.<br><br>'
-                     + 'We pop this form up monthly to encourage your feedback. It is accessible at any time at the top of the Exlpore page'  
-                     + 'or through Help > Feedback / bug report.<br>'
-                     + 'You can paste an image from your clipboard which will be added to the screenshots.';
+                     + 'Please don\'t hesitate to let us know about anything which annoys you or which you feel could be improved.'
 
                 // add extra info at top
 				$('<div>', {
                     html: help,
-                    style: `${padding} display: block;font-size: 12px;`
+                    style: `padding: 0px 15px 10px; display: block; font-size: 12px;`
                 }).insertBefore($ele);
             }
         }
@@ -242,7 +234,36 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
         this._formatBugTypeField();
         this._formatBugImageField();
 
+        this._setupMembershipField();
         this._setupProgramArea();
+    },
+
+    _setupMembershipField: function(){
+
+        const isNotMember = window.hWin.HAPI4.sysinfo.associationMembershipStatus === 'nomember';
+
+        let ele = this._editing.getFieldByName('bug_Title');
+        if(!ele || ele.length == 0){
+            return;
+        }
+
+        let membershipHTML = `
+        <span><input class="ui-state-disabled" type="radio" name="membership" value="1" checked="${!isNotMember ? 'checked' : ''}"> member</span>
+        <span style="padding-left: 1em;"><input class="ui-state-disabled" type="radio" name="membership" value="0" checked="${isNotMember ? 'checked' : ''}"> non-member</span>
+        <a href="https://heuristref.net/heurist/admin/utilities/checkMembershipForm.php" target="_blank" style="padding-left: 2.5em; color: blue; cursor: pointer;">check status</a>
+        <a href="mailto:support@heuristnetwork.org" target="#" style="padding-left: 2.5em; color: blue; cursor: pointer;">email us</a>
+        <span style="padding-left: 2.5em;">
+            Please <a href="https://forms.gle/xdAhjcZaSxpzkAsh9" target="_blank" style="color: blue; cursor: pointer;">join the association</a> to support Heurist
+        </span>
+        `;
+
+        $('<div>', {
+            html: `<span style="display: block; padding-bottom: 5px;">
+                <span style="font-size: larger;">Priority is given</span> to critical bugs reports and to members of the <em>Heurist Network</em> association
+            </span>
+            ${membershipHTML}`,
+            style: 'display: block; border-bottom: 1px solid black; padding: 5px 5px 10px; margin: 0px 2em 5px;'
+        }).insertBefore(ele);
     },
 
     /**
@@ -390,6 +411,15 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
 
         // Hide field name
         ele.find('.header').hide();
+
+        // Add help text about pasting images, before bug type field
+        if(this._as_dialog.find('.image-help').length === 0){
+            $('<div>', {
+                text: 'You can also paste an image which will be added to the screenshots',
+                style: 'padding: 1em 2em 5px; display: block;',
+                class: 'image-help'
+            }).insertBefore(ele);
+        }
     },
 
     /**
