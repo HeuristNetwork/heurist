@@ -195,7 +195,10 @@ class DbDefRecStructure extends DbEntityBase
             if(@$this->records[$idx]['rst_MaxValues']==null ||
                 !(intval(@$this->records[$idx]['rst_MaxValues'])>=0)) {$this->records[$idx]['rst_MaxValues'] = 1;}
 
-
+            if(@$this->records[$idx]['rst_PointerMode']==null || $this->records[$idx]['rst_PointerMode']==''){
+                $this->records[$idx]['rst_PointerMode'] = 'dropdown_add';
+            }
+                
             $this->records[$idx]['rst_Modified'] = date(DATE_8601);//reset
 
             $this->records[$idx]['is_new'] = $isInsert;
