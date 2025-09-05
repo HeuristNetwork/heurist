@@ -133,7 +133,7 @@ class HSystemMgr {
   * @returns {void}
   */
   verify_credentials(callback, requiredLevel, password_protected, password_entered, requiredPermission, associationMembershipContext) {
-      
+  
       if(associationMembershipContext && 'nonmember'==window.hWin.HAPI4.sysinfo['associationMembershipStatus']){
           
         let $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(

@@ -500,7 +500,7 @@ $.widget( "heurist.manageEntity", {
                 });     
                 
                 if(customRenderer){
-                   this.options.resultList.renderer =  customRenderer;
+                   this.options.resultList.renderer =  typeof customRenderer === 'functiion'?customRenderer:null;
                 }
                 if(customSearchfull){
                    this.options.resultList.searchfull =  customSearchfull; 
@@ -521,7 +521,7 @@ $.widget( "heurist.manageEntity", {
                         "resultlistonaction": this._onActionListener        
                         });
                         
-        }        
+        }         
         
         //---------    EDITOR PANEL
         //if actions allowed - add div for edit form exists - it may be shown as right-hand panel or in modal popup

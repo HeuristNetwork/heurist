@@ -2099,15 +2099,17 @@ $.widget( "heurist.resultList", {
 
         let action =  $target.attr('data-key') || $target.parents().attr('data-key');
         if(!window.hWin.HEURIST4.util.isempty(action)){ //action_btn && action_btn.length()>0){
+
+            //custom handler
+            if( window.hWin.HEURIST4.util.isFunction(this.options.onaction)
+                 && 
+                this.options.onaction.call(this, {action:action, recID:selected_rec_ID, target:$target})){
+                        
+                //custom onaction
+                return;
+            }
+
             if(this.options.renderer){
-                //custom handler
-                if( window.hWin.HEURIST4.util.isFunction(this.options.onaction)
-                     && 
-                    this.options.onaction.call(this, {action:action, recID:selected_rec_ID, target:$target})){
-                            
-                        //custom on action
-                        return;
-                }
                 
                 this._trigger( "onaction", null, {action:action, recID:selected_rec_ID, target:$target});
                 return;
@@ -2123,11 +2125,13 @@ $.widget( "heurist.resultList", {
 
                 window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, ordered_recordset, true, null);
                 //@todo callback to change rectitle
-
+                return;
+                
             }else if (action=='edit_ext'){
 
                 const url = window.hWin.HAPI4.baseURL + "?fmt=edit&db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
                 window.open(url, "_new");
+                return;
             }
             
             // remove this remark to prevent selection on action button click
@@ -3277,7 +3281,7 @@ $.widget( "heurist.resultList", {
                 });*/
             }
         }
-
+        
         //activate tab mode        
         if(this.options.view_mode=='tabs'){
             if(rec_toload.length>0){
@@ -3541,6 +3545,11 @@ $.widget( "heurist.resultList", {
             });
         }
         
+        if(typeof this.options.afterPageRenderer === 'function'){
+            this.options.afterPageRenderer.call(this);
+            $allrecs = this.div_content.find('.recordDiv');
+        }
+                
         //
         //        
         this._on( $allrecs, {
@@ -3649,6 +3658,7 @@ $.widget( "heurist.resultList", {
         this._loadFullRecordData( rec_toload );
         
         this.setCollected( null );
+
         
         this._trigger( "onpagerender", null, this );
         

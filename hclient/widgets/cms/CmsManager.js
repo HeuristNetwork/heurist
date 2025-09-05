@@ -94,10 +94,10 @@ class CmsManager {
         this.cms_home_counts = null; // Reset
 
         switch (actionid) {
-            case "menu-cms-create":
+            case 'menu-cms-create':
                 this.#createWebSite();
                 break;
-            case "menu-cms-create-page":
+            case 'menu-cms-create-page':
                 this.#createPage();
                 break;
             case 'menu-cms-edit-page':
@@ -294,7 +294,7 @@ class CmsManager {
             default_palette_class: 'ui-heurist-publish',
             resultList: {
                 show_toolbar: false,
-                view_mode: 'default', //'icons',
+                view_mode: 'icons', //'icons',
                 //show_action_buttons: false,
                 searchfull: function(arr_ids, pageno, callback){
                     
@@ -309,22 +309,63 @@ class CmsManager {
                     
                     
                 },
-                renderer: function(recordset, record) {
+                afterPageRenderer: function(){
+                    console.log(this.element.find('.recordDiv').length);
+                    
+                    const cnt = this.element.find('.recordDiv').length;
+                    
+                    if(cnt==0 || !conversionAllowed){ return; }
+                    
+                    let recordset = this.getRecordSet();
+                    
+                    const btnConvert = '<div data-key="cms-convert" '
+                    +'style="position:absolute;bottom:4px;right:5px;cursor:pointer;text-decoration:underline;color:blue">Convert to CMS v3</div>';
+                    
+                    this.element.find('.recordDiv').each(function(ids, rdiv){
+                        rdiv = $(rdiv);
+                        let rec_id = rdiv.attr('recid');
+                        
+                        let record = recordset.getRecord(rec_id);    
+                        const ver = recordset.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_VERSION']);
+                        if(ver!=3){
+                            $(btnConvert).appendTo(rdiv);    
+                        }  
+                        const s = `<b>${rec_id}&nbsp;&bull;&nbsp;</b>`;
+                        rdiv.find('.recordTitle').prepend($(s));
+                    });                    
+                    
+                    
+                    
+                },
+                renderer: 'use standard',
+                /* XXXrenderer: function(recordset, record) {
                     
                     const ver = conversionAllowed?recordset.fld(record, window.hWin.HAPI4.sysinfo['dbconst']['DT_VERSION']):3;
                     const btnConvert = '<div data-key="cms-convert" '
                     +'style="float:right;cursor:pointer;text-decoration:underline;color:blue">Convert to CMS v3</div>';
                     
                     let recID = recordset.fld(record, 'rec_ID');
+                    let rectypeID = recordset.fld('rec_RecTypeID');
                     let recTitle = recordset.fld(record, 'rec_Title');
                     let recTitle_strip_all = window.hWin.HEURIST4.util.stripTags(recTitle,'b');
+                    let html_thumb = '';
+                    if(recordset.fld('rec_ThumbnailURL')){
+                        let thumbURL = recordset.fld('rec_ThumbnailURL');
+                        html_thumb = `<div class="recTypeThumb realThumb" title="${recTitle_strip_all}" style="background-image: url(&quot;${thumbURL}&quot;);" data-id="${recID}"></div>`;   
+                    }else{
+                        html_thumb = '<div class="recTypeThumb rectypeThumb" title="'
+                            +recTitle_strip_all+'" style="background-image: url(&quot;'
+                            + window.hWin.HAPI4.iconBaseURL  + rectypeID + '&version=thumb&quot;);"></div>';
+                    }
+                    
                     let html = '<div class="recordDiv" id="rd' + recID + '" recid="' + recID + '" '
-                             +'style="padding: 10px;font-size: 1.2em !important;">' 
+                             +'style="padding: 10px;font-size: 1.2em !important;">'
+                             + html_thumb 
                              //+ (ver==3?'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;':'VER 2') + ' '
                              + `<b>${recID}</b>&nbsp;&bull;&nbsp;`
                              + recTitle_strip_all + (ver==3?'':btnConvert) +'</div>';
                     return html;
-                },
+                },*/
                 onaction: function(params){
                     console.log(params);
                     if(params.action=='cms-convert'){
@@ -359,7 +400,7 @@ class CmsManager {
                 `${window.hWin.HAPI4.baseURL}?disclaimer=association_membership.html #content`,
                 null, 'Heurist Network Association', 
                 {enable_buttons_after:5000, closeOnEscape:false, noClose:true,
-                    open:function(event, ui){$dlg.find('#noteAboutFunction').show()}
+                    open:function(event, ui){$dlg.find('#noteAboutFunction').show();}
             });
 
             //call logger
@@ -445,7 +486,7 @@ class CmsManager {
             + '<p>Choose the version for CMS  ' 
             + '<br><input name="rbVer" type="radio" checked id="rbV2"/><label for="rbV2">v 2</label>'
             + `<br><input name="rbVer" type="radio" id="rbV3" ${disabled}/><label for="rbV3">v 3 (for Heurist association members only)</label>`
-            +'</p>'
+            +'</p>';
 
         let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg,
             function() {
@@ -485,12 +526,12 @@ class CmsManager {
             let buttons = {};
             buttons[window.hWin.HR('Current (development) version')] = function() {
                 let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-                $dlg.dialog("close");
+                $dlg.dialog('close');
                 that.#openCMS(rec_ID, 'development', version);
             };
             buttons[window.hWin.HR('Production version')] = function() {
                 let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-                $dlg.dialog("close");
+                $dlg.dialog('close');
                 that.#openCMS(rec_ID, 'production', version);
             };
 
@@ -598,8 +639,7 @@ class CmsManager {
             return;
         }
                                                     
-        let sURL = window.hWin.HEURIST4.ui.getCmsLink({mode:'edit', websiteid:options.record_id, version:options.version, use_redirect:false})
-console.log(sURL);
+        let sURL = window.hWin.HEURIST4.ui.getCmsLink({mode:'edit', websiteid:options.record_id, version:options.version, use_redirect:false});
         if (options.newlycreated) {
             sURL = sURL + '&newlycreated';
         }
