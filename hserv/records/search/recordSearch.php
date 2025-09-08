@@ -2232,6 +2232,11 @@ function recordSearch($system, $params, $relation_query=null)
 
     $return_h3_format = false;
 
+    if(!array_key_exists('q', $params) && (array_key_exists('svs', $params) || array_key_exists('svsID', $params))){
+        $svsID = array_key_exists('svs', $params) ? $params['svs'] : $params['svsID'];
+        $params['q'] = "svs:{$svsID}";
+    }
+
     if(@$params['q']){
 
         $svsID = null;
