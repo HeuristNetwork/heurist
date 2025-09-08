@@ -108,7 +108,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'lastName'  => $values['lastName'],
         );
 
-        $statusMsg = postToEndpoint($payload, $ENDPOINT);
+        $statusMsg = [];
+        $membership = postToEndpoint($payload, $ENDPOINT);
+        if(strpos($membership, 'database')){
+          $statusMsg[] = 'project database';
+        }
+        if(strpos($membership, 'viaowner')){
+          $statusMsg[] = 'database owner';
+        }
+        if(strpos($membership, 'individual')){
+          $statusMsg[] = 'association member';
+        }
+        if(strpos($membership, 'nonmember')){
+          $statusMsg = 'NO - please contact <a href="mailto:support@heuristnetwork.org">support@heuristnetwork.org</a> if incorrect';
+        }else{
+          $statusMsg = 'YES - ' . implode(' & ', $statusMsg);
+        }
     }
 }
 ?>
