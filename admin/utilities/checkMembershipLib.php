@@ -53,7 +53,9 @@ const HOSTNAME_TO_SERVERNAME = [
 
 function getMainServerUrl(): ?string
 {
-    $isMainServer = (@$_SERVER["SERVER_NAME"]=='heuristref.net');
+    $isMainServer = (defined('HEURIST_SERVER_NAME') && HEURIST_SERVER_NAME=='heuristref.net') ||
+                    (isset($serverName) && $serverName=='heuristref.net') ||
+                    (@$_SERVER["SERVER_NAME"]=='heuristref.net');
     
     if($isMainServer){
         return null;    
@@ -75,7 +77,8 @@ function checkHeuristNetworkMembership(string $dbowner_email, string $email, str
 {
     $base = getMainServerUrl();
     if( $base==null ){ 
-        return checkMembershipInFile($dbowner_email, $email, $host, $database, $context, $firstName, $lastName);
+        $res = checkMembershipInFile($dbowner_email, $email, $host, $database, $context, $firstName, $lastName);
+        return $res;
     }
 
     $url = $base . 'admin/utilities/checkMembershipApi.php'
