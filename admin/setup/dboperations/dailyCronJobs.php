@@ -42,7 +42,8 @@ if (@$argv) {
 // example:
 //  sudo php -f /var/www/html/heurist/admin/setup/dboperations/dailyCronJobs.php -- reminder report
 // sudo php -f /var/www/html/heurist/admin/setup/dboperations/dailyCronJobs.php -- url
-
+// php -f /var/www/html/heurist/admin/setup/dboperations/dailyCronJobs.php -- database osmak_1 report 
+                                                                                      
     $ARGV = array();
     $i=0;
     while ($i < count($argv)) {

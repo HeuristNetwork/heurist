@@ -2478,7 +2478,7 @@ function recordSearch($system, $params, $relation_query=null)
         }
     }
 
-    $currentUser = $system->getCurrentUser();
+    $currentUser = (@$params['cli']==1) ?['ugr_ID'=>2] :$system->getCurrentUser();
 
     if ( $system->getUserId()<1 ) {
         $params['w'] = 'all';//does not allow to search bookmarks if not logged in
@@ -2529,7 +2529,7 @@ function recordSearch($system, $params, $relation_query=null)
             .',bkm_Rating ';
         }
     }
-
+    
     if($currentUser && @$currentUser['ugr_ID']>0){
         $currUserID = $currentUser['ugr_ID'];
     }else{
