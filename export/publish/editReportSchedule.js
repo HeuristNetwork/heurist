@@ -351,7 +351,6 @@ function ReportScheduleEditor() {
                     window.close(null);
                 }
             }
-        }
     };
 
     _init(); // Initialize the editor when a new instance is created.
