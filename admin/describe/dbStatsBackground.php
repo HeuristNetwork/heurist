@@ -48,7 +48,7 @@ if(!$isPublic || SERVER_NAME == 'localhost' || SERVER_NAME == '127.0.0.1' || SER
     exit;
 }
 
-$forcedRefresh = !empty($sysadmin_pwd) && $system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions);
+$forcedRefresh = !empty($sysadmin_pwd) && !$system->verifyActionPassword($sysadmin_pwd, $passwordForServerFunctions);
 
 $is_main_server = strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false;
 
