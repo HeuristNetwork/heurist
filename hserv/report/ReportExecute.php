@@ -156,6 +156,17 @@ class ReportExecute
             $content = $this->loadTemplateContent();
 
             if ($content) {
+                
+                //special case 
+                if( $this->params['template']=='Members_as_CSV.tpl' && 
+                    $this->system->dbname()=='Heurist_Contacts' &&
+                    strpos($_SERVER['HTTP_USER_AGENT']??'','curl')!==false &&
+                    $_SERVER['REMOTE_ADDR']=='203.101.228.47' )
+                {
+                   
+                    $this->params['cli'] = 1;
+                }                
+                
                 // Fetch record IDs based on search query
                 $query_result = $this->fetchRecordIDs();
 

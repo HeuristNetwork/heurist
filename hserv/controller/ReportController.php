@@ -283,12 +283,7 @@ class ReportController
                     'void' => $is_void
                      
                 ];
-                
-                //special case 
-                if( $row['rps_Template']=='Members_as_CSV.tpl' && $this->system->dbname()=='Heurist_Contacts') {
-                    //for scheduled report it is execuded from cli - need to allow to see private records as well
-                    $params['cli'] = 1;
-                }
+
 
                 $hquery = $row['rps_HQuery'];
                 if (strpos($hquery, "&q=") > 0) {
