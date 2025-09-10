@@ -2232,6 +2232,11 @@ function recordSearch($system, $params, $relation_query=null)
 
     $return_h3_format = false;
 
+    if(!array_key_exists('q', $params) && (array_key_exists('svs', $params) || array_key_exists('svsID', $params))){
+        $svsID = array_key_exists('svs', $params) ? $params['svs'] : $params['svsID'];
+        $params['q'] = "svs:{$svsID}";
+    }
+
     if(@$params['q']){
 
         $svsID = null;
@@ -2473,7 +2478,7 @@ function recordSearch($system, $params, $relation_query=null)
         }
     }
 
-    $currentUser = $system->getCurrentUser();
+    $currentUser = (@$params['cli']==1) ?['ugr_ID'=>2] :$system->getCurrentUser();
 
     if ( $system->getUserId()<1 ) {
         $params['w'] = 'all';//does not allow to search bookmarks if not logged in
@@ -2524,7 +2529,7 @@ function recordSearch($system, $params, $relation_query=null)
             .',bkm_Rating ';
         }
     }
-
+    
     if($currentUser && @$currentUser['ugr_ID']>0){
         $currUserID = $currentUser['ugr_ID'];
     }else{

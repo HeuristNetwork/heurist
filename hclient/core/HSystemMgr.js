@@ -1370,7 +1370,8 @@ class HSystemMgr {
                               let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                               $dlg.find('#version_cache').text(version_in_cache);
                               $dlg.find('#version_srv').text(current_server_version);
-                          }
+                          },
+                          dialogId: 'dlg-heurist-updated'
                       }
                   );
               }

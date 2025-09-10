@@ -53,7 +53,9 @@ const HOSTNAME_TO_SERVERNAME = [
 
 function getMainServerUrl(): ?string
 {
-    $isMainServer = (@$_SERVER["SERVER_NAME"]=='heuristref.net');
+    $isMainServer = (defined('HEURIST_SERVER_NAME') && HEURIST_SERVER_NAME=='heuristref.net') ||
+                    (isset($serverName) && $serverName=='heuristref.net') ||
+                    (@$_SERVER["SERVER_NAME"]=='heuristref.net');
     
     if($isMainServer){
         return null;    
@@ -75,7 +77,8 @@ function checkHeuristNetworkMembership(string $dbowner_email, string $email, str
 {
     $base = getMainServerUrl();
     if( $base==null ){ 
-        return checkMembershipInFile($dbowner_email, $email, $host, $database, $context, $firstName, $lastName);
+        $res = checkMembershipInFile($dbowner_email, $email, $host, $database, $context, $firstName, $lastName);
+        return $res;
     }
 
     $url = $base . 'admin/utilities/checkMembershipApi.php'
@@ -164,7 +167,7 @@ function checkMembershipInFile($dbowner_email, string $email, string $host = '',
 
         // Robust CSV parsing with quotes and escapes
         $parts = str_getcsv($line, ',', '"', '\\');
-        if (!$parts || count($parts) < 4) { continue; }
+        if (!$parts || count($parts) < 3 || (@$parts[0] !== 'DATABASE' && count($parts) < 4)) { continue; }
         
         $type = strtoupper(trim($parts[0]));
 
@@ -195,10 +198,16 @@ function checkMembershipInFile($dbowner_email, string $email, string $host = '',
             
         } elseif ($type === 'DATABASE' && $serverName !== '' && $dbName !== '') {
             // DATABASE, contactEmail, ServerName, DbName
-            $server = strtolower(trim($parts[2]));
-            $db     = strtolower(trim($parts[3]));
-            if ($server === $serverName && $db === $dbName) {
-                $hits['database'] = true;
+            $serverIdx = filter_var($parts[1], FILTER_VALIDATE_EMAIL) ? 2 : 1;
+            $dbIdxStart = $serverIdx + 1;
+            $server = strtolower(trim($parts[$serverIdx]));
+            $dbs = array_slice($parts, $dbIdxStart);
+            foreach($dbs as $db){
+                $db = strtolower(trim($db));
+                if ($server === $serverName && $db === $dbName) {
+                    $hits['database'] = true;
+                    break;
+                }
             }
         }
         

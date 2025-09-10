@@ -313,6 +313,13 @@ function downloadFileReferences($system, $ids){
         $where_clause = !empty($ids) ? ' WHERE ulf_ID IN ('. implode(',', $ids) .')' : '';
     }
 
+    // Set headers
+    $filename = HEURIST_DBNAME . '_File_References.csv';
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="' . $filename . '";');
+    header('Pragma: no-cache');
+    header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
+
     // open output handler
     $fd = fopen('php://output', 'w');
     if(!$fd){
@@ -339,7 +346,7 @@ function downloadFileReferences($system, $ids){
                         .(!empty($mysqli->error) ? $mysqli->error :'Unknown error');
     }else{
         $total_count_rows = mysql__found_rows($mysqli);
-        if($total_count_rows==0){
+        if($total_count_rows == 0){
             $err_message = 'Empty result set';
         }
     }
@@ -355,7 +362,7 @@ function downloadFileReferences($system, $ids){
     // return setup
 
     // write results
-    fputcsv($fd, ["Uploaded_File_ID", "Name", "Path", "Obfuscated URL", "Description", "Caption", "Copyright", "Copy Owner", "File Type", "File Size (in KB)", "Checksum", "Uploaded By", "Added On", "Last Modified", "Original file name", "Referenced by", "New ref H-IDs"], $seperator);
+    fputcsv($fd, ["Uploaded_File_ID", "Name", "Path", "Obfuscated URL", "Description", "Caption", "Copyright", "Copy Owner", "File Type", "File Size (in KB)", "Checksum", "Uploaded By", "Added On", "Last Modified", "Original file name", "Referenced by", "New ref H-IDs"], $seperator, "\"", "\\");
 
     /*
         [0] => File Name
@@ -391,16 +398,13 @@ function downloadFileReferences($system, $ids){
             $recs = [0];
         }
 
-        fputcsv($fd, [$id, $name, $path, $obf_url, $details[4], $details[11], $details[12], $details[13], $details[5], $file_size, $checksum, $details[7], $details[8], $details[9], $details[10], implode('|', $recs), ""], $seperator, "\"", "\\"); //, "\n"
+        fputcsv($fd, [$id, $name, $path, $obf_url, $details[4], $details[11], $details[12], $details[13], $details[5], $file_size, $checksum, $details[7], $details[8], $details[9], $details[10], implode('|', $recs), ""], $seperator, "\"", "\\");
     }
     $res_files->close();
 
-    rewind($fd);
-    $output = stream_get_contents($fd);
     fclose($fd);
 
-    $filename = HEURIST_DBNAME . '_File_References.csv';
-    dataOutput($output, $filename, 'text/csv');
+    exit;
 }
 
 /**

@@ -2798,7 +2798,7 @@ $.widget( "heurist.svs_list", {
      */
     _showURLDialog: function(svs_ID){
         
-        const URL = `${window.hWin.HAPI4.baseURL_pro}?db=${window.hWin.HAPI4.database}&svs=${svs_ID}`;
+        const URL = `${window.hWin.HAPI4.baseURL_pro}?db=${window.hWin.HAPI4.database}&q=svs:${svs_ID}`;
 
         let $dlg;
         let content = `<div>
