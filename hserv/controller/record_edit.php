@@ -100,13 +100,13 @@
 
                 $response = recordGetIncrementedValue($system, $_REQUEST);
 
-            } elseif($action=="duplicate" && @$_REQUEST['id']) {
+            } elseif($action=="duplicate" && isset($_REQUEST['id'])) {
 
 
                 $mysqli = $system->getMysqli();
                 $keep_autocommit = mysql__begin_transaction($mysqli);
-
-                $response = recordDuplicate($system, $_REQUEST['id']);
+                
+                $response = recordDuplicate($system, $_REQUEST['id'], $_REQUEST['permissions']??null, $_REQUEST['likedRtyID']??null, $_REQUEST['namePrefix']??null);
 
                 $isOK = $response && @$response['status']==HEURIST_OK;
 

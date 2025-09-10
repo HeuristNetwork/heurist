@@ -310,7 +310,6 @@ class CmsManager {
                     
                 },
                 afterPageRenderer: function(){
-                    console.log(this.element.find('.recordDiv').length);
                     
                     const cnt = this.element.find('.recordDiv').length;
                     
@@ -367,7 +366,7 @@ class CmsManager {
                     return html;
                 },*/
                 onaction: function(params){
-                    console.log(params);
+
                     if(params.action=='cms-convert'){
                         selDlg.dialog('close');
                         that.#convertToVersion3( params.recID, false );
@@ -392,7 +391,8 @@ class CmsManager {
     }
     
     #convertToVersion3(recId, withoutConditions)
-    {
+    {     
+        
         //1. association validation
         if('nonmember'==window.hWin.HAPI4.sysinfo['associationMembershipStatus']){
 
@@ -400,7 +400,8 @@ class CmsManager {
                 `${window.hWin.HAPI4.baseURL}?disclaimer=association_membership.html #content`,
                 null, 'Heurist Network Association', 
                 {enable_buttons_after:5000, closeOnEscape:false, noClose:true,
-                    open:function(event, ui){$dlg.find('#noteAboutFunction').show();}
+                    open:function(event, ui){$dlg.find('#noteAboutFunction').show();},
+                    container: 'dlg-association-teaser'
             });
 
             //call logger
@@ -419,27 +420,38 @@ class CmsManager {
 
         if(withoutConditions){
             
-            //@todo create duplication for the existing website
+            //create duplication for the existing website
+            window.hWin.HEURIST4.msg.bringCoverallToFront();
+            window.hWin.HAPI4.RecordMgr.duplicate({id: recId, 
+                permissions:{owner_grps:[2], access:'hidden'}, likedRtyID:this.RT_CMS_MENU, namePrefix:'BACKUP'}, 
+                response=>{
+                    
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+                    
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                    
+                        //update version field
+                        let request = {a: 'addreplace',
+                            recIDs: recId,
+                            dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_VERSION'],
+                            insert_new_values: 1,
+                            rVal: 3};
 
-            let request = {a: 'addreplace',
-                recIDs: recId,
-                dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_VERSION'],
-                insert_new_values: 1,
-                rVal: 3};
-
-            window.hWin.HAPI4.RecordMgr.batch_details(request, response=>{
-                this.#openCMS(recId, 'edit', 3);
-            });        
+                        window.hWin.HAPI4.RecordMgr.batch_details(request, response=>{
+                            this.#openCMS(recId, 'edit', 3);
+                        });        
+                    
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    } 
+                });
                           
             return true;
         }
         //2. warning message
         window.hWin.HEURIST4.msg.showMsgDlg(
-'<p>Conversion to V3 means that web site will be opened and edit in new environment that allows bootstrap and other new features.</p>'
-+'<ul><li>It should not affect the appearance of website, unless there are heavily customized page header and footer.</li>'
-+'<li>Anyway, follow the rule a thumb: MAKE A COPY for your current website (duplicate your CMS Home and Pages records -  record types:51,52).</li>'
-+'<li>Your website configuration will  be not affected till first saving.</li>'
-+'<li>In case you wish to rollback to v2 open CMS home record and change "Version" field to "2".</li></ul>',
+'<p>Conversion to CMS version 3 means that the web site will be opened and edited in a new editing environment that allows Bootstrap and other new features such as the creation of responsive websites. Conversion should not affect the appearance of the website, unless it has a heavily customized page header or footer.</p> '
++'<p>On conversion, your existing website records will be backed up with a title starting with BACKUP <date>. These backup records are owned by the database owner and marked as Hidden from all other users. If you need to restore the existing website, ask the database owner (if not yourself) to delete the new version and change the ownership and title of these backup records.<p>',
             ()=>this.#convertToVersion3(recId, true));
 
         return true;

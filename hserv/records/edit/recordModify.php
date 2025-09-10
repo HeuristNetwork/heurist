@@ -3340,7 +3340,7 @@ function prepareGeoValue($mysqli, $dtl_Value){
 //
 //
 //
-function recordDuplicate($system, $id){
+function recordDuplicate($system, $id, $newPermissionValues=null, $likedRtyID=null, $namePrefix=null){
 
     // Check that the user is allowed to create records
     $is_allowed = userCheckPermissions($system, 'add');
@@ -3355,12 +3355,18 @@ function recordDuplicate($system, $id){
         return $system->addError(HEURIST_INVALID_REQUEST, "Record ID is not defined");
     }
 
-    $def_params = recordAddDefaultValues($system);
-    $new_owner = $def_params['owner_grps'][0];
-    $access = $def_params['access'];
-    $access_grps = $def_params['access_grps'];
-
     $currentUserId = $system->getUserId();
+    
+    if(is_array($newPermissionValues))
+    {
+        $def_params = $newPermissionValues;
+    }else{
+        $def_params = recordAddDefaultValues($system);
+    }
+    $new_owner = $def_params['owner_grps'][0]??$currentUserId;
+    $access = @$def_params['access'];
+    $access_grps = @$def_params['access_grps'];
+    
 
     $row = mysql__select_row($mysqli, "SELECT rec_OwnerUGrpID, rec_RecTypeID FROM Records WHERE rec_ID = ".$id);
     //$owner = $row[0];
@@ -3378,6 +3384,7 @@ function recordDuplicate($system, $id){
 
     $system->defineConstant('DT_TARGET_RESOURCE');
     $system->defineConstant('DT_PRIMARY_RESOURCE');
+    $system->defineConstant('DT_NAME');
 
     $prefixDbErrorMsg = 'database error - ';
 
@@ -3445,8 +3452,19 @@ function recordDuplicate($system, $id){
                 }
             }//for
         }
+        
+        //update field name DT_NAME and add $duplicatePrefix
+        if(isset($namePrefix)){
+            $query = 'UPDATE recDetails set dtl_Value=CONCAT(?," ",dtl_Value)'
+            ." where dtl_RecID=$new_id and dtl_DetailTypeID=".DT_NAME;
 
+            $res = mysql__exec_param_query($mysqli, $query, array('s', $namePrefix));
+            
+            $query = 'UPDATE Records set rec_Title=CONCAT(?," ",rec_Title)'
+            ." where rec_ID=$new_id";
 
+            $res = mysql__exec_param_query($mysqli, $query, array('s', $namePrefix));
+        }
 
         //remove pointer fields where Parent-Child flag is ON
         $query = 'DELETE FROM recDetails where dtl_RecID='.$new_id.' and dtl_DetailTypeID in '
@@ -3505,7 +3523,48 @@ function recordDuplicate($system, $id){
                 $error = @$res['message'];
             }
         } //foreach
+        
+        
+        if(!isset($likedRtyID)){
+            continue;
+        }
 
+        //duplicate linked record of specified type
+        $query = 'select rl_TargetId, rl_DetailTypeID from recLinks, Records where rl_SourceID='
+        .$id.' and rl_RelationTypeID is null and rl_TargetId=rec_ID and rec_RecTypeID='.intval($likedRtyID);
+        
+        $refs_res = mysql__select_assoc2($mysqli, $query);
+
+        foreach ($refs_res as $linked_recid=>$dtyId){
+
+            $res = recordDuplicate($system, $linked_recid, $newPermissionValues, $likedRtyID, $namePrefix);
+
+            if($res && @$res['status']==HEURIST_OK){
+
+                $linked_recid_new = intval(@$res['data']['added']);
+
+                if($linked_recid_new>0){
+
+                    //change reference to old record id to new one
+                    $query = 'UPDATE recDetails set dtl_Value='.$linked_recid_new
+                    .' where dtl_RecID='.$new_id
+                    .' and dtl_Value='.$linked_recid   //old record id
+                    .' and (dtl_DetailTypeID='.$dtyId.')';
+
+                    $res = $mysqli->query($query);
+                    if(!$res){
+                        $error = $prefixDbErrorMsg .$mysqli->error;
+                        break;
+                    }else{
+                        $rels_count++;
+                    }
+                }
+            }else{
+                $error = @$res['message'];
+            }
+        } //foreach
+        
+        
         break;
     }//while
 
