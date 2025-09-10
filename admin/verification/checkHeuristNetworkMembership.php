@@ -177,7 +177,7 @@ function hn_render_nonmember_popup(string $context): void {
     <ul style="margin:0 0 0.75em 1.25em;">
       <li>consider joining the association or ask your project, lab or institution to do so.</li>
       <li>include funding to support Heurist in grant applications and annual budgets.</li>
-      <li>request a quote for any type of work associated with Heurist (database setup, website creation, new functionality),</li>
+      <li>request a quote for any type of work associated with Heurist <br>(database setup, website creation, new functionality),</li>
     </ul>
     <p>To discuss membership (including temporary membership while administrative wheels turn), special requirements or consultancy, please email <a href="mailto:support@heuristnetwork.org">support@heuristnetwork.org</a></p>
     <p>If you believe that you or your project, lab or institution is a member, but you have not been correctly identified, please email us specifying your database name, user name and institutional affiliation (this may happen because a new database has been created and not yet identified as belonging to a group membership).</p>
