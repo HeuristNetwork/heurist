@@ -140,7 +140,8 @@ class HSystemMgr {
                       `${window.hWin.HAPI4.baseURL}?disclaimer=association_membership.html #content`,
                        null, 'Heurist Network Association', 
                        {enable_buttons_after:5000, closeOnEscape:false, noClose:true,
-                       open:function(event, ui){$dlg.find('#noteAboutFunction').show()}
+                       open:function(event, ui){$dlg.find('#noteAboutFunction').show()},
+                       container: 'dlg-association-teaser'
                        });
                        
         //call logger
@@ -1371,7 +1372,7 @@ class HSystemMgr {
                               $dlg.find('#version_cache').text(version_in_cache);
                               $dlg.find('#version_srv').text(current_server_version);
                           },
-                          dialogId: 'dlg-heurist-updated'
+                          container: 'dlg-heurist-updated'
                       }
                   );
               }
