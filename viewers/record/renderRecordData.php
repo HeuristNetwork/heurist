@@ -762,7 +762,21 @@ if(!$system->hasAccess()){
                     //data-id
                 };
 
+                function __openOpenSeadragonViewer(event){
+
+                    let ele = $(event.target);
+                    if(!ele.attr('data-id')){
+                        ele = ele.parents('[data-id]');
+                    }
+                    let ulf_recID = ele.attr('data-id');
+
+                    let url = `${baseURL}hclient/widgets/viewers/openSeadragonViewer.php?db=${database}&recID=${ulf_recID}`;
+
+                    window.open(url, '_blank');
+                };
+
                 $('.miradorViewer_link').on('click', __openMiradorViewer);
+                $('.openSeadragonViewer_link').on('click', __openOpenSeadragonViewer);
 
                 $('.popupMedia_link').on('click', (e) => {
 
@@ -1127,7 +1141,7 @@ if(!empty($import_webfonts)){
             text-align: right;
             padding: 5px 10px 0px 5px;
             font-size: 0.8em; /*9px;*/
-            min-width: 80px;
+            min-width: 9em;
             cursor: default;
         }
         .download_link a,
@@ -2167,6 +2181,12 @@ function print_public_details($bib) {
                         .'<span class="ui-icon ui-icon-mirador" style="width:12px;height:12px;margin-left:5px;font-size:1em;display:inline-block;vertical-align: middle;'
                         .'filter: invert(35%) sepia(91%) saturate(792%) hue-rotate(174deg) brightness(96%) contrast(89%);'
                         .'"></span>&nbsp;Mirador</a>';
+                }
+
+                if(strpos($thumb['mimeType'], 'image/') === 0 || $thumb['orig_name'] == ULF_IIIF_IMAGE){
+
+                    print '<a href="#" data-id="'. $thumb['id'] .'" class="openSeadragonViewer_link">'
+                        .'<span class="ui-icon ui-icon-image" style="display: inline-block;"></span>&nbsp;OpenSeadragon</a>';
                 }
 
                 if(@$thumb['external_url']){

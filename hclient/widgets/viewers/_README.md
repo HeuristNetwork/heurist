@@ -13,6 +13,7 @@ This directory contains various widgets and scripts for displaying Heurist data 
 -   **connections.js**: jQuery UI widget for displaying network diagrams of Heurist result sets. It embeds an iframe (`springDiagram.php`) to visualize connections.
 -   **mediaViewer.js**: jQuery UI widget for displaying various media types (images, PDFs, audio, video, IIIF, 3D models). Supports thumbnail generation and FancyBox lightbox integration.
 -   **miradorViewer.php**: PHP script that initializes and handles the Mirador viewer, typically for IIIF manifests. It supports integration with Heurist annotations.
+-   **openSeadragonViewer.php**: PHP script that initializes and handles the OpenSeadragon viewer, a light weight alternative to Mirador (except for IIIF Manifests).
 -   **recordListExt.js**: jQuery UI widget for displaying Heurist record sets or selections within an iframe or directly in a div. Supports loading content from a URL (e.g., Smarty reports).
 -   **resultList.js**: jQuery UI widget for rendering a collection of records in various formats (list, grid, table). Handles incremental rendering, selection, view mode switching, and pagination.
 -   **resultListCollection.js**: jQuery UI widget for managing a temporary collection of records. Allows adding from a selection, clearing, and performing actions like creating a map or saving the collection.

@@ -1379,6 +1379,7 @@ $.widget( "heurist.editing_input", {
                     }
                     codeEditor = new EditorCodeMirror($input, editorMode);
                 }
+
                 
                 let $btn_edit_switcher;
 
@@ -1406,7 +1407,6 @@ $.widget( "heurist.editing_input", {
                             .addClass('smallbutton')
                             .css({cursor: 'pointer', 'margin-left': '10px'})
                             .appendTo($btn_edit_switcher);
-                            
                     }
                         
                     $('<span>table</span>')
@@ -3233,6 +3233,7 @@ $.widget( "heurist.editing_input", {
                             let $player = $($container.find(`div#player${dtyID}_${f_id}`)[0]);
                             let $thumbnail = $($container.find(`img#img${dtyID}_${f_id}`)[0]);
                             let $edit_metadata = $($container.find('.edit_metadata')[0]);
+                            $($container.find(`[data-id="${f_id}"]`)).attr('data-id', n_id);
 
                             $dwnld.attr({id: `dwn${dtyID}_${n_id}`, href: n_dwnld_link});
                             $player.attr({id: `player${dtyID}_${n_id}`});
@@ -3467,6 +3468,33 @@ $.widget( "heurist.editing_input", {
                         }                      
 
                         //data-id
+                    }
+                });
+
+                let $openseadragon_link = $('<a>', {
+                    href: '#', 'data-id': f_id, class: 'openseadragon_link', style: 'color: blue; padding-left: 0.75em;', title: 'Open in OpenSeadragon',
+                    html: '<span class="ui-icon ui-icon-image"></span>&nbsp;OpenSeadragon'
+                }).insertAfter($mirador_link);
+
+                this._on($openseadragon_link, {
+                    click: (event) => {
+
+                        window.hWin.HEURIST4.util.stopEvent(event);
+
+                        let ele = $(event.target)
+
+                        if(!ele.attr('data-id')){
+                            ele = ele.parents('[data-id]');
+                        }
+
+                        let fileID = ele.attr('data-id');
+
+                        let url = `${window.hWin.HAPI4.baseURL}hclient/widgets/viewers/openSeadragonViewer.php?db=${window.hWin.HAPI4.database}&recID=${fileID}`;
+
+                        window.hWin.HEURIST4.msg.showDialog(url, {
+                            dialogid: 'openseadragon-viewer', default_palette_class: 'ui-heurist-explore',
+                            width: '90%', height: '95%', allowfullscreen: true, 'padding-content': '0px'
+                        });
                     }
                 });
 
@@ -5104,11 +5132,11 @@ $.widget( "heurist.editing_input", {
                             let mirador_link = ele.parent().find('.miradorViewer_link');
                             let mimetype = response.data.mimetype;
                             if(response.data.original_name.indexOf('_iiif')===0){
-                                
+
                                 if(isMiradorManifest){
-                                    mirador_link.attr('data-manifest', '1');    
+                                    mirador_link.attr('data-manifest', '1');
                                 }
-                                
+
                                 mirador_link.show();
                                 ele.parent().find('div.preview_controls').show();                                
                             }else
@@ -5121,10 +5149,16 @@ $.widget( "heurist.editing_input", {
                                 mirador_link.show();
                                 ele.parent().find('div.preview_controls').show();                                
                             }else{
-                                mirador_link.hide();           
+                                mirador_link.hide();
                             }
-                            
-                            
+
+                            let openseadragon_link = ele.parent().find('.openseadragon_link');
+                            if(mimetype.indexOf('image/') === 0 || response.data.original_name.indexOf('_iiif_image') === 0){
+                                openseadragon_link.show();
+                            }else{
+                                openseadragon_link.hide();
+                            }
+
                             ele.trigger('change');
                         }
                     });
