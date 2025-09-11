@@ -319,7 +319,7 @@ class WebSite
         }else{
             ob_start();
             if($this->messageError){
-                include_once 'WebSiteInfo.php';    
+                include_once 'WebSiteInfo.php';
             }else{
                 include_once 'WebSiteTemplate.php';    
             }

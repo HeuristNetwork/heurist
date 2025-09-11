@@ -63,7 +63,6 @@ function ReportScheduleEditor() {
             
         const _url = window.hWin.HAPI4.baseURL + 'export/publish/loadReports.php';
         const request = { method: 'getreport', recID: _recID };
-            
         // Send AJAX request to fetch report data.
         window.hWin.HEURIST4.util.sendRequest(_url, request, null, _continueInit);
     }
@@ -107,7 +106,7 @@ function ReportScheduleEditor() {
         }
 
         // Try to get the entity being edited.
-        _entity = (_recID > 0 && _reports?.records?._recID) ? _reports.records[_recID] : null;
+        _entity = (_recID > 0 && _reports?.records?.[_recID]) ? _reports.records[_recID] : null;
 
         if (Number(_recID) > 0 && window.hWin.HEURIST4.util.isnull(_entity)) {
             document.getElementById("statusMsg").innerHTML = "<strong>Error: Report Schedule #" + _recID + "  was not found. Clicking 'save' button will create a new Schedule.</strong><br><br>";
