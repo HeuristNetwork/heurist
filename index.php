@@ -229,17 +229,20 @@ if( @$_REQUEST['isalive']==1){
     $params = USanitize::sanitizeInputArray();
 
     $name = $_REQUEST['disclaimer'];
-
-    $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-    if(empty($extension)){
-        $name .= '.html';
+    
+    if($name=='association_membership.html'){
+        $path = 'admin/verification/';
+    }elseif ($name=='terms_and_conditions.html'){
+        /*xtension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+        if(empty($extension)){
+            $name .= '.html';
+        }*/
+        $path = 'movetoparent/';
+    }else{
+        exit('Requested document is not allowed: ' . htmlspecialchars($name));
     }
-
-    $file = '../' . basename($name);
-    $backupFile = 'movetoparent/' . basename($name);
-    if(!file_exists($file)){
-        $file = $backupFile;
-    }
+    
+    $file = $path.basename($name);
 
     if(file_exists($file)){
         header("Location: {$file}");

@@ -73,7 +73,7 @@ if(defined('LOGIN_REQUIRED') && !$system->hasAccess()){
         && 'nonmember' == USystem::checkAssociationMembership($system, ASSOC_MEMBERSHIP_REQUIRED)){
         
         $is_error = false;
-        $message = file_get_contents(dirname(__FILE__).'/../../movetoparent/association_membership.html');
+        $message = file_get_contents(dirname(__FILE__).'/../../admin/verification/association_membership.html');
         if (preg_match('/<div id="content">(.*?)<\/div>/is', $message, $matches)) {
                 $message = $matches[0]; 
         }
