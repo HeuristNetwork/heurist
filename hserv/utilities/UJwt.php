@@ -39,7 +39,7 @@ class UJwt {
         return "$h.$p.".self::b64url_encode($sig);
     }
     
-    public static function jwt_verify(string $jwt, string $secret): array|false {
+    public static function jwt_verify(string $jwt, string $secret){ //}: array|false {
         $parts = explode('.', $jwt);
         if (count($parts) !== 3) return false;
         [$h,$p,$s] = $parts;
