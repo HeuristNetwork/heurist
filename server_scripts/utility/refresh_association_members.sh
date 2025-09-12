@@ -4,8 +4,8 @@ set -euo pipefail
 # --- Config ---
 DB="Heurist_Contacts"
 USER="johnson"
-PASS="*qRerhs~192Ybrcs";
-#PASS="${1:-}"   # password passed as first argument
+#PASS="define your pass";
+PASS="${1:-}"   # password passed as first argument
 AUTH_URL="https://heurist.huma-num.fr/h7-alpha/hserv/controller/auth.php"
 DATA_URL="https://heurist.huma-num.fr/h7-alpha/index.php"
 OUT_FILE="/var/www/html/HEURIST/association_members.txt"
