@@ -108,7 +108,7 @@ class ReportController
             if ($template_file && $action == null) {
                 $action = 'execute'; //by default
             }
-
+            
             switch ($action) {
                 case 'execute':
                     $repExec = new ReportExecute($this->system, $this->req_params);

@@ -2478,7 +2478,7 @@ function recordSearch($system, $params, $relation_query=null)
         }
     }
 
-    $currentUser = (@$params['cli']==1) ?['ugr_ID'=>2] :$system->getCurrentUser();
+    $currentUser = $system->getCurrentUser();
 
     if ( $system->getUserId()<1 ) {
         $params['w'] = 'all';//does not allow to search bookmarks if not logged in

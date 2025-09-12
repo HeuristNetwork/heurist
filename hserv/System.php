@@ -1900,7 +1900,7 @@ class System {
      *
      * @param string $username The username or, in special cases (with `$skip_pwd_check` or global password), potentially a user ID.
      * @param string $password The user's password.
-     * @param string $session_type Type of session to establish: 'public', 'shared' (1 day), or 'remember' (30 days).
+     * @param string $session_type Type of session to establish: 'none', 'public', 'shared' (1 day), or 'remember' (30 days).
      *                             Determines cookie lifetime.
      * @param bool $skip_pwd_check Optional. If true, password checking is skipped. This is used internally or
      *                             when the global `$passwordForDatabaseAccess` matches. Defaults to false.
@@ -1908,7 +1908,7 @@ class System {
      *                       typically for guest access scenarios. Defaults to false.
      * @return bool True if login is successful, false otherwise (errors will be set via `addError`).
      */
-    public function doLogin($username, $password, $session_type, $skip_pwd_check=false, $is_guest=false){
+    public function doLogin($username, $password, $session_type, $skip_pwd_check=false, $is_guest=false): bool{
         global $passwordForDatabaseAccess;
 
         if(empty($username) || (empty($password) && !$skip_pwd_check)){
@@ -1934,7 +1934,12 @@ class System {
         } elseif (!$is_guest && ($user['ugr_Enabled'] ?? 'n') === 'n'){
             $this->addError(HEURIST_REQUEST_DENIED,  "Your user profile is not active. Please contact database owner");
         } elseif ($skip_pwd_check || passwordCheck($password, $user['ugr_Password'], $this->mysqli, $user['ugr_ID']) ) { // passwordCheck is global
-            $this->doLoginSession($user['ugr_ID'], $session_type);
+        
+            if($session_type=='none'){
+                $this->currentUser = $user;
+            }else{
+                $this->doLoginSession($user['ugr_ID'], $session_type);
+            }
             // After doLoginSession, loginVerify(true) should be called to populate $this->currentUser and full session details
             // However, the original flow might rely on getCurrentUserAndSysInfo to do this.
             // For consistency, it's better if doLogin itself ensures currentUser is set or triggers it.

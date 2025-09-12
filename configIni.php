@@ -200,6 +200,18 @@ $matomoSiteId = null; // ID of tracked heurist domain in matomo configuration
 
 $parentIni = dirname(__FILE__)."/../heuristConfigIni.php";
 
+
+//configuration for JWT authentication
+$jwt_Secret = ''; //change to some long random secret string (8 chars min)
+$jwt_TTL    = 600; // 10 minutes
+
+/* Use the parameters above for JWT authentication
+ curl -sS -X POST https://your.api.example/auth.php -H "Content-Type: application/json" -d '{"db":"database name", "username":"your login","password":"your password"}'
+
+to use token use curl parm -H 
+
+*/
+
 // parent directory configuration file is optional, hence include not required
 // heuristConfigIni.php in parent directory overrides empty values in current file
 if (is_file($parentIni)){
