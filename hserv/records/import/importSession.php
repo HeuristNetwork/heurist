@@ -232,25 +232,15 @@ public static function getMatchingSamples($imp_ID, $rty_ID){
 
 
 /**
-* load records from import table
-*
-* @param string $import_table The name of the temporary import table.
-* @param array $imp_ids An array of `imp_id` values (row IDs from the import table) to retrieve.
-* @return array|null The first row found that matches any of the provided `imp_id`s,
-*                    or `null` if no matching row is found.
-*                    Note: Despite accepting multiple `imp_ids`, this method, due to `mysql__select_row`,
-*                    will only return the first matching row.
-*/
-    /**
-     * Retrieves the first matching row from a temporary import table by a list of import row IDs.
-     *
-     * Note: Although the query can match multiple `imp_id`s, this function uses `mysql__select_row`
-     * which will only return the data for the first row found.
-     *
-     * @param string $import_table The name of the temporary import table.
-     * @param array $imp_ids An array of `imp_id`s (row IDs in the import table).
-     * @return array|null The first row found as an associative array, or null if no match.
-     */
+ * Retrieves the first matching row from a temporary import table by a list of import row IDs.
+ *
+ * Note: Although the query can match multiple `imp_id`s, this function uses `mysql__select_row`
+ * which will only return the data for the first row found.
+ *
+ * @param string $import_table The name of the temporary import table.
+ * @param int|array $imp_ids An array of `imp_id`s, or a single `imp_id` (row IDs in the import table).
+ * @return array|null The first row found as an associative array, or null if no match.
+ */
 public static function getRecordsFromImportTable1( $import_table, $imp_ids) {
 
     self::initialize();
@@ -309,7 +299,12 @@ public static function getRecordsFromImportTable2( $import_table, $id_field, $mo
     }
 
     if(!($offset>0)) {$offset = 0;}
-    if(!is_int($limit)) {$limit = 100;}
+
+    if(is_numeric($limit)){
+        $limit = intval($limit);
+    }elseif(!is_int($limit)){
+        $limit = 100;
+    }
 
     if($mapping!=null && !is_array($mapping)){
         $mapping = json_decode($mapping, true);
