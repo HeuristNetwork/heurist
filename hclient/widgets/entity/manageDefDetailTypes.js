@@ -1741,7 +1741,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
      * for new record pointer fields (customization dialog).
      */
     _saveEditAndClose: function( fields, afterAction, onErrorAction ){
-        
+  
         let that_widget = this;
         
         if(!fields){
@@ -2095,6 +2095,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         }
                     );
                 });
+            }
+            else{
+                window.hWin.HEURIST4.msg.showMsgErr( response.sysmsg );
             }
         }else{
             window.hWin.HEURIST4.msg.showMsgErr(response);    
