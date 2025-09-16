@@ -3526,7 +3526,7 @@ function recordDuplicate($system, $id, $newPermissionValues=null, $likedRtyID=nu
         
         
         if(!isset($likedRtyID)){
-            continue;
+            break;
         }
 
         //duplicate linked record of specified type
