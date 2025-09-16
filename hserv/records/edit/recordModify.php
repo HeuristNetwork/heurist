@@ -3338,9 +3338,9 @@ function prepareGeoValue($mysqli, $dtl_Value){
 
 }
 //
+//  $likedRtyID is used to duplicate records of sepcified type linked to given record $id
 //
-//
-function recordDuplicate($system, $id, $newPermissionValues=null, $likedRtyID=null, $namePrefix=null){
+function recordDuplicate($system, $id, &$processedIds, $newPermissionValues=null, $likedRtyID=null, $namePrefix=null){
 
     // Check that the user is allowed to create records
     $is_allowed = userCheckPermissions($system, 'add');
@@ -3368,6 +3368,8 @@ function recordDuplicate($system, $id, $newPermissionValues=null, $likedRtyID=nu
     $access_grps = @$def_params['access_grps'];
     
 
+    $processedIds[] = $id;
+    
     $row = mysql__select_row($mysqli, "SELECT rec_OwnerUGrpID, rec_RecTypeID FROM Records WHERE rec_ID = ".$id);
     //$owner = $row[0];
     $recTypeID = intval($row[1]);
@@ -3497,7 +3499,11 @@ function recordDuplicate($system, $id, $newPermissionValues=null, $likedRtyID=nu
 
         foreach ($refs_res as $rel_recid){
 
-            $res = recordDuplicate($system, $rel_recid);
+            if( in_array($rel_recid, $processedIds) ){
+                continue;    
+            }
+
+            $res = recordDuplicate($system, $rel_recid, $processedIds);
 
             if($res && @$res['status']==HEURIST_OK){
 
@@ -3525,7 +3531,7 @@ function recordDuplicate($system, $id, $newPermissionValues=null, $likedRtyID=nu
         } //foreach
         
         
-        if(!isset($likedRtyID)){
+        if(!isset($likedRtyID) || !isPositiveInt($likedRtyID)){
             break;
         }
 
@@ -3537,6 +3543,10 @@ function recordDuplicate($system, $id, $newPermissionValues=null, $likedRtyID=nu
 
         foreach ($refs_res as $linked_recid=>$dtyId){
 
+            if( in_array($linked_recid, $processedIds) ){
+                continue;    
+            }
+            
             $res = recordDuplicate($system, $linked_recid, $newPermissionValues, $likedRtyID, $namePrefix);
 
             if($res && @$res['status']==HEURIST_OK){

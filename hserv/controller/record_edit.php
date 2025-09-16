@@ -106,7 +106,9 @@
                 $mysqli = $system->getMysqli();
                 $keep_autocommit = mysql__begin_transaction($mysqli);
                 
-                $response = recordDuplicate($system, $_REQUEST['id'], $_REQUEST['permissions']??null, $_REQUEST['likedRtyID']??null, $_REQUEST['namePrefix']??null);
+                $processedIds = [];
+                $response = recordDuplicate($system, $_REQUEST['id'], $processedIds,
+                    $_REQUEST['permissions']??null, $_REQUEST['likedRtyID']??null, $_REQUEST['namePrefix']??null);
 
                 $isOK = $response && @$response['status']==HEURIST_OK;
 
