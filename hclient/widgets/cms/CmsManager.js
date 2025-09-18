@@ -280,7 +280,7 @@ class CmsManager {
                      +'</div>';
         
         let selDlg = null;
-        
+
         let popup_options = {
             select_mode: 'select_single',
             select_return_mode: 'recordset',
@@ -297,11 +297,12 @@ class CmsManager {
                 view_mode: 'icons', //'icons',
                 //show_action_buttons: false,
                 searchfull: function(arr_ids, pageno, callback){
-                    
+
                     let ids = arr_ids.join(',');
                     let request = { q: '{"ids":"'+ ids+'"}',
                         w: 'a',
-                        detail: window.hWin.HAPI4.sysinfo['dbconst']['DT_VERSION'],
+                        verify_credentials: 'ok',
+                        detail: window.hWin.HAPI4.sysinfo['dbconst']['DT_VERSION']??'header',
                         id: window.hWin.HEURIST4.util.random(),
                         pageno: pageno };
 
@@ -310,7 +311,7 @@ class CmsManager {
                     
                 },
                 afterPageRenderer: function(){
-                    
+
                     const cnt = this.element.find('.recordDiv').length;
                     
                     if(cnt==0 || !conversionAllowed){ return; }
