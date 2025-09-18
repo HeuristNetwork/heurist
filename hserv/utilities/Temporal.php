@@ -796,6 +796,7 @@ class Temporal {
         if($value==null) {return null;}
 
         //1. Preparation of sting value - trim, remove "?", remove padding zeroes for year,
+        $origValue = $value;
         $origHasDays = false;
         $origHasSeconds = false;
         $date = null;
@@ -849,6 +850,8 @@ class Temporal {
                 //replace slashes or dots "/." to dashes "-"
                 //reorder month and day
                 $value = Temporal::correctDMYorder($value, $month_day_order);
+                
+                $value = rtrim($value,'-');
 
                 //2. Create php datetime and parse it to array
                 try{
