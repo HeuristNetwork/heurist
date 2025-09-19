@@ -44,7 +44,7 @@ class BulkEmailController{
 
     private $system;
     private $request;
-    private $allowedAction = ['list_databases', 'email_details', 'record_count', 'user_count', 'send_emails', 'csv_export', 'session'];
+    private $allowedAction = ['list_databases', 'email_details', 'record_count', 'user_count', 'send_emails', 'csv_export', 'session', 'prepare_email'];
 
     private $sysadminPWD;
     private $response;
@@ -112,6 +112,9 @@ class BulkEmailController{
                 break;
             case 'session':
                 $this->getSessionResult();
+                break;
+            case 'prepare_email':
+                $this->prepareEmail();
                 break;
             default:
                 $this->response = ['status' => HEURIST_ERROR, 'message' => "Invalid action provided to bulk mailer, action provided: {$this->request['a']}"];
@@ -440,7 +443,7 @@ class BulkEmailController{
 
         global $passwordForServerFunctions;
 
-        if(!isset($this->request['databases'], $this->request['users'], $this->request['emailBody'], $this->request['db'], $this->sysadminPWD)){
+        if(!isset($this->request['databases'], $this->request['users'], $this->request['db'], $this->sysadminPWD)){
             $this->response = ['status' => HEURIST_ACTION_BLOCKED, 'message' => 'Missing required parameters for sending bulk emails'];
             return;
         }elseif($this->system->verifyActionPassword($this->sysadminPWD, $passwordForServerFunctions)){
@@ -468,7 +471,7 @@ class BulkEmailController{
 
         global $passwordForServerFunctions;
 
-        if(!isset($this->request['databases'], $this->request['users'], $this->request['emailBody'], $this->request['db'], $this->sysadminPWD)){
+        if(!isset($this->request['databases'], $this->request['users'], $this->request['db'], $this->sysadminPWD)){
             $this->response = ['status' => HEURIST_ACTION_BLOCKED, 'message' => 'Missing required parameters for sending bulk emails'];
             return;
         }elseif($this->system->verifyActionPassword($this->sysadminPWD, $passwordForServerFunctions)){
@@ -651,6 +654,29 @@ class BulkEmailController{
         }
 
         return $details;
+    }
+
+    /**
+     * Save chunks of the email's body within a temporary file, to avoid request too large responses
+     *
+     * @access private
+     * @return void
+     */
+    private function prepareEmail(){
+
+        $append = $this->request['append'];
+        $file = HEURIST_SCRATCH_DIR . "bulkmailer_{$this->request['sessionID']}.txt";
+
+        $preparedBody = '';
+        if($append && file_exists($file)){
+            $preparedBody = file_get_contents($file);
+        }
+
+        $preparedBody .= $this->request['emailBody'];
+
+        $result = file_put_contents($file, $preparedBody);
+
+        $this->response = ['status' => !$result ? HEURIST_ERROR : HEURIST_OK, 'msg' => 'Failed to save the email body chunk', 'request' => $this->request['sessionID']];
     }
 }
 
