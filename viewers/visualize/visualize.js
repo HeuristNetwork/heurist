@@ -641,7 +641,11 @@ function getFitToExtentScale(){
     let fullWidth = $("#divSvg").width();
     let fullHeight = $("#divSvg").height();
 
-    const box = window.d3.select("#container").node().getBBox();
+    let node = window.d3.select("#container").node();
+    
+    if(!node) return null; // nothing to fit
+    
+    const box = node.getBBox();
 
     let width  = box.width,
         height = box.height;

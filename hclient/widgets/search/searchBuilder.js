@@ -826,7 +826,7 @@ $.widget( "heurist.searchBuilder", {
                     + 'Default is the default language used in construction of the database.');
             }
             
-            if(!this.options.is_dialog){
+            if(!this.options.is_dialog && this.pnl_Rectype){
                 //add header and button set for inline mode
                 let h = this.element.find('.btn-preview').is(':checked') ?'88px':'50px';
 

@@ -1835,6 +1835,7 @@ function browseTerms(_editing_input, $input, value){
         }
 
         $input.empty();
+        if(!$input[0]) return;
         window.hWin.HEURIST4.ui.addoption($input[0], '', '&nbsp;');
         if(window.hWin.HEURIST4.util.isNumber(trm_ID) && trm_ID>0){
             

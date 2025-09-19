@@ -3513,8 +3513,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
         rdata.count = rdata.order.length;
         
+        const isListInited = this.recordList && this.recordList.resultList('instance');
         
-        if(this.options.import_structure){
+        if(this.options.import_structure && isListInited){
             this.recordList.resultList('option', 'empty_remark',
                                         '<div style="padding:1em 0 1em 0">'+
                                         (hasFieldToImport
@@ -3524,8 +3525,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
         
         this._cachedRecordset = new HRecordSet(rdata);
-        this.recordList.resultList('updateResultSet', this._cachedRecordset);
-        
+        if(isListInited){
+            this.recordList.resultList('updateResultSet', this._cachedRecordset);    
+        }
         return this._cachedRecordset;
     }
 });

@@ -1918,8 +1918,8 @@ window.hWin.HEURIST4.ui = {
                 term_ID = window.hWin.HEURIST4.dbs.getInverseTermById(term_ID);    
             }
             let lbl = $Db.trm(term_ID, 'trm_Label');
-            let len = lbl.length;
-            lbl = window.hWin.HEURIST4.util.htmlEscape(lbl);
+            let len = lbl?lbl.length:0;
+            lbl = lbl?window.hWin.HEURIST4.util.htmlEscape(lbl):'';
            
             reltype = '<div style="display:table-cell;min-width:'+(Math.min(20,len)+1)+'ex;'
                 +'color: #999999;text-transform: none;padding-left:4px;vertical-align: middle;">'

@@ -2490,7 +2490,7 @@ $.widget( "heurist.mapping", {
     //
     _onLayerSelect: function(layer, latlng, add_to_selection){
 
-        if(layer.options && layer.options.selectable===false)
+        if(layer && layer.options && layer.options.selectable===false)
         {
             return;  
         } 

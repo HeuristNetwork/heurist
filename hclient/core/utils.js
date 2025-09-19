@@ -1146,7 +1146,7 @@ window.hWin.HEURIST4.util = {
     },
     
     isFullyActive: function (s /* self */) {
-        return s.window !== null
+        return s && s.window !== null
         && s.document === s.window.document
         && (s.window.top === s.window || window.hWin.HEURIST4.util.isFullyActive(s.window.parent));
     },

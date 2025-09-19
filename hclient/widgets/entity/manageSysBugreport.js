@@ -294,9 +294,9 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
 
             window.hWin.HAPI4.SystemMgr.get_defs(request, (response) => {
 
-                if(response.status != window.hWin.ResponseStatus.OK){
+                if(response?.status != window.hWin.ResponseStatus.OK){
 
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    window.hWin.HEURIST4.msg.showMsgErr(response??'Reference server does not respond');
 
                     this._program_area = false;
 

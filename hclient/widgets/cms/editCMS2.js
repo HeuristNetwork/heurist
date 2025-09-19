@@ -1120,8 +1120,10 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
     
         _layout_container.find('div[data-hid]').removeClass('cms-element-editing headline marching-ants marching');                        
         
-        _panel_treePage.find('span.fancytree-title').css({'font-style':'normal', 'text-decoration':'none'});
-        _panel_treePage.find('.fancytree-node').removeClass('fancytree-active');
+        if(_panel_treePage){
+            _panel_treePage.find('span.fancytree-title').css({'font-style':'normal', 'text-decoration':'none'});
+            _panel_treePage.find('.fancytree-node').removeClass('fancytree-active');
+        }
         
         _hideMenuInTree();
 
@@ -1134,8 +1136,10 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
             _editor_panel.find('.page_tree').show();
             
             _onPageChange();
-            
-            _panel_treePage[0].style.removeProperty('height');
+        
+            if(_panel_treePage){    
+                _panel_treePage[0].style.removeProperty('height');
+            }
         }
         
         _panel_propertyView.hide();
@@ -2210,7 +2214,7 @@ function(value){
         }
         __cleanLayout(newval);
 
-        let newname = newval[0].name;
+        //let newname = newval[0].name;
         
         // if page consist one group and one text without css - save only content of this text
         // it allows edit content in standard record edit

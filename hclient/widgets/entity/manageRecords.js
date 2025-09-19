@@ -1283,7 +1283,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
             
             
-            let recset = this.recordList.resultList('getRecordSet');
+            let recset = this.recordList && this.recordList.resultList('instance') && this.recordList.resultList('getRecordSet');
             if(recset && recset.length()>1 && recID>0){
                 if(this._toolbar){
                     this._toolbar.find('.btnPrev').css({'display':'inline-block','height':'2.1em','background':'#f2f2f2'});
@@ -5095,7 +5095,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 },
                 blur: (event) => { // Remove node focus
                 
-                    if(!(that.options.rts_editor && that.options.rts_editor.manageDefRecStructure('instance'))){
+                    if(!(that.options.rts_editor 
+                        && typeof that.options.rts_editor.manageDefRecStructure === 'function'
+                        && that.options.rts_editor.manageDefRecStructure('instance'))){
                         return;
                     }
 

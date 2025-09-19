@@ -1124,7 +1124,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     checkIfEditing: function(){
         let tree = $.ui.fancytree.getTree( this._treeview );
         let node = tree.getActiveNode();
-        return (node || this.editForm.is(':visible')) && this._editing.isModified();
+        return (node || this.editForm.is(':visible')) && this._editing && this._editing.isModified();
     },
     
     /**
@@ -2168,7 +2168,9 @@ console.log('onEditFormChange @todo check buttons!!!');
             this.previewEditor.show();
         }
         
-        this.previewEditor.manageRecords('setDisabledEditForm', false);
+        if(this.previewEditor && this.previewEditor.manageRecords('instance')){
+            this.previewEditor.manageRecords('setDisabledEditForm', false);    
+        }
         this.onEditFormChange(); //after close
     },  
                       

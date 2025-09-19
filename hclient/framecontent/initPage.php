@@ -327,8 +327,13 @@ if(!$invalid_access && (defined('CREATE_RECORDS') || defined('DELETE_RECORDS')))
             console.error(e);
         }
         
-        // Standalone check
-        if(!window.hWin.HAPI4){
+        if(!window.hWin){ //detectHeurist is not able to return window
+            //windows 
+            console.error('detectHeurist was not able to detect Heurist window');
+            return;
+        }    
+        
+        if(!window.hWin.HAPI4){ // Standalone check
             window.hWin.HAPI4 = new hAPI('<?php echo htmlspecialchars($_REQUEST['db'])?>', onHapiInit);
         }else if(!window.isHapiInited){
             // Not standalone, use HAPI from parent window
