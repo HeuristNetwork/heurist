@@ -26,6 +26,7 @@
         <title>Edit report schedule</title>
 
         <link rel="stylesheet" type="text/css" href="../../h4styles.css">
+        <link rel="stylesheet" type="text/css" href="../../external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
 <!--
         <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
@@ -37,7 +38,8 @@
 -->        
         <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha384-wsqsSADZR1YRBEZ4/kKHNSmU+aX8ojbnKUMN4RyD3jDkxw5mHtoe2z/T/n4l56U/" crossorigin="anonymous"></script>
         <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js" integrity="sha384-/L7+EN15GOciWSd0nb17+43i1HKOo5t8SFtgDKGqRJ2REbp8N6fwVumuBezFc4qC" crossorigin="anonymous"></script>
-
+        <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
+        
         <script type="text/javascript" src="../../hclient/core/detectHeurist.js"></script>
 
 
@@ -155,7 +157,7 @@
     <!-- rps_Template: Report Template (select - populated by JS) -->
     <div class="dtyField">
         <label class="dtyLabel required" for="rps_Template">Template:</label>
-        <select id="rps_Template" style="max-width:400;"></select> <!-- Populated by _updateTemplatesList in JS -->
+        <select id="rps_Template" style="max-width:400px;min-width:400px"></select> <!-- Populated by _updateTemplatesList in JS -->
         <div class="help prompt help1">
             The name of the template to be used in generating this report
         </div>

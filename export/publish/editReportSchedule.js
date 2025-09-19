@@ -42,7 +42,7 @@ function ReportScheduleEditor() {
      *                            Expected structure: `{ fieldNames: [...], records: { recID: [...] } }`.
      */
     let _reports = null;
-
+   
     /**
      * Initializes the editor form.
      * Sets up help text and fetches the report schedule data if editing an existing record,
@@ -122,28 +122,9 @@ function ReportScheduleEditor() {
         // Auto-fill FileName based on Title (cleaned for filenames).
         document.getElementById('rps_Title').onchange = function(event) {
             document.getElementById('rps_FileName').value = window.hWin.HEURIST4.ui.cleanFilename(event.target.value);
-            _updateTemplatesList(); // Populate template dropdown.
         };
         
-        _updateTemplatesList(); // Populate template dropdown.
         _fromArrayToUI();     // Populate form fields from _entity data.
-    }
-
-    /**
-     * Populates the template selector dropdown (`#rps_Template`).
-     * Uses `window.hWin.HEURIST4.ui.createTemplateSelector` for dynamic population.
-     *
-     * @private
-     * @todo Consider if `#todo - filter based on record types in result set` is still relevant.
-     */
-    function _updateTemplatesList() {
-        let sel = $('#rps_Template');
-        const keepSelValue = sel.val(); // Preserve current selection if possible.
-
-        sel.empty(); // Clear existing options.
-
-        // Use Heurist utility to populate template selector.
-        window.hWin.HEURIST4.ui.createTemplateSelector(sel, null, keepSelValue, null);
     }
 
     /**
@@ -166,6 +147,11 @@ function ReportScheduleEditor() {
             if (!window.hWin.HEURIST4.util.isnull(el)) {
                 el.value = (_entity && !window.hWin.HEURIST4.util.isnull(_entity[i])) ?_entity[i] :''; // Ensure null/undefined are empty strings
             }
+            if(fname=='rps_Template'){
+                let sel = $('#rps_Template');
+                window.hWin.HEURIST4.ui.createTemplateSelector(sel, null, _entity[i]??'');
+                        //{extraOptions: {menu_parent: $('#detailTypeValues') }});             
+            }
         }
 
         // Update UI elements based on new/edit mode.
@@ -184,6 +170,7 @@ function ReportScheduleEditor() {
         if (window.hWin.HEURIST4.util.isempty(interval) || isNaN(parseInt(interval)) || parseInt(interval) < 0) {
             intervalEl.value = 1440; // Default to 1 day (1440 minutes).
         }
+        
     }
 
     /**
