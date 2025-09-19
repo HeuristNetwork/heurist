@@ -101,6 +101,7 @@ class BulkEmailSystem {
 
     private $sessionID = null; // session ID
     private $progress = ''; // progress update
+    private $isCSVExport = false; // is exporting details in CSV format
 
     /**
      * Constructor for BulkEmailSystem.
@@ -121,6 +122,7 @@ class BulkEmailSystem {
     public function processFormData($data) {
 
         $this->sessionID = array_key_exists('sessionID', $data) ? $data['sessionID'] : null;
+        $this->isCSVExport = array_key_exists('csv', $data);
         $rtn = 0; // Default return value indicating success.
 
         $this->printMessage("Processing form data:<div style='padding: 10px;'>");
@@ -271,6 +273,13 @@ class BulkEmailSystem {
         $this->email_subject = isset($data["emailTitle"]) && is_string($data["emailTitle"])
             ? $data["emailTitle"]
             : null;
+
+        // Retrieve prepared email body from file.
+        $emailBodyFile = HEURIST_SCRATCH_DIR . "bulkmailer_{$this->sessionID}.txt";
+        if(file_exists($emailBodyFile)){
+            $data['emailBody'] = file_get_contents($emailBodyFile);
+            fileDelete($emailBodyFile);
+        }
 
         // Ensure the email body is provided and is a string.
         if (!isset($data["emailBody"]) || !is_string($data["emailBody"])) {
@@ -753,7 +762,7 @@ class BulkEmailSystem {
         $title = $this->email_subject ?? "Heurist email about databases: {$db_listed}";
 
         if ($this->debug_run) {
-            $status_msg = 'OK';
+            $email_rtn = 'OK';
         } elseif ($this->use_native_mail_function) {
             $email_rtn = $this->sendNativeMail($email, $title, $body);
         } elseif (isset($mailRelayPwd) && $mailRelayPwd != '' && endsWith($email, '@gmail.com')) {
@@ -1237,7 +1246,7 @@ class BulkEmailSystem {
      */
     private function printMessage($msg){
 
-        if(!$this->sessionID){
+        if(!$this->sessionID || $this->isCSVExport){
             return;
         }
 
@@ -1347,6 +1356,7 @@ function getCSVDownload($data) {
     $csv_obj = new BulkEmailSystem($system);
     $rtn = [];
 
+    $data['csv'] = 1;
     $setup_res = $csv_obj->processFormData($data);
     if($setup_res == 0){
 
