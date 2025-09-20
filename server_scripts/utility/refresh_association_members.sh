@@ -1,9 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# This script is for use only on the HeuristRef.net server to obtain the association membership list.
+
+# TO DO:  Change h7-alpha to /heurist/ once h7 is migrated to be the standard /heurist/ version on Huma-Num
+
+# Usage /var/www/html/HEURIST/heurist/server_scripts/utility/refresh_association_members.sh  <memsec password>
+# memsec is a special user of the Heurist_Contacts database
+# The script is placed in the root crontab to be run hourly
+
+# It downloads a list of Heurist Network association members in CSV format
+# Members can be projects (databases) or individual users
+# It is required since the records in the Contacts database are not public and they cannot therefore be exposed through a normal report
+
+# CHANGE THE URLS if the Heurist_Contacts database is moved
+
 # --- Config ---
 DB="Heurist_Contacts"
-USER="johnson"
+USER="memsec"
 #PASS="define your pass";
 PASS="${1:-}"   # password passed as first argument
 AUTH_URL="https://heurist.huma-num.fr/h7-alpha/hserv/controller/auth.php"

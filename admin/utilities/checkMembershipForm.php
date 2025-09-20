@@ -122,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if(strpos($membership, 'nonmember')!==false){
           $statusMsg = 'NO - please contact <a href="mailto:support@heuristnetwork.org">support@heuristnetwork.org</a> if incorrect';
         }else{
-          $statusMsg = 'YES - ' . implode(' & ', $statusMsg);
+          $statusMsg = 'YES, member - ' . implode(' & ', $statusMsg);
         }
     }
 }

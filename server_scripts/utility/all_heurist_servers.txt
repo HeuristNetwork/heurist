@@ -1,4 +1,4 @@
-# This file is only needed on HeuristRef.net
+# This file should only exist on HeuristRef.net
 # It is created and updated by /srv/scripts/list_all_servers.sh  
 
 # This file lists all known server IP addresses extracted from /var/log/httpd/access_log* and ssl_access_log*
