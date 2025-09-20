@@ -20,7 +20,7 @@ function postToEndpoint(array $payload, string $endpoint): string
     $isMainServer = (@$_SERVER["SERVER_NAME"]=='heuristref.net');
     
     if($isMainServer){
-        return checkMembershipInFile($payload['email'], $payload['host'], $payload['db'], '', $payload['firstName'], $payload['lastName']);
+        return checkMembershipInFile('', $payload['email'], $payload['host'], $payload['db'], '', $payload['firstName'], $payload['lastName']);
     }
     
     $postFields = http_build_query($payload, '', '&');
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!$validCombo) {
-        $statusMsg = '❌ Please provide at least one valid combination: Email OR (First name + Last name) OR (Server + Database).';
+        $statusMsg = 'Please provide at least one valid combination: Email OR (First name + Last name) OR (Server + Database).';
     } else {
         // Ensure DB has hdb_ prefix
         $dbName = strtolower($values['db']);
@@ -110,17 +110,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $statusMsg = [];
         $membership = postToEndpoint($payload, $ENDPOINT);
-        if(strpos($membership, 'database')){
+        if(strpos($membership, 'database')!==false){
           $statusMsg[] = 'project database';
         }
-        if(strpos($membership, 'viaowner')){
+        if(strpos($membership, 'viaowner')!==false){
           $statusMsg[] = 'database owner';
         }
-        if(strpos($membership, 'individual')){
+        if(strpos($membership, 'individual')!==false){
           $statusMsg[] = 'association member';
         }
-        if(strpos($membership, 'nonmember')){
-          $statusMsg = 'NO - please contact <a href="mailto:support@heuristnetwork.org">support@heuristnetwork.org</a> if incorrect';
+        if(strpos($membership, 'nonmember')!==false){
+          $statusMsg = $membership.' NO - please contact <a href="mailto:support@heuristnetwork.org">support@heuristnetwork.org</a> if incorrect';
         }else{
           $statusMsg = 'YES - ' . implode(' & ', $statusMsg);
         }
@@ -210,7 +210,7 @@ function clearForm(){
 
     <?php if ($statusMsg !== ''): ?>
       <div class="status">
-        <?php echo htmlspecialchars($statusMsg, ENT_QUOTES, 'UTF-8'); ?>
+        <?php echo $statusMsg; ?>
       </div>
     <?php endif; ?>
 
