@@ -250,12 +250,12 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
         let membershipHTML = `
         <span><input class="ui-state-disabled" type="radio" name="membership" value="1" checked="${!isNotMember ? 'checked' : ''}"> member</span>
         <span style="padding-left: 1em;"><input class="ui-state-disabled" type="radio" name="membership" value="0" checked="${isNotMember ? 'checked' : ''}"> non-member</span>
-        <a href="https://heuristref.net/heurist/admin/utilities/checkMembershipForm.php" target="_blank" style="padding-left: 2.5em; color: blue; cursor: pointer;">check status</a>
+        <a href="https://heuristref.net/h7-alpha/admin/utilities/checkMembershipForm.php" target="_blank" style="padding-left: 2.5em; color: blue; cursor: pointer;">check status</a>
         <a href="mailto:support@heuristnetwork.org" target="#" style="padding-left: 2.5em; color: blue; cursor: pointer;">email us</a>
         <span style="padding-left: 2.5em;">
             Please <a href="https://forms.gle/xdAhjcZaSxpzkAsh9" target="_blank" style="color: blue; cursor: pointer;">join the association</a> to support Heurist
         </span>
-        `;
+        `; // @todo: replace '/h7-alpha' with '/heurist', once /heurist has been updated
 
         $('<div>', {
             html: `<span style="display: block; padding-bottom: 5px;">
@@ -263,6 +263,14 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
             </span>
             ${membershipHTML}`,
             style: 'display: block; border-bottom: 1px solid black; padding: 5px 5px 10px; margin: 0px 2em 5px;'
+        }).insertBefore(ele);
+
+        $('<div>', {
+            html: `<div>
+                <h3>This form is for bug reports, feature requests and suggestions</h3>
+                If you need assistance with using Heurist or have a problem with Javascript or styling on a website,<br>
+                please send your enquiry (in French or English) to <a href="mailto:heurist-utilisateurs@groupes.renater.fr">heurist-utilisateurs@groupes.renater.fr</a>
+            </div>`
         }).insertBefore(ele);
     },
 

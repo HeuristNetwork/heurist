@@ -432,7 +432,16 @@ class DbSysBugreport extends DbEntityBase
 
                 $record['details']['38'][$idx] = $rec_uploads->downloadAndRegisterdURL($file_url, ['ulf_NewName' => $file_name], 2);
 
-                if(!$record['details']['38'][$idx]){ // backup: register as external image
+                if(strpos($file_url, HEURIST_BASE_URL)){
+
+                    $urlBase = $this->system->getSysUrl(DIR_ENTITY);
+                    $dirBase = $this->system->getSysDir(DIR_ENTITY);
+
+                    $file = str_replace($urlBase, $dirBase, $file_url);
+                    $record['details']['38'][$idx] = $rec_uploads->registerFile($file, null);
+                }
+
+                if(!$record['details']['38'][$idx] && HEURIST_DBNAME !== HEURIST_BUGREPORT_DATABASE){ // backup: register as external image
                     $record['details']['38'][$idx] = $rec_uploads->registerURL($file_url, false, 0);
                 }
 
