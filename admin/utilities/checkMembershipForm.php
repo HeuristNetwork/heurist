@@ -120,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           $statusMsg[] = 'association member';
         }
         if(strpos($membership, 'nonmember')!==false){
-          $statusMsg = $membership.' NO - please contact <a href="mailto:support@heuristnetwork.org">support@heuristnetwork.org</a> if incorrect';
+          $statusMsg = 'NO - please contact <a href="mailto:support@heuristnetwork.org">support@heuristnetwork.org</a> if incorrect';
         }else{
           $statusMsg = 'YES - ' . implode(' & ', $statusMsg);
         }
