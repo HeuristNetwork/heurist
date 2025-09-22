@@ -40,15 +40,16 @@ declare(strict_types=1);
 * @since       7.0
 */
 const HN_MEMBERS_FILE = '/var/www/html/HEURIST/association_members.txt';
+//const HN_MEMBERS_FILE = 'c:/xampp/htdocs/association_members.txt';
 const HN_LOG_FILE     = '/var/www/html/HEURIST/HEURIST_FILESTORE/_HEURISTNETWORK_membership_checkpoint.log';
 const HN_TIMEZONE     = 'Australia/Sydney';
 
 
 // map hostnames/URLs to the "server name" stored in the CSV (3rd column of DATABASE rows).
 const HOSTNAME_TO_SERVERNAME = [
-    'huma-num.fr'   => 'Fr Huma-Num',
-    'heurist.huma-num.fr'   => 'Fr Huma-Num',
-    'heurist2025.huma-num.fr'=> 'Fr Huma-Num',
+    'huma-num.fr'   => 'Heurist.Huma-Num.fr',
+    'heurist.huma-num.fr'   => 'Heurist.Huma-Num.fr',
+    'heurist2025.huma-num.fr'=> 'Heurist.Huma-Num.fr',
 ];
 
 function getMainServerUrl(): ?string
@@ -105,13 +106,14 @@ function normalizeServerName(string $input): string
         return strtolower(HOSTNAME_TO_SERVERNAME[$raw]);
     }
 
+    /*
     // Otherwise: convert host into "com domain" style
     $parts = explode('.', $raw);
     if (count($parts) > 1) {
         // Drop the first label (subdomain), keep the rest, reverse order
         $parts = array_reverse($parts);
         return implode(' ', array_splice($parts,0,2));
-    }
+    }*/
 
     // Fallback: just return raw
     return $raw;
@@ -198,10 +200,16 @@ function checkMembershipInFile($dbowner_email, string $email, string $host = '',
             
         } elseif ($type === 'DATABASE' && $serverName !== '' && $dbName !== '') {
             // DATABASE, contactEmail, ServerName, DbName
-            $serverIdx = filter_var($parts[1], FILTER_VALIDATE_EMAIL) ? 2 : 1;
+            $serverIdx = 1; //filter_var($parts[1], FILTER_VALIDATE_EMAIL) ? 2 : 1;
             $dbIdxStart = $serverIdx + 1;
             $server = strtolower(trim($parts[$serverIdx]));
-            $dbs = array_slice($parts, $dbIdxStart);
+            $db = strtolower(trim($parts[$dbIdxStart]));
+            if ($server === $serverName && $db === $dbName) {
+                $hits['database'] = true;
+                break;
+            }
+            /*
+            $dbs = array_slice($parts, $dbIdxStart); 
             foreach($dbs as $db){
                 $db = strtolower(trim($db));
                 if ($server === $serverName && $db === $dbName) {
@@ -209,6 +217,7 @@ function checkMembershipInFile($dbowner_email, string $email, string $host = '',
                     break;
                 }
             }
+            */
         }
         
         if(count($hits)==$toCheck){

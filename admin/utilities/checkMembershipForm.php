@@ -18,7 +18,7 @@ $ENDPOINT = 'https://heuristref.net/h7-alpha/admin/utilities/checkMembershipApi.
 function postToEndpoint(array $payload, string $endpoint): string
 {
     $isMainServer = (@$_SERVER["SERVER_NAME"]=='heuristref.net');
-    
+
     if($isMainServer){
         return checkMembershipInFile('', $payload['email'], $payload['host'], $payload['db'], '', $payload['firstName'], $payload['lastName']);
     }
