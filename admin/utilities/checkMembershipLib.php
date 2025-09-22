@@ -203,12 +203,12 @@ function checkMembershipInFile($dbowner_email, string $email, string $host = '',
             $serverIdx = 1; //filter_var($parts[1], FILTER_VALIDATE_EMAIL) ? 2 : 1;
             $dbIdxStart = $serverIdx + 1;
             $server = strtolower(trim($parts[$serverIdx]));
-            $db = strtolower(trim($parts[$dbIdxStart]));
+            /*$db = strtolower(trim($parts[$dbIdxStart]));
             if ($server === $serverName && $db === $dbName) {
                 $hits['database'] = true;
                 break;
-            }
-            /*
+            }*/
+            
             $dbs = array_slice($parts, $dbIdxStart); 
             foreach($dbs as $db){
                 $db = strtolower(trim($db));
@@ -217,7 +217,6 @@ function checkMembershipInFile($dbowner_email, string $email, string $host = '',
                     break;
                 }
             }
-            */
         }
         
         if(count($hits)==$toCheck){
