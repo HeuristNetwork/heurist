@@ -77,7 +77,7 @@ class FrontController
      */
     public function run()
     {
-        global $jwt_Secret, $jwt_Secret; 
+        global $jwt_Secret; 
         
         if (!(isset($this->system) && $this->system->isInited())) {
             return;
@@ -103,7 +103,12 @@ class FrontController
                     }else{
                         // Optional: check scopes
                         // if (!in_array('read:data', (array)($payload['scope'] ?? []))) { ... }
-                        $this->system->setCurrentUser(['ugr_ID'=>$payload['sub']]);
+                        $userID = $payload['sub'];
+                        $this->system->setCurrentUser([
+                                'ugr_ID'=>$userID, 
+                                'ugr_Groups'=>user_getWorkgroups( $this->system->getMysqli(), $userID )
+                        ]);
+
                     }
                 }
             }
