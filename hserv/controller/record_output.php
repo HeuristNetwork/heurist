@@ -96,6 +96,9 @@
     if(@$params['file_refs']){
         downloadFileReferences($system, $params['ids']);
         exit;
+    }elseif(@$params['mapmarker_csv']){
+        downloadMapMarkers($system, $params['ids']);
+        exit;
     }elseif(array_key_exists('prepare', $params)){
         prepareParameters('export', $params);
         exit;
@@ -401,6 +404,178 @@ function downloadFileReferences($system, $ids){
         fputcsv($fd, [$id, $name, $path, $obf_url, $details[4], $details[11], $details[12], $details[13], $details[5], $file_size, $checksum, $details[7], $details[8], $details[9], $details[10], implode('|', $recs), ""], $seperator, "\"", "\\");
     }
     $res_files->close();
+
+    fclose($fd);
+
+    exit;
+}
+
+/**
+ * Writes record url details out into CSV format.
+ *
+ * Retrieves record url details and outputs them as a CSV file.
+ * The CSV includes information such as record ID, title, url, and any field that contains the word "URL".
+ *
+ * @param \hserv\System $system Initialised Heurist system object.
+ * @param string|array $ids Record IDs to include (comma-separated string or array).
+ * @return void Outputs a CSV file or an HTML error message.
+ */
+function downloadMapMarkers($system, $ids){
+
+    $ids = prepareIds($ids);
+    if(empty($ids)){
+
+        header(CTYPE_HTML);
+        echo 'No record ids have been provided';
+        exit;
+    }
+
+    $accessOwnerIDs = $system->getUserGroupIds(); // all groups current user is a member
+    if(!is_array($accessOwnerIDs)){
+        $accessOwnerIDs = [];
+    }
+
+    array_push($accessOwnerIDs, 0); // everyone
+
+    $accessCondition = count($accessOwnerIDs) === 1 ? "= {$accessOwnerIDs[0]}" : 'IN ('. implode(',', $accessOwnerIDs) .')';
+    $accessCondition = '(rec_NonOwnerVisibility = "public"' . ($system->hasAccess() ? " OR (rec_NonOwnerVisibility != 'hidden' OR rec_OwnerUGrpID {$accessCondition}))" : ')');
+
+    $whereClause = count($ids) > 1 ? ' rec_ID IN ('. implode(',', $ids) .')' : '';
+    $whereClause = count($ids) == 1 ? " rec_ID = {$ids[0]}" : $whereClause;
+    $whereClause = !empty($whereClause) ? "{$accessCondition} AND {$whereClause}" : $accessCondition;
+
+    // Set headers
+    $filename = HEURIST_DBNAME . '_MapMarkers.csv';
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="' . $filename . '";');
+    header('Pragma: no-cache');
+    header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
+
+    // open output handler
+    $fd = fopen('php://output', 'w');
+    if(!$fd){
+
+        header(CTYPE_HTML);
+        echo 'Unable to open temporary output for writing CSV.<br>Please contact the Heurist team.';
+        exit;
+    }
+
+    $seperator = "\t";
+
+    // retrieve file details
+    $mysqli = $system->getMysqli();
+    $recodQuery = "SELECT rec_ID, rec_Title, rec_URL, rec_RecTypeID
+                   FROM Records
+                   WHERE {$whereClause}";
+
+    $resRecords = $mysqli->query($recodQuery);
+
+    $err_message = null;
+    if(!$resRecords){
+        $err_message = 'Record details could not be retrieved from database.<br><br>'
+                        .(!empty($mysqli->error) ? $mysqli->error :'Unknown error');
+    }else{
+        $total_count_rows = mysql__found_rows($mysqli);
+        if($total_count_rows == 0){
+            $err_message = 'Empty result set';
+        }
+    }
+
+    if($err_message!=null){
+        fclose($fd);
+
+        header(CTYPE_HTML);
+        echo $err_message;
+        exit;
+    }
+
+    $headings = ['Record ID', 'Record Title', 'Record URL'];
+    $handledFields = [];
+    $urlFieldQuery = "SELECT rst_DetailTypeID FROM defRecStructure WHERE LOWER(rst_DisplayName) LIKE '%URL%' AND rst_RecTypeID = ";
+    $rows = [];
+
+    foreach($ids as $recID){
+
+        $recTypeID = mysql__select_value($mysqli, 'SELECT rec_RecTypeID FROM Records WHERE rec_ID = ?', ['i', $recID]);
+        if(!array_key_exists($recTypeID, $handledFields)){
+
+            $handledFields[$recTypeID] = mysql__select_list2($mysqli, "{$urlFieldQuery} {$recTypeID}", 'intval');
+            if(empty($handledFields[$recTypeID])){
+                continue;
+            }
+
+            $dtyFilter = count($handledFields[$recTypeID]) === 1 ? "rst_DetailTypeID = {$handledFields[$recTypeID][0]}" : 'rst_DetailTypeID IN ('. implode(',', $handledFields[$recTypeID]) .')';
+            $titles = mysql__select_list2($mysqli, "SELECT rst_DisplayName FROM defRecStructure WHERE rst_RecTypeID = {$recTypeID} AND {$dtyFilter}");
+
+            $titles = array_filter($titles, function($heading) use ($headings){ return !in_array($heading, $headings); });
+            array_push($headings, ...$titles);
+
+        }elseif(empty($handledFields[$recTypeID])){
+            continue;
+        }
+
+        $row = [];
+        
+        $fieldFilter = count($handledFields[$recTypeID]) === 1 ? "dtl_DetailTypeID = {$handledFields[$recTypeID][0]}" : 'dtl_DetailTypeID IN ('. implode(',', $handledFields[$recTypeID]) .')';
+        $valueResults = $mysqli->query("SELECT rst_DisplayName, dtl_Value FROM recDetails WHERE dtl_RecID = {$recID} AND {$fieldFilter}");
+
+        if(mysql__found_rows($mysqli) === 0 || !$valueResults){
+            continue;
+        }
+
+        while($valueRow = $valueResults->fetch_row()){
+            if(!array_key_exists($valueRow[0], $row)){
+                $row[$valueRow[0]] = $valueRow[1];
+            }else{
+                $row[$valueRow[0]] .= " | {$valueRow[1]}";
+            }
+        }
+
+        $rows[$recID] = $row;
+    }
+
+    // write results
+    fputcsv($fd, $headings, $seperator, "\"", "\\");
+
+    /*
+        [0] => Record ID
+        [1] => Record Title
+        [2] => Record URL
+        [3, ...] => Record Fields containing the word "URL"
+    */
+    while($details = $resRecords->fetch_row()){
+
+        $row = [];
+        foreach($headings as $heading){
+
+            $recID = $details[0];
+            $recTypeID = $details[3];
+
+            $value = '';
+            switch($heading){
+                case 'Record ID':
+                    $value = $details[0];
+                    break;
+                case 'Record Title':
+                    $value = $details[1];
+                    break;
+                case 'Record URL':
+                    $value = $details[2];
+                    break;
+                default:
+                    $dtyID = array_search($heading, $handledFields[$recTypeID], true);
+                    if($dtyID !== false){
+                        $value = $rows[$recID][$dtyID];
+                    }
+                    break;
+            }
+
+            $row[] = $value;
+        }
+
+        fputcsv($fd, $row, $seperator, "\"", "\\");
+    }
+    $resRecords->close();
 
     fclose($fd);
 

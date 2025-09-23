@@ -2296,7 +2296,11 @@ window.hWin.HEURIST4.ui = {
                         $select.val( defValue );
                     }
                     
-                    window.hWin.HEURIST4.ui.initHSelect($select[0], false, null, options?.eventHandlers, options?.extraOptions);
+                    window.hWin.HEURIST4.ui.initHSelect($select[0], options?.useHtmlSelect, null, options?.eventHandlers, options?.extraOptions);
+
+                    if(typeof options?.onComplete === 'function'){
+                        options.onComplete();
+                    }
 
                 } else {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
