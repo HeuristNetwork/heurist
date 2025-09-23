@@ -300,6 +300,12 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     if(opts.layout_params['template']){
                         $dlg.find('select[name="map_template"]').attr('data-template', opts.layout_params['template']);        
                     }
+                    if(opts.layout_params['clusterTemplate']){
+                        $dlg.find('select[name="map_clusterTemplate"]').attr('data-template', opts.layout_params['clusterTemplate']);        
+                    }
+                    if(opts.layout_params['clusterDownloadText']){
+                        $dlg.find('#map_clusterDownloadText').val(opts.layout_params['clusterDownloadText']);        
+                    }
                     let popup = 'standard';
                     if(opts.layout_params['template']=='none'){
                         popup = 'none';
@@ -953,6 +959,12 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 window.hWin.HEURIST4.ui.createTemplateSelector( $selectMapTemplate
                     ,[{key:'',title:'Standard popup template'}], $selectMapTemplate.attr('data-template')
                     , {extraOptions: {menu_parent: $dlg}});
+
+                let $selectClusterTemplate = $dlg.find('select[name="map_clusterTemplate"]'); 
+
+                window.hWin.HEURIST4.ui.createTemplateSelector( $selectClusterTemplate
+                    ,[{key:'',title:'Default cluster popup'}], $selectMapTemplate.attr('data-template')
+                    , {extraOptions: {menu_parent: $dlg}});
                     //,{key:'none',title:'Disable popup'}
 
                 //======================================
@@ -1267,6 +1279,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             
             layout_params['published'] = 1;
             layout_params['template'] = $dlg.find('select[name="map_template"]').val();
+            layout_params['clusterTemplate'] = $dlg.find('select[name="map_clusterTemplate"]').val();
             layout_params['basemap'] = $dlg.find('select[name="map_basemap"]').val();
             layout_params['basemaps'] = $dlg.find('input[name="basemaps"]').val();
             layout_params['basemap_filter'] = $dlg.find('input[name="map_basemap_filter"]').val();
@@ -1315,8 +1328,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             opts['current_search_filter'] = $dlg.find('input[name="current_search_filter"]').val();   
 
             layout_params['style'] = $dlg.find('#map_default_style').val();   
-            layout_params['selection_style'] = $dlg.find('#map_select_style').val();   
-            
+            layout_params['selection_style'] = $dlg.find('#map_select_style').val();
+
+            layout_params['clusterDownloadText'] = $dlg.find('#map_clusterDownloadText').val();
+
             opts['layout_params'] = layout_params;
             opts['leaflet'] = true;
         }//heurist_Map

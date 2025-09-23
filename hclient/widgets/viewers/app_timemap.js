@@ -470,7 +470,7 @@ $.widget( "heurist.app_timemap", {
             let that=this;
             
             let mapping = this.mapframe[0].contentWindow.mapping;
-            
+
             //assign listeneres
             mapping.mapping('option', {'layout_params':this.options.layout_params});        
 

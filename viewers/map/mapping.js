@@ -3581,6 +3581,13 @@ $.widget( "heurist.mapping", {
             }
         }
 
+        if(params['clusterTemplate']){
+            this.options.clusterTemplate = params['clusterTemplate'];
+        }
+        if(params['clusterDownloadText']){
+            this.options.clusterDownloadText = params['clusterDownloadText'];
+        }
+
         //special case - till thematic map is not developed - for custom style
         /* expremental 
         this.isHamburgIslamicImpire = (params['search_realm']=='hie_places');
@@ -3814,9 +3821,6 @@ $.widget( "heurist.mapping", {
             this.mapManager.loadBaseMap( 0 ); //load default basemap 
         }
 
-        if(params['clusterTemplate']){
-            this.options.clusterTemplate = params['clusterTemplate'];
-        }
         if(params['template']){
             this.mapPopUpTemplate = params['template'];
         }
