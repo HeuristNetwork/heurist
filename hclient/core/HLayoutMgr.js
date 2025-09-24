@@ -301,7 +301,7 @@ class HLayoutMgr {
   
   */
   #layoutSetCssAndClasses(layout, element){
-    ifi(!element) return;
+    if (!element) return;
     if (!layout.css) layout.css = {};
     if (layout.css && !$.isEmptyObject(layout.css)) {
       element.css(layout.css);
