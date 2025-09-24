@@ -96,17 +96,18 @@ class HLayoutMgr {
             pageTreeData = this.convertHTMLtoJSON(container, 0);
       }
 
+      let that = this;
       //****************************
       //find all elements with data-heurist-cms
       $.each(container.find('[data-heurist-cms]'), (idx, ele) => {
           ele = $(ele);
           
-          let widget_cfg = this.#convertWidgetHTMLtoJSON(ele);
+          let widget_cfg = that.#convertWidgetHTMLtoJSON(ele);
           if(widget_cfg && widget_cfg.appid){
                //widget_cfg.key = this.pnl_counter;
-               //this.pnl_counter++;
+               //that.pnl_counter++;
                ele.attr('data-hid', widget_cfg.key); //.addClass('cms-element');
-               this.#layoutInitWidget(widget_cfg, ele);
+               that.#layoutInitWidget(widget_cfg, ele);
           }
       });
       
