@@ -2256,7 +2256,7 @@ class System {
         $entityDir = $this->getSysDir('entity');
         if ($entityDir) {
             // fileDelete is assumed to be a global helper function that safely attempts to delete a file.
-            fileDelete($entityDir . 'db.json'); 
+            fileDelete($entityDir . 'db.json'); //old version
             fileDelete($entityDir . 'dbdef_cache.json');
         } else {
             // Log error: could not determine entity directory

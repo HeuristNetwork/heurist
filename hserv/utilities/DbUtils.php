@@ -926,6 +926,7 @@ class DbUtils {
 
         self::setSessionVal(2);//folders created
 
+        //if true the archive is sql dump - need to copy the minimal set of files from current database
         $needCopyCurrentDbFolder = false;
         //unpack archive into this folder
         $unzip_error = null;
@@ -979,6 +980,10 @@ class DbUtils {
 
                 if(folderRecurseCopy( HEURIST_FILESTORE_DIR, $database_folder )){
                     self::databaseUpdateFilePaths(self::$system->dbname() , $database_name);
+                    
+                    //drop defintions cache
+                    $entityDir = self::$system->getSysDir('entity', $database_name);
+                    fileDelete( $entityDir. 'dbdef_cache.json');
                 }else{
                     folderDelete($database_folder);
                     self::$system->addError(HEURIST_ACTION_BLOCKED,
