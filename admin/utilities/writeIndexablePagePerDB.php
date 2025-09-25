@@ -459,6 +459,7 @@ foreach ($databases as $idx=>$db_name){
     // Check if the meta description is valid and has a minimum length.
     if (!isset($values[1]) || !is_string($values[1])) {
         //Meta description is missing or invalid.
+        echo $tabs0.$db_name.' Description is missed'.$eol;
         continue;
     }
 
@@ -466,6 +467,7 @@ foreach ($databases as $idx=>$db_name){
 
     if (strlen($metaDescription) < 50) {
         //Meta description is empty or not valid
+        echo $tabs0.$db_name.' Description is too short'.$eol;
         continue;
     }
 
@@ -613,10 +615,16 @@ foreach ($databases as $idx=>$db_name){
             $sitemap_row = str_replace($sitemap_replace, array('', $cms_link[0], $cms_link[1]), $sitemap_row_web);
             array_push($sitemap_databases, $sitemap_row); //link to website
         }
+    }else{
+        //echo $tabs0.$db_name.' no public websites'.$eol;
     }
 
     echo $tabs0.$db_name.' Completed, saved to '.$fname.$eol;
 }//for
+
+if($list_is_array){
+    exit;
+}
 
 // Update index.html
 $index_file = $index_dir . '/index.html';
