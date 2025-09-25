@@ -75,7 +75,7 @@ if( @$_REQUEST['isalive']==1){
     {
         $format = 'website';
 
-        if(@$_REQUEST['ver']==3){
+        if(false && @$_REQUEST['ver']==3){
             $controller = new FrontController(isset($params)?$params:null);
             $controller->run();
         }else{

@@ -398,7 +398,6 @@ class CmsManager {
 
             return;
         }
-        
         url = window.hWin.HEURIST4.ui.getCmsLink({mode:mode, websiteid:rec_ID});
         window.open(url, '_blank');
     }

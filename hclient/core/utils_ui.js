@@ -2652,9 +2652,10 @@ window.hWin.HEURIST4.ui = {
         if(isEdit){
             params.push('edit=2');
         }            
+        /*
         if(version>0){
             params.push('ver='+version);
-        }
+        }*/
         
         if(params.length>0){
             surl += '?'+params.join('&');    

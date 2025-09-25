@@ -188,6 +188,15 @@ if(!$hasAccess){
     exit;
 }
 
+if(__getValue($rec, '2-49')==3){
+    
+    $message = 'Sorry, this website uses website format version 3, and is only usable with Heurist version 7 or later ';
+
+    include_once ERROR_REDIR;
+    exit;
+    
+}
+
 $showWarnAboutPublic = !$edit_OldEditor && ($rec['rec_NonOwnerVisibility'] != 'public');
 
 $hasAccess = ($system->isAdmin() || $system->isMember($rec['rec_OwnerUGrpID']));
