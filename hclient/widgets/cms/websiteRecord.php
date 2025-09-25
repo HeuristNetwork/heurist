@@ -188,6 +188,14 @@ if(!$hasAccess){
     exit;
 }
 
+if(__getValue($rec, DT_VERSION)==3){
+
+    $message = 'Sorry, this website uses website format version 3 in old viewer. Remove parameter "ver=2"';
+    include_once ERROR_REDIR;
+    exit;
+}
+
+
 $showWarnAboutPublic = !$edit_OldEditor && ($rec['rec_NonOwnerVisibility'] != 'public');
 
 $hasAccess = ($system->isAdmin() || $system->isMember($rec['rec_OwnerUGrpID']));
