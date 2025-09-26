@@ -376,7 +376,7 @@ function editCMS2(website_document){
 
         let url = window.hWin.HEURIST4.ui.getCmsLink({version:2, websiteid:home_page_record_id});
         
-        _editor_panel.find('.website-url').text(url).attr('title', `Click to copy ${url} to clipboard`).on('click', function(){ // save website url to clipboard
+        _editor_panel.find('.website-url').text(url).attr('href', url).attr('title', `Click to copy ${url} to clipboard`).on('click', function(){ // save website url to clipboard
             window.hWin.HEURIST4.util.copyStringToClipboard(`${url}`);
             window.hWin.HEURIST4.msg.showMsgFlash('Website URL saved to clipboard', 3000);
         });
