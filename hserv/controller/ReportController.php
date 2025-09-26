@@ -295,7 +295,7 @@ class ReportController
 
                 $repExec->setParameters($params);
 
-                //result: 0 - error, 1 - created, 2 - updated, 3 - intakted
+                //result: 0 - error, 1 - created, 2 - updated, 3 - intacted
                 //check that report is already exists
                 $result = 1;
 

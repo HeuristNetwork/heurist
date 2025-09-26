@@ -188,7 +188,7 @@ if(!$hasAccess){
     exit;
 }
 
-if(__getValue($rec, DT_VERSION)==3){
+if(__getValue($rec, '2-49')==3){
 
     $message = 'Sorry, this website uses website format version 3 in old viewer. Remove parameter "ver=2"';
     include_once ERROR_REDIR;

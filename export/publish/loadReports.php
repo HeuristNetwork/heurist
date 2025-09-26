@@ -84,7 +84,8 @@ if ($method == "searchreports") {
 
     $records = array();
     // Base query to select all report schedule entries
-    $query = "SELECT rps_ID, rps_Type, rps_Title, rps_FilePath, rps_URL, rps_FileName, rps_HQuery, rps_Template, rps_IntervalMinutes, 0 AS selection, 0 AS status FROM usrReportSchedule";
+    $query = "SELECT rps_ID, rps_Type, rps_Title, rps_FilePath, rps_URL, rps_FileName, rps_HQuery, rps_Template, '
+    .'rps_IntervalMinutes, 0 AS selection, 0 AS status FROM usrReportSchedule";
 
     if ($f_name && $f_name != "") {
         $query .= " WHERE rps_Title LIKE '%".$f_name."%'"; // Append name filter if provided
@@ -205,14 +206,16 @@ exit; // Ensure script terminates after handling the request.
         }
 
         // Determine the output directory path
+        /* OUTPUT FOLDER is always generated-reports
         if ($row['rps_FilePath'] != null) {
             $dir = $row['rps_FilePath'];
             if (substr($dir, -1) != "/") {
                 $dir = $dir."/";
             }
-        } else {
-            $dir = HEURIST_FILESTORE_DIR."generated-reports/"; // Default directory
         }
+        */
+            
+        $dir = HEURIST_FILESTORE_DIR."generated-reports/"; // Default directory
 
         // Check if the output directory exists
         if (!file_exists($dir)) {
@@ -227,7 +230,12 @@ exit; // Ensure script terminates after handling the request.
         $path_parts = pathinfo($outputfile);
         $ext = array_key_exists('extension', $path_parts) ? $path_parts['extension'] : null;
         if ($ext == null) {
-            $outputfile = $outputfile.".html";
+            //take extension from rps_URL
+            if(isset($row['rps_URL'])){
+                $outputfile = $outputfile.'.'.$row['rps_URL'];
+            }else{
+                $outputfile = $outputfile.'.html';    
+            }
         }
 
         // Check if the output file exists
