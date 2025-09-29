@@ -3118,18 +3118,18 @@ class RecordsBatch
         }
 
         $mysqli = $this->system->getMysqli();
-        $date_mode = date(DATE_8601);
+        $today = date(DATE_8601);
 
         $dtyID = $this->data['dtyID'];
-        $dtyName = (@$this->data['dtyName'] ? "'".$this->data['dtyName']."'" : "id:".$this->data['dtyID']);
-        $baseTag = "~replace file to url $dtyName $date_mode";
+        $dtyName = @$this->data['dtyName'] ? "'{$this->data['dtyName']}'" : "id:{$this->data['dtyID']}";
+        $baseTag = "~replace file to url $dtyName $today";
 
-        $processedRecIDs = array();
-        $sqlErrors = array();
-        $uploadError = array();
-        $failed_ids = array();
+        $processedRecIDs = [];
+        $sqlErrors = [];
+        $uploadError = [];
+        $failedIDs = [];
 
-        $file_entity = new DbRecUploadedFiles($this->system);
+        $fileEntity = new DbRecUploadedFiles($this->system);
 
         // Find relevant local files
         $query = 'SELECT dtl_ID, ulf_ID, dtl_RecID '
@@ -3147,241 +3147,169 @@ class RecordsBatch
          */
 
         if(!$res){ // mysql error, end
-            $this->system->addError(HEURIST_ERROR, 'An error occurred while attempting to retrieve records using locally stored files.<br><br>MySQLi Error: ' . $mysqli->error);
+            $this->system->addError(HEURIST_ERROR, "An error occurred while attempting to retrieve records using locally stored files.<br><br>MySQLi Error: {$mysqli->error}");
             return false;
         }
 
-        $cur_ulf_ID = 0;
-        $new_ulf_ID = 0;
-        $dtl_IDs = array();
-        $rec_IDs = array();
-        $completed_ulf_IDs = array();
+        $cur_ulfID = 0;
+        $new_ulfID = 0;
+        $dtlIDs = [];
+        $recIDs = [];
+        $completed_ulfIDs = [];
 
         //2024-03-23
         // Obtain write API key/credentials
-        $service_id = $this->data['repository'];
+        $serviceID = $this->data['repository'];
 
-        $credentials = user_getRepositoryCredentials2($this->system, $service_id);
+        $credentials = user_getRepositoryCredentials2($this->system, $serviceID);
 
         if($credentials==null){
 
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Credentials for sepecified repository and user/group not found');
             return false;
 
-        }elseif(!@$credentials[$service_id]['params']['writeApiKey']){  // || @$credentials['params']['writeUser']
+        }elseif(!@$credentials[$serviceID]['params']['writeApiKey']){
 
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Write Credentials for sepecified repository and user/group not defined');
             return false;
 
-        }elseif(strpos($service_id,'nakala')===0 || strpos($service_id,'nakala')===1){
+        }elseif(strpos($serviceID,'nakala')===0 || strpos($serviceID,'nakala')===1){
 
             if(!array_key_exists('license', $this->data) || empty($this->data['license'])){ // ensure a license has been provided
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 'A license is missing');
                 return false;
             }
 
-            $meta_values = array();
-            $file = array();
+            $metaValues = [];
+            $file = [];
 
             // General Meta data
             // Normal Creator field (we use alternative author field, as this requires Author Ids/ORCIDs)
-            $meta_values['creator'] = array(
+            $metaValues['creator'] = [
                 'value' => null,
                 'lang' => null,
                 'typeUri' => null,
                 'propertyUri' => NAKALA_REPO.'terms#creator'
-            );
+            ];
             // Provided by user - used for all files
-            $meta_values['license'] = array(
+            $metaValues['license'] = [
                 'value' => $this->data['license'],
                 'lang' => null,
                 'typeUri' => XML_SCHEMA,
                 'propertyUri' => NAKALA_REPO.'terms#license'
-            );
+            ];
 
-            $api_key = $credentials[$service_id]['params']['writeApiKey'];  //$this->system->settings->get('sys_NakalaKey')
-            $use_test_url = @$this->data['use_test_url'] == 1 || strpos($service_id,'nakala')===1 ? 1 : 0;
+            $apiKey = $credentials[$serviceID]['params']['writeApiKey'];  //$this->system->settings->get('sys_NakalaKey')
+            $useTestURL = @$this->data['use_test_url'] == 1 || strpos($serviceID,'nakala')===1 ? 1 : 0;
 
             while($row = $res->fetch_row()){
 
-                if($cur_ulf_ID != $row[1]){
+                if($cur_ulfID != $row[1]){
 
-                    if($new_ulf_ID > 0){
-                        if($this->_updateUploadedFileIDs($new_ulf_ID, $dtl_IDs, $date_mode)){
-                            $completed_ulf_IDs[$row[1]] = $new_ulf_ID;
-                            $processedRecIDs = array_merge($processedRecIDs, $rec_IDs);
+                    if($new_ulfID > 0){
+                        if($this->_updateUploadedFileIDs($new_ulfID, $dtlIDs, $today)){
+                            $completed_ulfIDs[$row[1]] = $new_ulfID;
+                            $processedRecIDs = array_merge($processedRecIDs, $recIDs);
                         }else{
-                            $failed_ids = array_merge($failed_ids, $rec_IDs);
+                            $failedIDs = array_merge($failedIDs, $recIDs);
                         }
                     }
 
-                    $cur_ulf_ID = $row[1];
-                    $dtl_IDs = array();
-                    $rec_IDs = array();
-                    $new_ulf_ID = 0;
+                    $cur_ulfID = $row[1];
+                    $dtlIDs = [];
+                    $recIDs = [];
+                    $new_ulfID = 0;
 
-                    $file_query = 'SELECT ulf_OrigFileName, concat(ulf_FilePath, ulf_FileName) AS "fullPath", fxm_MimeType, ulf_Description, concat(ugr_FirstName, " ", ugr_LastName) AS "fullName", DATE(ulf_Added) '
-                    .'FROM recUploadedFiles, defFileExtToMimetype, sysUGrps '
-                    .'WHERE ulf_ID=' . intval($row[1]) . ' AND ulf_MimeExt=fxm_Extension AND ulf_UploaderUGrpID=ugr_ID';
-                    $file_res = $mysqli->query($file_query);
-                    if(!$file_res){ // another mysql error, skip
-                        $sqlErrors[$row[2]][] = FILE_NO . $row[1] . R_ARROW . $mysqli->error;
-                        $failed_ids[] = $row[2];
-                        continue;
-                    }
-                    /** $file_dtl:
-                     * [0] => title
-                     * [1] => file path
-                     * [2] => mime type
-                     * [3] => description
-                     * [4] => Uploader's full name
-                     * [5] => created date (no time)
-                     */
-
-                    $file_dtl = $file_res->fetch_row();
-                    $file_path = resolveFilePath($file_dtl[1]);
-                    if(!file_exists($file_path)){
-                        $uploadError[$row[2]][] = FILE_NO . $row[1] . R_ARROW . 'Unable to locate the local file for transfer';
-                        $failed_ids[] = $row[2];
+                    [$fileMetadata, $file] = getFileDetailsForNakala($mysqli, $row[1]);
+                    if(!$fileMetadata){
+                        $sqlErrors[$row[2]][] = $file;
+                        $failedIDs[] = $row[2];
                         continue;
                     }
 
-                    $file = array('path' => $file_path,
-                                  'type' => $file_dtl[2],
-                                  'name' => $file_dtl[0],
-                                  'description' => $file_dtl[3]);
+                    $fileMetadata = array_merge($fileMetadata, $metaValues);
 
-                    $meta_values['title'] = array(
-                        'value' => $file_dtl[0],
-                        'lang' => null,
-                        'typeUri' => XML_SCHEMA,
-                        'propertyUri' => NAKALA_REPO.'terms#title'
-                    );
-
-                    $file_type = $file_dtl[2];
-
-                    /** Use fxm_MimeType
-                     * Nakala <=> Mime Type
-                     * text <=> text | pdf
-                     * image <=> image
-                     * sound <=> sound | audio
-                     * video <=> video
-                     * other <=> anything else
-                     */
-                    if(strpos($file_type, 'text') !== false || strpos($file_type, 'pdf') !== false){
-                        $file_type = 'http://purl.org/coar/resource_type/c_1843';
-                    }elseif(strpos($file_type, 'sound') !== false || strpos($file_type, 'audio') !== false){
-                        $file_type = 'http://purl.org/coar/resource_type/c_18cc';
-                    }elseif(strpos($file_type, 'image') !== false){
-                        $file_type = 'http://purl.org/coar/resource_type/c_c513';
-                    }elseif(strpos($file_type, 'video') !== false){
-                        $file_type = 'http://purl.org/coar/resource_type/c_12ce';
-                    }else{ // other
-                        $file_type = 'http://purl.org/coar/resource_type/c_1843';
-                    }
-                    $meta_values['type'] = array(
-                        'value' => $file_type,
-                        'lang' => null,
-                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
-                        'propertyUri' => NAKALA_REPO.'terms#type'
-                    );
-
-                    // Current Heurist user
-                    $meta_values['alt_creator'] = array(
-                        'value' => $file_dtl[4],
-                        'lang' => null,
-                        'typeUri' => XML_SCHEMA,
-                        'propertyUri' => 'http://purl.org/dc/terms/creator'
-                    );
-
-                    // ulf_Added
-                    $meta_values['created'] = array(
-                        'value' => $file_dtl[5],//date('Y-m-d', $file_dtl[5]),
-                        'lang' => null,
-                        'typeUri' => XML_SCHEMA,
-                        'propertyUri' => NAKALA_REPO.'terms#created'
-                    );
-
-                    $rtn = uploadFileToNakala($this->system,   //upload in batch
-                        array('api_key' => $api_key, 'file' => $file,
-                              'meta' => $meta_values, 'status' => 'published', // pending | published
-                              'use_test_url' => $use_test_url));
+                    $rtn = uploadFileToNakala($this->system, [
+                        'api_key' => $apiKey, 'file' => $file,
+                        'meta' => $fileMetadata, 'status' => 'published', // pending | published
+                        'use_test_url' => $useTestURL
+                    ]);
 
                     if($rtn){ // register URL ($rtn)
-                        //$file_entity->setRecords(null);// reset records
-                        if($service_id){
-                            $fields = array('ulf_Parameters'=>'{"repository":"'.$service_id.'"}');
+                        //$fileEntity->setRecords(null);// reset records
+                        if($serviceID){
+                            $fields = ['ulf_Parameters'=>'{"repository":"'.$serviceID.'"}'];
                         }else{
                             $fields = null;
                         }
 
-                        $new_ulf_ID = $file_entity->registerURL($rtn,false,0,$fields);// register nakala url
-                        if(!is_numeric($new_ulf_ID) || $new_ulf_ID > 0){
+                        $new_ulfID = $fileEntity->registerURL($rtn,false,0,$fields);// register nakala url
+                        if(!is_numeric($new_ulfID) || $new_ulfID > 0){
                             $sqlErrors[$row[2]][] = FILE_NO . $row[1] . R_ARROW . $mysqli->error;
-                            $failed_ids[] = $row[2];
+                            $failedIDs[] = $row[2];
                         }
                     }else{
-                        $err_msg = $this->system->getError();
-                        if(array_key_exists('message', $err_msg)){
-                            $err_msg = $err_msg['message'];
+                        $errMsg = $this->system->getError();
+                        if(array_key_exists('message', $errMsg)){
+                            $errMsg = $errMsg['message'];
                         }else{
-                            $err_msg = 'Unknown error occurred while uploading to Nakala';
+                            $errMsg = 'Unknown error occurred while uploading to Nakala';
                         }
-                        $uploadError[$row[2]][] = FILE_NO . $row[1] . R_ARROW . $err_msg;
-                        $failed_ids[] = $row[2];
+                        $uploadError[$row[2]][] = FILE_NO . $row[1] . R_ARROW . $errMsg;
+                        $failedIDs[] = $row[2];
                     }
                 }
 
-                $dtl_IDs[] = intval($row[0]);
-                $rec_IDs[] = intval($row[3]);
+                $dtlIDs[] = intval($row[0]);
+                $recIDs[] = intval($row[3]);
 
             } // while
         }
-        if($new_ulf_ID > 0){
-            if($this->_updateUploadedFileIDs($new_ulf_ID, $dtl_IDs, $date_mode)){
-                $completed_ulf_IDs[$row[1]] = $new_ulf_ID;
-                $processedRecIDs = array_merge($processedRecIDs, $rec_IDs);
+        if($new_ulfID > 0){
+            if($this->_updateUploadedFileIDs($new_ulfID, $dtlIDs, $today)){
+                $completed_ulfIDs[$row[1]] = $new_ulfID;
+                $processedRecIDs = array_merge($processedRecIDs, $recIDs);
             }else{
-                $failed_ids = array_merge($failed_ids, $rec_IDs);
+                $failedIDs = array_merge($failedIDs, $recIDs);
             }
         }
 
-        if(!empty($completed_ulf_IDs)){
-            $ulf_to_delete = array();
-            foreach ($completed_ulf_IDs as $org_ID => $new_ID) {
-                $query = 'SELECT dtl_ID FROM recDetails WHERE dtl_UploadedFileID = ' . $org_ID;
-                $dtl_IDs = mysql__select_list2($mysqli, $query, 'intval');
+        if(!empty($completed_ulfIDs)){
+            $ulfToDelete = [];
+            foreach ($completed_ulfIDs as $org_ulfID => $new_ulfID) {
+                $query = "SELECT dtl_ID FROM recDetails WHERE dtl_UploadedFileID = {$org_ulfID}";
+                $dtlIDs = mysql__select_list2($mysqli, $query, 'intval');
 
-                if(!$dtl_IDs){
+                if(!$dtlIDs){
                     continue;
                 }
 
-                if(empty($dtl_IDs)){ // delete file reference + local file
-                    $ulf_to_delete[] = $org_ID;
+                if(empty($dtlIDs)){ // delete file reference + local file
+                    $ulfToDelete[] = $org_ulfID;
                 }elseif(array_key_exists('delete_file', $this->data) && $this->data['delete_file'] == 1){
                     // update references
-                    $dtl_IDs = prepareIds($dtl_IDs);//for snyk
-                    if($this->_updateUploadedFileIDs($new_ID, $dtl_IDs, $date_mode)){
+                    $dtlIDs = prepareIds($dtlIDs);//for snyk
+                    if($this->_updateUploadedFileIDs($new_ulfID, $dtlIDs, $today)){
                         // then delete the file reference + local file
-                        $ulf_to_delete[] = $org_ID;
+                        $ulfToDelete[] = $org_ulfID;
                     }
                 }
             }
 
-            if(!empty($ulf_to_delete)){
-                $cur_data = $file_entity->getData();
-                $cur_date['ulf_ID'] = array_unique($ulf_to_delete);
-                $file_entity->setData($cur_data);
-                $file_entity->delete();
+            if(!empty($ulfToDelete)){
+                $curData = $fileEntity->getData();
+                $curData['ulf_ID'] = array_unique($ulfToDelete);
+                $fileEntity->setData($curData);
+                $fileEntity->delete();
             }
         }
 
-        $failed_ids = array_unique($failed_ids);
+        $failedIDs = array_unique($failedIDs);
 
         $this->_assignTagsAndReport('processed', $processedRecIDs, $baseTag);
         $this->_assignTagsAndReport('errors',  array_merge($sqlErrors, $uploadError), $baseTag);
-        $this->result_data['fails'] = count($failed_ids);
-        $this->result_data['fails_list'] = $failed_ids;
+        $this->result_data['fails'] = count($failedIDs);
+        $this->result_data['fails_list'] = $failedIDs;
 
         return $this->result_data;
     }

@@ -475,8 +475,8 @@
 #ownership#Change record access and ownership
 #add_link#Add new link or create a relationship between records
 #extract_pdf#Extract text from PDF
-#url_to_file#Remote URLs to local files
-#local_to_repository#Upload local files to repository
+#url_to_file#Remote files to local (your database)
+#local_to_repository#Local files to remote repository
 #reset_thumbs#Reset thumbnails
 #case_conversion#Correct field capitalisations
 #nl2br#Multiline text to HTML

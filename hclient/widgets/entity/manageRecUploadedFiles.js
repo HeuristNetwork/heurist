@@ -193,9 +193,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                         
                         this._createMediaRecords();
                         
-                    }else if(action=='menu-file-export-csv'){ 
-                        
-                        this._downloadFileRefs()
+                    }else if(action == 'menu-file-export-csv-essential' || action == 'menu-file-export-csv'){
+
+                        this._downloadFileRefs(false, action == 'menu-file-export-csv-essential');
 
                     }else if(action=='menu-file-delete-selected'){ 
                         
@@ -217,6 +217,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
                         this._createScaledImages();
 
+                    }else if(action == 'menu-file-refrec-localremote'){
+
+                        this._showMessageAboutRepositories();
                     }
                 },
                 "searchrecuploadedfilesonresult": this.updateRecordList
@@ -1350,7 +1353,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     //
     // Download file references for current resultset
     //
-    _downloadFileRefs: function(_download_entire_set){
+    _downloadFileRefs: function(_download_entire_set, essentialsOnly = false){
         
         if(!this._checkUserPermissions(1)){
             return;
@@ -1368,7 +1371,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
             if(!window.hWin.HEURIST4.util.isArrayNotEmpty(ids)){
                 window.hWin.HEURIST4.msg.showMsg('There are not selected files/url references. Download CSV for entire set?',
-                            {buttons:function(){that._downloadFileRefs(true);}, 
+                            {buttons:function(){that._downloadFileRefs(true, essentialsOnly);}, 
                             labels:{title:'Warning',yes:'Proceed',no:'Cancel'},
                             default_palette_class:this.options.default_palette_class});
                     
@@ -1386,6 +1389,9 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         }
 
         let url = `${window.hWin.HAPI4.baseURL}hserv/controller/record_output.php?db=${window.hWin.HAPI4.database}&file_refs=1&ids=${ids}`;
+        if(essentialsOnly){
+            url += '&essential=1';
+        }
         window.open(url, '_blank');
     },
 
@@ -2311,5 +2317,33 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
             window.hWin.HEURIST4.msg.showMsgDlg(message);
         });
+    },
+
+    _showMessageAboutRepositories: function(){
+
+        let $dlg;
+
+        let msg = `<div>
+            To upload 'local' files (that is, files stored in your database) to a remote repository such as<br>
+            Nakala, or to download files from a repository and store them as 'local' files in your database:<br>
+            <ol>
+                <li>find and select the files in the list below</li>
+                <li>choose <strong>Show records referencing selection</strong> in this menu</li>
+                <li>
+                    select the appropriate direction from the <strong>Recode</strong> menu above the list of records:
+                    <ul>
+                        <li><strong>Local files to remote repository</strong></li>
+                        <li><strong>Remote files to local (your database)</strong></li>
+                    </ul>
+                </li>
+            </ol>
+            Note that these functions do not specifically target the selected images, but allow you to choose<br>
+            a specific file field in the records displayed and apply the request to all files in that field in the selected records.
+        </div>`;
+
+        let btn = {};
+        btn[window.hWin.HR('Close')] = () => $dlg.dialog('close');
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btn, {title: 'Transferring to/from remote storage'}, {default_palette_class: 'ui-heurist-populate', dialogId: 'upload-to-repo'});
     }
 });

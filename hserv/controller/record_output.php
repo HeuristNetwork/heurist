@@ -94,7 +94,7 @@
     set_time_limit(0);//no limit
 
     if(@$params['file_refs']){
-        downloadFileReferences($system, $params['ids']);
+        downloadFileReferences($system, $params['ids'], array_key_exists('essentials', $params));
         exit;
     }elseif(@$params['mapmarker_csv']){
         downloadMapMarkers($system, $params['ids']);
@@ -299,9 +299,10 @@
  *
  * @param \hserv\System $system Initialised Heurist system object.
  * @param string|array $ids File IDs to include (comma-separated string, array, or 'all').
+ * @param bool $essentialOnly Whether to return the essential fields only (File IDs, name, path, size and referenced by)
  * @return void Outputs a CSV file or an HTML error message.
  */
-function downloadFileReferences($system, $ids){
+function downloadFileReferences($system, $ids, $essentialOnly){
 
     if(empty($ids)){
 
@@ -310,10 +311,10 @@ function downloadFileReferences($system, $ids){
         exit;
     }
 
-    $where_clause = '';
+    $whereClause = '';
     if(is_array($ids) || (is_string($ids) && $ids != 'all')){ // change comma separated list into array
         $ids = prepareIds($ids);
-        $where_clause = !empty($ids) ? ' WHERE ulf_ID IN ('. implode(',', $ids) .')' : '';
+        $whereClause = !empty($ids) ? ' WHERE ulf_ID IN ('. implode(',', $ids) .')' : '';
     }
 
     // Set headers
@@ -336,36 +337,42 @@ function downloadFileReferences($system, $ids){
 
     // retrieve file details
     $mysqli = $system->getMysqli();
-    $file_query = 'SELECT ulf_ID, ulf_FileName, ulf_ExternalFileReference, ulf_ObfuscatedFileID, ulf_FilePath, ulf_Description, ulf_MimeExt, ulf_FileSizeKB,
+    $fileQuery = "SELECT ulf_ID, ulf_FileName, ulf_ExternalFileReference, ulf_ObfuscatedFileID, ulf_FilePath, ulf_Description, ulf_MimeExt, ulf_FileSizeKB,
                     ugr_Name, ulf_Added, ulf_Modified, ulf_OrigFileName, ulf_Caption, ulf_Copyright, ulf_Copyowner
                    FROM recUploadedFiles
-                   LEFT JOIN sysUGrps ON ulf_UploaderUGrpID = ugr_ID' . $where_clause;
+                   LEFT JOIN sysUGrps ON ulf_UploaderUGrpID = ugr_ID {$whereClause}";
 
-    $res_files = $mysqli->query($file_query);
+    $resFiles = $mysqli->query($fileQuery);
 
-    $err_message = null;
-    if (!$res_files) {
-        $err_message = 'File record details could not be retrieved from database.<br><br>'
+    $errMessage = null;
+    if (!$resFiles) {
+        $errMessage = 'File record details could not be retrieved from database.<br><br>'
                         .(!empty($mysqli->error) ? $mysqli->error :'Unknown error');
     }else{
-        $total_count_rows = mysql__found_rows($mysqli);
-        if($total_count_rows == 0){
-            $err_message = 'Empty result set';
+        $resultCount = mysql__found_rows($mysqli);
+        if($resultCount == 0){
+            $errMessage = 'Empty result set';
         }
     }
 
-    if($err_message!=null){
+    if($errMessage!=null){
         fclose($fd);
 
         header(CTYPE_HTML);
-        echo $err_message;
+        echo $errMessage;
         exit;
     }
 
     // return setup
 
     // write results
-    fputcsv($fd, ["Uploaded_File_ID", "Name", "Path", "Obfuscated URL", "Description", "Caption", "Copyright", "Copy Owner", "File Type", "File Size (in KB)", "Checksum", "Uploaded By", "Added On", "Last Modified", "Original file name", "Referenced by", "New ref H-IDs"], $seperator, "\"", "\\");
+    $headers = ["Uploaded_File_ID", "Name", "Path", "File Size (in KB)", "Referenced by"];
+    if($essentialOnly){
+        $headers[] = "Obfuscated ID";
+    }else{
+        array_push($headers, ...["Obfuscated URL", "Description", "Caption", "Copyright", "Copy Owner", "File Type",  "Checksum", "Uploaded By", "Added On", "Last Modified", "Original file name", "New ref H-IDs"]);
+    }
+    fputcsv($fd, $headers, $seperator, "\"", "\\");
 
     /*
         [0] => File Name
@@ -383,27 +390,33 @@ function downloadFileReferences($system, $ids){
         [12] => Copyright
         [13] => Copyowner
     */
-    while ($details = $res_files->fetch_row()){
+    while ($details = $resFiles->fetch_row()){
 
         $id = array_shift($details);
 
         $name = !empty($details[0]) ? $details[0] : $details[1];
-        $path = !empty($details[3]) ? "{$details[3]}{$name}" : 'External Source';
-        $obf_url = empty($details[2]) ? 'missing' : HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME . '&file=' . $details[2];
-        $file_size = $details[6] == 0 ? 'remote' : $details[6];
+        $path = !empty($details[3]) ? $details[3] : 'External Source';
+        $obfURL = empty($details[2]) ? 'MISSING' : HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME . '&file=' . $details[2];
+        $fileSize = $details[6] == 0 ? 'remote' : $details[6];
 
         $fullpath = !empty($details[0]) ? resolveFilePath( $details[3].$details[0] ) : '';
         $checksum = empty($fullpath) ? 'remote' : md5_file($fullpath);
 
-        $usage_query = "SELECT dtl_RecID FROM recDetails WHERE dtl_UploadedFileID = $id";
-        $recs = mysql__select_list2($mysqli, $usage_query);
-        if(empty($recs)){
-            $recs = [0];
+        $usage_query = "SELECT dtl_RecID FROM recDetails WHERE dtl_UploadedFileID = {$id}";
+        $recIDs = mysql__select_list2($mysqli, $usage_query);
+        if(empty($recIDs)){
+            $recIDs = [0];
         }
 
-        fputcsv($fd, [$id, $name, $path, $obf_url, $details[4], $details[11], $details[12], $details[13], $details[5], $file_size, $checksum, $details[7], $details[8], $details[9], $details[10], implode('|', $recs), ""], $seperator, "\"", "\\");
+        $fields = [$id, $name, $path, $fileSize, implode('|', $recIDs)];
+        if($essentialOnly){
+            $fields[] = $details[2];
+        }else{
+            array_push($fields, ...[$obfURL, $details[4], $details[11], $details[12], $details[13], $details[5], $checksum, $details[7], $details[8], $details[9], $details[10], '']);
+        }
+        fputcsv($fd, $fields,  $seperator, "\"", "\\");
     }
-    $res_files->close();
+    $resFiles->close();
 
     fclose($fd);
 
@@ -470,22 +483,22 @@ function downloadMapMarkers($system, $ids){
 
     $resRecords = $mysqli->query($recodQuery);
 
-    $err_message = null;
+    $errMessage = null;
     if(!$resRecords){
-        $err_message = 'Record details could not be retrieved from database.<br><br>'
+        $errMessage = 'Record details could not be retrieved from database.<br><br>'
                         .(!empty($mysqli->error) ? $mysqli->error :'Unknown error');
     }else{
-        $total_count_rows = mysql__found_rows($mysqli);
-        if($total_count_rows == 0){
-            $err_message = 'Empty result set';
+        $resultCount = mysql__found_rows($mysqli);
+        if($resultCount == 0){
+            $errMessage = 'Empty result set';
         }
     }
 
-    if($err_message!=null){
+    if($errMessage!=null){
         fclose($fd);
 
         header(CTYPE_HTML);
-        echo $err_message;
+        echo $errMessage;
         exit;
     }
 
