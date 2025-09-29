@@ -2164,4 +2164,98 @@ function saveIniFile($file, $data, $keyAsSection = false){
     return $result;
 }
 
+function getFileDetailsForNakala($mysqli, $ulfID){
+
+    $ulfID = intval($ulfID);
+    if($ulfID <= 0){
+        return [false, 'Invalid file ID provided'];
+    }
+
+    $fileQuery = "SELECT ulf_OrigFileName, concat(ulf_FilePath, ulf_FileName) AS 'fullPath', fxm_MimeType, ulf_Description, concat(ugr_FirstName, ' ', ugr_LastName) AS 'fullName', DATE(ulf_Added)
+    FROM recUploadedFiles, defFileExtToMimetype, sysUGrps
+    WHERE ulf_ID = {$ulfID} AND ulf_MimeExt = fxm_Extension AND ulf_UploaderUGrpID = ugr_ID";
+
+    $fileResult = $mysqli->query($fileQuery);
+    if(!$fileResult){ // another mysql error, skip
+        return [false, FILE_NO . $ulfID . R_ARROW . $mysqli->error];
+    }
+
+    /** $file_dtl:
+     * [0] => title
+     * [1] => file path
+     * [2] => mime type
+     * [3] => description
+     * [4] => Uploader's full name
+     * [5] => created date (no time)
+     */
+    $fileDetails = $fileResult->fetch_row();
+    $filePath = resolveFilePath($fileDetails[1]);
+    if(!file_exists($filePath)){
+        return [false, FILE_NO . $ulfID . R_ARROW . 'Unable to locate the local file for transfer'];
+    }
+
+    $file = [
+        'path' => $filePath,
+        'type' => $fileDetails[2],
+        'name' => $fileDetails[0],
+        'description' => $fileDetails[3]
+    ];
+
+    $metaValues = [];
+    $metaValues['title'] = [
+        'value' => $fileDetails[0],
+        'lang' => null,
+        'typeUri' => XML_SCHEMA,
+        'propertyUri' => NAKALA_REPO.'terms#title'
+    ];
+
+    $fileType = $fileDetails[2];
+
+    /** Use fxm_MimeType
+     * Nakala <=> Mime Type
+     * text <=> text | pdf
+     * image <=> image
+     * sound <=> sound | audio
+     * video <=> video
+     * other <=> anything else
+     */
+
+    if(strpos($fileType, 'text') !== false || strpos($fileType, 'pdf') !== false){
+        $fileType = 'http://purl.org/coar/resource_type/c_1843';
+    }elseif(strpos($fileType, 'sound') !== false || strpos($fileType, 'audio') !== false){
+        $fileType = 'http://purl.org/coar/resource_type/c_18cc';
+    }elseif(strpos($fileType, 'image') !== false){
+        $fileType = 'http://purl.org/coar/resource_type/c_c513';
+    }elseif(strpos($fileType, 'video') !== false){
+        $fileType = 'http://purl.org/coar/resource_type/c_12ce';
+    }else{ // other
+        $fileType = 'http://purl.org/coar/resource_type/c_1843';
+    }
+
+    $metaValues['type'] = [
+        'value' => $fileType,
+        'lang' => null,
+        'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
+        'propertyUri' => NAKALA_REPO.'terms#type'
+    ];
+
+    // Current Heurist user
+    $metaValues['alt_creator'] = [
+        'value' => $fileDetails[4],
+        'lang' => null,
+        'typeUri' => XML_SCHEMA,
+        'propertyUri' => 'http://purl.org/dc/terms/creator'
+    ];
+
+    // ulf_Added
+    $metaValues['created'] = [
+        'value' => $fileDetails[5],//date('Y-m-d', $file_dtl[5]),
+        'lang' => null,
+        'typeUri' => XML_SCHEMA,
+        'propertyUri' => NAKALA_REPO.'terms#created'
+    ];
+
+    return [$metaValues, $file];
+}
+
 ?>
