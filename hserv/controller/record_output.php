@@ -59,6 +59,7 @@
 */
 
     use hserv\utilities\USanitize;
+    use hserv\utilities\USystem;
     use hserv\records\export\RecordsExportCSV;
 
     require_once dirname(__FILE__).'/../../autoload.php';
@@ -435,6 +436,8 @@ function downloadFileReferences($system, $ids, $essentialOnly){
  */
 function downloadMapMarkers($system, $ids){
 
+    global $useRewriteRulesForRecordLink;
+
     $ids = prepareIds($ids);
     if(empty($ids)){
 
@@ -502,7 +505,11 @@ function downloadMapMarkers($system, $ids){
         exit;
     }
 
-    $headings = ['Record ID', 'Record Title', 'Record URL'];
+    $baseRecLink = $useRewriteRulesForRecordLink || USystem::checkRewriteRuleEnabled() ?
+        HEURIST_BASE_URL . '?fmt=html&db='. HEURIST_DBNAME .'&recID=' :
+        HEURIST_BASE_URL . HEURIST_DBNAME .'/view/';
+
+    $headings = ['Record ID', 'Record Title', 'Record URL', 'Record Link'];
     $handledFields = [];
     $urlFieldQuery = "SELECT rst_DetailTypeID FROM defRecStructure WHERE LOWER(rst_DisplayName) LIKE '%URL%' AND rst_RecTypeID = ";
     $rows = [];
@@ -574,6 +581,9 @@ function downloadMapMarkers($system, $ids){
                     break;
                 case 'Record URL':
                     $value = $details[2];
+                    break;
+                case 'Record Link':
+                    $value = "{$baseRecLink}{$recID}";
                     break;
                 default:
                     $dtyID = array_search($heading, $handledFields[$recTypeID], true);
