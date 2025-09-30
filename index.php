@@ -123,8 +123,12 @@ if( @$_REQUEST['isalive']==1){
         $format = 'xml';
     }
 
-    redirectURL('redirects/resolver.php?db='.@$_REQUEST['db'].'&recID='.$recid.'&fmt='.$format
-            .(@$_REQUEST['noheader']?'&noheader=1':''));
+    $database = @$_REQUEST['db'];
+    $noheader = @$_REQUEST['noheader'] ? '&noheader=1' : '';
+    $depth = is_numeric(@$_REQUEST['depth']) ? '&depth=' . intval($_REQUEST['depth']) : '';
+
+    redirectURL("redirects/resolver.php?db={$database}&recID={$recid}&fmt={$format}{$noheader}{$depth}");
+
     return;
 
 }elseif (@$_REQUEST['ent']){

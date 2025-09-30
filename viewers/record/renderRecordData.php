@@ -1532,7 +1532,7 @@ function print_private_details($bib) {
     <div class="detailRow fieldRow" style="<?php echo $is_map_popup?CSS_HIDDEN:''?>">
         <div class=detailType>Cite as</div><div class="detail<?php echo $is_map_popup?' truncate" style="max-width:400px;"':'"';?>>
             <a target=_blank class="external-link"
-                href="<?= HEURIST_SERVER_URL.HEURIST_DEF_DIR ?>?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">XML
+                href="<?php echo $system->recordLink($bib['rec_ID'], 'hml');?>">XML
             </a>
             &nbsp;&nbsp;
             <a target=_blank class="external-link"
