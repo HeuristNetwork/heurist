@@ -294,18 +294,18 @@
      */
     function getExternalTranslation($system, $string, $target_language, $source_language = null){
 
-        global $glb_lang_codes, $glb_lang_codes_index, $accessToken_DeepLAPI; // $glb_lang_codes is loaded by initLangCodes
+        global $glb_lang_codes_index, $accessToken_DeepLAPI; // $glb_lang_codes is loaded by initLangCodes
 
         initLangCodes();
 
         // Default list of languages - from https://www.deepl.com/docs-api/general/get-languages
-        $def_languages = array('AR', 'BG', 'CS', 'DA', 'DE', 'EL', 'EN', 'ES', 'ET', 'FI',
-                               'FR', 'HU', 'ID', 'IT', 'JA', 'KO', 'LT', 'LV', 'NB', 'NL',
-                               'PL', 'PT', 'RO', 'RU', 'SK', 'SL', 'SV', 'TR', 'UK', 'ZH');
+        $def_languages = ['AR', 'BG', 'CS', 'DA', 'DE', 'EL', 'EN', 'ES', 'ET', 'FI',
+                          'FR', 'HU', 'ID', 'IT', 'JA', 'KO', 'LT', 'LV', 'NB', 'NL',
+                          'PL', 'PT', 'RO', 'RU', 'SK', 'SL', 'SV', 'TR', 'UK', 'ZH'];
 
         // Retrieve from file, created by daily script
         $language_file = HEURIST_FILESTORE_ROOT . 'DEEPL_languages.json';
-        $deepl_languages = array();
+        $deepl_languages = [];
 
         if(file_exists($language_file)){
             $langs = file_get_contents($language_file);
@@ -324,42 +324,45 @@
             return false;
         }
 
-        $url = '';
-        $additional_headers = array();
-
-        $useragent = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.6) Gecko/2009011913 Firefox/3.0.6';
-
-        $curl_handle = curl_init();
-
-        curl_setopt($curl_handle, CURLOPT_COOKIEFILE, '/dev/null');
-        curl_setopt($curl_handle, CURLOPT_RETURNTRANSFER, 1);//return the output as a string from curl_exec
-        curl_setopt($curl_handle, CURLOPT_NOBODY, 0);
-        curl_setopt($curl_handle, CURLOPT_HEADER, 0);//don't include header in output
-        curl_setopt($curl_handle, CURLOPT_FOLLOWLOCATION, 1);// follow server header redirects
-
-        curl_setopt($curl_handle, CURLOPT_TIMEOUT, '30');// timeout after thirty seconds
-        curl_setopt($curl_handle, CURLOPT_MAXREDIRS, 5);// no more than 5 redirections
-
-        curl_setopt($curl_handle, CURLOPT_USERAGENT, $useragent);
-        curl_setopt($curl_handle, CURLOPT_FAILONERROR, true);
-        curl_setopt($curl_handle, CURLOPT_AUTOREFERER, true);
-
-        // check if the proxy needs to be used, $httpProxyActive defined in heuristConfigIni.php
-        $use_proxy = defined('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE') && HEURIST_HTTP_PROXY_ALWAYS_ACTIVE && defined('HEURIST_HTTP_PROXY');
-
-        if($use_proxy){
-
-            curl_setopt($curl_handle, CURLOPT_PROXY, HEURIST_HTTP_PROXY);
-            if(  defined('HEURIST_HTTP_PROXY_AUTH') ) {
-                curl_setopt($curl_handle, CURLOPT_PROXYUSERPWD, HEURIST_HTTP_PROXY_AUTH);
-            }
-        }
-
         // Check auth key has been defined
         if(empty($accessToken_DeepLAPI)){
             $system->addError(HEURIST_ACTION_BLOCKED, 'Deepl API key has not been configured - please ask your system administrator to setup the translator key');
             return false;
         }
+
+        $url = '';
+
+        $useragent = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.6) Gecko/2009011913 Firefox/3.0.6';
+
+        $curlHandle = curl_init();
+        $curlOptions = [
+
+            CURLOPT_COOKIEFILE => '/dev/null',
+            CURLOPT_RETURNTRANSFER => true, // return the output as a string from curl_exec
+            CURLOPT_NOBODY => false,
+            CURLOPT_HEADER => false, // don't include header in output
+            CURLOPT_FOLLOWLOCATION => true, // follow server header redirects
+
+            CURLOPT_TIMEOUT => 30, // timeout after thirty seconds
+            CURLOPT_MAXREDIRS => 5, // no more than 5 redirections
+
+            CURLOPT_USERAGENT => $useragent,
+            CURLOPT_FAILONERROR => true,
+            CURLOPT_AUTOREFERER => true
+        ];
+
+        // check if the proxy needs to be used, $httpProxyActive defined in heuristConfigIni.php
+        $use_proxy = defined('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE') && HEURIST_HTTP_PROXY_ALWAYS_ACTIVE && defined('HEURIST_HTTP_PROXY');
+        if($use_proxy){
+            $curlOptions[CURLOPT_PROXY] = HEURIST_HTTP_PROXY;
+            if(defined('HEURIST_HTTP_PROXY_AUTH')){
+                $curlOptions[CURLOPT_PROXYUSERPWD] = HEURIST_HTTP_PROXY_AUTH;
+            }
+        }
+
+        $curlOptions[CURLOPT_HTTPHEADER] = ["Authorization: DeepL-Auth-Key {$accessToken_DeepLAPI}"];
+
+        curl_setopt_array($curlHandle, $curlOptions);
 
         // Handle target language
         if(strlen($target_language) == 3){ // get ar2
@@ -379,7 +382,8 @@
          * free => api-free.deepl.com
          * pro => api.deepl.com
          */
-        $url = 'https://api-free.deepl.com/v2/translate?text=' . urlencode($string) . '&target_lang=' . $target_language;
+        $string = urlencode($string);
+        $url = "https://api-free.deepl.com/v2/translate?text={$string}&target_lang={$target_language}";
 
         // Handle source language
         if(!empty($source_language) && strlen($source_language) == 3){ // get ar2
@@ -388,7 +392,7 @@
 
         if(!empty($source_language) && in_array($source_language, $deepl_languages)){
             $k = array_search($source_language, $deepl_languages);
-            $url .= '&source_lang=' . $deepl_languages[$k];
+            $url .= "&source_lang={$deepl_languages[$k]}";
         }
 
         if($is_xml){ // possible xml
@@ -397,27 +401,21 @@
             $url .= '&tag_handling=html';
         }
 
-        $additional_headers = array('Authorization: DeepL-Auth-Key ' . $accessToken_DeepLAPI);
+        curl_setopt($curlHandle, CURLOPT_URL, $url);
+        $data = curl_exec($curlHandle);
 
-        if(is_array($additional_headers) && !empty($additional_headers)){
-            curl_setopt($curl_handle, CURLOPT_HTTPHEADER, $additional_headers);
-        }
-
-        curl_setopt($curl_handle, CURLOPT_URL, $url);
-        $data = curl_exec($curl_handle);
-
-        $error = curl_error($curl_handle);
+        $error = curl_error($curlHandle);
 
         if($error){
 
             $hmsg = '';// Heurist's error message
             $herror = HEURIST_UNKNOWN_ERROR;
-            $code = intval(curl_getinfo($curl_handle, CURLINFO_HTTP_CODE));
+            $code = intval(curl_getinfo($curlHandle, CURLINFO_HTTP_CODE));
 
             switch ($code) {
 
                 // Deepl error codes: https://support.deepl.com/hc/en-us/articles/9773964275868-DeepL-API-error-messages
-                //
+
                 case 400: // Missing parameter
                     $herror = HEURIST_INVALID_REQUEST;
                     $hmsg = 'Deepl was unable to complete this request.<br>'
@@ -457,7 +455,7 @@
                     $herror = HEURIST_ACTION_BLOCKED;
                     $hmsg = 'The request to Deepl\'s services was too large to process.<br>'
                            .'Please either:<br>'
-                           .'Split the value into smaller parts and then re-combine them once finished, or '
+                           .'Split the value into smaller parts and then re-combine them once finished, or<br>'
                            .'Make a bug report including which record and field you were attempting to translate and into which language.';
                     break;
 
@@ -468,10 +466,11 @@
                     break;
 
                 default: // unknown error or no additional handling
-                    $herror = HEURIST_REQUEST_DENIED; //HEURIST_UNKNOWN_ERROR
+                    $herror = HEURIST_UNKNOWN_ERROR;
                     $hmsg = 'An unknown error occurred with Deepl\'s services.<br>'
                            .'Please re-try your request in a few minutes.<br>'
-                           .'If this problem persists, please make a bug report.';
+                           .'If this problem persists, please make a bug report.<br><br>'
+                           .'Response error: <strong>' . $error . '</strong>';
                     break;
             }
 
