@@ -109,6 +109,7 @@ $.widget( "heurist.mapping", {
         recviewer_images: 1,  // show images in record viewer; 0 - show all images, 1 - no linked media, 2 - no images
 
         clusterTemplate: 'default',
+        clusterDownloadTemplate: '',
         clusterDownloadText: 'download'
     },
     
@@ -2524,9 +2525,50 @@ $.widget( "heurist.mapping", {
         }});
 
         let $selDownloadTemplate = $(this.main_popup._container).find('.downloadTemplate');
-        let $selDownloadLink = $(this.main_popup._container).find('.downloadLink')
+        let $selDownloadLink = $(this.main_popup._container).find('.downloadLink');
+
+        let onDownloadTemplateChange = () => {
+
+            let format = $selDownloadTemplate.val();
+            if(window.hWin.HEURIST4.util.isempty(format)){
+                return;
+            }
+
+            $selDownloadLink.show();
+            if($selDownloadTemplate.hSelect('instance') !== undefined){
+                $selDownloadTemplate.hSelect('widget').hide();
+            }else{
+                $selDownloadTemplate.hide();
+            }
+
+            let recIDs = [];
+            $(this.main_popup._container).find('.leaflet_layer_opt').each((idx, ele) => {
+                recIDs.push(ele.getAttribute('data-recid'));
+            });
+
+            let url = '';
+            if(format === 'def'){
+                url = `${window.hWin.HAPI4.baseURL}hserv/controller/record_output.php?db=${window.hWin.HAPI4.database}&mapmarker_csv=1&ids=${recIDs.join(',')}`;
+            }else{
+                url = `${window.hWin.HAPI4.baseURL}?template=${format}&q=ids:${recIDs.join(',')}&db=${window.hWin.HAPI4.database}`;
+            }
+            window.open(url, '_blank');
+
+            $selDownloadTemplate.val('');
+
+            if($selDownloadTemplate.hSelect('instance') !== undefined){
+                $selDownloadTemplate.hSelect('refresh');
+            }
+        };
+
         this._on($selDownloadLink, {
             click: () => {
+
+                if(window.hWin.HEURIST4.util.isempty(this.options.clusterDownloadTemplate)){ // default template only
+                    $selDownloadTemplate.val('def').trigger('change');
+                    return;                    
+                }
+
                 $selDownloadLink.hide();
                 if($selDownloadTemplate.hSelect('instance') !== undefined){
                     $selDownloadTemplate.hSelect('widget').show();
@@ -2536,6 +2578,15 @@ $.widget( "heurist.mapping", {
             }
         });
 
+        if(window.hWin.HEURIST4.util.isempty(this.options.clusterDownloadTemplate)){
+            $('<option>', {value: 'def', title: 'Default format'}).appendTo($selDownloadTemplate);
+            this._on($selDownloadTemplate, {
+                change: onDownloadTemplateChange
+            });
+            $selDownloadTemplate.uniqueId();
+            return;
+        }
+
         window.hWin.HEURIST4.ui.createTemplateSelector($selDownloadTemplate, [
             {key: '', title: 'select a download format...'},
             {key: 'def', title: 'Default CSV format'}
@@ -2543,36 +2594,20 @@ $.widget( "heurist.mapping", {
             useHtmlSelect: true,
             onComplete: () => {
 
-                $selDownloadTemplate.hSelect({
-                    change: () => {
-
-                        let format = $selDownloadTemplate.val();
-                        if(window.hWin.HEURIST4.util.isempty(format)){
+                if(!window.hWin.HEURIST4.util.isempty(this.options.clusterDownloadTemplate) && this.options.clusterDownloadTemplate !== 'all'){
+                    $.each($selDownloadTemplate.find('option'), (idx, option) => {
+                        if(idx <= 1){ // 0 - Placeholder, 1 - Default format
                             return;
                         }
-
-                        $selDownloadLink.show();
-                        if($selDownloadTemplate.hSelect('instance') !== undefined){
-                            $selDownloadTemplate.hSelect('widget').hide();
-                        }else{
-                            $selDownloadTemplate.hide();
+                        if(option.value !== this.options.clusterDownloadTemplate){
+                            option.setAttribute('disabled', true);
+                            option.setAttribute('hidden', true);
                         }
+                    });
+                }
 
-                        let recIDs = [];
-                        $(this.main_popup._container).find('.leaflet_layer_opt').each((idx, ele) => {
-                            recIDs.push(ele.getAttribute('data-recid'));
-                        });
-
-                        let url = '';
-                        if(format === 'def'){
-                            url = `${window.hWin.HAPI4.baseURL}hserv/controller/record_output.php?db=${window.hWin.HAPI4.database}&mapmarker_csv=1&ids=${recIDs.join(',')}`;
-                        }else{
-                            url = `${window.hWin.HAPI4.baseURL}?template=${format}&q=ids:${recIDs.join(',')}&db=${window.hWin.HAPI4.database}`;
-                        }
-                        window.open(url, '_blank');
-
-                        $selDownloadTemplate.val('').hSelect('refresh');
-                    },
+                $selDownloadTemplate.hSelect({
+                    change: onDownloadTemplateChange,
                     open: () => { this.main_popup.options.autoClose = false; },
                     close: () => { this.main_popup.options.autoClose = true; }
                 });
@@ -3583,6 +3618,9 @@ $.widget( "heurist.mapping", {
 
         if(params['clusterTemplate']){
             this.options.clusterTemplate = params['clusterTemplate'];
+        }
+        if(params['clusterDownloadTemplate']){
+            this.options.clusterDownloadTemplate = params['clusterDownloadTemplate'];
         }
         if(params['clusterDownloadText']){
             this.options.clusterDownloadText = params['clusterDownloadText'];

@@ -303,6 +303,9 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     if(opts.layout_params['clusterTemplate']){
                         $dlg.find('select[name="map_clusterTemplate"]').attr('data-template', opts.layout_params['clusterTemplate']);        
                     }
+                    if(opts.layout_params['clusterDownloadTemplate']){
+                        $dlg.find('select[name="map_clusterDownloadTemplate"]').attr('data-template', opts.layout_params['clusterDownloadTemplate']);        
+                    }
                     if(opts.layout_params['clusterDownloadText']){
                         $dlg.find('#map_clusterDownloadText').val(opts.layout_params['clusterDownloadText']);        
                     }
@@ -965,7 +968,12 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 window.hWin.HEURIST4.ui.createTemplateSelector( $selectClusterTemplate
                     ,[{key:'',title:'Default cluster popup'}], $selectMapTemplate.attr('data-template')
                     , {extraOptions: {menu_parent: $dlg}});
-                    //,{key:'none',title:'Disable popup'}
+
+                let $selectClusterDownloadTemplate = $dlg.find('select[name="map_clusterDownloadTemplate"]'); 
+
+                window.hWin.HEURIST4.ui.createTemplateSelector( $selectClusterDownloadTemplate
+                    ,[{key:'',title:'Default format only'},{key:'',title:'All available reports'}], $selectMapTemplate.attr('data-template')
+                    , {extraOptions: {menu_parent: $dlg}});
 
                 //======================================
                     
@@ -1280,6 +1288,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             layout_params['published'] = 1;
             layout_params['template'] = $dlg.find('select[name="map_template"]').val();
             layout_params['clusterTemplate'] = $dlg.find('select[name="map_clusterTemplate"]').val();
+            layout_params['clusterDownloadTemplate'] = $dlg.find('select[name="map_clusterDownloadTemplate"]').val();
             layout_params['basemap'] = $dlg.find('select[name="map_basemap"]').val();
             layout_params['basemaps'] = $dlg.find('input[name="basemaps"]').val();
             layout_params['basemap_filter'] = $dlg.find('input[name="map_basemap_filter"]').val();
