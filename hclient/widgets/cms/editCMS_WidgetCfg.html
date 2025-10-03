@@ -24,6 +24,7 @@
             <li><a href="#tools">Tools</a></li> <!-- Custom report widget -->
             <li><a href="#layers">Layers</a></li> <!-- Map widget -->
             <li><a href="#infobox">Infobox</a></li> <!-- Map widget, Normal record viewer / report popup -->
+            <li><a href="#clusters">Cluster</a></li> <!-- Map widget -->
             <li><a href="#image_blog">Images/blog</a></li> <!-- Result list widget -->
             <li><a href="#story">Map</a></li> <!-- Story map widget -->
             <li><a href="#story_overview">Overview</a></li> <!-- Story map widget, Overview and End page -->
@@ -463,11 +464,11 @@
 
                     <div>
                         Block zoom-in below&nbsp;&nbsp;
-                        <input name="map_maxzoom" type="number" min="0" value="0" placeholder="" style="width:35px"> km,
+                        <input name="map_maxzoom" type="number" min="0" value="0" style="width:35px"> km,
                         <label>&nbsp;&nbsp;above&nbsp;&nbsp;
-                        <input name="map_minzoom" type="number" min="0" value="0" placeholder="" style="width:35px"> km,</label><br>
+                        <input name="map_minzoom" type="number" min="0" value="0" style="width:35px"> km,</label><br>
                         <label>Zoom to point&nbsp;&nbsp;
-                        <input name="map_pntzoom" type="number" min="0" value="5" placeholder="" style="width:35px"> km</label>
+                        <input name="map_pntzoom" type="number" min="0" value="5" style="width:35px"> km</label>
 
                         <br>
 
@@ -689,9 +690,19 @@
 
         </div>
 
-        <div id="infobox"> <!-- Record / Report popup -->
+        <div id="clusters"> <!-- Map widget -->
 
             <fieldset><legend style="display:none"></legend>
+
+                <div class="heurist_Map">
+
+                    <div class="header">
+                        Maximum size for marker cluster spiderfy&nbsp;
+                    </div>
+
+                    <input id="map_clusterSpiderMax" name="map_clusterSpiderMax" class="text ui-widget-content ui-corner-all" style="width: 5em;" min="0" step="1" title="Size of the spiderify" type="number" value="6" />
+
+                </div>
 
                 <div class="heurist_Map">
 
@@ -724,6 +735,14 @@
                     <input id="map_clusterDownloadText" name="map_clusterDownloadText" class="text ui-widget-content ui-corner-all"/>
 
                 </div>
+
+            </fieldset>
+
+        </div>
+
+        <div id="infobox"> <!-- Record / Report popup -->
+
+            <fieldset><legend style="display:none"></legend>
 
                 <div class="heurist_Map">
 
@@ -895,7 +914,7 @@
                         Duration for zoom on map:
                     </div>
 
-                    <input name="zoomAnimationTime" class="text ui-widget-content ui-corner-all" width="60px" min="0" max="20000" step="100" title="" type="number" placeholder="5000"/>
+                    <input name="zoomAnimationTime" class="text ui-widget-content ui-corner-all" style="width:60px" min="0" max="20000" step="100" type="number" value="5000"/>
 
                 </div>
 

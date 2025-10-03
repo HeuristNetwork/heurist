@@ -306,6 +306,9 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     if(opts.layout_params['clusterDownloadTemplate']){
                         $dlg.find('select[name="map_clusterDownloadTemplate"]').attr('data-template', opts.layout_params['clusterDownloadTemplate']);        
                     }
+                    if(opts.layout_params['clusterSpiderMax']){
+                        $dlg.find('#map_clusterSpiderMax').val(opts.layout_params['clusterSpiderMax']);        
+                    }
                     if(opts.layout_params['clusterDownloadText']){
                         $dlg.find('#map_clusterDownloadText').val(opts.layout_params['clusterDownloadText']);        
                     }
@@ -972,7 +975,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 let $selectClusterDownloadTemplate = $dlg.find('select[name="map_clusterDownloadTemplate"]'); 
 
                 window.hWin.HEURIST4.ui.createTemplateSelector( $selectClusterDownloadTemplate
-                    ,[{key:'',title:'Default format only'},{key:'',title:'All available reports'}], $selectMapTemplate.attr('data-template')
+                    ,[{key:'',title:'Default format only'}], $selectMapTemplate.attr('data-template')
                     , {extraOptions: {menu_parent: $dlg}});
 
                 //======================================
@@ -1339,6 +1342,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             layout_params['style'] = $dlg.find('#map_default_style').val();   
             layout_params['selection_style'] = $dlg.find('#map_select_style').val();
 
+            layout_params['clusterSpiderMax'] = $dlg.find('#map_clusterSpiderMax').val();
             layout_params['clusterDownloadText'] = $dlg.find('#map_clusterDownloadText').val();
 
             opts['layout_params'] = layout_params;

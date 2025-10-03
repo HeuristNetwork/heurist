@@ -108,6 +108,7 @@ $.widget( "heurist.mapping", {
 
         recviewer_images: 1,  // show images in record viewer; 0 - show all images, 1 - no linked media, 2 - no images
 
+        clusterSpiderMax: 6,
         clusterTemplate: 'default',
         clusterDownloadTemplate: '',
         clusterDownloadText: 'download'
@@ -2030,7 +2031,7 @@ $.widget( "heurist.mapping", {
 
                         if(a.layer.getAllChildMarkers().length <= that.markerClusterMaxSpider){
                             a.layer.spiderfy(); 
-                        }else if(this.options.clusterTemplate && this.options.clusterTemplate !== 'default'){
+                        }else if(that.options.clusterTemplate && that.options.clusterTemplate !== 'default'){
 
                             let recIDs = [];
                             $.each(markers, (i, top_layer) => {    
@@ -2040,10 +2041,10 @@ $.widget( "heurist.mapping", {
                                 }
                             });
 
-                            let popupURL = `${window.hWin.HAPI4.baseURL}?template=${format}&q=ids:${recIDs.join(',')}&db=${window.hWin.HAPI4.database}`;
+                            let popupURL = `${window.hWin.HAPI4.baseURL}?template=${that.options.clusterTemplate}&q=ids:${recIDs.join(',')}&db=${window.hWin.HAPI4.database}`;
                             $.get(popupURL, (responseTxt, statusTxt) => {
                                 if(statusTxt == "success"){
-                                    this._showContentInPopup(latlng, responseTxt);
+                                    that._showContentInPopup(latlng, responseTxt);
                                 }
                             });
                         }else{
@@ -2444,7 +2445,7 @@ $.widget( "heurist.mapping", {
 
                 if(found_cnt > 1){
                     if(this.options.clusterTemplate && this.options.clusterTemplate !== 'default'){
-                        let popupURL = `${window.hWin.HAPI4.baseURL}?template=${format}&q=ids:${recIDs.join(',')}&db=${window.hWin.HAPI4.database}`;
+                        let popupURL = `${window.hWin.HAPI4.baseURL}?template=${this.options.clusterTemplate}&q=ids:${recIDs.join(',')}&db=${window.hWin.HAPI4.database}`;
                         $.get(popupURL, (responseTxt, statusTxt) => {
                             if(statusTxt == "success"){
                                 this._showContentInPopup(latlng, responseTxt);
@@ -2478,6 +2479,11 @@ $.widget( "heurist.mapping", {
         this.main_popup.setLatLng(latlng)
                         .setContent(content)
                         .openOn(this.nativemap);
+
+        $(this.main_popup.getElement()).css({
+            width: '25em'
+        });
+
     },
 
     //
@@ -2493,10 +2499,6 @@ $.widget( "heurist.mapping", {
                             <span class="downloadLink" style="color: blue; cursor: pointer;">${this.options.clusterDownloadText}</span>
                             <select class="downloadTemplate" style="display: none;"></select></p>
                             <div style="width:100%;max-height: 170px;overflow-y: auto;border: none;outline: none; cursor:pointer">${sText}</div>`);
-
-        $(this.main_popup.getElement()).css({
-            width: '300px'
-        });
 
         let that = this;
             
@@ -3549,7 +3551,7 @@ $.widget( "heurist.mapping", {
             
             this.markerClusterGridSize = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_grid', 50));
             this.markerClusterMaxZoom = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_zoom', 18));
-            this.markerClusterMaxSpider = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_spider', 6));
+            this.markerClusterMaxSpider = Number.parseInt(this.options.clusterSpiderMax, 10) || window.hWin.HAPI4.get_prefs_def('mapcluster_spider', 6);
         }
         
         
@@ -3624,6 +3626,10 @@ $.widget( "heurist.mapping", {
         }
         if(params['clusterDownloadText']){
             this.options.clusterDownloadText = params['clusterDownloadText'];
+        }
+        if(params['clusterSpiderMax']){
+            this.options.clusterSpiderMax = Number.parseInt(params['clusterSpiderMax'], 10) || 6;
+            this.markerClusterMaxSpider = this.options.clusterSpiderMax;
         }
 
         //special case - till thematic map is not developed - for custom style

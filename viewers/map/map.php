@@ -287,6 +287,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         layout_params['controls'] = __gp('controls');//comma separated list of visible controls
         layout_params['legend'] = __gp('legend');//legend configuration: csv basemaps,mapdocs,search,off,width
         layout_params['template'] = __gp('template');//smarty template for popup info
+        layout_params['clusterSpiderMax'] = __gp('clusterSpiderMax');//how big the cluster can be for spiderfy, before using the popup
         layout_params['clusterTemplate'] = __gp('clusterTemplate');//smarty template for cluster marker popup info
         layout_params['clusterDownloadTemplate'] = __gp('clusterDownloadTemplate');//smarty template for cluster marker info download
         layout_params['clusterDownloadText'] = __gp('clusterDownloadText');//cluster popup download link text
