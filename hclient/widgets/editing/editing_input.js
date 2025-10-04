@@ -4463,8 +4463,8 @@ $.widget( "heurist.editing_input", {
             }});
         }
 
-        let entryMaskAllowed = this.detailType == 'freetext';
-        if(window.hWin.HAPI4.is_admin() && this._isForRecords && this.options.dtID > 0 && entryMaskAllowed){
+        let entryMaskAllowed = window.hWin.HEURIST4.util.isPositiveInt(this.options?.recordset?.recID) && this.options.dtID > 0 && this.detailType == 'freetext';
+        if(window.hWin.HAPI4.is_admin() && entryMaskAllowed){
 
             let $btn_entrymask = $('<span>', {title: 'Edit value entry mask', class: 'smallicon ui-icon ui-icon-input btn_entry_mask show-onhover', style: 'cursor: pointer;'});
             $btn_entrymask.appendTo($inputdiv);
@@ -6553,7 +6553,7 @@ $.widget( "heurist.editing_input", {
                 //for fallback
                 date_keep = date['year']+'-'+date['month']+'-'+date['day'];
             }
- 
+
             try{    
                 let new_cal = from_calendar.newDate(date['year'], date['month'], date['day']);
                 if(!new_cal){

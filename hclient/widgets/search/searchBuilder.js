@@ -706,197 +706,195 @@ $.widget( "heurist.searchBuilder", {
      *              sorting and rulesets. Also sets up language selection if available.
      */
     , _initControls: function(){
+
+        let that = this;
         
-            let that = this;
+        if(this.select_main_rectype==null){
             
-            if(this.select_main_rectype==null){
-                
-                //additional rectypes                
-                this.select_additional_rectypes = this._createInputElement_RecordTypeSelector();
-                this.select_additional_rectypes.hide();
-                
-                this.svs_MultiRtSearch = this.element.find('#svs_MultiRtSearch');
-                
-                this._on(this.svs_MultiRtSearch, {change:function(event){
-                    if(this.select_additional_rectypes.editing_input('instance')){
-                        if(this.svs_MultiRtSearch.is(':checked')){
-                            this.select_additional_rectypes.show();
-                        }else{
-                            
-                            //reset flag - facet was changed - need to proceed all steps of wizard
-                            this.select_additional_rectypes.editing_input('setValue', '');
-                            this.select_additional_rectypes.hide();
-                        }
-                       
-                    }}});
+            //additional rectypes                
+            this.select_additional_rectypes = this._createInputElement_RecordTypeSelector();
+            this.select_additional_rectypes.hide();
             
-                this.pnl_Rectype  = this.element.find('#pnl_Rectype');
-                this.pnl_Tree  = this.element.find('#pnl_Tree');
-                this.pnl_Items = this.element.find('#pnl_Items');
-                this.pnl_CoverAll = this.element.find('#pnl_CoverAll');
-                
-                this.pnl_Result = this.element.find('#pnl_Result');
-                this.btnAddFieldItem = this.pnl_Items.find('.search_field_add');
-
-                this._on(this.btnAddFieldItem, {click:function(event){
-                    
-                    let rty_ID = that.select_main_rectype.val();
-                    that.addFieldItem( 'any:anyfield', [rty_ID , 'anyfield'] );
-                }});
-                
-                this._on(this.pnl_Tree, {click:function(event){
-                        event.stopPropagation(); 
-                }});
-
-                // sortby accordion header
-                this.sortbySection = this.pnl_Items.find('#sortby_accordion').accordion({heightStyle: "content",active: false,collapsible: true});
-
-                //
-                //
-                this.btnAddSortItem = this.pnl_Items.find('.sort_field_add');
-
-                this._on(this.btnAddSortItem, {click:function(event){
-                    
-                    that.addSortItem();
-					this.sortbySection.find('#sortby_header #sortby_values').text(this.sortbySection.find('#sortby_header #sortby_values').text() + ', record title');
-                }});
-                
-                this.search_conjunction = this.pnl_Items.find('.search_conjunction').find('select');
-                this._on(this.search_conjunction, {change:this._doCompose});
-                
-                this._on(this.pnl_Rectype.find('#btn-clear').button(), { click:this.clearAll });
-
-                // ruleset accordion headers
-                this.rulesetSection = this.pnl_Items.find('#ruleset_accordion').accordion({heightStyle: 'content', active: false, collapsible: true});
-
-                this._on(this.rulesetSection.find("#svs_RulesOnly"),{
-                    'change': function(event){
-                        this.rulesetSection.find("#divRulesOnly").css('display', $(event.target).is(':checked') ? 'inline-block' : 'none');
-                    }
-                });
-
-                this.rulesetSection.find("#svs_Rules_edit")
-                .button({icon:"ui-icon-pencil", showLabel:false})
-                .attr('title', window.hWin.HR('Edit RuleSet'))
-                .css({'height':'16px', 'width':'16px'})
-                .on('click', function( event ) {
-                    that._editRules();
-                });
-
-                this.rulesetSection.find("#svs_Rules_clear")
-                .button({icon:"ui-icon-close", showLabel:false})
-                .attr('title', window.hWin.HR('Clear RuleSet'))
-                .css({'height':'16px', 'width':'16px'})
-                .on('click', function( event ) {
-                    that.rulesetSection.find('#svs_Rules').val('');
-                });
-            }
+            this.svs_MultiRtSearch = this.element.find('#svs_MultiRtSearch');
             
-            
-            if(this.select_main_rectype==null || this.options.rty_ID>0){            
-                this.refreshRectypeMenu();
-            }
-            
-            if(this.select_language == null && this.element.find('#opt_language').length > 0){
-
-                this.select_language = this.element.find('#opt_language');
-                let options = [{title: 'ANY', key: '*', selected: true}, {title: 'Default', key: ''}];
-                this.select_language = window.hWin.HEURIST4.ui.createLanguageSelect(this.select_language, options, '*', false,
-                {onSelectMenu: function(){
-                        // Update language of dropdowns
-                        let lang = that.select_language.val();
-                        $.each(this.field_array, function(i, ele){
-
-                            let code = ele.searchBuilderItem('getCodes');
-                            let codes = code.split(':');
-
-                            if($Db.dty(codes[codes.length-1], 'dty_Type') == 'enum'){
-                                ele.searchBuilderItem('changeOptions',{
-                                    language: lang
-                                });
-                            }
-                        });
-                    }});
-
-
-                this.select_language.hSelect('widget').css({width: '100px', 'min-width': '100px'});
-
-                this.element.find('.filter-language').attr('title', 'Specify the language of the values dropdown and of the search.\n'
-                    + 'ANY will search across the default language and all translated terms or texts.\n'
-                    + 'Default is the default language used in construction of the database.');
-            }
-            
-            if(!this.options.is_dialog && this.pnl_Rectype){
-                //add header and button set for inline mode
-                let h = this.element.find('.btn-preview').is(':checked') ?'88px':'50px';
-
-                this.element.css({'font-size':'0.9em'});
-                this.pnl_Rectype.css({top:'35px'}); //,height:'30px'
-                this.pnl_Tree.css({top:35}); //, bottom:h
-                this.pnl_Items.css({bottom:h});
-                this.pnl_CoverAll.css({top:'85px', bottom:h});
-                this.pnl_Result.css({bottom:'40px'});
-                let _innerTitle = $('<div class="ui-heurist-header" style="top:0px;padding-left:10px;text-align:left">Filter builder</div>')
-                    .insertBefore(this.pnl_Rectype);
-                
-                this._on(    
-                $('<button>').button({icon:'ui-icon-closethick',showLabel:false, label:'Close'}) 
-                     .css({'position':'absolute', 'right':'4px', 'top':'6px', height:20, width:20})
-                     .appendTo(_innerTitle),
-                     {click:function(){
-                         that.closeDialog();
-                     }});
-                    
-                    
-                //button panel on the botom                        
-                let ele = this.element.find('.popup_buttons_div').show();
-            
-                ele.find('.btn-search').button({icon:'ui-icon-filter'});
-                this._on(ele.find('.btn-search'),{click:this._doSearch});
-
-                ele.find('.btn-save').button().hide();
-                this._on(ele.find('.btn-save'),{click:this._doSaveSearch});
-                
-                this._on(ele.find('.btn-preview'),{change:function(e){
-                    
-                    let h;
-                    if(this.element.find('.btn-preview').is(':checked')){
-                        h = this.options.is_dialog ? '50px':'88px';                       
-                        this.pnl_Result.show();
-                        this._doCompose();
+            this._on(this.svs_MultiRtSearch, {change:function(event){
+                if(this.select_additional_rectypes.editing_input('instance')){
+                    if(this.svs_MultiRtSearch.is(':checked')){
+                        this.select_additional_rectypes.show();
                     }else{
-                        h = this.options.is_dialog ? '0px':'50px';                       
-                        this.pnl_Result.hide();
+                        
+                        //reset flag - facet was changed - need to proceed all steps of wizard
+                        this.select_additional_rectypes.editing_input('setValue', '');
+                        this.select_additional_rectypes.hide();
                     }
-                        this.pnl_Items.css('bottom',h);
-                        this.pnl_CoverAll.css('bottom',h);
-                       
-                }});
+                    
+                }}});
+        
+            this.pnl_Rectype  = this.element.find('#pnl_Rectype');
+            this.pnl_Tree  = this.element.find('#pnl_Tree');
+            this.pnl_Items = this.element.find('#pnl_Items');
+            this.pnl_CoverAll = this.element.find('#pnl_CoverAll');
+            
+            this.pnl_Result = this.element.find('#pnl_Result');
+            this.btnAddFieldItem = this.pnl_Items.find('.search_field_add');
+
+            this._on(this.btnAddFieldItem, {click:function(event){
                 
+                let rty_ID = that.select_main_rectype.val();
+                that.addFieldItem( 'any:anyfield', [rty_ID , 'anyfield'] );
+            }});
+            
+            this._on(this.pnl_Tree, {click:function(event){
+                    event.stopPropagation(); 
+            }});
+
+            // sortby accordion header
+            this.sortbySection = this.pnl_Items.find('#sortby_accordion').accordion({heightStyle: "content",active: false,collapsible: true});
+
+            //
+            //
+            this.btnAddSortItem = this.pnl_Items.find('.sort_field_add');
+
+            this._on(this.btnAddSortItem, {click:function(event){
                 
-                this._on(ele.find('.btn-copy'),{click:function(e){
-                        let s = this.pnl_Result.text();
-                        if(s) window.hWin.HEURIST4.util.copyStringToClipboard(s);
-                }});
-                
-                $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, function(e, data){
-                    if(that.running_filter){
-                        that.running_filter = false;
-                        if(that.element.find('.save-filter').is(':checked')){
-                            that._doSaveSearch();
+                that.addSortItem();
+                this.sortbySection.find('#sortby_header #sortby_values').text(this.sortbySection.find('#sortby_header #sortby_values').text() + ', record title');
+            }});
+            
+            this.search_conjunction = this.pnl_Items.find('.search_conjunction').find('select');
+            this._on(this.search_conjunction, {change:this._doCompose});
+            
+            this._on(this.pnl_Rectype.find('#btn-clear').button(), { click:this.clearAll });
+
+            // ruleset accordion headers
+            this.rulesetSection = this.pnl_Items.find('#ruleset_accordion').accordion({heightStyle: 'content', active: false, collapsible: true});
+
+            this._on(this.rulesetSection.find("#svs_RulesOnly"),{
+                'change': function(event){
+                    this.rulesetSection.find("#divRulesOnly").css('display', $(event.target).is(':checked') ? 'inline-block' : 'none');
+                }
+            });
+
+            this.rulesetSection.find("#svs_Rules_edit")
+            .button({icon:"ui-icon-pencil", showLabel:false})
+            .attr('title', window.hWin.HR('Edit RuleSet'))
+            .css({'height':'16px', 'width':'16px'})
+            .on('click', function( event ) {
+                that._editRules();
+            });
+
+            this.rulesetSection.find("#svs_Rules_clear")
+            .button({icon:"ui-icon-close", showLabel:false})
+            .attr('title', window.hWin.HR('Clear RuleSet'))
+            .css({'height':'16px', 'width':'16px'})
+            .on('click', function( event ) {
+                that.rulesetSection.find('#svs_Rules').val('');
+            });
+        }
+        
+        
+        if(this.select_main_rectype==null || this.options.rty_ID>0){            
+            this.refreshRectypeMenu();
+        }
+        
+        if(this.select_language == null && this.element.find('#opt_language').length > 0){
+
+            this.select_language = this.element.find('#opt_language');
+            let options = [{title: 'ANY', key: '*', selected: true}, {title: 'Default', key: ''}];
+            this.select_language = window.hWin.HEURIST4.ui.createLanguageSelect(this.select_language, options, '*', false,
+            {onSelectMenu: function(){
+                    // Update language of dropdowns
+                    let lang = that.select_language.val();
+                    $.each(this.field_array, function(i, ele){
+
+                        let code = ele.searchBuilderItem('getCodes');
+                        let codes = code.split(':');
+
+                        if($Db.dty(codes[codes.length-1], 'dty_Type') == 'enum'){
+                            ele.searchBuilderItem('changeOptions',{
+                                language: lang
+                            });
                         }
+                    });
+                }});
+
+
+            this.select_language.hSelect('widget').css({width: '100px', 'min-width': '100px'});
+
+            this.element.find('.filter-language').attr('title', 'Specify the language of the values dropdown and of the search.\n'
+                + 'ANY will search across the default language and all translated terms or texts.\n'
+                + 'Default is the default language used in construction of the database.');
+        }
+        
+        if(!this.options.is_dialog && this.pnl_Rectype){
+            //add header and button set for inline mode
+            let h = this.element.find('.btn-preview').is(':checked') ?'88px':'50px';
+
+            this.element.css({'font-size':'0.9em'});
+            this.pnl_Rectype.css({top:'35px'}); //,height:'30px'
+            this.pnl_Tree.css({top:35}); //, bottom:h
+            this.pnl_Items.css({bottom:h});
+            this.pnl_CoverAll.css({top:'85px', bottom:h});
+            this.pnl_Result.css({bottom:'40px'});
+            let _innerTitle = $('<div class="ui-heurist-header" style="top:0px;padding-left:10px;text-align:left">Filter builder</div>')
+                .insertBefore(this.pnl_Rectype);
+            
+            this._on(    
+            $('<button>').button({icon:'ui-icon-closethick',showLabel:false, label:'Close'}) 
+                    .css({'position':'absolute', 'right':'4px', 'top':'6px', height:20, width:20})
+                    .appendTo(_innerTitle),
+                    {click:function(){
+                        that.closeDialog();
+                    }});
+                
+                
+            //button panel on the botom                        
+            let ele = this.element.find('.popup_buttons_div').show();
+        
+            ele.find('.btn-search').button({icon:'ui-icon-filter'});
+            this._on(ele.find('.btn-search'),{click:this._doSearch});
+
+            ele.find('.btn-save').button().hide();
+            this._on(ele.find('.btn-save'),{click:this._doSaveSearch});
+            
+            this._on(ele.find('.btn-preview'),{change:function(e){
+                
+                let h;
+                if(this.element.find('.btn-preview').is(':checked')){
+                    h = this.options.is_dialog ? '50px':'88px';                       
+                    this.pnl_Result.show();
+                    this._doCompose();
+                }else{
+                    h = this.options.is_dialog ? '0px':'50px';                       
+                    this.pnl_Result.hide();
+                }
+
+                this.pnl_Items.css('bottom',h);
+                this.pnl_CoverAll.css('bottom',h);                       
+            }});
+
+            this._on(ele.find('.btn-copy'),{click:function(e){
+                let s = this.pnl_Result.text();
+                if(s) window.hWin.HEURIST4.util.copyStringToClipboard(s);
+            }});
+
+            $(this.document).on('keyup', (event) => {
+                if(this.element.is(':visible') && event.key === 'Enter'){
+                    this._doSearch();
+                }
+            });
+            
+            $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, function(e, data){
+                if(that.running_filter){
+                    that.running_filter = false;
+                    if(that.element.find('.save-filter').is(':checked')){
+                        that._doSaveSearch();
                     }
-                });
-            }
-                
-                
-       
-        //window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, $dlg); 
+                }
+            });
+        }
 
         this.adjustDimension();
-        
-        
-        
     },
 
     /**
