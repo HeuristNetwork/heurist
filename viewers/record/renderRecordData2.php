@@ -223,4 +223,3 @@ $title = hr_fetch_record_title($pdo, $recId) ?? ('Record '.$recId);
 })();
 </script>
 
-?>

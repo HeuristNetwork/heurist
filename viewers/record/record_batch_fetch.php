@@ -220,5 +220,3 @@ function hr_group_details_by_field(array $rows): array {
     }
     return $by;
 }
-
-?>
