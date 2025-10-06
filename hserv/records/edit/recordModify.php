@@ -459,6 +459,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     $is_insert = ($recID<1);
     $is_save_new_record = false;
     $missingParents = [];
+    $msgSkippedCalcFields = null;
     $entryMaskIssues = [];
     $languageIssues = [];
 
@@ -710,14 +711,18 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         return $system->getError();
     }
 
+    if(!$modeImport){
+        mysql__supress_trigger($mysqli, true);
+        recordUpdateCalcFields( $system, $recID, $rectype );//update calculated fields in this record
+        mysql__supress_trigger($mysqli, false);
+    }
+    
     $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['Title']); //for main record on save
     $rty_counts = null;
 
     if(!$is_insert && !$modeImport)
     {
         mysql__supress_trigger($mysqli, true);
-
-        recordUpdateCalcFields( $system, $recID, $rectype );//update calculated fields in this record
 
         $entryMaskIssues = recordUpdateMaskFields($system, $recID, $rectype);
 
@@ -726,7 +731,10 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         //check that this record my affect other records with calculated fields
         //1. cfn_RecTypeIDs -> cfn_ID
         //2. defRecStructure where rst_CalcFunctionID  -> rst_RecTypeID+rst_DetailTypeID
-        //it may consume waste of time findAndUpdateAffectedCalcFields( $system, $rectype )
+        $res3 = findAndUpdateAffectedCalcFields( $system, $rectype );
+        if(isset($res3['skipped'])){
+            $msgSkippedCalcFields = $res3['skipped'];
+        }
 
         removeReverseChildToParentPointer($system, $recID, $rectype);
 
@@ -734,7 +742,7 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         $relRecsIDs = array();
 
         //@todo - rollback in case of error
-        $mask = mysql__select_value($mysqli,"select rty_TitleMask from defRecTypes where rty_ID=".RT_RELATION);
+        $mask = mysql__select_value($mysqli, "select rty_TitleMask from defRecTypes where rty_ID=".RT_RELATION);
 
         $relRecs = recordGetRelationship($system, $recID, null, array('detail'=>'ids'));
         if(!isEmptyArray($relRecs)){
@@ -825,7 +833,10 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         'affectedRty' =>$rectype,
         'issues' => []
     ];
-
+    
+    if($msgSkippedCalcFields!=null){
+        $rtn['issues']['skippedCalcFields'] = $msgSkippedCalcFields;
+    }
     if(!empty($missingParents)){
         $rtn['issues']['parents'] = $missingParents;
     }
@@ -2053,16 +2064,19 @@ function findAndUpdateAffectedCalcFields( $system, $rty_ID ){
 
     $query = 'SELECT cfn_ID FROM defCalcFunctions WHERE find_in_set('.$mysqli->real_escape_string($rty_ID).',cfn_RecTypeIDs) <> 0';
     $field_ids = mysql__select_list2($mysqli, $query);
+    
+    $res = null;
 
     if(!isEmptyArray($field_ids)){
 
-        $query = 'SELECT rst_RecTypeID WHERE rst_CalcFunctionID IN ('.implode(',',$field_ids).')';
+        $query = 'SELECT rst_RecTypeID FROM defRecStructure WHERE rst_CalcFunctionID IN ('.implode(',',$field_ids).')';
         $rectype_ids = mysql__select_list2($mysqli, $query);
 
         if(!isEmptyArray($rectype_ids)){
-            recordUpdateCalcFields($system, null, $rectype_ids);
+            $res = recordUpdateCalcFields($system, null, $rectype_ids, null, 100);
         }
     }
+    return $res;
 }
 
 /**
@@ -2114,7 +2128,7 @@ function findAndUpdateAffectedCalcFields( $system, $rty_ID ){
  *                     Returns `['message' => 'Smarty init error...']` or `['message' => 'Operation terminated...']`
  *                     in case of Smarty setup failure or user termination via progress session.
  */
-function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session_id=null)
+function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session_id=null, $limitOnUpdate=100)
 {
     $mysqli = $system->getMysqli();
 
@@ -2159,7 +2173,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
 
         $rectypes = array($rty_ID=>array($recID));
         $rec_count = 1;
-    }else //record is not defined - update all records
+    }else //record is not defined - update all records with givent $rty_ID
     {
 
         if($rty_ID!=null && !is_array($rty_ID)){
@@ -2173,6 +2187,12 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
         }else{
             $rec_count = mysql__select_value($mysqli, 'SELECT count(rec_ID) FROM Records '
             .'WHERE (rec_RecTypeID IN ('.implode(',',$rty_ID).')) AND (NOT rec_FlagTemporary)');
+            
+            if($rec_count>$limitOnUpdate){
+                //
+                return array('skipped'=>'There are '.$rec_count
+.' records that have dependent calculation fields based type of updated record. To avoid slowdown, please use Admin > Rebuild Calc');    
+            }
         }
         $rectypes = array();
         foreach ($rty_ID as $id){

@@ -4277,7 +4277,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     }
 
                     break;
-
+                    
+                case 'skippedCalcFields':
+                
+                    contents += issues;
+                    has_msg = true;
+                
+                    break;
                 case 'languages':{
 
                     if(issues?.added && Object.keys(issues.added).length > 0){
