@@ -1368,7 +1368,7 @@ class HSystemMgr {
                           hideTitle: false, // Show title
                           closeOnEscape: false,
                           open: function (event, ui) {
-                              let $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                              let $dlg = window.hWin.HEURIST4.msg.getMsgDlg('dlg-heurist-updated');
                               $dlg.find('#version_cache').text(version_in_cache);
                               $dlg.find('#version_srv').text(current_server_version);
                           },
