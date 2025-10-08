@@ -2710,7 +2710,9 @@ console.log('onEditFormChange @todo check buttons!!!');
         //1. update recordset if fieldvalues are set
         let recset = this.getRecordSet();
         if(fieldvalues!=null){
-            recset.setRecord(recID, fieldvalues);  
+            let rfr = $Db.rst(this.options.rty_ID);
+            rfr.setRecord(recID, fieldvalues);  //Db.rst
+            recset.setRecord(recID, fieldvalues); //in _cachedRecordset
         }
 
         let record = recset.getById(recID);
