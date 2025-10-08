@@ -1063,6 +1063,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         let ids = recID.split('.');
                         let sType = $Db.dty(ids[1], 'dty_Type');
 
+                        that._afterDeleteEventHandler( recID );
+                        
                         if(window.hWin.HAPI4.is_admin() && sType!='separator' && sType!='relmarker' && delete_data){
                             //delete fields from records
 
@@ -1078,10 +1080,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgFlash('All data deleted', 1000);
                                 }
-                                that._afterDeleteEventHandler( recID );
+                                //that._afterDeleteEventHandler( recID );
                             });
                         }else{
-                            that._afterDeleteEventHandler( recID );
+                            //that._afterDeleteEventHandler( recID );
                         }
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -2909,7 +2911,10 @@ console.log('onEditFormChange @todo check buttons!!!');
         }
         
         this._cachedRecordset.removeRecord( recID );
-        
+        //remove from local cache
+        let rfr = $Db.rst(this.options.rty_ID);
+        rfr.removeRecord(recID);
+
         this._super(recID);
         
         let node = this._tree.getNodeByKey(String(recID));
@@ -2927,14 +2932,18 @@ console.log('onEditFormChange @todo check buttons!!!');
             }
             node.remove();
         }
-
-        let is_allowed = $Db.dty(recID, 'dty_Status') != 'reserved' && $Db.dty(recID, 'dty_Type') != 'separator' && $Db.dty(recID, 'dty_Type') != 'relmarker';
+        
+        if(isfolder) {
+            this._initTreeView();    
+        }
+        this._showRecordEditorPreview(); //redraw
+        
+        let is_allowed = $Db.dty(recID, 'dty_Status') != 'reserved' && 
+                         $Db.dty(recID, 'dty_Type') != 'separator' && 
+                         $Db.dty(recID, 'dty_Type') != 'relmarker';
         if(window.hWin.HAPI4.is_admin() && $Db.dty(recID) && is_allowed){ // begin check for complete base field deletion
             this.checkFieldForData(recID);
         }
-
-        if(isfolder) this._initTreeView();
-        this._showRecordEditorPreview(); //redraw
     },
     
     /**

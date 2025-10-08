@@ -2845,7 +2845,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         return ffr;
     },
-               
+
     //
     // 
     /**
@@ -3079,7 +3079,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             // fields_ids - fields in rt structure (standard fields)
             // s_fields - sorted 
             // field_in_recset - all fields in record 
-            
+
             let rst_details =  $Db.rst(rectypeID);  //array of dty_ID:rst_ID
             let s_fields = [];  //sorted fields including hidden fields from record header 
             let fields_ids = []; //fields in structure
