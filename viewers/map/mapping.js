@@ -2467,13 +2467,18 @@ $.widget( "heurist.mapping", {
     _showContentInPopup: function(latlng, content){
 
         if(content.startsWith('http')){
-
+            
+            let frame = $('<iframe>');
+            frame.attr("src", content);
+            content = frame[0];
+            /*
             $.get(content, (responseTxt, statusTxt) => {
                 if(statusTxt == "success"){
                     this._showContentInPopup(latlng, responseTxt);
                 }
             });
             return;
+            */
         }
 
         this.main_popup.setLatLng(latlng)
@@ -2640,7 +2645,7 @@ $.widget( "heurist.mapping", {
 
         function __showPopup(content, latlng){
             
-            if(that.options.map_popup_mode=='standard'){ //show in map popup control
+            if(that.options.map_popup_mode=='standard' || that.options.map_popup_mode=='standard_frame'){ //show in map popup control
 
                 that._showContentInPopup(latlng, content);
 
@@ -2795,11 +2800,16 @@ $.widget( "heurist.mapping", {
                     window.hWin.HEURIST4.msg.showDialog(popupURL, opts);
 
                 }else if(that.options.map_popup_mode!='none'){
-                    $.get(popupURL, function(responseTxt, statusTxt, xhr){
-                        if(statusTxt == "success"){
-                            __showPopup(responseTxt, latlng);
-                        }
-                    });
+                    
+                    if(that.options.map_popup_mode=='standard_frame'){
+                        __showPopup(popupURL, latlng);
+                    }else{
+                        $.get(popupURL, function(responseTxt, statusTxt, xhr){
+                            if(statusTxt == "success"){
+                                __showPopup(responseTxt, latlng);
+                            }
+                        });
+                    }
                 }
             }else{
                 __showPopup(info, latlng);
