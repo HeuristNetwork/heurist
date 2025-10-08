@@ -240,7 +240,7 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
 
     _setupMembershipField: function(){
 
-        const isNotMember = window.hWin.HAPI4.sysinfo.associationMembershipStatus === 'nomember';
+        const isNotMember = window.hWin.HAPI4.sysinfo.associationMembershipStatus === 'nonmember';
 
         let ele = this._editing.getFieldByName('bug_Title');
         if(!ele || ele.length == 0){
@@ -248,8 +248,8 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
         }
 
         let membershipHTML = `
-        <span><input class="ui-state-disabled" type="radio" name="membership" value="1" checked="${!isNotMember ? 'checked' : ''}"> member</span>
-        <span style="padding-left: 1em;"><input class="ui-state-disabled" type="radio" name="membership" value="0" checked="${isNotMember ? 'checked' : ''}"> non-member</span>
+        <span><input class="ui-state-disabled" type="radio" name="membership" value="1" ${isNotMember ? '' :'checked'}> member</span>
+        <span style="padding-left: 1em;"><input class="ui-state-disabled" type="radio" name="membership" value="0" ${isNotMember ? 'checked' : ''}> non-member</span>
         <a href="https://heuristref.net/h7-alpha/admin/utilities/checkMembershipForm.php" target="_blank" style="padding-left: 2.5em; color: blue; cursor: pointer;">check status</a>
         <a href="mailto:support@heuristnetwork.org" target="#" style="padding-left: 2.5em; color: blue; cursor: pointer;">email us</a>
         <span style="padding-left: 2.5em;">
