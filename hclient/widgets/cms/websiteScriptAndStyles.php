@@ -930,9 +930,14 @@ function afterPageLoad(document, pageid, eventdata){
             const handle_recids = remaining_path.length > 0;
 
             let operator = '/?';
-            
+
+            let queryURI = remaining_path.find((part) => typeof part === 'string' && part.startsWith('q='));
+
             if(handle_query){
                 surl += `${operator}q=${eventdata.q}`;
+                operator = '&';
+            }else if(queryURI !== undefined){
+                surl += `${operator}${queryURI}`;
                 operator = '&';
             }
 
