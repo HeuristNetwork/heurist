@@ -298,7 +298,7 @@ class DbSysBugreport extends DbEntityBase
         }
 
         $memberString = '';
-        if($this->performLogout || USystem::checkAssociationMembership($this->system) !== 'nomember'){
+        if($this->performLogout || USystem::checkAssociationMembership($this->system) !== 'nonmember'){
             $new_record['details']['1067'] = ['7643'];
         }else{
             $new_record['details']['1067'] = [];
