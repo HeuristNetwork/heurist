@@ -98,7 +98,7 @@ class LookupController{
             'action' => 'import_records' // 'record_output'
         ],
 
-        'wikidata_sparql' => 'https://query.wikidata.org/sparql?'
+        'wikidata_SPARQL' => 'https://query.wikidata.org/sparql?'
     ];
 
     private $serviceParameters = [
@@ -140,7 +140,7 @@ class LookupController{
             'group' => ALPHANUMERIC
         ],
 
-        'wikidata_sparql' => [
+        'wikidata_SPARQL' => [
             'query' => ALPHANUMERIC
         ]
     ];
@@ -185,7 +185,7 @@ class LookupController{
         global $accessToken_GeonamesAPI, $ESTC_PermittedDBs, $ESTC_UserName, $ESTC_Password;
 
         if(empty(@$this->request['serviceType']) || !array_key_exists($this->request['serviceType'], $this->serviceURLs)){
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'The provided look up details are invalid');
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'The provided lookup details are invalid');
             return false;
         }
 
