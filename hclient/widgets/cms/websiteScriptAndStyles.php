@@ -369,15 +369,22 @@ function onPageInit(success)
 
             //if url has "q" parameter - load page with initial search
             var initial_query_from_url = window.hWin.HEURIST4.util.getUrlParameter('q');
+            if(!initial_query_from_url && location.pathname.indexOf('/q=') > 0){
+                let parts = location.pathname.split('/');
+                initial_query_from_url = parts.find((part) => typeof part === 'string' && part.startsWith('q='));
+                initial_query_from_url = !initial_query_from_url || initial_query_from_url.replace('q=', '');
+            }
+
             var eventdata = null;
             if(initial_query_from_url){
 
-                    eventdata = {detail:'ids', neadall:1, w:'a',
-                                 q:initial_query_from_url,
-                                 source: 'search_on_page_load',
-                                 event_type: window.hWin.HAPI4.Event.ON_REC_SEARCHSTART,
-                                 search_realm: 'search_group_1'
-                                 };
+                eventdata = {
+                    detail:'ids', neadall:1, w:'a',
+                    q:initial_query_from_url,
+                    source: 'search_on_page_load',
+                    event_type: window.hWin.HAPI4.Event.ON_REC_SEARCHSTART,
+                    search_realm: 'search_group_1'
+                };
             }
             loadPageContent( init_page_record_id>0 ?init_page_record_id :load_initially, eventdata);//on page init
 
@@ -540,114 +547,114 @@ function loadPageContent(pageid, eventdata){
             supp_options['heurist_SearchInput'] = {suppress_default_search:true};
         }
 
-            //after load event listener
-            function __loadPageContent(){
+        //after load event listener
+        function __loadPageContent(){
 
-                window.hWin.HEURIST4.msg.sendCoverallToBack();
-                $('body').find('#main-content').css('min-height', '');// remove min height
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
+            $('body').find('#main-content').css('min-height', '');// remove min height
 
-                if(!window.hWin.HAPI4.is_admin()){
-                    isCMS_active = false;
+            if(!window.hWin.HAPI4.is_admin()){
+                isCMS_active = false;
+            }
+
+            $('#btnOpenCMSeditor').html(isCMS_active?'close editor':'website editor');
+
+            if(isCMS_active){
+                if(!editCMS_instance2) {
+                    editCMS_instance2 = editCMS2(this.document);//editCMS_Init
                 }
 
-                $('#btnOpenCMSeditor').html(isCMS_active?'close editor':'website editor');
-
-                if(isCMS_active){
-                    if(!editCMS_instance2) {
-                        editCMS_instance2 = editCMS2(this.document);//editCMS_Init
-                    }
-
-                    if (! editCMS_instance2.startCMS({
-                                    record_id:pageid,
-                                    container:'#main-content',
-                                    isCMS_NewWebsite: isCMS_NewWebsite,
-                                    close: function(){
-                                        isCMS_active = false;
-                                        $('#btnOpenCMSeditor').html('website editor');
-                                    }})) //see editCMS2.js
-                    {
-                        //page is not loaded (previous page has been modified and not saved
-                        return;
-                    }
-
-                }else{
-                    window.hWin.HAPI4.layoutMgr.layoutInit( page_cache[pageid][DT_EXTENDED_DESCRIPTION], '#main-content', supp_options );
+                if (! editCMS_instance2.startCMS({
+                                record_id:pageid,
+                                container:'#main-content',
+                                isCMS_NewWebsite: isCMS_NewWebsite,
+                                close: function(){
+                                    isCMS_active = false;
+                                    $('#btnOpenCMSeditor').html('website editor');
+                                }})) //see editCMS2.js
+                {
+                    //page is not loaded (previous page has been modified and not saved
+                    return;
                 }
 
-                current_page_id = pageid;
-
-                var page_footer = page_target.find('#page-footer');
-                if(page_footer.length>0){  //adjust page footer height
-                    page_footer.detach();
-                    page_footer.appendTo( page_target );
-                    page_target.css({'min-height':page_target.parent().height()-page_footer.height()-10 });
-                }
-
-                timeout_count = 0;
-                afterPageLoad( document, pageid, eventdata);//execute custom script and custom css, assign page title
-            } // END __loadPageContent
-
-            if(page_cache[pageid]){ //this page has been already loaded
-                __loadPageContent();
             }else{
+                window.hWin.HAPI4.layoutMgr.layoutInit( page_cache[pageid][DT_EXTENDED_DESCRIPTION], '#main-content', supp_options );
+            }
 
-                var server_request = {
-                    q: 'ids:'+pageid,
-                    restapi: 1,
-                    columns:
-                    ['rec_ID', DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_PAGETITLE, DT_CMS_TOPMENUSELECTABLE],
-                    zip: 1,
-                    format:'json'};
+            current_page_id = pageid;
 
-                if(isJsAllowed){
-                    server_request.columns.push(DT_CMS_SCRIPT);
-                }
-                    server_request.columns.push(DT_CMS_CSS);
+            var page_footer = page_target.find('#page-footer');
+            if(page_footer.length>0){  //adjust page footer height
+                page_footer.detach();
+                page_footer.appendTo( page_target );
+                page_target.css({'min-height':page_target.parent().height()-page_footer.height()-10 });
+            }
 
-                //perform search see record_output.php
-                window.hWin.HAPI4.RecordMgr.search_new(server_request,
-                    function(response){
+            timeout_count = 0;
+            afterPageLoad( document, pageid, eventdata);//execute custom script and custom css, assign page title
+        } // END __loadPageContent
 
-                        if(window.hWin.HEURIST4.util.isJSON(response)) {
-                            if(response['records'] && response['records'].length>0){
-                                var res = response['records'][0]['details'];
-                                var keys = Object.keys(res);
-                                for(var idx in keys){
-                                    var key = keys[idx];
+        if(page_cache[pageid]){ //this page has been already loaded
+            __loadPageContent();
+        }else{
 
-                                    if(key == DT_EXTENDED_DESCRIPTION){
-                                        //the size content can be big so it stores in db as 64K chunks
-                                        //implode all parts of page
-                                        res[key] = Object.values(res[key]).join('');
-                                    }else if(key != DT_NAME){
-                                        //takes only first value
-                                        res[key] = res[key][ Object.keys(res[key])[0] ];
-                                    }
+            var server_request = {
+                q: 'ids:'+pageid,
+                restapi: 1,
+                columns:
+                ['rec_ID', DT_NAME, DT_EXTENDED_DESCRIPTION, DT_CMS_PAGETITLE, DT_CMS_TOPMENUSELECTABLE],
+                zip: 1,
+                format:'json'};
+
+            if(isJsAllowed){
+                server_request.columns.push(DT_CMS_SCRIPT);
+            }
+                server_request.columns.push(DT_CMS_CSS);
+
+            //perform search see record_output.php
+            window.hWin.HAPI4.RecordMgr.search_new(server_request,
+                function(response){
+
+                    if(window.hWin.HEURIST4.util.isJSON(response)) {
+                        if(response['records'] && response['records'].length>0){
+                            var res = response['records'][0]['details'];
+                            var keys = Object.keys(res);
+                            for(var idx in keys){
+                                var key = keys[idx];
+
+                                if(key == DT_EXTENDED_DESCRIPTION){
+                                    //the size content can be big so it stores in db as 64K chunks
+                                    //implode all parts of page
+                                    res[key] = Object.values(res[key]).join('');
+                                }else if(key != DT_NAME){
+                                    //takes only first value
+                                    res[key] = res[key][ Object.keys(res[key])[0] ];
                                 }
-                                if(window.hWin.HEURIST4.util.isBase64(res[DT_EXTENDED_DESCRIPTION])){
-                                    res[DT_EXTENDED_DESCRIPTION] = new TextDecoder().decode(
-                                            window.hWin.HEURIST4.util.base64ToBytes(res[DT_EXTENDED_DESCRIPTION]));
-                                }
-
-                                page_cache[pageid] = res; //assign to cache after load from server side
-                                __loadPageContent();
-                            }else if(pageid!=home_page_record_id){ //page not found - load home page by default
-                                loadPageContent(home_page_record_id);
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgErr({
-                                    message: `Web Page not found (record #${pageid})`,
-                                    error_title: 'Failed to load page'
-                                });
                             }
+                            if(window.hWin.HEURIST4.util.isBase64(res[DT_EXTENDED_DESCRIPTION])){
+                                res[DT_EXTENDED_DESCRIPTION] = new TextDecoder().decode(
+                                        window.hWin.HEURIST4.util.base64ToBytes(res[DT_EXTENDED_DESCRIPTION]));
+                            }
+
+                            page_cache[pageid] = res; //assign to cache after load from server side
+                            __loadPageContent();
+                        }else if(pageid!=home_page_record_id){ //page not found - load home page by default
+                            loadPageContent(home_page_record_id);
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr({
-                                message: response,
-                                error_title: 'Webpage search failed'
+                                message: `Web Page not found (record #${pageid})`,
+                                error_title: 'Failed to load page'
                             });
                         }
-                    });
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr({
+                            message: response,
+                            error_title: 'Webpage search failed'
+                        });
+                    }
+                });
 
-            }
+        }
 
     }
 } // loadPageContent
@@ -931,13 +938,8 @@ function afterPageLoad(document, pageid, eventdata){
 
             let operator = '/?';
 
-            let queryURI = remaining_path.find((part) => typeof part === 'string' && part.startsWith('q='));
-
             if(handle_query){
                 surl += `${operator}q=${eventdata.q}`;
-                operator = '&';
-            }else if(queryURI !== undefined){
-                surl += `${operator}${queryURI}`;
                 operator = '&';
             }
 
@@ -1006,6 +1008,10 @@ function afterPageLoad(document, pageid, eventdata){
 
     //Execute event - this search has been inited from different page
     if(eventdata && eventdata.event_type){
+
+        let jsonContent = window.hWin.HEURIST4.util.isJSON(page_cache[pageid][DT_EXTENDED_DESCRIPTION]);
+        eventdata.search_realm = jsonContent ? window.hWin.HAPI4.layoutMgr.layoutContentFindMainRealm(jsonContent) : eventdata.search_realm;
+
         if(eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
             || eventdata.event_type == window.hWin.HAPI4.Event.ON_REC_SELECT)
         {
