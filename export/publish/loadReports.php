@@ -84,8 +84,7 @@ if ($method == "searchreports") {
 
     $records = array();
     // Base query to select all report schedule entries
-    $query = "SELECT rps_ID, rps_Type, rps_Title, rps_FilePath, rps_URL, rps_FileName, rps_HQuery, rps_Template, '
-    .'rps_IntervalMinutes, 0 AS selection, 0 AS status FROM usrReportSchedule";
+    $query = "SELECT rps_ID, rps_Type, rps_Title, rps_FilePath, rps_URL, rps_FileName, rps_HQuery, rps_Template, rps_IntervalMinutes, 0 AS selection, 0 AS status FROM usrReportSchedule";
 
     if ($f_name && $f_name != "") {
         $query .= " WHERE rps_Title LIKE '%".$f_name."%'"; // Append name filter if provided
@@ -94,7 +93,7 @@ if ($method == "searchreports") {
     $res = $mysqli->query($query);
     if ($res) {
         while ($row = $res->fetch_assoc()) {
-            $row['status'] = getStatus($row); // Determine status of the report (e.g., file existence)
+            $row['status'] = getStatus($row, true); // Determine status of the report (e.g., file existence)
             $records[] = $row;
         }
         $res->close();
@@ -189,8 +188,9 @@ exit; // Ensure script terminates after handling the request.
      * Status is determined by the existence of its Smarty template, output folder, and output file.
      *
      * @param array $row Associative array containing report schedule data (must include 'rps_Template', 'rps_FilePath', 'rps_FileName').
+     * @param bool $returnLastModified Instead of returning 0 for OK, return the last modification timestamp for the file
      * @return int Status code:
-     *             0 - OK (all files/folders exist).
+     *             0/timestamp - OK (all files/folders exist).
      *             1 - Template file missing.
      *             2 - Output folder does not exist.
      *             3 - Output file does not exist.
@@ -198,7 +198,7 @@ exit; // Ensure script terminates after handling the request.
      * @uses HEURIST_SMARTY_TEMPLATES_DIR Path to Smarty templates.
      * @uses HEURIST_FILESTORE_DIR Path to the Heurist filestore.
      */
-    function getStatus($row)
+    function getStatus($row, $returnLastModified = false)
     {
         // Check if the Smarty template file exists
         if (!file_exists(HEURIST_SMARTY_TEMPLATES_DIR.$row['rps_Template'])) {
@@ -231,7 +231,7 @@ exit; // Ensure script terminates after handling the request.
         $ext = array_key_exists('extension', $path_parts) ? $path_parts['extension'] : null;
         if ($ext == null) {
             //take extension from rps_URL
-            if(isset($row['rps_URL'])){
+            if(!empty($row['rps_URL'])){
                 $outputfile = $outputfile.'.'.$row['rps_URL'];
             }else{
                 $outputfile = $outputfile.'.html';    
@@ -242,7 +242,8 @@ exit; // Ensure script terminates after handling the request.
         if (!file_exists($outputfile)) {
             return 3; // Output file does not exist
         } else {
-            return 0; // OK
+            $lastModified = filemtime($outputfile);
+            return $returnLastModified ? date('Y-m-d H:i', $lastModified) : 0; // OK
         }
     }
 

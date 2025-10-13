@@ -65,6 +65,8 @@ $requestContent = array('xml'=>'text/xml',
                         'rdf'=>'application/rdf+xml',
                         'html'=>'text/html');
 
+$allowedVersions = ['heurist','h6-alpha','h7-alpha','h6-ij'];
+                        
 $format = null;
 $redirection_path = '../';
 
@@ -85,24 +87,39 @@ if($is_own_domain){
     }
 }
 // --------------- INDEX or STARTUP
-if(count($requestUri)==1 && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-alpha' || $requestUri[0]=='h7-alpha')){
+if(count($requestUri)==1 && in_array($requestUri[0], $allowedVersions)){
 
     //redirectURL2('/'.rawurlencode($requestUri[0]).'/index.php');
     include_once '../index.php';  //root index that goes to startup
     exit;
 
-}elseif ((count($requestUri)==1)
-     ||
-    (count($requestUri)==2 && (!in_array($requestUri[1],$allowedActions) || $requestUri[1]=='startup'))
-    )
-{ //&& (@$requestUri[0]=='MBH' || @$requestUri[0]=='johns_test_BnF')){
-    $dbname = filter_var((count($requestUri)==1)?$requestUri[0]:$requestUri[1]);//to avoid "Open redirect" security report
+}elseif ($requestUri[0]=='startup' || @$requestUri[1]=='startup') {
+    
+    include_once '../startup/index.php';
+    exit;
 
-    if($dbname=='startup'){
-        //redirectURL2('/'.rawurlencode($requestUri[0]).'/startup/index.php');
-        include_once '../startup/index.php';
+}
+/*elseif (count($requestUri)==1){
+    
+    $dbname = filter_var($requestUri[0]);
+    if(!preg_match('/[^A-Za-z0-9_\$]/', $dbname)){
+        //include_once '../startup/index.php';
+        redirectURL2('/'.rawurlencode($dbname).'/web/');
         exit;
-    }elseif(!preg_match('/[^A-Za-z0-9_\$]/', $dbname)){
+    }
+    
+}*/
+elseif (!( ($requestUri[0]=='db') 
+    || (in_array($requestUri[0], $allowedVersions) && @$requestUri[1]=='viewers')
+    || (count($requestUri)>1 && (in_array($requestUri[1], $allowedActions) || in_array(@$requestUri[2], $allowedActions)))
+    ))
+{
+    
+    $idx = in_array($requestUri[0], $allowedVersions)?1:0; // heurst/dbname/action
+    
+    $dbname = filter_var(@$requestUri[$idx]);
+     
+    if(!preg_match('/[^A-Za-z0-9_\$]/', $dbname)){
         //include_once '../startup/index.php';
         redirectURL2('/'.rawurlencode($dbname).'/web/');
         exit;
@@ -224,7 +241,7 @@ $requestUri:
 
         if($database=='MBH'){ //special case
             $database='MBH_Manuscripta_Bibliae_Hebraicae';
-        }elseif($database=='heurist' || $database=='h6-alpha' || $database=='h7-alpha'){
+        }elseif(in_array($database, $allowedVersions)){
             redirectURL2('/'.rawurlencode($database).'/index.php');
             exit;
         }
@@ -398,7 +415,7 @@ $requestUri:
 
 }
 elseif(count($requestUri)>2
-      && ($requestUri[0]=='heurist' || $requestUri[0]=='h6-alpha' || $requestUri[0]=='h7-alpha') 
+      && ( in_array($requestUri[0], $allowedVersions) ) 
       && $requestUri[1]=='viewers'){
     //Redirects to index page for viewers plugins
     parse_str($_SERVER['QUERY_STRING'], $vars);

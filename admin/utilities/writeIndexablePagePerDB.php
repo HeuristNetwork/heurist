@@ -308,7 +308,7 @@ $template_page = <<<EXP
                 "name": "Heurist Data Catalog",
                 "entityTypes": "{struct_names}"
               }
-            }
+          },
           "dateModified": "{rec_last}"
         }
         </script>

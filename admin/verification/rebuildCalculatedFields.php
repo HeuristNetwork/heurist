@@ -135,6 +135,11 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
                 }else{
                     $('#q_blanks').hide();
                 }
+                
+                if(response.data['q_updates'] || response.data['q_cleared']){
+                    $('#updateTitlesLink').show();
+                }
+                
 
                 var sErrors = '';
                 if(response.data['errors']){
@@ -259,6 +264,14 @@ if($init_client){
                 <?php
                 }
                 ?>
+                <span id="updateTitlesLink" style="display: none;">
+                <h2 style="margin:0">Record titles depend on calculated fields</h2>
+                <p>
+                    If you think your record titles need updating, 
+                    <a href="<?php echo HEURIST_BASE_URL; ?>admin/verification/longOperationInit.php?type=titles&db=<?php echo HEURIST_DBNAME; ?>">Rebuild record titles</a>
+                </p>
+                </span>
+                
             </div>
 <?php
 

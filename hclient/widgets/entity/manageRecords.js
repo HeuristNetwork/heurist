@@ -2845,7 +2845,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         return ffr;
     },
-               
+
     //
     // 
     /**
@@ -3079,7 +3079,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             // fields_ids - fields in rt structure (standard fields)
             // s_fields - sorted 
             // field_in_recset - all fields in record 
-            
+
             let rst_details =  $Db.rst(rectypeID);  //array of dty_ID:rst_ID
             let s_fields = [];  //sorted fields including hidden fields from record header 
             let fields_ids = []; //fields in structure
@@ -4277,7 +4277,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     }
 
                     break;
-
+                    
+                case 'skippedCalcFields':
+                
+                    contents += issues;
+                    has_msg = true;
+                
+                    break;
                 case 'languages':{
 
                     if(issues?.added && Object.keys(issues.added).length > 0){
@@ -5185,7 +5191,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         let rt_icon = window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID+this._icon_timer_suffix;
 
         this.element.find('.rt-info-header img.rt-icon').css('background-image',`url('${rt_icon}')`);
-        this.editFormSummary.find('.summary-accordion').first().find('img.rt-icon').css('background-image',`url('${rt_icon}')`);
+        if(this.editFormSummary){
+            this.editFormSummary.find('.summary-accordion').first().find('img.rt-icon').css('background-image',`url('${rt_icon}')`);    
+        }
         
         //
         //

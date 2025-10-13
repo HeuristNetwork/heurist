@@ -2041,12 +2041,8 @@ $.widget( "heurist.mapping", {
                                 }
                             });
 
-                            let popupURL = `${window.hWin.HAPI4.baseURL}?template=${that.options.clusterTemplate}&q=ids:${recIDs.join(',')}&db=${window.hWin.HAPI4.database}`;
-                            $.get(popupURL, (responseTxt, statusTxt) => {
-                                if(statusTxt == "success"){
-                                    that._showContentInPopup(latlng, responseTxt);
-                                }
-                            });
+                            let templateURL = window.hWin.HEURIST4.ui.getTemplateLink(that.options.clusterTemplate, `ids:${recIDs.join(',')}`);
+                            that._showContentInPopup(latlng, templateURL);
                         }else{
 
                             let selected_layers = {};
@@ -2445,12 +2441,8 @@ $.widget( "heurist.mapping", {
 
                 if(found_cnt > 1){
                     if(this.options.clusterTemplate && this.options.clusterTemplate !== 'default'){
-                        let popupURL = `${window.hWin.HAPI4.baseURL}?template=${this.options.clusterTemplate}&q=ids:${recIDs.join(',')}&db=${window.hWin.HAPI4.database}`;
-                        $.get(popupURL, (responseTxt, statusTxt) => {
-                            if(statusTxt == "success"){
-                                this._showContentInPopup(latlng, responseTxt);
-                            }
-                        });
+                        let templateURL = window.hWin.HEURIST4.ui.getTemplateLink(this.options.clusterTemplate, `ids:${recIDs.join(',')}`);
+                        this._showContentInPopup(latlng, templateURL);
                     }else{
                         //show popup with selector
                         this._showMultiSelectionPopup(latlng, sText, selected_layers, add_to_selection);
@@ -2467,13 +2459,18 @@ $.widget( "heurist.mapping", {
     _showContentInPopup: function(latlng, content){
 
         if(content.startsWith('http')){
-
+            
+            let frame = $('<iframe>');
+            frame.attr("src", content);
+            content = frame[0];
+            /*
             $.get(content, (responseTxt, statusTxt) => {
                 if(statusTxt == "success"){
                     this._showContentInPopup(latlng, responseTxt);
                 }
             });
             return;
+            */
         }
 
         this.main_popup.setLatLng(latlng)
@@ -2640,7 +2637,7 @@ $.widget( "heurist.mapping", {
 
         function __showPopup(content, latlng){
             
-            if(that.options.map_popup_mode=='standard'){ //show in map popup control
+            if(that.options.map_popup_mode=='standard' || that.options.map_popup_mode=='standard_frame'){ //show in map popup control
 
                 that._showContentInPopup(latlng, content);
 
@@ -2795,11 +2792,16 @@ $.widget( "heurist.mapping", {
                     window.hWin.HEURIST4.msg.showDialog(popupURL, opts);
 
                 }else if(that.options.map_popup_mode!='none'){
-                    $.get(popupURL, function(responseTxt, statusTxt, xhr){
-                        if(statusTxt == "success"){
-                            __showPopup(responseTxt, latlng);
-                        }
-                    });
+                    
+                    if(that.options.map_popup_mode=='standard_frame'){
+                        __showPopup(popupURL, latlng);
+                    }else{
+                        $.get(popupURL, function(responseTxt, statusTxt, xhr){
+                            if(statusTxt == "success"){
+                                __showPopup(responseTxt, latlng);
+                            }
+                        });
+                    }
                 }
             }else{
                 __showPopup(info, latlng);

@@ -2690,7 +2690,8 @@ window.hWin.HEURIST4.ui = {
         let surl = window.hWin.HAPI4.baseURL;
         
         if(window.hWin.HAPI4.sysinfo.use_redirect){
-            surl = surl + `/${window.hWin.HAPI4.database}/tpl/${smarty_template}/`+encodeURIComponent(query);
+            let extraSlash = surl.endsWith('/') ? '' : '/';
+            surl += `${extraSlash}${window.hWin.HAPI4.database}/tpl/${smarty_template}/`+encodeURIComponent(query);
         }else{
             if(window.hWin.HEURIST4.util.isPositiveInt(query)){
                 query = 'ids:'+query;
