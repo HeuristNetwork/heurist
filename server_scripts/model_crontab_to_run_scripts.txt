@@ -7,6 +7,7 @@ MAILTO=<email address(es)>
 
 # minute, hour, day of month, month, day of week 0=sun, 1=mon etc.
 
+<<<<<<< Updated upstream
 # Monitor server metrics every 5 mins and report hourly if over limit
 5 * * * * /srv/scripts/alert_server.sh >/dev/null 2>&1
 
@@ -28,6 +29,9 @@ MAILTO=<email address(es)>
 #      Copy this file to both, then:
 #           REMOVE MYSQL SCRIPTS FROM WEB SERVER 
 #           REMOVE WEB SERVER SCRIPTS FROM MYSQL SERVER
+=======
+# SERVER MONITORING
+>>>>>>> Stashed changes
 
 # *********************
 
@@ -113,3 +117,39 @@ MAILTO=<email address(es)>
 0 21 * * * nice -n 10 /opt/snow/snowagent -w /opt/snow/ >/dev/null 2>&1
 
 
+
+# AUTOMATED REPORTING ON USERS AND SETUP OF THE DATABASES
+
+# Email lists to support
+# set last item to * for daily, 0 for sunday, 1 for Monday mailout
+0 06 * * 1 /srv/scripts/run_checks_and_email_lists_to_support.sh >/dev/null 2>&1
+
+
+# SUMMARISATION AND MAILING OF ERRORS
+
+MAILTO=ian.johnson.heurist@gmail.com,abed@mq.edu.au
+
+#Ansible: Email PHP errors logs
+15 03 * * * /usr/bin/php -f /srv/scripts/php_error_log_sender.php
+
+#Ansible: Send Apache 404 errors
+45 02 * * 1 /srv/scripts/apache_error_log.sh
+
+
+# ----------------------------------------------------------------------------------
+
+# This section is only for the master HeuristRef.net server where development work is carried out
+# based on the setup as at June 2023 and h6-ao version of Heurist as the alpha development version
+# Script timing is based on Sydney early morning times and minimisation of disruption elsewhere
+
+# The following creates a distribution h6-beta-in-wating on Monday morning, and the following week moves this to h6-beta
+# Update h6-beta from h6-beta-in-waiting weekly at 5am Monday Sydney time
+57 04 * * 1 cd /var/www/html/HEURIST/DISTRIBUTION/;rm h6-beta.tar.bz2;mv h6-beta-in-waiting.tar.bz2  h6-beta.tar.bz2
+# Update h6-beta-in-waiting from Artem's development directory: build runs weekly at 7.30am Monday Sydney time
+0 05 * * 1 cd /var/www/html/HEURIST/h6-ao/;./copy_distribution_files.sh h6-beta-in-waiting
+
+# Update current heurist from /heurist/ version: build runs daily at ~5am Sydney time
+15 05 * * * cd /var/www/html/HEURIST/heurist/;./copy_distribution_files.sh heurist
+
+# Update h6-alpha from Artem's development directory: build runs daily at ~5am Sydney time
+25 05 * * * cd /var/www/html/HEURIST/h6-ao/;./copy_distribution_files.sh h6-alpha
