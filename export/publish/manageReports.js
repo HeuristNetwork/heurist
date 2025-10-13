@@ -139,28 +139,30 @@ function ReportManager(_isFilterMode, _isWindowMode) { // _isFilterMode is not u
             // Status column with icon and tooltip
             { data: 'status', title: "<div style='font-size:10;'>Status</div>", visible: true, sortable: true, className: 'center', width: "16px",
                 render: function(data, type) { // data is the status code (0-3)
-                    if (type === 'display') {
-                        if (data > 0) { // 0 means OK
-                            let shint = '';
-                            let sfont = '';
-                            if (data == 1) { // Template file missing
-                                shint = 'Template file does not exist';
-                                sfont = 'style="color:red"';
-                            } else if (data == 2) { // Output folder missing
-                                shint = 'Output folder does not exist';
-                            } else if (data == 3) { // Generated report not created yet
-                                shint = 'Generated report is not created yet';
-                            }
-                            if (shint) {
-                                return '<span class="ui-icon ui-icon-alert" ' + sfont + ' title="' + shint + '"></span>';
-                            }
-                        }
-                        return ''; // No icon for status 0 (OK)
+                    let status = Number.isNaN(Number(data)) ? 0 : Number(data);
+                    if (type !== 'display') {
+                        return status; // For sorting/filtering, use the raw status code
                     }
-                    return data; // For sorting/filtering, use the raw status code
-            }},
+                    if (status > 0) { // 0 means OK
+                        let shint = '';
+                        let sfont = '';
+                        if (status === 1) { // Template file missing
+                            shint = 'Template file does not exist';
+                            sfont = 'style="color:red"';
+                        } else if (status === 2) { // Output folder missing
+                            shint = 'Output folder does not exist';
+                        } else if (status === 3) { // Generated report not created yet
+                            shint = 'Generated report is not created yet';
+                        }
+                        if (shint) {
+                            return '<span class="ui-icon ui-icon-alert" ' + sfont + ' title="' + shint + '"></span>';
+                        }
+                    }
+                    return ''; // No icon for status 0 (OK)
+                }
+            },
 
-            { data: 'rps_ID', title: "<div style='max-width:15px;'>#</div>", sortable: true, className: 'right', width: "16px" },
+            { data: 'rps_ID', title: "<div style='max-width:15px;'>#</div>", sortable: true, className: 'right', width: "16px", render: (data) => Number(data) },
 
             // Edit button column
             { data: 'rps_ID', title: "<div style='font-size:10;'>Edit</div>", sortable: false, orderable: false, width: "16px",
@@ -170,7 +172,8 @@ function ReportManager(_isFilterMode, _isWindowMode) { // _isFilterMode is not u
                                '<span class="ui-icon ui-icon-pencil" title="' + window.hWin.HR('Edit') + '"></span></a>';
                     }
                     return data;
-            }},
+                }
+            },
 
             // Execute (run) report button column
             { data: 'rps_ID', title: "<div style='font-size:10;'>Exec</div>", sortable: false, orderable: false, width: "16px",
@@ -181,18 +184,20 @@ function ReportManager(_isFilterMode, _isWindowMode) { // _isFilterMode is not u
                                '<span class="ui-icon ui-icon-refresh" title="' + window.hWin.HR('Run report') + '"></span></a>';
                     }
                     return rps_ID;
-            }},
+                }
+            },
 
             // View HTML report link column
             { data: 'rps_ID', title: "<div style='font-size:10;min-width:30px;'>HTML</div>", sortable: false, orderable: false, width: "18px",
                 render: function(rps_ID, type, row) {
                     if (type === 'display') {
-                         if (row.status == 1 || row.status == 2) { return ''; } // Cannot view if template/folder missing
+                        if (row.status == 1 || row.status == 2) { return ''; } // Cannot view if template/folder missing
                         return `<a href="${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&publish=3&template_id=${rps_ID}&mode=html" target="_blank">` +
                                '<img alt="HTML link" src="../../hclient/assets/external_link_16x16.gif" width="16" height="16" border="0" title="HTML link"></a>';
                     }
                     return rps_ID;
-            }},
+                }
+            },
             
             // View Raw report output link column
             { data: 'rps_URL', title: "<div style='font-size:10;'>Raw</div>", sortable: false, orderable: false, width: "16px",
@@ -205,7 +210,8 @@ function ReportManager(_isFilterMode, _isWindowMode) { // _isFilterMode is not u
                                '&nbsp;<img alt="Raw output link" src="../../hclient/assets/external_link_16x16.gif" width="16" height="16" border="0" title="Raw output link"></a>';
                     }
                     return data;
-            }},
+                }
+            },
 
             { data: "rps_Title", title: "Title", sortable: true /*, resizeable:true // resizeable not a standard DT option */ },
             { data: "rps_HQuery", title: "Query", sortable: false, /* resizeable:true, */
@@ -214,8 +220,19 @@ function ReportManager(_isFilterMode, _isWindowMode) { // _isFilterMode is not u
                         return "<div style='max-width:400px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;' title='" + data + "'>" + data + "</div>";
                     }
                     return data ? data : ''; // Return empty string for filtering/sorting if data is null
-            }},
-            { data: "rps_IntervalMinutes", title: "Interval (min)", sortable: true /*, resizeable:false */ }, // Added (min) for clarity
+                }
+            },
+            { data: "rps_IntervalMinutes", title: "Interval (min)", sortable: true,
+                render: (data, type) => {
+                    let minutes = Number.isNaN(Number(data)) ? data : Number(data);
+                    if(type === 'display' && minutes === 0){
+                        return 'Never';
+                    }
+                    return minutes;
+                }
+            }, // Added (min) for clarity
+
+            { data: 'status', title: "<div style='font-size:10;'>Last updated</div>", sortable: true, render: (data) => Number.isNaN(Number(data)) ? data : '' },
 
             // Delete button column
             { data: 'rps_ID', title: "Del", className: 'center', sortable: false, orderable: false,
