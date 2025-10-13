@@ -77,12 +77,12 @@ if(!$is_zip && $file_type !== 'text/plain' && $file_type !== 'txt'){
     $system->errorExitApi('Multiple loose files are not handled', HEURIST_ACTION_BLOCKED, false);
 }
 
-$dir_name = explode('/', $dir);
+$dir_name = explode('/', ALL_STATS);
 $dir_name = array_pop($dir_name);
 
-$is_dir_writable = folderExists($dir, true);
+$is_dir_writable = folderExists(ALL_STATS, true);
 if($is_dir_writable === -1){
-    $res = folderCreate2($dir, '');
+    $res = folderCreate2(ALL_STATS, '');
     if($res !== ''){
         $system->errorExitApi("Heurist is unable to create the {$dir_name} directory", HEURIST_ERROR, false);
     }
@@ -170,6 +170,7 @@ function transferZipFiles($remote_zip, $server_name, $allowed_stats){
 
         $to_zip->addFromString("{$file_name}.txt", $from_zip->getFromIndex($idx));
     }
+    finfo_close($finfo);
 
     $to_zip->close();
     $from_zip->close();
