@@ -392,7 +392,12 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
         };
 
         let $dlg; // Will hold the jQuery dialog object
-        let content = '<div style="padding: 10px;">';
+        let content = `<div style="padding: 10px;">
+            <div style="padding: 10px 5px;">
+                <span style="width: 16em; display: inline-block; font-weight: bold; padding-left: 1em;">Field label</span>
+                <span style="padding-right: 1em; font-size: 1.5em; cursor: default;">⇒</span>
+                <span style="width: 16em; display: inline-block; font-weight: bold; padding-left: 1em;">Record field</span>
+            </div>`;
 
         for(const fld_id in this._fields){
             content += `<div style="padding: 10px 5px;" class="sparql_field_row">
@@ -501,7 +506,7 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
         this.$Hmsg.bringCoverallToFront(this._as_dialog.parent()); // Show loading indicator
 
         // If called directly and no fields are mapped, force user to map fields first.
-        if(typeof this._fields === 'object' && Object.keys(this._fields).length === 0){
+        if(typeof this._fields !== 'object' || Object.keys(this._fields).length === 0 || this.result_fields.find((field) => this._fields.hasOwn(field)) === undefined){
             this.$Hmsg.showMsgFlash('Please map at least one field to return...', 3000);
             this._getFieldMapping(true); // Open mapping dialog, then call doAction()
             return;
@@ -522,7 +527,7 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
         }
 
         // Use the current SPARQL variable -> Heurist dty_ID mapping for prepareValues
-        this.options.mapping.fields = this._fields;
+        this.options.mapping.fields = Object.fromEntries(Object.entries(this._fields).filter(([label, field]) => this.result_fields.indexOf(label) >= 0));
         res = this.prepareValues(recset, record, res); // Map values based on this._fields
 
         // Handle dumping of raw record data if enabled

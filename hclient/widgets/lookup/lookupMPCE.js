@@ -416,7 +416,7 @@ $.widget( "heurist.lookupMPCE", $.heurist.lookupBase, {
                 if(window.hWin.HEURIST4.util.isempty(record)){
                     // something is wrong with the record
 
-                    msgToConsole('keywordLookup() Error: Selected Record is Invalid', record, 1);
+                    msgToConsole('MPCE lookup error: Selected record is invalid', record, 1);
                     window.hWin.HEURIST4.msg.showMsgErr({
                         message: 'The selected keyword is invalid',
                         error_title: 'Invalid selection',
@@ -1449,12 +1449,10 @@ function compareIndexes(a, b){
  */
 function mergeArraysUnique(a, b){
     
-    if(!Array.isArray(a)){
-        msgToConsole('mergeArraysUnique() Error: arguement \'a\' is not an array', a, 1);
-    }
-
-    if(!Array.isArray(b)){
-        msgToConsole('mergeArraysUnique() Error: arguement \'b\' is not an array', b, 1);
+    if(!Array.isArray(a) || !Array.isArray(b)){
+        let notArray = !Array.isArray(a) ? '"a"' : '"b"';
+        msgToConsole(`MPCE lookup error: arguement ${notArray} is not an array`, {a: a, b: b}, 1);
+        return;
     }
 
     if(a.length == 0){
