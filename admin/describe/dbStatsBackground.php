@@ -250,7 +250,7 @@ function zipStats($file_to_zip, $server_name, $delete_original = false){
 
     // Zip text file
     $zip = new ZipArchive();
-    if(!$zip->open($zip_name, ZipArchive::CREATE)){
+    if($zip->open($zip_name, ZipArchive::CREATE) !== true){
         exitScript(HEURIST_ERROR, 'Failed to create zip folder for stats', true);
     }
 

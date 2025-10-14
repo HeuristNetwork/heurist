@@ -117,7 +117,7 @@ function transferTextFile($remote_file, $server_name, $file_name){
     global $system;
 
     $to_zip = new ZipArchive();
-    if($to_zip->open(ALL_STATS . "/{$server_name}.zip", ZipArchive::CREATE)){
+    if($to_zip->open(ALL_STATS . "/{$server_name}.zip", ZipArchive::CREATE) !== true){
         $system->errorExitApi('Unable to create local zip for remote server', HEURIST_ERROR, false);
     }
 
@@ -143,13 +143,13 @@ function transferZipFiles($remote_zip, $server_name, $allowed_stats){
     $local_zip = ALL_STATS . "/{$server_name}.zip";
 
     $from_zip = new ZipArchive();
-    if(!$from_zip->open($remote_zip)){
+    if($from_zip->open($remote_zip) !== true){
         fileDelete($remote_zip);
         $system->errorExitApi('Unable to open archive from remote server', HEURIST_ERROR, false);
     }
 
     $to_zip = new ZipArchive();
-    if($to_zip->open($local_zip, ZipArchive::CREATE)){
+    if($to_zip->open($local_zip, ZipArchive::CREATE) !== true){
         fileDelete($remote_zip);
         $system->errorExitApi('Unable to create local zip for remote server', HEURIST_ERROR, false);
     }
