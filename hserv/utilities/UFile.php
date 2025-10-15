@@ -255,11 +255,11 @@ use hserv\utilities\USystem;
         }
 
         try {
-            $it = new RecursiveDirectoryIterator(
+            $it = new \RecursiveDirectoryIterator(
                 $dir,
-                FilesystemIterator::SKIP_DOTS | FilesystemIterator::CURRENT_AS_FILEINFO
+                \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::CURRENT_AS_FILEINFO
             );
-            $files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
+            $files = new \RecursiveIteratorIterator($it, \RecursiveIteratorIterator::CHILD_FIRST);
 
             foreach ($files as $file) {
                 // Delete links and regular files without resolving outside the tree
