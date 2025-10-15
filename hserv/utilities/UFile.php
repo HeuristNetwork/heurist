@@ -248,27 +248,40 @@ use hserv\utilities\USystem;
      * @param bool $rmdir If true, removes the directory itself after deleting its contents.
      * @return bool True if the operation was successful or the directory didn't exist, false if rmdir failed.
      */
-    function folderDelete2($dir, $rmdir) {
-
-        if(file_exists($dir)){
-
-            $files = new RecursiveIteratorIterator(
-                        new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
-                        RecursiveIteratorIterator::CHILD_FIRST
-            );
-
-            foreach ($files as $fileinfo) {
-                $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
-                $todo($fileinfo->getRealPath());
-            }
-
-            if($rmdir){
-                $res = rmdir($dir);
-                return $res;
-            }
+    function folderDelete2(string $dir, bool $rmdir = true): bool
+    {
+        if (!is_dir($dir)) {
+            return true; // nothing to do
         }
-        return true;
+
+        try {
+            $it = new RecursiveDirectoryIterator(
+                $dir,
+                FilesystemIterator::SKIP_DOTS | FilesystemIterator::CURRENT_AS_FILEINFO
+            );
+            $files = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
+
+            foreach ($files as $file) {
+                // Delete links and regular files without resolving outside the tree
+                if ($file->isLink() || $file->isFile()) {
+                    if (!@unlink($file->getPathname())) {
+                        return false;
+                    }
+                    continue;
+                }
+                if ($file->isDir()) {
+                    if (!@rmdir($file->getPathname())) {
+                        return false;
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            return false; // unreadable path or iterator error
+        }
+
+        return $rmdir ? @rmdir($dir) : true;
     }
+
 
     /**
      * Gets a list of files in specified directories, optionally filtered by extensions.
