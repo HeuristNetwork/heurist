@@ -86,6 +86,7 @@ if($is_own_domain){
         array_unshift($requestUri, $database_name_from_domain); //add to beginning of array
     }
 }
+
 // --------------- INDEX or STARTUP
 if(count($requestUri)==1 && in_array($requestUri[0], $allowedVersions)){
 
@@ -110,7 +111,7 @@ if(count($requestUri)==1 && in_array($requestUri[0], $allowedVersions)){
     
 }*/
 elseif (!( ($requestUri[0]=='db') 
-    || (in_array($requestUri[0], $allowedVersions) && @$requestUri[1]=='viewers')
+    || (in_array($requestUri[0], $allowedVersions) && (@$requestUri[1]=='viewers' || @$requestUri[1]=='redirects'))
     || (count($requestUri)>1 && (in_array($requestUri[1], $allowedActions) || in_array(@$requestUri[2], $allowedActions)))
     ))
 {
