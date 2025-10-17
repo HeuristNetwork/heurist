@@ -4927,7 +4927,7 @@ Heurist databases. It can run in report-only mode or perform actual purge/archiv
 Key functionalities include:
 - **Database Purge/Archive:** Databases are flagged for archival based on inactivity period
 and record count (e.g., &gt;3 months inactive with &lt;=10 records). Archived databases
-are dropped, and their filestores are moved to `DELETED_DATABASES`. Owners are notified.
+are dropped, and their filestores are moved to `_DELETED_DATABASES`. Owners are notified.
 - **Import Table Purge:** Old imported data tables (`sysImportFiles` entries and associated
 temporary tables) are dumped and compressed into `_PURGES_IMPORTS`.
 - **sysArchive Table Purge:** If the `sysArchive` table exceeds a certain size (e.g., 50,000 records),

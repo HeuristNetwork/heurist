@@ -383,7 +383,7 @@
 
                   $source = intval($source);
                   if($source==1){
-                      $lib_path = HEURIST_FILESTORE_ROOT.'DELETED_DATABASES/';
+                      $lib_path = HEURIST_FILESTORE_ROOT.'_DELETED_DATABASES/';
                   }elseif($source==2){
                       $lib_path = '/srv/BACKUP';
                       $include_dates = true;
@@ -395,7 +395,7 @@
                           $lib_path = '/srv/BACKUP/ARCHIVE';
                       }
                   }elseif($source==4){
-                      $lib_path = HEURIST_FILESTORE_ROOT.'DBS_TO_RESTORE/';
+                      $lib_path = HEURIST_FILESTORE_ROOT.'_DBS_TO_RESTORE/';
                   }
 
                   $lib_path = array($lib_path);

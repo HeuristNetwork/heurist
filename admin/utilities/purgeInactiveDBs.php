@@ -7,7 +7,7 @@
 *               Key functionalities include:
 *               - **Database Purge/Archive:** Databases are flagged for archival based on inactivity period
 *                 and record count (e.g., >3 months inactive with <=10 records). Archived databases
-*                 are dropped, and their filestores are moved to `DELETED_DATABASES`. Owners are notified.
+*                 are dropped, and their filestores are moved to `_DELETED_DATABASES`. Owners are notified.
 *               - **Import Table Purge:** Old imported data tables (`sysImportFiles` entries and associated
 *                 temporary tables) are dumped and compressed into `_PURGES_IMPORTS`.
 *               - **sysArchive Table Purge:** If the `sysArchive` table exceeds a certain size (e.g., 50,000 records),
@@ -59,7 +59,7 @@ if (@$argv) {
 
 /*
  This routine:
- deletes database and keeps archives in DELETED_DATABASES
+ deletes database and keeps archives in _DELETED_DATABASES
 
          Deletes/archives any database not updated for more than:
                    3 months with 10 records or less
@@ -156,7 +156,7 @@ $mysqli = $system->getMysqli();
 $databases = mysql__getdatabases4($mysqli, false);
 
 $upload_root = $system->getFileStoreRootFolder();
-$backup_root = $upload_root.'DELETED_DATABASES/';
+$backup_root = $upload_root.'_DELETED_DATABASES/';
 $backup_imports = $upload_root.'_PURGES_IMPORTS/';
 $backup_sysarch = $upload_root.'_PURGES_SYSARCHIVE/';
 
