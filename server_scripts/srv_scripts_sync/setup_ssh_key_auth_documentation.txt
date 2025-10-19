@@ -1,0 +1,73 @@
+ChatGPT:
+
+generates (or reuses) an ed25519 SSH key
+
+installs the public key on the remote (using ssh-copy-id or a safe fallback)
+
+tests passwordless SSH
+
+optional rsync dry-run test
+
+optional lockdown: disables password auth on the remote (key-only)
+
+optional AllowUsers and AllowGroups hardening (supports user@host patterns)
+
+Save it as setup_ssh_key_auth.sh, make it executable, and run with the examples below.
+
+Examples
+# Basic: set up key auth
+./setup_ssh_key_auth.sh --dest-user heuristeu --dest-host heurist.huma-num.fr
+
+# Lock to key-only, and restrict SSH to specific users and groups
+./setup_ssh_key_auth.sh \
+  --dest-user heuristeu \
+  --dest-host heurist.huma-num.fr \
+  --disable-password-auth \
+  --allow-users "heuristeu johnson@203.0.113.44" \
+  --allow-groups "sshusers sftponly"
+
+# Custom port and quick rsync dry-run test
+./setup_ssh_key_auth.sh \
+  --dest-user heuristeu \
+  --dest-host heurist.huma-num.fr \
+  --port 2222 \
+  --rsync-test /var/www/html/HEURIST_FILESTORE \
+  --dry-run
+  
+  
+  Notes & safety
+
+Keep your current SSH session open while hardening. Test a new session before closing the original.
+
+AllowUsers supports patterns like user@1.2.3.4, user@198.51.100.*, and hostnames.
+
+If you ever need to rollback on the remote:
+
+If /etc/ssh/sshd_config.d/99-key-only.conf exists, remove it and reload sshd.
+
+Or restore /etc/ssh/sshd_config.bak.* and reload.
+
+
+
+you now have a single, production-ready script for:
+
+generating and installing SSH keys,
+
+verifying passwordless access,
+
+testing rsync, and
+
+optionally hardening SSH with:
+
+password logins disabled,
+
+AllowUsers and AllowGroups restrictions.
+
+💡 To summarize your setup options
+Purpose    Command
+Basic key setup    ./setup_ssh_key_auth.sh --dest-user heuristeu --dest-host heurist.huma-num.fr
+Disable password login after success    ./setup_ssh_key_auth.sh --dest-user heuristeu --dest-host heurist.huma-num.fr --disable-password-auth
+Restrict SSH access to specific users/groups    ./setup_ssh_key_auth.sh --dest-user heuristeu --dest-host heurist.huma-num.fr --disable-password-auth --allow-users "heuristeu johnson" --allow-groups "sshusers"
+Test rsync connection after setup    ./setup_ssh_key_auth.sh --dest-user heuristeu --dest-host heurist.huma-num.fr --rsync-test /var/www/html/HEURIST_FILESTORE --dry-run
+
+After confirming that your key-based login works, SSH access will be limited to the users/groups you listed, with passwords disabled.

@@ -1,0 +1,83 @@
+ChatGPT:
+
+a single, consolidated Bash script that:
+
+creates/uses an ed25519 SSH key and installs it on a remote,
+
+tests passwordless SSH,
+
+optional rsync dry-run,
+
+optional SSH hardening (password logins off; AllowUsers/AllowGroups),
+
+optional SSH port change with firewall + SELinux updates (safe, two-phase),
+
+optional Fail2ban install & configure for the chosen SSH port.
+
+--backup-and-print
+
+makes an extra backup of any touched SSH config (even drop-ins),
+
+then prints a compact audit: effective sshd config (sshd -T filtered), open SSH ports, firewall status, SELinux ssh ports, Fail2ban jail status.
+
+Safety first: the script performs two-phase port switching. It adds the new port alongside the current one, opens the firewall/SELinux, reloads sshd, and tests a connection on the new port. Only if you pass --finalize-port-switch will it remove the old port and close its firewall hole.
+
+Examples
+
+
+  # Key setup + audit printout
+./setup_ssh_key_auth.sh --dest-user heuristeu --dest-host heurist.huma-num.fr --backup-and-print
+
+# Harden, set new SSH port (two-phase), install fail2ban, print audit
+./setup_ssh_key_auth.sh \
+  --dest-user heuristeu --dest-host heurist.huma-num.fr \
+  --disable-password-auth \
+  --allow-users "heuristeu johnson" \
+  --set-port 2222 \
+  --install-fail2ban \
+  --backup-and-print
+
+# Finalize the port switch later (keep only 2222), print audit
+./setup_ssh_key_auth.sh \
+  --dest-user heuristeu --dest-host heurist.huma-num.fr \
+  --set-port 2222 \
+  --finalize-port-switch \
+  --backup-and-print
+
+  
+ Notes & Rollback
+
+The script prefers an sshd_config.d drop-in (modern systems). On older systems it edits /etc/ssh/sshd_config directly and backs it up as sshd_config.bak.TIMESTAMP.
+
+Finalize later: If you used --set-port 2222 without --finalize-port-switch, the server listens on both old and new ports. Re-run with --finalize-port-switch to keep only the new port and close the old port in the firewall.
+
+Rollback:
+
+Remove /etc/ssh/sshd_config.d/98-ports.conf and/or /etc/ssh/sshd_config.d/99-key-only.conf, or restore /etc/ssh/sshd_config from backup.
+
+Reopen the old port in firewall if needed:
+
+firewalld: sudo firewall-cmd --permanent --add-port=22/tcp && sudo firewall-cmd --reload
+
+ufw: sudo ufw allow 22/tcp
+
+Reload sshd: sudo systemctl reload sshd (or service sshd reload)
+
+ 
+  
+What the audit prints (--backup-and-print)
+
+sshd -T filtered for: port, passwordauthentication, pubkeyauthentication, kbdinteractiveauthentication, challengeresponseauthentication, allowusers, allowgroups.
+
+Listening TCP ports (ss -tlpn).
+
+Firewall: firewall-cmd --list-ports or ufw status verbose.
+
+SELinux: semanage port -l | grep ssh_port_t (when available).
+
+Fail2ban: fail2ban-client status sshd (if installed).
+
+Backups stored on remote at: /root/ssh-backups/.
+
+
+  
