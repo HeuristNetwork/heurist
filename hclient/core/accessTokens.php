@@ -20,7 +20,6 @@ $parentIni = dirname(__FILE__)."/../../../heuristConfigIni.php";
 // parent directory configuration file is optional, hence include not require
 $accessToken_MapBox = '';
 $accessToken_MapTiles = '';
-$accessToken_GeonamesAPI = '';
 
 if (is_file($parentIni)){
     include_once $parentIni;

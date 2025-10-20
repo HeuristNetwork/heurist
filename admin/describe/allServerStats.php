@@ -70,7 +70,7 @@ if(extension_loaded('fileinfo')){
     $file_type = strtolower(pathinfo($temp_file, PATHINFO_EXTENSION));
 }
 
-$is_zip = $file_type !== 'application/zip' && $file_type !== 'zip';
+$is_zip = $file_type === 'application/zip' && $file_type === 'zip';
 if(!$is_zip && $file_type !== 'text/plain' && $file_type !== 'txt'){
     $system->errorExitApi('Invalid file provided', HEURIST_ACTION_BLOCKED, false);
 }elseif(!$is_zip && count($stat_types) > 1){
