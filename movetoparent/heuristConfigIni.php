@@ -71,11 +71,11 @@ if (!@$dbAdminPassword) {$dbAdminPassword = getenv("DB_ADMIN_PASSWORD") ?getenv(
 // They should open a MySQL port and an SSH connection exclusively to other trusted Heurist servers.
 // This server will need an appropriate SSH connection to each of the defined servers using a keyfile 
 // for file transfers in both directions using rsync.
-// Note: The server identifier eg. HN, HR, HN2, MUST be uppercase letters or digits only, maximum 5, no punctuation
+// Note: The server identifier eg. HN, HR, HN2, MUST be uppercase letters or digits only, maximum 6, no punctuation
 /*
 $remoteServers = [
-    'HN' => ['server' => 'heurist.huma-num.fr', 'port' => 3306, 'user' => 'heurist', 'pass' => 'xxxxxxxxxxxxxxx'],
-    'HR' => ['server' => 'heuristref.net', 'port' => 3306, 'user' => 'heurist', 'pass' => 'xxxxxxxxxxxxxx']
+    'HN' => ['server' => 'heurist.huma-num.fr', 'port' => 3306, 'sshuser' => 'dbtunnel', 'dbuser' => 'heurist',  'dbpass' => 'xxxx'], 
+    'HR' => ['server' => 'xxxx.xxxx.xx', 'port' => 3306, 'sshuser' => 'xxxx', 'dbuser' => 'xxxx',  'dbpass' => 'xxxx'] 
 ];
 */
 
