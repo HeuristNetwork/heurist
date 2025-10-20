@@ -159,6 +159,7 @@ $.widget( "heurist.resultList", {
         check_linked_media: true, // check linked records (only type "media") for an image
         
         fontsize: 0, //base font size for renderRecordData otherwise it takes from user preferences
+        useRelmarkerTitle: 0, // replace the curated relmarker string with the relationship record title
         
         language: 'def'
     },
@@ -244,6 +245,9 @@ $.widget( "heurist.resultList", {
 
         if(this.options.fontsize==0 && this.element.css('font-size')){
             this.options.fontsize = parseFloat(this.element.css('font-size'));
+        }
+        if(this.options.useRelmarkerTitle == 0){
+            window.hWin.HAPI4.get_prefs_def('useRelmarkerTitle', 0);
         }
         
         // Auto select record(s), retrieved from url
@@ -2532,6 +2536,9 @@ $.widget( "heurist.resultList", {
                     }
                     if(this.options.fontsize>0){
                         infoURL = infoURL + '&fontsize=' + this.options.fontsize;
+                    }
+                    if(this.options.useRelmarkerTitle > 0){
+                        infoURL += `&useRelmarkerTitle=${this.options.useRelmarkerTitle}`;
                     }
                     
                     

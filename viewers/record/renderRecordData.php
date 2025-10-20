@@ -84,7 +84,7 @@ if(array_key_exists('hideImages', $_REQUEST)){
 // How to handle fields set to hidden
 $show_hidden_fields = $is_production || $is_map_popup ? -1 : $system->userGetPreference('recordData_HiddenFields', 0);
 
-//                                                    
+//
 if(array_key_exists('fontsize', $_REQUEST)){
     $usr_font_size = intval($_REQUEST['fontsize']);    
 }else{
@@ -97,6 +97,12 @@ if(!$is_map_popup && $usr_font_size != 0){
 }
 define('FONT_SIZE', $font_size);
 
+$useRelmarkerTitle = 0;
+if(array_key_exists('useRelmarkerTitle', $_REQUEST)){
+    $useRelmarkerTitle = intval($_REQUEST['useRelmarkerTitle']);
+}else{
+    $useRelmarkerTitle = intval($system->userGetPreference('useRelmarkerTitle', 0));
+}
 
 $rectypesStructure = dbs_GetRectypeStructures($system);//getAllRectypeStructures();//get all rectype names
 
@@ -2425,7 +2431,7 @@ function print_other_tags($bib) {
 function print_relation_details($bib) {
 
     global $system, $relRT,$relSrcDT,$relTrgDT,
-        $ACCESSABLE_OWNER_IDS, $ACCESS_CONDITION,
+        $ACCESSABLE_OWNER_IDS, $ACCESS_CONDITION, $useRelmarkerTitle,
         $is_map_popup, $is_production, $rectypesStructure, $defTerms;
 
     $mysqli = $system->getMysqli();
@@ -2520,14 +2526,22 @@ function print_relation_details($bib) {
             }
 
             // get title mask for display
-            if(array_key_exists('rec_Title',$bd['RelatedRecID'])){
+            $recTitle = "Record ID #{$relatedRecID}";
+            if($useRelmarkerTitle){
+                $recTitle = $bd['recTitle'];
+            }elseif(array_key_exists('rec_Title',$bd['RelatedRecID'])){
+
                 $recTitle = $bd['RelatedRecID']['rec_Title'];
 
                 if($field_name !== false && array_key_exists('RelTerm',$bd)){
                     $recTitle = $bd['RelTerm'] . ' - > ' . $recTitle;
                 }
-            }else{
-                $recTitle = 'record id ' . $relatedRecID;
+                if(@$bd['StartDate']){
+                    $recTitle .= '&nbsp;&nbsp;' . htmlspecialchars($bd['StartDate']);
+                }
+                if(@$bd['EndDate']){
+                    $recTitle .= ' until ' . htmlspecialchars($bd['EndDate']);
+                }
             }
 
             print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.($is_map_popup?CSS_HIDDEN:'').'">';//FONT_SIZE. && $link_cnt>2 linkRow
@@ -2541,17 +2555,15 @@ function print_relation_details($bib) {
             }
 
             print '<div class="detail" '. $extra_styling .'>';
-                if (@$bd['RelatedRecID']) {
+            if (@$bd['RelatedRecID']) {
 
-                    print composeRecTypeIcon($bd['RelatedRecID']['rec_RecTypeID']);
+                print composeRecTypeIcon($bd['RelatedRecID']['rec_RecTypeID']);
 
-                    print composeRecLink($bd['RelatedRecID']['rec_ID'], $recTitle);
-                } else {
-                    print USanitize::sanitizeString($bd['Title'],ALLOWED_TAGS);
-                }
-                print '&nbsp;&nbsp;';
-                if (@$bd['StartDate']) {print Temporal::toHumanReadable($bd['StartDate'], true, 1);}//compact
-                if (@$bd['EndDate']) {print ' until ' . Temporal::toHumanReadable($bd['EndDate'], true, 1);}
+                print composeRecLink($bd['RelatedRecID']['rec_ID'], $recTitle);
+            } else {
+                print USanitize::sanitizeString($bd['Title'],ALLOWED_TAGS);
+            }
+
             print DIV_E.DIV_E;
         }
         $from_res->close();
@@ -2565,7 +2577,6 @@ function print_relation_details($bib) {
                 continue;
             }
             $relatedRecID = $bd['RelatedRecID']['rec_ID'];
-
 
             if(mysql__select_value($mysqli,
                 "select count(rec_ID) from Records where rec_ID =$relatedRecID and $ACCESS_CONDITION")==0){
@@ -2607,14 +2618,22 @@ function print_relation_details($bib) {
             }
 
             // get title mask for display
-            if(array_key_exists('rec_Title',$bd['RelatedRecID'])){
+            $recTitle = "Record ID #{$relatedRecID}";
+            if($useRelmarkerTitle){
+                $recTitle = $bd['recTitle'];
+            }elseif(array_key_exists('rec_Title',$bd['RelatedRecID'])){
+
                 $recTitle = $bd['RelatedRecID']['rec_Title'];
 
                 if($field_name !== false && array_key_exists('RelTerm',$bd)){
                     $recTitle = $bd['RelTerm'] . ' - > ' . $recTitle;
                 }
-            }else{
-                $recTitle = 'record id ' . $relatedRecID;
+                if(@$bd['StartDate']){
+                    $recTitle .= '&nbsp;&nbsp;' . htmlspecialchars($bd['StartDate']);
+                }
+                if(@$bd['EndDate']){
+                    $recTitle .= ' until ' . htmlspecialchars($bd['EndDate']);
+                }
             }
 
             print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.($is_map_popup?CSS_HIDDEN:'').'">';//FONT_SIZE. && $link_cnt>2 linkRow
@@ -2627,17 +2646,15 @@ function print_relation_details($bib) {
             }
 
             print '<div class="detail" '. $extra_styling .'>';
-                if (@$bd['RelatedRecID']) {
+            if (@$bd['RelatedRecID']) {
 
-                    print composeRecTypeIcon($bd['RelatedRecID']['rec_RecTypeID']);
+                print composeRecTypeIcon($bd['RelatedRecID']['rec_RecTypeID']);
 
-                    print composeRecLink($bd['RelatedRecID']['rec_ID'], $recTitle);
-                } else {
-                    print USanitize::sanitizeString($bd['Title'],ALLOWED_TAGS);
-                }
-                print '&nbsp;&nbsp;';
-                if (@$bd['StartDate']) {print htmlspecialchars($bd['StartDate']);}
-                if (@$bd['EndDate']) {print ' until ' . htmlspecialchars($bd['EndDate']);}
+                print composeRecLink($bd['RelatedRecID']['rec_ID'], $recTitle);
+            } else {
+                print USanitize::sanitizeString($bd['Title'],ALLOWED_TAGS);
+            }
+
             print DIV_E.DIV_E;
         }
         $to_res->close();

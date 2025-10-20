@@ -105,6 +105,7 @@ $.widget( "heurist.recordListExt", {
         export_options: 'all', // export formats allowed
 
         fontsize: 0, //base font size for renderRecordData otherwise it takes from user preferences
+        useRelmarkerTitle: 0, // replace the curated relmarker string with the relationship record title
         
         language: 'def'
     },
@@ -172,6 +173,9 @@ $.widget( "heurist.recordListExt", {
             }else if(this.div_content.css('font-size')){
                 this.options.fontsize = parseFloat(this.div_content.css('font-size'));
             }
+        }
+        if(this.options.useRelmarkerTitle == 0){
+            window.hWin.HAPI4.get_prefs_def('useRelmarkerTitle', 0);
         }
         
         
@@ -750,6 +754,9 @@ $.widget( "heurist.recordListExt", {
                     }
                     if(this.options.fontsize>0){
                         newurl = newurl + '&fontsize=' + this.options.fontsize;
+                    }
+                    if(this.options.useRelmarkerTitle === 0){
+                        newurl += `&useRelmarkerTitle=1`;
                     }
                 }
             }

@@ -238,6 +238,11 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
 
                     var isPopup = (window.hWin.HEURIST4.util.getUrlParameter('popup', window.location.search)==1);
 
+                    let useRelmarkerTitle = window.hWin.HEURIST4.util.getUrlParameter('useRelmakerTitle', window.location.search) == 1;
+                    if(window.hWin.HAPI4.is_guest_user()){
+                        window.hWin.HAPI4.currentUser['ugr_Preferences']['useRelmakerTitle'] = useRelmarkerTitle ? 1 : 0;
+                    }
+
                     /**
                      * Helper function to retrieve a parameter's value.
                      * It first checks the `prepared_params` object (populated by PHP from various request parameters)

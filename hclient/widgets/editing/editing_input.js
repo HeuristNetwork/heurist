@@ -1941,7 +1941,7 @@ $.widget( "heurist.editing_input", {
             
             if(this.options.dtID=='access'){
                 const sel_options = [
-                    {key: '', title: ''}, 
+                    {key: '', title: 'Select a visibility...'}, 
                     {key: 'viewable', title: 'viewable'}, 
                     {key: 'hidden', title: 'hidden'}, 
                     {key: 'public', title: 'public'}, 
@@ -2449,7 +2449,7 @@ $.widget( "heurist.editing_input", {
                                            (ptrset.length==0 || 
                                             window.hWin.HEURIST4.util.findArrayIndex(targetRectypeID, ptrset)>=0))
                                         {
-                                            
+
                                             let ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
                                                 {rec_ID: targetID, 
                                                  rec_Title: headers[targetID][0], 
@@ -2459,6 +2459,7 @@ $.widget( "heurist.editing_input", {
                                                  trm_ID: direct[k]['trmID'],
                                                  dtl_StartDate: direct[k]['dtl_StartDate'], 
                                                  dtl_EndDate: direct[k]['dtl_EndDate'],
+                                                 relTitle: direct[k]['relationTitle'],
                                                  is_inward: false
                                                 }, !this.isReadonly());
                                             ele.on('remove', __onRelRemove);
@@ -2501,7 +2502,7 @@ $.widget( "heurist.editing_input", {
                                             if(!isSubHeaderAdded){
                                                 isSubHeaderAdded = true;
                                             }
-                                            
+
                                             let ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
                                                 {rec_ID: targetID, 
                                                  rec_Title: headers[targetID][0], 
@@ -2511,6 +2512,7 @@ $.widget( "heurist.editing_input", {
                                                  trm_ID: reverse[k]['trmID'], //invTermID,
                                                  dtl_StartDate: reverse[k]['dtl_StartDate'], 
                                                  dtl_EndDate: reverse[k]['dtl_EndDate'],
+                                                 relTitle: reverse[k]['relationTitle'],
                                                  is_inward: true
                                                 }, !this.isReadonly());
                                             ele.addClass('reverse-relation', 1)

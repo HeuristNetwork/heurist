@@ -94,7 +94,7 @@ $.widget( "heurist.profilePreferences", $.heurist.baseAction, {
 
             // Main record view
             window.hWin.HEURIST4.ui.createTemplateSelector( this._$('#main_recview'), [{key:'default',title:'Standard record view'}],
-                            window.hWin.HAPI4.get_prefs_def('main_recview', 'default'));
+                window.hWin.HAPI4.get_prefs_def('main_recview', 'default'));
 
             //from prefs to ui
             allFields.each(function(){

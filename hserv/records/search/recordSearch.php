@@ -1443,7 +1443,7 @@ function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $l
     //query to find start and end date for relationship
     $system->defineConstant('DT_START_DATE');
     $system->defineConstant('DT_END_DATE');
-    $query_rel = 'SELECT rec_ID, d2.dtl_Value t2, d3.dtl_Value t3 from Records '
+    $query_rel = 'SELECT rec_ID, rec_Title, d2.dtl_Value t2, d3.dtl_Value t3 from Records '
     .' LEFT JOIN recDetails d2 on rec_ID=d2.dtl_RecID and d2.dtl_DetailTypeID='.(defined('DT_START_DATE')?DT_START_DATE:0)
     .' LEFT JOIN recDetails d3 on rec_ID=d3.dtl_RecID and d3.dtl_DetailTypeID='.(defined('DT_END_DATE')?DT_END_DATE:0)
     .SQL_WHERE.' rec_ID=';
@@ -1470,8 +1470,9 @@ function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $l
 
                     $vals = mysql__select_row($mysqli, $query_rel.$relation->relationID);
                     if($vals!=null){
-                        $relation->dtl_StartDate = $vals[1];
-                        $relation->dtl_EndDate = $vals[2];
+                        $relation->relationTitle = $vals[1];
+                        $relation->dtl_StartDate = $vals[2];
+                        $relation->dtl_EndDate = $vals[3];
                     }
                 }
 
@@ -1506,10 +1507,12 @@ function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $l
                 $relation->relationID  = intval($row[4]);
 
                 if($relation->relationID>0) {
+
                     $vals = mysql__select_row($mysqli, $query_rel.$relation->relationID);
                     if($vals!=null){
-                        $relation->dtl_StartDate = $vals[1];
-                        $relation->dtl_EndDate = $vals[2];
+                        $relation->relationTitle = $vals[1];
+                        $relation->dtl_StartDate = $vals[2];
+                        $relation->dtl_EndDate = $vals[3];
                     }
                 }
 

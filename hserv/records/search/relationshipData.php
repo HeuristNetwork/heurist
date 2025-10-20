@@ -71,7 +71,7 @@ function fetch_relation_details($system, $recID, $i_am_primary) {
     $recID = intval($recID); // Ensure recID is an integer
     $res = $mysqli->query('select * from recDetails where dtl_RecID = ' . $recID);
 
-    $bd = array('recID' => $recID);
+    $bd = ['recID' => $recID, 'recTitle' => mysql__select_value($mysqli, "SELECT rec_Title FROM Records WHERE rec_ID = {$recID}")];
     if($res){
 
         $query_select = 'select rec_ID, rec_Title, rec_RecTypeID, rec_URL from Records where rec_ID = ';
