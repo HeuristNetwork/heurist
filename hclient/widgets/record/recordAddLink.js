@@ -996,18 +996,39 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                 window.hWin.HAPI4.RecordMgr.saveRecord(request, __callBack);
             }
         }else{
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
-            if(requests.length>0){
+
+            let closeDialog = (res) => {
+
                 res.count = requests.length;
                 window.hWin.HEURIST4.msg.showMsgFlash('Link created...', 3000);
                 this._context_on_close = res;
-                
-                if(this._openRelationRecordEditor && res.count==1 && res.relation_recID>0){
-                     window.hWin.HEURIST4.ui.openRecordEdit(res.relation_recID, null, 
+
+                if(this._openRelationRecordEditor && res.count == 1 && res.relation_recID > 0){
+                    window.hWin.HEURIST4.ui.openRecordEdit(res.relation_recID, null, 
                         {relmarker_field: this.options.relmarker_dty_ID, relmarker_is_inward: false});   
                 }
+
                 this._as_dialog.dialog('close');
-               
+            };
+            let getRecTitle = window.hWin.HAPI4.get_prefs_def('useRelmarkerTitle', 0) == 1 && requests.length == 1;
+
+            if(getRecTitle){
+                window.hWin.HAPI4.RecordSearch.doSearchWithCallback({q: `ids:${res.relation_recID}`, detail: 'rec_Title'}, (response) => {
+
+                    if(response){
+                        let record = response.getById(res.relation_recID);
+                        res.relation_Title = response.fld(record, 'rec_Title');
+                    }
+                    
+                    closeDialog(res);
+                });
+
+                return;
+            }
+
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
+            if(requests.length>0){
+                closeDialog(res);
             }
         }
     }

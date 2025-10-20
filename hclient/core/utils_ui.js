@@ -1869,7 +1869,7 @@ window.hWin.HEURIST4.ui = {
     // selector_function opens select dialog. it it is true it opens record edit popup dialog
     createRecordLinkInfo:function(container, info, selector_function){
 
-        const titleOnly = window.hWin.HAPI4.get_prefs_def('useRelmarkerTitle', 0) === 1 && !window.hWin.HEURIST4.util.isempty(info.relTitle);
+        const titleOnly = window.hWin.HAPI4.get_prefs_def('useRelmarkerTitle', 0) == 1 && !window.hWin.HEURIST4.util.isempty(info.relTitle);
         let rec_Title = titleOnly ? info.relTitle : info['rec_Title'];
         if(!titleOnly && (info['dtl_StartDate'] || info['dtl_EndDate'])){
             rec_Title += ': ';
