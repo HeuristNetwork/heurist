@@ -479,7 +479,7 @@ window.hWin.HEURIST4.dbs = {
                 }
                 
                 if(all_header_fields || $fieldtypes.indexOf('added')>=0 || $fieldtypes.indexOf('rec_Added')>=0){
-                    $children.push({key:'rec_Modified', type:'date',
+                    $children.push({key:'rec_Added', type:'date',
                         title:('Added'+($mode!=7?' <span style="font-size:0.7em">(Date)</span>':'')), 
                         code:($recTypeId+_separator+'added'), name:'Date added'});
                 }
@@ -3281,13 +3281,14 @@ window.hWin.HEURIST4.dbs = {
      *  - `0`: Flat data array. Each element is `[dty_id, dty_label, [rst_label1, rst_label2, ...], show_in_lists_flag]`.
      *           `show_in_lists_flag` is true if `list_all_fields` is false and `dty_ShowInLists` is 0.
      *  - `1`: Array for dropdowns. Objects with `key` (dty_id), `title` (dty_label or rst_label), `depth` (for rst instances), `hidden` (show_in_lists_flag).
-     *  - `2`: (Commented as "needs testing") Intended for Fancytree nodes with `title`, `key`, `code`, `children`.
+     *  - `2`: Intended for Fancytree nodes with `title`, `key`, `code`, `children`.
      * @param {string|string[]} [allowed_types='all'] - Field types to include (e.g., 'freetext', ['resource', 'enum']). 'all' includes all types.
      * @param {number|number[]} [ignored_dty_id=[]] - Detail type ID(s) to ignore.
      * @param {boolean} [list_all_fields=true] - If `false`, the `dty_ShowInLists` property is considered for the `show_in_lists_flag`/`hidden` property.
+     * @param {boolean} [include_field_type=false] - If `true`, the field's type will be included in the title.
      * @returns {Array} An array structured according to the specified `mode`. Returns an empty array if `rty_IDs` is invalid or empty.
      */
-    getBaseFieldInstances: function(rty_IDs, mode = 0, allowed_types = 'all', ignored_dty_id = [], list_all_fields = true){
+    getBaseFieldInstances: function(rty_IDs, mode = 0, allowed_types = 'all', ignored_dty_id = [], list_all_fields = true, include_field_type = false){
 
         let fields = [];
 
@@ -3310,7 +3311,6 @@ window.hWin.HEURIST4.dbs = {
         let arr_idx = {}; // id to array idx
         for(const rty_id of rty_IDs){ // Get base fields and instances for each rectype
 
-        
             const rty_name = $Db.rty(rty_id, 'rty_Name');
 
             const recset = $Db.rst(rty_id);
@@ -3324,10 +3324,13 @@ window.hWin.HEURIST4.dbs = {
                 }
 
                 const dty = $Db.dty(dty_id);
-                const dty_name = dty['dty_Name'];
+                let dty_name = dty['dty_Name'];
+                const dty_Type = dty['dty_Type'];
 
-                if(allowed_types != 'all' && allowed_types.indexOf(dty['dty_Type']) < 0){
+                if(allowed_types != 'all' && allowed_types.indexOf(dty_Type) < 0){
                     return;
+                }else if(include_field_type){
+                    dty_name += ` <span style="font-size:0.7em" class="filterType_${dty_Type}">(${$Db.baseFieldType[dty_Type]})</span>`;
                 }
 
                 if(!Object.hasOwn(arr_idx, dty_id)) {
@@ -3335,7 +3338,7 @@ window.hWin.HEURIST4.dbs = {
                     let list_fld = !list_all_fields && $Db.dty(dty_id, 'dty_ShowInLists') == 0;
                     arr_idx[dty_id] = last_idx;
                     last_idx ++;
-                    fields.push( [ dty_id, dty_name, [], list_fld ] );
+                    fields.push( [ dty_id, dty_name, [], list_fld, dty_Type ] );
                 }
 
                 const dty_idx = arr_idx[dty_id];
@@ -3366,6 +3369,7 @@ window.hWin.HEURIST4.dbs = {
             const dty_title = field[1];
             const rst_titles = field[2];
             const show_in_list_flag = field[3]; // This flag is true if it should be hidden
+            const dty_type = field[4];
 
             if(mode == 1){ // For dropdowns
                
@@ -3374,21 +3378,22 @@ window.hWin.HEURIST4.dbs = {
                 for(const rst_title of rst_titles){
                     processed_fields.push({key: dty_id, title: rst_title, depth: 1, hidden: show_in_list_flag});
                 }
-            }
-            /*  needs testing
-            else if(false && mode == 2){ // For Fancytree (example)
+            }else if(mode == 2){ // For Fancytree (example)
 
                 let node = {
-                    'title': dty_title,
-                    'key': dty_id,
-                    'code': dty_id, // Could be dty_id or another code
-                    'children': []
+                    title: dty_title,
+                    key: dty_id,
+                    code: `:${dty_id}`, // Could be dty_id or another code
+                    children: [],
+                    type: dty_type,
+                    folder: true
                     // 'hidden': show_in_list_flag // If tree supports hiding nodes
                 };
 
                 let sub_node_template = { // Template for children
-                    'key': dty_id, // Child key might be composite like dty_id + '_' + rst_title or just dty_id
-                    'code': dty_id // Child code
+                    key: dty_id, // Child key might be composite like dty_id + '_' + rst_title or just dty_id
+                    code: `:${dty_id}`, // Child code
+                    type: dty_type
                     // 'hidden': show_in_list_flag
                 };
 
@@ -3400,10 +3405,9 @@ window.hWin.HEURIST4.dbs = {
 
                 processed_fields.push(node);
             }
-            */
         }
 
-        if(mode == 0 || mode == 2){ // Mode 0 returns the 'fields' array directly; Mode 2 would too if implemented
+        if(mode == 0){ // Mode 0 and 2 returns the 'fields' array directly
             return fields;
         }else{ // Mode 1 returns 'processed_fields'
             return processed_fields;
