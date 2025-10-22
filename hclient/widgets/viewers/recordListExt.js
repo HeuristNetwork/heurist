@@ -755,7 +755,7 @@ $.widget( "heurist.recordListExt", {
                     if(this.options.fontsize>0){
                         newurl = newurl + '&fontsize=' + this.options.fontsize;
                     }
-                    if(this.options.useRelmarkerTitle === 0){
+                    if(this.options.useRelmarkerTitle != 0){
                         newurl += `&useRelmarkerTitle=1`;
                     }
                 }
