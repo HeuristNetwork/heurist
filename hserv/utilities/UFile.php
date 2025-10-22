@@ -727,7 +727,7 @@ use hserv\utilities\USystem;
     {
         if(!empty($rawdata) && is_string($filename)){
             fileDelete($filename);
-            $fp = fopen($filename,'x');
+            $fp = fopen($filename, 'x');
             fwrite($fp, $rawdata);
             fclose($fp);
 

@@ -52,20 +52,15 @@ if($pathFromRequest!==''){
 // # Override by URL prefix (symlink name in the request)
 // SetEnvIf Request_URI "^/h7-hn/"     APP_VERSION=hn
 $envVersion = getenv('APP_VERSION') ?: ($_SERVER['APP_VERSION'] ?? null);
-/* older v php
-$envVersion = getenv('APP_VERSION');
-if ($envVersion === false || $envVersion === '') {
-    $envVersion = isset($_SERVER['APP_VERSION']) ? $_SERVER['APP_VERSION'] : null;
-}
-*/
+
 
 // Map folder names to internal version keys
 $folderToVersion = [
   'h7-hn'    => 'hn',
 // 'h7-hn2025'=> 'hn2025',
 ];
-// Decide final $version
-$version = $envVersion ?: ($folderToVersion[$firstSeg] ?? 'default');
+// Decide final cfgVersion
+$cfgVersion = $envVersion ?: ($folderToVersion[$firstSeg] ?? 'default');
 
 // [server url]                 
 // enter the server name or IP address of your Web server, null will pull SERVER_NAME from the request header
@@ -96,7 +91,7 @@ if (!@$heuristBaseURL_pro) {$heuristBaseURL_pro = null;}
 // Values can be assigned to environment variable or defined here
 
 // --- Switch configs by version ---
-switch ($version) {
+switch ($cfgVersion) {
   case 'hn':
     $dbHost = '127.0.0.1';
     $dbPort = 3307;

@@ -55,6 +55,8 @@
 // special case for dicobiosport.huma-num.fr and privileges.huma-num.fr
 //
 
+//error_log($_SERVER['REQUEST_URI'] ?? ($_SERVER['SCRIPT_NAME'] ?? 'resovler'));
+
 $requestUri = str_replace( '?'.$_SERVER['QUERY_STRING'], '', $_SERVER['REQUEST_URI'] );
 
 $requestUri = explode('/', trim($requestUri,'/'));
@@ -65,7 +67,7 @@ $requestContent = array('xml'=>'text/xml',
                         'rdf'=>'application/rdf+xml',
                         'html'=>'text/html');
 
-$allowedVersions = ['heurist','h6-alpha','h7-alpha','h6-ij'];
+$allowedVersions = ['heurist','h6-alpha','h7-alpha','h6-ij','h7-hn']; //
                         
 $format = null;
 $redirection_path = '../';
@@ -89,13 +91,11 @@ if($is_own_domain){
 
 // --------------- INDEX or STARTUP
 if(count($requestUri)==1 && in_array($requestUri[0], $allowedVersions)){
-
     //redirectURL2('/'.rawurlencode($requestUri[0]).'/index.php');
     include_once '../index.php';  //root index that goes to startup
     exit;
 
 }elseif ($requestUri[0]=='startup' || @$requestUri[1]=='startup') {
-    
     include_once '../startup/index.php';
     exit;
 

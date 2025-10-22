@@ -150,6 +150,7 @@ class System {
         }
 
         $res = mysql__init($this->dbnameFull);
+        
         if (is_a($res, 'mysqli')){
             //connection OK
             $this->mysqli = $res;
