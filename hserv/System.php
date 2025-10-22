@@ -752,7 +752,7 @@ class System {
             return true; //already defined
         }
 
-        if($dbname===null){
+        if($dbname!==null){
             list($database_name_full, $dbname) = mysql__get_names($dbname);
             if(mysql__check_dbname($dbname)!=null) {return false;}
         }else{

@@ -35,6 +35,38 @@
 // **** DO NOT EDIT THE COPY OF THIS FILE IN THE CODEBASE (..../HEURIST/movetoparent)
 //      as this will have no effect (it is the copy in ..../HEURIST/ which is used)
 
+
+// --- Figure out which folder name the request used (symlink-aware) ---
+$firstSeg = '';
+$pathFromRequest = $_SERVER['REQUEST_URI'] ?? ($_SERVER['SCRIPT_NAME'] ?? '');
+if($pathFromRequest!==''){
+    $path = parse_url($pathFromRequest, PHP_URL_PATH) ?? '/';   // e.g. "/h7-hn/index.php"
+    $segments = array_values(array_filter(explode('/', $path))); // ["h7-hn", "index.php"]
+    $firstSeg = $segments[0] ?? '';                              // "h7-hn"
+}
+
+// Optionally allow an ENV override (handy for CLI/cron or Apache SetEnv)
+// Define in httpd.conf under <VirtualHost>
+// # Default
+// SetEnv APP_VERSION default
+// # Override by URL prefix (symlink name in the request)
+// SetEnvIf Request_URI "^/h7-hn/"     APP_VERSION=hn
+$envVersion = getenv('APP_VERSION') ?: ($_SERVER['APP_VERSION'] ?? null);
+/* older v php
+$envVersion = getenv('APP_VERSION');
+if ($envVersion === false || $envVersion === '') {
+    $envVersion = isset($_SERVER['APP_VERSION']) ? $_SERVER['APP_VERSION'] : null;
+}
+*/
+
+// Map folder names to internal version keys
+$folderToVersion = [
+  'h7-hn'    => 'hn',
+// 'h7-hn2025'=> 'hn2025',
+];
+// Decide final $version
+$version = $envVersion ?: ($folderToVersion[$firstSeg] ?? 'default');
+
 // [server url]                 
 // enter the server name or IP address of your Web server, null will pull SERVER_NAME from the request header
 // you may set this value if several domains point to your server. It will unify urls across links, web pages, reports
@@ -56,15 +88,39 @@ if (!@$heuristBaseURL_pro) {$heuristBaseURL_pro = null;}
 // enter the host name or IP address of your MySQL server, blank --> localhost
 // for example $dbHost = "heuristdb.huma-num.fr";  will cause the code to use mysql on the server at heuristdb.huma-num.fr
 // Can be used to specify a separate database server in a tiered setup
-if (!@$dbHost) {$dbHost= "";}// Optional, blank = localhost for single tier, or set IP of MySQL server
 
 // MySQL user with full write (create) access on this database server
 // The default installation of MySql gives you "root" as the master user with whatever password you set up for this,
 // but you can specify another user and password with full access if preferred. We recommend "heurist". Password cannot be null.
 // MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
 // Values can be assigned to environment variable or defined here
-if (!@$dbAdminUsername) {$dbAdminUsername = getenv("DB_ADMIN_USERNAME") ?getenv("DB_ADMIN_USERNAME") : "";}// required
-if (!@$dbAdminPassword) {$dbAdminPassword = getenv("DB_ADMIN_PASSWORD") ?getenv("DB_ADMIN_PASSWORD") : "";}// required
+
+// --- Switch configs by version ---
+switch ($version) {
+  case 'hn':
+    $dbHost = '127.0.0.1';
+    $dbPort = 3307;
+    $dbAdminUsername = 'heurist'; // required
+    $dbAdminPassword = 'xxxx'; // required
+    
+    $defaultRootFileUploadURL = "https://yourdomain/HEURIST/HEURIST_FILESTORE_HN/";
+    $defaultRootFileUploadPath = "/var/www/html/HEURIST/HEURIST_FILESTORE_HN/";
+    break;
+
+  default:
+    if (!@$dbHost) {$dbHost= "";}// Optional, blank = localhost for single tier, or set IP of MySQL server
+    //if (!@$dbHost) {$dbPort= null;}// Optional, default 3306
+    if(!@$dbAdminUsername) {$dbAdminUsername = getenv("DB_ADMIN_USERNAME") ?getenv("DB_ADMIN_USERNAME") : "";}// required
+    if(!@$dbAdminPassword) {$dbAdminPassword = getenv("DB_ADMIN_PASSWORD") ?getenv("DB_ADMIN_PASSWORD") : "";}// required
+    
+    // [FOLDERS]
+    // REQUIRED: defines URL of Heurist filestore (contains files associated with databases)
+    if (!@$defaultRootFileUploadURL) {$defaultRootFileUploadURL = "http://yourdomain/HEURIST/HEURIST_FILESTORE/";}
+    // REQUIRED: defines internal location of Heurist filestore
+    if (!@$defaultRootFileUploadPath) {$defaultRootFileUploadPath = "/var/www/html/HEURIST/HEURIST_FILESTORE/";}
+    
+    break;
+}
 
 // REMOTE SERVER DATABASE ACCESS
 // This array defines other Heurist servers whose databases can be accessed from this server. 
@@ -79,12 +135,6 @@ $remoteServers = [
 ];
 */
 
-// [FOLDERS]
-
-// REQUIRED: defines URL of Heurist filestore (contains files associated with databases)
-if (!@$defaultRootFileUploadURL) {$defaultRootFileUploadURL = "http://localhost/HEURIST/HEURIST_FILESTORE/";}
-// REQUIRED: defines internal location of Heurist filestore
-if (!@$defaultRootFileUploadPath) {$defaultRootFileUploadPath = "/var/www/html/HEURIST/HEURIST_FILESTORE/";}
 
 // [EMAIL]
 
