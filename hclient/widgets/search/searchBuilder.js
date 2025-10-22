@@ -377,11 +377,11 @@ $.widget( "heurist.searchBuilder", {
             this._dialog.dialog('option', 'height', ht);    
         }else{
             topPos = this.element.parent().offset().top + 10;
-            
+
             if(ch > window.innerHeight-topPos){
                 ch = window.innerHeight-topPos;
             }
-            
+
             this.element.parent().height(ch);
         }
                 
@@ -396,7 +396,7 @@ $.widget( "heurist.searchBuilder", {
      */
     ,showFieldSelector: function( ele_id ){
         
-        if(!(this.select_main_rectype.val()>0)){
+        if(this.select_main_rectype.val() <= 0 && this.select_main_rectype.val() !== ''){
             this.pnl_Tree.hide();
         }else{
             this.select_field_for_id = ele_id;
@@ -660,8 +660,17 @@ $.widget( "heurist.searchBuilder", {
                 that._initTreeView([that.select_main_rectype.val()]);
             }
 
-            that.clearAll();
+            if(that.select_main_rectype.val() > 0){
+                that.element.find('.rty-selected.heurist-helper2').show();
+                that.element.find('#pnl_Tree').css('width', '350px');
+                that.element.find('#field_treeview').css('top', '50px');
+            }else{
+                that.element.find('.rty-selected.heurist-helper2').hide();
+                that.element.find('#pnl_Tree').css('width', '40em');
+                that.element.find('#field_treeview').css('top', '5px');
+            }
 
+            that.clearAll();
         }     
         
         this._on(this.element.find("#opt_rectypes"), {change: __onRectypeChange});
@@ -958,8 +967,7 @@ $.widget( "heurist.searchBuilder", {
      * @param {Array<string|number>} rectypeIds - An array of record type IDs to populate the tree with.
      */
     _initTreeView: function(rectypeIds){
-        
-        
+
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeIds) && this.current_tree_rectype_ids != rectypeIds.join(',') ){
 
             let that = this;
@@ -980,19 +988,31 @@ $.widget( "heurist.searchBuilder", {
             this.element.find('[name="tree_order"]').filter('[value="'+ node_order +'"]').prop('checked', true);
 
             //'title','modified',
-            let allowed_fieldtypes = ['header_ext','anyfield','enum','freetext','blocktext',
-                            'geo','year','date','integer','float','resource','relmarker','relationtype','file','separator'];
-                    
-            let treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree_new( 
-                            {
-                                mode:5, rectypeids:rectype, fieldtypes:allowed_fieldtypes, field_order:node_order //, enum_mode:'expanded' 
-                            } );
+            let allowed_fieldtypes = ['enum','freetext','blocktext',
+                            'geo','year','date','integer','float','resource','relmarker','relationtype','file'];
 
-                        treedata[0].expanded = true; //first expanded
+            let treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree_new({
+                mode: 5, rectypeids: rectype, fieldtypes: [...allowed_fieldtypes, 'header_ext', 'anyfield', 'separator'], field_order: node_order
+            });
 
-                        if(!treediv.is(':empty') && treediv.fancytree('instance')){
-                            treediv.fancytree('destroy');
-                        }
+            treedata[0].expanded = true; //first expanded
+
+            if(!treediv.is(':empty') && treediv.fancytree('instance')){
+                treediv.fancytree('destroy');
+            }
+
+            if(rectype === ''){
+                // Load all available fields
+                let all_fields = $Db.getBaseFieldInstances(rectype, 2, allowed_fieldtypes, [], true, true);
+
+                treedata[0].children.push({
+                    title: '<span style="font-style:italic">fields</span>',
+                    folder: true,
+                    is_rec_fields: true,
+                    children: all_fields,
+                    expanded: true
+                });
+            }
 
             //setTimeout(function(){
             treediv.addClass('tree-filter hidden_checkboxes').fancytree({
@@ -1161,26 +1181,19 @@ $.widget( "heurist.searchBuilder", {
                 },
                 loadChildren: function(e, data){
                     setTimeout(function(){
-                        that.showHideReverse(data);   
-                       
+                        that.showHideReverse(data);
                     },500);
                 },
-                /* select: function(e, data) {
-                   // Get a list of all selected nodes, and convert to a key array: 
-                },*/
                 click: function(e, data){
 
                     if(data.node.type == 'separator'){
                         return false;
                     }
 
-                    let isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
-
-                    if(isExpander) return;
-
-                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
+                    let ignoreExpand = $(e.originalEvent.target).hasClass('fancytree-title') && rectype == '';
+                    if(!ignoreExpand && $(e.originalEvent.target).is('span') && data.node?.children?.length > 0){
                         data.node.setExpanded(!data.node.isExpanded());
-                    }else if( data.node.lazy){
+                    }else if(!ignoreExpand && data.node.lazy){
                         data.node.setExpanded( true );
                     }else{
                         let code = data.node.data.code;
@@ -1189,8 +1202,6 @@ $.widget( "heurist.searchBuilder", {
 
                             if(codes.length == 2 && $Db.dty(codes[1], 'dty_Type') == 'enum'){
                                 // by default, handle as internal id
-                               
-                               
                             }
 
                             let codes2 = code.split(':');

@@ -2529,18 +2529,17 @@ $.widget( "heurist.resultList", {
                         if(that._is_publication && that.options.recviewer_images != 0){
                             infoURL += '&hideImages=' + that.options.recviewer_images;
                         }
+                        if(this.options.useRelmarkerTitle != 0){
+                            infoURL += `&useRelmarkerTitle=1`;
+                        }
                     }
-                    
+
                     if(that.options.language && that.options.language!='def'){
-                        infoURL = infoURL + '&lang='+that.options.language;
+                        infoURL += '&lang='+that.options.language;
                     }
                     if(this.options.fontsize>0){
-                        infoURL = infoURL + '&fontsize=' + this.options.fontsize;
+                        infoURL += '&fontsize=' + this.options.fontsize;
                     }
-                    if(this.options.useRelmarkerTitle > 0){
-                        infoURL += `&useRelmarkerTitle=${this.options.useRelmarkerTitle}`;
-                    }
-                    
                     
                     //content is smarty report
                     if( this.options.rendererExpandInFrame ||  !isSmarty)

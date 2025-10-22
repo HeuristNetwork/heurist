@@ -1451,6 +1451,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             opts['is_popup'] = $dlg.find('#is_popup_report').is(':checked');
             opts['popup_position'] = $dlg.find('#popup_report_position').val();
 
+            opts['useRelmarkerTitle'] = opts['useRelmarkerTitle'] === true ? 1 : 0;
+
         }else if(widget_name=='heurist_resultList'){
             opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode'] || opts['show_export_button'] || opts['support_collection'];
             if(window.hWin.HEURIST4.util.isempty(opts['recordview_onselect'])){
@@ -1458,6 +1460,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             }
             opts['empty_remark'] = empty_remark;
             opts['placeholder_text'] = placeholder;
+
+            opts['useRelmarkerTitle'] = opts['useRelmarkerTitle'] === true ? 1 : 0;
 
             let h_unit = opts['dialog_height'] > 0 ? opts['dialog_hunit'] : '';
             let w_unit = opts['dialog_width'] > 0 ? opts['dialog_wunit'] : '';

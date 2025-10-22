@@ -236,16 +236,13 @@ $.widget( "heurist.searchBuilderItem", {
         .on( 'mouseleave', function(event){
                    that.remove_token.css({visibility:'hidden'});
         } );
-        
+
         this._refresh();
-        
-        
+
         if(!this.options.hasFieldSelector){
             this._defineInputElement();            
         }
-        
-        
-        
+
     }, //end _create
     
     /**
@@ -284,15 +281,15 @@ $.widget( "heurist.searchBuilderItem", {
            
             let topOptions2 = [
                 {key:0,title:'Generic fields', group:1, disabled:true},
-                {key:'title',title:'Title (constructed)', depth:1},
-                {key:'added',title:'Date added', depth:1},
-                {key:'modified',title:'Date modified', depth:1},
-                {key:'addedby',title:'Creator (user)', depth:1},
-                {key:'url',title:'URL', depth:1},
-                {key:'notes',title:'Notes', depth:1},
-                {key:'owner',title:'Owner (user or group)', depth:1},
-                {key:'access',title:'Visibility', depth:1},
-                {key:'tag',title:'Tags', depth:1},
+                {key:'title',title:'Title <span style="font-size:0.7em">(Constructed Text)</span>', depth:1},
+                {key:'added',title:'Date added <span style="font-size:0.7em">(Date)</span>', depth:1},
+                {key:'modified',title:'Date modified <span style="font-size:0.7em">(Date)</span>', depth:1},
+                {key:'addedby',title:'Creator <span style="font-size:0.7em">(User)</span>', depth:1},
+                {key:'url',title:'URL <span style="font-size:0.7em">(Text)</span>', depth:1},
+                {key:'notes',title:'Notes <span style="font-size:0.7em">(Text)</span>', depth:1},
+                {key:'owner',title:'Owner <span style="font-size:0.7em">(User or Group)</span>', depth:1},
+                {key:'access',title:'Visibility <span style="font-size:0.7em" class="filterType_enum">(Terms)</span>', depth:1},
+                {key:'tag',title:'Tags <span style="font-size:0.7em" class="filterType_enum">(Terms)</span>', depth:1},
                 {key:'anyfield',title:window.hWin.HR('Any field')}
             ];
 
@@ -300,7 +297,7 @@ $.widget( "heurist.searchBuilderItem", {
             //[{key:'latitude',title:window.hWin.HR('geo: Latitude')},
             //                     {key:'longitude',title:window.hWin.HR('geo: Longitude')}]; 
 
-            if(this.options.top_rty_ID>0){
+            if(this.options.top_rty_ID >= 0){
                 
                 this.select_fields_btn.show();
                 this.select_fields.hide();
@@ -313,7 +310,7 @@ $.widget( "heurist.searchBuilderItem", {
                 this.select_fields.show();
 
                 if(!this._all_fields){
-                    this._all_fields = $Db.getBaseFieldInstances(null, 1, allowed_fieldtypes, []);
+                    this._all_fields = $Db.getBaseFieldInstances(null, 1, allowed_fieldtypes, [], true, true);
                 }
                 window.hWin.HEURIST4.ui.createSelector(this.select_fields[0], [...topOptions2, ...this._all_fields]);
 
@@ -383,12 +380,18 @@ $.widget( "heurist.searchBuilderItem", {
             }else{
                 this.label_token.text('broken!');
             }
-        }else if(this.options.dty_ID>0){
+        }else if(this.options.dty_ID > 0){
+
             let lbl_text = $Db.dty(this.options.dty_ID,'dty_Name');
             if(this.options.enum_field!=null){
                 lbl_text = lbl_text + '.' + this.options.enum_field;
             }
-            this.label_token.text(lbl_text);    
+
+            this.element
+                .find('span.ui-selectmenu-button>span.ui-selectmenu-text')
+                .text(lbl_text);
+
+            this.label_token.text(lbl_text);
         }
         
         let that = this;
@@ -460,7 +463,7 @@ $.widget( "heurist.searchBuilderItem", {
             ed_options['dtID'] = dty_ID;
             
             ed_options['language'] = (field_type=='enum') ? this.options.language : ''; // show translated terms
-            
+
             if(field_type=='enum' && (this.options.enum_field!=null ||
                 (this.options.enum_field==null && !(compare=='' || compare=='=' || compare=='-') ))){
 
@@ -512,7 +515,6 @@ $.widget( "heurist.searchBuilderItem", {
             ed_options['dtFields'] = dtFields;
         }//========
 
-        
         let eqopts = [];
 
         if(field_type=='geo'){
@@ -964,12 +966,13 @@ Whole value = EQUAL
      */
     _onSelectField:function(){
 
-        if(!(this.options.top_rty_ID>0)){        
-            this.options.dty_ID = this.select_fields.val();
+        if(this.options.top_rty_ID <= 0){
+            this.options.dty_ID = this.options.dty_ID ? this.options.dty_ID : this.select_fields.val();
+            this.options.dty_ID = this.options.dty_ID ? this.options.dty_ID : 'anyfield';
+            this.options.code = '';
         }
-            
+
         this._defineInputElement();
-        
     },
     
     /**
