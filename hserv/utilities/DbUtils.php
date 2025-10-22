@@ -208,7 +208,7 @@ class DbUtils {
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
         $msg_prefix = "Unable to delete <b> $database_name </b>. ";
 
-        if(defined('HEURIST_DBNAME') && $database_name!=HEURIST_DBNAME){ //switch to database
+        if($database_name!=$system->dbname()){ //switch to database
            $connected = (mysql__usedatabase($mysqli, $database_name_full)===true);
         }else{
            $connected = true;
@@ -395,7 +395,7 @@ class DbUtils {
 
         $mysqli = self::$mysqli;
 
-        if(defined('HEURIST_DBNAME') && $database_name!=HEURIST_DBNAME){ //switch to database
+        if($database_name!=self::$system->dbname()){ //switch to database
            $connected = (mysql__usedatabase($mysqli, $database_name_full)===true);
         }else{
            $connected = true;
@@ -1274,7 +1274,7 @@ class DbUtils {
 
         $res = true;
 
-        if($database_name!=HEURIST_DBNAME){ //switch to database
+        if($database_name!=$system->dbname()){ //switch to database
            $connected = (mysql__usedatabase($mysqli, $database_name_full)==true);
         }else{
            $connected = true;
@@ -1544,7 +1544,7 @@ class DbUtils {
     /**
      * Clones an entire database, including its file structure and data.
      *
-     * @param string|null $db_source Source database name. Defaults to the current database (HEURIST_DBNAME) if null.
+     * @param string|null $db_source Source database name. Defaults to the current database ($system->dbname()) if null.
      * @param string $db_target Target database name.
      * @param bool $nodata Optional. If true, only definitions and structure are cloned (no record data). Defaults to false.
      * @param bool $isCloneTemplate Optional. If true, specific logic for cloning a template database is applied.
@@ -1558,7 +1558,7 @@ class DbUtils {
         self::initialize();
 
         if($db_source==null){
-            $db_source = HEURIST_DBNAME;
+            $db_source = self::$system->dbname();
         }
 
         //$system = self::$system;
@@ -1578,7 +1578,7 @@ class DbUtils {
         }
 
         //additional check for self clone/rename
-        if($db_source==HEURIST_DBNAME && !self::$system->isAdmin()){
+        if($db_source==self::$system->dbname() && !self::$system->isAdmin()){
 
                 self::$system->addError(HEURIST_REQUEST_DENIED,
                             'To perform this action you must be logged in as Administrator of group \'Database Managers\' or as Database Owner');

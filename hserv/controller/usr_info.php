@@ -558,7 +558,7 @@
                 if($username && $system->doLogin($username, $password, $session_type, $skip_pwd_check, $is_guest)){
                     $res = $system->getCurrentUserAndSysInfo( true, $is_guest );//including reccount and dashboard entries
 
-                    checkDatabaseFunctions($mysqli);
+                    checkDatabaseFunctions($system);
 
                     $system->userLogActivity('Login');
                 }

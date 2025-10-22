@@ -1200,13 +1200,13 @@
             ($fromImport ? "A new Heurist user has been imported from another local database.\nPlease note that this new user's account will be enabled by default but they can only create new records.\n" :
                 "There is a Heurist user registration awaiting approval.\n") .
             "The user details ". ($fromImport ? "imported" : "submitted") ." are:\n".
-            "Database name: ".HEURIST_DBNAME."\n".
+            "Database name: ".$system->dbname()."\n".
             "Full name:    ".$ugr_FullName."\n".
             "Email address: ".$ugr_eMail."\n".
             "Organisation:  ".$ugr_Organisation."\n".
             "Go to the address below and navigate in menu Admin > Manage Users to review further details".
             ($fromImport ? "" : " and approve the registration") .":\n".
-            HEURIST_BASE_URL."?db=".HEURIST_DBNAME; //."&recID=$recID&mode=users";
+            HEURIST_BASE_URL."?db=".$system->dbname(); //."&recID=$recID&mode=users";
 
             if($is_guest_registration){
                 $email_text .= ("\n\n".'WARNING: Guest users can add up to 200 records per day');
@@ -1262,8 +1262,8 @@
             }
 
             //give them a pointer to the search page for the database
-            $email_text .= "\n\nLogin to the database: ".HEURIST_DBNAME." at ".
-            HEURIST_BASE_URL."?db=".HEURIST_DBNAME. "\n"."\n\nwith the username: " . $ugr_Name;
+            $email_text .= "\n\nLogin to the database: ".$system->dbname()." at ".
+            HEURIST_BASE_URL."?db=".$system->dbname(). "\n"."\n\nwith the username: " . $ugr_Name;
 
 
             if($tmp_password!=null){

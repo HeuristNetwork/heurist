@@ -56,7 +56,7 @@ if(!$system->isAdmin()){ //  $system->isDbOwner()
 <?php
 
 
-$isHeuristReferenceIndex = (strcasecmp(HEURIST_DBNAME, HEURIST_INDEX_DATABASE)==0);
+$isHeuristReferenceIndex = (strcasecmp($system->dbname(), HEURIST_INDEX_DATABASE)==0);
 $checker = new DbVerifyURLs($system, HEURIST_SERVER_URL, $isHeuristReferenceIndex);
 $results = $checker->checkURLs(true, $list_only);
 

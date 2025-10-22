@@ -159,12 +159,6 @@ class System {
             return false;
         }
 
-        if($this->dbnameFull && !defined('HEURIST_DBNAME')){
-            //init once for first system - preferable use methods
-            define('HEURIST_DBNAME', $this->dbname);
-            define('HEURIST_DBNAME_FULL', $this->dbnameFull);
-        }
-        
         if(!$this->dbnameFull && !$dbrequired){
             $this->isInited = true; 
         }elseif(!$init_session_and_constants){
@@ -758,8 +752,12 @@ class System {
             return true; //already defined
         }
 
-        list($database_name_full, $dbname) = mysql__get_names($dbname);
-        if(mysql__check_dbname($dbname)!=null) {return false;}
+        if($dbname===null){
+            list($database_name_full, $dbname) = mysql__get_names($dbname);
+            if(mysql__check_dbname($dbname)!=null) {return false;}
+        }else{
+            $dbname = $this->dbname();
+        }
 
         $upload_root = $this->getFileStoreRootFolder();
 

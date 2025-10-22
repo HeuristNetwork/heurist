@@ -349,7 +349,7 @@ $description = 'Modify tables:  defRecStructure(rst_SemanticReferenceURL,rst_Ter
      */
     function executeScript($system, $filename){
 
-        if(db_script($system->dbnameFullWithHost(), $filename)){
+        if(db_script($system->dbnameFull(), $filename)){ //dbnameFullWithHost
             return true;
         }else{
 ?>

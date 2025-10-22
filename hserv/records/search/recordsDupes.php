@@ -92,7 +92,7 @@ private static function initialize()
     self::$initialized = true;
 
     //check existense NEW_LIPOSUCTION_255
-    checkDatabaseFunctionsForDuplications(self::$mysqli); //HOSTISSUE change to self::$system for version that supports host prefixes
+    checkDatabaseFunctionsForDuplications(self::$system);
 }
 
 /**

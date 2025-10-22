@@ -305,27 +305,25 @@ use hserv\structure\ConceptCode;
     /**
      * Gets the database name with and without the Heurist prefix.
      *
-     * If no database name is provided, it uses `HEURIST_DBNAME` and `HEURIST_DBNAME_FULL`.
-     *
      * @param string|null $db The database name. If it starts with `HEURIST_DB_PREFIX`,
      *                        the prefix is stripped for the short name. Otherwise, the
      *                        prefix is added for the full name.
      * @return array An array containing two elements: `[$database_name_full, $database_name]`.
      */
-    function mysql__get_names( $db=null ){
+    function mysql__get_names( string $db ): array{
 
         if($db==null){
-            $database_name = HEURIST_DBNAME;
-            $database_name_full = HEURIST_DBNAME_FULL;
-        }else{
-            if(strpos($db, HEURIST_DB_PREFIX)===0){
-                $database_name_full = $db;
-                $database_name = substr($db,strlen(HEURIST_DB_PREFIX));
-            }else{
-                $database_name = $db;
-                $database_name_full = HEURIST_DB_PREFIX.$db;
-            }
+            return [null, null];
         }
+        
+        if(strpos($db, HEURIST_DB_PREFIX)===0){
+            $database_name_full = $db;
+            $database_name = substr($db,strlen(HEURIST_DB_PREFIX));
+        }else{
+            $database_name = $db;
+            $database_name_full = HEURIST_DB_PREFIX.$db;
+        }
+    
         return array($database_name_full, $database_name);
     }
 
@@ -1234,12 +1232,12 @@ $mysqli->kill($thread_id);
     * @return bool|array True if functions exist or are successfully recreated,
     *                    or an array with error details if script execution fails.
     */
-    function checkDatabaseFunctions($mysqli){
+    function checkDatabaseFunctions($system){
 
             $res = false;
 
-            if(!isFunctionExists($mysqli, 'getEstDate')){ //getTemporalDateString need drop old functions
-                $res = mysql__script(HEURIST_DBNAME_FULL, 'addProceduresTriggers.sql');
+            if(!isFunctionExists($system->getMysqli(), 'getEstDate')){ //getTemporalDateString need drop old functions
+                $res = mysql__script($system->dbnameFull(), 'addProceduresTriggers.sql');
             }else{
                 $res = true;
             }
@@ -1257,10 +1255,10 @@ $mysqli->kill($thread_id);
      * @return bool|array True if the function exists or is successfully created,
      *                    or an array with error details if script execution fails.
      */
-    function checkDatabaseFunctionsForDuplications($mysqli){
+    function checkDatabaseFunctionsForDuplications($system){
 
-         if(!isFunctionExists($mysqli, 'NEW_LIPOSUCTION_255')){
-                $res = mysql__script(HEURIST_DBNAME_FULL, 'addFunctions.sql');
+         if(!isFunctionExists($system->getMysqli(), 'NEW_LIPOSUCTION_255')){
+                $res = mysql__script($system->dbnameFull(), 'addFunctions.sql');
          }else{
                 $res = true;
          }
@@ -1303,9 +1301,9 @@ $mysqli->kill($thread_id);
                 }
                 if($res){
 
-                    $res = mysql__script(HEURIST_DBNAME_FULL, 'addProceduresTriggers.sql');
+                    $res = mysql__script($system->dbnameFull(), 'addProceduresTriggers.sql');
                     if($res===true){
-                        $res = mysql__script(HEURIST_DBNAME_FULL, 'sqlCreateRecLinks.sql');
+                        $res = mysql__script($system->dbnameFull(), 'sqlCreateRecLinks.sql');
                     }
                 }
 
@@ -1393,7 +1391,7 @@ $mysqli->kill($thread_id);
 
                 $report[] = 'recDetailsDateIndex created';
                 //recreate triggers
-                $res = mysql__script(HEURIST_DBNAME_FULL, 'addProceduresTriggers.sql');
+                $res = mysql__script($system->dbnameFull(), 'addProceduresTriggers.sql');
                 if($res!==true){
                     $system->addErrorArr($res);
                     return false;
@@ -2297,14 +2295,14 @@ $mysqli->kill($thread_id);
      *
      * @param \hserv\System $system The system object.
      * @param string $db_source Optional. The full name of the database to check.
-     *                          Defaults to `HEURIST_DBNAME_FULL` if defined and `$db_source` is empty.
+     *                          Defaults to `$system->dbnameFull()` if defined and `$db_source` is empty.
      * @return bool True if the column has the correct ENUM definition or was successfully updated,
      *              false on error (errors are added to the system object).
      */
     function checkUserStatusColumn($system, $db_source = ''){
 
-        if(empty($db_source) && defined(HEURIST_DBNAME_FULL)){
-            $db_source = HEURIST_DBNAME_FULL;
+        if(empty($db_source) && $system->dbnameFull()){
+            $db_source = $system->dbnameFull();
         }
 
         $mysqli = $system->getMysqli();
