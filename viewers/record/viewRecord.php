@@ -91,7 +91,7 @@ $hideImages = '&privateDetails=' . (array_key_exists('privateDetails', $_REQUEST
 $rec_title = $rec['rec_Title'];
 
 $record_renderer_url = HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='
-        .HEURIST_DBNAME.'&'.($bkm_ID>0 ? ('bkmk_id='.intval($bkm_ID)) : ('recID='.intval($rec_id)))
+        .$system->dbname().'&'.($bkm_ID>0 ? ('bkmk_id='.intval($bkm_ID)) : ('recID='.intval($rec_id)))
         .$noclutter
         .$hideImages;
 

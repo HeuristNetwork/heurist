@@ -46,7 +46,7 @@ $req_params = USanitize::sanitizeInputArray();
 
 $db = @$req_params['db'];
 
-if(mysql__check_dbname($db)==null){
+if(mysql__check_dbname($db)==null){ //HOST_ISSUE
 
     $system = new hserv\System();//without connection
     $fileid = filter_var(@$req_params['thumb'], FILTER_SANITIZE_STRING);
@@ -240,13 +240,13 @@ if(mysql__check_dbname($db)==null){
                                 if($recs['count']>0){
                                     $filename = $recs['records'][1][1];
                                     $filename = pathinfo($filename);
-                                    $external_url = HEURIST_BASE_URL.'mbtiles.php?'.HEURIST_DBNAME.'/'.$external_url.$filename['filename'];
+                                    $external_url = HEURIST_BASE_URL.'mbtiles.php?'.$system->dbname().'/'.$external_url.$filename['filename'];
                                 }else{
                                     $external_url = HEURIST_TILESTACKS_URL.$external_url;
                                 }
                             }elseif (file_exists($path)) {
                                 $filename = pathinfo($path);
-                                $external_url = HEURIST_BASE_URL.'mbtiles.php?'.HEURIST_DBNAME.'/'.$filename['filename'];
+                                $external_url = HEURIST_BASE_URL.'mbtiles.php?'.$system->dbname().'/'.$filename['filename'];
                             }
                         }
 

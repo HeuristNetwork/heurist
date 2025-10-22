@@ -156,7 +156,7 @@ if(!defined('PDIR')){
                                     }
 
                                 }else{
-                                    $rep = executeScript($dir.$filename);//execute SQL script
+                                    $rep = executeScript($system, $dir.$filename);//execute SQL script
                                 }
 
                                 if($rep){
@@ -193,7 +193,7 @@ if(!defined('PDIR')){
 
                         if( (!($trg_min==3 && $trg_sub>0)) && $src_min>$keep_minver){ //update database - set version up to date
                             $mysqli = $system->getMysqli();
-                            mysql__usedatabase($mysqli, HEURIST_DBNAME);
+                            mysql__usedatabase($mysqli, $system->dbname());
                             $query1 = "update sysIdentification set sys_dbSubVersion=$src_min, sys_dbSubSubVersion=0 where 1";
                             $res1 = $mysqli->query($query1);
 
@@ -201,7 +201,7 @@ if(!defined('PDIR')){
                         }
 
                         if($upgrade_success){
-                            print "<p>Upgrade was successeful.&nbsp;&nbsp;<a href='".HEURIST_BASE_URL."?db=".HEURIST_DBNAME."'>Return to main page</a></p>";
+                            print "<p>Upgrade was successeful.&nbsp;&nbsp;<a href='".HEURIST_BASE_URL."?db=".$system->dbname()."'>Return to main page</a></p>";
                         }
 
                     }
@@ -209,7 +209,7 @@ if(!defined('PDIR')){
                     //1d itweration INFORMATION!!!
                     ?>
 
-                    <p>Your database <b> <?=HEURIST_DBNAME?> </b> currently uses database format version
+                    <p>Your database <b> <?=$system->dbname()?> </b> currently uses database format version
                         <b><?=$src_maj.'.'.$src_min.'.'.$system->settings->get('sys_dbSubSubVersion')?> </b>
                         <br>(this is distinct from the program version # listed below)</p>
 
@@ -310,7 +310,7 @@ $description = 'Modify tables:  defRecStructure(rst_SemanticReferenceURL,rst_Ter
                                 <br>
                                 <p>
                                     <form action="<?php echo HEURIST_BASE_URL?>admin/setup/dbupgrade/upgradeDatabase.php">
-                                        <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>">
+                                        <input type="hidden" name="db" value="<?=$system->dbname()?>">
                                         <input type="hidden" name="mode" value="action">
                                         <button value="submit">Upgrade database</button>
                                     </form>
@@ -347,17 +347,15 @@ $description = 'Modify tables:  defRecStructure(rst_SemanticReferenceURL,rst_Ter
      * @param string $filename The full path to the SQL script file to be executed.
      * @return bool True if the script execution was successful, false otherwise.
      */
-    function executeScript($filename){
+    function executeScript($system, $filename){
 
-        global $system;
-
-        if(db_script(HEURIST_DBNAME_FULL, $filename)){
+        if(db_script($system->dbnameFullWithHost(), $filename)){
             return true;
         }else{
 ?>
                 <div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">
                     <span class="ui-icon ui-icon-alert" style="float: left; margin: .3em;"></span>
-                    Error: Unable to execute <?php echo htmlspecialchars($filename);?> for database <?php echo htmlspecialchars(HEURIST_DBNAME); ?><br>
+                    Error: Unable to execute <?php echo htmlspecialchars($filename);?> for database <?php echo htmlspecialchars($system->dbname()); ?><br>
                     Please check whether this file is valid. <?php echo CONTACT_HEURIST_TEAM_PLEASE;?> if needed<br>
                 </div>
 <?php

@@ -889,8 +889,8 @@ EXP;
 
         $iiif_type = $params['var'][0]['ulf_OrigFileName'];//image or manifest
 
-        $miradorViewer = HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='
-                    .$system->dbname();
+        $miradorViewer = HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='.$system->dbname();
+        
         if(($iiif_type==ULF_IIIF_IMAGE || $params['var'][0]['ulf_PreferredSource']=='iiif_image')
             && @$params['var'][0]['rec_ID']>0){
             $miradorViewer = $miradorViewer.'&q=ids:'.intval($params['var'][0]['rec_ID']);
@@ -1391,7 +1391,7 @@ function fileCreateThumbnail( $system, $fileid, $is_download ){
 
                 if($errorMsg){
                     //database, record ID and name of bad image
-                    sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cant create thumbnail image. DB:'.HEURIST_DBNAME,
+                    sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cant create thumbnail image. DB:'.$system->dbname(),
                             'File ID#'.$file['ulf_ID'].'  '.$filename.'. '.$errorMsg);
 
                     $img = UImage::createFromString('Thumbnail not created. '.$errorMsg);

@@ -232,7 +232,7 @@ if(!($max_size>0)) {$max_size = 0;}
             <input type="hidden" name="upload_thumb_url" value="<?php echo defined('HEURIST_THUMB_URL')?HEURIST_THUMB_URL:'';?>"/>
             <input type="hidden" name="unique_filename" value="0"/>
 
-            <input type="hidden" name="db" value="<?php echo HEURIST_DBNAME; ?>"/>
+            <input type="hidden" name="db" value="<?php echo $system->dbname(); ?>"/>
             <div><label for="upload_folder" style="color:black;">Select target folder:</label>
                 <select name="upload_subfolder" id="upload_folder">
                     <?php
@@ -749,7 +749,7 @@ if(!($max_size>0)) {$max_size = 0;}
                     // Uncomment the following to send cross-domain cookies:
                     //xhrFields: {withCredentials: true},
                     url: $('#fileupload').fileupload('option', 'url'),
-                    data: { db: "<?php echo HEURIST_DBNAME; ?>",
+                    data: { db: "<?php echo $system->dbname(); ?>",
                             acceptFileTypes:"<?php echo htmlspecialchars(implode('|',$allowed_exts))?>",
                             unique_filename: 0,
                             max_file_size: <?php echo $max_size;?>,

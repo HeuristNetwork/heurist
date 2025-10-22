@@ -439,7 +439,7 @@ if(@$_REQUEST['depth']=='all'){
 if (array_key_exists('q', $_REQUEST)) {
     if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
 
-        $collection =  &$_SESSION[HEURIST_DBNAME_FULL]['record-collection'];
+        $collection =  &$_SESSION[$system->dbnameFull()]['record-collection']; //dbnameFullWithHost()
         if (!empty($collection)) {
             $_REQUEST['q'] = 'ids:' . join(',', prepareIds(array_keys($collection)));
         } else {
@@ -1403,7 +1403,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
     }
 
     if (!$rectype_templates){
-        makeTag('citeAs', null, HEURIST_BASE_URL.'?recID='.$record['rec_ID'].'&db='.HEURIST_DBNAME);
+        makeTag('citeAs', null, HEURIST_BASE_URL.'?recID='.$record['rec_ID'].'&db='.$system->dbname());
         makeTag('title', null, $record['rec_Title']);
         if(@$record['rec_Added']) {makeTag('added', null, $record['rec_Added']);}
         if(@$record['rec_Modified']) {makeTag('modified', null, $record['rec_Modified']);}
@@ -1657,7 +1657,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
             $external_url = @$file['ulf_ExternalFileReference'];//ulf_ExternalFileReference
             $file_nonce = @$file['ulf_ObfuscatedFileID'];
 
-            $file_URL   = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file_nonce; //download
+            $file_URL   = HEURIST_BASE_URL.'?db='.$system->dbname().'&file='.$file_nonce; //download
             $file['URL'] = $external_url?$external_url:$file_URL;
 
             //including resources disabled since 2016-12-13
@@ -2330,7 +2330,7 @@ else{ // single output stream
     'xsi:schemaLocation' => '<?pho echo HEURIST_INDEX_BASE_URL;?>hml <?pho echo HEURIST_INDEX_BASE_URL;?>schemas/hml.xsd')
     );
     */
-    makeTag('database', array('id' => $dbID ), HEURIST_DBNAME);
+    makeTag('database', array('id' => $dbID ), $system->dbname());
 
     if(!$rectype_templates){
         makeTag('query', $query_attrs);
@@ -2354,7 +2354,7 @@ else{ // single output stream
 
     if($output_file_fd){
         fclose ($output_file_fd);
-        $output_file_name = HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME.".xml";
+        $output_file_name = HEURIST_FILESTORE_DIR.DIR_BACKUP.$system->dbname().".xml";
         rename($output_file, $output_file_name);
     }
 

@@ -1936,7 +1936,7 @@ function checkDtPtr($rty_IDs, $dty_ID){
 
             $recIDs_list = implode(',',$recIDs);
             $ret_message = "$ret_message<br><br><a href='#' onclick='window.open(\""
-            .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:$recIDs_list&nometadatadisplay=true\",\"_blank\")'>"
+            .HEURIST_BASE_URL."?db=".$system->dbname()."&q=ids:$recIDs_list&nometadatadisplay=true\",\"_blank\")'>"
             .'Click here</a> to view all the records affected';
 
             if(count($links)<count($recIDs)){
@@ -1957,7 +1957,7 @@ function checkDtPtr($rty_IDs, $dty_ID){
 */
 function checkTerms($termID){
 
-    global $mysqli;
+    global $system, $mysqli;
     /*
     Get parent vocabulary (vocab id) which is not necessarily the immediate parent term
     Get field types where this vocab is used
@@ -2027,7 +2027,7 @@ function checkTerms($termID){
 
                         $recIDs_list = implode(',',$recIDs);
                         $ret_message = "$ret_message<br><br><a href='#' onclick='window.open(\""
-                        .HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&q=ids:$recIDs_list&nometadatadisplay=true\",\"_blank\")'>"
+                        .HEURIST_BASE_URL."?db=".$system->dbname()."&q=ids:$recIDs_list&nometadatadisplay=true\",\"_blank\")'>"
                         .'Click here</a> to view all the records affected';
 
                         if(count($links)<count($recIDs)){
@@ -2105,7 +2105,7 @@ function isTermInUse($trmID, $infield, $indetails){
                     .'$dlg.dialog( \'close\' );'
                     .'window.hWin.HEURIST4.msg.showDialog(\''
                     .HEURIST_BASE_URL.'admin/structure/fields/manageDetailTypes.php?db='
-                    .HEURIST_DBNAME.'\',{width:1000});}">'
+                    .$system->dbname().'\',{width:1000});}">'
                     .'Edit base field definitions</a></div>';
 
                     //$ret['error_title'] = 'Warning: Terms in use';
@@ -2148,7 +2148,7 @@ function isTermInUse($trmID, $infield, $indetails){
                 }
                 $links = implode(',',$links);
                 $errMessage = "$errMessage<br><br><a href='#' onclick='window.open(\""
-                .HEURIST_BASE_URL."?db=".HEURIST_DBNAME
+                .HEURIST_BASE_URL."?db=".$system->dbname()
                 ."&q=ids:$links&nometadatadisplay=true\",\"_blank\")'>Click here</a> to view all the records affected";
                 if(count($links)<$recCount){
                     $errMessage = "$errMessage (limited to first 250)";

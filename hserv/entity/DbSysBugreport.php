@@ -106,7 +106,7 @@ class DbSysBugreport extends DbEntityBase
         if(!$res){
 
             $attempt_public_login = strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false
-                                    && $this->system->dbname() == HEURIST_BUGREPORT_DATABASE;
+                                    && $this->system->dbname() == HEURIST_BUGREPORT_DATABASE; //dbnameWithoutHost
 
             $this->performLogout = $attempt_public_login ? $this->system->doLogin('extern', null, 'public', true) : false; // attempt login to publicly available guest account
 
@@ -246,7 +246,7 @@ class DbSysBugreport extends DbEntityBase
         $reportDetails['958'] = ['Location' => $new_record['details']['958']];
 
         $url = @$record['bug_URL'];
-        $cur_url = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME;
+        $cur_url = HEURIST_BASE_URL.'?db='.$this->system->dbname();
         if(!empty($url)){
             $new_record['details']['993'] = [$url, $cur_url];
             $reportDetails['993'] = ['URL' => [$url, $cur_url]];
@@ -402,7 +402,7 @@ class DbSysBugreport extends DbEntityBase
             return false;
         }
 
-        $using_db = $this->system->dbname() == HEURIST_BUGREPORT_DATABASE;
+        $using_db = $this->system->dbname() == HEURIST_BUGREPORT_DATABASE; //dbnameWithoutHost
         $report_system = $using_db ? $this->system : null;
         if(!$using_db && strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false){
 
@@ -441,7 +441,7 @@ class DbSysBugreport extends DbEntityBase
                     $record['details']['38'][$idx] = $rec_uploads->registerFile($file, null);
                 }
 
-                if(!$record['details']['38'][$idx] && HEURIST_DBNAME !== HEURIST_BUGREPORT_DATABASE){ // backup: register as external image
+                if(!$record['details']['38'][$idx] && $this->system->dbname() !== HEURIST_BUGREPORT_DATABASE){ //dbnameWithoutHost backup: register as external image
                     $record['details']['38'][$idx] = $rec_uploads->registerURL($file_url, false, 0);
                 }
 

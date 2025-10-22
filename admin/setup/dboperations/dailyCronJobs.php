@@ -143,7 +143,6 @@ print 'HEURIST_MAIL_TO_INFO='.HEURIST_MAIL_TO_INFO."\n";
 
 // HEURIST_SMARTY_TEMPLATES_DIR  $system->getSysDir('smarty-templates')
 // HEURIST_SCRATCHSPACE_DIR      $system->getSysDir('scratch')
-// HEURIST_DBNAME                $system->dbname()
 
 // For sending an email to the sysadmin about reports that take longer than 10 seconds to generate
 $long_reports = array();

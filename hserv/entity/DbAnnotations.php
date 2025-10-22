@@ -105,7 +105,7 @@ class DbAnnotations extends DbEntityBase
 
             $recordId = $this->findRecIDbyUUID($this->data['uuid']);
             if($recordId>0){
-                $redirect = HEURIST_BASE_URL.'/hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&fmt=edit&recID='.$recordId;
+                $redirect = HEURIST_BASE_URL.'/hclient/framecontent/recordEdit.php?db='.$this->system->dbname().'&fmt=edit&recID='.$recordId;
                 redirectURL($redirect);
             }
             exit;

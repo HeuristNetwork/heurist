@@ -726,8 +726,8 @@ class DbDefTerms extends DbEntityBase
                     //rename it to recID.png
                     if($thumb_file_name == 'delete'){
 
-                        $thumb = parent::getEntityImagePath($trm_ID, 'thumb', HEURIST_DBNAME, 'png');
-                        $icon = parent::getEntityImagePath($trm_ID, 'icon', HEURIST_DBNAME, 'png');
+                        $thumb = parent::getEntityImagePath($trm_ID, 'thumb', $this->system->dbname(), 'png');
+                        $icon = parent::getEntityImagePath($trm_ID, 'icon', $this->system->dbname(), 'png');
 
                         if(!empty($thumb) && file_exists($thumb)){
                             unlink($thumb);

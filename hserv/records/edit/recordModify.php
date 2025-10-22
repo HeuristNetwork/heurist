@@ -797,9 +797,9 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         $user = @$user['ugr_FullName'];
         $user = $user ?: $system->getUserId();
 
-        $title = HEURIST_DBNAME . ", ID: $recID >> workflow: $stage_name";
+        $title = $system->dbname() . ", ID: $recID >> workflow: $stage_name";
         $msg = !empty($swf_body) ? $swf_body : '<b>'.$title.'</b> '
-        .'<a href="'.HEURIST_BASE_URL.'hclient/framecontent/recordEdit.php?db='.HEURIST_DBNAME.'&recID='.$recID.'">Record #'.$recID
+        .'<a href="'.HEURIST_BASE_URL.'hclient/framecontent/recordEdit.php?db='.$system->dbname().'&recID='.$recID.'">Record #'.$recID
         .'  "'.USanitize::sanitizeString($newTitle, false).'"</a><br>'
         .' has been changed to "'.$stage_name
         .'"<br><br> by user: '.$user;
@@ -811,14 +811,14 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
         $rec_view = $system->recordLink($recID);
         $rec_edit = strpos($rec_view, '/view/') !== false
                         ? str_replace('/view/', '/edit/', $rec_view)
-                        : HEURIST_BASE_URL_PRO . "?fmt=edit&recID={$recID}&db=" . HEURIST_DBNAME;
+                        : HEURIST_BASE_URL_PRO . "?fmt=edit&recID={$recID}&db=" . $system->dbname();
 
         $msg = str_replace(['#title#', '#link_v#', '#link_e#'], [$newTitle, $rec_view, $rec_edit], $msg);
 
         $firstEmail = array_pop($swf_emails);
         $swf_emails = empty($swf_emails) ? [$firstEmail] : ['to' => [$firstEmail], 'bcc' => $swf_emails];
 
-        $res = sendPHPMailer(HEURIST_MAIL_TO_ADMIN, 'Heurist DB '.HEURIST_DBNAME.'. ID: '.$recID, //'Workflow stage update notification',
+        $res = sendPHPMailer(HEURIST_MAIL_TO_ADMIN, 'Heurist DB '.$system->dbname().'. ID: '.$recID, //'Workflow stage update notification',
                     $swf_emails, $title, $msg, null, true);
 
         if($total_record_count > 1 && $res){ // block further emails for imports, only if the email was sent
@@ -1551,7 +1551,7 @@ function deleteOneRecord($system, $id, $rectype){
             }
         }
 
-        ElasticSearch::deleteRecordIndexEntry(HEURIST_DBNAME, $rectype, $id);
+        ElasticSearch::deleteRecordIndexEntry($system->dbname(), $rectype, $id);
 
         $mysqli->query('delete from usrReminders where rem_RecID = ' . $id);
         if ($mysqli->error) {break;}

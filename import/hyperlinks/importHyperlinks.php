@@ -377,7 +377,7 @@ if (@$urls) {
 <script src="importHyperlinks.js"></script>
 
 <?php //this frame is needed for title lookup ?>
-<form action="importHyperlinks.php?db=<?php echo HEURIST_DBNAME?>" method="post"
+<form action="importHyperlinks.php?db=<?php echo $system->dbname()?>" method="post"
         enctype="multipart/form-data" name="mainform" id="mainform" style="margin: 0px 3px;">
 
 <input type="hidden" name="wgTags" id="wgTags">
@@ -447,7 +447,7 @@ Note: the list only shows links which you have not already bookmarked.<br>
   hyperlink texts are ignored.
   &nbsp;&nbsp;
   <input type="button"
-    onClick="{'<?php echo HEURIST_BASE_URL;?>import/hyperlinks/configImportSettings.php?db=<?php echo HEURIST_DBNAME;?>',
+    onClick="{'<?php echo HEURIST_BASE_URL;?>import/hyperlinks/configImportSettings.php?db=<?php echo $system->dbname();?>',
   { title:'Bookmark import settings',
     width:700,
     height:400,

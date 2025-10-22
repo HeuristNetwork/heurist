@@ -72,7 +72,7 @@ if (empty($emailRecTypeId)) {
     <script>
         // Initialize the HAPI4 library if not already available.
         if (!window.hWin.HAPI4 && typeof hAPI === 'function') {
-            window.hWin.HAPI4 = new hAPI('<?php echo HEURIST_DBNAME; ?>', $.noop);
+            window.hWin.HAPI4 = new hAPI('<?php echo $system->dbname(); ?>', $.noop);
         }
 
         $(document).ready(() => {

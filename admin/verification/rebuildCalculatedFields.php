@@ -206,13 +206,13 @@ if($init_client){
 
     if($res['q_updates']){
         $q_updates = HEURIST_BASE_URL.'?w=all&q='.$res['q_updates']
-            .'&db='.HEURIST_DBNAME;
+            .'&db='.$system->dbname();
     }else{
         $q_updates = '';
     }
     if($res['q_cleared']){
         $q_cleared = HEURIST_BASE_URL.'?w=all&q='.$res['q_cleared']
-            .'&db='.HEURIST_DBNAME;
+            .'&db='.$system->dbname();
     }else{
         $q_cleared = '';
     }
@@ -268,7 +268,7 @@ if($init_client){
                 <h2 style="margin:0">Record titles depend on calculated fields</h2>
                 <p>
                     If you think your record titles need updating, 
-                    <a href="<?php echo HEURIST_BASE_URL; ?>admin/verification/longOperationInit.php?type=titles&db=<?php echo HEURIST_DBNAME; ?>">Rebuild record titles</a>
+                    <a href="<?php echo HEURIST_BASE_URL; ?>admin/verification/longOperationInit.php?type=titles&db=<?php echo $system->dbname(); ?>">Rebuild record titles</a>
                 </p>
                 </span>
                 

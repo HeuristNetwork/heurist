@@ -456,6 +456,8 @@ class UImage {
      * @return \GdImage|false A GD image resource on success, or false if loading fails or the image type is unsupported.
      */
     public static function safeLoadImage($filename, $mimeExt){
+        
+        global $system;
 
         $img = null;
 
@@ -469,7 +471,7 @@ class UImage {
 
                 $errline_prev=$errline;
                 //database, record ID and name of bad image
-                sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cannot load image file. DB:'.HEURIST_DBNAME,
+                sendEmail(HEURIST_MAIL_TO_ADMIN, 'Cannot load image file. DB:'.$system->dbname(),
                     'File :'.$filename.' is corrupted. System message: '.$errstr);
                 //ID#'.$file['ulf_ID'].'
 
@@ -859,6 +861,7 @@ class UImage {
      * @return bool True on success, false on failure.
      */
     public static function getPdfThumbnail( $filename, $thumbnail_file ){
+        global $system;
 
         if(!extension_loaded('imagick')){
 
@@ -886,7 +889,7 @@ class UImage {
                 $im->writeImage($thumbnail_file);
 
             } catch(\ImagickException $e) {
-                USanitize::errorLog($e . ', From Database: ' . HEURIST_DBNAME);
+                USanitize::errorLog($e . ', From Database: ' . $system->dbname());
                 return false;
             }
 

@@ -92,7 +92,7 @@ private static function initialize()
     self::$initialized = true;
 
     //check existense NEW_LIPOSUCTION_255
-    checkDatabaseFunctionsForDuplications(self::$mysqli);
+    checkDatabaseFunctionsForDuplications(self::$mysqli); //HOSTISSUE change to self::$system for version that supports host prefixes
 }
 
 /**
@@ -870,14 +870,14 @@ public static function exportList($params){
 
         $all_group_IDs = implode(',', array_keys($records));
 
-        $merge_URL = HEURIST_BASE_URL . "admin/verification/combineDuplicateRecords.php?bib_ids={$all_group_IDs}&db=" . HEURIST_DBNAME;
-        $search_URL = HEURIST_BASE_URL . "?w=all&q=ids:{$all_group_IDs}&db=" . HEURIST_DBNAME;
-        $ignore_URL = HEURIST_BASE_URL . "hserv/controller/recordVerify.php?a=dupes&ignore={$all_group_IDs}&db=" . HEURIST_DBNAME;
-        $instant_URL = HEURIST_BASE_URL . "admin/verification/combineDuplicateRecords.php?bib_ids={$all_group_IDs}&instant_merge=1&db=" . HEURIST_DBNAME . "&master_rec_id=record_to_keep";
+        $merge_URL = HEURIST_BASE_URL . "admin/verification/combineDuplicateRecords.php?bib_ids={$all_group_IDs}&db=" . self::$system->dbname();
+        $search_URL = HEURIST_BASE_URL . "?w=all&q=ids:{$all_group_IDs}&db=" . self::$system->dbname();
+        $ignore_URL = HEURIST_BASE_URL . "hserv/controller/recordVerify.php?a=dupes&ignore={$all_group_IDs}&db=" . self::$system->dbname();
+        $instant_URL = HEURIST_BASE_URL . "admin/verification/combineDuplicateRecords.php?bib_ids={$all_group_IDs}&instant_merge=1&db=" . self::$system->dbname() . "&master_rec_id=record_to_keep";
 
         foreach($records as $rec_ID => $rec_Title) {
 
-            $rec_URL = HEURIST_BASE_URL . "viewers/record/viewRecord.php?recID={$rec_ID}&db=" . HEURIST_DBNAME;
+            $rec_URL = HEURIST_BASE_URL . "viewers/record/viewRecord.php?recID={$rec_ID}&db=" . self::$system->dbname();
             fputcsv($fd, [$rec_ID, $rec_Title, $rec_URL, $merge_URL, $search_URL, $ignore_URL, $instant_URL], "\t");
 
             $merge_URL = '';
@@ -894,7 +894,7 @@ public static function exportList($params){
     $output = stream_get_contents($fd);
     fclose($fd);
 
-    $filename = HEURIST_DBNAME . '_Duplicate_Records.tsv';
+    $filename = self::$system->dbname() . '_Duplicate_Records.tsv';
 
     dataOutput($output, $filename, 'text/tab-separated-values');
 }

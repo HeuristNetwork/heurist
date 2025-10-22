@@ -226,7 +226,7 @@ if(!$system->hasAccess()){
         <script type="text/javascript">
 
             if(!window.hWin.HAPI4 && typeof hAPI === 'function'){
-                window.hWin.HAPI4 = new hAPI('<?php echo HEURIST_DBNAME; ?>', $.noop);
+                window.hWin.HAPI4 = new hAPI('<?php echo $system->dbname(); ?>', $.noop);
             }
             if(typeof window.hWin.HR !== 'function'){
                 window.hWin.HR = (res) => res; // to allow dialog creation
@@ -236,7 +236,7 @@ if(!$system->hasAccess()){
             var rec_Files_IIIF_and_3D = [];
             var rec_Files_IIIF_and_3D_linked = [];
             var baseURL = '<?php echo HEURIST_BASE_URL;?>';
-            var database = '<?php echo HEURIST_DBNAME;?>';
+            var database = '<?php echo $system->dbname();?>';
             var hint_popup = null, $map_frame = null;
 
             function zoomInOut(obj,thumb,url) {
@@ -1436,7 +1436,7 @@ function print_header_line($bib) {
         <?php if($system->hasAccess()){ ?>
 
             <span class="link"><a id=edit-link class="normal"
-                target=_new href="<?php echo HEURIST_BASE_URL;?>?fmt=edit&db=<?=HEURIST_DBNAME?>&recID=<?= $bib['rec_ID'] ?>">
+                target=_new href="<?php echo HEURIST_BASE_URL;?>?fmt=edit&db=<?=$system->dbname()?>&recID=<?= $bib['rec_ID'] ?>">
                 <img class="rv-editpencil" src="<?php echo HEURIST_BASE_URL;?>hclient/assets/edit-pencil.png" alt="Edit record" title="Edit record" style="vertical-align: top"></a>
             </span>
 
@@ -1445,7 +1445,7 @@ function print_header_line($bib) {
         <?php }
         if(!empty($wfs_details)){
 
-            $wfs_icon = HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME . '&entity=defTerms&icon=' . intval($wfs_details[0]);
+            $wfs_icon = HEURIST_BASE_URL . '?db=' . $system->dbname() . '&entity=defTerms&icon=' . intval($wfs_details[0]);
         ?>
 
             <span style="cursor: default; padding-left: 20px;">
@@ -1641,7 +1641,7 @@ function print_private_details($bib) {
                                 $grp_kwd = $grp.'\\\\'.$kwd;
                                 $label = 'Tag "'.$grp_kwd.'"';
                                 if (preg_match('/\\s/', $grp_kwd)) {$grp_kwd = '"'.$grp_kwd.'"';}
-                                print htmlspecialchars($grp.' - ').'<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&ver=1&amp;q=tag:'.urlencode($grp_kwd).'&amp;w=all&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($kwd).'">'.htmlspecialchars($kwd).'<img style="vertical-align: middle; margin: 1px; border: 0;" class="rv-magglass" src="'.HEURIST_BASE_URL.'hclient/assets/v6/magglass_12x11.gif"></a>';
+                                print htmlspecialchars($grp.' - ').'<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&ver=1&amp;q=tag:'.urlencode($grp_kwd).'&amp;w=all&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($kwd).'">'.htmlspecialchars($kwd).'<img style="vertical-align: middle; margin: 1px; border: 0;" class="rv-magglass" src="'.HEURIST_BASE_URL.'hclient/assets/v6/magglass_12x11.gif"></a>';
                             }
                             ?>
                         </div>
@@ -1679,7 +1679,7 @@ function print_personal_details($bkmk) {
                     $tag = $tags[$i];
                     $label = 'Tag "'.$tag.'"';
                     if (preg_match('/\\s/', $tag)) {$tag = '"'.$tag.'"';}
-                    print '<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&ver=1&amp;q=tag:'.urlencode($tag).'&amp;w=bookmark&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($tags[$i]).'">'.htmlspecialchars($tags[$i]).'<img style="vertical-align: middle; margin: 1px; border: 0;" class="rv-magglass" src="'.HEURIST_BASE_URL.'hclient/assets/v6/magglass_12x11.gif"></a>';
+                    print '<a class=normal style="vertical-align: top;" target=_parent href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&ver=1&amp;q=tag:'.urlencode($tag).'&amp;w=bookmark&amp;label='.urlencode($label).'" title="Search for records with tag: '.htmlspecialchars($tags[$i]).'">'.htmlspecialchars($tags[$i]).'<img style="vertical-align: middle; margin: 1px; border: 0;" class="rv-magglass" src="'.HEURIST_BASE_URL.'hclient/assets/v6/magglass_12x11.gif"></a>';
                 }
                 if (!empty($tags)) {
                     print "<br>\n";
@@ -1936,9 +1936,9 @@ function print_public_details($bib) {
                     $fileSize = $fileinfo['ulf_FileSizeKB'];
                     $file_nonce = $fileinfo['ulf_ObfuscatedFileID'];
 
-                    $file_playerURL = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME."&file=$file_nonce&mode=tag";
-                    $file_thumbURL  = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&offer_download=1&thumb='.$file_nonce;
-                    $file_URL   = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME."&file=$file_nonce"; //download
+                    $file_playerURL = HEURIST_BASE_URL.'?db='.$system->dbname()."&file=$file_nonce&mode=tag";
+                    $file_thumbURL  = HEURIST_BASE_URL.'?db='.$system->dbname().'&offer_download=1&thumb='.$file_nonce;
+                    $file_URL   = HEURIST_BASE_URL.'?db='.$system->dbname()."&file=$file_nonce"; //download
 
                     array_push($thumbs, array(
                         'id' => $bd['dtl_UploadedFileID'],
@@ -2161,8 +2161,8 @@ function print_public_details($bib) {
 
             $url = (@$thumb['external_url'] && strpos($thumb['external_url'],'http://')!==0)
                         ?$thumb['external_url']            //direct for https
-                        :(HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$thumb['nonce']);
-            $download_url = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&debug=3&download=1&file='.$thumb['nonce'];
+                        :(HEURIST_BASE_URL.'?db='.$system->dbname().'&file='.$thumb['nonce']);
+            $download_url = HEURIST_BASE_URL.'?db='.$system->dbname().'&debug=3&download=1&file='.$thumb['nonce'];
 
             if(!$is_map_popup){
                 print '<div class="download_link">';
@@ -2672,7 +2672,7 @@ function print_relation_details($bib) {
 
 
 function print_linked_details_header($bib){
-   global $is_map_popup, $is_production;
+   global $is_map_popup, $is_production, $system;
 
     if($is_map_popup){
        print '<div class="detailType fieldRow" style="display:none;line-height:21px">Linked from</div>';
@@ -2683,7 +2683,7 @@ function print_linked_details_header($bib){
     ?>
         <div style="position: relative;top: -7px;margin-bottom: 5px;">
             <div class=detailType style="width: auto;">Referenced by</div>
-            <div class="detail"><a href="<?=HEURIST_BASE_URL?>?db=<?=HEURIST_DBNAME?>&w=all&q=linkedto:<?=$bib['rec_ID']?>"
+            <div class="detail"><a href="<?=HEURIST_BASE_URL?>?db=<?=$system->dbname()?>&w=all&q=linkedto:<?=$bib['rec_ID']?>"
                     onClick="top.location.href = this.href; return false;"><b>Show list below as search results</b></a>
                 <!--  <br> <i>Search = linkedto:<?=$bib['rec_ID']?> <br>(returns records pointing TO this record)</i> -->
             </div>

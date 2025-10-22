@@ -329,6 +329,7 @@ if($system->defineConstant('DT_SYMBOLOGY')){
 // returns link to uploaded file
 //
 function __getFile(&$rec, $id, $def){
+    global $system;
 
     if(is_string($id) && strpos($id,'-')){
         $id = ConceptCode::getDetailTypeLocalID($id);
@@ -338,7 +339,7 @@ function __getFile(&$rec, $id, $def){
 
     if(is_array($file)){
         $file = array_shift($file);
-        $file = (array_key_exists('embed', $_REQUEST)?PDIR:HEURIST_BASE_URL).'?db='.HEURIST_DBNAME.'&file='.$file['fileid'];
+        $file = (array_key_exists('embed', $_REQUEST)?PDIR:HEURIST_BASE_URL).'?db='.$system->dbname().'&file='.$file['fileid'];
     }else{
         $file = $def;
     }

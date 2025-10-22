@@ -184,7 +184,7 @@ $rep_errors_only = true;
 
 // TODO: we need a link here which opens the Properties form in the main interface, rather than the old form
 // $linkToAdvancedProperties = "<a target=\"_blank\" href=\"../../admin/adminMenuStandalone.php?db="
-// . HEURIST_DBNAME
+// . $system->dbname()
 // ."&mode=properties2\"Database > Prxoperties</a>";
 
 $lib_keys = explode("|", $HEURIST_ZOTEROSYNC);
@@ -195,7 +195,7 @@ if(!$step){
 
         <form action="syncZotero.php" style="padding:20px;">
 
-            <input type="hidden" name="db" value="<?=HEURIST_DBNAME?>" />
+            <input type="hidden" name="db" value="<?=$system->dbname()?>" />
             <input type="hidden" name="step" value="1" />
             Please select library:
             <select name="lib_key">
@@ -419,7 +419,7 @@ if($step=="1"){  //first step - info about current status
 
         print "<div>Count items in Zotero: $totalitems</div>";
         if($totalitems>0){
-            print "<div id='divStart2'><br><a href='syncZotero.php?step=2&cnt=".$totalitems."&db=".HEURIST_DBNAME.
+            print "<div id='divStart2'><br><a href='syncZotero.php?step=2&cnt=".$totalitems."&db=".$system->dbname().
             "&lib_key=".$lib_key_idx."' onclick='__showLoading()'><button class='h3button'>Start</button></a></div><br><br>";
             print "<div id='divLoading' style='display:none;height:40px;background-color:#FFF; background-image: url(../../hclient/assets/loading-animation-white.gif);background-repeat: no-repeat;background-position:50%;'>loading...</div>";
         }
@@ -786,7 +786,7 @@ if($step=="1"){  //first step - info about current status
 
     $tot_erros = $cnt_ignored + $cnt_notmapped + $cnt_empty + $cnt_notfound;
 
-    $err_msg = 'Zotero Synching has encountered issues in Database: ' . HEURIST_DBNAME;
+    $err_msg = 'Zotero Synching has encountered issues in Database: ' . $system->dbname();
     $line_sep = '<br>- ';
 
     if($tot_erros>0){
@@ -902,11 +902,12 @@ if($step=="1"){  //first step - info about current status
  * @return string An HTML link, or '0' if the array is empty.
  */
 function composeLinkForAllIds($ids){
+    global $system;
     if(empty($ids)){
         return '0';
     }else{
         return '<a target="_blank" href="'
-        .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'
+        .HEURIST_BASE_URL.'?db='.$system->dbname().'&q=ids:'
         .htmlspecialchars(implode(',',$ids)).'&nometadatadisplay=true">'
         .count($ids).'</a>';
     }

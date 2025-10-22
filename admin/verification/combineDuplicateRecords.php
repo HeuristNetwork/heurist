@@ -645,7 +645,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                         }
                         ?>
                     </tbody></table>
-                <input type="hidden" name="db" id="db" value="<?php echo HEURIST_DBNAME;?>">
+                <input type="hidden" name="db" id="db" value="<?php echo $system->dbname();?>">
             </div>
         </div>
         <div class="ent_footer ui-dialog-buttonpane" style="padding-top:10px">
@@ -738,9 +738,10 @@ function detail_get_html_input_str( $detail, $repeatCount, $is_master, $use_chec
  * @return string The HTML anchor (`<a>`) tag.
  */
 function edit_link($rec_id, $label, $id_only=false, $strip_tags=true){
+    global $system;
 
     $link = '<a target="edit" href="'
-            .HEURIST_BASE_URL.'?fmt=edit&db='.HEURIST_DBNAME.'&recID='.$rec_id.'">';
+            .HEURIST_BASE_URL.'?fmt=edit&db='.$system->dbname().'&recID='.$rec_id.'">';
 
     if($strip_tags){
         $label = htmlspecialchars(strip_tags($label));
@@ -855,7 +856,7 @@ function do_fix_dupe()
     $bib_ids = array_diff($bib_ids, $records_no_access);
     if(count($bib_ids)<2 || !in_array($master_rec_id, $bib_ids)){
         //reload with flag that operation is NOT completed
-        redirectURL('combineDuplicateRecords.php?db='.HEURIST_DBNAME.'&finished_merge=0&bib_ids='.$bib_ids_list);
+        redirectURL('combineDuplicateRecords.php?db='.$system->dbname().'&finished_merge=0&bib_ids='.$bib_ids_list);
     }
 
     $finished_merge = true;
@@ -1150,6 +1151,6 @@ function do_fix_dupe()
         }
     }
     //reload with flag that operation is completed
-    redirectURL('combineDuplicateRecords.php?db='.HEURIST_DBNAME.'&finished_merge=1&bib_ids='.$bib_ids_list);
+    redirectURL('combineDuplicateRecords.php?db='.$system->dbname().'&finished_merge=1&bib_ids='.$bib_ids_list);
 }
 ?>

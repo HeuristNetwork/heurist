@@ -384,7 +384,7 @@ class BulkEmailSystem {
 
         // Prepare the query to fetch the user's email by their ID.
         $query = "SELECT ugr.ugr_eMail
-                  FROM " . HEURIST_DBNAME_FULL . ".sysUGrps AS ugr
+                  FROM " . $this->system->dbnameFull() . ".sysUGrps AS ugr
                   WHERE ugr.ugr_ID = ?";
 
         // Set email default value to false.
@@ -1288,7 +1288,7 @@ class BulkEmailSystem {
         $mysqli = $this->system->getMysqli();
 
         if(!$mysqli){
-            $this->system->init(HEURIST_DBNAME, true, false);
+            $this->system->init($system->dbname(), true, false);
             return;
         }
         
@@ -1300,7 +1300,7 @@ class BulkEmailSystem {
         }
 
         if(!$res){
-            $this->system->init(HEURIST_DBNAME, true, false);
+            $this->system->init($system->dbname(), true, false);
         }
     }
 }

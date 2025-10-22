@@ -180,7 +180,7 @@ if(!$init_client || $session_id > 0){
         <script type="text/javascript">
 
             if(!window.hWin.HAPI4 && typeof hAPI === 'function'){
-                window.hWin.HAPI4 = new hAPI('<?php echo HEURIST_DBNAME; ?>', $.noop);
+                window.hWin.HAPI4 = new hAPI('<?php echo $system->dbname(); ?>', $.noop);
             }
 
             $(document).ready(() => {
@@ -305,19 +305,19 @@ if(!$init_client || $session_id > 0){
         }else{
 
             if(!empty($results['records']['updated'])){
-                $updated_url = HEURIST_BASE_URL . "?w=a&q={$results['records']['updated']}&db=" . HEURIST_DBNAME;
+                $updated_url = HEURIST_BASE_URL . "?w=a&q={$results['records']['updated']}&db=" . $system->dbname();
             }
 
             if(!empty($results['records']['skipped'])){
-                $skipped_url = HEURIST_BASE_URL . "?w=a&q={$results['records']['skipped']}&db=" . HEURIST_DBNAME;
+                $skipped_url = HEURIST_BASE_URL . "?w=a&q={$results['records']['skipped']}&db=" . $system->dbname();
             }
 
             if(!empty($results['records']['invalid'])){
-                $inavlid_url = HEURIST_BASE_URL . "?w=a&q={$results['records']['invalid']}&db=" . HEURIST_DBNAME;
+                $inavlid_url = HEURIST_BASE_URL . "?w=a&q={$results['records']['invalid']}&db=" . $system->dbname();
             }
 
             if(!empty($results['records']['title_error'])){
-                $invalid_titles_url = HEURIST_BASE_URL . "?w=a&q={$results['records']['title_error']}&db=" . HEURIST_DBNAME;
+                $invalid_titles_url = HEURIST_BASE_URL . "?w=a&q={$results['records']['title_error']}&db=" . $system->dbname();
             }
 
             if(!empty($results['invalid_masks'])){

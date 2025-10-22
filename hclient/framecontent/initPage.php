@@ -72,14 +72,14 @@ if(defined('IS_INDEX_PAGE')){
 
     if(is_array($missed)){
         if(!empty($missed)){
-            $message = 'Database <b>'.HEURIST_DBNAME
+            $message = 'Database <b>'.$system->dbname()
             .'</b> is missing the following tables:<br><br><i>'
             .implode(', ',$missed)
             .'</i><p>Either the database has not been fully reated (if new) or fully restored from archive. '
             .CRITICAL_DB_ERROR_CONTACT_SYSADMIN.'</p>';
 
             //to add to error log
-            $system->addError(HEURIST_DB_ERROR, 'Database '.HEURIST_DBNAME
+            $system->addError(HEURIST_DB_ERROR, 'Database '.$system->dbname()
                     .' is missing the following tables: '.implode(', ',$missed));
 
             include_once ERROR_REDIR;
@@ -88,7 +88,7 @@ if(defined('IS_INDEX_PAGE')){
     }else{
         $message = 'There is database server intermittens. '.CRITICAL_DB_ERROR_CONTACT_SYSADMIN;
 
-        $system->addError(HEURIST_DB_ERROR, 'Database '.HEURIST_DBNAME, $missed);
+        $system->addError(HEURIST_DB_ERROR, 'Database '.$system->dbname(), $missed);
 
         include_once ERROR_REDIR;
         exit;

@@ -41,7 +41,7 @@ if($error!=null){
 
         if($system->setDbnameFull($dbname)){
 
-            $system->initPathConstants($dbname);
+            $system->initPathConstants();
 
             samlLogout($system, $sp, $_SERVER['PHP_SELF']);
             exit;

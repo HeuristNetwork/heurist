@@ -215,7 +215,7 @@
 
             }elseif(@$params['q']!=null){  //first request - save base filter
                 //remove all other "datatableXXX" keys from session
-                $dbname = $system->dbnameFull();
+                $dbname = $system->dbnameFull(); //dbnameFullWithHost
                 if(@$_SESSION[$dbname]['ugr_Preferences']!=null){
                     $keys = array_keys($_SESSION[$dbname]['ugr_Preferences']);
                     if(is_array($keys)){
@@ -319,7 +319,7 @@ function downloadFileReferences($system, $ids, $essentialOnly){
     }
 
     // Set headers
-    $filename = HEURIST_DBNAME . '_File_References.csv';
+    $filename = $system->dbname() . '_File_References.csv';
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment; filename="' . $filename . '";');
     header('Pragma: no-cache');
@@ -397,7 +397,7 @@ function downloadFileReferences($system, $ids, $essentialOnly){
 
         $name = !empty($details[0]) ? $details[0] : $details[1];
         $path = !empty($details[3]) ? $details[3] : 'External Source';
-        $obfURL = empty($details[2]) ? 'MISSING' : HEURIST_BASE_URL . '?db=' . HEURIST_DBNAME . '&file=' . $details[2];
+        $obfURL = empty($details[2]) ? 'MISSING' : HEURIST_BASE_URL . '?db=' . $system->dbname() . '&file=' . $details[2];
         $fileSize = $details[6] == 0 ? 'remote' : $details[6];
 
         $fullpath = !empty($details[0]) ? resolveFilePath( $details[3].$details[0] ) : '';
@@ -461,7 +461,7 @@ function downloadMapMarkers($system, $ids){
     $whereClause = !empty($whereClause) ? "{$accessCondition} AND {$whereClause}" : $accessCondition;
 
     // Set headers
-    $filename = HEURIST_DBNAME . '_MapMarkers.csv';
+    $filename = $system->dbname() . '_MapMarkers.csv';
     header('Content-Type: text/csv');
     header('Content-Disposition: attachment; filename="' . $filename . '";');
     header('Pragma: no-cache');
@@ -506,8 +506,8 @@ function downloadMapMarkers($system, $ids){
     }
 
     $baseRecLink = $useRewriteRulesForRecordLink || USystem::checkRewriteRuleEnabled() ?
-        HEURIST_BASE_URL . '?fmt=html&db='. HEURIST_DBNAME .'&recID=' :
-        HEURIST_BASE_URL . HEURIST_DBNAME .'/view/';
+        HEURIST_BASE_URL . '?fmt=html&db='. $system->dbname() .'&recID=' :
+        HEURIST_BASE_URL . $system->dbname() .'/view/';
 
     $headings = ['Record ID', 'Record Title', 'Record URL', 'Record Link'];
     $handledFields = [];

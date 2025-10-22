@@ -172,11 +172,11 @@ function entityResolveName($entity_name)
 * @param string $entity_name The name of the entity.
 * @param int|string $rec_id The record ID or database name (for sysDatabases).
 * @param string|null $version The version of the file (e.g., 'icon', 'thumbnail', 'full'). Defaults to 'icon' for defRecTypes, 'thumbnail' otherwise.
-* @param string|null $db_name The database name. Defaults to HEURIST_DBNAME if defined.
+* @param string|null $db_name The database name.
 * @param string|null $extension The specific file extension to look for. If null, common image extensions are checked.
 * @return array An array containing the absolute file path, content type, and URL. Returns [null, null, null] if not found or on error.
 */
-function resolveEntityFilename($entity_name, $rec_id, $version, $db_name=null, $extension=null){
+function resolveEntityFilename($entity_name, $rec_id, $version, $db_name, $extension=null){
     global $defaultRootFileUploadURL;
 
     $entity_name = entityResolveName($entity_name);
@@ -185,7 +185,7 @@ function resolveEntityFilename($entity_name, $rec_id, $version, $db_name=null, $
 
         $db_name = $rec_id;
         if(strpos($rec_id, HEURIST_DB_PREFIX)===0){
-            $db_name = substr($rec_id,strlen(HEURIST_DB_PREFIX));
+            $db_name = substr($rec_id, strlen(HEURIST_DB_PREFIX));
         }
         $rec_id = 1;
         $path = '/entity/sysIdentification/';
@@ -193,11 +193,7 @@ function resolveEntityFilename($entity_name, $rec_id, $version, $db_name=null, $
     }else{
 
         if($db_name==null){
-            if(defined('HEURIST_DBNAME')){
-                $db_name = HEURIST_DBNAME;
-            }else{
-                return array(null,null,null);
-            }
+            return array(null,null,null);
         }
 
         $path = '/entity/'.$entity_name.'/';
@@ -219,9 +215,9 @@ function resolveEntityFilename($entity_name, $rec_id, $version, $db_name=null, $
     $content_type = null;
     $url = null;
 
-    if(intval($rec_id)>0 && mysql__check_dbname($db_name)==null){
+    if(intval($rec_id)>0 && mysql__check_dbname($db_name)==null){ // HOSTISSUE
 
-        $fname = HEURIST_FILESTORE_ROOT.$db_name.$path.intval($rec_id);
+        $fname = HEURIST_FILESTORE_ROOT.basename($db_name).$path.intval($rec_id);
 
         $exts = $extension?array($extension):array('png','jpg','svg','jpeg','jpe','jfif','gif');
         foreach ($exts as $ext){

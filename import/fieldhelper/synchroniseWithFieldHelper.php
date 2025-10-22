@@ -209,7 +209,7 @@ $failed_exts = array();
                 if (!($mediaFolders=="" || empty($dirs))) {
                     print "<form name='selectdb' action='synchroniseWithFieldHelper.php' method='get'>";
                     print "<input name='mode' value='2' type='hidden'>";// calls the form to select mappings, step 2
-                    print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
+                    print "<input name='db' value='".$system->dbname()."' type='hidden'>";
                     print '<input name="media" value="'.$mediaFolders.'" type="hidden">';
                     print "<input name='exts' value='$mediaExts' type='hidden'>";
                     print '<input type="submit" value="Continue" class="h3button"/>';
@@ -222,7 +222,7 @@ $failed_exts = array();
 
         if(array_key_exists('mode', $_REQUEST) && $_REQUEST['mode']=='2'){
             $mediaFolders = filter_var($_REQUEST['media'], FILTER_SANITIZE_STRING);
-            print "<p>Now harvesting FieldHelper metadata into <b> ". HEURIST_DBNAME. "</b><br> ";
+            print "<p>Now harvesting FieldHelper metadata into <b> ". $system->dbname(). "</b><br> ";
 
             $dirs = explode(';', $mediaFolders);// get an array of folders
 

@@ -15,6 +15,7 @@
 */
 use hserv\utilities\DbRegis;
 use hserv\utilities\USanitize;
+use hserv\System;
 
 require_once dirname(__FILE__).'/../../autoload.php';
 
@@ -29,12 +30,19 @@ require_once dirname(__FILE__).'/../../autoload.php';
 
     $allow_action = true;
 
-    $system = new hserv\System();//global system
+    $system = new System();//global system
+    
+    if(@$req_params['db'] && strpos($req_params['db'],'-')>0){
+        $system->addError(HEURIST_ACTION_BLOCKED,
+            'The registration database from remove host is disabled');
+        $allow_action = false;
+        
+    }elseif(@$req_params['db'] && $action!='url'){
 
     //if db parameter is defined this is initial request
     //1. checks permission - must be dbowner or sysadmin password provided
     //2. adds dbowner credentials to request
-    if(@$req_params['db'] && $action!='url'){
+    
 
         $allow_action = false;
         if($system->init($req_params['db'])){

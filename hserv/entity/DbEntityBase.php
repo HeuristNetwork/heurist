@@ -1277,7 +1277,7 @@ abstract class DbEntityBase
 
             $entity_name = $this->config['entityName'];
 
-            list($filename, $content_type, $url) = resolveEntityFilename($entity_name, $recID, $version, $db_name, $extension);
+            list($filename, $content_type, $url) = resolveEntityFilename($entity_name, $recID, $version, $this->system->dbname(), $extension);
 
             return $filename;
     }

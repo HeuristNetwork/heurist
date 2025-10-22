@@ -53,14 +53,20 @@ $db = @$req_params['db'];
 $filename = basename(@$req_params['file']);
 $entity_name = htmlspecialchars(@$req_params['entity']);
 
-$error = mysql__check_dbname($db);
+$error = mysql__check_dbname($db); // HOSTISSUE !!!
 
-if($error==null){
+if($error!==null){
 
-        list($db_full, $db) = mysql__get_names( $db );
+    if(!$entity_name){ //print error as text
+        print htmlspecialchars($error);
+    }else{
+        _download_file(dirname(__FILE__).'/../../hclient/assets/100x100.gif', 'image/gif');
+    }
+    exit;
+}
 
-        $system = new hserv\System();//without db connection and session - just paths
-        $system->initPathConstants($db);
+$system = new hserv\System();//without db connection and session - just paths
+$system->initPathConstants($db);
 
 if($filename){ //download from scratch (for csv import)
 
@@ -231,14 +237,6 @@ if($filename){ //download from scratch (for csv import)
 
         }
         exit;
-}
-
-}else {
-    if(!$entity_name){ //print error as text
-        print htmlspecialchars($error);
-    }else{
-        _download_file(dirname(__FILE__).'/../../hclient/assets/100x100.gif', 'image/gif');
-    }
 }
 
 

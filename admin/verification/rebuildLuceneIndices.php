@@ -41,7 +41,7 @@
             </div>
 <?php
 
-    $code = ElasticSearch::buildAllIndices(HEURIST_DBNAME);
+    $code = ElasticSearch::buildAllIndices($system->dbname());
     if ($code ==0) {
         print '<div>Database indices have been rebuilt, please check for errors above</div>';
     } else {

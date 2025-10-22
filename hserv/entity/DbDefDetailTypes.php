@@ -122,7 +122,7 @@ class DbDefDetailTypes extends DbEntityBase
 
             $this->system->addError(HEURIST_ACTION_BLOCKED,
                 'You cannot delete field <strong>'. $fld_name .'</strong> as it is used <strong>'. count($rec_IDs) .'</strong> times in record data.<br><br>'
-                .'<a href="#" onclick="window.open(\''. HEURIST_BASE_URL .'?db='. HEURIST_DBNAME .'&q=ids:'. implode(',', $rec_IDs) .'\',\'_blank\');">'
+                .'<a href="#" onclick="window.open(\''. HEURIST_BASE_URL .'?db='. $this->system->dbname() .'&q=ids:'. implode(',', $rec_IDs) .'\',\'_blank\');">'
                 .'Open these records in a search</a> to allow the removal of all instances of the '. $fld_name .' field.');
             return false;
         }

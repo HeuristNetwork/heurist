@@ -38,7 +38,7 @@ $system = new hserv\System();
 
 define('EDIR','../../../external/3D/');
 
-if($system->init($db, true, false) && $system->initPathConstants($db)){ //without session
+if($system->init($db, true, false) && $system->initPathConstants()){ //without session
 
     if(@$req_params['file'] || @$req_params['ulf_ID']) { //ulf_ID is obfuscation id here
 

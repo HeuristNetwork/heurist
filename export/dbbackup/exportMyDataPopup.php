@@ -79,22 +79,22 @@ require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
  * Path to the main temporary backup folder for the current database.
  * @var string
  */
-define('FOLDER_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME);
+define('FOLDER_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.$system->dbname());
 /**
  * Path to the temporary folder for storing a standalone SQL backup.
  * @var string
  */
-define('FOLDER_SQL_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME.'_sql');
+define('FOLDER_SQL_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.$system->dbname().'_sql');
 /**
  * Path to the temporary folder for storing a standalone HML backup.
  * @var string
  */
-define('FOLDER_HML_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME.'_hml');
+define('FOLDER_HML_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.$system->dbname().'_hml');
 /**
  * Path to the temporary folder for storing a standalone TSV backup.
  * @var string
  */
-define('FOLDER_TSV_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.HEURIST_DBNAME.'_tsv');
+define('FOLDER_TSV_BACKUP', HEURIST_FILESTORE_DIR.DIR_BACKUP.$system->dbname().'_tsv');
 
 // --- Main script logic: Handle request parameters ---
 $mode = @$_REQUEST['mode']; // Current operation mode
@@ -188,7 +188,7 @@ if ($mode > 1) {
              */
             function closeArchiveWindow() {
                 // Perform AJAX request to cleanup backup folder (mode=4)
-                <?php print '$.ajax("'.HEURIST_BASE_URL.'/export/dbbackup/exportMyDataPopup.php?mode=4&db='.HEURIST_DBNAME.'");';?>
+                <?php print '$.ajax("'.HEURIST_BASE_URL.'/export/dbbackup/exportMyDataPopup.php?mode=4&db='.$system->dbname().'");';?>
                 window.close(); // Close the popup window
             }
 
@@ -409,7 +409,7 @@ if ($mode > 1) {
 
             <!-- Export options form -->
             <form name='f1' action='exportMyDataPopup.php' method='get'>
-                <input name='db' value='<?php echo HEURIST_DBNAME; ?>' type='hidden'>
+                <input name='db' value='<?php echo $system->dbname(); ?>' type='hidden'>
                 <input name='mode' value='1' type='hidden'> <!-- Submit form in mode=1 to process options -->
 
                 <!-- Checkbox options for including different data types -->
@@ -514,7 +514,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             $operation_in_progress = 'It appears that backup operation has been started already. Please try this function later';
 
             // Check for existing backup operation lock
-            if (!isActionInProgress('exportDB', 2, HEURIST_DBNAME)) { // 2 minutes lock
+            if (!isActionInProgress('exportDB', 2, $system->dbname())) { // 2 minutes lock
                 report_message($operation_in_progress, false); // False = not an error, just info
             } else {
                 echo_flush2("<br>Beginning archive process<br>"); // Send progress to client
@@ -650,8 +650,8 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                }
 
                // If separate HML zip is requested, copy the generated XML file
-               if (file_exists(FOLDER_BACKUP.'/'.HEURIST_DBNAME.'.xml') && $separate_hml_zip) {
-                   $separate_hml_zip = fileCopy(FOLDER_BACKUP.'/'.HEURIST_DBNAME.'.xml', FOLDER_HML_BACKUP."/".HEURIST_DBNAME.".xml");
+               if (file_exists(FOLDER_BACKUP.'/'.$system->dbname().'.xml') && $separate_hml_zip) {
+                   $separate_hml_zip = fileCopy(FOLDER_BACKUP.'/'.$system->dbname().'.xml', FOLDER_HML_BACKUP."/".$system->dbname().".xml");
                }
            }
 
@@ -674,23 +674,23 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
 
            // --- Export Database Structure Definitions ---
            echo_flush2("Exporting database definitions as readable text<br>");
-           $url_txt = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsSQL.php?db=".HEURIST_DBNAME."&pretty=1";
+           $url_txt = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsSQL.php?db=".$system->dbname()."&pretty=1";
            saveURLasFile($url_txt, FOLDER_BACKUP."/Database_Structure.txt");
 
            echo_flush2("Exporting database definitions as XML<br>");
-           $url_xml = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsXML.php?db=".HEURIST_DBNAME;
+           $url_xml = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsXML.php?db=".$system->dbname();
            saveURLasFile($url_xml, FOLDER_BACKUP."/Database_Structure.xml");
 
            // --- SQL Dump ---
            if ($system->isAdmin()) { // Only admins can perform full SQL dump
                 echo_flush2("Exporting SQL dump of the whole database (several minutes for large databases)<br>");
-                $database_dumpfile = FOLDER_BACKUP."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql";
+                $database_dumpfile = FOLDER_BACKUP."/".$system->dbname()."_MySQL_Database_Dump.sql";
                 $dump_options = array('skip-triggers' => true,
                                       'single-transaction' => true,
                                       'quick' =>true,
                                       'add-drop-trigger' => false, 'no-create-db' =>true, 'add-drop-table'=>true);
 
-                $res_dump = DbUtils::databaseDump(HEURIST_DBNAME_FULL, $database_dumpfile, $dump_options, false);
+                $res_dump = DbUtils::databaseDump($system->dbnameFull(), $database_dumpfile, $dump_options, false);
 
                 if (!$res_dump) {
                     
@@ -699,13 +699,13 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 }
 
                 if ($separate_sql_zip) { // Copy SQL dump for separate archive
-                    $separate_sql_zip = fileCopy($database_dumpfile, FOLDER_SQL_BACKUP."/".HEURIST_DBNAME."_MySQL_Database_Dump.sql");
+                    $separate_sql_zip = fileCopy($database_dumpfile, FOLDER_SQL_BACKUP."/".$system->dbname()."_MySQL_Database_Dump.sql");
                 }
            }
 
-           // Remove old style SQL dump file if it exists (named with HEURIST_DBNAME_FULL)
-           if (file_exists(FOLDER_BACKUP.'/'.HEURIST_DBNAME_FULL.'.sql')) {
-               unlink(FOLDER_BACKUP.'/'.HEURIST_DBNAME_FULL.'.sql');
+           // Remove old style SQL dump file if it exists
+           if (file_exists(FOLDER_BACKUP.'/'.$system->dbnameFull().'.sql')) {
+               unlink(FOLDER_BACKUP.'/'.$system->dbnameFull().'.sql');
            }
 
            // --- Create Archives (ZIP/TAR.BZ2) ---
@@ -765,14 +765,14 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
     <!-- Download links section -->
     <p>Your data has been backed up in <?php echo htmlspecialchars(FOLDER_BACKUP);?></p>
     <br><br><div class='lbl_form'></div> <!-- Label placeholder? -->
-        <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>.<?php echo $display_format; ?>?mode=2&db=<?php echo HEURIST_DBNAME.$param_format;?>"
+        <a href="exportMyDataPopup.php/<?php echo $system->dbname();?>.<?php echo $display_format; ?>?mode=2&db=<?php echo $system->dbname().$param_format;?>"
             target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download your data as a <?php echo $display_format;?> archive</a>
 
     <?php
     if ($separate_sql_zip) {
         if ($res_sql_archive === true) { ?>
         <br><br>
-        <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>_sql.<?php echo $display_format; ?>?mode=3&db=<?php echo HEURIST_DBNAME.$param_format;?>"
+        <a href="exportMyDataPopup.php/<?php echo $system->dbname();?>_sql.<?php echo $display_format; ?>?mode=3&db=<?php echo $system->dbname().$param_format;?>"
             target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download the SQL <?php echo $display_format;?> file only</a>
         <span class="heurist-helper1">(for db transfer on tiered servers)</span>
     <?php } else { ?>
@@ -784,7 +784,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
     if ($separate_hml_zip) {
         if ($res_hml_archive === true) { ?>
         <br><br>
-        <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>_hml.<?php echo $display_format; ?>?mode=5&db=<?php echo HEURIST_DBNAME.$param_format;?>"
+        <a href="exportMyDataPopup.php/<?php echo $system->dbname();?>_hml.<?php echo $display_format; ?>?mode=5&db=<?php echo $system->dbname().$param_format;?>"
             target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download the HML <?php echo $display_format;?> file only</a>
     <?php } else { ?>
         <br><br>
@@ -795,7 +795,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
     if ($separate_tsv_zip) {
         if ($res_tsv_archive === true) { ?>
         <br><br>
-        <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>_tsv.<?php echo $display_format; ?>?mode=6&db=<?php echo HEURIST_DBNAME.$param_format;?>"
+        <a href="exportMyDataPopup.php/<?php echo $system->dbname();?>_tsv.<?php echo $display_format; ?>?mode=6&db=<?php echo $system->dbname().$param_format;?>"
             target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download the TSV <?php echo $display_format;?> folder only</a>
     <?php } else { ?>
         <br><br>
@@ -833,12 +833,12 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                         $params['file'] = [
                             'path' => FOLDER_BACKUP . '.' . $display_format, // Path to the generated archive
                             'type' => $mime,
-                            'name' => HEURIST_DBNAME . '.' . $display_format
+                            'name' => $system->dbname() . '.' . $display_format
                         ];
 
                         // Metadata for Nakala
                         $params['meta']['title'] = [
-                            'value' => 'Archive of ' . HEURIST_DBNAME . ' on ' . $date, 'lang' => null,
+                            'value' => 'Archive of ' . $system->dbname() . ' on ' . $date, 'lang' => null,
                             'typeUri' => XML_SCHEMA, 'propertyUri' => NAKALA_REPO.'terms#title'
                         ];
                         $usr = $system->getCurrentUser();
@@ -908,7 +908,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
  */
 function report_message($message, $is_error = true, $need_cleanup = false)
 {
-    global $system; // Access to the global $system object for HEURIST_DBNAME
+    global $system; // Access to the global $system object for $system->dbname()
 
     if ($need_cleanup) {
         if (array_key_exists('repository', $_REQUEST)) {
@@ -924,7 +924,7 @@ function report_message($message, $is_error = true, $need_cleanup = false)
             if (defined('FOLDER_TSV_BACKUP')) folderDelete2(FOLDER_TSV_BACKUP, true);
         }
         // Release the action lock
-        isActionInProgress('exportDB', -1, HEURIST_DBNAME);
+        isActionInProgress('exportDB', -1, $system->dbname());
     }
 
     if ($message) { // Display message if provided

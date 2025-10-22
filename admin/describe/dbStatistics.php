@@ -469,13 +469,14 @@ if($is_csv){
                 * @returns {void}
                 */
                 function checkPassword() {
+                    
                     var submit = document.getElementById("pw-check");
                     submit.disabled = true;
 
                     this.password = document.getElementById("db-password").value;
 
                     var url = '<?php echo HEURIST_BASE_URL; ?>admin/setup/dboperations/deleteDB.php';
-                    var request = {pwd: password, db:'<?php echo HEURIST_DBNAME;?>' };
+                    var request = {pwd: password, db:'<?php $system->dbname();?>' };
 
                     // Authenticate user
                     window.hWin.HEURIST4.util.sendRequest(url, request, null,
@@ -509,7 +510,7 @@ if($is_csv){
                 function postDeleteRequest(current_index) {
                     if(current_index < databases.length) {
                         // Delete database
-                        if('<?php echo HEURIST_DBNAME;?>'==databases[current_index]){
+                        if('<?php echo $system->dbname();?>'==databases[current_index]){
 
                             $("#authorized").append('<div class="reps">Current db '+databases[current_index]
                             +' is skipped</div><div  class="reps" style="margin-top: 5px; width: 100%; border-bottom: 1px solid black;"></div>');
@@ -521,7 +522,7 @@ if($is_csv){
                             var url = '<?php echo HEURIST_BASE_URL; ?>admin/setup/dboperations/deleteDB.php';
                             var request = {pwd: password,
                                            create_archive: 1,
-                                           db: '<?php echo HEURIST_DBNAME;?>',
+                                           db: '<?php echo $system->dbname();?>',
                                            database: databases[current_index]};
 
                             window.hWin.HEURIST4.util.sendRequest(url, request, null,

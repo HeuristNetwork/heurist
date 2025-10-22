@@ -443,7 +443,7 @@ class DbsTerms
                 foreach($children as $trm_ID){
 
                     if($trm_ID==$parent_id){
-                        USanitize::errorLog('!!!!Database '.HEURIST_DBNAME
+                        USanitize::errorLog('!!!!Database '.$this->system->dbname()
                             .' Recursive tree for term '.$trm_ID.' parent '.$parent_id);
                         continue;
                     }
@@ -453,7 +453,7 @@ class DbsTerms
 
                     }elseif($mode==3){
                         if(in_array($trm_ID, $res)){ //already in set
-                            USanitize::errorLog('!!!!Database '.HEURIST_DBNAME
+                            USanitize::errorLog('!!!!Database '.$this->system->dbname()
                                 .' Recursive tree or duplication for term '.$trm_ID.' parent '.$parent_id);
                             continue;
                         }else{

@@ -3923,14 +3923,14 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
      * @return bool True if an index was missing (and creation was attempted), false if the index exists.
      */
     private function checkFullTextIndex(){
-        global $mysqli;
+        global $system, $mysqli;
 
         if($this->pred_type=='title' || $this->field_id=='title'){
 
             $fld = mysql__select_value($mysqli,
             'select group_concat(distinct column_name) as fld'
             .' from information_schema.STATISTICS '
-            ." where table_schema = '".HEURIST_DBNAME_FULL."' and table_name = 'Records' and index_type = 'FULLTEXT'");
+            ." where table_schema = '".$system->dbnameFull()."' and table_name = 'Records' and index_type = 'FULLTEXT'");
 
             if($fld==null){
                 $mysqli->query('ALTER TABLE Records ADD FULLTEXT INDEX `rec_Title_FullText` (`rec_Title`)');// VISIBLE
@@ -3943,7 +3943,7 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
             $fld = mysql__select_value($mysqli,
             'select group_concat(distinct column_name) as fld'
             .' from information_schema.STATISTICS '
-            ." where table_schema = '".HEURIST_DBNAME_FULL."' and table_name = 'recDetails' and index_type = 'FULLTEXT'");
+            ." where table_schema = '".$system->dbnameFull()."' and table_name = 'recDetails' and index_type = 'FULLTEXT'");
 
             if($fld==null){
 

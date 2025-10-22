@@ -203,10 +203,10 @@ if($init_client){
 
         if($res['q_updates']){
             print '<a target=_blank href="'.HEURIST_BASE_URL.'?w=all&q='.htmlspecialchars($res['q_updates'])
-                .'&db='.HEURIST_DBNAME.'&nometadatadisplay=true">Click to view updated records</a><br>&nbsp;<br>';
+                .'&db='.$system->dbname().'&nometadatadisplay=true">Click to view updated records</a><br>&nbsp;<br>';
         }
         if($res['q_blanks']){
-            print '<a target=_blank href="'.HEURIST_BASE_URL.'?w=all&q='.htmlspecialchars($res['q_blanks']).'&db='.HEURIST_DBNAME.
+            print '<a target=_blank href="'.HEURIST_BASE_URL.'?w=all&q='.htmlspecialchars($res['q_blanks']).'&db='.$system->dbname().
                 '&nometadatadisplay=true">Click to view records for which the data would create a blank title</a>'.
                 '<br>This is generally due to a faulty title mask (verify with Check Title Masks)'.
                 '<br>or faulty data in individual records. These titles have not been changed.';

@@ -239,6 +239,8 @@ function sendPHPMailer($email_from, $email_from_name, $email_to, $email_title, $
  * @return string "ok" on success, or an error message string on failure.
  */
 function sendEmail_native($email_to, $email_title, $email_text, $email_header, $is_utf8=false, $use_html=false){
+    
+    global $system;
 
     $res = "ok";
 
@@ -269,8 +271,8 @@ function sendEmail_native($email_to, $email_title, $email_text, $email_header, $
         if(!$email_header){
             $email_header = "From: HEURIST";
             if(defined('HEURIST_DOMAIN')){
-                if(defined('HEURIST_DBNAME')){
-                    $email_header = $email_header." (".HEURIST_DBNAME.")";
+                if(isset($system)){
+                    $email_header = $email_header." (".$system->dbname().")";
                 }
                 $email_header = $email_header." <no-reply@".(defined('HEURIST_MAIL_DOMAIN')?HEURIST_MAIL_DOMAIN:HEURIST_DOMAIN).">";
             }

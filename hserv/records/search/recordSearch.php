@@ -1237,7 +1237,7 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
 
     return array("status"=>HEURIST_OK, "data"=>$intervals);
 
-    //return $system->addError(HEURIST_UNKNOWN_ERROR, "An unknown error has occurred with attempting to retrieve the date data for DB => " . HEURIST_DBNAME . ", record ids => " . implode(',', $rec_ids));
+    //return $system->addError(HEURIST_UNKNOWN_ERROR, "An unknown error has occurred with attempting to retrieve the date data for DB => " . $system->dbname() . ", record ids => " . implode(',', $rec_ids));
 }
 
 /**

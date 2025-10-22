@@ -32,7 +32,7 @@ h: 240,
 
 uriBase: "<?=HEURIST_BASE_URL ?>",
 uriHost: "<?=HEURIST_SERVER_URL ?>/",
-database:"<?=HEURIST_DBNAME?>",
+database:"<?=$system->dbname()?>",
 init: function () {
     // toggle display if our div is already present in the DOM
     var e = document.getElementById('__heurist_bookmarklet_div');

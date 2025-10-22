@@ -129,7 +129,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
              * @returns {boolean} False to prevent default link behavior.
              */
             function onrowclick(rt_ID, innewtab){
-                var query = "w=all&db=<?=HEURIST_DBNAME?>&q=t:"+rt_ID;
+                var query = "w=all&db=<?=$system->dbname()?>&q=t:"+rt_ID;
                 if(innewtab){
                     window.open(window.hWin.HAPI4.baseURL+"?"+query, "_blank");
                     return false;
