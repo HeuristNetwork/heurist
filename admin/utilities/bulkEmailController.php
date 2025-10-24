@@ -512,6 +512,8 @@ class BulkEmailController{
         if($status === HEURIST_OK || $progress == 'terminate'){
             mysql__update_progress($mysqli, $this->request['session'], false, 'REMOVE');
         }
+        
+        $this->response = ['status' => HEURIST_OK, 'message' => $progress];
     }
 
     /**

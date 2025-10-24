@@ -337,6 +337,7 @@ $stmt->close();
             const emailRecords = <?php echo json_encode($emails)?>;// Object of Email records id->title
             let emailRec = 0; // Current email details being displayed
 
+            const SESSION_ID = window.hWin.HEURIST4.util.random();
             const BASE_URL = "<?php echo HEURIST_BASE_URL ?>";
             const CURRENT_DB = "<?php echo $currentDb ?>";
             const MAILCONTROLLER = `${BASE_URL}admin/utilities/bulkEmailController.php`;
@@ -930,7 +931,7 @@ $stmt->close();
                         $prog_dlg.find('#email-results').html('<strong>CANCELLED</strong>');
                         return;
                     }
-                    
+
                     if(response.status != 'ok'){
                         $prog_dlg.find('#email-results').html(`<strong>${response.message}</strong>`);
                         return;
@@ -939,7 +940,6 @@ $stmt->close();
                     }
 
                     window.hWin.HEURIST4.util.sendRequest(MAILCONTROLLER, {a: 'session', session: SESSION_ID, db: CURRENT_DB}, null, (session_resp) => {
-
                         if(session_resp.status == 'ok'){
                             $prog_dlg.find('#progress-report').html(session_resp.data);
                         
@@ -964,14 +964,23 @@ $stmt->close();
 
                     let request = { t: new Date().getMilliseconds(), session: SESSION_ID, db: CURRENT_DB };
 
-                    window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, (response) => {
+                    $.ajax(
+                    {url: progress_url, type: "POST", data: request, cache: false,
+                    success: function( response, textStatus, jqXHR ){
+//console.log('progress res', response);
                         if(response.message != 'terminate'){
                             $prog_dlg.find('#progress-report').html(response.message);
                         }else{
                             if(interval > 0) { clearInterval(interval); interval = null; }
                             return;
                         }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown ) {
+//console.log('ERROR', jqXHR, textStatus)                        
+                    }
                     });
+                    
+                    //window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, (response) => {});
                 }, 1000);
 
             }

@@ -23,6 +23,8 @@
     require_once dirname(__FILE__).'/../../autoload.php';
 
     $res = '';
+    
+    header('Content-type: application/json;charset=UTF-8');
 
     if(@$_REQUEST['db'] && @$_REQUEST['session']){
 
@@ -31,7 +33,7 @@
         $error = mysql__check_dbname($dbname);
         if($error==null){
 
-            [,$dbname] = mysql__get_names($dbname);
+            [$dbfull, $dbname] = mysql__get_names($dbname);
 
             if(!defined('HEURIST_SCRATCH_DIR')){
                 $warn = '';
