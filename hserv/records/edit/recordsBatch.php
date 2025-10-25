@@ -2889,7 +2889,7 @@ class RecordsBatch
 
     /**
      * Translates the content of a specified freetext or blocktext field for a batch of records
-     * to a target language using an external translation service (via `getExternalTranslation`).
+     * to a target language using an external translation service (via `getDeepLTranslation`).
      *
      * Key operations:
      * - Validates parameters, record accessibility, and ensures the target field is text-based.
@@ -3022,7 +3022,7 @@ class RecordsBatch
             }else {
 
                 // get translated value
-                $translated = getExternalTranslation($this->system, $value_to_translate, $lang, $source_lang);
+                $translated = getDeepLTranslation($this->system, $value_to_translate, $lang, $source_lang);
 
                 //$translated = $lang.': TRNASLATED! '.$value_to_translate;
 

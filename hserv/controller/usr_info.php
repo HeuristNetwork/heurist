@@ -317,7 +317,7 @@
             }
         }
     }elseif($action == "translate_string"){ // translate given string using Deepl's API, if able
-        $res = getExternalTranslation($system, @$req_params['string'], @$req_params['target'], @$req_params['source']);
+        $res = getDeepLTranslation($system, @$req_params['string'], @$req_params['target'], @$req_params['source']);
     }else{
 
         $mysqli = $system->getMysqli();

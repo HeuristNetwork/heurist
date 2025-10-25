@@ -7,7 +7,7 @@
 * - Initializing and retrieving standard language codes (initLangCodes, getLangCode3, getLangCode2).
 * - Extracting language prefixes from strings (extractLangPrefix).
 * - Retrieving translations for content, including integration with Smarty (getTranslation, getCurrentTranslation).
-* - Performing external translations using services like DeepL API (getExternalTranslation).
+* - Performing external translations using services like DeepL API (getDeepLTranslation).
 * - Handling "no translate" tags for content passed to translation services (addNoTranslateTags, removeNoTranslateTags).
 * - Preparing a list of languages for UI presentation (getPreparedLanguageList).
 *
@@ -286,37 +286,37 @@
      * @global string|null $accessToken_DeepLAPI The DeepL API authentication key.
      * @param \hserv\System $system Heurist's initialized system object.
      * @param string $string The string to be translated.
-     * @param string $target_language The target language code (2 or 3 letters, e.g., "EN", "FRA").
-     * @param string|null $source_language Optional. The source language code (2 or 3 letters).
+     * @param string $targetLanguage The target language code (2 or 3 letters, e.g., "EN", "FRA").
+     * @param string|null $sourceLanguage Optional. The source language code (2 or 3 letters).
      *                                     If null, DeepL attempts auto-detection.
      * @return string|false The translated string on success, or false on failure (e.g., API error, invalid language).
      *                      Error details are added to the $system object.
      */
-    function getExternalTranslation($system, $string, $target_language, $source_language = null){
+    function getDeepLTranslation($system, $string, $targetLanguage, $sourceLanguage = null){
 
-        global $glb_lang_codes_index, $accessToken_DeepLAPI; // $glb_lang_codes is loaded by initLangCodes
+        global $glb_lang_codes_index, $accessToken_DeepLAPI, $serverName_DeepL; // $glb_lang_codes is loaded by initLangCodes
 
         initLangCodes();
 
         // Default list of languages - from https://www.deepl.com/docs-api/general/get-languages
-        $def_languages = ['AR', 'BG', 'CS', 'DA', 'DE', 'EL', 'EN', 'ES', 'ET', 'FI',
-                          'FR', 'HU', 'ID', 'IT', 'JA', 'KO', 'LT', 'LV', 'NB', 'NL',
-                          'PL', 'PT', 'RO', 'RU', 'SK', 'SL', 'SV', 'TR', 'UK', 'ZH'];
+        $defLanguages = ['AR', 'BG', 'CS', 'DA', 'DE', 'EL', 'EN', 'ES', 'ET', 'FI',
+                         'FR', 'HU', 'ID', 'IT', 'JA', 'KO', 'LT', 'LV', 'NB', 'NL',
+                         'PL', 'PT', 'RO', 'RU', 'SK', 'SL', 'SV', 'TR', 'UK', 'ZH'];
 
         // Retrieve from file, created by daily script
-        $language_file = HEURIST_FILESTORE_ROOT . 'DEEPL_languages.json';
-        $deepl_languages = [];
+        $languagesFile = HEURIST_FILESTORE_ROOT . 'DEEPL_languages.json';
+        $deeplLanguages = [];
 
-        if(file_exists($language_file)){
-            $langs = file_get_contents($language_file);
+        if(file_exists($languagesFile)){
+            $langs = file_get_contents($languagesFile);
 
             $langs = json_decode($langs, true);
-            $deepl_languages = json_last_error() !== JSON_ERROR_NONE ? array() : $langs;
+            $deeplLanguages = json_last_error() !== JSON_ERROR_NONE ? [] : $langs;
 
-            $deepl_languages = !empty($langs) ? $langs : $def_languages;
+            $deeplLanguages = !empty($langs) ? $langs : $defLanguages;
         }
 
-        if(empty($string) || empty($target_language)){
+        if(empty($string) || empty($targetLanguage)){
 
             $msg = 'Your request is missing ' . (empty($string) ? 'a value to translate' : 'the target language to translate to');
 
@@ -329,10 +329,11 @@
             $system->addError(HEURIST_ACTION_BLOCKED, 'Deepl API key has not been configured - please ask your system administrator to setup the translator key');
             return false;
         }
+        if(empty($serverName_DeepL)){
+            $serverName_DeepL = 'https://api-free.deepl.com';
+        }
 
         $url = '';
-
-        $useragent = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.6) Gecko/2009011913 Firefox/3.0.6';
 
         $curlHandle = curl_init();
         $curlOptions = [
@@ -346,14 +347,14 @@
             CURLOPT_TIMEOUT => 30, // timeout after thirty seconds
             CURLOPT_MAXREDIRS => 5, // no more than 5 redirections
 
-            CURLOPT_USERAGENT => $useragent,
+            CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.6) Gecko/2009011913 Firefox/3.0.6',
             CURLOPT_FAILONERROR => true,
             CURLOPT_AUTOREFERER => true
         ];
 
         // check if the proxy needs to be used, $httpProxyActive defined in heuristConfigIni.php
-        $use_proxy = defined('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE') && HEURIST_HTTP_PROXY_ALWAYS_ACTIVE && defined('HEURIST_HTTP_PROXY');
-        if($use_proxy){
+        $useProxy = defined('HEURIST_HTTP_PROXY_ALWAYS_ACTIVE') && HEURIST_HTTP_PROXY_ALWAYS_ACTIVE && defined('HEURIST_HTTP_PROXY');
+        if($useProxy){
             $curlOptions[CURLOPT_PROXY] = HEURIST_HTTP_PROXY;
             if(defined('HEURIST_HTTP_PROXY_AUTH')){
                 $curlOptions[CURLOPT_PROXYUSERPWD] = HEURIST_HTTP_PROXY_AUTH;
@@ -365,134 +366,251 @@
         curl_setopt_array($curlHandle, $curlOptions);
 
         // Handle target language
-        if(strlen($target_language) == 3){ // get ar2
-            $target_language = $glb_lang_codes_index[$target_language];
+        if(strlen($targetLanguage) == 3){ // get ar2
+            $targetLanguage = $glb_lang_codes_index[$targetLanguage];
         }
-        if(!in_array($target_language, $deepl_languages)){
+        if(!in_array($targetLanguage, $deeplLanguages)){
             $system->addError(HEURIST_INVALID_REQUEST, 'The provided language is not supported by Deepl.<br>If you believe this is in error, please contact the Heurist team.');
             return false;
         }
 
-        $is_xml = strpos($string, '<?xml') === 0;
-
-        $string = replaceEncodedEntities($string);
-        $string = replacePunctuation($string);
+        $isXML = strpos($string, '<?xml') === 0;
 
         /**
          * free => api-free.deepl.com
          * pro => api.deepl.com
          */
-        $string = urlencode($string);
-        $url = "https://api-free.deepl.com/v2/translate?text={$string}&target_lang={$target_language}";
+        $url = "{$serverName_DeepL}/v2/translate?split_sentences=nonewlines&target_lang={$targetLanguage}";
 
         // Handle source language
-        if(!empty($source_language) && strlen($source_language) == 3){ // get ar2
-            $source_language = $glb_lang_codes_index[$source_language];
+        if(!empty($sourceLanguage) && strlen($sourceLanguage) == 3){ // get ar2
+            $sourceLanguage = $glb_lang_codes_index[$sourceLanguage];
         }
 
-        if(!empty($source_language) && in_array($source_language, $deepl_languages)){
-            $k = array_search($source_language, $deepl_languages);
-            $url .= "&source_lang={$deepl_languages[$k]}";
+        if(!empty($sourceLanguage) && in_array($sourceLanguage, $deeplLanguages)){
+            $k = array_search($sourceLanguage, $deeplLanguages);
+            $url .= "&source_lang={$deeplLanguages[$k]}";
         }
 
-        if($is_xml){ // possible xml
+        if($isXML){ // possible xml
             $url .= '&tag_handling=xml&ignore_tags=notranslate';
         }else{ // assume html
             $url .= '&tag_handling=html';
         }
 
-        curl_setopt($curlHandle, CURLOPT_URL, $url);
-        $data = curl_exec($curlHandle);
+        $string = replaceEncodedEntities($string);
 
-        $error = curl_error($curlHandle);
+        $response = processDeepLRequest($curlHandle, $url, $string);
+        if(is_array($response) && array_key_exists('status', $response)){
+            $system->addErrorArr($response);
+            return false;
+        }
 
-        if($error){
+        return replacePunctuation($response, true);
+    }
 
-            $hmsg = '';// Heurist's error message
-            $herror = HEURIST_UNKNOWN_ERROR;
-            $code = intval(curl_getinfo($curlHandle, CURLINFO_HTTP_CODE));
+    function processDeepLRequest($curlHandle, $baseURL, $string){
 
-            switch ($code) {
+        if(empty($baseURL) || empty($string)){
+            return '';
+        }
 
-                // Deepl error codes: https://support.deepl.com/hc/en-us/articles/9773964275868-DeepL-API-error-messages
+        $CHUNK_SIZE = 3000;
 
-                case 400: // Missing parameter
-                    $herror = HEURIST_INVALID_REQUEST;
-                    $hmsg = 'Deepl was unable to complete this request.<br>'
-                           .'Please make a bug report if this persists.';
-                    break;
+        $performRequest = function($textChunk) use ($curlHandle, $baseURL) {
 
-                case 403: // Invalid API key
-                    $herror = HEURIST_REQUEST_DENIED;
-                    $hmsg = 'Heurist was unable to access Deepl.<br>'
-                           .'This may be due to an error in handling or the necessary API key is missing.<br>'
-                           .'Please contact your system administrator and ask them if the API key has been configured.';
-                    break;
+            $textChunk = urlencode($textChunk);
 
-                case 404: // Wrong URL, e.g. using the free version URL for paid access
-                case 504:
-                    $herror = HEURIST_INVALID_REQUEST; //HEURIST_NOT_FOUND
-                    $hmsg = 'Deepl encountered an error with locating the desired function.<br>'
-                           .'Please make a bug report.';
-                    break;
-
-                case 429: // Too many requests
-                case 529: // Deepl is busy
-                    $herror = HEURIST_ACTION_BLOCKED;
-                    $hmsg = 'Deepl is currently busy processing other requests.<br>'
-                           .'Please re-try your request in a few minutes.';
-                    $error = '';
-                    break;
-
-                case 456: // [Free] Reached 500,000 character limit, [Paid] Reached cost control limit
-                    $herror = HEURIST_ACTION_BLOCKED;
-                    $hmsg = 'Heurist has exceeded it\'s quota with Deepl and will be unable to attempt automatic translations of your texts.<br>'
-                           .'We apologise for the inconvenience.';
-                    break;
-
-                case 413: // Request Too Large from Deepl
-                case 414: // HTTP Reuest Too Large
-                    $herror = HEURIST_ACTION_BLOCKED;
-                    $hmsg = 'The request to Deepl\'s services was too large to process.<br>'
-                           .'Please either:<br>'
-                           .'Split the value into smaller parts and then re-combine them once finished, or<br>'
-                           .'Make a bug report including which record and field you were attempting to translate and into which language.';
-                    break;
-
-                case 503: // Unknown Deepl error
-                    $herror = HEURIST_ACTION_BLOCKED;
-                    $hmsg = 'Deepl encountered an unknown error.<br>'
-                           .'Please re-try your request in a few minutes.';
-                    break;
-
-                default: // unknown error or no additional handling
-                    $herror = HEURIST_UNKNOWN_ERROR;
-                    $hmsg = 'An unknown error occurred with Deepl\'s services.<br>'
-                           .'Please re-try your request in a few minutes.<br>'
-                           .'If this problem persists, please make a bug report.<br><br>'
-                           .'Response error: <strong>' . $error . '</strong>';
-                    break;
+            curl_setopt($curlHandle, CURLOPT_URL, "{$baseURL}&text={$textChunk}");
+            $data = curl_exec($curlHandle);
+    
+            $error = curl_error($curlHandle);
+    
+            if($error){
+    
+                $hmsg = '';// Heurist's error message
+                $herror = HEURIST_UNKNOWN_ERROR;
+                $code = intval(curl_getinfo($curlHandle, CURLINFO_HTTP_CODE));
+    
+                switch($code){
+    
+                    // Deepl error codes: https://support.deepl.com/hc/en-us/articles/9773964275868-DeepL-API-error-messages
+    
+                    case 400: // Missing parameter
+                        $herror = HEURIST_INVALID_REQUEST;
+                        $hmsg = "Deepl was unable to complete this request.<br>
+                        Please make a bug report if this persists.";
+                        break;
+    
+                    case 403: // Invalid API key
+                        $herror = HEURIST_REQUEST_DENIED;
+                        $hmsg = "Heurist was unable to access Deepl.<br>
+                        This may be due to an error in handling or the necessary API key is missing.<br>
+                        Please contact your system administrator and ask them if the API key has been configured.";
+                        break;
+    
+                    case 404: // Wrong URL, e.g. using the free version URL for paid access
+                    case 504:
+                        $herror = HEURIST_INVALID_REQUEST; //HEURIST_NOT_FOUND
+                        $hmsg = "Deepl encountered an error with locating the desired function.<br>
+                        Please make a bug report.";
+                        break;
+    
+                    case 429: // Too many requests
+                    case 529: // Deepl is busy
+                        $herror = HEURIST_ACTION_BLOCKED;
+                        $hmsg = "Deepl is currently busy processing other requests.<br>
+                        Please re-try your request in a few minutes.";
+                        $error = '';
+                        break;
+    
+                    case 456: // [Free] Reached 500,000 character limit, [Paid] Reached cost control limit
+                        $herror = HEURIST_ACTION_BLOCKED;
+                        $hmsg = "Heurist has exceeded it's quota with Deepl and will be unable to attempt automatic translations of your texts.<br>
+                        We apologise for the inconvenience.";
+                        break;
+    
+                    case 413: // Request Too Large from Deepl
+                    case 414: // HTTP Reuest Too Large
+                        $herror = HEURIST_ACTION_BLOCKED;
+                        $hmsg = "The request to Deepl's services was too large to process.<br>
+                        Please either:<br>
+                        Split the value into smaller parts and then re-combine them once finished, or<br>
+                        Make a bug report including which record and field you were attempting to translate and into which language.";
+                        break;
+    
+                    case 503: // Unknown Deepl error
+                        $herror = HEURIST_ACTION_BLOCKED;
+                        $hmsg = "Deepl encountered an unknown error.<br>
+                        Please re-try your request in a few minutes.";
+                        break;
+    
+                    default: // unknown error or no additional handling
+                        $herror = HEURIST_UNKNOWN_ERROR;
+                        $hmsg = "An unknown error occurred with Deepl's services.<br>
+                        Please re-try your request in a few minutes.<br>
+                        If this problem persists, please make a bug report.<br><br>
+                        Response error: <strong>{$error}</strong>";
+                        break;
+                }
+    
+                return ['status' => $herror, 'message' => $hmsg, 'sysmsg' => $error];
+            }
+    
+            $data = json_decode($data, true);
+            if(json_last_error() !== JSON_ERROR_NONE || !is_array($data) || !array_key_exists('translations', $data)){
+                return ['status' => HEURIST_ERROR, 'message' => 'Deepl has responsed in an unknown format.<br>Please report this to the Heurist team.'];
             }
 
-            $system->addError($herror, $hmsg, $error);
+            $translation = $data['translations'];
+            if(is_array($translation) && !empty($translation)){
+                $textChunk = $translation[0]['text'];
+            }
 
-            return false;
+            return $textChunk;
+        };
+
+        if(mb_strlen($string) <= $CHUNK_SIZE){
+            return $string;//$performRequest($string);
         }
 
-        $data = json_decode($data, true);
-        if(json_last_error() !== JSON_ERROR_NONE || !is_array($data) || !array_key_exists('translations', $data)){
-            $system->addError(HEURIST_ERROR, 'Deepl has responsed in an unknown format.<br>Please report this to the Heurist team.');
-            return false;
+        $originalString = $string;
+        $replacements = [];
+        if(strpos($baseURL, '=html') !== false){
+
+            $fakeHTML = "<div>$string</div>";
+
+            $doc = new DOMDocument;
+            $doc->loadHTML(mb_encode_numericentity($fakeHTML, [0x80, 0x10FFFF, 0, ~0], 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD); // load html
+
+            $xpath = new DOMXPath($doc); // to retrieve text only
+            $textNodes = $xpath->query('//text()');
+
+            $idx = 0;
+            foreach($textNodes as $node){
+
+                if(empty(trim($node->textContent))){
+                    continue;
+                }
+
+                $text = replacePunctuation($node->textContent);
+
+                if(mb_strlen($text) <= $CHUNK_SIZE){                    
+                    $replacements["__{$idx}__"] = $text;
+                    $node->textContent = "__{$idx}__";
+                    $idx ++;
+                    continue;
+                }
+
+                $textWords = preg_split('/(\r\n|\r|\n|\.)/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+                $currentChunk = '';
+                foreach($textWords as $word){
+
+                    if(!empty(trim($word)) && (mb_strlen($currentChunk . $word) < $CHUNK_SIZE || $word === '.')){
+                        $currentChunk .= $word;
+                    }elseif(empty($currentChunk)){
+
+                        $replaced = false;
+                        $idxKey = "__{$idx}__";
+                        $replacements[$idxKey] = $currentChunk;
+                        mb_ereg_replace_callback($currentChunk, function($match) use (&$replaced, $idxKey) {
+
+                            if($replaced){
+                                return $match[0];
+                            }
+
+                            $replaced = true;
+                            return $idxKey;
+
+                        }, $node->textContent);
+
+                        $idx ++;
+                    }
+                }
+            }
+
+            $titleNodes = $xpath->query('//@title');
+            foreach($titleNodes as $node){
+
+                if(empty(trim($node->nodeValue))){
+                    continue;
+                }
+
+                $text = replacePunctuation($node->nodeValue);
+
+                $replacements["__{$idx}__"] = $text;
+                $node->nodeValue = "__{$idx}__";
+                $idx ++;
+            }
+
+            $string = $doc->saveHTML();
+
+            $string = mb_substr($string, 5, -7); // remove placeholders
         }
 
-        $res = '';
-        $translation = $data['translations'];
-        if(is_array($translation) && !empty($translation)){
-            $res = $translation[0]['text'];
-            $res = replacePunctuation($res, true);
+        $originalString = $string;
+        foreach($replacements as $placeholder => $value){
+
+            if(mb_strlen(trim($value)) <= 0){
+                $string = mb_ereg_replace($placeholder, $value, $string);
+            }else{
+
+                $result = $performRequest($value);
+
+                if(is_array($result)){
+                    return $result;
+                }
+                $string = mb_ereg_replace($placeholder, $result, $string);
+            }
+
+            if(!$string){
+                $string = $originalString;
+            }else{
+                $originalString = $string;
+            }
         }
 
-        return $res;
+        return $string;
     }
 
     /**
@@ -502,11 +620,16 @@
      *
      * @param string $string The string potential containing the specific punctuation
      * @param bool $reverse Whether to reverse the process, done after Deepl has translated the text
+     * @param bool $swapComparison Whether to replace greater than and less than symbols
      * @return string The string prepared for translation
      */
-    function replacePunctuation($string, $reverse = false){
+    function replacePunctuation($string, $reverse = false, $swapComparison = false){
 
         $punc = [ [';', '__SC__'], [':', '__CL__'], ['&', '__AMP__'] ];
+        if($swapComparison || $reverse){
+            $punc[] = ['<', '__GT__'];
+            $punc[] = ['>', '__LT__'];
+        }
 
         foreach($punc as $punctuation){
 
