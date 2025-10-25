@@ -1054,27 +1054,22 @@ function getWebImageCache($system, $fileinfo, $return_url=true){
         return false;
     }
 
-    $files = array();
-    $error_reported = false;
-
     //direct url to filestore folder
     $file_url = $system->getSysUrl().$fileinfo['fullPath'];
 
     $file_path_info = pathinfo($file_path);
 
     //return basename with extension
-    $file_name_cached = $file_path_info['filename'].'.jpg';
+    $file_name_cached = "{$file_path_info['filename']}.jpg";
 
     $file_url_cached = $system->getSysUrl(DIR_WEBIMAGECACHE).$file_name_cached;
-    $file_path_cached =  $web_cache_dir.'/'.$file_name_cached;
-      //fileWithGivenExt( $web_cache_dir , $file_path_info['basename'] );
+    $file_path_cached =  "{$web_cache_dir}/{$file_name_cached}";
 
-    $res  = true;
     if(!file_exists($file_path_cached)){ // already exists
         $res = UImage::createScaledImageFile($file_path, $file_path_cached, 1000, 1000, false, 'jpg');
     }
     if($res===true){
-        return $return_url?$file_url_cached:$file_path_cached;
+        return $return_url ? $file_url_cached : $file_path_cached;
     }else{
         return false;
     }

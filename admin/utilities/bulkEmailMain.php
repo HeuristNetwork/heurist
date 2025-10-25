@@ -345,7 +345,6 @@ $stmt->close();
             let gettingDatabases = false; // Flag for database retrieval operation in progress; true - general, 1 - intial list, false - none
             let runFilter = false;
             let callInProgress = false;
-            let sessionID = null;
 
             const handledSorts = Object.freeze(['name', 'rec_count', 'last_update']);
             let databaseDetails = []; // [{name: db_name, rec_count: db_rec_count, last_update: db_last_update}, ...]
@@ -836,7 +835,7 @@ $stmt->close();
                             a: 'prepare_email',
                             db: CURRENT_DB,
                             emailBody: emailBodyPart,
-                            sessionID: sessionID,
+                            sessionID: SESSION_ID,
                             append: appendToExisting
                         };
 
@@ -855,7 +854,6 @@ $stmt->close();
 
                 }
 
-                sessionID = !window.hWin.HEURIST4.util.isPositiveInt(sessionID) ? window.hWin.HEURIST4.util.random() : sessionID;
                 let emailBody = $('#emailBody').val();
                 const chunkLimit = 2000;
 
@@ -916,7 +914,7 @@ $stmt->close();
                 }, params);
 
                 params['a'] = 'send_emails';
-                params['sessionID'] = sessionID;
+                params['sessionID'] = SESSION_ID;
 
                 window.hWin.HEURIST4.util.sendRequest(MAILCONTROLLER, params, null, (response) => {
 
@@ -1017,7 +1015,7 @@ $stmt->close();
                 }, params);
 
                 params['a'] = 'csv_export';
-                params['sessionID'] = sessionID;
+                params['sessionID'] = SESSION_ID;
 
                 window.open(`${MAILCONTROLLER}?${(new URLSearchParams(params).toString())}`, '_blank');
             }
