@@ -524,7 +524,7 @@
             $doc->loadHTML(mb_encode_numericentity($fakeHTML, [0x80, 0x10FFFF, 0, ~0], 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD); // load html
 
             $xpath = new DOMXPath($doc); // to retrieve text only
-            $textNodes = $xpath->query('//text()');
+            $textNodes = $xpath->query('//text()[not(ancestor::*[@translate="no"])]'); // get all text nodes not within translate=no tags
 
             $idx = 0;
             foreach($textNodes as $node){
@@ -569,7 +569,7 @@
                 }
             }
 
-            $titleNodes = $xpath->query('//@title');
+            $titleNodes = $xpath->query('//@title[not(ancestor::*[@translate="no"])]'); // get all titles not within, or used with, translate=no tags
             foreach($titleNodes as $node){
 
                 if(empty(trim($node->nodeValue))){
