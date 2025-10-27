@@ -794,6 +794,10 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         
         return false;   
     },
+
+    _isWithinLoop: function(){
+        
+    },
     
     /**
      * @memberof heurist.reportEditor
@@ -1191,59 +1195,59 @@ this_id       : "term"
 */
 
                 
-                _varname = '';
+            _varname = '';
+            
+            let codes = _nodep.data.code;
+            if(!codes) codes = key;
+            
+            let prefix = 'r';
                 
-                    let codes = _nodep.data.code;
-                    if(!codes) codes = key;
-                    
-                    let prefix = 'r';
-                    
-                        codes = codes.split(':');
-                        
-                        if(key.startsWith('rec_')){
-                            _varname = key.replace('_','');
+            codes = codes.split(':');
+            
+            if(key.startsWith('rec_')){
+                _varname = key.replace('_','');
+            }
+            
+            if(codes[0]=='Relationship'){ //_nodep.type == 'relationship'){
+                this._insertGetRelatedRecords();
+                prefix = '';
+                if(_varname!='') {
+                    if(inloop!=1) inloop = 2; //Relationship will be without prefix $r
+                }else if(codes[1]){
+                    _varname = codes[1];
+                }
+
+                if(Number.isInteger(+_varname)){
+                    _varname = `relationRecord.f${_varname}`;
+                }
+
+                _varname = codes[0]+(_varname!=''?('.'+_varname):'');
+            }else{
+
+                let offset = 3;
+                let lastcode = codes[codes.length-1];
+                                    
+                if(_nodep.type == 'rectype'){
+                    rectypeId = _nodep.data.rtyID_local;
+                    _varname = '';
+                }else if(!key.startsWith('rec_')){
+
+                    if(key=='label' || key=='term' || key=='code' || key=='conceptid' || key=='internalid' || key=='desc'){ //terms
+                        if( inloop!=1 ){
+                            _varname = ('.'+key);
                         }
-                        
-                        if(codes[0]=='Relationship'){ //_nodep.type == 'relationship'){
-                            this._insertGetRelatedRecords();
-                            prefix = '';
-                            if(_varname!='') {
-                                if(inloop!=1) inloop = 2; //Relationship will be without prefix $r
-                            }else if(codes[1]){
-                                _varname = codes[1];
-                            }
-
-                            if(Number.isInteger(+_varname)){
-                                _varname = `relationRecord.f${_varname}`;
-                            }
-
-                            _varname = codes[0]+(_varname!=''?('.'+_varname):'');
-                        }else{
-
-                            let offset = 3;
-                            let lastcode = codes[codes.length-1];
-                                                
-                            if(_nodep.type == 'rectype'){
-                                rectypeId = _nodep.data.rtyID_local;
-                                _varname = '';
-                            }else if(!key.startsWith('rec_'))
-                            {
-                                if(key=='label' || key=='term' || key=='code' || key=='conceptid' || key=='internalid' || key=='desc'){ //terms
-                                    if( inloop!=1 ){
-                                        _varname = ('.'+key);
-                                    }
-                                    offset = 4;
-                                    lastcode = codes[codes.length-2];
-                                }else if (lastcode.indexOf('lt')==0) {
-                                    lastcode = lastcode.substring(2);
-                                }
-                                
-                                if(inloop==1 && (_nodep.type == 'date' || _nodep.type == 'geo' || _nodep.type == 'file')){
-                                    _varname = '_originalvalue'; //for loop it contains all value
-                                }
-                                
-                                _varname = 'f'+lastcode+_varname;    
-                            }
+                        offset = 4;
+                        lastcode = codes[codes.length-2];
+                    }else if (lastcode.indexOf('lt')==0) {
+                        lastcode = lastcode.substring(2);
+                    }
+                    
+                    if(inloop==1 && (_nodep.type == 'date' || _nodep.type == 'geo' || _nodep.type == 'file')){
+                        _varname = '_originalvalue'; //for loop it contains all value
+                    }
+                    
+                    _varname = 'f'+lastcode+_varname;    
+                }
 /*
 0: "5"   rt
 1: "lt15"   -5
@@ -1258,75 +1262,74 @@ this_id       : "term"
 3: "263"
 4: "Term"
 */                            
-                            if(codes.length>3){ //second level (isif && codes.length==2) || 
-                                
-                                let parent_key = '';
-                                let pkeys = [];
-                                while(codes.length-offset>0){
-                                    let pkey = codes[codes.length-offset];
-                                    if(pkey.indexOf('lt')==0){ //resource
-                                        pkey = 'f'+pkey.substring(2);
-                                    }else{
-                                        pkey = 'f'+pkey;
-                                    }
-                                    offset = offset + 2;
-                                    //prefix = prefix + '.' + pkey;
-                                    
-                                    pkeys.unshift(pkey);
-                                    
-                                    if(!parent_key) parent_key = pkey;
-                                    if(pkeys.length==2) break;
-                                }
-                                if(pkeys.length<2) pkeys.unshift(prefix);
-                                prefix = pkeys.join('.');
-                                //prefix = prefix + '.' + pkey;
-                                //prefix = parent_key; 
-                                
-                                if( inloop<2 ){
-                                    
-                                    //r.
-                                    _getrec = '{$' + parent_key + '=$heurist->getRecord($'+prefix+')}\n';
-                                    let _getrec2 = '{$' + parent_key + '=$heurist->getRecord($'+parent_key+')}\n';
-                                    //find if above cursor code already has such line             
-                                    if(this._findAboveCursor(_getrec) || this._findAboveCursor(_getrec2)) {
-                                            _getrec = '';
-                                    }
-                                    
-                                    //_getrec = _getrec+''+_getrec2;
-                                    
-                                    
-                                    _varname = parent_key +  (_varname?('.' + _varname):'');
-                                }
-                                prefix = '';
-                            }
-                        }
+                if(codes.length>3){ //second level (isif && codes.length==2) || 
                     
-                    // 0 - outside loop
-                    // 1 - insert loop operator
-                    // 2 - in loop
-                    if( inloop<2 ){
-                        _varname = prefix + ((prefix && _varname)?'.':'') + _varname;
-
-                        if(language_code && language_code != '' && (key == 'term' || key == 'desc')){
-
-                            let id_fld = _varname.replace(`.${key}`, '.id');
-                            let fld = (inloop==1) ? 'replace_id.id' : id_fld;
-                            let trm_fld = key == 'term' ? 'label' : 'desc';
-
-                            language_handle = `{$translated_label = $heurist->getTranslation("trm", $${fld}, "${trm_fld}", "${language_code}")} {* Get translated label *}\n\n`
-                                + (inloop==1 ? '\n\t' : '') + `{$translated_label} {* Print translated label *}`;
-                        }else if(file_field && _nodep.type == 'file'){
-
-                            let fld = (inloop==1) ? 'replace_id' : _varname;
-                            file_handle = `{$file_details = $${fld}_originalvalue|file_data:${file_field}} {* Get the requested field *}\n\n`
-                                + (inloop==1 ? '\n\t' : '') + `{$file_details} {* Print the field *}`;
+                    let parent_key = '';
+                    let pkeys = [];
+                    while(codes.length-offset>0){
+                        let pkey = codes[codes.length-offset];
+                        if(pkey.indexOf('lt')==0){ //resource
+                            pkey = 'f'+pkey.substring(2);
+                        }else{
+                            pkey = 'f'+pkey;
                         }
+                        offset = offset + 2;
+                        //prefix = prefix + '.' + pkey;
+                        
+                        pkeys.unshift(pkey);
+                        
+                        if(!parent_key) parent_key = pkey;
+                        if(pkeys.length==2) break;
                     }
+                    if(pkeys.length<2) pkeys.unshift(prefix);
+                    prefix = pkeys.join('.');
+                    //prefix = prefix + '.' + pkey;
+                    //prefix = parent_key; 
                     
-                    _nodep.data.varname = _varname;
-                    //_nodep.data.key = _varname;
+                    if(inloop < 2){
+
+                        _getrec = '{$' + parent_key + '=$heurist->getRecord($'+prefix+')}\n';
+                        let _getrec2 = '{$' + parent_key + '=$heurist->getRecord($'+parent_key+')}\n';console.log(arguments, _getrec, _getrec2);
+
+                        //find if above cursor code already has such line             
+                        if(this._findAboveCursor(_getrec) || this._findAboveCursor(_getrec2)) {
+                            _getrec = '';
+                        }else if(this._findAboveCursor(`{foreach $${prefix}s as`)){
+                            _getrec = _getrec2;
+                        }
+
+                        _varname = parent_key +  (_varname?('.' + _varname):'');
+                    }
+                    prefix = '';
+                }
+            }
+            
+            // 0 - outside loop
+            // 1 - insert loop operator
+            // 2 - in loop
+            if(inloop < 2){
+                _varname = prefix + ((prefix && _varname)?'.':'') + _varname;
+
+                if(language_code && language_code != '' && (key == 'term' || key == 'desc')){
+
+                    let id_fld = _varname.replace(`.${key}`, '.id');
+                    let fld = (inloop==1) ? 'replace_id.id' : id_fld;
+                    let trm_fld = key == 'term' ? 'label' : 'desc';
+
+                    language_handle = `{$translated_label = $heurist->getTranslation("trm", $${fld}, "${trm_fld}", "${language_code}")} {* Get translated label *}\n\n`
+                        + (inloop==1 ? '\n\t' : '') + `{$translated_label} {* Print translated label *}`;
+                }else if(file_field && _nodep.type == 'file'){
+
+                    let fld = (inloop==1) ? 'replace_id' : _varname;
+                    file_handle = `{$file_details = $${fld}_originalvalue|file_data:${file_field}} {* Get the requested field *}\n\n`
+                        + (inloop==1 ? '\n\t' : '') + `{$file_details} {* Print the field *}`;
+                }
+            }
+            
+            _nodep.data.varname = _varname;
+            //_nodep.data.key = _varname;
                 
-            if( inloop==1 ){
+            if(inloop == 1){
                 
                 //** _getrec = '';
                 _text = this._insertPatternMagicLoop(_nodep, _varname, language_handle, file_handle);
@@ -1475,7 +1478,7 @@ this_id       : "term"
             $langSel.html($langSel.html() + lang_opts);
         }
         $langSel.val(''); // reset
-        h = !show_languages && !show_file_data ? h - 10 : h;
+        h = !show_languages && !show_file_data ? h - 65 : h;
         
         this._addVariableDlg = window.hWin.HEURIST4.msg.showElementAsDialog(   
             {element: $ele_popup[0],
@@ -1494,7 +1497,7 @@ this_id       : "term"
             borderless: false,
             default_palette_class:null});
 
-        let grid_temp_cols = (!show_languages && !show_file_data ? '' : '75px ') + '130px 180px'
+        let grid_temp_cols = (!show_languages && !show_file_data ? '' : '75px ') + '10em 12.5em 10em';
 
         this._addVariableDlg.find('.insert-field-grid').css({'display': 'grid', 'grid-template-columns': '100%'});
         this._addVariableDlg.find('.insert-field-grid > div:not(.header)').css({'display': 'grid', 'grid-template-columns': grid_temp_cols, 'margin': '5px 0'});
@@ -1507,6 +1510,7 @@ this_id       : "term"
         });
         this._addVariableDlg.find('button').not('#btn_insert_var, #btn_insert_loop_var').css('margin-left', '10px');
         this._addVariableDlg.find('#btn_insert_var, #btn_insert_loop_var').css('width', '110px');
+        this._addVariableDlg.find('#btn_insert_if, #btn_insert_loop_if').css('width', '125px');
 
         if(no_loop){
             this._addVariableDlg.find('.ins_isloop').hide();
