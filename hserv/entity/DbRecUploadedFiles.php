@@ -562,7 +562,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         $files_dir = HEURIST_FILES_DIR;
         $current_db = $this->system->dbname();
 
-        if(strpos($this->system->getSysDir(), $current_db) === false){
+        if(strpos($files_dir, "/$current_db/") === false){
 
             $parts = explode("/", $thumb_dir);
             $idx = array_search("HEURIST_FILESTORE", $parts);
@@ -1428,25 +1428,25 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
        if($fields!==false){
 
-                if($tiledImageStack){
-                    //special case for tiled images stack
-                    $path_parts = pathinfo($fields['ulf_OrigFileName']);
-                    $fields['ulf_OrigFileName'] = ULF_TILED_IMAGE.'@'.$path_parts['filename'];
-                    $fields['ulf_PreferredSource'] = 'tiled';
-                }else{
-                    $fields['ulf_PreferredSource'] = 'local';
-                }
+            if($tiledImageStack){
+                //special case for tiled images stack
+                $path_parts = pathinfo($fields['ulf_OrigFileName']);
+                $fields['ulf_OrigFileName'] = ULF_TILED_IMAGE.'@'.$path_parts['filename'];
+                $fields['ulf_PreferredSource'] = 'tiled';
+            }else{
+                $fields['ulf_PreferredSource'] = 'local';
+            }
 
-                if(@$_fields['ulf_Description']!=null){
-                    $fields['ulf_Description'] = $_fields['ulf_Description'];
-                }
+            if(@$_fields['ulf_Description']!=null){
+                $fields['ulf_Description'] = $_fields['ulf_Description'];
+            }
 
-                $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
+            $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
 
-                $this->setData($fileinfo);
-                $ret = $this->save();//copies temp from scratch to file_upload it returns ulf_ID
+            $this->setData($fileinfo);
+            $ret = $this->save();//copies temp from scratch to file_upload it returns ulf_ID
 
-                return $ret;
+            return $ret;
        }else{
            return false;
        }

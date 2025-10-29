@@ -233,7 +233,7 @@ abstract class DbEntityBase
      *
      * This is typically used before update or delete actions.
      *
-     * @param array $records An array of records.
+     * @param array|null $records An array of records.
      * @return void
      */
     public function setRecords($records){

@@ -73,6 +73,9 @@ class DbSysBugreport extends DbEntityBase
     /** @var int The Heurist Record Type ID for bug reports/tasks (typically 56). */
     private $bugReportType = 56;
 
+    /** @var bool Whether the current server is the main server */
+    private $isMainServer = false;
+
     /**
      * Constructor for DbSysBugreport.
      *
@@ -85,6 +88,8 @@ class DbSysBugreport extends DbEntityBase
     public function __construct( $system, $data=null ) {
         parent::__construct( $system, $data );
         $this->requireAdminRights = false;
+
+        $this->isMainServer = strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false;
     }
 
     /**
@@ -105,8 +110,7 @@ class DbSysBugreport extends DbEntityBase
 
         if(!$res){
 
-            $attempt_public_login = strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false
-                                    && $this->system->dbname() == HEURIST_BUGREPORT_DATABASE; //dbnameWithoutHost
+            $attempt_public_login = $this->isMainServer && $this->system->dbname() == HEURIST_BUGREPORT_DATABASE; //dbnameWithoutHost
 
             $this->performLogout = $attempt_public_login ? $this->system->doLogin('extern', null, 'public', true) : false; // attempt login to publicly available guest account
 
@@ -305,7 +309,7 @@ class DbSysBugreport extends DbEntityBase
         }
 
         $res = false;
-        if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false){ // on server with Heurist_Job_Tracker DB
+        if($this->isMainServer){ // on server with Heurist_Job_Tracker DB
             $res = $this->createBugReportRecord($new_record);
         }else{
 
@@ -404,7 +408,7 @@ class DbSysBugreport extends DbEntityBase
 
         $using_db = $this->system->dbname() == HEURIST_BUGREPORT_DATABASE; //dbnameWithoutHost
         $report_system = $using_db ? $this->system : null;
-        if(!$using_db && strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false){
+        if(!$using_db && $this->isMainServer){
 
             $report_system = new System();
             $using_db = $report_system->init(HEURIST_BUGREPORT_DATABASE, true, false);
@@ -425,14 +429,14 @@ class DbSysBugreport extends DbEntityBase
         $files = [];
         $rec_uploads = new DbRecUploadedFiles($report_system);
         if(!empty($record['details']['38']) && $rec_uploads){
+
             foreach($record['details']['38'] as $idx => $file_url){
 
                 $file_name = explode("\\", $file_url);
                 $file_name = str_replace('~', 'bugreport_img_', array_pop($file_name));
 
-                $record['details']['38'][$idx] = $rec_uploads->downloadAndRegisterdURL($file_url, ['ulf_NewName' => $file_name], 2);
-
-                if(strpos($file_url, HEURIST_BASE_URL)){
+                $fileResult = null;
+                if(strpos($file_url, HEURIST_SERVER_URL)){ // same server, attempt local registeration
 
                     $urlBase = $this->system->getSysUrl(DIR_ENTITY);
                     $dirBase = $this->system->getSysDir(DIR_ENTITY);
@@ -441,17 +445,23 @@ class DbSysBugreport extends DbEntityBase
                     $record['details']['38'][$idx] = $rec_uploads->registerFile($file, null);
                 }
 
-                if(!$record['details']['38'][$idx] && $this->system->dbname() !== HEURIST_BUGREPORT_DATABASE){ //dbnameWithoutHost backup: register as external image
-                    $record['details']['38'][$idx] = $rec_uploads->registerURL($file_url, false, 0);
+                if(!$fileResult){
+                    $fileResult = $rec_uploads->downloadAndRegisterdURL($file_url, ['ulf_NewName' => $file_name], 2);
                 }
 
-                if(!$record['details']['38'][$idx]){
+                if(!$fileResult && $this->system->dbname() !== HEURIST_BUGREPORT_DATABASE){ //dbnameWithoutHost backup: register as external image
+                    $fileResult = $rec_uploads->registerURL($file_url, false, 0);
+                }
+
+                if(!$fileResult){
                     continue;
                 }
 
+                $record['details']['38'][$idx] = $fileResult;
                 $ulf_file_name = mysql__select_value($this->system->getMysqli(), "SELECT ulf_FileName FROM recUploadedFiles WHERE ulf_ID = {$record['details']['38'][$idx]}");
                 $files[] = $this->system->getSysDir(DIR_FILEUPLOADS) . $ulf_file_name;
             }
+
             $record['details']['38'] = array_filter($record['details']['38']); // remove null/false values
         }
 
