@@ -1028,11 +1028,12 @@ function isNotLocalFile($origName){
  *
  * @param hserv\System $system - initialised Heurist system object
  * @param $fileinfo - data obtained by fileGetFullInfo
- * @param bool $return_url - return url to file instead of file path
+ * @param bool $returnURL - return url to file instead of file path
+ * @param bool $forceRefresh - refresh the web cached image, if it exists
  *
  * @return bool | string - false on error, or path or url for cached image
  */
-function getWebImageCache($system, $fileinfo, $return_url=true){
+function getWebImageCache($system, $fileinfo, $returnURL = true, $forceRefresh = false){
 
     $skip_file = isNotLocalFile(@$fileinfo['ulf_OrigFileName']);
 
@@ -1055,8 +1056,6 @@ function getWebImageCache($system, $fileinfo, $return_url=true){
     }
 
     //direct url to filestore folder
-    $file_url = $system->getSysUrl().$fileinfo['fullPath'];
-
     $file_path_info = pathinfo($file_path);
 
     //return basename with extension
@@ -1064,12 +1063,19 @@ function getWebImageCache($system, $fileinfo, $return_url=true){
 
     $file_url_cached = $system->getSysUrl(DIR_WEBIMAGECACHE).$file_name_cached;
     $file_path_cached =  "{$web_cache_dir}/{$file_name_cached}";
+    $fileExists = file_exists($file_path_cached);
 
-    if(!file_exists($file_path_cached)){ // already exists
+    if($fileExists && $forceRefresh){ // force a refresh
+        fileDelete($file_path_cached);
+        $fileExists = false;
+    }
+
+    if(!$fileExists){ // already exists
         $res = UImage::createScaledImageFile($file_path, $file_path_cached, 1000, 1000, false, 'jpg');
     }
+
     if($res===true){
-        return $return_url ? $file_url_cached : $file_path_cached;
+        return $returnURL ? $file_url_cached : $file_path_cached;
     }else{
         return false;
     }

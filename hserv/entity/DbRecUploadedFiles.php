@@ -2635,7 +2635,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 continue;
             }
 
-            $cachedPath = getWebImageCache($this->system, $fileDetails, false);
+            $cachedPath = getWebImageCache($this->system, $fileDetails, false, true);
             if(!$cachedPath){
                 $results['error'][$ulfID] = $this->system->getErrorMsg();
                 continue;

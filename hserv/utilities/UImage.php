@@ -522,41 +522,48 @@ class UImage {
 
         $mimeExt = UImage::getImageType($filename);
 
-        if($mimeExt){
-
-            $errorMsg = UImage::checkMemoryForImage($filename, $mimeExt);
-
-            if(!$errorMsg){
-
-                if (extension_loaded('imagick')) {
-                    $res = UImage::_resizeImageImagic($filename, $scaled_file, $max_width, $max_height, $force_type);
-                    if($res!==true) {$errorMsg = 'Cannot resize image. '.$res;}
-                }else{
-                    $img = UImage::safeLoadImage($filename, $mimeExt);
-                    if($img){
-                        UImage::_resizeImageGD($img, $scaled_file, $max_width, $max_height);
-                        if(!file_exists($scaled_file)){
-                            $errorMsg = 'Cannot resize image';
-                        }
-                    }else{
-                        $errorMsg = 'Cannot load image file';
-                    }
-                }
-
-            }
-            if($errorMsg && $create_error_thumb)
-            {
-                $img = UImage::createFromString($errorMsg);
-                imagepng($img, $scaled_file);
-                imagedestroy($img);
-                return $errorMsg;
-
-            }else{
-                return file_exists($scaled_file)?true:$errorMsg;
-            }
+        if(!$mimeExt){
+            return '';
         }
 
-        return '';
+        $errorMsg = UImage::checkMemoryForImage($filename, $mimeExt);
+
+        if(!$errorMsg){
+
+            if(extension_loaded('imagick')){
+
+                $res = UImage::_resizeImageImagic($filename, $scaled_file, $max_width, $max_height, $force_type);
+
+                if($res!==true || !file_exists($scaled_file)){
+                    $errorMsg = 'Cannot resize image.';
+                }
+            }else{
+
+                $img = UImage::safeLoadImage($filename, $mimeExt);
+                if($img){
+
+                    UImage::_resizeImageGD($img, $scaled_file, $max_width, $max_height);
+
+                    if(!file_exists($scaled_file)){
+                        $errorMsg = 'Cannot resize image';
+                    }
+                }else{
+                    $errorMsg = 'Cannot load image file';
+                }
+            }
+
+        }
+
+        if($errorMsg && $create_error_thumb){
+
+            $img = UImage::createFromString($errorMsg);
+            imagepng($img, $scaled_file);
+            imagedestroy($img);
+            return $errorMsg;
+
+        }
+
+        return file_exists($scaled_file)?true:$errorMsg;
     }
 
 
@@ -1031,7 +1038,7 @@ class UImage {
 
         try{
             $image = new \Imagick($filename);
-            $dims = array('height' => $image->getImageHeight(), 'width' => $image->getImageWidth());
+            $dims = ['height' => $image->getImageHeight(), 'width' => $image->getImageWidth()];
 
             // rescale if either dimension is greater than 1000 pixels
             if($dims['height'] > $max_height || $dims['width'] > $max_width){
@@ -1050,7 +1057,7 @@ class UImage {
             if($force_type=='jpg'){
                 $image->setImageType('jpeg');
 
-                $image->setImageCompression(\imagick::COMPRESSION_JPEG);
+                $image->setImageCompression(\Imagick::COMPRESSION_JPEG);
                 $image->setImageCompressionQuality(75);
             }
 
@@ -1061,7 +1068,7 @@ class UImage {
             return $success;
 
         }catch(\ImagickException $e){
-            return $e->message;
+            return $e->getMessage();
         }
     }
 
