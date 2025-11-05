@@ -91,6 +91,11 @@ class ReportRecord
         $this->recordsCache = array(); // Cache for loaded records
         $this->translations = array('trm' => array());
         $this->rstFields = array(); //Cache for rty structure
+        
+        //for backward capability
+        if(!defined('HEURIST_DBNAME')){
+            define('HEURIST_DBNAME', $this->system->dbname());
+        }
     }
 
     /**
