@@ -265,6 +265,9 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
             //update
             this.recordList.resultList('updateResultSet', subset, request);   
         }else{
+
+            delete request.ugr_eMail;
+
             this._super(event, request); 
         }
     },
