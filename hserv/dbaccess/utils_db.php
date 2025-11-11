@@ -116,6 +116,9 @@ use hserv\structure\ConceptCode;
         if(null==$dbHost || $dbHost==""){
             return array(HEURIST_SYSTEM_FATAL, "Database server is not defined. Check your configuration file");
         }
+        if (!function_exists('mysqli_init')) {
+          return array(HEURIST_SYSTEM_FATAL, "PHP extension 'mysqli' is not loaded. Install/enable it (php-mysql / php-mysqlnd) and restart your web server.");
+        }
         
         $res = true;
 
