@@ -368,6 +368,14 @@ if ($mode > 1) {
                 document.forms[0].submit(); // This will reload the page with mode=1
             }
         </script>
+
+        <style>
+            .errorMsg{
+                color: red;
+                font-size: larger;
+                font-weight: bold;
+            }
+        </style>
     </head>
     <body class="popup ui-heurist-admin">
 
@@ -620,43 +628,54 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 folderRecurseCopy(HEURIST_DIR.'documentation/context_help/', FOLDER_BACKUP.'/documentation/context_help/');
             }
 
-           // Remove database definition cache files from backup
-           fileDelete(FOLDER_BACKUP.'/entity/db.json'); // Old name
-           fileDelete(FOLDER_BACKUP.'/entity/dbdef_cache.json');
+            // Remove database definition cache files from backup
+            fileDelete(FOLDER_BACKUP.'/entity/db.json'); // Old name
+            fileDelete(FOLDER_BACKUP.'/entity/dbdef_cache.json');
 
-           // --- HML Export ---
-           if (@$_REQUEST['include_hml'] == '1') {
-               echo_flush2("Exporting database as HML (Heurist Markup Language = XML)<br>(may take several minutes for large databases)<br>");
+            // --- HML Export ---
+            if (@$_REQUEST['include_hml'] == '1') {
+                echo_flush2("Exporting database as HML (Heurist Markup Language = XML)<br>(may take several minutes for large databases)<br>");
 
-               // Set parameters for flathml.php script
-               if (@$_REQUEST['allrecs'] != "1") { // Export records owned by current user
-                   $userid = $system->getUserId();
-                   $q_param = "owner:$userid";
-                   $_REQUEST['depth'] = '5';
-               } else { // Export all records
-                   $q_param = "sortby:-m"; // Sort by modification date descending
-                   $_REQUEST['depth'] = '0'; // Full depth
-                   $_REQUEST['linkmode'] = 'none';
-               }
-               $_REQUEST['w'] = 'all';    // All record types
-               $_REQUEST['a'] = '1';      // Include annotations
-               $_REQUEST['q'] = $q_param; // Query
-               $_REQUEST['rev'] = 'no';   // Do not include reverse pointers
-               $_REQUEST['filename'] = '1'; // Save to file (flathml.php handles actual saving to FOLDER_BACKUP)
+                // Set parameters for flathml.php script
+                if (@$_REQUEST['allrecs'] != "1") { // Export records owned by current user
+                    $userid = $system->getUserId();
+                    $q_param = "owner:$userid";
+                    $_REQUEST['depth'] = '5';
+                } else { // Export all records
+                    $q_param = "sortby:-m"; // Sort by modification date descending
+                    $_REQUEST['depth'] = '0'; // Full depth
+                    $_REQUEST['linkmode'] = 'none';
+                }
+                $_REQUEST['w'] = 'all';    // All record types
+                $_REQUEST['a'] = '1';      // Include annotations
+                $_REQUEST['q'] = $q_param; // Query
+                $_REQUEST['rev'] = 'no';   // Do not include reverse pointers
+                $_REQUEST['filename'] = '1'; // Save to file (flathml.php handles actual saving to FOLDER_BACKUP)
 
-               $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
-               if (is_file($to_include)) {
-                   include_once $to_include; // Execute HML export script
-               }
+                $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
+                if (is_file($to_include)) {
+                    include_once $to_include; // Execute HML export script
+                }
 
-               // If separate HML zip is requested, copy the generated XML file
-               if (file_exists(FOLDER_BACKUP.'/'.$system->dbname().'.xml') && $separate_hml_zip) {
-                   $separate_hml_zip = fileCopy(FOLDER_BACKUP.'/'.$system->dbname().'.xml', FOLDER_HML_BACKUP."/".$system->dbname().".xml");
-               }
-           }
+                // If separate HML zip is requested, copy the generated XML file
+                $hmlFile = FOLDER_BACKUP.'/'.HEURIST_DBNAME.'.xml';
+                $hmlFileBackup = HEURIST_FILESTORE_DIR.DIR_BACKUP.'/'.HEURIST_DBNAME.'.xml';
+                $zipHMLFile = FOLDER_HML_BACKUP.'/'.HEURIST_DBNAME.'.xml';
+                if(!$separate_hml_zip){
+                    file_exists($hmlFile) || fileCopy($hmlFileBackup, $hmlFile);
+                }elseif(file_exists($hmlFile)){
+                    $separate_hml_zip = fileCopy($hmlFile, $zipHMLFile);
+                }elseif(file_exists($hmlFileBackup)){
+                    fileCopy($hmlFileBackup, $hmlFile);
+                    $separate_hml_zip = fileCopy($hmlFileBackup, $zipHMLFile);
+                }
+                if(file_exists($hmlFileBackup)){
+                    unlink($hmlFileBackup);
+                }
+            }
 
-           // --- TSV Export ---
-           if (@$_REQUEST['include_tsv'] == '1') {
+            // --- TSV Export ---
+            if (@$_REQUEST['include_tsv'] == '1') {
                 echo_flush2("Exporting database records as TSV<br>(may take several minutes for large databases)<br>");
                 $dbExportTSV = new DbExportTSV($system);
                 // This should generate files in FOLDER_BACKUP . '/tsv-output/'
@@ -672,17 +691,17 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 }
             }
 
-           // --- Export Database Structure Definitions ---
-           echo_flush2("Exporting database definitions as readable text<br>");
-           $url_txt = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsSQL.php?db=".$system->dbname()."&pretty=1";
-           saveURLasFile($url_txt, FOLDER_BACKUP."/Database_Structure.txt");
+            // --- Export Database Structure Definitions ---
+            echo_flush2("Exporting database definitions as readable text<br>");
+            $url_txt = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsSQL.php?db=".$system->dbname()."&pretty=1";
+            saveURLasFile($url_txt, FOLDER_BACKUP."/Database_Structure.txt");
 
-           echo_flush2("Exporting database definitions as XML<br>");
-           $url_xml = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsXML.php?db=".$system->dbname();
+            echo_flush2("Exporting database definitions as XML<br>");
+            $url_xml = HEURIST_BASE_URL . "hserv/structure/export/getDBStructureAsXML.php?db=".$system->dbname();
            saveURLasFile($url_xml, FOLDER_BACKUP."/Database_Structure.xml");
 
-           // --- SQL Dump ---
-           if ($system->isAdmin()) { // Only admins can perform full SQL dump
+            // --- SQL Dump ---
+            if ($system->isAdmin()) { // Only admins can perform full SQL dump
                 echo_flush2("Exporting SQL dump of the whole database (several minutes for large databases)<br>");
                 $database_dumpfile = FOLDER_BACKUP."/".$system->dbname()."_MySQL_Database_Dump.sql";
                 $dump_options = array('skip-triggers' => true,
@@ -701,29 +720,29 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 if ($separate_sql_zip) { // Copy SQL dump for separate archive
                     $separate_sql_zip = fileCopy($database_dumpfile, FOLDER_SQL_BACKUP."/".$system->dbname()."_MySQL_Database_Dump.sql");
                 }
-           }
+            }
 
            // Remove old style SQL dump file if it exists
-           if (file_exists(FOLDER_BACKUP.'/'.$system->dbnameFull().'.sql')) {
-               unlink(FOLDER_BACKUP.'/'.$system->dbnameFull().'.sql');
-           }
+            if (file_exists(FOLDER_BACKUP.'/'.$system->dbnameFull().'.sql')) {
+                unlink(FOLDER_BACKUP.'/'.$system->dbnameFull().'.sql');
+            }
 
-           // --- Create Archives (ZIP/TAR.BZ2) ---
-           echo_flush2('<br>Zipping files<br>');
-           $destination = FOLDER_BACKUP.'.'.$format; // Path for the main archive
-           if (file_exists($destination)) unlink($destination);
-           // Ensure old tar.bz2 is removed if format changed to zip for the same base name
-           if ($format == 'zip' && file_exists(FOLDER_BACKUP.'.tar.bz2')) unlink(FOLDER_BACKUP.'.tar.bz2');
-           if ($format == 'tar' && file_exists(FOLDER_BACKUP.'.zip')) unlink(FOLDER_BACKUP.'.zip');
+            // --- Create Archives (ZIP/TAR.BZ2) ---
+            echo_flush2('<br>Zipping files<br>');
+            $destination = FOLDER_BACKUP.'.'.$format; // Path for the main archive
+            if (file_exists($destination)) unlink($destination);
+            // Ensure old tar.bz2 is removed if format changed to zip for the same base name
+            if ($format == 'zip' && file_exists(FOLDER_BACKUP.'.tar.bz2')) unlink(FOLDER_BACKUP.'.tar.bz2');
+            if ($format == 'tar' && file_exists(FOLDER_BACKUP.'.zip')) unlink(FOLDER_BACKUP.'.zip');
 
 
-           if ($format == 'zip') {
-               $res_archive = UArchive::zip(FOLDER_BACKUP, null, $destination, true); // true = delete original folder after zipping
-           } else { // tar.bz2
-               $res_archive = UArchive::createBz2(FOLDER_BACKUP, null, $destination, true);
-           }
+            if ($format == 'zip') {
+                $res_archive = UArchive::zip(FOLDER_BACKUP, null, $destination, true); // true = delete original folder after zipping
+            } else { // tar.bz2
+                $res_archive = UArchive::createBz2(FOLDER_BACKUP, null, $destination, true);
+            }
 
-           if ($res_archive === true) { // Main archive creation successful
+            if ($res_archive === true) { // Main archive creation successful
                 $res_sql_archive = false;
                 if ($separate_sql_zip) { // Create separate SQL archive
                     $destination_sql = FOLDER_SQL_BACKUP.'.'.$format;
@@ -777,7 +796,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
         <span class="heurist-helper1">(for db transfer on tiered servers)</span>
     <?php } else { ?>
         <br><br>
-        <div>Failed to create standalone SQL dump. <?php echo htmlspecialchars(is_string($res_sql_archive) ? $res_sql_archive : '');?></div>
+        <div class="errorMsg">Failed to create standalone SQL dump. <?php echo htmlspecialchars(is_string($res_sql_archive) ? $res_sql_archive : '');?></div>
     <?php
         }
     }
@@ -788,7 +807,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download the HML <?php echo $display_format;?> file only</a>
     <?php } else { ?>
         <br><br>
-        <div>Failed to create / set up a standalone HML file. <?php echo htmlspecialchars(is_string($res_hml_archive) ? $res_hml_archive : '');?></div>
+        <div class="errorMsg">Failed to create / set up a standalone HML file. <?php echo htmlspecialchars(is_string($res_hml_archive) ? $res_hml_archive : '');?></div>
     <?php
         }
     }
@@ -799,7 +818,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
             target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download the TSV <?php echo $display_format;?> folder only</a>
     <?php } else { ?>
         <br><br>
-        <div>Failed to create / set up a standalone TSV folder. <?php echo htmlspecialchars(is_string($res_tsv_archive) ? $res_tsv_archive : '');?></div>
+        <div class="errorMsg">Failed to create / set up a standalone TSV folder. <?php echo htmlspecialchars(is_string($res_tsv_archive) ? $res_tsv_archive : '');?></div>
     <?php
         }
     }
