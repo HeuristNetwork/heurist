@@ -2632,12 +2632,14 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             $fileDetails = fileGetFullInfo($this->system, $ulfObfuscatedID);
             if(!$fileDetails){
                 $results['error'][$ulfID] = $this->system->getErrorMsg();
+                $results['error'][$ulfID] = empty($results['error'][$ulfID]) ? 'An unknown issue occurred with retrieving file details' : $results['error'][$ulfID];
                 continue;
             }
 
-            $cachedPath = getWebImageCache($this->system, $fileDetails, false, true);
+            $cachedPath = getWebImageCache($this->system, $fileDetails[0], false, true);
             if(!$cachedPath){
                 $results['error'][$ulfID] = $this->system->getErrorMsg();
+                $results['error'][$ulfID] = empty($results['error'][$ulfID]) ? 'An unknown issue occurred with creating the scaled down image' : $results['error'][$ulfID];
                 continue;
             }
 

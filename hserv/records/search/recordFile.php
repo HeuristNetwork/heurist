@@ -1038,11 +1038,13 @@ function getWebImageCache($system, $fileinfo, $returnURL = true, $forceRefresh =
     $skip_file = isNotLocalFile(@$fileinfo['ulf_OrigFileName']);
 
     if($skip_file || @$fileinfo['ulf_FileSizeKB'] < 500){ // skip
-       return false;
+        $system->addError(HEURIST_ACTION_BLOCKED, 'File skipped');
+        return false;
     }
 
     $file_path = resolveFilePath( @$fileinfo['fullPath'] );
     if(!file_exists($file_path)){
+        $system->addError(HEURIST_ACTION_BLOCKED, 'Unable to locate file within filestore');
         return false;
     }
 
