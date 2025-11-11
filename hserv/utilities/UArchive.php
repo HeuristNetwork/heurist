@@ -237,30 +237,69 @@ class UArchive {
 
                     $destination_file = $destination_dir.$filename;
 
-                    $fp = $zip->getStream($filename);// Compliant
+                    $fp = $zip->getStream($filename); // Compliant
+                    if (!$fp) {
+                        throw new \Exception('Unable to open stream for '.$filename);
+                    }
+
+                    // make sure the destination subdirectory exists
+                    $destination_file = $destination_dir . $filename;
+                    $parentDir = dirname($destination_file);
+                    if (!is_dir($parentDir) && !mkdir($parentDir, 0777, true)) {
+                        throw new \Exception('Cannot create subfolder on unzip: '.$parentDir);
+                    }
+
+                    // open output in truncate mode so we never append to leftovers
+                    $ofp = fopen($destination_file, 'wb');
+                    if (!$ofp) {
+                        fclose($fp);
+                        throw new \Exception('Cannot open destination file for write: '.$destination_file);
+                    }
+
                     $currentSize = 0;
                     while (!feof($fp)) {
-                        $currentSize += READ_LENGTH;
-                        $totalSize += READ_LENGTH;
+                        $chunk = fread($fp, READ_LENGTH);        // READ_LENGTH is 1024 in your file
+                        if ($chunk === false) {                  // read error
+                            fclose($fp);
+                            fclose($ofp);
+                            @unlink($destination_file);
+                            throw new \Exception('Read error while extracting '.$filename);
+                        }
+                        if ($chunk === '') {                     // nothing more to read
+                            break;
+                        }
+
+                        $readLen = strlen($chunk);
+                        $currentSize += $readLen;
+                        $totalSize   += $readLen;
 
                         if ($totalSize > MAX_SIZE) {
-                            // Reached max. size
+                            fclose($fp);
+                            fclose($ofp);
+                            @unlink($destination_file);
                             throw new \Exception('Maximum allowed extraction size achieved ('.MAX_SIZE.')');
                         }
 
-                        // Additional protection: check compression ratio
-                        if ($stats['comp_size'] > 0  && $stats['comp_size']>READ_LENGTH) {
+                        if ($stats['comp_size'] > 0 && $stats['comp_size'] > READ_LENGTH) {
                             $ratio = floor($currentSize / $stats['comp_size']);
                             if ($ratio > MAX_RATIO) {
-                                // Reached max. compression ratio
-                                throw new \Exception('Maximum allowed compression ration detected ('.$ratio.' > '.MAX_RATIO.')');
+                                fclose($fp);
+                                fclose($ofp);
+                                @unlink($destination_file);
+                                throw new \Exception('Maximum allowed compression ratio detected ('.$ratio.' > '.MAX_RATIO.')');
                             }
                         }
 
-                        file_put_contents($destination_file, fread($fp, READ_LENGTH), FILE_APPEND);
+                        if (fwrite($ofp, $chunk) === false) {
+                            fclose($fp);
+                            fclose($ofp);
+                            @unlink($destination_file);
+                            throw new \Exception('Write error while extracting '.$destination_file);
+                        }
                     }
-
                     fclose($fp);
+                    fclose($ofp);
+
                 } else {
                     if (!file_exists($destination_dir.$filename) && !mkdir($destination_dir.$filename, 0777, true)) {
                         throw new \Exception('Cannot create subfolder on unzip');

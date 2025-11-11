@@ -1108,6 +1108,9 @@ $mysqli->kill($thread_id);
                 $cmd = $cmd         //." --login-path=local "
                 ." -h ".HEURIST_DBSERVER_NAME." ".$port
                 ." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD
+                ." --default-character-set=utf8mb4 "
+                ." --max-allowed-packet=1024M "
+                .' --init-command="SET SESSION FOREIGN_KEY_CHECKS=0; SET SESSION UNIQUE_CHECKS=0; SET SESSION SQL_LOG_BIN=0;" '
                 ." -D ".escapeshellarg($database_name_full)." < ".escapeshellarg($script_file). ' 2>&1';
 
                 $shell_res = exec($cmd, $arr_out, $res2);

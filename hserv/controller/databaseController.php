@@ -11,7 +11,8 @@
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @since       4.0
 */
-set_time_limit(0);
+@ini_set('max_execution_time', '0');
+@set_time_limit(0);
 
 use hserv\utilities\DbUtils;
 use hserv\utilities\DbVerify;

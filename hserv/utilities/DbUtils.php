@@ -970,9 +970,6 @@ class DbUtils {
 
         }else{
 
-            $dumpfile_from_archive = $database_folder.basename($dumpfile);
-            $filecontent = file_get_contents($dumpfile_from_archive);
-
             //$subs = folderGetSubFolders($database_folder);
             if($needCopyCurrentDbFolder){
                 //archive does not contain any file but database dump
@@ -991,21 +988,41 @@ class DbUtils {
                     return false;
                 }
             }
+/* OLD
+            $dumpfile_from_archive = $database_folder.basename($dumpfile);
+            $filecontent = file_get_contents($dumpfile_from_archive);
 
             fileDelete($dumpfile_from_archive);//remove temp dump file
             $dumpfile = $database_folder.'_temp_dump.sql';
             file_put_contents($dumpfile, preg_replace('/DEFINER=`\w+`@`[\w.]+`/m', 'DEFINER=CURRENT_USER', $filecontent));
 
             $script_file = basename($dumpfile);
-            //$script_file = HEURIST_DIR.'admin/setup/dbcreate/'.$script_file;
-            //fileCopy($dumpfile, $script_file);
+            fileDelete($dumpfile);//remove temp dump file
+*/
+            $dumpfile_from_archive = $database_folder.basename($dumpfile);
+            $in  = fopen($dumpfile_from_archive, 'rb');
+            $out = fopen($dumpfile_tmp = $database_folder . '_temp_dump.sql', 'wb');
+            $pattern = '/DEFINER=`[^`]+`@`[^`]+`/m';
 
-            $res = self::databaseCreate($database_name, 1, $script_file);//from archive
+            while (!feof($in)) {
+                $line = fgets($in);
+                if ($line === false) break;
+                $line = preg_replace($pattern, 'DEFINER=CURRENT_USER', $line);
+                fwrite($out, $line);
+            }
+            fclose($in);
+            fclose($out);
+
+            // swap in the transformed file
+            @unlink($dumpfile_from_archive);
+            rename($dumpfile_tmp, $dumpfile_from_archive);            
+            
+            $res = self::databaseCreate($database_name, 1, $dumpfile_from_archive);//from archive
 
             self::setSessionVal(4);//database restored from dump
 
-            fileDelete($dumpfile);//remove temp dump file
-
+            fileDelete($dumpfile_from_archive);
+            
             if(!$res){
                 folderDelete($database_folder);
             }else{
