@@ -521,8 +521,8 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
                     window.hWin.HEURIST4.msg.showMsgDlgUrl(
                               `${window.hWin.HAPI4.baseURL}?disclaimer=association_membership.html #content`,
                                null, 'Heurist Network Association', 
-                               {enable_buttons_after:5000, closeOnEscape:false, noClose:true,
-                               container: 'dlg-association-teaser'});
+                               {enable_buttons_after:2000, closeOnEscape:false, noClose:true,
+                               container: 'dlg-association-teaser', open: (event, ui) => { $(event.target).css('height', '42em'); }});
                 }
             }
                 
