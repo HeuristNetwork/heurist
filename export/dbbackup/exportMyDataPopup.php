@@ -658,9 +658,9 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 }
 
                 // If separate HML zip is requested, copy the generated XML file
-                $hmlFile = FOLDER_BACKUP.'/'.HEURIST_DBNAME.'.xml';
-                $hmlFileBackup = HEURIST_FILESTORE_DIR.DIR_BACKUP.'/'.HEURIST_DBNAME.'.xml';
-                $zipHMLFile = FOLDER_HML_BACKUP.'/'.HEURIST_DBNAME.'.xml';
+                $hmlFile = FOLDER_BACKUP."/{$system->dbname()}.xml";
+                $hmlFileBackup = HEURIST_FILESTORE_DIR.DIR_BACKUP."/{$system->dbname()}.xml";
+                $zipHMLFile = FOLDER_HML_BACKUP."/{$system->dbname()}.xml";
                 if(!$separate_hml_zip){
                     file_exists($hmlFile) || fileCopy($hmlFileBackup, $hmlFile);
                 }elseif(file_exists($hmlFile)){
