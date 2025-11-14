@@ -634,18 +634,20 @@ if (!defined('PDIR')){
         _showStep(8);
         _getDatabases( <?php echo (@$_REQUEST['list']==1)?'true':'false';?> );
 
+        // Show message about potential missing databases, for main servers only
         const dbParam = window.hWin.HEURIST4.util.getUrlParameter('db', location.search);
         const mainServers = ['heuristref.net', 'intersect.org.au', 'heuristau.net', 'heurist.huma-num.fr', 'heurist.eu'];
         const curURL = location.href.toLowerCase();
         if(!window.hWin.HEURIST4.util.isempty(dbParam) && mainServers.find((server) => curURL.indexOf(server) >= 0)){
 
             let anchorAttr = 'target="_blank" style="color: blue;" rel="noopener"';
+            let toSwitchboard = '/heurist/startup/?list=1';
             let msg = `<div>
                 <h2 style="color: green; font-style: italic;">Don't Panic !</h2>
-                If your database was/is on the Australian Heurist server (<a href="HeuristRef.net" ${anchorAttr}>HeuristRef.net</a> or intersect.org.au) up to mid Nov 2025,<br>
-                you will now find it at <a href="HeuristAU.net" ${anchorAttr}>HeuristAU.net</a> (this simply points to the same server, nothing else has changed).<br>
+                If your database was/is on the Australian Heurist server (<a href="https://HeuristRef.net${toSwitchboard}" ${anchorAttr}>HeuristRef.net</a> or intersect.org.au) up to mid Nov 2025,<br>
+                you will now find it at <a href="https://HeuristAU.net${toSwitchboard}" ${anchorAttr}>HeuristAU.net</a> (this simply points to the same server, nothing else has changed).<br>
                 <br>
-                If you do not find it there, please try <a href="Heurist.Huma-Num.fr" ${anchorAttr}>Heurist.Huma-Num.fr</a> and <a href="Heurist.eu" ${anchorAttr}>Heurist.eu</a>.<br>
+                If you do not find it there, please try <a href="https://Heurist.Huma-Num.fr${toSwitchboard}" ${anchorAttr}>Heurist.Huma-Num.fr</a> and <a href="https://Heurist.eu${toSwitchboard}" ${anchorAttr}>Heurist.eu</a>.<br>
                 If you are unable to find it, contact us at <a href="mailto:support@heuristnetwork.org" ${anchorAttr}>support@heuristnetwork.org</a> (we have multiple backups of all databases and can restore them rapidly to any of these servers).
             </div>`;
 
