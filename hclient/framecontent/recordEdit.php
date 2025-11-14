@@ -197,6 +197,7 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecords.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecUploadedFiles.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecUploadedFiles.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysBugreport.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageUsrTags.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchUsrTags.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/mediaViewer.js"></script>
@@ -228,13 +229,19 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
             function onPageInit(success){
                 if(success){
 
+                    $container = $('<div>').appendTo($("body"));
+
+                    if(window.hWin.HEURIST4.util.getUrlParameter('bugreport')==1){
+                        // https://heuristref.net/h7-alpha/hclient/framecontent/recordEdit.php?db=Heurist_Job_Tracker&bugreport=1
+                        window.hWin.HEURIST4.ui.showWidgetDialog('manageSysBugreport', {isdialog:false, container:$container});
+                        return;
+                    }
+                    
                     //FORCE LOGIN
                     if(!window.hWin.HEURIST4.ui.checkAndLogin(true, function(){ onPageInit(true);}))
                     {
                         return;
                     }
-
-                    $container = $('<div>').appendTo($("body"));
 
                     var isPopup = (window.hWin.HEURIST4.util.getUrlParameter('popup', window.location.search)==1);
 

@@ -191,7 +191,8 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
         this._super();
 
         //find file uploader and make entire dialogue as a paste zone - to catch Ctrl+V globally
-        let ele = this._as_dialog.find('input[type=file]');
+        let ele = this.element.find('input[type=file]'); //this._as_dialog
+console.log('IMAG ', ele.length);        
         if(ele.length>0){
             ele.fileupload('option', 'pasteZone', this._as_dialog);
         }
@@ -420,8 +421,8 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
         // Hide field name
         ele.find('.header').hide();
 
-        // Add help text about pasting images, before bug type field
-        if(this._as_dialog.find('.image-help').length === 0){
+        // Add help text about pasting images, before bug type field this._as_dialog.
+        if(this.element.find('.image-help').length === 0){
             $('<div>', {
                 text: 'You can also paste an image which will be added to the screenshots',
                 style: 'padding: 1em 2em 5px; display: block;',
