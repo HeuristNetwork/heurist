@@ -911,6 +911,18 @@ function doAuthentication(login_data, login_dialog)
                     updateStatus(login_dialog, false, response.message);
                     setTimeout(function(){ updateStatus(login_dialog); }, 2000);
                 }
+            }else if(response.status == window.hWin.ResponseStatus.ACTION_BLOCKED && response.message.indexOf('Heurist.eu') >= 0){
+
+                window.hWin.HEURIST4.msg.showMsgDlgUrl(
+                    `${window.hWin.HAPI4.baseURL}?disclaimer=association_membership.html #content`,
+                    null, 'Heurist Network Association', {
+                        enable_buttons_after:2000, closeOnEscape:false, noClose:true, container: 'dlg-association-required',
+                        open: (event, ui) => {
+                            $(event.target).find('#membership-required').show();
+                            $(event.target).css({height: '46em', padding: '0em 2em'});
+                        }
+                    }
+                );
             }else {
                 window.hWin.HEURIST4.msg.showMsgErr(response);
             }
@@ -952,7 +964,7 @@ function onAuthentication(response){
                           `${window.hWin.HAPI4.baseURL}?disclaimer=association_membership.html #content`,
                            null, 'Heurist Network Association', 
                            {enable_buttons_after:2000, closeOnEscape:false, noClose:true, 
-                           container: 'dlg-association-teaser', open: (event, ui) => { $(event.target).css('height', '42em'); }});
+                           container: 'dlg-association-teaser', open: (event, ui) => { $(event.target).css({height: '41em', padding: '2em 2em 0em'}); }});
             }
         }        
     }

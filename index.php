@@ -522,7 +522,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
                               `${window.hWin.HAPI4.baseURL}?disclaimer=association_membership.html #content`,
                                null, 'Heurist Network Association', 
                                {enable_buttons_after:2000, closeOnEscape:false, noClose:true,
-                               container: 'dlg-association-teaser', open: (event, ui) => { $(event.target).css('height', '42em'); }});
+                               container: 'dlg-association-teaser', open: (event, ui) => { $(event.target).css({height: '41em', padding: '2em 2em 0em'}); }});
                 }
             }
                 
