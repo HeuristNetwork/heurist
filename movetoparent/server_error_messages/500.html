@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>HEURIST — 500 Internal Server Error</title>
+  <base href="/server_error_messages/">
+  <link rel="stylesheet" href="heurist.css">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+  
+    <script>
+        (function () {
+            const h = location.hostname.toLowerCase();
+            if (/(^|\.)heurist\.huma-num\.fr$/.test(h)){
+            //if (/(^|\.)heuristref\.net$/.test(h)){
+                document.getElementsByClassName('show-on-huma')[0].style.display = 'block';
+            }
+        })();
+    </script>
+    <style>
+        body{
+            font-size: 1.1em;
+        }
+    </style>  
+</head>
+<body>
+    <div class="header"><div class="header-inner" style="max-width:800px">
+            <div class="left">
+                <img class="logo" src="h6logo_inv.png" alt="HEURIST">
+                <a class="title" href="/"></a>
+            </div>
+            <div class="right"></div>
+        </div>
+    </div>
+    <div class="container-full" style="max-width:800px">
+        <div class="main" style="margin:12px 0">
+            <div class="section-title"><div>Server error <span class="badge fail">500</span></div></div>
+            <div class="section-sub">
+                <p>Something went wrong on our side.</p>
+
+                <div class="show-on-huma" style="display:none">
+                <hr>
+
+                <p>From Dec 2025 this server is managed by the volunteer Committée Technique (CoTech) established by Huma-Num. The CoTech aims to keep the service running but does not have the resources to fix non-essential bugs.</p>
+
+
+                <p>Newer versions of Heurist (version 10 and above) are available through Heurist.eu. These can edit and analyse databases hosted on Heurist.Huma-Num.fr in order to maintain continuity of hosting, particularly for website publishing.</p>
+
+
+                <p>Version 10 and above are maintained by Heurist Network, a non-profit association dedicated to developing and maintaining Heurist, and by the designer and principal developers of Heurist: Dr Ian Johnson ; Artem Osmakov & Brandon McKay.</p>
+                
+                </div>
+                <hr>
+
+                <p>If you believe this is an error in the Heurist software, please <a href="https://heuristref.net/heurist/hclient/framecontent/recordEdit.php?db=Heurist_Job_Tracker&bugreport=1">submit a bug report</a></p>
+
+                <p>We recommended that you clear your browser cache and reload the page before reporting a bug, as an outdated cache is a common source of errors</p>
+
+                <p>
+                <!--<a href="">Go back</a>&nbsp;&nbsp;&nbsp;-->
+                <a href="/">Go to startup page</a> Or try refreshing the page or checking the URL.</p>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
