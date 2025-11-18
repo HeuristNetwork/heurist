@@ -251,12 +251,12 @@ console.log('IMAG ', ele.length);
         let membershipHTML = `
         <span><input class="ui-state-disabled" type="radio" name="membership" value="1" ${isNotMember ? '' :'checked'}> member</span>
         <span style="padding-left: 1em;"><input class="ui-state-disabled" type="radio" name="membership" value="0" ${isNotMember ? 'checked' : ''}> non-member</span>
-        <a href="https://heuristref.net/h7-alpha/admin/utilities/checkMembershipForm.php" target="_blank" style="padding-left: 2.5em; color: blue; cursor: pointer;">check status</a>
+        <a href="https://heuristref.net/heurist/admin/utilities/checkMembershipForm.php" target="_blank" style="padding-left: 2.5em; color: blue; cursor: pointer;">check status</a>
         <a href="mailto:support@heuristnetwork.org" target="#" style="padding-left: 2.5em; color: blue; cursor: pointer;">email us</a>
         <span style="padding-left: 2.5em;">
             Please <a href="https://forms.gle/xdAhjcZaSxpzkAsh9" target="_blank" style="color: blue; cursor: pointer;">join the association</a> to support Heurist
         </span>
-        `; // @todo: replace '/h7-alpha' with '/heurist', once /heurist has been updated
+        `;
 
         $('<div>', {
             html: `<span style="display: block; padding-bottom: 5px;">

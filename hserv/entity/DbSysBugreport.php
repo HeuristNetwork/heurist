@@ -50,7 +50,7 @@ class DbSysBugreport extends DbEntityBase
 
     If the bug is marked as DONE, please see the explanation below (generally at the top of the bug description).<br>
     You can test in the h6-alpha or h7-alpha version (it takes time for fixes to migrate to the stndard version).<br>
-    If you are not running one of these, replace /heurist/ in the URL with /h6-alpha/ or /h7-alpha/<br><br>
+    If you are not running one of these, replace /heurist/ in the URL with /h7-alpha/<br><br>
     
     You can view your report at: <a href="__LINK__">__LINK__</a><br><br>
 

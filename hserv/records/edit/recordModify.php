@@ -4580,7 +4580,7 @@ function bugreportUpdate($system, $recID){
     Ticket: <a href="$url">$url</a><br> <br>
     <hr>
     When an issue is fixed and marked as DONE, the change will typically appear in the alpha version <br>
-    (/h6-alpha/, /h7-alpha/, ...) within a couple of days on HeuristRef.net and any server which has <br>
+    (/h7-alpha/, ...) within a couple of days on HeuristRef.net and any server which has <br>
     automated daily update of the alpha version, and a week or more on the Huma-Num server <br>
     (due to new approval protocols from September 2025).
     EMAIL;

@@ -135,7 +135,7 @@ function sendStatsToMain(){
 
     global $system, $is_main_server;
 
-    $script = HEURIST_MAIN_SERVER . '/h7-alpha/admin/describe/allServerStats.php'; // @todo: replace '/h7-alpha' with '/heurist', once /heurist has been updated
+    $script = HEURIST_MAIN_SERVER . '/heurist/admin/describe/allServerStats.php';
 
     if(!file_exists(DB_STATS_FILE) && !createStats()){
         exitScript(null, null, true);
