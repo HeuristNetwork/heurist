@@ -304,7 +304,10 @@
                          'PL', 'PT', 'RO', 'RU', 'SK', 'SL', 'SV', 'TR', 'UK', 'ZH'];
 
         // Retrieve from file, created by daily script
-        $languagesFile = HEURIST_FILESTORE_ROOT . 'DEEPL_languages.json';
+        $languagesFile = HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA/DEEPL_languages.json';
+        if(!file_exists($languagesFile)){
+            $languagesFile = HEURIST_FILESTORE_ROOT . 'DEEPL_languages.json';
+        }
         $deeplLanguages = [];
 
         if(file_exists($languagesFile)){

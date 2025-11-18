@@ -172,12 +172,37 @@ class LookupController{
         if($this->system->getUserId() < 1){
             $this->system->addError(HEURIST_REQUEST_DENIED, 'You must be logged in to use the external lookup services');
             return false;
+        }elseif(!defined('HEURIST_FILESTORE_ROOT')){
+            define('HEURIST_FILESTORE_ROOT', $this->system->getFileStoreRootFolder());
         }
 
-        $this->nakalaFile = HEURIST_FILESTORE_ROOT . 'NAKALA_metadata_values.json';
-        $this->openthesoFile = HEURIST_FILESTORE_ROOT . 'OPENTHESO_thesauruses.json';
+        $this->nakalaFile = HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA/NAKALA_metadata_values.json';
+        $this->openthesoFile = HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA/OPENTHESO_thesauruses.json';
+
+        $this->metadataCleanup();
 
         return true;
+    }
+
+    private function metadataCleanup(){
+
+        $oldNakalaFile = HEURIST_FILESTORE_ROOT . 'NAKALA_metadata_values.json';
+        $oldOpenthesoFile = HEURIST_FILESTORE_ROOT . 'OPENTHESO_thesauruses.json';
+
+        if(folderExists(HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA', true) !== true){
+            folderCreate2(HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA', '');
+        }
+
+        if(file_exists($oldNakalaFile) && !file_exists($this->nakalaFile)){
+            rename($oldNakalaFile, $this->nakalaFile);
+        }elseif(file_exists($oldNakalaFile)){
+            fileDelete($oldNakalaFile);
+        }
+        if(file_exists($oldOpenthesoFile) && !file_exists($this->openthesoFile)){
+            rename($oldOpenthesoFile, $this->openthesoFile);
+        }elseif(file_exists($oldOpenthesoFile)){
+            fileDelete($oldOpenthesoFile);
+        }
     }
 
     private function setupRequest(){

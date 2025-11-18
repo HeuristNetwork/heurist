@@ -751,13 +751,18 @@ class USystem {
     private static function updateDeeplLanguages(){
 
         global $accessToken_DeepLAPI;
+
         if(empty($accessToken_DeepLAPI)){
             return;
         }
 
         $target_url = 'https://api-free.deepl.com/v2/languages?type=target';
 
-        $language_file = HEURIST_FILESTORE_ROOT . 'DEEPL_languages.json';
+        $language_file = HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA/DEEPL_languages.json';
+        if(folderExists(HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA', true) !== true){
+            folderCreate2(HEURIST_FILESTORE_ROOT . '_EXTERNAL_LOOKUP_DATA', '');
+            fileDelete(HEURIST_FILESTORE_ROOT . 'DEEPL_languages.json');
+        }
 
         $target_res = loadRemoteURLContentWithRange($target_url, false, true, 60, array('Authorization: DeepL-Auth-Key ' . $accessToken_DeepLAPI));
 
