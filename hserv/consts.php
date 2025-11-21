@@ -100,7 +100,7 @@ if(!defined('HEURIST_DIR'))  {
     define('HEURIST_DIR', $host_params['heurist_dir']);
 }
 
-/** @const string Base URL for general Heurist application access (e.g., "https://myheurist.net/h7-alpha/"). */
+/** @const string Base URL for general Heurist application access (e.g., "https://myheurist.net/heurist/"). */
 define('HEURIST_BASE_URL', $host_params['baseURL'] );
 /** @const string Base URL for production Heurist access, often shorter (e.g., "https://myheurist.net/heurist/"). */
 define('HEURIST_BASE_URL_PRO', $host_params['baseURL_pro'] );

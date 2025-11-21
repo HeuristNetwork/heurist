@@ -7,8 +7,6 @@ set -euo pipefail
 # The memsec users password is set in the following file:  MEMSEC_PASS_FILE=/srv/scripts/.secrets/heuristnetwork_memsec.pass
 # CHANGE THE URLS if the Heurist_Contacts database is moved
 
-# TO DO:  Change h7-alpha to /heurist/ once h7 is migrated to be the standard /heurist/ version on Huma-Num
-
 # Silent on success; on failure sends an email with custom subject. DEBUG=1 adds rich diagnostics.
 # memsec is a special user of the Heurist_Contacts database
 # The script is placed in the root crontab to be run hourly
@@ -28,7 +26,7 @@ PATH="/usr/sbin:/usr/bin:/sbin:/bin"
 # --- Config -------------------------------------------------------------------
 readonly DB="Heurist_Contacts"
 readonly USER="memsec"
-readonly BASE="https://heurist.huma-num.fr/h7-alpha"   # TODO: switch to /heurist/ when migrated
+readonly BASE="https://heurist.huma-num.fr/heurist"
 readonly AUTH_URL="${BASE}/hserv/controller/auth.php"
 readonly DATA_URL="${BASE}/index.php"
 readonly OUT_FILE="/var/www/html/HEURIST/association_members.txt"

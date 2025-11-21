@@ -414,7 +414,7 @@ class CmsManager {
                 ctx: 'cms v3 coversion'  // context
             };  
 
-            window.hWin.HEURIST4.util.sendRequest('https://heuristref.net/h7-alpha/admin/utilities/checkMembershipApi.php',
+            window.hWin.HEURIST4.util.sendRequest('https://heuristref.net/heurist/admin/utilities/checkMembershipApi.php',
                 request, null, ()=>{}, 'auto');
             return false;
         }

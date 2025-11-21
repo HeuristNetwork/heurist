@@ -5,7 +5,7 @@
  * Deepwiki — Automated publish pipeline (menu-only) 13 Aug 2025
  * 
  * The crawler writes the documentation into:
-            /var/www/html/HEURIST/h7-alpha/documentation/Structural Documentation - DeepWiki
+            /var/www/html/HEURIST/heurist/documentation/Structural Documentation - DeepWiki
             on the current server (it is run monthly on HeuristNetwork.org) and sends an email toi support@heuristnetwork.org. 
             It should then be uploaded manually to gitHub in /documentation/Structural Documentation - DeepWiki
             TODO: automate upload to gitHub
@@ -39,7 +39,7 @@ const fetch = require('node-fetch'); // v2 (CommonJS)
 const START_URL   = 'https://deepwiki.com/HeuristNetwork/heurist';
 const PATH_PREFIX = '/HeuristNetwork/heurist';         // crawl scope
 const OUTPUT_DIR  = path.resolve('./deepwiki_download'); // build here
-const PUBLISH_DIR = '/var/www/html/HEURIST/h7-alpha/documentation/Structural Documentation - DeepWiki';            // publish here
+const PUBLISH_DIR = '/var/www/html/HEURIST/heurist/documentation/Structural Documentation - DeepWiki';            // publish here
 const EMAIL_TO    = 'support@heuristnetwork.org';
 const EMAIL_SUBJ  = 'HEURIST: Deepwiki crawl report - please update gitHub';
 const MIN_REQUIRED_PAGES = 21; // must be > 20
@@ -608,7 +608,7 @@ async function rsyncPublish(srcDir, dstDir, { chownUserGroup } = {}) {
     report.push(`Date: ${startTime}`);
 
     report.push('In case you are satisfied with the result, you have to publish the documentation to the code repository.');
-    report.push('The downloaded documentation is on heuristref.net server in folder /var/www/html/HEURIST/h7-alpha/documentation/Structural Documentation - DeepWiki.');
+    report.push('The downloaded documentation is on heuristref.net server in folder /var/www/html/HEURIST/heurist/documentation/Structural Documentation - DeepWiki.');
     report.push('1) Please sync your local copy of code with this server');                                               
     report.push('2) Create and push commit to current Heurist branch (h7dev)');
   

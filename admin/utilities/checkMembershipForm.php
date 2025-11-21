@@ -12,7 +12,7 @@
 * @since       7.0
 */
 require_once 'checkMembershipLib.php';
-$ENDPOINT = 'https://heuristref.net/h7-alpha/admin/utilities/checkMembershipApi.php';
+$ENDPOINT = 'https://heuristref.net/heurist/admin/utilities/checkMembershipApi.php';
 
 // ---------- helpers ----------
 function postToEndpoint(array $payload, string $endpoint): string

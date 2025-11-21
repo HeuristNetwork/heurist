@@ -72,7 +72,7 @@ if (!@$mailDomain) {$mailDomain = null;} // set mail domain if it does not use s
 // if base $heuristBaseURL is null, heurist detects it automatically 
 // Although it may differ from desired url you wish to see (because web server settings: aliases, rewrite rules etc)
 // Set this value explicitely to avoid possible issues
-if (!@$heuristBaseURL) {$heuristBaseURL = null;}  // base url ( ie server url+optional folder https://heurist.huma-num.fr/h7-alpha )  
+if (!@$heuristBaseURL) {$heuristBaseURL = null;}  // base url ( ie server url+optional folder https://heurist.huma-num.fr/hx-alpha )  
 // if you have several heurist instances of heurist, set this value to production instance
 //
 // if $heuristBaseURL is set and $heuristBaseURL_pro is null, then production version is the same as $heuristBaseURL

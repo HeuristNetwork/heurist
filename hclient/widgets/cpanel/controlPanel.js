@@ -600,7 +600,7 @@ $.widget( "heurist.controlPanel", {
 
         const newestVersion = 7;
         const isAlpha = window.hWin.HAPI4.baseURL.match(/h\d+-alpha|alpha/);
-        const isVersion7 = window.hWin.HAPI4.baseURL.match(/h7-alpha|heurist2025/); // @todo: remove once version 7 is standard
+        const isVersion7 = window.hWin.HAPI4.baseURL.match(/heurist|heurist2025/); // @todo: remove once version 7 is standard
 
         if(this.version_message && this.version_message !== true && this.element.find('#heuristVersionSwapper').length === 0){ // Check if it's already a jQuery object
             return;

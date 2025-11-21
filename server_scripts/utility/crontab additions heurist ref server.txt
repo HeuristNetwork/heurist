@@ -7,23 +7,22 @@
 # CRON JOBS TO BUILD INSTALLATION PACKAGES
 
 # This section is only for the master HeuristRef.net server where development work is carried out
-# based on the setup as at June 2025 with h6-ao and h7-alpha as the alpha development versions
+# based on the setup as at June 2025 with hx-alpha (currently x=7) as the alpha development versions
 # Script timing is based on Sydney early morning times and minimisation of disruption elsewhere
 
 # Update h7-alpha distribution from the h7-alpha directory: build runs daily at 6am Sydney 
 0 06 * * * cd /var/www/html/HEURIST/h7-alpha/;./copy_distribution_files.sh h7-alpha
 
-# Update h6-alpha distribution from Artem's development directory: build runs daily at 7am Sydney 
-0 07 * * * cd /var/www/html/HEURIST/h6-ao/;./copy_distribution_files.sh h6-alpha
+# Retained out of interest:
+# ------------------------
+# The following creates a distribution hx-beta-in-waiting.tar.bz2 on Monday morning, 
+# and the following week moves this to hx-beta.tar.bz2
 
-# The following creates a distribution h6-beta-in-waiting.tar.bz2 on Monday morning, 
-# and the following week moves this to h6-beta.tar.bz2
+# Update hx-beta from hx-beta-in-waiting weekly at 7:15am Monday Sydney time
+15 07 * * 1 cd /var/www/html/HEURIST/DISTRIBUTION/;rm hx-beta.tar.bz2;mv hx-beta-in-waiting.tar.bz2  hx-beta.tar.bz2
 
-# Update h6-beta from h6-beta-in-waiting weekly at 7:15am Monday Sydney time
-15 07 * * 1 cd /var/www/html/HEURIST/DISTRIBUTION/;rm h6-beta.tar.bz2;mv h6-beta-in-waiting.tar.bz2  h6-beta.tar.bz2
-
-# Update h6-beta-in-waiting: build runs weekly at 7.30am Monday Sydney time
-30 07 * * 1 cd /var/www/html/HEURIST/h6-ao/;./copy_distribution_files.sh h6-beta-in-waiting
+# Update hx-beta-in-waiting: build runs weekly at 7.30am Monday Sydney time
+30 07 * * 1 cd /var/www/html/HEURIST/hx-ao/;./copy_distribution_files.sh hx-beta-in-waiting
 
 # -------------------------------------------------------------------------------
 

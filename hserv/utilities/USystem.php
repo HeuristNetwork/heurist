@@ -52,7 +52,7 @@ class USystem {
      *   'domain' (string): Server domain name without port (e.g., "heuristref.net").
      *   'server_url' (string): Full server URL with scheme (e.g., "https://heuristref.net:80").
      *   'heurist_dir' (string): Detected Heurist code root directory path on the server.
-     *   'baseURL' (string): Base URL for the current Heurist installation (e.g., "https://heuristref.net/h7-alpha/").
+     *   'baseURL' (string): Base URL for the current Heurist installation (e.g., "https://heuristref.net/hx-alpha/").
      *   'baseURL_pro' (string): Base URL for the production Heurist installation (e.g., "https://heuristref.net/heurist/").
      */
     public static function getHostParams( $argv=null )

@@ -62,7 +62,7 @@ function getMainServerUrl(): ?string
         return null;    
     }
     //hardcoded
-    $base = 'https://heuristref.net/h7-alpha/';
+    $base = 'https://heuristref.net/heurist/';
     return $base;
 }
 

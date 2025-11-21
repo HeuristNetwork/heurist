@@ -232,7 +232,7 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
                     $container = $('<div>').appendTo($("body"));
 
                     if(window.hWin.HEURIST4.util.getUrlParameter('bugreport')==1){
-                        // https://heuristref.net/h7-alpha/hclient/framecontent/recordEdit.php?db=Heurist_Job_Tracker&bugreport=1
+                        // https://heuristref.net/heurist/hclient/framecontent/recordEdit.php?db=Heurist_Job_Tracker&bugreport=1
                         window.hWin.HEURIST4.ui.showWidgetDialog('manageSysBugreport', {isdialog:false, container:$container});
                         return;
                     }

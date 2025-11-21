@@ -67,7 +67,7 @@ $requestContent = array('xml'=>'text/xml',
                         'rdf'=>'application/rdf+xml',
                         'html'=>'text/html');
 
-$allowedVersions = ['heurist','h6-alpha','h7-alpha','h6-ij','h7-hn']; //
+$allowedVersions = ['heurist','h6-alpha','h7-alpha','h7-hn']; //
                         
 $format = null;
 $redirection_path = '../';

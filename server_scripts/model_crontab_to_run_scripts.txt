@@ -17,12 +17,6 @@ MAILTO=<email address(es)>
 # Update h7-alpha at 1am from reference server - build runs daily at 8am or later Sydney time
 30 00 * * * curl -lk https://HeuristRef.Net/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s h7-alpha
 
-# Update h6-alpha at 1am from reference server - build runs daily at 8am or later Sydney time
-40 00 * * * curl -l https://heuristref.net/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s h6-alpha  >/dev/null 2>&1
-
-# Update h6-beta at 4.15am from reference server - build runs daily at 8.15am or later Sydney time
-50 00 * * * curl -l https://heuristref.net/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s h6-beta >/dev/null 2>&1
-
 # *********************
 
 # IF TWO TIER SYSTEM: 
