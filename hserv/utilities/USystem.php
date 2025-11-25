@@ -65,7 +65,7 @@ class USystem {
 
         $installDir = '';
         $installDir_pro = '';
-        $codeFolders = array('heurist','h6-alpha','h7-alpha','h6-ao','h6-ij');//need to cli and short url
+        $codeFolders = array('heurist','h6-alpha','h7-alpha','h6-ao');//need to cli and short url
 
         if (php_sapi_name() == 'cli'){
 
@@ -918,7 +918,7 @@ class USystem {
         ];
 
         if(strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL)) === 0){
-
+            //the same version
             $mysql_indexdb = mysql__init(HEURIST_INDEX_DATABASE);
             $db_version = getDbVersion($mysql_indexdb);
             if($db_version){
