@@ -74,7 +74,7 @@ of the codebase and rename it to index.html
 // ---------------------------------------------------------------------------------
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "7.0.1";// sets current program version number, determined by Heurist development lead
+$version = "7.0.0";// sets current program version number, determined by Heurist development lead
 
 // ---------------------------------------------------------------------------------
 // 7.0.0  29 March 2025
@@ -151,7 +151,7 @@ $mailDomain = null; // set mail domain if it does not use server domain
 // if base $heuristBaseURL is null, heurist detects it automatically 
 // Although it may differ from desired url you wish to see (because web server settings: aliases, rewrite rules etc)
 // Set this value explicitely to avoid possible issues
-$heuristBaseURL = null;     // base url ( ie server url+optional folder https://heurist.huma-num.fr/hx-alpha )  
+$heuristBaseURL = null;     // base url ( ie server url+optional folder https://heurist.huma-num.fr/h7-alpha )  
 // if you have several heurist instances of heurist, set this value to production instance
 //
 // if $heuristBaseURL is set and $heuristBaseURL_pro is null, then production version is the same as $heuristBaseURL
