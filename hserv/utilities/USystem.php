@@ -893,8 +893,21 @@ class USystem {
      */
     public static function getLastCodeAndDbVersion($getDatabaseVersion = false){
 
-        $getAlpha = preg_match("/h\d+\-alpha|alpha\//", HEURIST_BASE_URL) === 1 ? true : false;
-        $key = $getAlpha ? 'alpha' : 'stable';
+        $fullSegment = '';
+        if (preg_match('~/(h(\d+)-alpha)(?:[/?#]|$)~', HEURIST_BASE_URL, $matches)) {
+
+            $fullSegment = $matches[1];
+            $versionNo   = $matches[2];
+            
+            $getAlpha = true;
+            $key = 'alpha';
+        } else {
+            $getAlpha = false;
+            $key = 'stable';
+        }        
+        
+        //old way $getAlpha = preg_match("/h\d+\-alpha|alpha\//", HEURIST_BASE_URL) === 1 ? true : false;
+        //old way $key = $getAlpha ? 'alpha' : 'stable';
         $dayAgo = time() - 24 * 60 * 60;
 
         $fileName = HEURIST_FILESTORE_ROOT."_latestVersionReceived.ini";
@@ -926,7 +939,7 @@ class USystem {
             }
 
         }else{
-            $url = ($getAlpha ? HEURIST_MAIN_SERVER . '/h7-alpha/' : HEURIST_INDEX_BASE_URL) . "admin/setup/dbproperties/getCurrentVersion.php?db=".HEURIST_INDEX_DATABASE."&check=1";
+            $url = ($getAlpha ? (HEURIST_MAIN_SERVER . '/'.$fullSegment.'/') : HEURIST_INDEX_BASE_URL) . "admin/setup/dbproperties/getCurrentVersion.php?db=".HEURIST_INDEX_DATABASE."&check=1";
             $rawdata = loadRemoteURLContentSpecial($url); // it returns HEURIST_VERSION|HEURIST_DBVERSION
         }
 
