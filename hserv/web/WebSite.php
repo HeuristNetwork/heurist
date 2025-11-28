@@ -383,8 +383,8 @@ class WebSite
         }elseif($val==null){
             $val ='';
         }
-        
-        return $is_safe ?htmlspecialchars(strip_tags($val)) :$val;
+
+        return $is_safe ? USanitize::sanitizeString($val) : $val;
     }
     
     //
@@ -427,7 +427,7 @@ class WebSite
             $val = '';
             
             if(array_key_exists($field, $codes)){
-                $val = $this->getVal($codes[$field]);
+                $val = strip_tags($this->getVal($codes[$field]));
             }elseif($field=='lang'){
                 $val = $this->currentLang; 
             }elseif($field=='favicon'){            

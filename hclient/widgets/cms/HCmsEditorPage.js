@@ -1316,13 +1316,14 @@ function(value){
         //1. show div with properties over treeview
         let h = this._panel_treePage.find('ul.fancytree-container').height() + 10;
 
-        h = (h<175)?h:175; 
+        h = h < 175 ? h : 175;
+        h = h < 80 ? 80 : h; 
         this._panel_treePage.css('height',h+'px');
-        this._panel_propertyView.css('top',(h+20)+'px');
+        this._panel_propertyView.css('top',(h+45)+'px');
         this._toolbar_Page.hide();
-        
+
         this._panel_propertyView.fadeIn(500);
-        
+
         this._cmsEditor.expandEditorPanel(); //expand width of editor panel at least 450px
         
         //scroll tree that selected element will be visible

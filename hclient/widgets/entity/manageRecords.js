@@ -4206,8 +4206,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         // Message not needed right now as only one issue is handled, probably separate issues into tabs within the message dialog
 
         let has_msg = false;
-        let headers = 'The following issues were found when saving the record, please note that the record has been saved and that these issues are considered minor problems<br><br>'
-                    + '<div class="issues-tabs"><ul>';
+        let headers = `The following issues were found when saving the record.<br>
+        Note: <strong>The record has been saved</strong>, these issues are just considered minor problems or nuisance<br><br>
+        <div class="issues-tabs">
+            <ul>`;
         let contents = '';
         let handlers = {};
 
@@ -4309,27 +4311,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     if(issues?.unknown && Object.keys(issues.unknown).length > 0){
 
                         let unknown = Object.values(issues.unknown).join('<br>');
-                        msg += `Unknown Languages for websites:<br><strong>${unknown}</strong><br>
-                        Please ensure that these <span id="lnk_Terms" style="text-decoration: underline; cursor: pointer;">
-                            language terms have a term standard code and that it is in ISO 639-2 format
-                        </span><br>(e.g. eng = English).<br><hr><br>`;
-
-                        $.extend(handlers, {
-                            '#lnk_Terms': () => {
-                                let vocabID = $Db.dty(window.hWin.HAPI4.sysinfo.dbconst.DT_LANGUAGES, 'dty_JsonTermIDTree');
-                                let langTrm = {
-                                    height:800, width:1300,
-                                    selection_on_init: vocabID,
-                                    innerTitle: false,
-                                    innerCommonHeader: $(`<div>
-                                        <span style="margin-left:260px">Field: <b>${$Db.dty(window.hWin.HAPI4.sysinfo.dbconst.DT_LANGUAGES, 'dty_Name')}</b></span>
-                                        <span style="margin-left:110px">This field uses vocabulary: <b>${$Db.trm(vocabID, 'trm_Label')}</b></span>
-                                    </div>`)
-                                };
-
-                                window.hWin.HEURIST4.ui.showEntityDialog('defTerms', langTrm);
-                            }
-                        });
+                        msg += `<div style="padding: 10px 2em;">${unknown}</div><br>
+                        Please edit the language vocabulary used and add the ISO 639-2 codes (e.g. EN, FR, ...)<br>
+                        as a standard code for each of the language terms selected<br><hr><br>`;
                     }
 
                     if(issues?.website && Object.keys(issues.website).length > 0){

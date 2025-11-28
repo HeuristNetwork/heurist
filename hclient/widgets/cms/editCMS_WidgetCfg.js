@@ -1535,12 +1535,14 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     message: 'For "tree" mode you have to select groups to be displayed',
                     error_title: 'Missing required setting'
                 });
+                $('[name="searchTreeMode"][value="0"]').prop('checked', true);
                 return false;
             }else if (window.hWin.HEURIST4.util.isempty(opts.allowed_svsIDs) && selval==0) { //individual filters are not defined
                 window.hWin.HEURIST4.msg.showMsgErr({
                     message: 'For "button" mode you must select either workgroups or filters individually',
                     error_title: 'Missing required setting(s)'
                 });
+                $('[name="searchTreeMode"][value="1"]').prop('checked', true);
                 return false;
             }
         }
