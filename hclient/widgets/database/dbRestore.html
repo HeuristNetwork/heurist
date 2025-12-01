@@ -53,6 +53,11 @@
             </label>
             <br>
             <label>
+                <input type="radio" value="5" name="selArchiveFolder"/>
+                Databases backed up from other servers (in HEURIST_FILESTORE/_DBS_FROM_REMOTES)
+            </label>
+            <br>
+            <label>
                 <input type="radio" value="3" name="selArchiveFolder"/>
                 Archived backups (in /srv/BACKUP/ARCHIVE, or in HEURIST_FILESTORE/BACKUP/ARCHIVE on localhost)
             </label>
@@ -63,9 +68,9 @@
         
     </div>
 
-    <div class="entry-box" style="width:640px;">
+    <div id="db-restore-name" class="entry-box" style="width:640px;display: none;">
 
-        <div id="divSelectedZip" style="display:none;">
+        <div id="divSelectedZip">
            Archive: <span id="selectedZip" style="font-weight:bold"></span>
         </div>
 

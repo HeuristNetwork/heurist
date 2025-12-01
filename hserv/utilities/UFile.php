@@ -333,28 +333,36 @@ use hserv\utilities\USystem;
             $files = scandir($folder);
             foreach ($files as $filename) {
 
-                    $path_parts = pathinfo($filename);
-                    if(array_key_exists('extension', $path_parts))
-                    {
-                        $ext = strtolower($path_parts['extension']);
-                        if($include_dates && (strlen($ext)==10) && (DateTime::createFromFormat('Y-m-d', $ext) !== false)){
-                            $fname = substr($filename, 0, -11);
-                            $path_parts = pathinfo($fname);
-                            if(array_key_exists('extension', $path_parts)){
-                                $ext = strtolower($path_parts['extension']);
-                            }
-                        }
+                $fullPath = "{$folder}{$filename}";
+                $path_parts = pathinfo($filename);
+                if(in_array('folders', $exts) && is_dir($fullPath) && $filename != '.' && $filename != '..'){
 
-                        if(file_exists($folder.$filename) && ($exts==null || in_array($ext, $exts)))
-                        {
-                            $fsize = (is_file($folder.$filename))?filesize($folder.$filename):0;
+                    $fsize = folderSize($fullPath);
 
-                            $records[$idx] = array($idx, $filename, $folder, $url, $fsize);
-                            $order[] = $idx;
-                            $idx++;
+                    $records[$idx] = [$idx, $filename, $folder, $url, $fsize];
+                    $order[] = $idx;
+                    $idx++;
+
+                }elseif(array_key_exists('extension', $path_parts)){
+
+                    $ext = strtolower($path_parts['extension']);
+                    if($include_dates && (strlen($ext)==10) && (DateTime::createFromFormat('Y-m-d', $ext) !== false)){
+                        $fname = substr($filename, 0, -11);
+                        $path_parts = pathinfo($fname);
+                        if(array_key_exists('extension', $path_parts)){
+                            $ext = strtolower($path_parts['extension']);
                         }
                     }
 
+                    if(file_exists($fullPath) && ($exts==null || in_array($ext, $exts)))
+                    {
+                        $fsize = (is_file($fullPath))?filesize($fullPath):0;
+
+                        $records[$idx] = array($idx, $filename, $folder, $url, $fsize);
+                        $order[] = $idx;
+                        $idx++;
+                    }
+                }
             }//for
         }
 

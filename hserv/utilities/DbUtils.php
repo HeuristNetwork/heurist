@@ -869,6 +869,7 @@ class DbUtils {
      *                            2: /srv/BACKUP/
      *                            3: /srv/BACKUP/ARCHIVE/ (or HEURIST_FILESTORE_ROOT.'BACKUP/ARCHIVE/' for local dev)
      *                            4: _DBS_TO_RESTORE
+     *                            5: _DBS_FROM_REMOTES
      * @return bool True on success, false on failure.
      */
     public static function databaseRestoreFromArchive($database_name, $archive_file, $archive_folder=1){
@@ -889,12 +890,17 @@ class DbUtils {
             }
         }elseif($source==4){
             $lib_path = $upload_root.'_DBS_TO_RESTORE/';
+        }elseif($source == 5){
+            $archive_file = "{$upload_root}_DBS_FROM_REMOTES/{$archive_file}/backup/{$archive_file}.zip";
+            $archive_file = !file_exists($archive_file) ? "{$upload_root}_DBS_FROM_REMOTES/{$archive_file}/backup/{$archive_file}_sql.zip" : $archive_file;
         }else{
             //default
             $lib_path = $upload_root.'_DELETED_DATABASES/';
         }
 
-        $archive_file = $lib_path.basename($archive_file);
+        if($source != 5){
+            $archive_file = $lib_path.basename($archive_file);
+        }
 
         //check archive
         if(!file_exists($archive_file)){
@@ -946,7 +952,7 @@ class DbUtils {
                 }
             }else{
                 $fileCount = UArchive::unzip(self::$system, $archive_file, $database_folder);
-                $needCopyCurrentDbFolder = ($fileCount==1);
+                $needCopyCurrentDbFolder = $fileCount == 1 && $source != 5;
             }
 
         }catch(\Exception $e){
@@ -1783,7 +1789,7 @@ class DbUtils {
         [db_target_full, db_target] = mysql__get_names(db_target)
 
         // Copy filestore
-        ...
+        rename(SOURCE_FILESTORE, TARGET_FILESTORE)
         setSessionVal(2)
 
         // Create new database
@@ -1795,6 +1801,10 @@ class DbUtils {
         FOREACH tables as table:
             "RENAME TABLE db_source_full.table TO db_target_full.table"
         END FOR
+
+        // Reset Privileges
+        "GRANT ALL PRIVILEGES ON db_target_full.* TO 'user'@'db server'"
+        "FLUSH PRIVILEGES"
 
         // Add SQL triggers and constraints
         databaseCreateConstraintsAndTriggers(db_target_full)

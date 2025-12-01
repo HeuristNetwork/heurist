@@ -365,45 +365,47 @@
         }
         elseif($action=="foldercontent") { //get list of files for given folder
 
-              //by default this are mbtiles in uploaded_tilestack
+            //by default this are mbtiles in uploaded_tilestack
 
-              $source = @$req_params['source'];
-              if(@$req_params['exts']){
-                    $exts = explode(',',@$req_params['exts']);
-              }
-              if(!is_array($exts) || empty($exts)){
-                    $exts = array('png','svg');
-              }
+            $source = @$req_params['source'];
+            if(@$req_params['exts']){
+                $exts = explode(',',@$req_params['exts']);
+            }
+            if(!is_array($exts) || empty($exts)){
+                $exts = array('png','svg');
+            }
 
-              $include_dates = false;
+            $include_dates = false;
 
-              if($source=='uploaded_tilestacks'){
-                  $lib_path = array(HEURIST_FILESTORE_DIR.'uploaded_tilestacks/');
-              }elseif(intval($source)>0){
+            if($source=='uploaded_tilestacks'){
+                $lib_path = array(HEURIST_FILESTORE_DIR.'uploaded_tilestacks/');
+            }elseif(intval($source)>0){
 
-                  $source = intval($source);
-                  if($source==1){
-                      $lib_path = HEURIST_FILESTORE_ROOT.'_DELETED_DATABASES/';
-                  }elseif($source==2){
-                      $lib_path = '/srv/BACKUP';
-                      $include_dates = true;
-                  }elseif($source==3){
-                      $include_dates = true;
-                      if(strpos(HEURIST_BASE_URL, '://127.0.0.1')>0){
-                          $lib_path = HEURIST_FILESTORE_ROOT.'BACKUP/ARCHIVE/';
-                      }else{
-                          $lib_path = '/srv/BACKUP/ARCHIVE';
-                      }
-                  }elseif($source==4){
-                      $lib_path = HEURIST_FILESTORE_ROOT.'_DBS_TO_RESTORE/';
-                  }
+                $source = intval($source);
+                if($source==1){
+                    $lib_path = HEURIST_FILESTORE_ROOT.'_DELETED_DATABASES/';
+                }elseif($source==2){
+                    $lib_path = '/srv/BACKUP';
+                    $include_dates = true;
+                }elseif($source==3){
+                    $include_dates = true;
+                    if(strpos(HEURIST_BASE_URL, '://127.0.0.1')>0){
+                        $lib_path = HEURIST_FILESTORE_ROOT.'BACKUP/ARCHIVE/';
+                    }else{
+                        $lib_path = '/srv/BACKUP/ARCHIVE';
+                    }
+                }elseif($source==4){
+                    $lib_path = HEURIST_FILESTORE_ROOT.'_DBS_TO_RESTORE/';
+                }elseif($source==5){
+                    $lib_path = HEURIST_FILESTORE_ROOT.'_DBS_FROM_REMOTES/';
+                }
 
-                  $lib_path = array($lib_path);
-              }else{
-                  //default 64px
-                  $lib_path = array('admin/setup/iconLibrary/'.(($source=='assets16')?'16':'64').'px/');
-              }
-              $res = folderContent($lib_path, $exts, $include_dates);
+                $lib_path = array($lib_path);
+            }else{
+                //default 64px
+                $lib_path = array('admin/setup/iconLibrary/'.(($source=='assets16')?'16':'64').'px/');
+            }
+            $res = folderContent($lib_path, $exts, $include_dates);
 
         }
         elseif($action=="folders") { //get list of system images

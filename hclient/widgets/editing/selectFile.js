@@ -336,63 +336,64 @@ or a numeric string representing the ID of an archive folder.
      */
     _gettingFiles: function(){
         
-            let that = this; // For use in closures
-            
-            // Show loading indicator
-            window.hWin.HEURIST4.msg.bringCoverallToFront(null, {opacity: '0.3'}, window.hWin.HR('Getting files...'));
-            $('body').css('cursor','progress');
-       
-            // API call to get folder content
-            window.hWin.HAPI4.SystemMgr.get_foldercontent(this.options.source, this.options.extensions,
-                function(response){ // Async callback
-                    $('body').css('cursor','auto'); // Restore cursor
-                    window.hWin.HEURIST4.msg.sendCoverallToBack(true); // Hide loading indicator
-                    
-                    if(response.status == window.hWin.ResponseStatus.OK){ // If request was successful
-                        
-                        that._is_source_changed = false; // Reset flag
-                        let recset = new HRecordSet(response.data); // Create HRecordSet from response
-                        if(recset.length()>0){ // If files were returned
-                            
-                            if(that.options.isdialog){ // If in dialog mode
-                                
-                                if(that._as_dialog){ // If dialog instance already exists
-                                    that._as_dialog.dialog('open');
-                                }else{ // Create new dialog instance
-                                    let $dlg = that.element.dialog({
-                                        autoOpen: true,
-                                        height: 640,
-                                        width: 840,
-                                        modal: true,
-                                        title: window.hWin.HR(that.options.title),
-                                        resizeStop: function( event, ui ) { // Adjust size on resize
-                                            let pele = that.element.parents('div[role="dialog"]');
-                                            that.element.css({overflow: 'none !important', width:pele.width()-24 });
-                                        },
-                                        close:function(){ // Dialog close behavior
-                                            if(that.options.keep_dialogue){
-                                                that._as_dialog.dialog('close');
-                                            }else{
-                                                that._as_dialog.remove();        
-                                            }
-                                        }
-                                    });
-                                    that._as_dialog = $dlg; // Store dialog instance
-                                }
-                            }
-                            
-                            that._cachedRecordset = recset; // Cache the fetched data
-                            
-                            that.recordList.resultList('updateResultSet', recset); // Update the resultList
-                        }else{ // No files found
-                            if(that._as_dialog) that._as_dialog.dialog('close'); // Close dialog if open
-                            window.hWin.HEURIST4.msg.showMsgFlash(that._emptyMessage); // Show empty message
-                        }
+        let that = this; // For use in closures
+        
+        // Show loading indicator
+        window.hWin.HEURIST4.msg.bringCoverallToFront(null, {opacity: '0.3'}, window.hWin.HR('Getting files...'));
+        $('body').css('cursor','progress');
 
-                    }else{ // API request failed
+        // API call to get folder content
+        window.hWin.HAPI4.SystemMgr.get_foldercontent(this.options.source, this.options.extensions,
+            function(response){ // Async callback
+                $('body').css('cursor','auto'); // Restore cursor
+                window.hWin.HEURIST4.msg.sendCoverallToBack(true); // Hide loading indicator
+                
+                if(response.status == window.hWin.ResponseStatus.OK){ // If request was successful
+                    
+                    that._is_source_changed = false; // Reset flag
+                    let recset = new HRecordSet(response.data); // Create HRecordSet from response
+                    if(recset.length()>0){ // If files were returned
+                        
+                        if(that.options.isdialog){ // If in dialog mode
+                            
+                            if(that._as_dialog){ // If dialog instance already exists
+                                that._as_dialog.dialog('open');
+                            }else{ // Create new dialog instance
+                                let $dlg = that.element.dialog({
+                                    autoOpen: true,
+                                    height: 640,
+                                    width: 840,
+                                    modal: true,
+                                    title: window.hWin.HR(that.options.title),
+                                    resizeStop: function( event, ui ) { // Adjust size on resize
+                                        let pele = that.element.parents('div[role="dialog"]');
+                                        that.element.css({overflow: 'none !important', width:pele.width()-24 });
+                                    },
+                                    close:function(){ // Dialog close behavior
+                                        if(that.options.keep_dialogue){
+                                            that._as_dialog.dialog('close');
+                                        }else{
+                                            that._as_dialog.remove();        
+                                        }
+                                    }
+                                });
+                                that._as_dialog = $dlg; // Store dialog instance
+                            }
+                        }
+                        
+                        that._cachedRecordset = recset; // Cache the fetched data
+                        
+                        that.recordList.resultList('updateResultSet', recset); // Update the resultList
+                    }else{ // No files found
                         if(that._as_dialog) that._as_dialog.dialog('close'); // Close dialog if open
-                        window.hWin.HEURIST4.msg.showMsgErr(response); // Show error message
+                        window.hWin.HEURIST4.msg.showMsgFlash(that._emptyMessage); // Show empty message
                     }
-                });
+
+                }else{ // API request failed
+                    if(that._as_dialog) that._as_dialog.dialog('close'); // Close dialog if open
+                    window.hWin.HEURIST4.msg.showMsgErr(response); // Show error message
+                }
+            }
+        );
     }
 });

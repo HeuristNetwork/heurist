@@ -355,18 +355,22 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         let that = this;
         let src_folder = this._$('input[name=selArchiveFolder]:checked').val(); // e.g., 'local', 'server'
 
+        let extensions = src_folder == 3 ? 'zip.bz2' : 'zip'; // Folder 3 might be specific to server-side archives
+        extensions = src_folder == 5 ? 'folders' : extensions;
+
         if(!this._select_file_dlg){ // Initialize dialog on first use
             this._select_file_dlg = $('<div>').hide().appendTo( this.element ); // Create hidden div for dialog
+
             this._select_file_dlg.selectFile({
                keep_dialogue: true, // Keep dialog instance for reuse
                showFilter: true,
                source: src_folder,
-               extensions: (src_folder==3)?'zip,bz2':'zip', // Folder 3 might be specific to server-side archives
+               extensions: extensions,
                title: window.HR('Select database archive'),
                onselect:function(res){
                     if(res && res.filename){
                         that._$('#selectedZip').text(res.filename);
-                        that._$('#divSelectedZip').show();
+                        that._$('#db-restore-name').show();
 
                         // Suggest database name based on archive filename
                         if(that._$('#dbname').val().trim()==''){
@@ -380,13 +384,13 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                         }
                     }else{ // No file selected or dialog cancelled
                         that._$('#selectedZip').text('');
-                        that._$('#divSelectedZip').hide();
+                        that._$('#db-restore-name').hide();
                     }
                }});
         }else{ // Reuse existing dialog instance
             this._select_file_dlg.selectFile('option', { // Update options for existing dialog
                source: src_folder,
-               extensions: (src_folder==3)?'zip,bz2':'zip'
+               extensions: extensions
             });
             this._select_file_dlg.selectFile('open'); // Reopen the dialog
         }
