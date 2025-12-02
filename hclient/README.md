@@ -8,7 +8,7 @@ This directory contains the client-side functionalities for the Heurist applicat
 
 ## Key files
 
-(This directory primarily serves as a container for subdirectories and doesn't have key operational files at its immediate level beyond this README.)
+(This directory primarily serves as a container for subdirectories and doesn't have key operational files at its immediate level beyond this README)
 
 ## Subdirectories
 
