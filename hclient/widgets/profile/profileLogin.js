@@ -911,7 +911,7 @@ function doAuthentication(login_data, login_dialog)
                     updateStatus(login_dialog, false, response.message);
                     setTimeout(function(){ updateStatus(login_dialog); }, 2000);
                 }
-            }else if(response.status == window.hWin.ResponseStatus.ACTION_BLOCKED && response.message.indexOf('Heurist.eu') >= 0){
+            }else if(response.status == window.hWin.ResponseStatus.ACTION_BLOCKED && response.message == 'Association members only'){
 
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(
                     `${window.hWin.HAPI4.baseURL}?disclaimer=association_membership.html #content`,

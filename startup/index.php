@@ -636,7 +636,7 @@ if (!defined('PDIR')){
 
         // Show message about potential missing databases, for main servers only
         const dbParam = window.hWin.HEURIST4.util.getUrlParameter('db', location.search);
-        const mainServers = ['heuristref.net', 'intersect.org.au', 'heuristau.net', 'heurist.huma-num.fr', 'heurist.eu'];
+        const mainServers = ['heuristref.net', 'intersect.org.au', 'heuristau.net', 'heurist.huma-num.fr', 'heurist.eu', 'heuristeu.net'];
         const curURL = location.href.toLowerCase();
         if(!window.hWin.HEURIST4.util.isempty(dbParam) && mainServers.find((server) => curURL.indexOf(server) >= 0)){
 
@@ -647,7 +647,7 @@ if (!defined('PDIR')){
                 If your database was/is on the Australian Heurist server (<a href="https://HeuristRef.net${toSwitchboard}" ${anchorAttr}>HeuristRef.net</a> or intersect.org.au) up to mid Nov 2025,<br>
                 you will now find it at <a href="https://HeuristAU.net${toSwitchboard}" ${anchorAttr}>HeuristAU.net</a> (this simply points to the same server, nothing else has changed).<br>
                 <br>
-                If you do not find it there, please try <a href="https://Heurist.Huma-Num.fr${toSwitchboard}" ${anchorAttr}>Heurist.Huma-Num.fr</a> and <a href="https://Heurist.eu${toSwitchboard}" ${anchorAttr}>Heurist.eu</a>.<br>
+                If you do not find it there, please try <a href="https://Heurist.Huma-Num.fr${toSwitchboard}" ${anchorAttr}>Heurist.Huma-Num.fr</a> and <a href="https://HeuristEU.net${toSwitchboard}" ${anchorAttr}>HeuristEU.net</a>.<br>
                 If you are unable to find it, contact us at <a href="mailto:support@heuristnetwork.org" ${anchorAttr}>support@heuristnetwork.org</a> (we have multiple backups of all databases and can restore them rapidly to any of these servers).
             </div>`;
 

@@ -262,4 +262,6 @@ $absolutePathsToRemoveFromWebPages = null;
 //
 $matomoUrl = null; //'domain.com/matomo';
 $matomoSiteId = null; //'1';
+
+$flag_HNAssoc_Server = false; // Leave this set to FALSE: changing it to TRUE will cause interface glitches on any server not running the special Heurist Network association private version of Heurist
 ?>

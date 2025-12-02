@@ -1908,7 +1908,7 @@ class System {
      * @return bool True if login is successful, false otherwise (errors will be set via `addError`).
      */
     public function doLogin($username, $password, $session_type, $skip_pwd_check=false, $is_guest=false): bool{
-        global $passwordForDatabaseAccess;
+        global $passwordForDatabaseAccess, $flag_HNAssoc_Server;
 
         if(empty($username) || (empty($password) && !$skip_pwd_check)){
             $this->addError(HEURIST_INVALID_REQUEST, "Username / password not defined");
@@ -1933,8 +1933,27 @@ class System {
         } elseif (!$is_guest && ($user['ugr_Enabled'] ?? 'n') === 'n'){
             $this->addError(HEURIST_REQUEST_DENIED,  "Your user profile is not active. Please contact database owner");
         } elseif ($skip_pwd_check || passwordCheck($password, $user['ugr_Password'], $this->mysqli, $user['ugr_ID']) ) { // passwordCheck is global
-        
-            if($session_type=='none'){
+
+            $returnBool = true;
+            $membership = '';
+            $flag_HNAssoc_Server = $flag_HNAssoc_Server ?? false;
+            if(@$flag_HNAssoc_Server === true && !$skip_pwd_check){
+                // When flag_HNAssoc_Server is true, only allow association members to login
+                // on block, it will show the membership popup
+
+                $originalUser = $this->currentUser;
+                $this->currentUser = [
+                    'ugr_ID' => $user['ugr_ID'],
+                    'ugr_eMail' => $user['ugr_eMail']
+                ];
+                $membership = USystem::checkAssociationMembership($this);
+                $this->currentUser = $originalUser;
+            }
+
+            if($membership === 'nonmember'){
+                $this->addError(HEURIST_ACTION_BLOCKED, 'Association members only');
+                $returnBool = false;
+            }elseif($session_type=='none'){
                 $this->currentUser = $user;
             }else{
                 $this->doLoginSession($user['ugr_ID'], $session_type);
@@ -1943,7 +1962,7 @@ class System {
             // However, the original flow might rely on getCurrentUserAndSysInfo to do this.
             // For consistency, it's better if doLogin itself ensures currentUser is set or triggers it.
             // $this->loginVerify($user); // Pass the fetched user array to loginVerify
-            return true;
+            return $returnBool;
         } else {
             $this->addError(HEURIST_REQUEST_DENIED,  "The credentials supplied are not correct");
         }
