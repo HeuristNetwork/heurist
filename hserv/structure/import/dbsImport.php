@@ -1270,7 +1270,6 @@ $mysqli->commit();
             if(!$only_terms){
                 $remoteURL = $remoteURL.'&rectypes=all&detailtypes=all';
             }
-
             $defs = loadRemoteURLContent($remoteURL);
             if(!$defs){ // unable to connect to Heurist Reference Index
                 global $glb_curl_error;
@@ -1282,7 +1281,7 @@ $mysqli->commit();
                     ."a) URL requested: $remoteURL<br><br>");//$database_url
             }
 
-            $defs = json_decode(gzdecode($defs), true);
+            $defs = json_decode($defs, true); //was gzdecode($defs)
             if(!$defs || @$defs['status']!=HEURIST_OK){
                 $this->system->addError(HEURIST_ERROR, $message);
                 return false;
