@@ -308,6 +308,7 @@ class WebSite {
         pagetitle = window.hWin.HEURIST4.util.stripTags(pagetitle,'br,hr,p,i,b,u,em,strong,sup,sub,small,span');//<br>
         
         let isShowTitlePerPage = this.#getPageRecValue(window.hWin.DT_CMS_PAGETITLE); 
+
         if( window.hWin.HEURIST4.util.isempty(isShowTitlePerPage)){
             isShowTitlePerPage = this.siteOptions.isShowTitle; //per website setting
         }else{

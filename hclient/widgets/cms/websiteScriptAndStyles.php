@@ -776,15 +776,19 @@ function assignPageTitle(pageid){
     // if page title is visible - increase height of header
     if($('#main-header').length>0 && $('#main-content-container').length>0){
 
-        const h = parseInt($('#main-header').css('height')); 
-        const h2 = $('#main-header').height();
-        if(h2==137 || h==144 || h==180){ //default values
-            $('#main-header').height(is_show_pagetitle?180:144);
-            $('#main-content-container').css({top:is_show_pagetitle?187:151});
+        const eleHeader = document.getElementById('main-header');
+        const h = $(eleHeader).outerHeight();
+
+        if(h==137 || h==144 || h==151 || h==181){ //default values
+            //debug $('#main-header').css({'border':'2px red solid'});
+
+            $(eleHeader).outerHeight(is_show_pagetitle?181:151);
+
+            $('#main-content-container').css({top:is_show_pagetitle?181:151});
         //}else if(h == 137 && navigator.userAgent.indexOf('Firefox') > 0){ //default value on Firefox
         //    $('#main-content-container').css({top:144});
         
-            $('#main-menu').css('bottom',is_show_pagetitle?40:0);
+            $('#main-menu').css('bottom', is_show_pagetitle? title_container.outerHeight() :0);
         }
 
     }
