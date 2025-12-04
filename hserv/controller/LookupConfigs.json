@@ -258,7 +258,8 @@
     "options": {
         "dump_record": false,
         "dump_field": "rec_ScratchPad",
-        "SPARQL_field_map": {}
+        "SPARQL_field_map": [],
+        "SPARQL_queries": {}
     }
 }
 ]

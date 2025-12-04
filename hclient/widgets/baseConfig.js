@@ -179,22 +179,18 @@ $.widget("heurist.baseConfig", {
 
             this._on(this.save_btn, {
                 click: () => {
-                    that._closeHandler(true, false, null);
+                    that._closeHandler(true, false);
                 }
             });
             this._on(this.close_btn, {
                 click: () => {
-                    that._closeHandler(false, false, null);
+                    that._closeHandler(false, false);
                 }
             });
 
-            this._on(this.element.find('.ent_wrapper:first'), {
-                mouseleave: (event) => {
-                    if($(event.target).is('div') && (that._is_modified || that._services_modified) && !that._isNewCfg){
-                        that._closeHandler(false, true, $(event.target));
-                    }
-                }
-            });
+            if($('.ui-menu6').length > 0){
+                $('.ui-menu6').slidersMenu('manageSwitchHandler', 'design', `${this.options.type}Configure`, () => this._closeHandler(false, true));
+            }
         }
 
         this._updateStatus();
@@ -223,7 +219,7 @@ $.widget("heurist.baseConfig", {
             class:'btnClose',
             css:{'float':'right','margin-left':'30px'}, 
             click: function() { 
-                that._closeHandler(false, false, null);
+                that._closeHandler(false, false);
             }
         },
         {
@@ -231,7 +227,7 @@ $.widget("heurist.baseConfig", {
             class:'ui-button-action btnSave',
             css:{'float':'right'},
             click: function() {
-                that._closeHandler(true, false, null);
+                that._closeHandler(true, false);
             }
         }];
     },
@@ -315,8 +311,12 @@ $.widget("heurist.baseConfig", {
             return;
         }
 
-        if(is_force===true){
-            this._as_dialog.dialog('option','beforeClose',null);
+        if(!this.options.isdialog && $('.ui-menu6').length > 0){
+            $('.ui-menu6').slidersMenu('manageSwitchHandler', 'remove', `${this.options.type}Configure`);
+        }
+
+        if(is_force === true){
+            this._as_dialog.dialog('option', 'beforeClose', null);
         }
 
         this._as_dialog.dialog("close");
@@ -325,7 +325,7 @@ $.widget("heurist.baseConfig", {
     //
     // on close 
     //
-    _closeHandler: function(isSave=false, isMouseLeave=false, trigger = null){
+    _closeHandler: function(isSave = false, menuSwitch = false){
 
         let that = this;
 
@@ -352,15 +352,15 @@ $.widget("heurist.baseConfig", {
 
         if(isSave){
             this.saveConfigrations();
-        }else if(trigger && !trigger.is('button') && hasChanges){
+        }else if(menuSwitch && hasChanges){
 
             let wording = this._is_modified ? 'current configuration' : 'available services';
             let button = this._is_modified ? '"Apply"' : '"Save"'
 
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(`You have made changes to the ${wording}. Click ${button} otherwise all changes will be lost.`, 
                 buttons, {title: `Unsaved Changes for ${this.options.type == 'service' ? 'Lookup' : 'Repository'} configurations`, yes: 'Save', no: 'Ignore and Close'}, {default_palette_class: 'ui-heurist-design'});
-        }else if(isMouseLeave){
-            return;
+        }else if(menuSwitch){
+            return true;
         }else if(this.options.isdialog && this._as_dialog.dialog('instance') !== undefined){
             this._as_dialog.dialog('close');
         }else{

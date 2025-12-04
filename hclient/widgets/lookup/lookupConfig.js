@@ -440,7 +440,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
             // Show message if no fields are available for mapping
             if(this._current_cfg.fields.length == 0){
-                this._$(`#no_fields_msg, #no_fields_msg .${this._current_cfg.service}`).show();
+                this._handleExtraSettings();
             }
 
             // Get local ID for the record type
@@ -469,6 +469,86 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
         }
         
         this._updateStatus(); // Refresh UI element states
+    },
+
+    _handleExtraSettings: function(){
+
+        const serviceType = this._current_cfg.service;
+        const rtyID = this._current_cfg.rty_ID;
+        let $settings = this._$(`#lookup_settings .${serviceType}`);
+
+        if($settings.length === 0){
+            return;
+        }
+        if($settings.hasClass('no_settings')){
+            $settings.show();
+            return;
+        }
+
+        if(serviceType === 'wikidata_SPARQL'){
+
+            let popupWikidataFieldMapping = (entry) => {
+
+                let label = '';
+                let dtyID = 0;
+
+                if(entry !== false){
+                    label = entry.find('.labelField').text();
+                    dtyID = entry.find('.rstField').attr('data-id');
+                }
+
+                let $editForm = $settings.find('#SPARQL_field_edit');
+                $editForm.find('input').val(label);
+                $editForm.find('select').val(dtyID);
+
+                this.$Hmsg.showElementAsDialog({
+                    element: $editForm[0],
+                    open: function(){
+                        console.log('open', this, arguments);
+                    },
+                    title: dtyID === 0 ? 'Create new field mapping' : 'Edit existing field mapping',
+                    buttons: {
+                        'Save': function(){ console.log(this, arguments); },
+                        'Cancel': () => {}
+                    }
+                });
+            };
+
+            let fields = this._current_cfg.options.SPARQL_field_map;
+            let $table = $settings.find('#SPARQL_field_map');
+            let $newMapping = $table.find('.new-data');
+
+            for(const label in fields){
+
+                if(!Object.hasOwn(fields, dtyID)){
+                    continue;
+                }
+
+                const dtyID = fields[label];
+                const rstLabel = $Db.rst(rtyID, dtyID, 'rst_DisplayName');
+                let rows = `
+                <td class="labelField" style="font-weight: bold;">${label}</td>
+                <td> &rArr; </td>
+                <td class="rstField" style="font-weight: bold;" data-id="${dtyID}">${rstLabel}</td>
+                <td>
+                    <button title="Edit entry" class="ui-icon ui-icon-pencil"></button>
+                    <button title="Remove entry" class="ui-icon ui-icon-close"></button>
+                </td>
+                `;
+
+                $('<tr>', {html: rows, class: 'field-entry', title: `Field "${label}" will be matched to the record field "${rstLabel}"`})
+                    .insertBefore($newMapping);
+            }
+
+            this._on($newMapping, {
+                click: () => popupWikidataFieldMapping(null)
+            });
+            this._on($table.find('.ui-icon-pencil'), {
+                click: (event) => {
+                    popupWikidataFieldMapping($(event.target).closest('.field-entry'));
+                }
+            })
+        }
     },
     
     /**
@@ -1202,6 +1282,8 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
         this.options.service_config[t_name] = this._current_cfg;
 
         this._isNewCfg = false; // No longer a new configuration
+
+        this._getExtraSettings();
 
         this._services_modified = true; // Mark that overall configurations have changed
         window.hWin.HEURIST4.util.setDisabled(this.save_btn, !this._services_modified); // Enable main save button

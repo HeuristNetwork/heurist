@@ -285,7 +285,7 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
      * Features:
      * - **Dynamic Row Addition**: Users can add new mapping rows.
      * - **Heurist Field Dropdowns**: Populated using `HEURIST4.ui.createRectypeDetailSelect`,
-     *   filtered for compatible field types ('freetext', 'blocktext', 'term', 'resource', 'relmarker', 'geo').
+     *   filtered for compatible field types ('freetext', 'blocktext', 'enum', 'resource', 'relmarker', 'geo', 'date').
      * - **Auto-Suggestion for SPARQL Variables**: When an input field for a SPARQL variable
      *   gets focus, a dropdown list of unmapped variables from `this.result_fields` appears.
      * - **Saving Mappings**: On "Update mapping", `this._fields` is updated with the UI values,
@@ -313,7 +313,7 @@ $.widget("heurist.lookupWikidata_SPARQL", $.heurist.lookupBase, {
                 let value = select.getAttribute('data-value');
 
                 this.$Hui.createRectypeDetailSelect(select, rtyID,
-                    ['freetext', 'blocktext', 'term', 'resource', 'relmarker', 'geo'], null,
+                    ['freetext', 'blocktext', 'enum', 'resource', 'relmarker', 'geo', 'date'], null,
                     {useHtmlSelect: false, selectedValue: value}
                 );
             });
