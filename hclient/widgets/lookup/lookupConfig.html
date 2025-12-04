@@ -131,10 +131,9 @@
                     <div id="lookup_settings" style="padding-top: 10px;">
                         <div class="wikidata_SPARQL" style="display: none;">
                             <table role="presentation" id="SPARQL_field_map" style="font-size:1em;" data-idx="0">
-                                <tr class="new-data" colspan="3" style="cursor: pointer; text-decoration: underline;">
-                                    <td> + Add new field </td>
-                                </tr>
+                                <tbody></tbody>
                             </table>
+                            <div class="new-data" style="cursor: pointer; text-decoration: underline; padding-left: 10px" title="Add new field mapping"> + Add new field </div>
                             <div id="SPARQL_queries" style="display: none;">
                                 <div>
                                     <select class="query_selector"></select>
@@ -142,18 +141,21 @@
                                     <button class="query_discard"></button>
                                 </div>
                             </div>
-                            <div id="SPARQL_field_edit" style="display: none;">
-                                <div>
-                                    <span class="header required">Query field label:</span>
+                            <div id="SPARQL_field_edit" class="ent_wrapper" style="display: none;">
+                                <div style="padding: 2em 2em 1em;">
+                                    <div class="header required" style="width: 12em; display: inline-block;">Query field label:</div>
                                     <span>
                                         <input type="text" value="" class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em" />
                                     </span>
-                                    <div class="heurist-helper2">Enter the SPARQL field name WITHOUT the question mark (?)</div>
+                                    <div class="heurist-helper2" style="padding-top: 0.5em;">
+                                        Enter the SPARQL field name WITHOUT the preceeding question mark (?)<br>
+                                        <strong>The field name must be unique from existing field mappings</strong>
+                                    </div>
                                 </div>
-                                <div>
-                                    <span class="header required">Record field label:</span>
+                                <div style="padding: 1em 2em 2em;">
+                                    <div class="header required" style="width: 12em; display: inline-block;">Record field label:</div>
                                     <span>
-                                        <select class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em">
+                                        <select id="SPARQL_edit_rst" class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em">
                                             <option value="">Select a record field...</option>
                                         </select>
                                     </span>

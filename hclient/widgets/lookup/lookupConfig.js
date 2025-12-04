@@ -438,10 +438,8 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
                 $(`<tr><td>${field}</td><td><select data-field="${field}"></select></td><td class="lookup_data" data-field="${field}"></td></tr>`).appendTo(tbl);
             }
 
-            // Show message if no fields are available for mapping
-            if(this._current_cfg.fields.length == 0){
-                this._handleExtraSettings();
-            }
+            // Prepare any additional lookup settings
+            this._setupExtraSettings();
 
             // Get local ID for the record type
             let rty_ID = this._current_cfg.rty_ID > 0 ? $Db.getLocalID('rty',this._current_cfg.rty_ID) : '';
@@ -471,7 +469,15 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
         this._updateStatus(); // Refresh UI element states
     },
 
-    _handleExtraSettings: function(){
+    /**
+     * Set up the extra settings elements for the current service, pre-filled with current settings or default values
+     *
+     * @memberof heurist.lookupConfig
+     * @instance
+     * @private
+     * @returns {void}
+     */
+    _setupExtraSettings: function(){
 
         const serviceType = this._current_cfg.service;
         const rtyID = this._current_cfg.rty_ID;
@@ -487,67 +493,235 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
         if(serviceType === 'wikidata_SPARQL'){
 
+            let fields = this._current_cfg.options.SPARQL_field_map;
+            let $table = $settings.find('#SPARQL_field_map');
+            let $tbody = $table.find('tbody');
+            let $newMapping = $settings.find('.new-data');
+            const tdStyle = 'font-weight: bold; width: 40ch; max-width: 40ch; padding-bottom: 10px;';
+
+            $tbody.empty();
+
             let popupWikidataFieldMapping = (entry) => {
 
                 let label = '';
                 let dtyID = 0;
 
-                if(entry !== false){
+                let $editForm = $settings.find('#SPARQL_field_edit');
+
+                if(entry !== null){
+
                     label = entry.find('.labelField').text();
                     dtyID = entry.find('.rstField').attr('data-id');
+
+                    $editForm.find('input').val(label);
+                    $editForm.find('select').val(dtyID);
+    
+                    if($editForm.find('select').hSelect('instance') !== undefined){
+                        $editForm.find('select').hSelect('refresh');
+                    }
                 }
 
-                let $editForm = $settings.find('#SPARQL_field_edit');
-                $editForm.find('input').val(label);
-                $editForm.find('select').val(dtyID);
 
-                this.$Hmsg.showElementAsDialog({
+                let $dlg = null;
+                let allowCloseDialog = true;
+                $dlg = this.$Hmsg.showElementAsDialog({
                     element: $editForm[0],
+                    height: 225,
                     open: function(){
-                        console.log('open', this, arguments);
+                        $dlg = this;
                     },
                     title: dtyID === 0 ? 'Create new field mapping' : 'Edit existing field mapping',
+                    beforeClose: () => { return allowCloseDialog; },
                     buttons: {
-                        'Save': function(){ console.log(this, arguments); },
-                        'Cancel': () => {}
-                    }
+                        'Save': () => {
+
+                            let $editor = $dlg.find('#SPARQL_field_edit');
+                            let newLabel = $editor.find('input').val().replaceAll(/\s*/g, '');
+                            let newDTYID = $editor.find('select').val();
+                            allowCloseDialog = false;
+
+                            if(this.$H.isempty(newLabel) || !this.$H.isPositiveInt(newDTYID)){
+
+                                let msg = this.$H.isempty(newLabel) && !this.$H.isPositiveInt(newDTYID) ? 'Please enter a field name and select a record field...' : 'Please select a record field...';
+                                msg = this.$H.isempty(newLabel) ? 'Please enter a field name...' : msg;
+                                this.$Hmsg.showMsgFlash(msg, 3000);
+
+                                return;
+
+                            }else if(newLabel !== label){
+
+                                let existingLabels = $tbody.find(`[data-lbl="${newLabel}"]`);
+
+                                if(existingLabels.length > 0){
+                                    this.$Hmsg.showMsgFlash('Field label already used, please change it to something unique...', 3000);
+                                    return;
+                                }
+                            }
+
+                            let rstLabel = $Db.rst(rtyID, newDTYID, 'rst_DisplayName');
+
+                            if(entry !== null){
+                                entry.find('.labelField').text(newLabel);
+                                entry.find('.rstField').text(rstLabel).attr('data-id', newDTYID);
+                                entry.attr('data-lbl', newLabel).attr('title', `Field "${newLabel}" will be matched to the record field "${rstLabel}"`);
+                            }else{
+
+                                let rows = `
+                                <td class="labelField truncate" style="${tdStyle}">${newLabel}</td>
+                                <td style="width: 2em; text-align: center; padding-bottom: 10px;"> &rArr; </td>
+                                <td class="rstField truncate" style="${tdStyle}" data-id="${newDTYID}">${rstLabel}</td>
+                                <td style="padding-left: 10px;">
+                                    <button title="Edit entry" class="ui-icon ui-icon-pencil"></button>
+                                    <button title="Remove entry" class="ui-icon ui-icon-close" style="margin-left: 1em;"></button>
+                                </td>
+                                `;
+
+                                let $row = $('<tr>', {html: rows, 'data-lbl': newLabel, class: 'field-entry', title: `Field "${label}" will be matched to the record field "${rstLabel}"`})
+                                    .appendTo($tbody);
+                                
+                                $row.find('button').button();
+                                this._on($row.find('.ui-icon-pencil'), {
+                                    click: (event) => {
+                                        popupWikidataFieldMapping($(event.target).closest('.field-entry'));
+                                    }
+                                });
+                                this._on($row.find('.ui-icon-close'), {
+                                    click: (event) => {
+                                        $(event.target).closest('.field-entry').remove();
+                                        this._updateStatus();
+                                    }
+                                });
+                            }
+
+                            this._updateStatus();
+
+                            allowCloseDialog = true;
+                            $dlg.dialog('close');
+                        },
+                        'Cancel': () => {
+                            allowCloseDialog = true;
+                            $dlg.dialog('close');
+                        }
+                    },
+                    default_palette_class: 'ui-heurist-design'
                 });
             };
 
-            let fields = this._current_cfg.options.SPARQL_field_map;
-            let $table = $settings.find('#SPARQL_field_map');
-            let $newMapping = $table.find('.new-data');
-
             for(const label in fields){
 
-                if(!Object.hasOwn(fields, dtyID)){
+                if(!Object.hasOwn(fields, label)){
                     continue;
                 }
 
                 const dtyID = fields[label];
                 const rstLabel = $Db.rst(rtyID, dtyID, 'rst_DisplayName');
                 let rows = `
-                <td class="labelField" style="font-weight: bold;">${label}</td>
-                <td> &rArr; </td>
-                <td class="rstField" style="font-weight: bold;" data-id="${dtyID}">${rstLabel}</td>
-                <td>
+                <td class="labelField truncate" style="${tdStyle}">${label}</td>
+                <td style="width: 2em; text-align: center; padding-bottom: 10px;"> &rArr; </td>
+                <td class="rstField truncate" style="${tdStyle}" data-id="${dtyID}">${rstLabel}</td>
+                <td style="padding-left: 10px;">
                     <button title="Edit entry" class="ui-icon ui-icon-pencil"></button>
-                    <button title="Remove entry" class="ui-icon ui-icon-close"></button>
+                    <button title="Remove entry" class="ui-icon ui-icon-close" style="margin-left: 1em;"></button>
                 </td>
                 `;
 
-                $('<tr>', {html: rows, class: 'field-entry', title: `Field "${label}" will be matched to the record field "${rstLabel}"`})
-                    .insertBefore($newMapping);
+                $('<tr>', {html: rows, 'data-lbl': label, class: 'field-entry', title: `Field "${label}" will be matched to the record field "${rstLabel}"`})
+                    .appendTo($tbody);
             }
 
             this._on($newMapping, {
                 click: () => popupWikidataFieldMapping(null)
             });
+
+            $table.find('button').button();
             this._on($table.find('.ui-icon-pencil'), {
                 click: (event) => {
                     popupWikidataFieldMapping($(event.target).closest('.field-entry'));
                 }
-            })
+            });
+            this._on($table.find('.ui-icon-close'), {
+                click: (event) => {
+                    $(event.target).closest('.field-entry').remove();
+                    this._updateStatus();
+                }
+            });
+
+            this.$Hui.createRectypeDetailSelect($settings.find('select#SPARQL_edit_rst')[0], rtyID,
+                ['freetext', 'blocktext', 'enum', 'resource', 'relmarker', 'geo', 'date'],
+                [{key:'', title:'Select a field...'}],
+                {useHtmlSelect: false, selectedValue: ''}
+            );
+        }
+
+        // @todo: Handle general record dump settings for wikidata, bnf, etc...
+
+        $settings.show();
+    },
+
+    /**
+     * Check whether the current configuration has any extra setting changes
+     *
+     * @memberof heurist.lookupConfig
+     * @instance
+     * @private
+     * @param {boolean} setOptions - update the current configuration's options
+     * @returns {boolean} whether there has been any changes to service settings
+     */
+    _handleExtraSettings: function(setOptions = false){
+
+        const serviceType = this._current_cfg.service;
+        let $settings = this._$(`#lookup_settings .${serviceType}`);
+        let isModified = false;
+
+        if($settings.length === 0 || $settings.hasClass('no_settings')){
+            return isModified;
+        }
+
+        let options = this.$H.cloneJSON(this._current_cfg.options);
+        if(serviceType === 'wikidata_SPARQL'){
+
+            fields = this._retrieveExtraSettings();
+
+            if(JSON.stringify(this._current_cfg.options.SPARQL_field_map) !== JSON.stringify(fields)){
+                isModified = true;
+                options.SPARQL_field_map = fields;
+            }
+        }
+
+        if(setOptions){
+            this._current_cfg.options = options;
+        }
+
+        return isModified;
+    },
+
+    /**
+     * Retrieve the settings value from the UI elements and prepare it for saving
+     *
+     * @memberof heurist.lookupConfig
+     * @instance
+     * @private
+     * @returns {Object|string} value from settings UI element, preapred for saving
+     */
+    _retrieveExtraSettings: function(){
+
+        const serviceType = this._current_cfg.service;
+        let $settings = this._$(`#lookup_settings .${serviceType}`);
+
+        if($settings.length === 0 || $settings.hasClass('no_settings')){
+            return false;
+        }
+
+        if(serviceType === 'wikidata_SPARQL'){
+
+            let $tbody = $settings.find('#SPARQL_field_map tbody');
+            let fields = {};
+            $.each($tbody.find('tr'), (idx, row) => {
+                row = $(row);
+                fields[row.attr('data-lbl')] = row.find('.rstField').attr('data-id');
+            });
+
+            return fields;
         }
     },
     
@@ -654,7 +828,11 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
             // Check if basic properties (record type, label) have changed
             this._is_modified = (this._current_cfg.rty_ID != this.selectRecordType.val())
                              || (this._current_cfg.label != this._$('#inpt_label').val());
-    
+
+            if(this._current_cfg.service === 'wikidata_SPARQL'){
+                this._is_modified = this._handleExtraSettings(false);
+            }
+
             if(!this._is_modified){ // If not modified by basic properties, check further (e.g., field mappings)
                 this._super(); // Calls baseConfig._checkModification or similar
             }
@@ -1283,7 +1461,8 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
         this._isNewCfg = false; // No longer a new configuration
 
-        this._getExtraSettings();
+        // Update the extra settings
+        this._handleExtraSettings(true);
 
         this._services_modified = true; // Mark that overall configurations have changed
         window.hWin.HEURIST4.util.setDisabled(this.save_btn, !this._services_modified); // Enable main save button
