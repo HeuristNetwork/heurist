@@ -128,7 +128,6 @@ class System {
     public function __construct( $full_check=false ) {
 
         $this->needFullSessionCheck = $full_check;
-
         $this->settings = new SystemSettings($this);
     }
 

@@ -76,6 +76,9 @@ if( @$_REQUEST['isalive']==1){
         $format = 'website';
 
         $controller = new FrontController(isset($params)?$params:null);
+        if(!$controller->isInited()){
+            exit;
+        }
         
         if(array_key_exists('ver', $_REQUEST)){
             $websiteVersion = $_REQUEST['ver'];

@@ -54,16 +54,19 @@ class FrontController
     {
         // Take from GET or POST
         $this->req_params = is_array($params) ? $params : USanitize::sanitizeInputArray();
-
         $system = new System();
         if (!$system->init(@$this->req_params['db'])) {
             dataOutput($system->getError());
-            return null;
+            return;
         }
-
         $this->system = $system;
 
         ConceptCode::setSystem($system);
+    }
+    
+    public function isInited(): bool
+    {
+        return (isset($this->system) && $this->system->isInited());
     }
 
     /**
@@ -79,7 +82,7 @@ class FrontController
     {
         global $jwt_Secret; 
         
-        if (!(isset($this->system) && $this->system->isInited())) {
+        if(!$this->isInited()){
             return;
         }
 
