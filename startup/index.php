@@ -400,6 +400,8 @@ if (!defined('PDIR')){
 
                         if(Object.keys(all_databases).length>0 && show_list){
                             _showDatabaseList(); //show list at once
+                            $('#btnNewDatabase').button().show();
+                            $('#showDatabaseList').on({click: _showDatabaseList}); // goto step8
                         }else{
                             _initControls(); //show new database
                         }
@@ -607,7 +609,7 @@ if (!defined('PDIR')){
             list_div.empty();
             let len = Object.keys(all_databases).length;
             for (let idx=0;idx<len;idx++){
-                $('<li class=db-info truncate">'+all_databases[idx]+'</li>').appendTo(list_div);
+                $('<li class="db-info truncate">'+all_databases[idx]+'</li>').appendTo(list_div);
             }
 
             // hide loading icon - show title and list
@@ -829,8 +831,8 @@ a{
                             <button class="ui-button-action" id="btnOpenDatabase">Go</button>
                         </div>
                         <div style="font-size:smaller">You will be redirected to the Heurist database upon your selection</div>
-                        <div style="font-size:smaller"><a href="listDatabases.php" target="_blank" id="showDatabaseList" data-step="8">Browse all databases on server</a>
-                        (as <a href="../../databases/index.html" target="_blank" rel="noopener">html pages</a>)</div>
+                        <div style="font-size:smaller"><a href="#" id="showDatabaseList" data-step="8">Browse all databases on server</a>
+                        (as <a href="../../db-html-pages/index.html" target="_blank" rel="noopener">html pages</a>)</div>
                     </div>
 
                 </div>
@@ -937,7 +939,7 @@ a{
                 <h1 style="display:none">Databases</h1>
                 <span>Filter: </span>
                 <input id="filter_database" class="text ui-widget-content ui-corner-all" value="" autocomplete="off"/>
-                <button id="btnNewDatabase" onclick="_showStep(1)" class="ui-button-action" style="float:right;display:none">New Database</button>
+                <button id="btnNewDatabase" onclick="_showStep(1)" class="ui-button-action" style="margin-left: 5em; display: none;">New Database</button>
 
                 <?php if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false){ ?>
                 <span style="float:right;position:relative;bottom:25px;">
