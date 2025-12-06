@@ -278,6 +278,8 @@ $template_page = <<<EXP
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <title>{db_dname} - a Heurist Database by {db_owner}</title>
 
+        <link rel=icon href="{$base_url}favicon.ico" type="image/x-icon">
+
         <style>
             .dtl_row{display: table-row}
             .dtl_head{ display: table-cell; width: 175px; }
@@ -579,11 +581,12 @@ foreach ($databases as $idx=>$db_name){
     //list of all rectype names
 
     // This currently sorts alphabetically within groups, but could later use rty_OrderInGroup if it is ever set
-    $vals = mysql__select_list2($mysqli, 'SELECT rty_Name FROM defRecTypes,defRecTypeGroups WHERE rty_ShowInLists = 1 AND rty_RecTypeGroupID=rtg_ID ORDER BY rtg_Order,rty_Name');
-    if($vals==null){
+    $vals = mysql__select_list2($mysqli, 'SELECT DISTINCT rty_Name FROM Records INNER JOIN defRecTypes ON rty_ID = rec_RecTypeID INNER JOIN defRecTypeGroups ON rtg_ID = rty_RecTypeGroupID WHERE rec_FlagTemporary != 1 AND rty_ShowInLists = 1 ORDER BY rtg_Order, rty_Name');
+    if($vals == null){
         echo $tabs0.$db_name.' cannot execute query for defRecTypes table'.$eol;
         continue;
     }
+    $vals = array_filter($vals, function($rty_Name){});
 
     $values[17] = implode('<br>', $vals);// produce concatenated string of record types
 
