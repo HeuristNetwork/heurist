@@ -586,7 +586,6 @@ foreach ($databases as $idx=>$db_name){
         echo $tabs0.$db_name.' cannot execute query for defRecTypes table'.$eol;
         continue;
     }
-    $vals = array_filter($vals, function($rty_Name){});
 
     $values[17] = implode('<br>', $vals);// produce concatenated string of record types
 
