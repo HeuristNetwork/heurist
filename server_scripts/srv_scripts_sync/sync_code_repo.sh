@@ -27,6 +27,9 @@ git checkout h7dev-assoc
 echo "$LOG_PREFIX [ASSOC] Fetching from origin (h7dev-assoc)..."
 git fetch origin
 
+echo "$LOG_PREFIX [ASSOC] Resetting local h7dev-assoc to origin/h7dev-assoc..."
+git reset --hard origin/h7dev-assoc
+
 # 2) Fetch from upstream so upstream/h7dev is current
 echo "$LOG_PREFIX [ASSOC] Fetching from upstream (h7dev)..."
 git fetch upstream
@@ -64,11 +67,8 @@ cd "$REPO_DIR_GPL"
 git checkout h7dev
 
 echo "$LOG_PREFIX [GPL] Fetching from upstream (h7dev)..."
-git fetch upstream
-
-# Here we assume GPL repo has no local custom commits; we use fast-forward only.
-echo "$LOG_PREFIX [GPL] Fast-forwarding local h7dev from upstream/h7dev..."
-git merge --ff-only upstream/h7dev
+git fetch origin
+git reset --hard origin/h7dev
 
 echo "$LOG_PREFIX [GPL] Done."
 

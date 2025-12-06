@@ -130,8 +130,6 @@ We use `upstream` to point to the main Heurist repo (`HeuristNetwork/heurist.git
 - For **GPL repo**: `origin` = `HeuristNetwork/heurist`
 - For **ASSOC repo**: `origin` = `HeuristNetwork/HN_Association`
 
-You need to add `upstream` in **both** repos.
-
 ### 3.1 Add `upstream` in association repo (`h7-alpha-assoc`)
 
 ```bash
@@ -154,30 +152,6 @@ origin   git@github.com:HeuristNetwork/HN_Association.git (push)
 upstream https://github.com/HeuristNetwork/heurist.git (fetch)
 upstream https://github.com/HeuristNetwork/heurist.git (push)
 ```
-
-### 3.2 Add `upstream` in GPL repo (`h7-alpha-gpl`)
-
-```bash
-cd /var/www/html/HEURIST/h7-alpha-gpl
-
-git remote add upstream https://github.com/HeuristNetwork/heurist.git
-```
-
-Verify:
-
-```bash
-git remote -v
-```
-
-You should see something like:
-
-```text
-origin   https://github.com/HeuristNetwork/heurist.git (fetch)
-origin   https://github.com/HeuristNetwork/heurist.git (push)
-upstream https://github.com/HeuristNetwork/heurist.git (fetch)
-upstream https://github.com/HeuristNetwork/heurist.git (push)
-```
-
 ---
 
 ## 4. Manual check commands (before automating)
@@ -200,12 +174,14 @@ git checkout h7dev-assoc
 
 # Fetch from origin (updates origin/h7dev-assoc)
 git fetch origin
+git reset --hard origin/h7dev
 
 # Fetch from upstream (updates upstream/h7dev)
 git fetch upstream
 
 # Merge upstream/h7dev into local h7dev-assoc
-git merge upstream/h7dev
+git merge --no-ff upstream/h7dev -m "Automated merge from upstream/h7dev into h7dev-assoc"
+
 # If conflicts appear, resolve them, then:
 git add <fixed-files>
 git commit
@@ -231,10 +207,10 @@ git branch -a
 git checkout h7dev
 
 # Fetch latest from upstream
-git fetch upstream
+git fetch origin
+git reset --hard origin/h7dev
 
-# Fast-forward local h7dev to upstream/h7dev
-git merge --ff-only upstream/h7dev
+
 ```
 
 If `--ff-only` fails with a message that histories have diverged, you’ll need to inspect/review local commits in this repo. Under normal circumstances, this repo is expected to simply track upstream.
