@@ -71,3 +71,7 @@ echo "$LOG_PREFIX [GPL] Fast-forwarding local h7dev from upstream/h7dev..."
 git merge --ff-only upstream/h7dev
 
 echo "$LOG_PREFIX [GPL] Done."
+
+echo "$LOG_PREFIX [OWNERSHIP] Fixing ownership to myuser:heurist..."
+chown -R osmakov:heurist "$REPO_DIR_ASSOC" "$REPO_DIR_GPL"
+echo "$LOG_PREFIX [OWNERSHIP] Ownership fixed."
