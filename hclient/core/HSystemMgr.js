@@ -140,7 +140,7 @@ class HSystemMgr {
                       `${window.hWin.HAPI4.baseURL}?disclaimer=association_membership.html #content`,
                        null, 'Heurist Network Association', 
                        {enable_buttons_after:2000, closeOnEscape:false, noClose:true,
-                       open: (event, ui) => { $dlg.find('#noteAboutFunction').show(); $(event.target).css({height: '46em', padding: '0em 2em'}); },
+                       open: (event, ui) => { $dlg.find('#noteAboutFunction').show(); $(event.target).css({height: '44em', padding: '0em 2em'}); },
                        container: 'dlg-association-teaser'});
                        
         //call logger

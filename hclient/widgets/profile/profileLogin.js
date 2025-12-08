@@ -919,7 +919,7 @@ function doAuthentication(login_data, login_dialog)
                         enable_buttons_after:2000, closeOnEscape:false, noClose:true, container: 'dlg-association-required',
                         open: (event, ui) => {
                             $(event.target).find('#membership-required').show();
-                            $(event.target).css({height: '46em', padding: '0em 2em'});
+                            $(event.target).css({height: '44em', padding: '0em 2em'});
                         }
                     }
                 );
@@ -943,6 +943,7 @@ function doAuthentication(login_data, login_dialog)
 function onAuthentication(response){
 
     if(response.status == window.hWin.ResponseStatus.OK){
+
         window.hWin.HAPI4.setCurrentUser(response.data.currentUser);
         window.hWin.HAPI4.sysinfo = response.data.sysinfo;
 
@@ -950,21 +951,21 @@ function onAuthentication(response){
                         [window.hWin.HAPI4.currentUser]);
 
         if(login_dialog && login_dialog.dialog('instance') !== undefined) login_dialog.dialog( "close" );
-        
+
         if('nonmember'==window.hWin.HAPI4.sysinfo['associationMembershipStatus'] 
         || 'viaowner'==window.hWin.HAPI4.sysinfo['associationMembershipStatus']){
-            
+
             const lastcheck = window.hWin.HAPI4.get_prefs('association_teaser_last_shown');
             const currdate =  new Date().toISOString().slice(0, 10);
             if(lastcheck!=currdate){
-            
+
                 window.hWin.HAPI4.save_pref('association_teaser_last_shown',  currdate);
-            
+
                 window.hWin.HEURIST4.msg.showMsgDlgUrl(
                           `${window.hWin.HAPI4.baseURL}?disclaimer=association_membership.html #content`,
                            null, 'Heurist Network Association', 
                            {enable_buttons_after:2000, closeOnEscape:false, noClose:true, 
-                           container: 'dlg-association-teaser', open: (event, ui) => { $(event.target).css({height: '41em', padding: '2em 2em 0em'}); }});
+                           container: 'dlg-association-teaser', open: (event, ui) => { $(event.target).css({height: '39em', padding: '2em 2em 0em'}); }});
             }
         }        
     }
