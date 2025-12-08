@@ -1,0 +1,146 @@
+RewriteEngine On
+
+########################################################################
+# 0. Maintenance mode (disabled by default)
+########################################################################
+
+# Uncomment this block when you want to show a maintenance page.
+# This will redirect ALL requests to /maintenance.html
+# except requests that are already for /maintenance.html itself.
+
+# RewriteCond %{REQUEST_URI} !^/maintenance\.html$
+# RewriteRule ^ /maintenance.html [R=302,L]
+
+
+########################################################################
+# 1. API entry points for each instance
+########################################################################
+
+# /heurist/api/... → /heurist/hserv/controller/api.php
+RewriteRule ^heurist/api/(.*)$ /heurist/hserv/controller/api.php [L,QSA]
+
+# /h7-alpha/api/... → /h7-alpha/hserv/controller/api.php
+RewriteRule ^h7-alpha/api/(.*)$ /h7-alpha/hserv/controller/api.php [L,QSA]
+
+# /h6-alpha/api/... → /h6-alpha/hserv/controller/api.php
+RewriteRule ^h6-alpha/api/(.*)$ /h6-alpha/hserv/controller/api.php [L,QSA]
+
+# Special mapping kept as in original:
+# /h6-ij/api/... → /h6-alpha/hserv/controller/api.php
+RewriteRule ^h6-ij/api/(.*)$ /h6-alpha/hserv/controller/api.php [L,QSA]
+
+
+########################################################################
+# 2. Root-level website/web/tpl/hml/view/edit/adm
+#    (dicobiosports on its own domain)
+########################################################################
+
+# For vhosts where those paths are used directly as entry points:
+# /website, /web/foo, /view/123, etc. → /heurist/redirects/resolver.php
+RewriteRule ^(website|web|tpl|hml|view|edit|adm)(?:/|$)(.*)$ \
+    /heurist/redirects/resolver.php [L,QSA]
+
+
+########################################################################
+# 3. /instance/<DB>/(website|web|tpl|hml|view|edit|adm)...
+########################################################################
+
+# /heurist/<DB>/website|web|tpl|hml|view|edit|adm → heurist resolver
+RewriteRule ^heurist/([A-Za-z0-9_]+)/(website|web|tpl|hml|view|edit|adm)(.*)$ \
+    /heurist/redirects/resolver.php [L,QSA]
+
+# /h7-alpha/<DB>/website|web|... → h7-alpha resolver
+RewriteRule ^h7-alpha/([A-Za-z0-9_]+)/(website|web|tpl|hml|view|edit|adm)(.*)$ \
+    /h7-alpha/redirects/resolver.php [L,QSA]
+
+# /h6-alpha/<DB>/website|web|... → h6-alpha resolver
+RewriteRule ^h6-alpha/([A-Za-z0-9_]+)/(website|web|tpl|hml|view|edit|adm)(.*)$ \
+    /h6-alpha/redirects/resolver.php [L,QSA]
+
+# /h6-ij/<DB>/website|web|... → h6-ij resolver
+RewriteRule ^h6-ij/([A-Za-z0-9_]+)/(website|web|tpl|hml|view|edit|adm)(.*)$ \
+    /h6-ij/redirects/resolver.php [L,QSA]
+
+
+########################################################################
+# 4. Generic /<DB>/(website|short-mode) resolver
+#    Excludes reserved prefixes (instances & technical paths)
+########################################################################
+
+# Reserved prefixes: heurist, h7-alpha, h6-alpha, h6-ij, startup, matomo, hst
+#
+# If URI starts with <DB>/website or <DB>/<1–4-letter-lowercase>,
+# and <DB> is NOT one of those reserved prefixes,
+# then dispatch to the generic heurist resolver.
+
+RewriteRule ^(?!(?:heurist|h7-alpha|h6-alpha|h6-ij|startup|matomo|hst)/) \
+    ([A-Za-z0-9_]+)/(?:website|[a-z]{1,4})(?:/|$)(.*)$ \
+    /heurist/redirects/resolver.php [L,QSA]
+
+
+########################################################################
+# 5. Default website when only /instance/<DB> (no mode) is given
+########################################################################
+
+# /heurist/<DB> or /heurist/<DB>/ → heurist resolver
+RewriteRule ^heurist/([A-Za-z0-9_]+\/?)$ \
+    /heurist/redirects/resolver.php [L,QSA]
+
+# /h7-alpha/<DB> or /h7-alpha/<DB>/ → h7-alpha resolver
+RewriteRule ^h7-alpha/([A-Za-z0-9_]+\/?)$ \
+    /h7-alpha/redirects/resolver.php [L,QSA]
+
+# /h6-alpha/<DB> or /h6-alpha/<DB>/ → h6-alpha resolver
+RewriteRule ^h6-alpha/([A-Za-z0-9_]+\/?)$ \
+    /h6-alpha/redirects/resolver.php [L,QSA]
+
+# /h6-ij/<DB> or /h6-ij/<DB>/ → h6-ij resolver
+# (This was pointing to /heurist/redirects/ in your original; now consistent.)
+RewriteRule ^h6-ij/([A-Za-z0-9_]+\/?)$ \
+    /h6-ij/redirects/resolver.php [L,QSA]
+
+
+########################################################################
+# 6. Default website when only /<DB> (no instance) is given
+########################################################################
+
+# If the FIRST path segment is alnum/underscore, and is NOT one of
+# the reserved prefixes, then treat it as a root-level DB name
+# and hand it to the heurist resolver.
+#
+# Examples:
+#   /mydb           → /heurist/redirects/resolver.php
+#   /mydb/          → /heurist/redirects/resolver.php
+#
+# Note: /db and /db/ will still match this rule (same as before),
+# but /db/record/... is handled separately by the universal resolver
+# further below.
+RewriteRule ^(?!(?:heurist|h7-alpha|h6-alpha|h6-ij|startup|matomo|hst)(?:/|$)) \
+    ([A-Za-z0-9_]+\/?)$ \
+    /heurist/redirects/resolver.php [L,QSA]
+
+
+########################################################################
+# 7. Special temporary redirect (books of hours in Canada)
+########################################################################
+
+# For 6 months: if URL is /heurist or /heurist/ and query string is
+# db=booksofhoursincanada, redirect to the website URL instead.
+
+RewriteCond %{QUERY_STRING} ^db=booksofhoursincanada$ [NC]
+RewriteRule ^heurist/?$ /booksofhoursincanada/web [R=302,L,QSD]
+
+
+########################################################################
+# 8. Universal record & file resolvers
+########################################################################
+
+# /db/(record|rec|rty|dty|trm)/<concept-code>/<record-id>?
+# e.g. /db/record/123-456/789
+RewriteRule ^db/(record|rec|rty|dty|trm)/([0-9-]+\/?)([0-9]+)?$ \
+    /h7-alpha/redirects/resolver.php [L,QSA]
+
+# /db/file/<token>
+# e.g. /db/file/abc-123/
+RewriteRule ^db/file/([a-z0-9-]+\/?)$ \
+    /h7-alpha/redirects/resolver.php [L,QSA]

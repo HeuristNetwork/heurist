@@ -82,7 +82,7 @@ This directory contains files that should be placed in the parent directory of t
 
 `heuristConfigIni.php` is **CRITICAL**, as it sets all local configuration parameters, including server names, directory locations, and database access passwords.
 
-### **/server_scripts**
+### **/server_management**
 
 This directory contains scripts for installing, updating, and verifying instances, and for managing databases on a server. These should be copied to an appropriate place (e.g., `/srv/scripts`) and configured for the local environment, including creating a global cron job with `sudo crontab -e`.
 

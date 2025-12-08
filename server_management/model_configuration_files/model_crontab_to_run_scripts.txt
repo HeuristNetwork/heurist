@@ -2,17 +2,19 @@
 
 # Last revised (Huma-Num server): 4 July 2025
 
+#   ******** THIS FILE NEEDS UPDATING FROM RECENT CHANGES MADE ON HEURISTAU.NET
+#            Scripts no longer need to be moved to /srv/scripts, they can run in situ in the heurist code
+
 # Set the address for mailign results and warnings. Comma delimit multiple addresses
 MAILTO=<email address(es)>
 
 # minute, hour, day of month, month, day of week 0=sun, 1=mon etc.
 
-<<<<<<< Updated upstream
 # Monitor server metrics every 5 mins and report hourly if over limit
-5 * * * * /srv/scripts/alert_server.sh >/dev/null 2>&1
+5 * * * * /var/www/html/HEURIST/heurist/server_management/alert_server.sh >/dev/null 2>&1
 
 # Puts a copy of the support directory files on the server as a backup against the HeuristRef.net server going down
-20 0 * * * /srv/scripts/sync_HEURIST_SUPPORT_from_HeuristRef.sh
+20 0 * * * /var/www/html/HEURIST/heurist/server_management/code_synchronisation/sync_HEURIST_SUPPORT_from_HeuristRefNet.sh
 
 # Update h7-alpha at 1am from reference server - build runs daily at 8am or later Sydney time
 30 00 * * * curl -lk https://HeuristRef.Net/HEURIST/DISTRIBUTION/update_heurist.sh | bash -s h7-alpha
@@ -25,7 +27,6 @@ MAILTO=<email address(es)>
 #           REMOVE WEB SERVER SCRIPTS FROM MYSQL SERVER
 =======
 # SERVER MONITORING
->>>>>>> Stashed changes
 
 # *********************
 
@@ -57,45 +58,51 @@ MAILTO=<email address(es)>
 
 # mins hour  day  month  weekday  command   * indicates any, weekdays 0 - 6
 
-# BACKUPS - early morning = late evening in Europe, afternoon in USA
-# Runs on the database server. 
-# If run from the web server these scripts will be SLOW compared with running on single tier or directly on the DB server
+# Run all the backup and reporting fucntions (developed 7/12/25)
+00 01 * * * /var/www/html/HEURIST/heurist/server_management/nightly_procedures.php
 
-#Ansible: Local backups for all databases
-00 01 * * * /srv/scripts/backup_all_dbs.sh
+//Replaces all the rest
 
-# Creates archive copy of database dumps when bz2 files change
-30 02 * * * /srv/scripts/archive_bzip_dbs.sh >/dev/null 2>&1
+    # BACKUPS - early morning = late evening in Europe, afternoon in USA
+    # Runs on the database server. 
+    # If run from the web server these scripts will be SLOW compared with running on single tier or directly on the DB server
 
+    #Ansible: Local backups for all databases
+    00 01 * * * /srv/scripts/backup_all_dbs.sh
+
+    # Creates archive copy of database dumps when bz2 files change
+    30 02 * * * /srv/scripts/archive_bzip_dbs.sh >/dev/null 2>&1
+
+    # Removes redundant older bz2 files of SQL database dumps
+    15 03 * * * /srv/scripts/purge_ARCHIVE.sh >/dev/null 2>&1
+
+    # AUTOMATED REPORT_ARCHIVEING ON USERS AND SETUP OF THE DATABASES
+
+    # Email lists to support
+    # set last item to * for daily, 0 for sunday, 1 for Monday mailout
+    00 04 * * 0 /srv/scripts/run_checks_and_email_lists_to_support.sh >/dev/null 2>&1
+    
+    # Cleanup database folders (root, backup and scratch) 4:30am on Monday
+    00 05 * * 0  php -f /var/www/html/HEURIST/h6-alpha/admin/utilities/cleanupFoldersDBs.php -- -purge
+
+    #Ansible: Check all database tables
+    10 05 * * 0 /srv/scripts/check_for_required_tables.sh
+
+    # Purge inactive databases, import and sysArchive tables
+    30 05 * * 0  php -f /var/www/html/HEURIST/heurist/admin/utilities/purgeInactiveDBs.php -- -purge
+
+
+    # Create list of all users for all databases (Sunday)
+    19 10 * * 0 /srv/scripts/list_all_users_with_dbs.sh
+
+# ----------------------------------------------------
+    
 # Precautionary restart of apache and mysqld in the early hours
-00 03 * * * service mysqld restart
-05 03 * * * /usr/sbin/apachectl restart
-
-# Removes redundant older bz2 files of SQL database dumps
-15 03 * * * /srv/scripts/purge_ARCHIVE.sh >/dev/null 2>&1
-
-# AUTOMATED REPORT_ARCHIVEING ON USERS AND SETUP OF THE DATABASES
-
-# Email lists to support
-# set last item to * for daily, 0 for sunday, 1 for Monday mailout
-00 04 * * 0 /srv/scripts/run_checks_and_email_lists_to_support.sh >/dev/null 2>&1
+00 05 * * * service mysqld restart
+05 05 * * * /usr/sbin/apachectl restart
 
 # Email reminders and update scheduled smarty reports
 00 05 * * * php -f /var/www/html/HEURIST/heurist/admin/setup/dboperations/dailyCronJobs.php
-
-# Cleanup database folders (root, backup and scratch) 4:30am on Monday
-00 05 * * 0  php -f /var/www/html/HEURIST/h6-alpha/admin/utilities/cleanupFoldersDBs.php -- -purge
-
-#Ansible: Check all database tables
-10 05 * * 0 /srv/scripts/check_for_required_tables.sh
-
-# Purge inactive databases, import and sysArchive tables
-30 05 * * 0  php -f /var/www/html/HEURIST/heurist/admin/utilities/purgeInactiveDBs.php -- -purge
-
-
-# Create list of all users for all databases (Sunday)
-19 10 * * 0 /srv/scripts/list_all_users_with_dbs.sh
-
 
 #Ansible: Email PHP errors logs
 15 03 * * * /usr/bin/php -f /srv/scripts/php_error_log_sender.php

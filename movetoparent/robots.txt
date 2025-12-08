@@ -8,7 +8,7 @@ Disallow: /heurist/hserv/
 Disallow: /heurist/import/
 Disallow: /heurist/movetoparent/
 Disallow: /heurist/redirects/
-Disallow: /heurist/server_scripts/
+Disallow: /heurist/server_management/
 Disallow: /heurist/startup/
 Disallow: /heurist/viewers/
 Disallow: /h6-alpha/

@@ -230,7 +230,7 @@ mkdir -p /srv/scripts
 Assuming `sync_code_repo.sh` already exists in your source code (for example in a repository checkout), copy it to `/srv/scripts/`:
 
 ```bash
-cp /var/www/html/HEURIST/h7-alpha-gpl/hserv/server_scripts/srv_scripts_sync/sync_code_repo.sh /srv/scripts/sync_code_repo.sh
+cp /var/www/html/HEURIST/h7-alpha-gpl/hserv/server_management/srv_scripts_sync/sync_code_repo.sh /srv/scripts/sync_code_repo.sh
 ```
 
 ### 5.3 Make the script executable

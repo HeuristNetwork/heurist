@@ -1,5 +1,5 @@
 
-Directory:	/server_scripts/prerequisites
+Directory:	/server_management/prerequisites
 
 Overview:	These scripts are rather old and retained mainly jsut for reference
             or later revamp

@@ -3,6 +3,7 @@
 # Script: build_archive_packages.sh               
 
 # Creates complete/full archive packages for all or specified list of databases
+# It was written to allow transfer of a large number of databases between servers
 # Package contains all database data in various formats and all files from db folder
 # It uses buildArchivePackagesCMD.php
 # Destintion folder is _BATCH_PROCESS_ARCHIVE_PACKAGE
