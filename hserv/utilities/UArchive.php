@@ -158,9 +158,8 @@ class UArchive {
                 $size = filesize($destination) / pow(1024, 2);
 
                 if($verbose) {
-                    echo "<br>Successfully dumped data from ". htmlspecialchars($source) ." to ".htmlspecialchars($destination);
-                    echo "<br>The zip file contains ".htmlspecialchars($numFiles." files and is ".sprintf("%.2f", $size))."MB";
-                }
+                    echo "<br>Created full backup file (".htmlspecialchars($numFiles." files, ".sprintf("%.2f", $size))."MB) ".htmlspecialchars($destination);
+                    }
             }else{
                 return $verbose?($destination.' archive not created. Directory may be non-writeable or archive function is not installed on server'):false;
             }
@@ -512,8 +511,7 @@ class UArchive {
                 $size = filesize($destination.'.bz2') / pow(1024, 2);
 
                 if($verbose) {
-                    echo "<br>Successfully dumped data from ". htmlspecialchars($source) ." to ".htmlspecialchars($destination);
-                    echo "<br>The archive file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
+                    echo "<br>Created SQL-only backup file (".htmlspecialchars($numFiles." files, ".sprintf("%.2f", $size))."MB) ".htmlspecialchars($destination);
                 }
             }else{
                 return $verbose?($destination.'.bz2 archive not created Directory may be non-writeable or archive function is not installed on server'):false;

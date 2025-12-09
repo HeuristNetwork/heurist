@@ -409,7 +409,7 @@ if ($mode > 1) {
             </p>
             <h3 class="ui-heurist-title">Warning</h3>
             <p>Zipping databases and including lots of images or video may bog down the server and the file may not upload to the repository
-            - in that case it may be better to ask your sysadmin to give you the files separately on a USB drive and attempt to upload it yourself.</p>
+            - in that case it may be better to ask your sysadmin to give you the files separately via large file transfer and attempt to upload it yourself.</p>
             <?php } ?>
             <p>Attached files may be omitted by unchecking the first checkbox.
             <br>This may also be useful for databases with lots of attached files which are already backed up elsewhere.
