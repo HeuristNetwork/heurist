@@ -154,12 +154,11 @@ class ReportExecute
 
             // Load template content
             $content = $this->loadTemplateContent();
-
+            
             if ($content) {
                 
                 // Fetch record IDs based on search query
                 $query_result = $this->fetchRecordIDs();
-
                 $result = true;
 
                 // Handle empty result set

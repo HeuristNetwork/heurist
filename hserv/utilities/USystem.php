@@ -65,7 +65,7 @@ class USystem {
 
         $installDir = '';
         $installDir_pro = '';
-        $codeFolders = array('heurist','h6-alpha','h7-alpha','h6-ao');//need to cli and short url
+        $codeFolders = array('heurist','h6-alpha','h7-alpha','h6-ao','h7-alpha-gpl');//need to cli and short url
 
         if (php_sapi_name() == 'cli'){
 
@@ -88,7 +88,7 @@ class USystem {
 
             $iDir = explode('/', $sDir);
             $cntDir = count($iDir)-1;
-            $path = null;
+            $path = [];
             for ($i=$cntDir; $i>=0; $i--){
                 if(in_array($iDir[$i], $codeFolders)) {
                     $installDir = '/'.$iDir[$i].'/';
