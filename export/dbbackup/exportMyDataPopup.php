@@ -402,7 +402,7 @@ if ($mode > 1) {
             <h3 class="ui-heurist-title">Warning</h3>
             <p>Zipping databases with large numbers of images or very large files such as high
             <br>resolution maps or video may bog down the server and the zip file may be too big to download.
-            <br>In that case you may need to ask your sysadmin to give you the files separately on a USB drive.</p>
+            <br>In that case you may need to ask your sysadmin to give you the files separately by large file transfer.</p>
             <?php } else { ?>
             <!-- Information for repository export -->
             <p>The output of the process will be zipped and uploaded to the selected repository
@@ -782,7 +782,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                     $display_format = ($format == 'tar' || $format == 'tar.bz2') ? 'tar.bz2' : 'zip';
     ?>
     <!-- Download links section -->
-    <p>Your data has been backed up in <?php echo htmlspecialchars(FOLDER_BACKUP);?></p>
+    <p>Your data has been successfully backed up as zip file(s) indicated above</p>
     <br><br><div class='lbl_form'></div> <!-- Label placeholder? -->
         <a href="exportMyDataPopup.php/<?php echo $system->dbname();?>.<?php echo $display_format; ?>?mode=2&db=<?php echo $system->dbname().$param_format;?>"
             target="_blank" rel="noopener" style="color:blue; font-size:1.2em">Click here to download your data as a <?php echo $display_format;?> archive</a>
