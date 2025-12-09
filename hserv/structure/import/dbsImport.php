@@ -1281,7 +1281,7 @@ $mysqli->commit();
                     ."a) URL requested: $remoteURL<br><br>");//$database_url
             }
 
-            $defs = json_decode($defs, true); //was gzdecode($defs)
+            $defs = json_decode(gzdecode($defs), true);
             if(!$defs || @$defs['status']!=HEURIST_OK){
                 $this->system->addError(HEURIST_ERROR, $message);
                 return false;
