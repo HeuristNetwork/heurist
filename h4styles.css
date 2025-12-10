@@ -1435,6 +1435,26 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     display: inline-block;
 }
 
+.heuristFacetHistogram{
+    display: flex;
+    flex-direction: row;
+
+    height: 50px;
+    max-height: 50px;
+}
+.heuristFacetHistogramColumn{
+    cursor: pointer;
+
+    display: inline-block;
+    margin-top: auto;
+
+    background-color: gray;
+}
+.heuristFacetHistogramColumn:hover{
+    background-color: lightgray;
+    border: 1px solid black;
+}
+
 .truncate {
     white-space: nowrap;
     overflow: hidden;

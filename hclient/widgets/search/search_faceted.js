@@ -2981,123 +2981,134 @@ let s_time = new Date().getTime() / 1000;
                                     if(dty_ID.indexOf('r.')==0){
                                         dty_ID = dty_ID.slice(2);    
                                     }
-                                    
+
                                     let request = {
-                                        a: 'gethistogramdata',  // Get histogram data
+                                        a: 'getdatehistogramdata',  // Get histogram data
                                         db: window.hWin.HAPI4.database, // database
-                                        recids: ids,            // record/s of interest
-                                        dtyid: dty_ID,     // detail type id
+                                        recids: ids, // record/s of interest
+                                        dtyid: dty_ID, // detail type id
                                         range: [lower, higher], 
-                                        format: date_type,      // year, month, day
-                                        interval: 25,            // interval size
-                                        is_between: (field.srange=='between')?1:0
+                                        format: date_type, // year, month, day
+                                        interval: 25, // interval size
+                                        is_between: field.srange=='between' ? 1 : 0
                                     };
 
                                     let $slide_range = $facet_values.find('div.ui-slider-range');
 
                                     window.HAPI4.RecordMgr.get_date_histogram_data(request, function(response){
 
-                                        if(response.status == window.hWin.ResponseStatus.OK){
+                                        if(response.status != window.hWin.ResponseStatus.OK){
                                             
-                                            let data = response.data;
-                                            
-                                            $slide_range.parent().parent().css('margin-top', '50px'); // Add space above slider
+                                            if(window.hWin.HAPI4.has_access()){ //display error message, only if the user is logged in
+                                                response.message = 'An error occurred with generating the time graph data<br>' + response.message;
+                                                window.hWin.HEURIST4.msg.showMsgErr(response);
+                                            }
 
-                                            // Get available width
-                                            let slider_width = $slide_range.width();
+                                            return;
+                                        }
 
-                                            // Diagram's Container
-                                            let $diagram = $('<div>', {id: `facet_histo_${facet_index}`, class: 'heuristFacetHistogram'})
+                                        let data = response.data;
+
+                                        // Get available width
+                                        let slider_width = $slide_range.width();
+
+                                        // Diagram's Container
+                                        let $diagram = $('<div>', {id: `facet_histo_${facet_index}`, class: 'heuristFacetHistogram'})
+                                        .css({
+                                            width: `${slider_width}px`,
+                                            'max-width': `${slider_width}px`
+                                        })
+                                        .prependTo($slide_range.parent().parent());
+
+                                        // Cautionary check before continuing
+                                        if($diagram.length == 0){
+                                            return;
+                                        }
+
+                                        $diagram
+                                            .position({my: 'bottom left', at: 'top left', of: $slide_range})
                                             .css({
-                                                'height': '50px', 
-                                                'max-height': '50px', 
-                                                'width': slider_width+'px', 
-                                                'max-width': slider_width+'px', 
-                                                'display': 'flex',
-                                                'flex-direction': 'row'
-                                            })
-                                            .appendTo($slide_range.parent())
-                                            .position({my: 'bottom left', at: 'top left', of: $slide_range});
-
-                                            // Object doesn't exist
-                                            if($diagram.length == 0){
-                                                return;
-                                            }
-
-                                            let position = $diagram.position();
-
-                                            // Cautionary check before continuing
-                                            if(window.hWin.HEURIST4.util.isempty(position)){
-                                                return;
-                                            }
-
-                                            let left = position.left - 1;
-                                            let top = position.top - 32;
-
-                                            $diagram.css({
-                                                'top': top+'px', 
-                                                'max-width': $diagram.width()-4, 
-                                                'width': $diagram.width()-4,
-                                                'position': 'absolute'
+                                                'max-width': $diagram.width()-4,
+                                                width: $diagram.width()-4,
+                                                position: 'relative',
+                                                top: '0px'
                                             });
 
-                                            // Column sizing
-                                            let col_width = $diagram.width() / data.length;
-                                            let col_gap = col_width * 0.25;
-                                            col_width -= col_gap;
+                                        // Column sizing
+                                        let col_width = $diagram.width() / data.length;
+                                        let col_gap = col_width * 0.25;
+                                        col_width -= col_gap;
 
-                                            if(col_width < 3) {
-                                                col_width = $diagram.width() / data.length;
-                                                col_gap = 0;
+                                        if(col_width < 3) {
+                                            col_width = $diagram.width() / data.length;
+                                            col_gap = 0;
+                                        }
+                                        if(data.length == 1){
+                                            col_gap = 0;
+                                        }
+
+                                        let max_value = 0;
+
+                                        for(let i = 0; i < data.length; i++){
+                                            const count = data[i][2];
+                                            if(max_value < count) max_value = count;
+                                        }
+                                        // Adding individual columns
+                                        for(let i = 0; i < data.length; i++){
+
+                                            const count = data[i][2];
+                                            let height = 0;
+
+                                            if(count > 0){
+                                                height = count / max_value * 50;
+                                                if(height < 10){
+                                                    height = 10;
+                                                }
                                             }
-                                            if(data.length == 1){
-                                                col_gap = 0;
-                                            }
 
-                                            let max_height = 0, max_value = 0;
+                                            let dateRange = `${temporalSimplifyDate(data[i][0].toString())} to ${temporalSimplifyDate(data[i][1].toString())} (n = ${count})`;
+                                            let range = `${temporalSimplifyDate(data[i][0].toString())} ${temporalSimplifyDate(data[i][1].toString())}`;
 
-                                            for(let i = 0; i < data.length; i++){
-                                                const count = data[i][2];
-                                                if(max_value < count) max_value = count;
-                                            }
-                                            // Adding individual columns
-                                            for(let i = 0; i < data.length; i++){
-                                                const count = data[i][2];
-                                                let height = 0;
+                                            $('<div>', {id: `histo_col_${facet_index}_${i}`, class: 'heuristFacetHistogramColumn', title: dateRange, 'data-range': range})
+                                            .css({
+                                                width: `${col_width}px`, 
+                                                'margin-right': `${col_gap}px`,  
+                                                height: `${height == 0 ? 2 : height}px`,
+                                                visibility: height == 0 ? 'hidden' : 'visible'
+                                            }).appendTo($diagram);
+                                        }
 
-                                                if(count > 0){
-                                                    height = (count / max_value) * 50;
-                                                    if(height < 10){
-                                                        height = 10;
-                                                    }
+                                        that._on($diagram.find('.heuristFacetHistogramColumn'), {
+                                            click: (event) => {
+
+                                                let $target = $(event.target);
+
+                                                window.hWin.HEURIST4.util.stopEvent(event);
+                                                event.preventDefault();
+
+                                                if(!$target.hasClass('heuristFacetHistogramColumn')){
+                                                    return;
                                                 }
 
-                                                $('<div>', {id: `histo_col_${facet_index}_${i}`, class: 'heuristFacetHistogramColumn'})
-                                                .css({
-                                                    'background-color': 'gray', 
-                                                    'width': col_width+'px', 
-                                                    'margin-right': col_gap+'px', 
-                                                    'display': 'inline-block', 
-                                                    'height': ((height == 0) ? 2 : height) +'px',
-                                                    'visibility': (height == 0) ? 'hidden' : 'visible',
-                                                    'margin-top': 'auto'
-                                                }).appendTo($diagram);
-                                            }
+                                                let range = $target.attr('data-range')?.split(' ');
 
-                                           
-                                            if(small_ui){
+                                                if(!range || range?.length !== 2){
+                                                    return;
+                                                }
 
-                                                let $slide_handle = $slide_range.parent().find('.ui-icon-triangle-1-w-stop');
-                                                if($slide_handle.length>0)
-                                                $facet_values.find('.ui-icon-triangle-1-w').position({my: 'right-6 center+5', at: 'right bottom', of: $($slide_handle)});
-                                                
-                                                $slide_handle = $slide_range.parent().find('.ui-icon-triangle-1-e-stop');
-                                                if($slide_handle.length>0)
-                                                $facet_values.find('.ui-icon-triangle-1-e').position({my: 'left+6 center+5', at: 'left bottom', of: $($slide_handle)});
+                                                __onSlideStartSearch(range[0], range[1]);
                                             }
-                                        }else if(window.hWin.HAPI4.has_access()){ //display error message, only if the user is logged in
-                                            response.message = 'An error occurred with generating the time graph data<br>' + response.message;
-                                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                                        });
+
+                                        if(small_ui){
+
+                                            let $slide_handle = $slide_range.parent().find('.ui-icon-triangle-1-w-stop');
+                                            if($slide_handle.length>0)
+                                            $facet_values.find('.ui-icon-triangle-1-w').position({my: 'right-6 center+5', at: 'right bottom', of: $($slide_handle)});
+
+                                            $slide_handle = $slide_range.parent().find('.ui-icon-triangle-1-e-stop');
+                                            if($slide_handle.length>0)
+                                            $facet_values.find('.ui-icon-triangle-1-e').position({my: 'left+6 center+5', at: 'left bottom', of: $($slide_handle)});
                                         }
                                     });
                                 }

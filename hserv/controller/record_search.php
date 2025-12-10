@@ -136,7 +136,7 @@
 
         $response = recordSearchFacets($system, $req_params);
 
-    }elseif(@$req_params['a'] == 'gethistogramdata'){ // returns array of lower and upper limit plus a count for each interval
+    }elseif(@$req_params['a'] == 'getdatehistogramdata'){ // returns array of lower and upper limit plus a count for each interval
 
         $response = getDateHistogramData($system, $req_params['range'], $req_params['interval'],
                     @$req_params['recids'], @$req_params['dtyid'], @$req_params['format'], @$req_params['is_between']==1);
