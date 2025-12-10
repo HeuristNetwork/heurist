@@ -250,6 +250,18 @@ We want:
 
 > Note: For email delivery to work, the server must have a mail transfer agent (MTA) configured (e.g. `postfix`, `sendmail`, etc.).  
 
+If you really want to run the script as root via cron, you must tell Git (for root) that these directories are safe
+
+```bash
+git config --global --add safe.directory /var/www/html/HEURIST/h7-alpha-assoc
+git config --global --add safe.directory /var/www/html/HEURIST/h7-alpha-gpl
+```
+
+You can check later with:
+```bash
+git config --global --get-all safe.directory
+```
+
 ### 6.1 Open crontab
 
 For the user that should run the sync (commonly `root`):
