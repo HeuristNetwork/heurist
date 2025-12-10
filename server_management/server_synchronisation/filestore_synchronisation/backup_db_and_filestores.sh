@@ -73,7 +73,8 @@ for DB in $DBS; do
     mkdir -p "$BACKUP_DIR"
 
     # Dump + gzip
-    DUMP_FILE="${BACKUP_DIR}/${DB}_${DATE}.sql.gz"
+    # Add ${DATE} for timestamp
+    DUMP_FILE="${BACKUP_DIR}/${DB}.sql.gz"
     echo "[$LOG_TAG] Dumping database ${DB} to ${DUMP_FILE}"
 
     mysqldump_cmd "$DB" | gzip > "$DUMP_FILE"
@@ -84,13 +85,13 @@ for DB in $DBS; do
 
     echo "[$LOG_TAG] Rsync ${LOCAL_DIR} -> ${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
 
-    rsync -az --delete \
+    rsync -az --delete --omit-dir-times \
       -e "ssh -i /home/tunnel/.ssh/dbtunnel_ed25519 -o IdentitiesOnly=yes" \
       "$LOCAL_DIR" \
       "${REMOTE_USER}@${REMOTE_HOST}:${REMOTE_DIR}"
         
     # TESTING: stop after first database
-    break        
+    # break        
 done
 
 echo "[$LOG_TAG] $(date) - Backup run completed successfully."
