@@ -752,7 +752,7 @@ var datatable_custom_render = null;
 // is_show_pagetitle_main - for cms home
 //
 function assignPageTitle(pageid){
-
+    
     var pagetitle = '';
 
     if(!window.hWin.HEURIST4.util.isempty(page_cache[pageid][DT_NAME])){
@@ -774,22 +774,21 @@ function assignPageTitle(pageid){
     }
 
     // if page title is visible - increase height of header
-    if($('#main-header').length>0 && $('#main-content-container').length>0){
+    if($('#main-header').length>0 && $('#main-content-container').length>0 && title_container.length>0){
 
         const eleHeader = $(document.getElementById('main-header'));
         const h = eleHeader.outerHeight();
 
-        if(h==137 || h==144 || h==151 || h==181){ //default values
+        //if(h==137 || h==144 || h==151 || h==181){ //values to detect default bhaviour - not reliable
 
             //debug $('#main-header').css({'border':'2px red solid'});
-
+            
             let title_height = title_container.outerHeight() - 20;
-            $(eleHeader).outerHeight(is_show_pagetitle ? 181 + title_height : 151);
-
-            $('#main-content-container').css({top: is_show_pagetitle ? 181 + title_height : 151});
+            $(eleHeader).outerHeight(is_show_pagetitle ?181+title_height :151);
+            $('#main-content-container').css({top:is_show_pagetitle? 181+title_height :151});
 
             $('#main-menu').css('bottom', is_show_pagetitle ? title_container.outerHeight() : 0);
-        }
+        
 
     }
 }
