@@ -12,7 +12,7 @@
  *
  * Usage from cron (example):
  *   MAILTO="support@heuristnetwork.org"
- *   17 * * * * /usr/bin/php /var/www/html/HEURIST/heurist/admin/utilities/refreshMembershipList.php
+ *   18 * * * * php -f /var/www/html/heurist/admin/utilities/refreshMembershipList.php
  *
  * On success:  silent (exit 0)
  * On failure:  message on STDERR, non-zero exit → cron mails you if MAILTO is set.
