@@ -737,7 +737,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             // return the date intervals for the provided record type using the provided detail type
             //
             , get_date_histogram_data: function (request, callback) {
-                if (request && !request.a) request.a = 'gethistogramdata';
+                if (request && !request.a) request.a = 'getdatehistogramdata';
                 _callserver('record_search', request, callback);
             }
 

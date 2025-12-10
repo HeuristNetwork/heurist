@@ -2090,35 +2090,35 @@ $.widget( "heurist.search_faceted_wiz", {
                 let btn = listdiv.find('button.btnset_radio[data-idx="'+idd+'"][data-value="'+facets[k].isfacet+'"]');
                 btn.addClass('ui-heurist-btn-header1');  //heighlight               
 
-                    function __dateGrouping(idd){ //for year-date
-                        
-                            let idx = -1;
-                            for(let m=0; m<facets.length; m++){
-                                if(facets[m]['var']==idd){
-                                    idx = m;
-                                    break;
-                                }
-                            }
-                            if(idx>=0){
-                                if(facets[idx].type=='date' || facets[idx].type=='year'){
-                                    let cur_mode = listdiv.find('button.ui-heurist-btn-header1[data-idx="'+idd+'"]').attr('data-value');
-                                    let is_allowed = (cur_mode>1);
-                                                   
-                                    listdiv.find('#facet_DateGroup'+idd).css({'display':is_allowed?'inline':'none'});        
-                                    listdiv.find('input:checkbox[name="facet_HideHistogram'+idd+'"]').css({'display': cur_mode==1?'inline':'none'});
-                                    if(is_allowed){
-                                        if(window.hWin.HEURIST4.util.isempty(facets[idx].groupby)){
-                                            facets[idx].groupby = 'year';
-                                        }
-                                        listdiv.find('select[name="facet_Group'+idd+'"]').val(facets[idx].groupby);
-                                    }
-                                }
-                            }else{
-                                console.error('Facet not found '+idd);
-                            }
-                    }
+                function __dateGrouping(idd){ //for year-date
 
-                
+                    let idx = -1;
+                    for(let m=0; m<facets.length; m++){
+                        if(facets[m]['var']==idd){
+                            idx = m;
+                            break;
+                        }
+                    }
+                    if(idx>=0){
+                        if(facets[idx].type=='date' || facets[idx].type=='year'){
+                            let cur_mode = listdiv.find('button.ui-heurist-btn-header1[data-idx="'+idd+'"]').attr('data-value');
+                            let is_allowed = (cur_mode>1);
+
+                            listdiv.find('#facet_DateGroup'+idd).css({'display':is_allowed?'inline':'none'});        
+                            listdiv.find('input:checkbox[name="facet_HideHistogram'+idd+'"]').css({'display': cur_mode==1?'inline':'none'});
+                            if(is_allowed){
+                                if(window.hWin.HEURIST4.util.isempty(facets[idx].groupby)){
+                                    facets[idx].groupby = 'year';
+                                }
+                                listdiv.find('select[name="facet_Group'+idd+'"]').val(facets[idx].groupby);
+                            }
+                        }
+                    }else{
+                        console.error('Facet not found '+idd);
+                    }
+                }
+
+
                 this._on( listdiv.find('button.btnset_radio'), {
                     click: function(event) {
                         let btn = $(event.target);
