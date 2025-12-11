@@ -338,9 +338,9 @@ function task_backupAllDatabases(array $config): TaskResult
         $sqlFile = $backupDir . '/' . $dbName . '.sql';
         $bz2File = $sqlFile . '.bz2';
 
-        // mysqldump command
+        // mysqldump command     --databases vs --no-create-db 
         $cmd = sprintf(
-            'mysqldump -h%s -P%d -u%s -p%s --single-transaction --routines --triggers --events --add-drop-database --skip-dump-date --databases %s > %s',
+'mysqldump -h%s -P%d -u%s -p%s --single-transaction --skip-triggers --skip-routines --add-drop-table --quick --skip-dump-date %s > %s',
             escapeshellarg($config['mysql']['host']),
             (int)$config['mysql']['port'],
             escapeshellarg($config['mysql']['user']),
@@ -348,6 +348,8 @@ function task_backupAllDatabases(array $config): TaskResult
             escapeshellarg($dbName),
             escapeshellarg($sqlFile)
         );
+        
+        
 
         $exitDump = runShellCommand($cmd, $res, $backupDir);
         if ($exitDump !== 0) {
