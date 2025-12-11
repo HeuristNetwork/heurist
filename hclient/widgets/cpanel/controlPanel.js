@@ -123,7 +123,7 @@ $.widget( "heurist.controlPanel", {
         let that = this;
 
         // Set the basic CSS for the control panel
-        this.element.css('height', '100%').addClass('ui-heurist-header2')
+        this.element.css('height', '100%')
             .disableSelection();// prevent double click to select text
 
         this.div_logo = $('div.logo');
@@ -160,7 +160,12 @@ $.widget( "heurist.controlPanel", {
             }
         });
 
-
+        //change bg color for remote database
+        this.element.addClass('ui-heurist-header2');
+        if(window.hWin.HAPI4.sysinfo.database_hostname){
+            this.element.css({'background-color':'rgb(128, 0, 0)'});    
+        }
+        
         // current and last databases dropdown
         this.div_dbname = this.element.find('div.dblist-container');
 
@@ -179,8 +184,17 @@ $.widget( "heurist.controlPanel", {
                 wasCtrl = event.shiftKey;
             })
             .on('change', function(event){
-                if(window.hWin.HAPI4.database!=$(event.target).val()){
-                    let url =  window.hWin.HAPI4.baseURL+'?db='+$(event.target).val();
+                const dbname  = $(event.target).val();
+
+                let currentDb = window.hWin.HAPI4.database;
+                if(window.hWin.HAPI4.sysinfo.database_hostcode){
+                    currentDb = window.hWin.HAPI4.sysinfo.database_hostcode+'-'+currentDb;
+                }
+                
+                if(currentDb!=dbname){
+                    //window.hWin.HAPI4.sysinfo.database_hostname
+                    //window.hWin.HAPI4.sysinfo.database_hostcode
+                    let url =  window.hWin.HAPI4.baseURL+'?db='+dbname;
                     $(event.target).val(window.hWin.HAPI4.database);
                     if(wasCtrl){
                         location.href = url;
@@ -192,7 +206,14 @@ $.widget( "heurist.controlPanel", {
             })
             .addClass('ui-heurist-header2')
             .uniqueId()
-            .val( window.hWin.HAPI4.database ).appendTo( this.div_dbname );
+            .appendTo( this.div_dbname );
+
+            let currentDb = window.hWin.HAPI4.database;
+            if(window.hWin.HAPI4.sysinfo.database_hostcode){
+                currentDb = window.hWin.HAPI4.sysinfo.database_hostcode+'-'+currentDb;
+            }
+            $(selObj).val(currentDb);
+            
         }else{
 
             $("<div>").css({'font-size':'1em', 'font-weight':'bold', 'padding-left':'22px', 'margin-left':'50px',

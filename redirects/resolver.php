@@ -42,7 +42,7 @@
 
 // NOTE: THIS HAS BEEN SUBSTANTIALLY DEVELOPED AND IS NOW DOCUMENTED IN /server_management/utility/apache_configurations.txt
 // Add to httpd.conf
-// RewriteRule ^/heurist/([A-Za-z0-9_]+)/(website|web|tpl|hml|view)/(.*)$ /heurist/redirects/resolver.php
+// RewriteRule ^/heurist/([A-Za-z0-9_-]+)/(website|web|tpl|hml|view)/(.*)$ /heurist/redirects/resolver.php
 // redirection for CMS, Smarty, hml output and record view
 // website or web - cms website
 // tpl - smarty
@@ -67,7 +67,7 @@ $requestContent = array('xml'=>'text/xml',
                         'rdf'=>'application/rdf+xml',
                         'html'=>'text/html');
 
-$allowedVersions = ['heurist','h6-alpha','h7-alpha','h7-hn']; //
+$allowedVersions = ['heurist','h6-alpha','h7-alpha','h7-hn'];
                         
 $format = null;
 $redirection_path = '../';
@@ -103,7 +103,7 @@ if(count($requestUri)==1 && in_array($requestUri[0], $allowedVersions)){
 /*elseif (count($requestUri)==1){
     
     $dbname = filter_var($requestUri[0]);
-    if(!preg_match('/[^A-Za-z0-9_\$]/', $dbname)){
+    if(!preg_match('/[^A-Za-z0-9_\-\$]/', $dbname)){
         //include_once '../startup/index.php';
         redirectURL2('/'.rawurlencode($dbname).'/web/');
         exit;
@@ -120,7 +120,7 @@ elseif (!( ($requestUri[0]=='db')
     
     $dbname = filter_var(@$requestUri[$idx]);
      
-    if(!preg_match('/[^A-Za-z0-9_\$]/', $dbname)){
+    if(!preg_match('/[^A-Za-z0-9_\-\$]/', $dbname)){
         //include_once '../startup/index.php';
         redirectURL2('/'.rawurlencode($dbname).'/web/');
         exit;
@@ -229,7 +229,7 @@ $requestUri:
     }
 
     $error_msg = null; //mysql__check_dbname($requestUri[1]);
-    if($requestUri[1]=='' || preg_match('/[^A-Za-z0-9_\$]/', $requestUri[1])){
+    if($requestUri[1]=='' || preg_match('/[^A-Za-z0-9_\-\$]/', $requestUri[1])){
         $error_msg = 'Database parameter is wrong';
     }
     $params = array();

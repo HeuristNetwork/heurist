@@ -98,6 +98,7 @@ $heuristReferenceServerMirror = ''; //reserve mirror server, if it is set, it ow
 
 // *** DO NOT SET THESE UNLESS YOU KNOW WHAT YOU ARE DOING ***
 //     they override the values set in ../heuristConfigIni.php
+$dbHostName = '';
 $dbHost = '';
 $dbPort = null;  //'3306'
 $dbAdminUsername = '';
@@ -151,7 +152,7 @@ $mailDomain = null; // set mail domain if it does not use server domain
 // if base $heuristBaseURL is null, heurist detects it automatically 
 // Although it may differ from desired url you wish to see (because web server settings: aliases, rewrite rules etc)
 // Set this value explicitely to avoid possible issues
-$heuristBaseURL = null;     // base url ( ie server url+optional folder https://heurist.huma-num.fr/h7-alpha )  
+$heuristBaseURL = null;     // base url ( ie server url+optional folder https://heurist.eu/h7-alpha )  
 // if you have several heurist instances of heurist, set this value to production instance
 //
 // if $heuristBaseURL is set and $heuristBaseURL_pro is null, then production version is the same as $heuristBaseURL
@@ -212,9 +213,39 @@ to use token use curl parm -H
 
 */
 
+// detect database server from database parameter
+$envVersion = null;
+if(isset($params['db']) || isset($_REQUEST['db'])){
+    $dbHostCode = null;
+    $dbName = $params['db']??$_REQUEST['db'];
+    if(strpos($dbName,'-')>1){
+        [$dbHostCode, $dbName] = explode('-', $dbName);
+    }
+    
+    if($dbHostCode){
+        $envVersion = strtoupper($dbHostCode);
+        $_REQUEST['db'] = $dbName; //without host code
+    }else{
+        //try to find in session
+        $dbnameFull = $dbName;
+        if(strpos($dbName, $dbPrefix)!==0){
+            $dbnameFull = $dbPrefix.$dbName;
+        }
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_name('heurist-sessionid');//set session name
+            session_cache_limiter('none');
+            @session_start();
+        }
+        if(isset($_SESSION[$dbnameFull]['dbHostCode'])){
+            $envVersion = $_SESSION[$dbnameFull]['dbHostCode'];
+        }
+    }
+}
+
+
 // parent directory configuration file is optional, hence include not required
 // heuristConfigIni.php in parent directory overrides empty values in current file
 if (is_file($parentIni)){
     include_once $parentIni;
 }
-?>
+

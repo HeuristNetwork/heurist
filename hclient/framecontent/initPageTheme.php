@@ -202,8 +202,8 @@ select.ui-heurist-header2, input.ui-heurist-header2{
 }
 
 .ui-heurist-header2, .ui-heurist-btn-header1 {
-    background-color:<?php uout('ca_bg', '#364050');?> !important;
-    color:<?php uout('ca_color', CLR_WHITE);?> !important;
+    background-color:<?php uout('ca_bg', '#364050');?>;
+    color:<?php uout('ca_color', CLR_WHITE);?>;
 }
 .ui-heurist-btn-header1 {
     border: none !important;

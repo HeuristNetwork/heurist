@@ -1169,13 +1169,18 @@ class DbUtils {
      * Creates the standard set of folders required for a Heurist database if they do not already exist.
      *
      * @param string $database_name The name of the database for which to create folders.
+     * @param string $server_prefix Server prefix to attach to filestore directory.
      * @return array An array of warning messages if any folder creation failed. Empty if all successful.
      */
-    public static function databaseCreateFolders($database_name){
+    public static function databaseCreateFolders($database_name, $server_prefix = ''){
 
         list($database_name_full, $database_name) = mysql__get_names( $database_name );
 
         $upload_root = self::$system->getFileStoreRootFolder();
+
+        if($server_prefix !== ''){
+            $upload_root = str_replace('HEURIST_FILESTORE', "HEURIST_FILESTORE_{$server_prefix}", $upload_root);
+        }
 
         // Create a default upload directory for uploaded files eg multimedia, images etc.
         $database_folder = $upload_root.$database_name.'/';
@@ -1949,6 +1954,163 @@ class DbUtils {
         return $res;
     }
 
+    /**
+     * Setup filesotre for connecting a new remote database, by:
+     *  0 => Adds the database to the waiting list (_DBS_AWAITING_SYNC.txt) and awaits the completion of the remote filestore download
+     *       This assumes that the setup remote filestore shell script is setup and runs every minute (script: setup_remote_db_filestore.sh)
+     *  1 => Create default database filestore directory within the remote filestore directory
+     *       This assumes the auto rsync shell script is setup and runs ever 5 minutes (script: monitor_and_rsync_db_filestores.sh)
+     * The association setup uses mode 1.
+     *
+     * @param array $request
+     * @return bool|array{message: string, status: string|bool}
+     */
+    public static function connectRemoteDatabase($request){
+
+        global $remoteServers, $defaultRootFileUploadPath;
+
+        if(empty($request['remoteDB']) || empty($request['server'])){
+            self::$system->addError(HEURIST_INVALID_REQUEST, 'Missing required parameters for remote database setup');
+            return false;
+        }
+
+        /*
+            Modes: 
+            0 - use the waiting list (add to text file, file will be read by bash script, file store directory will be created in the bash script)
+            1 - use the sync script (create file store directory, on next sync files will be added)
+        */
+        $mode = @$_REQUEST['mode'] === 0 ? 0 : 1;
+
+        // Prepare server prefix and database name
+        $remoteDatabase = htmlspecialchars($request['remoteDB']);
+        $serverPrefix = htmlspecialchars($request['server']);
+        if(empty($remoteServers) || empty($defaultRootFileUploadPath) || !array_key_exists($serverPrefix, $remoteServers)){
+            self::$system->addError(HEURIST_ACTION_BLOCKED, 'Operation not allowed');
+            return false;
+        }
+        $syncDatabase = "{$serverPrefix}-{$remoteDatabase}";
+
+        $filestorePath = str_replace("HEURIST_FILESTORE", "HEURIST_FILESTORE_{$serverPrefix}", $defaultRootFileUploadPath);
+        $remoteFilestorePath = "{$filestorePath}{$remoteDatabase}";
+
+        // Verify that: the server has a filestore root on this server and that the database isn't already connected
+        if(!file_exists($filestorePath)){
+            self::$system->addError(HEURIST_ERROR, 'Unable to determine path to local filestore.');
+            return false;
+        }elseif(folderExists($remoteFilestorePath, false) === 1){
+            self::$system->addError(HEURIST_ACTION_BLOCKED, "This remote database is already connected.");
+            return false;
+        }
+
+        // ERROR MESSAGES
+        $emailSupport = <<<EMAIL
+        please contact the <a href="mailto:support@heuristnetwork.org?subject=Attempting to synchronise {$remoteDatabase} to Heurist.eu">Heurist team</a>.
+        EMAIL;
+
+        $SYNC_DONE = <<<STR
+        Your remote database has been synchronised to this server.<br>
+        If your database doesn't appear on the list below, {$emailSupport}
+        STR;
+
+        $SYNC_INPROGRESS = <<<STR
+        Your remote database is still being synchronised to this server, please refresh the database list page in a few minutes (for larger databases this time can be longer than normal).<br>
+        If your database still doesn't appear after 10 minutes, {$emailSupport}
+        STR;
+
+        $SYNC_ERROR = <<<STR
+        An error has occurred while attempting to synchronise the remote database to this server, this can be due to networking issues between this server and the remote server.<br>
+        Please contact the <a href="mailto:support@heuristnetwork.org?subject=Error while synchronising {$remoteDatabase} to Heurist.eu">Heurist team</a>, include which remote server and database you are attempting to set up.
+        STR;
+
+        $SYNC_BUSY = <<<STR
+        The server is currently experiencing delays in setting up new remote databases, please refresh the database list page after a few minutes.<br>
+        If after 10 minutes your database doesn't appear, {$emailSupport}<br><br>
+        <em><strong>NOTE: Spamming the remote set up request will not make the process go any faster</strong></em>
+        STR;
+
+        $SYNC_PREP_DONE = <<<STR
+        Your remote database has been synchronised to this server.<br>
+        If your database doesn't appear on the list below, {$emailSupport}
+        STR;
+
+        $SYNC_PREP_WAIT = <<<STR
+        The local filestore has been prepped for synchronisation.<br>
+        The synchronisation script is ran roughly every 5 minutes on this server.<br>
+        The download may take longer for databases with many images or very large files.<br><br>
+        <strong>Please wait a few minutes before refreshing this page and attempting to access your remote database</strong>.
+        STR;
+
+        $SYNC_PREP_FAILED = <<<STR
+        Heurist failed to prepare the local filestore for the new remote database.<br>
+        Please contact the <a href="mailto:support@heuristnetwork.org?subject=Error while synchronising {$remoteDatabase} to Heurist.eu">Heurist team</a>, include which remote server and database you are attempting to set up.<br><br>
+        STR;
+
+        if($mode === 0){ // use the waiting list - requires setup_remote_db_filestore.sh to be ran from a cronjob
+
+            $waitingListFile = HEURIST_FILESTORE_ROOT . '_DBS_AWAITING_SYNC.txt';
+            if(!file_exists($waitingListFile) || filesize($waitingListFile) === 0){
+                file_put_contents($waitingListFile, "$syncDatabase,");
+            }else{
+                $waitingList = file_get_contents($waitingListFile) ?: '';
+                if(!mb_ereg("{$syncDatabase},", $waitingList)){
+                    $waitingList .= "{$syncDatabase},";
+                    file_put_contents($waitingListFile, $waitingList);
+                }
+            }
+
+            $waiting = 0;
+            while(true){
+
+                sleep(60);
+
+                if(folderSize($remoteFilestorePath) > 0 || filesize($waitingListFile) === 0 || $waiting === 10){
+                    break;
+                }
+
+                $waiting ++;
+            }
+
+            $isRemoteFilestoreCreated = folderSize($remoteFilestorePath) > 0;
+            $stillSyncing = file_exists("/tmp/ssh_setup_fs_{$syncDatabase}");
+            $waitingList = file_get_contents($waitingListFile) ?: '';
+
+            $result = $stillSyncing ? ['status' => 'inprogress', 'message' => $SYNC_INPROGRESS] : [];
+            $result = $isRemoteFilestoreCreated && !$stillSyncing ? ['status' => 'done', 'message' => $SYNC_DONE] : $result;
+            $result = empty($result) && mb_ereg("{$syncDatabase},", $waitingList) ? ['status' => 'busy', 'message' => $SYNC_BUSY] : $result;
+            $result = empty($result) ? ['status' => 'error', 'message' => $SYNC_ERROR] : $result;
+
+        }else{ // creates the basic filestore, then waits for the 5 minute auto sync to run 
+
+            $warnings = self::databaseCreateFolders($remoteDatabase, $serverPrefix);
+
+            if(!empty($warnings)){
+
+                $listedErrors = implode(' | ', $warnings);
+
+                self::$system->addError(HEURIST_ERROR, "Failed to setup the filestore for {$syncDatabase}, errors: {$listedErrors}");
+
+                $SYNC_PREP_FAILED .= implode('<br>', $warnings);
+
+                $result = ['status' => 'failed', 'message' => $SYNC_PREP_FAILED];
+            }
+
+            $waiting = 0;
+            while(true){
+
+                sleep(60);
+
+                if(file_exists("$remoteFilestorePath/userInteraction.log") || $waiting == 10){
+                    break;
+                }
+
+                $waiting ++;
+            }
+
+            $result = file_exists("$remoteFilestorePath/userInteraction.log") ? ['status' => 'done', 'message' => $SYNC_PREP_DONE] : ['status' => 'inprogress', 'message' => $SYNC_PREP_WAIT];
+        }
+
+        return $result;
+    }
 
 }
 

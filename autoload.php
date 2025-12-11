@@ -42,6 +42,7 @@ spl_autoload_register(
         require_once $filepath;
     }
 );
+
 require_once dirname(__FILE__).'/configIni.php';// read in the configuration file
 
 require_once dirname(__FILE__).'/hserv/consts.php';

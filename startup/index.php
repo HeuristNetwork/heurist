@@ -13,8 +13,11 @@
 */
 use hserv\utilities\USystem;
 
+define('DB_LIST_ONLY', @$_REQUEST['openDatabase'] == 1);
+
 if (!defined('PDIR')){
-    define('PDIR',substr($_SERVER['REQUEST_URI'] , -1)=='/'?'../':'');
+    $PDIR = DB_LIST_ONLY || substr($_SERVER['REQUEST_URI'] , -1) == '/' ? '../' : '';
+    define('PDIR',$PDIR);
     require_once dirname(__FILE__).'/../autoload.php';
 }
 
@@ -49,16 +52,23 @@ if (!defined('PDIR')){
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
 
 <script>
-    window.hWin = window;
-     //stub
-    window.hWin.HR = function(res){ return res; }
+
+    if(!window.hWin){
+        window.hWin = window;
+    }
+
+    //stub
+    window.hWin.HR = res => res;
+
 </script>
 
 <script type="text/javascript">
 
     const baseURL = '<?php echo HEURIST_BASE_URL; ?>';
     const sysadmin_email = '<?php echo HEURIST_MAIL_TO_ADMIN; ?>';
-    let all_databases = {};
+    let allDatabases = {};
+    let availableDatabases = {};
+    let serverNames = {};
 
 /*
     screens/steps
@@ -380,39 +390,41 @@ if (!defined('PDIR')){
     /**
      * Fetches the list of databases from the server.
      * Sends a request to 'startup/listDatabases.php'.
-     * On success, stores the database list in `all_databases`.
+     * On success, stores the database list in `allDatabases`.
      * If `show_list` is true and databases are found, it calls `_showDatabaseList`.
      * Otherwise, it calls `_initControls`.
-     * On failure, it clears `all_databases` and shows an error.
+     * On failure, it clears `allDatabases` and shows an error.
      * @param {boolean} show_list - If true, attempts to show the database list screen immediately after fetching.
      */
     function _getDatabases( show_list ){
-            const url = baseURL+'startup/listDatabases.php';
 
-            let request = {format:'json'};
+        const url = `${baseURL}startup/listDatabases.php`;
 
-            window.hWin.HEURIST4.util.sendRequest(url, request, null,
-                function(response){
+        let request = { format: 'json', includeRemote: 1 };
 
-                    if(response.status == window.hWin.ResponseStatus.OK){
+        window.hWin.HEURIST4.util.sendRequest(url, request, null, (response) => {
 
-                        all_databases = response.data;
+            if(response.status == window.hWin.ResponseStatus.OK){
 
-                        if(Object.keys(all_databases).length>0 && show_list){
-                            _showDatabaseList(); //show list at once
-                            $('#btnNewDatabase').button().show();
-                            $('#showDatabaseList').on({click: _showDatabaseList}); // goto step8
-                        }else{
-                            _initControls(); //show new database
-                        }
+                allDatabases = response.data;
+                serverNames = allDatabases.server_names;
+                delete allDatabases.server_names;
 
-                    }else{
-                        all_databases = {};
-                        //@todo show error on special screen - not popup
-                        window.hWin.HEURIST4.msg.showMsgErr(response, false);
-                    }
+                if(Object.keys(allDatabases).length > 0 && show_list){
+                    _showDatabaseList(); //show list at once
+                    $('#btnNewDatabase').button().show();
+                    $('#showDatabaseList').on({click: _showDatabaseList}); // goto step8
+                }else{
+                    _initControls(); //show new database
+                }
 
-                });
+            }else{
+                allDatabases = {};
+                //@todo show error on special screen - not popup
+                window.hWin.HEURIST4.msg.showMsgErr(response, false);
+            }
+
+        });
     }
 
     /**
@@ -456,7 +468,7 @@ if (!defined('PDIR')){
     /**
      * Initializes controls on the main startup screen (step 1).
      * Sets up event handlers for registration, database creation, and getting started buttons.
-     * If existing databases are found (`all_databases` is populated):
+     * If existing databases are found (`allDatabases` is populated):
      *  - Initializes the "Find your database" search input with autocomplete functionality.
      *  - Sets up the "Open Database" button.
      *  - Sets up the "Browse all databases" link.
@@ -474,7 +486,7 @@ if (!defined('PDIR')){
         $('#btnCreateDatabase').button().on({click: _doCreateDatabase});//on step 3
         $('#btnGetStarted').button().on({click: _showGetStarted });//goto step6 - getting started
 
-        if(Object.keys(all_databases).length>0){
+        if(Object.keys(allDatabases).length>0){
 
             //init controls on existing-user div
 
@@ -485,14 +497,16 @@ if (!defined('PDIR')){
                if($(event.target).parents('.list_div').length==0) { $('.list_div').hide();};
             }});
 
-            $('.list_div').on({click:function(e){
-                        $(e.target).hide();
-                        if($(e.target).hasClass('truncate')){
-                            //navigate to database
-                            $('#search_database').val($(e.target).text());
-                            $('.list_div').hide();
-                        }
-                    }});
+            $('.list_div').on({
+                click: (e) => {
+                    $(e.target).hide();
+                    if($(e.target).hasClass('truncate')){
+                        //navigate to database
+                        $('#search_database').val($(e.target).text());
+                        $('.list_div').hide();
+                    }
+                }
+            });
 
             $('#search_database')
                 .attr('autocomplete','off')
@@ -500,52 +514,50 @@ if (!defined('PDIR')){
                 .attr('autocapitalize','none')
                 .on({'keyup': function(event){
 
-                let list_div = $('.list_div');
+                    let list_div = $('.list_div');
 
-                let inpt = $(event.target);
-                let sval = inpt.val().toLowerCase();
+                    let inpt = $(event.target);
+                    let sval = inpt.val().toLowerCase();
 
-                if(sval.length>1){
-                    list_div.empty();
-                    let is_added = false;
-                    let len = Object.keys(all_databases).length;
-                    for (let idx=0;idx<len;idx++){
-                        if(all_databases[idx].toLowerCase().indexOf(sval)>=0){
-                            is_added = true; //res.push( all_databases[idx] );
-                            $('<div class="truncate">'+all_databases[idx]+'</div>').appendTo(list_div);
+                    if(sval.length>1){
+                        list_div.empty();
+                        let is_added = false;
+                        let len = Object.keys(allDatabases['current']).length;
+                        for (let idx = 0; idx < len; idx++){
+                            if(allDatabases['current'][idx].toLowerCase().indexOf(sval) >= 0){
+                                is_added = true;
+                                $(`<div class="truncate">${allDatabases['current'][idx]}</div>`).appendTo(list_div);
+                            }
                         }
+
+                        list_div.addClass('ui-widget-content').position({my:'left top', at:'left bottom', of:inpt})
+                            //.css({'max-width':(maxw+'px')});
+                            .css({'max-width':inpt.width()+60});
+                            if(is_added){
+                                list_div.show();
+                            }else{
+                                list_div.hide();
+                            }
+                    }else{
+                        list_div.hide();
                     }
-
-                    list_div.addClass('ui-widget-content').position({my:'left top', at:'left bottom', of:inpt})
-                        //.css({'max-width':(maxw+'px')});
-                        .css({'max-width':inpt.width()+60});
-                        if(is_added){
-                            list_div.show();
-                        }else{
-                            list_div.hide();
-                        }
-                }else{
-                    list_div.hide();
-                }
-
-
                 }});
 
             $('#btnOpenDatabase').button().on({click:function(){
 
-                    let sval = $('#search_database').val().trim();
-                    if(sval==''){
-                        window.hWin.HEURIST4.msg.showMsgFlash('Define database name');
-                    }else{
-                        let len = Object.keys(all_databases).length;
-                        for (let idx=0;idx<len;idx++){
-                            if(all_databases[idx] == sval){
-                                location.href = baseURL + '?db='+sval;
-                                return;
-                            }
+                let sval = $('#search_database').val().trim();
+                if(sval==''){
+                    window.hWin.HEURIST4.msg.showMsgFlash('Define database name');
+                }else{
+                    let len = Object.keys(allDatabases['current']).length;
+                    for (let idx = 0; idx < len; idx++){
+                        if(allDatabases['current'][idx] == sval){
+                            location.href = baseURL + '?db='+sval;
+                            return;
                         }
-                        window.hWin.HEURIST4.msg.showMsgFlash('Database "'+sval+'" not found');
                     }
+                    window.hWin.HEURIST4.msg.showMsgFlash('Database "'+sval+'" not found');
+                }
 
             }});
 
@@ -560,7 +572,7 @@ if (!defined('PDIR')){
 
     /**
      * Shows the list of all databases (step 8).
-     * If the list hasn't been populated yet, it dynamically creates list items for each database from `all_databases`.
+     * If the list hasn't been populated yet, it dynamically creates list items for each database from `allDatabases`.
      * Initializes a filter input to search through the database list.
      * Makes list items clickable to navigate to the selected database.
      * @param {Event} [event] - The click event object (optional), used to stop event propagation.
@@ -569,61 +581,240 @@ if (!defined('PDIR')){
         
         window.hWin.HEURIST4.util.stopEvent(event);
 
+        // hide loading icon and show title
         let screen = $('.center-box.screen8');
-        let list_div = screen.find('.db-list');
+        screen.find('span.ui-icon').parent().hide();
+        screen.find('h1').show();
 
-        if(list_div.children().length==0){
+        if($('#tabs-view').tabs('instance') !== undefined){
+            _showStep(8);
+            return;
+        }
 
-            $('#filter_database').on({'keyup': function(event){
+        _setupTab('current');
 
-                let list_div = $('.db-list');
+        for(const serverID in allDatabases){
 
-                let inpt = $(event.target);
-                let sval = inpt.val().toLowerCase();
+            if(serverID === 'current'){
+                continue;
+            }
 
-                if(sval.length>1){
+            _setupTab(serverID);
+        }
 
-                    list_div.find('.db-info').each(function(i,li){
-                        
+        $('#tabs-view').tabs();
+        setupAddRemoteDBLink();
+        _showStep(8);
+    }
+
+    function _setupTab(server){
+
+        let $screen = $('.center-box.screen8');
+        if(!Object.hasOwn(allDatabases, server)){
+            return;
+        }
+
+        let serverPrefix = server !== 'current' ? `${server.toUpperCase()}-` : '';
+
+        let $tabsContainer = $screen.find('#tabs-view');
+        let $tabsLinks = $tabsContainer.find('#tabs-server-list');
+        let $tabLink = $tabsLinks.find(`a[href="#${server}-server-tab"]`);
+        let $tabContent = $tabsContainer.find(`#${server}-server-tab`);
+
+        if($tabContent.length === 0){
+
+            $tabLink = $('<a>', {href: `#${server}-server-tab`, text: serverNames[server]}).appendTo($('<li>').appendTo($tabsLinks));
+            $tabContent = $('<div>', {id: `${server}-server-tab`, class: 'server-tab'}).appendTo($tabsContainer);
+
+            $('<h3>', {text: `${serverNames[server]} (${serverPrefix})`}).appendTo($tabContent);
+            $('<span>', {text: 'Filter: '}).appendTo($tabContent);
+            $('<input>', {id: `${server}-tabs-filter_database`, class: 'text ui-widget-content ui-corner-all'}).attr('autocomplete', 'off').appendTo($tabContent);
+            <?php if(!DB_LIST_ONLY){ ?> $('<span>', {class: 'fake_link setup-remote-db', text: 'add database'}).data('server', server).appendTo($tabContent); <?php } ?>
+
+            $('<ul>', {class: 'db-list', style: 'display: none;'}).appendTo($tabContent);
+            $('<span>', {class: 'no-filtered-results', text: 'Filter does not match any found database'}).hide().appendTo($tabContent);
+        }
+
+        let $list = $tabContent.find('.db-list');
+
+        $tabContent.find(`#${server}-tabs-filter_database`).on({
+            keyup: (event) => {
+
+                let $tabContent = $(event.target).closest('.server-tab');
+                let $list = $tabContent.find('.db-list');
+
+                let $input = $(event.target);
+                let sval = $input.val().toLowerCase();
+
+                if(sval.length > 1){
+
+                    $list.find('.db-info').each((i, li) => {
+
                         let dbname;
-                        
-                        if(li.nodeName.toLowerCase()=='li'){
+
+                        if(li.nodeName.toLowerCase() == 'li'){
                             dbname = li.innerHTML.toLowerCase();
                         }else{
                             dbname = li.firstChild.innerHTML.toLowerCase();
                         }
-                        
-                        if(dbname.indexOf(sval)>=0){
+
+                        if(dbname.indexOf(sval) >= 0){
                             li.style.display = 'block';
                         }else{
                             li.style.display = 'none';
                         }
                     });
-
                 }else{
-                    list_div.find('.db-info').show();
+                    $list.find('.db-info').show();
                 }
-            }});
 
+                if($list.find('.db-info:visible').length === 0){
+                    $tabContent.find('.no-filtered-results').show();
+                }else{
+                    $tabContent.find('.no-filtered-results').hide();
+                }
+            }
+        });
 
-            list_div.empty();
-            let len = Object.keys(all_databases).length;
-            for (let idx=0;idx<len;idx++){
-                $('<li class="db-info truncate">'+all_databases[idx]+'</li>').appendTo(list_div);
+        $list.empty();
+
+        let databases = allDatabases[server];
+        for(let idx = 0; idx < databases.length; idx++){
+            $(`<li class="db-info truncate" title="${serverPrefix}${databases[idx]}">${serverPrefix}${databases[idx]}</li>`).appendTo($list);
+        }
+
+        $list.find('li').css('cursor', 'pointer').on({
+            click: (e) => {
+                let dbname = $(e.target).text();
+                <?php if(!DB_LIST_ONLY){ ?>
+                location.href = `${baseURL}?db=${dbname}`;
+                <?php }else{ ?>
+                window.hWin.location.href = `${baseURL}?db=${dbname}`;
+                <?php } ?>
+            }
+        });
+
+        $list.show();
+    }
+
+    function setupAddRemoteDBLink(){
+
+        let blockClick = false;
+        let $screen = $('.center-box.screen8');
+        $screen.find('.setup-remote-db').on({
+            click: (event) => {
+
+                if(blockClick){
+                    return;
+                }
+                blockClick = true;
+
+                let server = $(event.target).data('server');
+
+                const url = `${baseURL}startup/listDatabases.php`;
+
+                let request = { format: 'json', db: `${server}-` };
+
+                window.hWin.HEURIST4.msg.bringCoverallToFront($('body'), null, '<span style="color: white;">Retrieving list of databases on remote server...</span>');
+
+                window.hWin.HEURIST4.util.sendRequest(url, request, null, (response) => {
+
+                    blockClick = false;
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        availableDatabases[server] = response.data;
+                    }else{
+                        availableDatabases[server] = [];
+                        window.hWin.HEURIST4.msg.showMsgErr(response, false);
+                    }
+
+                    _listRemoteDatabases(server);
+                });
+            }
+        });
+    }
+
+    function _listRemoteDatabases(server){
+
+        if(!Object.hasOwn(availableDatabases, server)){
+            return;
+        }
+
+        let list = '';
+        for(const database of availableDatabases[server]){
+            list += `<div class="list-row truncate" title="${database}" data-database="${database.toLocaleLowerCase()}">${database}</div>`;
+        }
+        list = `<div class="setup-db-list">${list}</div>`;
+
+        let content = `<div>
+            <div>
+                <span>Search: <input id="database-name-search" class="text ui-widget-content ui-corner-all" value="" autocomplete="off" /></span>
+            </div>
+            ${list}
+        </div>`;
+
+        let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, null, {title: 'Set up remote database', ok: 'Close'}, {dialogId: 'heurist-load-remote'});
+
+        $dlg.find('.list-row').on('click', (event) => {
+
+            let request = {
+                action: 'connectRemote',
+                server: server,
+                remoteDB: $(event.target).text(),
+                mode: 1 //0
+            };
+
+            let msg = `<div style="font-size: 14px;padding: 2em 0em;font-weight: bold;">
+                The remote database filestore is being synchronised to this server.<br>
+                Due to the nature of this operation, the sync script is ran roughly every 5 minutes.<br>
+                The download may take longer for databases with many images or very large files.
+            </div>`;
+            let $msg = window.hWin.HEURIST4.msg.showMsgDlg(msg, {}, {title: 'Setting up remote database connection'}, {dialogId: 'connect-remote-db', closeOnEscape: false, noClose: true});
+
+            let url = `${baseURL}hserv/controller/databaseController.php`;
+            window.hWin.HEURIST4.util.sendRequest(url, request, null, (response) => {
+
+                $msg.dialog('close');
+
+                if(response.status != window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                    return;
+                }
+
+                $dlg.dialog('close');
+
+                let data = response.data;
+                let title = data.status === 'done' ? 'Finished remote database synchronisation' : 'Failed to synchronise remote database';
+                title = data.status === 'inprogress' ? 'Remote database synchronisation in progress' : title;
+
+                window.hWin.HEURIST4.msg.showMsgDlg(data.message, null, {title: title, ok: 'Close'}, {dialogId: 'connected-remote-db'});
+
+                if(data.status === 'done'){
+                    _getDatabases(true);
+                }
+
+            });
+        });
+
+        $dlg.find('#database-name-search').on('keyup', () => {
+
+            let $list = $dlg.find('.setup-db-list');
+            let searchingFor = $dlg.find('#database-name-search').val().toLowerCase();
+
+            if(window.hWin.HEURIST4.util.isempty(searchingFor) || searchingFor.length < 2){
+                $list.find('.list-row').show();
+                return;
             }
 
-            // hide loading icon - show title and list
-            screen.find('span.ui-icon').parent().hide();
-            list_div.show();
-            screen.find('h1').show();
-
-            list_div.find('li').css('cursor','pointer').on({click:function(e){
-                    let dbname  = $(e.target).text();
-                    location.href = baseURL + '?db='+dbname;
-            }});
-
-        }
-        _showStep(8);
+            let $results = $list.find(`.list-row[data-database*=${searchingFor}]`);
+            if($results.length > 0){
+                $list.find('.list-row').hide();
+                $results.show();
+            }else{
+                $list.find('.list-row').show();
+            }
+        });
     }
 
     /**
@@ -692,7 +883,7 @@ a{
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width:230px;
+    max-width:16.5em;
 }
 .logo_intro{
     background-image: url("<?php echo PDIR;?>hclient/assets/v6/h6logo_intro.png");
@@ -771,7 +962,9 @@ a{
     height:106px;
 }
 .db-list{
-    column-width: 250px;
+    column-width: 22em;
+    padding-left: 0px;
+    clear: both;
 }
 .db-list li {
     list-style: none;
@@ -780,6 +973,72 @@ a{
     background-repeat: no-repeat;
     padding-left: 30px;
     line-height: 17px;
+}
+.server-container{
+    margin-bottom: 3em;
+}
+.no-filtered-results{
+    font-weight: bold;
+    cursor: default;
+}
+.fake_link{
+    color: blue !important;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-left: 2em;
+}
+/* Tabs styling */
+.ui-tabs .ui-tabs-nav{
+    padding: 0px;
+    border: none;
+}
+.ui-tabs .ui-tabs-nav a{
+    font-weight: bold;
+    font-size: 1.1em;
+    color: black;
+}
+.ui-tabs .ui-tabs-panel{
+    padding: 0px 0.5em 0.75em;
+    height: 65em;
+    overflow-y: auto;
+}
+.ui-tabs .ui-tabs-active{
+    background: #ECF1FB;
+}
+.ui-tabs .ui-tabs-active a{
+    cursor: default !important;
+}
+.ui-tabs .ui-tabs-tab{
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border: 1px solid #AAA;
+}
+
+.setup-db-list{
+    overflow-y: auto;
+    max-height: 60em;
+    margin: 20px 0px;
+}
+.setup-db-list .list-row{
+    cursor: pointer;
+    padding: 0.5em 1.5em;
+    font-size: 14px;
+    height: 20px;
+}
+
+.setup-db-list .list-row {
+    background:-moz-linear-gradient(center top, #EDF5FF, #EDF5FF) repeat scroll 0 0 transparent;
+    background:-webkit-gradient(linear, left top, left bottom, from(#EDF5FF), to(#EDF5FF));
+
+    border: 1px solid black;
+    border-left: none;
+    border-right: none;
+
+    max-width: 20em;
+}
+.setup-db-list .list-row:hover {
+    background:-moz-linear-gradient(center top, #EFEFEF, #DDDDDD) repeat scroll 0 0 transparent;
+    background:-webkit-gradient(linear, left top, left bottom, from(#EFEFEF), to(#DDD));
 }
 </style>
 
@@ -801,6 +1060,7 @@ a{
         </div>
         <div class="ent_content_full bg_intro">
 
+        <?php if(!DB_LIST_ONLY){ ?>
             <!-- SCREEN#1 -->
             <div class="center-box screen1">
                 <h1>Set Up a New Database</h1>
@@ -933,28 +1193,48 @@ a{
                 </div>
             </div>
 
+        <?php } ?>
 
             <!-- SCREEN#8 Databases -->
-            <div class="center-box screen8" style="width:1330;height:auto;margin:10px;width:auto;">
-                <h1 style="display:none">Databases</h1>
-                <span>Filter: </span>
-                <input id="filter_database" class="text ui-widget-content ui-corner-all" value="" autocomplete="off"/>
-                <button id="btnNewDatabase" onclick="_showStep(1)" class="ui-button-action" style="margin-left: 5em; display: none;">New Database</button>
+            <div class="center-box screen8" style="height: auto; margin: 10px; width: auto;">
 
-                <?php if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false){ ?>
-                <span style="float:right;position:relative;bottom:25px;">
-                    <span style="color: red;">If your database has disappeared:</span> Databases which have not been updated for more than 3 / 6 / 12 months, depending on size, will be archived unless marked for retention.<br>
-                    Databases can be recovered later but it makes work for us, so please just create a new one if you did not enter any data.<br>
-                    If you have a reference database which will never be updated or there will be a hiatus > 3 months in use of your database please inform us so we can protect it from deletion.
-                </span>
-                <?php } ?>
+                <h1 style="display: none;">Databases</h1>
 
-                <ul class="db-list" style="display:none;clear:both;">
-                </ul>
+                <div id="tabs-view">
+
+                    <ul id="tabs-server-list">
+                        <li><a href="#current-server-tab">This server</a></li>
+                    </ul>
+
+                    <div id="current-server-tab" class="server-tab">
+
+                        <h3>This server</h3>
+
+                        <span>Filter: </span>
+                        <input id="current-tabs-filter_database" class="text ui-widget-content ui-corner-all" value="" autocomplete="off" />
+                        <button id="btnNewDatabase" onclick="_showStep(1)" class="ui-button-action" style="position: absolute;left: 20em;top: 6.4em;display: none;">New Database</button>
+
+                        <?php if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false){ ?>
+                        <span style="float: right;position: relative;bottom: 3em;">
+                            <span style="color: red;">If your database has disappeared:</span> Databases which have not been updated for more than 3 / 6 / 12 months, depending on size, will be archived unless marked for retention.<br>
+                            Databases can be recovered later but it makes work for us, so please just create a new one if you did not enter any data.<br>
+                            If you have a reference database which will never be updated or there will be a hiatus > 3 months in use of your database please inform us so we can protect it from deletion.
+                        </span>
+                        <?php } ?>
+
+                        <ul class="db-list" style="display: none;">
+                        </ul>
+
+                        <span class="no-filtered-results" style="display: none;">Filter does not match any found database</span>
+
+                    </div>
+
+                </div>
 
                 <div style="text-align: center;padding: 60px 0;">
                     <span class="ui-icon ui-icon-loading-status-circle rotate" style="height: 300px;width: 300px;font-size: 800%;color: rgb(79, 129, 189);"></span>
                 </div>
+
             </div>
 
         </div>

@@ -17,7 +17,8 @@ if(!defined('PDIR')){
     require_once dirname(__FILE__).'/../autoload.php';
 }
 
-$is_json = (@$_REQUEST['format']=='json');
+$is_json = @$_REQUEST['format'] == 'json';
+$list = [];
 
 if(!isset($system)){
     $system = new hserv\System();
@@ -34,11 +35,33 @@ if( !$system->isInited() ){  //cannot init system (apparently connection to Data
 
 if($system->getMysqli()!=null) { //server is connected
 
-    $list =  mysql__getdatabases4($system->getMysqli());
+    $list = mysql__getdatabases4($system->getMysqli());
     if(!$is_json && empty($list)){
         //redirect to create database
         redirectURL(HEURIST_BASE_URL . 'startup/index.php');
         exit;
+    }
+}
+
+if(@$_REQUEST['includeRemote'] == 1 && !empty($remoteServers) && !empty($defaultRootFileUploadPath)){
+
+    $fileStoreBase = str_replace('HEURIST_FILESTORE/', 'HEURIST_FILESTORE_', $defaultRootFileUploadPath);
+    $list = [ 'current' => $list, 'server_names' => [] ];
+
+    foreach($remoteServers as $remoteID => $remoteDetails){
+
+        $remoteFilestore = "{$fileStoreBase}{$remoteID}/";
+        if(folderExists($remoteFilestore, false) !== 1){
+            continue;
+        }
+
+        $remoteDBs = folderGetSubFolders($remoteFilestore);
+        $remoteDBs = array_filter($remoteDBs, fn($db) => mb_strpos($db, '_') !== 0);
+
+        natcasesort($remoteDBs);
+        $list[$remoteID] = array_values($remoteDBs);
+
+        $list['server_names'][$remoteID] = $remoteDetails['server'];
     }
 }
 
@@ -49,7 +72,7 @@ if($is_json){
     if(isset($error_msg) && $error_msg!=''){
         $response = $system->getError();
     }else{
-        $response = array("status"=>HEURIST_OK, "data"=> $list);
+        $response = ["status"=>HEURIST_OK, "data"=> $list];
     }
 
     print json_encode( $response );

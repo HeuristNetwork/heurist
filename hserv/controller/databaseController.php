@@ -44,12 +44,12 @@ if($action==null){
 
 $session_id = intval(@$req_params['session']);
 
-if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, except create
+if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connectRemote')){ //db required, except create
     //get error and response
     $response = $system->getError();
 }else{
 
-   $isNewUserRegistration = ($action=='create' && !$system->hasAccess());
+   $isNewUserRegistration = ($action == 'create' || $action == 'connectRemote') && !$system->hasAccess();
 
    if(!($isNewUserRegistration || $system->hasAccess())){
         $response = $system->addError(HEURIST_REQUEST_DENIED, 'You must be logged in');
@@ -69,6 +69,9 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
             //get list of available databases
 
 
+        }
+        elseif($action == 'connectRemote'){
+            $res = DbUtils::connectRemoteDatabase($req_params);
         }
         elseif($action=='check_newdefs'){
 
@@ -257,7 +260,12 @@ if(!$system->init(@$req_params['db'], ($action!='create'))){ //db required, exce
 
             $db_source = trim(preg_replace(REGEX_ALPHANUM, '', $db_source));//for snyk
 
-            $sErrorMsg = DbUtils::databaseValidateName($db_source, 2);//exists
+            if(isset($envVersion)){
+                $sErrorMsg = 'This action on remote database host is disabled.';
+            }else{
+                $sErrorMsg = DbUtils::databaseValidateName($db_source, 2);//exists    
+            }
+            
             if ($sErrorMsg!=null) {
                 if(strpos($sErrorMsg,'not exists')>0){
                    $sErrorMsg = 'Operation is possible when database to be cloned or renamed is on the same server. '

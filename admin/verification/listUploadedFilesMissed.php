@@ -37,6 +37,11 @@ if($is_included){
     define('PDIR','../../');
 
     require_once dirname(__FILE__).'/../../autoload.php';
+    
+    if(isset($envVersion)){
+        print 'This action on remote database host is disabled.';
+        return;
+    }
 
     $sysadmin_pwd = USanitize::getAdminPwd();
 

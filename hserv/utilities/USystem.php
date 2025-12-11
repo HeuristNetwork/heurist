@@ -235,7 +235,7 @@ class USystem {
 
         //validate
         if(@$_SERVER["DOCUMENT_ROOT"]){
-            $codeFolders = array('heurist','h6-alpha','h7-alpha','h6-ao');//need to cli and short url
+            $codeFolders = array('heurist','h6-alpha','h7-alpha', 'h6-ao');//need to cli and short url
 
             $i = 0;
             while ($i<=count($codeFolders)) {
@@ -519,10 +519,18 @@ class USystem {
 
                 $user_id = @$_SESSION[$db]['ugr_ID'];
                 if($user_id == $currentUser['ugr_ID']){
+                    $dbname = $db;
                     if(strpos($db, HEURIST_DB_PREFIX)===0){
-                        $db = substr($db,strlen(HEURIST_DB_PREFIX));
+                        $dbname = substr($db,strlen(HEURIST_DB_PREFIX));
                     }
-                    array_push($dbrecent, $db);
+                    $dbWithHost = $dbname;
+                    if(isset($_SESSION[$db]['dbHostName'])){
+                        $dbWithHost = $_SESSION[$db]['dbHostName'].': '.$dbWithHost;                        
+                    }
+                    if(isset($_SESSION[$db]['dbHostCode'])){
+                        $dbname = $_SESSION[$db]['dbHostCode'].'-'.$dbname;
+                    }
+                    array_push($dbrecent, ['key'=>$dbname, 'title'=>$dbWithHost]);
                 }
             }
         }

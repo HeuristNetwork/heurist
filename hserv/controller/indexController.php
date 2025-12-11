@@ -34,7 +34,7 @@ require_once dirname(__FILE__).'/../../autoload.php';
     
     if(@$req_params['db'] && strpos($req_params['db'],'-')>0){
         $system->addError(HEURIST_ACTION_BLOCKED,
-            'The registration database from remove host is disabled');
+            'The registration database on remote host is disabled');
         $allow_action = false;
         
     }elseif(@$req_params['db'] && $action!='url'){

@@ -124,7 +124,6 @@ class WebSite
         $this->publishmode = max(min($this->publishmode,3),0);
 
         $this->isHeadless = false; //if true it returns main content only
-
         $this->isJsAllowed = $this->system->settings->isJavaScriptAllowed();
         
         $this->currentLang = $this->params['lang'];

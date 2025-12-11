@@ -15,7 +15,7 @@
 * @todo move controller
 */
 
-if (session_status() != PHP_SESSION_ACTIVE) {
+if (session_status() !== PHP_SESSION_ACTIVE) {
 
     require_once 'USystem.php';
 

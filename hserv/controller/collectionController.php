@@ -31,7 +31,7 @@ if(strpos($db, HEURIST_DB_PREFIX)===0){
 }
 
 //since this script is called after system is inited we can be sure that session is available already
-if (@$_COOKIE['heurist-sessionid']) {
+if (@$_COOKIE['heurist-sessionid'] && session_status() !== PHP_SESSION_ACTIVE) {
     session_name('heurist-sessionid');
     /* @todo test
     session_set_cookie_params ( 0, '/', '', $is_https);

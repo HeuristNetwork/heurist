@@ -1236,7 +1236,8 @@ class System {
                $saml_service_provides, $hideStandardLogin,
                $accessToken_DeepLAPI, $useRewriteRulesForRecordLink,
                $allowCMSCreation,
-               $matomoUrl, $matomoSiteId, $accessToken_Matomo;
+               $matomoUrl, $matomoSiteId, $accessToken_Matomo,
+               $envVersion, $dbHostName;
 
         // Initialize $needEncodeRecordDetails if not set
         $needEncodeRecordDetails = $needEncodeRecordDetails ?? 0;
@@ -1265,7 +1266,9 @@ class System {
                         "referenceServerIndexDatabase" => HEURIST_INDEX_DATABASE,
                         "referenceServerBugreportDatabase" => HEURIST_BUGREPORT_DATABASE,
                         "referenceServerHelpDatabase" => HEURIST_HELP_DATABASE,
-                        'database_prefix' => HEURIST_DB_PREFIX
+                        'database_prefix' => HEURIST_DB_PREFIX,
+                        'database_hostcode' => $envVersion,
+                        'database_hostname' => $dbHostName
                     ],
                     'host_logo' => $host_logo,
                     'host_url' => $host_url,
@@ -1313,6 +1316,8 @@ class System {
                     "baseURL" => HEURIST_BASE_URL,
                     'baseURL_pro' => HEURIST_BASE_URL_PRO,
                     'database_prefix' => HEURIST_DB_PREFIX,
+                    'database_hostcode' => $envVersion,
+                    'database_hostname' => $dbHostName,
                     "referenceServerURL" => HEURIST_INDEX_BASE_URL,
                     "referenceServerIndexDatabase" => HEURIST_INDEX_DATABASE,
                     "referenceServerBugreportDatabase" => HEURIST_BUGREPORT_DATABASE,
@@ -1597,6 +1602,7 @@ class System {
     *              Returns true if headers have already been sent (as session cannot be started then).
     */
     private function startMySession($check_session_folder=true){
+        global $envVersion, $dbHostName;
 
         if(headers_sent()) {
             // Cannot start session if headers are already sent.
@@ -1623,6 +1629,10 @@ class System {
 
         if (session_status() === PHP_SESSION_ACTIVE)
         {
+            if(isset($envVersion)){
+                $_SESSION[$this->dbnameFull]['dbHostCode'] = $envVersion;    
+                $_SESSION[$this->dbnameFull]['dbHostName'] = $dbHostName;
+            }
             if (@$_SESSION[$this->dbnameFull]['keepalive'] && !USystem::sessionUpdateCookies())
             {
                 USanitize::errorLog('CANNOT UPDATE COOKIE '.session_id().'   '.$this->dbnameFull);
@@ -1870,7 +1880,30 @@ class System {
 
                 // 5. Find user by email in THIS database
                 if($userEmail_in_linkedDB){
+
                     $user_in_current_db = user_getByField($this->getMysqli(), 'ugr_eMail', $userEmail_in_linkedDB); // user_getByField is global
+
+                    $this->currentUser = [
+                        'ugr_ID' => $user_in_current_db['ugr_ID'],
+                        'ugr_eMail' => $user_in_current_db['ugr_eMail']
+                    ];
+
+                    // Set DB connection to linked database
+                    $originalDB = $this->dbnameFull();
+                    $this->mysqli = mysql__usedatabase($this->mysqli, $ldb_full_name);
+                    $this->setDbnameFull($ldb_full_name);
+
+                    // Check membership for linked database
+                    $membership = USystem::checkAssociationMembership($this);
+                    if($membership === 'nonmember' && preg_match("/Heurist\.eu/i", HEURIST_BASE_URL) === 1){
+                        $this->addError(HEURIST_REQUEST_DENIED, 'Heurist.eu is for members of the Heurist Association only');
+                        $user_in_current_db = null;
+                    }
+
+                    // Reset DB connection to original database
+                    $this->mysqli = mysql__usedatabase($this->mysqli, $originalDB);
+                    $this->setDbnameFull($originalDB);
+
                     if(null != $user_in_current_db && ($user_in_current_db['ugr_Type'] ?? '') =='user' && ($user_in_current_db['ugr_Enabled'] ?? 'n') !='n') {
                         // 6. Success - establish new session in current DB
                         $this->doLoginSession($user_in_current_db['ugr_ID'], 'public');

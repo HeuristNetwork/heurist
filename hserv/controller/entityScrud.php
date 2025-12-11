@@ -13,10 +13,10 @@
 * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 * @since       4.0
 */
+    require_once dirname(__FILE__).'/../../autoload.php';
+
     use hserv\utilities\USanitize;
     use hserv\utilities\USystem;
-
-    require_once dirname(__FILE__).'/../../autoload.php';
 
     require_once 'entityScrudSrv.php';
 

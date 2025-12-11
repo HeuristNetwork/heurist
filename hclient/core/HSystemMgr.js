@@ -334,10 +334,15 @@ class HSystemMgr {
    */
   databaseAction(request, callback) {
       let controller = 'databaseController';
+      let timeout = 600000; //10 minutes
+      
       if(request.action=='register'){
           controller = 'indexController';
+      }else if(request.action=='restore' || request.action=='clone' || request.action=='rename'){
+          timeout = 1800000; //30 minutes
       }
-      window.hWin.HAPI4.callserver(controller, request, callback, 600000); //5 minutes
+      
+      window.hWin.HAPI4.callserver(controller, request, callback, timeout); //10 or 30 minutes
   }
 
   /**

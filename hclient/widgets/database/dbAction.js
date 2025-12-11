@@ -118,6 +118,14 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
 
         }else if(this.options.actionName=='register')
         {
+            if(window.hWin.HAPI4.sysinfo.database_hostname){
+                this._$('#div_header').hide();
+                this._$('#div_block').show();
+                return;
+            }
+            this._$('#div_block').hide();
+            
+
             let that = this;
             window.hWin.HAPI4.EntityMgr.getEntityData('sysIdentification', false, function(response){
                 if(!window.hWin.HEURIST4.util.isempty(response)){

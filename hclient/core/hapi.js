@@ -146,6 +146,10 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     // @TODO: rename to rtyIconURL 
                     that.iconBaseURL = that.baseURL + '?db=' + _database + '&icon=';
                     
+                    //database without heurist prefix
+                    if(that.database.indexOf(window.hWin.HAPI4.sysinfo.database_prefix)===0){
+                        that.database = that.database.substring(window.hWin.HAPI4.sysinfo.database_prefix.length);
+                    }
                     //loads list of actions                 window.hWin.document
                     if(typeof ActionHandler !== 'undefined'){
                         (async () => {
