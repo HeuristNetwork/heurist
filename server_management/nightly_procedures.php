@@ -234,7 +234,7 @@ function getHeuristDatabases(array $config): array
     );
     $dbs = [];
     while ($row = $stmt->fetch()) {
-        $dbs[] = $row['schema_name'];
+        $dbs[] = $row['SCHEMA_NAME'];
     }
     return $dbs;
 }
@@ -332,6 +332,10 @@ function task_backupAllDatabases(array $config): TaskResult
     $res->addMessage("Found " . count($dbs) . " Heurist databases to back up.");
 
     foreach ($dbs as $dbName) {
+        if(!$dbName){
+            continue;
+        }
+        
         $cnt++;
         $res->addMessage("$dbName : backing up ...");
 
@@ -588,7 +592,7 @@ function task_checkRequiredTables(array $config): TaskResult
             $stmt->execute($params);
             $present = [];
             while ($row = $stmt->fetch()) {
-                $present[] = $row['table_name'];
+                $present[] = $row['TABLE_NAME'];
             }
             $missing = array_values(array_diff($requiredTables, $present));
 
