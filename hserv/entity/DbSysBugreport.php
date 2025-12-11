@@ -238,8 +238,10 @@ class DbSysBugreport extends DbEntityBase
 
             $bug_descr = str_replace("\n",'<br>', $bug_descr);
 
-            $new_record['details']['3'] = "<p>$bug_descr</p>";
-            $reportDetails['3'] = ['Bug description' => $bug_descr];
+            $database = empty(@$record['bug_Database']) ? '' : "Database: {$record['bug_Database']}<br>";
+
+            $new_record['details']['3'] = "{$database}<p>{$bug_descr}</p>";
+            $reportDetails['3'] = ['Bug description' => "{$database}{$bug_descr}"];
         }
 
         //extra information
@@ -260,6 +262,17 @@ class DbSysBugreport extends DbEntityBase
         }
 
         $user_info = $this->system->getCurrentUser();
+        if(@$record['bug_GuestUser'] == 1){
+            if(empty($record['bug_Username']) || empty($record['bug_Email'])){
+                $this->system->addError(HEURIST_ACTION_BLOCKED, "You must provided your name and email address for bug reports");
+                return false;
+            }
+            $user_info = [
+                'ugr_FullName' => $record['bug_Username'],
+                'ugr_eMail' => $record['bug_Email'],
+                'ugr_Organisation' => ''
+            ];
+        }
         if($user_info){
 
             $user = user_getByField($mysqli, 'ugr_ID', $user_info['ugr_ID']);
@@ -267,7 +280,7 @@ class DbSysBugreport extends DbEntityBase
             $new_record['details']['955'] = "{$user_info['ugr_FullName']} [{$user['ugr_Organisation']}]";
             $new_record['details']['956'] = $user['ugr_eMail'];
 
-            $reportDetails['955'] = ["User's name" => $user['ugr_Name']];
+            $reportDetails['955'] = ["User's name" => $user['ugr_FullName']];
             $reportDetails['956'] = ["User's email" => $user['ugr_eMail']];
         }
 
