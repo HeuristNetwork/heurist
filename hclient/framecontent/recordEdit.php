@@ -27,6 +27,8 @@ require_once dirname(__FILE__).'/../../hserv/utilities/testSimilarURLs.php';
 
     $params = array();
 
+    $loggedIn = $system->getUserId() > 0;
+
 if(@$_REQUEST['annotationId'] || @$_REQUEST['a']){
 
     $system->defineConstant('DT_ORIGINAL_RECORD_ID');
@@ -233,7 +235,7 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
 
                     if(window.hWin.HEURIST4.util.getUrlParameter('bugreport')==1){
                         // https://heuristref.net/heurist/hclient/framecontent/recordEdit.php?db=Heurist_Job_Tracker&bugreport=1
-                        window.hWin.HEURIST4.ui.showWidgetDialog('manageSysBugreport', {isdialog:false, container:$container});
+                        window.hWin.HEURIST4.ui.showWidgetDialog('manageSysBugreport', {isdialog:false, container:$container, guestUser: <?php echo $loggedIn; ?>});
                         return;
                     }
                     

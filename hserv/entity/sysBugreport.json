@@ -5,25 +5,45 @@
 
     "fields": [
         {
+            "dtID": "bug_Username",
+            "dtFields":{
+                "dty_Type": "freetext",
+                "dty_Size": 120,
+                "rst_DisplayWidth": 70,
+                "rst_DisplayName": "Your name",
+                "rst_DisplayHelpText": "Please enter your name"
+            }
+        },
+        {
+            "dtID": "bug_Email",
+            "dtFields":{
+                "dty_Type": "freetext",
+                "dty_Size": 120,
+                "rst_DisplayWidth": 70,
+                "rst_DisplayName": "Your email",
+                "rst_DisplayHelpText": "Please enter your email address, this email will recieve a copy of the bug report and allow us to contact you for additional information"
+            }
+        },
+        {
             "dtID": "bug_Title",
             "dtFields":{
-                "dty_Type":"freetext",
+                "dty_Type": "freetext",
                 "dty_Size":120,
                 "rst_DisplayWidth":70,
                 "rst_DisplayName": "Concise summary",
                 "rst_DisplayHelpText": "Please give a concise but descriptive title for the bug or feature request.<br><strong><em>Limit of 120 characters</em></strong>",
-                "rst_RequirementType":"required"
+                "rst_RequirementType": "required"
             }
         },
         {
             "dtID": "bug_Type",
             "dtFields":{
-                "dty_Type":"enum",
+                "dty_Type": "enum",
                 "rst_DisplayName": "Feedback type",
                 "rst_DisplayHelpText": "",
                 "rst_MaxValues": 0,
                 "rst_TermsAsButtons": 1,
-                "rst_RequirementType":"required",
+                "rst_RequirementType": "required",
                 "rst_FieldConfig": [
                     {"key": "7615", "title": "Suggestion or feature request"},
                     {"key": "7608", "title": "Minor annoyance, workflow or cosmetic issue"},
@@ -47,32 +67,42 @@
         {
             "dtID": "bug_Description",
             "dtFields":{
-                "dty_Type":"blocktext",
-                "rst_DisplayWidth":70,
-                "rst_DisplayHeight":14,
+                "dty_Type": "blocktext",
+                "rst_DisplayWidth": 70,
+                "rst_DisplayHeight": 14,
                 "rst_DisplayName": "Full description",
                 "rst_DisplayHelpText": "Please give a detailed description of the bug or feature request, including steps to reproduce.<br>Please be comprehensive in your description.",
-                "rst_RequirementType":"required"
+                "rst_RequirementType": "required"
             },
             "force_displayheight": 14
         },
         {
             "dtID": "bug_Image",
             "dtFields":{
-                "dty_Type":"file",
-                "rst_DisplayName":"Screenshot",
+                "dty_Type": "file",
+                "rst_DisplayName": "Screenshot",
                 "rst_DisplayHelpText": "Upload a screen capture or document showing the bug or describing the feature in more detail", 
-                "rst_FieldConfig":{"entity":"sysBugreport", "accept":".png,.jpg,.gif", "size":1200},
-                "dty_Role":"virtual",
-                "rst_MaxValues":0
+                "rst_FieldConfig":{"entity": "sysBugreport", "accept": ".png,.jpg,.gif", "size":1200},
+                "dty_Role": "virtual",
+                "rst_MaxValues": 0
+            }
+        },
+        {
+            "dtID": "bug_Database",
+            "dtFields":{
+                "dty_Type": "freetext",
+                "dty_Size": 120,
+                "rst_DisplayWidth": 70,
+                "rst_DisplayName": "Database",
+                "rst_DisplayHelpText": "Please enter the name of your database (if applicable)"
             }
         },
         {
             "dtID": "bug_URL",
             "dtFields":{
-                "dty_Type":"freetext",
-                "dty_Size":2046,
-                "rst_DisplayWidth":70,
+                "dty_Type": "freetext",
+                "dty_Size": 2046,
+                "rst_DisplayWidth": 70,
                 "rst_DisplayName": "URL",
                 "rst_DisplayHelpText": "Please copy and paste the URL that you were using when you encountered the problem"
             }

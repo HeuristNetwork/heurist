@@ -33,6 +33,10 @@
  * @property {number} height Default height of the widget dialog, set to 932 pixels.
  */
 $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
+
+    options:{
+        guestUser: false
+    },
    
     _entityName:'sysBugreport',
     
@@ -57,7 +61,7 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
         this.options.select_mode = 'manager';
         this.options.layout_mode = 'editonly';
         this.options.width = 900;
-        this.options.height = 932;
+        this.options.height = 992;
 
         this._super();
     },
@@ -74,6 +78,20 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
     _initControls: function() {
 
         this.options.default_palette_class = 'ui-heurist-admin';
+
+        if(!this.options.guestUser){
+
+            delete this.options.entity.fields[7];
+            delete this.options.entity.fields[1];
+            delete this.options.entity.fields[0];
+
+            this.options.entity.fields = this.options.entity.fields.filter((val, idx) => this.options.entity.fields.hasOwnProperty(idx));
+        }else{
+
+            this.options.entity.fields[1].dtFields.rst_RequirementType = 'required';
+            this.options.entity.fields[7].dtFields.rst_RequirementType = 'required';
+            this.options.entity.fields[0].dtFields.rst_RequirementType = 'required';
+        }
 
         if(!this._super()){
             return false;
@@ -160,6 +178,8 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
             }
         });
 
+        res['bug_GuestUser'] = this.options.guestUser ? 1 : 0;
+
         return res;
     },
     
@@ -191,10 +211,10 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
         this._super();
 
         //find file uploader and make entire dialogue as a paste zone - to catch Ctrl+V globally
-        let ele = this.element.find('input[type=file]'); //this._as_dialog
-console.log('IMAG ', ele.length);        
+        let ele = this.element.find('input[type=file]');
+
         if(ele.length>0){
-            ele.fileupload('option', 'pasteZone', this._as_dialog);
+            ele.fileupload('option', 'pasteZone', this.element);
         }
 
         // Add default values to url
@@ -421,7 +441,7 @@ console.log('IMAG ', ele.length);
         // Hide field name
         ele.find('.header').hide();
 
-        // Add help text about pasting images, before bug type field this._as_dialog.
+        // Add help text about pasting images, before bug type field
         if(this.element.find('.image-help').length === 0){
             $('<div>', {
                 text: 'You can also paste an image which will be added to the screenshots',
