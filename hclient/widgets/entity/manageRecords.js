@@ -4216,6 +4216,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         let parent = null;
         let readded_parents = null;
 
+        let skippedCalcPref = window.hWin.HAPI4.get_prefs_def('skippedCalcWarning', {});
+        const oneHour = 3600000;
+        const currentTime = Date.now();
+
         for(const issue_type in response.issues){
 
             const issues = response.issues[issue_type];
@@ -4224,6 +4228,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             if(window.hWin.HEURIST4.util.isempty(issues) || (typeof issues === 'object' && Object.keys(issues).length == 0)){
                 continue;
+            }else if(issue_type === 'skippedCalcFields'){
+
+                if(!Object.hasOwn(skippedCalcPref, this._currentEditRecTypeID) || (skippedCalcPref[this._currentEditRecTypeID] + oneHour) <= currentTime){
+                    skippedCalcPref[this._currentEditRecTypeID] = currentTime;
+                }else{
+                    continue;
+                }
             }
 
             switch(issue_type){
@@ -4279,13 +4290,16 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     }
 
                     break;
-                    
+
                 case 'skippedCalcFields':
-                
-                    contents += issues;
+
+                    headers += `<li><a href="#${id}">Calculated fields</a></li>`;
+                    contents += `<div id="${id}" style="margin: 7.5px 10px;">${issues}</div>`;
+
                     has_msg = true;
                 
                     break;
+
                 case 'languages':{
 
                     if(issues?.added && Object.keys(issues.added).length > 0){
@@ -4363,6 +4377,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             $dlg.find('.issues-tabs').tabs();
         }
+
+        skippedCalcPref = !window.hWin.HEURIST4.util.isObject(skippedCalcPref) ? {} : skippedCalcPref;
+        window.hWin.HAPI4.save_pref('skippedCalcWarning', skippedCalcPref);
 
         delete response.issues;
         return this._afterSaveHandler(response, afterAction);

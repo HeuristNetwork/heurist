@@ -954,7 +954,7 @@ a{
     height:106px;
 }
 .db-list{
-    column-width: 22em;
+    column-width: 17em;
     padding-left: 0px;
     clear: both;
 }

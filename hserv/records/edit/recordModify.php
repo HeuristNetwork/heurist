@@ -2190,8 +2190,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
             
             if($rec_count>$limitOnUpdate){
                 //
-                return array('skipped'=>'There are '.$rec_count
-.' records that have dependent calculation fields based type of updated record. To avoid slowdown, please use Admin > Rebuild Calc');    
+                return ['skipped' => "There are {$rec_count} records that have dependent calculation fields based type of updated record. To avoid slowdown, please use Admin > Rebuild calculation fields."];
             }
         }
         $rectypes = array();
