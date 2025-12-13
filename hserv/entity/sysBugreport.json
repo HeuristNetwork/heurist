@@ -88,6 +88,16 @@
             }
         },
         {
+            "dtID": "bug_Server",
+            "dtFields":{
+                "dty_Type": "freetext",
+                "dty_Size": 120,
+                "rst_DisplayWidth": 70,
+                "rst_DisplayName": "Server",
+                "rst_DisplayHelpText": "Please enter the name of your server (if applicable)"
+            }
+        },
+        {
             "dtID": "bug_Database",
             "dtFields":{
                 "dty_Type": "freetext",

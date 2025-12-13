@@ -239,9 +239,10 @@ class DbSysBugreport extends DbEntityBase
             $bug_descr = str_replace("\n",'<br>', $bug_descr);
 
             $database = empty(@$record['bug_Database']) ? '' : "Database: {$record['bug_Database']}<br>";
+            $server = empty(@$record['bug_Server']) ? '' : "Server: {$record['bug_Server']}<br>";
 
-            $new_record['details']['3'] = "{$database}<p>{$bug_descr}</p>";
-            $reportDetails['3'] = ['Bug description' => "{$database}{$bug_descr}"];
+            $new_record['details']['3'] = "{$database}{$server}<p>{$bug_descr}</p>";
+            $reportDetails['3'] = ['Bug description' => "{$database}{$server}{$bug_descr}"];
         }
 
         //extra information

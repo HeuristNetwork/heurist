@@ -81,6 +81,7 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
 
         if(!this.options.guestUser){
 
+            delete this.options.entity.fields[8];
             delete this.options.entity.fields[7];
             delete this.options.entity.fields[1];
             delete this.options.entity.fields[0];
@@ -90,6 +91,7 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
 
             this.options.entity.fields[1].dtFields.rst_RequirementType = 'required';
             this.options.entity.fields[7].dtFields.rst_RequirementType = 'required';
+            this.options.entity.fields[8].dtFields.rst_RequirementType = 'required';
             this.options.entity.fields[0].dtFields.rst_RequirementType = 'required';
         }
 
