@@ -41,6 +41,7 @@ if($system->getMysqli()!=null) { //server is connected
         redirectURL(HEURIST_BASE_URL . 'startup/index.php');
         exit;
     }
+    $list = ['current' => $list];
 }
 
 if(@$_REQUEST['includeRemote'] == 1 && !empty($remoteServers) && !empty($defaultRootFileUploadPath)){

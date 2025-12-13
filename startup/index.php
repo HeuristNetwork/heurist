@@ -646,32 +646,21 @@ if (!defined('PDIR')){
                 let $input = $(event.target);
                 let sval = $input.val().toLowerCase();
 
+                $tabContent.find('.no-filtered-results').hide();
+
                 if(sval.length > 1){
 
-                    $list.find('.db-info').each((i, li) => {
+                    $list.find('.db-info').hide();
 
-                        let dbname;
+                    let $results = $list.find(`.db-info[data-database*="${sval}"]`);
+                    if($results.length > 0){
+                        $results.show();
+                    }else{
+                        $tabContent.find('.no-filtered-results').show();
+                    }
 
-                        if(li.nodeName.toLowerCase() == 'li'){
-                            dbname = li.innerHTML.toLowerCase();
-                        }else{
-                            dbname = li.firstChild.innerHTML.toLowerCase();
-                        }
-
-                        if(dbname.indexOf(sval) >= 0){
-                            li.style.display = 'block';
-                        }else{
-                            li.style.display = 'none';
-                        }
-                    });
                 }else{
                     $list.find('.db-info').show();
-                }
-
-                if($list.find('.db-info:visible').length === 0){
-                    $tabContent.find('.no-filtered-results').show();
-                }else{
-                    $tabContent.find('.no-filtered-results').hide();
                 }
             }
         });
@@ -680,7 +669,7 @@ if (!defined('PDIR')){
 
         let databases = allDatabases[server];
         for(let idx = 0; idx < databases.length; idx++){
-            $(`<li class="db-info truncate" title="${serverPrefix}${databases[idx]}">${serverPrefix}${databases[idx]}</li>`).appendTo($list);
+            $(`<li class="db-info truncate" data-database="${databases[idx].toLowerCase()}" title="${serverPrefix}${databases[idx]}">${serverPrefix}${databases[idx]}</li>`).appendTo($list);
         }
 
         $list.find('li').css('cursor', 'pointer').on({
@@ -701,6 +690,11 @@ if (!defined('PDIR')){
 
         let blockClick = false;
         let $screen = $('.center-box.screen8');
+
+        if($screen.find('.server-tab').length <= 1){
+            return;
+        }
+
         $screen.find('.setup-remote-db').on({
             click: (event) => {
 
@@ -802,17 +796,15 @@ if (!defined('PDIR')){
             let $list = $dlg.find('.setup-db-list');
             let searchingFor = $dlg.find('#database-name-search').val().toLowerCase();
 
-            if(window.hWin.HEURIST4.util.isempty(searchingFor) || searchingFor.length < 2){
+            if(window.hWin.HEURIST4.util.isempty(searchingFor) || searchingFor.length < 1){
                 $list.find('.list-row').show();
                 return;
             }
 
+            $list.find('.list-row').hide();
             let $results = $list.find(`.list-row[data-database*=${searchingFor}]`);
             if($results.length > 0){
-                $list.find('.list-row').hide();
                 $results.show();
-            }else{
-                $list.find('.list-row').show();
             }
         });
     }
