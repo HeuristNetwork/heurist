@@ -10,8 +10,9 @@ LOG_PREFIX="[heurist-sync]"
 #    - origin:   h7dev-assoc
 #    - upstream: h7dev
 ###############################################################################
+DATE="$(date +%F_%H-%M-%S)"
 
-echo "$LOG_PREFIX [ASSOC] Starting sync..."
+echo "$LOG_PREFIX [ASSOC] ${DATE} Starting sync..."
 
 if [ ! -d "$REPO_DIR_ASSOC/.git" ]; then
   echo "$LOG_PREFIX [ASSOC] ERROR: $REPO_DIR_ASSOC is not a git repository" >&2
