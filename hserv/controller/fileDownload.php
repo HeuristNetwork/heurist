@@ -52,14 +52,6 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
         return;
     }
 
-// https://heurist.eu/h7-alpha/?db=HN-osmak_3&file=72bc3f93ff2706e6b81d5a140d170c4f6d879010
-// https://heurist.eu/heurist/?db=osmak_1&file=edf8626174a216d76ce8d4583ce773640469c4ee
-    if(isset($envVersion) && ($externalServer ?? '') !== '' && @$req_params['mode']!=='tag' && @$req_params['mode']!=='page'){
-        // rebuild URL
-        $req_params['db'] = $db;
-        $url = $externalServer . '/hserv/controller/fileDownload.php?' . http_build_query($req_params);        
-        redirectURL( $url );
-    }
     
     $system = new hserv\System();//without connection
     $fileid = filter_var(@$req_params['thumb'], FILTER_SANITIZE_STRING);
@@ -83,6 +75,9 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
                     }
 
                 }else{
+                    
+                    checkForExternalServer( $req_params );
+                    
                     //recreate thumbnail and output it
                     $system->init($db);
                     fileCreateThumbnail( $system, $fileid, true );
@@ -116,15 +111,7 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
     //find
     $listpaths = fileGetFullInfo($system, $fileid);
-    
-/*    
-if(isset($req_params['debug'])){
-    echo '>>>>' . $system->dbname() . '  ' . $fileid;
-    echo print_r($listpaths, true);
-    //exit;
-}
-*/
-    
+
     if(isEmptyArray($listpaths)){
         //Filedata not found
         redirectURL('../../hclient/assets/200x200-missed.png');
@@ -321,6 +308,8 @@ if(isset($req_params['debug'])){
 
             }else{
                 //File not found
+                checkForExternalServer( $req_params );
+             
                 redirectURL('../../hclient/assets/200x200-missed2.png');
             }
         }

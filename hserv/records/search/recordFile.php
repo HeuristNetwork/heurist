@@ -1655,5 +1655,14 @@ function filestoreReplaceDuplicatesInDetails($mysqli, $ulf_id, $ulf_ids_replaced
     $mysqli->query($del_query);
 }
 
-
+function checkForExternalServer( $req_params ){
+    global $envVersion, $externalServer;
+         
+    if(isset($envVersion) && ($externalServer ?? '') !== ''){
+        // rebuild URL
+        $req_params['db'] = $db;
+        $url = $externalServer . '/hserv/controller/fileDownload.php?' . http_build_query($req_params);        
+        redirectURL( $url );
+    }
+}
 ?>
