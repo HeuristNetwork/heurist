@@ -69,7 +69,7 @@ class System {
      * The short name of the database, without any prefix.
      * @var string|null
      */
-    private $dbname = null;
+    private $dbnameEnv = null;
 
     /**
      * An array to store error messages. Each error is an array with keys like 'status', 'message', 'sysmsg', 'error_title'.
@@ -871,6 +871,15 @@ class System {
     public function dbname(){
         return $this->dbname;
     }
+    
+    public function dbnameEnv(){
+        global $envVersion;
+        if( ($envVersion??'')!=='' ){
+            return $envVersion . '-' . $this->dbname;
+        }
+        return $this->dbname;
+    }
+    
 
     /**
      * Sets the full and short database names based on the provided database identifier.

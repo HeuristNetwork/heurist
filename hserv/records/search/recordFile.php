@@ -420,7 +420,7 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor, $check_linked_media 
             $thumb_url = HEURIST_THUMB_URL . $thumb_filename_on_server;
         }else{
             // Fallback to dynamic generation via fileDownload.php (or similar controller)
-            $thumb_url = HEURIST_BASE_URL."?db=".$system->dbname()."&thumb=".$fileid_clean;
+            $thumb_url = HEURIST_BASE_URL."?db=".$system->dbnameEnv()."&thumb=".$fileid_clean;
         }
 
         if($get_bgcolor){
@@ -784,18 +784,18 @@ function fileGetPlayerTag($system, $fileid, $mimeType, $params, $external_url, $
         $filepath = $external_url;  //external
     }else{
         //to itself
-        $filepath = HEURIST_BASE_URL_PRO."?db=".$system->dbname()."&file=".$fileid;
+        $filepath = HEURIST_BASE_URL_PRO."?db=".$system->dbnameEnv()."&file=".$fileid;
 
         //to avoid download via proxy
         $filepath = $filepath.'&fancybox=1';
     }
-    $thumb_url = HEURIST_BASE_URL_PRO."?db=".$system->dbname()."&thumb=".$fileid;
+    $thumb_url = HEURIST_BASE_URL_PRO."?db=".$system->dbnameEnv()."&thumb=".$fileid;
 
     $mode_3d_viewer = detect3D_byExt(@$params['var'][0]['ulf_MimeExt']);
 
     if($mode_3d_viewer!=null && $mode_3d_viewer!=''){
 
-        $playerURL = HEURIST_BASE_URL.'hclient/widgets/viewers/'.$mode_3d_viewer.'Viewer.php?db='.$system->dbname()
+        $playerURL = HEURIST_BASE_URL.'hclient/widgets/viewers/'.$mode_3d_viewer.'Viewer.php?db='.$system->dbnameEnv()
                     .'&file='.$fileid;
 
         $result = '<a href="'.$playerURL.'" target="_blank"><img src="'.$thumb_url.'" '.$style.'/></a>';
@@ -889,7 +889,7 @@ EXP;
 
         $iiif_type = $params['var'][0]['ulf_OrigFileName'];//image or manifest
 
-        $miradorViewer = HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='.$system->dbname();
+        $miradorViewer = HEURIST_BASE_URL.'hclient/widgets/viewers/miradorViewer.php?db='.$system->dbnameEnv();
         
         if(($iiif_type==ULF_IIIF_IMAGE || $params['var'][0]['ulf_PreferredSource']=='iiif_image')
             && @$params['var'][0]['rec_ID']>0){

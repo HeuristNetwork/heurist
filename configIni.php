@@ -214,17 +214,40 @@ to use token use curl parm -H
 */
 
 // detect database server from database parameter
-$envVersion = null;
-if(isset($params['db']) || isset($_REQUEST['db'])){
+[$envVersion, $dbFromRequest] = detectServerAndDatabase( $params['db'] ?? $_REQUEST['db'] ?? null);
+if(isset($params) && is_array($params)){
+    $params['db'] = $dbFromRequest;
+}
+$_REQUEST['db'] = $dbFromRequest;
+
+// parent directory configuration file is optional, hence include not required
+// heuristConfigIni.php in parent directory overrides empty values in current file
+if (is_file($parentIni)){
+    include_once $parentIni;
+}
+
+
+/**
+* Returns a pair - server code and short database name
+* 
+* @param mixed $dbName
+*/
+function detectServerAndDatabase( $dbName ){
+    global $dbPrefix;
+    
+    $envVersion = null; // server environment (detected from database prefix for example HN-mydabase, HN is code for huma-num.fr)
+    if(!$dbName){
+        return [null, null];    
+    }
+    
     $dbHostCode = null;
-    $dbName = $params['db']??$_REQUEST['db'];
+    
     if(strpos($dbName,'-')>1){
         [$dbHostCode, $dbName] = explode('-', $dbName);
     }
     
-    if($dbHostCode){
+    if($dbHostCode){ //defined in request
         $envVersion = strtoupper($dbHostCode);
-        $_REQUEST['db'] = $dbName; //without host code
     }else{
         //try to find in session
         $dbnameFull = $dbName;
@@ -240,12 +263,7 @@ if(isset($params['db']) || isset($_REQUEST['db'])){
             $envVersion = $_SESSION[$dbnameFull]['dbHostCode'];
         }
     }
-}
-
-
-// parent directory configuration file is optional, hence include not required
-// heuristConfigIni.php in parent directory overrides empty values in current file
-if (is_file($parentIni)){
-    include_once $parentIni;
+    
+    return [$envVersion, $dbName];
 }
 
