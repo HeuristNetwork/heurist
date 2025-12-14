@@ -349,6 +349,9 @@ class UImage {
                     case IMAGETYPE_GIF:
                         $mimeExt = 'gif';
                         break;
+                    case IMAGETYPE_WEBP:
+                        $mimeExt = 'webp';
+                        break;
                     default;
                 }
             }else{
@@ -365,6 +368,9 @@ class UImage {
                         break;
                     case 'png':
                         $mimeExt = 'png';
+                        break;
+                    case 'webp':
+                        $mimeExt = 'webp';
                         break;
                     default;
                 }
@@ -423,6 +429,8 @@ class UImage {
             case 'gif':
             case 'image/png':
             case 'png':
+            case 'image/webp':
+            case 'webp':
 
                 $imageInfo = getimagesize($filename);
                 if(is_array($imageInfo)){
@@ -494,6 +502,10 @@ class UImage {
             case 'image/png':
             case 'png':
                 $img = @imagecreatefrompng($filename);
+                break;
+            case 'image/webp':
+            case 'webp':
+                $img = @imagecreatefromwebp($filename);
                 break;
             default:
                 $img = false; //not image
