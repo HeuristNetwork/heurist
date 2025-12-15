@@ -47,7 +47,7 @@ if($system->getMysqli()!=null) { //server is connected
 if(@$_REQUEST['includeRemote'] == 1 && !empty($remoteServers) && !empty($defaultRootFileUploadPath)){
 
     $fileStoreBase = str_replace('HEURIST_FILESTORE/', 'HEURIST_FILESTORE_', $defaultRootFileUploadPath);
-    $list = [ 'current' => $list, 'server_names' => [] ];
+    $list['server_names'] = [];
 
     foreach($remoteServers as $remoteID => $remoteDetails){
 
@@ -120,6 +120,7 @@ if($is_json){
                 <div style="overflow-y:auto;position:absolute;top:<?php echo $list_top;?>;bottom:0.5em;left:1em;right:0.5em">
                 <ul class="db-list">
                     <?php
+                    $list = $list['current'];
                     foreach ($list as $name) {
                         $name = htmlentities($name);
                         print "<li><a href='".HEURIST_BASE_URL."?db=$name'>$name</a></li>";

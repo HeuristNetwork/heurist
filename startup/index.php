@@ -821,9 +821,10 @@ if (!defined('PDIR')){
 
         // Show message about potential missing databases, for main servers only
         const dbParam = window.hWin.HEURIST4.util.getUrlParameter('db', location.search);
+        const listOnly = window.hWin.HEURIST4.util.getUrlParameter('openDatabase', location.search); 
         const mainServers = ['heuristref.net', 'intersect.org.au', 'heuristau.net', 'heurist.huma-num.fr', 'heurist.eu', 'heuristeu.net'];
         const curURL = location.href.toLowerCase();
-        if(!window.hWin.HEURIST4.util.isempty(dbParam) && mainServers.find((server) => curURL.indexOf(server) >= 0)){
+        if(!listOnly && !window.hWin.HEURIST4.util.isempty(dbParam) && mainServers.find((server) => curURL.indexOf(server) >= 0)){
 
             let anchorAttr = 'target="_blank" style="color: blue;" rel="noopener"';
             let toSwitchboard = '/heurist/startup/?list=1';
@@ -1206,7 +1207,7 @@ a{
                         <input id="current-tabs-filter_database" class="text ui-widget-content ui-corner-all" value="" autocomplete="off" />
                         <button id="btnNewDatabase" onclick="_showStep(1)" class="ui-button-action" style="position: absolute;left: 20em;top: 6.4em;display: none;">New Database</button>
 
-                        <?php if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false){ ?>
+                        <?php if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false && !DB_LIST_ONLY){ ?>
                         <span style="float: right;position: relative;bottom: 3em;">
                             <span style="color: red;">If your database has disappeared:</span> Databases which have not been updated for more than 3 / 6 / 12 months, depending on size, will be archived unless marked for retention.<br>
                             Databases can be recovered later but it makes work for us, so please just create a new one if you did not enter any data.<br>
