@@ -482,10 +482,15 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
         const serviceType = this._current_cfg.service;
         const rtyID = this._current_cfg.rty_ID;
         let $settings = this._$(`#lookup_settings .${serviceType}`);
+        let options = this._current_cfg.options;
+        const hasRecDumpSettings = options && Object.hasOwn(options, 'dump_record');
+        this._$('#lookup_settings, .settings').hide();
 
-        if($settings.length === 0){
+        if($settings.length === 0 && !hasRecDumpSettings){
             return;
         }
+
+        this._$('#lookup_settings').show();
         if($settings.hasClass('no_settings')){
             $settings.show();
             return;
@@ -493,7 +498,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
         if(serviceType === 'wikidata_SPARQL'){
 
-            let fields = this._current_cfg.options.SPARQL_field_map;
+            let fields = options.SPARQL_field_map;
             let $table = $settings.find('#SPARQL_field_map');
             let $tbody = $table.find('tbody');
             let $newMapping = $settings.find('.new-data');
@@ -653,7 +658,74 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
             );
         }
 
-        // @todo: Handle general record dump settings for wikidata, bnf, etc...
+        if(hasRecDumpSettings){
+
+            this._$('.recdump_container').show();
+
+            let dumpRecord = options.dump_record;
+
+            let $enableRecDump = this._$('[name="dump_record"]');
+            let $dumpToSratchPad = this._$('[name="dump_field"][value="rec_ScratchPad"]');
+            let $dumpToRecField = this._$('[name="dump_field"][value="dty_ID"]');
+            let $dumpRecField = this._$('#recdump_rty_flds');
+
+            $enableRecDump.prop('checked', dumpRecord);
+            this._on($enableRecDump, {
+                change: () => {
+
+                    const disableDumpControls = !$enableRecDump.is(':checked');
+                    const selectedField = this._$('[name="dump_field"]:checked').val(); console.log(selectedField);
+
+                    this.$H.setDisabled($dumpToSratchPad, disableDumpControls);
+                    this.$H.setDisabled($dumpToRecField, disableDumpControls);
+                    this.$H.setDisabled($dumpRecField, disableDumpControls || selectedField == 'rec_ScratchPad');
+
+                    this._updateStatus();
+                }
+            });
+
+            let topOption = [{key: '', title: 'select a field...', disabled: true, selected: true, hidden: true}];
+
+            this.$Hui.createRectypeDetailSelect($dumpRecField[0], rtyID, ['blocktext'], topOption, {useHtmlSelect: false});
+
+            let selectedField = this.$H.isempty(options.dump_field) ? 'rec_ScratchPad' : options.dump_field;
+
+            if(this.$H.isempty(selectedField) || selectedField === 'rec_ScratchPad'){
+                $dumpToSratchPad.prop('checked', true);
+            }else{
+                $dumpToRecField.prop('checked', true);
+                $dumpRecField.val(selectedField);
+
+                if($dumpRecField.hSelect('instance') !== undefined){
+                    $dumpRecField.hSelect('refresh');
+                }
+            }
+
+            this.$H.setDisabled($dumpToSratchPad, !dumpRecord);
+            this.$H.setDisabled($dumpToRecField, !dumpRecord);
+            this.$H.setDisabled($dumpRecField, !dumpRecord || selectedField == 'rec_ScratchPad');
+            this._on(this._$('[name="dump_field"]'), {
+                change: () => {
+
+                    const dumpRecord = $enableRecDump.is(':checked');
+                    const selectedField = this._$('[name="dump_field"]:checked').val();
+
+                    this.$H.setDisabled($dumpRecField, !dumpRecord || selectedField == 'rec_ScratchPad');
+                    if(selectedField == 'rec_ScratchPad'){
+                        $dumpRecField.val('');
+                        if($dumpRecField.hSelect('instance') !== undefined){
+                            $dumpRecField.hSelect('refresh');
+                        }
+                    }
+
+                    this._updateStatus();
+                }
+            });
+
+            this._on($dumpRecField, {
+                change: () => this._updateStatus()
+            });
+        }
 
         $settings.show();
     },
@@ -671,24 +743,21 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
         const serviceType = this._current_cfg.service;
         let $settings = this._$(`#lookup_settings .${serviceType}`);
+        const hasRecDumpSettings = this._current_cfg.options && Object.hasOwn(this._current_cfg.options, 'dump_record');
         let isModified = false;
 
-        if($settings.length === 0 || $settings.hasClass('no_settings')){
+        if($settings.length === 0 && !$settings.hasClass('no_settings') && !hasRecDumpSettings){
             return isModified;
         }
 
-        let options = this.$H.cloneJSON(this._current_cfg.options);
-        if(serviceType === 'wikidata_SPARQL'){
-
-            fields = this._retrieveExtraSettings();
-
-            if(JSON.stringify(this._current_cfg.options.SPARQL_field_map) !== JSON.stringify(fields)){
-                isModified = true;
-                options.SPARQL_field_map = fields;
-            }
+        let options = {};
+        if(serviceType === 'wikidata_SPARQL' || serviceType === 'bnfLibrary' || serviceType === 'bnfLibraryAut'){
+            options = this._retrieveExtraSettings();
         }
 
-        if(setOptions){
+        isModified = JSON.stringify(this._current_cfg.options) !== JSON.stringify(options);
+
+        if(setOptions && isModified){
             this._current_cfg.options = options;
         }
 
@@ -707,22 +776,46 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
 
         const serviceType = this._current_cfg.service;
         let $settings = this._$(`#lookup_settings .${serviceType}`);
+        const hasRecDumpSettings = this._current_cfg.options && Object.hasOwn(this._current_cfg.options, 'dump_record');
 
-        if($settings.length === 0 || $settings.hasClass('no_settings')){
+        if($settings.length === 0 && !$settings.hasClass('no_settings') && !hasRecDumpSettings){
             return false;
         }
 
+        let options = {};
         if(serviceType === 'wikidata_SPARQL'){
 
             let $tbody = $settings.find('#SPARQL_field_map tbody');
-            let fields = {};
+            let fields = {SPARQL_queries: {}};
             $.each($tbody.find('tr'), (idx, row) => {
                 row = $(row);
                 fields[row.attr('data-lbl')] = row.find('.rstField').attr('data-id');
             });
 
-            return fields;
+            options.SPARQL_field_map = fields;
+        }else if(serviceType === 'bnfLibrary'){
+            // Temporary - setup textarea to allow users to define the author codes
+            options.author_codes = this._current_cfg.options.author_codes;
         }
+
+        let $dumpSettings = this._$('#lookup_settings .recdump_container');
+        if($dumpSettings.length > 0 && $dumpSettings.is(':visible')){
+
+            let dumpSettings = {
+                dump_record: this._$('[name="dump_record"]:checked').length > 0,
+                dump_field: ''
+            };
+
+            if(dumpSettings.dump_record){
+                let dumpFIeld = this._$('[name="dump_field"]:checked').val();
+                dumpSettings.dump_field = dumpFIeld === 'rec_ScratchPad' ? 'rec_ScratchPad' : this._$('#recdump_rty_flds').val();
+                dumpSettings.dump_field = this.$H.isempty(dumpSettings.dump_field) ? 'rec_ScratchPad' : dumpSettings.dump_field;
+            }
+
+            options = $.extend({}, options, dumpSettings);
+        }
+
+        return options;
     },
     
     /**
@@ -829,7 +922,7 @@ $.widget("heurist.lookupConfig", $.heurist.baseConfig, {
             this._is_modified = (this._current_cfg.rty_ID != this.selectRecordType.val())
                              || (this._current_cfg.label != this._$('#inpt_label').val());
 
-            if(this._current_cfg.service === 'wikidata_SPARQL'){
+            if(Object.hasOwn(this._current_cfg, 'options')){
                 this._is_modified = this._handleExtraSettings(false);
             }
 

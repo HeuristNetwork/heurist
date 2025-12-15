@@ -98,10 +98,8 @@ $.widget("heurist.lookupBnF", $.heurist.lookupBase, {
 
         let $select = this.element.find('#rty_flds');
         let top_opt = [{key: '', title: 'select a field...', disabled: true, selected: true, hidden: true}];
-        let sel_options = {
-            useHtmlSelect: false
-        };
-        window.hWin.HEURIST4.ui.createRectypeDetailSelect($select[0], this.options.mapping.rty_ID, ['blocktext'], top_opt, sel_options);
+
+        window.hWin.HEURIST4.ui.createRectypeDetailSelect($select[0], this.options.mapping.rty_ID, ['blocktext'], top_opt, {useHtmlSelect: false});
 
         this._on(this.element.find('input[name="dump_field"]'), {
             change: function(){

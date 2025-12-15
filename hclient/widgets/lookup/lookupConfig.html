@@ -129,7 +129,8 @@
                     </table>
 
                     <div id="lookup_settings" style="padding-top: 10px;">
-                        <div class="wikidata_SPARQL" style="display: none;">
+
+                        <div class="wikidata_SPARQL settings" style="display: none;">
                             <table role="presentation" id="SPARQL_field_map" style="font-size:1em;" data-idx="0">
                                 <tbody></tbody>
                             </table>
@@ -162,6 +163,29 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="recdump_container settings" style="display: none; margin-top: 1.5em;">
+
+                            <h4>Record dump settings</h4>
+
+                            <div style="padding-bottom: 0.5em;">
+                                Enable record dumping <input type="checkbox" name="dump_record" style="vertical-align: middle;" />
+                                <span class="heurist-helper1" style="vertical-align: middle;">(this will dump the selected lookup result into a record field)</span>
+                            </div>
+
+                            <div style="padding-top: 0.5em;">
+                                Where will the record dump be placed:
+
+                                <div style="padding: 1em;">
+                                    <label><input type="radio" name="dump_field" value="rec_ScratchPad" style="vertical-align: middle;" /> Record scratch pad</label><br><br>
+                                    <label><input type="radio" name="dump_field" value="dty_ID" style="vertical-align: middle;" /> Record field (blocktext fields only)</label>
+                                    <select id="recdump_rty_flds">
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+
                     </div>
                 </div>
                 

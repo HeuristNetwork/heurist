@@ -25,18 +25,18 @@ Widget hierarchy:<br>
 
 | Service | Description | Link | Status |
 | :-----: | ----------- | ---- | :----: |
-| TLCMap | Query the Time Layered Cultural Mapping of Australian history and culture database | site: [tlcmap.org](https://tlcmap.org) | Disabled, issues with API response |
-| GeoNames | Query the Geonames database for geographical locations covering all countries and many additional places | site: [geonames.org](https://geonames.org) | Done |
-| GeoNames Postalcodes | Query the Geonames' postalcode database for more precise locale information | site: [geonames.org/postal-codes/](https://geonames.org/postal-codes/) | Done |
-| MPCE | Assign keywords to a Work (Book) record from searches or by association | database: [Mapping Print Charting Enlightenment](https://HeuristRef.net/heurist/?db=MPCE_Mapping_Print_Charting_Enlightenment&website) | Done |
-| LRC18 | Import record information from the ESTC_Helsinki_Bibliographic_Metadata database via a search | database: [ESTC Helsinki Bibliographic Metadata](https://HeuristRef.net/heurist/?db=ESTC_Helsinki_Bibliographic_Metadata) | Done |
-| BnF Bib | Query the Bibliothèque nationale de France's bibliographic records | site: [BnF.fr](https://www.bnf.fr) | Done |
-| BnF Aut | Query the Bibliothèque nationale de France's authoritative records | site: [BnF.fr](https://www.bnf.fr) | Done |
-| Nomisma | Retrieve the Nomisma records for Mints, Hoards and Findspots | site: [nomisma.org](https://nomisma.org/) | Done |
-| Nakala | Search Nakala's publicly available multi-media records | site: [nakala.fr](https://nakala.fr/) | Done |
-| Nakala Authors | Search the authority records from Nakala's database | site: [nakala.fr](https://nakala.fr/) | Done |
-| Opentheso | Query various servers that have a Opentheso service | sites: [pactols.frantiq.fr](https://pactols.frantiq.fr/index.xhtml) ; [opentheso.huma-num.fr](https://opentheso.huma-num.fr/index.xhtml) | Done |
-| Wikidata | Perform SPARQL requests on the Wikidata database | site: [wikidata.org](https://query.wikidata.org/) | Done |
+| [TLCMap](lookupTLC.js) | Query the Time Layered Cultural Mapping of Australian history and culture database | site: [tlcmap.org](https://tlcmap.org) | Disabled, issues with API response |
+| [GeoNames](lookupGN.js) | Query the Geonames database for geographical locations covering all countries and many additional places | site: [geonames.org](https://geonames.org) | Done |
+| [GeoNames Postalcodes](lookupGN_postalCode.js) | Query the Geonames' postalcode database for more precise locale information | site: [geonames.org/postal-codes/](https://geonames.org/postal-codes/) | Done |
+| [MPCE](lookupMPCE.js) | Assign keywords to a Work (Book) record from searches or by association | database: [Mapping Print Charting Enlightenment](https://HeuristRef.net/heurist/?db=MPCE_Mapping_Print_Charting_Enlightenment&website) | Done |
+| [LRC18](lookupLRC18C.js) | Import record information from the ESTC_Helsinki_Bibliographic_Metadata database via a search | database: [ESTC Helsinki Bibliographic Metadata](https://HeuristRef.net/heurist/?db=ESTC_Helsinki_Bibliographic_Metadata) | Done |
+| [BnF Bib](lookupBnFLibrary_bib.js) | Query the Bibliothèque nationale de France's bibliographic records | site: [BnF.fr](https://www.bnf.fr) | Done |
+| [BnF Aut](lookupBnFLibrary_aut.js) | Query the Bibliothèque nationale de France's authoritative records | site: [BnF.fr](https://www.bnf.fr) | Done |
+| [Nomisma](lookupNomisma.js) | Retrieve the Nomisma records for Mints, Hoards and Findspots | site: [nomisma.org](https://nomisma.org/) | Done |
+| [Nakala](lookupNakala.js) | Search Nakala's publicly available multi-media records | site: [nakala.fr](https://nakala.fr/) | Done |
+| [Nakala Authors](lookupNakalaAuthor.js) | Search the authority records from Nakala's database | site: [nakala.fr](https://nakala.fr/) | Done |
+| [Opentheso](lookupOpentheso.js) | Query various servers that have a Opentheso service | sites: [pactols.frantiq.fr](https://pactols.frantiq.fr/index.xhtml) ; [opentheso.huma-num.fr](https://opentheso.huma-num.fr/index.xhtml) | Done |
+| [Wikidata](lookupWikidata_SPARQL.js) | Perform SPARQL requests on the Wikidata database | site: [wikidata.org](https://query.wikidata.org/) | Done |
 | Isadore | Request data from ISIDORE's database | site: [isidore.science](https://isidore.science/) |  |
 | MediHAL | Request data from MediHal's database | site: [hal.science](https://media.hal.science/) |  |
 
