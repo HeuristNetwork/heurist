@@ -382,6 +382,8 @@ if ($mode > 1) {
         // $please_advise is defined but not consistently used. It could be appended to error messages.
         $please_advise = "<br>Please consult with your system administrator for a resolution.";
 
+        $DB_DESCRIPTION = mysql__select_value($system->getMysqli(), "SELECT sys_dbDescription FROM sysIdentification WHERE sys_ID = 1");
+
         // --- Display initial form if $mode is not set (i.e., initial page load) ---
         if (!$mode) {
             ?>
@@ -510,7 +512,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                     <div class="header recommended">
                         Database description
                     </div>
-                    <textarea name='desc' rows="4" cols="100"></textarea>
+                    <textarea name='desc' rows="4" cols="100"><?php echo $DB_DESCRIPTION; ?></textarea>
                 </div>
                 <div class="input-row repo-Nakala" style="display: none;padding: 5px 0 10px 0;">
                     <div class="header optional">
