@@ -1396,7 +1396,7 @@ class LookupController{
             }
         }
 
-        if(empty($this->lookupResponse) || !$response){
+        if(empty($this->lookupResponse) || !$response || array_key_exists('status', $this->lookupResponse)){
             return;
         }
 
@@ -1532,13 +1532,9 @@ class LookupController{
         $data['last_update'] = date('Y-m-d');
 
         $fileSize = fileSave(json_encode($data), $this->nakalaFile);
-        $response = $fileSize <= 0 && !empty($data);
+        $response = $fileSize >= 0 && !empty($data);
 
-        if($response){
-            $this->lookupResponse = $this->system->addError(HEURIST_ERROR, 'Cannot save Nakala metadata into local file store');
-        }else{
-            $this->lookupResponse = $data;
-        }
+        $this->lookupResponse = !$response ? $this->system->addError(HEURIST_ERROR, 'Cannot save Nakala metadata into local file store') : $data;
 
         return $response;
     }
@@ -1562,7 +1558,7 @@ class LookupController{
             case 'years':
                 return $this->lookupResponse['years'] ?? [];
             default:
-                return $this->lookupResponse;
+                return array_key_exists($this->lookupMetadata, $this->lookupResponse) ? $this->lookupResponse[$this->lookupMetadata] : $this->lookupResponse;
         }
     }
 

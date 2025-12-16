@@ -1200,7 +1200,6 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);//return the output as a string from curl_exec
-    curl_setopt($ch, CURLOPT_BINARYTRANSFER, 1);
     curl_setopt($ch, CURLOPT_NOBODY, 0);
     curl_setopt($ch, CURLOPT_HEADER, 0);//don't include header in output
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);// follow server header redirects
@@ -1254,7 +1253,7 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
             $glb_curl_error = 'Error Code : '.$error;
         }
 
-        curl_close($ch);
+        unset($ch);
         return false;
     } else {
         if(!$data){
@@ -1264,7 +1263,7 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
             $glb_curl_error = 'HTTP Response Code: '.$code;
         }
 
-        curl_close($ch);
+        unset($ch);
         return $data;
     }
 }
@@ -1323,7 +1322,7 @@ function loadRemoteURLContentType($url, $bypassProxy = true, $timeout=30) {
     } else {
         $content_type = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
     }
-    curl_close($ch);
+    unset($ch);
 
     return $content_type;
 }
@@ -1704,7 +1703,6 @@ function isActionInProgress($action, $range_minutes, $db_name=''){
      *
      * @global int|string|null $glb_curl_code Stores cURL error code from Nakala API calls.
      * @global string|null $glb_curl_error Stores cURL error message from Nakala API calls.
-     * @global \hserv\System $system The Heurist system instance (re-declared global, also passed as param).
      * @param \hserv\System $system The Heurist system instance.
      * @param array $params An associative array of parameters:
      *                      'api_key' (string): User's Nakala API Key.
@@ -1721,7 +1719,7 @@ function isActionInProgress($action, $range_minutes, $db_name=''){
      */
 function uploadFileToNakala($system, $params) {
 
-    global $glb_curl_code, $glb_curl_error, $system; // $system is passed as param, also global.
+    global $glb_curl_code, $glb_curl_error;
     $glb_curl_code = null;
     $glb_curl_error = '';
 
@@ -1745,14 +1743,14 @@ function uploadFileToNakala($system, $params) {
         return false;
     }
 
-    $api_key = 'X-API-KEY: ' . $params['api_key'];
+    $api_key = "X-API-KEY: {$params['api_key']}";
     $file_sha1 = '';
 
     $useragent = 'Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.0.6) Gecko/2009011913 Firefox/3.0.6';
 
     $ch = curl_init();
 
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array($api_key));// USERs API KEY
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [$api_key]);// USERs API KEY
 
     curl_setopt($ch, CURLOPT_COOKIEFILE, '/dev/null');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);//return the output as a string from curl_exec
@@ -1800,7 +1798,7 @@ function uploadFileToNakala($system, $params) {
             $glb_curl_error .= $missing_key;
             $herror = HEURIST_INVALID_REQUEST;
 
-            curl_close($ch);
+            unset($ch);
             $system->addError($herror, $glb_curl_error);
 
             return false;
@@ -1817,7 +1815,7 @@ function uploadFileToNakala($system, $params) {
                 $glb_curl_error .= $missing_key;
                 $herror = HEURIST_INVALID_REQUEST;
 
-                curl_close($ch);
+                unset($ch);
                 $system->addError($herror, $glb_curl_error);
 
                 return false;
@@ -1835,7 +1833,7 @@ function uploadFileToNakala($system, $params) {
     if($file_sha1 == ''){ // UPLOAD FILE - (upload one file at a time, collect all SHA1 values, then process all together)
 
         curl_setopt($ch, CURLOPT_POST, 1);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, array('file' => $curl_file));
+        curl_setopt($ch, CURLOPT_POSTFIELDS, ['file' => $curl_file]);
 
         $file_details = curl_exec($ch);
 
@@ -1855,7 +1853,7 @@ function uploadFileToNakala($system, $params) {
                 $glb_curl_error = $file_details['message'];
             }
 
-            curl_close($ch);
+            unset($ch);
             $system->addError($herror, $glb_curl_error);
 
             return false;
@@ -1864,7 +1862,7 @@ function uploadFileToNakala($system, $params) {
         $file_details = json_decode($file_details, true);
 
         if(JSON_ERROR_NONE != json_last_error() || !is_array($file_details)){ // json error occurred | is not array | is missing information
-            curl_close($ch);
+            unset($ch);
             $system->addError(HEURIST_ACTION_BLOCKED, $unknow_error_msg);
 
             return false;
@@ -1881,7 +1879,7 @@ function uploadFileToNakala($system, $params) {
                 $glb_curl_error = $file_details['message'];
             }
 
-            curl_close($ch);
+            unset($ch);
             $system->addError($herror, $glb_curl_error);
 
             return false;
@@ -1902,9 +1900,9 @@ function uploadFileToNakala($system, $params) {
     }
 
     // UPLOAD METADATA
-    $metadata = array('status' => $status, 'metas' => array(), 'files' => array());
+    $metadata = ['status' => $status, 'metas' => [], 'files' => []];
 
-    $metadata['files'][] = array( 'sha1' => $file_sha1 );
+    $metadata['files'][] = [ 'sha1' => $file_sha1 ];
     if(!empty($params['file']['description'])){
         $metadata['files'][0]['description'] = htmlspecialchars($params['file']['description']);
     }
@@ -1913,7 +1911,7 @@ function uploadFileToNakala($system, $params) {
         $metadata['metas'][] = $data;
     }
 
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array($api_key, 'Content-Type:application/json'));// Reset headers to specify the return type
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [$api_key, 'Content-Type:application/json']);// Reset headers to specify the return type
     curl_setopt($ch, CURLOPT_URL, "{$NAKALA_BASE_URL_API}");
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($metadata));
 
@@ -1935,7 +1933,7 @@ function uploadFileToNakala($system, $params) {
             $glb_curl_error = $file_details['message'];
         }
 
-        curl_close($ch);
+        unset($ch);
         $system->addError($herror, $glb_curl_error);
 
         return false;
@@ -1944,7 +1942,7 @@ function uploadFileToNakala($system, $params) {
     $result = json_decode($result, true);
 
     if(JSON_ERROR_NONE != json_last_error() || !is_array($result)){ // json error occurred | is not array | is missing information
-        curl_close($ch);
+        unset($ch);
         $system->addError(HEURIST_ACTION_BLOCKED, $unknow_error_msg);
 
         return false;
@@ -1960,13 +1958,9 @@ function uploadFileToNakala($system, $params) {
             }
         }else{
 
-            curl_close($ch);
-            $msg = '';
-            if(is_array($payload)){
-                $msg = implode('<br>', array_values($payload));
-            }else{
-                $msg = $payload;
-            }
+            unset($ch);
+            $msg = is_array($payload) ? implode('<br>', array_values($payload)) : $payload;
+
             $system->addError($herror, $msg);
 
             return false;
@@ -1982,12 +1976,12 @@ function uploadFileToNakala($system, $params) {
             $glb_curl_error = $result['message'];
         }
 
-        curl_close($ch);
+        unset($ch);
         $system->addError($herror, $glb_curl_error);
 
         return false;
     }else{
-        curl_close($ch);
+        unset($ch);
         $system->addError(HEURIST_ACTION_BLOCKED, $unknow_error_msg);
 
         return false;
@@ -2275,6 +2269,15 @@ function getFileDetailsForNakala($mysqli, $ulfID){
         'typeUri' => XML_SCHEMA,
         'propertyUri' => NAKALA_REPO.'terms#created'
     ];
+    
+    if(!empty($fileDetails[3])){
+        $metaValues['description'] = [
+            'value' => $fileDetails[3],
+            'lang' => null,
+            'typeUri' => XML_SCHEMA,
+            'propertyUri' => 'http://purl.org/dc/terms/description'
+        ];
+    }
 
     return [$metaValues, $file];
 }

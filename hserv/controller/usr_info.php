@@ -699,31 +699,31 @@
                 }else{
 
                     // Prepare parameters
-                    $params = array();
+                    $params = [];
 
                     // File
-                    $params['file'] = array(
+                    $params['file'] = [
                         'path' => HEURIST_FILESTORE_DIR . DIR_SCRATCH
                                 . USanitize::sanitizeFileName(USanitize::sanitizePath($req_params['file'][0]['name'])),
                         'type' => htmlspecialchars($req_params['file'][0]['type']),
                         'name' => htmlspecialchars($req_params['file'][0]['original_name'])
-                    );
+                    ];
 
                     // Metadata
-                    $params['meta']['title'] = array(
+                    $params['meta']['title'] = [
                         'value' => htmlspecialchars(@$req_params['meta']['title']),
                         'lang' => null,
                         'typeUri' => XML_SCHEMA,
                         'propertyUri' => NAKALA_REPO.'terms#title'
-                    );
+                    ];
 
                     if(empty($req_params['meta']['creator']['authorId'])){
-                        $params['meta']['creator'] = array(
+                        $params['meta']['creator'] = [
                             'value' => null,
                             'lang' => null,
                             'typeUri' => null,
                             'propertyUri' => NAKALA_REPO.'terms#creator'
-                        );
+                        ];
 
                         if(array_key_exists('givenname', $req_params['meta']['creator']) || array_key_exists('surname', $req_params['meta']['creator'])){
 
@@ -736,49 +736,49 @@
                             }
                             $fullname = trim($fullname);
 
-                            $params['meta']['alt_creator'] = array(
+                            $params['meta']['alt_creator'] = [
                                 'value' => $fullname,
                                 'lang' => null,
                                 'typeUri' => XML_SCHEMA,
                                 'propertyUri' => 'http://purl.org/dc/terms/creator'
-                            );
+                            ];
                         }
                     }else{
-                        $params['meta']['creator'] = array(
+                        $params['meta']['creator'] = [
                             'value' => @$req_params['meta']['creator'],
                             'propertyUri' => NAKALA_REPO.'terms#creator'
-                        );
+                        ];
                     }
 
                     if(array_key_exists('created', $req_params['meta']) && !empty($req_params['meta']['created'])){
-                        $params['meta']['created'] = array(
+                        $params['meta']['created'] = [
                             'value' => @$req_params['meta']['created'],
                             'lang' => null,
                             'typeUri' => XML_SCHEMA,
                             'propertyUri' => NAKALA_REPO.'terms#created'
-                        );
+                        ];
                     }else{
-                        $params['meta']['created'] = array(
+                        $params['meta']['created'] = [
                             'value' => null,
                             'lang' => null,
                             'typeUri' => null,
                             'propertyUri' => NAKALA_REPO.'terms#created'
-                        );
+                        ];
                     }
 
-                    $params['meta']['type'] = array(
+                    $params['meta']['type'] = [
                         'value' => @$req_params['meta']['type'],
                         'lang' => null,
                         'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
                         'propertyUri' => NAKALA_REPO.'terms#type'
-                    );
+                    ];
 
-                    $params['meta']['license'] = array(
+                    $params['meta']['license'] = [
                         'value' => @$req_params['meta']['license'],
                         'lang' => null,
                         'typeUri' => XML_SCHEMA,
                         'propertyUri' => NAKALA_REPO.'terms#license'
-                    );
+                    ];
 
                     // User API Key
                     $params['api_key'] = $credentials[$repo_id]['params']['writeApiKey'];
