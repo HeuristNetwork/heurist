@@ -311,7 +311,7 @@ $.widget("heurist.baseConfig", {
             return;
         }
 
-        if(!this.options.isdialog && $('.ui-menu6').length > 0){
+        if($('.ui-menu6').length > 0){
             $('.ui-menu6').slidersMenu('manageSwitchHandler', 'remove', `${this.options.type}Configure`);
         }
 
@@ -333,7 +333,7 @@ $.widget("heurist.baseConfig", {
 
         let $dlg, buttons = {};
 
-        buttons['Save'] = function(){
+        buttons['Save'] = () => {
 
             if(that._is_modified){
                 that._applyConfig();
@@ -345,9 +345,14 @@ $.widget("heurist.baseConfig", {
             that.saveConfigrations();
         };
 
-        buttons['Ignore and close'] = function(){ 
+        buttons['Ignore and close'] = () => { 
+
             $dlg.dialog('close');
             that.element.empty().hide();
+
+            if($('.ui-menu6').length > 0){
+                $('.ui-menu6').slidersMenu('manageSwitchHandler', 'remove', `${this.options.type}Configure`);
+            }
         };
 
         if(isSave){
