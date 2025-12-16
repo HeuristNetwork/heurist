@@ -363,7 +363,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
         let that = this;
         let src_folder = this._$('input[name=selArchiveFolder]:checked').val(); // e.g., 'local', 'server'
 
-        let extensions = src_folder == 3 ? 'zip.bz2' : 'zip'; // Folder 3 might be specific to server-side archives
+        let extensions = src_folder == 3 ? 'zip,bz2' : 'zip'; // Folder 3 might be specific to server-side archives
         extensions = src_folder == 5 ? 'folders' : extensions;
 
         if(!this._select_file_dlg){ // Initialize dialog on first use
