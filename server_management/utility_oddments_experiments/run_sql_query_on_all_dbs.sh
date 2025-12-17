@@ -29,11 +29,12 @@ BASE_URL="${3:-${BASE_URL:-}}"
 if [ -z "$BASE_URL" ]; then
   BASE_URL_SOURCE="apachectl"
   if command -v apachectl >/dev/null 2>&1; then
-    # Try ServerName lines from apachectl -S (more reliable than namevhost parsing)
-    AP_DOMAIN="$( { apachectl -S 2>/dev/null || true; } | awk \'
+    # Try ServerName lines from apachectl -S (won't abort under set -e)
+    AP_DOMAIN="$({ apachectl -S 2>/dev/null || true; } | awk '
       $1=="ServerName" {print $2; exit}
       /namevhost/      {print $4; exit}
-    \')"
+    ')"
+
     if [ -n "$AP_DOMAIN" ]; then
       BASE_URL="https://${AP_DOMAIN}"
     fi
