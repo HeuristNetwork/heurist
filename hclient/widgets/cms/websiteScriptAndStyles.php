@@ -531,9 +531,10 @@ function loadPageContent(pageid, eventdata){
 
     if(pageid>0){
 
-        var page_target = $('#main-content');
+        let page_target = $('#main-content');
+        page_target.empty();
 
-        var supp_options = {
+        let supp_options = {
             heurist_emailForm: {website_record_id: home_page_record_id},
             heurist_resultListExt: {record_with_custom_styles: home_page_record_id},
             heurist_Navigation: {aftermenuselect: initLinksAndImages},

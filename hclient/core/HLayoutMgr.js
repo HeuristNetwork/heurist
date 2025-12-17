@@ -298,14 +298,44 @@ class HLayoutMgr {
       return $d;
   }
   
+  #sanitizeCssMap(css) {
+      // Ensure we only deal with a plain object
+      if (!css || typeof css !== "object" || Array.isArray(css)) return {};
+
+      const out = {};
+
+      for (let [rawKey, rawVal] of Object.entries(css)) {
+      const key = typeof rawKey === "string" ? rawKey.trim() : "";
+      if (!key) continue; // empty key
+
+      // Allow values like 0, false, etc. if you want — CSS is usually string/number.
+      // We'll treat null/undefined/"" as empty.
+      if (rawVal == null) continue;
+
+      const val =
+      typeof rawVal === "string"
+      ? rawVal.trim()
+      : (typeof rawVal === "number" ? String(rawVal) : "");
+
+      if (!val) continue; // empty value after trim/coerce
+
+      out[key] = val;
+      }
+
+      return out;
+  }
+  
+  
   /*
   
   */
   #layoutSetCssAndClasses(layout, element){
     if (!element) return;
     if (!layout.css) layout.css = {};
+    
     if (layout.css && !$.isEmptyObject(layout.css)) {
-      element.css(layout.css);
+        layout.css = this.#sanitizeCssMap(layout.css);
+        element.css(layout.css);
     }
     if (layout.bsClasses){
         element.addClass(layout.bsClasses);
@@ -1276,8 +1306,7 @@ console.log(content);
         
         //TEST PURPOSE and back to json
         //res = this.convertHTMLtoJSON(res, 0);
-        
-        console.log(res);
+        //console.log(res);
         
         return res;
     }
