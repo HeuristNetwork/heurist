@@ -94,7 +94,7 @@ function sendPHPMailer($email_from, $email_from_name, $email_to, $email_title, $
     if(is_array($email_text)){
         $email_text =  json_encode($email_text);
     }
-
+    
     if(!$email_to){
         if(isset($system)){
             $system->addError(HEURIST_ACTION_BLOCKED,

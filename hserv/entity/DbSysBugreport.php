@@ -754,7 +754,7 @@ class DbSysBugreport extends DbEntityBase
 
 
         $email_title = null;
-        $email_from_name = @$fields['person'];
+        $email_from_name = $fields['person']??'';
         $email_to = null;
 
         //3. get $email_to - either address from website_id record or current database owner
@@ -769,7 +769,7 @@ class DbSysBugreport extends DbEntityBase
                 $email_to = recordGetField($record, DT_EMAIL);
                 if($email_to) {$email_to = explode(';', $email_to);}
             }
-            $email_from_name = 'Website contact';
+            $email_from_name = 'Website contact '.$email_from_name;
         }else{
             $email_from_name = 'Bug Reporter';
         }
