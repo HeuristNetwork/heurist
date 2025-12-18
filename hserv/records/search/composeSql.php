@@ -1821,12 +1821,17 @@ class HPredicate {
 
                 if(!$this->field_id){ //field type not defined
                 
+                    /*
+                    $keepValue = $this->value;
+                
                     $this->pred_type='title';
                     $res1 = $this->predicateField(); //search for rec_Title
-                    
+                    $this->value = $keepValue;
+                    */
                     $this->pred_type='field'; //restore
                     $res2 = $this->predicateAnyField(); //search for any field
-                    return array("where"=>"({$res1['where']}) OR ({$res2['where']})");
+                    return array("where"=>$res2['where']);
+                    //return array("where"=>"({$res1['where']}) OR ({$res2['where']})");
                 }else{
                     return $this->predicateField();
                 }
@@ -2272,34 +2277,20 @@ class HPredicate {
 
         global $mysqli, $is_admin, $top_query, $wg_ids;
 
-        //$p_alias = "rd".$this->qlevel;
-        //$p = $p_alias.'.';
-        $p_alias = '';
-        $p = '';
-
-        $keep_val = $this->value;
+        $keepValue = $this->value;
 
         $this->field_type = 'enum';
         $val_enum = $this->getFieldValue();
 
         $this->field_type = 'freetext';
-        $val_wo_prefixes = $this->value;
-        $this->value = $keep_val;
+        $this->value = $keepValue;
         $val = $this->getFieldValue();
         if(!$val) {return null;}
-
-        $field_name1 =  $p.'dtl_Value ';
-        $field_name2 =  'link.rec_Title ';
-
-        $ignoreApostrophe = (strpos($val, 'LIKE')==1);
-        if($ignoreApostrophe){
-            $field_name1 = "replace($field_name1,\"'\",'') ";
-            $field_name2 = "replace($field_name2,\"'\",'') ";
-        }
+        $val_wo_prefixes = $this->value;
 
         $field_condition = '';
 
-        if(!$is_admin){
+        if(!$is_admin){ //@todo!!!
 
             $field_condition = ' AND rst_DetailTypeID = dtl_DetailTypeID'
                                 .' AND rst_RecTypeID = r'.$this->qlevel.'.rec_RecTypeID'
@@ -2318,36 +2309,64 @@ class HPredicate {
             }
         }
 
+        
+        $detal_compare =  'rd.dtl_Value ';
+        $title_compare =  'link.rec_Title ';
+
         if($this->fulltext){
+            $detal_compare = "MATCH($detal_compare) $val";
+            $title_compare = "MATCH($title_compare) $val";
+        }else{
+            //$ignoreApostrophe = (stripos($val, 'LIKE') !== false);
+            $ignoreApostrophe = (strpos(trim($val), 'LIKE')===0);
+            if($ignoreApostrophe){
+                $detal_compare = "replace($detal_compare,\"'\",'') $val";
+                $title_compare = "replace($title_compare,\"'\",'') $val";
+            } else {
+                $detal_compare = "$detal_compare $val";
+                $title_compare = "$title_compare $val";
+            }       
+        }
+       
 
-            //execute fulltext search query
-            $res = 'select dtl_RecID from recDetails '
-            . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
-            . ' left join Records link on dtl_Value=link.rec_ID '
-            . ' left join defRecStructure on dtl_DetailTypeID=rst_DetailTypeID '
-            .' where if(dty_Type != "resource", '
-                .' if(dty_Type="enum", dtl_Value'.$val_enum
-                    .', '. ($this->negate ? SQL_NOT : '')
-                    ."MATCH(dtl_Value) $val), $field_name2 LIKE '%{$val_wo_prefixes}%')"
-                .$field_condition;
+$rQuery = <<<QUERY
+SELECT rl.rl_SourceID as dtl_RecID
+FROM Records link 
+JOIN recLinks rl
+ON rl.rl_TargetID = link.rec_ID
+WHERE $title_compare
+    AND rl.rl_DetailTypeID IS NOT NULL 
 
-            $list_ids = mysql__select_list2($mysqli, $res);
+UNION ALL
+
+SELECT rd.dtl_RecID
+FROM recDetails rd
+JOIN defDetailTypes dt
+ON dt.dty_ID = rd.dtl_DetailTypeID
+WHERE dt.dty_Type <> 'resource'
+AND dt.dty_Type <> 'enum'
+AND $detal_compare
+QUERY;
+
+if($val_enum!=='=0'){
+  $rQuery .= <<<QUERY
+
+UNION ALL
+SELECT rd.dtl_RecID
+FROM defDetailTypes dt
+JOIN recDetails rd
+  ON rd.dtl_DetailTypeID = dt.dty_ID
+WHERE dt.dty_Type = 'enum'
+  AND rd.dtl_Value $val_enum
+QUERY;
+    
+}
+
+            $rQuery = "SELECT DISTINCT x.dtl_RecID FROM ( $rQuery ) AS x;";
+
+            $list_ids = mysql__select_list2($mysqli, $rQuery);
 
             $res = predicateId('r'.$this->qlevel.'.rec_ID',$list_ids);
-
-        }else{
-
-            $res = 'exists (select dtl_ID from recDetails '.$p
-            . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
-            . ' left join Records link on '.$p.'dtl_Value=link.rec_ID '
-            .' where r'.$this->qlevel.'.rec_ID='.$p.'dtl_RecID '
-            .'  and if(dty_Type != "resource", '
-                    .' if(dty_Type="enum", '.$p.'dtl_Value'.$val_enum
-                       .', '.$field_name1.$val
-                       .'), '.$field_name2.$val.')'
-            .$field_condition.')';
-
-        }
 
         return array("where"=>$res);
     }
