@@ -40,7 +40,6 @@ declare(strict_types=1);
 * @since       7.0
 */
 const HN_MEMBERS_FILE = '/var/www/html/HEURIST/association_members.txt';
-//const HN_MEMBERS_FILE = 'c:/xampp/htdocs/association_members.txt';
 const HN_LOG_FILE     = '/var/www/html/HEURIST/HEURIST_FILESTORE/_HEURISTNETWORK_membership_checkpoint.log';
 const HN_TIMEZONE     = 'Australia/Sydney';
 

@@ -1273,7 +1273,7 @@ class HSystemMgr {
                   const $currentDialog = window.hWin.HEURIST4.msg.getMsgDlg();
                   if ($currentDialog) $currentDialog.dialog('close');
                   // Optionally, indicate cancellation to callback or handle differently
-                  if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this);
+                  if (window.hWin.HEURIST4.util.isFunction(callback)) callback.call(this, true);
               }
           },
           window.hWin.HR('Required Definitions Missing'));

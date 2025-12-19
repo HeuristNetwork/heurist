@@ -85,8 +85,8 @@ class CmsManager {
             return;
         }
         
-        if (!this.checkRequiredRecordTypes(() => {
-            this.executeAction(actionid);
+        if (!this.checkRequiredRecordTypes((isCancel) => {
+            if(!isCancel) this.executeAction(actionid);
         })) {
             return;
         }

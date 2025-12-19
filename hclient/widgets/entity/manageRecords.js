@@ -4559,8 +4559,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 
                                 window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('3-1019', 2,
                                                         'Map document record must have Bounding Box field!',
-                                        function(){
-                                            
+                                        function(isCancel){
+                                                if(isCancel) return;
                                                 that.saveQuickWithoutValidation( function(){ //save without validation
                                                     that._editing.initEditForm(null, null); //clear edit form
                                                     that._initEditForm_step3(that._currentEditID); //reload edit form                       

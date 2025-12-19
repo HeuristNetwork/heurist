@@ -391,7 +391,8 @@ $.widget( "heurist.mediaViewer", {
                                 if(evt.already_checked!==true && window.hWin && window.hWin.HAPI4 && window.hWin.HAPI4.has_access()){
                                     window.hWin.HAPI4.SystemMgr.checkPresenceOfRectype('2-101', 2,
                                         'In order to add Annotation to image you have to import "Annotation" record type',
-                                        function(){
+                                        function(isCancels){
+                                            if(isCancel) return;
                                             evt.already_checked = true;
                                             __openMiradorViewer(evt);
                                     });
