@@ -1516,7 +1516,14 @@ class Temporal {
                 }elseif(@$date['end']['latest']){
                     $to = Temporal::dateToString($date['end']['latest'], $calendar);
                 }
-                $res = $from.' to '.$to;
+
+                $res = "{$from} to {$to}";
+
+                $possibleMonthSpan = [];
+                Temporal::checkMonthSpan($possibleMonthSpan, $date);
+                if(!empty($possibleMonthSpan)){
+                    $res = $possibleMonthSpan['Date'];
+                }
             }
 
             //add native decription as prefix
