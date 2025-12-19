@@ -283,7 +283,7 @@ function checkMembershipLogNonmember(string $context, string $email, string $hos
     }    
 }
 
-function httpGet(string $url, int $timeout = 5): string
+function httpGet(string $url, int $timeout = 30): string
 {
     if (function_exists('curl_init')) {
         $ch = curl_init($url);

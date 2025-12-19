@@ -514,7 +514,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
             
             if('nonmember'==window.hWin.HAPI4.sysinfo['associationMembershipStatus'] 
             || 'viaowner'==window.hWin.HAPI4.sysinfo['associationMembershipStatus']){
-                
+
                 const lastcheck = window.hWin.HAPI4.get_prefs('association_teaser_last_shown');
                 const currdate =  new Date().toISOString().slice(0, 10);
                 if(lastcheck!=currdate){
