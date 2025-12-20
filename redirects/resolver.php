@@ -84,7 +84,10 @@ if($is_own_domain){
     //'dicobiosport' and 'privileges'
     //detect databasename
     $database_name_from_domain = substr($_SERVER["SERVER_NAME"],0,-12);//remove .huma-num.fr
-    if(empty($requestUri) || $requestUri[0]!=$database_name_from_domain){
+    //replace hyphens with underscores
+    $database_name_from_domain = str_replace('-','_',$database_name_from_domain);
+    
+    if(!in_array($database_name_from_domain, $requestUri)){
         array_unshift($requestUri, $database_name_from_domain); //add to beginning of array
     }
 }
@@ -117,7 +120,6 @@ elseif (!( ($requestUri[0]=='db')
 {
     
     $idx = in_array($requestUri[0], $allowedVersions)?1:0; // heurst/dbname/action
-    
     $dbname = filter_var(@$requestUri[$idx]);
      
     if(!preg_match('/[^A-Za-z0-9_\-\$]/', $dbname)){
@@ -590,6 +592,10 @@ redirectURL2($redirection_path.$redirect);
  * @return void
  */
 function redirectURL2($url){
+    if(isset($_REQUEST['debug'])){
+        echo $url;
+        exit;
+    }
     header('Location: '.$url);
 }
 ?>
