@@ -1175,6 +1175,7 @@ console.log(content);
             res = root_cfg;
             this.#layoutInitKey(res, 0);
             container.attr('data-hid', res.key).addClass('cms-element');
+            res = Array.isArray(res) ? res : [res];
         }
 
         return res;
@@ -1259,7 +1260,7 @@ console.log(content);
         if (!css) return s;
         if (css instanceof CSSStyleDeclaration) {
             for (let i in css) {
-                if ((css[i]).toLowerCase()) {
+                if ((css[i]).toLowerCase() && css[css[i]]) {
                     s[(css[i]).toLowerCase()] = (css[css[i]]);
                 }        
             }
@@ -1269,6 +1270,7 @@ console.log(content);
                 let vs = css[i].split(':');
                 const key = String(vs.shift()).trim();
                 const val = vs.join(':').trim();
+                if(!key || !val) continue;
                 s[key.toLowerCase()] = val;
             }
         }
