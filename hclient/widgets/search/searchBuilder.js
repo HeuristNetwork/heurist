@@ -1147,7 +1147,8 @@ $.widget( "heurist.searchBuilder", {
                                                                             
                     let res = window.hWin.HEURIST4.dbs.createRectypeStructureTree_new( 
                     {
-                        mode:5, rectypeids:rectypes, fieldtypes:allowed_fieldtypes, 
+                        mode:5, rectypeids:rectypes, 
+                        fieldtypes: [...allowed_fieldtypes, 'header_ext'],
                         parentcode: parentcode,
                         field_order:node_order//, enum_mode:'expanded' 
                     } );
