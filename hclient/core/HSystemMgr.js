@@ -402,7 +402,7 @@ class HSystemMgr {
               if (response.data.sysinfo) {
                   window.hWin.HAPI4.sysinfo = response.data.sysinfo;
               }
-          } else if(window.hWin.HEURIST4.msg) 
+          } else if(window.hWin.HEURIST4.msg) {
               window.hWin.HEURIST4.msg.showMsgErr(response);
           }
           if (callback) callback(success);
