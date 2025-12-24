@@ -237,53 +237,53 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
 
             this.coverMessage();			
-        
-        this.options.onInitCompleted =  function(){
-            
-            if(that.options.isFrontUI){
-                let rg_options = {
-                     isdialog: false, 
-                     isFrontUI: true,
-                     container: that.fieldtype_groups,
-                     title: 'Base field groups',
-                     layout_mode: 'short',
-                     select_mode: 'manager',
-                     reference_dt_manger: that.element,
-                     onSelect:function(res){
-                         
-                        if(window.hWin.HEURIST4.util.isRecordSet(res)){
+
+            this.options.onInitCompleted =  function(){
+                
+                if(that.options.isFrontUI){
+                    let rg_options = {
+                         isdialog: false, 
+                         isFrontUI: true,
+                         container: that.fieldtype_groups,
+                         title: 'Base field groups',
+                         layout_mode: 'short',
+                         select_mode: 'manager',
+                         reference_dt_manger: that.element,
+                         onSelect:function(res){
                              
-                            if(!that.getRecordSet()){
-                                that._loadData( true );
+                            if(window.hWin.HEURIST4.util.isRecordSet(res)){
+                                 
+                                if(!that.getRecordSet()){
+                                    that._loadData( true );
+                                }
+                                 
+                                res = res.getIds();                     
+                                if(res && res.length>0){
+                                    //filter by field group
+                                    that.options.dtg_ID = res[0];
+                                    that.searchForm.searchDefDetailTypes('option','dtg_ID', res[0]);
+                                }
                             }
                              
-                            res = res.getIds();                     
-                            if(res && res.length>0){
-                                //filter by field group
-                                that.options.dtg_ID = res[0];
-                                that.searchForm.searchDefDetailTypes('option','dtg_ID', res[0])
+                            if(that.options.select_mode == 'manager'){ // reset search to default for manager
+
+                                that.searchForm.find('#input_search').val('');
+                                that.searchForm.find('#input_search_type').val('any');
+                                that.searchForm.find('#chb_show_all_groups').prop('checked', false);
+                                that.searchForm.find('#input_sort_type').val('name');
+
+                                that.searchForm.searchDefDetailTypes('startSearch');
                             }
-                        }
-						 
-						if(that.options.select_mode == 'manager'){ // reset search to default for manager
-
-                            that.searchForm.find('#input_search').val('');
-                            that.searchForm.find('#input_search_type').val('any');
-                            that.searchForm.find('#chb_show_all_groups').prop('checked', false);
-                            that.searchForm.find('#input_sort_type').val('name');
-
-                            that.searchForm.searchDefDetailTypes('startSearch');
-                        }
-                     },
-                     add_to_begin: true
-                };
-                                                                             
-                window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypeGroups', rg_options);        
-            }else{
-                that._loadData(true);    
+                         },
+                         add_to_begin: true
+                    };
+                                                                                 
+                    window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypeGroups', rg_options);        
+                }else{
+                    that._loadData(true);    
+                }
             }
-        }
-
+        
         }else if(this.options.select_mode=='select_multi'){
             
             this.recordList.resultList({ 
@@ -314,7 +314,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
         // init search header
         this.searchForm.searchDefDetailTypes(this.options);
-        
         
         if(this.options.use_cache){
             this._on( this.searchForm, {
