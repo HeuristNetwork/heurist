@@ -292,10 +292,16 @@ define('MT_SOUNDCLOUD','audio/soundcloud');
 define('HTTP_SCHEMA','http://');
 /** @const string HTTPS URI scheme prefix. */
 define('HTTPS_SCHEMA','https://');
-/** @const string XML Schema namespace for string type. */
-define('XML_SCHEMA','http://www.w3.org/2001/XMLSchema#string');
 /** @const string PHP temporary memory stream identifier, allowing up to 1MB before using a temporary file. */
 define('TEMP_MEMORY', 'php://temp/maxmemory:1048576');
+/** @const string XML Schema namespace for string type. */
+define('W3_XML_SCHEMA_STRING','http://www.w3.org/2001/XMLSchema#string');
+/** @const string Schema namespace for URI string type. */
+define('PURL_TERM_URI','http://purl.org/dc/terms/URI');
+/** @const string Schema namespace for Lanuage AR2 code type. */
+define('PURL_TERM_LANG','http://purl.org/dc/terms/RFC5646');
+/** @const string Schema namespace for dates code type. */
+define('PURL_TERM_DATE','http://purl.org/dc/terms/W3CDTF');
 
 // Global variable for language codes, initialized to null.
 global $glb_lang_codes;

@@ -691,7 +691,7 @@
                 // load ONE file to ext.repository - from manageRecUploadedFiles
                 // see also local_to_repository in record_batch
 
-                $repo_id = $req_params['api_key'];
+                $repo_id = $req_params['apiKey'];
                 $credentials = user_getRepositoryCredentials2($system, $repo_id);
 
                 if($credentials === null || !@$credentials[$repo_id]['params']['writeApiKey']){
@@ -713,7 +713,7 @@
                     $params['meta']['title'] = [
                         'value' => htmlspecialchars(@$req_params['meta']['title']),
                         'lang' => null,
-                        'typeUri' => XML_SCHEMA,
+                        'typeUri' => W3_XML_SCHEMA_STRING,
                         'propertyUri' => NAKALA_REPO.'terms#title'
                     ];
 
@@ -739,7 +739,7 @@
                             $params['meta']['alt_creator'] = [
                                 'value' => $fullname,
                                 'lang' => null,
-                                'typeUri' => XML_SCHEMA,
+                                'typeUri' => W3_XML_SCHEMA_STRING,
                                 'propertyUri' => 'http://purl.org/dc/terms/creator'
                             ];
                         }
@@ -754,7 +754,7 @@
                         $params['meta']['created'] = [
                             'value' => @$req_params['meta']['created'],
                             'lang' => null,
-                            'typeUri' => XML_SCHEMA,
+                            'typeUri' => PURL_TERM_DATE,
                             'propertyUri' => NAKALA_REPO.'terms#created'
                         ];
                     }else{
@@ -769,23 +769,21 @@
                     $params['meta']['type'] = [
                         'value' => @$req_params['meta']['type'],
                         'lang' => null,
-                        'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI',
+                        'typeUri' => PURL_TERM_URI,
                         'propertyUri' => NAKALA_REPO.'terms#type'
                     ];
 
                     $params['meta']['license'] = [
                         'value' => @$req_params['meta']['license'],
                         'lang' => null,
-                        'typeUri' => XML_SCHEMA,
+                        'typeUri' => W3_XML_SCHEMA_STRING,
                         'propertyUri' => NAKALA_REPO.'terms#license'
                     ];
 
                     // User API Key
-                    $params['api_key'] = $credentials[$repo_id]['params']['writeApiKey'];
+                    $params['apiKey'] = $credentials[$repo_id]['params']['writeApiKey'];
 
-                    $params['use_test_url'] = @$req_params['use_test_url'] == 1 || strpos($repo_id,'nakala')===1 ? 1 : 0;
-
-                    $params['status'] = 'published';// publish uploaded file, return url to newly uploaded file on Nakala
+                    $params['status'] = @$req_params['status'] === 'pending' || @$req_params['status'] === 'published' ? $this->data['status'] : 'published'; // publish uploaded file, return url to newly uploaded file on Nakala; @todo: default to pending
 
                     // Upload file
                     $res = uploadFileToNakala($system, $params);//from record edit - define file field
