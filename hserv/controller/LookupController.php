@@ -62,11 +62,6 @@ class LookupController{
     private $isMetadata = false;
     private $isDebug = false;
 
-    private $metadataRequests = [
-        'nakala' => ['all', 'licenses', 'types', 'years'],
-        'opentheso' => ['servers', 'thesauruses', 'collections']
-    ];
-
     private $serviceURLs = [
         'tlcmap' => [
             'https://tlcmap.org/ghap/search?',
@@ -158,7 +153,7 @@ class LookupController{
         $this->system = $system;
 
         // Check if more servers have been defined within heuristConfigIni
-        if(!empty($OPENTHESO_SERVERS) && is_array($OPENTHESO_SERVERS)){
+        if(!empty($OPENTHESO_SERVERS) && \is_array($OPENTHESO_SERVERS)){
             $this->serviceURLs['opentheso'] = array_merge($this->serviceURLs['opentheso'], $OPENTHESO_SERVERS);
         }
     }
@@ -172,7 +167,7 @@ class LookupController{
         if($this->system->getUserId() < 1){
             $this->system->addError(HEURIST_REQUEST_DENIED, 'You must be logged in to use the external lookup services');
             return false;
-        }elseif(!defined('HEURIST_FILESTORE_ROOT')){
+        }elseif(!\defined('HEURIST_FILESTORE_ROOT')){
             define('HEURIST_FILESTORE_ROOT', $this->system->getFileStoreRootFolder());
         }
 
@@ -209,7 +204,7 @@ class LookupController{
 
         global $accessToken_GeonamesAPI, $ESTC_PermittedDBs, $ESTC_UserName, $ESTC_Password;
 
-        if(empty(@$this->request['serviceType']) || !array_key_exists($this->request['serviceType'], $this->serviceURLs)){
+        if(empty(@$this->request['serviceType']) || !\array_key_exists($this->request['serviceType'], $this->serviceURLs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'The provided lookup details are invalid');
             return false;
         }
@@ -218,9 +213,9 @@ class LookupController{
         $this->isDebug = @$this->request['dbg'] == 1;
 
         $this->lookupType = $this->request['serviceType'];
-        $this->lookupURL = array_key_exists('service', $this->request) && !empty($this->request['service'])
+        $this->lookupURL = \array_key_exists('service', $this->request) && !empty($this->request['service'])
             ? filter_var($this->request['service'], FILTER_VALIDATE_URL) : '';
-        $this->lookupMetadata = array_key_exists('metadata', $this->request) && !empty($this->request['metadata']) ? $this->request['metadata'] : '';
+        $this->lookupMetadata = \array_key_exists('metadata', $this->request) && !empty($this->request['metadata']) ? $this->request['metadata'] : '';
 
         $serviceURLs = $this->serviceURLs[$this->lookupType];
 
@@ -229,10 +224,10 @@ class LookupController{
             $this->lookupAction = $this->request['action'];
             $this->isESTC = true;
             $this->isValid = $serviceURLs['db'] == $this->database || $serviceURLs['action'] == $this->lookupAction;
-        }elseif(array_key_exists($this->lookupType, $this->metadataRequests) && in_array($this->lookupMetadata, $this->metadataRequests[$this->lookupType])){
+        }elseif($this->lookupMetadata){
             $this->isValid = true;
             $this->isMetadata = true;
-        }elseif(!is_array($serviceURLs)){
+        }elseif(!\is_array($serviceURLs)){
             $this->isValid = $serviceURLs == $this->lookupURL || strpos($this->lookupURL, $serviceURLs) === 0;
         }else{
             foreach($serviceURLs as $url){
@@ -269,7 +264,7 @@ class LookupController{
         $lookupType = strpos($this->lookupType, 'bnf') !== false ? 'bnf' : $this->lookupType;
         $lookupType = strpos($this->lookupType, 'nakala') !== false ? 'nakala' : $lookupType;
 
-        if($this->isESTC || $this->isDebug || $this->isMetadata || !array_key_exists($lookupType, $this->serviceParameters) || !$this->isValid){
+        if($this->isESTC || $this->isDebug || $this->isMetadata || !\array_key_exists($lookupType, $this->serviceParameters) || !$this->isValid){
             $this->isValid || $this->system->addError(HEURIST_INVALID_REQUEST, 'Provided service "'. htmlspecialchars($lookupType) .'" is not valid');
             return $this->isValid;
         }
@@ -290,12 +285,12 @@ class LookupController{
 
         foreach($serviceParams as $field => $type){
 
-            if(!array_key_exists($field, $urlQuery)){
+            if(!\array_key_exists($field, $urlQuery)){
                 continue;
             }
 
             if($field === NUMERIC){
-                $newQuery[$field] = intval($urlQuery[$field]);
+                $newQuery[$field] = \intval($urlQuery[$field]);
             }else{
                 $newQuery[$field] = htmlspecialchars($urlQuery[$field], ENT_NOQUOTES);
             }
@@ -374,7 +369,7 @@ class LookupController{
 
             $errorMsg = "<br>Heurist cannot connect/load data from the service url: $url<br>$errorCode";
 
-            if(intval($http_code) >= 500){
+            if(\intval($http_code) >= 500){
 
                 $errorMsg .= '<br><br>Please retry your request in a few minutes as the requested service is currently busy,'
                 .  '<br>if the problem persists then please make a bug report.';
@@ -427,7 +422,7 @@ class LookupController{
 
                     $hasGeo = false;
                     $this->lookupResponse = str_getcsv($this->lookupResponse, "\n");//parse the rows
-                    if(is_array($this->lookupResponse) && count($this->lookupResponse)>1){
+                    if(\is_array($this->lookupResponse) && \count($this->lookupResponse)>1){
 
                         $header = str_getcsv(array_shift($this->lookupResponse));
                         $id = 1;
@@ -454,7 +449,7 @@ class LookupController{
                         if(!$hasGeo){
                             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Service did not return data in an appropriate format');
                         }
-                    }elseif(is_array($this->lookupResponse) && count($this->lookupResponse) == 1){
+                    }elseif(\is_array($this->lookupResponse) && \count($this->lookupResponse) == 1){
                         $this->system->addError(HEURIST_NOT_FOUND, 'No records match the search criteria');
                     }else{
                         $this->system->addError(HEURIST_ERROR, 'Service did not return any data');
@@ -470,7 +465,7 @@ class LookupController{
 
                 $this->lookupResponse = ['status' => HEURIST_OK, 'data' => json_decode($this->lookupResponse, true)];
 
-                if(array_key_exists('error', $this->lookupResponse['data'])){
+                if(\array_key_exists('error', $this->lookupResponse['data'])){
                     $this->lookupResponse['status'] = $this->lookupResponse['data']['error']['code'] === 'missingparam' ? HEURIST_INVALID_REQUEST : HEURIST_REQUEST_DENIED;
                     $this->lookupResponse['msg'] = $this->lookupResponse['data']['error']['info'];
                 }
@@ -505,7 +500,7 @@ class LookupController{
 
         $authorCodes = '';
 
-        if(array_key_exists('author_codes', $this->request) && !empty($this->request['author_codes']) && $this->request['author_codes'] != 'all'){
+        if(\array_key_exists('author_codes', $this->request) && !empty($this->request['author_codes']) && $this->request['author_codes'] != 'all'){
             $authorCodes = explode(',', $this->request['author_codes']);
         }
         $results = [];
@@ -536,7 +531,7 @@ class LookupController{
                 }elseif($cf_tag == '003') { // Record URL
                     $formattedArray['biburl'] = (string)$cf_ele[0];
                     break;
-                }elseif(intval($cf_tag) > 3){
+                }elseif(\intval($cf_tag) > 3){
                     break;
                 }
             }
@@ -545,7 +540,7 @@ class LookupController{
 
                 $df_tag = @$df_ele->attributes()['tag'];
 
-                if(!$df_tag || !in_array($df_tag, $dfHandled)){
+                if(!$df_tag || !\in_array($df_tag, $dfHandled)){
                     continue;
                 }
 
@@ -561,12 +556,12 @@ class LookupController{
 
                             $formattedArray['type'] = (string)$sf_ele[0];
 
-                            if(array_key_exists('title', $formattedArray)){
+                            if(\array_key_exists('title', $formattedArray)){
                                 $formattedArray['title'] .= " [{$formattedArray['type']}]";
                             }
                         }else{
 
-                            if(array_key_exists('title', $formattedArray)){
+                            if(\array_key_exists('title', $formattedArray)){
                                 $formattedArray['title'] .= ' , ' . (string)$sf_ele[0];
                             }
                         }
@@ -685,7 +680,7 @@ class LookupController{
 
                     if(isset($role) && !empty($role) && !empty($authorCodes)){ // role code found
 
-                        if(in_array($role, $authorCodes)){
+                        if(\in_array($role, $authorCodes)){
                             $formattedArray['author'][$id] = $author;
                         }else{
                             $formattedArray['contributor'][$id] = $author;
@@ -744,7 +739,7 @@ class LookupController{
         }
 
         // Add other details
-        $results['numberOfRecords'] = intval($xmlObj->children(BNF_XML_RECORDS_NAMESPACE, false)->numberOfRecords);
+        $results['numberOfRecords'] = \intval($xmlObj->children(BNF_XML_RECORDS_NAMESPACE, false)->numberOfRecords);
 
         // Encode to json for response to JavaScript
         $this->lookupResponse = $results;
@@ -775,7 +770,7 @@ class LookupController{
                 }elseif($cf_tag == '003') { // Record URL
                     $formattedArray['auturl'] = (string)$cf_ele[0];
                     break;
-                }elseif(intval($cf_tag) > 3){
+                }elseif(\intval($cf_tag) > 3){
                     break;
                 }
             }
@@ -783,7 +778,7 @@ class LookupController{
             foreach ($details->recordData->children(BNF_XML_DETAILS_NAMESPACE, false)->record->datafield as $key => $df_ele) { // datafield elements
                 $df_tag = @$df_ele->attributes()['tag'];
 
-                if(!$df_tag || !in_array($df_tag, $dfHandled)){
+                if(!$df_tag || !\in_array($df_tag, $dfHandled)){
                     continue;
                 }
 
@@ -798,7 +793,7 @@ class LookupController{
                                 $formattedArray['name'] = (string)$sf_ele[0];
                             }elseif($sf_code == 'b'){ // First name
 
-                                if( array_key_exists('name', $formattedArray)){
+                                if( \array_key_exists('name', $formattedArray)){
                                     $formattedArray['name'] .= ', ' . (string)$sf_ele[0];
                                 }else{
                                     $formattedArray['name'] = (string)$sf_ele[0];
@@ -829,7 +824,7 @@ class LookupController{
                                 $formattedArray['name'] = (string)$sf_ele[0];
                             }elseif($sf_code == 't'){ // title
 
-                                if( array_key_exists('name', $formattedArray)){
+                                if( \array_key_exists('name', $formattedArray)){
                                     $formattedArray['name'] .= ' [' . (string)$sf_ele[0] . ']';
                                 }else{
                                     $formattedArray['name'] = (string)$sf_ele[0];
@@ -845,7 +840,7 @@ class LookupController{
                             }
 
                             // Name
-                            if(array_key_exists('name', $formattedArray)){
+                            if(\array_key_exists('name', $formattedArray)){
                                 $formattedArray['name'] .= ' . ' . (string)$sf_ele[0];
                             }else{
                                 $formattedArray['name'] = (string)$sf_ele[0];
@@ -862,7 +857,7 @@ class LookupController{
                             }
 
                             // Name
-                            if(array_key_exists('name', $formattedArray)){
+                            if(\array_key_exists('name', $formattedArray)){
                                 $formattedArray['name'] .= ' ' . (string)$sf_ele[0];
                             }else{
                                 $formattedArray['name'] = (string)$sf_ele[0];
@@ -885,20 +880,20 @@ class LookupController{
                     }
                 }
 
-                if(array_key_exists('name', $formattedArray) && !empty($formattedArray['name'])){ // add authority type
+                if(\array_key_exists('name', $formattedArray) && !empty($formattedArray['name'])){ // add authority type
                     $formattedArray['authority_type'] = (string)$df_tag[0];
                 }
 
                 break;
             }
 
-            if(!empty($formattedArray) && array_key_exists('name', $formattedArray) && !empty($formattedArray['name'])){
+            if(!empty($formattedArray) && \array_key_exists('name', $formattedArray) && !empty($formattedArray['name'])){
                 $results['result'][] = $formattedArray;
             }
         }
 
         // Add other details, can be used for more calls to retrieve all results (currently retrieves 500 records at max)
-        $results['numberOfRecords'] = intval($xmlObj->children(BNF_XML_RECORDS_NAMESPACE, false)->numberOfRecords);
+        $results['numberOfRecords'] = \intval($xmlObj->children(BNF_XML_RECORDS_NAMESPACE, false)->numberOfRecords);
 
         // Encode to json for response to JavaScript
         $this->lookupResponse = $results;
@@ -913,7 +908,7 @@ class LookupController{
         }
 
         $results = [];
-        if(!array_key_exists('totalResults', $this->lookupResponse) || json_last_error() !== JSON_ERROR_NONE){
+        if(!\array_key_exists('totalResults', $this->lookupResponse) || json_last_error() !== JSON_ERROR_NONE){
             $this->lookupResponse = json_last_error() !== JSON_ERROR_NONE ? $this->system->getError() : [];
             return;
         }
@@ -929,7 +924,7 @@ class LookupController{
         foreach ($this->lookupResponse['datas'] as $records) {
 
             $id = @$records['identifier'];
-            $has_files = array_key_exists('files', $records);
+            $has_files = \array_key_exists('files', $records);
 
             if($has_files){ // datas, files
                 $results['records'][$id]['rec_url'] = "https://nakala.fr/{$id}";
@@ -957,14 +952,14 @@ class LookupController{
 
                 if(strpos($metadata['propertyUri'], 'terms#creator') !== false){ // Author
 
-                    if(array_key_exists('fullName', $metadata['value'])){
+                    if(\array_key_exists('fullName', $metadata['value'])){
                         $results['records'][$id]['author'][] = $metadata['value']['fullName'];
                     }else{
                         $aut_name = '';
-                        if(array_key_exists('givenname', $metadata['value'])){
+                        if(\array_key_exists('givenname', $metadata['value'])){
                             $aut_name = $metadata['value']['givenname'];
                         }
-                        if(array_key_exists('surname', $metadata['value'])){
+                        if(\array_key_exists('surname', $metadata['value'])){
                             $aut_name .= $metadata['value']['surname'];
                         }
                         if($aut_name != ''){
@@ -994,25 +989,25 @@ class LookupController{
 
             if($has_files){
                 foreach ($records['files'] as $idx => $file) {
-                    if(array_key_exists('name', $file)){ // Name
+                    if(\array_key_exists('name', $file)){ // Name
                         $results['records'][$id]['filename'][] = $file['name'];
                     }
-                    if(array_key_exists('mime_type', $file)){ // Type
+                    if(\array_key_exists('mime_type', $file)){ // Type
                         $results['records'][$id]['mime_type'][] = $file['mime_type'];
                     }
-                    if(array_key_exists('sha1', $file)){ // File URI
+                    if(\array_key_exists('sha1', $file)){ // File URI
                         $results['records'][$id]['url'][] = "https://api.nakala.fr/data/{$id}/{$file['sha1']}";
                     }
                 }
             }
 
-            if(count($results['records'][$id]['title']) == 0){
+            if(\count($results['records'][$id]['title']) == 0){
                 $results['records'][$id]['title'] = 'Undetermined';
             }
-            if(count($results['records'][$id]['author']) == 0){
+            if(\count($results['records'][$id]['author']) == 0){
                 $results['records'][$id]['author'] = 'Anonymous';
             }
-            if(count($results['records'][$id]['source']) == 0){
+            if(\count($results['records'][$id]['source']) == 0){
                 $results['records'][$id]['source'] = 'Unknown';
             }
         }
@@ -1072,10 +1067,10 @@ class LookupController{
             $code = '';
             $translated_labels = [];
 
-            if(array_key_exists($desc_idx, $details)){
+            if(\array_key_exists($desc_idx, $details)){
                 $desc = $details[$desc_idx][0]['value'];
             }
-            if(array_key_exists($code_idx, $details)){
+            if(\array_key_exists($code_idx, $details)){
                 $code = $details[$code_idx][0]['value'];
             }
             $code_parts = explode('/', $uri);
@@ -1094,8 +1089,8 @@ class LookupController{
                 $translated_labels[$lang_code] = "{$lang_code}:{$label_details['value']}";// LANG_CODE:Value
             }
 
-            $notes = array_key_exists($notes_idx, $details) ? $details[$notes_idx][0]['value'] : '';
-            $geopoint = array_key_exists($geopoint_idx, $details) && $details[$geopoint_idx][0]['datatype'] == $valid_geopoint_type ?
+            $notes = \array_key_exists($notes_idx, $details) ? $details[$notes_idx][0]['value'] : '';
+            $geopoint = \array_key_exists($geopoint_idx, $details) && $details[$geopoint_idx][0]['datatype'] == $valid_geopoint_type ?
             $details[$geopoint_idx][0]['value'] : '';
 
             $results[] = ['term_label' => $label, 'term_desc' => $desc, 'term_code' => $code, 'term_uri' => $uri, 'term_translations' => $translated_labels, 'editor_notes' => $notes, 'geopoint' => $geopoint];
@@ -1108,7 +1103,7 @@ class LookupController{
 
         if($this->lookupType === 'opentheso'){
 
-            if(is_array(@$this->request['params'])){
+            if(\is_array(@$this->request['params'])){
                 $this->request = array_merge($this->request, $this->request['params']);
             }
 
@@ -1151,7 +1146,7 @@ class LookupController{
         $this->lookupResponse = [];
         $response = false;
 
-        $refresh = intval($this->request['refresh']) == 1;
+        $refresh = \intval($this->request['refresh']) == 1;
 
         if(!file_exists($this->openthesoFile)){ // create new file
             $response = $this->updateOpenthesoThesauruses();
@@ -1169,7 +1164,7 @@ class LookupController{
                 $response = json_last_error() !== JSON_ERROR_NONE;
             }
 
-            if(!$response || !is_array($this->lookupResponse) || $this->lookupResponse['last_update'] < date('Y-m-d')){
+            if(!$response || !\is_array($this->lookupResponse) || $this->lookupResponse['last_update'] < date('Y-m-d')){
                 if($alreadyUpdated){
                     $this->system->errorExitApi('Unable to retrieve Opentheso thesauruses due to unknown error.', HEURIST_ACTION_BLOCKED);
                     exit;
@@ -1182,7 +1177,7 @@ class LookupController{
             return;
         }
 
-        if(is_array($this->lookupResponse)){
+        if(\is_array($this->lookupResponse)){
             unset($this->lookupResponse['last_update']);
         }
         if(empty($this->lookupResponse)){
@@ -1200,11 +1195,11 @@ class LookupController{
         // Get existing data
         $dataOld = file_exists($this->openthesoFile) && filesize($this->openthesoFile) > 0 ? file_get_contents($this->openthesoFile) : [];
         $dataOld = json_decode($dataOld, true);
-        $dataOld = json_last_error() !== JSON_ERROR_NONE || !is_array($dataOld) ? [] : $dataOld;
+        $dataOld = json_last_error() !== JSON_ERROR_NONE || !\is_array($dataOld) ? [] : $dataOld;
 
         $this->lookupResponse = [];
 
-        $servers = !is_array(@$this->request['servers']) || empty($this->request['servers']) ? array_keys($this->serviceURLs['opentheso']) : $this->request['servers'];
+        $servers = !\is_array(@$this->request['servers']) || empty($this->request['servers']) ? array_keys($this->serviceURLs['opentheso']) : $this->request['servers'];
 
         foreach ($servers as $server){
 
@@ -1254,7 +1249,7 @@ class LookupController{
                 }
 
                 $this->lookupResponse[$server][$key] = ['name' => $label, 'groups' => []];
-                if($dataOld && is_array($dataOld[$server][$key]) && !empty($dataOld[$server][$key]['groups'])){
+                if($dataOld && \is_array($dataOld[$server][$key]) && !empty($dataOld[$server][$key]['groups'])){
                     // Validate cached groups, remove invalid ones
 
                     $old_groups = $dataOld[$server][$key]['groups'];
@@ -1268,7 +1263,7 @@ class LookupController{
                         if(json_last_error() !== JSON_ERROR_NONE || empty($group_dtls)){ continue; }
 
                         $keys = array_keys($group_dtls);
-                        if(!array_key_exists('http://www.w3.org/2004/02/skos/core#prefLabel', $group_dtls[$keys[0]])){ continue; }
+                        if(!\array_key_exists('http://www.w3.org/2004/02/skos/core#prefLabel', $group_dtls[$keys[0]])){ continue; }
 
                         $this->lookupResponse[$server][$key]['groups'][$group_id] = $gname;
                     }
@@ -1288,7 +1283,7 @@ class LookupController{
 
     private function getThesauruseCollections(){ // getOpenthesoCollections
 
-        if(empty($this->request['server']) || !array_key_exists($this->request['server'], $this->serviceURLs['opentheso']) || empty($this->request['thesaurus'])){
+        if(empty($this->request['server']) || !\array_key_exists($this->request['server'], $this->serviceURLs['opentheso']) || empty($this->request['thesaurus'])){
             $this->lookupResponse = $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid request to retrieve record groups for thesauruses');
             return;
         }
@@ -1304,12 +1299,12 @@ class LookupController{
         $data = filesize($this->openthesoFile) > 0 ? file_get_contents($this->openthesoFile) : null;
 
         $data = $data !== null ? json_decode($data, true) : null;
-        if(json_last_error() !== JSON_ERROR_NONE || !is_array($data) || empty($data)){
+        if(json_last_error() !== JSON_ERROR_NONE || !\is_array($data) || empty($data)){
             $this->lookupResponse = $this->system->addError(HEURIST_ERROR, 'Unable to retrieve details from the Opentheso cache');
             return;
         }
 
-        if(intval(@$this->request['refresh']) != 1 && !empty($data[$server][$theso]['groups'])){
+        if(\intval(@$this->request['refresh']) != 1 && !empty($data[$server][$theso]['groups'])){
             $this->lookupResponse = $data[$server][$theso]['groups'];
             return;
         }
@@ -1366,177 +1361,434 @@ class LookupController{
      * If the data is outdated or the file doesn't exist, it updates the metadata before returning the data.
      */
     private function getNakalaMetadata(){
-        // check NAKALA_metadata_values.json
-        // if date in file is old (data.last_update), update metadata first (all types)
-        // then return data.types
 
         $this->lookupResponse = [];
-        $response = false;
-
-        if(!file_exists($this->nakalaFile)){ // create new file
-            $response = $this->updateNakalaMetadata();
-        }else{ // read from file
-
-            $this->lookupResponse = file_get_contents($this->nakalaFile);
-            $alreadyUpdated = false;
-
-            if(!$this->lookupResponse || empty($this->lookupResponse)){
-                $response = $this->updateNakalaMetadata();
-                $alreadyUpdated = true;
-            }else{
-                $this->lookupResponse = json_decode($this->lookupResponse, true);
-                $response = json_last_error() === JSON_ERROR_NONE;
-            }
-
-            if(!$response || !is_array($this->lookupResponse) || $this->lookupResponse['last_update'] < date('Y-m-d')){
-                if($alreadyUpdated){
-                    return;
-                }
-                $response = $this->updateNakalaMetadata();
-            }
-        }
-
-        if(empty($this->lookupResponse) || !$response || array_key_exists('status', $this->lookupResponse)){
-            return;
-        }
+        $this->setupNakalaMetadata();
 
         // Return the requested type of data or the entire metadata
         $this->lookupResponse = $this->getRequestedNakalaData();
     }
 
     /**
-     * Updates the cached Nakala metadata by fetching fresh data from the Nakala API.
-     *
-     * Retrieves information about data types, licenses, and creation years.
-     * Stores the updated metadata in a JSON file.
-     *
-     * @return bool Returns whether the update was successful
+     * Hardcoded Nakala metadata values for licences, data types, and property types
+     * The 'years' type is too be setup client side
      */
-    private function updateNakalaMetadata(){
-        // update NAKALA_metadata_values.json
+    private function setupNakalaMetadata(){
 
-        $page = 1;
-        $totalPages = 10;
-        $data = ['years' => [], 'licenses' => [], 'types' => []];
+        $licences = [
+            'CC-BY-4.0',
+            'CC-BY-NC-SA-4.0',
+            'CC-BY-NC-ND-4.0',
+            'CC-BY-NC-4.0',
+            'PDM',
+            'InC',
+            'etalab-2.0',
+            'CC-BY-SA-4.0',
+            'CC-BY-NC-SA-2.0',
+            'CC-BY-NC-ND-3.0',
+            'UND',
+            'CC0-1.0',
+            'Reserved',
+            'CC-BY-NC-SA-2.5',
+            'CC-BY-NC-SA-3.0',
+            'CC-BY-ND-4.0',
+            'ODbL-1.0',
+            'CC-BY-ND-3.0',
+            'CC-BY-NC-2.5',
+            'Etalab-2.0',
+            'NoC-CR',
+            'CNE',
+            'CC-BY-NC-SA-2.0-FR',
+            'NoC-NC',
+            '0BSD'
+        ];
 
-        // Get datatype names, Nakala only provides the datatype ids
-        $datatypesXML = loadRemoteURLContentWithRange('https://vocabularies.coar-repositories.org/resource_types/resource_types_for_dspace_en.xml', null, true, 60);
-        $datatypesXML = simplexml_load_string($datatypesXML, null, LIBXML_PARSEHUGE);
+        $dataTypes = <<<DATATYPES
+        [
+            ["Image", "c_c513"],
+            ["Journal article", "c_6501"],
+            ["Other", "c_1843"],
+            ["Book", "c_2f33"],
+            ["Archival material", "http://purl.org/library/ArchiveMaterial"],
+            ["Map", "c_12cd"],
+            ["Letter", "c_0857"],
+            ["Sound", "c_18cc"],
+            ["Manuscript", "c_0040"],
+            ["Text", "c_18cf"],
+            ["Periodical", "c_2659"],
+            ["Video", "c_12ce"],
+            ["Dataset", "c_ddb1"],
+            ["Musical notation", "c_18cw"],
+            ["Webpage", "c_7ad9"],
+            ["Critical edition", "c_ba08"],
+            ["Conference object", "c_c94f"],
+            ["Report", "c_93fc"],
+            ["Bulletin", "http://purl.org/ontology/bibo/Series"],
+            ["Learning object", "c_e059"],
+            ["Survey data", "https://w3id.org/survey-ontology#SurveyDataSet"],
+            ["Software", "c_5ce6"],
+            ["Bibliography", "c_86bc"],
+            ["Conference poster", "c_6670"],
+            ["Preprint", "c_816b"],
+            ["Thesis", "c_46ec"],
+            ["Data paper", "c_beb9"],
+            ["Review", "c_efa0"],
+            ["Art exhibition", "http://purl.org/ontology/bibo/Collection"],
+            ["Computational notebook", "c_e9a0"]
+        ]
+        DATATYPES;
 
-        $handledTypes = [];// type codes already added
+        $dataTypes = json_decode($dataTypes);
 
-        while ($page <= $totalPages) {
-
-            $results = loadRemoteURLContentWithRange("https://api.nakala.fr/search?fq=scope%3Ddata&order=relevance&page={$page}&size=1000", null, true, 60);
-
-            if($results === false){
-                $this->lookupResponse = $this->system->addError(HEURIST_ACTION_BLOCKED, 'Unable to retrieve metadata values from Nakala');
-                return false;
+        $properties = <<<PROPERTIES
+        [
+            {
+                "name": "Nakala title",
+                "value": "http://nakala.fr/terms#title",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Nakala creator",
+                "value": "http://nakala.fr/terms#creator",
+                "repeatable": true,
+                "type": "authour"
+            },
+            {
+                "name": "Nakala created",
+                "value": "http://nakala.fr/terms#created",
+                "repeatable": false,
+                "type": "date"
+            },
+            {
+                "name": "Nakala licence",
+                "value": "http://nakala.fr/terms#license",
+                "repeatable": false,
+                "type": "license"
+            },
+            {
+                "name": "Nakala type",
+                "value": "http://nakala.fr/terms#type",
+                "repeatable": false,
+                "type": "type"
+            },
+            {
+                "name": "Title",
+                "value": "http://purl.org/dc/terms/title",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Creator",
+                "value": "http://purl.org/dc/terms/creator",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Subject",
+                "value": "http://purl.org/dc/terms/subject",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Description",
+                "value": "http://purl.org/dc/terms/description",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Publisher",
+                "value": "http://purl.org/dc/terms/publisher",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Contributor",
+                "value": "http://purl.org/dc/terms/contributor",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Date",
+                "value": "http://purl.org/dc/terms/date",
+                "repeatable": true,
+                "type": "date"
+            },
+            {
+                "name": "Type",
+                "value": "http://purl.org/dc/terms/type",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Format",
+                "value": "http://purl.org/dc/terms/format",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Identifier",
+                "value": "http://purl.org/dc/terms/identifier",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Source",
+                "value": "http://purl.org/dc/terms/source",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Language",
+                "value": "http://purl.org/dc/terms/language",
+                "repeatable": true,
+                "type": "language_ar2"
+            },
+            {
+                "name": "Relation",
+                "value": "http://purl.org/dc/terms/relation",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Coverage",
+                "value": "http://purl.org/dc/terms/coverage",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Rights",
+                "value": "http://purl.org/dc/terms/rights",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Audience",
+                "value": "http://purl.org/dc/terms/audience",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Alternative",
+                "value": "http://purl.org/dc/terms/alternative",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Table Of Contents",
+                "value": "http://purl.org/dc/terms/tableOfContents",
+                "repeatable": false
+            },
+            {
+                "name": "Abstract",
+                "value": "http://purl.org/dc/terms/abstract",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Created",
+                "value": "http://purl.org/dc/terms/created",
+                "repeatable": true,
+                "type": "date"
+            },
+            {
+                "name": "Valid",
+                "value": "http://purl.org/dc/terms/valid",
+                "repeatable": true,
+                "type": "date"
+            },
+            {
+                "name": "Available",
+                "value": "http://purl.org/dc/terms/available",
+                "repeatable": true,
+                "type": "date"
+            },
+            {
+                "name": "Issued",
+                "value": "http://purl.org/dc/terms/issued",
+                "repeatable": true,
+                "type": "date"
+            },
+            {
+                "name": "Modified",
+                "value": "http://purl.org/dc/terms/modified",
+                "repeatable": true,
+                "type": "date"
+            },
+            {
+                "name": "Extent",
+                "value": "http://purl.org/dc/terms/extent",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Medium",
+                "value": "http://purl.org/dc/terms/medium",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Is Version Of",
+                "value": "http://purl.org/dc/terms/isVersionOf",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Has Version",
+                "value": "http://purl.org/dc/terms/hasVersion",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Is Replaced By",
+                "value": "http://purl.org/dc/terms/isReplacedBy",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Replaces",
+                "value": "http://purl.org/dc/terms/replaces",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Is Required By",
+                "value": "http://purl.org/dc/terms/isRequiredBy",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Requires",
+                "value": "http://purl.org/dc/terms/requires",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Is Part Of",
+                "value": "http://purl.org/dc/terms/isPartOf",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Has Part",
+                "value": "http://purl.org/dc/terms/hasPart",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Is Referenced By",
+                "value": "http://purl.org/dc/terms/isReferencedBy",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "References",
+                "value": "http://purl.org/dc/terms/references",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Is Format Of",
+                "value": "http://purl.org/dc/terms/isFormatOf",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Has Format",
+                "value": "http://purl.org/dc/terms/hasFormat",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Conforms To",
+                "value": "http://purl.org/dc/terms/conformsTo",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Spatial",
+                "value": "http://purl.org/dc/terms/spatial",
+                "repeatable": true,
+                "type": "geo"
+            },
+            {
+                "name": "Temporal",
+                "value": "http://purl.org/dc/terms/temporal",
+                "repeatable": true,
+                "type": "date"
+            },
+            {
+                "name": "Mediator",
+                "value": "http://purl.org/dc/terms/mediator",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Date Accepted",
+                "value": "http://purl.org/dc/terms/dateAccepted",
+                "repeatable": true,
+                "type": "date"
+            },
+            {
+                "name": "Date Copyrighted",
+                "value": "http://purl.org/dc/terms/dateCopyrighted",
+                "repeatable": true,
+                "type": "date"
+            },
+            {
+                "name": "Date Submitted",
+                "value": "http://purl.org/dc/terms/dateSubmitted",
+                "repeatable": true,
+                "type": "date"
+            },
+            {
+                "name": "Education Level",
+                "value": "http://purl.org/dc/terms/educationLevel",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Access Rights",
+                "value": "http://purl.org/dc/terms/accessRights",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Bibliographic Citation",
+                "value": "http://purl.org/dc/terms/bibliographicCitation",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "License",
+                "value": "http://purl.org/dc/terms/license",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Rights Holder",
+                "value": "http://purl.org/dc/terms/rightsHolder",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Provenance",
+                "value": "http://purl.org/dc/terms/provenance",
+                "repeatable": true,
+                "type": "text"
+            },
+            {
+                "name": "Instructional Method",
+                "value": "http://purl.org/dc/terms/instructionalMethod",
+                "repeatable": true,
+                "type": "text"
             }
+        ]
+        PROPERTIES;
 
-            $results = json_decode($results, true);
-            if(json_last_error() !== JSON_ERROR_NONE){
-                $this->lookupResponse = $this->system->addError(HEURIST_ERROR, 'Unable to retrieve metadata values from Nakala, receieved a response not in a JSON format');
-                return false;
-            }
+        // years = range(1, date('Y'))
 
-            if($results['totalResults'] == 0 || empty($results['datas'])){ // no more records
-                break;
-            }
-
-            foreach ($results['datas'] as $records) {
-
-                $handledType = false;
-                $handledLicense = false;
-                $handledYear = false;
-
-                if(empty($records['metas'])){
-                    continue;
-                }
-
-                foreach ($records['metas'] as $metadata) {
-
-                    if($metadata['value'] == null){
-                        continue;
-                    }
-
-                    if(strpos($metadata['propertyUri'], 'terms#created') !== false){ // Created Date
-
-                        if(strpos($metadata['value'], '-') !== false){ // YYYY-MM | YYYY-MM-DD
-                            $metadata['value'] = explode('-', $metadata['value'])[0];
-                        }
-
-                        if(!in_array($metadata['value'], $data['years'])){
-                            $data['years'][] = $metadata['value'];
-                        }
-
-                        $handledYear = true;
-                    }elseif(strpos($metadata['propertyUri'], 'terms#license') !== false && !in_array($metadata['value'], $data['licenses'])){ // License
-                        $data['licenses'][] = $metadata['value'];
-                        $handledLicense = true;
-                    }elseif(strpos($metadata['propertyUri'], 'terms#type') !== false){ // Type
-
-                        //Retrieve type name from XML object
-                        $code = explode('/', $metadata['value']);
-                        $code = $code[count($code) - 1];
-                        $label = $code;
-
-                        if(strpos($code, 'c_') === false){
-                            $code = $metadata['value'];
-                        }
-
-                        if(!in_array($code, $handledTypes)){
-
-                            if(strpos($code, 'c_') !== false){
-
-                                $escaped_code = trim(preg_replace('/[^a-zA-Z0-9_\-]/', '', $code));
-
-                                $escaped_code = str_replace("'", "&apos;", $escaped_code);
-
-                                $nodes = $datatypesXML->xpath("//node[@id='$escaped_code']");
-                                if(is_array($nodes) && !empty($nodes)){
-                                    $label = $nodes[0]->attributes()->label;
-                                    $label = ucfirst($label);
-                                }else{
-                                    $label .= ' (deprecated type)';
-                                }
-                            }
-
-                            $data['types'][] = [$label, $code];
-                            $handledTypes[] = $code;
-                        }
-
-                        $handledType = true;
-                    }
-
-                    if($handledYear && $handledType && $handledLicense){ // handled all necessary metadata for current record
-                        break;
-                    }
-                }
-            }
-
-            $page ++;
-        }
-
-        // Sort values
-        if(count($data['years']) > 0){
-            sort($data['years']);
-        }
-        if(count($data['types']) > 0){
-            array_multisort($data['types']);
-        }
-        if(count($data['licenses']) > 0){
-            sort($data['licenses']);
-        }
-
-        $data['last_update'] = date('Y-m-d');
-
-        $fileSize = fileSave(json_encode($data), $this->nakalaFile);
-        $response = $fileSize >= 0 && !empty($data);
-
-        $this->lookupResponse = !$response ? $this->system->addError(HEURIST_ERROR, 'Cannot save Nakala metadata into local file store') : $data;
-
-        return $response;
+        $this->lookupResponse = ['licenses' => $licences, 'types' => $dataTypes, 'fields' => $properties];
     }
 
     /**
@@ -1546,20 +1798,24 @@ class LookupController{
     */
     private function getRequestedNakalaData(){
 
-        if(!is_array($this->lookupResponse) || empty($this->lookupResponse)){
+        if(!\is_array($this->lookupResponse) || empty($this->lookupResponse)){
             return [];
+        }elseif($this->lookupMetadata === 'all'){
+            return $this->lookupResponse;
         }
 
-        switch ($this->lookupMetadata) {
-            case 'types':
-                return $this->lookupResponse['types'] ?? [];
-            case 'licenses':
-                return $this->lookupResponse['licenses'] ?? [];
-            case 'years':
-                return $this->lookupResponse['years'] ?? [];
-            default:
-                return array_key_exists($this->lookupMetadata, $this->lookupResponse) ? $this->lookupResponse[$this->lookupMetadata] : $this->lookupResponse;
+        $requestedMetadata = explode(',', $this->lookupMetadata);
+
+        $response = [];
+        foreach($requestedMetadata as $metadataOption){
+            $response[$metadataOption] = \array_key_exists($metadataOption, $this->lookupResponse) ? $this->lookupResponse[$metadataOption] : [];
         }
+
+        if(\count($response) === 1){
+            $response = array_pop($response);
+        }
+
+        return $response;
     }
 
     public function output($returnValue = false){
@@ -1587,14 +1843,14 @@ class LookupController{
             return false;
         }
 
-        if(array_key_exists('entity', $this->request)){ // retrieve definition details, e.g. book type terms
+        if(\array_key_exists('entity', $this->request)){ // retrieve definition details, e.g. book type terms
             require_once __DIR__ . '/entityScrud.php';
             exit;
         }
 
         $this->system->getCurrentUserAndSysInfo(false);
 
-        if(array_key_exists('action', $this->request)){ // import record for LRC18C lookup
+        if(\array_key_exists('action', $this->request)){ // import record for LRC18C lookup
 
             if($this->request['action'] == 'import_records'){ // perform standard record import action, user on ESTC server
                 require_once __DIR__ . '/importController.php';
@@ -1660,7 +1916,7 @@ $isAllowed = isset($ESTC_PermittedDBs, $ESTC_UserName, $ESTC_Password) && strpos
 
 if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false){ // currently on server where ESTC DB is located
 
-    if(array_key_exists('entity', $params)){ // retrieve entity info (term lookup)
+    if(\array_key_exists('entity', $params)){ // retrieve entity info (term lookup)
         require_once dirname(__FILE__).'/entityScrud.php';
         exit;
     }
@@ -1675,7 +1931,7 @@ if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== fal
 
             $system->getCurrentUserAndSysInfo(false);
 
-            if(array_key_exists('action', $params)){ // import record for LRC18C lookup
+            if(\array_key_exists('action', $params)){ // import record for LRC18C lookup
 
                 if($params['action'] == 'import_records'){ // perform standard record import action, user on ESTC server
                     require_once dirname(__FILE__).'/importController.php';
@@ -1701,7 +1957,7 @@ if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== fal
 
     $baseURL = "{$ESTC_ServerURL}hserv/controller/LookupController.php?";
 
-    if(array_key_exists('action', $params) && @$params['action'] == 'import_records'){
+    if(\array_key_exists('action', $params) && @$params['action'] == 'import_records'){
 
         $baseURL = "{$ESTC_ServerURL}hserv/controller/FrontController.php?"; // record_output
         $params = [];

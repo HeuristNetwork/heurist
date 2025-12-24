@@ -79,7 +79,7 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
 
         let request = {
             serviceType: 'nakala',
-            metadata: 'all'
+            metadata: 'types,licenses'
         };
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request, (data) => {
 
@@ -110,17 +110,6 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
             }else{
                 $select.hide();
                 that.element.find('[for="inpt_license"]').hide();
-            }
-
-            $select = that.element.find('#inpt_year');
-            if(Object.hasOwn(data,'years')){
-                $.each(data['years'], (idx, year) => {
-                    window.hWin.HEURIST4.ui.addoption($select[0], year, year);
-                });
-                window.hWin.HEURIST4.ui.initHSelect($select, false);
-            }else{
-                $select.hide();
-                that.element.find('[for="inpt_year"]').hide();
             }
         });
 
@@ -237,7 +226,7 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
         if(this.element.find('#inpt_license').val() != 'all'){
             filter_query += `;license=${this.element.find('#inpt_license').val()}`;
         }
-        if(this.element.find('#inpt_year').val() != 'all'){
+        if(!window.hWin.HEURIST4.util.isempty(this.element.find('#inpt_year').val())){
 
             let years = this.getYear();
             filter_query += `;year=${years}`;
@@ -371,11 +360,12 @@ $.widget( "heurist.lookupNakala", $.heurist.lookupBase, {
     getYear: function(){
 
         let years = this.element.find('#inpt_year').val();
-        if(years.length > 4){
+
+        if(!window.hWin.HEURIST4.util.isempty(years)){
             if(years.indexOf(',') === -1 && years.indexOf(' ') === -1){
                 years = years.replace(/.{4}/g, '$&,');
             }
-            if(years.indexOf(',') === -1){
+            if(years.indexOf(' ') !== -1){
                 years = years.replaceAll(' ', ',');
             }
             if(years.indexOf(', ') !== -1){

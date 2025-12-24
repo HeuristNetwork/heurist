@@ -3103,7 +3103,6 @@ class RecordsBatch
      * - 'recIDs', 'rtyID' (optional), 'dtyID', 'dtyName' (optional), 'tag': Common batch parameters.
      * - 'repository': (string, required) Service ID of the target repository (e.g., "nakala.fr", "test.nakala.fr").
      * - 'license': (string, required for some repositories like Nakala) License for the uploaded file.
-     * - 'use_test_url': (int, optional) If 1, use repository's test URL (e.g., for Nakala).
      * - 'delete_file': (int, optional) If 1, delete original local file after successful upload and reference update.
      *
      * @return array|false The result array (`$this->result_data`) summarizing the operation.
@@ -3195,12 +3194,12 @@ class RecordsBatch
             $metaValues['license'] = [
                 'value' => $this->data['license'],
                 'lang' => null,
-                'typeUri' => XML_SCHEMA,
+                'typeUri' => W3_XML_SCHEMA_STRING,
                 'propertyUri' => NAKALA_REPO.'terms#license'
             ];
 
-            $apiKey = $credentials[$serviceID]['params']['writeApiKey'];  //$this->system->settings->get('sys_NakalaKey')
-            $useTestURL = @$this->data['use_test_url'] == 1 || strpos($serviceID,'nakala')===1 ? 1 : 0;
+            $apiKey = $credentials[$serviceID]['params']['writeApiKey']; // $this->system->settings->get('sys_NakalaKey')
+            $status = @$this->data['status'] === 'pending' || @$this->data['status'] === 'published' ? $this->data['status'] : 'published'; // pending | published; @todo: default to pending
 
             while($row = $res->fetch_row()){
 
@@ -3230,15 +3229,14 @@ class RecordsBatch
                     $fileMetadata = array_merge($fileMetadata, $metaValues);
 
                     $rtn = uploadFileToNakala($this->system, [
-                        'api_key' => $apiKey, 'file' => $file,
-                        'meta' => $fileMetadata, 'status' => 'published', // pending | published
-                        'use_test_url' => $useTestURL
+                        'apiKey' => $apiKey, 'file' => $file,
+                        'meta' => $fileMetadata, 'status' => $status
                     ]);
 
                     if($rtn){ // register URL ($rtn)
                         //$fileEntity->setRecords(null);// reset records
                         if($serviceID){
-                            $fields = ['ulf_Parameters'=>'{"repository":"'.$serviceID.'"}'];
+                            $fields = ['ulf_Parameters' => "{\"repository\":\"{$serviceID}\"}"];
                         }else{
                             $fields = null;
                         }

@@ -39,7 +39,6 @@
 * @uses $_REQUEST['include_docs'] If 1, includes background documentation (hidden, checked by default).
 * @uses $_REQUEST['allrecs'] If 1, includes resources from other users (hidden, checked by default).
 * @uses $_REQUEST['license'] Specifies the license for Nakala uploads.
-* @uses $_REQUEST['use_test_url'] For Nakala, if 1, uses the test Nakala instance.
 *
 * @const MANAGER_REQUIRED Indicates that manager-level access is required for this page.
 * @const PDIR Path to the parent directory, used for constructing URLs to JS/CSS assets.
@@ -492,16 +491,6 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                 </div>
 
                 <!-- Nakala-specific options -->
-                <!-- <div id="nakala-url" class="input-row repo-Nakala" style="padding: 10px 0px; display: none;">
-                    <span>
-                        Select which version of Nakala to use: <br><br>
-                        <label style="display: inline-block; margin-bottom: 5px;"> <input type='radio' name='use_test_url' value='0' checked="checked"> Standard</label> <br>
-                        <label style="display: inline-block; margin-bottom: 5px;"> <input type='radio' name='use_test_url' value='1'> Test (test.nakala.fr)</label>
-                        <span class="heurist-helper1" style="vertical-align: middle;">
-                            Please note that this version should only be used for testing / temporary storage as at any moment the uploaded Zip can be cleared by Nakala/Huma-num
-                        </span>
-                    </span>
-                </div> -->
                 <div class="input-row repo-Nakala" style="display: none;padding: 5px 0 10px 0;">
                     <div class="header recommended" style="display: inline-block">
                         Select a license
@@ -891,41 +880,41 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                         // Metadata for Nakala
                         $params['meta']['title'] = [
                             'value' => "Heurist database {$system->dbname()} : archive copy {$date}", 'lang' => null,
-                            'typeUri' => XML_SCHEMA, 'propertyUri' => NAKALA_REPO.'terms#title'
+                            'typeUri' => W3_XML_SCHEMA_STRING, 'propertyUri' => NAKALA_REPO.'terms#title'
                         ];
                         $usr = $system->getCurrentUser();
                         if (is_array($usr) && !empty($usr['ugr_FullName'])) {
                             $params['meta']['creator'] = [
                                 'value' => $usr['ugr_FullName'], 'lang' => null,
-                                'typeUri' => XML_SCHEMA, 'propertyUri' => 'http://purl.org/dc/terms/creator'
+                                'typeUri' => W3_XML_SCHEMA_STRING, 'propertyUri' => 'http://purl.org/dc/terms/creator'
                             ];
                         }
                         $params['meta']['created'] = [
                             'value' => $date, 'lang' => null,
-                            'typeUri' => XML_SCHEMA, 'propertyUri' => NAKALA_REPO.'terms#created'
+                            'typeUri' => PURL_TERM_DATE, 'propertyUri' => NAKALA_REPO.'terms#created'
                         ];
                         $params['meta']['type'] = [ // Default type: Dataset
                             'value' => 'http://purl.org/coar/resource_type/c_ddb1', 'lang' => null,
-                            'typeUri' => 'http://www.w3.org/2001/XMLSchema#anyURI', 'propertyUri' => NAKALA_REPO.'terms#type'
+                            'typeUri' => PURL_TERM_URI, 'propertyUri' => NAKALA_REPO.'terms#type'
                         ];
                         if (array_key_exists('license', $_REQUEST) && !empty($_REQUEST['license'])) {
                             $params['meta']['license'] = [
                                 'value' => $_REQUEST['license'], 'lang' => null,
-                                'typeUri' => XML_SCHEMA, 'propertyUri' => NAKALA_REPO.'terms#license'
+                                'typeUri' => W3_XML_SCHEMA_STRING, 'propertyUri' => NAKALA_REPO.'terms#license'
                             ];
                         }
                         if(array_key_exists('desc', $_REQUEST) && !empty($_REQUEST['desc'])){
                             $params['meta']['description'] = [
                                 'value' => htmlspecialchars($_REQUEST['desc']),
                                 'lang' => null,
-                                'typeUri' => XML_SCHEMA,
+                                'typeUri' => W3_XML_SCHEMA_STRING,
                                 'propertyUri' => 'http://purl.org/dc/terms/description'
                             ];
                         }
                         if(array_key_exists('location', $_REQUEST) && !empty($_REQUEST['location'])){
 
                             $location = htmlspecialchars($_REQUEST['location']);
-                            $typeURI = filter_var($location, FILTER_VALIDATE_URL) ? 'http://purl.org/dc/terms/URI' : XML_SCHEMA;
+                            $typeURI = filter_var($location, FILTER_VALIDATE_URL) ? PURL_TERM_URI : W3_XML_SCHEMA_STRING;
 
                             $params['meta']['location'] = [
                                 'value' => $location,
@@ -949,7 +938,7 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                                 $params['meta'][] = [
                                     'value' => $keyword,
                                     'lang' => null,
-                                    'typeUri' => XML_SCHEMA,
+                                    'typeUri' => W3_XML_SCHEMA_STRING,
                                     'propertyUri' => 'http://purl.org/dc/terms/subject'
                                 ];
                             }
@@ -958,16 +947,15 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                             $params['meta']['collection'] = [
                                 'value' => htmlspecialchars($_REQUEST['collection']),
                                 'lang' => null,
-                                'typeUri' => XML_SCHEMA,
+                                'typeUri' => W3_XML_SCHEMA_STRING,
                                 'propertyUri' => 'http://purl.org/dc/terms/isPartOf'
                             ];
                         }
 
-                        $params['api_key'] = $repo_details['params']['writeApiKey'];
-                        $params['use_test_url'] = strpos($repo_account,'nakala') === 1 ? 1 : 0; // use test version
+                        $params['apiKey'] = $repo_details['params']['writeApiKey'];
 
                         $params['status'] = 'pending'; // Keep new record private initially
-                        $params['return_type'] = 'editor'; // Return link to the editor interface
+                        $params['returnType'] = 'editor'; // Return link to the editor interface
 
                         // REMARK: uploadFileToNakala function is external to this file.
                         $rtn_upload = uploadFileToNakala($system, $params);

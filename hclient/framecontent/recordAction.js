@@ -421,11 +421,6 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             + '</div>').appendTo($fieldset);
 
             $('<div style="padding: 0.2em; width: 100%;display: none;" class="input">'
-                + '<div class="header" style="padding-right: 16px;"><label for="sel_repository">Use test server</label></div>'
-                + '<input type="checkbox" id="ch_use_test_server" class="text ui-widget-content ui-corner-all" style="margin-bottom:10px">'
-            + '</div>').appendTo($fieldset);
-
-            $('<div style="padding: 0.2em; width: 100%;display: none;" class="input">'
                 + '<div class="header" style="padding-right: 16px;"><label for="sel_license">License</label></div>'
                 + '<select id="sel_license" style="max-width:30em" data-init="0"></select>'
             + '</div>').appendTo($fieldset);
@@ -827,7 +822,6 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         window.hWin.HEURIST4.msg.showMsgFlash('Please select a license', 3000);
                         return;
                     }
-                    request['use_test_url'] = request['repository'].indexOf('nakala') === 1 ? 1 : 0;
                 }
 
             }else if(action_type=='delete_detail'){

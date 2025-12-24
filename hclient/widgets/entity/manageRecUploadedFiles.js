@@ -1434,16 +1434,6 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                                     + '</div>'
                                 + '</div>'
 
-                                + '<div id="nakala-url" style="display: none;">'
-                                    + '<div class="header recommended" style="vertical-align: top; display: table-cell;"><label>Use test server:</label></div>'
-                                    + '<span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
-                                    + '<div class="input-cell" style="padding-bottom: 12px;">'
-                                        + '<input type="checkbox" class="text ui-widget-content ui-corner-all" id="use_test_url">'
-                                        + '<br>'
-                                        + '<span class="heurist-helper1">Use Nakala\'s test server, instead of the standard version</span>'
-                                    + '</div>'
-                                + '</div>'
-
                                 + '<div>'
                                     + '<div class="header required" style="vertical-align: top; display: table-cell;"><label>File title:</label></div>'
                                     + '<span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
@@ -1569,8 +1559,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                             type: type,
                             license: license
                         },
-                        api_key: account,
-                        use_test_url: account.indexOf('_') == -1 ? 1 : 0
+                        apiKey: account
                     };
 
                     window.hWin.HEURIST4.msg.bringCoverallToFront(that._edit_dialog);
@@ -1618,7 +1607,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
                 let request = {
                     serviceType: 'nakala',
-                    metadata: 'all'
+                    metadata: 'types,licenses'
                 };
 
                 window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));

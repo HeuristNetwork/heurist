@@ -11,12 +11,17 @@ connection="mysql -H<SERVER> -P3306 -uheurist -p<PASSWORD>"
 
 for db in `echo "select schema_name from information_schema.schemata where schema_name like 'hdb_%' " | mysql --login-path=$connection`; 
 do 
+
 # Add the statements to be executed below
 
-sudo mysql --login-path=$connection --skip-column-names --silent $db -e "SELECT '>> $db >>>>',sys_MediaFolders from sysIdentification";  
+sudo mysql --login-path=$connection --skip-column-names --silent $db -e "SELECT '>> $db >>>>',dtl_RecID from recDetails where dtl_Value Like '%h6-alpha%'";  
 
 done
 
+# ----------------------------------------
+# EXAMPLES:
+
+#sudo mysql --login-path=$connection --skip-column-names --silent $db -e "SELECT '>> $db >>>>',sys_MediaFolders from sysIdentification";  
 
 
 
