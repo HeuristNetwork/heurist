@@ -845,7 +845,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             this.recordList.css('top', '0px');
         }
 
-        that._loadData(true);
+        this._delay(function () {
+            this._loadData(true);
+        }, 0);            
 
         return true;
     },//_initControls   
