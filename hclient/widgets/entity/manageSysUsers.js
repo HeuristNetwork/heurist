@@ -675,12 +675,12 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
     _Saml_from_UI: function( saml_id ){
        
        if(saml_id){
-           let auth = this._editing.getValue('usr_ExternalAuthentication')[0];
+           let auth = this._editing.getValue('usr_ExternalAuthentication');
            auth = window.hWin.HEURIST4.util.isJSON(auth);
            if(!auth) auth = {};
            
-           let uid = this._editing.getValue('ugl_SpUID')[0];
-           let mail = this._editing.getValue('ugl_SpMail')[0];
+           let uid = this._editing.getValue('ugl_SpUID');
+           let mail = this._editing.getValue('ugl_SpMail');
 
            if(uid!='' || mail=='y'){
                //replace SP
@@ -708,7 +708,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         
        this._currentSaml = saml_id;
 
-       let auth = this._editing.getValue('usr_ExternalAuthentication')[0];
+       let auth = this._editing.getValue('usr_ExternalAuthentication');
 
        auth = window.hWin.HEURIST4.util.isJSON(auth);
        if(auth && auth[saml_id]){
@@ -811,7 +811,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
 
         if(this._currentEditID==null || this._currentEditID<1) return;
 
-        const isEnabled = this._editing.getValue('ugr_Enabled')[0];
+        const isEnabled = this._editing.getValue('ugr_Enabled');
         const isModified = this._editing.isModified();
         let that = this;
 

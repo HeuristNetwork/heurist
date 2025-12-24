@@ -193,7 +193,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
         if(!this.editForm.find('#single_rectype').is(':checked')){
             let rectypes = this._editing.getValue('cfn_RecTypeIDs');
 
-            if(window.hWin.HEURIST4.util.isempty(rectypes) || (rectypes.length === 1 && rectypes[0] === '')){
+            if(window.hWin.HEURIST4.util.isempty(rectypes)){
                 window.hWin.HEURIST4.msg.showMsgErr('Please select additional record types, or uncheck the checkbox above the required field.');
                 return;
             }
@@ -255,7 +255,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
 
         if($multiRecTypes){
 
-            let checked = this._currentEditID !== -1 && multiRecTypeIDs.length === 1 && multiRecTypeIDs[0] === '';
+            let checked = this._currentEditID !== -1 && window.hWin.HEURIST4.util.isempty(multiRecTypeIDs);
 
             let $multiRtyChkb = $('<input>', {type: 'checkbox', id: 'single_rectype', checked: checked ? 'checked' : false});
             let $container = $('<div>', {
@@ -285,7 +285,7 @@ $.widget( "heurist.manageDefCalcFunctions", $.heurist.manageEntity, {
                     
         let that = this;
 
-        let cfn_Content = this._editing.getValue('cfn_FunctionSpecification')[0];
+        let cfn_Content = this._editing.getValue('cfn_FunctionSpecification');
         let rty_ID = !window.hWin.HEURIST4.util.isPositiveInt(this.options.rst_RecTypeID) ? null : this.options.rst_RecTypeID;
 
         let popup_dialog_options = {

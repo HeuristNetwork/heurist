@@ -867,9 +867,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                     if(!window.hWin.HEURIST4.util.isempty(context)) {
 
                                         let rst_fields = {
-                                            rst_RequirementType: that._editing.getValue('rst_RequirementType')[0], 
-                                            rst_MaxValues: that._editing.getValue('rst_MaxValues')[0], 
-                                            rst_DisplayWidth: that._editing.getValue('rst_DisplayWidth')[0] 
+                                            rst_RequirementType: that._editing.getValue('rst_RequirementType'), 
+                                            rst_MaxValues: that._editing.getValue('rst_MaxValues'), 
+                                            rst_DisplayWidth: that._editing.getValue('rst_DisplayWidth')
                                         };
 
                                         that._trigger("multiselect", null, {selection:context.reverse(), rst_fields:rst_fields}); // handler in manageDefRecStructure
@@ -1025,7 +1025,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 this._on( this.set_detail_type_btn, {    
                     'click': function(event){
 
-                        let dt_type = this._editing.getValue('dty_Type')[0];
+                        let dt_type = this._editing.getValue('dty_Type');
                 
                         let $dlg, buttons = [
                             {text:window.hWin.HR('Cancel'),
@@ -1295,15 +1295,15 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                            
                            
-                            let rst_fields = {rst_RequirementType: that._editing.getValue('rst_RequirementType')[0], 
-                                rst_MaxValues: that._editing.getValue('rst_MaxValues')[0], 
-                                rst_DisplayWidth: that._editing.getValue('rst_DisplayWidth')[0] };
+                            let rst_fields = {rst_RequirementType: that._editing.getValue('rst_RequirementType'), 
+                                rst_MaxValues: that._editing.getValue('rst_MaxValues'), 
+                                rst_DisplayWidth: that._editing.getValue('rst_DisplayWidth') };
 
                             if(ele.text().includes('Numeric') && !that._editing.getFieldByName('rst_DisplayWidth').is(':visible')){
                                 rst_fields['rst_DisplayWidth'] = 10;
                             }
 
-                            let sematic_url = that._editing.getValue('dty_SemanticReferenceURL')[0];
+                            let sematic_url = that._editing.getValue('dty_SemanticReferenceURL');
                             if(sematic_url){
                                 rst_fields['rst_SemanticReferenceURL'] = sematic_url;
                             }
@@ -1439,8 +1439,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         let is_add_vocab = ($(event.target).attr('id')=='add_vocabulary');
 
         
-        let term_type = this._editing.getValue('dty_Type')[0];
-        let dt_name = this._editing.getValue('dty_Name')[0];
+        let term_type = this._editing.getValue('dty_Type');
+        let dt_name = this._editing.getValue('dty_Name');
 
         if(term_type!="enum"){
             term_type="relation";
@@ -1503,7 +1503,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _showOtherTerms: function(event){
         
 
-        let term_type = this._editing.getValue('dty_Type')[0];
+        let term_type = this._editing.getValue('dty_Type');
 
         let vocab_id;
         if(event=='add_new'){
@@ -1535,7 +1535,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         if(this._currentEditID > 0){
             fieldname = $Db.dty(this._currentEditID, 'dty_Name');
         }else{
-            fieldname = this._editing.getValue('dty_Name')[0];
+            fieldname = this._editing.getValue('dty_Name');
         }
 
         if(window.hWin.HEURIST4.util.isempty(fieldname)){
@@ -1583,9 +1583,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _recreateTermsVocabSelector: function(newval){
         
         //selected vocabulary
-        let allTerms = newval>0?newval:this._editing.getValue('dty_JsonTermIDTree')[0];
+        let allTerms = newval>0?newval:this._editing.getValue('dty_JsonTermIDTree');
         
-        let term_type = this._editing.getValue('dty_Type')[0];
+        let term_type = this._editing.getValue('dty_Type');
         
         if(term_type!='enum'){
             term_type='relation';
@@ -1636,7 +1636,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
      */
     _recreateTermsPreviewSelector: function(){
 
-        let allTerms = this._editing.getValue('dty_JsonTermIDTree')[0];
+        let allTerms = this._editing.getValue('dty_JsonTermIDTree');
 
         //remove old selector
         let preview_sel = this.enum_container.find("#termsPreview1");
@@ -1644,14 +1644,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
        
        
         
-        let term_type = this._editing.getValue('dty_Type')[0];
+        let term_type = this._editing.getValue('dty_Type');
         if(term_type=='relationtype'){
             allTerms = 'relation';
         }
 
         if(!window.hWin.HEURIST4.util.isempty(allTerms)) {
             
-            //let disTerms = this._editing.getValue('dty_TermIDTreeNonSelectableIDs')[0];  //@todo remove - is not used anymore
+            //let disTerms = this._editing.getValue('dty_TermIDTreeNonSelectableIDs');  //@todo remove - is not used anymore
 
             //append to first preview
             let new_selector = this.enum_container.find('#selPreview');
@@ -1793,7 +1793,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     let browser_filter = this._editing.getFieldByName('rst_PointerBrowseFilter');
                     let child_rec = this._editing.getFieldByName('rst_CreateChildIfRecPtr');
                     let resource_default = this._editing.getFieldByName('rst_DefaultValue_resource');
-                    let default_val = this._editing.getValue('rst_DefaultValue')[0];
+                    let default_val = this._editing.getValue('rst_DefaultValue');
                     
                     // Setup default value
                     resource_default.editing_input('fset','rst_PtrFilteredIDs', fields['dty_PtrTargetRectypeIDs']);
@@ -2159,13 +2159,13 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _selectAndClose: function(){
         
         if(this.options.newFieldForRtyID>0){
-            let rst_fields = {rst_RequirementType: this._editing.getValue('rst_RequirementType')[0], 
-                              rst_MaxValues: this._editing.getValue('rst_MaxValues')[0], 
-                              rst_DisplayWidth: this._editing.getValue('rst_DisplayWidth')[0],
-                              rst_PointerMode: this._editing.getValue('rst_PointerMode')[0],
-                              rst_PointerBrowseFilter: this._editing.getValue('rst_PointerBrowseFilter')[0],
-                              rst_CreateChildIfRecPtr: this._editing.getValue('rst_CreateChildIfRecPtr')[0],
-                              rst_DefaultValue_resource: this._editing.getValue('rst_DefaultValue_resource')[0]
+            let rst_fields = {rst_RequirementType: this._editing.getValue('rst_RequirementType'), 
+                              rst_MaxValues: this._editing.getValue('rst_MaxValues'), 
+                              rst_DisplayWidth: this._editing.getValue('rst_DisplayWidth'),
+                              rst_PointerMode: this._editing.getValue('rst_PointerMode'),
+                              rst_PointerBrowseFilter: this._editing.getValue('rst_PointerBrowseFilter'),
+                              rst_CreateChildIfRecPtr: this._editing.getValue('rst_CreateChildIfRecPtr'),
+                              rst_DefaultValue_resource: this._editing.getValue('rst_DefaultValue_resource')
                           };
                               
             this._resultOnSelection = { rst_fields:rst_fields, updatedRstField: this.updatedRstField };

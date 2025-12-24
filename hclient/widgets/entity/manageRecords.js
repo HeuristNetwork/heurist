@@ -6768,7 +6768,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     + '</div>';
 
                 let existing_val = this._editing.getValue(fld_id);
-                field_values[fld_id] = (existing_val == null || window.hWin.HEURIST4.util.isempty(existing_val[0])) ? [] : existing_val;
+                field_values[fld_id] = window.hWin.HEURIST4.util.isempty(existing_val) ? [] : [existing_val];
 
                 todo_count ++;
             }
