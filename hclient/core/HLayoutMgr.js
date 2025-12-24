@@ -964,12 +964,15 @@ console.log(content);
             children = parent.children;    
         }
         
-        for(let i=0; i<children.length; i++){
-            if(children[i].key == ele_key){
-                return  parent;
-            }else if(children[i].children && children[i].children.length>0){
-                let res = this.#layoutContentFindParent(children[i], ele_key);    
-                if(res) return res;
+        if(Array.isArray(children) && children.length>0){
+        
+            for(let i=0; i<children.length; i++){
+                if(children[i].key == ele_key){
+                    return  parent;
+                }else if(children[i].children && children[i].children.length>0){
+                    let res = this.#layoutContentFindParent(children[i], ele_key);    
+                    if(res) return res;
+                }
             }
         }
         return false; //not found
