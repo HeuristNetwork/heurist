@@ -3604,7 +3604,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 $input.css('min-width', '');
                             }
                         });
-                    }else if(ui.newPanel && that.options.rts_editor != undefined && ui.newPanel.find('div[data-dtid]:first').length > 0){
+                    }else if(ui.newPanel && 
+                            !window.hWin.HEURIST4.util.isnull( that.options.rts_editor ) && 
+                            ui.newPanel.find('div[data-dtid]:first').length > 0)
+                    {
                         let dty_id = ui.newPanel.find('div[data-dtid]:first').attr('data-dtid');
                         that.options.rts_editor.manageDefRecStructure('highlightNode', dty_id);
                     }
@@ -3615,7 +3618,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 if(!hasField){ // open modify structure, if able when there are no fields
                     this.editRecordType(true);
-                }else if(this.options.edit_structure == undefined && this.options.rts_editor == undefined){ // check for default title mask
+                }else if(window.hWin.HEURIST4.util.isnull(this.options.edit_structure) && 
+                         window.hWin.HEURIST4.util.isnull(this.options.rts_editor))
+                { // check for default title mask
 
                     let title_mask = $Db.rty(that._currentEditRecTypeID, 'rty_TitleMask');
                     let match_result = title_mask?title_mask.match(/\[([^\]]+)\]/g):null; // check for fields in title mask
@@ -6763,7 +6768,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     + '</div>';
 
                 let existing_val = this._editing.getValue(fld_id);
-                field_values[fld_id] = (existing_val == null || window.hWin.HEURIST4.util.isempty(existing_val[0])) ? [] : existing_val;
+                field_values[fld_id] = window.hWin.HEURIST4.util.isempty(existing_val) ? [] : [existing_val];
 
                 todo_count ++;
             }
@@ -7791,7 +7796,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         let that = this;
 
-        let struct_changes = this.options.rts_editor.manageDefRecStructure('checkIfEditing');
+        let struct_changes = this.options.rts_editor?this.options.rts_editor.manageDefRecStructure('checkIfEditing'):false;
         let data_changes = this._editing.isModified();
 
         if(!force_close && (struct_changes || data_changes)){

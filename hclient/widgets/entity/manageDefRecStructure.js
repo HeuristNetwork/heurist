@@ -1325,9 +1325,9 @@ console.log('onEditFormChange @todo check buttons!!!');
                         }
                         else{
                             rst = {
-                                rst_RequirementType: that._editing.getValue('rst_RequirementType')[0], 
-                                rst_MaxValues: that._editing.getValue('rst_MaxValues')[0], 
-                                rst_DisplayWidth: that._editing.getValue('rst_DisplayWidth')[0] 
+                                rst_RequirementType: that._editing.getValue('rst_RequirementType'), 
+                                rst_MaxValues: that._editing.getValue('rst_MaxValues'), 
+                                rst_DisplayWidth: that._editing.getValue('rst_DisplayWidth') 
                             };
                         }
                         
@@ -1772,7 +1772,7 @@ console.log('onEditFormChange @todo check buttons!!!');
                 
             }
             
-            let v = that._editing.getValue('rst_CreateChildIfRecPtr')[0];
+            let v = that._editing.getValue('rst_CreateChildIfRecPtr');
            
             this._rst_PointerMode_EnableBrowse(v!=1);
             
@@ -1872,7 +1872,7 @@ console.log('onEditFormChange @todo check buttons!!!');
             this._onDetailTypeChange();
         }
         
-        const dt_type = this._editing.getValue('dty_Type')[0];
+        const dt_type = this._editing.getValue('dty_Type');
 
         // Always show help text
         this.editForm.find('.heurist-helper1').removeClass('heurist-helper1').addClass('heurist-helper3').show();
@@ -1883,13 +1883,13 @@ console.log('onEditFormChange @todo check buttons!!!');
 
         if(dt_type=='separator'){
             
-            let sep_type = this._editing.getValue('rst_DefaultValue')[0]; //take from db
+            let sep_type = this._editing.getValue('rst_DefaultValue'); //take from db
             if(!(sep_type=='accordion' || sep_type=='tabs' || sep_type=='tabs_new' || sep_type=='expanded')){
                 sep_type = 'group';
             }
             this._editing.setFieldValueByName( 'rst_SeparatorType', sep_type, false ); //assign to entry selector
 
-            sep_type = this._editing.getValue('rst_RequirementType')[0];
+            sep_type = this._editing.getValue('rst_RequirementType');
             sep_type = (sep_type=='forbidden')?sep_type:'optional';
             this._editing.setFieldValueByName( 'rst_SeparatorRequirementType', sep_type, false );
 
@@ -1982,9 +1982,10 @@ console.log('onEditFormChange @todo check buttons!!!');
 
                         if($(event.target).is(':checked')){                            
 
-                            let f_width = that._editing.getValue('rst_DisplayWidth')[0];
+                            let f_width = that._editing.getValue('rst_DisplayWidth');
 
-                            if(f_width <= 0){
+                            const w = parseInt(f_width, 10) || 0;
+                            if(w <= 0){
                                 that._editing.setFieldValueByName('rst_DisplayWidth', 100, true);
                                 that.onEditFormChange();
                             }
@@ -1993,9 +1994,8 @@ console.log('onEditFormChange @todo check buttons!!!');
                 });
 
                 if(edit_ele.find('input').is(':checked')){
-                    let f_width = this._editing.getValue('rst_DisplayWidth')[0];
-
-                    if(f_width <= 0){
+                    const w = parseInt(this._editing.getValue('rst_DisplayWidth'), 10) || 0;
+                    if(w <= 0){
                         this._editing.setFieldValueByName('rst_DisplayWidth', 100, true);
                         this.onEditFormChange();
                     }
@@ -2112,8 +2112,8 @@ console.log('onEditFormChange @todo check buttons!!!');
             }
 
             window.hWin.HEURIST4.ui.createTermSelect($select[0], {
-                vocab_id: this._editing.getValue('rst_FilteredJsonTermIDTree')[0] ?? this._editing.getValue('dty_TermIDTreeNonSelectableIDs')[0],
-                defaultTermID: this._editing.getValue('rst_TermPreview')[0] ?? this._editing.getValue('rst_DefaultValue')[0],
+                vocab_id: this._editing.getValue('rst_FilteredJsonTermIDTree') || this._editing.getValue('dty_TermIDTreeNonSelectableIDs'),
+                defaultTermID: this._editing.getValue('rst_TermPreview') || this._editing.getValue('rst_DefaultValue'),
                 topOptions: [{key: '', title: '&nbsp;'}],
                 eventHandlers: {
                     onSelectMenu: () => {
@@ -2187,7 +2187,7 @@ console.log('onEditFormChange @todo check buttons!!!');
      */
     _onDetailTypeChange: function(){
 
-        let dt_type = this._editing.getValue('dty_Type')[0]
+        let dt_type = this._editing.getValue('dty_Type');
         
         //hide all virtual 
         let virtual_fields = this._editing.getFieldByValue("dty_Role","virtual");
@@ -2222,7 +2222,7 @@ console.log('onEditFormChange @todo check buttons!!!');
                 this._recreateResourceSelector();
             }
             
-            let maxval = parseInt(this._editing.getValue('rst_MaxValues')[0]);
+            let maxval = parseInt(this._editing.getValue('rst_MaxValues'), 10) || 0;
             let res = 'repeatable';
             if(maxval==1){
                 res = 'single';
@@ -2258,9 +2258,9 @@ console.log('onEditFormChange @todo check buttons!!!');
      */
     _recreateTermsPreviewSelector: function(){
         
-        let allTerms = this._editing.getValue('rst_FilteredJsonTermIDTree')[0];
+        let allTerms = this._editing.getValue('rst_FilteredJsonTermIDTree');
         let disTerms = null;
-        let term_type = this._editing.getValue('dty_Type')[0];//'enum', 'relmarker' or 'relationtype'
+        let term_type = this._editing.getValue('dty_Type');//'enum', 'relmarker' or 'relationtype'
         
         if(term_type=='relationtype'){
             allTerms = 'relation';
@@ -2270,15 +2270,15 @@ console.log('onEditFormChange @todo check buttons!!!');
 
         if(!window.hWin.HEURIST4.util.isempty(allTerms)) {
 
-            disTerms = this._editing.getValue('dty_TermIDTreeNonSelectableIDs')[0];
+            disTerms = this._editing.getValue('dty_TermIDTreeNonSelectableIDs');
             
-            term_type = this._editing.getValue('dty_Type')[0];
+            term_type = this._editing.getValue('dty_Type');
             if(term_type!="enum"){
                 term_type="relation";
             }
         }
 
-        let defval = this._editing.getValue('rst_DefaultValue')[0];
+        let defval = this._editing.getValue('rst_DefaultValue');
         if(!window.hWin.HEURIST4.util.isempty(allTerms) && defval){
             this._editing.setFieldValueByName('rst_DefaultValue', '', false);
         }
@@ -2306,8 +2306,8 @@ console.log('onEditFormChange @todo check buttons!!!');
      */
     _recreateResourceSelector: function(){
         
-        let ptrIds = this._editing.getValue('rst_PtrFilteredIDs')[0];
-        let ptrMode = this._editing.getValue('rst_PointerMode')[0];
+        let ptrIds = this._editing.getValue('rst_PtrFilteredIDs');
+        let ptrMode = this._editing.getValue('rst_PointerMode');
         
         //disable
         let edit_ele = this._editing.getFieldByName('rst_PtrFilteredIDs');
@@ -2318,7 +2318,7 @@ console.log('onEditFormChange @todo check buttons!!!');
         }
         
         
-        let defval = this._editing.getValue('rst_DefaultValue')[0];
+        let defval = this._editing.getValue('rst_DefaultValue');
         if(!window.hWin.HEURIST4.util.isempty(ptrIds) && defval){
             this._editing.setFieldValueByName('rst_DefaultValue', '', false);
         }
@@ -2339,7 +2339,7 @@ console.log('onEditFormChange @todo check buttons!!!');
      */
     _recreateDefaultValue: function(){
         
-        let defval = this._editing.getValue('rst_DefaultValue')[0];
+        let defval = this._editing.getValue('rst_DefaultValue');
         let ele = this._editing.getFieldByName('rst_DefaultValue_inc');          
         ele = ele.find('.input-div');
         //remove old content
@@ -2398,7 +2398,7 @@ console.log('onEditFormChange @todo check buttons!!!');
 
         setTimeout(function(){that._editing.getFieldByName('rst_DisplayWidth').hide();}, 200);
 
-        let curr_width = this._editing.getValue('rst_DisplayWidth')[0];
+        let curr_width = parseInt(this._editing.getValue('rst_DisplayWidth'),10) || 0;
         let $ele = this._editing.getFieldByName('rst_DisplayWidth_ext').find('.input-div');
 
         $ele.empty();
@@ -2541,11 +2541,11 @@ console.log('onEditFormChange @todo check buttons!!!');
             return;   
         }
 
-        if(this._editing && this._editing.getValue('dty_Type') == 'separator'){
+        if(this._editing && this._editing.getValue('dty_Type') === 'separator'){
             
             let val = this._editing.getValue('rst_DisplayName');
             let sep_type = this._editing.getValue('rst_SeparatorType');
-            if(val && window.hWin.HEURIST4.util.isempty(val[0]) && sep_type && (sep_type[0]=='group' || sep_type[0]=='group_break')) {
+            if(window.hWin.HEURIST4.util.isempty(val) && (sep_type=='group' || sep_type=='group_break')) {
 
                 let $dlg;
                 let msg = 'You have left the Field label empty.<br>Would you like the header to be blank?';
@@ -2974,7 +2974,7 @@ console.log('onEditFormChange @todo check buttons!!!');
      */
     _rst_PointerMode_EnableBrowse: function(is_enable){
         
-        let ptrMode = this._editing.getValue('rst_PointerMode')[0];
+        let ptrMode = this._editing.getValue('rst_PointerMode');
         let pointer_mode = this._editing.getFieldByName('rst_PointerMode');
         
         //ENUM('dropdown_add', 'dropdown', 'addorbrowse', 'addonly', 'browseonly')        

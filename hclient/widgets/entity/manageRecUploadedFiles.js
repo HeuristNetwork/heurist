@@ -361,9 +361,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             this.editForm.append( this.mediaviewer );
             this.mediaviewer.mediaViewer({
                 rec_Files:[{
-                    id: this._editing.getValue('ulf_ObfuscatedFileID')[0], 
-                    filename: this._editing.getValue('ulf_OrigFileName')[0], 
-                    mimeType: this._editing.getValue('fxm_MimeType')[0]
+                    id: this._editing.getValue('ulf_ObfuscatedFileID'), 
+                    filename: this._editing.getValue('ulf_OrigFileName'), 
+                    mimeType: this._editing.getValue('fxm_MimeType')
                 }]
             }); //nonce + memtype
                 
@@ -397,7 +397,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
             isLocal = window.hWin.HEURIST4.util.isempty(this._getField('ulf_ExternalFileReference'));
 
-            if(window.hWin.HEURIST4.util.isempty(this._editing.getValue('ulf_WhoCanView')[0])){
+            if(window.hWin.HEURIST4.util.isempty(this._editing.getValue('ulf_WhoCanView'))){
                 // force option to public, without changes
                 let ele = this._editing.getFieldByName('ulf_WhoCanView');
                 ele.editing_input('setValue', 'viewable', true);
@@ -746,12 +746,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             }
             
         }else{
-            let urls = this._editing.getValue('ulf_ExternalFileReference');
-            if(urls){
-                this._previousURL = urls[0];    
-            }else{
-                this._previousURL = null;
-            }
+            this._previousURL = this._editing.getValue('ulf_ExternalFileReference');
         }
 
         //hide after edit init btnRecRemove
@@ -763,11 +758,11 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         let res = this._super();
         
         let val = this._editing.getValue('ulf_ExternalFileReference');
-        let isLocal = window.hWin.HEURIST4.util.isempty(val[0]);
+        let isLocal = window.hWin.HEURIST4.util.isempty(val);
         if(!isLocal && res){
             
             let mimeext = this._editing.getValue('ulf_MimeExt');
-            let err_msg = this._validateExt( mimeext[0] );        
+            let err_msg = this._validateExt( mimeext );        
             if(err_msg){
                 window.hWin.HEURIST4.msg.showMsgErr({
                     message: err_msg,
@@ -838,7 +833,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     //
     _requestMimeTypeByURL:function(){
         
-        if(this._additionMode=='tiled' || this._editing.getValue('ulf_OrigFileName')[0].indexOf('_tiled')==0 ){
+        if(this._additionMode=='tiled' || this._editing.getValue('ulf_OrigFileName').indexOf('_tiled')==0 ){
             //special case for tiled image stack            
             let ele2 = this._editing.getFieldByName('ulf_MimeExt');
             if(this._previousURL){
@@ -1434,16 +1429,6 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                                     + '</div>'
                                 + '</div>'
 
-                                + '<div id="nakala-url" style="display: none;">'
-                                    + '<div class="header recommended" style="vertical-align: top; display: table-cell;"><label>Use test server:</label></div>'
-                                    + '<span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
-                                    + '<div class="input-cell" style="padding-bottom: 12px;">'
-                                        + '<input type="checkbox" class="text ui-widget-content ui-corner-all" id="use_test_url">'
-                                        + '<br>'
-                                        + '<span class="heurist-helper1">Use Nakala\'s test server, instead of the standard version</span>'
-                                    + '</div>'
-                                + '</div>'
-
                                 + '<div>'
                                     + '<div class="header required" style="vertical-align: top; display: table-cell;"><label>File title:</label></div>'
                                     + '<span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
@@ -1569,8 +1554,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                             type: type,
                             license: license
                         },
-                        api_key: account,
-                        use_test_url: account.indexOf('_') == -1 ? 1 : 0
+                        apiKey: account
                     };
 
                     window.hWin.HEURIST4.msg.bringCoverallToFront(that._edit_dialog);
@@ -1618,7 +1602,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
 
                 let request = {
                     serviceType: 'nakala',
-                    metadata: 'all'
+                    metadata: 'types,licenses'
                 };
 
                 window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));

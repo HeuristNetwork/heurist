@@ -702,7 +702,7 @@ function HEditing(_options) {
      * @function _getValue
      * @description Retrieves the value(s) for a specific field by its dtID.
      * @param {string|number} dtID - The ID of the data type field.
-     * @returns {Array<any>|null} An array of values for the field, or null if not found or empty.
+     * @returns {<any>|''} First value for the field, or empty string if not found or empty.
      */
     function _getValue(dtID){
         for (let idx in editing_inputs) {
@@ -710,13 +710,13 @@ function HEditing(_options) {
             if(ele.editing_input('instance') && ele.editing_input('option', 'dtID')==dtID){
                 let vals = ele.editing_input('getValues');
                 if(vals && vals.length>0){
-                    return ele.editing_input('getValues');
+                    return vals[0] ?? '';
                 }else{
-                    return null;
+                    return '';
                 }
             }
         }
-        return null;
+        return '';
     }
     
     /**
@@ -1040,7 +1040,7 @@ function HEditing(_options) {
          * @memberof Widgets.Editing.HEditing
          * @instance
          * @param {string|number} dtID - The ID of the data type field.
-         * @returns {Array<any>|null} An array of values for the field. Returns null if the field is not found or has no values.
+         * @returns {<any>|''} First value for the field. Returns empty string if the field is not found or has no values.
          */
         getValue:function(dtID){
             return _getValue(dtID);

@@ -2674,8 +2674,9 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Write Credentials for sepecified repository and user/group not defined');
             return false;
         }
+
         $apiKey = $credentials[$serviceID]['params']['writeApiKey'];
-        $useTestURL = @$this->data['use_test_url'] == 1 || strpos($serviceID,'nakala')===1 ? 1 : 0;
+        $status = @$this->data['status'] === 'pending' || @$this->data['status'] === 'published' ? $this->data['status'] : 'published'; // pending | published; @todo: default to pending
 
         if(!empty($files)){
             $fileCond = count($files) > 1 ? 'IN (' . implode(',', $files) . ')' : "= {$files[0]}";
@@ -2703,7 +2704,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
         $metaValues['license'] = [
             'value' => $this->data['license'],
             'lang' => null,
-            'typeUri' => XML_SCHEMA,
+            'typeUri' => W3_XML_SCHEMA_STRING,
             'propertyUri' => NAKALA_REPO.'terms#license'
         ];
 
@@ -2718,9 +2719,8 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             $fileData = array_merge($fileData, $metaValues);
 
             $rtn = uploadFileToNakala($this->system, [
-                'api_key' => $apiKey, 'file' => $file,
-                'meta' => $fileData, 'status' => 'published',
-                'use_test_url' => $useTestURL
+                'apiKey' => $apiKey, 'file' => $file,
+                'meta' => $fileData, 'status' => $status
             ]);
 
             $new_ulfID = $ulfID;
@@ -2728,7 +2728,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
                 $fields = null;
                 if($serviceID){
-                    $fields = ['ulf_Parameters'=>'{"repository":"'.$serviceID.'"}'];
+                    $fields = ['ulf_Parameters' => "{\"repository\":\"{$serviceID}\"}"];
                 }
 
                 $new_ulfID = $this->registerURL($rtn, false, 0, $fields);// register nakala url

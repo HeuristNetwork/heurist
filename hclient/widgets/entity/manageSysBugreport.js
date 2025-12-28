@@ -423,6 +423,8 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
 
         // Format widths
         let ele = this._editing.getFieldByName('bug_Type');
+        if(!ele){ return; }
+        
         $.each(ele.find('label.enum_input'), (idx, label) => {
 
             label = $(label);

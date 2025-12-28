@@ -177,7 +177,11 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             this.element.find('#input_sort_type_div').hide();
         }
         if(window.hWin.HEURIST4.util.isFunction(this.options.onInitCompleted)){
-            this.options.onInitCompleted.call();
+
+          this._delay(function () {
+            this.options.onInitCompleted.call(this);
+          }, 0);            
+          
         }else{
             this.startSearch();              
         }

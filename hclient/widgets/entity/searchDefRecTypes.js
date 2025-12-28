@@ -167,7 +167,9 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         }
        
         if(window.hWin.HEURIST4.util.isFunction(this.options.onInitCompleted)){
-            this.options.onInitCompleted.call();
+            this._delay(function () {
+                this.options.onInitCompleted.call(this);
+                }, 0);            
         }else{
             this.startSearch();              
         }

@@ -691,9 +691,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             }else{
                                 vocab_name += '(#'+ that.options.trm_VocabularyID +')';
                             }
-                            that.recordList.resultList('clearAllRecordDivs',null, '<div style="padding: 10px;cursor: wait;">'
-                                            + '<span class="ui-icon ui-icon-loading-status-balls"></span> &nbsp;&nbsp;'
-                                            + 'Loading: '+ vocab_name +'</div>');
+                            if(this.recordList.resultList('instance')){
+                                that.recordList.resultList('clearAllRecordDivs',null, '<div style="padding: 10px;cursor: wait;">'
+                                                + '<span class="ui-icon ui-icon-loading-status-balls"></span> &nbsp;&nbsp;'
+                                                + 'Loading: '+ vocab_name +'</div>');
+                            }
                         }
 
                         if(that.getRecordSet()!==null){
@@ -843,7 +845,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             this.recordList.css('top', '0px');
         }
 
-        that._loadData(true);
+        this._delay(function () {
+            this._loadData(true);
+        }, 0);            
 
         return true;
     },//_initControls   
@@ -1034,9 +1038,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }
 
             }else{
-                this.recordList.resultList('clearAllRecordDivs',null,
-                    '<div style="padding: 8px;">Select vocabulary'+
-                    ((this.options.select_mode!='manager')?'':' on the left')+'</div>');
+                if(this.recordList.resultList('instance')){
+                    this.recordList.resultList('clearAllRecordDivs',null,
+                        '<div style="padding: 8px;">Select vocabulary'+
+                        ((this.options.select_mode!='manager')?'':' on the left')+'</div>');
+                }
 
                 sGroupTitle += '</h4>';
             }
@@ -1857,6 +1863,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }
 
                 if(languages.length > 0){
+                    this._cachedLabels[recID] = {};
                     this._cachedLabels[recID]['langs'] = languages.join(' ');
                     this._cachedLabels[recID]['labels'] = labels.join('<br>');
                 }else{

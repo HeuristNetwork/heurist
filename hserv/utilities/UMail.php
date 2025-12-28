@@ -110,6 +110,7 @@ function sendPHPMailer($email_from, $email_from_name, $email_to, $email_title, $
     // strip all whitespaces
     $email_from = filter_var($email_from, FILTER_SANITIZE_EMAIL);
 
+    //using heuristref.net as mail relay for gmail recipients
     if(isset($mailRelayPwd) && $mailRelayPwd!=''
     && count($email_to)==1 && endsWith($email_to[0], '@gmail.com')){
 

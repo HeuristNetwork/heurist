@@ -1669,16 +1669,18 @@ function(value){
 
         tinymce.remove('.tinymce-body'); //detach
         _layout_container.find('.lid-actionmenu').remove();
+        
         //find index in _layout_content
-        let idx = -1;
-        for(let i=0; i<parent_children.length; i++){
-          if(parent_children[i].key==ele_id){
-              idx = i;
-              break;
-          }   
-        }        
-        //from json
-        parent_children.splice(idx, 1); //remove from children
+        if(Array.isArray(parent_children) && parent_children.length>0){
+            let idx = -1;
+            for(let i=0; i<parent_children.length; i++){
+              if(parent_children[i].key==ele_id){
+                  idx = i;
+                  parent_children.splice(idx, 1); //remove from children
+                  break;
+              }   
+            }        
+        }
 
         //from tree
         node.remove();
@@ -1723,14 +1725,16 @@ function(value){
         }else{
             parent_children = oldparent.children;
         }
-        let idx = -1;
-        for(let i=0; i<parent_children.length; i++){
-          if(parent_children[i].key==ele_id){
-              idx = i;
-              break;
-          }   
-        }        
-        parent_children.splice(idx, 1); //remove from children
+        if(Array.isArray(parent_children) && parent_children.length>0){
+            let idx = -1;
+            for(let i=0; i<parent_children.length; i++){
+              if(parent_children[i].key==ele_id){
+                  idx = i;
+                  parent_children.splice(idx, 1); //remove from children
+                  break;
+              }   
+            }     
+        }
         
         //add to new parent  ---------------
         let tree = $.ui.fancytree.getTree( _panel_treePage );
@@ -1739,10 +1743,13 @@ function(value){
         let parentnode = node.getParent();
         let parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
         parent_children = parent_element ? parent_element.children : _layout_content;
+        if(!Array.isArray(parent_children)){
+            parent_children = [];
+        }
         
         if(prevnode==null){
             idx = 0;
-        }else{
+        }else if(Array.isArray(parent_children) && parent_children.length>0){
             for(let i=0; i<parent_children.length; i++){
               if(parent_children[i].key==prevnode.key){
                   idx = i+1;
@@ -2078,25 +2085,25 @@ function(value){
         tinymce.remove('.tinymce-body'); //detach
         _layout_container.find('.lid-actionmenu').remove();
 
+        parent_element = null;
+        
         if(parentnode.folder){
             //add child
-
             parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, parentnode.key);
-            parent_container = _layout_container.find('div[data-hid='+parentnode.key+']');
-            parent_children = parent_element.children;
-
-        }else{
+        }else if(!parentnode.parent.isRootNode()){
             //add sibling
-            if(parentnode.parent.isRootNode()){
-                parent_element = null;
-                parent_container = _layout_container;
-                parent_children = _layout_content;
-            }else{
-                parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, parentnode.parent.key);
-                parent_container = _layout_container.find('div[data-hid='+parentnode.parent.key+']');
-                parent_children = parent_element.children;
-            }
+            parent_element = window.hWin.HAPI4.layoutMgr.layoutContentFindElement(_layout_content, parentnode.parent.key);
         }
+            
+        if(parent_element){
+            parent_container = _layout_container.find('div[data-hid='+parentnode.parent.key+']');
+            parent_children = parent_element.children;
+        }else{
+            //add to root
+            parent_container = _layout_container;
+            parent_children = _layout_content;
+        }
+        
 
         if(Array.isArray(new_element_json) && new_element_json.length==1){
             new_element_json = new_element_json[0];
