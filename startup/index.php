@@ -830,11 +830,13 @@ if (!defined('PDIR')){
             let toSwitchboard = '/heurist/startup/?list=1';
             let msg = `<div>
                 <h2 style="color: green; font-style: italic;">Don't Panic !</h2>
-                If your database was/is on the Australian Heurist server (<a href="https://HeuristRef.net${toSwitchboard}" ${anchorAttr}>HeuristRef.net</a> or intersect.org.au) up to mid Nov 2025,<br>
-                you will now find it at <a href="https://HeuristAU.net${toSwitchboard}" ${anchorAttr}>HeuristAU.net</a> (this simply points to the same server, nothing else has changed).<br>
+                If your database was/is on the Australian Heurist server (HeuristRef.net) up to mid Nov 2025,
+                <br>you will now find it at <a href="https://HeuristAU.net">HeuristAU.net</a> 
+                <br>(this simply points to the same server, nothing else has changed).<br>
                 <br>
-                If you do not find it there, please try <a href="https://Heurist.Huma-Num.fr${toSwitchboard}" ${anchorAttr}>Heurist.Huma-Num.fr</a> and <a href="https://HeuristEU.net${toSwitchboard}" ${anchorAttr}>HeuristEU.net</a>.<br>
-                If you are unable to find it, contact us at <a href="mailto:support@heuristnetwork.org" ${anchorAttr}>support@heuristnetwork.org</a> (we have multiple backups of all databases and can restore them rapidly to any of these servers).
+                If you do not find it there, please try <a href="https://Heurist.Huma-Num.fr">Heurist.Huma-Num.fr</a><br>
+                If you are unable to find it, contact us at <a href="mailto:support@heuristnetwork.org">support@heuristnetwork.org</a> 
+                <br>(we have multiple backups of all servers and can restore them rapidly to any of these servers).
             </div>`;
 
             window.hWin.HEURIST4.msg.showMsgDlg(msg, null, {title: 'Requested database is not on this server'});
