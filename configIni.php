@@ -74,9 +74,10 @@ of the codebase and rename it to index.html
 // ---------------------------------------------------------------------------------
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "7.0.0";// sets current program version number, determined by Heurist development lead
+$version = "7.0.1";// sets current program version number, determined by Heurist development lead
 
 // ---------------------------------------------------------------------------------
+// 7.0.1  28 Dec 2025  New daily update of code from gitHub in place
 // 7.0.0  29 March 2025
 
 // 6.7.2  12 May 2025
