@@ -1,13 +1,13 @@
 #! /bin/sh
 
-# update_heurist.sh: update script for Heurist, creates new copy
+# update_heurist.sh: update script for Heurist, creates new copy. codeonly does not update the support packages.
 
 # @package     Heurist academic knowledge management system
 # @link        http://HeuristNetwork.org
-# @copyright   (C) 2005-2022 University of Sydney
+# @copyright   (C) 2005-2023 University of Sydney  2024 onwards Heurist Network
 # @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
 # @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-# @version     6
+# @version     7
 
 # Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
@@ -26,8 +26,8 @@ base_dir="/var/www/html"
 # Checking parameters and availability ...
 if [ -z $1 ]
    then
-      echo "Usage: ./update_heurist.sh hx.x.x sudo"
-      echo "Please supply version eg. hx.x.x. (this MUST exist as a tar.bz2 file "
+      echo "Usage: ./update_heurist.sh hx-alpha sudo codeonly"
+      echo "Please supply version eg. hx-alpha or hx.x.x (this MUST exist as a tar.bz2 file "
       echo "on $ref_server/HEURIST/DISTRIBUTION or script will not download the Heurist code package)"
       exit
    fi
@@ -36,10 +36,10 @@ if [ -z $1 ]
 if ! curl -fs --range 0-100 $ref_server/HEURIST/DISTRIBUTION/$1.tar.bz2 > /dev/null; then
         echo "The version parameter you supplied does not point to a Heurist installation package"
         echo "Please check for the latest version at HeuristNetwork.org/installation"
-        echo "The parameter should be eg. h6.2.1 as given - DO NOT include the url path or .tar.bz2"
-        echo "Supply 'sudo' as the second argument eg.  "
+        echo "The parameter should be eg. h7.0.1 as given - DO NOT include the url path or .tar.bz2"
+        echo "Supply 'sudo' as the second argument, codeonly as optional third argument eg.  "
         echo
-        echo "       ./update_heurist.sh h6.2.1 sudo"
+        echo "       ./update_heurist.sh h7.0.1 sudo codeonly"
         exit
 fi
 
@@ -66,10 +66,6 @@ $2 rm -Rf "${base_dir}/HEURIST/$1"
 $2 mkdir "${base_dir}/HEURIST/$1"
 $2 cp -R $1/* "${base_dir}/HEURIST/$1"
 
-echo
-echo Obtaining updated support files - external and help files
-echo
-
 # Ensure correct ownership and mode of HEURIST_SUPPORT (added 19/7/22)
 # Worst case this won't set group if heurist group does not exist
 $2 chown -R apache "${base_dir}/HEURIST/HEURIST_SUPPORT"
@@ -77,23 +73,30 @@ $2 chgrp -R heurist "${base_dir}/HEURIST/HEURIST_SUPPORT"
 $2 chmod -R ug+rwx "${base_dir}/HEURIST/HEURIST_SUPPORT"
 
 # Update support files
-cd "${base_dir}/HEURIST/HEURIST_SUPPORT"
+if [ "$2" != "codeonly" ] && [ "$3" != "codeonly" ]; then
 
-$2 rm -f external_h5.tar.bz2
-$2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5.tar.bz2
-$2 tar -xjf external_h5.tar.bz2
-$2 rm -f external_h5.tar.bz2
+    echo
+    echo Obtaining updated support files - external and help files
+    echo
 
-$2 rm -f vendor.tar.bz2
-$2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/vendor.tar.bz2
-$2 tar -xjf vendor.tar.bz2
-$2 rm -f vendor.tar.bz2
+    cd "${base_dir}/HEURIST/HEURIST_SUPPORT"
 
-$2 rm -f help.tar.bz2
-$2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
-$2 tar -xjf help.tar.bz2
-$2 rm -f help.tar.bz2
+    $2 rm -f external_h5.tar.bz2
+    $2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5.tar.bz2
+    $2 tar -xjf external_h5.tar.bz2
+    $2 rm -f external_h5.tar.bz2
 
+    $2 rm -f vendor.tar.bz2
+    $2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/vendor.tar.bz2
+    $2 tar -xjf vendor.tar.bz2
+    $2 rm -f vendor.tar.bz2
+
+    $2 rm -f help.tar.bz2
+    $2 curl -O# $ref_server/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/help.tar.bz2
+    $2 tar -xjf help.tar.bz2
+    $2 rm -f help.tar.bz2
+    
+    fi
 
 # Ensure correct ownership of instance just installed (added 19/7/22)
 # Worst case this won't set group if heurist group does not exist
