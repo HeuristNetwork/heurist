@@ -206,6 +206,10 @@ if ($mode > 1) {
                     return; // Exit if selectors are not found
                 }
 
+                // reset settings
+                $('[class*="repo-"]').hide(); // Hide all repository-specific sections
+                complete_list_repositories = {};
+
                 $repos.empty(); // Clear existing options
                 window.hWin.HEURIST4.ui.addoption($repos[0], '', 'select a repository...'); // Add default option
 
@@ -277,9 +281,25 @@ if ($mode > 1) {
                     window.hWin.HEURIST4.ui.initHSelect($accounts, false, {width: '200px', 'margin-left':'5px'}, {
                         onSelectMenu: () => { // Event handler for when an account is selected
                             let value = $accounts.val(); // Selected account ID
-                            // Show "setup keys" link if it's a test account (heuristic: ID doesn't contain '_')
-                            value != '' && value.indexOf('_') == -1 ? $('.setup-keys').show() : $('.setup-keys').hide();
+                            // Show note about test accounts (the pre-filled test accounts don't contain an '_')
+                            value != '' && value.indexOf('_') == -1 ? $('#test-key').show() : $('#test-key').hide();
                         }
+                    });
+                });
+
+                $('.setup-keys').show();
+                $('#manage-repo-keys').on('click', () => {
+                    window.hWin.HEURIST4.ui.showRecordActionDialog('repositoryConfig', {
+                        service_config: window.hWin.HAPI4.sysinfo['repository_config'],
+                        onClose: () => {
+                            initRepositorySelector();
+                        },
+                        classes:{
+                            "ui-dialog": "ui-heurist-design",
+                            "ui-dialog-titlebar": "ui-heurist-design"
+                        },
+                        title: 'Repository service configuration',
+                        path: 'widgets/admin/'
                     });
                 });
             }
@@ -485,7 +505,8 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                         Select an account
                         <select id='sel_accounts' name='repo_account'></select>
                         <span class="heurist-helper1 setup-keys" style="vertical-align: middle;display: none;">
-                            This key is for a test account, you can setup your own key at Design > External repositories
+                            <span id="test-key" style="font-weight: bold; display: none;">This is for a test account.</span>
+                            You can setup your own account keys at <span id="manage-repo-keys" style="color: blue; cursor: pointer; text-decoration: underline;">Design > External repositories</span>
                         </span>
                     </span>
                 </div>
