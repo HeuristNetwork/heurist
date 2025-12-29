@@ -4955,9 +4955,9 @@ $.widget( "heurist.editing_input", {
                 let sdiv = '<div class="child_delete_dlg">'
                 +'<div style="padding:15px 0">You are deleting a pointer to a child record, that is a record which is owned by/an integral part of the current record, as identified by a pointer back from the child to the current record.</div>'
                 //Actions:<br>
-                +'<div><label><input type="radio" value="1" name="delete_mode" style="outline:none"/>'
+                +'<div><label><input type="radio" value="1" name="delete_mode" checked="checked" style="outline:none"/>'
                             +'Delete connection between parent and child</label><br><br>'
-                        +'<label><input type="radio" value="2" name="delete_mode" checked="checked" style="outline:none"/>'
+                        +'<label><input type="radio" value="2" name="delete_mode" style="outline:none"/>'
                             +'Delete the child record completely</label></div>'
                 +'<div style="padding:15px 0">Warning: If you delete the connection between the parent and child, this will often render the child record useless as it may lack identifying information.</div></div>';
                 
@@ -4969,42 +4969,77 @@ $.widget( "heurist.editing_input", {
             let $dlg_pce = null;
             
             let btns = [
-                    {text:window.hWin.HR('Proceed'),
-                          click: function() { 
-                          
-                          let mode = popele.find('input[name="delete_mode"]:checked').val();     
-                          if(mode==2){
-                              //remove child record
-                              let child_rec_to_delete = that.newvalues[input_id];
-                              window.hWin.HAPI4.RecordMgr.remove({ids: child_rec_to_delete}, 
-                                function(response){
-                                    if(response.status == window.hWin.ResponseStatus.OK){
-                                        
-                                        let delcnt = response.data.deleted.length, msg = '';
-                                        if(delcnt>1){
-                                            msg = delcnt + ' records have been removed.';
-                                            if(response.data.bkmk_count>0 || response.data.rels_count>0){
-                                               msg = ' as well as '+
-                                                (response.data.bkmk_count>0?(response.data.bkmk_count+' bookmarks'):'')+' '+
-                                                (response.data.rels_count>0?(response.data.rels_count+' relationships'):'');
-                                            }
-                                        }else{
-                                            msg = 'Child record has been removed';
+                { text: window.hWin.HR('Proceed'), click: function(){ 
+
+                    let mode = popele.find('input[name="delete_mode"]:checked').val();     
+                    if(mode == 2){
+
+                        let $dlgConfirmDelete;
+                        let confirmMsg = `
+                        You are about to delete the child record.<br><br>
+                        <span><input type="checkbox"> Check this box if you are sure you want to do this</span>
+                        `;
+
+                        let confirmBtns = {};
+                        confirmBtns[window.hWin.HR('Delete child record')] = () => {
+
+                            $dlgConfirmDelete.dialog('close');
+                            $dlg_pce.dialog('close');
+
+                            // remove child record
+                            let child_rec_to_delete = that.newvalues[input_id];
+                            window.hWin.HAPI4.RecordMgr.remove({ids: child_rec_to_delete}, function(response){
+    
+                                if(response.status == window.hWin.ResponseStatus.OK){
+    
+                                    let delcnt = response.data.deleted.length, msg = '';
+    
+                                    if(delcnt > 1){
+    
+                                        msg = `${delcnt} records have been removed.`;
+    
+                                        if(response.data.bkmk_count > 0 || response.data.rels_count > 0){
+    
+                                            msg = ' as well as '+
+                                            (response.data.bkmk_count > 0 ? `${response.data.bkmk_count} bookmarks` : '') + ' ' +
+                                            (response.data.rels_count > 0 ? `${response.data.rels_count} relationships` : '');
                                         }
-                                        window.hWin.HEURIST4.msg.showMsgFlash(msg, 2500);
-                                        
-                                        that._removeInput( input_id );
+                                    }else{
+                                        msg = 'Child record has been removed';
                                     }
-                                });
-                          } else {
-                              that._removeInput( input_id );
-                          }
-                          
-                          $dlg_pce.dialog('close'); 
-                    }},
-                    {text:window.hWin.HR('Cancel'),
-                          click: function() { $dlg_pce.dialog('close'); }}
-            ];            
+                                    window.hWin.HEURIST4.msg.showMsgFlash(msg, 2500);
+                                    
+                                    that._removeInput( input_id );
+                                }
+                            });
+                        };
+                        confirmBtns[window.hWin.HR('Remove link without deleting the record')] = () => {
+                            that._removeInput(input_id);
+                            $dlgConfirmDelete.dialog('close');
+                            $dlg_pce.dialog('close');
+                        };
+                        confirmBtns[window.hWin.HR('Cancel')] = () => {
+                            $dlgConfirmDelete.dialog('close');
+                        };
+
+                        $dlgConfirmDelete = window.hWin.HEURIST4.msg.showMsgDlg(confirmMsg, confirmBtns,
+                            {title: 'Are you sure you want to delete the child record?'},
+                            {default_palette_class: 'ui-heurist-explore', dialogId: 'confirm-rec-deletion'});
+
+                        let $firstBtn = $dlgConfirmDelete.parent().find('.ui-dialog-buttonset button:first');
+                        window.hWin.HEURIST4.util.setDisabled($firstBtn, true);
+
+                        let $checkbox = $dlgConfirmDelete.find('input[type="checkbox"]');
+                        $checkbox.on('change', () => {
+                            window.hWin.HEURIST4.util.setDisabled($firstBtn, !$checkbox.prop('checked'));
+                        });
+                    }else{
+                        that._removeInput( input_id );
+                        $dlg_pce.dialog('close'); 
+                    }
+                }},
+                { text: window.hWin.HR('Cancel'), click: function(){ $dlg_pce.dialog('close'); } }
+            ];
             
             $dlg_pce = window.hWin.HEURIST4.msg.showElementAsDialog({
                 window:  window.hWin, //opener is top most heurist window
