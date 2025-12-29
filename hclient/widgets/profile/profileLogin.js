@@ -48,7 +48,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
     if(!dialog_id) dialog_id = 'heurist-login-dialog';
     
     login_dialog = $(parentwin.document['body']).find('#'+dialog_id);
-    
+
     function __onDialogClose($dlg) {
              
             let allFields = $dlg.find('input');       
@@ -78,6 +78,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             doSamlLogin(callback, parentwin, sel.val());
         }
 */
+        toggleLoginFormControls(login_dialog, false);
         let $dlg = login_dialog;
         let sel = $dlg.find('#saml_sp');
         if(sel.val()){
@@ -118,6 +119,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
             callback:function(user_id){
     console.log('callback on close saml dialog', user_id);            
 
+                toggleLoginFormControls(login_dialog, true);
                 if(user_id>0){
                     doAuthentication({username: user_id, password:null, saml_entity:sp_entity}, login_dialog);
                 }else{
@@ -242,7 +244,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                     $dlg.find('#login_guest').css({'display': 'block', 'margin-left':'133px'});
                 }
 
-                $dlg.find('#btn_guest_auth').button().on('click',()=>doRegister( parentwin, true ));
+                $dlg.find('#btn_guest_auth').button().on('click',()=>doAccountRegister( parentwin, true ));
             }
                 
             $dlg.find('#span-database').text(window.hWin.HAPI4.database);
@@ -285,7 +287,6 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
 
             function __doLogin(){
 
-                
                 if($dlg.find('#saml_sp').val()!=0){
                         __onSamlLogin();
                         return;
@@ -304,11 +305,11 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 let mode = $dlg.attr('data-mode');
 
                 if(mode == 1){
-                    setupResetPin($dlg);
+                    setupAccountResetPin($dlg);
                 }else if(mode == 2){
-                    validateResetPin($dlg);
+                    validateAccountResetPin($dlg);
                 }else if(mode == 3){
-                    resetPassword($dlg);
+                    resetAccountPassword($dlg);
                 }else{
 
                     let username = $dlg.find('#username');
@@ -344,26 +345,26 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
 
             $dlg.find("#link_restore").on("click", function(){
                 if(saml_login_only){ return; }
-                updateStatus($dlg, 1, '');
+                updateLoginPopupStatus($dlg, 1, '');
             });
 
             $dlg.find("#link_resend").on("click", function(){
 
-                updateStatus($dlg, 2, '');
-                setupResetPin($dlg);
+                updateLoginPopupStatus($dlg, 2, '');
+                setupAccountResetPin($dlg);
             });
 
             let arr_buttons = [];
             let reg_status = window.hWin.HAPI4.sysinfo.registration_allowed;
             if(2 & reg_status){
                 arr_buttons.push({text:window.hWin.HR('Import profile from another DB'), click: function(){
-                    doImport();   
+                    doAccountImport();   
                 }, id:'btn_import'});
             }
             arr_buttons.push({html:('<b>'+window.hWin.HR('Login')+'</b>'), click: __doLogin, id:'btn_login2'});
             if(1 & reg_status){
                 arr_buttons.push({text:window.hWin.HR('Register'), click: function(){
-                    doRegister( parentwin );   
+                    doAccountRegister( parentwin );   
                 }, id:'btn_register'});
             }
             arr_buttons.push({text:window.hWin.HR('Cancel'), click: function() {    //isforsed?'Change database':
@@ -372,7 +373,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 if(mode == 0){
                     $dlg.dialog( "close" );
                 }else{
-                    updateStatus($dlg, 0, '');
+                    updateLoginPopupStatus($dlg, 0, '');
                 }
             }, id:'btn_close'});
 
@@ -387,7 +388,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                 title: window.hWin.HR('Heurist Login'),
                 buttons: arr_buttons,
                 open: function() {
-                    updateStatus($dlg, 0, '');
+                    updateLoginPopupStatus($dlg, 0, '');
                 }
                 //position:{ my: "center center", at: "center center", of: $(top.document) }
             });
@@ -398,7 +399,7 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
 
             login_dialog.dialog('option','close', function(){__onDialogClose($dlg)});
 
-            updateStatus($dlg, saml_login_only ? -1 : 0, '');
+            updateLoginPopupStatus($dlg, saml_login_only ? -1 : 0, '');
 
         });//load html
     }else if(login_dialog.dialog('instance')){
@@ -410,16 +411,43 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
 }
 
 /**
- * @function updateStatus
+ * @function toggleLoginFormControls
+ * @description Toggles the form controls status from enabled to disabled
+ * @param {jQuery} $dlg - jQuery object of the login dialog.
+ * @param {bool} enableControls - whether to enable or disable the controls
+ * @param {string} [message=''] - a message to be flashed on screen 
+ * @returns {void}
+ */
+function toggleLoginFormControls($dlg, enableControls, message = ''){
+
+    if(!$dlg || $dlg.length <= 0){
+        return;
+    }
+
+    let formControls = $dlg.find('input');
+    let formButtons = $dlg.parent().find('button');
+    let smalSelect = $dlg.find('select');
+
+    window.hWin.HEURIST4.util.setDisabled(formControls, !enableControls);
+    window.hWin.HEURIST4.util.setDisabled(formButtons, !enableControls);
+    window.hWin.HEURIST4.util.setDisabled(smalSelect, !enableControls);
+
+    if(!window.hWin.HEURIST4.util.isempty(message)){
+        window.hWin.HEURIST4.msg.showMsgFlash(message, 3000);
+    }
+}
+
+/**
+ * @function updateLoginPopupStatus
  * @description Updates the status message and display mode of the login dialog.
  * @param {jQuery} $dlg - jQuery object of the login dialog.
  * @param {(boolean|number)} [new_mode=false] - The new display mode for the dialog.
- *                                              See `changeDisplay` for mode details.
+ *                                              See `changeLoginPopupDisplay` for mode details.
  *                                              If false, only the error message is updated.
  * @param {string} [error=''] - The error message to display. If empty, clears the error message.
  * @returns {void}
  */
-function updateStatus($dlg, new_mode = false, error = ''){
+function updateLoginPopupStatus($dlg, new_mode = false, error = ''){
 
     let $err_msg = $dlg.find('.messages');
     if(window.hWin.HEURIST4.util.isempty(error)){
@@ -443,7 +471,7 @@ function updateStatus($dlg, new_mode = false, error = ''){
         $dlg.find('#dup_new_password').val('');
     }
 
-    changeDisplay(new_mode, $dlg);
+    changeLoginPopupDisplay(new_mode, $dlg);
     return;
 }
 
@@ -458,7 +486,7 @@ function updateStatus($dlg, new_mode = false, error = ''){
  * @param {jQuery} $dlg - jQuery object of the login dialog.
  * @returns {void}
  */
-function changeDisplay(mode, $dlg){
+function changeLoginPopupDisplay(mode, $dlg){
 
     if(isNaN(Number(mode))){
         return;
@@ -536,24 +564,24 @@ function changeDisplay(mode, $dlg){
 }
 
 /**
- * @function setupResetPin
+ * @function setupAccountResetPin
  * @description Requests the creation of a password reset pin.
  *              Validates username and captcha input.
  *              Calls `HAPI4.SystemMgr.reset_password` to request the pin.
  * @param {jQuery} $dlg - jQuery object of the login dialog.
  * @returns {void}
  */
-function setupResetPin($dlg){
+function setupAccountResetPin($dlg){
 
     let username = $dlg.find('#reset_username');
     let captcha_code = $dlg.find('#captcha_ans').val();
 
     if(!window.hWin.HEURIST4.msg.checkLength( username, "username", null, 1, 0 )){
-        updateStatus($dlg, 1, 'Please enter a username or email');
+        updateLoginPopupStatus($dlg, 1, 'Please enter a username or email');
         return;
     }
     if(window.hWin.HEURIST4.util.isempty(captcha_code)){
-        updateStatus($dlg, 1, 'Please complete the captcha');
+        updateLoginPopupStatus($dlg, 1, 'Please complete the captcha');
         return;
     }
 
@@ -569,7 +597,7 @@ function setupResetPin($dlg){
                 window.hWin.HEURIST4.msg.showMsgFlash(response.data, 3000);
             }
 
-            updateStatus($dlg, 2, '');
+            updateLoginPopupStatus($dlg, 2, '');
             return;
         }else{
             window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -578,13 +606,13 @@ function setupResetPin($dlg){
 }
 
 /**
- * @function validateResetPin
+ * @function validateAccountResetPin
  * @description Validates the entered password reset pin.
  *              Calls `HAPI4.SystemMgr.reset_password` to validate the pin.
  * @param {jQuery} $dlg - jQuery object of the login dialog.
  * @returns {void}
  */
-function validateResetPin($dlg){
+function validateAccountResetPin($dlg){
 
     let username = $dlg.find('#reset_username').val();
     let pin = $dlg.find('#reset_pin').val();
@@ -602,7 +630,7 @@ function validateResetPin($dlg){
                 return;
             }
 
-            updateStatus($dlg, 3, '');
+            updateLoginPopupStatus($dlg, 3, '');
             return;
         }else{
             window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -611,14 +639,14 @@ function validateResetPin($dlg){
 }
 
 /**
- * @function resetPassword
+ * @function resetAccountPassword
  * @description Resets the user's password using the validated pin.
  *              Validates that the new password and its confirmation match.
  *              Calls `HAPI4.SystemMgr.reset_password` to set the new password.
  * @param {jQuery} $dlg - jQuery object of the login dialog.
  * @returns {void}
  */
-function resetPassword($dlg){
+function resetAccountPassword($dlg){
 
     let username = $dlg.find('#reset_username').val();
     let pin = $dlg.find('#reset_pin').val();
@@ -628,7 +656,7 @@ function resetPassword($dlg){
 
     if(pwd !== dup_pwd){
 
-        updateStatus($dlg, 3, 'Both passwords must match');
+        updateLoginPopupStatus($dlg, 3, 'Both passwords must match');
         return;
     }
 
@@ -640,7 +668,7 @@ function resetPassword($dlg){
 
         if(response.status == window.hWin.ResponseStatus.OK){
 
-            updateStatus($dlg, 0, '');
+            updateLoginPopupStatus($dlg, 0, '');
 
             window.hWin.HEURIST4.msg.showMsgDlg('Your password has been update.<br>Please login using your new password.');
 
@@ -677,14 +705,14 @@ function setupCaptcha($dlg){
 }
 
 /**
- * @function doRegister
+ * @function doAccountRegister
  * @description Initiates the user registration process by showing the profile edit dialog.
  *              Loads `profileEdit.js` if not already loaded.
  * @param {?Window} [parentwin=window.hWin] - The parent window object.
  * @param {boolean} [is_guest=false] - True if registering a guest user.
  * @returns {void}
  */
-function doRegister( parentwin, is_guest=false ){
+function doAccountRegister( parentwin, is_guest=false ){
 
     let is_secondary_parent = false;
     if(!parentwin){
@@ -707,7 +735,7 @@ function doRegister( parentwin, is_guest=false ){
     }else{
         $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profileEdit.js', function() {
             if(window.hWin.HEURIST4.util.isFunction($doc.profileEdit)){
-                doRegister( parentwin, is_guest );
+                doAccountRegister( parentwin, is_guest );
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr({
                     message: 'Widget "Profile edit" cannot be loaded!',
@@ -721,13 +749,13 @@ function doRegister( parentwin, is_guest=false ){
 }
 
 /**
- * @function doImport
+ * @function doAccountImport
  * @description Handles the process of importing a user profile from another database.
  *              Guides the user through selecting a database and then an account to import.
  *              Requires password confirmation for the selected account.
  * @returns {void}
  */
-function doImport(){
+function doAccountImport(){
 
     let reg_status = window.hWin.HAPI4.sysinfo.registration_allowed;
     if(!(2 & reg_status)){
@@ -888,9 +916,12 @@ function doAuthentication(login_data, login_dialog)
         login_data['is_guest'] = 1;
     }
 
+    toggleLoginFormControls(login_dialog, false, 'Logging in');
+
     //get hapi and perform login
     window.hWin.HAPI4.SystemMgr.login(login_data,
         function(response){
+            toggleLoginFormControls(login_dialog, true);
             if(response.status == window.hWin.ResponseStatus.OK){
 
                 onAuthentication(response);
@@ -908,8 +939,8 @@ function doAuthentication(login_data, login_dialog)
                
             }else if(response.status == window.hWin.ResponseStatus.REQUEST_DENIED){
                 if(login_dialog){
-                    updateStatus(login_dialog, false, response.message);
-                    setTimeout(function(){ updateStatus(login_dialog); }, 2000);
+                    updateLoginPopupStatus(login_dialog, false, response.message);
+                    setTimeout(function(){ updateLoginPopupStatus(login_dialog); }, 2000);
                 }
             }else if(response.status == window.hWin.ResponseStatus.ACTION_BLOCKED && response.message == 'Association members only'){
 
@@ -984,6 +1015,7 @@ function onAuthentication(response){
  */
 function doSamlLogin(callback, parentwin, sp_entity, login_dialog){
     
+    toggleLoginFormControls(login_dialog, false);
     //loads saml dialog into iframe
     window.hWin.HEURIST4.msg.showDialog(
     window.hWin.HAPI4.baseURL+'hserv/controller/saml.php?a=login&sp='+sp_entity+'&db='+window.hWin.HAPI4.database,
@@ -1008,6 +1040,7 @@ function doSamlLogin(callback, parentwin, sp_entity, login_dialog){
         callback:function(user_id){
 console.log('callback on close saml dialog', user_id);            
 
+            toggleLoginFormControls(login_dialog, true);
             if(user_id>0){
                 doAuthentication({username: user_id, password:null, saml_entity:sp_entity}, login_dialog);
             }else{

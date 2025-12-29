@@ -2212,6 +2212,9 @@ div.coverall-div {
     background-repeat: no-repeat;
     background-position: center;     
     cursor:wait;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
 }
     
 /* classes taken from expernation design*/
