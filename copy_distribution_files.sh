@@ -28,7 +28,7 @@
 # See the License for the specific language governing permissions and limitations under the License.
 
 if [ -z $1 ]
-   then echo "Usage:   sudo ./copy_distribution_files.sh. h6.x.x ( insert appropriate sub-versions or alpha or beta in .x.x)"
+   then echo "Usage:   sudo ./copy_distribution_files.sh. h6.x.x codeonly ( codeonly is optional, insert appropriate sub-versions or alpha or beta in .x.x)"
    exit
    fi
 
@@ -122,20 +122,25 @@ ls -alt ../heurist-build
 # Perhaps to allow it to be downloaded on its own without runnign into php execution barrier
 zip -j ../DISTRIBUTION/verifyInstallation.zip admin/verification/verifyInstallation.php
 
-echo
-echo creating support library tarballs in /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5, vendor, and help
 
-# GOTCHA: If support directory not set up you get an error trying to tar into it
-mkdir /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT
-cd /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT
+if [ "$2" != "codeonly" ] && [ "$3" != "codeonly" ]; then
+
+    echo
+    echo creating support library tarballs in /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT/external_h5, vendor, and help
+
+    # GOTCHA: If support directory not set up you get an error trying to tar into it
+    mkdir /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT
+    cd /var/www/html/HEURIST/DISTRIBUTION/HEURIST_SUPPORT
 
 
-tar -cjf ./external_h5.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ external_h5/
+    tar -cjf ./external_h5.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ external_h5/
 
-tar -cjf ./vendor.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ vendor/
+    tar -cjf ./vendor.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ vendor/
 
-tar -cjf ./help.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ help/
+    tar -cjf ./help.tar.bz2 -C /var/www/html/HEURIST/HEURIST_SUPPORT/ help/
 
+    fi
+    
 cp /var/www/html/HEURIST/heurist-build/$1.tar.bz2  /var/www/html/HEURIST/DISTRIBUTION
 
 chown -R apache:heurist /var/www/html/HEURIST/DISTRIBUTION

@@ -67,13 +67,18 @@ foreach($databases as $database){
 
         $rec_count = mysql__select_value($mysqli, "SELECT COUNT(rec_ID) FROM Records WHERE rec_OwnerUGrpID = ?", ['i', $usr_ID]);
         $is_admin = mysql__select_value($mysqli, "SELECT ugl_ID FROM sysUsrGrpLinks WHERE ugl_GroupID = 1 AND ugl_Role = 'admin' AND ugl_UserID = ?", ['i', $usr_ID]);
+        $last_login = mysql__select_value($mysqli, "SELECT ugr_LastLoginTime FROM sysUGrps WHERE ugr_ID = ?", ['i', $usr_ID]);
+        $last_login = empty($last_login) ? 'Never' : date_format(date_create($last_login), 'Y-m-d');
+        $user_fullname = mysql__select_value($mysqli, "SELECT CONCAT(ugr_FirstName, ' ', ugr_LastName) FROM sysUGrps WHERE ugr_ID = ?", ['i', $usr_ID]);
 
         $user_list[$usr_email][] = [
             $database,
             $usr_ID,
             intval($rec_count),
             $usr_ID == 2 ? 1 : 0,
-            intval($is_admin) > 0 ? 1 : 0
+            intval($is_admin) > 0 ? 1 : 0,
+            $last_login,
+            $user_fullname
         ];
     }
 }
@@ -97,6 +102,25 @@ ksort($user_list, SORT_FLAG_CASE);
 
         <script type="text/javascript">
 
+            function filterResults(){
+                let showOwners = document.querySelector('input[name="chkbx_owner"]').checked;
+                let showAdmins = document.querySelector('input[name="chkbx_admin"]').checked;
+                let neverLoggedInOnly = document.querySelector('input[name="chkbx_lastlogin"]').checked;
+
+                document.querySelectorAll('div.user-section').forEach((element) => {
+
+                    let hideAsOwner = !showOwners && element.querySelector(`[data-owner="1"]`);
+                    let hideAsAdmin = !showAdmins && element.querySelector(`[data-admin="1"]`);
+                    let hideLoggedIn = neverLoggedInOnly && !element.querySelector('[data-lastlogin="Never"]');
+
+                    if(hideAsOwner || hideAsAdmin || hideLoggedIn){
+                        element.display.style = 'none';
+                    }else{
+                        element.display.style = 'block';
+                    }
+                });
+            }
+
             document.addEventListener('DOMContentLoaded', () => {
 
                 document.querySelector('#btn_Search').addEventListener('click', () => {
@@ -116,21 +140,12 @@ ksort($user_list, SORT_FLAG_CASE);
                     document.querySelectorAll('input[name="txt_email"]').value = '';
                     document.querySelector('input[name="chkbx_owner"]').checked = true;
                     document.querySelector('input[name="chkbx_admin"]').checked = true;
+                    document.querySelector('input[name="chkbx_lastlogin"]').checked = false;
                 });
 
-                document.querySelector('input[name="chkbx_owner"], input[name="chkbx_admin"]').addEventListener('change', () => {
-
-                    let show_owners = document.querySelector('input[name="chkbx_owner"]').checked;
-                    let show_admins = document.querySelector('input[name="chkbx_admin"]').checked;
-
-                    document.querySelectorAll('div.user-section').forEach((element) => {
-                        if((!show_owners && element.querySelector(`[data-owner="1"]`)) || (!show_admins && element.querySelector(`[data-admin="1"]`))){
-                            element.display.style = 'none';
-                        }else{
-                            element.display.style = 'block';
-                        }
-                    });
-                });
+                document.querySelector('input[name="chkbx_owner"]').addEventListener('change', filterResults);
+                document.querySelector('input[name="chkbx_admin"]').addEventListener('change', filterResults);
+                document.querySelector('input[name="chkbx_lastlogin"]').addEventListener('change', filterResults);
             });
         </script>
 
@@ -138,11 +153,20 @@ ksort($user_list, SORT_FLAG_CASE);
 
             .user-section{
                 border-top: 1px black solid;
-                margin-top: 10px;
+                margin-top: 1em;
             }
 
             h3{
-                margin-top: 10px;
+                margin: 1em 0px 0px;
+            }
+
+            h5{
+                margin: 0.5em 0px 1.5em;
+                display: inline-block;
+            }
+
+            span{
+                padding-left: 1em;
             }
 
             table{
@@ -151,6 +175,10 @@ ksort($user_list, SORT_FLAG_CASE);
 
             td{
                 text-align: center;
+            }
+
+            input[type="checkbox"]{
+                vertical-align: -0.1em;
             }
 
         </style>
@@ -164,9 +192,16 @@ ksort($user_list, SORT_FLAG_CASE);
             <label>Email: <input type="text" name="txt_email" size="20"></label>
             <button id="btn_Search" style="margin-right: 15px;">Search</button>
 
-            Show: 
-            <label><input type="checkbox" name="chkbx_owner" checked="checked"> Owners</label>
-            <label><input type="checkbox" name="chkbx_admin" checked="checked"> Administrators</label>
+            <span>
+                Show: 
+                <label><input type="checkbox" name="chkbx_owner" checked="checked"> Owners</label>
+                <label><input type="checkbox" name="chkbx_admin" checked="checked"> Administrators</label>
+            </span>
+
+            <span>
+                Other:
+                <label><input type="checkbox" name="chkbx_lastlogin"> Never logged in</label>
+            </span>
 
             <button id="btn_Reset"style="margin-left: 15px;">Reset</button>
         </div>
@@ -176,6 +211,7 @@ ksort($user_list, SORT_FLAG_CASE);
         foreach($user_list as $email => $user_accounts){
 
             $list_items = '';
+            $names = [];
 
             foreach($user_accounts as $details){
 
@@ -183,18 +219,24 @@ ksort($user_list, SORT_FLAG_CASE);
                 $admin = $details[4] == 1 ? 'Yes' : 'No';
                 $url = HEURIST_BASE_URL . "?db={$details[0]}";
                 $recs_url = HEURIST_BASE_URL . "?db={$details[0]}&q=owner:{$details[1]}";
+                if(!in_array($details[6], $names)){
+                    $names[] = $details[6];
+                }
 
                 $list_items .= '<tr class="user-row">'
                     . "<td><a href='{$url}' target='_blank' rel='noopener'>Database link</a></td><td>{$details[0]}</td>"
                     . "<td data-reccount='{$details[2]}' title='Click to search for records'><a href='{$recs_url}' target='_blank' rel='noopener'>{$details[2]}</a></td>"
                     . "<td data-owner='{$details[3]}'>{$owner}</td><td data-admin='{$details[4]}'>{$admin}</td>"
+                    . "<td data-lastlogin='{$details[5]}'>{$details[5]}</td>"
                 . '</tr>';
             }
 
+            $names = implode(', ', $names);
             print "<div data-idx='{$idx}' class='user-section'>"
                     . "<h3>{$email}</h3>"
+                    . "<span>Name(s): <h5>{$names}</h5></span>"
                     . '<table role="presentation">'
-                        . '<thead><tr><th></th><th>Database</th><th>Owned records</th><th>Is owner?</th><th>Is admin?</th></tr></thead>'
+                        . '<thead><tr><th></th><th>Database</th><th>Owned records</th><th>Is owner?</th><th>Is admin?</th><th>Last login (Y-m-d)</th></tr></thead>'
                         . "<tbody>{$list_items}</tbody>"
                     . '</table>'
                 . '</div>';
