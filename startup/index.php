@@ -411,9 +411,16 @@ if (!defined('PDIR')){
                 delete allDatabases.server_names;
 
                 if(Object.keys(allDatabases).length > 0 && show_list){
+
                     _showDatabaseList(); //show list at once
+
                     $('#btnNewDatabase').button().show();
                     $('#showDatabaseList').on({click: _showDatabaseList}); // goto step8
+
+                    $('.button-registration').button().on({click:_showRegistration});//goto step2
+
+                    $('#btnCreateDatabase').button().on({click: _doCreateDatabase});//on step 3
+                    $('#btnGetStarted').button().on({click: _showGetStarted });//goto step6 - getting started
                 }else{
                     _initControls(); //show new database
                 }
@@ -494,7 +501,7 @@ if (!defined('PDIR')){
             $('#showDatabaseList').on({click: _showDatabaseList});//goto step8
 
             $(document).on({click: function(event){
-               if($(event.target).parents('.list_div').length==0) { $('.list_div').hide();};
+               if($(event.target).parents('.list_div').length == 0){ $('.list_div').hide(); };
             }});
 
             $('.list_div').on({
