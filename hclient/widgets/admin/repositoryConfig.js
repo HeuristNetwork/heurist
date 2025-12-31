@@ -61,7 +61,7 @@ $.widget( "heurist.repositoryConfig", $.heurist.baseConfig, {
             return;
         }
 
-        this.getConfigurations(this._super());
+        this.getConfigurations(this._super);
     },
 
     /**
