@@ -916,7 +916,7 @@ function doAuthentication(login_data, login_dialog)
         login_data['is_guest'] = 1;
     }
 
-    toggleLoginFormControls(login_dialog, false, 'Logging in');
+    toggleLoginFormControls(login_dialog, false, 'Attempting log in');
 
     //get hapi and perform login
     window.hWin.HAPI4.SystemMgr.login(login_data,

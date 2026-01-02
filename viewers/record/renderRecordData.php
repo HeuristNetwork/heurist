@@ -2728,11 +2728,11 @@ function print_linked_details($bib, $link_cnt)
         print '<div class="detailRow fieldRow" style="'.($is_map_popup?CSS_HIDDEN:'').'">';//FONT_SIZE && $link_cnt>2 linkRow
         $link_cnt++;
 
-            print '<div style="display:table-cell;width:28px;height:21px;text-align: right;padding-right:4px">'
-                .composeRecTypeIcon($row['rec_RecTypeID']).DIV_E;
+        print '<div style="display: table-cell;width: 28px;max-width: 28px;height: 21px;text-align: right;padding-right: 4px;">'
+            .composeRecTypeIcon($row['rec_RecTypeID']).DIV_E;
 
-            print '<div style="display: table-cell;vertical-align:top;'
-            .($is_map_popup?'max-width:250px;':'').'" class="truncate">'
+        print '<div style="display: table-cell; vertical-align: top;'
+            .($is_map_popup?'max-width:250px;" class="truncate">':'">')
             .composeRecLink($row['rec_ID'], $row['rec_Title']).DIV_E;
 
         print DIV_E;
