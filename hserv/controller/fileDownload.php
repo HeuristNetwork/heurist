@@ -261,6 +261,22 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
                 }
             }
             elseif($external_url){
+
+                if(!empty($fileParams) && array_key_exists('repository', $fileParams)){ // add API key to header for request, if necessary
+
+                    $credID = $fileParams['repository'];
+                    $creds = user_getRepositoryCredentials2($system, $credID, true);
+
+                    if($creds){
+
+                        $apiKey = !empty($creds[$credID]['params']['readApiKey']) ? $creds[$credID]['params']['readApiKey'] : $creds[$credID]['params']['writeApiKey'];
+
+                        if(strpos($creds[$credID]['service'], 'nakala') !== false){
+                            header("X-API-KEY: {$apiKey}");
+                        }
+                    }
+                }
+
                 if(@$req_params['mode']=='url'){
 
                     //if it does not start with http - this is relative path
