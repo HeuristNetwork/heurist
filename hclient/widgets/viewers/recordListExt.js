@@ -710,7 +710,7 @@ $.widget( "heurist.recordListExt", {
             || window.hWin.HEURIST4.util.isempty(this.options.url)){
             return;  
         }else{
-            this.options.empty_remark = window.hWin.HR('emptyremark').replace('__REPORTNAME__', templateName);
+            this.options.empty_remark = window.hWin.HR('resultListExt_empty_remark').replace('__REPORTNAME__', templateName);
         }
 
         let empty_results = this.options.recordset==null || this.options.recordset.length()==0;
