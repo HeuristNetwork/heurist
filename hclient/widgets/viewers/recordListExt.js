@@ -159,6 +159,8 @@ $.widget( "heurist.recordListExt", {
         
         if(this.options.empty_remark=='def'){
             this.options.empty_remark = window.hWin.HR('resultListExt_empty_remark');
+            let templateName = window.hWin.HEURIST4.util.getUrlParameter('template', this.options.url) ?? 'Record Viewer';
+            this.options.empty_remark = templateName ? this.options.empty_remark.replace('__REPORTNAME__', templateName) : this.options.empty_remark;
         }
         if(this.options.placeholder_text=='def'){
             this.options.placeholder_text = window.hWin.HR('resultListExt_placeholder_text');
@@ -700,13 +702,15 @@ $.widget( "heurist.recordListExt", {
 
         if(this.placeholder_ele != null){
             this.placeholder_ele.hide();
-           
         }
 
         //refesh if element is visible only - otherwise it costs much resources
+        let templateName = window.hWin.HEURIST4.util.getUrlParameter('template', this.options.url) ?? 'Record Viewer';
         if(  (!this.element.is(':visible') && !this._is_publication) 
             || window.hWin.HEURIST4.util.isempty(this.options.url)){
             return;  
+        }else{
+            this.options.empty_remark = window.hWin.HR('emptyremark').replace('__REPORTNAME__', templateName);
         }
 
         let empty_results = this.options.recordset==null || this.options.recordset.length()==0;
