@@ -242,8 +242,10 @@ $requestUri:
         $action = filter_var($requestUri[2]);
         $redirect = '';
 
-        if($database=='MBH'){ //special case
+        if($database=='MBH'){ //special case for MBH project, Elodie Attia, U. Aix-Maseeille on Huma-Num
             $database='MBH_Manuscripta_Bibliae_Hebraicae';
+        }elseif ($database=='BEnum'){ //special case for Association des Études Grecques, Revue des études grecques on Huma-Num
+            $database='BE_Bulletin_Epigraphique';
         }elseif(in_array($database, $allowedVersions)){
             redirectURL2('/'.rawurlencode($database).'/index.php');
             exit;
