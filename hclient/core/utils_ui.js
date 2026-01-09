@@ -3373,9 +3373,11 @@ window.hWin.HEURIST4.ui = {
             img.attr('title', item.title);
             
             imgs.push(img);
+            
+            img.attr('src',item.img);
 
             if(idx>0){ //hide all except first one
-                img.hide().attr('src',item.img);
+                img.hide();
             }else{
                 title_ele.html(item.title);    
                 // $.load(url, params, callback)
