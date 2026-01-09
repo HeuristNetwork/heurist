@@ -1853,7 +1853,18 @@ function print_public_details($bib) {
                     }
                 }
 
-                //replace link <a href="[numeric]"> to record view links
+                
+                // replace href="[numeric]" or href="[numeric]/something.tpl" to record view links
+                $bd['val'] = preg_replace_callback(
+                    '/\bhref=(["\'])(\d+(?:\/[^"\']+\.tpl)?)\1/i',
+                    function ($matches) use ($system) {
+                        return 'onclick="return (typeof link_open === \'function\')?link_open(this, false):true;" href="'
+                            . $system->recordLink($matches[2]) . '"';
+                    },
+                    $bd['val']
+                );
+                
+                /* OLD
                 $bd['val'] = preg_replace_callback('/href=["|\']?(\d+\/.+\.tpl|\d+)["|\']?/',
                         function($matches){
                             global $system;
@@ -1862,7 +1873,7 @@ function print_public_details($bib) {
                                     .$system->recordLink($matches[1]).'"';
                         },
                         $bd['val']);
-
+                */
 
             }elseif($bd['dty_Type'] == 'resource') {
 
