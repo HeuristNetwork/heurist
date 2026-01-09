@@ -890,6 +890,11 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                 $rec_fields = json_decode($rec_fields, true);
             }
 
+            $fileParams = null;
+            if(array_key_exists('repository', $this->data)){
+                $fileParams = ['ulf_Parameters' => "{\"repository\":\"{$this->data['repository']}\"}"];
+            }
+
             if(!empty($rec_fields)){
 
                 $results = array();
@@ -909,7 +914,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                                 $file_id = mysql__select_value($mysqli, $query);
 
                                 if(!$file_id){ // new external file to save
-                                    $file_id = $this->registerURL($url);
+                                    $file_id = $this->registerURL($url, false, 0, $fileParams);
                                 }
 
                                 if($file_id > 0){ // retrieve file Obfuscated ID
@@ -940,7 +945,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         $file_id = mysql__select_value($mysqli, $query);
 
                         if(!$file_id){ // new external file to save
-                            $file_id = $this->registerURL($urls);
+                            $file_id = $this->registerURL($urls, false, 0, $fileParams);
                         }
 
                         if($file_id > 0){ // retrieve file Obfuscated ID

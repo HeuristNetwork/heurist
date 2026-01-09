@@ -2454,30 +2454,32 @@ window.hWin.HEURIST4.dbs = {
 
     /**
      * Retrieves the label for a given term ID, optionally translated into a specified language.
-     * If the language is not provided, or is 'ENG'/'ALL', or if no translation exists,
+     * If the language is 'def'/'all', or if no translation exists,
      * the term's default `trm_Label` is returned.
      *
      * @function trm_getLabel
      * @memberof HEURIST4.dbs
      * @param {number} term_id - The ID of the term.
-     * @param {string} [language=null] - The 3-letter language code (e.g., 'FRA') for the desired translation.
+     * @param {string} [language=''] - The 2-letter or 3-letter language code (e.g., 'FRA') for the desired translation.
      * @returns {string} The (translated) label of the term, or its default label if no translation is found or language is not specified. Returns `trm_Label` from `$Db.trm` as fallback.
      */
-    trm_getLabel: function(term_id, language = null){
+    trm_getLabel: function(term_id, language = ''){
 
+        language = typeof language === 'string' ? language.toLowerCase() : '';
 
-        if(!window.hWin.HEURIST4.util.isempty(language)){
-            language = window.hWin.HAPI4.getLangCode3(language);    
-            if(language!='ENG' && language!='ALL'){
-                let translations = window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation');
+        if(language !== 'def' && language !== 'all'){
 
-                if(translations){   
-                    let rec = translations.getSubSetByRequest({trn_LanguageCode: language, 
-                        trn_Source: 'trm_Label', 
-                        trn_Code: term_id}).getFirstRecord();
-                    if(rec && Object.keys(rec).length > 0){
-                        return translations.fld(rec, 'trn_Translation');
-                    }
+            language = window.hWin.HAPI4.getLangCode3(language);
+
+            let translations = window.hWin.HAPI4.EntityMgr.getEntityData2('trm_Translation');
+
+            if(translations){
+
+                let rec = translations.getSubSetByRequest({trn_LanguageCode: language,
+                    trn_Source: 'trm_Label',
+                    trn_Code: term_id}).getFirstRecord();
+                if(rec && Object.keys(rec).length > 0){
+                    return translations.fld(rec, 'trn_Translation');
                 }
             }
         }

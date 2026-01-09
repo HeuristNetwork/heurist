@@ -3040,13 +3040,17 @@ function isMonthSpan(start, end){
     let endDate = new TDate(end);
 
     let startDay = Number.parseInt(startDate.getDay());
-    if(startDay !== 1){
+    let startMonth = Number.parseInt(startDate.getMonth());
+    let startYear = Number.parseInt(startDate.getYear());
+    let endDay = Number.parseInt(endDate.getDay());
+    let endMonth = Number.parseInt(endDate.getMonth());
+    let endYear = Number.parseInt(endDate.getYear());
+
+    if(startYear !== endYear || startDay !== 1 || startMonth !== endMonth){
         return false;
     }
 
-    let endDay = Number.parseInt(endDate.getDay());
-
-    return TDate.getDaysInMonth(endDate.getYear(), endDate.getMonth()) === endDay;
+    return TDate.getDaysInMonth(endYear, endMonth) === endDay;
 }
 
 /**

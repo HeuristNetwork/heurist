@@ -90,6 +90,13 @@ if($is_own_domain){
     if(!in_array($database_name_from_domain, $requestUri)){
         array_unshift($requestUri, $database_name_from_domain); //add to beginning of array
     }
+}elseif($_SERVER["SERVER_NAME"]=='heuristnetwork.org'){
+    if(count($requestUri)===0){
+        $requestUri[] = 'web';
+    }
+    if(!in_array('Heurist_Contacts', $requestUri)){
+        array_unshift($requestUri, 'Heurist_Contacts'); //add to beginning of array
+    }
 }
 
 // --------------- INDEX or STARTUP

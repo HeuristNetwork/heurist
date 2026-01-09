@@ -1570,7 +1570,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                                 ele.editing_input('getInputs')[0].trigger('blur');
                             }*/
 
-                            that._afterExternalUpload(response.data);
+                            that._afterExternalUpload(response.data, account);
                             $dlg.dialog('close');
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -1694,7 +1694,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
     //
     // Register new external file
     //
-    _afterExternalUpload: function(external_url){
+    _afterExternalUpload: function(external_url, serviceID = null){
 
         let that = this;
 
@@ -1703,11 +1703,15 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         }
 
         let request = {
-            'a': 'batch',
-            'entity': 'recUploadedFiles',
-            'request_id': window.hWin.HEURIST4.util.random(),
-            'regExternalFiles': JSON.stringify({0: [external_url]})
+            a: 'batch',
+            entity: 'recUploadedFiles',
+            request_id: window.hWin.HEURIST4.util.random(),
+            regExternalFiles: JSON.stringify({0: [external_url]})
         };
+
+        if(!window.hWin.HEURIST4.util.isempty(serviceID)){
+            request['repository'] = serviceID;
+        }
 
         window.hWin.HAPI4.EntityMgr.doRequest(request, function(response){
 

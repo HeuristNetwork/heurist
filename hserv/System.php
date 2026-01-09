@@ -69,7 +69,7 @@ class System {
      * The short name of the database, without any prefix.
      * @var string|null
      */
-    private $dbnameEnv = null;
+    private $dbname = null;
 
     /**
      * An array to store error messages. Each error is an array with keys like 'status', 'message', 'sysmsg', 'error_title'.

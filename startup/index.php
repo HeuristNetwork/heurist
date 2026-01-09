@@ -411,9 +411,16 @@ if (!defined('PDIR')){
                 delete allDatabases.server_names;
 
                 if(Object.keys(allDatabases).length > 0 && show_list){
+
                     _showDatabaseList(); //show list at once
+
                     $('#btnNewDatabase').button().show();
                     $('#showDatabaseList').on({click: _showDatabaseList}); // goto step8
+
+                    $('.button-registration').button().on({click:_showRegistration});//goto step2
+
+                    $('#btnCreateDatabase').button().on({click: _doCreateDatabase});//on step 3
+                    $('#btnGetStarted').button().on({click: _showGetStarted });//goto step6 - getting started
                 }else{
                     _initControls(); //show new database
                 }
@@ -494,7 +501,7 @@ if (!defined('PDIR')){
             $('#showDatabaseList').on({click: _showDatabaseList});//goto step8
 
             $(document).on({click: function(event){
-               if($(event.target).parents('.list_div').length==0) { $('.list_div').hide();};
+               if($(event.target).parents('.list_div').length == 0){ $('.list_div').hide(); };
             }});
 
             $('.list_div').on({
@@ -1209,7 +1216,9 @@ a{
                         <input id="current-tabs-filter_database" class="text ui-widget-content ui-corner-all" value="" autocomplete="off" />
                         <button id="btnNewDatabase" onclick="_showStep(1)" class="ui-button-action" style="position: absolute;left: 20em;top: 6.4em;display: none;">New Database</button>
 
-                        <?php if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false && !DB_LIST_ONLY){ ?>
+                        <?php 
+                        $showMsgAboutArchived = strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false || strpos(strtolower(HEURIST_BASE_URL), 'heuristau.net');
+                        if($showMsgAboutArchived && !DB_LIST_ONLY){ ?>
                         <span style="float: right;position: relative;bottom: 3em;">
                             <span style="color: red;">If your database has disappeared:</span> Databases which have not been updated for more than 3 / 6 / 12 months, depending on size, will be archived unless marked for retention.<br>
                             Databases can be recovered later but it makes work for us, so please just create a new one if you did not enter any data.<br>

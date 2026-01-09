@@ -1519,10 +1519,10 @@ class Temporal {
 
                 $res = "{$from} to {$to}";
 
-                $possibleMonthSpan = [];
-                Temporal::checkMonthSpan($possibleMonthSpan, $date);
-                if(!empty($possibleMonthSpan)){
-                    $res = $possibleMonthSpan['Date'];
+                $possibleDateSpan = [];
+                Temporal::checkForLongDateSpan($possibleDateSpan, $date);
+                if(!empty($possibleDateSpan)){
+                    $res = $possibleDateSpan['Date'];
                 }
             }
 
@@ -1678,10 +1678,10 @@ class Temporal {
                 }
 
                 if($is_simple){
-                    Temporal::checkMonthSpan($res, $date);
+                    Temporal::checkForLongDateSpan($res, $date);
                 }
 
-                $res['Type'] = ($is_simple)?$tSimpleRange:'Fuzzy Range';
+                $res['Type'] = $is_simple ? $tSimpleRange : 'Fuzzy Range';
             }
 
             //add native decription as prefix
@@ -1896,24 +1896,31 @@ class Temporal {
         return $dtl_Value;
     }
 
-    private static function checkMonthSpan(&$resDate, $date){
+    private static function checkForLongDateSpan(&$resDate, $date){
 
         $start = strval(@$date['estMinDate']);
         $end = strval(@$date['estMaxDate']);
+        $earliest = @$date['start']['earliest'] ?? '';
+        $latest = @$date['end']['latest'] ?? '';
 
-        if(empty($start) || empty($end) || substr($start, 0, -2) !== substr($end, 0, -2)){
+        $checkMonthSpan = substr($start, 0, -2) === substr($end, 0, -2);
+        $checkYearSpan = substr($start, 0, 4) === substr($end, 0, 4);
+        if(empty($start) || empty($end) || !$checkYearSpan){
             return;
         }
 
-        if(preg_match('/01$/', $start) && preg_match('/(?:02(?:28|29)|(?:01|03|05|07|08|10|12)31|(?:04|06|09|11)30)$/', $end)){
+        $year = substr($start, 0, 4);
+
+        if($checkMonthSpan && preg_match('/01$/', $start) && preg_match('/(?:02(?:28|29)|(?:01|03|05|07|08|10|12)31|(?:04|06|09|11)30)$/', $end)){
 
             $start = self::decimalToYMD($start);
             $start = new \DateTime($start);
 
             $resDate['Date'] = $start->format('F Y');
+        }elseif((preg_match('/0101$/', $start) || preg_match("/{$year}-01$/", $earliest)) && (preg_match('/1231$/', $end) || preg_match("/{$year}-12$/", $latest))){
+            $resDate['Date'] = $year;
         }
     }
-
 
 } // end Temporal class
 ?>

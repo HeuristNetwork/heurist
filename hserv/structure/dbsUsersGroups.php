@@ -713,7 +713,7 @@
 
             if(@$prefs['externalRepositories']==null){
                 //get current from database
-                $repositories = user_getRepositoryCredentials($system, false, $ugr_ID);
+                $repositories = user_getRepositoryCredentials($system, false, $ugrID);
                 if($repositories!=null && !empty($repositories)){
                     $prefs['externalRepositories'] = $repositories;
                 }
@@ -1739,7 +1739,7 @@
     //
     // returns credentials for given service_id  (service_name+user_id)
     //
-    function user_getRepositoryCredentials2($system, $serviceId) {
+    function user_getRepositoryCredentials2($system, $serviceId, $search_all_groups = false) {
 
         // Chcek if serviceId is a testing one
         //  these keys are publicly available from their respective services
@@ -1750,8 +1750,9 @@
             'unakala2' => 'f41f5957-d396-3bb9-ce35-a4692773f636',
             'unakala3' => 'aae99aba-476e-4ff2-2886-0aaf1bfa6fd2'
         ];
+
         if(array_key_exists($serviceId, $TEST_KEYS)){
-            return [ $serviceId => [ 'params' => [ 'writeApiKey' => $TEST_KEYS[$serviceId] ] ] ];//implode('-', $TEST_KEYS[$serviceId])
+            return [ $serviceId => [ 'service' => 'nakala', 'params' => [ 'writeApiKey' => $TEST_KEYS[$serviceId] ] ] ];
         }
 
         $parts = explode('_', $serviceId);
@@ -1762,7 +1763,7 @@
             $serviceName = $parts[0];
         }
 
-        return user_getRepositoryCredentials($system, false, $ugr_ID, $serviceName);
+        return user_getRepositoryCredentials($system, $search_all_groups, $ugr_ID, $serviceName);
     }
 
     //
@@ -1783,14 +1784,6 @@
             $query = 'SELECT ugr_ID, ugr_Preferences FROM sysUGrps '
                     .' WHERE ugr_ID='.$ugr_ID;
         }
-
-        /*
-        if($all_groups){
-                $query .= ' WHERE ugr_ID=0 OR ugr_ID='.intval($ugr_ID)
-                .' OR ugr_ID in (SELECT ugl_GroupID FROM sysUsrGrpLinks WHERE ugl_UserID='.intval($ugr_ID).')';
-        }else{
-                $query .= ' WHERE ugr_ID='.intval($ugr_ID);
-        }*/
 
         $result = null;
 
