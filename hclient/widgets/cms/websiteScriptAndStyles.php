@@ -722,8 +722,10 @@ function loadRecordContent(url_or_record_id, target){
                    window.hWin.HEURIST4.msg.sendCoverallToBack(true);
 
                    frm = frm[0];
-                   container.height(frm.contentWindow.document.body.scrollHeight);
-                   initLinksAndImages($(frm.contentWindow.document.body));
+                   if(frm){
+                       container.height(frm.contentWindow.document.body.scrollHeight);
+                       initLinksAndImages($(frm.contentWindow.document.body));
+                   }
 
                    container.find('button.keywords').on('click', function(){
                         $('#main-recordview').hide();
