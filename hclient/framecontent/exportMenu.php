@@ -180,9 +180,19 @@ require_once 'initPage.php';
                 HuNI harvestable XML files (file-per-record)</a>
         </div>
 
+        <div id="menu-export-html" class="export-item">
+            <button class="export-button">HTML</button>
+            <a href="#" oncontextmenu="return false;"
+                data-logaction="exp_HTML"
+                data-action="menu-export-html"
+                title="Generate one HTML file per PUBLIC record (for record view)">
+                Record data HTML pages for public records (file-per-record)</a>
+        </div>
+        
         <div class="heurist-prompt" style="padding:6px">
             Allow popup window in your browser preferences
         </div>
+        
         <br>
     </div>
 </body>

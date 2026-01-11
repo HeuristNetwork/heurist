@@ -102,6 +102,7 @@
 #menu-manage-rectitles#Rebuild record titles
 #menu-manage-calcfields#Rebuild calculation fields
 #menu-interact-log#Interaction log
+#menu-clear-rec-cache#Clear record view cache
 #menu-profile-files-hint#Manage uploaded files and registered remote media resources
 #menu-profile-preferences-hint#Display preferences relating to behaviours related to this database
 #menu-structure-duplicates-hint#Fuzzy search to identify records which might contain duplicate data

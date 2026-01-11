@@ -63,7 +63,6 @@ require_once dirname(__FILE__).'/../records/edit/recordsBatch.php';
 
             $res = $dbRecDetails->createRecordLinksByMatching();
 
-
         }elseif(@$_REQUEST['a'] == 'rectype_change'){
 
             $res = $dbRecDetails->changeRecordTypeInBatch();

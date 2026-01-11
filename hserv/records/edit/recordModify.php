@@ -33,6 +33,7 @@ use hserv\utilities\UImage;
 use hserv\utilities\Temporal;
 use hserv\structure\ConceptCode;
 use hserv\report\ReportRecord;
+use hserv\records\export\ExportRecordsHTML;
 
 require_once dirname(__FILE__).'/recordTitleMask.php';
 require_once dirname(__FILE__).'/../search/recordSearch.php';
@@ -846,7 +847,9 @@ function recordSave($system, $record, $use_transaction=true, $suppress_parent_ch
     if(!empty($languageIssues)){
         $rtn['issues']['languages'] = $languageIssues;
     }
-
+    //clear cached record view page 
+    ExportRecordsHTML::clearHtmlOutputCacheForRecord($system->getSysDir('html-output'), intval($recID));
+    
     return $rtn;
     //, 'counts'=>$rty_counts
     /*
@@ -1082,6 +1085,9 @@ function recordDelete($system, $recids, $need_transaction=true,
                 $deleted = array_merge($deleted, $stat['deleted']);
                 $rels_count += $stat['rels_count'];
                 $bkmk_count += $stat['bkmk_count'];
+                
+                //clear cached record view page 
+                ExportRecordsHTML::clearHtmlOutputCacheForRecord($system->getSysDir('html-output'), $recID);
 
                 if(!in_array($rectypes[$recID],$affected_rectypes)){
                     array_push($affected_rectypes, $rectypes[$recID]);

@@ -318,6 +318,9 @@ function hexportMenu( container ) {
         }else if(action == "menu-export-hml-plusrelated"){ // Current resulteset plus any related records
             _exportRecords({format:'hml', isAll:true, includeRelated:true, multifile:false, save_as_file:save_as_file});
 */
+        }else if(action == "menu-export-html"){ 
+            _exportRecords({format:'html', save_as_file:save_as_file});
+            
         }else if(action == "menu-export-hml-multifile"){ // selected + related
             _exportRecords({format:'hml', save_as_file:save_as_file});
             
@@ -421,7 +424,7 @@ function hexportMenu( container ) {
 
         let script; 
         let params = '';
-        const showOptionsDialog = true;
+        const showOptionsDialog = (opts.format!='html');
         if(showOptionsDialog){
 
             if(isEntireDb){
@@ -552,7 +555,7 @@ function hexportMenu( container ) {
                     if(include_additional_info!==''){
                         params = params + '&extinfo=' + include_additional_info;
                     }
-                }else{
+                }else if(opts.format!=='html'){
                     params = params +'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
                 }
             }

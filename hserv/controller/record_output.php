@@ -265,7 +265,7 @@
 
     }else{
 
-            $allowed_formats = array('xml','geojson','gephi','iiif','json','rdf');
+            $allowed_formats = array('xml','geojson','gephi','iiif','json','rdf','html');
             $idx = array_search(strtolower($params['format']),$allowed_formats);
 
             if($idx===false || !($idx>0)){
@@ -274,7 +274,11 @@
 
             $classname = 'hserv\records\export\ExportRecords'.strtoupper($allowed_formats[$idx]);
 
-            $outputHandler = new $classname($system);
+            try{
+                $outputHandler = new $classname($system);
+            } catch (\Throwable $e) {
+                echo $classname . ': ' . $e->getMessage();
+            }
 
             if(!$outputHandler){
                 $system->addError(HEURIST_INVALID_REQUEST, 'Wrong parameter "format": '.htmlspecialchars(@$params['format']));

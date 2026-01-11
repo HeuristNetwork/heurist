@@ -32,20 +32,57 @@
  * @author      Ian Johnson ian.johnson.heurist@gmail.com
  * @since       3.1.0
  */
-
-if(!defined('PDIR')) {define('PDIR','../../');} //need for proper path to js and css
-
 use hserv\utilities\USanitize;
 use hserv\utilities\Temporal;
 
 require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../../hserv/structure/dbsTerms.php';
 
+if(!defined('PDIR')) {
+    define('PDIR', HEURIST_BASE_URL); //need for proper path to js and css '../../'
+}
+
 $system = new hserv\System();
 
 if(!$system->init(@$_REQUEST['db'])){
     include_once dirname(__FILE__).'/../../hclient/framecontent/infoPage.php';
     exit;
+}
+
+$primary_language = isset($_REQUEST['lang']) ? getLangCode3($_REQUEST['lang']) : null;
+$lang = $primary_language ?: 'eng';
+$lang = preg_replace('~[^a-z0-9_-]+~i', '', $lang);  // safety    
+
+$is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup']==1);
+$without_header = array_key_exists('noheader', $_REQUEST) && ($_REQUEST['noheader']==1);
+
+//force update cache file
+$forceCache = array_key_exists('forceCache', $_REQUEST) && ($_REQUEST['forceCache']==1);
+
+$rec_id = intval($_REQUEST['recID']??0);
+
+$useCache = $rec_id > 0 
+    && $_SERVER['REQUEST_METHOD'] === 'GET'
+    && !($is_map_popup || $without_header);
+    
+if($useCache && !$forceCache){
+    //@todo use sepcical cache for lang and hideImages
+    
+    $cacheDir = rtrim($system->getSysDir('html-output'), '/').'/'.$lang.'/';
+    $cachedPage = $cacheDir.$rec_id.'.html';
+    
+    //check for cache    
+    if(is_file($cachedPage)){
+        $cachedPageUrl = $system->getSysUrl('html-output').$lang.'/'.$rec_id.'.html';
+        header('Location: '.$cachedPageUrl, true, 302);
+        
+        /* Another option - serve cached file directly
+        header('Content-Type: text/html; charset=UTF-8');
+        header('Cache-Control: public, max-age=300');
+        readfile($cachedPage);        
+        */
+        exit;       
+    }
 }
 
 require_once dirname(__FILE__).'/../../hserv/records/search/recordFile.php';
@@ -64,12 +101,9 @@ define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br><span>');//for
 //'<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li><img>'
 
 $noclutter = array_key_exists('noclutter', $_REQUEST);//like for map popup, but with header
-$is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup']==1);
-$without_header = array_key_exists('noheader', $_REQUEST) && ($_REQUEST['noheader']==1);
 
 $layout_name = @$_REQUEST['ll'];
 $is_production = !$is_map_popup && $layout_name=='WebSearch';
-$primary_language = !empty(@$_REQUEST['lang']) ? getLangCode3($_REQUEST['lang']) : null;
 
 $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['reloadPopup']==1);
 // 0 - No private details, 1 - collapsed private details, 2 - expanded private details
@@ -88,7 +122,7 @@ $show_hidden_fields = $is_production || $is_map_popup ? -1 : $system->userGetPre
 if(array_key_exists('fontsize', $_REQUEST)){
     $usr_font_size = intval($_REQUEST['fontsize']);    
 }else{
-    $usr_font_size = intval($system->userGetPreference('userFontSize', 0));    
+    $usr_font_size = intval($system->userGetPreference('userFontSize', 14));    
 }
 $font_size = '';
 if(!$is_map_popup && $usr_font_size != 0){
@@ -142,8 +176,6 @@ $system->defineConstant('DT_EXTENDED_DESCRIPTION');
 $system->defineConstant('DT_CMS_HEADER');
 $system->defineConstant('DT_CMS_FOOTER');
 
-$rec_id = intval(@$_REQUEST['recID']);
-
 $already_linked_ids = array();
 $group_details = array();
 
@@ -187,6 +219,10 @@ if(@$_REQUEST['ids']){
     $sel_ids = prepareIds($_REQUEST['ids']);
     $sel_ids = array_unique($sel_ids);
 }
+
+// Start output buffering
+ob_start();
+
 if(!($is_map_popup || $without_header)){
 
 ?>
@@ -226,7 +262,7 @@ if(!$system->hasAccess()){
         <script type="text/javascript">
 
             if(!window.hWin.HAPI4 && typeof hAPI === 'function'){
-                window.hWin.HAPI4 = new hAPI('<?php echo $system->dbname(); ?>', $.noop);
+                window.hWin.HAPI4 = new hAPI('<?php echo $system->dbname(); ?>', $.noop, '<?php echo HEURIST_BASE_URL;?>');
             }
             if(typeof window.hWin.HR !== 'function'){
                 window.hWin.HR = (res) => res; // to allow dialog creation
@@ -1271,6 +1307,9 @@ if($noclutter){
     $is_map_popup = true;
 }
 
+$writeToCacheRes = 0; //0 - OK, 1 - not found, 2 - not public 
+$writeToCache = false;
+
 if ($bkm_ID>0 || $rec_id>0) {
 
         if ($bkm_ID>0) {
@@ -1285,11 +1324,15 @@ if ($bkm_ID>0 || $rec_id>0) {
             'select * from Records left join defRecTypes on rec_RecTypeID=rty_ID where rec_ID='
             .$rec_id.' and not rec_FlagTemporary');
         }
+            $writeToCache = $useCache && $bibInfo['rec_NonOwnerVisibility']==='public' && $forceCache;
+            if($bibInfo['rec_NonOwnerVisibility']!=='public'){
+                $writeToCacheRes = 2;
+            }
 
             print '<div data-recid="'.intval($bibInfo['rec_ID']).'">';// style="font-size:0.8em"
             print_details($bibInfo);
             print DIV_E;
-
+            
             $opts = '';
             $list = '';
 
@@ -1344,11 +1387,18 @@ if ($bkm_ID>0 || $rec_id>0) {
 
             }
         } else {
+            $writeToCacheRes = 1;
             print 'No details found';
         }
+        
  if(!$noclutter && $is_map_popup || $without_header){
 //    print DIV_E;
  }else{
+     if($writeToCache){
+        $timestamp = new DateTime();
+        print '<div style="font-size:8px">Cached at '.$timestamp->format('c').'<div>'; 
+     }
+     
        ?>
         <div id=bottom><div></div>
 
@@ -1356,10 +1406,47 @@ if ($bkm_ID>0 || $rec_id>0) {
 </html>
 <?php
  }
-flush();
-ob_flush();
-sleep(2);
+ 
+if($writeToCache){
+
+    $cacheDir = rtrim($system->getSysDir('html-output'), '/').'/'.$lang.'/';
+    $cachedPage = $cacheDir.$rec_id.'.html';
+
+    // Ensure directory exists
+    if (!is_dir($cacheDir)) {
+        @mkdir($cacheDir, 0775, true);
+    }
+
+    // Get rendered HTML
+    $html = ob_get_contents();
+
+    // Write atomically (avoid half-written files)
+    $tmpFile = $cachedPage.'.tmp';
+    if (@file_put_contents($tmpFile, $html) !== false) {
+        @rename($tmpFile, $cachedPage);
+    }
+    if($forceCache){
+        ob_clean();
+        echo $writeToCacheRes;
+    }else{
+        // Send output to browser
+        ob_end_flush();  
+    }
+} else {
+    // No caching → just send output
+    if($forceCache){
+        ob_clean();
+        echo $writeToCacheRes;
+    }else{
+        ob_end_flush();
+        // Optional: give browser time to start receiving data
+        flush();
+        sleep(1);
+    }
+}
 exit(0);
+
+
 
 /***** END OF OUTPUT *****/
 

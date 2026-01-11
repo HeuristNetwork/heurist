@@ -489,6 +489,16 @@
         "text": "Refresh memory"
     },
     {
+        "id": "menu-clear-rec-cache",
+        
+        "data": {
+            "icon": "ui-icon-erase",
+            "user-admin-status": "0"
+        },
+        "title": "Clear cached html pages for recrod view",
+        "text": "Clear record view cache"
+    },
+    {
         "id": "menu-structure-duplicates",
         
         "data": {

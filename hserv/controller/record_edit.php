@@ -21,6 +21,8 @@
     require_once dirname(__FILE__).'/../../autoload.php';
     require_once dirname(__FILE__).'/../records/edit/recordModify.php';
 
+    use hserv\records\export\ExportRecordsHTML;
+
     $response = array();
 
     $system = new hserv\System();
@@ -100,6 +102,15 @@
 
                 $response = recordGetIncrementedValue($system, $_REQUEST);
 
+            } elseif($action=="clear_cache"){
+                
+                if(!userCheckAccess($system, 1)){ //admin level
+                    $response = false;
+                }else{
+                    $deleted = ExportRecordsHTML::clearHtmlOutputCache($system->getSysDir('html-output'));
+                    $response = array('status'=>HEURIST_OK, 'deleted'=>$deleted);
+                }
+                
             } elseif($action=="duplicate" && isset($_REQUEST['id'])) {
 
 

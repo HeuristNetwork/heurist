@@ -509,6 +509,10 @@ class ActionHandler {
                 window.hWin.HAPI4.EntityMgr.emptyEntityData(null);
                 window.hWin.HAPI4.SystemMgr.get_defs_all( true, window.hWin.document);
                 break;
+
+            case "menu-clear-rec-cache":
+                window.hWin.HAPI4.RecordMgr.clearRecordViewCache();
+                break;
                 
             case "menu-profile-admin":{
             

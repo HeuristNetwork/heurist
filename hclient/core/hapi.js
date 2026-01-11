@@ -87,6 +87,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     */    
     function _init(_db, _oninit, _baseURL) { //, _currentUser) {
 
+        detectBaseURL();
+        
         that.SystemMgr = new HSystemMgr(that);
 
         //@todo - take  database from URL
@@ -96,8 +98,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             _database = window.hWin.HEURIST4.util.getUrlParameter('db');
         }
 
-        detectBaseURL();
-        
         that.database = _database;
 
         if (!window.hWin.HR) {
@@ -587,6 +587,18 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 _callserver('record_batch', request, function (response) { _triggerRecordUpdateEvent(response, callback); });
             },
+            
+            clearRecordViewCache: function( callback ){
+               _callserver('record_edit', {a: 'clear_cache'}, (response)=>{
+
+                        if (response && response.status == window.hWin.ResponseStatus.OK) {
+                            window.hWin.HEURIST4.msg.showMsgFlash(response.deleted+' cached record view pages have been cleared');
+                        } else {
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                   
+               }); 
+            },
 
             //@TODO - need to implement queue for record_search, otherwise sometimes we get conflict on simultaneous requests            
 
@@ -636,9 +648,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         if (response.status == window.hWin.ResponseStatus.OK) {
                             resdata = new HRecordSet(response.data);
                         } else {
-
                             window.hWin.HEURIST4.msg.showMsgErr(response);
-
                         }
                         if (!window.hWin.HEURIST4.util.isnull(document)) {
                             document.trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, { resultset: resdata }); //global app event
@@ -819,6 +829,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                     );
                 }
+            },
+            
+            //
+            // clear cached html pages for recrod view
+            //
+            clearRecordViewCache: function(){
+                
             },
 
             //
