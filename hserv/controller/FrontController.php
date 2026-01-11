@@ -56,7 +56,12 @@ class FrontController
         $this->req_params = is_array($params) ? $params : USanitize::sanitizeInputArray();
         $system = new System();
         if (!$system->init(@$this->req_params['db'])) {
-            dataOutput($system->getError());
+            if(array_key_exists('website', $this->req_params)){
+                header('Location: '.HEURIST_BASE_URL.'documentation/context_help/missedDatabaseDontPanic.htm');
+                exit;
+            }else{
+                dataOutput($system->getError());
+            }
             return;
         }
         $this->system = $system;
