@@ -221,6 +221,10 @@ $.widget( "heurist.resultList", {
     //to refresh icon after structure edit
     _icon_timer_suffix: ('&t='+window.hWin.HEURIST4.util.random()),
     
+    observer: null,
+    expObserver: null,
+    _expandedHeightCache: {},
+    
     // the constructor
     _create: function() {
 
@@ -936,7 +940,10 @@ $.widget( "heurist.resultList", {
 
         //-----------------------
         this.setHeaderText(window.hWin.HR('Filtered Result'));
-
+        
+        // create observer to check record's cards visibility within scrollable div_content viewport
+        this.createIntersectionObserver();
+        this.createExpandedIntersectionObserver();
     },
     
     _setOptions: function() {
@@ -1368,6 +1375,9 @@ $.widget( "heurist.resultList", {
             this.div_coverall.hide();
         }
         
+        //stop observing
+        if(this.observer) this.observer.disconnect();
+        if(this.expObserver) this.expObserver.disconnect();
 
         if(this.div_content){
             
@@ -2379,7 +2389,6 @@ $.widget( "heurist.resultList", {
     // expand ALL recordDivs
     //
     expandDetailsInlineALL: function(can_proceed){
-        
         const that = this;
         
         if(can_proceed!==true && this.allowedPageSizeForRecContent(function(){
@@ -2397,7 +2406,7 @@ $.widget( "heurist.resultList", {
     //
     //
     expandDetailsInline: function(recID){
-        
+
         let $rdiv = this.div_content.find('div[recid='+recID+']');
         if($rdiv.length==0) return; //no such recod in current page
         
@@ -2422,11 +2431,13 @@ $.widget( "heurist.resultList", {
                 }
                 if(!window.hWin.HEURIST4.util.isempty(rendererTemplate))
                 {
+                    let placeholderH = this._expandedHeightCache?.[recID] || 300;
+                    
                     //add new record-expand-info 
                     let ele = $('<div>')
                         .attr('data-recid', recID)
-                        .css({'overflow':'hidden','padding-top':'5px','height':'25px'}) //'max-height':'600px','width':'100%',
-                        .addClass('record-expand-info');
+                        .css({'overflow':'hidden','padding-top':'5px','height':'auto', minHeight:placeholderH+'px'}) 
+                        .addClass('record-expand-info loading');
                     
                     if(this.options.view_mode=='list'){
                         ele.appendTo($rdiv);
@@ -2540,7 +2551,7 @@ $.widget( "heurist.resultList", {
                     if(this.options.fontsize>0){
                         infoURL += '&fontsize=' + this.options.fontsize;
                     }
-                    
+
                     //content is smarty report
                     if( this.options.rendererExpandInFrame ||  !isSmarty)
                     {
@@ -2548,9 +2559,10 @@ $.widget( "heurist.resultList", {
                         ele.addClass('loading');
                         
                         $('<iframe>').attr('data-recid',recID)
+                            .attr('data-src', infoURL)
                             .appendTo(ele)
                             .css('opacity',0)
-                            .attr('src', infoURL).on('load',function()
+                            .on('load', function()  //.attr('src', infoURL)
                             { 
                                 let _recID = $(this).attr('data-recid');
                                 let ele2 = that.div_content.find('.record-expand-info[data-recid='+_recID+']');
@@ -2574,7 +2586,7 @@ $.widget( "heurist.resultList", {
                                             h = 300 //default value
                                         }
                                         ele2.height(h);//+(h*0.05)    
-                                        
+                                        that._expandedHeightCache[_recID] = h;
                                     }
                                 }
                                 
@@ -2595,7 +2607,14 @@ $.widget( "heurist.resultList", {
 
                         });
                         
-
+                        if (this.expObserver && this._expandAllDivs) {
+                          this.expObserver.observe(ele[0]);
+                        } else {
+                          // fallback: load immediately if observer not available
+                          ele.find('iframe').attr('src', infoURL);
+                        }                        
+                                                
+                        
                     }else{
 
                         ele.addClass('loading').css({'overflow-y':'auto'}).load(infoURL, function(){ 
@@ -2612,7 +2631,32 @@ $.widget( "heurist.resultList", {
             }        
         
     },
-    
+        
+    createExpandedIntersectionObserver() {
+      const options = {
+        root: null,                 // OR: this.div_content[0] if that’s the scroll container
+        rootMargin: '200px 0px',    // prefetch a bit before it’s visible
+        threshold: [0, 0.25, 0.5]
+      };
+      this.expObserver = new IntersectionObserver(
+        (entries) => this.handleExpandedIntersect(entries),
+        options
+      );
+    },
+
+    handleExpandedIntersect(entries){
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const expDiv = entry.target;
+          const $iframe = $(expDiv).find('iframe[data-src]');
+          if ($iframe.length && !$iframe.attr('src')) {
+            $iframe.attr('src', $iframe.attr('data-src'));
+          }
+          this.expObserver.unobserve(expDiv);
+        }
+      });
+    },
+        
     //
     // keeps full set for multiselection 
     //
@@ -3661,10 +3705,18 @@ $.widget( "heurist.resultList", {
 
         //rec_toload - list of ids
         //load full record info - record header
-        this._loadFullRecordData( rec_toload );
+        //this._loadFullRecordData( rec_toload );
+        if(rec_toload.length>0 && this.observer){
+            const allCards = this.div_content[0].querySelectorAll( 'div.recordDiv[recid]' );
+            allCards.forEach((item) => {
+                const id = Number.parseInt(item.getAttribute('recid'), 10);
+                if (rec_toload.includes(id)) {
+                    this.observer.observe(item);
+                }
+            });            
+        }        
         
         this.setCollected( null );
-
         
         this._trigger( "onpagerender", null, this );
         
@@ -3763,6 +3815,34 @@ $.widget( "heurist.resultList", {
         if(this.options.field_for_ext_classes > 0){
             this._addCustomClasses();
         }
+    },
+    
+    
+    createIntersectionObserver() {
+
+          let options = {
+            root: null,
+            rootMargin: '0px',
+            threshold: [0, 0.25, 0.5, 0.75, 1],
+            delay: 300
+          };
+
+          this.observer = new IntersectionObserver((entries, observer)=>this.handleIntersect(entries, observer), options);
+    },
+    
+    handleIntersect(entries, observer){
+         
+         let rec_toload = [];
+         entries.forEach(entry => {
+            if (entry.intersectionRatio > 0.44) {
+              rec_toload.push(entry.target.getAttribute('recid'));
+              this.observer.unobserve(entry.target);
+            }
+          });
+
+         if(rec_toload.length>0){
+             this._loadFullRecordData(rec_toload);
+         }
     },
     
     //
