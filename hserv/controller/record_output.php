@@ -104,7 +104,9 @@
         prepareParameters('export', $params);
         exit;
     }elseif(array_key_exists('preparedID', $params)){
-        retrieveParameters('export', $params);
+        if(!retrieveParameters($system, 'export', $params)){
+            $system->errorExitApi();
+        }
     }
 
     if(!@$params['format']){
@@ -672,10 +674,11 @@ function prepareParameters($type, $parameters){
  * @param array $parameters Parameters array to be updated with stored parameters
  * @return void
  */
-function retrieveParameters($type, &$parameters){
+function retrieveParameters($system, $type, &$parameters){
 
     if(!is_numeric(@$parameters['preparedID'])){
-        return;
+        $system->addError(HEURIST_INVALID_REQUEST, 'Wrong parameter preparedID. Must be integer');
+        return false;
     }
 
     $id = intval($parameters['preparedID']);
@@ -683,7 +686,8 @@ function retrieveParameters($type, &$parameters){
     $paramsFile = HEURIST_SCRATCH_DIR . "{$type}_{$id}.json";//yml
 
     if(!file_exists($paramsFile)){
-        return;
+        $system->addError(HEURIST_INVALID_REQUEST, 'Query parameters file not found. Either parameter preparedID is wrong or session expired');
+        return false;
     }
 
     $storedParameters = file_get_contents($paramsFile);
@@ -700,6 +704,6 @@ function retrieveParameters($type, &$parameters){
 
     fileDelete($paramsFile);
 
-    return;
+    return true;
 }
 ?>
