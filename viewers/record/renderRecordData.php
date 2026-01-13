@@ -52,6 +52,7 @@ if(!$system->init(@$_REQUEST['db'])){
 $primary_language = isset($_REQUEST['lang']) ? getLangCode3($_REQUEST['lang']) : null;
 $lang = $primary_language ?: 'eng';
 $lang = preg_replace('~[^a-z0-9_-]+~i', '', $lang);  // safety    
+$lang = strtolower($lang);
 
 $is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup']==1);
 $without_header = array_key_exists('noheader', $_REQUEST) && ($_REQUEST['noheader']==1);

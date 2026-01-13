@@ -37,37 +37,38 @@ class ExportRecordsHTML extends ExportRecords {
 
     public function output($data, $params)
     {
-        
         $htmlOutputDir = rtrim($this->system->getSysDir('html-output'), '/').'/';
 
         $params['linkmode'] = 'none';
 
         $lang = $params['lang'] ?? 'eng';
         $lang = preg_replace('~[^a-z0-9_-]+~i', '', $lang) ?: 'eng';
+        $lang = strtolower($lang);
 
         $langDir = $htmlOutputDir.$lang.'/';
         if (!is_dir($langDir)) {
             @mkdir($langDir, 0775, true);
         }
 
-        $force = true || !empty($params['force']); // optional: regenerate even if file exists
+        $force = true; //!empty($params['force']);
 
-        // Public host (used only for Host header, not for routing)
-        $publicHost = HEURIST_DOMAIN;//'heuristau.net';
+        // Public host only for vhost routing via Host header
+        $publicHost = defined('HEURIST_DOMAIN') ? HEURIST_DOMAIN : 'heuristau.net';
 
         // Local URL to avoid Cloudflare/network
-        $publishUrl = 'http://127.0.0.1/h7-alpha/viewers/record/renderRecordData.php'
+        $publishUrl = 'https://127.0.0.1/h7-alpha/viewers/record/renderRecordData.php'
             .'?forceCache=1'
             .'&db='.rawurlencode($this->system->dbname())
             .'&lang='.rawurlencode($lang)
             .'&recID=';
-            
 
         if (!$this->_outputPrepare($data, $params)) {
             return false;
         }
 
         $ch = curl_init();
+
+        // --- Common options for HTTPS loopback ---
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_FOLLOWLOCATION => true,
@@ -75,12 +76,58 @@ class ExportRecordsHTML extends ExportRecords {
             CURLOPT_CONNECTTIMEOUT => 3,
             CURLOPT_TIMEOUT        => 30,
             CURLOPT_USERAGENT      => 'HeuristCachePublisher/1.0',
+
+            // Ensure we do GET (some environments behave oddly otherwise)
+            CURLOPT_HTTPGET        => true,
+
+            // Route to the correct vhost/app using Host header
             CURLOPT_HTTPHEADER     => [
-                'Host: '.HEURIST_DOMAIN,
+                'Host: '.$publicHost,
                 'Accept: text/html',
             ],
+
+            /**
+             * TLS note:
+             * We connect to https://127.0.0.1 but the cert is for heuristau.net,
+             * so verification would fail. This is loopback only, so disabling
+             * verify is acceptable.
+             */
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => 0,
+
+            // Optional: avoid “Expect: 100-continue” edge cases
+            CURLOPT_HTTPHEADER     => [
+                'Host: '.$publicHost,
+                'Accept: text/html',
+                'Expect:',
+            ],
         ]);
-        
+
+        // --- Preflight check before processing records ---
+        // Use a lightweight request; we just want to confirm the endpoint is reachable.
+        $testRecId = 1; // any integer; the goal is reachability
+        $testUrl   = $publishUrl.$testRecId;
+
+        curl_setopt($ch, CURLOPT_URL, $testUrl);
+        $testBody  = curl_exec($ch);
+        $testErrno = curl_errno($ch);
+        $testHttp  = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if ($testErrno !== 0) {
+            curl_close($ch);
+            error_log("Cache publisher preflight failed (cURL $testErrno) url=$testUrl");
+            echo "Preflight failed (cURL $testErrno). Aborting.";
+            return false;
+        }
+
+        if ($testHttp >= 500) { // treat 5xx as service not healthy
+            curl_close($ch);
+            error_log("Cache publisher preflight failed (HTTP $testHttp) url=$testUrl");
+            echo "Preflight failed (HTTP $testHttp). Aborting.";
+            return false;
+        }
+        // Note: 404 is OK for preflight (record might not exist); we only care that service responds.
+
         $cntErros = 0;
         $cntSkip = 0;
         $cntCached = 0;
@@ -100,7 +147,6 @@ class ExportRecordsHTML extends ExportRecords {
             }
 
             $url = $publishUrl.$recID;
-
             curl_setopt($ch, CURLOPT_URL, $url);
 
             $body = curl_exec($ch);
@@ -109,39 +155,42 @@ class ExportRecordsHTML extends ExportRecords {
 
             if ($errno !== 0) {
                 $cntErros++;
-                //error_log("Cache publish failed (cURL $errno) recID=$recID url=$url");
+                error_log("Cache publish failed (cURL $errno) recID=$recID url=$url");
                 continue;
             }
 
             if ($http >= 400) {
                 $cntErros++;
-                //error_log("Cache publish failed (HTTP $http) recID=$recID url=$url");
+                error_log("Cache publish failed (HTTP $http) recID=$recID url=$url");
                 continue;
             }
-            
-            // Optional: verify cache file created
+
+            // Verify cache file created
             if (!is_file($cachedFile)) {
-                
-                if($body==1){
-                    $cntNotFound++; 
-                }elseif($body==2){
-                    $cntSkip++; 
-                }else{
+                // body codes: 1=not found, 2=not public
+                if ((string)$body === '1') {
+                    $cntNotFound++;
+                } elseif ((string)$body === '2') {
+                    $cntSkip++;
+                } else {
                     $cntErros++;
                 }
-                //error_log("Cache publish did not create file recID=$recID (expected $cachedFile)");
+                //error_log("Cache publish did not create file recID=$recID (expected $cachedFile) Code=".$body);
                 continue;
             }
-            
+
             $cntCached++;
 
             if (!empty($params['sleep_ms'])) {
                 usleep((int)$params['sleep_ms'] * 1000);
             }
         }
-        
-        echo 'Processed: '.count($this->records).'. Cached: '.$cntCached.
-                '. Not public: '.$cntSkip.'. Not found: '.$cntNotFound.'. Errors: '.$cntErros;
+
+        echo 'Processed: '.count($this->records)
+            .'. Cached: '.$cntCached
+            .'. Not public: '.$cntSkip
+            .'. Not found: '.$cntNotFound
+            .'. Errors: '.$cntErros;
 
         curl_close($ch);
         return true;
