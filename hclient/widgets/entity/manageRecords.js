@@ -6364,36 +6364,12 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             return;
         }else if(that.term_values.length == 0){ // all terms handled
 
-            if(new_terms['refresh']){ // check whether local cache needs updating
+            function passBackToFields(){
 
-                delete new_terms['refresh'];
-
-                window.hWin.HAPI4.EntityMgr.refreshEntityData(['defTerms'], function(success){
-
-                    if(success){
-
-                        for(let fld_id in new_terms){ // pass term ids to respective fields
-
-                            let values = new_terms[fld_id];
-                            values = values.filter(n => !window.hWin.HEURIST4.util.isempty(n));
-        
-                            if(values.length == 0){
-                                continue;
-                            }
-        
-                            that._editing.setFieldValueByName(fld_id, values);
-
-                            let fieldname = $Db.rst(that._currentEditRecTypeID, fld_id, 'rst_DisplayName');
-                            if(!completed_fields.includes(fieldname)) { completed_fields.push(fieldname); }
-                        }
-                        that.processFileFields(completed_fields);
-                    }
-                });
-            }else{ // no cache updating needed
-
-                for(let fld_id in new_terms){
+                for(let fld_id in new_terms){ // pass term ids to respective fields
 
                     let values = new_terms[fld_id];
+                    values = Array.isArray(values) ? values : [values];
                     values = values.filter(n => !window.hWin.HEURIST4.util.isempty(n));
 
                     if(values.length == 0){
@@ -6405,7 +6381,21 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     let fieldname = $Db.rst(that._currentEditRecTypeID, fld_id, 'rst_DisplayName');
                     if(!completed_fields.includes(fieldname)) { completed_fields.push(fieldname); }
                 }
-                this.processFileFields(completed_fields);
+                that.processFileFields(completed_fields);
+            }
+
+            if(new_terms['refresh']){ // check whether local cache needs updating
+
+                delete new_terms['refresh'];
+
+                window.hWin.HAPI4.EntityMgr.refreshEntityData(['defTerms'], function(success){
+
+                    if(success){
+                        passBackToFields();
+                    }
+                });
+            }else{ // no cache updating needed
+                passBackToFields();
             }
 
             return;
@@ -6413,7 +6403,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         let cur_term = this.term_values.shift(); // 0 => dt_id, 1 => term label/term details
 
+        const dtyID = cur_term[0];
         let trm_details = cur_term[1];
+
         if(!window.hWin.HEURIST4.util.isObject(trm_details)){
             trm_details = {
                 label: cur_term[1],
@@ -6426,13 +6418,13 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
         let org_label = trm_details['label'];
 
-        let vocab_id = $Db.dty(cur_term[0], 'dty_JsonTermIDTree');
-        let field_name = $Db.rst(this._currentEditRecTypeID, cur_term[0], 'rst_DisplayName');
+        let vocab_id = $Db.dty(dtyID, 'dty_JsonTermIDTree');
+        let field_name = $Db.rst(this._currentEditRecTypeID, dtyID, 'rst_DisplayName');
 
         // add current field (dt_id) to new_terms, and retain any existing values
-        if(!Object.hasOwn(new_terms, cur_term[0])){
-            let existing_val = this._editing.getValue(cur_term[0]);
-            new_terms[cur_term[0]] = (existing_val == null || window.hWin.HEURIST4.util.isempty(existing_val[0])) ? [] : existing_val;
+        if(!Object.hasOwn(new_terms, dtyID)){
+            let existing_val = this._editing.getValue(dtyID);
+            new_terms[dtyID] = window.hWin.HEURIST4.util.isempty(existing_val[0]) ? [] : existing_val;
         }
 
         let $dlg;
@@ -6479,7 +6471,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
             if(trm_ID > 0){
 
-                new_terms[cur_term[0]].push(trm_ID);
+                new_terms[dtyID].push(trm_ID);
                 $dlg.dialog('close');
 
                 that.processTermFields(completed_fields, new_terms);
@@ -6515,7 +6507,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    new_terms[cur_term[0]].push(response.data[0]); // response.data[0] == new term id
+                    new_terms[dtyID].push(response.data[0]); // response.data[0] == new term id
 
                     $dlg.dialog('close');
 
@@ -6549,7 +6541,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
 
                     window.hWin.HEURIST4.msg.showMsgDlg(`Are you sure you wish to use ${trm_label} in place of ${org_label}?`, 
                     function(){
-                        new_terms[cur_term[0]].push($sel.val());
+                        new_terms[dtyID].push($sel.val());
                         $dlg.dialog('close');
                         that.processTermFields(completed_fields, new_terms);
                     }, {title: 'Use existing term'}, {default_palette_class: 'ui-heurist-design'});

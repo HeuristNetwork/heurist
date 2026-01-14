@@ -31,6 +31,15 @@ namespace hserv\controller;
 use hserv\System;
 use hserv\utilities\USanitize;
 
+use function is_array;
+use function array_key_exists;
+use function in_array;
+use function intval;
+use function count;
+use function defined;
+use function define;
+use function is_bool;
+
 require_once dirname(__FILE__).'/../../autoload.php';
 
 // BnF Constants
@@ -45,24 +54,24 @@ define('ESTC_ERROR_MSG', 'For licensing reasons this function is only accessible
 
 class LookupController{
 
-    private $system;
-    private $database = '';
-    private $request = [];
+    private System $system;
+    private string $database = '';
+    private array $request = [];
 
-    private $lookupType = '';
-    private $lookupURL = '';
-    private $lookupMetadata = '';
-    private $lookupAction = '';
-    private $lookupHeaders = [];
-    private $lookupTimeout = 30;
+    private string $lookupType = '';
+    private string $lookupURL = '';
+    private string $lookupMetadata = '';
+    private string $lookupAction = '';
+    private array $lookupHeaders = [];
+    private int $lookupTimeout = 30;
     private $lookupResponse = null;
 
-    private $isValid = false;
-    private $isESTC = false;
-    private $isMetadata = false;
-    private $isDebug = false;
+    private bool $isValid = false;
+    private bool $isESTC = false;
+    private bool $isMetadata = false;
+    private bool $isDebug = false;
 
-    private $serviceURLs = [
+    private array $serviceURLs = [
         'tlcmap' => [
             'https://tlcmap.org/ghap/search?',
             'https://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?'
@@ -96,7 +105,7 @@ class LookupController{
         'wikidata_SPARQL' => 'https://query.wikidata.org/sparql?'
     ];
 
-    private $serviceParameters = [
+    private const SERVICE_PARAMETERS = [ // array
         'tlcmap' => [
             'name' => ALPHANUMERIC,
             'fuzzyname' => ALPHANUMERIC,
@@ -140,12 +149,12 @@ class LookupController{
         ]
     ];
 
-    private $nakalaFile = '';
-    private $openthesoFile = '';
+    private string $nakalaFile = '';
+    private string $openthesoFile = '';
 
-    private $ESTCMsg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
+    private string $ESTCMsg = 'For licensing reasons this function is only accessible to authorised projects.<br>Please contact the Heurist team if you wish to use this.';
 
-    public function __construct($system, $request){
+    public function __construct(System $system, array $request){
 
         global $OPENTHESO_SERVERS;
 
@@ -153,21 +162,21 @@ class LookupController{
         $this->system = $system;
 
         // Check if more servers have been defined within heuristConfigIni
-        if(!empty($OPENTHESO_SERVERS) && \is_array($OPENTHESO_SERVERS)){
+        if(!empty($OPENTHESO_SERVERS) && is_array($OPENTHESO_SERVERS)){
             $this->serviceURLs['opentheso'] = array_merge($this->serviceURLs['opentheso'], $OPENTHESO_SERVERS);
         }
     }
 
-    public function init(){
+    public function init() : bool{
         return $this->setupRequest() && $this->setupSystem() && $this->verifyRequestParameters();
     }
 
-    private function setupSystem(){
+    private function setupSystem() : bool{
 
         if($this->system->getUserId() < 1){
             $this->system->addError(HEURIST_REQUEST_DENIED, 'You must be logged in to use the external lookup services');
             return false;
-        }elseif(!\defined('HEURIST_FILESTORE_ROOT')){
+        }elseif(!defined('HEURIST_FILESTORE_ROOT')){
             define('HEURIST_FILESTORE_ROOT', $this->system->getFileStoreRootFolder());
         }
 
@@ -179,7 +188,7 @@ class LookupController{
         return true;
     }
 
-    private function metadataCleanup(){
+    private function metadataCleanup() : void{
 
         $oldNakalaFile = HEURIST_FILESTORE_ROOT . 'NAKALA_metadata_values.json';
         $oldOpenthesoFile = HEURIST_FILESTORE_ROOT . 'OPENTHESO_thesauruses.json';
@@ -200,11 +209,11 @@ class LookupController{
         }
     }
 
-    private function setupRequest(){
+    private function setupRequest() : bool{
 
         global $accessToken_GeonamesAPI, $ESTC_PermittedDBs, $ESTC_UserName, $ESTC_Password;
 
-        if(empty(@$this->request['serviceType']) || !\array_key_exists($this->request['serviceType'], $this->serviceURLs)){
+        if(empty(@$this->request['serviceType']) || !array_key_exists($this->request['serviceType'], $this->serviceURLs)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'The provided lookup details are invalid');
             return false;
         }
@@ -213,9 +222,9 @@ class LookupController{
         $this->isDebug = @$this->request['dbg'] == 1;
 
         $this->lookupType = $this->request['serviceType'];
-        $this->lookupURL = \array_key_exists('service', $this->request) && !empty($this->request['service'])
+        $this->lookupURL = array_key_exists('service', $this->request) && !empty($this->request['service'])
             ? filter_var($this->request['service'], FILTER_VALIDATE_URL) : '';
-        $this->lookupMetadata = \array_key_exists('metadata', $this->request) && !empty($this->request['metadata']) ? $this->request['metadata'] : '';
+        $this->lookupMetadata = array_key_exists('metadata', $this->request) && !empty($this->request['metadata']) ? $this->request['metadata'] : '';
 
         $serviceURLs = $this->serviceURLs[$this->lookupType];
 
@@ -227,7 +236,7 @@ class LookupController{
         }elseif($this->lookupMetadata){
             $this->isValid = true;
             $this->isMetadata = true;
-        }elseif(!\is_array($serviceURLs)){
+        }elseif(!is_array($serviceURLs)){
             $this->isValid = $serviceURLs == $this->lookupURL || strpos($this->lookupURL, $serviceURLs) === 0;
         }else{
             foreach($serviceURLs as $url){
@@ -257,20 +266,20 @@ class LookupController{
         return $this->isValid;
     }
 
-    private function verifyRequestParameters(){
+    private function verifyRequestParameters() : bool{
 
         global $accessToken_GeonamesAPI;
 
         $lookupType = strpos($this->lookupType, 'bnf') !== false ? 'bnf' : $this->lookupType;
         $lookupType = strpos($this->lookupType, 'nakala') !== false ? 'nakala' : $lookupType;
 
-        if($this->isESTC || $this->isDebug || $this->isMetadata || !\array_key_exists($lookupType, $this->serviceParameters) || !$this->isValid){
+        if($this->isESTC || $this->isDebug || $this->isMetadata || !array_key_exists($lookupType, self::SERVICE_PARAMETERS) || !$this->isValid){
             $this->isValid || $this->system->addError(HEURIST_INVALID_REQUEST, 'Provided service "'. htmlspecialchars($lookupType) .'" is not valid');
             return $this->isValid;
         }
 
         $urlParts = parse_url($this->lookupURL);
-        $serviceParams = $this->serviceParameters[$lookupType];
+        $serviceParams = self::SERVICE_PARAMETERS[$lookupType];
 
         $newURL = '';
         $newQuery = [];
@@ -285,12 +294,12 @@ class LookupController{
 
         foreach($serviceParams as $field => $type){
 
-            if(!\array_key_exists($field, $urlQuery)){
+            if(!array_key_exists($field, $urlQuery)){
                 continue;
             }
 
             if($field === NUMERIC){
-                $newQuery[$field] = \intval($urlQuery[$field]);
+                $newQuery[$field] = intval($urlQuery[$field]);
             }else{
                 $newQuery[$field] = htmlspecialchars($urlQuery[$field], ENT_NOQUOTES);
             }
@@ -320,7 +329,7 @@ class LookupController{
         return true;
     }
 
-    public function execute(){
+    public function execute() : bool{
 
         $response = null;
 
@@ -338,7 +347,7 @@ class LookupController{
         return $response;
     }
 
-    private function performLookup(){
+    private function performLookup() : bool{
         
         $response = loadRemoteURLContentWithRange($this->lookupURL, null, true, $this->lookupTimeout, $this->lookupHeaders);
 
@@ -369,7 +378,7 @@ class LookupController{
 
             $errorMsg = "<br>Heurist cannot connect/load data from the service url: $url<br>$errorCode";
 
-            if(\intval($http_code) >= 500){
+            if(intval($http_code) >= 500){
 
                 $errorMsg .= '<br><br>Please retry your request in a few minutes as the requested service is currently busy,'
                 .  '<br>if the problem persists then please make a bug report.';
@@ -384,7 +393,7 @@ class LookupController{
         return $this->lookupResponse !== false;
     }
 
-    private function processLookupResponse(){
+    private function processLookupResponse() : bool{
 
         if($this->lookupResponse === null){
             return false;
@@ -422,7 +431,7 @@ class LookupController{
 
                     $hasGeo = false;
                     $this->lookupResponse = str_getcsv($this->lookupResponse, "\n");//parse the rows
-                    if(\is_array($this->lookupResponse) && \count($this->lookupResponse)>1){
+                    if(is_array($this->lookupResponse) && count($this->lookupResponse)>1){
 
                         $header = str_getcsv(array_shift($this->lookupResponse));
                         $id = 1;
@@ -449,7 +458,7 @@ class LookupController{
                         if(!$hasGeo){
                             $this->system->addError(HEURIST_ACTION_BLOCKED, 'Service did not return data in an appropriate format');
                         }
-                    }elseif(\is_array($this->lookupResponse) && \count($this->lookupResponse) == 1){
+                    }elseif(is_array($this->lookupResponse) && count($this->lookupResponse) == 1){
                         $this->system->addError(HEURIST_NOT_FOUND, 'No records match the search criteria');
                     }else{
                         $this->system->addError(HEURIST_ERROR, 'Service did not return any data');
@@ -465,7 +474,7 @@ class LookupController{
 
                 $this->lookupResponse = ['status' => HEURIST_OK, 'data' => json_decode($this->lookupResponse, true)];
 
-                if(\array_key_exists('error', $this->lookupResponse['data'])){
+                if(array_key_exists('error', $this->lookupResponse['data'])){
                     $this->lookupResponse['status'] = $this->lookupResponse['data']['error']['code'] === 'missingparam' ? HEURIST_INVALID_REQUEST : HEURIST_REQUEST_DENIED;
                     $this->lookupResponse['msg'] = $this->lookupResponse['data']['error']['info'];
                 }
@@ -494,13 +503,15 @@ class LookupController{
             default: // nomisma
                 break;
         }
+
+        return true;
     }
 
-    private function processBnFBibliographicSearch(){
+    private function processBnFBibliographicSearch() : void{
 
         $authorCodes = '';
 
-        if(\array_key_exists('author_codes', $this->request) && !empty($this->request['author_codes']) && $this->request['author_codes'] != 'all'){
+        if(array_key_exists('author_codes', $this->request) && !empty($this->request['author_codes']) && $this->request['author_codes'] != 'all'){
             $authorCodes = explode(',', $this->request['author_codes']);
         }
         $results = [];
@@ -531,7 +542,7 @@ class LookupController{
                 }elseif($cf_tag == '003') { // Record URL
                     $formattedArray['biburl'] = (string)$cf_ele[0];
                     break;
-                }elseif(\intval($cf_tag) > 3){
+                }elseif(intval($cf_tag) > 3){
                     break;
                 }
             }
@@ -540,7 +551,7 @@ class LookupController{
 
                 $df_tag = @$df_ele->attributes()['tag'];
 
-                if(!$df_tag || !\in_array($df_tag, $dfHandled)){
+                if(!$df_tag || !in_array($df_tag, $dfHandled)){
                     continue;
                 }
 
@@ -556,12 +567,12 @@ class LookupController{
 
                             $formattedArray['type'] = (string)$sf_ele[0];
 
-                            if(\array_key_exists('title', $formattedArray)){
+                            if(array_key_exists('title', $formattedArray)){
                                 $formattedArray['title'] .= " [{$formattedArray['type']}]";
                             }
                         }else{
 
-                            if(\array_key_exists('title', $formattedArray)){
+                            if(array_key_exists('title', $formattedArray)){
                                 $formattedArray['title'] .= ' , ' . (string)$sf_ele[0];
                             }
                         }
@@ -680,7 +691,7 @@ class LookupController{
 
                     if(isset($role) && !empty($role) && !empty($authorCodes)){ // role code found
 
-                        if(\in_array($role, $authorCodes)){
+                        if(in_array($role, $authorCodes)){
                             $formattedArray['author'][$id] = $author;
                         }else{
                             $formattedArray['contributor'][$id] = $author;
@@ -739,13 +750,13 @@ class LookupController{
         }
 
         // Add other details
-        $results['numberOfRecords'] = \intval($xmlObj->children(BNF_XML_RECORDS_NAMESPACE, false)->numberOfRecords);
+        $results['numberOfRecords'] = intval($xmlObj->children(BNF_XML_RECORDS_NAMESPACE, false)->numberOfRecords);
 
         // Encode to json for response to JavaScript
         $this->lookupResponse = $results;
     }
 
-    private function processBnFAuthoritySearch(){
+    private function processBnFAuthoritySearch() : void{
 
         $results = [];
 
@@ -770,7 +781,7 @@ class LookupController{
                 }elseif($cf_tag == '003') { // Record URL
                     $formattedArray['auturl'] = (string)$cf_ele[0];
                     break;
-                }elseif(\intval($cf_tag) > 3){
+                }elseif(intval($cf_tag) > 3){
                     break;
                 }
             }
@@ -778,7 +789,7 @@ class LookupController{
             foreach ($details->recordData->children(BNF_XML_DETAILS_NAMESPACE, false)->record->datafield as $key => $df_ele) { // datafield elements
                 $df_tag = @$df_ele->attributes()['tag'];
 
-                if(!$df_tag || !\in_array($df_tag, $dfHandled)){
+                if(!$df_tag || !in_array($df_tag, $dfHandled)){
                     continue;
                 }
 
@@ -793,7 +804,7 @@ class LookupController{
                                 $formattedArray['name'] = (string)$sf_ele[0];
                             }elseif($sf_code == 'b'){ // First name
 
-                                if( \array_key_exists('name', $formattedArray)){
+                                if( array_key_exists('name', $formattedArray)){
                                     $formattedArray['name'] .= ', ' . (string)$sf_ele[0];
                                 }else{
                                     $formattedArray['name'] = (string)$sf_ele[0];
@@ -824,7 +835,7 @@ class LookupController{
                                 $formattedArray['name'] = (string)$sf_ele[0];
                             }elseif($sf_code == 't'){ // title
 
-                                if( \array_key_exists('name', $formattedArray)){
+                                if( array_key_exists('name', $formattedArray)){
                                     $formattedArray['name'] .= ' [' . (string)$sf_ele[0] . ']';
                                 }else{
                                     $formattedArray['name'] = (string)$sf_ele[0];
@@ -840,7 +851,7 @@ class LookupController{
                             }
 
                             // Name
-                            if(\array_key_exists('name', $formattedArray)){
+                            if(array_key_exists('name', $formattedArray)){
                                 $formattedArray['name'] .= ' . ' . (string)$sf_ele[0];
                             }else{
                                 $formattedArray['name'] = (string)$sf_ele[0];
@@ -857,7 +868,7 @@ class LookupController{
                             }
 
                             // Name
-                            if(\array_key_exists('name', $formattedArray)){
+                            if(array_key_exists('name', $formattedArray)){
                                 $formattedArray['name'] .= ' ' . (string)$sf_ele[0];
                             }else{
                                 $formattedArray['name'] = (string)$sf_ele[0];
@@ -880,26 +891,26 @@ class LookupController{
                     }
                 }
 
-                if(\array_key_exists('name', $formattedArray) && !empty($formattedArray['name'])){ // add authority type
+                if(array_key_exists('name', $formattedArray) && !empty($formattedArray['name'])){ // add authority type
                     $formattedArray['authority_type'] = (string)$df_tag[0];
                 }
 
                 break;
             }
 
-            if(!empty($formattedArray) && \array_key_exists('name', $formattedArray) && !empty($formattedArray['name'])){
+            if(!empty($formattedArray) && array_key_exists('name', $formattedArray) && !empty($formattedArray['name'])){
                 $results['result'][] = $formattedArray;
             }
         }
 
         // Add other details, can be used for more calls to retrieve all results (currently retrieves 500 records at max)
-        $results['numberOfRecords'] = \intval($xmlObj->children(BNF_XML_RECORDS_NAMESPACE, false)->numberOfRecords);
+        $results['numberOfRecords'] = intval($xmlObj->children(BNF_XML_RECORDS_NAMESPACE, false)->numberOfRecords);
 
         // Encode to json for response to JavaScript
         $this->lookupResponse = $results;
     }
 
-    private function processNakalaIDSearch(){
+    private function processNakalaIDSearch() : void{
 
         $this->lookupResponse = json_decode($this->lookupResponse, true);
 
@@ -908,7 +919,7 @@ class LookupController{
         }
 
         $results = [];
-        if(!\array_key_exists('totalResults', $this->lookupResponse) || json_last_error() !== JSON_ERROR_NONE){
+        if(!array_key_exists('totalResults', $this->lookupResponse) || json_last_error() !== JSON_ERROR_NONE){
             $this->lookupResponse = json_last_error() !== JSON_ERROR_NONE ? $this->system->getError() : [];
             return;
         }
@@ -924,7 +935,7 @@ class LookupController{
         foreach ($this->lookupResponse['datas'] as $records) {
 
             $id = @$records['identifier'];
-            $has_files = \array_key_exists('files', $records);
+            $has_files = array_key_exists('files', $records);
 
             if($has_files){ // datas, files
                 $results['records'][$id]['rec_url'] = "https://nakala.fr/{$id}";
@@ -952,14 +963,14 @@ class LookupController{
 
                 if(strpos($metadata['propertyUri'], 'terms#creator') !== false){ // Author
 
-                    if(\array_key_exists('fullName', $metadata['value'])){
+                    if(array_key_exists('fullName', $metadata['value'])){
                         $results['records'][$id]['author'][] = $metadata['value']['fullName'];
                     }else{
                         $aut_name = '';
-                        if(\array_key_exists('givenname', $metadata['value'])){
+                        if(array_key_exists('givenname', $metadata['value'])){
                             $aut_name = $metadata['value']['givenname'];
                         }
-                        if(\array_key_exists('surname', $metadata['value'])){
+                        if(array_key_exists('surname', $metadata['value'])){
                             $aut_name .= $metadata['value']['surname'];
                         }
                         if($aut_name != ''){
@@ -989,25 +1000,25 @@ class LookupController{
 
             if($has_files){
                 foreach ($records['files'] as $idx => $file) {
-                    if(\array_key_exists('name', $file)){ // Name
+                    if(array_key_exists('name', $file)){ // Name
                         $results['records'][$id]['filename'][] = $file['name'];
                     }
-                    if(\array_key_exists('mime_type', $file)){ // Type
+                    if(array_key_exists('mime_type', $file)){ // Type
                         $results['records'][$id]['mime_type'][] = $file['mime_type'];
                     }
-                    if(\array_key_exists('sha1', $file)){ // File URI
+                    if(array_key_exists('sha1', $file)){ // File URI
                         $results['records'][$id]['url'][] = "https://api.nakala.fr/data/{$id}/{$file['sha1']}";
                     }
                 }
             }
 
-            if(\count($results['records'][$id]['title']) == 0){
+            if(count($results['records'][$id]['title']) == 0){
                 $results['records'][$id]['title'] = 'Undetermined';
             }
-            if(\count($results['records'][$id]['author']) == 0){
+            if(count($results['records'][$id]['author']) == 0){
                 $results['records'][$id]['author'] = 'Anonymous';
             }
-            if(\count($results['records'][$id]['source']) == 0){
+            if(count($results['records'][$id]['source']) == 0){
                 $results['records'][$id]['source'] = 'Unknown';
             }
         }
@@ -1015,7 +1026,7 @@ class LookupController{
         $this->lookupResponse = $results;
     }
 
-    private function processOpenthesoSearch(){
+    private function processOpenthesoSearch() : void{
 
         $def_lang = $this->system->userGetPreference('layout_language', 'fr');
         $def_lang = getLangCode2($def_lang);
@@ -1067,10 +1078,10 @@ class LookupController{
             $code = '';
             $translated_labels = [];
 
-            if(\array_key_exists($desc_idx, $details)){
+            if(array_key_exists($desc_idx, $details)){
                 $desc = $details[$desc_idx][0]['value'];
             }
-            if(\array_key_exists($code_idx, $details)){
+            if(array_key_exists($code_idx, $details)){
                 $code = $details[$code_idx][0]['value'];
             }
             $code_parts = explode('/', $uri);
@@ -1089,8 +1100,8 @@ class LookupController{
                 $translated_labels[$lang_code] = "{$lang_code}:{$label_details['value']}";// LANG_CODE:Value
             }
 
-            $notes = \array_key_exists($notes_idx, $details) ? $details[$notes_idx][0]['value'] : '';
-            $geopoint = \array_key_exists($geopoint_idx, $details) && $details[$geopoint_idx][0]['datatype'] == $valid_geopoint_type ?
+            $notes = array_key_exists($notes_idx, $details) ? $details[$notes_idx][0]['value'] : '';
+            $geopoint = array_key_exists($geopoint_idx, $details) && $details[$geopoint_idx][0]['datatype'] == $valid_geopoint_type ?
             $details[$geopoint_idx][0]['value'] : '';
 
             $results[] = ['term_label' => $label, 'term_desc' => $desc, 'term_code' => $code, 'term_uri' => $uri, 'term_translations' => $translated_labels, 'editor_notes' => $notes, 'geopoint' => $geopoint];
@@ -1099,11 +1110,11 @@ class LookupController{
         $this->lookupResponse = $results;
     }
 
-    private function retrieveMetadata(){
+    private function retrieveMetadata() : bool{
 
         if($this->lookupType === 'opentheso'){
 
-            if(\is_array(@$this->request['params'])){
+            if(is_array(@$this->request['params'])){
                 $this->request = array_merge($this->request, $this->request['params']);
             }
 
@@ -1141,12 +1152,12 @@ class LookupController{
     /**
      * Retrieves Opentheso thesauruses, potentially refreshing from the cache or server.
      */
-    private function getOpenthesoThesauruses(){
+    private function getOpenthesoThesauruses() : void{
 
         $this->lookupResponse = [];
         $response = false;
 
-        $refresh = \intval($this->request['refresh']) == 1;
+        $refresh = intval($this->request['refresh']) == 1;
 
         if(!file_exists($this->openthesoFile)){ // create new file
             $response = $this->updateOpenthesoThesauruses();
@@ -1164,7 +1175,7 @@ class LookupController{
                 $response = json_last_error() !== JSON_ERROR_NONE;
             }
 
-            if(!$response || !\is_array($this->lookupResponse) || $this->lookupResponse['last_update'] < date('Y-m-d')){
+            if(!$response || !is_array($this->lookupResponse) || $this->lookupResponse['last_update'] < date('Y-m-d')){
                 if($alreadyUpdated){
                     $this->system->errorExitApi('Unable to retrieve Opentheso thesauruses due to unknown error.', HEURIST_ACTION_BLOCKED);
                     exit;
@@ -1177,7 +1188,7 @@ class LookupController{
             return;
         }
 
-        if(\is_array($this->lookupResponse)){
+        if(is_array($this->lookupResponse)){
             unset($this->lookupResponse['last_update']);
         }
         if(empty($this->lookupResponse)){
@@ -1190,16 +1201,16 @@ class LookupController{
      *
      * @return bool Whether the updating was success.
      */
-    private function updateOpenthesoThesauruses(){
+    private function updateOpenthesoThesauruses() : bool{
 
         // Get existing data
         $dataOld = file_exists($this->openthesoFile) && filesize($this->openthesoFile) > 0 ? file_get_contents($this->openthesoFile) : [];
         $dataOld = json_decode($dataOld, true);
-        $dataOld = json_last_error() !== JSON_ERROR_NONE || !\is_array($dataOld) ? [] : $dataOld;
+        $dataOld = json_last_error() !== JSON_ERROR_NONE || !is_array($dataOld) ? [] : $dataOld;
 
         $this->lookupResponse = [];
 
-        $servers = !\is_array(@$this->request['servers']) || empty($this->request['servers']) ? array_keys($this->serviceURLs['opentheso']) : $this->request['servers'];
+        $servers = !is_array(@$this->request['servers']) || empty($this->request['servers']) ? array_keys($this->serviceURLs['opentheso']) : $this->request['servers'];
 
         foreach ($servers as $server){
 
@@ -1249,7 +1260,7 @@ class LookupController{
                 }
 
                 $this->lookupResponse[$server][$key] = ['name' => $label, 'groups' => []];
-                if($dataOld && \is_array($dataOld[$server][$key]) && !empty($dataOld[$server][$key]['groups'])){
+                if($dataOld && is_array($dataOld[$server][$key]) && !empty($dataOld[$server][$key]['groups'])){
                     // Validate cached groups, remove invalid ones
 
                     $old_groups = $dataOld[$server][$key]['groups'];
@@ -1263,7 +1274,7 @@ class LookupController{
                         if(json_last_error() !== JSON_ERROR_NONE || empty($group_dtls)){ continue; }
 
                         $keys = array_keys($group_dtls);
-                        if(!\array_key_exists('http://www.w3.org/2004/02/skos/core#prefLabel', $group_dtls[$keys[0]])){ continue; }
+                        if(!array_key_exists('http://www.w3.org/2004/02/skos/core#prefLabel', $group_dtls[$keys[0]])){ continue; }
 
                         $this->lookupResponse[$server][$key]['groups'][$group_id] = $gname;
                     }
@@ -1281,9 +1292,9 @@ class LookupController{
         return $fileSize > 0 && !empty($this->lookupResponse);
     }
 
-    private function getThesauruseCollections(){ // getOpenthesoCollections
+    private function getThesauruseCollections() : void{ // getOpenthesoCollections
 
-        if(empty($this->request['server']) || !\array_key_exists($this->request['server'], $this->serviceURLs['opentheso']) || empty($this->request['thesaurus'])){
+        if(empty($this->request['server']) || !array_key_exists($this->request['server'], $this->serviceURLs['opentheso']) || empty($this->request['thesaurus'])){
             $this->lookupResponse = $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid request to retrieve record groups for thesauruses');
             return;
         }
@@ -1299,12 +1310,12 @@ class LookupController{
         $data = filesize($this->openthesoFile) > 0 ? file_get_contents($this->openthesoFile) : null;
 
         $data = $data !== null ? json_decode($data, true) : null;
-        if(json_last_error() !== JSON_ERROR_NONE || !\is_array($data) || empty($data)){
+        if(json_last_error() !== JSON_ERROR_NONE || !is_array($data) || empty($data)){
             $this->lookupResponse = $this->system->addError(HEURIST_ERROR, 'Unable to retrieve details from the Opentheso cache');
             return;
         }
 
-        if(\intval(@$this->request['refresh']) != 1 && !empty($data[$server][$theso]['groups'])){
+        if(intval(@$this->request['refresh']) != 1 && !empty($data[$server][$theso]['groups'])){
             $this->lookupResponse = $data[$server][$theso]['groups'];
             return;
         }
@@ -1360,7 +1371,7 @@ class LookupController{
      * It checks if the metadata in the NAKALA_metadata_values.json file is up-to-date.
      * If the data is outdated or the file doesn't exist, it updates the metadata before returning the data.
      */
-    private function getNakalaMetadata(){
+    private function getNakalaMetadata() : void{
 
         $this->lookupResponse = [];
         $this->setupNakalaMetadata();
@@ -1373,7 +1384,7 @@ class LookupController{
      * Hardcoded Nakala metadata values for licences, data types, and property types
      * The 'years' type is too be setup client side
      */
-    private function setupNakalaMetadata(){
+    private function setupNakalaMetadata() : void{
 
         $licences = [
             'CC-BY-4.0',
@@ -1796,9 +1807,9 @@ class LookupController{
     *
     * @return array The requested subset of metadata, or the full data if 'all' is specified.
     */
-    private function getRequestedNakalaData(){
+    private function getRequestedNakalaData() : array{
 
-        if(!\is_array($this->lookupResponse) || empty($this->lookupResponse)){
+        if(!is_array($this->lookupResponse) || empty($this->lookupResponse)){
             return [];
         }elseif($this->lookupMetadata === 'all'){
             return $this->lookupResponse;
@@ -1808,17 +1819,17 @@ class LookupController{
 
         $response = [];
         foreach($requestedMetadata as $metadataOption){
-            $response[$metadataOption] = \array_key_exists($metadataOption, $this->lookupResponse) ? $this->lookupResponse[$metadataOption] : [];
+            $response[$metadataOption] = array_key_exists($metadataOption, $this->lookupResponse) ? $this->lookupResponse[$metadataOption] : [];
         }
 
-        if(\count($response) === 1){
+        if(count($response) === 1){
             $response = array_pop($response);
         }
 
         return $response;
     }
 
-    public function output($returnValue = false){
+    public function output(bool $returnValue = false){
 
         if(!$this->lookupResponse){
             $this->lookupResponse = $this->system->getError() ?? [];
@@ -1832,7 +1843,7 @@ class LookupController{
         exit;
     }
 
-    private function handleESTC(){
+    private function handleESTC() : bool{
 
         global $ESTC_UserName, $ESTC_Password;
 
@@ -1843,14 +1854,14 @@ class LookupController{
             return false;
         }
 
-        if(\array_key_exists('entity', $this->request)){ // retrieve definition details, e.g. book type terms
+        if(array_key_exists('entity', $this->request)){ // retrieve definition details, e.g. book type terms
             require_once __DIR__ . '/entityScrud.php';
             exit;
         }
 
         $this->system->getCurrentUserAndSysInfo(false);
 
-        if(\array_key_exists('action', $this->request)){ // import record for LRC18C lookup
+        if(array_key_exists('action', $this->request)){ // import record for LRC18C lookup
 
             if($this->request['action'] == 'import_records'){ // perform standard record import action, user on ESTC server
                 require_once __DIR__ . '/importController.php';
@@ -1868,7 +1879,7 @@ class LookupController{
         return true;
     }
 
-    private function sendESTCRequest(){
+    private function sendESTCRequest() : bool{
         $this->system->addError(HEURIST_ACTION_BLOCKED, 'ESTC Request not implemented');
         return false;
     }
@@ -1916,7 +1927,7 @@ $isAllowed = isset($ESTC_PermittedDBs, $ESTC_UserName, $ESTC_Password) && strpos
 
 if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false){ // currently on server where ESTC DB is located
 
-    if(\array_key_exists('entity', $params)){ // retrieve entity info (term lookup)
+    if(array_key_exists('entity', $params)){ // retrieve entity info (term lookup)
         require_once dirname(__FILE__).'/entityScrud.php';
         exit;
     }
@@ -1931,7 +1942,7 @@ if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== fal
 
             $system->getCurrentUserAndSysInfo(false);
 
-            if(\array_key_exists('action', $params)){ // import record for LRC18C lookup
+            if(array_key_exists('action', $params)){ // import record for LRC18C lookup
 
                 if($params['action'] == 'import_records'){ // perform standard record import action, user on ESTC server
                     require_once dirname(__FILE__).'/importController.php';
@@ -1950,14 +1961,14 @@ if(strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== fal
             $response = ['status' => HEURIST_ERROR, 'message' => "We are unable to access the records within the ESTC database at this moment.<br>Please contact the Heurist team. Query is: {$query}"];
         }
     }else{ // cannot access ESTC DB
-        $response = $isAllowed ? $system->getError() : array('status' => HEURIST_REQUEST_DENIED, 'message' => ESTC_ERROR_MSG);
+        $response = $isAllowed ? $system->getError() : ['status' => HEURIST_REQUEST_DENIED, 'message' => ESTC_ERROR_MSG];
     }
 
 }elseif(isset($ESTC_ServerURL)){ // external server
 
     $baseURL = "{$ESTC_ServerURL}hserv/controller/LookupController.php?";
 
-    if(\array_key_exists('action', $params) && @$params['action'] == 'import_records'){
+    if(array_key_exists('action', $params) && @$params['action'] == 'import_records'){
 
         $baseURL = "{$ESTC_ServerURL}hserv/controller/FrontController.php?"; // record_output
         $params = [];
