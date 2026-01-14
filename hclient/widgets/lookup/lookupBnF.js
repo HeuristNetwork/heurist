@@ -209,8 +209,11 @@ $.widget("heurist.lookupBnF", $.heurist.lookupBase, {
 
         json_data = window.hWin.HEURIST4.util.isJSON(json_data);
 
-        if(!Array.isArray(json_data?.result)){
+        if(json_data?.numberOfRecords === 0){
+            json_data.result = [];
+        }else if(!Array.isArray(json_data?.result)){
             this._super(false);
+            return;
         }
 
         let res_records = {}, res_orders = [];
@@ -241,7 +244,8 @@ $.widget("heurist.lookupBnF", $.heurist.lookupBase, {
 
         this.checkResultSize(json_data.numberOfRecords, maxRecords);
 
-        let res = res_orders.length > 0 ? {fields: fields, order: res_orders, records: res_records} : false;
+        let res = json_data.numberOfRecords === 0 ? null : false;
+        res = res_orders.length > 0 ? {fields: fields, order: res_orders, records: res_records} : res;
         this._super(res);
     }
 });
