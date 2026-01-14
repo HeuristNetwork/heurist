@@ -102,6 +102,7 @@ class BulkEmailSystem {
     private $sessionID = null; // session ID
     private $progress = ''; // progress update
     private $isCSVExport = false; // is exporting details in CSV format
+    private $isCronJob = false;
 
     /**
      * Constructor for BulkEmailSystem.
@@ -671,7 +672,7 @@ class BulkEmailSystem {
      *
      * @return int response code: 0 = success, anything else means error
      */
-    public function constructEmails() {
+    public function constructEmails($withReceipt) {
 
         global $mailRelayPwd; //see in heuristConfigIni
 
@@ -685,8 +686,10 @@ class BulkEmailSystem {
             return -1;
         }
 
-        $this->saveReceipt(null);
-        $this->exportReceipt(true);
+        if($withReceipt){
+            $this->saveReceipt(null);
+            $this->exportReceipt(true);
+        }
 
         // Initialise PHPMailer
         $mailer = new PHPMailer(true);// send true to use exceptions
@@ -694,14 +697,21 @@ class BulkEmailSystem {
         $mailer->Encoding = "base64";
         $mailer->isHTML(true);
 
-        $email_from = 'no-reply@'.(defined('HEURIST_MAIL_DOMAIN')?HEURIST_MAIL_DOMAIN:HEURIST_DOMAIN);
+        $domain = (defined('HEURIST_MAIL_DOMAIN')?HEURIST_MAIL_DOMAIN:HEURIST_DOMAIN);
+        if($domain==='127.0.0.1' || $domain==='localhost'){
+            $domain = 'heuristnetwork.org';
+        }
+        
+        $email_from = 'no-reply@'.$domain;
         $email_from_name = 'Heurist system ('.HEURIST_SERVER_NAME.')';
 
         $mailer->CharSet = 'UTF-8';
         $mailer->Encoding = 'base64';
         $mailer->isHTML( true );
         $mailer->ClearReplyTos();
-        $mailer->addReplyTo($this->cur_user['ugr_eMail'], $this->cur_user["ugr_FullName"]);
+        if(is_array($this->cur_user) && array_key_exists('ugr_eMail',$this->cur_user) && array_key_exists('ugr_FullName', $this->cur_user)){
+            $mailer->addReplyTo($this->cur_user['ugr_eMail'], $this->cur_user['ugr_FullName']);
+        }
         $mailer->SetFrom($email_from, $email_from_name);
 
         $this->printMessage("Sending ". count($this->user_details) ." emails:<div style='padding: 10px;'>");
@@ -738,7 +748,9 @@ class BulkEmailSystem {
 
         //SUCCESS
         $this->printMessage('</div><strong>Emails sent</strong><br>');
-        $this->saveReceipt($email_rtn);
+        if($withReceipt){
+            $this->saveReceipt($email_rtn);
+        }
 
         return $email_rtn;
     }
@@ -762,7 +774,7 @@ class BulkEmailSystem {
         $title = $this->email_subject ?? "Heurist email about databases: {$db_listed}";
 
         if ($this->debug_run) {
-            $email_rtn = 'OK';
+            $email_rtn = 0;//'OK';
         } elseif ($this->use_native_mail_function) {
             $email_rtn = $this->sendNativeMail($email, $title, $body);
         } elseif (isset($mailRelayPwd) && $mailRelayPwd != '' && endsWith($email, '@gmail.com')) {
@@ -1245,6 +1257,12 @@ class BulkEmailSystem {
      * @return void
      */
     private function printMessage($msg){
+        
+        if($this->isCronJob){
+            echo $msg;
+            return;
+        }
+        
 
         if(!$this->sessionID || $this->isCSVExport){
             return;
@@ -1303,6 +1321,132 @@ class BulkEmailSystem {
             $this->system->init($system->dbname(), true, false);
         }
     }
+    
+    public function processCronJob(string $templateFile, array $options = []): int
+    {
+        $this->isCronJob = true;
+        
+        // 1) Load ALL databases
+        $all = $this->getAllHeuristDatabases();          // you add this helper (below)
+        $this->databases = $this->validateDatabases($all);
+
+        // 2) Owners only
+        $this->users = "owner";
+
+        // 3) Template from file
+        [$subject, $body] = $this->loadTemplateFile($templateFile);  // you add this helper (below)
+        
+        if (empty($body)) {
+            $this->setError("Email body is not defined. Template: ".$templateFile);
+            return -1;
+        }
+        if (empty($subject)) {
+            $this->setError("Email subject is not defined. Template: ".$templateFile);
+            return -1;
+        }
+        
+        $this->email_subject = $subject;
+        $this->email_body = $body;
+
+        // Optional flags
+        $this->debug_run = !empty($options["dry_run"]);
+        $this->use_native_mail_function = !empty($options["use_native"]);
+        $this->add_gdpr = !empty($options["add_gdpr"]);
+
+        // Defaults used elsewhere
+        $this->rec_lastmod = $options["rec_lastmod"] ?? null;
+        $this->rec_lastmod_logic = $options["rec_lastmod_logic"] ?? "<=";
+
+        $this->user_details = [];
+        $this->user_invalid_email = [];
+        
+        // Run
+        $rtn = $this->createUserList();
+        if ($rtn !== 0) return $rtn;
+
+        if (empty($this->user_details)) {
+            $this->setError("No users have been retrieved, no emails have been sent");
+            return -1;
+        }
+
+        return $this->constructEmails( false );
+    }
+    
+    private function getAllHeuristDatabases(): array
+    {
+        $mysqli = $this->system->getMysqli();
+        $prefix = HEURIST_DB_PREFIX;
+
+        $dbs = [];
+        $q = "SELECT SCHEMA_NAME
+              FROM INFORMATION_SCHEMA.SCHEMATA
+              WHERE SCHEMA_NAME LIKE CONCAT(?, '%')
+              ORDER BY SCHEMA_NAME";
+
+        $stmt = $mysqli->prepare($q);
+        $stmt->bind_param("s", $prefix);
+        $stmt->execute();
+        $res = $stmt->get_result();
+
+        while ($row = $res->fetch_row()) {
+            $dbs[] = $row[0];
+        }
+        
+        $dbs = array('hdb_osmak_3','hdb_johns_test_063');
+
+        $stmt->close();
+        return $dbs;
+    }
+    
+    private function loadTemplateFile(string $path): array
+    {
+        if (!is_readable($path)) {
+            $this->setError("Template file not found or not readable: " . htmlspecialchars($path));
+            return [null, ""];
+        }
+
+        $raw = file_get_contents($path);
+        if ($raw === false) {
+            $this->setError("Failed to read template file: " . htmlspecialchars($path));
+            return [null, ""];
+        }
+
+        /*
+         * Normalize all line endings to \n
+         * Handles \r\n (Windows), \r (old Mac), \n (Unix)
+         */
+        $raw = str_replace(["\r\n", "\r"], "\n", $raw);
+
+        /*
+         * Split header and body on a line containing only ---
+         * Allows surrounding whitespace
+         */
+        $parts = preg_split('/\n\s*---\s*\n/', $raw, 2);
+
+        $header = $parts[0] ?? "";
+        $body   = $parts[1] ?? "";
+
+        $subject = null;
+
+        /*
+         * Parse header lines
+         */
+        foreach (preg_split("/\n/", $header) as $line) {
+            $line = trim($line);
+            if ($line === "") {
+                continue;
+            }
+
+            if (stripos($line, "subject:") === 0) {
+                $subject = trim(substr($line, strlen("subject:")));
+                break;
+            }
+        }
+
+        return [$subject, $body];
+    }
+
+    
 }
 
 /**
@@ -1323,7 +1467,7 @@ function sendSystemEmail($data) {
     if($setup_res == 0){
 
         //prepare and send emails
-        $email_res = $email_obj->constructEmails();
+        $email_res = $email_obj->constructEmails(true);
         if($email_res <= -1){
             $rtn = ['status' => HEURIST_ERROR, 'message' => 'An error occurred with preparing and sending the system emails.<br>' . $email_obj->getLog()];
         }elseif($email_res == 1){
