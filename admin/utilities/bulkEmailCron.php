@@ -22,8 +22,8 @@
 // Basic safety: CLI only
 // -----------------------------------------------------------------------------
 if (php_sapi_name() !== 'cli') {
-    //fwrite(STDERR, "This script must be run from the command line.\n");
-    //exit(1);
+    echo "This script must be run from the command line.\n";
+    exit(1);
 }
 
 require_once dirname(__FILE__).'/../../autoload.php';

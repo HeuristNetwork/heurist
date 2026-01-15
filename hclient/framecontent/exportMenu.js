@@ -381,28 +381,26 @@ function hexportMenu( container ) {
         if(opts.format=='rdf' && !(window.hWin.HAPI4.sysinfo['db_registeredid']>0) ){
 
            window.hWin.HEURIST4.msg.showMsgDlg(
-'<p>Sorry, RDF is only available for databases which have been registered. This is required in order to make your Subject, Predicate and Object URIs unique within the Heurist namespace.</p>'
-+'<p>Please go to Design > Register to register your database.</p>');
+    '<p>Sorry, RDF is only available for databases which have been registered. This is required in order to make your Subject, Predicate and Object URIs unique within the Heurist namespace.</p>'
+    +'<p>Please go to Design > Register to register your database.</p>');
             return;
         }
-    
-    
-        let q = "",
-        layoutString,rtFilter,relFilter,ptrFilter;
+
+        let q = "";
         const parameterLimit = 5000;
-        
+
         let isEntireDb = false;
-        
+
         opts.isAll = (opts.isAll!==false);
         opts.multifile = (opts.multifile===true);
 
         if(opts.isAll){
 
             if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
-                
+
                 q = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
 
-                isEntireDb = (window.hWin.HAPI4.currentRecordset && 
+                isEntireDb = (window.hWin.HAPI4.currentRecordset &&
                     window.hWin.HAPI4.currentRecordset.length()==window.hWin.HAPI4.sysinfo.db_total_records);
 
             }
@@ -422,40 +420,43 @@ function hexportMenu( container ) {
             return;
         }
 
-        let script; 
-        let params = '';
+        let script;
         const showOptionsDialog = (opts.format!='html');
+
+        // ---- pick depth/linkmode defaults (previously via params string) ----
+        // We'll store these in locals then set them onto newURLParams later.
+        let depthValue = null;
+
         if(showOptionsDialog){
 
             if(isEntireDb){
-                params =  'depth=0&linkmode=none';
+                depthValue = '0';
+                opts.linksMode = 'none';
             }else {
                 if(opts.format!='iiif' && opts.questionResolved!==true){
                     let $expdlg = window.hWin.HEURIST4.msg.showMsgDlg(
-'<p>The records you are exporting may contain pointers to other records which are not in your current results set. These records may additionally point to other records.</p>'                
-//+'<p>Heurist follows the chain of related records, which will be included in the XML or JSON output. The total number of records exported will therefore exceed the results count indicated.</p>'
-//+'<p>To disable this feature and export current result only uncheck "Follow pointers"</p>'
-+'<p style="padding:20px 0"><label><input type="radio" name="links" value="direct" style="float:left;margin-right:8px;" checked/>Follow pointers and relationship markers in records <b>(recommended)</b></label>'
-+'<br><br><label><input type="radio" name="links" value="direct_links" style="float:left;margin-right:8px;"/>Follow only pointers, ignore relationship markers <warning about losing relationships></label>'
-+'<br><br><label><input type="radio" name="links" value="none" style="float:left;margin-right:8px;"/>Don\'t follow pointers or relationship markers (you will lose any data which is referenced by pointer fields in the exported records)</label>'
-+'<br><br><label><input type="radio" name="links" value="all" style="float:left;margin-right:8px;"/>Follow ALL connections including reverse pointers" (warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</label></p>'
-+(opts.format=='hml'?'<p><input type="checkbox" name="human_readable_names"/>Include human-readable names and local IDs for everything '
-+'<div class="heurist-helper3">(NOT RECOMMENDED except for small subset troubleshooting.If checked this will result in a VERY large file and VERY long export time)</div>':'')
-+(opts.format=='rdf'?'<p>Since, RDF export is experimental please specify the access word: <input type="password" name="rdfpwd"/>':'')
+    '<p>The records you are exporting may contain pointers to other records which are not in your current results set. These records may additionally point to other records.</p>'
+    +'<p style="padding:20px 0"><label><input type="radio" name="links" value="direct" style="float:left;margin-right:8px;" checked/>Follow pointers and relationship markers in records <b>(recommended)</b></label>'
+    +'<br><br><label><input type="radio" name="links" value="direct_links" style="float:left;margin-right:8px;"/>Follow only pointers, ignore relationship markers <warning about losing relationships></label>'
+    +'<br><br><label><input type="radio" name="links" value="none" style="float:left;margin-right:8px;"/>Don\'t follow pointers or relationship markers (you will lose any data which is referenced by pointer fields in the exported records)</label>'
+    +'<br><br><label><input type="radio" name="links" value="all" style="float:left;margin-right:8px;"/>Follow ALL connections including reverse pointers" (warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</label></p>'
+    +(opts.format=='hml'?'<p><input type="checkbox" name="human_readable_names"/>Include human-readable names and local IDs for everything '
+    +'<div class="heurist-helper3">(NOT RECOMMENDED except for small subset troubleshooting.If checked this will result in a VERY large file and VERY long export time)</div>':'')
+    +(opts.format=='rdf'?'<p>Since, RDF export is experimental please specify the access word: <input type="password" name="rdfpwd"/>':'')
 
-                    , function(){ 
+                    , function(){
                         if(opts.format=='rdf' && $expdlg.find('input[name="rdfpwd"]').val()!='Tehri'){
                             return;
                         }
-                        
+
                         let val = $expdlg.find('input[name="links"]:checked').val();
 
                         opts.linksMode = val;
-                        opts.questionResolved=true; 
-                        
+                        opts.questionResolved=true;
+
                         opts.showHumanReadableNames = $expdlg.find('input[name="human_readable_names"]').is(':checked');
 
-                        _exportRecords( opts ); 
+                        _exportRecords( opts );
                     },
                     {
                         yes: 'Proceed',
@@ -464,63 +465,72 @@ function hexportMenu( container ) {
 
                     return;
                 }
-                params =  'depth=all';
+                depthValue = 'all';
             }
         }
 
-        params =  params + (opts.linksMode?('&linkmode='+opts.linksMode):'');
+        // ---- parse the existing query string into params ----
+        // q is expected to include a leading "?" already; URLSearchParams accepts that.
+        const qParams = new URLSearchParams(q);
 
-        let urlParams = new URLSearchParams(q);
         if(!window.hWin.HEURIST4.util.isempty(opts.columns)){
-            urlParams.append('columns', opts.columns);
+            qParams.set('columns', opts.columns);
         }
-        urlParams = [...urlParams.entries()];
 
-        let newURLParams = new URLSearchParams();
-        let toStoreParams = {};
-        let longParameters = ['q', 'columns'];
-        urlParams.forEach(async (param) => {
+        // ---- build final URL params here (no string concatenation) ----
+        const newURLParams = new URLSearchParams();
 
-            let key = param[0];
-            let value = param[1];
+        // move safe params over; pre-send long ones
+        let preparedSessionID;
+        const toStoreParams = {};
+        const longParameters = new Set(['q', 'columns']);
 
-            if(value.length > parameterLimit){ // presend larger parameters in chunks, to avoid a 414 error
+        // IMPORTANT: forEach(async ...) won't await; use for..of
+        for (const [key, value] of qParams.entries()) {
 
-                let paramChunks = Math.ceil(value.length / parameterLimit);
+            if (typeof value === 'string' && value.length > parameterLimit) {
+
+                // pre-send larger parameters in chunks, to avoid a 414 error
+                const paramChunks = Math.ceil(value.length / parameterLimit);
                 let start = 0;
 
-                for(let i = 0; i < paramChunks; i++){
-                    preparedSessionID = await _preSendParameters({[key]: value.substring(start, start + parameterLimit)});
+                for (let i = 0; i < paramChunks; i++) {
+                    preparedSessionID = await _preSendParameters({ [key]: value.substring(start, start + parameterLimit) });
                     start += parameterLimit;
                 }
 
-                return;
-            }else if(!longParameters.includes(key)){ // are there other possible long parameters here?
-                newURLParams.append(key, value);
-                return;
+                continue;
             }
 
-            toStoreParams[key] = value;
-        });
+            if (!longParameters.has(key)) {
+                newURLParams.append(key, value);
+            } else {
+                toStoreParams[key] = value;
+            }
+        }
 
         if(Object.keys(toStoreParams).length > 0){
             preparedSessionID = await _preSendParameters(toStoreParams);
         }
-        if(newURLParams.size > 0){
-            q = (q.startsWith('?') ? '&' : '') + newURLParams.toString();
-        }else{
-            q = '';
+
+        // depth/linkmode (only when showOptionsDialog true in old logic)
+        if (showOptionsDialog && depthValue !== null) {
+            newURLParams.set('depth', depthValue);
+        }
+        if (showOptionsDialog && opts.linksMode) {
+            newURLParams.set('linkmode', opts.linksMode);
         }
 
+        // ---- select script + format-specific params ----
         if(opts.format=='hml'){
 
-            script = 'export/xml/flathml.php';                
+            script = 'export/xml/flathml.php';
 
-            //multifile is for HuNI  
-            params =  params + (opts.multifile?'&multifile=1':'');  
+            // multifile is for HuNI
+            if (opts.multifile) newURLParams.set('multifile', '1');
 
             if(opts.showHumanReadableNames){
-                params =  params + '&human_readable_names=1';    
+                newURLParams.set('human_readable_names', '1');
             }
 
         }else{
@@ -530,53 +540,64 @@ function hexportMenu( container ) {
             if(opts.format=='iiif'){
 
                 if(opts.save_as_file==='mirador'){
-                    //create dynamic manifest with given set of media
-                    script = 'hclient/widgets/viewers/miradorViewer.php'
+                    // create dynamic manifest with given set of media
+                    script = 'hclient/widgets/viewers/miradorViewer.php';
                 }else{
-                    params = 'format=iiif';
+                    newURLParams.set('format', 'iiif');
                 }
+
             }else{
-                params = params + '&format='+opts.format
+                newURLParams.set('format', opts.format);
 
                 if(opts.format=='gephi'){
-                    params += $('#limitGEPHI').is(':checked') ? '&limit=1000' : '';
+                    if ($('#limitGEPHI').is(':checked')) newURLParams.set('limit', '1000');
+
                 }else if(opts.format=='geojson'){
-                    params = params + '&detail_mode='+$('input[name="detail_mode"]:checked').val();        
+                    newURLParams.set('detail_mode', $('input[name="detail_mode"]:checked').val());
+
                 }else if(opts.format=='rdf'){
-                    params = params + '&vers=2&serial_format='+$('input[name="serial_format"]:checked').val();        
+                    newURLParams.set('vers', '2');
+                    newURLParams.set('serial_format', $('input[name="serial_format"]:checked').val());
+
                     let include_additional_info = '';
                     include_additional_info += $('#include_definition_label').is(':checked')?'1':'0';
                     include_additional_info += $('#include_resource_term_label').is(':checked')?'1':'0';
                     include_additional_info += $('#include_resource_rec_title').is(':checked')?'1':'0';
                     include_additional_info += $('#include_resource_file_info').is(':checked')?'1':'0';
+
                     if(include_additional_info=='1111'){
                         include_additional_info = '1';
                     }
                     if(include_additional_info!==''){
-                        params = params + '&extinfo=' + include_additional_info;
+                        newURLParams.set('extinfo', include_additional_info);
                     }
+
                 }else if(opts.format!=='html'){
-                    params = params +'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
+                    newURLParams.set('defs', '0');
+                    newURLParams.set('extended', ($('#extendedJSON').is(':checked')?2:1));
                 }
             }
         }
 
-        if(opts.save_as_file===true){          
-            params = params + '&file=1'; //save as file
+        if(opts.save_as_file===true){
+            newURLParams.set('file', '1'); // save as file
         }
 
         if(window.hWin.HEURIST4.util.isPositiveInt(preparedSessionID)){
-            params += `&preparedID=${preparedSessionID}`;
+            newURLParams.set('preparedID', String(preparedSessionID));
         }
 
-        let database = `${(window.hWin.HEURIST4.util.isempty(q) ? '?' : '&')}db=${window.hWin.HAPI4.database}`;
+        // always include db
+        newURLParams.set('db', window.hWin.HAPI4.database);
 
-        let url = `${window.hWin.HAPI4.baseURL}${script}${q}${database}&${params}`;
+        // final URL: always exactly one "?" and no duplicated "&"
+        const url = `${window.hWin.HAPI4.baseURL}${script}?${newURLParams.toString()}`;
 
         window.open(url, '_blank');
 
         return false;
     }
+
     
     /**
      * Handles the export of records in KML format.
