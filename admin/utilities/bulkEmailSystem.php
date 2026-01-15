@@ -703,7 +703,7 @@ class BulkEmailSystem {
         }
         
         $email_from = 'no-reply@'.$domain;
-        $email_from_name = 'Heurist system ('.HEURIST_SERVER_NAME.')';
+        $email_from_name = 'Heurist system ('.$domain.')';
 
         $mailer->CharSet = 'UTF-8';
         $mailer->Encoding = 'base64';
@@ -780,6 +780,7 @@ class BulkEmailSystem {
         } elseif (isset($mailRelayPwd) && $mailRelayPwd != '' && endsWith($email, '@gmail.com')) {
             $email_rtn = $this->sendViaRelay($email, $title, $body, $mailRelayPwd);
         } else {
+            //$this->printMessage('sendUsingPHPMailer');    
             $email_rtn = $this->sendUsingPHPMailer($email, $title, $body, $mailer);
         }
 
@@ -1259,7 +1260,7 @@ class BulkEmailSystem {
     private function printMessage($msg){
         
         if($this->isCronJob){
-            echo $msg;
+            echo strip_tags($msg)."\n";
             return;
         }
         
@@ -1392,8 +1393,8 @@ class BulkEmailSystem {
             $dbs[] = $row[0];
         }
         
-        $dbs = array('hdb_osmak_3','hdb_johns_test_063');
-
+        //TEST $dbs = array('hdb_osmak_1','hdb_osmak_2','hdb_ian_testdb');
+        
         $stmt->close();
         return $dbs;
     }
@@ -1401,13 +1402,17 @@ class BulkEmailSystem {
     private function loadTemplateFile(string $path): array
     {
         if (!is_readable($path)) {
-            $this->setError("Template file not found or not readable: " . htmlspecialchars($path));
+            $sMsg = "Template file not found or not readable: " . htmlspecialchars($path)."\n";                        
+            echo $sMsg;
+            $this->setError($sMsg);
             return [null, ""];
         }
 
         $raw = file_get_contents($path);
         if ($raw === false) {
-            $this->setError("Failed to read template file: " . htmlspecialchars($path));
+            $sMsg = "Failed to read template file: " . htmlspecialchars($path)."\n";            
+            echo $sMsg;
+            $this->setError($sMsg);
             return [null, ""];
         }
 
@@ -1425,7 +1430,7 @@ class BulkEmailSystem {
 
         $header = $parts[0] ?? "";
         $body   = $parts[1] ?? "";
-
+        
         $subject = null;
 
         /*

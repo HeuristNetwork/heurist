@@ -31,31 +31,44 @@ require_once dirname(__FILE__).'/../../autoload.php';
 require_once "bulkEmailSystem.php";
 
 // Example
-// 15 2 * * * /usr/bin/php /path/bulkEmailCron.php /etc/heurist/templates/owner_notice_email.txt >> /var/log/bulk_email.log 2>&1
+// 15 2 * * * /usr/bin/php /path/bulkEmailCron.php /srv/scripts/owner_notice_email.txt >> /var/log/bulk_email.log 2>&1
 
 
 $template = $argv[1] ?? null;
 
-$template = '/etc/heurist/templates/email_template.txt';
+//$template = '/srv/scripts/email_template_backup_your_db.txt';
+//$template = 'c:/docs/email_template.txt';
+//$template = '/var/www/html/HEURIST/email_template_backup_your_db.txt';
 
 if (!$template) {
-    fwrite(STDERR, "Usage: php bulkEmailCron.php /path/to/template.txt [--dry-run]\n");
+    $sMsg = "Usage: php -f bulkEmailCron.php /path/to/template.txt [--dry-run]\n";
+    if(defined('STDERR')){
+        fwrite(STDERR, $sMsg);    
+    }else{
+        echo $sMsg;
+    }
     exit(2);
 }
 
 $dryRun = is_array($argv) && in_array("--dry-run", $argv, true);
 
-//$dryRun = true;
+//$dryRun = false;
 
 $bulk = new bulkEmailSystem($system);
 $rtn = $bulk->processCronJob($template, [
     "dry_run" => $dryRun,
-    // "use_native" => true,
+    //"use_native" => true,
     // "add_gdpr" => true,
 ]);
 
 if ($rtn !== 0) {
-    fwrite(STDERR, "Bulk email failed: " . $bulk->getError() . "\n");
+    $sMsg = "Bulk email failed: " . $bulk->getError() . "\n";
+    if(defined('STDERR')){
+        fwrite(STDERR, $sMsg);    
+    }else{
+        echo $sMsg;
+    }
+    
     exit(1);
 }
 
