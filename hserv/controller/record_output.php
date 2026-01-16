@@ -672,7 +672,7 @@ function prepareParameters($type, $parameters){
  *
  * @param string $type Process type, e.g. 'export' or 'import'
  * @param array $parameters Parameters array to be updated with stored parameters
- * @return void
+ * @return bool
  */
 function retrieveParameters($system, $type, &$parameters){
 

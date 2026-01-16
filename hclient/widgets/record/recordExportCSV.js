@@ -295,9 +295,19 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
      * @returns {Array<object>} Array of button definition objects.
      */
     _getActionButtons: function(){
+
         let res = this._super();
         res[1].text = window.hWin.HR('Download');
         res[0].text = window.hWin.HR('Close');
+
+        let btnGetFeed = {
+            text:window.hWin.HR('Get feed'), 
+            class:'ui-button-action btnDoActionFeed',
+            css:{'float':'right','margin-left':'30px'}, 
+            click: () => this.doAction('feed')
+        };
+        res.splice(1, 0, btnGetFeed);
+
         return res;
     },    
         
@@ -414,16 +424,16 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         window.hWin.HEURIST4.ui.initHSelect(selScope);
         
     },
-            
+
     /**
      * @function doAction
      * @memberof Widgets.Records.recordExportCSV
      * @private
      * @description Performs the CSV export. Gathers the scope of records and current settings (using `getSettings`).
      * Constructs a request object and submits it via a hidden form to the server-side export controller.
-     * @param {any} [mode] - (Unused in this implementation).
+     * @param {string} [outputMode] - how the results should be outputted ['file', 'feed']
      */
-    doAction: function(mode){
+    doAction: function(outputMode = 'file'){
 
         let scope_val = this.selectRecordScope.val();
         
@@ -457,6 +467,9 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             
         if(rec_RecTypeID>0){
             request['rec_RecTypeID'] = rec_RecTypeID;
+        }
+        if(outputMode === 'feed'){
+            request['output_raw'] = 1;
         }
         
         let url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_output.php'
