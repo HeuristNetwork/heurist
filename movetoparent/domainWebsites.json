@@ -1,0 +1,14 @@
+{
+  "domains": {
+    "parramattafoodcultures.net": { "db": "parramatta_food_cultures", "website": 68, "version": "heurist" },
+    "dicobiosport.huma-num.fr": { "db": "dicobiosport", "version": "heurist" },
+    "privileges.huma-num.fr": { "db": "privileges", "version": "heurist" },
+    "heuristnetwork.org": { "db": "Heurist_Contacts", "version": "heurist" },
+    "mbh.example.com": { "db": "Manuscripta_Bibliae_Hebraicae", "version": "heurist" }
+  },
+  "dbref": {
+    "MBH": { "db": "Manuscripta_Bibliae_Hebraicae" },
+    "BEnum": { "db": "BE_Bulletin_Epigraphique" }
+  },
+  "reserved_paths": ["heurist","h7-alpha","h7-ao","h7-bm","startup","matomo","errors","db","api"]
+}

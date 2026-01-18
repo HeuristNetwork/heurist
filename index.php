@@ -26,7 +26,7 @@ use hserv\utilities\USystem;
 use hserv\utilities\USanitize;
 use hserv\controller\FrontController;
 
-require_once dirname(__FILE__).'/autoload.php';
+require_once __DIR__.'/autoload.php';
 
 $isLocalHost = isLocalHost();
 
