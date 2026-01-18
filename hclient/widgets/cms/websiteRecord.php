@@ -230,14 +230,14 @@ if(!($rec['rec_RecTypeID']==RT_CMS_HOME || $isWebPage)){
     exit;
 }
 
-$image_icon = __getFile($rec, DT_THUMBNAIL, (array_key_exists('embed', $_REQUEST)?PDIR:HEURIST_BASE_URL).'favicon.ico');
-$image_logo = __getFile($rec, DT_FILE_RESOURCE, null);
+$image_icon = __getFile($system, $rec, DT_THUMBNAIL, (array_key_exists('embed', $_REQUEST)?PDIR:HEURIST_BASE_URL).'favicon.ico');
+$image_logo = __getFile($system, $rec, DT_FILE_RESOURCE, null);
 
-$image_altlogo = __getFile($rec, '2-926', null);//DT_CMS_ALTLOGO
+$image_altlogo = __getFile($system, $rec, '2-926', null);//DT_CMS_ALTLOGO
 $image_altlogo_url = __getValue($rec, '2-943');//DT_CMS_ALTLOGO_URL
 $title_alt = __getValue($rec, '3-1009');//DT_CMS_ALT_TITLE
 $title_alt2 = __getValue($rec, '2-1052');
-$image_banner = __getFile($rec, '99-951', null);//DT_CMS_BANNER
+$image_banner = __getFile($system, $rec, '99-951', null);//DT_CMS_BANNER
 
 $image_logo = $image_logo?'<img src="'.$image_logo.'">':'';
 
@@ -328,8 +328,7 @@ if($system->defineConstant('DT_SYMBOLOGY')){
 //
 // returns link to uploaded file
 //
-function __getFile(&$rec, $id, $def){
-    global $system;
+function __getFile($system, &$rec, $id, $def){
 
     if(is_string($id) && strpos($id,'-')){
         $id = ConceptCode::getDetailTypeLocalID($id);

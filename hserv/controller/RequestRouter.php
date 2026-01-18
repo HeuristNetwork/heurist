@@ -152,10 +152,10 @@ final class RequestRouter
 
         // /<db>
         if (count($segments) === 1) {
-            $params = ['db' => $dbResolved, 'website' => 1];
+            $params = ['db' => $dbResolved, 'website' => 0];
 
             if ($allowRedirects) {
-                // Canonicalize to /<activeVersion>/?db=...&website=1
+                // Canonicalize to /<activeVersion>/?db=...&website=0
                 $qs = http_build_query($params);
                 return self::resultRedirect("/{$activeVersion}/?{$qs}", 302, $params);
             }
@@ -297,13 +297,13 @@ final class RequestRouter
 
         // Home: /
         if (empty($segments)) {
-            $params['website'] = ($website !== null) ? $website : 1;
+            $params['website'] = ($website !== null) ? $website : 0;
             return self::resultInternal(self::serverRoot() . "/{$version}/index.php", $params);
         }
 
         // /<pageid>
         if (count($segments) === 1 && ctype_digit($segments[0])) {
-            $params['website'] = ($website !== null) ? $website : 1;
+            $params['website'] = ($website !== null) ? $website : 0;
             $params['pageid'] = (int)$segments[0];
             return self::resultInternal(self::serverRoot() . "/{$version}/index.php", $params);
         }
@@ -371,7 +371,7 @@ final class RequestRouter
                 if (isset($rest[0]) && ctype_digit($rest[0])) {
                     $params['website'] = (int)$rest[0];
                 } else {
-                    $params['website'] = 1;
+                    $params['website'] = 0; //default
                 }
                 if (isset($rest[1]) && ctype_digit($rest[1])) {
                     $params['pageid'] = (int)$rest[1];

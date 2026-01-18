@@ -7,7 +7,7 @@ use hserv\controller\RequestRouter;
 $mappingFile = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/') . '/HEURIST/domainWebsites.json';
 
 RequestRouter::dispatch([
-  'default_version' => 'heurist',
+  'default_version' => 'heurist', //'h7-alpha',
   'mapping_file' => $mappingFile,
   'allow_canonical_redirects' => false // turn on later if you decide to canonicalize
 ]);

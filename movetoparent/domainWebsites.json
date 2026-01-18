@@ -1,6 +1,7 @@
 {
   "domains": {
     "parramattafoodcultures.net": { "db": "parramatta_food_cultures", "website": 68, "version": "heurist" },
+    "china-australia-heritage-corridor.net": { "db": "WSU_China_Australia_Heritage_Corridor", "website": 1551, "version": "heurist" },
     "dicobiosport.huma-num.fr": { "db": "dicobiosport", "version": "heurist" },
     "privileges.huma-num.fr": { "db": "privileges", "version": "heurist" },
     "heuristnetwork.org": { "db": "Heurist_Contacts", "version": "heurist" },

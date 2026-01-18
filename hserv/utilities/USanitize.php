@@ -63,13 +63,27 @@ class USanitize {
      */
     public static function sanitizeInputArray()
     {
-        if(@$_SERVER['REQUEST_METHOD']=='POST'){
-            $req_params = filter_input_array(INPUT_POST);
-        }else{
-            $req_params = filter_input_array(INPUT_GET);
+        if (@$_SERVER['REQUEST_METHOD'] === 'POST') {
+            $req_params = filter_input_array(INPUT_POST) ?: [];
+        } else {
+            $req_params = filter_input_array(INPUT_GET) ?: [];
         }
+
+        // Merge router-injected params (from internal routing)
+        // $_REQUEST may include cookies too, so only merge safe scalar keys
+        if (!empty($_REQUEST) && is_array($_REQUEST)) {
+            foreach ($_REQUEST as $k => $v) {
+                if ($k === '' || $k === null) continue;
+                // Do not override explicit GET/POST values unless you want router to win.
+                if (!array_key_exists($k, $req_params)) {
+                    $req_params[$k] = $v;
+                }
+            }
+        }
+
         return $req_params;
     }
+
 
     /**
      * Recursively sanitizes an array of parameters by trimming whitespace and applying `filter_var` with `FILTER_SANITIZE_STRING`.

@@ -54,4 +54,4 @@ require_once dirname(__FILE__).'/hserv/utilities/ULocale.php';
 
 global $system;
 global $glb_curl_error;
-?>
+
