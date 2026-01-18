@@ -212,6 +212,7 @@ public static function output($data, $params){
     }
 
     $save_to_file = @$params['save_to_file'] == 1;
+    $ouput_to_browser = @$params['output_raw'] == 1;
 
     $term_ids_only = (@$params['prefs']['term_ids_only']==1);
     $include_term_ids = (@$params['prefs']['include_term_ids']==1) || $term_ids_only;
@@ -1081,7 +1082,7 @@ public static function output($data, $params){
 
     $error_log[] = print_r($rt_counts, true);
 
-    return self::writeResults( $streams, $filename, $headers, $error_log, $save_to_file );
+    return self::writeResults( $streams, $filename, $headers, $error_log, $save_to_file, $ouput_to_browser );
 } //output
 
 //
@@ -1441,10 +1442,11 @@ public static function output_header($data, $params)
      * @param array|null $error_log An array of error messages to include in a log file (primarily for ZIP output).
      * @param bool $save_to_file If true, attempts to save the output to a file on the server
      *                           instead of streaming to the browser. Default is false.
+     * @param bool $ouput_to_browser If true, displays the raw feed to the user's web browser, no file downloading
      * @return int|void If `$save_to_file` is true, returns the number of bytes written (or a negative value on error).
      *                  Otherwise, no explicit return value as it exits after output.
      */
-private static function writeResults( $streams, $temp_name, $headers, $error_log, $save_to_file=false ) {
+private static function writeResults( $streams, $temp_name, $headers, $error_log, $save_to_file=false, $ouput_to_browser=false ) {
 
     if(is_array($streams) && count($streams)<2){
 
@@ -1514,10 +1516,15 @@ private static function writeResults( $streams, $temp_name, $headers, $error_log
 
         $content_len = $content_len+3;
 
-        header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename='.rawurlencode($csv_filename));
-        header(CONTENT_LENGTH . $content_len);
-        echo "\xEF\xBB\xBF";// Byte Order Mark
+        if($ouput_to_browser){
+            $out = "<pre>{$out}</pre>";
+        }else{
+            header('Content-Type: text/csv');
+            header('Content-Disposition: attachment; filename='.rawurlencode($csv_filename));
+            header(CONTENT_LENGTH . $content_len);
+            echo "\xEF\xBB\xBF";// Byte Order Mark
+        }
+
         exit($out);
 
     }else{
