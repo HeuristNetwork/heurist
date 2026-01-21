@@ -54,20 +54,21 @@ require_once dirname(__FILE__).'/autoload.php';
 // Base path for assets/scripts. Even for versionless pretty URLs, assets live under /<version>/.
 // (websiteRecord.php and many legacy scripts expect PDIR to be set early.)
 if (!defined('PDIR') && !array_key_exists('embed', $_REQUEST)) {
-    define('PDIR', '/' . basename(__DIR__) . '/');
-/*
-    $defaultVersion = 'heurist'; // change if needed
+
+    $defaultVersion = 'h7-alpha'; // change if needed
 
     $reqPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
     $reqPath = preg_replace('~/index\.php$~i', '/', $reqPath);
     $reqPath = preg_replace('~//+~', '/', $reqPath);
 
     if (preg_match('~^/(heurist|h7-alpha|h7-[A-Za-z0-9_-]+)(/|$)~', $reqPath, $m)) {
-        define('PDIR', '/' . $m[1] . '/');
+        define('PDIR', '/' . $m[1] . '/');   // keeps "~heurist" or "heurist" exactly as in URL
     } else {
-        define('PDIR', '/' . $defaultVersion . '/');   // <-- key change
+        // For versionless pretty URLs (eg /db/web/...), choose your public default.
+        // If your public default is "heurist", set it to "heurist" here.
+        define('PDIR', '/' . $defaultVersion . '/');
     }
-*/    
+ 
 }
 
 $isLocalHost = isLocalHost();
