@@ -433,12 +433,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 // assign paramters
                 //
                 if(widget_name=='heurist_resultListExt'){ // custom report
+
                     if(opts['template']){
                         $dlg.find('select[name="rep_template"]').attr('data-template', opts['template']);        
                     }
-                    
-                    $dlg.find('#empty_remark').val(opts['empty_remark']?opts['empty_remark']:opts['emptysetmessage']); //for empty selection
-                    $dlg.find('#placeholder_text').val(opts['placeholder_text']); //for empty result
 
                     if(!opts['selection_mode']){
 
@@ -451,11 +449,11 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         $dlg.find(`input[value="${opts['selection_mode']}"]`).prop('checked', true);
                     }
                 }else if(widget_name=='heurist_resultList'){ // standard result list
+
                     if(opts['rendererExpandDetails']){
                         $dlg.find('select[name="rendererExpandDetails"]').attr('data-template', opts['rendererExpandDetails']);        
                     }
-                    $dlg.find('#empty_remark').val(opts['empty_remark']);
-                    $dlg.find('#placeholder_text').val(opts['placeholder_text']);
+
                     if(opts['field_for_ext_classes']){
                         $dlg.find('select[name="field_for_ext_classes"]').attr('fld-id', opts['field_for_ext_classes']);
                     }
@@ -488,14 +486,20 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 }else if(widget_name=='heurist_resultListDataTable'){ // datatable
                     $dlg.find('#dataTableParams').val(opts['dataTableParams']);
                     $dlg.find('#empty_remark').val(opts['emptyTableMsg']);
-                    $dlg.find('#placeholder_text').val(opts['placeholder_text']);
                 }else if(widget_name=='heurist_SearchInput'){
-                    $dlg.find('#si_placeholder_text').val(opts['placeholder_text']);
+
+                    let placeholder = opts['placeholder_text'];
+                    $dlg.find('#si_placeholder_text').val(placeholder == 'def' ? '' : placeholder);
                 }else if(widget_name=='heurist_StoryMap'){
+
                     window.hWin.HEURIST4.ui.initEditSymbologyControl($dlg.find('#def_map_symbology'), opts.def_map_symbology);
                     window.hWin.HEURIST4.ui.initEditSymbologyControl($dlg.find('#def_story_symbology'), opts.def_story_symbology);
-                    $dlg.find('#placeholder_text').val(opts['storyPlaceholder']);
-                    $dlg.find('#elementsPlaceholder').val(opts['elementsPlaceholder']);
+                    
+                    let storyPlaceholder = opts['storyPlaceholder'];
+                    $dlg.find('#placeholder_text').val(storyPlaceholder == 'def' ? '' : storyPlaceholder);
+
+                    let elementsPlaceholder = opts['elementsPlaceholder'];
+                    $dlg.find('#elementsPlaceholder').val(elementsPlaceholder == 'def' ? '' : elementsPlaceholder);
                 }
 
                 if(_def_labels[widget_name]){ // fill in default labels
@@ -511,20 +515,44 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         let label = window.HR(_def_labels[widget_name]['elementsPlaceholder_def']);
                         $dlg.find('#elementsPlaceholder_def').text(label).attr('title', label);
                     }
+                    if(widget_name == 'heurist_SearchInput'){
+                        $dlg.find('#si_placeholder_def').text(def_placeholder).attr('title', def_placeholder);
+                    }
                 }
 
-                if(opts['blank_placeholder'] || $dlg.find('#placeholder_text').val() == 'def'){ // replace 'def' with a blank
-                    $dlg.find('#placeholder_text').val('');
+                let hasPlaceholder = $dlg.find(`.${widget_name} #placeholder_text`).length > 0;
+                let hasRemark = $dlg.find(`.${widget_name} #empty_remark`).length > 0;
+                if((hasPlaceholder || widget_name == 'heurist_SearchInput') && opts['placeholder_recent']){
+                    $dlg.find('#placeholder_text').val(opts['placeholder_recent']);
+                    $dlg.find('#si_placeholder_text').val(opts['placeholder_recent']);
                 }
-                if(opts['si_blank_placeholder'] || $dlg.find('#si_placeholder_text').val() == 'def'){ // replace 'def' with a blank
-                    $dlg.find('#si_placeholder_text').val('');
+                if(hasRemark && opts['empty_remark_recent']){
+                    $dlg.find('#empty_remark').val(opts['empty_remark_recent']);
                 }
-                if(opts['blank_empty_remark'] || $dlg.find('#empty_remark').val() == 'def'){ // replace 'def' with a blank
-                    $dlg.find('#empty_remark').val('');
+                if(opts['elementsPlaceholder_recent']){
+                    $dlg.find('#elementsPlaceholder').val(opts['elementsPlaceholder_recent']);
                 }
-                if(widget_name == 'heurist_StoryMap' && 
-                    (opts['blank_elementsPlaceholder'] || $dlg.find('#elementsPlaceholder').val() == 'def')){ // replace 'def' with a blank
-                    $dlg.find('#elementsPlaceholder').val('');
+
+                // Set default options for placeholder and remarks fields
+                if(hasPlaceholder && !opts['placeholder_option']){
+                    let placeholder_opt = opts['placeholder_text'] === 'def' ? 'def' : 'provided';
+                    placeholder_opt = window.hWin.HEURIST4.util.isempty(opts['placeholder_text']) ? 'blank' : placeholder_opt;
+                    $dlg.find(`input[name="placeholder_option"][value="${placeholder_opt}"]`).prop('checked', true);
+                }
+                if(widget_name == 'heurist_SearchInput' && !opts['si_placeholder_option']){
+                    let placeholder_opt = opts['placeholder_text'] === 'def' ? 'def' : 'provided';
+                    placeholder_opt = window.hWin.HEURIST4.util.isempty(opts['placeholder_text']) ? 'blank' : placeholder_opt;
+                    $dlg.find(`input[name="si_placeholder_option"][value="${placeholder_opt}"]`).prop('checked', true);
+                }
+                if(widget_name == 'heurist_StoryMap' && !opts['elementsPlaceholder_option']){
+                    let elePlaceholder_opt = opts['elementsPlaceholder'] === 'def' ? 'def' : 'provided';
+                    elePlaceholder_opt = window.hWin.HEURIST4.util.isempty(opts['elementsPlaceholder']) ? 'blank' : elePlaceholder_opt;
+                    $dlg.find(`input[name="elementsPlaceholder_option"][value="${elePlaceholder_opt}"]`).prop('checked', true);
+                }
+                if(hasRemark && !opts['empty_remark_option']){
+                    let empty_remark_opt = opts['empty_remark'] === 'def' ? 'def' : 'provided';
+                    empty_remark_opt = window.hWin.HEURIST4.util.isempty(opts['empty_remark']) ? 'blank' : empty_remark_opt;
+                    $dlg.find(`input[name="empty_remark_option"][value="${empty_remark_opt}"]`).prop('checked', true);
                 }
 
                 if(opts['export_options']){
@@ -1411,17 +1439,35 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
         });
 
         let empty_remark = $dlg.find('#empty_remark').val();
-        if(window.hWin.HEURIST4.util.isempty(empty_remark) && !opts['blank_empty_remark']){
-            empty_remark = 'def';
-        }else if(opts['blank_empty_remark']){
-            empty_remark = '';
+        if($dlg.find(`.${widget_name} #empty_remark`).length > 0){
+
+            let empty_remark_opt = $dlg.find('input[name="empty_remark_option"]:checked').val();
+            opts['blank_empty_remark'] = false;
+            if(!window.hWin.HEURIST4.util.isempty(empty_remark)){
+                opts['empty_remark_recent'] = empty_remark;
+            }
+            if(empty_remark_opt === 'blank'){
+                opts['blank_empty_remark'] = true;
+                empty_remark = '';
+            }else if(empty_remark_opt === 'def'){
+                empty_remark = 'def';
+            }
         }
 
         let placeholder = $dlg.find('#placeholder_text').val();
-        if(window.hWin.HEURIST4.util.isempty(placeholder) && !opts['blank_placeholder']){
-            placeholder = 'def';
-        }else if(opts['blank_placeholder']){
-            placeholder = '';
+        if($dlg.find(`.${widget_name} #placeholder_text`).length > 0){
+
+            let placeholder_opt = $dlg.find('input[name="placeholder_option"]:checked').val();
+            opts['blank_placeholder'] = false;
+            if(!window.hWin.HEURIST4.util.isempty(placeholder)){
+                opts['placeholder_recent'] = placeholder;
+            }
+            if(placeholder_opt === 'blank'){
+                opts['blank_placeholder'] = true;
+                placeholder = '';
+            }else if(placeholder_opt === 'def'){
+                placeholder = 'def';
+            }
         }
 
         if(widget_name=='heurist_resultListExt'){
@@ -1490,12 +1536,18 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             opts['emptyTableMsg'] = empty_remark;
             opts['placeholder_text'] = placeholder;
         }else if(widget_name=='heurist_SearchInput'){
-            
+
             placeholder = $dlg.find('#si_placeholder_text').val();
-            if(window.hWin.HEURIST4.util.isempty(placeholder) && !opts['si_blank_placeholder']){
-                placeholder = 'def';
-            }else if(opts['si_blank_placeholder']){
+            let placeholder_opt = $dlg.find('input[name="si_placeholder_option"]:checked').val();
+            opts['blank_placeholder'] = false;
+            if(!window.hWin.HEURIST4.util.isempty(placeholder)){
+                opts['placeholder_recent'] = placeholder;
+            }
+            if(placeholder_opt === 'blank'){
+                opts['blank_placeholder'] = true;
                 placeholder = '';
+            }else if(placeholder_opt === 'def'){
+                placeholder = 'def';
             }
             
             opts['placeholder_text'] = placeholder;
@@ -1504,11 +1556,20 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             opts['storyPlaceholder'] = placeholder;
             delete opts['placeholder_text'];
 
-            opts['elementsPlaceholder'] = $dlg.find('#elementsPlaceholder').val();
-            if(window.hWin.HEURIST4.util.isempty(opts['elementsPlaceholder']) && !opts['blank_elementsPlaceholder']){
-                // replace with default
-                opts['elementsPlaceholder'] = 'def';
+            let elePlaceholder = $dlg.find('#elementsPlaceholder').val();
+            let elePlaceholder_opt = $dlg.find('input[name="elementsPlaceholder_option"]:checked').val();
+            opts['blank_placeholder'] = false;
+            if(!window.hWin.HEURIST4.util.isempty(elePlaceholder)){
+                opts['elementsPlaceholder_recent'] = elePlaceholder;
             }
+            if(elePlaceholder_opt === 'blank'){
+                opts['blank_placeholder'] = true;
+                elePlaceholder = '';
+            }else if(elePlaceholder_opt === 'def'){
+                elePlaceholder = 'def';
+            }
+
+            opts['elementsPlaceholder'] = elePlaceholder;
         }
 
         if($dlg.find(`.${widget_name} input[name="export_options"]`).is(':visible')){
