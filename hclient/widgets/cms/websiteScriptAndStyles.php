@@ -1617,6 +1617,8 @@ if($website_custom_javascript!=null){
 //generate main menu on server side - for bootstrap menu
 $mainmenu_content = null;
 
+global $ids_was_added, $records;
+
 $ids_was_added = array();
 $resids = array();
 $records = recordSearchMenuItems($system, array($home_page_on_init), $resids, true, true);
@@ -1632,7 +1634,7 @@ function _getFld($record,$dty_ID){
 }
 
 function _getMenuContent($parent_id, $menuitems, $lvl){
-   global $system, $records, $ids_was_added, $home_page_on_init;
+    global $system, $records, $ids_was_added, $home_page_on_init;
 
             $res = '';
             $resitems = array();
@@ -1711,4 +1713,4 @@ function _getMenuContent($parent_id, $menuitems, $lvl){
 }//_getMenuContent
 
 USystem::insertLogScript('web');
-?>
+

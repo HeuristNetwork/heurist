@@ -38,6 +38,7 @@ $error_msg = '';
 $isSystemInited = false;
 
 // init main system class
+global $system;
 $system = new hserv\System(true);
 
 if(@$_REQUEST['db']){
@@ -46,7 +47,7 @@ if(@$_REQUEST['db']){
 }
 
 if(!$isSystemInited){
-    include_once ERROR_REDIR;
+    include_once ERROR_REDIR;    
     exit;
 }
 

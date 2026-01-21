@@ -44,7 +44,7 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
     $req_params = USanitize::sanitizeInputArray();
 
-    $db = $dbFromRequest; //global, see configIni.php detectServerAndDatabase  @$req_params['db'];
+    $db = $dbFromRequest ?? $req_params['db']; //global, see configIni.php detectServerAndDatabase  @$req_params['db'];
 
     $err = mysql__check_dbname($db);
     if($err!==null){ //HOST_ISSUE

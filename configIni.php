@@ -215,7 +215,7 @@ to use token use curl parm -H
 */
 
 // detect database server from database parameter
-[$envVersion, $dbFromRequest] = detectServerAndDatabase( $params['db'] ?? $_REQUEST['db'] ?? null);
+[$envVersion, $dbFromRequest] = detectServerAndDatabase( $params['db'] ?? $_REQUEST['db'] ?? $GLOBALS['HEURIST_ROUTE_PARAMS']['db'] ?? null);
 if(isset($params) && is_array($params)){
     $params['db'] = $dbFromRequest;
 }

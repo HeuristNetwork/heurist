@@ -82,6 +82,26 @@ final class RequestRouter
         }
         $activeVersion = $mappedVersion ?: ($versionPrefix ?: $defaultVersion);
 
+        
+        // Normalize "/index.php" (and optionally "/index.html") to "/"
+        if (count($segments) === 1) {
+            $s0 = strtolower($segments[0]);
+            if ($s0 === 'index.php' || $s0 === 'index.html') {
+                $segments = [];
+            }
+        }        
+        
+        // If host is not mapped and request is root "/", show welcome page
+        if ($hostMap === null && empty($segments)) {
+            $welcome = self::serverRoot() . "/index.html";
+            if (is_file($welcome)) {
+                return self::resultInternal($welcome, []);
+            }
+            // fallback: go to startup
+            return self::resultRedirect("/{$activeVersion}/startup/", 302, []);
+            //or 404 self::result404();
+        }        
+        
         $query = self::queryParamsFromRequestUri();
 
         // Parameterized entry: /<version>/?db=...
@@ -102,21 +122,39 @@ final class RequestRouter
         // But even if it doesn't, we keep safe fallbacks.
 
         // ---- 1) Startup
+        // Canonicalise /<version>/startup/index.php -> /<version>/startup/
+        // (startup expects directory-style URL for PDIR logic)
         if (self::isStartupRoute($segments)) {
-            return self::resultInternal(self::serverRoot() . "/startup/index.php", []);
+            $q  = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_QUERY);
+            $qs = $q ? ('?' . $q) : '';
+            return self::resultRedirect("/{$activeVersion}/startup/{$qs}", 302, []);
         }
 
         // ---- 2) API
+        // IMPORTANT: API must be executed as an entry script (do not go via index.php)
         if (self::isApiRoute($segments)) {
             $script = self::serverRoot() . "/{$activeVersion}/hserv/controller/api.php";
-            return self::resultInternal($script, []);
+            return self::resultInternal($script, $query);
         }
 
-        // ---- 3) /db/* resolver namespace (record/def/file)
+        // ---- 3) /db/* pretty namespace (record/def/file)
+        // Map /db/* URLs into canonical params, then continue to version/index.php.
         if (self::isDbResolverRoute($segments)) {
             $params = self::paramsFromDbResolverPath($segments);
+
+            // /db/file/<id> should behave like old resolver.php: mode=page
+            if (!empty($params['file']) && empty($params['mode'])) {
+                $params['mode'] = 'page';
+            }
+
+            // Query wins: only set fmt if missing from query AND missing from path-derived params
+            // (negotiateFmtIfMissing also checks $_GET['fmt'] if your implementation includes that)
             $params = self::negotiateFmtIfMissing($params);
-            $script = self::serverRoot() . "/{$defaultVersion}/redirects/resolver.php";
+
+            // Query wins over path-derived params
+            $params = array_merge($params, $query);
+
+            $script = self::serverRoot() . "/{$activeVersion}/index.php";
             return self::resultInternal($script, $params);
         }
 
@@ -150,28 +188,38 @@ final class RequestRouter
         // Apply DBREF (MBH -> Manuscripta_Bibliae_Hebraicae)
         $dbResolved = self::applyDbRef($mapping, $dbCandidate);
 
-        // /<db>
+        // /<db>  => canonical redirect to /<db>/web/ (or /<version>/<db>/web/ if version prefix was used)
         if (count($segments) === 1) {
-            $params = ['db' => $dbResolved, 'website' => 0];
-
-            if ($allowRedirects) {
-                // Canonicalize to /<activeVersion>/?db=...&website=0
-                $qs = http_build_query($params);
-                return self::resultRedirect("/{$activeVersion}/?{$qs}", 302, $params);
+            // Own-domain mapped hosts must preserve host and generally treat "/" as homepage.
+            // For unmapped hosts, canonicalize to a pretty /web/ URL.
+            if ($mustPreserveHost) {
+                $params = ['db' => $dbResolved, 'website' => (int)($mappedWebsite ?? 0)];
+                return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", array_merge($params, $query));
             }
 
-            return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", $params);
+            $q  = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_QUERY);
+            $qs = $q ? ('?' . $q) : '';
+
+            if ($versionPrefix !== null) {
+                return self::resultRedirect("/{$versionPrefix}/{$dbCandidate}/web/{$qs}", 302, []);
+            }
+            return self::resultRedirect("/{$dbCandidate}/web/{$qs}", 302, []);
         }
 
         // /<db>/<action>/...
         $action = $segments[1] ?? null;
         if ($action !== null && in_array($action, self::ALLOWED_ACTIONS, true)) {
             $params = self::paramsFromPrettyRoute($dbResolved, $action, array_slice($segments, 2));
+            // Query wins over path-derived params
+            $params = array_merge($params, $query);
             return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", $params);
         }
 
+        // If it looks like /<db>/<something> and <something> is not a known action, treat as 404.
+        return self::result404();
         // Fallback: let app decide (db browser / 404 / etc.)
-        return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", []);
+        //return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", []);
+        
     }
 
     /**
@@ -204,11 +252,11 @@ final class RequestRouter
 
             case 'INTERNAL':
             default:
-                if (!empty($res['params'])) {
-                    foreach ($res['params'] as $k => $v) {
-                        $_REQUEST[$k] = $v;
-                    }
+                $GLOBALS['HEURIST_ROUTE_PARAMS'] = $res['params'] ?? [];
+                foreach (($res['params'] ?? []) as $k => $v) {
+                    $_REQUEST[$k] = $v;    
                 }
+
                 $script = $res['script'];
                 if (!is_file($script)) {
                     http_response_code(404);

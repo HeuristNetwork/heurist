@@ -185,29 +185,29 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     // finds and assign  installDir   baseURL    baseURL_pro
     // 
     function detectBaseURL(){
-         let installDir = '';
+        let installDir = '';
 
         if(window.hWin.location.host.indexOf('.huma-num.fr')>0 && window.hWin.location.host!=='heurist.huma-num.fr'){
             installDir = '/heurist/';
         }else{
-
             let script_name = window.hWin.location.pathname;
-            if(script_name.endsWith('/web') || script_name.endsWith('/website')) script_name = script_name + '/'; //add last slash
 
-            //actions for redirection https://hist/heurist/[dbname]/web/
+            if(script_name.endsWith('/web') || script_name.endsWith('/website')) script_name = script_name + '/';
+
             if(script_name.search(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm|test)\/.*/)>=0){
-                installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm|test)\/.*/, '')+'/';
-                if(installDir=='/') installDir = '/heurist/';/* to change back to '/heurist/'; */
+                installDir = script_name.replace(/\/([A-Za-z0-9_]+)\/(website|web|hml|tpl|view|edit|adm|test)\/.*/, '') + '/';
             }else{
-                //removed top folders: applications|common|search|records|
-                installDir = script_name.replace(/(((\?|admin|documentation|export|hapi|hclient|hserv|import|startup|test|redirects|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in utils_host.php also
+                installDir = script_name.replace(/(((\?|admin|documentation|export|hapi|hclient|hserv|import|startup|test|redirects|viewers|help|ext|external)\/.*)|(index.*|test.php))/, "");
             }
         }
 
-        that.installDir = installDir; //to detect development or production version 
+        // critical: root pretty URLs on mapped domains must use production installDir
+        if (!installDir || installDir === '/') installDir = '/heurist/';
+
+        that.installDir = installDir;
         if (!_baseURL) _baseURL = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
         that.baseURL = _baseURL;
-        
+
         //detect production version
         if (installDir && !installDir.endsWith('/heurist/')) {
             //replace devlopment folder to production one (ie h6-ij to heurist)
@@ -221,8 +221,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         } else {
             that.baseURL_pro = _baseURL;
         }        
-        
     }
+    
     
     function _getKeyCount(data, level) {
         level = level || 0;

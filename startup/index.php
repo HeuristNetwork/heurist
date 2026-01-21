@@ -16,9 +16,20 @@ use hserv\utilities\USystem;
 define('DB_LIST_ONLY', @$_REQUEST['openDatabase'] == 1);
 
 if (!defined('PDIR')){
-    $PDIR = DB_LIST_ONLY || substr($_SERVER['REQUEST_URI'] , -1) == '/' ? '../' : '';
-    define('PDIR',$PDIR);
-    require_once dirname(__FILE__).'/../autoload.php';
+    //$reqPath = DB_LIST_ONLY || substr($_SERVER['REQUEST_URI'] , -1) == '/' ? '../' : '';
+
+    $reqPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+    $reqPath = preg_replace('~/index\.php$~i', '/', $reqPath);
+
+    if (preg_match('~^/(heurist|h7-alpha|h7-[A-Za-z0-9_-]+)/startup/~', $reqPath, $m)) {
+        define('PDIR', '/' . $m[1] . '/');
+    } else {
+        define('PDIR', '/');
+    }
+    
+    
+    $path = dirname(__FILE__, 2).'/autoload.php';
+    require_once $path;
 }
 
 // init main system class

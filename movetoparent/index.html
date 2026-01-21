@@ -1,127 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 
-    <!--
+<!--
+Home / welcome page
 
-    INSTALLATION: Move this file to the parent directory in which your Heurist instances are
-    installed ( normally /var/www/html/HEURIST ) and rename to index.html. Then add a simlink 
-    to index.html in the parent of the HEURIST directory (normally /var/www/html) unless it is 
-    shared with other applications which need equal, or primary, billing.
+This page is intentionally static HTML.
+It is served for "/" when the host is not mapped to a specific website in domainWebsites.json.
 
-    IMPORTANT: This file points at the Heurist start page index.php, at createNewDatabase.php
-    and at the global stylesheet using fixed relative paths, so these MUST exist on the server.
+If modifying this page, please leave the “Powered by Heurist” acknowledgement.
+-->
 
-    * Home page for Heurist application, allows registration, new or browse existing databases,
-    * links to Heurist Network site. Assumes production version of Heurist will be installed in 
-    * ./heurist (normally a simlink within the .../HEURIST directory)
+<head>
+  <title>Heurist - Heurist Network Association server</title>
 
-    * @project     Heurist academic knowledge management system
-    * @link        https://HeuristNetwork.org
-    * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
-    * @author      Artem Osmakov   <osmakov@gmail.com>
-    * @author      Ian Johnson     <ian.johnson.heurist@gmail.com>
-    * @license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     5
+  <meta charset="utf-8">
 
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at https://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
+  <base href="/errors/">
+  <link rel="stylesheet" href="heurist.css">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 
-    -->
+  <style>
+    body{
+      font-size: 1.1em;
+    }
+    .welcome p{
+      margin: 0.6em 0;
+    }
+    /* keep table buttons readable */
+    .welcome table button{
+      width: 240px;
+    }
+    .welcome table td{
+      vertical-align: top;
+      padding: 6px 10px;
+    }
+  </style>
 
-    <head>
-        <title>Heurist Academic Collaborative Database (C) 2005 - 2023, University of Sydney</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <meta content="Ian Johnson" name="author">
-        <meta content="Open Source collaborative web database software for richly interlinked heterogeneous research data" name="description">
+</head>
 
-        <!-- 9 Oct 2019: The styles were commented out. Probably the stylesheets no longer contain
-        styles for the homepage - to check - as the page is largely unstyled, but the button styles 
-        ARE used and work since removal of the comments - so why were these commented out? -->
+<body>
 
-        <link rel=stylesheet type="text/css" href='heurist/h4styles.css'>
+<div class="header">
+  <div class="header-inner" style="max-width:900px">
+    <div class="left">
+      <img class="logo" src="h6logo_inv.png" alt="HEURIST">
+      <a class="title" href="/"></a>
+    </div>
+    <div class="right"></div>
+  </div>
+</div>
 
-        <style type="text/css">
-            button {width:200px;}
-            .buttons {display: table-cell; padding-right: 20px; text-align: left; vertical-align: middle; width: 250;}
-            .description {width:400px; display:table-cell; text-align:left;vertical-align: middle; margin-left: 20px; margin-top:10px; margin-bottom:20px;}
-            .options {display: table; margin: 0 auto; padding: 10px 0; text-align: left;}
-            body {overflow-y:auto}
-            #page {left:10%; right:10%}
-            .small {width:13px;margin:0 auto}
-        </style>
-
-
-    </head>
-
-    <body>
-
-        <h1>Heurist Academic Knowledge Management System Vsn 7</h1>
-        <p>Heurist is an Open Source collaborative web database service for recording, managing, analysing, visualising, publishing and archiving richly interlinked and heterogeneous research data without the need for a dedicated server, programming or a great deal of technical support. Unlike most database systems, the structure of a database can be instantly modified and extended as research needs evolve, without affecting existing content. All interaction is through a standard web browser.</p>
-        <p>Heurist provides:
-            web bookmarking; bibliographic functions including Zotero synchronisation; flexible data import (CSV, XML, KML, JSon, bookmarks); export of CSV, XML, JSon, KML, Gephi and archival data packages, 
-            custom reporting, network, map and timeline visualisations; web site generation and management (built-in CMS). For advanced users there is an API and the ability to extend the software with new widgets.</p>
-        <p>Heurist databases are inherently sustainable due to a well-documented and stable underlying MySQL data structure, shared hosting on a small number of servers, and a single point of maintenance (all databases use the same program code and are upgraded and patched automatically if required).</p> 
-
-        <table role="presentation">
-            <tbody>
-            <tr>
-                <td width:30px;>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                <td style="text-align: right;"><button onclick="location.href='heurist/startup/index.php'"> Create your own database</button> </td>
-                <td width:30px;>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                <td><br>Subsequent databases can be created from within Heurist using Database > New Database. 
-                    <br>You become the owner of the new databases created.
-                    <br>
-                </td>
-            </tr>
-
-            <tr>
-                <td></td>
-                <td style="text-align: right;"><button onclick="location.href='heurist/index.php?db='">Browse databases</button> </td>
-                <td width:30px;>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                <td><br>Browse the list of databases on this server.
-                    <br>You will only be able to open databases for which you have login details.
-                    <br>
-                </td>
-            </tr>
-
-            <tr>
-                <td></td>
-                <td style="text-align: right;"><button onclick="location.href='https://HeuristNetwork.org'">Heurist Network site</button> </td>
-                <td width:30px;>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                <td><br>A one-stop shop for everything Heurist, including full documentation, training materials, 
-                    <br>workshops, hosted Heurist services, exemplars and annotated database templates
-                    <br>&nbsp;<br>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+<div class="container-full" style="max-width:900px">
+  <div class="main" style="margin:12px 0">
 
 
-        <hr>
-        <h4>Heurist Academic Knowledge Management System,  
-            (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network Association<br></h4>
+<div class="section-title">
+  <div>Heurist Academic Knowledge Management System Vsn 7</div>
+</div>
 
+<div class="section-sub welcome">
+
+  <p>
+    Heurist is open source web-based database software designed for humanities research.
+    Unlike most database systems, the structure of a database can be instantly modified and extended
+    as research needs evolve, without affecting existing content. All interaction is through a standard web browser.
+  </p>
+
+  <p>
+    Heurist provides:
+    web bookmarking; bibliographic functions including Zotero synchronisation; flexible data import (CSV, XML, KML, JSon, bookmarks);
+    export of CSV, XML, JSon, KML, Gephi and archival data packages, custom reporting, network, map and timeline visualisations;
+    web site generation and management (built-in CMS). For advanced users there is an API and the ability to extend the software with new widgets.
+  </p>
+
+  <p>
+    Heurist databases are inherently sustainable due to a well-documented and stable underlying MySQL data structure,
+    shared hosting on a small number of servers, and a single point of maintenance (all databases use the same program code
+    and are upgraded and patched automatically if required).
+  </p>
+
+  <table role="presentation" style="width:100%; margin-top: 10px">
+    <tbody>
+
+      <tr>
+        <td style="width:280px; text-align:right;">
+          <button class="button" onclick="location.href='/heurist/startup'">Create your own database</button>
+        </td>
+        <td>
+          <p style="margin:0.2em 0 0 0">
+            Subsequent databases can be created from within Heurist using Database &gt; New Database.
+            <br>You become the owner of the new databases created.
+          </p>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="width:280px; text-align:right;">
+          <button class="button" onclick="location.href='/heurist'">Browse databases</button>
+        </td>
+        <td>
+          <p style="margin:0.2em 0 0 0">
+            Browse the list of databases on this server.
+            <br>You will only be able to open databases for which you have login details.
+          </p>
+        </td>
+      </tr>
+
+      <tr>
+        <td style="width:280px; text-align:right;">
+          <button class="button" onclick="location.href='https://HeuristNetwork.org'">Heurist Network site</button>
+        </td>
+        <td>
+          <p style="margin:0.2em 0 0 0">
+            A one-stop shop for everything Heurist, including full documentation, training materials,
+            workshops, hosted Heurist services, exemplars and annotated database templates.
+          </p>
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+
+  <hr>
+
+  <p>
+                <strong>Powered by <img src="favicon.ico" alt="Heurist Academic Knowledge Management System">
+                    Heurist (C) 2005-2023 The University of Sydney, (C) 2024 onwards - Heurist Network Association.
+                See <a href="https://HeuristNetwork.org" target="_blank" rel="noopener">HeuristNetwork.org</a> </strong>
+                <br><br>
+                <i>If modifying this introductory page, please leave the Powered by Heurist acknowledgement.</i>
+  </p>
+
+</div>
+
+<br><br>
+
+<div class="section-title">
+  <div>Heurist Team</div>
+</div>
+
+<div class="section-sub welcome">
         Team leader/designer: Ian Johnson<br>
         Lead Programmer: Artem Osmakov<br>
         Server Manager: Abed Kassis<br>
         Documentation: Ian Johnson, Vincent Sheehan, Claire Reeler<br>
         Other Programming: Brandon McKay, Tom Murtagh, Kim Jackson, Steve White, Maria Shvedova,
         Ireneusz Golka, Damian Evans, Mitema Emmanuel, Steven Hayes. <br>
-        External Programming: Arjen Lentz, Maxim Nitikin.<br> 
+        External Programming: Arjen Lentz, Maxim Nikitin.<br> 
         Interns: Jan Jaap de Groot, Marco Springer, Erik Baiij, Tobias Peirick, Hanna Chamoun<br>
+</div>
 
-        <div class="resource" style="padding:0px; margin-top:0px; margin-bottom: 40px;">
-            <p>
-                <strong>Powered by <img src="heurist/favicon.ico" alt="Heurist Academic Knowledge Management System">
-                    Heurist (C) 2005-2023 The University of Sydney, 2024 - Heurist Network Association.
-                See <a href="https://HeuristNetwork.org" target="_blank" rel="noopener">HeuristNetwork.org</a> </strong>
-                <br><br>
-                <i>If modifying this introductory page, please leave the Powered by Heurist acknowledgement.</i>
-            </p>
-        </div>
 
-        </div>
-    </body></html>
+
+  </div>
+</div>
+
+</body>
+</html>

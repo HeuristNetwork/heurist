@@ -26,6 +26,7 @@ $error_msg = '';
 $isSystemInited = false;
 
 // init main system class
+global $system;
 $system = new hserv\System();
 
 if(defined('ADMIN_PWD_REQUIRED') && ADMIN_PWD_REQUIRED==1){

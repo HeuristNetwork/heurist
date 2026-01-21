@@ -5,6 +5,29 @@
  * @fileOverview This script initializes the Heurist layout, handles various URL parameters for actions like
  * displaying records, CMS content, API requests, file downloads, and asset loading.
  * It performs initial setup and can trigger an initial search if query parameters are defined.
+ * Workflow:
+ * Apache
+ *   ↓
+ * root/index.php
+ *   ↓
+ * RequestRouter::route()
+ *   ↓
+ * (if REDIRECT → done)
+ * (if INTERNAL → try RecordResolver + FileResolver)
+ *   ↓
+ * require <version>/index.php 
+ *
+ * In this design:
+ *
+ * RecordResolver returns redirect URLs
+ *
+ * FileResolver returns redirect URLs
+ *
+ * root/index.php executes the redirect
+ *
+ * <version>/index.php handles only UI + FrontController
+ * 
+ * 
  * @project     Heurist academic knowledge management system
  * @package Core
  * @link https://HeuristNetwork.org
@@ -26,7 +49,26 @@ use hserv\utilities\USystem;
 use hserv\utilities\USanitize;
 use hserv\controller\FrontController;
 
-require_once __DIR__.'/autoload.php';
+require_once dirname(__FILE__).'/autoload.php';
+
+// Base path for assets/scripts. Even for versionless pretty URLs, assets live under /<version>/.
+// (websiteRecord.php and many legacy scripts expect PDIR to be set early.)
+if (!defined('PDIR') && !array_key_exists('embed', $_REQUEST)) {
+    define('PDIR', '/' . basename(__DIR__) . '/');
+/*
+    $defaultVersion = 'heurist'; // change if needed
+
+    $reqPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+    $reqPath = preg_replace('~/index\.php$~i', '/', $reqPath);
+    $reqPath = preg_replace('~//+~', '/', $reqPath);
+
+    if (preg_match('~^/(heurist|h7-alpha|h7-[A-Za-z0-9_-]+)(/|$)~', $reqPath, $m)) {
+        define('PDIR', '/' . $m[1] . '/');
+    } else {
+        define('PDIR', '/' . $defaultVersion . '/');   // <-- key change
+    }
+*/    
+}
 
 $isLocalHost = isLocalHost();
 
@@ -45,92 +87,41 @@ if( @$_REQUEST['isalive']==1){
     }
     exit;
 
-}elseif( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)){
-    //redirection for CMS
+}elseif( array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)
+    || (array_key_exists('field', $_REQUEST) && $_REQUEST['field']>0) ){
+    // CMS WEBSITE MODE
 
-    $recid = 0;
-    if(@$_REQUEST['recID']){
-        $recid = $_REQUEST['recID'];
-    }elseif(@$_REQUEST['recid']){
-        $recid = $_REQUEST['recid'];
-    }elseif(@$_REQUEST['id']){
-        $recid = $_REQUEST['id'];
-    }
-    if(strpos($recid, '-')>0){
-        list($database_id, $recid) = explode('-', $recid, 2);
-        $database_id = intval($database_id);
-        $recid = intval($database_id).'-'.intval($recid);
-    }else{
-        $recid = intval($recid);
-    }
-
-
-    if(@$_REQUEST['fmt']){
-        $format = filter_var($_REQUEST['fmt'], FILTER_SANITIZE_STRING);
-    }elseif(@$_REQUEST['format']){
-        $format = filter_var($_REQUEST['format'], FILTER_SANITIZE_STRING);
-        
-    }elseif (array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)
-    || (array_key_exists('field', $_REQUEST) && $_REQUEST['field']>0) )
-    {
-        $format = 'website';
-
-        $controller = new FrontController(isset($params)?$params:null);
-        if(!$controller->isInited()){
-            exit;
-        }
-        
-        if(array_key_exists('ver', $_REQUEST)){
-            $websiteVersion = $_REQUEST['ver'];
-        }else{
-            //auto detect version of website
-            $websiteVersion = $controller->getWebsiteVersion();    
-            
-            if($websiteVersion==3 && @$_REQUEST['edit']){
-                $_REQUEST['edit'] = 'start';
-            }
-        }
-
-        if($websiteVersion==3){
-            
-            if(@$_REQUEST['edit']=='start'){
-                unset($_REQUEST['edit']);
-                if(!defined('PDIR')) {define('PDIR','');}
-                include_once dirname(__FILE__).'/hclient/widgets/cms/WebSiteEditor.php';
-            }else{
-                //$controller = new FrontController(isset($params)?$params:null);
-                $controller->run();
-            }
-        }else{
-            //embed - when heurist is run on page on non-heurist server
-            if(array_key_exists('embed', $_REQUEST)){
-                //require_once dirname(__FILE__).'/hserv/System.php';
-                define('PDIR', HEURIST_INDEX_BASE_URL);
-            }else{
-                if(!defined('PDIR')) {define('PDIR','');}
-            }
-            include_once dirname(__FILE__).'/hclient/widgets/cms/websiteRecord.php';
-        }
-        
+    $controller = new FrontController();
+    if(!$controller->isInited()){
         exit;
-
-        // old way to retrieve the content of particular page
-        //if(intval(@$_REQUEST['field'])>0){
-        //    $redirect = $redirect.'&field='.intval($_REQUEST['field']);
-        //}
-
-
-    }elseif (array_key_exists('field', $_REQUEST) && intval($_REQUEST['field'])>0) {
-        $format = 'web&field='.intval($_REQUEST['field']);
+    }
+    
+    if(array_key_exists('ver', $_REQUEST)){
+        $websiteVersion = $_REQUEST['ver'];
     }else{
-        $format = 'xml';
+        //auto detect version of website
+        $websiteVersion = $controller->getWebsiteVersion();
+        if($websiteVersion==3 && @$_REQUEST['edit']){
+            $_REQUEST['edit'] = 'start';
+        }
     }
 
-    $database = @$_REQUEST['db'];
-    $noheader = @$_REQUEST['noheader'] ? '&noheader=1' : '';
-    $depth = is_numeric(@$_REQUEST['depth']) ? '&depth=' . intval($_REQUEST['depth']) : '';
-
-    redirectURL("redirects/resolver.php?db={$database}&recID={$recid}&fmt={$format}{$noheader}{$depth}");
+    if($websiteVersion==3){
+        if(@$_REQUEST['edit']=='start'){
+            unset($_REQUEST['edit']);
+            include_once dirname(__FILE__).'/hclient/widgets/cms/WebSiteEditor.php';
+        }else{
+            $controller->run();
+        }
+    }else{
+        //embed - when heurist is run on page on non-heurist server
+        if(array_key_exists('embed', $_REQUEST)){
+            define('PDIR', HEURIST_INDEX_BASE_URL);
+        }
+        include_once dirname(__FILE__).'/hclient/widgets/cms/websiteRecord.php';
+    }
+    
+    exit;
 
     return;
 
@@ -150,7 +141,7 @@ if( @$_REQUEST['isalive']==1){
         elseif(@$_REQUEST['dty']) {$s = 'dty='.$_REQUEST['dty'];}
             elseif(@$_REQUEST['trm']) {$s = 'trm='.$_REQUEST['trm'];}
 
-                redirectURL('redirects/resolver.php?db='.@$_REQUEST['db'].'&'.$s);
+                redirectURL('hserv/structure/export/getDBStructureAsXML.php?db='.@$_REQUEST['db'].'&'.$s);
     return;
 
 
