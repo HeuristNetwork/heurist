@@ -201,9 +201,21 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             }
         }
 
+        // --- Normalize installDir for own-domain numeric routes (websiteId/pageId) ---
+        // Make sure installDir ends with "/"
+        if (installDir && !installDir.endsWith('/')) installDir += '/';
+
+        // If URL is like "/124/" or "/124/117" (own-domain website/page route),
+        // installDir must be the production folder, not the numeric path.
+        const pathOnly = window.hWin.location.pathname || '/';
+        if (/^\/\d+(\/\d+)?\/?$/.test(pathOnly)) {
+            installDir = '/heurist/';
+        }     
+                
+        
         // critical: root pretty URLs on mapped domains must use production installDir
         if (!installDir || installDir === '/') installDir = '/heurist/';
-
+        
         that.installDir = installDir;
         if (!_baseURL) _baseURL = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
         that.baseURL = _baseURL;
@@ -220,7 +232,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             that.baseURL_pro = window.hWin.location.protocol + '//' + window.hWin.location.host + installDir;
         } else {
             that.baseURL_pro = _baseURL;
-        }        
+        } 
+        
+console.log(that.installDir, that.baseURL);               
     }
     
     

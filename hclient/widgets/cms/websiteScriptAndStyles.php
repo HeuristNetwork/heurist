@@ -919,7 +919,53 @@ function afterPageLoad(document, pageid, eventdata){
 
         if(spath.endsWith('/web') || spath.endsWith('/website')) spath = spath + '/';//add last slash
 
-        if(spath.search(/\/([A-Za-z0-9_]+)\/(website|web)\/.*/)>=0 || spath.indexOf('/web/')===0 ){
+        // Own-domain numeric pretty URLs:
+        //   "/"                (home)
+        //   "/<pageid>"        (page under fixed website)
+        //   "/<websiteid>/<pageid>" (site+page when website not fixed)
+        const isOwnDomainNumeric =
+            spath === '/' ||
+            /^\/\d+\/?$/.test(spath) ||
+            /^\/\d+\/\d+\/?$/.test(spath);
+
+        // If this is an own-domain website (no db/web prefix), keep numeric pretty URLs
+        if (isOwnDomainNumeric && !/\/([A-Za-z0-9_]+)\/(website|web)\//.test(spath)) {
+
+            // Decide which numeric style to use:
+            // If site is fixed by mapping, prefer "/<pageid>"
+            // Otherwise use "/<websiteid>/<pageid>"
+            const fixedWebsite = (home_page_record_id && window.hWin.HAPI4?.website_id_fixed); // you may need to define this
+            // If you don't have a flag, infer: if pathname is "/" or "/<pageid>", treat as fixed-website mode.
+
+            const pathIsTwoNums = /^\/\d+\/\d+\/?$/.test(spath);
+            const useTwoNums = pathIsTwoNums; // safest: preserve current style if already two numbers
+
+            if (useTwoNums) {
+                // keep website id already present in URL if possible; otherwise fall back to home_page_record_id as website id
+                const parts = spath.replace(/^\/|\/$/g,'').split('/');
+                const webId = parts[0] || home_page_record_id;
+                surl = `/${webId}/${pageid}`;
+            } else {
+                // fixed-website style
+                if (pageid === home_page_record_id) {
+                    surl = '/';
+                } else {
+                    surl = `/${pageid}`;
+                }
+            }
+
+            // add optional lang/q as query params
+            let operator = '/?';
+            if (eventdata?.event_type === window.hWin.HAPI4.Event.ON_REC_SEARCHSTART && eventdata?.q) {
+                surl += `${operator}q=${encodeURIComponent(eventdata.q)}`;
+                operator = '&';
+            }
+            if (current_language && current_language !== default_language) {
+                surl += `${operator}lang=${encodeURIComponent(current_language)}`;
+                operator = '&';
+            }
+
+        } else if(spath.search(/\/([A-Za-z0-9_]+)\/(website|web)\/.*/)>=0 || spath.indexOf('/web/')===0 ){
             //folder style parameters [database]/web/[site id]/[page id]/?q=[query params]
 
             const org_spath = spath;

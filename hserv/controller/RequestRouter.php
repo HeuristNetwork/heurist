@@ -349,10 +349,20 @@ final class RequestRouter
             return self::resultInternal(self::serverRoot() . "/{$version}/index.php", $params);
         }
 
-        // /<pageid>
+        // /<websiteid>
         if (count($segments) === 1 && ctype_digit($segments[0])) {
-            $params['website'] = ($website !== null) ? $website : 0;
-            $params['pageid'] = (int)$segments[0];
+            
+            $n = (int)$segments[0];
+
+            if ($website !== null && $website !== 0) {
+                // Fixed website mapping: /<pageid>
+                $params['website'] = (int)$website;
+                $params['pageid']  = $n;
+            } else {
+                // No fixed website mapping: /<websiteid>
+                $params['website'] = $n;
+                // pageid intentionally not set
+            }            
             return self::resultInternal(self::serverRoot() . "/{$version}/index.php", $params);
         }
 
