@@ -234,7 +234,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             that.baseURL_pro = _baseURL;
         } 
         
-console.log(that.installDir, that.baseURL);               
+        //console.log(that.installDir, that.baseURL);               
     }
     
     

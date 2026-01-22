@@ -24,10 +24,12 @@
 
     $res = '';
     
-    header('Content-type: application/json;charset=UTF-8');
+    header('Content-type: text/plain;charset=UTF-8');
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header('Expires: 0');
 
     if(@$_REQUEST['db'] && @$_REQUEST['session']){
-
         $system = new hserv\System();
         $dbname = @$_REQUEST['db'];
         $error = mysql__check_dbname($dbname);
@@ -50,10 +52,11 @@
             //keep progress value in HEURIST_SCRATCH_DIR
             if(@$_REQUEST['terminate']==1){
                 $res = 'terminate';
-                mysql__update_progress($mysqli, intval($_REQUEST['session']), false, $res);
+                mysql__update_progress($mysqli, $_REQUEST['session'], false, $res);
             }else{
                 //retrieve current status
-                $res = mysql__update_progress($mysqli, intval($_REQUEST['session']), false, null);
+                $res = mysql__update_progress($mysqli, $_REQUEST['session'], false, null);
+//error_log('porgress status '.$res);                
             }
         }
         if($res==null) {$res = '';}

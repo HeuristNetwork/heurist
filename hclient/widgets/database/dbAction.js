@@ -387,7 +387,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
                                 sname = sname.substring(window.hWin.HAPI4.sysinfo.database_prefix.length);
                             }
                             if(sname.indexOf('.')>0){ sname = sname.substring(0,sname.indexOf('.')); }
-                            if(sname.length>24){ sname = sname.substring(0,23); } // Max length constraint
+                            if(sname.length>60){ sname = sname.substring(0,59); } // Max length constraint
                             that._$('#dbname').val(sname);
                         }
                     }else{ // No file selected or dialog cancelled
@@ -502,7 +502,7 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
             if (this._progressInterval) clearInterval(this._progressInterval); // Clear any existing interval
 
             this._progressInterval = setInterval(function(){
-                let request = {t:(new Date()).getMilliseconds(), session:session_id}; // Add timestamp for cache busting
+                let request = {t:Date.now(), session:session_id}; // Add timestamp for cache busting
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                     if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){ // Error condition
                         that._hideProgress();
@@ -570,7 +570,6 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
     _hideProgress: function (){
         $('body').css('cursor','auto');
         window.hWin.HEURIST4.msg.sendCoverallToBack(true); // Remove overlay
-
         if(this._progressInterval!=null){
             clearInterval(this._progressInterval);
             this._progressInterval = null;

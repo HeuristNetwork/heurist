@@ -1667,7 +1667,7 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
             $mysqli = $this->system->getMysqli();
 
-            $session_id = intval(@$this->data['session']);
+            $session_id = DbUtils::prepareSessionId(@$this->data['session']);
             if($session_id>0){
                 DbUtils::initialize();
                 DbUtils::setSessionId($session_id);//start progress session

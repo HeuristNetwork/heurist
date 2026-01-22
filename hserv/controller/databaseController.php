@@ -12,7 +12,9 @@
 * @since       4.0
 */
 @ini_set('max_execution_time', '0');
-@set_time_limit(0);
+
+ignore_user_abort(true);
+set_time_limit(0);
 
 use hserv\utilities\DbUtils;
 use hserv\utilities\DbVerify;
@@ -42,7 +44,7 @@ if($action==null){
     $action = @$req_params['action'];
 }
 
-$session_id = intval(@$req_params['session']);
+$session_id = DbUtils::prepareSessionId(@$req_params['session']);
 
 if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connectRemote')){ //db required, except create
     //get error and response
@@ -55,6 +57,11 @@ if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connect
         $response = $system->addError(HEURIST_REQUEST_DENIED, 'You must be logged in');
         //@todo !!!!!  check for $passwordForDatabaseCreation
    }else{
+       
+        // IMPORTANT: allow concurrent progress.php calls from same browser session
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }       
 
         $res = false;
 

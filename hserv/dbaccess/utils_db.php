@@ -2061,10 +2061,18 @@ $mysqli->kill($thread_id);
      */
     function mysql__update_progress($mysqli, $session_id, $is_init, $value){
 
-        $session_id = intval($session_id);
+        // Normalize session_id to string
+        if (is_int($session_id)) {
+            $session_id = (string)$session_id;
+        } elseif (!is_string($session_id)) {
+            return null;
+        }
 
-        if($session_id==null || $session_id==0) {return null;}
-
+        // Validate: 1–15 digits only
+        if (!preg_match('/^\d{1,15}$/', $session_id)) {
+            return null;
+        }
+        
         if(!defined('HEURIST_SCRATCH_DIR')) {return null;}
 
         $res = null;
@@ -2082,7 +2090,8 @@ $mysqli->kill($thread_id);
             }
 
             if($value!=null && $res!='terminate'){ //already terminated
-                file_put_contents($session_file, $value);
+                clearstatcache(true, $session_file);
+                file_put_contents($session_file,  (string)$value, LOCK_EX);
                 $res = $value;
             }
         }
