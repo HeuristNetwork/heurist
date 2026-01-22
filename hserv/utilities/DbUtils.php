@@ -92,6 +92,21 @@ class DbUtils {
 
         self::$initialized = true;
     }
+    
+    public static function prepareSessionId($session_id){
+        // Normalize session_id to string
+        if (is_int($session_id)) {
+            $session_id = (string)$session_id;
+        } elseif (!is_string($session_id)) {
+            return '';
+        }
+
+        // Validate: 1–15 digits only
+        if (!preg_match('/^\d{1,15}$/', $session_id)) {
+            return '';
+        }
+        return $session_id;
+    }
 
     /**
      * Sets the session ID for progress tracking.
@@ -116,7 +131,6 @@ class DbUtils {
         if(self::$progress_step>0 && intval($session_val)>0){
             $session_val = self::$progress_step+$session_val;
         }
-
         $current_val = mysql__update_progress(self::$mysqli, self::$session_id, false, $session_val);
         if($current_val=='terminate'){ //session was terminated from client side
             self::$session_id = 0;
@@ -994,35 +1008,8 @@ class DbUtils {
                     return false;
                 }
             }
-/* OLD
             $dumpfile_from_archive = $database_folder.basename($dumpfile);
-            $filecontent = file_get_contents($dumpfile_from_archive);
-
-            fileDelete($dumpfile_from_archive);//remove temp dump file
-            $dumpfile = $database_folder.'_temp_dump.sql';
-            file_put_contents($dumpfile, preg_replace('/DEFINER=`\w+`@`[\w.]+`/m', 'DEFINER=CURRENT_USER', $filecontent));
-
-            $script_file = basename($dumpfile);
-            fileDelete($dumpfile);//remove temp dump file
-*/
-            $dumpfile_from_archive = $database_folder.basename($dumpfile);
-            $in  = fopen($dumpfile_from_archive, 'rb');
-            $out = fopen($dumpfile_tmp = $database_folder . '_temp_dump.sql', 'wb');
-            $pattern = '/DEFINER=`[^`]+`@`[^`]+`/m';
-
-            while (!feof($in)) {
-                $line = fgets($in);
-                if ($line === false) break;
-                $line = preg_replace($pattern, 'DEFINER=CURRENT_USER', $line);
-                fwrite($out, $line);
-            }
-            fclose($in);
-            fclose($out);
-
-            // swap in the transformed file
-            @unlink($dumpfile_from_archive);
-            rename($dumpfile_tmp, $dumpfile_from_archive);            
-            
+          
             $res = self::databaseCreate($database_name, 1, $dumpfile_from_archive);//from archive
 
             self::setSessionVal(4);//database restored from dump
@@ -1041,6 +1028,100 @@ class DbUtils {
             return $res;
         }
     }
+    
+    /**
+     * Stream-rewrite a MySQL dump:
+     *  - DEFINER=`user`@`host`  => DEFINER=CURRENT_USER
+     *  - COLLATE=utf8mb4_0900_* => either removed or replaced with a generic collation
+     *
+     * Works chunk-wise (handles matches across chunk boundaries).
+     */
+    private static function rewriteDump(string $src, array $opts = []): void
+    {
+        $replaceCollation = $opts['replaceCollation'] ?? 'utf8mb4_general_ci'; // or 'utf8mb4_unicode_ci'
+        $dropCollation    = $opts['dropCollation'] ?? false; // if true, remove COLLATE=... instead of replace
+
+        $dir  = dirname($src);
+        $base = basename($src);
+
+        // temp file in same directory (required for rename() on Windows)
+        $tmp = $dir . DIRECTORY_SEPARATOR . '.' . $base . '.tmp';
+
+        $in = fopen($src, 'rb');
+        if (!$in) {
+            throw new \RuntimeException("Cannot open dump for read: $src");
+        }
+
+        $out = fopen($tmp, 'wb');
+        if (!$out) {
+            fclose($in);
+            throw new \RuntimeException("Cannot open temp file for write: $tmp");
+        }
+
+        // Regexes are designed to be applied to chunks (not lines).
+        $reDefiner = '~DEFINER=`[^`]*`@`[^`]*`~';
+        // Match COLLATE=utf8mb4_0900_xxx (xxx can be ai_ci, as_cs, etc.)
+        $reColl0900 = '~\bCOLLATE\s*=\s*utf8mb4_0900_[A-Za-z0-9_]+~';
+        // Some dumps use "COLLATE utf8mb4_0900_ai_ci" (space form), handle that too
+        $reColl0900Space = '~\bCOLLATE\s+utf8mb4_0900_[A-Za-z0-9_]+~';
+
+        $chunkSize = $opts['chunkSize'] ?? (8 * 1024 * 1024); // 8MB is a good default for 100–500MB files
+        $carry = '';
+
+        // Keep enough tail to cover the longest pattern that could straddle chunks.
+        // 256 bytes is plenty for these tokens; bump if you add more complex patterns later.
+        $carryLen = $opts['carryLen'] ?? 256;
+
+        while (!feof($in)) {
+            $chunk = fread($in, $chunkSize);
+            if ($chunk === false) break;
+            if ($chunk === '') continue;
+
+            $buf = $carry . $chunk;
+
+            // Transform DEFINER
+            if (strpos($buf, 'DEFINER=`') !== false) {
+                $buf = preg_replace($reDefiner, 'DEFINER=CURRENT_USER', $buf);
+            }
+
+            // Transform COLLATE utf8mb4_0900_*
+            if (strpos($buf, 'utf8mb4_0900_') !== false) {
+                if ($dropCollation) {
+                    $buf = preg_replace($reColl0900, '', $buf);
+                    $buf = preg_replace($reColl0900Space, '', $buf);
+                } else {
+                    $buf = preg_replace($reColl0900, 'COLLATE=' . $replaceCollation, $buf);
+                    $buf = preg_replace($reColl0900Space, 'COLLATE ' . $replaceCollation, $buf);
+                }
+            }
+
+            // Write all but the tail, keep tail as carry for boundary safety.
+            if (strlen($buf) > $carryLen) {
+                $write = substr($buf, 0, -$carryLen);
+                $carry = substr($buf, -$carryLen);
+                fwrite($out, $write);
+            } else {
+                // Buffer still small; keep accumulating (rare unless file is tiny / chunkSize tiny)
+                $carry = $buf;
+            }
+        }
+
+        // Flush remainder
+        if ($carry !== '') {
+            fwrite($out, $carry);
+        }
+
+        fclose($in);
+        fclose($out);
+        
+        // Replace original file
+        @unlink($src);
+        if (!rename($tmp, $src)) {
+            @unlink($tmp);
+            throw new \RuntimeException("Failed to replace dump file: $src");
+        }    
+    }
+        
 
     /**
      * Creates a new Heurist database.
@@ -1067,6 +1148,8 @@ class DbUtils {
         }
 
         $database_folder = null;
+        
+        $start = microtime(true);
 
         if($dumpfile==null){
             $dumpfile = 'blankDBStructure.sql';
@@ -1075,18 +1158,25 @@ class DbUtils {
 
             $upload_root = self::$system->getFileStoreRootFolder();
             $database_folder = $upload_root.$database_name.'/';
-
-            //remove COLLATE= for huma-num
-            if(defined('HEURIST_SERVER_NAME') && HEURIST_SERVER_NAME=='heurist.huma-num.fr'){
-                $dump_name_full = $database_folder.$dumpfile;
-                $cmd = "sed -i 's/ COLLATE=utf8mb4_0900_ai_ci//g' ".escapeshellarg($dump_name_full);
-                exec($cmd, $arr_out, $res2);
-
-                if ($res2 != 0 ) {
-                    $error = 'Error: '.print_r($res2, true);
+            $dump_name_full = $database_folder.$dumpfile;
+            
+            try{
+                self::rewriteDump($dump_name_full, [
+                    'dropCollation' => true,
+                    // safest for MySQL 5.7 + MariaDB
+                    //'replaceCollation' => 'utf8mb4_general_ci',
+                ]); 
+            }catch (\RuntimeException $e) {         
+                    $error = 'Error: '.print_r($e->getMessage(), true);
                     error_log($error);
-                }
+                    self::$system->addErrorArr($error);
+                    return false;
             }
+            
+            $elapsed = microtime(true) - $start;
+            error_log('rewriteDump '.$dumpfile.' execution time: '.number_format($elapsed, 3). 'seconds');
+            $start = microtime(true);
+
         }
 
         $mysqli = self::$mysqli;
@@ -1103,6 +1193,10 @@ class DbUtils {
 
         //restore data from sql dump
         $res = mysql__script($database_name_full, $dumpfile, $database_folder);//restore from dump
+        
+        $elapsed = microtime(true) - $start;
+        error_log('Restore '.$database_name_full.' from dump execution time: '.number_format($elapsed, 3). 'seconds');
+        
         if($res!==true){
             $res[1] = 'Cannot create database tables. '.$res[1];
             self::$system->addErrorArr($res);
@@ -1111,25 +1205,11 @@ class DbUtils {
         }elseif(self::databaseCreateConstraintsAndTriggers($database_name_full)){
             return true;
         }
-//----------------------
 
         if (is_array($res)){
             self::$system->addErrorArr($res);//can't create
-            mysql__drop_database($mysqli, $database_name_full);
-            return false;
         }elseif($level<1){
             return true; //create empty database
-        }
-
-        //restore data from sql dump
-        $res = mysql__script($database_name_full, $dumpfile, $database_folder);//restore from dump
-        if($res!==true){
-            $res[1] = 'Cannot create database tables. '.$res[1];
-            self::$system->addErrorArr($res);
-        }elseif($level<2){
-            return true;  //without constraints and triggers
-        }elseif(self::databaseCreateConstraintsAndTriggers($database_name_full)){
-            return true;
         }
 
         //fails
