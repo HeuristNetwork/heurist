@@ -475,7 +475,7 @@ class ActionHandler {
                 popup_dialog_options['classes'] = {"ui-dialog": "ui-heurist-design", "ui-dialog-titlebar": "ui-heurist-design"};
                 popup_dialog_options['service_config'] = window.hWin.HAPI4.sysinfo['repository_config'];
                 popup_dialog_options['title'] = window.hWin.HR('Repository service configuration');
-                popup_dialog_options['path'] = 'widgets/admin/';
+                popup_dialog_options['path'] = 'widgets/repository/';
                 window.hWin.HEURIST4.ui.showRecordActionDialog('repositoryConfig', popup_dialog_options);
                 break;
             case "menu-statistics-cms":{

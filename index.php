@@ -385,7 +385,7 @@ if($isLocalHost){
 }
 ?>
 
-<script src="<?php echo PDIR;?>hclient/widgets/admin/repositoryConfig.js"></script>
+<script src="<?php echo PDIR;?>hclient/widgets/repository/repositoryConfig.js"></script>
 
 
 <!-- Driver.js

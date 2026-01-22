@@ -299,7 +299,7 @@ if ($mode > 1) {
                             "ui-dialog-titlebar": "ui-heurist-design"
                         },
                         title: 'Repository service configuration',
-                        path: 'widgets/admin/'
+                        path: 'widgets/repository/'
                     });
                 });
             }

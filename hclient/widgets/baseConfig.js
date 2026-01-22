@@ -95,7 +95,7 @@ $.widget("heurist.baseConfig", {
         //load html from file
         if(this._need_load_content && this.options.htmlContent){
 
-            let sub_dir = this.options.type === 'service' ? 'lookup' : 'admin';
+            let sub_dir = this.options.type === 'service' ? 'lookup' : 'repository';
             let html = `${window.hWin.HAPI4.baseURL}hclient/widgets/${sub_dir}/${this.options.htmlContent}?t=${window.hWin.HEURIST4.util.random()}`;
 
             this.element.load(html,
