@@ -275,7 +275,9 @@ if($isWebPage){ //set in websiteRecord.php
 
 
 
-        <!-- References to old MBH website, for reference
+        <!-- References to old MBH website, for reference. 
+             https://mbh.huma-num.fr redirects to https://heurist.huma-num.fr/MBH
+             and the other addresses redirect to an equivalent path within the new website (which generally will not work)
              https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output_poster.jpg
              https://mbh.huma-num.fr/sites/all/themes/mbh/assets/videos/output.mp4
              document.getElementById('wrapper-video').style.display = 'none';
