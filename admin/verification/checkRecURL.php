@@ -39,6 +39,63 @@ if( ! $system->init(@$_REQUEST['db']) ){
 if(!$system->isAdmin()){ //  $system->isDbOwner()
     print '<span>You must be logged in as Database Administrator to perform this operation</span>';
 }
+
+// -----------------------------------------------------------------------------
+// TSV download of the most recent results (stored in DB setting "Invalid URLs").
+// Usage: checkRecURL.php?db=DBNAME&download=1
+// -----------------------------------------------------------------------------
+if(@$_REQUEST['download']==1){
+
+    $results = $system->settings->getDatabaseSetting('Invalid URLs');
+    if(!$results || !is_array($results)){
+        header('Content-Type: text/plain; charset=utf-8');
+        print "No saved results found. Run the check first.\n";
+        exit;
+    }
+
+    $db = $system->dbname();
+    $fname = 'invalid_urls_'.$db.'_'.date('Ymd_His').'.tsv';
+
+    header('Content-Type: text/tab-separated-values; charset=utf-8');
+    header('Content-Disposition: attachment; filename="'.$fname.'"');
+
+    // TSV header
+    $cols = ["scope","rec_ID","detailTypeID","href","link_text","resolved_url","error"];
+    print implode("\t",$cols)."\n";
+
+    // Records.rec_URL
+    if(isset($results['record']) && is_array($results['record'])){
+        foreach($results['record'] as $recId=>$href){
+            $resolved = $results['record_resolved'][$recId] ?? $href;
+            $err = $results['record_error'][$recId] ?? 'Invalid';
+            $text = $results['record_text'][$recId] ?? $href;
+            $row = ["record", $recId, "", $href, $text, $resolved, $err];
+            $row = array_map(function($v){ $v=strval($v); $v=str_replace(["\t","\r","\n"]," ",$v); return $v; }, $row);
+            print implode("\t",$row)."\n";
+        }
+    }
+
+    // Field-based (text / file)
+    foreach(['text','file'] as $scope){
+        if(isset($results[$scope]) && is_array($results[$scope])){
+            foreach($results[$scope] as $recId=>$fields){
+                foreach($fields as $dty=>$hrefs){
+                    foreach($hrefs as $href){
+                        $text = $results[$scope.'_text'][$recId][$dty][$href] ?? $href;
+                        $resolved = $results[$scope.'_resolved'][$recId][$dty][$href] ?? $href;
+                        $err = $results[$scope.'_error'][$recId][$dty][$href] ?? 'Invalid';
+                        $row = [$scope, $recId, $dty, $href, $text, $resolved, $err];
+                        $row = array_map(function($v){ $v=strval($v); $v=str_replace(["\t","\r","\n"]," ",$v); return $v; }, $row);
+                        print implode("\t",$row)."\n";
+                    }
+                }
+            }
+        }
+    }
+
+    exit;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -51,6 +108,8 @@ if(!$system->isAdmin()){ //  $system->isDbOwner()
     <body class="popup">
         <div class="banner">
             <h3>Check Records URL</h3>
+<p><a href="?db=<?php echo htmlentities(@$_REQUEST['db']); ?>&download=1">Download TSV of latest results</a></p>
+<p style="color:#666">Use <code>&amp;max=0</code> to scan the whole database (default), or set a positive limit for quicker testing.</p>
         </div>
         <div id="page-inner">
 <?php
@@ -58,7 +117,8 @@ if(!$system->isAdmin()){ //  $system->isDbOwner()
 
 $isHeuristReferenceIndex = (strcasecmp($system->dbname(), HEURIST_INDEX_DATABASE)==0);
 $checker = new DbVerifyURLs($system, HEURIST_SERVER_URL, $isHeuristReferenceIndex);
-$results = $checker->checkURLs(true, $list_only);
+$maxCount = isset($_REQUEST['max']) ? intval($_REQUEST['max']) : 0; // 0 = whole database
+$results = $checker->checkURLs(true, $list_only, $maxCount);
 
 /* heurist instances   THIS IS NOT A COMPREHENSIVE LSIT NOR MAINTAINED
 $heurist_instances = array(

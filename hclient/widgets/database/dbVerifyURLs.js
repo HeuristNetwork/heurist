@@ -26,6 +26,16 @@
  */
 $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
 
+    // Server-side action name. New implementation avoids MySQL REGEXP extraction.
+    // If the widget is instantiated with the legacy actionName ("verifyurls"), we transparently
+    // switch to the new action.
+    options: {
+        // Default action used by databaseController.php
+        // (Your revised server-side implementation should be wired to this action.)
+        actionName: "verifyurls"
+    },
+
+
     prevSessionExists: false,
 
     /**
@@ -37,7 +47,8 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
      * @private
      */
     _initControls:function(){
-        this._checkPreviousSession();
+                // Backward compatibility: old dialogs may still instantiate with actionName="verifyurls"
+this._checkPreviousSession();
         return this._super();
     },
 
@@ -115,8 +126,8 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
      */
     doAction: function(){
         let limit = this._$('#selCheckURLsLimit').val();
-        // Mode: 0 = New/Restart, 1 = Continue, 2 = Recheck Bad (if prevSessionExists is true)
-        const mode = this.prevSessionExists ? this._$('input[name="mode"]:checked').val() : 0;
+        // Mode: 0 = Continue, 1 = Recheck bad URLs then continue, 2 = Start from scratch
+        const mode = this.prevSessionExists ? this._$('input[name="mode"]:checked').val() : 2;
         let request = {limit: limit, verbose:0, mode:mode};
         this._sendRequest(request);
     },
@@ -218,9 +229,14 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
             this._on(div_res.find('.btnCSV'), {click:this._getPreviousSessionAsCSV}); // Rebind, or ensure it's bound once
         }
 
-        this.prevSessionExists = false; // Reset flag, next action will be "mode 0" unless _checkPreviousSession finds data
+        this.prevSessionExists = (response_data.total_checked || 0) > 0; // Allow "Continue checking" to resume by default
 
-        if(termination_message){
+        
+        // After any run, default the radio selection to "continue" for the next click.
+        if(this.prevSessionExists){
+            this._$('input[name="mode"][value="0"]').prop('checked', true);
+        }
+if(termination_message){
             let message_text = window.hWin.HEURIST4.util.isObject(termination_message)
                         ? termination_message.message
                         : termination_message;

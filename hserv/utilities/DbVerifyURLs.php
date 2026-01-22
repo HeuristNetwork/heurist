@@ -1,4 +1,5 @@
 <?php
+// ChatGPT modified @ 21:17 on 11/01/2026
 /**
 * DbVerifyURLs.php - Class DbVerifyURLs
 * 
@@ -67,6 +68,9 @@ class DbVerifyURLs {
     private $results;
     
 
+    /** @var int $maxRecId Maximum rec_ID in Records table (records are never deleted) */
+    private $maxRecId = 0;
+
     /**
      * Constructor for DbVerifyURLs.
      *
@@ -84,6 +88,9 @@ class DbVerifyURLs {
 
         $this->isHeuristReferenceIndex = $isHeuristReferenceIndex;
         
+
+        // Cache MAX(rec_ID) once (rec_ID is primary key and records are never deleted)
+        $this->maxRecId = $this->getMaxRecId();
         //ini_set('default_socket_timeout', 10); //default is 60 seconds
     }
 
@@ -338,6 +345,124 @@ class DbVerifyURLs {
         }
     }
 
+    /**
+     * Returns MAX(rec_ID) from Records (0 if table is empty or query fails).
+     */
+    private function getMaxRecId(){
+        $maxId = 0;
+        try{
+            $res = $this->mysqli->query('SELECT MAX(rec_ID) FROM Records');
+            if($res){
+                $row = $res->fetch_row();
+                $maxId = intval($row[0] ?? 0);
+                $res->close();
+            }
+        }catch(\Exception $e){
+            // ignore; keep 0
+        }
+        return $maxId;
+    }
+
+    /**
+     * Normalises a hyperlink found in content:
+     * - resolves relative URLs against the current Heurist server base URL
+     * - supports scheme-relative URLs ("//example.com")
+     * - treats pure integers as internal rec_ID links
+     * - skips mailto/tel/javascript/hash links
+     *
+     * Returns an array: [type => 'remote'|'internal_recid'|'skip', original => string, url => string|null, recId => int|null]
+     */
+    private function normaliseHref($href){
+
+        $href = trim($href ?? '');
+        if($href===''){
+            return ['type'=>'skip','original'=>$href,'url'=>null,'recId'=>null];
+        }
+
+        // decode common HTML entities
+        $href_decoded = html_entity_decode($href, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $href_decoded = trim($href_decoded);
+
+        $l = strtolower($href_decoded);
+
+        // Skip non-navigational or non-http(s)
+        if($l==='#' || strpos($l,'#')===0 ||
+           strpos($l,'mailto:')===0 || strpos($l,'tel:')===0 ||
+           strpos($l,'javascript:')===0)
+        {
+            return ['type'=>'skip','original'=>$href,'url'=>null,'recId'=>null];
+        }
+
+        // Pure numeric -> internal record link
+        if(preg_match('/^\d+$/', $href_decoded)){
+            $rid = intval($href_decoded);
+            return ['type'=>'internal_recid','original'=>$href,'url'=>null,'recId'=>$rid];
+        }
+
+        // Scheme-relative URL
+        if(strpos($href_decoded,'//')===0){
+            $base = parse_url($this->heuristDomain);
+            $scheme = $base['scheme'] ?? 'https';
+            return ['type'=>'remote','original'=>$href,'url'=>$scheme.':'.$href_decoded,'recId'=>null];
+        }
+
+        // Absolute http(s)
+        if(preg_match('/^https?:\/\//i', $href_decoded)){
+            return ['type'=>'remote','original'=>$href,'url'=>$href_decoded,'recId'=>null];
+        }
+
+        // Resolve relative links against this server (heuristDomain is scheme://host)
+        $rel = $href_decoded;
+        if(strpos($rel,'./')===0){
+            $rel = substr($rel, 2);
+        }
+        if(strpos($rel,'?')===0){
+            $rel = '/'.$rel; // make it root-relative
+        }
+        if(strpos($rel,'/')!==0){
+            $rel = '/'.$rel;
+        }
+
+        return ['type'=>'remote','original'=>$href,'url'=>$this->heuristDomain.$rel,'recId'=>null];
+    }
+
+    /**
+     * Extracts hyperlinks (href + anchor text) from a chunk of HTML-ish text.
+     * Returns array of [href, text].
+     */
+    private function extractLinksWithText($html){
+        $links = [];
+
+        if($html===null || $html===''){
+            return $links;
+        }
+
+        $prev = libxml_use_internal_errors(true);
+        $dom = new \DOMDocument();
+
+        $html_wrapped = '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>'.$html.'</body></html>';
+        $dom->loadHTML($html_wrapped, LIBXML_NOWARNING | LIBXML_NOERROR);
+        $as = $dom->getElementsByTagName('a');
+
+        foreach($as as $a){
+            $href = $a->getAttribute('href');
+            if($href===null || trim($href)===''){
+                continue;
+            }
+            $text = trim($a->textContent ?? '');
+            if($text===''){
+                $text = $href;
+            }
+            $links[] = [$href, $text];
+        }
+        libxml_clear_errors();
+        libxml_use_internal_errors($prev);
+
+        return $links;
+    }
+
+
+
     private function isReferenceDatabase( $recTypeId ){
         return $this->isHeuristReferenceIndex && ($recTypeId == 101 || $recTypeId == 103);
     }
@@ -425,17 +550,44 @@ class DbVerifyURLs {
                 continue;
             }
 
-            // Validate the URL
-            $error_msg = $this->checkRemoteURL($recUrl, $isReferenceDatabase);
+            // Normalise and validate the URL (supports relative URLs and internal rec_ID links)
+            $norm = $this->normaliseHref($recUrl);
+            if($norm['type']=='skip'){
+                continue;
+            }
+
+            $error_msg = null;
+
+            if($norm['type']=='internal_recid'){
+                $rid = intval($norm['recId']);
+                if($rid<1 || ($this->maxRecId>0 && $rid>$this->maxRecId)){
+                    $error_msg = 'Invalid internal rec_ID link (out of range)';
+                }
+            }else{
+                $error_msg = $this->checkRemoteURL($norm['url'], $isReferenceDatabase);
+            }
 
             if($error_msg==null){
                 //passed
-                $this->handleRecordUrl($recId, $recUrl, $data, $isReferenceDatabase);
-            }elseif($this->handleBrokenRecordUrl($recId, $recUrl, $error_msg)){ //exit on curl error
-                return false;
+                $this->handleRecordUrl($recId, $norm['url'], $data, $isReferenceDatabase);
+            }else{
+                // store additional metadata for TSV export
+                $this->results['record_text'][$recId] = $recUrl;
+                $this->results['record_resolved'][$recId] = $norm['url'];
+                $this->results['record_error'][$recId] = $error_msg;
+
+                if($this->handleBrokenRecordUrl($recId, $recUrl, $error_msg)){ //exit on curl error
+                    return false;
+                }
             }
             
             $this->checkedCount++;
+            if($this->isVerbose && ($this->checkedCount % 50)==0){
+                print '<div style="color:#666">Progress: checked '.$this->checkedCount.' URL(s)...</div>';
+                if(function_exists('ob_flush')){ @ob_flush(); }
+                if(function_exists('flush')){ @flush(); }
+            }
+
             $passed_cnt++;
             if($this->checkedCount >= $this->maxCountToCheck ||
                $this->updateSessionProgress($this->checkedCount.','.$this->maxCountToCheck))
@@ -499,7 +651,7 @@ class DbVerifyURLs {
         $query = 'SELECT dtl_RecID, dtl_Value, dtl_DetailTypeID, dtl_ID FROM recDetails ' .
             'INNER JOIN defDetailTypes ON dty_ID = dtl_DetailTypeID ' .
             'INNER JOIN Records ON rec_ID = dtl_RecID ' .
-            'WHERE (dty_Type = "freetext" OR dty_Type = "blocktext") AND dtl_Value REGEXP "https?://"';
+            'WHERE (dty_Type = "freetext" OR dty_Type = "blocktext") AND (dtl_Value LIKE "%http://%" OR dtl_Value LIKE "%https://%" OR dtl_Value LIKE "%href=%" OR dtl_Value LIKE "%./?%" OR dtl_Value LIKE "%?db=%")';
             
             
         if(!$this->listOnly){
@@ -534,11 +686,21 @@ class DbVerifyURLs {
             $detailTypeId = $row[2];
             $dtlID = $row[3];
 
-            $urls = [];
-            preg_match_all("/https?:\/\/[^\s\"'>()\\\\]*/", $value, $urls);
-            $urls = $urls[0] ?? [];
+            $pairs = $this->extractLinksWithText($value);
 
-            foreach ($urls as $url) {
+            // Also include bare absolute URLs that are not inside <a href="...">
+            $urls = [];
+            preg_match_all("/https?:\/\/[^\s\"'>()\\]*/", $value, $urls);
+            $urls = $urls[0] ?? [];
+            foreach($urls as $u){
+                $pairs[] = [$u, $u];
+            }
+
+            foreach ($pairs as $pair) {
+
+                $url = $pair[0];
+                $linkText = $pair[1] ?? $pair[0];
+
                 
                 if($this->skipFieldUrl($recId, $url, $detailTypeId, 'text')){
                     continue;
@@ -551,6 +713,12 @@ class DbVerifyURLs {
                 $this->results['ts_text'] = $dtlID;
                 $passed_cnt++;
                 $this->checkedCount++;
+            if($this->isVerbose && ($this->checkedCount % 50)==0){
+                print '<div style="color:#666">Progress: checked '.$this->checkedCount.' URL(s)...</div>';
+                if(function_exists('ob_flush')){ @ob_flush(); }
+                if(function_exists('flush')){ @flush(); }
+            }
+
             }
             
             if($this->checkedCount >= $this->maxCountToCheck ||
@@ -618,6 +786,12 @@ class DbVerifyURLs {
             $this->results['ts_file'] = $dtlID;
             $passed_cnt++;
             $this->checkedCount++;
+            if($this->isVerbose && ($this->checkedCount % 50)==0){
+                print '<div style="color:#666">Progress: checked '.$this->checkedCount.' URL(s)...</div>';
+                if(function_exists('ob_flush')){ @ob_flush(); }
+                if(function_exists('flush')){ @flush(); }
+            }
+
             if($this->checkedCount >= $this->maxCountToCheck ||
                $this->updateSessionProgress($this->checkedCount.','.$this->maxCountToCheck))
             {
@@ -768,29 +942,62 @@ class DbVerifyURLs {
      * @param string $field_type_idx  'text' or 'file'
      * @return true in case of fatal CURL error
      */
-    private function validateAndHandleFieldUrl($recId, $url, $detailTypeId, $field_type_idx) {
+    private function validateAndHandleFieldUrl($recId, $norm, $detailTypeId, $field_type_idx, $linkText=null) {
+
+        $original = is_array($norm) ? ($norm['original'] ?? '') : strval($norm);
+        $url = is_array($norm) ? ($norm['url'] ?? $original) : strval($norm);
+        $type = is_array($norm) ? ($norm['type'] ?? 'remote') : 'remote';
+        $internalRecId = is_array($norm) ? ($norm['recId'] ?? null) : null;
 
         if ($this->listOnly) {
-            $url = htmlentities($url);
-            print intval($recId) . ' : ' . intval($detailTypeId) . ' : <a href="' . $url . '" target="_blank" rel="noopener">' . $url . '</a><br>';
+            $safeUrl = htmlentities($url);
+            $safeOrig = htmlentities($original);
+            $safeText = htmlentities($linkText ?? $safeOrig);
+            print intval($recId) . ' : ' . intval($detailTypeId) .
+                ' <a href="' . $safeUrl . '" target="_blank" rel="noopener">' . $safeText . '</a>' .
+                ' <span style="color:#666">(href: ' . $safeOrig . ')</span><br>';
             return false;
         }
 
-        $error_msg = $this->checkRemoteURL($url);
+        $error_msg = null;
+
+        if($type==='internal_recid'){
+            $rid = intval($internalRecId);
+            if($rid<1 || ($this->maxRecId>0 && $rid>$this->maxRecId)){
+                $error_msg = 'Invalid internal rec_ID link (out of range)';
+            }
+        }else{
+            $error_msg = $this->checkRemoteURL($url);
+        }
 
         if ($error_msg!=null) {
 
-            $this->results[$field_type_idx][$recId][$detailTypeId][] = $url;
+            // Backward-compatible list of broken URLs (store original href for human diagnostics)
+            $this->results[$field_type_idx][$recId][$detailTypeId][] = $original;
             $this->results['session_bad_'.$field_type_idx]++;
-        
+
+            // Store additional metadata for TSV export
+            $this->results[$field_type_idx.'_text'][$recId][$detailTypeId][$original] = $linkText;
+            $this->results[$field_type_idx.'_resolved'][$recId][$detailTypeId][$original] = $url;
+            $this->results[$field_type_idx.'_error'][$recId][$detailTypeId][$original] = $error_msg;
+
             if($this->isVerbose){
-                $urlMessage = '<div><a href="' . $url . '" target="_blank" rel="noopener">' . $url . '</a>&nbsp;' . htmlspecialchars($error_msg) . '</div>';
+
+                $safeOrig = htmlentities($original);
+                $safeUrl = htmlentities($url);
+                $safeText = htmlentities($linkText ?? $original);
+
+                $urlMessage = intval($recId) . ' : ' . intval($detailTypeId) .
+                    ' <a href="' . $safeUrl . '" target="_blank" rel="noopener">' . $safeText . '</a>' .
+                    ' <span style="color:#666">(href: ' . $safeOrig . ')</span>' .
+                    ' <span style="color:#a00"> — ' . htmlentities($error_msg) . '</span><br>';
+
                 print $urlMessage;
             }
 
         }
 
-        $is_fatal = strpos($error_msg,CURL_ERR)===0;
+        $is_fatal = (is_string($error_msg) && strpos($error_msg,CURL_ERR)===0);
         if($is_fatal){
             $this->results['curl'] = $error_msg;
             $this->errorMsg($error_msg);

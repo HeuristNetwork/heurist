@@ -16,14 +16,21 @@
         
         <h3>Check for invalid URLs in Record headers, text and file fields</h3>        
         
+        
         <p>
-Checking speed is restricted to 30 URLs per minute to avoid blocking the server. We recommend limiting the check to 150 checks (5 minutes), which will return a list of the bad URLs encountered to that point as a CSV file and a search showing the records containing them so that you can correct them. 
-        </p>
+This tool scans the database for URLs stored in record headers, text/memo fields, and file fields.
+It runs in small batches to minimise server load; you can stop at any time and resume later.
+Each batch reports how many URLs were processed and how many appear problematic, and provides:
+</p>
+<ul style="margin-top:0">
+  <li>a CSV export of problematic URLs, and</li>
+  <li>links to saved searches showing the records that contain them, so you can correct the source data.</li>
+</ul>
+
+        
 
         <div id="prevSessionNotExist">
-            <p>
-You may then run the function again and it will recheck the bad URLs to ensure they have been corrected, then start up where it left off. Repeat as often as needed to correct the whole database
-            </p>
+            <p>If you have not run this check before, choose a batch size below and click <b>Verify URLs</b>.</p>
         </div>                       
         
         <div id="prevSessionExist" style="display:none">
@@ -33,7 +40,7 @@ In previous session(s) <span class="total_checked"></span> URLs have been checke
             </p>
             <p>Select mode for next check:</p>
             <label><input type="radio" value="0" name="mode" checked="checked">Start where it left off</label><br>
-            <label><input disabled type="radio" value="1" name="mode">Check invalid URLs first and then continue where it left off</label><br>
+            <label><input type="radio" value="1" name="mode">Check invalid URLs first and then continue where it left off</label><br>
             <label><input type="radio" value="2" name="mode">Start from scratch</label><br><br>
                     
         </div>                       
@@ -41,10 +48,10 @@ In previous session(s) <span class="total_checked"></span> URLs have been checke
         <div>
             <label for="selCheckURLsLimit">Maximum URLs to check :</label>
             <select id="selCheckURLsLimit">
-                <option value="30">30 = 1 minutes</option>
-                <option value="150" selected="selected">150 = 5 minutes</option>
-                <option value="300">300 = 10 minutes</option>
-                <option value="600">600 = 20 minutes</option>
+                <option value="30">30 ≈ 1 minute</option>
+                <option value="150" selected="selected">150 ≈ 5 minutes</option>
+                <option value="300">300 ≈ 10 minutes</option>
+                <option value="600">600 ≈ 20 minutes</option>
             </select>
         </div>
         
