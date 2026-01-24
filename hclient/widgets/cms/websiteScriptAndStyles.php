@@ -377,7 +377,7 @@ function onPageInit(success)
 
             var eventdata = null;
             if(initial_query_from_url){
-
+                //create object that triggers intial search after page load
                 eventdata = {
                     detail:'ids', neadall:1, w:'a',
                     q:initial_query_from_url,

@@ -97,8 +97,8 @@ $.widget( "heurist.recordListExt", {
         
         onLoadComplete: null,  //callback
 
-        empty_remark: null, //html content for empty message  (search returns empty result)
-        placeholder_text: null, //text to display while no record/recordset is loaded  (search is not performed)
+        empty_remark: '', //html content for empty message  (search returns empty result)
+        placeholder_text: '', //text to display while no record/recordset is loaded  (search is not performed)
         
         show_export_button: false, // show button to export current record set
         show_print_button: false, // show button to print current record set
@@ -157,12 +157,20 @@ $.widget( "heurist.recordListExt", {
             this.div_content.css({width:'100%', height:'100%'}); 
         }
         
-        if(this.options.empty_remark=='def'){
+        if(this.options.empty_remark_option=='provided' && this.options.empty_remark_recent){
+            this.options.empty_remark = this.options.empty_remark_recent;
+        }else if(this.options.empty_remark_option=='blank'){
+            this.options.empty_remark = '';
+        }else{
             this.options.empty_remark = window.hWin.HR('resultListExt_empty_remark');
             let templateName = window.hWin.HEURIST4.util.getUrlParameter('template', this.options.url) ?? 'Record Viewer';
             this.options.empty_remark = templateName ? this.options.empty_remark.replace('__REPORTNAME__', templateName) : this.options.empty_remark;
         }
-        if(this.options.placeholder_text=='def'){
+        if(this.options.placeholder_option=='provided' && this.options.placeholder_recent){
+            this.options.placeholder_text = this.options.placeholder_recent;
+        }else if(this.options.placeholder_option=='blank'){
+            this.options.placeholder_text = '';
+        }else{
             this.options.placeholder_text = window.hWin.HR('resultListExt_placeholder_text');
         }
        
@@ -437,14 +445,14 @@ $.widget( "heurist.recordListExt", {
             this.options.search_initial = null;
         }        
         
-        if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)
-        || !window.hWin.HEURIST4.util.isempty(this.options.empty_remark)){
-            this.placeholder_ele = $('<div>')
+        //if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)
+        //|| !window.hWin.HEURIST4.util.isempty(this.options.empty_remark)){
+        this.placeholder_ele = $('<div>')
                 .css({'white-space': 'pre-wrap', 'padding-top': '20px'})
                 .prependTo(this.element)
-                .html(window.hWin.HEURIST4.util.isempty(this.options.empty_remark)
-                    ?this.options.placeholder_text:this.options.empty_remark);
-        }
+                .html(this.options.empty_remark);
+        //?this.options.placeholder_text:this.options.empty_remark);
+        //}
 
         // Force single selection for normal record viewer
         if(!window.hWin.HEURIST4.util.isempty(this.options.url) && this.options.url.indexOf('renderRecordData.php') != -1){
@@ -710,7 +718,15 @@ $.widget( "heurist.recordListExt", {
             || window.hWin.HEURIST4.util.isempty(this.options.url)){
             return;  
         }else{
-            this.options.empty_remark = window.hWin.HR('resultListExt_empty_remark').replace('__REPORTNAME__', templateName);
+            
+            if(this.options.empty_remark_option=='provided' && this.options.empty_remark_recent){
+                this.options.empty_remark = this.options.empty_remark_recent;
+            }else if(this.options.empty_remark_option=='blank'){
+                this.options.empty_remark = '';
+            }else{
+                this.options.empty_remark = window.hWin.HR('resultListExt_empty_remark');
+            }
+            this.options.empty_remark = this.options.empty_remark.replace('__REPORTNAME__', templateName);
         }
 
         let empty_results = this.options.recordset==null || this.options.recordset.length()==0;
@@ -807,9 +823,7 @@ $.widget( "heurist.recordListExt", {
 
         }else if(empty_results && this.placeholder_ele!=null){
 
-            if(!window.hWin.HEURIST4.util.isempty(this.options.empty_remark)){
-                this.placeholder_ele.html(this.options.empty_remark);
-            }
+            this.placeholder_ele.html(this.options.empty_remark);
 
             if(this.options.is_frame_based){
                 this.dosframe.hide();

@@ -1473,7 +1473,6 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
         if(widget_name=='heurist_resultListExt'){
             opts['template'] = $dlg.find('select[name="rep_template"]').val();
             opts['reload_for_recordset'] = true;
-            opts['emptysetmessage'] = empty_remark; //to remove
             opts['empty_remark'] = empty_remark;
 
             let selection_mode = opts['selection_mode'];
