@@ -438,6 +438,7 @@ final class RequestRouter
 
             case 'view':
                 if (isset($rest[0])) $params['recid'] = $rest[0];
+                $params['fmt'] = $params['fmt'] ?? 'html';
                 break;
 
             case 'edit':
