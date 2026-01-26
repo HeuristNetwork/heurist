@@ -187,6 +187,7 @@ final class RequestRouter
 
         // Apply DBREF (MBH -> Manuscripta_Bibliae_Hebraicae)
         $dbResolved = self::applyDbRef($mapping, $dbCandidate);
+        $defaultWebsite = self::getDefWebsite($mapping, $dbCandidate);
 
         // /<db>  => canonical redirect to /<db>/web/ (or /<version>/<db>/web/ if version prefix was used)
         if (count($segments) === 1) {
@@ -209,7 +210,7 @@ final class RequestRouter
         // /<db>/<action>/...
         $action = $segments[1] ?? null;
         if ($action !== null && in_array($action, self::ALLOWED_ACTIONS, true)) {
-            $params = self::paramsFromPrettyRoute($dbResolved, $action, array_slice($segments, 2));
+            $params = self::paramsFromPrettyRoute($dbResolved, $action, array_slice($segments, 2), $defaultWebsite);
             // Query wins over path-derived params
             $params = array_merge($params, $query);
             return self::resultInternal(self::serverRoot() . "/{$activeVersion}/index.php", $params);
@@ -376,7 +377,7 @@ final class RequestRouter
         // Allow /web/... etc on own-domain too
         $action = $segments[0] ?? null;
         if ($action !== null && in_array($action, self::ALLOWED_ACTIONS, true)) {
-            $params = self::paramsFromPrettyRoute($db, $action, array_slice($segments, 1));
+            $params = self::paramsFromPrettyRoute($db, $action, array_slice($segments, 1), $website);
             return self::resultInternal(self::serverRoot() . "/{$version}/index.php", $params);
         }
 
@@ -418,21 +419,27 @@ final class RequestRouter
         return $params;
     }
 
-    private static function paramsFromPrettyRoute(string $db, string $action, array $rest): array
+    private static function paramsFromPrettyRoute(string $db, string $action, array $rest, ?int $defaultWebsite = null): array
     {
         $params = ['db' => $db];
 
         switch ($action) {
             case 'web':
-            case 'website':
+            case 'website': // also covers "web" if you map it here
                 // /<db>/web/[websiteId]/[pageId]
                 if (isset($rest[0]) && ctype_digit($rest[0])) {
                     $params['website'] = (int)$rest[0];
+                    if (isset($rest[1]) && ctype_digit($rest[1])) {
+                        $params['pageid'] = (int)$rest[1];
+                    }
                 } else {
-                    $params['website'] = 0; //default
-                }
-                if (isset($rest[1]) && ctype_digit($rest[1])) {
-                    $params['pageid'] = (int)$rest[1];
+                    // websiteId not present in URL => use mapping default if provided
+                    $params['website'] = ($defaultWebsite !== null) ? (int)$defaultWebsite : 0;
+
+                    // In this form, the first segment (if numeric) is the page id
+                    if (isset($rest[0]) && ctype_digit($rest[0])) {
+                        $params['pageid'] = (int)$rest[0];
+                    }
                 }
                 break;
 
@@ -452,11 +459,43 @@ final class RequestRouter
                 if (isset($rest[1]) && ctype_digit($rest[1])) $params['depth'] = (int)$rest[1];
                 break;
 
-            case 'tpl':
-                if (isset($rest[0])) $params['template'] = $rest[0];
-                if (isset($rest[1]) && ctype_digit($rest[1])) $params['template_id'] = (int)$rest[1];
-                break;
+            case 'tpl': {
+                // Support:
+                //  1) /tpl/<templateId>/<query>
+                //  2) /tpl/<templateName>/<query>
+                //
+                // Query normalization:
+                //  - if query looks like record ids -> q=ids:...
+                //  - else q=<raw>
 
+                if (!isset($rest[0]) || $rest[0] === '') break;
+
+                $first = $rest[0];
+
+                // /tpl/<templateId>/...
+                if (ctype_digit($first)) {
+                    $params['template_id'] = (int)$first;
+                } else {
+                    // /tpl/<templateName>/...
+                    $params['template'] = $first;
+                }
+
+                // Optional query segment(s)
+                // If there are multiple segments, join them back with "/" to preserve original query
+                if (isset($rest[1]) && $rest[1] !== '') {
+                    $rawQuery = implode('/', array_slice($rest, 1));
+
+                    // prepareIds may accept comma/space/semicolon separated ids etc.
+                    $ids = self::prepareIds($rawQuery);
+                    if (!empty($ids)) {
+                        $params['q'] = 'ids:' . implode(',', $ids);
+                    } else {
+                        $params['q'] = $rawQuery;
+                    }
+                }
+
+                break;
+            }
             case 'adm':
                 $params['adm'] = 1;
                 break;
@@ -467,6 +506,34 @@ final class RequestRouter
 
     // ----------------- Mapping + parsing helpers -----------------
 
+    private static function prepareIds($ids, bool $canBeZero=false): array
+    {
+        if ($ids === null) return [];
+
+        if (!is_array($ids)) {
+            $ids = (string)$ids;
+
+            // If a single numeric token, treat as one id
+            if (is_numeric($ids)) {
+                $ids = [$ids];
+            } else {
+                // Support commas + whitespace/semicolon/plus (more forgiving for URLs)
+                $ids = preg_split('~[,\s;+]+~', $ids) ?: [];
+            }
+        }
+
+        $res = [];
+        foreach ($ids as $v) {
+            $v = trim((string)$v);
+            if ($v === '') continue;
+
+            if (is_numeric($v) && ((float)$v > 0 || ($canBeZero && (float)$v == 0))) {
+                $res[] = (int)$v;
+            }
+        }
+        return $res;
+    }
+    
     private static function defaultMappingFile(): string
     {
         // This class lives under .../<version>/hserv/controller/
@@ -590,6 +657,17 @@ final class RequestRouter
         }
         return $dbCandidate;
     }
+    
+    private static function getDefWebsite(array $mapping, string $dbCandidate): ?int
+    {
+        $dbref = $mapping['dbref'][$dbCandidate] ?? null;
+
+        if (is_array($dbref) && isset($dbref['website']) && ctype_digit((string)$dbref['website'])) {
+            return (int)$dbref['website'];
+        }
+
+        return null;
+    }    
 
     private static function isValidDbToken(string $db): bool
     {

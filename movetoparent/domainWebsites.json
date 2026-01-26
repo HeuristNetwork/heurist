@@ -8,7 +8,7 @@
     "mbh.example.com": { "db": "Manuscripta_Bibliae_Hebraicae", "version": "heurist" }
   },
   "dbref": {
-    "MBH": { "db": "Manuscripta_Bibliae_Hebraicae" },
+    "MBH": { "db": "MBH_Manuscripta_Bibliae_Hebraicae", "website": 123 },
     "BEnum": { "db": "BE_Bulletin_Epigraphique" }
   },
   "reserved_paths": ["heurist","h7-alpha","h7-ao","h7-bm","startup","matomo","errors","db","api"]
