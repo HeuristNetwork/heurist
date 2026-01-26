@@ -931,27 +931,33 @@ function afterPageLoad(document, pageid, eventdata){
         // If this is an own-domain website (no db/web prefix), keep numeric pretty URLs
         if (isOwnDomainNumeric && !/\/([A-Za-z0-9_]+)\/(website|web)\//.test(spath)) {
 
-            // Decide which numeric style to use:
-            // If site is fixed by mapping, prefer "/<pageid>"
-            // Otherwise use "/<websiteid>/<pageid>"
-            const fixedWebsite = (home_page_record_id && window.hWin.HAPI4?.website_id_fixed); // you may need to define this
-            // If you don't have a flag, infer: if pathname is "/" or "/<pageid>", treat as fixed-website mode.
-
+            // Always produce "/<website>/<pageid>" for own-domain numeric routes,
+            // except when current page is the home page, then "/<website>/".
+            //
+            // This avoids ambiguity: a single numeric segment "/<n>" can be interpreted as "website" by RequestRouter.
             const pathIsTwoNums = /^\/\d+\/\d+\/?$/.test(spath);
-            const useTwoNums = pathIsTwoNums; // safest: preserve current style if already two numbers
+            const pathIsOneNum  = /^\/\d+\/?$/.test(spath);
 
-            if (useTwoNums) {
-                // keep website id already present in URL if possible; otherwise fall back to home_page_record_id as website id
+            // Determine website id to use:
+            //  - If current URL already contains website id (two-number form), preserve it.
+            //  - Else fallback to home_page_record_id as website id (your code uses it as website id in web-folder mode).
+            let webId = home_page_record_id;
+
+            if (pathIsTwoNums) {
                 const parts = spath.replace(/^\/|\/$/g,'').split('/');
-                const webId = parts[0] || home_page_record_id;
-                surl = `/${webId}/${pageid}`;
+                if (parts[0] && /^\d+$/.test(parts[0])) webId = parseInt(parts[0], 10);
+            } else if (pathIsOneNum) {
+                // If URL is "/<n>" we cannot know if it was website or page.
+                // Treat it as website id (to match router) when forming canonical "/<website>/..."
+                const parts = spath.replace(/^\/|\/$/g,'').split('/');
+                if (parts[0] && /^\d+$/.test(parts[0])) webId = parseInt(parts[0], 10);
+            }
+
+            // Build canonical URL
+            if (pageid === home_page_record_id) {
+                surl = `/${webId}/`;
             } else {
-                // fixed-website style
-                if (pageid === home_page_record_id) {
-                    surl = '/';
-                } else {
-                    surl = `/${pageid}`;
-                }
+                surl = `/${webId}/${pageid}`;
             }
 
             // add optional lang/q as query params
