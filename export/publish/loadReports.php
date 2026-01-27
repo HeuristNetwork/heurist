@@ -93,7 +93,7 @@ if ($method == "searchreports") {
     $res = $mysqli->query($query);
     if ($res) {
         while ($row = $res->fetch_assoc()) {
-            $row['status'] = getStatus($row, true); // Determine status of the report (e.g., file existence)
+            $row['status'] = getReportStatus($row, true); // Determine status of the report (e.g., file existence)
             $records[] = $row;
         }
         $res->close();
@@ -198,7 +198,7 @@ exit; // Ensure script terminates after handling the request.
      * @uses HEURIST_SMARTY_TEMPLATES_DIR Path to Smarty templates.
      * @uses HEURIST_FILESTORE_DIR Path to the Heurist filestore.
      */
-    function getStatus($row, $returnLastModified = false)
+    function getReportStatus($row, $returnLastModified = false)
     {
         // Check if the Smarty template file exists
         if (!file_exists(HEURIST_SMARTY_TEMPLATES_DIR.$row['rps_Template'])) {
@@ -239,12 +239,18 @@ exit; // Ensure script terminates after handling the request.
         }
 
         // Check if the output file exists
-        if (!file_exists($outputfile)) {
-            return 3; // Output file does not exist
-        } else {
-            $lastModified = filemtime($outputfile);
-            return $returnLastModified ? date('Y-m-d H:i', $lastModified) : 0; // OK
+        clearstatcache(true, $outputfile);
+        if(!file_exists($outputfile)){
+            // Try the filename lowercased
+            $outputfile = str_replace($filename, strtolower($filename), $outputfile);
         }
+
+        if(!file_exists($outputfile)){
+            return 3; // Output file does not exist
+        }
+
+        $lastModified = filemtime($outputfile);
+        return $returnLastModified ? date('Y-m-d H:i', $lastModified) : 0; // OK
     }
 
     /**
