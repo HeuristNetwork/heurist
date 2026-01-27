@@ -153,95 +153,143 @@ record types and fields exported from the target database, this is
 only useful for synchronising vocabularies and terms.\n\n";
 
 // This $import_help string is embedded as a JSON object within the main JSON output.
-$import_help = "{"
-. "\n \t\t\"TRM_ID\": \"Specifies any of the following, which are evaluated in order: local ID, concept code, label or standard code. If no match is found, the value will be added as a new term\","
-. "\n \t\t\"DATE\": \"Specify date field values in ISO format (yyyy or yyyy-mm or yyyy-mm-dd)\","
-. "\n \t\t\"RECORD_REFERENCE\": \"May be replaced with a numeric or alphanumeric reference to another record. Note that this reference will be replaced with an automatically generated numeric Heurist record ID (H-ID), and the reference supplied will be recorded in a field Original ID.\","
-. "\n \t\t\"RELATIONSHIP_RECORD\": \"Special fields that contain no data; instead new records of type RELATIONSHIP should be imported. They will appear in the marker fields when the data is viewed.\","
-. "\n \t\t\"RECORD-IDENTIFIER\": \"Specify the record identifier in the source database (numeric or alphanumeric) if the record could be the target of a record pointer field, including the target record pointer of a relationship record.\""
-. "\n \t}";
+const IMPORT_HELP = <<<OUTPUT
+ {
+            "TRM_ID": "Specifies any of the following, which are evaluated in order: local ID, concept code, label or standard code. If no match is found, the value will be added as a new term",
+            "DATE": "Specify date field values in ISO format (yyyy or yyyy-mm or yyyy-mm-dd)",
+            "RECORD_REFERENCE": "May be replaced with a numeric or alphanumeric reference to another record. Note that this reference will be replaced with an automatically generated numeric Heurist record ID (H-ID), and the reference supplied will be recorded in a field Original ID.",
+            "RELATIONSHIP_RECORD": "Special fields that contain no data; instead new records of type RELATIONSHIP should be imported. They will appear in the marker fields when the data is viewed.",
+            "RECORD-IDENTIFIER": "Specify the record identifier in the source database (numeric or alphanumeric) if the record could be the target of a record pointer field, including the target record pointer of a relationship record."
+        }
+OUTPUT;
 
 // --- Start JSON Output Construction ---
-$json = "{\"heurist\":{\n \t\"help\": ". $import_help .",\n \t\"records\":[";
+$json = <<<OUTPUT
+{
+    "heurist":{
+        "help": %s,
+        "records": [
+OUTPUT;
+$json = sprintf($json, IMPORT_HELP);
 
 // RECORD STRUCTURES
-$file_field = '{"file": {"ulf_ExternalFileReference": "FILE_OR_URL", "fxm_MimeType": "TEXT", "ulf_Description": "MEMO_TEXT", "ulf_OrigFileName": "TEXT"}}';
-$geo_field = '{"geo": {"wkt": "WKT_VALUE"}}';
+const FILE_FIELD = '{"file": {"ulf_ExternalFileReference": "FILE_OR_URL", "fxm_MimeType": "TEXT", "ulf_Description": "MEMO_TEXT", "ulf_OrigFileName": "TEXT"}}';
+const GEO_FIELD = '{"geo": {"wkt": "WKT_VALUE"}}';
+const RECPOINTER_FIELD = '{"id": "RECORD_REFERENCE", "type": "RTY_ID", "title": "TEXT"}';
+const TERM_FIELD = '"TRM_ID"';
+const RELMARKER_FIELD = '"RELATIONSHIP_RECORD"';
 
-$sep = '';
+$recTypeSeparator = '';
 $rectypes = '';
-foreach ($rectype_ids as $rty_id) {
+foreach ($rectype_ids as $rty_ID) {
 
-    $rectype_structure = recordTemplateByRecTypeID($system, $rty_id);// recordSearch.php
-    $rec_templates = '';
+    $rectypeStructure = recordTemplateByRecTypeID($system, $rty_ID);// recordSearch.php
+    $recTypeTemplates = '';
 
-    if(!array_key_exists('error', $rectype_structure)){
+    if(!array_key_exists('error', $rectypeStructure)){
 
         // Add record fields
-        $rec_templates = $sep . "\n \t\t{\"rec_ID\": \"RECORD-IDENTIFIER\", \"rec_RecTypeID\": ". $rectype_structure['rec_RecTypeID'] .", \"rec_URL\": \"URL\", \"rec_ScratchPad\": \"MEMO_TEXT\", \"details\": [";
+        $recTypeTemplates = <<<OUTPUT
+        $recTypeSeparator
+                {
+                    "rec_ID": "RECORD-IDENTIFIER", "rec_RecTypeID": "{$rectypeStructure['rec_RecTypeID']}", "rec_URL": "URL", "rec_ScratchPad": "MEMO_TEXT", "details": [
+        OUTPUT;
         $dtl_output = '';
-        $fld_sep = '';
+        $fieldSeparator = '';
 
         // Add record detail fields
-        foreach ($rectype_structure['details'] as $dt => $details) {
+        foreach ($rectypeStructure['details'] as $dt => $details) {
 
             foreach ($details as $value) {
                 if(is_array($value)){
                     if(array_key_exists('file', $value)){ // file field
-                        $value = $file_field;
+                        $value = FILE_FIELD;
                     }elseif(array_key_exists('geo', $value)){ // geo field
-                        $value = $geo_field;
-                    }elseif(array_key_exists('id', $value) && strpos($value['id'],'RECORD_REFERENCE')===0){
-                        $value = '{"id": "RECORD_REFERENCE", "type": "RTY_ID", "title": "TEXT"}';
+                        $value = GEO_FIELD;
+                    }elseif(array_key_exists('id', $value) && strpos($value['id'],'RECORD_REFERENCE') === 0){ // record pointer field
+                        $value = RECPOINTER_FIELD;
                     }else{
                         $value = '"' . json_encode($value) . '"';
                     }
-                }elseif(strpos($value, 'VALUE') !== false){ //$value == 'VALUE'
-                    $value = '"TRM_ID"';
-                }elseif(strpos($value, 'SEE NOTES AT START') !== false){ //$value == 'SEE NOTES AT START'
-                    $value = '"RELATIONSHIP_RECORD"';
+                }elseif(strpos($value, 'VALUE') !== false){ // term field
+                    $value = TERM_FIELD;
+                }elseif(strpos($value, 'SEE NOTES AT START') !== false){ // Relmarker field
+                    $value = RELMARKER_FIELD;
                 }else{
-                    $value = '"' . $value . '"';
+                    $value = "\"{$value}\"";
                 }
 
-                $rec_templates .= $fld_sep . "\n \t\t\t{\"dty_ID\":" . $dt . ", \"value\":" . $value . "}";
-                $fld_sep = ',';
+                $recTypeTemplates .= <<<OUTPUT
+                {$fieldSeparator}
+                                {"dty_ID": "{$dt}", "value": {$value}}
+                OUTPUT;
+                $fieldSeparator = ',';
             }
         }
-        $rec_templates .= "\n \t\t]}";
+
+        $recTypeTemplates .= <<<OUTPUT
+        
+                    ]
+                }
+        OUTPUT;
 
         // Prepare rectypes list
-        $rty_conceptID = ConceptCode::getRecTypeConceptID($rty_id);
+        $rty_conceptID = ConceptCode::getRecTypeConceptID($rty_ID);
 
-        $rectypes .= $sep ."\n \t\t\t\"". $rty_id ."\": {\n \t\t\t\t\"name\": \"". $rty_names[$rty_id] ."\",\n \t\t\t\t\"code\": \"". $rty_conceptID ."\",\n \t\t\t\t\"count\": 1\n \t\t\t}";
+        $rectypes .= <<<OUTPUT
+        {$recTypeSeparator}
+                    "{$rty_ID}": {
+                        "name": "{$rty_names[$rty_ID]}",
+                        "code": "{$rty_conceptID}",
+                        "count": 1
+                    }
+        OUTPUT;
 
     }else{
-        $rec_templates = $sep. "\n \t\t{\"" . $rty_id . "\": \"" . $rectype_structure['error'] . "\"}]}";
+
+        $recTypeTemplates = <<<OUTPUT
+        {$recTypeSeparator}
+                {"{$rty_ID}": "{$rectypeStructure['error']}"}]}
+        OUTPUT;
     }
 
-    $json .= $rec_templates;
-    //fwrite($fd, $rec_templates);// add template to file
+    $json .= $recTypeTemplates;
 
-    $sep = ',';
+    $recTypeSeparator = ',';
 }
 
-$json .= "\n \t],";
-//fwrite($fd, "\n \t],");// end of record templates
+$json .= <<<OUTPUT
+
+    ],
+OUTPUT; // end of record templates
 
 // Add database details
-$db_details = "\n \t\"database\":{"
-. "\n \t\t\"id\": \"". $system->settings->get('sys_dbRegisteredID') ."\","
-. "\n \t\t\"db\": \"". htmlspecialchars($system->dbname()) ."\","
-. "\n \t\t\"url\": \"". HEURIST_BASE_URL ."\","
-. "\n \t\t\"rectypes\": {". $rectypes ."\n \t\t}"
-. "\n \t}";
-$json .= $db_details;
+$registeredID = $system->settings->get('sys_dbRegisteredID');
+$dbName = htmlspecialchars($system->dbname());
+$dbURL = HEURIST_BASE_URL_PRO;
+
+// Database details
+$json .= <<<OUTPUT
+
+    "database": {
+        "id": "{$registeredID}",
+        "db": "{$dbName}",
+        "url": "{$dbURL}",
+        "rectypes": {{$rectypes}
+        }
+    }
+OUTPUT;
 
 // Close off
-$json .= "\n}}";
+$json .= <<<OUTPUT
+
+}}
+OUTPUT;
 
 // Sanitize DB name for filename
-$filename = 'Template_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $_REQUEST['db']) . '_' . date("YmdHis") . '.json'; 
+$sanitisedDBName = preg_replace('/[^a-zA-Z0-9_-]/', '_', $_REQUEST['db']);
+$datetime = date('YmdHis');
+$filename = "Template_{$sanitisedDBName}_{$datetime}.json"; 
 
 // --- Set Headers and Output JSON ---
 header(CTYPE_JSON); // Specify JSON content type and charset

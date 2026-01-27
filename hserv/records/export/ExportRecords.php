@@ -524,7 +524,7 @@ abstract class ExportRecords {
         //add database information to be able to load definitions later
         $dbID = $this->system->settings->get('sys_dbRegisteredID');
         $database_info = array('id'=>$dbID,
-                                'url'=>HEURIST_BASE_URL,
+                                'url'=>HEURIST_BASE_URL_PRO,
                                 'db'=>$this->system->dbname());
 
         $query = 'select rty_ID,rty_Name,'

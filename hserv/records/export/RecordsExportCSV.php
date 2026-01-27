@@ -773,7 +773,7 @@ public static function output($data, $params){
                                     if(@$val['file']['ulf_ExternalFileReference']){
                                         $file_urls[] = $val['file']['ulf_ExternalFileReference'];
                                     }else{
-                                        $file_urls[] = HEURIST_BASE_URL.'?db='.self::$system->dbname().'&file='.$val['file']['ulf_ObfuscatedFileID'];
+                                        $file_urls[] = HEURIST_BASE_URL_PRO.'?db='.self::$system->dbname().'&file='.$val['file']['ulf_ObfuscatedFileID'];
                                     }
                                 }
                             }

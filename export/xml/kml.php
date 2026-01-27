@@ -30,7 +30,7 @@
 * @const KML_CLOSE Defines the closing tags for a KML document.
 * @const XML_HEADER Defines the XML declaration header (expected Heurist constant).
 * @const HEURIST_SCRATCHSPACE_DIR Path to the scratch space for temporary files.
-* @const HEURIST_BASE_URL Base URL of the Heurist instance.
+* @const HEURIST_BASE_URL_PRO Base URL of the Heurist instance.
 * @const DT_FILE_RESOURCE Detail Type ID for generic file resources.
 * @const DT_KML_FILE Detail Type ID for uploaded KML files.
 * @const DT_KML Detail Type ID for KML snippets stored directly in details.
@@ -279,7 +279,7 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
                     fwrite($kml_file_stream, '<NetworkLink>');
                     fwrite($kml_file_stream, '<name>'.htmlspecialchars($file_data[2]).'</name>');
                     fwrite($kml_file_stream, '<Link id="'.$file_id.'">');
-                    fwrite($kml_file_stream, '<href>'.HEURIST_BASE_URL.'export/xml/kml.php?id='.$file_id.'</href>');
+                    fwrite($kml_file_stream, '<href>'.HEURIST_BASE_URL_PRO.'export/xml/kml.php?id='.$file_id.'</href>');
                     fwrite($kml_file_stream, '</Link>');
                     fwrite($kml_file_stream, '</NetworkLink>');
                 }

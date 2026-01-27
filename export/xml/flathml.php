@@ -1403,7 +1403,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
     }
 
     if (!$rectype_templates){
-        makeTag('citeAs', null, HEURIST_BASE_URL.'?recID='.$record['rec_ID'].'&db='.$system->dbname());
+        makeTag('citeAs', null, HEURIST_BASE_URL_PRO.'?recID='.$record['rec_ID'].'&db='.$system->dbname());
         makeTag('title', null, $record['rec_Title']);
         if(@$record['rec_Added']) {makeTag('added', null, $record['rec_Added']);}
         if(@$record['rec_Modified']) {makeTag('modified', null, $record['rec_Modified']);}
@@ -1657,7 +1657,7 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
             $external_url = @$file['ulf_ExternalFileReference'];//ulf_ExternalFileReference
             $file_nonce = @$file['ulf_ObfuscatedFileID'];
 
-            $file_URL   = HEURIST_BASE_URL.'?db='.$system->dbname().'&file='.$file_nonce; //download
+            $file_URL   = HEURIST_BASE_URL_PRO.'?db='.$system->dbname().'&file='.$file_nonce; //download
             $file['URL'] = $external_url?$external_url:$file_URL;
 
             //including resources disabled since 2016-12-13

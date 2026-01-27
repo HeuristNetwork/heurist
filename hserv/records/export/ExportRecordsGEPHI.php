@@ -85,7 +85,7 @@ protected function _outputHeader(){
     $dt = $t2->format('Y-m-d');
 
     //although anyURI is defined it is not recognized by gephi v0.92
-    $heurist_url = HEURIST_BASE_URL.'?db='.$this->system->dbname();
+    $heurist_url = HEURIST_BASE_URL_PRO.'?db='.$this->system->dbname();
 
     $rec_fields = '';
     if(!empty($this->retrieve_detail_fields)){
@@ -182,8 +182,8 @@ protected function _outputRecord($record){
     $recID = intval($record['rec_ID']);
     $rty_ID = intval($record['rec_RecTypeID']);
     $name   = htmlspecialchars($record['rec_Title']);
-    $image  = htmlspecialchars(HEURIST_BASE_URL.'?db='.$this->system->dbname().'&icon='.$rty_ID);
-    $recURL = htmlspecialchars(HEURIST_BASE_URL.'recID='.$recID.'&fmt=html&db='.$this->system->dbname());
+    $image  = htmlspecialchars(HEURIST_BASE_URL_PRO.'?db='.$this->system->dbname().'&icon='.$rty_ID);
+    $recURL = htmlspecialchars(HEURIST_BASE_URL_PRO.'recID='.$recID.'&fmt=html&db='.$this->system->dbname());
 
     $rec_values = '';
     if(!is_array($this->retrieve_detail_fields)){
