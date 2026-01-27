@@ -27,7 +27,7 @@ final class RecordResolver
      *
      * @return array|null ['url' => string, 'status' => int]
      */
-    public static function resolve(string $version, array $params, string $serverRoot): ?array
+    public static function resolve(string $version, array $params, string $serverRoot=null): ?array
     {
         // ---- Definitions (structure export)
         foreach (['rty','dty','trm','rst'] as $k) {
@@ -156,8 +156,12 @@ final class RecordResolver
     private static function resolveRemoteDbUrl(string $serverRoot, string $version, int $dbID): ?string
     {
         // Load just enough to call DbRegis. This request will end with a redirect.
-        $autoload = rtrim($serverRoot, '/\\') . "/{$version}/autoload.php";
-        $dbregis  = rtrim($serverRoot, '/\\') . "/{$version}/hserv/utilities/DbRegis.php";
+        //$autoload = rtrim($serverRoot, '/\\') . "/{$version}/autoload.php";
+        //$dbregis  = rtrim($serverRoot, '/\\') . "/{$version}/hserv/utilities/DbRegis.php";
+        
+        $autoload = dirname(__FILE__).'/../../autoload.php';
+        $dbregis = dirname(__FILE__).'/../utilities/DbRegis.php';
+
         if (is_file($autoload)) {
             require_once $autoload;
         }

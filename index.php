@@ -48,12 +48,16 @@
 use hserv\utilities\USystem;
 use hserv\utilities\USanitize;
 use hserv\controller\FrontController;
+use hserv\controller\RecordResolver;
+use hserv\controller\FileResolver;
+
 
 require_once dirname(__FILE__).'/autoload.php';
 
+$version = '';
 // Base path for assets/scripts. Even for versionless pretty URLs, assets live under /<version>/.
 // (websiteRecord.php and many legacy scripts expect PDIR to be set early.)
-if (!defined('PDIR') && !array_key_exists('embed', $_REQUEST)) {
+if (!array_key_exists('embed', $_REQUEST)) {
 
     $defaultVersion = 'h7-alpha'; // change if needed
 
@@ -62,13 +66,15 @@ if (!defined('PDIR') && !array_key_exists('embed', $_REQUEST)) {
     $reqPath = preg_replace('~//+~', '/', $reqPath);
 
     if (preg_match('~^/(heurist|h7-alpha|h7-[A-Za-z0-9_-]+)(/|$)~', $reqPath, $m)) {
-        define('PDIR', '/' . $m[1] . '/');   // keeps "~heurist" or "heurist" exactly as in URL
+        $version = $m[1];
     } else {
         // For versionless pretty URLs (eg /db/web/...), choose your public default.
         // If your public default is "heurist", set it to "heurist" here.
-        define('PDIR', '/' . $defaultVersion . '/');
+        $version = $defaultVersion;
     }
- 
+    if(!defined('PDIR')){
+        define('PDIR', '/' . $version . '/');    
+    }
 }
 
 $isLocalHost = isLocalHost();
@@ -126,6 +132,7 @@ if( @$_REQUEST['isalive']==1){
 
     return;
 
+
 }elseif (@$_REQUEST['ent']){
 
     //to avoid "Open Redirect" security warning
@@ -134,7 +141,23 @@ if( @$_REQUEST['isalive']==1){
 
     redirectURL('hserv/controller/api.php?'.$query_string);
     return;
+    
+}elseif (@$_REQUEST['controller']=='ReportController' || array_key_exists('template',$_REQUEST) || array_key_exists('template_id',$_REQUEST)
+        || @$_REQUEST['controller']=='ImportAnnotations'){
 
+    //execute smarty template,  $_REQUEST may be composed in resolver.php
+    $controller = new FrontController($_REQUEST);
+    $controller->run();
+    exit;
+
+}elseif ($r = RecordResolver::resolve($version, $_REQUEST)) {
+    header('Location: ' . $r['url'], true, (int)($r['status'] ?? 302));
+    exit;
+//  use FileResolver and remark array_key_exists('file',$_REQUEST)
+}elseif ($r = FileResolver::resolve($version, $_REQUEST)) {
+    header('Location: ' . $r['url'], true, (int)($r['status'] ?? 302));
+    exit;
+/*
 }elseif (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
         //download xml template for given db defintion
 
@@ -144,16 +167,7 @@ if( @$_REQUEST['isalive']==1){
 
                 redirectURL('hserv/structure/export/getDBStructureAsXML.php?db='.@$_REQUEST['db'].'&'.$s);
     return;
-
-
-}elseif (@$_REQUEST['controller']=='ReportController' || array_key_exists('template',$_REQUEST) || array_key_exists('template_id',$_REQUEST)
-        || @$_REQUEST['controller']=='ImportAnnotations'){
-
-    //execute smarty template,  $_REQUEST may be composed in resolver.php
-    $controller = new FrontController($_REQUEST);
-    $controller->run();
-    exit;
-
+    
 }elseif (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
           array_key_exists('icon',$_REQUEST)){
 
@@ -171,7 +185,7 @@ if( @$_REQUEST['isalive']==1){
     $query_string = http_build_query($vars);
     header( 'Location: '.$script_name.'?'.$query_string );
     return;
-
+*/
 }elseif (@$_REQUEST['asset']){ //only from documentation/context_help - download localized help or documentation
 
     $params = USanitize::sanitizeInputArray();
@@ -250,6 +264,8 @@ if( @$_REQUEST['isalive']==1){
         exit('Document not found: ' . htmlspecialchars($name));
     }
 }
+
+
 
 
 define('IS_INDEX_PAGE',true);
