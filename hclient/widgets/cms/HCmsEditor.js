@@ -143,7 +143,7 @@ class HCmsEditor {
                 $('<span class="heurist-helper2 '+this.editor_pos+'TogglerVertical" style="width:270px;'+margin+'">Menu structure and page content</span>').appendTo(tog);
             }
 
-            let helpURL = window.hWin.HRes( 'website_instructions.htm' );
+            let helpURL = window.hWin.HRes( 'website_instructions' );
             this._editor_panel.find('#helpLink').attr('href',helpURL)
             
             

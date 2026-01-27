@@ -1824,27 +1824,19 @@ Automatic translation
         HRes: function (name, ele) {
 
             //window.hWin.HAPI4.getLocale()
-            let sURL = window.hWin.HAPI4.baseURL + '?lang=' + _region + '&asset=' + name;
-        
+            let sURL = `${window.hWin.HAPI4.baseURL}?lang=${_region}&asset=${name}`;
+
+            // Does the file need the html extension
+            let needsHTMLExt = ['advanced_search', 'kml_import', 'smarty_reports', 'website_instructions', 'zotero'];
+            if(needsHTMLExt.includes(name)){
+                sURL += '.html';
+            }
+
             if (ele) {
                 ele.load(sURL);
             } else {
                 return sURL;
             }
-
-            /*default extension is html
-            let ext = window.hWin.HEURIST4.util.getFileExtension(name);
-            if(window.hWin.HEURIST4.util.isempty(ext)){
-                name = name + '.html';
-            }
-            let sURL = '';
-            if(_region && _region!='en'){
-                sURL = sURL + _region + '/';
-                
-            }
-            resultListEmptyMsg.html;
-            */
-
         },
 
 
