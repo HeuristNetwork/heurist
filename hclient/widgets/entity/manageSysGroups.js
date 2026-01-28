@@ -153,8 +153,8 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
                     let sHeader = '<div style="display:flex;">'
                         +`<div style="flex:0 0 33px;border-right:none;"></div>`
-                        +`<div style="flex:0 1 ${select_roles?'3.5':'4'}em;border-left:1px solid gray;padding-left:5px;">ID</div>`
-                        +`<div style="flex:0 2 11em;border-left:1px solid gray;padding-left:5px;">Name</div>`;
+                        +`<div style="flex:0 0 ${select_roles?'3.5':'4'}em;border-left:1px solid gray;padding-left:5px;">ID</div>`
+                        +`<div style="flex:2 0 11em;border-left:1px solid gray;padding-left:5px;">Name</div>`;
 
                     if(select_roles){
                         sHeader = sHeader
@@ -392,9 +392,9 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         let desc = fld('ugr_Description');
 
         let name_width = navigator.userAgent.toLowerCase().includes('firefox') ? 10 : 11;
-        let recTitle = fld2('ugr_ID',is_list?'flex:0 1 4em':'', '')
+        let recTitle = fld2('ugr_ID',is_list?'flex:0 0 4em':'', '')
             +fld2('ugr_Name',is_list
-                        ?`flex:0 2 ${name_width}em;padding-left:5px;`
+                        ?`flex:2 0 ${name_width}em;padding-left:5px;`
                         :('position:absolute;top:16px;'+(is_icon?'left:60px;right:42px;':''))
                         , name);
 
@@ -419,7 +419,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         if(!is_user_roles){
 
             let show_role = this.searchForm.find('#input_search_type').val()!='any';
-            html = html + '<div title="Role" style="'+(is_list?'flex:0 0 80px;':'')+'text-align:center;">'
+            html = html + '<div title="Role" style="'+(is_list?'flex:0 0 40px;':'')+'text-align:center;">'
                     +(show_role?fld('ugl_Role'):'')+'</div>';
         }
 
@@ -502,7 +502,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
         html = html 
             + fld2('ugr_Description',(is_list
-                    ?'flex:0 0 50em;padding-left:10px;'
+                    ?'flex:0 5 50em;padding-left:10px;'
                     :('position:absolute;bottom:5px;'+(is_icon?'left:60px;right:42px;':'width:100%;'))), desc)
             + '</div>';
 
