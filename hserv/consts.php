@@ -824,6 +824,7 @@ function includeJQuery($useBootstrap=false){
           
         
         <script type="text/javascript"> 
+        if(Sentry){
   Sentry.onLoad(function() {
         Sentry.init({
           dsn: "https://bd493ee1a58acc612b6cc71d055d8ff9@o4509586661507072.ingest.de.sentry.io/4509586665701456",
@@ -835,6 +836,7 @@ function includeJQuery($useBootstrap=false){
           ],
         });
       });
+        }
         </script>        
 <?php
    }

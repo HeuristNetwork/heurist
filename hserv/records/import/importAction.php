@@ -3827,9 +3827,6 @@ public static function importTerms($params){
         }
         $results['error'][$idx] = [];
 
-        $row_total = count($terms);
-        mysql__update_progress(null, $progress_session_id, false, "0,$row_total");
-
         $new_terms = [];
 
         $new_term = [
@@ -3837,14 +3834,26 @@ public static function importTerms($params){
             'trm_ParentTermID' => $parent_ID,
             'trm_Domain' => 'enum'
         ];
+        
+        //prepare possible multivalues
+        $terms2 = [];
+        $enclosure = $imp_session['csv_enclosure'] ?? '"';
+        $mvsep     = $imp_session['csv_mvsep'] ?? '|';
+        foreach($terms as $term){
+            $terms2 = array_merge($terms2, self::getMultiValues($term, $enclosure, $mvsep));
+        }
+        $terms = array_values(array_unique($terms2));
 
+        $row_total = count($terms);
+        mysql__update_progress(null, $progress_session_id, false, "0,$row_total");
+        
         $row_count = 1;
-        foreach($terms as $row => $term){
+        foreach($terms as $rowId => $term){
 
             $row_count ++;
 
             if(mb_strlen($term) > 200){
-                $results['error'][$idx][] = "Row $row => Invalid term label (more than 200 characters)";
+                $results['error'][$idx][] = "Row $rowId => Invalid term label (more than 200 characters)";
                 continue;
             }
 
