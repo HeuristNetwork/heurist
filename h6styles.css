@@ -295,3 +295,109 @@ div.slidersMenu > div.ui-heurist-header:hover{
     height: 25px !important;
     border-bottom: 1px solid #CCC !important;
 }
+
+/* ADAPTIVE FORM */
+/* Base reset / safety */
+.hf-fieldset {
+  padding: 5px;
+  border: 0;
+  box-sizing: border-box;
+
+  /* Enable container queries on THIS element */
+  container-type: inline-size;
+}
+
+/* Row layout (wide by default): label column + input column */
+.hf-fieldset .input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  padding-top: 0.2em;
+}
+
+/* Label cell */
+.hf-fieldset .header {
+  flex: 0 0 150px;      /* same as your old 150px */
+  min-width: 150px;
+  text-align: right;
+  padding: 4px 0.4em 0 0;
+  box-sizing: border-box;
+}
+
+/* Inputs should never overflow */
+.hf-fieldset input,
+.hf-fieldset select,
+.hf-fieldset textarea,
+.hf-fieldset .ui-selectmenu-button {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Make text inputs fill remaining space */
+.hf-fieldset input[type="text"],
+.hf-fieldset input[type="email"],
+.hf-fieldset input[type="password"],
+.hf-fieldset input[type="url"],
+.hf-fieldset input[type="tel"],
+.hf-fieldset input[type="search"],
+.hf-fieldset input[type="number"],
+.hf-fieldset select,
+.hf-fieldset .ui-selectmenu-button {
+  flex: 1 1 auto;
+  min-width: 0;          /* critical in flex to allow shrinking */
+  width: 100%;
+}
+
+/* Textarea should also fill the available width */
+.hf-fieldset textarea {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+
+/* ARROW FIELDSET: labels above inputs, left aligned */
+@container (max-width: 399px) {
+  .hf-fieldset .input {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .hf-fieldset .header {
+    flex: 0 0 auto;
+    min-width: 0;
+    width: 100%;
+    text-align: left;
+    padding: 0 16px 0 16px; /* mimic your inline padding */
+  }
+}
+/* CAPTCHA row: use flex and allow wrapping */
+.hf-fieldset .hf-captcha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;  /* ← THIS FIXES IT */
+  gap: 8px;
+  width: 100%;
+}
+
+@container (max-width: 499px) {
+  .hf-fieldset .hf-captcha .header {
+    width: 100%;
+    text-align: left;
+    padding: 0 16px;
+  }
+
+  .hf-fieldset #captcha_img {
+    padding: 6px 0;
+  }
+
+  .hf-fieldset #captcha {
+    width: 10em;
+    max-width: 100%;
+  }
+}
+
+
+

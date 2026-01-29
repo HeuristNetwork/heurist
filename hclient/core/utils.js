@@ -84,19 +84,39 @@ window.hWin.HEURIST4.util = {
      * @param {boolean} [def=true] - The default value to return if `val` is null or undefined.
      * @returns {boolean} True if the value is considered true, false otherwise.
      */
-    istrue: function(val, def){
-        def = window.hWin.HEURIST4.util.isnull(def)?true:def;
-        if(window.hWin.HEURIST4.util.isnull(val)){
+    istrue: function (val, def) {
+        def = window.hWin.HEURIST4.util.isnull(def) ? true : def;
+
+        if (window.hWin.HEURIST4.util.isnull(val)) {
             return def;
-        }else if(val===true){
-            return true;
-        }else if(typeof val==='string'){
-            val =  val.toLowerCase();
-            return val=='yes' || val=='y'  || val=='true' || val=='t' || val=='1';
-        }else{
-            return val==1;
         }
+
+        if (val === true) {
+            return true;
+        }
+
+        if (val === false) {
+            return false;
+        }
+
+        if (typeof val === 'string') {
+            val = val.toLowerCase();
+            return (
+                val === 'yes' ||
+                val === 'y' ||
+                val === 'true' ||
+                val === 't' ||
+                val === '1'
+            );
+        }
+
+        if (typeof val === 'number') {
+            return val === 1;
+        }
+
+        return false;
     },
+    
     
     /**
      * Checks if a string is a valid CSS color.

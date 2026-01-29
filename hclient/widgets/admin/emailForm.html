@@ -12,36 +12,36 @@
 * @since       4
 */
 -->
-<fieldset><legend style="display:none"></legend>
-    <div style="height: 30px; width: 100%;" class="input">
-        <div class="header" style="padding: 0 16px 0 16px;">
+<fieldset class="hf-fieldset"><legend style="display:none"></legend>
+    <div style="width: 100%;" class="input">
+        <div class="header">
             <label for="letter_name" class="slocale">Your name</label>
         </div>
         <input type="text" id="letter_name" required="required" placeholder="e.g. Jane Doe" aria-required="true" size="50">
     </div>
     
-    <div style="height: 30px; width: 100%;" class="input">
-        <div class="header" style="padding: 0 16px 0 16px;">
+    <div style="width: 100%;" class="input">
+        <div class="header">
             <label for="letter_email" class="slocale">Email Address</label>
         </div>
         <input type="email" id="letter_email" required="required" placeholder="e.g. jane.doe@example.com" aria-required="true" size="50">
     </div>
 
     
-    <div style="padding: 0.2em; width: 100%;" class="input">
-        <div class="header" style="padding: 0 16px 0 16px;vertical-align:top;">
+    <div style="align-items: flex-start;width: 100%;" class="input">
+        <div class="header">
             <label for="letter_content" class="slocale">Email Message</label>
         </div>
-        <textarea id="letter_content"  required="required" style="width:400px;height:150px"></textarea>
+        <textarea id="letter_content"  required="required" style="height:150px"></textarea>
     </div>
     
     
-    <div style="height: 35px; width: 100%;" class="input">
-        <div class="header" style="padding: 0 16px 0 16px;">
+    <div class="input hf-captcha" style="width: 100%;">
+        <div class="header">
             <label for="captcha" class="slocale">Prove you are human</label>
         </div>
-        <div id="captcha_img" style="padding:10px 4px;display:inline-block;"></div>
-        <input type="text" name="captcha" id="captcha" style="display:inline-block;width:10em;" maxlength="16" />
+        <div id="captcha_img"></div>
+        <input type="text" name="captcha" id="captcha" maxlength="16" />
         <input type="hidden" name="captchaid" id="captchaid"/>
     </div>
     

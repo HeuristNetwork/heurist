@@ -475,7 +475,7 @@ function editCMS_ElementCfg( element_cfg, _layout_content, _layout_container, $c
             let ele = cont.find('input[name="'+name+'"]');
             let val = ele.val();
             if( (val != '' || val != 'auto') && parseInt(val)>0){
-                if(!val.endsWith('%') && !val.endsWith('px') && !val.endsWith('em')){
+                if(!val.endsWith('%') && !val.endsWith('px') && !val.endsWith('em') && !val.endsWith('vh') && !val.endsWith('vw')){
                     val = val + 'px';
                 }
                 css[name] = val;

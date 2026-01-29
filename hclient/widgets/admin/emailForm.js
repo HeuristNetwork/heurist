@@ -142,8 +142,7 @@ $.widget( "heurist.emailForm", {
             this._element_form = $('<div>').appendTo(this.element);
         }
 
-
-        if(this.options.isdialog){  //show this widget as popup dialog
+        if(window.hWin.HEURIST4.util.istrue(this.options.isdialog)){  //show this widget as popup dialog
             this._open_button = $('<button>').button(
                 {label:window.hWin.HR('Email Us')}) //, icon:options.icon})
             .appendTo(this.element);
@@ -231,7 +230,7 @@ $.widget( "heurist.emailForm", {
 
         this._refreshCaptcha();
 
-        if(this.options.isdialog){
+        if(window.hWin.HEURIST4.util.istrue(this.options.isdialog)){
             this._on(this._open_button, {click:this.popupDialog});
         }else{
             //adds/inits buttons in form
@@ -368,7 +367,9 @@ $.widget( "heurist.emailForm", {
      * @memberof Widgets.Admin.emailForm
      */
     popupDialog: function(){
-        if(this.options.isdialog){
+        if(!window.hWin.HEURIST4.util.istrue(this.options.isdialog)){
+            return;    
+        }
             window.hWin.HRA(this._element_form);//this.element
 
             let $dlg = this._as_dialog.dialog("open");
@@ -391,7 +392,6 @@ $.widget( "heurist.emailForm", {
                 let helpURL = window.hWin.HRes( this.options.helpContent )+' #content';
                 window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog, null, helpURL, false);
             }
-        }
     },
 
     /**
@@ -408,7 +408,7 @@ $.widget( "heurist.emailForm", {
         this._element_form.find('#letter_email').val('');
         this._element_form.find('#letter_content').val('');
 
-        if(this.options.isdialog){
+        if(window.hWin.HEURIST4.util.istrue(this.options.isdialog)){
             if(is_force===true){
                 this._as_dialog.dialog('option','beforeClose',null);
             }
