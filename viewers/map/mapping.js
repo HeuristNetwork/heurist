@@ -1678,7 +1678,25 @@ $.widget( "heurist.mapping", {
             }else{
                 this.nativemap.setMinZoom(0);
             }
-    },    
+    }, 
+    
+    _canRenderMap: function(el) {
+        if (!el || !el.length) return false;
+
+        // Fast checks
+        if (!el.is(":visible")) return false;
+
+        // Real size check (handles cases where :visible is true but size is 0)
+        const node = el[0];
+        const rect = node.getBoundingClientRect();
+        if (rect.width <= 1 || rect.height <= 1) return false;
+
+        // Also check computed style (rare edge cases)
+        const cs = window.getComputedStyle(node);
+        if (cs.display === "none" || cs.visibility === "hidden") return false;
+
+        return true;
+    },       
 
     _zoom_timeout: 0,
     //
@@ -1688,65 +1706,73 @@ $.widget( "heurist.mapping", {
     //
     zoomToBounds: function(bounds, fly_params){
         
-            if(bounds && !(bounds instanceof L.LatLngBounds)){
-                if(Array.isArray(bounds) && bounds.length>1 ){
-                    bounds = L.latLngBounds(bounds);
-                }
+        
+        const $el = this.element; // map container element for the widget
+
+        // If hidden/collapsed/0-size -> do nothing (prevent Leaflet exceptions)
+        if (!this.nativemap || !this._canRenderMap($el)) {
+            return;
+        }        
+        
+        if(bounds && !(bounds instanceof L.LatLngBounds)){
+            if(Array.isArray(bounds) && bounds.length>1 ){
+                bounds = L.latLngBounds(bounds);
+            }
+        }
+        
+        if(this._zoom_timeout>0){
+            clearTimeout(this._zoom_timeout);   
+            this._zoom_timeout = 0;
+        }
+                    
+        if(bounds && bounds.isValid()){
+            
+            let maxZoom = this.nativemap.getMaxZoom();
+            
+            let nativeZoom = this.convertZoomToNative(this.options.zoomMaxInKM, bounds); //adjust for current lat
+            if(nativeZoom>=0 && nativeZoom<maxZoom){
+                maxZoom = nativeZoom;
+            } 
+            if(window.hWin.HEURIST4.util.isObject(fly_params) && (!fly_params['maxZoom'] || fly_params['maxZoom'] > maxZoom)){
+                fly_params['maxZoom'] = maxZoom;
             }
             
-            if(this._zoom_timeout>0){
-                clearTimeout(this._zoom_timeout);   
-                this._zoom_timeout = 0;
-            }
-                        
-            if(bounds && bounds.isValid()){
-                
-                let maxZoom = this.nativemap.getMaxZoom();
-                
-                let nativeZoom = this.convertZoomToNative(this.options.zoomMaxInKM, bounds); //adjust for current lat
-                if(nativeZoom>=0 && nativeZoom<maxZoom){
-                    maxZoom = nativeZoom;
-                } 
-                if(window.hWin.HEURIST4.util.isObject(fly_params) && (!fly_params['maxZoom'] || fly_params['maxZoom'] > maxZoom)){
-                    fly_params['maxZoom'] = maxZoom;
-                }
-                
-                let zoom_params = $.extend({maxZoom: maxZoom}, this.options.map_margins);
+            let zoom_params = $.extend({maxZoom: maxZoom}, this.options.map_margins);
 
-                try{
+            try{
 
-                    if(fly_params){
-                        let duration = 5;
-                        if(fly_params===true){
-                            fly_params = {animate:true, duration:duration, maxZoom: maxZoom};
-                        }else{
-                            if(fly_params.duration>0){
-                                duration = fly_params.duration;
-                            }else{
-                                fly_params.duration = duration;
-                            }
-                        }
-                        fly_params = $.extend(fly_params, this.options.map_margins);
-                        this.nativemap.flyToBounds(bounds, fly_params);
-                        
-                        let that = this; //fly to bounds fits bounds wrong
-                        this._zoom_timeout = setTimeout(function(){
-                                that.nativemap.fitBounds(bounds, zoom_params);
-                                that._zoom_timeout = 0;
-                        }, duration*1000+200);
-
+                if(fly_params){
+                    let duration = 5;
+                    if(fly_params===true){
+                        fly_params = {animate:true, duration:duration, maxZoom: maxZoom};
                     }else{
-                        this.nativemap.fitBounds(bounds, zoom_params);
-                        //paddingTopLeft:L.point(500,50),paddingBottomRight:L.point(50,0)});
-                        //padding: L.point(50, 50)});  //padding - margins for map 
-                        //this.nativemap.fitBounds(bounds, {maxZoom: 0});   
+                        if(fly_params.duration>0){
+                            duration = fly_params.duration;
+                        }else{
+                            fly_params.duration = duration;
+                        }
                     }
+                    fly_params = $.extend(fly_params, this.options.map_margins);
+                    this.nativemap.flyToBounds(bounds, fly_params);
+                    
+                    let that = this; //fly to bounds fits bounds wrong
+                    this._zoom_timeout = setTimeout(function(){
+                            that.nativemap.fitBounds(bounds, zoom_params);
+                            that._zoom_timeout = 0;
+                    }, duration*1000+200);
 
-                }catch(e){
-                    console.error('Can not zoom to bounds ', bounds.toBBoxString());
+                }else{
+                    this.nativemap.fitBounds(bounds, zoom_params);
+                    //paddingTopLeft:L.point(500,50),paddingBottomRight:L.point(50,0)});
+                    //padding: L.point(50, 50)});  //padding - margins for map 
+                    //this.nativemap.fitBounds(bounds, {maxZoom: 0});   
                 }
 
+            }catch(e){
+                console.error('Can not zoom to bounds ', bounds.toBBoxString());
             }
+
+        }
     },
 
     //
