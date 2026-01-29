@@ -819,12 +819,12 @@ function includeJQuery($useBootstrap=false){
         
 
         <script src="https://js-de.sentry-cdn.com/bd493ee1a58acc612b6cc71d055d8ff9.min.js" 
-                integrity="sha384-9VO5vanIJCFDnA2SFKhCvK9vMoaNQIY2Lja47RSYp3T3wSWl1se77mZSzdpVlJgD"
+                integrity="sha384-uJ1kv5AM1PIf6IknvFka0Bz6fhImzrMsIoiUoYwy+Sf5DgJs59ODm+4HAae4TVbh"
                 crossorigin="anonymous"></script>
           
         
         <script type="text/javascript"> 
-        if(Sentry){
+        if (window.Sentry && typeof window.Sentry.onLoad === "function") { 
   Sentry.onLoad(function() {
         Sentry.init({
           dsn: "https://bd493ee1a58acc612b6cc71d055d8ff9@o4509586661507072.ingest.de.sentry.io/4509586665701456",
