@@ -817,11 +817,11 @@ function includeJQuery($useBootstrap=false){
         <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js" integrity="sha384-/L7+EN15GOciWSd0nb17+43i1HKOo5t8SFtgDKGqRJ2REbp8N6fwVumuBezFc4qC" crossorigin="anonymous"></script>
         <link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
         
+<!-- integrity="sha384-uJ1kv5AM1PIf6IknvFka0Bz6fhImzrMsIoiUoYwy+Sf5DgJs59ODm+4HAae4TVbh" -->
 
         <script src="https://js-de.sentry-cdn.com/bd493ee1a58acc612b6cc71d055d8ff9.min.js" 
-                integrity="sha384-uJ1kv5AM1PIf6IknvFka0Bz6fhImzrMsIoiUoYwy+Sf5DgJs59ODm+4HAae4TVbh"
                 crossorigin="anonymous"></script>
-          
+                
         
         <script type="text/javascript"> 
         if (window.Sentry && typeof window.Sentry.onLoad === "function") { 
