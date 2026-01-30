@@ -915,7 +915,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                         that.list_div.empty();
                         $('<div style="min-width:160px;font-size:0.8em" class="ui-widget-content">'
                         +'<span class="ui-icon ui-icon-check" '
-                        +'style="display:inline-block;vertical-align:bottom;"/>'
+                        +'style="display:inline-block;vertical-align:bottom;"></span>'
                         +'Confirm&nbsp;and&nbsp;assign&nbsp;new&nbsp;Tag</div>')
                             .appendTo(that.list_div)
                                 .on('click',  function(event){

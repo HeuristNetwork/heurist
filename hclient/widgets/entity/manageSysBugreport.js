@@ -81,18 +81,18 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
 
         if(!this.options.guestUser){
 
-            delete this.options.entity.fields[8];
-            delete this.options.entity.fields[7];
-            delete this.options.entity.fields[1];
-            delete this.options.entity.fields[0];
+            this.options.entity.fields[0].dtFields.rst_Display = 'hidden';
+            this.options.entity.fields[1].dtFields.rst_Display = 'hidden';
+            this.options.entity.fields[7].dtFields.rst_Display = 'hidden';
+            this.options.entity.fields[8].dtFields.rst_Display = 'hidden';
 
-            this.options.entity.fields = this.options.entity.fields.filter((val, idx) => this.options.entity.fields.hasOwnProperty(idx));
-        }else{
+        }else if(this.options.guestUser){
 
-            this.options.entity.fields[1].dtFields.rst_RequirementType = 'required';
-            this.options.entity.fields[7].dtFields.rst_RequirementType = 'required';
-            this.options.entity.fields[8].dtFields.rst_RequirementType = 'required';
-            this.options.entity.fields[0].dtFields.rst_RequirementType = 'required';
+            this.options.entity.fields[0].dtFields.rst_Display = '';
+            this.options.entity.fields[1].dtFields.rst_Display = '';
+            this.options.entity.fields[7].dtFields.rst_Display = '';
+            this.options.entity.fields[8].dtFields.rst_Display = '';
+
         }
 
         if(!this._super()){
@@ -219,6 +219,8 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
             ele.fileupload('option', 'pasteZone', this.element);
         }
 
+        this.element.find('fieldset').addClass('sysBugReport');
+
         // Add default values to url
         this._editing.setFieldValueByName('bug_URL', location.href, false);
 
@@ -228,10 +230,6 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
         for(const ele of eles){ // ignore last element (image field)
 
             let $ele = $(ele);
-
-            if($ele.find('textarea,input.text,.fileupload').length != 0){
-                $ele.css({'padding-top': '10px', 'display': 'block'});
-            }
             
             if(help === ''){
 
