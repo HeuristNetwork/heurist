@@ -50,6 +50,7 @@ use hserv\utilities\USanitize;
 use hserv\controller\FrontController;
 use hserv\controller\RecordResolver;
 use hserv\controller\FileResolver;
+use hserv\controller\RequestRouter;
 
 
 require_once dirname(__FILE__).'/autoload.php';
@@ -82,7 +83,7 @@ if (!array_key_exists('embed', $_REQUEST)) {
 // (i.e. request did NOT go through root /index.php).
 // This only injects DB/website from domainWebsites.json and DBREF mappings.
 // ------------------------------------------------------------------
-if (empty($GLOBALS['HEURIST_ROUTED_VIA_ROOT']) && empty($_REQUEST['db'])) {
+if ( empty($GLOBALS['HEURIST_ROUTED_VIA_ROOT']) ) {
 
     $opts = [
         'default_version' => $version,

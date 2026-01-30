@@ -330,7 +330,7 @@ final class RequestRouter
         $q = [];
         if ($qstr) { parse_str($qstr, $q); }
         $dbCandidate = $q['db'] ?? null;
-        
+
         if (is_string($dbCandidate) && $dbCandidate !== '') {
             $dbResolved = self::applyDbRef($mapping, $dbCandidate);
 
