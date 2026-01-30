@@ -11,7 +11,8 @@
                 "dty_Size": 120,
                 "rst_DisplayWidth": 70,
                 "rst_DisplayName": "Your name",
-                "rst_DisplayHelpText": "Please enter your name"
+                "rst_DisplayHelpText": "Please enter your name",
+                "dty_Role": "virtual"
             }
         },
         {
@@ -21,7 +22,8 @@
                 "dty_Size": 120,
                 "rst_DisplayWidth": 70,
                 "rst_DisplayName": "Your email",
-                "rst_DisplayHelpText": "Please enter your email address, this email will recieve a copy of the bug report and allow us to contact you for additional information"
+                "rst_DisplayHelpText": "Please enter your email address, this email will recieve a copy of the bug report and allow us to contact you for additional information",
+                "dty_Role": "virtual"
             }
         },
         {
@@ -94,7 +96,8 @@
                 "dty_Size": 120,
                 "rst_DisplayWidth": 70,
                 "rst_DisplayName": "Server",
-                "rst_DisplayHelpText": "Please enter the name of your server (if applicable)"
+                "rst_DisplayHelpText": "Please enter the name of your server (if applicable)",
+                "dty_Role": "virtual"
             }
         },
         {
@@ -104,7 +107,8 @@
                 "dty_Size": 120,
                 "rst_DisplayWidth": 70,
                 "rst_DisplayName": "Database",
-                "rst_DisplayHelpText": "Please enter the name of your database (if applicable)"
+                "rst_DisplayHelpText": "Please enter the name of your database (if applicable)",
+                "dty_Role": "virtual"
             }
         },
         {

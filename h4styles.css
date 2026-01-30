@@ -221,6 +221,10 @@ fieldset > div, .input-row{
     display:table-row;
     /*padding-bottom:0.2em;*/
 }
+fieldset.sysBugReport > div{
+    padding-top: 1em;
+    display: block;
+}
 
 fieldset input:focus,
 fieldset textarea:focus,
