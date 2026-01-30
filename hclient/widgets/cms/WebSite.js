@@ -327,17 +327,16 @@ class WebSite {
         }else{
             title_container.empty().hide();
         }
-
         
         //Change url in browser 
         if(this.siteOptions.isEmbeded){
             return;
         }
         
-        const options = {websiteid:this.siteId, pageid:this.pageId, lang:this.currentLanguage, version:3};
+        var params = window.hWin.HEURIST4.util.getUrlParams(location.href);
+        const options = {websiteid:this.siteId, pageid:this.pageId, lang:this.currentLanguage, version:3, otherParams: params};
         const surl = window.hWin.HEURIST4.ui.getCmsLink(options);
         window.history.pushState({}, "Title", surl);
-        
     }
      
     /*
@@ -406,6 +405,7 @@ class WebSite {
         params['db'] = window.hWin.HAPI4.database;
         if(!eventdata) eventdata = {};
         eventdata['url_params'] = params;
+console.log('url_params', params);
         
         let func_name = 'afterPageLoad'+this.siteId;
         

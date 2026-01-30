@@ -505,6 +505,10 @@ $.widget( "heurist.resultList", {
                             });
                         }else{
                             that.setSelected(data.selection);        
+                            
+                            //if(window.hWin.HEURIST4.util.isFunction(that.options.onSelect)){
+                            //    that.options.onSelect.call(that, data.selection);    
+                            //}
                         }
                         
                         

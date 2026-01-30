@@ -2614,77 +2614,157 @@ window.hWin.HEURIST4.ui = {
 
     //
     //
-    //    
-    getCmsLink: function( options ){
-        
-        if(window.hWin.HEURIST4.util.isnull(options)){
+    //
+    getCmsLink: function(options){
+
+        const U = window.hWin.HEURIST4.util;
+
+        if (U.isnull(options)) {
             options = {};
-        }else if(window.hWin.HEURIST4.util.isPositiveInt( options )){
-            options = {website: options};
+        } else if (U.isPositiveInt(options)) {
+            options = { website: options };
         }
-        
-        const websiteid = options.websiteid; 
-        const pageid = (websiteid==options.pageid)?0:options.pageid;
-        
-        const mode = options.mode??'production';
 
-        const version = options.version??'2'; //by default version 2
-        
-        if(mode=='edit' && !options.edit){
-            options.edit = version==3?'start':'2';
+        // accept either websiteid or website (back-compat)
+        const websiteid = options.websiteid ?? options.website ?? 0;
+        const pageid = (websiteid == options.pageid) ? 0 : (options.pageid ?? 0);
+
+        const mode = options.mode ?? 'production';
+        const version = options.version ?? '2'; // default version 2
+
+        if (mode === 'edit' && !options.edit) {
+            options.edit = (version == 3) ? 'start' : '2';
         }
-        const isEdit = !window.hWin.HEURIST4.util.isempty(options.edit);
-        
-        const use_redirect = version!=3 && (options.use_redirect??window.hWin.HAPI4.sysinfo.use_redirect);
-        
-        let surl = window.hWin.HAPI4[(mode=='production' && version!=3)?'baseURL_pro':'baseURL'];
-        
+        const isEdit = !U.isempty(options.edit);
+
+        const use_redirect = version != 3 && (options.use_redirect ?? window.hWin.HAPI4.sysinfo.use_redirect);
+
+        // ---- (1) Detect own-domain numeric pretty URLs (no /web) ----
+        let spath = location.pathname || '/';
+        while (spath.substring(0, 2) === '//') spath = spath.substring(1);
+
+        if (spath.endsWith('/web') || spath.endsWith('/website')) spath = spath + '/'; // add last slash
+
+        const isOwnDomainNumeric =
+            spath === '/' ||
+            /^\/\d+\/?$/.test(spath) ||
+            /^\/\d+\/\d+\/?$/.test(spath);
+
+        // classify own-domain style for building links
+        const ownStyle =
+            (spath === '/' || /^\/\d+\/?$/.test(spath)) ? 'fixedWebsite' :
+            (/^\/\d+\/\d+\/?$/.test(spath) ? 'websiteAndPage' : null);
+
+        // base URL as before
+        let surl = window.hWin.HAPI4[(mode === 'production' && version != 3) ? 'baseURL_pro' : 'baseURL'];
+
         let params = [];
-        
-        if(use_redirect){
-            
-            if(mode=='production'){
-                surl = window.hWin.HAPI4.baseURL_pro.replace('/heurist/', '/');    
-            }
-            
-            surl += `${window.hWin.HAPI4.database}/web`;
 
-            if(websiteid>0){
-                surl += '/'+websiteid;
-                if(pageid>0){
-                    surl += '/'+pageid;
+        if (use_redirect) {
+
+            if (mode === 'production') {
+                surl = window.hWin.HAPI4.baseURL_pro.replace('/heurist/', '/');
+            }
+
+            if (isOwnDomainNumeric) {
+                // Own domain numeric pretty links: build on current origin without /<db>/web
+                surl = location.origin;
+
+                if (ownStyle === 'fixedWebsite') {
+                    // "/" or "/<pageid>" (website fixed)
+                    surl += (pageid > 0) ? `/${pageid}` : `/`;
+                } else {
+                    // "/<websiteid>/<pageid>" (website not fixed)
+                    if (websiteid > 0) {
+                        surl += `/${websiteid}`;
+                        if (pageid > 0) surl += `/${pageid}`;
+                    } else {
+                        surl += `/`;
+                    }
+                }
+
+            } else {
+                // original redirect behaviour
+                surl += `${window.hWin.HAPI4.database}/web`;
+
+                if (websiteid > 0) {
+                    surl += '/' + websiteid;
+                    if (pageid > 0) {
+                        surl += '/' + pageid;
+                    }
                 }
             }
-        }else{
+
+        } else {
 
             params.push(`db=${window.hWin.HAPI4.database}`);
-            
-            if(websiteid>0){
+
+            if (websiteid > 0) {
                 params.push(`website=${websiteid}`);
-                if(pageid>0){
+                if (pageid > 0) {
                     params.push(`pageid=${pageid}`);
                 }
-            }else{
+            } else {
                 params.push('website');
             }
         }
-        
-        if(isEdit){
-            params.push('edit='+options.edit);
-        }            
-        if(version!='' && version!='2'){
-            params.push('ver='+version);
+
+        // owned params (options take priority)
+        if (isEdit) {
+            params.push('edit=' + options.edit);
         }
-        if(options.header){
-            params.push('header='+options.header);
+        if (version !== '' && version !== '2') {
+            params.push('ver=' + version);
         }
-        if(options.lang && options.lang!='def'){
-            params.push('lang='+options.lang);
+        if (options.header) {
+            params.push('header=' + options.header);
         }
-        
-        if(params.length>0){
-            surl += '?'+params.join('&');    
+        if (options.lang && options.lang !== 'def') {
+            params.push('lang=' + options.lang);
         }
+
+        // ---- (2) Keep other possible url parameters (except owned ones) ----
+        // options.otherParams should be an object like { foo:"1", bar:["a","b"], ... }
+        if (options.otherParams && typeof options.otherParams === 'object') {
+
+            // Keys that this function "owns" (do not carry through from otherParams)
+            const ownedKeys = new Set([
+                'db',
+                'website', 'websiteid',
+                'pageid',
+                'mode',
+                'edit',
+                'ver',
+                'header',
+                'lang'
+            ]);
+
+            // also exclude anything explicitly present in options (options has priority)
+            Object.keys(options).forEach(k => ownedKeys.add(k));
+
+            // add any non-owned params (preserve arrays)
+            Object.keys(options.otherParams).forEach(key => {
+                if (ownedKeys.has(key)) return;
+
+                const val = options.otherParams[key];
+                if (val === undefined || val === null || val === '') return;
+
+                if (Array.isArray(val)) {
+                    val.forEach(v => {
+                        if (v === undefined || v === null || v === '') return;
+                        params.push(encodeURIComponent(key) + '=' + encodeURIComponent(String(v)));
+                    });
+                } else {
+                    params.push(encodeURIComponent(key) + '=' + encodeURIComponent(String(val)));
+                }
+            });
+        }
+
+        if (params.length > 0) {
+            // avoid adding "?" twice if surl already contains query (rare but safe)
+            surl += (surl.indexOf('?') >= 0 ? '&' : '?') + params.join('&');
+        }
+
         return surl;
     },
 

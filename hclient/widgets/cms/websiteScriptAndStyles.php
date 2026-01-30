@@ -860,7 +860,7 @@ function afterPageLoad(document, pageid, eventdata){
     var params = window.hWin.HEURIST4.util.getUrlParams(location.href);
     params['db'] = window.hWin.HAPI4.database;
     if(!eventdata) eventdata = {};
-    eventdata['url_params'] = params;
+        eventdata['url_params'] = params;
 
     //execute custom javascript for home page =========================
     if(pageid!=home_page_record_id && is_execute_homepage_custom_javascript){
@@ -1053,8 +1053,6 @@ function afterPageLoad(document, pageid, eventdata){
                 s.push('q=' + eventdata.q);
             }
             surl = spath + '?' + s.join('&');
-
-
 
         }
 
