@@ -173,9 +173,9 @@ if($is_dir_writable === -1){ // Create directory
     exit($msg);
 }
 
-$value_to_replace = array('{db_name}','{db_desc}','{db_url}','{db_website}','{db_rights}','{db_owner}','{db_id}','{db_logo}','{db_dname}',
-                          '{server_host}','{server_url}','{owner_name}','{owner_email}',
-                          '{rec_count}','{file_count}','{rec_last}','{struct_last}','{struct_names}','{date_now}');
+$value_to_replace = ['{db_name}','{db_desc}','{db_url}','{db_website}','{db_rights}','{db_owner}','{db_id}','{db_logo}','{db_dname}',
+                     '{server_host}','{server_url}','{owner_name}','{owner_email}',
+                     '{rec_count}','{file_count}','{rec_last}','{struct_last}','{struct_names}','{date_now}'];
 
 $curr_date = date('Y-m-d');
 
@@ -253,9 +253,9 @@ EXP;
 $index_row = '<div class="db-info"><strong>{db_name}</strong> (<a href="{db_page_link}" target=_blank>database page</a>)<br>' // <strong>{db_dname} ({db_name})</strong>
             . '{website_link}<br>'
             . '<span class="desc">{db_desc}</span></div>';
-$index_row_replace = array('{db_name}', '{db_page_link}', '{website_link}', '{db_desc}');
+$index_row_replace = ['{db_name}', '{db_page_link}', '{website_link}', '{db_desc}'];
 
-$sitemap_replace = array('{db_page_link}', '{website_url}', '{website_mod}');
+$sitemap_replace = ['{db_page_link}', '{website_url}', '{website_mod}'];
 
 $sitemap_row_info = '<url><loc>'.$base_url_root.DBPAGES_DIR.'/{db_page_link}</loc><lastmod>'.$curr_date.'</lastmod><priority>0.7</priority></url>';
 $sitemap_row_web = '<url><loc>{website_url}</loc><lastmod>{website_mod}</lastmod><priority>0.7</priority></url>';
@@ -410,8 +410,8 @@ $today = date('Y-m-d');//'d-M-Y'
 $pages_made = 0;
 $list_is_array = is_array($arg_database);
 
-$index_databases = array();// array of databases with websites (is inserted, with links, into index.html)
-$sitemap_databases = array();
+$index_databases = []; // array of databases with websites (is inserted, with links, into index.html)
+$sitemap_databases = [];
 
 foreach ($databases as $idx=>$db_name){
 
@@ -459,18 +459,19 @@ foreach ($databases as $idx=>$db_name){
     $values[8] = $vals['db_dname'];
 
     // Check if the meta description is valid and has a minimum length.
+    $checkDescriptionLength = true;
     if (!isset($values[1]) || !is_string($values[1])) {
         //Meta description is missing or invalid.
-        echo $tabs0.$db_name.' Description is missed'.$eol;
-        continue;
+        echo $tabs0.$db_name.' Description is missed'.$eol; // report to output
+        $values[1] = 'No description provided'; // use a default description
+        $checkDescriptionLength = false;
     }
 
     $metaDescription = strip_tags(trim($values[1])); // Remove HTML tags and trim whitespace.
 
-    if (strlen($metaDescription) < 50) {
+    if ($checkDescriptionLength && strlen($metaDescription) < 50) {
         //Meta description is empty or not valid
-        echo $tabs0.$db_name.' Description is too short'.$eol;
-        continue;
+        echo $tabs0.$db_name.' Description is short'.$eol; // report short descriptions
     }
 
     // Replace missing/placeholder values
@@ -489,7 +490,7 @@ foreach ($databases as $idx=>$db_name){
     $prime_url_base = $base_url_root.$db_name.'/web/'; //was $base_url.
     $alt_url_base = $base_url.'?db='.$db_name.'&website=';
 
-    $cms_links = array();
+    $cms_links = [];
     
     if($cms_home_id !== null){
 
@@ -503,7 +504,7 @@ foreach ($databases as $idx=>$db_name){
                 $alt_url = $alt_url_base.$rec_ID;
                 
                 $cms_homes[] = '<a href="'.$prime_url.'" target="_blank" rel="noopener">'.$prime_url.'</a> (<a href="'.$alt_url.'" target="_blank" rel="noopener">alternative link</a>)';
-                $cms_links[] = array($prime_url, strstr($rec_Date,' ',true));
+                $cms_links[] = [$prime_url, strstr($rec_Date,' ',true)];
             }
             $values[3] = implode('<br>', $cms_homes);
 
@@ -605,16 +606,15 @@ foreach ($databases as $idx=>$db_name){
     // $db_name => Name, [1] => Description, [3] => Websites
     if($values[3] !== 'None'){ // only databases with PUBLIC websites are listed in index.html
 
-        $index_details = str_replace($index_row_replace, array($db_name, $db_filename, $values[3], $values[1]), $index_row);
+        $index_details = str_replace($index_row_replace, [$db_name, $db_filename, $values[3], $values[1]], $index_row);
 
         array_push($index_databases, $index_details);
-        
-        
-        $sitemap_row = str_replace($sitemap_replace, array($db_filename, '', ''), $sitemap_row_info);
+
+        $sitemap_row = str_replace($sitemap_replace, [$db_filename, '', ''], $sitemap_row_info);
         array_push($sitemap_databases, $sitemap_row); //link to description
         
         foreach ($cms_links as $cms_link){
-            $sitemap_row = str_replace($sitemap_replace, array('', $cms_link[0], $cms_link[1]), $sitemap_row_web);
+            $sitemap_row = str_replace($sitemap_replace, ['', $cms_link[0], $cms_link[1]], $sitemap_row_web);
             array_push($sitemap_databases, $sitemap_row); //link to website
         }
     }else{
