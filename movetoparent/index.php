@@ -187,6 +187,8 @@ if (!$script || !is_file($script)) {
     exit;
 }
 
+$GLOBALS['HEURIST_ROUTED_VIA_ROOT'] = true;
+
 $oldCwd = getcwd();
 @chdir(dirname($script));
 require $script;

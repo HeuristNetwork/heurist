@@ -301,6 +301,55 @@ final class RequestRouter
         }
     }
     
+    /**
+    * Detects database for own domain and DBREF 
+    */
+    public static function detectDb(array $server, array $opts = []): array
+    {
+        $defaultVersion = $opts['default_version'] ?? 'heurist';
+        $mappingFile = $opts['mapping_file'] ?? self::defaultMappingFile();
+        $mapping = self::loadMapping($mappingFile);
+
+        // 1) DOMAIN mapping by host (highest priority)
+        $host = strtolower($server['HTTP_HOST'] ?? '');
+
+        // Host mapping (own domain)
+        $hostMap = $mapping['domains'][strtolower($host)] ?? null;
+
+        if (is_array($hostMap) && !empty($hostMap['db'])) {
+            return [
+                'db' => (string)$hostMap['db'],
+                //'website' => isset($hostMap['website']) ? (int)$hostMap['website'] : null,
+                //'version' => $hostMap['version'] ?? $defaultVersion,
+                'source' => 'domain',
+            ];
+        }
+
+        // 2) DB param mapping (DBREF)
+        $qstr = parse_url($server['REQUEST_URI'] ?? '', PHP_URL_QUERY);
+        $q = [];
+        if ($qstr) { parse_str($qstr, $q); }
+        $dbCandidate = $q['db'] ?? null;
+        
+        if (is_string($dbCandidate) && $dbCandidate !== '') {
+            $dbResolved = self::applyDbRef($mapping, $dbCandidate);
+
+            if (is_string($dbResolved) && $dbResolved !== '' && $dbResolved !== $dbCandidate) {
+                return [
+                    'db' => $dbResolved,
+                    'source' => 'dbref',
+                ];
+            }
+        }
+
+        return [
+            'db' => null,
+            //'website' => null,
+            //'version' => $defaultVersion,
+            'source' => 'none',
+        ];
+    }
+    
     // ----------------- Route builders -----------------
 
     private static function resultInternal(string $script, array $params): array

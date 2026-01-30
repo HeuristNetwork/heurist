@@ -77,6 +77,31 @@ if (!array_key_exists('embed', $_REQUEST)) {
     }
 }
 
+// ------------------------------------------------------------------
+// Fallback routing when this version/index.php is hit directly
+// (i.e. request did NOT go through root /index.php).
+// This only injects DB/website from domainWebsites.json and DBREF mappings.
+// ------------------------------------------------------------------
+if (empty($GLOBALS['HEURIST_ROUTED_VIA_ROOT']) && empty($_REQUEST['db'])) {
+
+    $opts = [
+        'default_version' => $version,
+        'mapping_file' => dirname(__DIR__) . '/domainWebsites.json',
+        'allow_canonical_redirects' => false,  // IMPORTANT: no redirects here, just detect params
+    ];
+
+    $det = RequestRouter::detectDb($_SERVER, $opts);
+
+    if (!empty($det['db'])) {
+        $_REQUEST['db'] = $det['db'];
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
+            $_GET['db'] = $det['db'];
+        }
+        $GLOBALS['HEURIST_ROUTE_PARAMS']['db'] = $det['db'];
+    }
+}
+
+
 $isLocalHost = isLocalHost();
 
 //validate that instance is ok and database is accessible
