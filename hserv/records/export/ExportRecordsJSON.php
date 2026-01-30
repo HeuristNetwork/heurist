@@ -154,26 +154,18 @@ protected function _outputPrepareFields($params){
 
         $this->datatable_columns = array('0'=>array());//for datatable
         $this->datatable_row_placeholder = array();
-        $need_rec_type = false;
 
         //for datatable convert  $params['columns'] to array
-            if(array_key_exists('columns', $params) && is_string($params['columns'])){
-                $params['columns'] = json_decode($params['columns'], true);
-            }
-            
+        if(array_key_exists('columns', $params) && is_string($params['columns'])){
+            $params['columns'] = json_decode($params['columns'], true);
+        }
 
-        /*
-0: ["rec_ID","rec_Title"],
-3: ["rec_ID", "rec_RecTypeID", "1", "949", "9", "61"]
-5: ["1", "38"]
-        */
-        $need_tags = false;
         $this->retrieve_detail_fields = array();
         $this->retrieve_header_fields = array();//header fields
-        $retrieve_relmarker_fields = array();
 
         if(array_key_exists('columns', $params) && is_array($params['columns'])){
-            foreach($params['columns'] as $idx=>$column){
+
+            foreach($params['columns'] as $column){
                 
                 if(!array_key_exists('data', $column)){
                     continue;
@@ -190,19 +182,13 @@ protected function _outputPrepareFields($params){
                     $this->datatable_row_placeholder[$col_name] = '';
                 }
 
-                if($col_name=='rec_Tags'){
-                    $need_tags = true;
-                }elseif($rt_id==0){
-                    if(strpos($col_name,'rec_')===0){
+                if($rt_id==0){
+                    if(strpos($col_name,'rec_') === 0){
                         array_push($this->retrieve_header_fields, $col_name);
                     }elseif(strpos($col_name, 'lt')===0 || strpos($col_name, 'rt')===0){
                         array_push($this->retrieve_detail_fields, substr($col_name, 2));
-                    }else{
-                        if($col_name === 'typename'){
-                            $need_rec_type = true;
-                        }else{
-                            array_push($this->retrieve_detail_fields, $col_name);
-                        }
+                    }elseif($col_name !== 'typename'){
+                        array_push($this->retrieve_detail_fields, $col_name);
                     }
                 }
 
@@ -227,6 +213,7 @@ protected function _outputPrepareFields($params){
             array_push($this->datatable_columns['0'],'rec_RecTypeID');
         }
 
+        $this->retrieve_header_fields = array_unique($this->retrieve_header_fields);
         $this->retrieve_header_fields = implode(',', $this->retrieve_header_fields);
 
     }elseif($this->extended_mode==3){ //for media viewer

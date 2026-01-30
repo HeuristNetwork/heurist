@@ -325,11 +325,11 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                 let is_date = dtid == 'added' || dtid == 'modified' || type == 'date';
                 let is_term = dtid == 'access' || dtid == 'tag' || type == 'enum';
                 if(is_number || is_date){
-                    $select.val(5);
+                    $select.val(10);
                 }else if(is_term){
                     $select.val(20);
                 }else{
-                    $select.val(100);
+                    $select.val(30);
                 }
             }
     },

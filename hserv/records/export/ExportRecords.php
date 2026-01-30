@@ -313,11 +313,23 @@ abstract class ExportRecords {
         $this->_outputPrepareFields($params);
         $this->_outputHeader();
 
+        $retrieveTags = $this->retrieve_detail_fields && in_array('tag', $this->retrieve_detail_fields) ? 'tag' : false; // retrieve record tags
+
         //MAIN LOOP  ----------------------------------------
         foreach ($this->records as $record) {
+
             $recID = is_array($record) ? $record['rec_ID'] : $record;
+
             if (!is_array($record)) {
                 $record = recordSearchByID($this->system, $recID, $this->retrieve_detail_fields, $this->retrieve_header_fields);
+            }
+
+            if($retrieveTags){
+                $tags = recordSearchPersonalTags($this->system, $recID);
+                if(!array_key_exists('details', $record)){
+                    $record['details'] = [];
+                }
+                $record['details'][$retrieveTags] = $tags;
             }
 
             $rty_ID = @$record['rec_RecTypeID'];

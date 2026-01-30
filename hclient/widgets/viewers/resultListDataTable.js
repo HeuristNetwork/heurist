@@ -465,24 +465,28 @@ that._dout('myOnShowEvent');
                         
                     }
                     
-
+                    let recordHeaderField = {
+                        added: 'rec_Added',
+                        addedby: 'rec_AddedByUGrpID',
+                        notes: 'rec_ScratchPad',
+                        owner: 'rec_OwnerUGrpID',
+                        access: 'rec_NonOwnerVisibility'
+                    };
                     let cols = this.options.dataTableParams['columns'];
                     this.hidden_cols = [];
                     for(let i=0;i<cols.length;i++){
-                        /* custom rendereing is not use - remarked due a secirity reason - using eval
-                        if(typeof cols[i]['render']==='string'){
-                            let fooName = cols[i]['render']
-                            if(typeof(eval(fooName))=='function'){ 
-                                cols[i]['render'] = eval(fooName);//function(data,type){ [fooName](data,type); }
-                            }else{
-                                cols[i]['render'] = null;
-                            }
-                        }
-                        */
+
+                        // Remove custom renderers due to security concerns
                         cols[i]['render'] = null;
 
+                        // Record hidden columns
                         if(cols[i]['visible'] === "false" || cols[i]['visible'] === false){
                             this.hidden_cols.push(i);
+                        }
+
+                        let field = cols[i].data.indexOf('.') > 0 ? cols[i].data.split('.')[1] : cols[i].data;
+                        if(this.options.serverSide && cols[i].data.indexOf('.') < 0 && recordHeaderField[field]){
+                            cols[i].data = recordHeaderField[field];//cols[i].data.indexOf('.') > 0 ? cols[i].data.replace(`.${field}`, `.${recordHeaderField[field]}`) : recordHeaderField[field];
                         }
                     }
                     
@@ -525,15 +529,15 @@ this._dout('reload datatable '+this.options.serverSide);
                         this.options.dataTableParams['processing'] = false;
                         this.options.dataTableParams['serverSide'] = false;                    
                         this.options.dataTableParams['ajax'] = {
-                                            "type": "POST",
-                                            "url": queryURL,  
-                                            "data":{
-                                                "db": window.hWin.HAPI4.database,
-                                                "format": 'json',
-                                                "q":queryStr,
-                                                "datatable": 1
-                                            }
-                                            };
+                            "type": "POST",
+                            "url": queryURL,  
+                            "data":{
+                                "db": window.hWin.HAPI4.database,
+                                "format": 'json',
+                                "q":queryStr,
+                                "datatable": 1
+                            }
+                        };
                         this._dataTable = this.div_datatable.DataTable( this.options.dataTableParams );
                     }
 
