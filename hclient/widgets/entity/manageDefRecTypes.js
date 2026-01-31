@@ -1513,7 +1513,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     sMsg = '<div style="margin-top:5em;">'
                         +'<b>There are no record types (entity types) defined within this group.</b>'
                         +'<br><br>Please drag record types from other groups or add new record types to this group.'
-                        +'<br><br>We suggest renaming the "My record types" group to something that suits your project.'
                         +'</div>';   
                 }else{
                     sMsg = '<div style="padding: 10px">'
