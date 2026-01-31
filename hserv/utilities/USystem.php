@@ -235,7 +235,7 @@ class USystem {
 
         //validate
         if(@$_SERVER["DOCUMENT_ROOT"]){
-            $codeFolders = array('heurist','h6-alpha','h7-alpha', 'h6-ao');//need to cli and short url
+            $codeFolders = array('heurist','h6-alpha','h7-alpha','h6-ao','h7-alpha-gpl');//need to cli and short url
 
             $i = 0;
             while ($i<=count($codeFolders)) {

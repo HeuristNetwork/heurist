@@ -60,7 +60,7 @@ $version = '';
 // (websiteRecord.php and many legacy scripts expect PDIR to be set early.)
 if (!array_key_exists('embed', $_REQUEST)) {
 
-    $defaultVersion = 'h7-alpha'; // change if needed
+    $defaultVersion = 'heurist'; // change if needed
 
     $reqPath = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
     $reqPath = preg_replace('~/index\.php$~i', '/', $reqPath);

@@ -114,7 +114,7 @@
 * This mode is intended for developers only and should not be enabled in production links.
 */
 
- $defaultVersion = 'h7-alpha';
+ $defaultVersion = 'heurist';
  $codePath = '/HEURIST/'; // or /
  
 require_once __DIR__ . $codePath . $defaultVersion . '/hserv/controller/RequestRouter.php';
