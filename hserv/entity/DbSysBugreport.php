@@ -46,22 +46,28 @@ class DbSysBugreport extends DbEntityBase
 
     /** @var string Email template for bug report notifications. Placeholders like __LINK__, __DESC__ are replaced. */
     private $reportEmail = <<<EMAIL
-    Your bug report has been successfully added to, or updated in, the Heurist Job tracker database.<br> <br>
-
-    If the bug is marked as DONE, please see the explanation below (generally at the top of the bug description).<br>
-    You can test in the hx-alpha version (it takes time for fixes to migrate to the stndard version).<br>
-    If you are not running one of these, replace /heurist/ in the URL with /hx-alpha/ where x is the version required eg. 7, 10, ...<br><br>
+    Your ticket has been successfully added to, or updated in, the Heurist Job tracker database. 
+    <br>
+    <br>
+    Description:__DESC__
+ 
+    <hr>
     
-    You can view your report at: <a href="__LINK__">__LINK__</a><br><br>
+    You can test in the hx-alpha version which is updated nightly (it may therefore not be updated until tomorrow). The standard /heurist/ version is updated infrequently (our target is monthly).
+    <br>
+    If you are not running the alpha version, replace /heurist/ in the URL with /hx-alpha/ where x is the version required (7 as of 2026).
+    <br>
+    <br>
+    You can view your ticket at: <a href="__LINK__">__LINK__</a><br><br>
 
     Heurist development team only: <a href="__EDIT__">Edit</a><br><br>
     
-    For current and resolved issues list see: <a href="__DB_JOBTRAK__/web/64/1526">__DB_JOBTRAK__</a><br><br>
+    For current and resolved tickets see: <a href="__DB_JOBTRAK__/web/64/1526">__DB_JOBTRAK__</a><br><br>
     <br>
     Reporter: __NAME__ [__EMAIL__]<br>
     Database: __DBLINK__<br>
     __MEMBER__<br>
-    Bug description:__DESC__
+    
     EMAIL;
 
     /** @var string Message about membership for non-member emails, replaces __MEMBER__ within the report email. */

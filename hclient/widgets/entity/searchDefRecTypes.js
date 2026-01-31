@@ -60,7 +60,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         }else{
             
             this.btn_add_record
-                    .button({label: window.hWin.HR('Add'), showLabel:true, 
+                    .button({label: window.hWin.HR('Add record type'), showLabel:true, 
                             icon:"ui-icon-plus"})
                     .addClass('ui-button-action')
                     .css({padding:'2px'})
