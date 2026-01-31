@@ -167,8 +167,25 @@ $.widget( "heurist.dbAction", $.heurist.baseAction, {
 
         // User and database name inputs
         let ele = this._$('#uname');
-        if(ele.length > 0 && ele.val()=='' && window.hWin.HAPI4.currentUser){ // Check ele.length
-            ele.val(window.hWin.HAPI4.currentUser.ugr_Name.slice(0,5).replace(/[^a-zA-Z0-9$_]/g,''));
+        if(ele.length > 0 && ele.val()==''){ // Check ele.length
+            ele.val(window.hWin.HAPI4.currentUser.ugr_Name.replace(/[^a-zA-Z0-9$_]/g,'').slice(0,5));
+            
+            const rawName = window.hWin.HAPI4.currentUser.ugr_Name || '';
+
+            // Keep only allowed chars
+            let dbName = rawName.replace(/[^a-zA-Z0-9]/g, '');
+
+            // If non-latin → empty after replace
+            if (!dbName) {
+                dbName = 'user';
+            }
+
+            // Ensure exactly 5 characters
+            if (dbName.length < 5) {
+                dbName = dbName.padEnd(5, '0'); // user0, ab120, etc.
+            }
+
+            ele.val(dbName.slice(0, 5).toLowerCase());            
         }
         this._on(this._$('#newdblink'),{click:this.closeDialog}); // Assuming closeDialog is from baseAction
         this._$('span.dbname').text(window.hWin.HAPI4.database);
