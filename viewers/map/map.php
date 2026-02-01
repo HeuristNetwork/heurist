@@ -322,33 +322,34 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
     function onMapInit( mapwdiget ){
 
         //take url parameters and open mapdocument or/and perform query
-            //take from frame
-            var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', location.search);
-            //take from top most
-            if( window.hWin.HEURIST4.util.isempty(mapdocument) ){
-                mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
-                if(!(mapdocument>0)){
-                    mapdocument = null;
-                }
+        //take from frame
+        var mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', location.search);
+        //take from top most
+        if( window.hWin.HEURIST4.util.isempty(mapdocument) ){
+            mapdocument = window.hWin.HEURIST4.util.getUrlParameter('mapdocument', window.hWin.location.search);
+            if(!(mapdocument>0)){
+                mapdocument = null;
             }
+        }
 
-            var with_mapdoc = !window.hWin.HEURIST4.util.isempty(mapdocument);
+        var with_mapdoc = !window.hWin.HEURIST4.util.isempty(mapdocument);
 
-            if( with_mapdoc ){
-                mapwdiget.mapping('getMapManager').toggleMapDocument( mapdocument );//load map document
-            }
+        if( with_mapdoc ){
+            mapwdiget.mapping('getMapManager').toggleMapDocument( mapdocument );//load map document
+        }
 
-            var request = window.hWin.HEURIST4.query.parseHeuristQuery(location.search );
-            if( !window.hWin.HEURIST4.util.isempty(request['q']) ){
-                //do not zoom to current search if mapdoc is defined - preserve viewport
-                mapwdiget.mapping('addSearchResult', request, 'Current results', with_mapdoc);
-            }
+        var request = window.hWin.HEURIST4.query.parseHeuristQuery(location.search );
+        if( !window.hWin.HEURIST4.util.isempty(request['q']) ){
+            //do not zoom to current search if mapdoc is defined - preserve viewport
+            mapwdiget.mapping('addSearchResult', request, 'Current results', with_mapdoc);
+        }
 
-            var app_timemap_widget = window.hWin.HEURIST4.util.getUrlParameter('widget', location.search);
-            if(app_timemap_widget && window.hWin && window.hWin.HAPI4){
-                window.hWin.HAPI4.LayoutMgr.executeWidgetMethod(app_timemap_widget,'app_timemap','onMapInit');
-            }
+        var app_timemap_widget = window.hWin.HEURIST4.util.getUrlParameter('widget', location.search);
+        if(app_timemap_widget && window.hWin && window.hWin.HAPI4){
+            window.hWin.HAPI4.LayoutMgr.executeWidgetMethod(app_timemap_widget,'app_timemap','onMapInit');
+        }
 
+        $('#mapping').css('cursor', ''); // remove 'loading' cursor
     }
 
     //
@@ -450,7 +451,7 @@ if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
         <!-- Timeline -->
         <div class="ui-layout-south">
             <div id="timeline" style="width:100%;height:100%;overflow-y:auto;"></div>
-            <div id="timeline_toolbar" style="position:absolute;top:1;left:1;height:20px;"></div>
+            <div id="timeline_toolbar" style="position:absolute;top:1px;left:1px;height:20px;"></div>
         </div>
     </div>
 
