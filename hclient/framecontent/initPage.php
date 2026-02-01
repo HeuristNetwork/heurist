@@ -24,15 +24,16 @@ use hserv\utilities\USystem;
 
 require_once dirname(__FILE__).'/../../autoload.php';
 
-
+/*
 if(defined('IS_INDEX_PAGE')){
     //from main (index) page it redirects to startup
     $_REQUEST['list'] = 1;
-    define('ERROR_REDIR','startup/index.php');//redirects to startup page - list of all databases
+    define('ERROR_REDIR','startup/index.php'); //redirects to startup page - list of all databases
 }else{
+*/
     if(!defined('PDIR')) {define('PDIR','../../');}//need for proper path to js and css
     define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
-}
+
 
 $error_msg = '';
 $isSystemInited = false;
@@ -47,7 +48,21 @@ if(@$_REQUEST['db']){
 }
 
 if(!$isSystemInited){
-    include_once ERROR_REDIR;    
+    
+    $treatWronDatabase = ERROR_REDIR;
+    
+    if(defined('IS_INDEX_PAGE')){
+        
+        if(isset($_REQUEST['db'])){
+            $treatWronDatabase = dirname(__FILE__).'/../../hclient/framecontent/dbNotFound.php';
+        }else{
+            //redirects to startup page - list of all databases
+            $_REQUEST['list'] = 1;
+            $treatWronDatabase = dirname(__FILE__).'/../../startup/index.php'; 
+        }
+    }
+    
+    include_once $treatWronDatabase;    
     exit;
 }
 
