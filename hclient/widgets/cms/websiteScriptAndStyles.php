@@ -1566,7 +1566,9 @@ function _openCMSeditor(event){
 
     var btn = $(event.target);
 
-    if(window.hWin.HAPI4.is_admin()){
+    if(!window.hWin.HAPI4.has_access()){
+        window.hWin.HEURIST4.ui.checkAndLogin(true, () => {location.reload();});
+    }else if(window.hWin.HAPI4.is_admin()){
 
         if(isCMS_active){
             //close
