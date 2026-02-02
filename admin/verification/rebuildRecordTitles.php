@@ -110,7 +110,7 @@ if(!$init_client || intval(@$_REQUEST['session'])>0){ //2a. init operation on cl
 ?>
 
         var sURL = window.hWin.HAPI4.baseURL
-                        +'?w=all&db='+window.hWin.HAPI4.database+'&nometadatadisplay=true&q=';
+                        +'?w=all&db='+window.hWin.HAPI4.database+'&q=';
 
         window.hWin.HEURIST4.util.sendRequest(action_url, request, null, function(response){
             window.hWin.HEURIST4.msg.hideProgress();
@@ -203,11 +203,11 @@ if($init_client){
 
         if($res['q_updates']){
             print '<a target=_blank href="'.HEURIST_BASE_URL.'?w=all&q='.htmlspecialchars($res['q_updates'])
-                .'&db='.$system->dbname().'&nometadatadisplay=true">Click to view updated records</a><br>&nbsp;<br>';
+                .'&db='.$system->dbname().'">Click to view updated records</a><br>&nbsp;<br>';
         }
         if($res['q_blanks']){
             print '<a target=_blank href="'.HEURIST_BASE_URL.'?w=all&q='.htmlspecialchars($res['q_blanks']).'&db='.$system->dbname().
-                '&nometadatadisplay=true">Click to view records for which the data would create a blank title</a>'.
+                '">Click to view records for which the data would create a blank title</a>'.
                 '<br>This is generally due to a faulty title mask (verify with Check Title Masks)'.
                 '<br>or faulty data in individual records. These titles have not been changed.';
 

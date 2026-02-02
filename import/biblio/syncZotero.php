@@ -908,7 +908,7 @@ function composeLinkForAllIds($ids){
     }else{
         return '<a target="_blank" href="'
         .HEURIST_BASE_URL.'?db='.$system->dbname().'&q=ids:'
-        .htmlspecialchars(implode(',',$ids)).'&nometadatadisplay=true">'
+        .htmlspecialchars(implode(',',$ids)).'">'
         .count($ids).'</a>';
     }
 }
