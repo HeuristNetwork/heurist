@@ -1739,6 +1739,20 @@ $.widget( "heurist.editing_input", {
                                     __openRecordLink(node);
                                 }
                             });
+
+                            editor.on('paste', (e) => {
+
+                                let items = e?.clipboardData?.items;
+                                if(!items){
+                                    return;
+                                }
+
+                                let index = Object.entries(items).findIndex((item) => item[1].type.indexOf('image') !== -1);
+                                if(index !== -1){
+                                    window.hWin.HEURIST4.msg.showMsgFlash('Please use the media button in the toolbar to insert images', 3500);
+                                    return;
+                                }
+                            });
                         },
                         init_instance_callback: function(editor){
                             let html = '<span class="tox-tbtn__select-label">URL</span>';
