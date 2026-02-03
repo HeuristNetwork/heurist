@@ -1325,7 +1325,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
                             {default_palette_class:that.options.default_palette_class});        
                         
                     }else{
-                        let url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+recs.join(',') + '&nometadatadisplay=true';
+                        let url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+recs.join(',');
                         
                         window.hWin.HEURIST4.msg.showMsgDlg(
                         ((recs.length==1)?'There is a reference':('There are '+recs.length+' references'))

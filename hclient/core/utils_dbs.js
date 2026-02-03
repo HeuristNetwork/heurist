@@ -2626,7 +2626,7 @@ window.hWin.HEURIST4.dbs = {
                             + ' this term because it (or its children) is already in use in fields '
                             + ' ( '+s+' ) which reference this vocabulary</p> '
                             + ' <p><a href="'+window.hWin.HAPI4.baseURL+'?db='
-                            + window.hWin.HAPI4.database+'&q=ids:' + response.sysmsg['records'].join(',') + '&nometadatadisplay=true'
+                            + window.hWin.HAPI4.database+'&q=ids:' + response.sysmsg['records'].join(',')
                             + '" target="_blank">Show '+response.sysmsg['reccount']+' records</a> which use this term (or its descendants).</p>';
                         }else{
                             sMsg = response.message;

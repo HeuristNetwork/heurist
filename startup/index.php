@@ -840,9 +840,10 @@ if (!defined('PDIR')){
         // Show message about potential missing databases, for main servers only
         const dbParam = window.hWin.HEURIST4.util.getUrlParameter('db', location.search);
         const listOnly = window.hWin.HEURIST4.util.getUrlParameter('openDatabase', location.search); 
+/*        
         const mainServers = ['heuristref.net', 'intersect.org.au', 'heuristau.net', 'heurist.huma-num.fr', 'heurist.eu', 'heuristeu.net'];
         const curURL = location.href.toLowerCase();
-        if(!listOnly && !window.hWin.HEURIST4.util.isempty(dbParam) && mainServers.find((server) => curURL.indexOf(server) >= 0)){
+        if(!listOnly && !window.hWin.HEURIST4.util.isempty(dbParam) && mainServers.find((server) => curURL.indexOf(server) >= 0) ){
             let anchorAttr = 'target="_blank" style="color: blue;" rel="noopener"';
             let toSwitchboard = '/heurist/startup/?list=1';
 
@@ -850,7 +851,7 @@ if (!defined('PDIR')){
             window.hWin.HEURIST4.msg.showMsgDlgUrl(contentURL, null, 'Requested database is not on this server', 
                         {isPopupDlg:true, width:600, height:300});
         }
-
+*/
         <?php if(is_array(@$_REQUEST['error']) && count($_REQUEST['error']) >= 1){
             if(isset($_REQUEST['error']['message'])){
                 $_REQUEST['error']['message'] = '<br>' . $_REQUEST['error']['message'];

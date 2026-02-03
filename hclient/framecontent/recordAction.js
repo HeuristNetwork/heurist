@@ -979,7 +979,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                             tag_link = '<span><a href="'+
                             encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                                 +'&q=tag:"'+response[key+'_tag']+'"')+
-                            '&nometadatadisplay=true" target="_blank">view</a></span>';
+                            '" target="_blank">view</a></span>';
                             
                         }else if(response[key+'_tag_error']){
                             tag_link = '<span>'+response[key+'_tag_error']['message']+'</span>';
@@ -990,7 +990,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                                 tag_link = '<span><a href="'+
                                 encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                                     +'&q=sortby:-m after:"5 minutes ago"')+
-                                '&nometadatadisplay=true" target="_blank">view recent changes</a></span>';
+                                '" target="_blank">view recent changes</a></span>';
                             }
                             
                         }else if(key=='fails' && response['fails_list'] && response['fails_list'].length>0){
@@ -998,7 +998,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                             tag_link = '<span style="background-color:#ffcccc"><a href="'+
                             encodeURI(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                                 +'&q=ids:'+response['fails_list'].join(','))+
-                            '&nometadatadisplay=true" target="_blank">view</a></span>';
+                            '" target="_blank">view</a></span>';
                         }else if(key == 'limited' && action_type == 'add_detail' && response[key] > 0){
                             tag_link = `<span style="display: block; font-size: 0.9em; padding: 5px 5px;">
                                             For single value fields which were skipped because they already have a value,<br>

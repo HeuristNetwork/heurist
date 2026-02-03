@@ -109,7 +109,7 @@ if (!window.hWin.HEURIST4.collection)
         collectionShow: function(){
             if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.collection._collection)){
                 let url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"
-                    +window.hWin.HEURIST4.collection._collection.join(',')+'&nometadatadisplay=true';
+                    +window.hWin.HEURIST4.collection._collection.join(',');
                 if(url.length>2083){ // URL length limit, common for IE
                     window.hWin.HEURIST4.msg.showMsgDlg(
                         window.hWin.HR('collection_url_hint'), null, window.hWin.HR('Warning'), {default_palette_class:'ui-heurist-explore'}

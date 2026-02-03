@@ -1936,7 +1936,7 @@ function checkDtPtr($rty_IDs, $dty_ID){
 
             $recIDs_list = implode(',',$recIDs);
             $ret_message = "$ret_message<br><br><a href='#' onclick='window.open(\""
-            .HEURIST_BASE_URL."?db=".$system->dbname()."&q=ids:$recIDs_list&nometadatadisplay=true\",\"_blank\")'>"
+            .HEURIST_BASE_URL."?db=".$system->dbname()."&q=ids:$recIDs_list\",\"_blank\")'>"
             .'Click here</a> to view all the records affected';
 
             if(count($links)<count($recIDs)){
@@ -2027,7 +2027,7 @@ function checkTerms($termID){
 
                         $recIDs_list = implode(',',$recIDs);
                         $ret_message = "$ret_message<br><br><a href='#' onclick='window.open(\""
-                        .HEURIST_BASE_URL."?db=".$system->dbname()."&q=ids:$recIDs_list&nometadatadisplay=true\",\"_blank\")'>"
+                        .HEURIST_BASE_URL."?db=".$system->dbname()."&q=ids:$recIDs_list\",\"_blank\")'>"
                         .'Click here</a> to view all the records affected';
 
                         if(count($links)<count($recIDs)){
@@ -2136,12 +2136,14 @@ function isTermInUse($trmID, $infield, $indetails){
                 $labels = getTermLabels($mysqli, array($trmID));
                 $errMessage = "You cannot delete term $trmID [{$labels[$trmID]}]. It or its child terms are referenced in $recCount record(s)";
                 $links = array();
+                $linksTruncated = false;
 
                 while ($row = $res->fetch_row()) {
 
                     if(count($links)<251) {
                         array_push($links, $row[0]);
                     }else {
+                        $linksTruncated = true;
                         break;
                     }
 
@@ -2149,8 +2151,8 @@ function isTermInUse($trmID, $infield, $indetails){
                 $links = implode(',',$links);
                 $errMessage = "$errMessage<br><br><a href='#' onclick='window.open(\""
                 .HEURIST_BASE_URL."?db=".$system->dbname()
-                ."&q=ids:$links&nometadatadisplay=true\",\"_blank\")'>Click here</a> to view all the records affected";
-                if(count($links)<$recCount){
+                ."&q=ids:$links\",\"_blank\")'>Click here</a> to view all the records affected";
+                if($linksTruncated){
                     $errMessage = "$errMessage (limited to first 250)";
                 }
 

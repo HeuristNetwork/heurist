@@ -869,7 +869,7 @@ $.widget( "heurist.resultListMenu", {
         if(this._selection!=null){
             let recIDs_list = this._selection.getIds();
             if (recIDs_list.length > 0) {
-                let url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+recIDs_list.join(',') + '&nometadatadisplay=true';
+                let url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+recIDs_list.join(',');
                 window.open(url, "_blank");
             }
         }

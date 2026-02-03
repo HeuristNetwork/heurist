@@ -57,7 +57,8 @@ class FrontController
         $system = new System();
         if (!$system->init(@$this->req_params['db'])) {
             if(array_key_exists('website', $this->req_params)){
-                header('Location: '.HEURIST_BASE_URL.'documentation/context_help/missedDatabaseDontPanic.htm');
+                //header('Location: '.HEURIST_BASE_URL.'documentation/context_help/missedDatabaseDontPanic.htm');
+                include_once dirname(__FILE__).'/../../hclient/framecontent/dbNotFound.php';
                 exit;
             }else{
                 dataOutput($system->getError());
