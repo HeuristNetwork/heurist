@@ -420,7 +420,7 @@ class SystemSettings {
         // Ensure it's a positive integer, default to 0 if not or if conversion failed.
         if(!isPositiveInt($quota_bytes)){
             $quota_bytes = 0;
-            // Default: $quota_bytes = 1073741824; //1GB
+            // Default: $quota_bytes = 10737418240; //10GB
         }
         return $quota_bytes;
     }

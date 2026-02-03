@@ -197,7 +197,7 @@ $databases = array('AmateurS1');
 */
 
 set_time_limit(0); // No time limit for execution to avoid timeout
-ini_set('memory_limit','1024M');  // Increase memory limit to 1GB
+ini_set('memory_limit','10240M');  // Increase memory limit to 10GB
 
 $datetime1 = date_create('now');  // current time stamp for comparison
 $cnt_archived = 0;

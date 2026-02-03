@@ -88,7 +88,7 @@ $mysqli = $system->getMysqli();
         $quota = $system->settings->getDiskQuota();//takes value from disk_quota_allowances.txt
         $quota_not_defined = (!isPositiveInt($quota));
         if($quota_not_defined){
-            $quota = 1073741824; //1GB
+            $quota = 10737418240; //10GB
         }
         $usage = filestoreGetUsageByScan($system);
 

@@ -76,7 +76,7 @@ if(intval($_SERVER['CONTENT_LENGTH'])>$post_max_size){
         $quota = $system->settings->getDiskQuota();//takes value from disk_quota_allowances.txt
         $quota_not_defined = (!($quota>0));
         if($quota_not_defined){
-            $quota = 1073741824; //1GB
+            $quota = 10737418240; //10GB
         }
         $usage = filestoreGetUsageByScan($system);
 
