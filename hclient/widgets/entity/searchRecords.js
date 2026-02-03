@@ -115,7 +115,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             false);
             
         this.btn_add_record = this.element.find('.btn_AddRecord');    
-        this.btn_select_rt = this.element.find( "#btn_select_rt");
+        this.btn_select_rt = this.element.find( "#btn_select_rt").hide();
         
         let is_browse = (that.options.pointer_mode == 'browseonly' || window.hWin.HAPI4.is_guest_user());
         let is_addonly = (that.options.pointer_mode == 'addonly');
@@ -187,10 +187,17 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }
 
         this.btn_add_record
-            .button({label: window.hWin.HR('Add Record'), 
+            .button({label: `<span class="btn-label">${window.hWin.HR('Add Record')}</span> <span class="ui-icon ui-icon-carat-1-s btn-dropdown" style="margin-left: 1em;" title="Select a record type to create"></span>`, 
                         icon: is_browse?null:"ui-icon-plus"})
-            .addClass('ui-button-action')
-            .on('click', function(e) {
+            .addClass('ui-button-action');
+
+        this._on(this.btn_add_record, {
+            click: function(e) {
+
+                if($(e.target).hasClass('btn-dropdown')){
+                    that.btn_select_rt.trigger('click');
+                    return;
+                }
 
                 let search_val = that.element.find('#fill_in_data').val();
                 search_val = search_val == '' ? that.options.init_filter : search_val;
@@ -203,7 +210,19 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 }else{
                     window.hWin.HEURIST4.msg.showMsgFlash('Cannot create a record of all types', 3000);
                 }
-            }); 
+            }
+        });
+
+        //open and adjust position of dropdown
+        this._on( this.btn_select_rt, {
+            click:  function(){
+                this._select_mode = 0;
+                this.selectRectype.hSelect('open'); console.log(this.selectRectype.hSelect('menuWidget'));
+                this.selectRectype.hSelect('menuWidget').position({my: "left top", at: "left bottom", of: this.btn_add_record });
+                return false;
+            }
+        });
+
         if(is_browse){
             this.element.find('#lbl_add_record').text('Select in list');
             this.btn_add_record.hide();
@@ -212,11 +231,10 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }
 
         // create list of tabs for every rectype in this.options.rectype_set
-        if(!is_addonly && is_expand_rt_list){ //(rt_list.length>1 && rt_list.length<20)
+        if(!is_addonly && is_expand_rt_list){
             
             this.element.find('label[for="sel_rectypes-button"]').hide();
             this.element.find('#sel_rectypes-button').hide();
-            this.btn_select_rt.hide();
             let cont = this.element.find('#row_tabulator');
 
             let groupTabHeader = $('<ul>').appendTo(cont);
@@ -254,19 +272,6 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             
         }else{
 
-            this.btn_select_rt
-            .button({label:window.hWin.HR("Select record type"), icon: "ui-icon-carat-1-s", showLabel:false});
-
-            //open and adjust position of dropdown    
-            this._on( this.btn_select_rt, {
-                click:  function(){
-                    this._select_mode = 0;
-                    this.selectRectype.hSelect('open');
-                    this.selectRectype.hSelect('menuWidget').position({my: "left top", at: "left bottom", of: this.btn_add_record });
-                    return false;
-
-            }});
-
             //adjust position of dropdown    
             this.sel_rectypes_btn = this.element.find( "#sel_rectypes-button");
             this._on( this.sel_rectypes_btn, {
@@ -280,7 +285,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             if(is_only_rt){
                 this.element.find('label[for="sel_rectypes-button"]').hide();
                 this.element.find('#sel_rectypes-button').hide();
-                this.btn_select_rt.hide();
+                this.btn_add_record.find('.btn-dropdown').hide();
 
                 if(is_addonly){
 
@@ -305,29 +310,26 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         // change label for btn_add_record 
         //
         function __onSelectRecType(sel){
-            
-            let is_any = false;
-            if(sel || sel.val()){
-                is_any = sel.val().indexOf(',') !== -1;
-            }
-        
-            if(is_browse || is_any){
+
+            if(is_browse){
                 that.btn_add_record.hide();
             }else{
                 that.btn_add_record.show();
             }
 
             if(that.btn_add_record.is(':visible')){
+
                 let lbl;
-                if(sel.val()>0){
-                    lbl = window.hWin.HR('Add')+' '+ sel.find( "option:selected" ).text().trim();
+                if(sel.val() > 0){
+                    lbl = `${window.hWin.HR('Add')} <span style="margin-left: 1em;">${sel.find('option:selected').text()}</span>`.trim();
                 }else{
                     lbl = window.hWin.HR('Add Record');
                 }
-                that.btn_add_record.button('option','label',lbl);
+
+                that.btn_add_record.find('.btn-label').html(lbl);
             }
 
-            if(is_browse || is_any){
+            if(is_browse){
                 that.element.find('#lbl_add_record').text('Select in list');
             }else if(is_addonly){
                 that.element.find('#lbl_add_record').text('Add new');
