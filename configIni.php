@@ -74,9 +74,10 @@ of the codebase and rename it to index.html
 // ---------------------------------------------------------------------------------
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "7.0.2";// sets current program version number, determined by Heurist development lead
+$version = "7.0.3";// sets current program version number, determined by Heurist development lead
 
 // ---------------------------------------------------------------------------------
+// 7.0.3  1 Feb 2026 Tidy up custom domains and simplified db names
 // 7.0.2  25 Jan 2026 Stuff to do with custiom domain and simplified DBnames
 // 7.0.1  28 Dec 2025  New daily update of code from gitHub in place
 // 7.0.0  29 March 2025
