@@ -2,6 +2,8 @@
 
 ## Overview
 
+HFilter is widget that handles execution of saved searches. It is invoked via HMenu. Both are used in CMS v3 only.
+
 The `HFilter` widget serves as a container and controller for displaying filter dialog, primarily for executing saved searches (also known as "Saved Filters") and managing faceted search interfaces within the Heurist system. It allows users to apply predefined search criteria or interact with faceted navigation to refine record sets.
 
 The widget inherits from `HBaseView`, providing a foundational structure for a view component.

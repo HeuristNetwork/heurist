@@ -4,6 +4,8 @@
 
 The `HMenu` widget is a Heurist component designed for displaying navigation menus within the Heurist interface. It provides a flexible way to render menus from various data sources and supports different visual styles and interactions.
 
+HFilter is widget that handles execution of saved searches. It is invoked via HMenu. Both are used in CMS v3 only.
+
 ## Key Features
 
 -   **View Modes**: Supports multiple ways to display the menu:
