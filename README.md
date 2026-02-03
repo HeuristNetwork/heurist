@@ -1,6 +1,6 @@
 ### **Heurist Research Data Management System - Overview**
 
-**Ian Johnson, 3 April 2025**
+**Ian Johnson, 3 Feb 2026**
 
 **https://HeuristNetwork.org**
 **(C) 2005-2023 University of Sydney**
@@ -10,15 +10,16 @@
 
 Heurist is a mature, web-based data management infrastructure specifically tailored to the needs of Humanities researchers. It allows researchers to design, create, manage, analyze, and publish their own richly-structured databases through a simple web interface, without needing programmers or consultants. A complete application can be built in as little as half a day, and complex databases in under a week. Database structures can be modified incrementally on live databases, allowing them to evolve with project needs. The project runs free services for researchers, independent of their institution (through Intersect in Australia and the Huma-Num eResearch service in France). This frees researchers from managing servers, backups, and upgrades.
 
-Heurist is built using PHP, JavaScript, and MySQL. It was developed under the direction of Dr. Ian Johnson (formerly Director of the Archaeological Computing Laboratory, later the Spatial Science Innovation Unit, then Arts eResearch at the University of Sydney) with assistance from ACL programmers. From 2015, it continued with administrative processing but no funding from the University until 2024. At that point, administrative support was removed, and Heurist was transferred to a non-profit association, Heurist Network, based in Paris. Work is underway in 2025/2026, with help from Huma-Num (huma-num.fr), to expand to a community of volunteer technical and documentation contributors.
+Heurist is built using PHP, JavaScript, and MySQL. It was developed from 2005 under the direction of Dr. Ian Johnson (formerly Director of Arts eResearch at the University of Sydney) with assistance from staff programmers. From 2015, it continued with administrative processing but no funding from the University until 2024. At that point, Heurist was transferred to a non-profit association, Heurist Network, based in Paris. Work is underway in 2025/2026, with help from Huma-Num (huma-num.fr), to expand to a community of volunteer technical and documentation contributors. The most active Heurist server is the French server provided by Huma-Num.
 
-**See the `_README.md` file in the root of the codebase** for further information on user interface functions and other background information. See files in the `/documentation` directory for general documentation, contribution guidelines, and installation information.
+**See https://HeuristNetwork.org/Installation for installation instructions** Also see the `_README.md` file in the root of the codebase for further information on user interface functions and other background information. See files in the `/documentation` directory for general documentation, contribution guidelines, and installation information. Please note tht the latest code is in the h7dev branch as of 2026.
+
 
 ---
 
 ## **Understanding the Code Tree**
 
-These are the directories in the root of the Heurist codebase. This codebase will generally be placed in `/var/www/html/HEURIST/xxxxxxx`, where `xxxxxxx` is either `heurist` or a variant such as `h6-alpha`, `h6-beta`, `heurist-prev`, etc.
+These are the directories in the root of the Heurist codebase. This codebase will generally be placed in `/var/www/html/HEURIST/xxxxxxx`, where `xxxxxxx` is either `heurist` or a variant such as `h7-alpha`, `h7-beta`, `heurist-prev`, etc.
 
 Multiple versions of the software can thus coexist on the server and be run interchangeably. The differences in database format between successive sub-versions are generally small and permit backward and forward compatibility. Later versions will update the format with new tables, fields, field lengths, etc., but will never change the definition or order of existing tables and fields.
 
