@@ -727,6 +727,8 @@ window.hWin.HEURIST4.query = {
 
         let subqueries = [...query.matchAll(getSubquery)];
         for(const idx in subqueries){
+            
+            if(!subqueries[idx]) { continue; }
 
             let subquery = subqueries[idx].replaceAll(removeParenthesis, '');
             

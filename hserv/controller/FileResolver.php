@@ -30,7 +30,7 @@ final class FileResolver
 
         // asset (context help)
         if (!empty($params['asset'])) {
-            return self::resolveAsset($version, (string)$params['asset'], $params);
+            return self::resolveAsset($version, $params);
         }
 
         // disclaimer: redirect to allow-listed static documents
@@ -48,37 +48,71 @@ final class FileResolver
         return null;
     }
 
-    private static function resolveAsset(string $version, string $assetName, array $params): ?array
+    private static function resolveAsset(string $version, array $params): ?array
     {
-        $part = '';
-        if (strpos($assetName, '#') !== false) {
-            [$assetName, $part] = explode('#', $assetName, 2);
-            $part = '#' . $part;
+        $name = $params['asset']??'';
+        
+        $part = strstr($name,'#');
+        if($part){
+             $name = strstr($name,'#');
+        }
+        
+        if($name===''){
+            return ['url' => null, 'status' => 404];
+        }
+        
+        $asset_folder = 'documentation/context_help/';
+
+        $name = basename($name);
+        $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
+        $base = pathinfo($name, PATHINFO_FILENAME);
+
+        // allowed extensions
+        $allowed_ext = ['htm', 'html'];
+
+        /* strip extension if it's not valid
+        if (!$extension || !in_array($extension, $allowed_ext, true)) {
+            $base = pathinfo($name, PATHINFO_FILENAME);
+            $extensions_to_try = $allowed_ext;
+        } else {
+            $base = pathinfo($name, PATHINFO_FILENAME);
+            $extensions_to_try = [$extension];
+        }*/
+
+        // locale handling
+        $locale = $params['lang']; // locale
+        if ($locale && preg_match('/^[A-Za-z]{3}$/', $locale)) {
+            $locale = strtolower($locale);
+            $locale = ($locale === 'eng') ? '' : ($locale . '/');
+        } else {
+            $locale = '';
         }
 
-        // default extension .htm
-        $ext = strtolower(pathinfo($assetName, PATHINFO_EXTENSION));
-        if ($ext === '') {
-            $assetName .= '.htm';
-        }
+        // try to resolve asset (locale first, then fallback)
+        $asset = null;
 
-        $locale = '';
-        if (!empty($params['lang']) && preg_match('/^[A-Za-z]{3}$/', (string)$params['lang'])) {
-            $l = strtolower((string)$params['lang']);
-            if ($l !== 'eng') {
-                $locale = $l . '/';
+        foreach ($allowed_ext as $ext) {
+            $candidate = $asset_folder . $locale . $base . '.' . $ext;
+            if (file_exists($candidate)) {
+                $asset = $candidate;
+                break;
             }
         }
 
-        $base = "/{$version}/documentation/context_help/";
-        $candidate = $base . $locale . rawurlencode(basename($assetName));
-        // We cannot reliably check file existence at this layer without filesystem knowledge;
-        // default to locale candidate when locale provided, else default.
-        $url = $candidate;
-        if ($locale === '') {
-            $url = $base . rawurlencode(basename($assetName));
+        if (!$asset && $locale !== '') {
+            // fallback without locale
+            foreach ($allowed_ext as $ext) {
+                $candidate = $asset_folder . $base . '.' . $ext;
+                if (file_exists($candidate)) {
+                    $asset = $candidate;
+                    break;
+                }
+            }
+            if($asset){
+                 $asset = $asset . ' ' . $part;
+            }
         }
-
-        return ['url' => $url . $part, 'status' => 302];
+        
+        return ['url' => $asset, 'status' => $asset?302:404];
     }
 }

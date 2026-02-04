@@ -181,77 +181,16 @@ if( @$_REQUEST['isalive']==1){
     exit;
 //  use FileResolver and remark array_key_exists('file',$_REQUEST)
 }elseif ($r = FileResolver::resolve($version, $_REQUEST)) {
-    header('Location: ' . $r['url'], true, (int)($r['status'] ?? 302));
-    exit;
-/*
-}elseif (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
-        //download xml template for given db defintion
-
-        if(@$_REQUEST['rty']) {$s = 'rty='.$_REQUEST['rty'];}
-        elseif(@$_REQUEST['dty']) {$s = 'dty='.$_REQUEST['dty'];}
-            elseif(@$_REQUEST['trm']) {$s = 'trm='.$_REQUEST['trm'];}
-
-                redirectURL('hserv/structure/export/getDBStructureAsXML.php?db='.@$_REQUEST['db'].'&'.$s);
-    return;
     
-}elseif (array_key_exists('file',$_REQUEST) || array_key_exists('thumb',$_REQUEST) ||
-          array_key_exists('icon',$_REQUEST)){
-
-    if(array_key_exists('icon',$_REQUEST))
-    {
-        //download entity icon or thumbnail
-        $script_name = 'hserv/controller/fileGet.php';
-    }else {
-        //download file, thumb or remote url for recUploadedFiles
-        $script_name = 'hserv/controller/fileDownload.php';
-    }
-
-    //to avoid "Open Redirect" security warning
-    parse_str($_SERVER['QUERY_STRING'], $vars);
-    $query_string = http_build_query($vars);
-    header( 'Location: '.$script_name.'?'.$query_string );
-    return;
-*/
-}elseif (@$_REQUEST['asset']){ //only from documentation/context_help - download localized help or documentation
-
-    $params = USanitize::sanitizeInputArray();
-
-    $name = $params['asset'];
-    $part = strstr($name,'#');
-    if($part){
-         $name = strstr($name,'#');
-    }
-
-    //default ext is html
-    $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
-    if(!$extension){
-        $name = $name . '.htm';
-    }
-
-    $asset_folder = 'documentation/context_help/';
-
-    $locale = $params['lang'];//locale
-    if($locale && preg_match('/^[A-Za-z]{3}$/', $locale)){
-        $locale = strtolower($locale);
-        $locale = ($locale=='eng')?'' :($locale.'/');
+    $status = (int)($r['status']??302);
+    if(empty($r['url']) || $status===404){
+        http_response_code(404);
+        $err = __DIR__ . '/../errors/404.html';
+        if (is_file($err)) readfile($err); else echo '404 Not Found';
     }else{
-        $locale = '';
+        header('Location: ' . $r['url'], true, $status);
     }
-
-    $asset = $asset_folder.$locale.basename($name);
-    if(!file_exists($asset)){
-        //without locale - default is English
-        $locale = '';
-        $asset = $asset_folder.basename($name);
-    }
-
-    if(file_exists($asset_folder.$name)){
-        //download
-        header( 'Location: '.$asset.' '.$part );
-        return;
-    }else{
-        exit('Asset not found: '.htmlspecialchars($name));
-    }
+    exit;
 
 }elseif (@$_REQUEST['logo']){
 
