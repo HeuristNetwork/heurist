@@ -698,11 +698,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             }
                         }
 
-                        if(that.getRecordSet()!==null){
-                            setTimeout(() => {
-                                that._filterByVocabulary();
-                            }, 100);
-                        }
+                        setTimeout(() => {
+                            that._filterByVocabulary();
+                        }, 100);
                     }
                 };
 
@@ -941,7 +939,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
      */
     _filterByVocabulary: function(){
 
-        if(!this.getRecordSet()) return;
+        const hasRecordSet = !this.getRecordSet();
 
         const that = this;
 
@@ -961,17 +959,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                     
                 //initial selection
-                if(this.options.selection_on_init>0){
+                if(this.options.selection_on_init > 0 && hasRecordSet){
                     this.selectRecordInRecordset( this.options.selection_on_init );    
                     this.options.selection_on_init = null;
                 }else{
                     let rdiv = this.recordList.find('.recordDiv:first');
-                    if(rdiv.length){
+                    if(rdiv.length > 0){
                         rdiv.trigger('click');
                     }else if(window.hWin.HEURIST4.util.isFunction(this.options.onSelect)){
                         this.options.onSelect.call( this, null );
                     }
-                }                    
+                }
 
             }else{
                 sGroupTitle += '</h3>';
@@ -984,21 +982,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 let vocab_id = this.options.trm_VocabularyID;
 
-               
-               
-
                 let subset = $Db.trm_TreeData(vocab_id, 'flat'); //returns recordset
 
                 if(!this.recordList.resultList('instance')) return;
-                
+
                 this.recordList.resultList('updateResultSet', subset, null);
 
                 if(this.recordTree && this.recordTree.fancytree('instance')){
 
                     //filtered
                     let treedata = $Db.trm_TreeData(vocab_id, 'tree'); //tree data
-                    
-                   
+
                     let tree = $.ui.fancytree.getTree( this.recordTree );
                     tree.reload(treedata);
                 }
@@ -1009,32 +1003,32 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 // Retrieve Term usages
                 let trm_ids = $Db.trm_TreeData(vocab_id, 3);
-                if(window.hWin.HEURIST4.util.isempty(trm_ids)){
-                    return;
-                }
-                trm_ids = trm_ids.join(',');
+                if(!window.hWin.HEURIST4.util.isempty(trm_ids)){
 
-                let req = {
-                    'trmID': trm_ids,
-                    'a': 'counts',
-                    'mode': 'term_usage',
-                    'entity': 'defTerms',
-                    'request_id': window.hWin.HEURIST4.util.random()
-                };
-                window.hWin.HAPI4.EntityMgr.doRequest(req, function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        that.updateTermUsage(response.data);
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    trm_ids = trm_ids.join(',');
+    
+                    let req = {
+                        'trmID': trm_ids,
+                        'a': 'counts',
+                        'mode': 'term_usage',
+                        'entity': 'defTerms',
+                        'request_id': window.hWin.HEURIST4.util.random()
+                    };
+                    window.hWin.HAPI4.EntityMgr.doRequest(req, function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            that.updateTermUsage(response.data);
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    });
+    
+                    // Retrieve Term labels
+                    if(this._getTranslatedLabels){
+                        this._getTranslatedLabels = false;
+                        window.hWin.HAPI4.EntityMgr.getTranslatedDefs('defTerms', 'trm', null, () => this.updateTermTranslations);
+                    }else if(this.options.select_mode == 'manager' && this.options.auxilary == 'term'){
+                        this.updateTermTranslations();
                     }
-                });
-
-                // Retrieve Term labels
-                if(this._getTranslatedLabels){
-                    this._getTranslatedLabels = false;
-                    window.hWin.HAPI4.EntityMgr.getTranslatedDefs('defTerms', 'trm', null, () => this.updateTermTranslations);
-                }else if(this.options.select_mode == 'manager' && this.options.auxilary == 'term'){
-                    this.updateTermTranslations();
                 }
 
             }else{
