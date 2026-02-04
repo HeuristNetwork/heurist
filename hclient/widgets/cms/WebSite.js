@@ -91,6 +91,7 @@ class WebSite {
                 that.currentLanguage = langSelector.val();
                 that.switchLanguage(); //reload entirely
             });
+            langSelector.css('visibility', this.allLanguages.length>1?'visible':'hidden');
         }
 
         this.suppOptions = {heurist_isJsAllowed:window.hWin.HAPI4.sysinfo['custom_js_allowed'],

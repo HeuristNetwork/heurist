@@ -247,6 +247,7 @@ $meta_description = htmlspecialchars(strip_tags(__getValue($rec, DT_SHORT_SUMMAR
 
 $website_language_def = '';
 $website_languages_links = '';
+$website_languages_options = '';
 $website_languages = null;
 if(defined('DT_LANGUAGES')){
     $website_languages = @$rec['details'][DT_LANGUAGES];
@@ -254,6 +255,7 @@ if(defined('DT_LANGUAGES')){
         $orig_arr = print_r($website_languages,true);
         $website_languages_codes = getTermCodes($mysqli, $website_languages);
         $res = '';
+        $res_opts = '';
         $website_languages_res = array();//defined codes
 
         foreach($website_languages as $term_id){
@@ -263,10 +265,12 @@ if(defined('DT_LANGUAGES')){
                 $lang_code = strtoupper($lang_code);
                 if($website_language_def=='') {$website_language_def = $lang_code;}
                 $res = $res.'<a href="#" data-lang="'.$lang_code.'" onclick="switchLanguage(event)">'.$lang_code.'</a><br>';
+                $res_opts = $res_opts.'<option value="'.$lang_code.'">'.$lang_code.'</option>';
                 array_push($website_languages_res, $lang_code);
             }
         }
         $website_languages_links = count($website_languages_res)>1?$res:'';
+        $website_languages_options = count($website_languages_res)>1?$res_opts:'';
         $website_languages = $website_languages_res;
     }
 }
@@ -277,6 +281,9 @@ if(!$current_language) {$current_language = $website_language_def;}
 if(!empty($website_languages_links)){
     $curr_lang_text = 'data-lang="'.$website_language_def.'"';
     $website_languages_links = str_replace($curr_lang_text, $curr_lang_text . ' class="lang-selected"', $website_languages_links);
+    
+    $curr_lang_text = 'value="'.$website_language_def.'"';
+    $website_languages_options = str_replace($curr_lang_text, $curr_lang_text . ' selected', $website_languages_options);
 }
 
 $website_title = __getValueAsJSON($rec, DT_NAME);//multilang titles

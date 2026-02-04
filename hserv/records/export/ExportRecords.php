@@ -220,12 +220,13 @@ abstract class ExportRecords {
         $this->retrieve_header_fields = array();
         $this->retrieve_detail_fields = array();
 
-        if (@$params['detail']) {
+        if (!empty($params['detail'])) {
             $params['columns'] = is_array($params['detail']) ? $params['detail'] : explode(',', $params['detail']);
-            $default_all_fields = false;
         }
 
-        if (@$params['columns'] && is_array($params['columns'])) {
+        if (!empty($params['columns']) && is_array($params['columns'])) {
+            $default_all_fields = false;
+            
             foreach ($params['columns'] as $col_name) {
                 if (is_array($col_name)) {
                     $col_name = $col_name['data'];
@@ -313,7 +314,7 @@ abstract class ExportRecords {
         $this->_outputPrepareFields($params);
         $this->_outputHeader();
 
-        $retrieveTags = $this->retrieve_detail_fields && in_array('tag', $this->retrieve_detail_fields) ? 'tag' : false; // retrieve record tags
+        $retrieveTags = is_array($this->retrieve_detail_fields) && in_array('tag', $this->retrieve_detail_fields) ? 'tag' : false; // retrieve record tags
 
         //MAIN LOOP  ----------------------------------------
         foreach ($this->records as $record) {

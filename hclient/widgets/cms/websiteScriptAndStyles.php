@@ -436,8 +436,22 @@ function initMainMenu( afterInitMainMenu ){
 
     topmenu.show();
     
-    $('#main-languages').find('a[data-lang]').removeClass('lang-selected');
-    $('#main-languages').find(`a[data-lang=${current_language}]`).addClass('lang-selected');
+    let ele = $('#main-languages');
+    if(ele.length>0){
+        ele.find('a[data-lang]').removeClass('lang-selected');
+        ele.find(`a[data-lang=${current_language}]`).addClass('lang-selected');
+    }
+    ele = $('#main-languages-sel');
+    if(ele.length>0){
+        if(ele.find('option').length>1){
+            ele.show();
+        }else{
+            ele.hide();
+        }
+        
+        ele.val(current_language);
+        ele.on('change', switchLanguage);
+    }
 }
 
 //
@@ -446,6 +460,9 @@ function initMainMenu( afterInitMainMenu ){
 function switchLanguage(event){
 
     var lang_code = $(event.target).attr('data-lang');
+    if(!lang_code){
+        lang_code = $(event.target).val(); //main-languages-sel
+    }
 
     if(lang_code && current_language != lang_code){
         //add url parameter
@@ -1393,6 +1410,7 @@ $website_title -> #main-title>h2
 $title_alt -> #main-title-alt
 $title_alt2 -> #main-title-alt2
 $website_languages_links ->#main-languages
+$website_languages_options ->#main-languages-sel
 */
 
     // Load and Add banner image
@@ -1454,6 +1472,9 @@ $website_languages_links ->#main-languages
 
     if($('#main-languages').length>0){
         $('#main-languages').html('<?php print str_replace("'",APOSTROPHE, $website_languages_links);?>');
+    }
+    if($('#main-languages-sel').length>0){
+        $('#main-languages-sel').html('<?php print str_replace("'",APOSTROPHE, $website_languages_options);?>');
     }
 
     // Setup login button, if needed

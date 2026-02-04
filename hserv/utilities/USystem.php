@@ -853,6 +853,8 @@ class USystem {
             return false;
         }
         
+        return 'database';
+        
         // false && 
         if(session_status() === PHP_SESSION_ACTIVE && isset($_SESSION[$database]['isAssociationMember'])){
             
