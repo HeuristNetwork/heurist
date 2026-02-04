@@ -363,7 +363,6 @@
                 $curlOptions[CURLOPT_PROXYUSERPWD] = HEURIST_HTTP_PROXY_AUTH;
             }
         }
-
         $curlOptions[CURLOPT_HTTPHEADER] = ["Authorization: DeepL-Auth-Key {$accessToken_DeepLAPI}"];
 
         curl_setopt_array($curlHandle, $curlOptions);
@@ -425,6 +424,7 @@
             $textChunk = urlencode($textChunk);
 
             curl_setopt($curlHandle, CURLOPT_URL, "{$baseURL}&text={$textChunk}");
+            
             $data = curl_exec($curlHandle);
     
             $error = curl_error($curlHandle);
@@ -514,7 +514,7 @@
         };
 
         if(mb_strlen($string) <= $CHUNK_SIZE){
-            return $string;//$performRequest($string);
+            return $performRequest($string);
         }
 
         $originalString = $string;
