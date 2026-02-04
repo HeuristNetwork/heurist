@@ -514,7 +514,7 @@
         };
 
         if(mb_strlen($string) <= $CHUNK_SIZE){
-            return $string;//$performRequest($string);
+            return $performRequest($string);
         }
 
         $originalString = $string;
