@@ -1770,7 +1770,7 @@ function recordGetLinkedRecords($system, $recordID){
     }
 
     // Merge results, ensuring uniqueness by record ID. $sources will overwrite $targets on key collision.
-    return array_merge($targets, $sources);
+    return $targets + $sources;
 }
 
 
