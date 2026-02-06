@@ -30,10 +30,18 @@ final class RecordResolver
     public static function resolve(string $version, array $params, string $serverRoot=null): ?array
     {
         // ---- Definitions (structure export)
-        foreach (['rty','dty','trm','rst'] as $k) {
-            if (!empty($params[$k])) {
-                $qs = http_build_query(['db' => $params['db'] ?? null, $k => $params[$k]]);
-                return ['url' => "/{$version}/hserv/structure/export/getDBStructureAsXML.php?{$qs}", 'status' => 302];
+        foreach (['rty','dty','trm','rst'] as $entity) {
+            if (!empty($params[$entity])) {
+                
+                list($remote, $recid) = self::resolveRemoteDbUrl($params[$entity], $params['db']??null);
+                if($remote){
+                    $sep = (strpos($remote, '?') === false) ? '?' : '&';
+                    $qs = [$entity => $params[$entity]];
+                    return ['url' => $remote . $sep . http_build_query($qs), 'status' => 302];
+                }else{
+                    $qs = http_build_query(['db' => $params['db'] ?? null, $entity => $params[$entity]]);
+                    return ['url' => "/{$version}/hserv/structure/export/getDBStructureAsXML.php?{$qs}", 'status' => 302];
+                }
             }
         }
 
@@ -62,33 +70,17 @@ final class RecordResolver
             $fmt = 'hml';
         }
         // Concept ID? DBID-RECID
-        $database_id = 0;
-        $recid = $recToken;
-        if (strpos((string)$recid, '-') !== false) {
-            [$database_id, $recid] = explode('-', (string)$recid, 2);
-            $database_id = (int)$database_id;
-            $recid = (int)$recid;
-        } else {
-            $recid = (int)$recid;
-            // Legacy: numeric db treated as registry ID
-            if (isset($params['db']) && is_numeric($params['db']) && (string)(int)$params['db'] === (string)$params['db']) {
-                $database_id = (int)$params['db'];
-            }
-        }
-
         // Remote registry resolution
-        if ($database_id > 0) {
-            $remote = self::resolveRemoteDbUrl($serverRoot, $version, $database_id);
-            if ($remote) {
-                // Remote endpoints expect parameterized URL (as per legacy resolver.php)
-                $q = ['recID' => $recid, 'fmt' => $fmt];
-                if (!empty($params['depth']))    $q['depth'] = (int)$params['depth'];
-                if (!empty($params['noheader'])) $q['noheader'] = 1;
-                if (!empty($params['action']))   $q['action'] = (string)$params['action'];
+        list($remote, $recid) = self::resolveRemoteDbUrl($recToken, $db);
+        if ($remote) {
+            // Remote endpoints expect parameterized URL (as per legacy resolver.php)
+            $q = ['recID' => $recid, 'fmt' => $fmt];
+            if (!empty($params['depth']))    $q['depth'] = (int)$params['depth'];
+            if (!empty($params['noheader'])) $q['noheader'] = 1;
+            if (!empty($params['action']))   $q['action'] = (string)$params['action'];
 
-                $sep = (strpos($remote, '?') === false) ? '?' : '&';
-                return ['url' => $remote . $sep . http_build_query($q), 'status' => 302];
-            }
+            $sep = (strpos($remote, '?') === false) ? '?' : '&';
+            return ['url' => $remote . $sep . http_build_query($q), 'status' => 302];
         }
 
         // Local routes require db
@@ -153,11 +145,30 @@ final class RecordResolver
         return $out;
     }
 
-    private static function resolveRemoteDbUrl(string $serverRoot, string $version, int $dbID): ?string
+    private static function resolveRemoteDbUrl(string $recToken, string $dbParam=null): array
     {
         // Load just enough to call DbRegis. This request will end with a redirect.
         //$autoload = rtrim($serverRoot, '/\\') . "/{$version}/autoload.php";
         //$dbregis  = rtrim($serverRoot, '/\\') . "/{$version}/hserv/utilities/DbRegis.php";
+        
+        // Concept ID? DBID-RECID
+        $database_id = 0;
+        $recid = $recToken;
+        if (strpos((string)$recid, '-') !== false) {
+            [$database_id, $recid] = explode('-', (string)$recid, 2);
+            $database_id = (int)$database_id;
+            $recid = (int)$recid;
+        } else {
+            $recid = (int)$recid;
+            // Legacy: numeric db treated as registry ID
+            if (isset($dbParam) && is_numeric($dbParam) && (string)(int)$dbParam === (string)$dbParam) {
+                $database_id = (int)$dbParam;
+            }
+        }
+        
+        if (!($database_id > 0)) {
+            return array(null, $recid);                
+        }
         
         $autoload = dirname(__FILE__).'/../../autoload.php';
         $dbregis = dirname(__FILE__).'/../utilities/DbRegis.php';
@@ -169,13 +180,13 @@ final class RecordResolver
             require_once $dbregis;
         }
         if (!class_exists('hserv\\utilities\\DbRegis')) {
-            return null;
+            return array(null, $recid);                
         }
         try {
-            $url = \hserv\utilities\DbRegis::registrationGet(['dbID' => $dbID]);
-            return $url ?: null;
+            $url = \hserv\utilities\DbRegis::registrationGet(['dbID' => $database_id]);
         } catch (\Throwable $e) {
-            return null;
+            $url = null;       
         }
+        return array($url?:null, $recid);
     }
 }

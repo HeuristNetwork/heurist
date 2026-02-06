@@ -436,9 +436,8 @@ final class RequestRouter
     private static function paramsFromDbResolverPath(array $segments): array
     {
         // patterns:
-        // /db/record/2312-123
-        // /db/record/2312/123
-        // /db/rty/1376/10  OR /db/rty/1376-10
+        // /db/record/2312-123 OR /db/record/2312/123
+        // /db/rty/1376-10
         // /db/file/<fileid>
         $params = [];
 
