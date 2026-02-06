@@ -63,6 +63,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //fields_name:{rtyid:'ID',ccode:'Code',addrec:'Add',filter:'Filter',count:'Count',group:'Group',icon:'Icon',edit:'Attr',editstr:'Edit',
     //             name:'Name',description:'Description',show:'Show',duplicate:'Dup',fields:'Info',status:'Del'},
 
+    moving_record_type_to_trash: false,
 
     /**
      * @brief Initializes the widget.
@@ -244,30 +245,49 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
           
             this.recordList.resultList({ 
-                    empty_remark: 'There are no record types defined in this group',
-                    show_toolbar: false,
-                    list_mode_is_table: true,
-                    rendererHeader:function(){ return that._recordListHeaderRenderer() },
-                    draggable: function(){
-                        
-                        that.recordList.find('.rt_draggable > .item').draggable({ // 
-                                    revert: 'invalid',
-                                    helper: function(){ 
-                                        return $('<div class="rt_draggable ui-drag-drop" recid="'+
-                                            $(this).parent().attr('recid')
-                                        +'" style="width:300;padding:4px;text-align:center;font-size:0.8em;background:#EDF5FF"'
-                                        +'>Drag and drop to group item to change record type group</div>'); 
-                                    },
-                                    zIndex:100,
-                                    appendTo:'body',
-                                    scope: 'rtg_change',
-                                    containment: 'window'
-                                    //containment: that.element,
-                                    //delay: 200
-                                });   
-                    }});
+                empty_remark: 'There are no record types defined in this group',
+                show_toolbar: false,
+                list_mode_is_table: true,
+                rendererHeader:function(){ return that._recordListHeaderRenderer() },
+                draggable: function(){
                     
-                    
+                    that.recordList.find('.rt_draggable > .item').draggable({ // 
+                        revert: 'invalid',
+                        helper: function(){ 
+                            return $('<div class="rt_draggable ui-drag-drop" recid="'+
+                                $(this).parent().attr('recid')
+                            +'" style="width:300;padding:4px;text-align:center;font-size:0.8em;background:#EDF5FF"'
+                            +'>Drag and drop to group item to change record type group</div>'); 
+                        },
+                        zIndex:100,
+                        appendTo:'body',
+                        scope: 'rtg_change',
+                        containment: 'window'
+                        //containment: that.element,
+                        //delay: 200
+                    });
+                },
+                afterPageRenderer: () => {
+
+                    if(this.element.find('#chb_show_all_groups').is(':checked')){
+                        return;
+                    }
+
+                    let $list = this.recordList.find('.div-result-list-content.list');
+                    $('<div>', {
+                        style: 'color: green;display: inline-block;padding: 3em;cursor: default;',
+                        html: `Once you have created a record type here, you do not need to use this screen to modify its structure.<br><br>
+                        Simply use Modify Structure when editing a record of that type (the changes apply to all records of that type)<br><br>
+                        <div style="border: 1px solid black;padding: 1em;">
+                        Organising your record types<br><br>
+                        1. Drag the groups you use frequently to the top of the list of groups on the left<br>
+                        2. Create a new group at the top for the record types you use most often<br>
+                        3. Drag record types that you use frequently into the groups near the top of the list
+                        </div>`
+                    }).appendTo($list);
+                }
+            });
+
             if(this.options.isFrontUI) {
                 this._on( this.recordList, { 
                         "resultlistondblclick": function(event, selected_recs){
@@ -354,10 +374,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 that._loadData( true );
             }
 
-            
-            let iheight = that.options.import_structure?0:80;
-            that.searchForm.css({'height':iheight});
-            that.recordList.css({'top':iheight});     
+            let iheight = that.options.import_structure ? 0 : 95;
+            that.searchForm.css({'height': iheight});
+            that.recordList.css({'top': iheight});
             //!!!! that.changeUI(null, that.options.ui_params);    
         }
         
@@ -1190,9 +1209,17 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
      */
     _deleteAndClose: function(unconditionally){
     
-        if(unconditionally===true){
-            this.deleted_from_group_ID = $Db.rty(this._currentEditID,'rty_RecTypeGroupID');
-            this._super(); 
+        if(unconditionally === true){
+
+            const trashGID = $Db.getTrashGroupId('rtg');
+            const currentGID = $Db.rty(this._currentEditID, 'rty_RecTypeGroupID');
+            if(this.options.select_mode == 'manager' && window.hWin.HEURIST4.util.isPositiveInt(trashGID) && trashGID !== currentGID){
+                this.moving_record_type_to_trash = true;
+                this._saveEditAndClose({rty_ID: this._currentEditID, rty_ShowInLists: 0, rty_RecTypeGroupID: trashGID});
+            }else{
+                this.deleted_from_group_ID = $Db.rty(this._currentEditID,'rty_RecTypeGroupID');
+                this._super(); 
+            }
         }else{
             this.deleted_from_group_ID = 0;
             let that = this;
@@ -1200,7 +1227,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 'manageDefRectypes_delete_warn '
                 , function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'},
-                {default_palette_class:this.options.default_palette_class});        
+                {default_palette_class:this.options.default_palette_class}
+            );
         }
     },
     
@@ -1636,18 +1664,24 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         // close on addition of new record in select_single mode    
         //this._currentEditID<0 && 
         if(this.options.select_mode=='select_single'){
-            
-                this._selection = new HRecordSet();
-               
-                this._selection.addRecord(recID, fieldvalues);
-                this._selectAndClose();
-                this._triggerRefresh('rty');
-                return;    
+
+            this._selection = new HRecordSet();
+
+            this._selection.addRecord(recID, fieldvalues);
+            this._selectAndClose();
+            this._triggerRefresh('rty');
+            return;    
         }
         
         //add to local definitions
         $Db.rty().setRecord(recID, fieldvalues);
-        this._super( recID, fieldvalues );
+        if(this.moving_record_type_to_trash){
+            this.moving_record_type_to_trash = false;
+            window.hWin.HEURIST4.msg.showMsgFlash(`${$Db.rty(recID, 'rty_Name')} hidden and moved to Trash group`);
+            this.refreshRecordList();
+        }else{
+            this._super( recID, fieldvalues );
+        }
         
         if(this.it_was_insert){
             this.searchForm.searchDefRecTypes('startSearch'); //refresh

@@ -169,7 +169,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         if(window.hWin.HEURIST4.util.isFunction(this.options.onInitCompleted)){
             this._delay(function () {
                 this.options.onInitCompleted.call(this);
-                }, 0);            
+            }, 0);            
         }else{
             this.startSearch();              
         }
@@ -366,15 +366,17 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
 
                     request['rty_RecTypeGroupID'] = this.options.rtg_ID;
                     sGroupTitle += ($Db.rtg(this.options.rtg_ID,'rtg_Name')
-                                        +'</h4><div class="heurist-helper3 truncate" style="font-size:0.7em">'
+                                        +'</h4><div class="heurist-helper3 truncate rtg_Description" style="font-size:0.7em">'
                                         +$Db.rtg(this.options.rtg_ID,'rtg_Description')+'</div>');
+
+                    sGroupTitle += '<div style="font-size: 0.8em; color: green; padding-top: 0.2em;">Drag into the groups on the left to organise</div>';
                 }else{
                     this.input_search.parent().show();
                     sGroupTitle += window.hWin.HR('All Groups')+
                         '</h4><div class="heurist-helper3" style="font-size:0.7em">'+window.hWin.HR('All record type groups')+'</div>';
                 }
+
                 this.element.find('#div_group_information').html(sGroupTitle);
-        
             }
             
             this.input_sort_type = this.element.find('#input_sort_type');

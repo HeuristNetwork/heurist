@@ -124,24 +124,23 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
         if(!this._super()){
             return false;
         }
-        
+
         if(this.options.edit_mode=='editonly'){
             this._initEditorOnly( $Db[this._entityPrefix]() );
             return;
         }
 
         let that = this;
-        
+
         this.recordList.resultList({
             show_toolbar:false,
             sortable: true,
             empty_remark: 'Add new group',
             onSortStop: function(){
                 that._onActionListener(null, 'save-order');
-               
             },
             droppable: function(){   //change group for record type
-                
+
                 that.recordList.find('.recordDiv')  //.recordDiv, ,.recordDiv>.item
                     .droppable({
                         //accept: '.rt_draggable',
@@ -163,27 +162,27 @@ $.widget( "heurist.manageDefGroups", $.heurist.manageEntity, {
                 axis: 'y'
             }
         });
-        
 
         if(this.options.isFrontUI){
             //specify add new/save order buttons above record list
             let btn_array = [
-                {showLabel:true, icon:'ui-icon-plus',label:window.hWin.HR('Add'),
-                      css:{'margin':'5px','float':'left',padding:'3px'}, class:'btnAddButton',
-                      click: function() { that._onActionListener(null, 'add'); }},
-
-                {label:window.hWin.HR('Save'),
-                          css:{'margin-right':'0.5em','float':'left',display:'none'}, class:'btnApplyOrder',
-                      click: function() { that._onActionListener(null, 'save-order'); }}
-                      ];
+                {
+                    showLabel: true, icon: 'ui-icon-plus', label: window.hWin.HR('Add Group'), css: {'margin':'5px','float':'left',padding:'3px'}, class: 'btnAddButton ui-button-action',
+                    click: function() { that._onActionListener(null, 'add'); }
+                },
+                {
+                    label:window.hWin.HR('Save'), css:{'margin-right':'0.5em','float':'left',display:'none'}, class:'btnApplyOrder',
+                    click: function() { that._onActionListener(null, 'save-order'); }
+                }
+            ];
 
             this._toolbar = this.searchForm;
             this.searchForm.css({'padding-top': '8px'}).empty();
             $(`<h4>${that._title}</h4>`).css({'margin':5}).appendTo(this.searchForm);
+            $('<span>', {text: window.hWin.HR('Drag frequently used groups to the top'), style: 'color: darkgreen'}).appendTo(this.searchForm);
             this._defineActionButton2(btn_array[0], this.searchForm);
             this._defineActionButton2(btn_array[1], this.searchForm);
-           
-            
+
             this.searchForm.height(70);
         }
         
