@@ -79,6 +79,8 @@ prepareMapSymbol
 
 showEditSymbologyDialog
 showImgFilterDialog
+
+initGalleryContainer
 */
 
 if (!window.hWin.HEURIST4){

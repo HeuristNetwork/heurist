@@ -1936,7 +1936,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     },
                 'Sysadmin override password required', {password:true});
             }else{
-                window.hWin.HEURIST4.msg.showMsgDlg('Reserved field changes are not allowed' 
+                window.hWin.HEURIST4.msg.showMsgDlg('Reserved field changes are not allowed ' 
                 + 'unless a special system administrator password is set - please consult system administrator.');
             }
             return;

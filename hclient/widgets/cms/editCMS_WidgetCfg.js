@@ -176,8 +176,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
         let active_idx = null;
 
         let last_idx = $dlg.find('.ui-tabs-panel').length - 1; // Connections tab, all widgets have connection field(s)
-
         $dlg.find('.ui-tabs-panel').each(function(idx, ele){
+            //if tab panel does not have div with widget_name class it will be hidden            
             if($(ele).find(`div.${widget_name}`).length == 0 && idx != last_idx){
                 disabled_tabs.push(idx);
             }else if(active_idx == null){
@@ -410,7 +410,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         $dlg.find('input[name="map_basemap_filter"]').val('');
                     }});
                 
-            }else{
+            }
+            else{
 
                 $dlg.find('div.'+widget_name+' input').each(function(idx, item){
                     item = $(item);
@@ -654,7 +655,66 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
 
 
-            }else 
+            
+            }else
+            if(widget_name=='heurist_mediaViewer'){
+
+                // infer source mode if not set (backward compatibility)
+                if(!opts['content_source']){
+                    if(opts['selector']){
+                        opts['content_source'] = 'selector';
+                    }else if(opts['mediaViewer_recIDs']){
+                        opts['content_source'] = 'list';
+                    }else{
+                        opts['content_source'] = 'search';
+                    }
+                }
+
+                $dlg.find(`.heurist_mediaViewer input[name="content_source"][value="${opts['content_source']}"]`)
+                    .prop('checked', true);
+
+                function __mvToggle(){
+                    let mode = $dlg.find('.heurist_mediaViewer input[name="content_source"]:checked').val();
+                    $dlg.find('.mv-src-search').toggle(mode=='search');
+                    $dlg.find('.mv-src-selector').toggle(mode=='selector');
+                    $dlg.find('.mv-src-list').toggle(mode=='list');
+                }
+
+                $dlg.find('.heurist_mediaViewer input[name="content_source"]').off('change.mediaViewer')
+                    .on('change.mediaViewer', function(){
+                        __mvToggle();
+                        on_change();
+                    });
+
+                // init record list selector (editing_input)
+                let rval = $dlg.find('.heurist_mediaViewer input[name="mediaViewer_recIDs"]').val();
+                rval = rval ? rval.split(',') : [0];
+
+                let ele = $dlg.find('#mediaViewer_recIDs');
+
+                if(!ele.editing_input('instance')){
+
+                    const ed_options = {
+                        recID: -1,
+                        dtID: ele.attr('id'),
+                        values: rval,
+                        readonly: false,
+                        showclear_button: true,
+                        dtFields:{
+                            dty_Type:"resource", rst_MaxValues:0, rst_MinValues:1,
+                            rst_DisplayName: 'Select media records:', rst_DisplayHelpText:'',
+                            rst_PtrFilteredIDs: [window.hWin.HAPI4.sysinfo['dbconst']['RT_MEDIA_RECORD']],
+                            rst_FieldConfig: {entity:'records', csv:false}
+                        },
+                        change: on_change
+                    };
+
+                    ele.editing_input(ed_options);
+                    ele.parent().css('display','block');
+                }
+
+                __mvToggle();
+            }else
             if (widget_name=='heurist_recordAddButton'){
 
                     let ele = $dlg.find('button[name="add_record_cfg"]');
@@ -1400,6 +1460,52 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             }
             cont.find('input[name="menu_recIDs"]').val( menu_recIDs );
         }else
+        if(widget_name=='heurist_mediaViewer'){
+            let mode = cont.find('input[name="content_source"]:checked').val() || 'search';
+            opts['content_source'] = mode;
+
+            if(mode=='list'){
+                let recIDs = cont.find('#mediaViewer_recIDs').editing_input('getValues');
+                if(window.hWin.HEURIST4.util.isempty(recIDs) ||
+                    (Array.isArray(recIDs) && (recIDs.length==0 || window.hWin.HEURIST4.util.isempty(recIDs[0]))))
+                {
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'Please select at least one media record',
+                        error_title: 'Missing required setting'
+                    });
+                    return false;
+                }
+                if(Array.isArray(recIDs)) recIDs = recIDs.join(',');
+                cont.find('input[name="mediaViewer_recIDs"]').val(recIDs);
+
+                // clear other inputs
+                cont.find('input[name="search_initial"]').val('');
+                cont.find('input[name="selector"]').val('');
+            }else if(mode=='selector'){
+                let sel = cont.find('input[name="selector"]').val();
+                if(window.hWin.HEURIST4.util.isempty(sel)){
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'Please provide a selector',
+                        error_title: 'Missing required setting'
+                    });
+                    return false;
+                }
+                cont.find('input[name="mediaViewer_recIDs"]').val('');
+                cont.find('input[name="search_initial"]').val('');
+            }else{ // search
+                let q = cont.find('input[name="search_initial"]').val();
+                if(window.hWin.HEURIST4.util.isempty(q)){
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'Please provide a search query',
+                        error_title: 'Missing required setting'
+                    });
+                    return false;
+                }
+                cont.find('input[name="mediaViewer_recIDs"]').val('');
+                cont.find('input[name="selector"]').val('');
+            }
+        }else
+
         if(widget_name=='heurist_StoryMap')
         {
             let storyFields = cont.find('#storyFields').editing_input('getValues');

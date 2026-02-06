@@ -20,6 +20,7 @@
 
         <ul id="tab-headers">
             <li><a href="#setup">Setup</a></li>
+            <li><a href="#content">Content</a></li> <!-- MediaViewer widget -->
             <li><a href="#controls">Controls</a></li>
             <li><a href="#tools">Tools</a></li> <!-- Custom report widget -->
             <li><a href="#layers">Layers</a></li> <!-- Map widget -->
@@ -298,6 +299,97 @@
 
         </div>
 
+        <div id="content"> <!-- MediaViewer content -->
+
+            <fieldset><legend style="display:none"></legend>
+
+                <div class="heurist_mediaViewer">
+
+                    <div class="header header_wide">
+                        Content source
+                    </div>
+
+                    <label><input type="radio" name="content_source" value="search" checked/>search result</label>&nbsp;&nbsp;
+                    <label><input type="radio" name="content_source" value="list"/>manually selected list</label>&nbsp;&nbsp;
+                    <label><input type="radio" name="content_source" value="selector"/>selector</label>
+
+                </div>
+
+                <div class="heurist_mediaViewer mv-src-search">
+
+                    <div class="header header_wide">
+                        Search query
+                    </div>
+
+                    <input name="search_initial" size="45"/>
+                    <i class="help-text-block">Heurist search query to retrieve media records</i>
+
+                </div>
+
+                <div class="heurist_mediaViewer mv-src-selector" style="display:none">
+
+                    <div class="header header_wide">
+                        Selector
+                    </div>
+
+                    <input name="selector" size="45"/>
+                    <i class="help-text-block">DOM selector for existing thumbnails/links</i>
+
+                </div>
+
+                <div class="heurist_mediaViewer mv-src-list" style="display:none">
+
+                    <div class="header header_wide">
+                        Record list
+                    </div>
+
+                    <input type="hidden" name="mediaViewer_recIDs" value=""/>
+                    <div id="mediaViewer_recIDs" style="display:table-row"></div>
+
+                </div>
+
+                <hr class="heurist_mediaViewer"/>
+
+                <div class="heurist_mediaViewer">
+
+                    <div class="header header_wide">
+                        Show as slide show
+                    </div>
+
+                    <input type="checkbox" name="slideshowShow"/>
+                </div>
+
+                <div class="heurist_mediaViewer">
+
+                    <div class="header header_wide">
+                        Duration (ms)
+                    </div>
+
+                    <input type="number" name="slideshowDuration" min="0" step="100" value="5000"/>
+                </div>
+
+                <div class="heurist_mediaViewer">
+
+                    <div class="header header_wide">
+                        Fade out (ms)
+                    </div>
+
+                    <input type="number" name="showFade" min="0" step="50" value="300"/>
+                </div>
+
+                <div class="heurist_mediaViewer">
+
+                    <div class="header header_wide">
+                        Show full images
+                    </div>
+
+                    <input type="checkbox" name="slideshowFull"/>
+                </div>
+
+            </fieldset>
+
+        </div>
+        
         <div id="controls"> <!-- Specific control options -->
 
             <fieldset><legend style="display:none"></legend>

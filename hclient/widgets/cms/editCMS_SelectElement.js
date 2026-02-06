@@ -89,7 +89,7 @@ function editCMS_SelectElement( callback ){
                 heurist_Navigation:{name:'Menu', description:'#menu'}, //Navigation Menu
                 heurist_recordAddButton:{name:'Add Record', description:'#add_record'}, //Button to addition of new Heurist record
                 heurist_emailForm:{name:'Email Us Form', description:'#email_form'}, //Form to send email to addrees specified in home page as site owner email
-                
+                heurist_mediaViewer:{name:'Media Viewer/Image Gallery', description:'#mediaViewer'}, //Image gallery                  
             grp4:{name:'New Widgets', description:'#widgets2', is_group_header:true}, //Heurist Widgets for dynamic content or interaction
                 
                 HRecordList:{name:'Records list', description:'#HRecordList'},
