@@ -457,7 +457,12 @@ final class RequestRouter
         } else {
             $concept = $segments[2] ?? '';
         }
-        $concept = self::stripKnownExtensions($concept);
+        
+        [$concept, $ext] = self::stripKnownExtensions($concept);
+        
+        if(empty($params['fmt']) && !empty($ext) && !empty(self::REQUEST_CONTENT[$ext])){
+            $params['fmt'] = $ext;
+        }
 
         if (in_array($kind, ['rty','dty','rst','trm'], true)) {
             $params[$kind] = $concept;
@@ -666,13 +671,16 @@ final class RequestRouter
         return in_array($segments[1], ['record','rec','rty','dty','rst','trm','file'], true);
     }
 
-    private static function stripKnownExtensions(string $token): string
+    private static function stripKnownExtensions(string $token): array
     {
         // allow accidental .rdf etc on the last segment
+        $ext = null;
         if (strpos($token, '.') !== false) {
-            $token = explode('.', $token, 2)[0];
+            $token = explode('.', $token, 2);
+            $ext = $token[1]??null;
+            $token = $token[0];
         }
-        return $token;
+        return [$token, $ext];
     }
 
     private static function negotiateFmtIfMissing(array $params): array

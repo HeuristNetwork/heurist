@@ -57,10 +57,10 @@ final class RecordResolver
         } elseif ($action === 'edit' || $params['edit'] == 1) {
             $fmt = 'edit';
         }
+
         if ($fmt === null) {
             $fmt = 'hml';
         }
-
         // Concept ID? DBID-RECID
         $database_id = 0;
         $recid = $recToken;
@@ -81,7 +81,7 @@ final class RecordResolver
             $remote = self::resolveRemoteDbUrl($serverRoot, $version, $database_id);
             if ($remote) {
                 // Remote endpoints expect parameterized URL (as per legacy resolver.php)
-                $q = ['recID' => $database_id . '-' . $recid, 'fmt' => $fmt];
+                $q = ['recID' => $recid, 'fmt' => $fmt];
                 if (!empty($params['depth']))    $q['depth'] = (int)$params['depth'];
                 if (!empty($params['noheader'])) $q['noheader'] = 1;
                 if (!empty($params['action']))   $q['action'] = (string)$params['action'];
