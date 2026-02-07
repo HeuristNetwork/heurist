@@ -669,7 +669,7 @@ $.widget( "heurist.controlPanel", {
 
         // Add message about reporting bugs
         let $bugMsg = $('<span>', {
-            title: 'Click to make a bug report',
+            title: 'Click to submit Heurist ticket',
             style: "color: #FFFF66; cursor: pointer; flex: 0 0 20em;",
             html: '<span class="ui-icon ui-icon-bug" style="float: left;margin: 5px;"></span>Please report bugs here, or suggest improvements. We are responsive'
         }).appendTo(this.version_message);

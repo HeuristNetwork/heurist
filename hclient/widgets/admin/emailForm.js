@@ -344,7 +344,7 @@ $.widget( "heurist.emailForm", {
                 title: this.options.title? this.options.title:window.hWin.HR('Email Us'), //title will be set in  initControls as soon as entity config is loaded
                 position: options['position'],
                 beforeClose: options.beforeClose,
-                resizeStop: function( event, ui ) {//fix bug
+                resizeStop: function( event, ui ) {
                     that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
                 },
                 close:function(){

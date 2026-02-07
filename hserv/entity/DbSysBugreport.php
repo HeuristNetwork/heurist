@@ -504,7 +504,7 @@ class DbSysBugreport extends DbEntityBase
 
         mysql__insertupdate($mysqli, 'Records', 'rec', ['rec_ID' => $res, 'rec_AddedByUGrpID' => $uid, 'rec_OwnerUGrpID' => 2]);
 
-        recordUpdateTitle($report_system, $res, $record['RecTypeID'], "Bug report: {$record['details']['1']}");
+        recordUpdateTitle($report_system, $res, $record['RecTypeID'], "Heurist ticket: {$record['details']['1']}");
 
         if(!empty($record['details']['956'])){
 
@@ -532,7 +532,7 @@ class DbSysBugreport extends DbEntityBase
             $user_query = "SELECT ugr_eMail FROM sysUsrGrpLinks LEFT JOIN sysUGrps ON ugr_ID = ugl_UserID WHERE ugl_GroupID = 1 AND ugl_Role='admin'";
             $admin_emails = mysql__select_list2($mysqli, $user_query);
 
-            $sent_email = sendPHPMailer(null, 'Bug reporter', ['to' => $record['details']['956'], 'bcc' => $admin_emails], $title, $msg, $files, true);
+            $sent_email = sendPHPMailer(null, 'Heurist Tickets', ['to' => $record['details']['956'], 'bcc' => $admin_emails], $title, $msg, $files, true);
         }
 
         return ['status' => HEURIST_OK, 'data' => ['recID' => $res, 'email_sent' => $sent_email]];
@@ -705,7 +705,7 @@ class DbSysBugreport extends DbEntityBase
         </html>
         EMAIL;
 
-        return sendPHPMailer(null, 'Bug report', $toAddresses, $emailTitle, $emailBody, $files, true);
+        return sendPHPMailer(null, 'Heurist tickets', $toAddresses, $emailTitle, $emailBody, $files, true);
     }
 
     /**
@@ -777,7 +777,7 @@ class DbSysBugreport extends DbEntityBase
             }
             $email_from_name = 'Website contact '.$email_from_name;
         }else{
-            $email_from_name = 'Bug Reporter';
+            $email_from_name = 'Heurist Tickets';
         }
         if(!$email_to){
             $email_to = user_getDbOwner($this->system->getMysqli(), 'ugr_eMail');

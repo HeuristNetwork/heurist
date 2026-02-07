@@ -1994,7 +1994,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     if(window.hWin.HAPI4 && window.hWin.HAPI4.actionHandler){ // Check HAPI4 exists
                         buttons = 
                         {
-                            [window.hWin.HR('Send Bug Report')]: function() { // Translate button label
+                            [window.hWin.HR('Send Bug Report')]: function() {
                                 window.hWin.HAPI4.actionHandler.executeActionById('menu-help-bugreport');
                                 if ($dlgm) $dlgm.dialog( 'close' );
                                 },

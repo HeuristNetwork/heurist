@@ -264,7 +264,7 @@ $.widget("heurist.baseConfig", {
             title: this.options.title,
             position: position,
             beforeClose: options.beforeClose,
-            resizeStop: function( event, ui ) {//fix bug
+            resizeStop: function( event, ui ) {
                 that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
             },
             close:function(){

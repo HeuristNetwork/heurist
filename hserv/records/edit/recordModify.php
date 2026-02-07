@@ -4592,8 +4592,8 @@ function bugreportUpdate($system, $recID){
 
     $to = [$reportersEmail];
 
-    sendPHPMailer(null, 'Bug report updater', ['to' => $to], "Heurist tracker #{$recID}: {$title}", $updateEmail, null, true);
-    sendPHPMailer(null, 'Bug report updater', ['to' => 'support@HeuristNetwork.org'], "Heurist tracker #{$recID}: {$title}", $updateEmail, null, true);
+    sendPHPMailer(null, 'Heurist Tickets updater', ['to' => $to], "Heurist tracker #{$recID}: {$title}", $updateEmail, null, true);
+    sendPHPMailer(null, 'Heurist Tickets updater', ['to' => 'support@HeuristNetwork.org'], "Heurist tracker #{$recID}: {$title}", $updateEmail, null, true);
 }
 
 /**

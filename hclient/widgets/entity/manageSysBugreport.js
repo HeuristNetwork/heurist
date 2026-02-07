@@ -191,10 +191,10 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
      * @override
      * @memberof heurist.manageSysBugreport
      * @param {string} message The success message from the server (usually confirmation).
-     * Displays a confirmation dialog titled "Bug report sent" and then closes the main widget dialog.
+     * Displays a confirmation dialog and then closes the main widget dialog.
      */
     _afterSaveEventHandler: function(message){
-        window.hWin.HEURIST4.msg.showMsgDlg(message, null, {title: 'Bug report sent'}, {default_palette_class: 'ui-heurist-admin'});
+        window.hWin.HEURIST4.msg.showMsgDlg(message, null, {title: 'Heurist Ticket submitted'}, {default_palette_class: 'ui-heurist-admin'});
         this.closeDialog(true); //force to avoid warning
     },
     
