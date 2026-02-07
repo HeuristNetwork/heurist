@@ -671,7 +671,7 @@ $.widget( "heurist.controlPanel", {
         let $bugMsg = $('<span>', {
             title: 'Click to submit Heurist ticket',
             style: "color: #FFFF66; cursor: pointer; flex: 0 0 20em;",
-            html: '<span class="ui-icon ui-icon-bug" style="float: left;margin: 5px;"></span>Please report bugs here, or suggest improvements. We are responsive'
+            html: '<span class="ui-icon ui-icon-bug" style="float: left;margin: 5px;"></span>CREATE TICKET<br><i>(we are responsive)</i>'
         }).appendTo(this.version_message);
 
         this._on($bugMsg, {
