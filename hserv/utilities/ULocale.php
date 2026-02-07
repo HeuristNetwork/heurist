@@ -442,7 +442,7 @@
                     case 400: // Missing parameter
                         $herror = HEURIST_INVALID_REQUEST;
                         $hmsg = "Deepl was unable to complete this request.<br>
-                        Please make a bug report if this persists.";
+                        Please create a ticket if this persists.";
                         break;
     
                     case 403: // Invalid API key
@@ -456,7 +456,7 @@
                     case 504:
                         $herror = HEURIST_INVALID_REQUEST; //HEURIST_NOT_FOUND
                         $hmsg = "Deepl encountered an error with locating the desired function.<br>
-                        Please make a bug report.";
+                        Please create a ticket.";
                         break;
     
                     case 429: // Too many requests
@@ -479,7 +479,7 @@
                         $hmsg = "The request to Deepl's services was too large to process.<br>
                         Please either:<br>
                         Split the value into smaller parts and then re-combine them once finished, or<br>
-                        Make a bug report including which record and field you were attempting to translate and into which language.";
+                        Create a ticket including which record and field you were attempting to translate and into which language.";
                         break;
     
                     case 503: // Unknown Deepl error
@@ -492,7 +492,7 @@
                         $herror = HEURIST_UNKNOWN_ERROR;
                         $hmsg = "An unknown error occurred with Deepl's services.<br>
                         Please re-try your request in a few minutes.<br>
-                        If this problem persists, please make a bug report.<br><br>
+                        If this problem persists, please create a ticket.<br><br>
                         Response error: <strong>{$error}</strong>";
                         break;
                 }

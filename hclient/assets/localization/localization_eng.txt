@@ -213,7 +213,7 @@
 #menu-help-online-hint#Comprehensive online documentation for the Heurist system
 #menu-help-website-hint#Heurist Network website - a source for a wide range of information, services and contacts
 #CONTACT#
-#menu-help-bugreport#Bug report/feature request
+#menu-help-bugreport#Ticket (bug report/feature request)
 #menu-help-emailteam#Heurist Team
 #menu-help-emailadmin#System Administrator
 #menu-help-acknowledgements#Acknowledgements
@@ -466,7 +466,7 @@
 #Error_Server_Side#The server responded with a status of 500 (Internal Server Error).<br><br>This may be due to uncought exception in server side code. If the problem persists, please email a bug report to the Heurist team so we can investigate.
 #Error_Connection_Reset#Timeout on response from Heurist server.<br><br><b>This will occur after a period of inactivity : reload the page to continue</b><br><br>This may be due to an internet outage (the most common source), or due to server load or to requesting too large a result set, or a query that fails to resolve. If the problem persists, please email a bug report to the Heurist team so we can investigate.
 #New_Function_Conversion#This function has not yet been converted from Heurist version 4 to version 5 (2018). 
-#New_Function_Contact_Team#If you need this function please send an email to heuristnetwork dot org or click on the Bug report/feature request entry in the Help menu - we may already have an alpha version that you can use or can prioritise development.
+#New_Function_Contact_Team#If you need this function please send an email to heuristnetwork dot org or click on the Create ticket request entry in the Help menu - we may already have an alpha version that you can use or can prioritise development.
 #mailto_fail#You have not set an email handler for mailto: links. <br>Please set this in your  browser (it is normally in the content settings under Privacy).
 #add_record#Add new record
 #add_detail#Add field value

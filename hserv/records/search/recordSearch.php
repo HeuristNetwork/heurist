@@ -2955,7 +2955,7 @@ function recordSearch($system, $params, $relation_query=null)
 
             //.$params['q'].'  '.$query.'<br><br>'
 
-            .'If you think the filter is correct, please make a bug report (link under Help menu at top right) or email the Heurist team, including the text of your filter.');
+            .'If you think the filter is correct, please create a ticket (link under Help menu at top right), including the text of your filter.');
 
         //$response = $system->addError(HEURIST_DB_ERROR, $savedSearchName.
         //    ' Search query error on saved search. Parameters:'.print_r($params, true).' Query '.$query, $mysqli->error);

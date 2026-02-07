@@ -1778,8 +1778,8 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
     $NAKALA_BASE_URL_API = $useTest ? 'https://apitest.nakala.fr/datas' : 'https://api.nakala.fr/datas';
 
     $missingApiKey = '<br><br>Your Nakala API key is either missing or invalid, please check it under Design > External repositories';
-    $unknownErrorMsg = 'An unknown response was received from Nakala after uploading the selected file.<br>Please make a bug report if this persists.';
-    $nakalaUnavailable = '<br><br>Nakala services appear to be unavailable.<br>Please make a bug report if this persists.';
+    $unknownErrorMsg = 'An unknown response was received from Nakala after uploading the selected file.<br>Please create a ticket if this persists.';
+    $nakalaUnavailable = '<br><br>Nakala services appear to be unavailable.<br>Please create a ticket if this persists.';
 
     $curlLoaded = function_exists('curl_init');
     if(!$curlLoaded || empty($filesToUpload) || empty($apiKey) || empty($datas)){

@@ -684,7 +684,7 @@
     },
     {
         "id": "menu-help-bugreport",
-        "text": "Bug report/feature request",
+        "text": "Ticket (bug report or feature request)",
         
         "data": {
             "logaction": "hlp_BugReport",

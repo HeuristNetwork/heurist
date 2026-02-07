@@ -727,7 +727,7 @@ $.widget( "heurist.controlPanel", {
                 click: () => {
 
                     let $dlg;
-                    let msg = 'If you encounter <span style="text-decoration: underline">any</span> bug, we ask that you report it with the <a href="#" id="msg_bug_rpt">bug reporter</a>'
+                    let msg = 'If you encounter <span style="text-decoration: underline">any</span> bug, we ask that you report it with <a href="#" id="msg_bug_rpt">Create ticket</a>'
                         + ' - bugs are generally<br>'
                         + 'fixed within a day or so.<br><br>'
                         + 'We recommend that you use the alpha version unless you encounter a newly introduced bug<br>'

@@ -1000,7 +1000,7 @@ $.widget( "heurist.lookupBase", $.heurist.recordAction, {
 
             this.$Hmsg.showMsgErr({
                 message: 'An error has occurred with mapping values to their respective fields,<br>'
-                        + 'please report this by using the bug reporter under Help at the top right of the main screen or,<br>'
+                        + 'please report this by using Create ticket under Help at the top right of the main screen or,<br>'
                         + 'via email directly to support@heuristnetwork.org so we can fix this quickly.<br><br>'
                         + 'Invalid field details:<br>'
                         + `Response field - "${field}"<br>`

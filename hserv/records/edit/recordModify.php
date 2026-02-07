@@ -4561,7 +4561,7 @@ function bugreportUpdate($system, $recID){
 
     $title = array_key_exists($titleDtyID, $details) ? $details[$titleDtyID] : null;
     $title = is_array($title) ? array_pop($title) : $title;
-    $title = !empty($title) ? $title : "Bug report #{$recID}";
+    $title = !empty($title) ? $title : "Ticket #{$recID}";
 
     $desc = array_key_exists($descDtyID, $details) ? $details[$descDtyID] : null;
     $desc = is_array($desc) ? array_pop($desc) : $desc;

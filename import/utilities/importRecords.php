@@ -155,7 +155,7 @@ $s_max_size = round($max_size/1024/1024).' MBytes';
             The source database MUST be registered with the Heurist Reference Index BEFORE the data is exported. If it has not been registered, please close this dialogue, register the source database (only the owner or an administrator can do this), re-export the data and then run this function on the new file.
             </p>
             <p class="st1_A st1_B import-rem heurist-helper3">
-            If the download/synch of listed entity types fails to clear this message, please click on Help > Bug report and let us know. We will get back to you within 24 hours and help you import your data.
+            If the download/synch of listed entity types fails to clear this message, please click on Help > Create ticket and let us know. We will get back to you within 24 hours and help you import your data.
             </p>
             -->
 
@@ -225,7 +225,7 @@ $s_max_size = round($max_size/1024/1024).' MBytes';
 
             </p>
             <!--
-            <p>Note: no attempt is made to identify duplicate records - all items imported will create a new record. If you require duplicate record identification and replacement or merging, please <?php echo CONTACT_HEURIST_TEAM;?> for assistance (support at heuristnetwork dot org or use the bug report function)</p>
+            <p>Note: no attempt is made to identify duplicate records - all items imported will create a new record. If you require duplicate record identification and replacement or merging, please <?php echo CONTACT_HEURIST_TEAM;?> for assistance (support at heuristnetwork dot org or use the create ticket function)</p>
             -->
             <br>
             <button id="btn_ImportRecords" class="ui-button-action">Import Records</button>
