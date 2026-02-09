@@ -221,6 +221,9 @@ $.widget( "heurist.search_faceted", {
     _expanded_count_order: [], // order of retrieval for above
     _expanded_count_cancel: false,
     
+    _facetXhr: null, 
+    _facetCountXhr: null, 
+    
     /**
      * @memberof heurist.search_faceted
      * @instance
@@ -332,8 +335,8 @@ $.widget( "heurist.search_faceted", {
                             .text('some facets not processed')
                             .css('color', 'red').insertBefore(this.btn_close);
 
-            this._terminateFacetCalculation = true; 
-            
+            this._doTerminate();
+                            
             this.btn_reset.show();
         }});
 
@@ -753,7 +756,8 @@ $.widget( "heurist.search_faceted", {
         this.div_toolbar.find('#facet_process_msg')
                             .attr('data-interrupt', 0)
                             .text(window.hWin.HR('filter_facet_processing'))
-                            .css('color', 'black').hide();
+                            .css('color', 'black')
+                            .insertBefore(this.btn_terminate).hide();
         
         this.options.params.add_filter = null;
         this.options.params.add_filter_original = null;
@@ -1440,6 +1444,7 @@ $.widget( "heurist.search_faceted", {
 
     ,doClose: function(){
         //$(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ {reset:true, search_realm:this.options.search_realm} ]);  //global app event to clear views
+        this._doTerminate();
         this._trigger( "onclose");
         if(window.hWin.HEURIST4.util.isFunction(this.options.onclose)){
             this.options.onclose(this);
@@ -1447,6 +1452,16 @@ $.widget( "heurist.search_faceted", {
         if(!this.options.is_publication){
             setTimeout((context) => { $(context.document).trigger(window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE); }, 500, this);
         }
+    }
+    
+    , _doTerminate: function(){
+            this._terminateFacetCalculation = true;
+            this._request_id = -1;
+            
+            if (this._facetXhr && this._facetXhr.abort) { this._facetXhr.abort(); }
+            this._facetXhr = null;
+            if (this._facetCountXhr && this._facetCountXhr.abort) { this._facetCountXhr.abort(); }
+            this._facetCountXhr = null; 
     }
 
 
@@ -1808,7 +1823,8 @@ $.widget( "heurist.search_faceted", {
                         ispreview: this.options.ispreview,
                         search_realm: this.options.search_realm,
                         search_page: this.options.search_page,
-                        facet_value: this._last_term_value
+                        facet_value: this._last_term_value,
+                        skipStructureCheck: true
                     }; //, facets: facets
                         
         if(this.options.ispreview){
@@ -1818,7 +1834,7 @@ $.widget( "heurist.search_faceted", {
         this._expanded_count_cancel = this._expanded_count_order.length > 0;
 
         //perform search
-        window.hWin.HAPI4.RecordSearch.doSearch( this, request );
+        this._facetXhr = window.hWin.HAPI4.RecordSearch.doSearch( this, request );
         
         //perform search for facet values
        
@@ -1834,9 +1850,7 @@ $.widget( "heurist.search_faceted", {
     , _recalculateFacets: function(field_index){
      
 //@todo need to check that the sequence is not called more than once - otherwise we get multiple controls on facets
-        
-        
-let s_time = new Date().getTime() / 1000;        
+        let s_time = new Date().getTime() / 1000;        
        
         // this._currentquery
         // this._resultset
@@ -1847,8 +1861,15 @@ let s_time = new Date().getTime() / 1000;
             this._request_id =  window.hWin.HEURIST4.util.random();
         
             this._terminateFacetCalculation = false;
+            //this._expanded_count_cancel = true; //stop previous
             this.btn_terminate.show();
-            this.div_toolbar.find('#facet_process_msg').show();
+            
+            this.div_toolbar.find('#facet_process_msg')
+                            .attr('data-interrupt', 0)
+                            .text(window.hWin.HR('filter_facet_processing'))
+                            .css('color', 'black')
+                            .insertBefore(this.btn_terminate).show();
+            
             if(this.btn_reset) this.btn_reset.hide();
             this.btn_close.hide();
 
@@ -2048,7 +2069,7 @@ let s_time = new Date().getTime() / 1000;
                                      needcount: needcount,         
                                      relation_direction: field['relation_direction'],
                                      qname:this.options.query_name,
-                                     request_id:this._request_id,
+                                     request_id: this._request_id,
                                      source:this.element.attr('id') }; //, facets: facets
 
                 if(this.options.ispreview){
@@ -2065,11 +2086,12 @@ let s_time = new Date().getTime() / 1000;
                 }
                 field.last_count_query = hashQuery;
 
-                window.HAPI4.RecordMgr.get_facets(request, function(response){ 
+                this._facetXhr = window.HAPI4.RecordMgr.get_facets(request, function(response){ 
 
                     //ignore results of passed sequence
                     if(response.request_id != that._request_id){
-                        if(response.status != window.hWin.ResponseStatus.OK){
+                        if(response.status != window.hWin.ResponseStatus.OK 
+                            && response.status != window.hWin.ResponseStatus.CANCELLED){
                             console.error('ERROR: get_facets', response.message);
                         }
                         return;
@@ -2080,7 +2102,7 @@ let s_time = new Date().getTime() / 1000;
                 break;
             }
 
-        }
+        }//main loop
         
         
         if(i >= this.options.params.facets.length){
@@ -2168,7 +2190,7 @@ let s_time = new Date().getTime() / 1000;
                 }else if(!(this.options.params.viewport>0)){
                     this.options.params.viewport = 5; //default viewport
                 }
-        
+
                 if(response.status == window.hWin.ResponseStatus.OK){
                     
                     if(keep_cache && response.count_query){
@@ -3586,29 +3608,47 @@ let s_time = new Date().getTime() / 1000;
                                     $opt.attr('selected',true);
                                 }
                             }
-
-                           
-                            let selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
-                            selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
-                            selObj.hSelect( "widget" ).css({'background':'none',
-                                                                'width':'auto',
-                                                                'min-width':'100px',
-                                                                'max-width':(w-65)+'px'});
-                            let ele = selObj.hSelect( "widget" ).find('.ui-selectmenu-text');
-                            ele.css({'min-height':'','padding-right':'0px','margin-right':'12px'});
-
-                            let btn_dropdown = selObj.hSelect( "widget" );
-                            //change appearance for dropdown button
-                            if(needsDropdown){
-                                btn_dropdown.css({"font-size": "0.96em", width: 'auto', color:"#999999", 
-                                    'min-width':'', background: 'none'});
-                                btn_dropdown.addClass('borderless');
-                                btn_dropdown.find('.ui-selectmenu-text').html('dropdown')
-                                    .css({'min-height':'', padding:'', 'padding-right':'16px'});
-                            }else{
-                                btn_dropdown.css({"font-size": "0.9em", "min-width": "8em"});
-                            }                            
                             
+                            /*
+                            console.log('jQ check', {
+                              local$: $.fn && $.fn.jquery,
+                              localHasHSelect: !!($.fn && $.fn.hSelect),
+                              hWin$: window.hWin.$ && window.hWin.$.fn && window.hWin.$.fn.jquery,
+                              hWinHasHSelect: !!(window.hWin.$ && window.hWin.$.fn && window.hWin.$.fn.hSelect)
+                            });                            
+                            */
+
+                            if ($sel && typeof $sel.hSelect === 'function') {
+                                let selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
+                                selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
+                                selObj.hSelect( "widget" ).css({'background':'none',
+                                                                    'width':'auto',
+                                                                    'min-width':'100px',
+                                                                    'max-width':(w-65)+'px'});
+                                let ele = selObj.hSelect( "widget" ).find('.ui-selectmenu-text');
+                                
+                                ele.css({'min-height':'','padding-right':'0px','margin-right':'12px'});
+
+                                let btn_dropdown = selObj.hSelect( "widget" );
+                                //change appearance for dropdown button
+                                if(needsDropdown){
+                                    btn_dropdown.css({"font-size": "0.96em", width: 'auto', color:"#999999", 
+                                        'min-width':'', background: 'none'});
+                                    btn_dropdown.addClass('borderless');
+                                    btn_dropdown.find('.ui-selectmenu-text').html('dropdown')
+                                        .css({'min-height':'', padding:'', 'padding-right':'16px'});
+                                }else{
+                                    btn_dropdown.css({"font-size": "0.9em", "min-width": "8em"});
+                                }                            
+                            
+                            } else {
+                              console.warn('hSelect missing', {
+                                hasSelObj: !!$sel,
+                                jqueryVersion: $sel && $sel.jquery,
+                                hasFn: !!(window.hWin.$ && window.hWin.$.fn && window.hWin.$.fn.hSelect),
+                                hasGlobalFn: !!($.fn && $.fn.hSelect)
+                              });
+                            }
 
                             $sel.on('change',function(event){ that._onDropdownSelect(event); });
                         }
@@ -4246,7 +4286,7 @@ let s_time = new Date().getTime() / 1000;
     
     _addFacetToExpandedCount: function(facet_index, facet_value, $container, $facet){
 
-        if(!this.options.params.rules){
+        if(!this.options.params.rules || this._expanded_count_order.length>500){ //limit to avoid too many count queries 
             return;
         }
 
@@ -4277,17 +4317,16 @@ let s_time = new Date().getTime() / 1000;
 
         const that = this;
 
-        if(!this.options.params.rules || this._expanded_count_order.length == 0){
+        if(this._terminateFacetCalculation || !this.options.params.rules || this._expanded_count_order.length == 0){
             //rules not defined
             return;
         }
 
         let f_idx = this._expanded_count_order[0];
-
-        if(!this._expanded_count_facets[f_idx] || this._expanded_count_facets[f_idx].items.length == 0){
+        if( !this._expanded_count_facets[f_idx] || this._expanded_count_facets[f_idx].items.length==0){
 
             this._expanded_count_order.shift();
-
+            
             this._getExpandedFacetCount();
             return;
         }
@@ -4338,16 +4377,21 @@ let s_time = new Date().getTime() / 1000;
             q: query,
             detail: 'ids',
             rules: this.options.params.rules,
-            rulesonly: rulesonly 
+            rulesonly: rulesonly,
+            skipStructureCheck: true
         };
 
-        window.hWin.HAPI4.RecordMgr.search(request, (response) => {
+        this._facetCountXhr = window.hWin.HAPI4.RecordMgr.search(request, (response) => {
 
-            if(that._expanded_count_order.length == 0 || that._expanded_count_cancel){ // cancel
+            if(that._terminateFacetCalculation || that._expanded_count_order.length == 0 || that._expanded_count_cancel){ // cancel
                 that._expanded_count_cancel = false;
                 return;
             }
-            if(response.status != window.hWin.ResponseStatus.OK || response.data.count < 1){
+            if(response.status != window.hWin.ResponseStatus.OK){
+                //error or cancelled
+                return;
+            }
+            if(response.data.count < 1){
                 that._getExpandedFacetCount(); //no extension - next 
                 return;
             }

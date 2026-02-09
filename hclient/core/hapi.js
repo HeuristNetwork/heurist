@@ -264,7 +264,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
         _is_callserver_in_progress = true;
         
-        if(window.hWin.HAPI4 && action!='entityScrud' && action!='usr_info' && !request.remote
+        if(window.hWin.HAPI4 && action!='entityScrud' && action!='usr_info' 
+            && !request.remote && !request.skipStructureCheck
             && (new Date().getTime())-_last_check_dbcache_relevance> 7000){ //7 seconds
             _last_check_dbcache_relevance = new Date().getTime();
             
@@ -277,7 +278,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 window.hWin.HAPI4.EntityMgr.relevanceEntityData(function(){
                     _callserver(action, request, callback, timeout);
                 });
-                return;
+                return null;
             }
         }
         
@@ -338,12 +339,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 _is_callserver_in_progress = false;
 
-                if (window.hWin.HEURIST4.util.isFunction(callback)) {
-                    if ($.isPlainObject(response)) {
-                        response.request_code = request_code;
-                    }
-                    callback(response);
-                }
+                if ($.isPlainObject(response)) {response.request_code = request_code;}
+                if (window.hWin.HEURIST4.util.isFunction(callback)) {callback(response);}
 
                 /*check response for special marker that forces to reload user and system info
                 //after update sysIdentification, dbowner and user role
@@ -355,16 +352,6 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                          });
                 }*/
 
-            },
-            fail: function (jqXHR, textStatus, errorThrown) {
-
-                _is_callserver_in_progress = false;
-
-                let response = window.hWin.HEURIST4.util.interpretServerError(jqXHR, url, request_code);
-
-                if (window.hWin.HEURIST4.util.isFunction(callback)) {
-                    callback(response);
-                }
             }
         };
         
@@ -372,8 +359,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             ajax_options['timeout'] = timeout;
         }
         
-        $.ajax(ajax_options);
-
+        const jqXHR = $.ajax(ajax_options);
+        return jqXHR;
     }
 
     /**
@@ -636,7 +623,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         request['verify_credentials'] = 'ok';
                         that.search(request, callback);
                     }, 0);
-                    return;
+                    return null;
                 }
 
                 if (request['verify_credentials']) {
@@ -674,7 +661,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 window.hWin.HEURIST4.util.encodeRequest(request, ['q']);
 
                 // start search
-                _callserver('record_search', request, callback);    //standard search
+                return _callserver('record_search', request, callback);    //standard search
 
             }
 
@@ -754,11 +741,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             // find ranges for faceted search
             //
             , get_facets: function (request, callback) {
-                if (request && !request.a) request.a = 'getfacets';
+                if (!request) request = {};
+                if (!request.a) request.a = 'getfacets';
+                request.skipStructureCheck = true;
 
                 window.hWin.HEURIST4.util.encodeRequest(request, ['q', 'count_query']);
 
-                _callserver('record_search', request, callback);
+                return _callserver('record_search', request, callback);
             }
 
             //
