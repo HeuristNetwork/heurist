@@ -908,22 +908,12 @@ $.widget( "heurist.resultList", {
             }
         }
 
-        if(this.options.show_export_button){
+        let showExportBackend = this.options.entityName=='records' && !this._is_publication; // show CSV export button on backend
+        if(showExportBackend || this.options.show_export_button){ 
 
+            let title = showExportBackend ? 'Export current results in CSV format' : 'Export current results';
             this.export_button = $('<button>', {
-                text: window.hWin.HR('Export'), title: window.hWin.HR('Export current results'), 
-                class: 'btnExportRecords ui-button-action', style: 'margin: 6px 10px 2px 0px; float: right;'
-            }).button({icon: 'ui-icon-download'}).prependTo(this.div_toolbar);
-
-            this.export_button[0].style.setProperty('color', '#FFF', 'important');
-
-            this._on(this.export_button, {
-                click: this._exportRecords
-            });
-        }else if(this.options.entityName=='records' && !this._is_publication){ // show CSV export button on backend
-
-            this.export_button = $('<button>', {
-                text: window.hWin.HR('CSV'), title: 'Export current results in CSV format',
+                text: showExportBackend ? window.hWin.HR('CSV') : window.hWin.HR('Export'), title: window.hWin.HR(title),
                 class: 'ui-main-color', style: 'padding: 8px; float: right; margin-right: 10px;'
             }).button({icon: 'ui-icon-arrowthick-1-s'}).insertBefore(this.view_mode_selector);
 
@@ -1027,7 +1017,15 @@ $.widget( "heurist.resultList", {
 
         if(isForced!==true && !this.element.is(':visible')) return;
         
-        let top = 0;    
+        let hideToolbar = (this._currentRecordset == null || this._currentRecordset.count_total() == 0) && this._is_publication;
+        let top = 0;
+
+        if(hideToolbar){
+            this.div_header.find('.result-list-header').hide();
+        }else{
+            this.div_header.find('.result-list-header').show();
+        }
+
         if(this.options.show_inner_header || !window.hWin.HEURIST4.util.isempty(this.options.title)){
             this.div_header.show();
             top = this.div_header.height();
@@ -1036,8 +1034,8 @@ $.widget( "heurist.resultList", {
         }
 
         let override_option = this.options.support_collection || (this.options.show_export_button && this.export_button.is(':visible'));
-   
-        if(this.options.show_toolbar || override_option){
+
+        if((this.options.show_toolbar || override_option) && !hideToolbar){
             this.div_toolbar.css({'top':(top-1)+'px', height:'auto'});
             this.div_toolbar.show();
             top = top + this.div_toolbar.height();
@@ -1088,8 +1086,8 @@ $.widget( "heurist.resultList", {
     //
     _showHideOnWidth: function(){      
         
-        let total_inquery = (this._currentRecordset!=null)?this._currentRecordset.count_total():0;
-        
+        let total_inquery = this._currentRecordset != null ? this._currentRecordset.count_total() : 0;
+
         if(this.options.show_viewmode==true && total_inquery>0){
             this.view_mode_selector.show();
         }else{
@@ -1122,9 +1120,8 @@ $.widget( "heurist.resultList", {
                 console.log('pagingResize');
             }
         }
-        
-        this._adjustHeadersPos();
 
+        this._adjustHeadersPos();
     },
 
     // events bound via _on are removed automatically
@@ -1357,7 +1354,7 @@ $.widget( "heurist.resultList", {
             } 
           
                
-            let btn =   this.view_mode_selector.find('button[value="'+newmode+'"]');
+            let btn = this.view_mode_selector.find('button[value="'+newmode+'"]');
             
             if(this.options.header_class==null) btn.addClass('ui-heurist-btn-header1')                
             btn.css({'border':'1px solid'});
