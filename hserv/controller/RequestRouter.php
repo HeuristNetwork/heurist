@@ -105,7 +105,7 @@ final class RequestRouter
         $query = self::queryParamsFromRequestUri();
 
         // Parameterized entry: /<version>/?db=...
-        if (!empty($query['db'])) {
+        if (!empty($query['db']) && !self::isApiRoute($segments)) {
             // normalize / apply DBREF if you want:
             $dbResolved = self::applyDbRef($mapping, (string)$query['db']);
             $query['db'] = $dbResolved;
