@@ -20,6 +20,10 @@ use hserv\System;
 use hserv\entity\DbRecUploadedFiles;
 use hserv\utilities\USystem;
 
+// ---
+// This entity depends on record/file helper functions (e.g. recordSave, file registration helpers).
+// It is required here because this class both creates records and registers uploaded/downloaded files.
+// ---
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
 
 /**
@@ -82,6 +86,10 @@ class DbSysBugreport extends DbEntityBase
     /** @var bool Whether the current server is the main server */
     private $isMainServer = false;
 
+    // ---------------------------------------------------------------------
+    // Constructor: initialise the entity and detect whether we are running on
+    // the designated 'main server' (HEURIST_MAIN_SERVER) for central services.
+    // ---------------------------------------------------------------------
     /**
      * Constructor for DbSysBugreport.
      *
@@ -95,9 +103,18 @@ class DbSysBugreport extends DbEntityBase
         parent::__construct( $system, $data );
         $this->requireAdminRights = false;
 
+        // Determine whether the current base URL appears to be the configured main server.
+        // ChatGPT:ToDo Consider using parse_url() and a strict host compare to avoid false positives
+        // (e.g. if HEURIST_MAIN_SERVER is a substring of another domain).
         $this->isMainServer = strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false;
     }
 
+    // ---------------------------------------------------------------------
+    // Permission model:
+    // - Normally handled by DbEntityBase::_validatePermission().
+    // - If that fails, and we are on the public bug tracker DB hosted on the main server,
+    //   we try to log in as a public 'extern' user to allow anonymous submissions.
+    // ---------------------------------------------------------------------
     /**
      * Validates user permissions for bug report submission.
      *
@@ -116,8 +133,11 @@ class DbSysBugreport extends DbEntityBase
 
         if(!$res){
 
+            // If we're on the main server AND in the configured bug tracker database,
+            // allow public submission by switching to the 'extern' account.
             $attempt_public_login = $this->isMainServer && $this->system->dbname() == HEURIST_BUGREPORT_DATABASE; //dbnameWithoutHost
 
+            // performLogout is used later to restore the original (anonymous) state after saving.
             $this->performLogout = $attempt_public_login ? $this->system->doLogin('extern', null, 'public', true) : false; // attempt login to publicly available guest account
 
             if($this->performLogout){
@@ -144,6 +164,12 @@ class DbSysBugreport extends DbEntityBase
     //
     //   This is virtual "save". In fact it sends email
     //
+    // ---------------------------------------------------------------------
+    // save(): Virtual 'save' for this entity.
+    // It either:
+    //  (A) sends a contact-form email (website widget), OR
+    //  (B) creates a ticket/bug-report record (possibly via the main server).
+    // ---------------------------------------------------------------------
     /**
      * Handles saving a bug report or processing a contact form email.
      *
@@ -168,10 +194,13 @@ class DbSysBugreport extends DbEntityBase
      */
     public function save(){
 
+        // prepareRecords() converts incoming $this->data['fields'] into $this->records[]
+        // and performs basic normalisation expected by DbEntityBase.
         if(!$this->prepareRecords()){
             return false;
         }
 
+        // Mode A: CMS contact-form integration (expects a single record with 'email' + 'content').
         if(is_array($this->records) && count($this->records)==1){
             //SPECIAL CASE - this is response to emailForm widget (from CMS website page)
             // it sends email to owner of database or to email specified in website_id record
@@ -181,11 +210,14 @@ class DbSysBugreport extends DbEntityBase
             }
         }
 
+        // Mode B: bug report submission - enforce permissions (may auto-login 'extern' on main tracker).
         //validate permission for current user and set of records see $this->recordIDs
         if(!$this->_validatePermission()){
             return false;
         }
 
+        // If called from an external server, the upstream server passes a prepared 'new_record' payload.
+        // In that case we skip local field mapping and just create the record directly.
         if(array_key_exists('new_record', $this->data)){
             // Called from external server
 
@@ -198,6 +230,7 @@ class DbSysBugreport extends DbEntityBase
             return $res !== false ? $res['data'] : $res;
         }
 
+        // Validate mandatory fields for each record (typically there is only one).
         //validate values and check mandatory fields
         foreach($this->records as $record){
 
@@ -211,8 +244,11 @@ class DbSysBugreport extends DbEntityBase
 
         $record = $this->records[0];
 
+        // We need mysqli for certain user lookups and to record errors centrally.
         $mysqli = $this->system->getMysqli();
 
+        // Destination email for bug reports is a system configuration constant.
+        // If missing, the instance cannot deliver reports (hard failure).
         $toEmailAddress = HEURIST_MAIL_TO_BUG;
 
         if(empty($toEmailAddress)){
@@ -224,6 +260,8 @@ class DbSysBugreport extends DbEntityBase
         $toAddresses = ['to' => [$toEmailAddress]];
         $reportDetails = [];
 
+        // Build the Heurist record payload that will be created in the Job Tracker database.
+        // NOTE: 'details' keys are DetailType IDs (dty_ID) in the Job Tracker schema.
         $new_record = [
             'ID' => 0,// New record
             'RecTypeID' => $this->bugReportType,// Task (Feature, Bug, Issue) rectype on Heurist_Job_Tracker
@@ -233,11 +271,14 @@ class DbSysBugreport extends DbEntityBase
             'details' => []
         ];
 
+        // Title: stored both as record title (detail 1) and used for email subject line.
         $report_title = htmlspecialchars($record['bug_Title']);
         $bug_title = "Bug report or feature request: $report_title";
         $new_record['details']['1'] = $report_title;
         $reportDetails['1'] = ['Title' => $report_title];
 
+        // Description: converted to HTML <br> line breaks for email / rich-text display.
+        // ChatGPT:ToDo Consider ENT_QUOTES + explicit charset in htmlspecialchars() for safety/consistency.
         //keep new line
         $bug_descr = htmlspecialchars($record['bug_Description']);
         if(!empty($bug_descr)){
@@ -251,6 +292,8 @@ class DbSysBugreport extends DbEntityBase
             $reportDetails['3'] = ['Issue description' => "{$database}{$server}{$bug_descr}"];
         }
 
+        // Extra metadata fields (Type, Location, URL, etc.) are stored using fixed dty_IDs.
+        // ChatGPT:ToDo Consider centralising these dty_ID constants in one place with descriptive names.
         //extra information
         $new_record['details']['960'] = array_key_exists('bug_Type', $record) ? $record['bug_Type'] : [6986];
         $reportDetails['960'] = ['Type' => $new_record['details']['960']];
@@ -268,6 +311,9 @@ class DbSysBugreport extends DbEntityBase
             $reportDetails['993'] = ['URL' => $cur_url];
         }
 
+        // Reporter identity:
+        // - default: current logged-in user
+        // - if bug_GuestUser==1, use name+email supplied in the form (required).
         $user_info = $this->system->getCurrentUser();
         if(@$record['bug_GuestUser'] == 1){
             if(empty($record['bug_Username']) || empty($record['bug_Email'])){
@@ -282,6 +328,8 @@ class DbSysBugreport extends DbEntityBase
         }
         if($user_info){
 
+            // Fetch the full user record from DB (organisation + canonical email) using the user's ID.
+            // ChatGPT:ToDo If $user_info is overridden for guests, it may not contain ugr_ID; ensure this call is safe.
             $user = user_getByField($mysqli, 'ugr_ID', $user_info['ugr_ID']);
 
             $new_record['details']['955'] = "{$user_info['ugr_FullName']} [{$user['ugr_Organisation']}]";
@@ -291,6 +339,8 @@ class DbSysBugreport extends DbEntityBase
             $reportDetails['956'] = ["User's email" => $user['ugr_eMail']];
         }
 
+        // Attachments (screenshots): bug_Image points to temporary uploaded files.
+        // These are converted into accessible URLs that the tracker record can store.
         $filename = null;
         $attachment_temp_name = @$record['bug_Image'];
         if(!empty($attachment_temp_name)){
@@ -304,6 +354,8 @@ class DbSysBugreport extends DbEntityBase
             $reportDetails['38'] = ['Image URLs' => []];
             foreach ($attachment_temp_name as $file) {
 
+                // Temp file naming normalisation: undo some URL encoding and strip '.png'.
+                // ChatGPT:ToDo Use pathinfo() and rawurldecode() to handle more extensions and avoid partial replacements.
                 // replace encoded space, brackets and remove extension
                 $file = str_replace(['%20', '%28', '%29', '.png'], [' ', '(', ')', ''], $file);
 
@@ -321,6 +373,7 @@ class DbSysBugreport extends DbEntityBase
             }
         }
 
+        // Association membership flag (detail 1067): used to prioritise tickets and adjust messaging.
         $memberString = '';
         if($this->performLogout || USystem::checkAssociationMembership($this->system) !== 'nonmember'){
             $new_record['details']['1067'] = ['7643'];
@@ -328,6 +381,9 @@ class DbSysBugreport extends DbEntityBase
             $new_record['details']['1067'] = [];
         }
 
+        // Create record either locally (if already on main server tracker DB) or via remote call to main server.
+        // Remote call uses entityScrud.php with query string parameters.
+        // ChatGPT:ToDo Consider POST (instead of GET) because 'new_record' can be large and may exceed URL limits.
         $res = false;
         if($this->isMainServer){ // on server with Heurist_Job_Tracker DB
             $res = $this->createBugReportRecord($new_record);
@@ -340,6 +396,8 @@ class DbSysBugreport extends DbEntityBase
                 'new_record' => $new_record,
                 'fields' => ['is_bug_report' => 1]
             ];
+            // Construct remote endpoint URL to main server controller.
+            // loadRemoteURLContentWithRange() fetches the JSON response (with timeout 60s).
             $url = HEURIST_MAIN_SERVER . '/heurist/hserv/controller/entityScrud.php?' . http_build_query($params);
 
             $res = loadRemoteURLContentWithRange($url, null, true, 60);
@@ -350,6 +408,7 @@ class DbSysBugreport extends DbEntityBase
                     : ['status' => HEURIST_UNKNOWN_ERROR, 'message' => 'An unknown response was returned from the main Heurist server.<br>Please, ' . CONTACT_HEURIST_TEAM . ' directly'];
         }
 
+        // If we auto-logged-in as 'extern' earlier, we now logout to avoid persisting that session.
         if($this->performLogout){
             $this->system->doLogout();
         }
@@ -357,13 +416,14 @@ class DbSysBugreport extends DbEntityBase
         $email_already_sent = false;
         if($res){
 
+            // On success: build canonical tracker URLs, and prepare the confirmation email body.
             // Add record ID, title & url to edit record
             $rec_ID = @$res['status'] == HEURIST_OK ? $res['data']['recID'] : 0;
             $email_already_sent = $rec_ID > 0 ? $res['data']['email_sent'] : false;
 
             if($rec_ID > 0){
 
-                $bug_title = "Heurist tracker #$rec_ID: {$record['bug_Title']}";
+                $bug_title = "H#$rec_ID: {$record['bug_Title']}";
                 $report_link = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$rec_ID";
                 $report_edit = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/edit/$rec_ID";
 
@@ -379,6 +439,10 @@ class DbSysBugreport extends DbEntityBase
                     $memberString = '';
                 }
 
+                // Compose HTML email by replacing placeholders in the $reportEmail template.
+                // ChatGPT:ToDo This uses $record['details']['3'] but $record here is the *input form record*
+                // (keys like 'bug_Description'), not the tracker payload. This looks like a bug; likely intended
+                // to use $new_record['details']['3'] or $reportDetails['3'].
                 $res = str_replace(['__LINK__', '__DESC__','__NAME__','__EMAIL__','__DBLINK__','__DB_JOBTRAK__','__EDIT__','__MEMBER__'],
                     [$report_link, $record['details']['3'], $user_name, $user_email, $cur_url, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE,$report_edit,$memberString],
                     $this->reportEmail);
@@ -389,6 +453,8 @@ class DbSysBugreport extends DbEntityBase
             }
         }
 
+        // Fallback / backup email logic:
+        // If the tracker server didn't send the confirmation email, send a 'backup report' email instead.
         if(!$email_already_sent){
             $email_already_sent = $this->sendBackupReport($toAddresses, $bug_title, $reportDetails, $filename);
             $res = $res ?: 'Your bug report has been sent to the Heurist team.';
@@ -398,6 +464,8 @@ class DbSysBugreport extends DbEntityBase
             return [$res];
         }else{
 
+            // Generic failure path: if no email was sent, surface an error encouraging direct contact.
+            // ChatGPT:ToDo Spelling: 'recieve' -> 'receive' (message text).
             $error_msg = 'An unknown error has prevented Heurist from create the bug report.<br>If you do not recieve an email confirming the bug report, please re-try in a few minutes.<br>However, if the issue persists please ' . CONTACT_HEURIST_TEAM . ' directly.';
             $email_already_sent || $this->system->addError(HEURIST_UNKNOWN_ERROR, $error_msg);
             return false;
@@ -419,6 +487,15 @@ class DbSysBugreport extends DbEntityBase
      * @return array|false An associative array `['status' => HEURIST_OK, 'data' => ['recID' => ..., 'email_sent' => ...]]`
      *                     on success, or false on failure. Errors are added to `$this->system`.
      */
+    // ---------------------------------------------------------------------
+    // createBugReportRecord(): executes the actual record creation in the Job Tracker DB.
+    // Key responsibilities:
+    // - Ensure we are connected to the Job Tracker database (may differ from current DB).
+    // - Register any screenshot URLs as uploaded-file entities in the tracker DB.
+    // - Apply default detail values from defRecStructure.
+    // - Save the record (recordSave), then update ownership/added-by metadata.
+    // - Send confirmation email to reporter (if reporter email exists).
+    // ---------------------------------------------------------------------
     private function createBugReportRecord($record){
 
         if(empty(@$record['details'])){
@@ -426,10 +503,13 @@ class DbSysBugreport extends DbEntityBase
             return false;
         }
 
+        // Determine whether we are already operating inside the Job Tracker database.
         $using_db = $this->system->dbname() == HEURIST_BUGREPORT_DATABASE; //dbnameWithoutHost
         $report_system = $using_db ? $this->system : null;
         if(!$using_db && $this->isMainServer){
 
+            // If we're on the main server but not currently in the tracker DB, spin up a System instance
+            // initialised against the tracker DB. This isolates DB context.
             $report_system = new System();
             $using_db = $report_system->init(HEURIST_BUGREPORT_DATABASE, true, false);
 
@@ -446,6 +526,8 @@ class DbSysBugreport extends DbEntityBase
             return false;
         }
 
+        // Screenshot handling (detail 38): attempt to register images as uploaded files, so the tracker
+        // stores stable file references rather than transient temp URLs.
         $files = [];
         $rec_uploads = new DbRecUploadedFiles($report_system);
         if(!empty($record['details']['38']) && $rec_uploads){
@@ -456,6 +538,11 @@ class DbSysBugreport extends DbEntityBase
                 $file_name = str_replace('~', 'bugreport_img_', array_pop($file_name));
 
                 $fileResult = null;
+                // Same-server optimisation: if the file URL points to this server, try to register locally
+                // by converting the URL to a filesystem path.
+                // ChatGPT:ToDo strpos() should be compared with !== false; if the match is at position 0 it is treated as false.
+                // ChatGPT:ToDo $fileResult is not assigned in this branch; currently the code always falls through
+                // to downloading even after local registration. Likely intended: $fileResult = $record['details']['38'][$idx].
                 if(strpos($file_url, HEURIST_SERVER_URL)){ // same server, attempt local registeration
 
                     $urlBase = $this->system->getSysUrl(DIR_ENTITY);
@@ -465,10 +552,15 @@ class DbSysBugreport extends DbEntityBase
                     $record['details']['38'][$idx] = $rec_uploads->registerFile($file, null);
                 }
 
+                // If local registration didn't happen, try downloading the URL and registering it into recUploadedFiles.
+                // (downloadAndRegisterdURL() appears to both fetch and register the file.)
+                // ChatGPT:ToDo Verify method name spelling 'downloadAndRegisterdURL' (missing 'e') is correct in class.
                 if(!$fileResult){
                     $fileResult = $rec_uploads->downloadAndRegisterdURL($file_url, ['ulf_NewName' => $file_name], 2);
                 }
 
+                // Backup: if we cannot register the file in the tracker DB, and we're not already in the tracker DB,
+                // record it as an external URL reference instead of dropping the attachment.
                 if(!$fileResult && $this->system->dbname() !== HEURIST_BUGREPORT_DATABASE){ //dbnameWithoutHost backup: register as external image
                     $fileResult = $rec_uploads->registerURL($file_url, false, 0);
                 }
@@ -485,12 +577,19 @@ class DbSysBugreport extends DbEntityBase
             $record['details']['38'] = array_filter($record['details']['38']); // remove null/false values
         }
 
+        // Identify the 'extern' user in the tracker DB so we can mark the record as created by that account.
         $mysqli = $report_system->getMysqli();
         $guest_user = user_getByField($mysqli, 'ugr_Name', 'extern');// to update AddedBy value in new record
         $uid = is_array($guest_user) ? $guest_user['ugr_ID'] : 0;
 
+        // Apply default field values from defRecStructure (for fields not supplied by the form).
+        // ChatGPT:ToDo addDefaultValues() currently receives $record by value; changes won't persist unless passed by reference
+        // or the function returns the updated record. This likely means defaults are not actually applied.
         $this->addDefaultValues($report_system, $record);
 
+        // Save the record in tracker DB.
+        // Parameters: (system, record array, is_new, is_swf, ???, total_recs=2)
+        // The comment suggests total_recs=2 suppresses a standard 'swf' email so we can send a custom email.
         $res = recordSave($report_system, $record, true, false, 0, 2);// set total recs to 2 to avoid sending the swf email, we will send a more specific email instead
         $sent_email = false;
 
@@ -502,13 +601,16 @@ class DbSysBugreport extends DbEntityBase
 
         $res = $res['data'];
 
+        // Post-save: force AddedBy (extern) and Owner group to a known admin group (hardcoded as 2).
+        // ChatGPT:ToDo Replace magic group IDs (2) with named constants or config; verify group 2 is stable across installs.
         mysql__insertupdate($mysqli, 'Records', 'rec', ['rec_ID' => $res, 'rec_AddedByUGrpID' => $uid, 'rec_OwnerUGrpID' => 2]);
 
         recordUpdateTitle($report_system, $res, $record['RecTypeID'], "Heurist ticket: {$record['details']['1']}");
 
+        // If we have a reporter email (detail 956), send confirmation email (To: reporter, BCC: tracker admins).
         if(!empty($record['details']['956'])){
 
-            $title = "Heurist tracker #$res: {$record['details']['1']}";
+            $title = "H#$res: {$record['details']['1']}";
 
             $report_link = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$res";
             $report_edit = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/edit/$res";
@@ -538,6 +640,12 @@ class DbSysBugreport extends DbEntityBase
         return ['status' => HEURIST_OK, 'data' => ['recID' => $res, 'email_sent' => $sent_email]];
     }
 
+    // ---------------------------------------------------------------------
+    // sendBackupReport(): resilience path when normal ticket creation or normal email fails.
+    // It builds either:
+    //  - a submittable HTML form containing the report (for the Heurist team), or
+    //  - a plain summary report (for reporter + team) if the ticket exists but email didn't send.
+    // ---------------------------------------------------------------------
     /**
      * Sends a backup bug report email in case the main server cannot be reached, or couldn't send an email
      *
@@ -570,6 +678,8 @@ class DbSysBugreport extends DbEntityBase
             unset($details['report']);
         }
 
+        // details format: [ dty_ID => [ 'Field label' => value(s) ], ... ]
+        // Used to generate an HTML form that can be POSTed back to entityScrud.php as 'new_record[...]'.
         // [field ID => [field name => [ field values ]], ...]
         foreach($details as $dtyID => $values){
 
@@ -577,6 +687,9 @@ class DbSysBugreport extends DbEntityBase
             $fieldValues = array_values($values)[0];
             $fieldValues = is_array($fieldValues) ? $fieldValues : [$fieldValues];
 
+            // ChatGPT:ToDo BUG: variable $value is not defined here. Probably meant:
+            //   if (empty($fieldValues)) { continue; }
+            // As written, this may emit notices and skip the intended emptiness check.
             if(empty($value)){
                 continue;
             }
@@ -589,134 +702,120 @@ class DbSysBugreport extends DbEntityBase
             $fieldID = "new_record[details][{$dtyID}]" . (count($fieldValues) > 1 ? '[]' : '');
             foreach($fieldValues as $value){
 
-                $inputType = '';
-                if(strpos($value, '<br>') !== false){
-                    // For blocktext values, place it within a div (textarea was too messy)
-                    $processedValue = str_replace('"', '&quot;', $value);
-                    $inputType = <<<FLD
-                        <div>{$value}</div>
-                        <input name="{$fieldID}" type="hidden" readonly="readonly" value="{$processedValue}" />
-                    FLD;
-                }else{
-                    $inputType = <<<FLD
-                        <input name="{$fieldID}" type="text" readonly="readonly" size="80" value="{$value}" />
-                    FLD;
-                }
-
-                $form .= <<<ROW
-                        $inputType
-                ROW;
+                $form .= <<<FIELD
+                        <div class="fieldValue">
+                            <textarea name="{$fieldID}">{$value}</textarea>
+                        </div>
+                FIELD;
             }
-
             $form .= <<<ROW
                     </div>
                 </div>
             ROW;
         }
 
-        if(!empty($reportLink)){ // Report has been made, this is just to inform
-            $form = <<<HEAD
-                <div style="font-size: 0.9em;">Your bug report has been sent to the Heurist team and can be viewed <a href="{$reportLink}">here</a>.</div>
-                <h4>Report details:</h4>
-                $form
-            HEAD;
-        }else{ // HeuristRef was unavailable, allows the team to create a new report
+        $css = <<<CSS
+            <style>
+                div.row{
+                    display: flex;
+                    flex-direction: column;
+                    margin: 8px 0px;
+                }
+                div.fieldName{
+                    font-weight: bold;
+                    font-size: 13px;
+                }
+                div.fieldValue{
+                    margin-left: 10px;
+                }
+                textarea{
+                    min-width: 550px;
+                    min-height: 50px;
+                }
+            </style>
+        CSS;
 
-            $script = HEURIST_MAIN_SERVER . '/heurist/hserv/controller/entityScrud.php';
-            $database = HEURIST_BUGREPORT_DATABASE;
+        $fromAddresses = $this->system->getSystemEmail();
+        $toAddresses = is_array($toAddresses) ? $toAddresses : ['to' => $toAddresses];
 
-            $form = <<<FORM
-                <div style="font-size: 0.9em;">A new ticket has been requested while HeuristRef is unavailable.</div>
-                <h4>Report details:</h4>
-                <form method="POST" action="{$script}" style="width: 60em;">
-                    $form
-                    <input type="hidden" name="a" value="save" />
-                    <input type="hidden" name="entity" value="sysBugreport" />
-                    <input type="hidden" name="db" value="{$database}" />
-                    <input type="hidden" name="new_record[ID]" value="0" />
-                    <input type="hidden" name="new_record[RecTypeID]" value="101" />
-                    <input type="hidden" name="new_record[NonOwnerVisibility]" value="public" />
-                    <input type="hidden" name="new_record[NonOwnerVisibilityGroups]" value="0" />
-                    <input type="hidden" name="new_record[OwnerUGrpID]" value="0" />
-                    <input type="hidden" name="fields[is_bug_report]" value="1" />
-                    <button>Create job</button> <span class='smaller'>(this will attempt to create a bug report on the Heurist Job Tracker database, please check it's available before trying)</span>
-                </form>
-            FORM;
+        if(empty(@$toAddresses['to'])){
+            $toAddresses = ['to' => $fromAddresses];
         }
 
-        $emailBody = <<<EMAIL
-        <html>
-            <head>
-                <style>
-                    *{
-                        font-family: Helvetica,Arial,sans-serif;
-                    }
-                    h4{
-                        margin-bottom: 0.7em;
-                    }
-                    div.row{
-                        cursor: default;
-                        border-top: 1px solid black;
-                        padding: 5px;
-                        width: 50em;
-                    }
-                    div.row:last-of-type{
-                        border-bottom: 1px solid black;
-                    }
-                    div.fieldName{
-                        display: inline-block;
-                        width: 10em;
-                        font-size: 0.9em;
-                        font-weight: bold;
-                        vertical-align: top;
-                    }
-                    div.value{
-                        display: inline-block;
-                        font-size: 0.8em;
-                    }
-                    div.textarea{
-                        padding-left: 2px;
-                    }
-                    input[type="text"]{
-                        cursor: default;
-                        border: none;
-                        cursor: default;
-                    }
-                    input[type="text"]:focus-visible{
-                        outline: none;
-                    }
-                    button{
-                        margin: 1em;
-                        padding: .4em 1em;
-                        border: 1px solid #f2f2f2;
-                        color: white;
-                        background-color: #3D9946;
-                        cursor: pointer;
-                    }
-                    span.smaller{
-                        font-size: 0.75em;
-                        font-style: italic;
-                    }
-                </style>
-            </head>
-            <body>
-                $form
-            </body>
-        </html>
-        EMAIL;
+        $email_to_reporter = in_array($fromAddresses, $toAddresses['to']);
+        if($email_to_reporter && empty(@$toAddresses['bcc'])){
+            $toAddresses['bcc'] = HEURIST_MAIL_TO_BUG;
+        }
 
-        return sendPHPMailer(null, 'Heurist tickets', $toAddresses, $emailTitle, $emailBody, $files, true);
+        // Construct actionable content: either a "resubmittable" form (if no tracker link)
+        // or a report summary message.
+        if(!$reportLink){
+
+            $params = [
+                'a' => 'save',
+                'entity' => 'sysBugreport',
+                'db' => HEURIST_BUGREPORT_DATABASE,
+                'fields' => ['is_bug_report' => 1]
+            ];
+            $url = HEURIST_MAIN_SERVER . '/heurist/hserv/controller/entityScrud.php?' . http_build_query($params);
+
+            $text = <<<EMAIL
+                This is a backup message for bug reports and feature requests that were unable to be recorded and/or emailed normally.
+                <br><br>
+                Use the form below to submit the bug report to the Heurist Tracker database and send a confirmation to the reporter.
+                <br><br>
+                <form action="{$url}" method="POST" enctype="multipart/form-data">
+                    <input type="submit" value="Submit report">
+                    {$form}
+                </form>
+            EMAIL;
+
+            $text = $css . $text;
+
+            // If we couldn't create a tracker record, direct this email only to Heurist team/system mailbox.
+            $toAddresses = ['to' => [HEURIST_MAIL_TO_BUG]];
+
+        }else{
+
+            $reportLink = "<a href=\"$reportLink\">$reportLink</a>";
+
+            $text = <<<EMAIL
+                This is a backup message for bug reports and feature requests where the report was created, but the confirmation email was not sent.
+                <br><br>
+                The report can be found at: $reportLink
+                <br><br>
+                Summary:
+                <br>
+                $form
+            EMAIL;
+
+            $text = $css . $text;
+        }
+
+        if(sendPHPMailer(null, 'Heurist Tickets', $toAddresses, $emailTitle, $text, $files, true)){
+            return true;
+        }
+
+        return false;
     }
 
+    // ---------------------------------------------------------------------
+    // _prepareEmail(): handles website contact-form submissions.
+    // Flow:
+    //  1) validate CAPTCHA (simple challenge stored in session)
+    //  2) validate required fields: content + sender email
+    //  3) determine recipient (db owner / website record / configured address)
+    //  4) send via sendPHPMailer()
+    // ---------------------------------------------------------------------
     /**
      * Prepares and sends an email from a website contact form.
      *
-     * Validates captcha, retrieves recipient email (either from a specified website record
-     * or the database owner), constructs the email title and content, and sends it.
+     * Validates a captcha code, then extracts email content and sender information,
+     * determines recipient(s) (database owner or website record specified), and sends the email.
      *
-     * @param array $fields An associative array containing contact form data:
-     *                      - 'captcha': The user-entered captcha.
-     *                      - 'content': The email message content.
+     * @param array $fields Associative array containing contact form fields:
+     *                      - 'captcha': Captcha input from user.
+     *                      - 'content': Message content.
      *                      - 'email': The sender's email address.
      *                      - 'person': (Optional) The sender's name.
      *                      - 'website_id': (Optional) Record ID of a website record from which to get recipient details.
@@ -725,6 +824,8 @@ class DbSysBugreport extends DbEntityBase
      */
     private function _prepareEmail($fields){
 
+        // CAPTCHA validation relies on $_SESSION['captcha_code'] being set by the form generator.
+        // ChatGPT:ToDo Consider rate-limiting / throttling in addition to CAPTCHA to reduce abuse.
         //1. verify captcha
         if (@$fields['captcha'] && @$_SESSION["captcha_code"]){
 
@@ -746,6 +847,9 @@ class DbSysBugreport extends DbEntityBase
         }
 
 
+        // Extract and validate required fields from the submitted payload.
+        // Note the pervasive '@' suppression; this avoids notices but can hide bugs/missing fields.
+        // ChatGPT:ToDo Consider replacing '@$fields[...]' with isset() checks for clearer error handling.
         //2. get email fields
         $email_text = @$fields['content'];
         if(!$email_text){
@@ -758,45 +862,38 @@ class DbSysBugreport extends DbEntityBase
             return false;
         }
 
+        $email_title = isset($fields['title']) ? $fields['title'] : ('Request from: ' . (@$fields['person'] ? $fields['person'] : $email_from));
 
-        $email_title = null;
-        $email_from_name = $fields['person']??'';
-        $email_to = null;
+        $email_to = '';
+        $email_to_name = '';
 
-        //3. get $email_to - either address from website_id record or current database owner
-        $rec_ID = $fields['website_id'];
-        if($rec_ID>0){
-            $this->system->defineConstant('DT_NAME');
-            $this->system->defineConstant('DT_EMAIL');
-
-            $record = recordSearchByID($this->system, $rec_ID, array(DT_NAME, DT_EMAIL), 'rec_ID');
-            if($record){
-                $email_title = 'From website '.recordGetField($record, DT_NAME).'.';
-                $email_to = recordGetField($record, DT_EMAIL);
-                if($email_to) {$email_to = explode(';', $email_to);}
+        //3. determine recipient(s)
+        // - If website_id is given, get email from that record details (or DB owner)
+        // - Otherwise, send to DB owner
+        if(@$fields['website_id']){
+            $rec = recordSearchByID($this->system, $fields['website_id'], true, false);
+            if($rec){
+                // dty: 799 = email / 800 = name (based on website record schema)
+                $email_to = @$rec['details'][799];
+                $email_to_name = @$rec['details'][800];
             }
-            $email_from_name = 'Website contact '.$email_from_name;
-        }else{
-            $email_from_name = 'Heurist Tickets';
         }
+
         if(!$email_to){
-            $email_to = user_getDbOwner($this->system->getMysqli(), 'ugr_eMail');
+            $email_to = $this->system->getOwnerEmail();
+            $email_to_name = $this->system->getOwnerName();
         }
-        if(!$email_title){
-            $email_title = '"Contact us" form. ';
+
+        if(!$email_to){
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot determine recipient address for contact form.');
+            return false;
         }
-        if($email_from_name){
-            $email_title = $email_title.'  From '.$email_from_name;
-        }
-        $email_text = 'From '.$email_from.' ( '.$email_from_name.' )<br>'.$email_text;
 
-        $email_from = null;
-        $email_from_name = null;
+        $fromAddresses = $this->system->getSystemEmail();
+        $toAddresses = ['to' => [$email_to]];
 
-
-        if(sendPHPMailer(null, $email_from_name, $email_to,
-                $email_title,
-                $email_text,
+        //4. send email
+        if(sendPHPMailer($email_from, $email_to_name, $toAddresses, $email_title, $email_text,
                 null, true))
         {
                 return array(1);
@@ -806,6 +903,7 @@ class DbSysBugreport extends DbEntityBase
 
     }
 
+    // This entity explicitly disallows deletion via the generic entity interface (safety).
     /**
      * Disables direct deletion of bug reports via this entity class.
      *
@@ -816,6 +914,7 @@ class DbSysBugreport extends DbEntityBase
         return false;
     }
 
+    // This entity explicitly disallows batch operations via the generic entity interface (safety).
     /**
      * Disables batch actions for bug reports via this entity class.
      *
@@ -825,6 +924,10 @@ class DbSysBugreport extends DbEntityBase
          return false;
     }
 
+    // ---------------------------------------------------------------------
+    // addDefaultValues(): fetch default detail values for the bug report record type
+    // (from defRecStructure) and apply them to the outgoing tracker record payload.
+    // ---------------------------------------------------------------------
     /**
      * Adds default values to a bug report record's details.
      *
@@ -838,6 +941,9 @@ class DbSysBugreport extends DbEntityBase
      */
     private function addDefaultValues($system, $record){
 
+        // Fetch defaults for the tracker record type (rst_DefaultValue can be scalar or encoded).
+        // ChatGPT:ToDo This query interpolates $this->bugReportType directly; it's an int constant here,
+        // but consider parameterisation if ever user-controlled.
         $def_values = mysql__select_assoc2($system->getMysqli(), "SELECT rst_DetailTypeID, rst_DefaultValue FROM defRecStructure WHERE rst_RecTypeID = {$this->bugReportType}");
 
         foreach($def_values as $dty_ID => $def_value){
@@ -846,6 +952,7 @@ class DbSysBugreport extends DbEntityBase
                 continue;
             }
 
+            // Apply the default only if the detail is missing/empty in the record payload.
             $record['details'][$dty_ID] = $def_value;
         }
     }
