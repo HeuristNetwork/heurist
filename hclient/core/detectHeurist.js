@@ -73,6 +73,7 @@ if(!window.hWin) window.hWin = _detectHeurist(window);
  * @property {string} INVALID_REQUEST - The request provided was invalid.
  * @property {string} NOT_FOUND - The requested object was not found.
  * @property {string} OK - The response contains a valid result; the operation was successful.
+ * @property {string} CANCELLED - Request aborted by user.
  * @property {string} REQUEST_DENIED - The user/webpage is not allowed to use the service or perform the action due to permissions.
  * @property {string} ACTION_BLOCKED - The action cannot be performed due to constraints or insufficient rights.
  * @property {string} DB_ERROR - A request could not be processed due to a server database error. Likely a bug.
@@ -87,6 +88,7 @@ if(!window.hWin.ResponseStatus){
             INVALID_REQUEST: "invalid",    // The Request provided was invalid.
             NOT_FOUND: "notfound",         // The requested object not found.
             OK: "ok",                      // The response contains a valid Result.
+            CANCELLED: "cancelled",        // Request aborted by user
             REQUEST_DENIED: "denied",      // The webpage is not allowed to use the service. User permissions.
             ACTION_BLOCKED: "blocked",     // No enough rights or action is blocked by constraints
             DB_ERROR: "database",          // A request could not be processed due to a server database error. Most probably this is BUG. Contact developers

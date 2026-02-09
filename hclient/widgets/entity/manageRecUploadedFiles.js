@@ -289,7 +289,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
         }else
         if(isLocal){ //local
-            this.options.entity.fields[i_url].dtFields['rst_DefaultValue'] = window.hWin.HAPI4.baseURL
+            this.options.entity.fields[i_url].dtFields['rst_DefaultValue'] = window.hWin.HAPI4.baseURL_pro
                                                     + '?db=' + window.hWin.HAPI4.database 
                                                     + '&file='+this._getField('ulf_ObfuscatedFileID');
             this.options.entity.fields[i_url_ext].dtFields['rst_Display']  = 'hidden'; 
@@ -955,7 +955,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             
         if(this.options.select_mode=='manager'){
         html_thumb = '<a href="'+            
-window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&player=1':'')
+window.hWin.HAPI4.baseURL_pro+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&player=1':'')
  + '&file='+fld('ulf_ObfuscatedFileID')+'" target="yoxview" class="yoxviewLink">' +  html_thumb + '</a>';                   
         }
 

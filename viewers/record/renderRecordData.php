@@ -1513,7 +1513,7 @@ function print_header_line($bib) {
     ?>
 
     <div class=HeaderRow style="margin-bottom:5px;min-height:0px;">
-        <h2 style="text-transform:none;line-height:16px;font-size:1.4em;margin-bottom:0;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
+        <h2 style="text-transform:none;line-height:1.2em;font-size:1.3em;margin-bottom:0;<?php echo ($is_map_popup)?'max-width: 380px;':'';?>">
                 <?php echo USanitize::sanitizeString($bib['rec_Title'],ALLOWED_TAGS);?>
         </h2>
 

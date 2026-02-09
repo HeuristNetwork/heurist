@@ -119,7 +119,7 @@ function HRecordSearch() {
                 owner_element_id = null;
             }
     
-            if(request == null) return; // Do nothing if request is null
+            if(request == null) return null; // Do nothing if request is null
 
             // Ensure a unique ID for the request if not already present
             if( window.hWin.HEURIST4.util.isnull(request.id) ) {
@@ -154,7 +154,7 @@ function HRecordSearch() {
             }
 
             // Perform the actual search using RecordMgr
-            window.hWin.HAPI4.RecordMgr.search(request, function(response){
+            return window.hWin.HAPI4.RecordMgr.search(request, function(response){
                     _onSearchResult(response); // Pass server response to the result handler
             });
     }

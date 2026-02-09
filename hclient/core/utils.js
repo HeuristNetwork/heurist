@@ -547,6 +547,17 @@ window.hWin.HEURIST4.util = {
      * @returns {Object} A standardized error response object with status, message, and request_code.
      */
     interpretServerError: function(jqXHR, url, request_code){
+        
+        // user-aborted request
+        if (jqXHR && jqXHR.status === 0 && jqXHR.readyState === 0) {
+            return {
+                status: window.hWin.ResponseStatus.CANCELLED,
+                message: 'Request aborted',
+                aborted: true,
+                request_code: request_code
+            };
+        }        
+        
         let err_message = '';
         if(window.hWin.HEURIST4.util.isempty(jqXHR.responseText)){
             if(jqXHR.status==500){ err_message = 'Error_Server_Side'; }
