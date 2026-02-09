@@ -265,7 +265,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
         message = 
 'Unfortunately we have encountered a program error. Please report this to us using ' 
-+'the bug reporter under Help at the top right of the main screen, or via email '
++'create ticket under Help at the top right of the main screen, or via email '
 +'to support@heuristnetwork.org so that we can fix it immediately.' 
 
 +'<br><br>Please remember to tell us the context in which this occurred. '
@@ -2007,7 +2007,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     $dlgm = window.hWin.HEURIST4.msg.showMsgDlg(
     '<p>Sorry, native php functions in custom reports are disabled by default<br>'
     +'as a security precaution. </p>'
-    +'<p>Please use the bug report function to ask that this function be enabled. </p>',
+    +'<p>Please use the Create ticket function to ask that this function be enabled. </p>',
                         buttons,
                         window.hWin.HR('Warning')); // Translate title
                         

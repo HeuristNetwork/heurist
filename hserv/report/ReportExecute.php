@@ -674,7 +674,7 @@ class ReportExecute
                     try{
                         $output = $this->smarty->fetch($temp_templateFile);
                     } catch (\Exception $e) {
-                        $output = 'Exception on calculation field execution (if you get this message, please send a bug report - we are trying to track the problem): '.$e->getMessage();
+                        $output = 'Exception on calculation field execution (if you get this message, please create a ticket - we are trying to track the problem): '.$e->getMessage();
                     }
                     fileDelete($this->smarty->getTemplateDir().$temp_templateFile);
                     echo $output;
@@ -706,7 +706,7 @@ class ReportExecute
             /* Apparently need to use $this->smarty->display($templateFile) for huge reprot to direct output to browser*/
 
         } catch (\Exception $e) {
-            $this->outputError('Exception on execution (if you get this error please send us a bug report, we are trying to track the problem): ' . $e->getMessage());
+            $this->outputError('Exception on execution (if you get this error please create a ticket, we are trying to track the problem): ' . $e->getMessage());
             $result = false;
         }
 

@@ -289,7 +289,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
         }else
         if(isLocal){ //local
-            this.options.entity.fields[i_url].dtFields['rst_DefaultValue'] = window.hWin.HAPI4.baseURL
+            this.options.entity.fields[i_url].dtFields['rst_DefaultValue'] = window.hWin.HAPI4.baseURL_pro
                                                     + '?db=' + window.hWin.HAPI4.database 
                                                     + '&file='+this._getField('ulf_ObfuscatedFileID');
             this.options.entity.fields[i_url_ext].dtFields['rst_Display']  = 'hidden'; 
@@ -801,7 +801,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
                 msg_error = 
                 '<b>Unsupported file type</b>'
-                +'<p>The URL you have entered does not appear to point to a file type that we currently support. It must point to a FILE resource which can be rendered eg an image, streaming data source or data file. If you would like this file type supported, please contact the Heurist team (by email or Bug reporter at top of page).</p>'
+                +'<p>The URL you have entered does not appear to point to a file type that we currently support. It must point to a FILE resource which can be rendered eg an image, streaming data source or data file. If you would like this file type supported, please contact the Heurist team (by email or create ticket at top of page).</p>'
                 +'Currently supported file types include: <ul><li>'
                 +'Web compatible images (JPG, PNG, GIF, JPEG2000; note that other image formats may be supported but cannot be rendered in web pages without special software) </li>'
                 +'<li>Composite image resources (Tiled image stacks, IIIF Manifests) </li>'
@@ -955,7 +955,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
             
         if(this.options.select_mode=='manager'){
         html_thumb = '<a href="'+            
-window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&player=1':'')
+window.hWin.HAPI4.baseURL_pro+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&player=1':'')
  + '&file='+fld('ulf_ObfuscatedFileID')+'" target="yoxview" class="yoxviewLink">' +  html_thumb + '</a>';                   
         }
 

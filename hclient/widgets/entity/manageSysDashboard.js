@@ -155,7 +155,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         menu_entries.push({key:'',title:'select command ...'});
         menu_entries.push({key:'menu-import-add-record',title:'Add record'});
         menu_entries.push({key:'action-AddRecord',title:'Add record - specific type'});
-        menu_entries.push({key:'menu-help-bugreport',title:'Bug report'});
+        menu_entries.push({key:'menu-help-bugreport',title:'Create ticket'});
         menu_entries.push({key:'menu-manage-archive',title:'Create archive package'});
         menu_entries.push({key:'menu-structure-rectypes',title:'Edit record types'});
         menu_entries.push({key:'menu-structure-vocabterms',title:'Edit vocabularies'});

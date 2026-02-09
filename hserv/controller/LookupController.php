@@ -381,7 +381,7 @@ class LookupController{
             if(intval($http_code) >= 500){
 
                 $errorMsg .= '<br><br>Please retry your request in a few minutes as the requested service is currently busy,'
-                .  '<br>if the problem persists then please make a bug report.';
+                .  '<br>if the problem persists then please create a ticket (top of page).';
 
                 $heuristErrorType = HEURIST_ACTION_BLOCKED;
             }

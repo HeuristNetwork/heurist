@@ -671,7 +671,7 @@ $.widget( "heurist.controlPanel", {
         let $bugMsg = $('<span>', {
             title: 'Click to submit Heurist ticket',
             style: "color: #FFFF66; cursor: pointer; flex: 0 0 20em;",
-            html: '<span class="ui-icon ui-icon-bug" style="float: left;margin: 5px;"></span>Please report bugs here, or suggest improvements. We are responsive'
+            html: '<span class="ui-icon ui-icon-bug" style="float: left;margin: 5px;"></span>CREATE TICKET<br><i>(we are responsive)</i>'
         }).appendTo(this.version_message);
 
         this._on($bugMsg, {
@@ -727,7 +727,7 @@ $.widget( "heurist.controlPanel", {
                 click: () => {
 
                     let $dlg;
-                    let msg = 'If you encounter <span style="text-decoration: underline">any</span> bug, we ask that you report it with the <a href="#" id="msg_bug_rpt">bug reporter</a>'
+                    let msg = 'If you encounter <span style="text-decoration: underline">any</span> bug, we ask that you report it with <a href="#" id="msg_bug_rpt">Create ticket</a>'
                         + ' - bugs are generally<br>'
                         + 'fixed within a day or so.<br><br>'
                         + 'We recommend that you use the alpha version unless you encounter a newly introduced bug<br>'

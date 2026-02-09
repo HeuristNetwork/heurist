@@ -831,12 +831,12 @@ if($step=="1"){  //first step - info about current status
             $err_msg);
 
         print '<span><br>If you think the Zotero import needs updating or wish to provide additional information'
-              .'please submit a bug report/improvement request - link at top of page.</span>';
+              .'please create a ticket - link at top of page.</span>';
 
         print '<script>window.hWin.HEURIST4.msg.showMsgDlg("Warning: '.$tot_erros
         .' warnings reported: Please check the warnings listed. '
         .' We do not map all fields from Zotero as for most purposes these are fields of little use in your database.'
-        .' Please submit a bug report/improvement request at top of page if you think the Zotero import needs updating."'
+        .' Please create a ticket at top of page if you think the Zotero import needs updating."'
         .',null,"Zotero synchronisation warnings");</script>';
     }
 

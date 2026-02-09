@@ -1,7 +1,7 @@
 {
     "entityName": "sysBugreport",
     
-    "entityTitle": "Bug report",
+    "entityTitle": "Create ticket",
 
     "fields": [
         {
@@ -22,7 +22,7 @@
                 "dty_Size": 120,
                 "rst_DisplayWidth": 70,
                 "rst_DisplayName": "Your email",
-                "rst_DisplayHelpText": "Please enter your email address, this email will recieve a copy of the bug report and allow us to contact you for additional information",
+                "rst_DisplayHelpText": "Please enter your email address, this email will recieve a copy of the ticket and any updates to it, and allow us to contact you for additional information",
                 "dty_Role": "virtual"
             }
         },

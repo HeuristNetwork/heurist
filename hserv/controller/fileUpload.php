@@ -224,7 +224,7 @@ if($response!=null){
                 if(false && strpos($file->error, 'Filetype not')===false &&
                    strpos($file->error, 'ownership permissions')===false &&
                    strpos($file->error, 'post_max_size')===false){
-                    $sMsg = $sMsg.' The most likely cause is that the file extension ('. ($file->type?$file->type:'XXX!') .') is not currently enabled for the upload function, jquery UploadHandler. Please use the bug report link above to request addition of this file type.';
+                    $sMsg = $sMsg.' The most likely cause is that the file extension ('. ($file->type?$file->type:'XXX!') .') is not currently enabled for the upload function, jquery UploadHandler. Please use the Create ticket link above to request addition of this file type.';
                 }
 
                 $response = $system->addError(HEURIST_UNKNOWN_ERROR, $sMsg, null);

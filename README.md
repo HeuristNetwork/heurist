@@ -130,7 +130,7 @@ The GitHub repository for Heurist source code is freely available under the stan
 Please note: we do not use GitHub issues. Please visit our [job tracking system](https://HeuristRef.net/heurist/?db=Heurist_Job_Tracker&website) developed in Heurist.
 You can raise an issue or request a feature there: first, click the "Add Job" link at the top left, then use login `guest` + `guest` (or request a personal login via the link on the login page).
 
-Issues and feature requests can also be submitted via the "Issue tracker" link in any Heurist database (Help > Bug report/feature request, also a separate link in the top bar of the web interface). This also saves additional information about your use environment, which may help resolve the issue, and attributes a Ticket ID, sending you an email when the ticket is cleared.
+Issues and feature requests can also be submitted via the "Issue tracker" link in any Heurist database (Help > Create ticket request, also a separate link in the top bar of the web interface). This also saves additional information about your use environment, which may help resolve the issue, and attributes a Ticket ID, sending you an email when the ticket is cleared.
 
 ### **Online Help**
 

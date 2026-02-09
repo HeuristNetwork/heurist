@@ -248,7 +248,7 @@ class DbSysBugreport extends DbEntityBase
             $server = empty(@$record['bug_Server']) ? '' : "Server: {$record['bug_Server']}<br>";
 
             $new_record['details']['3'] = "{$database}{$server}<p>{$bug_descr}</p>";
-            $reportDetails['3'] = ['Bug description' => "{$database}{$server}{$bug_descr}"];
+            $reportDetails['3'] = ['Issue description' => "{$database}{$server}{$bug_descr}"];
         }
 
         //extra information
@@ -422,7 +422,7 @@ class DbSysBugreport extends DbEntityBase
     private function createBugReportRecord($record){
 
         if(empty(@$record['details'])){
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Bug report details are missing');
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Ticket details are missing');
             return false;
         }
 
@@ -626,7 +626,7 @@ class DbSysBugreport extends DbEntityBase
             $database = HEURIST_BUGREPORT_DATABASE;
 
             $form = <<<FORM
-                <div style="font-size: 0.9em;">A new bug report/feature request has been made while HeuristRef is unavailable.</div>
+                <div style="font-size: 0.9em;">A new ticket has been requested while HeuristRef is unavailable.</div>
                 <h4>Report details:</h4>
                 <form method="POST" action="{$script}" style="width: 60em;">
                     $form

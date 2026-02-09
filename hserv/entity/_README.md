@@ -2,7 +2,7 @@
 
 ## Overview
 This directory contains PHP classes that represent data entities or models, likely corresponding to database tables. These classes typically encapsulate data and provide methods for Create, Read, Update, and Delete (CRUD) operations or other data-specific logic. Associated JSON files hold schema definitions, configurations, or initial data for these entities.
-It also includes classes for particular Record type (Annotation, Bug report) management and search and list Heurist databases (they use the same base class DbEntityBase.php).
+It also includes classes for particular Record type (Annotation, create ticket) management and search and list Heurist databases (they use the same base class DbEntityBase.php).
 
 ## Key files
 - `DbDefCalcFunctions.php`: Provides database access and operations for the `defCalcFunctions` table, which stores definitions for calculated fields.
