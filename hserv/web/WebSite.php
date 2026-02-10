@@ -176,13 +176,17 @@ class WebSite
         
             $this->pageRecord = $this->verifyTypeAndAccess($pageId, false);
             $res = ($this->pageRecord!=null);
-
-            $this->outputfile = $pageId.'.html';
+            if($res){
+                $this->outputfile = $pageId.'.html';
+            }
+        }   
         
-        }else{
-            //page id not defined - this is home page
+        if(!$res){
+            //page id not defined or not found - load home page
             $this->pageRecord = null;
             $this->outputfile = $siteId.'.html';
+            $this->messageError = null;
+            $res = true;
         }
         
         return $res;

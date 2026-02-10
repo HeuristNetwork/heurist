@@ -157,7 +157,7 @@ class WebSite {
         //perform search see record_output.php       
         window.hWin.HAPI4.RecordMgr.search_new(server_request,
             function(response){
-              
+                
                 if(window.hWin.HEURIST4.util.isJSON(response)) {
                     let record = response['records'];
                     if(record && record.length>0){
@@ -406,7 +406,6 @@ class WebSite {
         params['db'] = window.hWin.HAPI4.database;
         if(!eventdata) eventdata = {};
         eventdata['url_params'] = params;
-console.log('url_params', params);
         
         let func_name = 'afterPageLoad'+this.siteId;
         

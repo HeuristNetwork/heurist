@@ -496,6 +496,7 @@ function switchLanguage(event){
 // eventdata - data to be passed to afterPageLoad (to perform initial search or other action) - it may be call from another page
 //
 function loadPageContent(pageid, eventdata){
+
     var topmenu = $('#main-menu').find('div[widgetid="heurist_Navigation"]');
 
     // this is not website page, this is ordinary record - show it in main-recordview or popup
@@ -521,8 +522,9 @@ function loadPageContent(pageid, eventdata){
                 window.hWin.HAPI4.RecordMgr.search_new(server_request,
                         function(response){
 
-                           if(window.hWin.HEURIST4.util.isJSON(response)) {
-                               if(response['records'] && response['records'].length>0){
+                           if(window.hWin.HEURIST4.util.isJSON(response) && 
+                                response['records'] && response['records'].length>0) {
+                               
                                    var res = response['records'][0]['rec_RecTypeID'];
                                    if(res == RT_CMS_MENU || res == RT_CMS_HOME){
                                        if(!eventdata) eventdata = {};
@@ -532,7 +534,9 @@ function loadPageContent(pageid, eventdata){
                                        usual_heurist_records.push(pageid);
                                        loadRecordContent(pageid);
                                    }
-                               }
+                           }else{
+                               window.hWin.HEURIST4.msg.sendCoverallToBack(true);
+                               window.hWin.HEURIST4.msg.showMsgFlash('Record #'+pageid+' not found');
                            }
                 });
                 return;
@@ -632,7 +636,9 @@ function loadPageContent(pageid, eventdata){
             //perform search see record_output.php
             window.hWin.HAPI4.RecordMgr.search_new(server_request,
                 function(response){
-
+                    
+                    const errMsg = `Web Page not found (record #${pageid})`;
+                    
                     if(window.hWin.HEURIST4.util.isJSON(response)) {
                         if(response['records'] && response['records'].length>0){
                             var res = response['records'][0]['details'];
@@ -657,16 +663,17 @@ function loadPageContent(pageid, eventdata){
                             page_cache[pageid] = res; //assign to cache after load from server side
                             __loadPageContent();
                         }else if(pageid!=home_page_record_id){ //page not found - load home page by default
+                            window.hWin.HEURIST4.msg.showMsgFlash(errMsg, 3000)
                             loadPageContent(home_page_record_id);
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr({
-                                message: `Web Page not found (record #${pageid})`,
+                                message: errMsg,
                                 error_title: 'Failed to load page'
                             });
                         }
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr({
-                            message: response,
+                            message:  errMsg, //response
                             error_title: 'Webpage search failed'
                         });
                     }
