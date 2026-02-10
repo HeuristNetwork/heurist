@@ -80,8 +80,23 @@ class DbSysBugreport extends DbEntityBase
     of the <em>Heurist Network</em> association. Please consider <a href="https://forms.gle/xdAhjcZaSxpzkAsh9" target=_blank>joining the association</a> to support Heurist.<br>
     MEMBERSHIP;
     
-    /** @var int The Heurist Record Type ID for bug reports/tasks (typically 56). */
-    private $bugReportType = 56;
+    /** @var int The Heurist Record Type ID for bug reports/tasks (currently 56). */
+    private const BUGREPORT_TYPE = 56;
+
+    /** @var int The Heurist Group ID for Database Administrators (defaults to 2). */
+    private const DB_ADMIN_ID = 2;
+
+    private const DTY_FIELD_MAPPING = [
+        'bug_Title' => '1',
+        'bug_Description'=> '3',
+        'bug_Type' => '960',
+        'bug_Location' => '958',
+        'bug_URL' => '993',
+        'bug_Reporter_Name' => '955',
+        'bug_Reporter_Email' => '956',
+        'bug_Image' => '38',
+        'bug_Membership' => '1067'
+    ];
 
     /** @var bool Whether the current server is the main server */
     private $isMainServer = false;
@@ -104,8 +119,6 @@ class DbSysBugreport extends DbEntityBase
         $this->requireAdminRights = false;
 
         // Determine whether the current base URL appears to be the configured main server.
-        // ChatGPT:ToDo Consider using parse_url() and a strict host compare to avoid false positives
-        // (e.g. if HEURIST_MAIN_SERVER is a substring of another domain).
         $this->isMainServer = strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false;
     }
 
@@ -201,11 +214,11 @@ class DbSysBugreport extends DbEntityBase
         }
 
         // Mode A: CMS contact-form integration (expects a single record with 'email' + 'content').
-        if(is_array($this->records) && count($this->records)==1){
+        if(\is_array($this->records) && \count($this->records)==1){
             //SPECIAL CASE - this is response to emailForm widget (from CMS website page)
             // it sends email to owner of database or to email specified in website_id record
             $fields = $this->records[0];
-            if(array_key_exists('email', $fields) && array_key_exists('content', $fields)){
+            if(\array_key_exists('email', $fields) && \array_key_exists('content', $fields)){
                 return $this->_prepareEmail($fields);
             }
         }
@@ -218,7 +231,7 @@ class DbSysBugreport extends DbEntityBase
 
         // If called from an external server, the upstream server passes a prepared 'new_record' payload.
         // In that case we skip local field mapping and just create the record directly.
-        if(array_key_exists('new_record', $this->data)){
+        if(\array_key_exists('new_record', $this->data)){
             // Called from external server
 
             $res = $this->createBugReportRecord($this->data['new_record']);
@@ -264,7 +277,7 @@ class DbSysBugreport extends DbEntityBase
         // NOTE: 'details' keys are DetailType IDs (dty_ID) in the Job Tracker schema.
         $new_record = [
             'ID' => 0,// New record
-            'RecTypeID' => $this->bugReportType,// Task (Feature, Bug, Issue) rectype on Heurist_Job_Tracker
+            'RecTypeID' => self::BUGREPORT_TYPE,// Task (Feature, Bug, Issue) rectype on Heurist_Job_Tracker
             'NonOwnerVisibility' => 'public',// Force visibility to public
             'NonOwnerVisibilityGroups' => 0,// Force group visibility to everyone
             'OwnerUGrpID' => 0,// Force ownership to DB admins later
@@ -274,12 +287,10 @@ class DbSysBugreport extends DbEntityBase
         // Title: stored both as record title (detail 1) and used for email subject line.
         $report_title = htmlspecialchars($record['bug_Title']);
         $bug_title = "Bug report or feature request: $report_title";
-        $new_record['details']['1'] = $report_title;
-        $reportDetails['1'] = ['Title' => $report_title];
+        $new_record['details'][self::DTY_FIELD_MAPPING['bug_Title']] = $report_title;
+        $reportDetails[self::DTY_FIELD_MAPPING['bug_Title']] = ['Title' => $report_title];
 
         // Description: converted to HTML <br> line breaks for email / rich-text display.
-        // ChatGPT:ToDo Consider ENT_QUOTES + explicit charset in htmlspecialchars() for safety/consistency.
-        //keep new line
         $bug_descr = htmlspecialchars($record['bug_Description']);
         if(!empty($bug_descr)){
 
@@ -288,27 +299,25 @@ class DbSysBugreport extends DbEntityBase
             $database = empty(@$record['bug_Database']) ? '' : "Database: {$record['bug_Database']}<br>";
             $server = empty(@$record['bug_Server']) ? '' : "Server: {$record['bug_Server']}<br>";
 
-            $new_record['details']['3'] = "{$database}{$server}<p>{$bug_descr}</p>";
-            $reportDetails['3'] = ['Issue description' => "{$database}{$server}{$bug_descr}"];
+            $new_record['details'][self::DTY_FIELD_MAPPING['bug_Description']] = "{$database}{$server}<p>{$bug_descr}</p>";
+            $reportDetails[self::DTY_FIELD_MAPPING['bug_Description']] = ['Issue description' => "{$database}{$server}{$bug_descr}"];
         }
 
         // Extra metadata fields (Type, Location, URL, etc.) are stored using fixed dty_IDs.
-        // ChatGPT:ToDo Consider centralising these dty_ID constants in one place with descriptive names.
-        //extra information
-        $new_record['details']['960'] = array_key_exists('bug_Type', $record) ? $record['bug_Type'] : [6986];
-        $reportDetails['960'] = ['Type' => $new_record['details']['960']];
+        $new_record['details'][self::DTY_FIELD_MAPPING['bug_Type']] = \array_key_exists('bug_Type', $record) ? $record['bug_Type'] : [6986];
+        $reportDetails[self::DTY_FIELD_MAPPING['bug_Type']] = ['Type' => $new_record['details'][self::DTY_FIELD_MAPPING['bug_Type']]];
 
-        $new_record['details']['958'] = array_key_exists('bug_Location', $record) ? $record['bug_Location'] : [7105];
-        $reportDetails['958'] = ['Location' => $new_record['details']['958']];
+        $new_record['details'][self::DTY_FIELD_MAPPING['bug_Location']] = \array_key_exists('bug_Location', $record) ? $record['bug_Location'] : [7105];
+        $reportDetails[self::DTY_FIELD_MAPPING['bug_Location']] = ['Location' => $new_record['details'][self::DTY_FIELD_MAPPING['bug_Location']]];
 
         $url = @$record['bug_URL'];
         $cur_url = HEURIST_BASE_URL.'?db='.$this->system->dbname();
         if(!empty($url)){
-            $new_record['details']['993'] = [$url, $cur_url];
-            $reportDetails['993'] = ['URL' => [$url, $cur_url]];
+            $new_record['details'][self::DTY_FIELD_MAPPING['bug_URL']] = [$url, $cur_url];
+            $reportDetails[self::DTY_FIELD_MAPPING['bug_URL']] = ['URL' => [$url, $cur_url]];
         }else{
-            $new_record['details']['993'] = $cur_url;
-            $reportDetails['993'] = ['URL' => $cur_url];
+            $new_record['details'][self::DTY_FIELD_MAPPING['bug_URL']] = $cur_url;
+            $reportDetails[self::DTY_FIELD_MAPPING['bug_URL']] = ['URL' => $cur_url];
         }
 
         // Reporter identity:
@@ -329,14 +338,13 @@ class DbSysBugreport extends DbEntityBase
         if($user_info){
 
             // Fetch the full user record from DB (organisation + canonical email) using the user's ID.
-            // ChatGPT:ToDo If $user_info is overridden for guests, it may not contain ugr_ID; ensure this call is safe.
-            $user = user_getByField($mysqli, 'ugr_ID', $user_info['ugr_ID']);
+            $user = \array_key_exists('ugr_ID', $user_info) ? user_getByField($mysqli, 'ugr_ID', $user_info['ugr_ID']) : $user_info;
 
-            $new_record['details']['955'] = "{$user_info['ugr_FullName']} [{$user['ugr_Organisation']}]";
-            $new_record['details']['956'] = $user['ugr_eMail'];
+            $new_record['details'][self::DTY_FIELD_MAPPING['bug_Reporter_Name']] = "{$user_info['ugr_FullName']} [{$user['ugr_Organisation']}]";
+            $new_record['details'][self::DTY_FIELD_MAPPING['bug_Reporter_Email']] = $user['ugr_eMail'];
 
-            $reportDetails['955'] = ["User's name" => $user['ugr_FullName']];
-            $reportDetails['956'] = ["User's email" => $user['ugr_eMail']];
+            $reportDetails[self::DTY_FIELD_MAPPING['bug_Reporter_Name']] = ["User's name" => $user['ugr_FullName']];
+            $reportDetails[self::DTY_FIELD_MAPPING['bug_Reporter_Email']] = ["User's email" => $user['ugr_eMail']];
         }
 
         // Attachments (screenshots): bug_Image points to temporary uploaded files.
@@ -345,17 +353,16 @@ class DbSysBugreport extends DbEntityBase
         $attachment_temp_name = @$record['bug_Image'];
         if(!empty($attachment_temp_name)){
 
-            if(!is_array($attachment_temp_name)){
+            if(!\is_array($attachment_temp_name)){
                 $attachment_temp_name = [$attachment_temp_name];
             }
 
             $filename = [];
-            $new_record['details']['38'] = [];
-            $reportDetails['38'] = ['Image URLs' => []];
+            $new_record['details'][self::DTY_FIELD_MAPPING['bug_Image']] = [];
+            $reportDetails[self::DTY_FIELD_MAPPING['bug_Image']] = ['Image URLs' => []];
             foreach ($attachment_temp_name as $file) {
 
                 // Temp file naming normalisation: undo some URL encoding and strip '.png'.
-                // ChatGPT:ToDo Use pathinfo() and rawurldecode() to handle more extensions and avoid partial replacements.
                 // replace encoded space, brackets and remove extension
                 $file = str_replace(['%20', '%28', '%29', '.png'], [' ', '(', ')', ''], $file);
 
@@ -368,22 +375,21 @@ class DbSysBugreport extends DbEntityBase
                 $filename[] = $info->getPathname();
 
                 $image = $this->system->getSysUrl(DIR_ENTITY) . "{$this->config['entityName']}/{$info->getFilename()}";
-                $new_record['details']['38'][] = $image;
-                $reportDetails['38']['Image URLs'][] = $image;
+                $new_record['details'][self::DTY_FIELD_MAPPING['bug_Image']][] = $image;
+                $reportDetails[self::DTY_FIELD_MAPPING['bug_Image']]['Image URLs'][] = $image;
             }
         }
 
         // Association membership flag (detail 1067): used to prioritise tickets and adjust messaging.
         $memberString = '';
         if($this->performLogout || USystem::checkAssociationMembership($this->system) !== 'nonmember'){
-            $new_record['details']['1067'] = ['7643'];
+            $new_record['details'][self::DTY_FIELD_MAPPING['bug_Membership']] = ['7643'];
         }else{
-            $new_record['details']['1067'] = [];
+            $new_record['details'][self::DTY_FIELD_MAPPING['bug_Membership']] = [];
         }
 
         // Create record either locally (if already on main server tracker DB) or via remote call to main server.
         // Remote call uses entityScrud.php with query string parameters.
-        // ChatGPT:ToDo Consider POST (instead of GET) because 'new_record' can be large and may exceed URL limits.
         $res = false;
         if($this->isMainServer){ // on server with Heurist_Job_Tracker DB
             $res = $this->createBugReportRecord($new_record);
@@ -423,31 +429,29 @@ class DbSysBugreport extends DbEntityBase
 
             if($rec_ID > 0){
 
-                $bug_title = "H#$rec_ID: {$record['bug_Title']}";
+                $bug_title = "Heurist ticket #$rec_ID: {$record['bug_Title']}";
                 $report_link = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$rec_ID";
                 $report_edit = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/edit/$rec_ID";
 
                 $reportDetails['report'] = $report_link;
 
-                $user_name = is_array($user_info) ? $user_info['ugr_FullName'] : 'None found';
-                $user_email = is_array($user_info) ? $user_info['ugr_eMail'] : 'None found';
+                $user_name = \is_array($user_info) ? $user_info['ugr_FullName'] : 'None found';
+                $user_email = \is_array($user_info) ? $user_info['ugr_eMail'] : 'None found';
 
-                $toAddresses = is_array($user_info) ? ['to' => [$user_email, HEURIST_MAIL_TO_BUG]] : $toAddresses;
+                $toAddresses = \is_array($user_info) ? ['to' => [$user_email, HEURIST_MAIL_TO_BUG]] : $toAddresses;
 
                 $memberString = $this->membershipString;
-                if(!empty(@$new_record['details']['1067'])){
+                if(!empty(@$new_record['details'][self::DTY_FIELD_MAPPING['bug_Membership']])){
                     $memberString = '';
                 }
 
                 // Compose HTML email by replacing placeholders in the $reportEmail template.
-                // ChatGPT:ToDo This uses $record['details']['3'] but $record here is the *input form record*
-                // (keys like 'bug_Description'), not the tracker payload. This looks like a bug; likely intended
-                // to use $new_record['details']['3'] or $reportDetails['3'].
+                $truncatedDesc = mb_strimwidth($new_record['details'][self::DTY_FIELD_MAPPING['bug_Description']], 0, 200, '...');
                 $res = str_replace(['__LINK__', '__DESC__','__NAME__','__EMAIL__','__DBLINK__','__DB_JOBTRAK__','__EDIT__','__MEMBER__'],
-                    [$report_link, $record['details']['3'], $user_name, $user_email, $cur_url, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE,$report_edit,$memberString],
+                    [$report_link, $truncatedDesc, $user_name, $user_email, $cur_url, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
                     $this->reportEmail);
 
-            }elseif(is_array($res)){
+            }elseif(\is_array($res)){
                 $this->system->addErrorArr($res);
                 $res = false;
             }
@@ -465,8 +469,7 @@ class DbSysBugreport extends DbEntityBase
         }else{
 
             // Generic failure path: if no email was sent, surface an error encouraging direct contact.
-            // ChatGPT:ToDo Spelling: 'recieve' -> 'receive' (message text).
-            $error_msg = 'An unknown error has prevented Heurist from create the bug report.<br>If you do not recieve an email confirming the bug report, please re-try in a few minutes.<br>However, if the issue persists please ' . CONTACT_HEURIST_TEAM . ' directly.';
+            $error_msg = 'An unknown error has prevented Heurist from create the bug report.<br>If you do not receive an email confirming the bug report, please re-try in a few minutes.<br>However, if the issue persists please ' . CONTACT_HEURIST_TEAM . ' directly.';
             $email_already_sent || $this->system->addError(HEURIST_UNKNOWN_ERROR, $error_msg);
             return false;
         }
@@ -530,9 +533,9 @@ class DbSysBugreport extends DbEntityBase
         // stores stable file references rather than transient temp URLs.
         $files = [];
         $rec_uploads = new DbRecUploadedFiles($report_system);
-        if(!empty($record['details']['38']) && $rec_uploads){
+        if(!empty($record['details'][self::DTY_FIELD_MAPPING['bug_Image']]) && $rec_uploads){
 
-            foreach($record['details']['38'] as $idx => $file_url){
+            foreach($record['details'][self::DTY_FIELD_MAPPING['bug_Image']] as $idx => $file_url){
 
                 $file_name = explode("\\", $file_url);
                 $file_name = str_replace('~', 'bugreport_img_', array_pop($file_name));
@@ -540,21 +543,17 @@ class DbSysBugreport extends DbEntityBase
                 $fileResult = null;
                 // Same-server optimisation: if the file URL points to this server, try to register locally
                 // by converting the URL to a filesystem path.
-                // ChatGPT:ToDo strpos() should be compared with !== false; if the match is at position 0 it is treated as false.
-                // ChatGPT:ToDo $fileResult is not assigned in this branch; currently the code always falls through
-                // to downloading even after local registration. Likely intended: $fileResult = $record['details']['38'][$idx].
-                if(strpos($file_url, HEURIST_SERVER_URL)){ // same server, attempt local registeration
+                if(strpos($file_url, HEURIST_SERVER_URL) !== false){ // same server, attempt local registeration
 
                     $urlBase = $this->system->getSysUrl(DIR_ENTITY);
                     $dirBase = $this->system->getSysDir(DIR_ENTITY);
 
                     $file = str_replace($urlBase, $dirBase, $file_url);
-                    $record['details']['38'][$idx] = $rec_uploads->registerFile($file, null);
+                    $fileResult = $rec_uploads->registerFile($file, null);
                 }
 
                 // If local registration didn't happen, try downloading the URL and registering it into recUploadedFiles.
                 // (downloadAndRegisterdURL() appears to both fetch and register the file.)
-                // ChatGPT:ToDo Verify method name spelling 'downloadAndRegisterdURL' (missing 'e') is correct in class.
                 if(!$fileResult){
                     $fileResult = $rec_uploads->downloadAndRegisterdURL($file_url, ['ulf_NewName' => $file_name], 2);
                 }
@@ -569,22 +568,21 @@ class DbSysBugreport extends DbEntityBase
                     continue;
                 }
 
-                $record['details']['38'][$idx] = $fileResult;
-                $ulf_file_name = mysql__select_value($this->system->getMysqli(), "SELECT ulf_FileName FROM recUploadedFiles WHERE ulf_ID = {$record['details']['38'][$idx]}");
+                $ulf_ID = $record['details'][self::DTY_FIELD_MAPPING['bug_Image']][$idx];
+                $record['details'][self::DTY_FIELD_MAPPING['bug_Image']][$idx] = $fileResult;
+                $ulf_file_name = mysql__select_value($this->system->getMysqli(), "SELECT ulf_FileName FROM recUploadedFiles WHERE ulf_ID = {$ulf_ID}");
                 $files[] = $this->system->getSysDir(DIR_FILEUPLOADS) . $ulf_file_name;
             }
 
-            $record['details']['38'] = array_filter($record['details']['38']); // remove null/false values
+            $record['details'][self::DTY_FIELD_MAPPING['bug_Image']] = array_filter($record['details'][self::DTY_FIELD_MAPPING['bug_Image']]); // remove null/false values
         }
 
         // Identify the 'extern' user in the tracker DB so we can mark the record as created by that account.
         $mysqli = $report_system->getMysqli();
         $guest_user = user_getByField($mysqli, 'ugr_Name', 'extern');// to update AddedBy value in new record
-        $uid = is_array($guest_user) ? $guest_user['ugr_ID'] : 0;
+        $uid = \is_array($guest_user) ? $guest_user['ugr_ID'] : 0;
 
         // Apply default field values from defRecStructure (for fields not supplied by the form).
-        // ChatGPT:ToDo addDefaultValues() currently receives $record by value; changes won't persist unless passed by reference
-        // or the function returns the updated record. This likely means defaults are not actually applied.
         $this->addDefaultValues($report_system, $record);
 
         // Save the record in tracker DB.
@@ -602,39 +600,39 @@ class DbSysBugreport extends DbEntityBase
         $res = $res['data'];
 
         // Post-save: force AddedBy (extern) and Owner group to a known admin group (hardcoded as 2).
-        // ChatGPT:ToDo Replace magic group IDs (2) with named constants or config; verify group 2 is stable across installs.
-        mysql__insertupdate($mysqli, 'Records', 'rec', ['rec_ID' => $res, 'rec_AddedByUGrpID' => $uid, 'rec_OwnerUGrpID' => 2]);
+        mysql__insertupdate($mysqli, 'Records', 'rec', ['rec_ID' => $res, 'rec_AddedByUGrpID' => $uid, 'rec_OwnerUGrpID' => self::DB_ADMIN_ID]);
 
-        recordUpdateTitle($report_system, $res, $record['RecTypeID'], "Heurist ticket: {$record['details']['1']}");
+        $title = $record['details'][self::DTY_FIELD_MAPPING['bug_Title']];
+        recordUpdateTitle($report_system, $res, $record['RecTypeID'], "Heurist ticket: {$title}");
 
         // If we have a reporter email (detail 956), send confirmation email (To: reporter, BCC: tracker admins).
-        if(!empty($record['details']['956'])){
+        if(!empty($record['details'][self::DTY_FIELD_MAPPING['bug_Reporter_Email']])){
 
-            $title = "H#$res: {$record['details']['1']}";
+            $title = "Heurist ticket #$res: {$title}";
 
             $report_link = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$res";
             $report_edit = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/edit/$res";
 
-            $user_name = $record['details']['955'] ?? 'None found';
+            $user_name = $record['details'][self::DTY_FIELD_MAPPING['bug_Reporter_Name']] ?? 'None found';
             $user_name = strpos($user_name, '[') > 0 ? explode('[', $user_name)[0] : $user_name;
 
-            $user_email = $record['details']['956'] ?? 'None found';
+            $user_email = $record['details'][self::DTY_FIELD_MAPPING['bug_Reporter_Email']] ?? 'None found';
 
-            $db_link = is_array($record['details']['993']) ? $record['details']['993'][1] : $record['details']['993'];
+            $db_link = \is_array($record['details'][self::DTY_FIELD_MAPPING['bug_URL']]) ? $record['details'][self::DTY_FIELD_MAPPING['bug_URL']][1] : $record['details'][self::DTY_FIELD_MAPPING['bug_URL']];
 
             $memberString = $this->membershipString;
-            if(!empty(@$record['details']['1067'])){
+            if(!empty(@$record['details'][self::DTY_FIELD_MAPPING['bug_Membership']])){
                 $memberString = '';
             }
 
             $msg = str_replace(['__LINK__', '__DESC__', '__NAME__', '__EMAIL__','__DBLINK__','__DB_JOBTRAK__','__EDIT__','__MEMBER__'],
-             [$report_link, $record['details']['3'], $user_name, $user_email, $db_link,HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
+             [$report_link, $record['details'][self::DTY_FIELD_MAPPING['bug_Description']], $user_name, $user_email, $db_link,HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
               $this->reportEmail);
 
             $user_query = "SELECT ugr_eMail FROM sysUsrGrpLinks LEFT JOIN sysUGrps ON ugr_ID = ugl_UserID WHERE ugl_GroupID = 1 AND ugl_Role='admin'";
             $admin_emails = mysql__select_list2($mysqli, $user_query);
 
-            $sent_email = sendPHPMailer(null, 'Heurist Tickets', ['to' => $record['details']['956'], 'bcc' => $admin_emails], $title, $msg, $files, true);
+            $sent_email = sendPHPMailer(null, 'Heurist Tickets', ['to' => $record['details'][self::DTY_FIELD_MAPPING['bug_Reporter_Email']], 'bcc' => $admin_emails], $title, $msg, $files, true);
         }
 
         return ['status' => HEURIST_OK, 'data' => ['recID' => $res, 'email_sent' => $sent_email]];
@@ -673,23 +671,18 @@ class DbSysBugreport extends DbEntityBase
         $form = '';
         $reportLink = null;
 
-        if(array_key_exists('report', $details)){
+        if(\array_key_exists('report', $details)){
             $reportLink = $details['report'];
             unset($details['report']);
         }
 
-        // details format: [ dty_ID => [ 'Field label' => value(s) ], ... ]
-        // Used to generate an HTML form that can be POSTed back to entityScrud.php as 'new_record[...]'.
         // [field ID => [field name => [ field values ]], ...]
         foreach($details as $dtyID => $values){
 
             $fieldName = array_keys($values)[0];
             $fieldValues = array_values($values)[0];
-            $fieldValues = is_array($fieldValues) ? $fieldValues : [$fieldValues];
+            $fieldValues = \is_array($fieldValues) ? $fieldValues : [$fieldValues];
 
-            // ChatGPT:ToDo BUG: variable $value is not defined here. Probably meant:
-            //   if (empty($fieldValues)) { continue; }
-            // As written, this may emit notices and skip the intended emptiness check.
             if(empty($value)){
                 continue;
             }
@@ -699,57 +692,41 @@ class DbSysBugreport extends DbEntityBase
                     <div class="fieldName">{$fieldName}</div>
                     <div class="value">
             ROW;
-            $fieldID = "new_record[details][{$dtyID}]" . (count($fieldValues) > 1 ? '[]' : '');
+            $fieldID = "new_record[details][{$dtyID}]" . (\count($fieldValues) > 1 ? '[]' : '');
             foreach($fieldValues as $value){
 
-                $form .= <<<FIELD
-                        <div class="fieldValue">
-                            <textarea name="{$fieldID}">{$value}</textarea>
-                        </div>
-                FIELD;
+                $inputType = '';
+                if(strpos($value, '<br>') !== false){
+                    // For blocktext values, place it within a div (textarea was too messy)
+                    $processedValue = str_replace('"', '&quot;', $value);
+                    $inputType = <<<FLD
+                        <div>{$value}</div>
+                        <input name="{$fieldID}" type="hidden" readonly="readonly" value="{$processedValue}" />
+                    FLD;
+                }else{
+                    $inputType = <<<FLD
+                        <input name="{$fieldID}" type="text" readonly="readonly" size="80" value="{$value}" />
+                    FLD;
+                }
+
+                $form .= <<<ROW
+                        $inputType
+                ROW;
             }
+
             $form .= <<<ROW
                     </div>
                 </div>
             ROW;
         }
 
-        $css = <<<CSS
-            <style>
-                div.row{
-                    display: flex;
-                    flex-direction: column;
-                    margin: 8px 0px;
-                }
-                div.fieldName{
-                    font-weight: bold;
-                    font-size: 13px;
-                }
-                div.fieldValue{
-                    margin-left: 10px;
-                }
-                textarea{
-                    min-width: 550px;
-                    min-height: 50px;
-                }
-            </style>
-        CSS;
-
-        $fromAddresses = $this->system->getSystemEmail();
-        $toAddresses = is_array($toAddresses) ? $toAddresses : ['to' => $toAddresses];
-
-        if(empty(@$toAddresses['to'])){
-            $toAddresses = ['to' => $fromAddresses];
-        }
-
-        $email_to_reporter = in_array($fromAddresses, $toAddresses['to']);
-        if($email_to_reporter && empty(@$toAddresses['bcc'])){
-            $toAddresses['bcc'] = HEURIST_MAIL_TO_BUG;
-        }
-
-        // Construct actionable content: either a "resubmittable" form (if no tracker link)
-        // or a report summary message.
-        if(!$reportLink){
+        if(!empty($reportLink)){ // Report has been made, this is just to inform
+            $form = <<<HEAD
+                <div style="font-size: 0.9em;">Your bug report has been sent to the Heurist team and can be viewed <a href="{$reportLink}">here</a>.</div>
+                <h4>Report details:</h4>
+                $form
+            HEAD;
+        }else{ // HeuristRef was unavailable, allows the team to create a new report
 
             $params = [
                 'a' => 'save',
@@ -757,46 +734,85 @@ class DbSysBugreport extends DbEntityBase
                 'db' => HEURIST_BUGREPORT_DATABASE,
                 'fields' => ['is_bug_report' => 1]
             ];
-            $url = HEURIST_MAIN_SERVER . '/heurist/hserv/controller/entityScrud.php?' . http_build_query($params);
+            $script = HEURIST_MAIN_SERVER . '/heurist/hserv/controller/entityScrud.php' . http_build_query($params);
 
-            $text = <<<EMAIL
-                This is a backup message for bug reports and feature requests that were unable to be recorded and/or emailed normally.
-                <br><br>
-                Use the form below to submit the bug report to the Heurist Tracker database and send a confirmation to the reporter.
-                <br><br>
-                <form action="{$url}" method="POST" enctype="multipart/form-data">
-                    <input type="submit" value="Submit report">
-                    {$form}
+            $form = <<<FORM
+                <div style="font-size: 0.9em;">A new ticket has been requested while HeuristRef is unavailable.</div>
+                <h4>Report details:</h4>
+                <form method="POST" action="{$script}" style="width: 60em;" enctype="multipart/form-data">
+                    $form
+                    <input type="hidden" name="new_record[ID]" value="0" />
+                    <input type="hidden" name="new_record[RecTypeID]" value="101" />
+                    <input type="hidden" name="new_record[NonOwnerVisibility]" value="public" />
+                    <input type="hidden" name="new_record[NonOwnerVisibilityGroups]" value="0" />
+                    <input type="hidden" name="new_record[OwnerUGrpID]" value="0" />
+                    <button>Create job</button> <span class='smaller'>(this will attempt to create a bug report on the Heurist Job Tracker database, please check it's available before trying)</span>
                 </form>
-            EMAIL;
+            FORM;
+        }
 
-            $text = $css . $text;
-
-            // If we couldn't create a tracker record, direct this email only to Heurist team/system mailbox.
-            $toAddresses = ['to' => [HEURIST_MAIL_TO_BUG]];
-
-        }else{
-
-            $reportLink = "<a href=\"$reportLink\">$reportLink</a>";
-
-            $text = <<<EMAIL
-                This is a backup message for bug reports and feature requests where the report was created, but the confirmation email was not sent.
-                <br><br>
-                The report can be found at: $reportLink
-                <br><br>
-                Summary:
-                <br>
+        $emailBody = <<<EMAIL
+        <html>
+            <head>
+                <style>
+                    *{
+                        font-family: Helvetica,Arial,sans-serif;
+                    }
+                    h4{
+                        margin-bottom: 0.7em;
+                    }
+                    div.row{
+                        cursor: default;
+                        border-top: 1px solid black;
+                        padding: 5px;
+                        width: 50em;
+                    }
+                    div.row:last-of-type{
+                        border-bottom: 1px solid black;
+                    }
+                    div.fieldName{
+                        display: inline-block;
+                        width: 10em;
+                        font-size: 0.9em;
+                        font-weight: bold;
+                        vertical-align: top;
+                    }
+                    div.value{
+                        display: inline-block;
+                        font-size: 0.8em;
+                    }
+                    div.textarea{
+                        padding-left: 2px;
+                    }
+                    input[type="text"]{
+                        cursor: default;
+                        border: none;
+                        cursor: default;
+                    }
+                    input[type="text"]:focus-visible{
+                        outline: none;
+                    }
+                    button{
+                        margin: 1em;
+                        padding: .4em 1em;
+                        border: 1px solid #f2f2f2;
+                        color: white;
+                        background-color: #3D9946;
+                        cursor: pointer;
+                    }
+                    span.smaller{
+                        font-size: 0.75em;
+                        font-style: italic;
+                    }
+                </style>
+            </head>
+            <body>
                 $form
-            EMAIL;
+            </body>
+        </html>
+        EMAIL;
 
-            $text = $css . $text;
-        }
-
-        if(sendPHPMailer(null, 'Heurist Tickets', $toAddresses, $emailTitle, $text, $files, true)){
-            return true;
-        }
-
-        return false;
+        return sendPHPMailer(null, 'Heurist tickets', $toAddresses, $emailTitle, $emailBody, $files, true);
     }
 
     // ---------------------------------------------------------------------
@@ -846,7 +862,6 @@ class DbSysBugreport extends DbEntityBase
             return false;
         }
 
-
         // Extract and validate required fields from the submitted payload.
         // Note the pervasive '@' suppression; this avoids notices but can hide bugs/missing fields.
         // ChatGPT:ToDo Consider replacing '@$fields[...]' with isset() checks for clearer error handling.
@@ -862,38 +877,47 @@ class DbSysBugreport extends DbEntityBase
             return false;
         }
 
-        $email_title = isset($fields['title']) ? $fields['title'] : ('Request from: ' . (@$fields['person'] ? $fields['person'] : $email_from));
 
-        $email_to = '';
-        $email_to_name = '';
+        $email_title = null;
+        $email_from_name = $fields['person']??'';
+        $email_to = null;
 
         //3. determine recipient(s)
         // - If website_id is given, get email from that record details (or DB owner)
         // - Otherwise, send to DB owner
-        if(@$fields['website_id']){
-            $rec = recordSearchByID($this->system, $fields['website_id'], true, false);
-            if($rec){
-                // dty: 799 = email / 800 = name (based on website record schema)
-                $email_to = @$rec['details'][799];
-                $email_to_name = @$rec['details'][800];
+        $rec_ID = $fields['website_id'];
+        if($rec_ID>0){
+            $this->system->defineConstant('DT_NAME');
+            $this->system->defineConstant('DT_EMAIL');
+
+            $record = recordSearchByID($this->system, $rec_ID, array(DT_NAME, DT_EMAIL), 'rec_ID');
+            if($record){
+                $email_title = 'From website '.recordGetField($record, DT_NAME).'.';
+                $email_to = recordGetField($record, DT_EMAIL);
+                if($email_to) {$email_to = explode(';', $email_to);}
             }
+            $email_from_name = 'Website contact '.$email_from_name;
+        }else{
+            $email_from_name = 'Heurist Tickets';
         }
-
         if(!$email_to){
-            $email_to = $this->system->getOwnerEmail();
-            $email_to_name = $this->system->getOwnerName();
+            $email_to = user_getDbOwner($this->system->getMysqli(), 'ugr_eMail');
         }
-
-        if(!$email_to){
-            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot determine recipient address for contact form.');
-            return false;
+        if(!$email_title){
+            $email_title = '"Contact us" form. ';
         }
+        if($email_from_name){
+            $email_title = $email_title.'  From '.$email_from_name;
+        }
+        $email_text = 'From '.$email_from.' ( '.$email_from_name.' )<br>'.$email_text;
 
-        $fromAddresses = $this->system->getSystemEmail();
-        $toAddresses = ['to' => [$email_to]];
+        $email_from = null;
+        $email_from_name = null;
 
-        //4. send email
-        if(sendPHPMailer($email_from, $email_to_name, $toAddresses, $email_title, $email_text,
+
+        if(sendPHPMailer(null, $email_from_name, $email_to,
+                $email_title,
+                $email_text,
                 null, true))
         {
                 return array(1);
@@ -939,16 +963,15 @@ class DbSysBugreport extends DbEntityBase
      * @param array &$record The bug report record array (passed by reference), specifically its 'details' sub-array.
      * @return void
      */
-    private function addDefaultValues($system, $record){
+    private function addDefaultValues($system, &$record){
 
         // Fetch defaults for the tracker record type (rst_DefaultValue can be scalar or encoded).
-        // ChatGPT:ToDo This query interpolates $this->bugReportType directly; it's an int constant here,
-        // but consider parameterisation if ever user-controlled.
-        $def_values = mysql__select_assoc2($system->getMysqli(), "SELECT rst_DetailTypeID, rst_DefaultValue FROM defRecStructure WHERE rst_RecTypeID = {$this->bugReportType}");
+        $bugReportType = self::BUGREPORT_TYPE;
+        $def_values = mysql__select_assoc2($system->getMysqli(), "SELECT rst_DetailTypeID, rst_DefaultValue FROM defRecStructure WHERE rst_RecTypeID = {$bugReportType}");
 
         foreach($def_values as $dty_ID => $def_value){
 
-            if($def_value == null || $def_value == '' || (array_key_exists($dty_ID, $record['details']) && !empty($record['details'][$dty_ID]))){
+            if($def_value == null || $def_value == '' || (\array_key_exists($dty_ID, $record['details']) && !empty($record['details'][$dty_ID]))){
                 continue;
             }
 
