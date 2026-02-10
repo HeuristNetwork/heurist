@@ -89,8 +89,8 @@ $.widget( "heurist.svs_list", {
         handle_favourites: null, // function to add/remove favourite filters
 
         simple_search_allowed: 0, // enable 'search everything' filter
-        simple_search_header: 'Simple search', // header text for 'search everything' filter
-        simple_search_text: 'Search everything:', // field label for the simple search filter
+        simple_search_header: '', // header text for 'search everything' filter, blank by defaukt
+        simple_search_text: 'Search all:', // field label for the simple search filter
         
         language: 'def',  //use default
         
@@ -3225,7 +3225,7 @@ $.widget( "heurist.svs_list", {
     /**
      * @memberof heurist.svs_list
      * @instance
-     * @description Adds a "Search everything" input field and button to the widget, allowing for simple, direct searches.
+     * @description Adds a "Search all" input field and button to the widget, allowing for simple, direct searches.
      * This is typically used in published/CMS scenarios.
      * @param {boolean} [is_buttons=false] - If true, positions the search input after the accordion (button list).
      *                                      Otherwise, positions it before the accordion.
@@ -3240,8 +3240,8 @@ $.widget( "heurist.svs_list", {
             this.direct_search_div = null;
         }
 
-        let header_label = !window.hWin.HEURIST4.util.isempty(this.options.simple_search_header) ? this.options.simple_search_header : 'Simple search';
-        let field_text = !window.hWin.HEURIST4.util.isempty(this.options.simple_search_text) ? this.options.simple_search_text : 'Search everything:';
+        let header_label = !window.hWin.HEURIST4.util.isempty(this.options.simple_search_header) ? this.options.simple_search_header : ''; // empty stays empty
+        let field_text = !window.hWin.HEURIST4.util.isempty(this.options.simple_search_text) ? this.options.simple_search_text : 'Search all:';
 
         this.direct_search_div = $('<div style="height:6em;padding:4px 4px 4px 15px;width:100%">'
             +'<h4 style="padding:10px 0px;margin:0">'+ header_label +'</h4><label>'+ field_text +'</label>'
