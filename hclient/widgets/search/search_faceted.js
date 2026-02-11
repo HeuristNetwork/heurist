@@ -545,7 +545,7 @@ $.widget( "heurist.search_faceted", {
         
         this._refreshTitle();
         this._refreshButtons();
-                            
+        this._doTerminate();
         
         this.doRender();
        
@@ -591,6 +591,8 @@ $.widget( "heurist.search_faceted", {
     // 
     // custom, widget-specific, cleanup.
     _destroy: function() {
+        
+        this._doTerminate();
 
         $(this.document).off( window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
             +' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
@@ -2157,7 +2159,7 @@ $.widget( "heurist.search_faceted", {
 
             this._refreshButtons();
 
-            if(this._expanded_count_order.length > 0){
+            if(this._expanded_count_order.length > 0 && !this.options.ispreview){
                 this._getExpandedFacetCount();
             }
         }
@@ -2593,17 +2595,17 @@ $.widget( "heurist.search_faceted", {
                     }else 
                     if(field['type']=="rectype"){  //@todo
 
+                        if(facet_index>=0){
                         for (let i=0;i<response.data.length;i++){
                             let cterm = response.data[i];
 
-                            if(facet_index>=0){
-                                let rtID = cterm[0];
-                                let f_link = this._createFacetLink(facet_index, 
-                                    {title:$Db.rty(rtID,'rty_Name'), query:rtID, count:cterm[1]}, 'inline-block');
-                                $("<div>").css({"display":"inline-block","padding-right":"5px"})
-                                  .addClass('facet-item')
-                                  .append(f_link).appendTo($facet_values);
-                            }
+                            let rtID = cterm[0];
+                            let f_link = this._createFacetLink(facet_index, 
+                                {title:$Db.rty(rtID,'rty_Name'), query:rtID, count:cterm[1]}, 'inline-block');
+                            $("<div>").css({"display":"inline-block","padding-right":"5px"})
+                              .addClass('facet-item')
+                              .append(f_link).appendTo($facet_values);
+                        }
                         }
 
                     }else 
@@ -4286,7 +4288,7 @@ $.widget( "heurist.search_faceted", {
     
     _addFacetToExpandedCount: function(facet_index, facet_value, $container, $facet){
 
-        if(!this.options.params.rules || this._expanded_count_order.length>500){ //limit to avoid too many count queries 
+        if(!this.options.params.rules){ // || this._expanded_count_order.length>500 limit to avoid too many count queries 
             return;
         }
 
@@ -4308,14 +4310,18 @@ $.widget( "heurist.search_faceted", {
             }
         }
         if(!found){
+            // add facet value and ref to count badge element
             this._expanded_count_facets[facet_index]['items'].push([facet_value, $facet]);
         }
 
     },
 
     _getExpandedFacetCount: function(){
-
+    
+        //return;
+        
         const that = this;
+        
 
         if(this._terminateFacetCalculation || !this.options.params.rules || this._expanded_count_order.length == 0){
             //rules not defined
@@ -4330,9 +4336,16 @@ $.widget( "heurist.search_faceted", {
             this._getExpandedFacetCount();
             return;
         }
-
+        
         let $parent_container = this._expanded_count_facets[f_idx].container;
         let current_facet = this._expanded_count_facets[f_idx].items.shift();
+        
+        if(!$(current_facet[1]).is(':visible')){
+            //invisble - skip
+            this._getExpandedFacetCount();
+            return;
+        }
+        
         let facet_placeholder = `$X${this.options.params.facets[f_idx].var}`; // placeholder for field, e.g. $X76917
         let field = ''; // field id, e.g. f:10
 
