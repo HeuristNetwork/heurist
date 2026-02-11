@@ -4545,7 +4545,7 @@ function bugreportUpdate($system, $recID){
     $reportersEmail = is_array($reportersEmail) ? array_pop($reportersEmail) : $reportersEmail;
 
     $reportersName = array_key_exists($reporterEmailDtyID, $details) ? $details[$reporterEmailDtyID] : null;
-    $reportersName = is_array($reportersEmail) ? implode(' & ', $reportersName) : $reportersName;
+    $reportersName = is_array($reportersEmail) ? array_pop($reportersName) : $reportersName;
     $reportersName = empty($reportersName) ? $reportersEmail : $reportersName;
 
     if(!$status || !$reportersEmail || !in_array($status, $terms)){
@@ -4574,14 +4574,14 @@ function bugreportUpdate($system, $recID){
     $url = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$recID";
 
     $updateEmail = <<<EMAIL
-    The status of the following ticket has been ùpdated to: <strong>$status</strong>.<br>
+    The status of the following ticket has been updated to: <strong>$status</strong>.<br>
        
     $resolution <br>
      
     <hr>
     $desc<br><br>
     Reporter: $reportersName <br>
-    Database: $database <br>
+    $database <br>
     Ticket: <a href="$url">$url</a><br> <br>
     <hr>
     When an issue is fixed and marked as DONE, the change will typically appear in the alpha version <br>

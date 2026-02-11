@@ -174,9 +174,6 @@ class DbSysBugreport extends DbEntityBase
         return null;
     }
 
-    //
-    //   This is virtual "save". In fact it sends email
-    //
     // ---------------------------------------------------------------------
     // save(): Virtual 'save' for this entity.
     // It either:
@@ -429,7 +426,7 @@ class DbSysBugreport extends DbEntityBase
 
             if($rec_ID > 0){
 
-                $bug_title = "Heurist ticket #$rec_ID: {$record['bug_Title']}";
+                $bug_title = "H#$rec_ID: {$record['bug_Title']}";
                 $report_link = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$rec_ID";
                 $report_edit = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/edit/$rec_ID";
 
@@ -446,8 +443,8 @@ class DbSysBugreport extends DbEntityBase
                 }
 
                 // Compose HTML email by replacing placeholders in the $reportEmail template.
-                $truncatedDesc = mb_strimwidth($new_record['details'][self::DTY_FIELD_MAPPING['bug_Description']], 0, 200, '...');
-                $res = str_replace(['__LINK__', '__DESC__','__NAME__','__EMAIL__','__DBLINK__','__DB_JOBTRAK__','__EDIT__','__MEMBER__'],
+                $truncatedDesc = mb_substr($new_record['details'][self::DTY_FIELD_MAPPING['bug_Description']], 0, 100) . '...';
+                $res = str_replace(['__LINK__', '__DESC__', '__NAME__', '__EMAIL__', '__DBLINK__', '__DB_JOBTRAK__', '__EDIT__', '__MEMBER__'],
                     [$report_link, $truncatedDesc, $user_name, $user_email, $cur_url, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
                     $this->reportEmail);
 
@@ -461,7 +458,7 @@ class DbSysBugreport extends DbEntityBase
         // If the tracker server didn't send the confirmation email, send a 'backup report' email instead.
         if(!$email_already_sent){
             $email_already_sent = $this->sendBackupReport($toAddresses, $bug_title, $reportDetails, $filename);
-            $res = $res ?: 'Your bug report has been sent to the Heurist team.';
+            $res = $res ?: 'Heurist could not contact the Heurist Job Tracker database.<br>A backup report has been sent, that can be used to create a ticket once the main server is contactable.';
         }
 
         if($res && $email_already_sent){
@@ -475,6 +472,15 @@ class DbSysBugreport extends DbEntityBase
         }
     }
 
+    // ---------------------------------------------------------------------
+    // createBugReportRecord(): executes the actual record creation in the Job Tracker DB.
+    // Key responsibilities:
+    // - Ensure we are connected to the Job Tracker database (may differ from current DB).
+    // - Register any screenshot URLs as uploaded-file entities in the tracker DB.
+    // - Apply default detail values from defRecStructure.
+    // - Save the record (recordSave), then update ownership/added-by metadata.
+    // - Send confirmation email to reporter (if reporter email exists).
+    // ---------------------------------------------------------------------
     /**
      * Creates a bug report record in the Heurist Job Tracker database.
      *
@@ -490,15 +496,6 @@ class DbSysBugreport extends DbEntityBase
      * @return array|false An associative array `['status' => HEURIST_OK, 'data' => ['recID' => ..., 'email_sent' => ...]]`
      *                     on success, or false on failure. Errors are added to `$this->system`.
      */
-    // ---------------------------------------------------------------------
-    // createBugReportRecord(): executes the actual record creation in the Job Tracker DB.
-    // Key responsibilities:
-    // - Ensure we are connected to the Job Tracker database (may differ from current DB).
-    // - Register any screenshot URLs as uploaded-file entities in the tracker DB.
-    // - Apply default detail values from defRecStructure.
-    // - Save the record (recordSave), then update ownership/added-by metadata.
-    // - Send confirmation email to reporter (if reporter email exists).
-    // ---------------------------------------------------------------------
     private function createBugReportRecord($record){
 
         if(empty(@$record['details'])){
@@ -568,8 +565,8 @@ class DbSysBugreport extends DbEntityBase
                     continue;
                 }
 
-                $ulf_ID = $record['details'][self::DTY_FIELD_MAPPING['bug_Image']][$idx];
                 $record['details'][self::DTY_FIELD_MAPPING['bug_Image']][$idx] = $fileResult;
+                $ulf_ID = $record['details'][self::DTY_FIELD_MAPPING['bug_Image']][$idx];
                 $ulf_file_name = mysql__select_value($this->system->getMysqli(), "SELECT ulf_FileName FROM recUploadedFiles WHERE ulf_ID = {$ulf_ID}");
                 $files[] = $this->system->getSysDir(DIR_FILEUPLOADS) . $ulf_file_name;
             }
@@ -608,7 +605,7 @@ class DbSysBugreport extends DbEntityBase
         // If we have a reporter email (detail 956), send confirmation email (To: reporter, BCC: tracker admins).
         if(!empty($record['details'][self::DTY_FIELD_MAPPING['bug_Reporter_Email']])){
 
-            $title = "Heurist ticket #$res: {$title}";
+            $title = "H#$res: {$title}";
 
             $report_link = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/view/$res";
             $report_edit = HEURIST_MAIN_SERVER . "/" . HEURIST_BUGREPORT_DATABASE . "/edit/$res";
@@ -625,8 +622,9 @@ class DbSysBugreport extends DbEntityBase
                 $memberString = '';
             }
 
-            $msg = str_replace(['__LINK__', '__DESC__', '__NAME__', '__EMAIL__','__DBLINK__','__DB_JOBTRAK__','__EDIT__','__MEMBER__'],
-             [$report_link, $record['details'][self::DTY_FIELD_MAPPING['bug_Description']], $user_name, $user_email, $db_link,HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
+            $truncateDesc = mb_substr($record['details'][self::DTY_FIELD_MAPPING['bug_Description']], 0, 100) . '...';
+            $msg = str_replace(['__LINK__', '__DESC__', '__NAME__', '__EMAIL__', '__DBLINK__', '__DB_JOBTRAK__', '__EDIT__', '__MEMBER__'],
+             [$report_link, $truncateDesc, $user_name, $user_email, $db_link, HEURIST_MAIN_SERVER.'/'.HEURIST_BUGREPORT_DATABASE, $report_edit, $memberString],
               $this->reportEmail);
 
             $user_query = "SELECT ugr_eMail FROM sysUsrGrpLinks LEFT JOIN sysUGrps ON ugr_ID = ugl_UserID WHERE ugl_GroupID = 1 AND ugl_Role='admin'";
@@ -971,7 +969,7 @@ class DbSysBugreport extends DbEntityBase
 
         foreach($def_values as $dty_ID => $def_value){
 
-            if($def_value == null || $def_value == '' || (\array_key_exists($dty_ID, $record['details']) && !empty($record['details'][$dty_ID]))){
+            if($def_value == null || $def_value == '' || \array_key_exists($dty_ID, $record['details']) && !empty($record['details'][$dty_ID])){
                 continue;
             }
 
