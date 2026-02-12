@@ -2214,7 +2214,7 @@ function recordUpdateCalcFields($system, $recID, $rty_ID=null, $progress_session
     if($progress_session_id>0 && $rec_count>100){
         mysql__update_progress(null, $progress_session_id, true, '0,'.$rec_count);
     }else{
-        $progress_session_id = 0;
+        $progress_session_id = null;
     }
 
     $progress_count = 0;

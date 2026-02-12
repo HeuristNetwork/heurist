@@ -176,7 +176,7 @@ window.hWin.cfg_layouts = [
                 apps:[
                     {appid:'heurist_resultListExt', name: 'Record View', 
                                 options:{url: 'viewers/record/renderRecordData.php?recID=[recID]&db=[dbname]', 
-                                is_single_selection:true, 'data-logaction':'open_Record'}
+                                showProgress:false,is_single_selection:true, 'data-logaction':'open_Record'}
                     },    // H3 record viewer
                     {appid:'heurist_resultListDataTable', name: 'List View', options:{ dataTableParams:{}, show_export_buttons:true } },
                     {appid:'heurist_Map', options:{'data-logaction':'open_MapTime'}}, // map viewer (map.php) inside widget (app_timemap.js)
@@ -194,7 +194,7 @@ window.hWin.cfg_layouts = [
                                      url: 'hclient/framecontent/visualize/springDiagram.php?db=[dbname]',
                                      'data-logaction':'open_Network'}},
  
-                    {appid:'heurist_resultListExt', name: 'Crosstabs', options:{title:'Crosstabs', 
+                    {appid:'heurist_resultListExt', name: 'Crosstabs', options:{title:'Crosstabs', showProgress: false,
                                 url: 'viewers/crosstab/crosstabs.php?db=[dbname]','data-logaction':'open_Crosstabs'}}
                     
             ]}]
@@ -214,7 +214,7 @@ window.hWin.cfg_layouts = [
                         //css:{padding:'0px',width:'100%',height:'100%'},
                 apps:[
                     {appid:'heurist_resultListExt', name: 'Record', 
-                                options:{url: 'viewers/record/renderRecordData.php?recID=[recID]&db=[dbname]', 
+                                options:{url: 'viewers/record/renderRecordData.php?recID=[recID]&db=[dbname]', showProgress: false,
                                 is_single_selection:true, 'data-logaction':'open_Record',css:{overflow:'hidden'}}
                     },    // H3 record viewer
                     {appid:'heurist_resultListDataTable', name: 'List View', 
@@ -235,7 +235,7 @@ window.hWin.cfg_layouts = [
                                      'data-logaction':'open_Network'}},
  
                     {appid:'heurist_resultListExt', name: 'Crosstabs', options:{title:'Crosstabs', 
-                                url: 'viewers/crosstab/crosstabs.php?db=[dbname]','data-logaction':'open_Crosstabs',
+                                url: 'viewers/crosstab/crosstabs.php?db=[dbname]','data-logaction':'open_Crosstabs', showProgress:false,
                                 css:{overflow:'hidden'}}}
             ]}]
         }
@@ -263,7 +263,7 @@ window.hWin.cfg_layouts = [
     {"type":"east","children":[
         {type:"tabs","children":[
                     {appid:'heurist_resultListExt', name: 'Record', 
-                                options:{url: 'viewers/record/renderRecordData.php?recID=[recID]&db=[dbname]', 
+                                options:{url: 'viewers/record/renderRecordData.php?recID=[recID]&db=[dbname]', showProgress: false,
                                 is_single_selection:true, 'data-logaction':'open_Record',css:{overflow:'hidden'}}
                     },    // H3 record viewer
                     {appid:'heurist_resultListDataTable', name: 'List View', 
@@ -283,7 +283,7 @@ window.hWin.cfg_layouts = [
                                      'data-logaction':'open_Network'}},
  
                     {appid:'heurist_resultListExt', name: 'Crosstabs', options:{title:'Crosstabs', 
-                                url: 'viewers/crosstab/crosstabs.php?db=[dbname]','data-logaction':'open_Crosstabs',
+                                url: 'viewers/crosstab/crosstabs.php?db=[dbname]','data-logaction':'open_Crosstabs',showProgress: false,
                                 css:{overflow:'hidden'}}}        
         
         ],"folder":true, css:{height:'100%'}},

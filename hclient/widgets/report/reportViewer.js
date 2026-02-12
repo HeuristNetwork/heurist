@@ -624,11 +624,11 @@ $.widget( "heurist.reportViewer", {
         if(this._facet_value){
             request['facet_val'] = this._facet_value;
         }
-        if(rec_count>500){
-            request['session'] = window.hWin.HEURIST4.msg.showProgress();
+        if(rec_count>50){
+            request['session'] = window.hWin.HEURIST4.msg.showProgress({container:this._$('#progressbar_div')});
+        }else{
+            window.hWin.HEURIST4.msg.bringCoverallToFront(this._$('#rep_container'));
         }
-
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._$('#rep_container'));
         
         let inputs = '';
         for (let [key, value] of Object.entries(request)) {

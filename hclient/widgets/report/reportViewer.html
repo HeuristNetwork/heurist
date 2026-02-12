@@ -15,12 +15,6 @@
 -->
 <div id="viewercontainer" style="padding:0" class="ui-layout-center">
     <iframe title="for print" id="ifrmPrint" style="width:0; height:0;"></iframe>
-    <div id="progressbar_div" style="width:99%;height:36px;display:none;padding:5px">
-        <div id="progressbar">
-            <div class="progress-label">Loading data...</div>
-        </div>
-        <div id="progress_stop" style="float:right;">Stop</div>
-    </div>
     <div id="toolbardiv" style="padding:6px" class="ent_header">
         <div style="display:inline-block;vertical-align: bottom;" class="selectmenu-parent">
             <span style="width:100px;padding-left:0.5em;white-space:nowrap;" class="slocale">Select template:</span>
@@ -47,4 +41,7 @@
     <span class="fileinput-button" style="display: none;">
             <input id="fileupload" type="file" name="import_template" accept=".gpl">
     </span>
+    
+    <div id="progressbar_div" class="ent_content_full" style="display:none;top:0px;padding:5px;z-index:999;background:white;">
+    </div>
 </div>

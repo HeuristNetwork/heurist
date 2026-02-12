@@ -205,6 +205,7 @@ if(!array_key_exists('embed', $_REQUEST)){
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAction.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAccess.js"></script>
 
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/admin/progressReport.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/admin/importStructure.js"></script>
 <?php
 }

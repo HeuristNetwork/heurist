@@ -31,6 +31,8 @@ set_time_limit(0);
 define('MANGER_REQUIRED',1);
 define('PDIR','../../');//need for proper path to js and css
 
+use hserv\utilities\DbUtils;
+
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordTitleMask.php';
 
@@ -51,11 +53,18 @@ if(@$_REQUEST['recTypeIDs']){
     if(!empty($rty_ids)) {$rty_ids_list = implode(',', $rty_ids);}
 }
 
-if(!$init_client || intval(@$_REQUEST['session'])>0){ //2a. init operation on client side
+$sessionId = DbUtils::prepareSessionId($_REQUEST['session']?? null);
 
-    $res = doRecTitleUpdate($system, intval(@$_REQUEST['session']),  $rty_ids_list);
+if(!$init_client || !empty($sessionId)){ //2a. init operation on client side
 
-    if(@$_REQUEST['session']>0)
+    // IMPORTANT: allow concurrent progress.php calls from same browser session
+    if (!empty($sessionId) && session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
+    }               
+
+    $res = doRecTitleUpdate($system, $sessionId,  $rty_ids_list);
+
+    if(!empty($sessionId))
     {
         //2b. response to client side
         if( is_bool($res) && !$res ){

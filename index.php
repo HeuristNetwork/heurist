@@ -333,6 +333,7 @@ require_once dirname(__FILE__).'/hclient/framecontent/initPage.php';
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefVocabularyGroups.js"></script>
 -->
 
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/admin/progressReport.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/admin/importStructure.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapPublish.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/publishDialog.js"></script>

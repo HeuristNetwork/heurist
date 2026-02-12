@@ -27,6 +27,8 @@ set_time_limit(0);
 define('MANGER_REQUIRED',1);
 define('PDIR','../../');//need for proper path to js and css
 
+use hserv\utilities\DbUtils;
+
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 require_once dirname(__FILE__).'/../../hserv/records/edit/recordModify.php';
 
@@ -37,19 +39,27 @@ require_once dirname(__FILE__).'/../../hserv/records/edit/recordModify.php';
 // 2b. execute operation on server   session=numeric
 
 $init_client = (@$_REQUEST['verbose']!=1);
+$sessionId = DbUtils::prepareSessionId($_REQUEST['session']?? null);
 
-if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client side
+
+if(!$init_client || !empty($sessionId)){ //2a. init operation on client side
 
 
-    if(@$_REQUEST['session']>0)
+    if(!empty($sessionId))
     {
+        
+        // IMPORTANT: allow concurrent progress.php calls from same browser session
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }               
+        
         $rty_IDs = null;
         if(@$_REQUEST['recTypeIDs']!=null){
             $rty_IDs = prepareIds(filter_var($_REQUEST['recTypeIDs']));
         }
 
         $system->setResponseHeader();
-        $res = recordUpdateCalcFields($system, null, $rty_IDs, intval(@$_REQUEST['session']));
+        $res = recordUpdateCalcFields($system, null, $rty_IDs, $sessionId);
 
         //2b. response to client side
         if( is_bool($res) && !$res ){

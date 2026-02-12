@@ -1685,6 +1685,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     _progressInterval: 0, // Internal: Stores interval ID for progress polling
     _progressDiv: null, // Internal: Stores jQuery object of the progress display div
     _progressPopup: null, // Internal: Stores jQuery object of the progress popup dialog
+    _progressWidgetEl: null,
     
     /**
      * Displays a progress indicator, either in a popup dialog or an existing container.
@@ -1710,6 +1711,43 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      *                             operation is still active (indicated by `_progressInterval > 0`).
      */
     showProgress: function( options ){
+        options = options || {};  
+
+        let $el;
+        if(options.container && options.container.length>0){ //container element
+            options.showDialog = false;
+            $el = $(options.container);
+            //$el.css('border','2px solid red');
+        }else{
+            options.showDialog = true;
+            $el = $('<div>');
+        }   
+     
+        // if already has instance, destroy first to mimic old singleton behavior
+        const inst = $el.progressReport('instance');
+        if (inst) {
+            $el.progressReport('destroy');
+        }     
+     
+        const session_id = $el.progressReport(options).progressReport('start');
+        
+        this._progressWidgetEl = $el;
+        
+        return session_id;
+    },
+    
+    hideProgress: function(instance){
+
+          // allow hideProgress() with no args to close the singleton (old callers)
+          let $el = instance ? $(instance) : this._progressWidgetEl;
+
+          if ($el && $el.length && $el.progressReport('instance')) {
+            $el.progressReport('destroy');
+          }
+          this._progressWidgetEl = null;
+    },
+     
+    showProgress2: function( options ){
         if(window.hWin.HEURIST4.msg._progressInterval>0){
             console.log('previous progress is not completed'); // Log and exit if another progress is running
             return 0;
@@ -1816,7 +1854,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     //it may return terminate,done,
                     
                     let resp = response.split(',');
-                    
                     if(response=='terminate' || !(resp.length>=2)){
                         //first or last response
                         if(response=='terminate'){
@@ -1918,7 +1955,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
      * @memberof HEURIST4.msg
      * @returns {void}
      */
-    hideProgress: function(){
+    hideProgress2: function(){
         $('body').css('cursor','auto');
 
         if(window.hWin.HEURIST4.msg._progressInterval!=null){
