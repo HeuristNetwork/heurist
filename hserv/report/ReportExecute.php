@@ -18,10 +18,16 @@ namespace hserv\report;
 use hserv\report\ReportRecord;
 use hserv\utilities\USanitize;
 use hserv\utilities\Temporal;
+use hserv\utilities\DbUtils;
 
 require_once 'smartyInit.php';
 require_once dirname(__FILE__).'/../records/search/recordSearch.php';
 require_once dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php';
+
+/**
+ * Thrown to abort Smarty rendering when a user requests termination or a timeout is reached.
+ */
+class ReportTerminatedException extends \RuntimeException {}
 
 /**
  * HTML tag string for closing head element.
@@ -66,10 +72,6 @@ class ReportExecute
 
     /** @var string|int|null Session ID for tracking progress of report generation, especially for long reports. */
     private $smartySessionId;
-    /** @var int Counter for records processed during Smarty loop, used for progress updates. */
-    private $executionCounter;
-    /** @var int Total number of records to be processed, used for progress calculation. */
-    private $executionCounterTotal;
 
     /** @var bool Whether JavaScript output/inclusion is allowed, based on system settings. */
     private $isJsAllowed;
@@ -205,8 +207,11 @@ class ReportExecute
 
         $this->recordWithCustomCSS = isset($params['cssid']) ? intval($params['cssid']) : null;
 
-        $this->smartySessionId = isset($params['session']) ? $params['session'] : null;
-
+        $this->smartySessionId = DbUtils::prepareSessionId($params['session']?? null);
+        // IMPORTANT: allow concurrent progress.php calls from same browser session
+        if (!empty($this->smartySessionId) && session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }               
 
         $this->outputmode = isset($params['mode']) ? preg_replace('/[^a-z]/', "", $params["mode"]) : 'html';
         $allowed_exts = array('html','js','txt','text','csv','xml','json','css');
@@ -530,7 +535,6 @@ class ReportExecute
      * If Smarty is not already initialized (or if `$force_init` is true), this method
      * calls the global `smartyInit()` function to get a Smarty instance.
      * It then registers Heurist-specific Smarty plugins/functions:
-     * - `progressCallback`: For updating progress during template loops.
      * - `out`: For `printLabelValuePair`.
      * - `wrap`: For `printProcessedValue`.
      *
@@ -557,7 +561,6 @@ class ReportExecute
             return false;
         }
 
-        $this->smarty->registerPlugin(\Smarty\Smarty::PLUGIN_FUNCTION, 'progressCallback', [$this, 'progressCallback']);
         $this->smarty->registerPlugin(\Smarty\Smarty::PLUGIN_FUNCTION, 'out', [$this, 'printLabelValuePair']);
         $this->smarty->registerPlugin(\Smarty\Smarty::PLUGIN_FUNCTION, 'wrap', [$this, 'printProcessedValue']);
 
@@ -585,8 +588,12 @@ class ReportExecute
     public function executeTemplate($qresult, $content)
     {
         $results = $qresult["records"];  //reocrd ids
-        $this->executionCounterTotal = count($results);
         $heuristRec = new ReportRecord($this->system);
+        
+        if (!empty($this->smartySessionId)) {
+            $timeoutSec = isset($this->params['timeout']) ? max(1, intval($this->params['timeout'])) : 60;
+            $heuristRec->startInterrupt($this->smartySessionId, $results, $timeoutSec);
+        }
 
         if (method_exists($this->smarty, 'assignByRef')) {
             $this->smarty->assignByRef('heurist', $heuristRec); //deprecated
@@ -647,7 +654,7 @@ class ReportExecute
      * Continues template execution: sets up filters, fetches, and handles output.
      *
      * - If `template_body` was used, saves it to a temporary file via `saveTemporaryTemplate()`.
-     * - Registers Smarty pre-filter `translateTerms` and post-filter `addProgressCallback`.
+     * - Registers Smarty pre-filter `translateTerms` 
      * - Calls `smarty->fetch()` to process the template.
      * - Passes the fetched output to `handleTemplateOutput()`.
      * - Manages progress session updates and cleanup.
@@ -686,17 +693,6 @@ class ReportExecute
 
 
         $this->smarty->registerFilter('pre', [$this, 'translateTerms']);  //smarty_pre_filter
-        if ($this->publishmode == 0 && $this->smartySessionId > 0) {
-            $this->executionCounter = 0;
-
-            $this->smarty->registerFilter('post', [$this, 'addProgressCallback']);  //smarty_post_filter
-        }else{
-            $this->smartySessionId = 0;
-        }
-
-        /* smarty output filter is not used in this version since we fetch output to variable
-            $this->smarty->registerFilter('output', [$this, 'handleTemplateOutput']);
-        */
 
         $this->smarty->assign('template_file', $this->templateFile);
         try {
@@ -705,12 +701,20 @@ class ReportExecute
 
             /* Apparently need to use $this->smarty->display($templateFile) for huge reprot to direct output to browser*/
 
+        } catch (ReportTerminatedException $e) {
+            $msg = $e->getMessage();
+            if ($msg === 'timeout') {
+                $this->outputError('Report execution timed out.');
+            } else {
+                $this->outputError('Report execution was terminated.');
+            }
+            $result = false;
         } catch (\Exception $e) {
             $this->outputError('Exception on execution (if you get this error please create a ticket, we are trying to track the problem): ' . $e->getMessage());
             $result = false;
         }
 
-        if ($this->smartySessionId > 0) {
+        if (!empty($this->smartySessionId)) {
             mysql__update_progress(null, $this->smartySessionId, false, 'REMOVE');
         }
 
@@ -892,36 +896,7 @@ class ReportExecute
         return $tpl_source;
     }
 
-    //
-    /**
-     * Smarty post-filter to inject a progress callback into template loops.
-     *
-     * This filter searches for the beginning of Smarty's compiled `foreach` loops
-     * and inserts a call to the `progressCallback` Smarty plugin. This allows
-     * for progress tracking during the rendering of large datasets.
-     *
-     * @param string $tpl_source The compiled template source code.
-     * @param \Smarty\Template $template The Smarty template object.
-     * @return string The modified compiled template source with the progress callback injected.
-     */
-    public function addProgressCallback($tpl_source, \Smarty\Template $template)
-    {
-        //find fist foreach and insert as first operation
-        $offset = strpos($tpl_source,'foreach ($_from ?? [] as $_smarty_tpl->getVariable(');//'foreach ($_from as $_smarty_tpl');
-
-        if($offset>0){
-            $pos = strpos($tpl_source,'{',$offset);
-
-            return substr($tpl_source,0,$pos+1)
-."\n".'$_smarty_tpl->getSmarty()->getFunctionHandler("progressCallback")->handle(array(), $_smarty_tpl);'."\n"
-//old way            ."\n".'{ if(progressCallback(array(), $_smarty_tpl)){ return; }'."\n"
-            .substr($tpl_source,$pos+1);
-
-        }
-
-        return $tpl_source;
-    }
-
+    
     private function removeHeadAndBodyTags($content){
 
             $dom = new \DOMDocument();
@@ -1550,60 +1525,6 @@ Javascript wrap:<br>
 </p></body></html>
                     <?php
     }
-
-
-    //
-    /**
-     * Smarty plugin function for progress tracking within template loops.
-     *
-     * This function is called by the code injected by `addProgressCallback`.
-     * It updates the progress session on the server side via `mysql__update_progress`
-     * periodically (e.g., every 10 records or near the beginning/end).
-     * It also checks if the user has requested to terminate the report generation.
-     *
-     * @param array $params Parameters passed from the Smarty tag. Expected (optional):
-     *                      'done': Current number of items processed.
-     *                      'tot_count': Total number of items to process.
-     * @param \Smarty\Template $smarty The Smarty template object (passed by reference, but not strictly needed by this method's logic for `$smarty` object itself).
-     * @return bool True if the process was terminated by the user, false otherwise.
-     */
-    public function progressCallback($params, &$smarty){
-
-        if($this->publishmode!=0 || $this->smartySessionId==null){ //check that this call from ui
-            return false;
-        }
-
-        $res = false;
-
-            if(@$params['done']==null){//not set, this is execution from smarty
-                $this->executionCounter++;
-            }else{
-                $this->executionCounter = @$params['done'];
-            }
-
-            if(isset($this->executionCounterTotal) && $this->executionCounterTotal>0){
-                $tot_count = $this->executionCounterTotal;
-            }elseif(@$params['tot_count']>=0){
-                $tot_count = $params['tot_count'];
-            }else{
-                $tot_count = count(@$smarty->getVariable('results')->value);
-            }
-
-            if($this->executionCounter<2 || $this->executionCounter % 10==0 || $this->executionCounter>$tot_count-3){
-
-                $session_val = $this->executionCounter.','.$tot_count;
-                $current_val = mysql__update_progress(null, $this->smartySessionId, false, $session_val);
-                if($current_val && $current_val=='terminate'){
-                    $session_val = '';//remove from db
-                    $res = true;
-                }
-            }
-
-        return $res;
-
-
-    }
-
 
     /**
      * Smarty plugin function `{out}` to print a label-value pair, typically in a div structure.

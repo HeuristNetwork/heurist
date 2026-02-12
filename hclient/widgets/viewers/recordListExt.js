@@ -100,6 +100,7 @@ $.widget( "heurist.recordListExt", {
         empty_remark: '', //html content for empty message  (search returns empty result)
         placeholder_text: '', //text to display while no record/recordset is loaded  (search is not performed)
         
+        showProgress: true,
         show_export_button: false, // show button to export current record set
         show_print_button: false, // show button to print current record set
         export_options: 'all', // export formats allowed
@@ -349,7 +350,7 @@ $.widget( "heurist.recordListExt", {
                 that._run_initial = true;
 
                 that._refresh();
-                that.loadanimation(false);
+//                that.loadanimation(false);
 
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
 
@@ -475,6 +476,12 @@ $.widget( "heurist.recordListExt", {
 
         this._current_url = newurl;
         this.loadanimation(true);
+        
+        if(this.options.showProgress){
+            const session_id = window.hWin.HEURIST4.msg.showProgress();
+            newurl = newurl + '&session=' + session_id;
+console.log(newurl);            
+        }
 
         if(this._print_frame){
             this._print_frame.attr('src', '');
@@ -961,6 +968,8 @@ $.widget( "heurist.recordListExt", {
         // remove generated elements
         if(this.dosframe) this.dosframe.remove();
         if(this.div_content) this.div_content.empty();
+        
+        window.hWin.HEURIST4.msg.hideProgress();
     },
     
     /**
@@ -995,6 +1004,9 @@ $.widget( "heurist.recordListExt", {
             this.div_content.css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center');
         }else{
             this.div_content.css('background','none');
+            if(this.options.showProgress){
+                window.hWin.HEURIST4.msg.hideProgress();
+            }
         }
     },
 

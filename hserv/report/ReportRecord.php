@@ -237,11 +237,18 @@ class ReportRecord
     public function getRecord($rec, $details=true, $smarty_obj = null)
     {
         $rec_ID = is_array($rec) && $rec['recID'] ? $rec['recID'] : $rec;
-
+        
         if ($details===true && @$this->recordsCache[$rec_ID]) {
             return $this->recordsCache[$rec_ID];
         }
 
+        if ($this->interruptEnabled) {
+            if(in_array($rec_ID, $this->mainRecordSet)){
+                $this->done++;    
+            }
+            $this->tickInterrupt('tick');
+        }        
+        
         $rec = recordSearchByID($this->system, $rec_ID, $details);
         if ($details===true && $rec) {
             $rec['rec_Tags'] = recordSearchPersonalTags($this->system, $rec_ID);
@@ -1411,5 +1418,57 @@ class ReportRecord
         
         return $link;
     }
+
+//-----------------------------------------------------------    
+protected $interruptEnabled = false;
+protected $interruptSessionId = '';
+protected $interruptStartTs = 0.0;
+protected $interruptTimeoutSec = 0;
+protected $interruptLastPollTs = 0.0;
+protected $interruptPollIntervalSec = 0.5; // 500ms
+protected $done = 0;
+protected $total = 0;
+protected $mainRecordSet = [];
+
+public function startInterrupt($sessionId, $mainRecordSet, $timeoutSec = 60) {
+    if (empty($sessionId)) return;
+    $this->interruptEnabled = true;
+    $this->interruptSessionId = $sessionId;
+    $this->interruptStartTs = microtime(true);
+    $this->interruptTimeoutSec = max(1, (int)$timeoutSec);
+    $this->interruptLastPollTs = 0.0;
+    $this->done = 0;
+    $this->mainRecordSet = $mainRecordSet ?? [];
+    $this->total = (int)count($mainRecordSet);
+
+    // immediate check (fast fail)
+    $this->tickInterrupt('start');
+}
+
+protected function tickInterrupt($phase = 'tick') {
+    if (!$this->interruptEnabled) return;
+
+    $now = microtime(true);
+
+    // timeout check always
+    if ($this->interruptTimeoutSec > 0 && ($now - $this->interruptStartTs) > $this->interruptTimeoutSec) {
+        throw new ReportTerminatedException('timeout');
+    }
+
+    // throttle DB polling
+    if ($this->interruptLastPollTs > 0 && ($now - $this->interruptLastPollTs) < $this->interruptPollIntervalSec) {
+        return;
+    }
+    $this->interruptLastPollTs = $now;
+
+    $session_val = $this->done . ',' . $this->total;
+    $current_val = mysql__update_progress(null, $this->interruptSessionId, false, $session_val);
+
+    if ($current_val === 'terminate') {
+        mysql__update_progress(null, $this->interruptSessionId, false, ''); // clear if you want
+        throw new ReportTerminatedException('terminate');
+    }
+}
+    
     
 }

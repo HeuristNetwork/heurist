@@ -44,7 +44,7 @@ if($action==null){
     $action = @$req_params['action'];
 }
 
-$session_id = DbUtils::prepareSessionId(@$req_params['session']);
+$session_id = DbUtils::prepareSessionId($req_params['session']??null);
 
 if(!$system->init(@$req_params['db'], $action != 'create' && $action != 'connectRemote')){ //db required, except create
     //get error and response

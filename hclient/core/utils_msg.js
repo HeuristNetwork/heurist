@@ -1712,7 +1712,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     showProgress: function( options ){
         if(window.hWin.HEURIST4.msg._progressInterval>0){
             console.log('previous progress is not completed'); // Log and exit if another progress is running
-            return;
+            return 0;
         }
         
         let $progress_div;
@@ -1806,7 +1806,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
         window.hWin.HEURIST4.msg._progressInterval = setInterval(function(){ 
             
-            let request = {t:(new Date()).getMilliseconds(), session:session_id};            
+            let request = {t:Date.now(), session:session_id};            
             
             window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
 
@@ -1922,7 +1922,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         $('body').css('cursor','auto');
 
         if(window.hWin.HEURIST4.msg._progressInterval!=null){
-            
             clearInterval(window.hWin.HEURIST4.msg._progressInterval);
             window.hWin.HEURIST4.msg._progressInterval = null;
         }
