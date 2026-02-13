@@ -503,6 +503,7 @@ $.widget( "heurist.resultList", {
                                 search_realm: that.options.search_realm,
                                 query: query
                             });
+                            
                         }else{
                             that.setSelected(data.selection);        
                             
@@ -1459,6 +1460,7 @@ $.widget( "heurist.resultList", {
         {
             if(this._count_of_divs<this.options.pagesize){ // DRAW CURRENT PAGE
                 this._renderPage(0, recordset);
+                this._triggerOnPage(0); 
             }
 
         }else if(this._count_of_divs<1) {   // EMPTY RESULT SET
@@ -2759,7 +2761,6 @@ $.widget( "heurist.resultList", {
 
             let recIDs_list = window.hWin.HAPI4.getSelection(selection, true); //need to rewrite since it works with global currentRecordset
             if( window.hWin.HEURIST4.util.isArrayNotEmpty(recIDs_list) ){
-
                 this.div_content.find('.recordDiv').each(function(ids, rdiv){
                     let rec_id = $(rdiv).attr('recid');
                     let idx = window.hWin.HEURIST4.util.findArrayIndex(rec_id, recIDs_list);
@@ -3020,6 +3021,7 @@ $.widget( "heurist.resultList", {
             
             if(this.options.navigator=='none'){
                 this._renderPage(0);
+                this._triggerOnPage(0);
             }else{
                 
                 // KJ's patented heuristics for awesome useful page numbers
@@ -3059,6 +3061,7 @@ $.widget( "heurist.resultList", {
                         $( "<button>", { text: "1", id:'page0'}).css({'font-size':'0.7em'}).button()
                         .appendTo( span_pages ).on("click", function(){ 
                             that._renderPage(0); 
+                            that._triggerOnPage(0);
                         } );
                         if(start!=2){
                             $( "<span>" ).html("..").appendTo( span_pages );
@@ -3075,6 +3078,7 @@ $.widget( "heurist.resultList", {
                         .on('click', function(event){
                             let page = Number(this.id.substring(4));
                             that._renderPage(page);
+                            that._triggerOnPage(page);
                         } );
                     }
                 }
@@ -3089,7 +3093,10 @@ $.widget( "heurist.resultList", {
                             $( "<span>" ).html("..").appendTo( span_pages );
                         }
                         $( "<button>", { text: ''+pageCount, id:'page'+finish }).css({'font-size':'0.7em'}).button()
-                        .appendTo( span_pages ).on("click", function(){ that._renderPage(pageCount-1); } );
+                        .appendTo( span_pages ).on("click", function(){ 
+                                that._renderPage(pageCount-1);
+                                that._triggerOnPage(pageCount-1);
+                        } );
                     }
                 }
 
@@ -3122,13 +3129,14 @@ $.widget( "heurist.resultList", {
                         select: function( event, ui ) {
                             let page =  Number(ui.item.attr('id').substring(4)); 
                             that._renderPage(page);
+                            that._triggerOnPage(page);
                     }})
                     .hide();
 
                     this._on( this.btn_page_prev, {
-                        click: function() {  that._renderPage(that.current_page-1)  }});
+                        click: function() {  that._renderPage(that.current_page-1); that._triggerOnPage(that.current_page-1)  }});
                     this._on( this.btn_page_next, {
-                        click: function() {  that._renderPage(that.current_page+1)  }});
+                        click: function() {  that._renderPage(that.current_page+1); that._triggerOnPage(that.current_page+1)  }});
 
                     this._on( this.btn_page_menu, {
                         click: function() {
@@ -3221,6 +3229,26 @@ $.widget( "heurist.resultList", {
         }
         
     }
+    
+    , _triggerOnPage(pageno)
+    {
+        if(!this.options.search_realm){
+            return;
+        }
+        
+        let all_ids = [];
+        
+        const $allrecs = this.div_content.find('.recordDiv');
+        $allrecs.each(function(idx, item){
+            all_ids.push($(item).attr('recid'));
+        });
+        
+        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_PAGE_RENDERED, {
+            selection: all_ids,
+            search_realm: this.options.search_realm
+        });
+    }
+    
 
     //
     // render the given page (called from navigator and on search finish)
@@ -3248,7 +3276,7 @@ $.widget( "heurist.resultList", {
             }
 
             if(!recordset) return;
-
+            
             if(pageno>=this.max_page){
                 pageno= this.max_page - 1;
             }
@@ -3256,14 +3284,13 @@ $.widget( "heurist.resultList", {
                 pageno = 0;
             }
 
-            this.current_page = pageno<0?0:pageno;
-
-            this._renderPagesNavigator(); //redraw paginator
+            this.current_page = pageno;
 
             idx = pageno*this.options.pagesize;
             len = Math.min(recordset.length(), idx+this.options.pagesize)
             pagesize = this.options.pagesize;
-            
+
+            this._renderPagesNavigator(); //redraw paginator
         }
         
         
@@ -3271,7 +3298,7 @@ $.widget( "heurist.resultList", {
         let recs = recordset.getRecords();
         let rec_order = recordset.getOrder();
         let rec_toload = [];
-        let rec_onpage = [];
+        let rec_onpage = []; //already loaded
         
         //for active tab
         let tab_active_index = 0;

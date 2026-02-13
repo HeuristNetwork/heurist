@@ -294,6 +294,15 @@ class ReportExecute
         } else {
             // Perform a query/search for the recordset
             $qresult = $this->searchRecords();
+            
+            if($this->params['cmseditor'] == 1 && 
+                isset($this->params["limit"]) && 
+                isset($qresult['reccount']) && 
+                $qresult['reccount']==$this->params["limit"])
+            {
+                $this->messageAboutTruncation = '<div><b>In design mode, report has been truncated to '.intval($this->params["limit"]).' records</b></div>';
+            }
+            
         }
 
         return $qresult;

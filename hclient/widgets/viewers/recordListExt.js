@@ -77,6 +77,9 @@ $.widget( "heurist.recordListExt", {
 
         is_single_selection: false, //work with the only record - reloads content on every selection event
         is_multi_selection: false, //work with all selectd records
+        show_page: false, //work with current page only
+        show_all: true,
+        
         init_show_all: false, //show complete recordset at initialisation
 
         recordset: null,
@@ -334,6 +337,7 @@ $.widget( "heurist.recordListExt", {
         //-----------------------     listener of global events
         this._events = window.hWin.HAPI4.Event.ON_CREDENTIALS 
         + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
+        + ' ' + window.hWin.HAPI4.Event.ON_REC_PAGE_RENDERED
         + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
         + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT;
 
@@ -351,10 +355,19 @@ $.widget( "heurist.recordListExt", {
                 
                 that.options.recordset = data.recordset; //HRecordSet
 
-                that._run_initial = true;
+                if(that.options.show_all){
+                    that._run_initial = true;
+
+                    that._refresh();
+                }
+
+            }else if(e.type == window.hWin.HAPI4.Event.ON_REC_PAGE_RENDERED && that.options.show_page){ 
+
+                if(!that._isSameRealm(data)) return;
+                
+                that.options.selection = data.selection;//ids
 
                 that._refresh();
-//                that.loadanimation(false);
 
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
 
@@ -481,7 +494,7 @@ $.widget( "heurist.recordListExt", {
         this._current_url = newurl;
         
         if(window.isCMS_active || window.parent?.cmsEditor){
-            newurl = newurl + '&limit=5';
+            newurl = newurl + '&limit=5&publish=0&cmseditor=1';
             this.options.showProgress = false;
         }
         
@@ -647,13 +660,7 @@ $.widget( "heurist.recordListExt", {
         this.options.selection = null;
         this.options.recordset = null;
         if(request.q!=''){
-            /*
-            if(this.options.showProgress){
-                const session_id = window.hWin.HEURIST4.msg.showProgress({container:this.div_content});
-                newurl = newurl + '&session=' + session_id;
-            }else{
-                this.loadanimation(true);    
-            }*/
+            //    this.loadanimation(true);    
         }
         this._refresh();
     },
@@ -754,15 +761,15 @@ $.widget( "heurist.recordListExt", {
         let empty_results = this.options.recordset==null || this.options.recordset.length()==0;
         let content_updated = false;
 
-        if(this.options.is_single_selection || this.options.is_multi_selection){ //reload content on every selection event
+        if(this.options.is_single_selection || this.options.is_multi_selection || this.options.show_page){ //reload content on every selection event
 
             let newurl = null;
-            let show_all = this._run_initial && this.options.init_show_all && !empty_results;
+            let show_all = (this._run_initial && this.options.init_show_all && !empty_results);
             this._run_initial = false;
 
             if(window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.selection) || show_all){
 
-                let recIDs_list = !show_all ? this.options.selection : this.options.recordset.getIds().join(',');
+                let recIDs_list = !show_all ? this.options.selection : this.options.recordset.getIds();
 
                 if(recIDs_list.length>0){
                     

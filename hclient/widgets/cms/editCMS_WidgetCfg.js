@@ -443,6 +443,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
                         if(opts['is_single_selection']){
                             opts['selection_mode'] = 'is_single_selection';
+                        }else if(opts['is_multi_selection']){
+                            opts['selection_mode'] = 'is_multi_selection';
+                        }else if(opts['show_page']){
+                            opts['selection_mode'] = 'show_page';
                         }else{
                             opts['selection_mode'] = 'show_all';
                         }
@@ -1586,6 +1590,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             opts['is_single_selection'] = false;
             opts['is_multi_selection'] = false;
             opts['show_all'] = false;
+            opts['show_page'] = false;
 
             opts[selection_mode] = true;
 

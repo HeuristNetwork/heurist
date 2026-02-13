@@ -1248,6 +1248,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             ON_CREDENTIALS: 'ON_CREDENTIALS', //login, logout, change user role, sysinfo (change sysIdentification) 
             ON_REC_SEARCHSTART: "ON_REC_SEARCHSTART",
             ON_REC_SEARCH_FINISH: "ON_REC_SEARCH_FINISH",
+            ON_REC_PAGE_RENDERED: "ON_REC_PAGE_RENDERED",
             ON_CUSTOM_EVENT: "ON_CUSTOM_EVENT", //special event for custom link various widgets
             ON_ACTION: 'ON_ACTION',
             ON_REC_UPDATE: "ON_REC_UPDATE",
