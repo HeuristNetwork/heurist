@@ -18,36 +18,41 @@
 * @since       6.0
 */
 -->
-<div id="ent_header" style="height:6em; padding: 0.2em; width: 99%;">
-    <fieldset style="float: left;" id="search_container"><legend style="display:none"></legend>
+<div>
 
-        <div style="padding: 0.2em; width: 99%;" class="input">
+    <div id="ent_header" style="height:6em; padding: 0.2em; width: 99%;">
+        <fieldset style="float: left;" id="search_container"><legend style="display:none"></legend>
 
-            <div>
-                <div class="header required" style="padding: 0px 16px 0px 5px; width: 8em;">
-                    <label for="inpt_placename">Place name:</label>
+            <div style="padding: 0.2em; width: 99%;" class="input">
+
+                <div>
+                    <div class="header required" style="padding: 0px 16px 0px 5px; width: 8em;">
+                        <label for="inpt_placename">Place name:</label>
+                    </div>
+                    <input id="inpt_placename" class="text ui-widget-content ui-corner-all search_on_enter" style="max-width: 30em;"/>
+
+                    <div class="header required" style="padding: 0px 16px 0px 16px; width: 8em;">
+                        <label for="inpt_postalcode">Postal Code:</label>
+                    </div>
+                    <input id="inpt_postalcode" class="text ui-widget-content ui-corner-all search_on_enter" style="max-width:30em"/>
                 </div>
-                <input id="inpt_placename" class="text ui-widget-content ui-corner-all search_on_enter" style="max-width: 30em;"/>
 
-                <div class="header required" style="padding: 0px 16px 0px 16px; width: 8em;">
-                    <label for="inpt_postalcode">Postal Code:</label>
+                <div style="margin-top: 10px;">
+                    <div class="header optional" style="padding: 0px 16px 0px 5px;">
+                        <label for="inpt_country">Country:</label>
+                    </div>
+                    <select id="inpt_country" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
                 </div>
-                <input id="inpt_postalcode" class="text ui-widget-content ui-corner-all search_on_enter" style="max-width:30em"/>
+
             </div>
+            
+        </fieldset>
 
-            <div style="margin-top: 10px;">
-                <div class="header optional" style="padding: 0px 16px 0px 5px;">
-                    <label for="inpt_country">Country:</label>
-                </div>
-                <select id="inpt_country" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
-            </div>
+        <button id="btnStartSearch" style="position:relative; right: 10em; float: right;">Search</button>
 
-        </div>
+    </div>
 
-    </fieldset>
+    <div id="div_result" class="ent_content_full" style="display: none;top:8em">
+    </div>
 
-    <button id="btnStartSearch" style="position:relative;top:1em;left:2em;">Search</button>
-
-</div>
-<div id="div_result" class="ent_content_full" style="display: none;top:8em">
 </div>
