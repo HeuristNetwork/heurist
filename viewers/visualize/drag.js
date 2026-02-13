@@ -34,17 +34,19 @@ function addNodes() {
 
    // Append nodes
    let nodes = window.d3.select("#container")
-                  .selectAll(".node")
-                  .data(data.nodes)
-                  .enter()
-                  .append("g")
-                  .on("dblclick", (d) => {
-                    if(!settings.isDatabaseStructure){ //Added Double Click to Edit Function - Travis Doyle 19/9
-                        window.open(window.hWin.HAPI4.baseURL + '?fmt=edit&db=' + window.hWin.HAPI4.database + '&recID=' + d.id, '_blank');
-                    }else if(window.hWin.HAPI4.is_admin()){
-                        editRecStructure(d.id);
-                    }
-                  });
+        .selectAll(".node")
+        .data(data.nodes)
+        .enter()
+        .append("g")
+        .on("dblclick", (d) => {
+            if(settings.minimal && !settings.isDatabaseStructure && typeof expandNode === 'function'){ // expand node
+                expandNode(d.id);
+            }else if(!settings.isDatabaseStructure){ //Added Double Click to Edit Function - Travis Doyle 19/9
+                window.open(window.hWin.HAPI4.baseURL + '?fmt=edit&db=' + window.hWin.HAPI4.database + '&recID=' + d.id, '_blank');
+            }else if(window.hWin.HAPI4.is_admin()){
+                editRecStructure(d.id);
+            }
+        });
                  
    // Dragging
    let drag = window.d3.behavior.drag()
@@ -186,7 +188,7 @@ function showNodeInformation(d){
     let infoFrame = window.d3.select("#infoIframe"); // select the iframe
     let infoBox = window.d3.select("#infoBox"); // select the info box
 
-    if(infoDiv.length == 0 || infoFrame.length == 0 || infoBox.length == 0){
+    if(infoDiv.length == 0 || infoFrame.length == 0 || infoBox.length == 0 || settings.minimal === 1){
         return;
     }
 
@@ -226,7 +228,7 @@ function showNodeInformation(d){
                     window.hWin.HEURIST4.msg.sendCoverallToBack(true);
 
                     let viewMaxHeight = document.querySelector('#divSvg').scrollHeight;
-                    viewMaxHeight = viewMaxHeight <= 0 ? 500 : viewMaxHeight - 20;
+                    viewMaxHeight = viewMaxHeight <= 0 ? 500 : viewMaxHeight - 150;
 
                     let height = infoFrame.node().contentWindow.document.body.scrollHeight;
                     height += 15;
@@ -357,8 +359,9 @@ function dragstart(d, i) {
        }); 
     d.fixed = true; 
     currentNode = d.id;
-    
-    updateCircles(".node.id"+d.id, selectionColor, selectionColor);
+
+    updateCircles(".node", foregroundColor, false);
+    updateCircles(`.node.id${d.id}`, selectionColor, true);
 }
 
 /**
@@ -407,8 +410,8 @@ function dragend(d, i) {
         obj = {}; 
     }else{
         obj = JSON.parse(record);
-    }  
-    
+    }
+
     // Set attributes 'x' and 'y' and store object
     obj.px = d.px;
     obj.py = d.py;
@@ -424,7 +427,4 @@ function dragend(d, i) {
     if(currentNode == d.id){
         currentNode = null;
     }
-/*    setTimeout(function(){    //tick();
-        window.d3.select("#container").attr("transform","scale(1)");
-    },500); */
 }

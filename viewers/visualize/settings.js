@@ -248,7 +248,7 @@ function handleSettingsInUI() {
         .on('change.color', function(event, color){ // Added event parameter
             if(color){
                 putSetting('setting_entitycolor', color);
-                updateCircles(".node", null, getSetting('setting_entitycolor'));
+                updateCircles(".node", null, false);
                 updateRectangles(".node", getSetting('setting_entitycolor'));
                 visualizeData(); // Consider if a full redraw is always needed
             }
@@ -384,12 +384,28 @@ function handleSettingsInUI() {
     if(isNaN(fontSize) || fontSize<8) fontSize = 8;  //min
     else if(fontSize>25) fontSize = 25; //max
 
-    $('#fontSize').val(fontSize).on('change',
-    function(event){ // Added event parameter
+    $('#fontSize').val(fontSize).on('change', function(event){ // Added event parameter
         let newval = $(event.target).val();
         putSetting('setting_fontsize', newval);
         let isLabelCurrentlyVisible = (window.currentMode!='icons' || (getSetting('setting_labels', 'on')=='on'));
         if(isLabelCurrentlyVisible) visualizeData(); // Redraw if labels are potentially visible
+    });
+
+    $('#showRecordTitles').prop('checked', true).on('change', () => { // show node titles
+        svg.selectAll('text.nodelabel.namelabel').style('display', $('#showRecordTitles').is(':checked') ? '' : 'none');
+    });
+    $('#applyGravity').on('change', () => { // gravity controls
+        let applyGravity = $('#applyGravity').is(':checked');
+        setGravity(applyGravity ? 'touch' : 'off');
+    });
+    $('#recTitleSize').val(9).on('change', () => updateLabels()); //svg.selectAll('text.nodelabel.namelabel').style('font-size', $('#recTitleSize').val(), 'important');
+    $('#lnkOpenPopup').on('click', () => {
+        if(typeof currentRequest === undefined || typeof currentRequest?.q !== 'string'){
+            return;
+        }
+
+        const URL = `${window.hWin.HAPI4.baseURL}viewers/visualize/springDiagram.php?db=${window.hWin.HAPI4.database}&mini=2&q=${currentRequest.q}`;
+        window.hWin.HEURIST4.msg.showDialog(URL, {title: `Record Network Graph`, ok: window.hWin.HR('Cancel'), width: 900, height: 900});
     });
 
     if(settings.isDatabaseStructure){
@@ -494,6 +510,7 @@ function _syncUI(){
  */
 function changeViewMode(mode){
     $(".offset_line").remove(); // Remove any offset lines (related to link drawing?)
+    mode = ['icons', 'infoboxes', 'infoboxes_full'].indexOf(mode) === -1 ? 'icons' : mode; // default to icon mode
     if(mode!=window.currentMode){
         window.currentMode = mode; // Update global current mode
 

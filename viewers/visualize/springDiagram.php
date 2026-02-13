@@ -52,6 +52,8 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
  */
 var isStandAlone = false;
 
+var currentRequest = null;
+
 /**
  * Callback function executed after the page's initial dependencies are loaded.
  * If successful and in standalone mode (query parameter 'q' is present),
@@ -72,57 +74,109 @@ function onPageInit(success){
         {
             isStandAlone = true;
 
-            var rules = window.hWin.HEURIST4.util.getUrlParameter('rules', location.search);
+            performSearch(q);
+        }
+}
 
-            if(!window.hWin.HEURIST4.util.isempty(rules)){
-                try{
-                    rules = JSON.parse(rules);
-                }catch(ex){
-                    rules = null; // Handle potential JSON parsing errors
-                }
-            }else{
-                rules = null;
+function performSearch(q){
+
+    var rules = window.hWin.HEURIST4.util.getUrlParameter('rules', location.search);
+
+    if(!window.hWin.HEURIST4.util.isempty(rules)){
+        try{
+            rules = JSON.parse(rules);
+        }catch(ex){
+            rules = null; // Handle potential JSON parsing errors
+        }
+    }else{
+        rules = null;
+    }
+
+    var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
+
+    let query = {q: q, rules: rules, w: 'a', detail: 'detail', l: MAXITEMS};
+
+    window.hWin.HAPI4.RecordMgr.search(query, (response) => {
+
+        if(response.status == window.hWin.ResponseStatus.OK){
+
+            var recordset = new HRecordSet(response.data); // Assumes HRecordSet is available globally or via hWin
+
+            var records_ids = recordset.getIds(MAXITEMS);
+            if(records_ids.length <= 0){
+                return;
             }
 
-            var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
+            window.hWin.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, (response_related) => {
 
-            let query = {q: q, rules: rules, w: 'a', detail: 'detail', l: MAXITEMS};
+                if(response_related.status == window.hWin.ResponseStatus.OK){
+                    // Store relationships
+                    // Parse response to spring diagram format
+                    var data = __parseData(records_ids, response_related.data);
 
-            window.hWin.HAPI4.RecordMgr.search(query,
-                function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
+                    showData(data, [], query, null, null, null);
 
-                        var recordset = new HRecordSet(response.data); // Assumes HRecordSet is available globally or via hWin
-
-                        var records_ids = recordset.getIds(MAXITEMS);
-                        if(records_ids.length>0){
-
-                            var callback = function(response_related) // Renamed to avoid conflict
-                            {
-                                // var resdata = null; // Unused variable
-                                if(response_related.status == window.hWin.ResponseStatus.OK){
-                                    // Store relationships
-                                    // Parse response to spring diagram format
-                                    var data = __parseData(records_ids, response_related.data);
-
-                                    showData(data, [], query, null, null, null);
-
-                                }else{
-                                    window.hWin.HEURIST4.msg.showMsgErr(response_related);
-                                }
-
-                            }
-
-                            window.hWin.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, callback);
-                        }
-
-
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response_related);
                 }
-            );
+            });
+
+        }else{
+            window.hWin.HEURIST4.msg.showMsgErr(response);
         }
+    });
+}
+
+function expandNode(rec_ID){
+
+    let q = window.hWin.HEURIST4.util.isJSON(currentRequest.q);
+    if(!q){
+        return;
+    }
+
+    let isUpdated = false; // whether we need to update the graph
+    if(q[0].any){
+
+        // Add to links clause
+        if(q[0].any[0].links || q[0].any[1].links){
+
+            let linksIdx = q[0].any[0].links ? 0 : 1;
+            let curLinks = q[0].any[linksIdx].links.split(',');
+
+            if(curLinks.indexOf(rec_ID) === -1){
+                curLinks.push(rec_ID);
+                isUpdated = true;
+            }
+
+            q[0].any[linksIdx].links = curLinks.join(',');
+        }
+
+        /* Add to ids clause
+        if(q[0].any[0].ids || q[0].any[1].ids){
+
+            let idsIdx = q[0].any[0].ids ? 0 : 1;
+            let curIds = q[0].any[idsIdx].ids.split(',');
+
+            if(curIds.indexOf(rec_ID) === -1){
+                curIds.push(rec_ID);
+                isUpdated = true;
+            }
+
+            q[0].any[idsIdx].ids = curIds.join(',');
+        }*/
+    }
+
+    if(!isUpdated){
+        window.hWin.HEURIST4.msg.showMsgFlash('Node has already been expanded', 3000);
+        return;
+    }
+
+    let title = d3.select(`.id${rec_ID}`).data();
+    title = title[0] && title[0].name ? `${title[0].name} (#${rec_ID})` : `Record #${rec_ID}`;
+
+    window.hWin.HEURIST4.msg.bringCoverallToFront($('body'), {'background-color': 'white', opacity: 1, color: 'black'}, `Extending graph for ${title}...`);
+
+    performSearch(JSON.stringify(q));
 }
 
         </script>
@@ -135,6 +189,7 @@ function onPageInit(success){
              * @global int $isDatabaseStructure Indicates if the visualization is for database structure (0 for record data).
              */
             $isDatabaseStructure = 0;
+            $isMinimalVersion = intval(@$_REQUEST['mini']);
             include_once "visualize.php"; // Includes the common HTML structure for the visualization
         ?>
 
@@ -259,64 +314,70 @@ function onPageInit(success){
          * @param {function} [onExpandRecords] - Callback function to handle requests to expand node connections.
          */
         function showData(data, selectedRecordsIds, new_request, onSelectEvent, onRefreshData, onExpandRecords) {
-               // Initial message while building graph
-                if(data && data.nodes && data.nodes.length > 0){ // Check if nodes array is not empty
-                    $("#d3svg").html('<text x="25" y="25" fill="black">Building graph ...</text>');
-                }else{
-                    $("#d3svg").html('<text x="25" y="25" fill="black">No data for graph</text>');
-                    return;
+            // Initial message while building graph
+            if(data && data.nodes && data.nodes.length > 0){ // Check if nodes array is not empty
+                $("#d3svg").html('<text x="25" y="25" fill="black">Building graph ...</text>');
+            }else{
+                $("#d3svg").html('<text x="25" y="25" fill="black">No data for graph</text>');
+                return;
+            }
+
+            /**
+             * Custom data parsing function for the visualize plugin.
+             * In this case, it's an identity function as data is pre-parsed by `__parseData`.
+             * @param {object} d - Input data.
+             * @returns {object} The same data.
+             */
+            function getData(d) {
+                return d;
+            }
+
+            /**
+             * Calculates the desired line length for links, potentially adjusted by node depth.
+             * @param {object} record - The source or target record data object, may have a `depth` property.
+             * @returns {number} The calculated line length.
+             */
+            function getLineLength(record) {
+                var length = getSetting('setting_linelength'); // Assumes getSetting is globally available
+                if(record !== undefined && Object.hasOwn(record, "depth") && record.depth > 0) { // Ensure depth is positive
+                    length = length / (record.depth+1);
                 }
+                return length;
+            }
 
-                /**
-                 * Custom data parsing function for the visualize plugin.
-                 * In this case, it's an identity function as data is pre-parsed by `__parseData`.
-                 * @param {object} d - Input data.
-                 * @returns {object} The same data.
-                 */
-                function getData(d) {
-                    return d;
-                }
+            $(window).on('onresize',onVisualizeResize); // Bind resize handler
+            onVisualizeResize(); // Initial call
 
-                /**
-                 * Calculates the desired line length for links, potentially adjusted by node depth.
-                 * @param {object} record - The source or target record data object, may have a `depth` property.
-                 * @returns {number} The calculated line length.
-                 */
-                function getLineLength(record) {
-                    var length = getSetting('setting_linelength'); // Assumes getSetting is globally available
-                    if(record !== undefined && Object.hasOwn(record, "depth") && record.depth > 0) { // Ensure depth is positive
-                        length = length / (record.depth+1);
-                    }
-                    return length;
-                }
+            // Initialize the visualize plugin
+            $("#visualize").visualize({ // Assumes #visualize is the ID of the main container in visualize.php
+                data: data,
+                request: new_request,
+                getData: getData, // Pass the identity function
+                getLineLength: getLineLength,
 
-                $(window).on('onresize',onVisualizeResize); // Bind resize handler
-                onVisualizeResize(); // Initial call
+                selectedNodeIds: selectedRecordsIds,   // Assign current selection
+                triggerSelection: onSelectEvent,       // Callback for selection changes
+                onRefreshData: onRefreshData,          // Callback for data refresh requests
+                onExpandNode: onExpandRecords,         // Callback for node expansion requests
 
-                // Initialize the visualize plugin
-                $("#visualize").visualize({ // Assumes #visualize is the ID of the main container in visualize.php
-                    data: data,
-                    request: new_request,
-                    getData: getData, // Pass the identity function
-                    getLineLength: getLineLength,
+                entityradius: 1, // Default, likely overridden by settings.js
+                linewidth: 1,    // Default, likely overridden by settings.js
 
-                    selectedNodeIds: selectedRecordsIds,   // Assign current selection
-                    triggerSelection: onSelectEvent,       // Callback for selection changes
-                    onRefreshData: onRefreshData,          // Callback for data refresh requests
-                    onExpandNode: onExpandRecords,         // Callback for node expansion requests
+                showCounts: false,            // These are specific to the plugin's capabilities
+                showEntitySettings: false,
+                showFormula: false,
+                gravity: 'off', // Start with gravity off; can be 'touch' to initially scatter
+                minimal: <?php echo $isMinimalVersion; ?>
+            });
 
-                    entityradius: 1, // Default, likely overridden by settings.js
-                    linewidth: 1,    // Default, likely overridden by settings.js
+            // Example: setTimeout(function(){ setGravity('off');}, 3000); // turn off gravity after initial scatter
 
-                    showCounts: false,            // These are specific to the plugin's capabilities
-                    showEntitySettings: false,
-                    showFormula: false,
-                    gravity: 'off' // Start with gravity off; can be 'touch' to initially scatter
-                });
+            changeViewMode('icons'); // set initial view mode
+            zoomToFit();
 
-                // Example: setTimeout(function(){ setGravity('off');}, 3000); // turn off gravity after initial scatter
+            currentRequest = new_request;
 
-                changeViewMode('icons'); // Set initial view mode
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
         }
 
         /**
@@ -324,9 +385,8 @@ function onPageInit(success){
          * @global
          */
         function onVisualizeResize(){
-                var width = $(window).width();
-                var supw = 3.5; // Simplified, was: (width<744)?3.8:3.5;
-                $('#divSvg').css('top', supw+'em'); // Assumes #divSvg is the SVG container
+            var width = $(window).width();
+            $('#divSvg').css('top', '0em'); // Assumes #divSvg is the SVG container
         }
 
         </script>

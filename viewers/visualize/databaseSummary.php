@@ -260,6 +260,7 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                 <div id="main_content" class="ent_wrapper" style="left:0px;">
                     <?php
                         $isDatabaseStructure = 1;
+                        $isMinimalVersion = intval(@$_REQUEST['mini']);
                         include_once dirname(__FILE__).'/visualize.php';
                     ?>
                 </div>
@@ -442,7 +443,8 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
                             getData: function(data) { return data_to_vis; },
                             linelength: 200,
                             isDatabaseStructure: true,
-                            showCounts: false
+                            showCounts: false,
+                            minimal: <?php echo intval($isMinimalVersion); ?>
                         });
                     }
 

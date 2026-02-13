@@ -112,8 +112,8 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
         </div>
 
         <div id="setDivExport" class="toolbar-section advanced" style="display:none;border-left: solid 1px gray; padding-left:10px;text-align:right;min-width:50px;"> <?php // Export options ?>
-            <button type="button" id="gephi-export" onclick="getGephiFormat()" title="Export graph to GEXF format for Gephi">GEPHI</button>
-            <button type="button" id="embed-export" title="Get embed code for this visualization">Embed</button>
+            <button id="gephi-export" onclick="getGephiFormat()" title="Export graph to GEXF format for Gephi">GEPHI</button>
+            <button id="embed-export" title="Get embed code for this visualization">Embed</button>
         </div>
 
     </div> <?php // end of toolbar ?>
@@ -129,95 +129,147 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 </div>
 
 <?php
+} elseif(@$isMinimalVersion !== 0) {
+?>
+
+<div id="toolbar" class="split_bar" style="display: none;">
+
+    <div class="dropdown-content1">
+        <div>
+            <span id="lnkOpenPopup" class="fake_link" style="padding-right: 1em;">popup <span class="ui-icon ui-icon-extlink"></span></span>
+
+            <span style="display: inline-block;">
+                <button id="btnSingleSelect" name="selectMode" value="single" title="Select and drag single nodes">Select and drag nodes</button>
+                <button id="btnMultipleSelect" name="selectMode" value="multi" title="Select multiple nodes using a selection box (right-click and drag)">Select multiple nodes</button>
+            </span>
+
+            <span style="padding-left: 1em; display: inline-block;">
+                <span>Gravity:</span>
+                <input id="applyGravity" title="Apply gravity to the graph" type="checkbox" />
+            </span>
+
+            <span style="display: inline-block;">
+                <span>Titles:</span>
+                <input id="showRecordTitles" title="Show node record titles" type="checkbox" />
+            </span>
+
+            <span style="display: inline-block;">
+                <span>Font:</span>
+                <input id="recTitleSize" title="Font Size (pixels)" class="number-input" style="width: 3em; vertical-align: -1px;" type="number" min="8" max="30" step="1" />
+            </span>
+
+            <span style="display: inline-block;">
+                <span title="Node radius sizing" style="padding-left: 1.2em;">Node radius:</span>
+                <input id="nodesRadius" class="number-input small" type="number" min="12" max="45" step="1" title="Base node radius" />
+            </span>
+
+            <span style="padding-left: 1em; display: inline-block;">
+                <span style="border:none;background:none;">Zoom: </span>
+                <button id="btnZoomIn" style="width:20px;" title="Zoom In">In</button>
+                <button id="btnZoomOut" style="width:20px;" title="Zoom Out">Out</button>
+                <button id="btnFitToExtent" style="width:20px;" title="Fit graph to view">Fit to extent</button>
+            </span>
+
+            <span style="padding-left: 1em; display: inline-block;">
+                <span style="border:none;background:none;">Export:</span>
+                <button id="gephi-export" onclick="getGephiFormat()" title="Export to GEXF for Gephi">GEPHI</button>
+                <button id="embed-export" title="Get embed code">Embed</button>
+            </span>
+        </div>
+    </div>
+
+    <span class="heurist-helper2" style="position: absolute;left: 1em;bottom: 1em;">Double click to expand nodes</span>
+
+</div>
+
+<div id="divSvg" class="ent_content_full" style="top:4.5em;overflow:hidden;"> <?php // Main content area for SVG ?>
+    <svg id="d3svg" class="fullscreen" style="width: 100%; height: 100%;">
+        <text x="25" y="25" fill="black">Building graph ...</text> <?php // Initial loading message ?>
+    </svg>
+
+    <div id="net_limit_warning" style="z-index:2000;position:absolute;top:0;right:0;border-radius:6px;background-color: rgb(172, 231, 255);font-weight:bold;color:red; padding:8px; display:none;">
+    </div> <?php // Warning message for item limit ?>
+</div>
+
+<?php
 } else { // Toolbar and layout for Recordset Visualization (embedded in search results, etc.)
 ?>
-<div id="toolbar" class="split_bar"> <?php // Simplified toolbar using dropdowns ?>
-    <ul class="split_bar">
-        <li class="dropdown1" style="position:absolute;left:0px;top:10px;"> <?php // Changed div to li for ul parent ?>
-            <span id="nodecontrolbox" class="toolbar-dropdown-trigger">Node Control</span>
-            <div class="dropdown-content1">
-                <div>
-                    <span>Select Mode: </span>
-                    <button id="btnSingleSelect" name="selectMode" value="single" title="Select and drag single nodes">Select and drag nodes</button>
+<div id="toolbar" class="split_bar"> <?php // split toolbar, placed in corners (top left, top right and bottom left) ?>
+
+    <div class="dropdown-content1">
+        <div>
+            <span>Select Mode: </span>
+            <button id="btnSingleSelect" name="selectMode" value="single" title="Select and drag single nodes">Select and drag nodes</button>
             <button id="btnMultipleSelect" name="selectMode" value="multi" title="Select multiple nodes by dragging a selection box (usually right-click + drag)">Select multiple nodes</button>
-                </div>
+        </div>
 
-                <div>
-                    <span style="border:none;background:none;">Gravity:</span>
-                    <div id="setGravityMode" style="padding-left:10px;">
-                        <button id="gravityMode0" name="gravityMode" value="off" title="Turn off gravity">Off</button>
-                        <button id="gravityMode1" name="gravityMode" value="touch" title="Apply gravity on interaction">On</button>
-                    </div>
-                </div>
+        <div>
+            <span style="border:none;background:none;">Gravity:</span>
+            <div id="setGravityMode" style="padding-left:10px;">
+                <button id="gravityMode0" name="gravityMode" value="off" title="Turn off gravity">Off</button>
+                <button id="gravityMode1" name="gravityMode" value="touch" title="Apply gravity on interaction">On</button>
             </div>
-        </li> <?php // end dropdown1 ?>
-    </ul>
+        </div>
+    </div>
 
-    <ul class="split_bar">
-        <li class="dropdown2" style="position: absolute;left: 130px;top:10px; "> <?php // Changed div to li ?>
-            <span id="linkcontrolbox" class="toolbar-dropdown-trigger">Link Control</span>  <?php // Changed id for clarity ?>
-            <div class="dropdown-content2">
-                <div>
-                    <span>Links:</span>
-                    <label><input id="linksEmpty" title="Show empty links (zero count) as faint lines" type="checkbox" />&nbsp;Empty</label>
-                    <label><input id="expand-links" title="Expand all links between two nodes" type="checkbox" />&nbsp;Expand</label>
-                </div>
-                <div>
-                    <br/> <?php // Spacer ?>
-                    <span title="Node sizing formula">Node Size Formula:</span>
-                    <button id="nodesMode0" name="nodesMode" value="linear" title="Radius of nodes changes linearly">Lin</button>
-                    <button id="nodesMode1" name="nodesMode" value="logarithmic" title="Radius of nodes changes logarithmically">Log</button>
-                    <button id="nodesMode2" name="nodesMode" value="unweighted" checked="checked" title="Radius of nodes has fixed size">Fixed</button>
-                    <input id="nodesRadius" class="number-input small" type="number" min="12" max="45" step="1" title="Base node radius" />
-                </div>
+    <div class="dropdown-content2">
+        <div>
+            <span>Links:</span>
+            <label><input id="linksEmpty" title="Show empty links (zero count) as faint lines" type="checkbox" />&nbsp;Empty</label>
+            <label><input id="expand-links" title="Expand all links between two nodes" type="checkbox" />&nbsp;Expand</label>
+        </div>
+        <div>
+            <br>
+            <span title="Node sizing formula">Node Size Formula:</span>
+            <br>
+            <br>
+            <button id="nodesMode0" name="nodesMode" value="linear" title="Radius of nodes changes linearly">Lin</button>
+            <button id="nodesMode1" name="nodesMode" value="logarithmic" title="Radius of nodes changes logarithmically">Log</button>
+            <button id="nodesMode2" name="nodesMode" value="unweighted" checked="checked" title="Radius of nodes has fixed size">Fixed</button>
+            <input id="nodesRadius" class="number-input small" type="number" min="12" max="45" step="1" title="Base node radius" />
+        </div>
 
-            </div> <?php // end dropdown-content2 ?>
-        </li> <?php // end dropdown2 ?>
-    </ul>
+    </div> <?php // end dropdown-content2 ?>
 
-    <ul class="split_bar">
-        <li class="dropdown3" style="position: absolute;left: 250px;top:10px;"> <?php // Changed div to li ?>
-            <span id="graphcontrolbox" class="toolbar-dropdown-trigger">Graph Control</span> <?php // Changed id for clarity ?>
-            <div class="dropdown-content3">
-                <div>
-                    <button id="resetbutton" name="reset" onclick="refreshButton();" title="Refresh graph data and layout">Refresh Data</button>
-                    <button type="button" id="windowPopOut" onclick="openWin();" title="Open graph in a new fullscreen window">Open Fullscreen</button>
-                    <button type="button" id="closegraphbutton" onclick="window.close();" title="Close this fullscreen graph window">Close Fullscreen</button>
-                </div>
-                <div>
-                    <span id="viewnode" class="ui-controlgroup-label" style="border:none;background:none;">View Mode:
-                    </span>
-                    <button id="btnViewModeIcon" name="viewMode" value="icons" title="Icon view">Icons</button> <?php // Corrected name attribute ?>
-                    <button id="btnViewModeInfo" name="viewMode" value="infoboxes" title="Basic info box view">Info</button>
-                    <button id="btnViewModeFull" name="viewMode" value="infoboxes_full" title="Full info box with links view">Info + Links</button>
-                </div>
+    <div class="dropdown-content3">
+        <div>
+            <button id="resetbutton" onclick="refreshButton();" title="Refresh graph data and layout">Refresh Data</button>
+            <button id="windowPopOut" onclick="openWin();" title="Open graph in a new fullscreen window">Open Fullscreen</button>
+            <button id="closegraphbutton" onclick="window.close();" title="Close this fullscreen graph window">Close Fullscreen</button>
+        </div>
+        <div>
+            <span id="viewnode" class="ui-controlgroup-label" style="border:none;background:none;">View Mode:
+            </span>
+            <button id="btnViewModeIcon" name="viewMode" value="icons" title="Icon view">Icons</button> <?php // Corrected name attribute ?>
+            <button id="btnViewModeInfo" name="viewMode" value="infoboxes" title="Basic info box view">Info</button>
+            <button id="btnViewModeFull" name="viewMode" value="infoboxes_full" title="Full info box with links view">Info + Links</button>
+        </div>
 
-                <div>
-                    <span class="ui-controlgroup-label" style="border:none;background:none;">Set Zoom: </span>
-                    <button id="btnZoomIn" style="width:20px;" title="Zoom In">Zoom In</button>
-                    <button id="btnZoomOut" style="width:20px;" title="Zoom Out">Zoom Out</button>
-                    <button id="btnFitToExtent" style="width:20px;" title="Fit graph to view">Fit to extent</button>
-                </div>
+        <div>
+            <span class="ui-controlgroup-label" style="border:none;background:none;">Set Zoom: </span>
+            <button id="btnZoomIn" style="width:20px;" title="Zoom In">Zoom In</button>
+            <button id="btnZoomOut" style="width:20px;" title="Zoom Out">Zoom Out</button>
+            <button id="btnFitToExtent" style="width:20px;" title="Fit graph to view">Fit to extent</button>
+        </div>
 
-                <div id="setDivExport">
-                    <span class="ui-controlgroup-label" style="border:none;background:none;">Export:</span>
-                    <button type="button" id="gephi-export" onclick="getGephiFormat()" title="Export to GEXF for Gephi">GEPHI</button>
-                    <button type="button" id="embed-export" title="Get embed code">Embed</button>
-                </div>
-            </div>
+        <div id="setDivExport">
+            <span class="ui-controlgroup-label" style="border:none;background:none;">Export:</span>
+            <button id="gephi-export" onclick="getGephiFormat()" title="Export to GEXF for Gephi">GEPHI</button>
+            <button id="embed-export" title="Get embed code">Embed</button>
+        </div>
+    </div>
 
-            <?php // Labels settings are part of advanced in the other view, here they are hidden by default but could be shown ?>
-            <div id="setDivLabels" style="display:none; padding-left: 10px; min-width:140px;"> <?php // Hidden by default ?>
-                <span>Labels:</span>
-                <input type="checkbox" id="textOnOff" value="on" title="Show labels for icon view" style="margin: 5px;"/>
-                <div id="textColor" class="xcolorblock" title="Text color">Text</div> <?php // Placeholder ?>
+    <?php // Labels settings are part of advanced in the other view, here they are hidden by default but could be shown ?>
+    <div id="setDivLabels" style="display:none; padding-left: 10px; min-width:140px;"> <?php // Hidden by default ?>
+        <span>Labels:</span>
+        <input type="checkbox" id="textOnOff" value="on" title="Show labels for icon view" style="margin: 5px;"/>
+        <div id="textColor" class="xcolorblock" title="Text color">Text</div> <?php // Placeholder ?>
 
-                <input id="textLength" title="Max Label Length" class="number-input medium" type="number" min="10" max="250" step="10" />
-                x
-                <input id="fontSize" title="Font Size" class="number-input small" type="number" min="8" max="25" step="1" /> <?php // Note: This div is display:none by default ?>
-            </div>
-        </li> <?php // end dropdown3 ?>
-    </ul>
+        <input id="textLength" title="Max Label Length" class="number-input medium" type="number" min="10" max="250" step="10" />
+        x
+        <input id="fontSize" title="Font Size" class="number-input small" type="number" min="8" max="25" step="1" /> <?php // Note: This div is display:none by default ?>
+    </div>
+
 </div> <?php // end toolbar for recordset ?>
 
 <div id="divSvg" class="ent_content_full" style="top:4.5em;overflow:hidden;"> <?php // Main content area for SVG ?>

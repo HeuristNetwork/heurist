@@ -177,11 +177,12 @@ $system->defineConstant('DT_EXTENDED_DESCRIPTION');
 $system->defineConstant('DT_CMS_HEADER');
 $system->defineConstant('DT_CMS_FOOTER');
 
-$already_linked_ids = array();
-$group_details = array();
+$connectedRecIDs = [];
+$already_linked_ids = [];
+$group_details = [];
 
 $font_styles = '';
-$font_families = array();
+$font_families = [];
 
 $formats = $system->settings->getDatabaseSetting('TinyMCE formats');
 
@@ -275,6 +276,7 @@ if(!$system->hasAccess()){
             var baseURL = '<?php echo HEURIST_BASE_URL;?>';
             var database = '<?php echo $system->dbname();?>';
             var hint_popup = null, $map_frame = null;
+            var connectedRecsCount = 0;
 
             function zoomInOut(obj,thumb,url) {
                 var thumb = thumb;
@@ -504,8 +506,6 @@ if(!$system->hasAccess()){
             //
             function showHidePrivateInfo( event ){
 
-
-
                 let ele = $('#link_showhide_private');
 
                 if(ele.length == 0){
@@ -544,6 +544,30 @@ if(!$system->hasAccess()){
                 return false;
             }
 
+            function addNetworkGraphLink(){
+
+                let $group_container = $('div#div_public_data');
+
+                if($('#network-graph-area').length > 0 || <?php echo $noclutter || $is_map_popup ? 1 : 0; ?> === 1){ // already setup or skip for no clutter/map popup
+                    return;
+                }
+
+                let $network = $('<div>', {id: 'network-graph-area', style: 'display: none; padding: 1em 0px;'})
+                .append($('<h4>', {
+                    style: 'margin: 5px 0px 5px;font-size: 1.1em;text-transform: uppercase;',
+                    text: 'Network'
+                }))
+                .append($('<span>', {
+                    id: 'show_network',
+                    class: 'fake_link',
+                    style: 'padding-left: 2em; font-size: 12px;',
+                    html: `<span class="ui-icon ui-icon-network"></span>View network (<span id="connectionsPlaceholder"></span> connections)`
+                }))
+                .insertBefore($group_container.find('.detailRow.fieldRow').first());
+
+                $network.find('#show_network').on('click', () => openNetworkGraph());
+            }
+
             //
             // Add group headers to record viewer
             //
@@ -555,66 +579,104 @@ if(!$system->hasAccess()){
                 var $g_ele = null, $g_header = null;
                 var current_type = null;
 
+                addNetworkGraphLink();
+
                 if(groups == null || $data.length < 0 || $group_container.length < 0){
                     return;
-                }else{
-                    var parent_group = -1;
-                    $.each(groups, function(idx, group){
-
-                        var group_name = group[0];
-                        var order = group[1];
-                        var sep_type = group[2];
-                        let inner_group = sep_type == 'group' || sep_type == 'accordion_inner' || sep_type == 'expanded_inner';
-                        if(!inner_group){
-                            parent_group = order;
-                        }
-
-                        var next_group = groups[Number(idx)+1];
-                        var key = (next_group == null) ? null : next_group[0];
-                        var next_order = (key == null) ? null : next_group[1];
-                        var $field_container = $('<fieldset>').attr('id', order);
-
-                        $.each($data, function(idx, detail){
-
-                            var $detail = $(detail);
-                            var detail_order = $detail.attr('data-order');
-                            if(detail_order < order){ // detail belongs in previous group
-                                return;
-                            }else if(detail_order > order && (next_order == null || order < next_order)){
-                                $detail.appendTo($field_container);
-                            }else{ // detail belongs in next group
-                                return false;
-                            }
-                        });
-
-                        if(group_name != '-'){
-                            if(inner_group){
-                                $('<h5>').attr('data-order', order)
-                                    .css({'margin': '5px 15px 2px', 'font-size': '1em', 'font-style': 'italic'})
-                                    .text(group_name).appendTo($group_container);
-                                $field_container.attr('data_parent',parent_group);
-                            }else{
-                                $('<h4>').attr('data-order', order)
-                                    .css({'margin': '5px 0px 2px', 'font-size': '1.1em', 'text-transform': 'uppercase'})
-                                    .text(group_name).appendTo($group_container);
-                            }
-                        }else{
-                            $('<hr>').attr('data-order', order).css({'margin': '5px 0px 5px', 'border-top': '1px solid black'}).appendTo($group_container);
-                        }
-
-                        $field_container.appendTo($group_container);
-                    });
-
-                    //hide fieldset and groups without content
-                    $.each($group_container.find('fieldset'), function(idx, fieldset){
-                        if($(fieldset).find('div').length == 0){
-                            $(fieldset).hide();
-                            $group_container.find('h4[data-order="'+ $(fieldset).attr('id') +'"], h5[data-order="'+ $(fieldset).attr('id') +'"]').hide();
-                        }else if($(fieldset).attr('data_parent')>0){
-                            $group_container.find('h4[data-order="'+ $(fieldset).attr('data_parent') +'"]').show();
-                        }
-                    });
                 }
+
+                var parent_group = -1;
+                $.each(groups, function(idx, group){
+
+                    var group_name = group[0];
+                    var order = group[1];
+                    var sep_type = group[2];
+                    let inner_group = sep_type == 'group' || sep_type == 'accordion_inner' || sep_type == 'expanded_inner';
+                    if(!inner_group){
+                        parent_group = order;
+                    }
+
+                    var next_group = groups[Number(idx)+1];
+                    var key = (next_group == null) ? null : next_group[0];
+                    var next_order = (key == null) ? null : next_group[1];
+                    var $field_container = $('<fieldset>').attr('id', order);
+
+                    $.each($data, function(idx, detail){
+
+                        var $detail = $(detail);
+                        var detail_order = $detail.attr('data-order');
+                        if(detail_order < order){ // detail belongs in previous group
+                            return;
+                        }else if(detail_order > order && (next_order == null || order < next_order)){
+                            $detail.appendTo($field_container);
+                        }else{ // detail belongs in next group
+                            return false;
+                        }
+                    });
+
+                    if(group_name != '-'){
+                        if(inner_group){
+                            $('<h5>').attr('data-order', order)
+                                .css({'margin': '5px 15px 2px', 'font-size': '1em', 'font-style': 'italic'})
+                                .text(group_name).appendTo($group_container);
+                            $field_container.attr('data_parent', parent_group);
+                        }else{
+                            $('<h4>').attr('data-order', order)
+                                .css({'margin': '5px 0px 2px', 'font-size': '1.1em', 'text-transform': 'uppercase'})
+                                .text(group_name).appendTo($group_container);
+                        }
+                    }else{
+                        $('<hr>').attr('data-order', order).css({'margin': '5px 0px 5px', 'border-top': '1px solid black'}).appendTo($group_container);
+                    }
+
+                    $field_container.appendTo($group_container);
+                });
+
+                //hide fieldset and groups without content
+                $.each($group_container.find('fieldset'), function(idx, fieldset){
+
+                    fieldset = $(fieldset);
+                    const data_parent = fieldset.attr('data_parent');
+
+                    if(fieldset.find('div').length == 0){
+                        fieldset.hide();
+                        $group_container.find(`h4[data-order="${fieldset.attr('id')}"], h5[data-order="${fieldset.attr('id')}"]`).hide();
+                    }else if(data_parent){
+                        $group_container.find(`h4[data-order="${data_parent}"]`).show();
+                    }
+                });
+            }
+
+            function openNetworkGraph(){
+
+                let $networkElement = $('.networkGraphViewer');
+                if($networkElement.length === 0){
+                    $networkElement = $('<div>', {
+                        class: 'networkGraphViewer',
+                        style: 'height: 40em; background-color: white; box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);',
+                        html: `<button class="closeVisualiser" style="position: absolute; right: 1.5em;" title="Close mini visualiser">X</button>
+                        <iframe style="height: 40em;"></iframe>`
+                    }).appendTo($('#network-graph-area'));
+
+                    $networkElement.find('.closeVisualiser').button({icon: 'ui-icon-close', showLabel: false}).on('click', () => $networkElement.hide());
+                }
+
+                const recID = <?php echo intval($rec_id); ?>;
+                if(recID <= 0){
+                    return;
+                }
+
+                let iframe = $networkElement.find('iframe');
+                let query = encodeURI(`[{"any":[{"links":"${recID}"},{"ids":"${recID}"}]}]`);
+                let URL = `${baseURL}viewers/visualize/springDiagram.php?db=${database}&mini=1&q=${query}`; // mini: 1 = small, 2 = large
+
+                if($networkElement.attr('data-recid') == recID){
+                    $networkElement.show();
+                    return;
+                }
+
+                $networkElement.find('iframe').attr('src', URL);
+                $networkElement.attr('data-recid', recID);
             }
 
             //
@@ -685,7 +747,7 @@ if(!$system->hasAccess()){
 
                         for(var i = 1; i < Object.keys(related_records[key]).length; i++){
 
-                            var $rel_field = $rel_section.find('div[data-id="'+ related_records[key][i] +'"]').hide();
+                            var $rel_field = $rel_section.find(`div[data-id="${related_records[key][i]}"]`).hide();
 
                             if($pre_location.is('fieldset')){
                                 $rel_field.clone().appendTo($pre_location).show();// show rel field
@@ -945,20 +1007,21 @@ if(!$system->hasAccess()){
 
                 $.each($group_container.find('fieldset'), function(idx, fieldset){
 
-                    let $header = $group_container.find('h4[data-order="'+ $(fieldset).attr('id') +'"], h5[data-order="'+ $(fieldset).attr('id') +'"]');
-                    $(fieldset).show();
+                    fieldset = $(fieldset);
+                    let $header = $group_container.find(`h4[data-order="${fieldset.attr('id')}"], h5[data-order="${fieldset.attr('id')}"]`);
+                    fieldset.show();
                     $header.show();
 
-                    let $vis_rows = $(fieldset).find('div.detailRow').filter((idx, div) => { return $(div).css('display') != 'none';});
+                    let $vis_rows = fieldset.find('div.detailRow').filter((idx, div) => { return $(div).css('display') != 'none';});
                     if($vis_rows.length == 0){
-                        $(fieldset).hide();
+                        fieldset.hide();
                         $header.hide();
                     }
 
-                    let parent_id = $(fieldset).attr('data_parent');
+                    let parent_id = fieldset.attr('data_parent');
                     let $parent_ele = parent_id > 0 ? [] : $group_container.find(`h4[data-order="${parent_id}"]`);
                     if($parent_ele.length > 0){
-                        if($parent_ele.find('h4, h5').is(':visible')){
+                        if($parent_ele.find('h4, h5').is(':visible') || $parent_ele.is('h4:visible') || $parent_ele.is('h5:visible')){
                             $group_container.find(`h4[data-order="${parent_id}"]`).show();
                         }else{
                             $group_container.find(`h4[data-order="${parent_id}"]`).hide();
@@ -1085,6 +1148,16 @@ if(!$system->hasAccess()){
                     $login_icon.on('click', () => window.hWin.HEURIST4.ui.checkAndLogin(true, () => {location.reload();}));
                 }else{
                     $login_icon.hide();
+                }
+
+                if(connectedRecsCount > 0){
+
+                    if($('#network-graph-area').length === 0){
+                        addNetworkGraphLink();
+                    }
+
+                    $('#network-graph-area').show();
+                    $('#connectionsPlaceholder').text(connectedRecsCount);
                 }
 
             });
@@ -1453,7 +1526,7 @@ exit(0);
 
 // this functions outputs common info.
 function print_details($bib) {
-    global $is_map_popup, $without_header, $ACCESSABLE_OWNER_IDS, $system, $group_details, $show_private_details;
+    global $is_map_popup, $without_header, $ACCESSABLE_OWNER_IDS, $system, $group_details, $show_private_details, $connectedRecIDs;
 
     print_header_line($bib);
 
@@ -1488,6 +1561,13 @@ function print_details($bib) {
     }else{
         $login_link = $system->hasAccess() ? '' : '<br><br><a onclick="{window.hWin.HEURIST4.ui.checkAndLogin(true, ()=>location.reload() );}" href="#">Click here to login</a>';
         print "Sorry, your group membership does not allow you to view the content of this record {$login_link}";
+    }
+
+    $connectedRecIDCount = count($connectedRecIDs);
+    if($connectedRecIDCount > 0){
+        ?>
+        <script>connectedRecsCount = <?php echo $connectedRecIDCount; ?>;</script>
+        <?php
     }
 
 }
@@ -1786,7 +1866,7 @@ function print_personal_details($bkmk) {
 function print_public_details($bib) {
 
     global $system, $defTerms, $is_map_popup, $noclutter, $without_header, $is_production, $primary_language,
-        $ACCESSABLE_OWNER_IDS, $ACCESS_CONDITION, $relRT, $startDT, $already_linked_ids, $group_details, $hide_images;
+        $ACCESSABLE_OWNER_IDS, $ACCESS_CONDITION, $relRT, $startDT, $already_linked_ids, $connectedRecIDs, $group_details, $hide_images;
 
     $has_thumbs = false;
 
@@ -1999,8 +2079,8 @@ function print_public_details($bib) {
                         $bd['order_by_date'] = htmlspecialchars($row[0]);
                     }
 
-
-                    array_push($already_linked_ids, $rec_id);
+                    $connectedRecIDs[] = $rec_id;
+                    $already_linked_ids[] = $rec_id;
                 }
 
             }
@@ -2531,7 +2611,7 @@ function print_relation_details($bib) {
 
     global $system, $relRT,$relSrcDT,$relTrgDT,
         $ACCESSABLE_OWNER_IDS, $ACCESS_CONDITION, $useRelmarkerTitle,
-        $is_map_popup, $is_production, $rectypesStructure, $defTerms;
+        $is_map_popup, $is_production, $rectypesStructure, $defTerms,$connectedRecIDs;
 
     $mysqli = $system->getMysqli();
 
@@ -2663,6 +2743,10 @@ function print_relation_details($bib) {
                 print USanitize::sanitizeString($bd['Title'],ALLOWED_TAGS);
             }
 
+            if(!in_array($relatedRecID, $connectedRecIDs)){
+                $connectedRecIDs[] = $relatedRecID;
+            }
+
             print DIV_E.DIV_E;
         }
         $from_res->close();
@@ -2754,6 +2838,10 @@ function print_relation_details($bib) {
                 print USanitize::sanitizeString($bd['Title'],ALLOWED_TAGS);
             }
 
+            if(!in_array($relatedRecID, $connectedRecIDs)){
+                $connectedRecIDs[] = $relatedRecID;
+            }
+
             print DIV_E.DIV_E;
         }
         $to_res->close();
@@ -2800,7 +2888,7 @@ function print_linked_details_header($bib){
 function print_linked_details($bib, $link_cnt)
 {
     global $system, $relRT, $ACCESS_CONDITION,
-        $is_map_popup, $rectypesStructure, $already_linked_ids;
+        $is_map_popup, $rectypesStructure, $already_linked_ids,$connectedRecIDs;
 
     $ignored_ids = '';
     if(!empty($already_linked_ids)){
@@ -2824,6 +2912,10 @@ function print_linked_details($bib, $link_cnt)
 
     while ($row = $res->fetch_assoc()) {
 
+        if(in_array($row['rec_ID'], $already_linked_ids)){
+            continue;
+        }
+
         print '<div class="detailRow fieldRow" style="'.($is_map_popup?CSS_HIDDEN:'').'">';//FONT_SIZE && $link_cnt>2 linkRow
         $link_cnt++;
 
@@ -2835,6 +2927,11 @@ function print_linked_details($bib, $link_cnt)
             .composeRecLink($row['rec_ID'], $row['rec_Title']).DIV_E;
 
         print DIV_E;
+
+        $already_linked_ids[] = $row['rec_ID'];
+        if(!in_array($row['rec_ID'], $connectedRecIDs)){
+            $connectedRecIDs[] = $row['rec_ID'];
+        }
     }
 
     print DIV_E;

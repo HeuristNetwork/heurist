@@ -84,12 +84,16 @@ function addSelectionBox() {
 * Updates the fill color of foreground and background circles of specified nodes.
 * @param {string} selector - A D3 selector string for the nodes to update.
 * @param {string} [fgColor=foregroundColor] - The new foreground color. Defaults to the global `foregroundColor`.
-* @param {string} bgColor - The new background color.
+* @param {boolean} isSelection - Is the node being selected
 */
-function updateCircles(selector, fgColor, bgColor) {
+function updateCircles(selector, fgColor, isSelection) {
     if(!fgColor){
         fgColor = foregroundColor;
     }
+
+    let bgColor = !isSelection && !settings.isDatabaseStructure ? determineColour : getSetting('setting_entitycolor');
+    bgColor = isSelection ? window.selectionColor : bgColor;
+
     let nodes = window.d3.selectAll(selector);
     nodes.select(".foreground").style("fill", fgColor);
     nodes.select(".background").style("fill", bgColor);
@@ -115,11 +119,12 @@ function determineColour(dataColour) {
                      '#FF7043', '#EFEBE9', '#D7CCC8','#BCAAA4', '#A1887F', '#8D6E63', '#FAFAFA','#F5F5F5', '#EEEEEE', '#E0E0E0',
                      '#BDBDBD', '#ECEFF1', '#CFD8DC', '#B0BEC5', '#90A4AE','#78909C',  '#FF80AB', '#EA80FC', '#B388FF', '#8C9EFF'];
 
+    const colourLength = colours.length;
     let idx = dataColour.rty_ID - 1;
-    if(idx > 0 && idx < colours.length){
-        return colours[idx];
-    }
-    // Consider returning a default color if no match, or let the caller handle undefined.
+    idx = idx >= colourLength ? idx % colourLength : idx;
+    idx = idx < 0 ? Math.random() * colourLength : idx;
+
+    return colours[idx];
 }
 
 /**
@@ -153,7 +158,6 @@ function onRecordNodeClick(event, data, node) {
     }
 
     // Clicked with ctrl key?
-    let bgColor = getSetting('setting_entitycolor');
     if(event.ctrlKey){
         // Select multiple
         let idx = settings.selectedNodeIds.indexOf(recID);
@@ -161,12 +165,12 @@ function onRecordNodeClick(event, data, node) {
             // Deselect if already selected
             needSelect = false;
             //NOTE - need test IT WAS ".node"
-            updateCircles(".node.id"+recID, foregroundColor, bgColor); // Deselect this specific node
+            updateCircles(".node.id"+recID, foregroundColor, false); // Deselect this specific node
             settings.selectedNodeIds.splice(idx, 1);
         }
     }else{
         // Select single, deselect all others
-        updateCircles(".node", foregroundColor, bgColor); // Deselect all
+        updateCircles(".node", foregroundColor, false); // Deselect all
         settings.selectedNodeIds = [];
     }
 
@@ -176,7 +180,7 @@ function onRecordNodeClick(event, data, node) {
         settings.selectedNodeIds.push(recID);
 
         // Update circles and show overlay
-        updateCircles(node, window.selectionColor, window.selectionColor);
+        updateCircles(node, window.selectionColor, true);
 
         let nodePos = $(node).offset();
         const r = getEntityRadius(data.count);
@@ -204,7 +208,7 @@ function visualizeSelection(selectedNodeIds) {
 
     // Deselect all first
     if(currentMode == 'icons'){
-        updateCircles(".node", foregroundColor, getSetting('setting_entitycolor'));
+        updateCircles(".node", foregroundColor, false);
     }else{
         updateRectangles(".node", foregroundColor); // Assuming default color for unselected rectangles
     }
@@ -215,7 +219,7 @@ function visualizeSelection(selectedNodeIds) {
             let selector = ".id"+selectedNodeIds[i];
 
             if(currentMode == 'icons'){
-                updateCircles(selector, window.selectionColor, window.selectionColor);
+                updateCircles(selector, window.selectionColor, true);
             }else{
                 updateRectangles(selector, window.selectionColor);
             }
@@ -267,8 +271,7 @@ function onMouseDown() {
         positions.clickY1 = window.d3.event.y; // Screen Y
 
         // Deselect all nodes visually
-        const bgColor = getSetting('setting_entitycolor');
-        updateCircles(".node", foregroundColor, bgColor);
+        updateCircles(".node", foregroundColor, false);
         settings.selectedNodeIds = []; // Clear logical selection
     }
 }
@@ -340,7 +343,7 @@ function onMouseUp() {
             const nodeCenterY = nodePos.top + nodePos.height / 2;
 
             if (nodeCenterX >= minX && nodeCenterX <= maxX && nodeCenterY >= minY && nodeCenterY <= maxY) {
-               updateCircles(selector, window.selectionColor, window.selectionColor);
+               updateCircles(selector, window.selectionColor, true);
                settings.selectedNodeIds.push(""+d.id);
             }
         });
@@ -351,8 +354,7 @@ function onMouseUp() {
 
     } else if (window.d3.event.button === 0 && !window.d3.event.ctrlKey && !$(window.d3.event.target).closest('.node').length) {
         // Left click on empty space (not on a node) and not Ctrl key
-        const bgColor = getSetting('setting_entitycolor');
-        updateCircles(".node", foregroundColor, bgColor); // Deselect all
+        updateCircles(".node", foregroundColor, false); // Deselect all
         settings.selectedNodeIds = [];
         if(settings.triggerSelection){
             settings.triggerSelection.call(this, settings.selectedNodeIds);

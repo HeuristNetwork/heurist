@@ -219,11 +219,11 @@ text.shadow {
 
 /**Node information iframe
   *ADDED BY ISH */
-  #infoDiv {
+#infoDiv {
     display: none;
     position: absolute;
     right: 10px;
-    top: 3.5em;
+    top: 9em;
     width: 30%;
     min-width: 380px;
     max-width: 380px;
@@ -238,10 +238,10 @@ text.shadow {
     z-index: 60001;
 }
 #btnCtrlNewtab{
-    right: 36px;
+    right: 2.5em;
 }
 #btnCtrlPopup{
-    right: 72px;
+    right: 5em;
 }
 .iframeControls .ui-icon{
     top: 3px;
@@ -270,10 +270,8 @@ text.shadow {
     display:table-cell;
     height:auto;
 }
-#toolbar.split_bar {
-    display: flex;
-    position: relative;
-    width: 400px;
+.split_bar{
+    height: 0px;
 }
 
 #toolbar2 {
@@ -303,23 +301,30 @@ text.shadow {
 .dropdown-content3 {
     padding: 5px;
     margin-top: 5px;
-    display: none;
-    position: relative;
-    background-color: #f1f1f1;
+    background-color: #EFEFEF;
     min-width: 200px;
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
+    position: absolute;
 }
 
+.dropdown-content1{
+    top: 1px;
+    left: 1px;
+}
+
+.dropdown-content2{
+    bottom: 1px;
+    left: 1px;
+}
+
+.dropdown-content3{
+    top: 1px;
+    right: 1px;
+}
 
 .dropdown-content a:hover {
     background-color: #ddd;
-}
-
-.dropdown1:hover .dropdown-content1,
-.dropdown2:hover .dropdown-content2,
-.dropdown3:hover .dropdown-content3 {
-    display: block;
 }
 
 .dropdown-content1 div,
@@ -330,15 +335,6 @@ text.shadow {
 
 .dropdown:hover .dropbtn {
     background-color: #1fb5cf;
-}
-
-ul.split_bar {
-
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background-color: #333;
 }
 
 .ui-icon-cursor{

@@ -173,7 +173,6 @@ let maxCountForLinks;
             showGravity: true,
             showAttraction: true,
 
-
             // Default UI settings values
             advanced: false,        // Whether advanced settings panel is shown
             linetype: "straight",   // 'straight', 'curved', 'stepped'
@@ -200,7 +199,9 @@ let maxCountForLinks;
             // Initial transform values for the graph container
             translatex: 200,
             translatey: 200,
-            scale: 1
+            scale: 1,
+
+            minimal: 0
         }, options );
 
         // Handle settings initialization and UI setup (from settings.js)
@@ -442,7 +443,7 @@ function visualizeData() {
     determineMaxCount(data);
 
     // Container with zoom and force
-    let container = addContainer();
+    addContainer();
     svg.call(zoomBehaviour); 
     window.force = addForce();
 
@@ -453,11 +454,11 @@ function visualizeData() {
     addLines("bottom-lines", getSetting('setting_linecolor', '#000'), 1); // larger than top-line, shows connections
     addLines("top-lines", "#FFF", 1); // small line that is for displaying direction arrows
     addLines("rollover-lines", "#FFF", 3); // invisible thicker line for rollover
-   
+
     // Nodes
     addNodes();
     //addTitles();
-    
+
     if(settings.isDatabaseStructure){
         
         let cnt_vis = data.nodes?data.nodes.length:0;
@@ -471,18 +472,14 @@ function visualizeData() {
             
         $('#lblShowRectypeSelector').text(sText);
 
-    }else{
-        inIframe();
+    }else if(!settings.minimal){
+        inIframe();   
     }
 
-    if(settings.isDatabaseStructure || isStandAlone){
+    if(settings.isDatabaseStructure || (isStandAlone && !settings.minimal)){
         $('#embed-export').css('visibility','hidden');//hide();
     }else{
-        $('#embed-export').button({icon:'ui-icon-globe',showLabel:false}).on('click',
-            function(){
-                 showEmbedDialog();
-            }
-        );
+        $('#embed-export').button({icon:'ui-icon-globe',showLabel:false}).on('click', showEmbedDialog);
     }
 
     tick()// update display
@@ -534,27 +531,54 @@ function addContainer() {
                            .scale(scale)
                            .scaleExtent(scaleExtentVals)
                            .on("zoom", zoomed);
-                    
+
+    updateLabels();
+
     return container;
 }
 
 /**
 * Update label scaling
 */
-function updateLabels() {
+function updateLabels(){
 
-    //Gerard Zoom Scaling
-    const nodeList = document.querySelectorAll('.nodelabel');  //.setAttribute('style', 'scale: 5 !important;');
-    for (let i = 0; i < nodeList.length; i++) {
-        nodeList[i].style.scale = "1";
-        nodeList[i].style.transform = "translate(0px, 0px)";
+    if(window.currentMode !== 'icons'){
+        return;
     }
+
+    const scale = this.zoomBehaviour.scale();
+
+    let fontSize = $('#recTitleSize').length > 0 ? $('#recTitleSize').val() : getSetting('setting_fontsize', $('#fontSize').val());
+    let nodeSize = $('#nodeSize').length > 0 ? $('#nodeSize').val() : getSetting('setting_nodesize', window.circleSize);
+    let iconSize = $('#iconSize').length > 0 ? $('#iconSize').val() : getSetting('setting_iconsize', window.iconSize);
+    fontSize = Number.parseFloat(fontSize);
+    nodeSize = Number.parseFloat(nodeSize);
+    iconSize = Number.parseFloat(iconSize);
+
+    nodeSize /= scale;
+    iconSize /= scale;
+    const iconPos = -iconSize / 2;
+
+    const labelList = document.querySelectorAll('.nodelabel');
+    fontSize /= scale;
+    const labelX = nodeSize + 20;
+    for(let i = 0; i < labelList.length; i++){
+
+        labelList[i].style.setProperty('font-size', `${fontSize}px`, 'important');
+        labelList[i].style.setProperty('scale', '1');
+        labelList[i].style.setProperty('transform', 'translate(0px, 0px)');
+        //labelList[i].setAttribute('x', labelX);
+    }
+
+    tick();
 }
 
 /**
 * Called after a zoom-event takes place.
 */
 function zoomed() { 
+
+    let scale = window.d3.event.scale; //Math.pow(window.d3.event.scale,0.75);
 
     updateLabels();
 
@@ -581,11 +605,9 @@ function zoomed() {
     }else{
         notDefined = true;
     }
-    
-    let scale = window.d3.event.scale; //Math.pow(window.d3.event.scale,0.75);
-    
+
     //keep current setting Scale
-    if(!isNaN(window.d3.event.scale) && isFinite(window.d3.event.scale)&& scale!=0){
+    if(!isNaN(window.d3.event.scale) && isFinite(window.d3.event.scale)&& scale != 0){
         putSetting('setting_scale', scale);
         transform = transform + "scale("+scale+")";
     }
@@ -852,7 +874,7 @@ function addLines(name, color, thickness) {
     let lines;
     
     let linetype = getSetting('setting_linetype', 'straight');
-    let hide_empty = (getSetting('setting_line_empty_link', 1)==0);
+    let hide_empty = getSetting('setting_line_empty_link', 1) == 0;
     
     lines = window.d3.select("#container")
            .append("svg:g")
@@ -1059,19 +1081,18 @@ function updateStraightLines(lines, type) {
         $(this).remove();
     });
     let container = window.d3.select('#container');
-    
+
     // Calculate the straight points
     lines.attr("d", function(d) {
 
-        if(d == null){
+        if(d == null || !d.source.id || !d.target.id){
             return '';
         }
         
         //are source and target defined
-        if(d.source.id && d.target){
-            if(isNaN(d.source.x) || isNaN(d.source.y) || isNaN(d.target.x) || isNaN(d.target.y)){
-                return false;
-            }
+        let missingPosition = isNaN(d.source.x) || isNaN(d.source.y) || isNaN(d.target.x) || isNaN(d.target.y);
+        if(missingPosition){
+            return '';
         }
         
         let key = d.source.id+'_'+d.target.id,
@@ -1592,14 +1613,21 @@ function addLabels(name, color) {
 //
 function showEmbedDialog(){
 
-    let query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
-    query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
-    let url = window.hWin.HAPI4.baseURL+'viewers/visualize/springDiagram.php' + query;
+    let URLParams = new URLSearchParams();
+    URLParams.append('db', window.hWin.HAPI4.database);
+    if(settings.minimal){
+        URLParams.append('mini', 2);
+    }
+
+    let hQuery = typeof currentRequest?.q === 'string' ? currentRequest : window.hWin.HEURIST4.current_query_request;
+    let query = window.hWin.HEURIST4.query.composeHeuristQuery2(hQuery, false);
+    query += `${query == '?' ? '' : '&'}${URLParams.toString()}`;
+    let url = `${window.hWin.HAPI4.baseURL}viewers/visualize/springDiagram.php${query}`;
 
     //encode
-    query = window.hWin.HEURIST4.query.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
-    query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
-    let url_enc = window.hWin.HAPI4.baseURL+'viewers/visualize/springDiagram.php' + query;
+    query = window.hWin.HEURIST4.query.composeHeuristQuery2(hQuery, true);
+    query += `${query == '?' ? '' : '&'}${URLParams.toString()}`;
+    let url_enc = `${window.hWin.HAPI4.baseURL}viewers/visualize/springDiagram.php${query}`;
 
     window.hWin.HEURIST4.ui.showPublishDialog({mode:'graph', url: url, url_encoded: url_enc});
 
@@ -1633,6 +1661,10 @@ function inIframe() {
         gravitymodeOne.style.display = 'visible';
 
     }
+
+    $(fullscreenbtn).button();
+    $(closewindowbtn).button();
+    $(refreshData).button();
 
 }
 
