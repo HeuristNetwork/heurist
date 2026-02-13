@@ -378,7 +378,7 @@ $.widget( "heurist.navigation", {
 
             }else{
             
-                let menuName = (home_page_id==page_id)?top.HR('Home'):resdata.fld(record, DT_NAME, this.options.language);
+                let menuName = (home_page_id==page_id)?window.hWin.HR('Home'):resdata.fld(record, DT_NAME, this.options.language);
                 let menuTitle = (home_page_id==page_id)?'':resdata.fld(record, DT_SHORT_SUMMARY, this.options.language);
                 let menuIcon = (home_page_id==page_id)?null:resdata.fld(record, DT_THUMBNAIL);
 

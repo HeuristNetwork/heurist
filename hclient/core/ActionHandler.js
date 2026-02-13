@@ -604,7 +604,7 @@ class ActionHandler {
                 
                 break;
             case "menu-magic-tool":
-                window.hWin.HEURIST4.msg.showMsg(top.HR('New_Function_Contact_Team'));
+                window.hWin.HEURIST4.msg.showMsg(window.hWin.HR('New_Function_Contact_Team'));
                 break;
             case "menu-subset-set":{ //see menu Explore
                 let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');

@@ -973,7 +973,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         let records = recordset.getRecords();
         let order = recordset.getOrder();
         
-        let list_div = $('<div><span">'+top.HR(sort_mode)+': </span></div>')   // style="font-weight:bold
+        let list_div = $('<div><span">'+window.hWin.HR(sort_mode)+': </span></div>')   // style="font-weight:bold
             .css({'padding':'4px'}); //,'line-height':'22px'
         let that = this;
         

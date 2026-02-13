@@ -1444,7 +1444,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     for(let idx in headers){
                         let acc = $('<div>').addClass('summary-accordion').appendTo(this.editFormSummary);
                         
-                        $('<h3>').text(top.HR(headers[idx])).appendTo(acc);
+                        $('<h3>').text(window.hWin.HR(headers[idx])).appendTo(acc);
                         //content
                         $('<div>').attr('data-id', idx).addClass('summary-content').appendTo(acc);
                         
@@ -1665,7 +1665,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 //activate buttons
                 /* moved to top of editForm 2017-12-21
-                panel.find('.btn-config2').button({showLabel:false,label:top.HR('Modify record type structure in new window'),
+                panel.find('.btn-config2').button({showLabel:false,label:window.hWin.HR('Modify record type structure in new window'),
                         icon:'ui-icon-extlink'})
                     .addClass('ui-heurist-btn-header1')
                     .css({float: 'right','font-size': '0.8em', height: '18px', 'margin-left':'4px'})
@@ -1673,7 +1673,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         that.editRecordTypeOnNewTab();
                     });
                     
-                panel.find('.btn-config').button({showLabel:false,label:top.HR('Modify record type structure'),
+                panel.find('.btn-config').button({showLabel:false,label:window.hWin.HR('Modify record type structure'),
                         icon:'ui-icon-gear'})
                     .addClass('ui-heurist-btn-header1')
                     .css({float: 'right','font-size': '0.8em', height: '18px', 'margin-left':'4px'})
@@ -1682,7 +1682,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 */
                     
                 let btn_change_rt = panel.find('.btn-modify');                        
-                btn_change_rt.button({showLabel:false, label:top.HR('Change record type'),
+                btn_change_rt.button({showLabel:false, label:window.hWin.HR('Change record type'),
                         icon:'ui-icon-triangle-1-s'})
                     //.addClass('ui-heurist-btn-header1')
                     .css({float: 'left','font-size': '0.8em', height: '14px', width: '14px'})
@@ -1791,7 +1791,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
                     
                     
-            panel.find('.btn-access').button({showLabel:false,label:top.HR('Change ownership and access rights'),
+            panel.find('.btn-access').button({showLabel:false,label:window.hWin.HR('Change ownership and access rights'),
                         icon:'ui-icon-pencil'})
                     //.addClass('ui-heurist-btn-header1')
                     .css({float: 'right','margin': '0 0 0.8em 7px', 'font-size': '0.8em', height: '14px', width: '14px'})
@@ -2176,7 +2176,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             pnl.append(sContent);
 
             //append/manage button
-            $('<div>').button({label:top.HR('Manage reminders'), showLabel:false,
+            $('<div>').button({label:window.hWin.HR('Manage reminders'), showLabel:false,
                 icon:'ui-icon-pencil'})  //ui-icon-mail
                 .css({position:'absolute',right:'13px', height: '18px'})
                 .addClass('non-owner-disable')
@@ -2213,7 +2213,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             pnl.empty().css({'font-size': '0.9em'});
 
             //append/manage button
-            $('<div>').button({label:top.HR('Manage bookmark info'), showLabel:false,
+            $('<div>').button({label:window.hWin.HR('Manage bookmark info'), showLabel:false,
                 icon:'ui-icon-pencil'})  //ui-icon-bookmark
                 .addClass('non-owner-disable')
                 .css({float: 'right', height: '18px'}) //position:'absolute',right:'13px',
@@ -2326,7 +2326,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
             
             //append manage button
-            $('<div>').button({label:top.HR('Manage record tags'), showLabel:false,
+            $('<div>').button({label:window.hWin.HR('Manage record tags'), showLabel:false,
                 icon:'ui-icon-tag'})
                 .addClass('ui-heurist-btn-header1')
                 .css({float:'right', height: '18px'})

@@ -235,9 +235,9 @@ $.widget( "heurist.app_storymap", {
             "children":
             [{"name":"TabControl","type": ((this.options.reportOverviewMode=='tab' || this.options.reportEndPageMode=='tab')?"tabs":"group"),
                 "css":{},"folder":true,"dom_id":"tabCtrl","children":
-                [{"name":top.HR('Overview'),"type":"group","css":cssOverview,"folder":true,
+                [{"name":window.hWin.HR('Overview'),"type":"group","css":cssOverview,"folder":true,
                     "children":[{"name":"Overview content","type":"text","css":{},"content":"","dom_id":"pnlOverview"}]},
-                 {"name":top.HR('Story'),"type":"group","css":{},"folder":true,
+                 {"name":window.hWin.HR('Story'),"type":"group","css":{},"folder":true,
                         "children":[{"appid":"heurist_resultList","name":"Story list","css":
                                     {"position":"absolute","minWidth":150,"height":'100%',"width":'100%'}, //"minHeight":400
                             "options":{
@@ -284,7 +284,7 @@ $.widget( "heurist.app_storymap", {
                                 "eventbased": false},
                             "dom_id":"storyList"}]
                     },
-                    {"name":top.HR('End page'),"type":"group","css":cssEndPage,"folder":true,
+                    {"name":window.hWin.HR('End page'),"type":"group","css":cssEndPage,"folder":true,
                     "children":[{"name":"End page content","type":"text","css":{},"content":"","dom_id":"pnlEndPage"}]}
                 ]
             }]
@@ -961,7 +961,7 @@ $.widget( "heurist.app_storymap", {
             */    
             }else{
                 //show warning on overview panel
-                this.pnlOverview.html(top.HR('No story fields defined'));
+                this.pnlOverview.html(window.hWin.HR('No story fields defined'));
                 this.pnlEndPage.html('');
             }
                 
@@ -1134,7 +1134,7 @@ $.widget( "heurist.app_storymap", {
             if(this.options.reportOverviewMode=='inline' && this.options.reportElementMode!='vertical'){
                 this._btn_clear_story.button({icon:'ui-icon-circle-b-close', showLabel:false});
             }else{
-                this._btn_clear_story.button({label:top.HR('Close'),showLabel:true,icon:null});
+                this._btn_clear_story.button({label:window.hWin.HR('Close'),showLabel:true,icon:null});
             }
             this._btn_clear_story.show();  
         } 

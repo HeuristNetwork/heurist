@@ -150,7 +150,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 }
 
                 if(msg=='' || (needlogin && response.sysmsg==0)){
-                    msg = msg + top.HR('Session expired');
+                    msg = msg + window.hWin.HR('Session expired');
                     show_login_dlg = true;
                 }else if(response.sysmsg==0){
                     msg = msg + 'You must be logged in';  

@@ -1989,7 +1989,7 @@ window.hWin.HEURIST4.ui = {
             }
             
             //remove button
-            ele.find('.btn-del').button({showLabel:false, label:top.HR('Remove '+(info['relation_recID']>0?'relation':'link')),
+            ele.find('.btn-del').button({showLabel:false, label:window.hWin.HR('Remove '+(info['relation_recID']>0?'relation':'link')),
                             icon:'ui-icon-circlesmall-close'})
             .css({'font-size': '0.8em', height: '21px', 'max-width': '18px'})
             .on('click', function(event){
@@ -2036,7 +2036,7 @@ window.hWin.HEURIST4.ui = {
                             + top.HAPI4.iconBaseURL + '1\');"/>'
             +'<span class="ui-button-icon ui-icon ui-icon-pencil" style="margin:0"></span>').appendTo(bele);
             
-            //.button({showLabel:false, label:top.HR((isEdit?'Edit':'View')+' relationship record'),icon:'ui-icon-pencil'})
+            //.button({showLabel:false, label:window.hWin.HR((isEdit?'Edit':'View')+' relationship record'),icon:'ui-icon-pencil'})
             
             bele.addClass('ui-button').css({'font-size': '0.8em', height: '18px', 'max-width': '40px',
                 'min-width': '40px', display: 'inline-block', padding: 0, background: 'none'})
@@ -2138,7 +2138,7 @@ window.hWin.HEURIST4.ui = {
                             
                 }else{
                     
-                    btn_edit.button({showLabel:false, label:top.HR('Edit linked record'),
+                    btn_edit.button({showLabel:false, label:window.hWin.HR('Edit linked record'),
                                     icon:'ui-icon-pencil'})
                                 .css({'font-size': '0.8em', height: '21px', 'max-width': '18px'})
                     

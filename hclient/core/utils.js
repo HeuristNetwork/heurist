@@ -1177,9 +1177,13 @@ window.hWin.HEURIST4.util = {
     },
     
     isFullyActive: function (s /* self */) {
+        let win = s.window ?? null;
+        return !!win && !!win.document && win.document.readyState === "complete";
+        /* it raises an exception for embed mode
         return s && s.window !== null
         && s.document === s.window.document
         && (s.window.top === s.window || window.hWin.HEURIST4.util.isFullyActive(s.window.parent));
+        */
     },
     
     //constants for saved searches\
