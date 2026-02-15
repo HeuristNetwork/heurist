@@ -1307,7 +1307,7 @@ class BulkEmailSystem {
         $mysqli = $this->system->getMysqli();
 
         if(!$mysqli){
-            $this->system->init($system->dbname(), true, false);
+            $this->system->init($this->system->dbname(), true, false);
             return;
         }
         
@@ -1319,7 +1319,7 @@ class BulkEmailSystem {
         }
 
         if(!$res){
-            $this->system->init($system->dbname(), true, false);
+            $this->system->init($this->system->dbname(), true, false);
         }
     }
     

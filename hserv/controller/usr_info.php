@@ -97,7 +97,7 @@
         if($system->setDbnameFull($dbname)){
 
             $system->initPathConstants($dbname);
-            $system->userLogActivity(@$req_params['activity'], @$req_params['suplementary'], @$req_params['user']);
+            $system->userLogActivity(@$req_params['activity'], @$req_params['suplementary'], @$req_params['user'], @$req_params['session']);
             $res = true;
 
             if(@$req_params['activity']=='impEmails'){
@@ -318,6 +318,12 @@
         }
     }elseif($action == "translate_string"){ // translate given string using Deepl's API, if able
         $res = getDeepLTranslation($system, @$req_params['string'], @$req_params['target'], @$req_params['source']);
+    }elseif($action == 'prepare_params'){
+        $type = @$req_params['preparedType'];
+        $mode = @$req_params['preparedMode'];
+        unset($req_params['preparedType']);
+        unset($req_params['preparedMode']);
+        $res = USystem::prepareParameters($type, $mode, $req_params);
     }else{
 
         $mysqli = $system->getMysqli();

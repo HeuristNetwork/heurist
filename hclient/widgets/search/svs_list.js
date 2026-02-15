@@ -2366,14 +2366,14 @@ $.widget( "heurist.svs_list", {
                                 that.doSearch( 0, qname, qsearch, ele );
                             });
                             return;
-                        }else
-                            if(this.search_faceted.html()==''){ //not created yet
-                                this.search_faceted.search_faceted( noptions );
-                            }else{
-                                this.search_faceted.search_faceted('option', noptions ); //assign new parameters
-                            }
+                        }
+                        if(this.search_faceted.html()==''){ //not created yet
+                            this.search_faceted.search_faceted( noptions );
+                        }else{
+                            this.search_faceted.search_faceted('option', noptions ); //assign new parameters
+                        }
 
-                        window.hWin.HAPI4.SystemMgr.user_log('search_Record_faceted');
+                        window.hWin.HAPI4.SystemMgr.user_log('search_Record_faceted', {svs: svs_ID});
                     }
 
                 }else{
@@ -2415,7 +2415,7 @@ $.widget( "heurist.svs_list", {
                         window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('RuleSets require an initial search result as a starting point.'),
                             3000, window.hWin.HR('Warning'), ele);
                     }else{
-                        window.hWin.HAPI4.SystemMgr.user_log('search_Record_applyrules');
+                        window.hWin.HAPI4.SystemMgr.user_log('search_Record_applyrules', {q: request.q, rules: request.rules});
                     }
                     
                 }else if(window.hWin.HEURIST4.util.isempty(request.q)){
@@ -2433,7 +2433,7 @@ $.widget( "heurist.svs_list", {
                     request.search_page = this.options.search_page;
                     request.search_ID = svs_ID;
                     
-                    window.hWin.HAPI4.SystemMgr.user_log('search_Record_savedfilter');
+                    window.hWin.HAPI4.SystemMgr.user_log('search_Record_savedfilter', {svs: svs_ID});
                     
                     //get hapi and perform search
                     window.hWin.HAPI4.RecordSearch.doSearch( this, request );

@@ -100,11 +100,14 @@
     }elseif(@$params['mapmarker_csv']){
         downloadMapMarkers($system, $params['ids']);
         exit;
-    }elseif(array_key_exists('prepare', $params)){
-        prepareParameters('export', $params);
+    }elseif(array_key_exists('preparedID', $params)){
+        $mode = @$params['preparedMode'];
+        unset($params['preparedMode']);
+        $id = USystem::prepareParameters('export', $mode, $params);
+        dataOutput(['status' => HEURIST_OK, 'data' => $id]);
         exit;
     }elseif(array_key_exists('preparedID', $params)){
-        if(!retrieveParameters($system, 'export', $params)){
+        if(!USystem::getPreparedParameters($system, 'export', $params)){
             $system->errorExitApi();
         }
     }
@@ -611,99 +614,4 @@ function downloadMapMarkers($system, $ids){
     exit;
 }
 
-/**
- * Store parameters to be used in an upcoming server call, this is done to avoid excessively long URLs that lead to 414 errors
- * @todo: move location to somewhere more accessible, include retrieveParameters
- *
- * @param string $type Process type, e.g. 'export' or 'import'
- * @param array $parameters Parameters to be saved, ignores 'prepare', 'replace' and 'DBGSESSID' keys
- * @return void
- */
-function prepareParameters($type, $parameters){
-
-    if(empty($parameters)){
-        dataOutput(['status' => HEURIST_OK, 'data' => null]);
-    }
-
-    $id = !is_numeric(@$parameters['prepare']) || intval($parameters['prepare']) <= 0 ? time() : intval($parameters['prepare']);
-
-    /*
-    0 - Complete replace
-    1 - Merge + maintain existing
-    2 - Merge + replace existing
-    */
-    $replace = !is_numeric(@$parameters['replace']) ? 0 : intval($parameters['replace']);
-    $replace = $replace > 2 || $replace < 0 ? 0 : $replace;
-
-    $paramsFile = HEURIST_SCRATCH_DIR . "{$type}_{$id}.json";//yml
-
-    $storedParameters = [];
-    if(file_exists($paramsFile)){
-        $storedParameters = file_get_contents($paramsFile);
-
-        $storedParameters = json_decode($storedParameters, true);
-        $storedParameters = json_last_error() !== JSON_ERROR_NONE ? [] : $storedParameters;
-    }
-
-    foreach($parameters as $key => $value){
-
-        if($key === 'prepare' || $key === 'replace' || $key === 'DBGSESSID'){
-            continue;
-        }elseif($replace !== 0 && array_key_exists($key, $storedParameters) && $key !== 'db'){
-            if(is_array($storedParameters[$key]) && is_array($value)){
-                $storedParameters[$key] = $replace === 1 ? array_merge($storedParameters[$key], $value) : array_merge($value, $storedParameters[$key]);
-                continue;
-            }elseif(is_string($storedParameters[$key]) && is_string($value)){
-                $storedParameters[$key] .= $value;
-                continue;
-            }
-        }
-
-        $storedParameters[$key] = $value;
-    }
-
-    file_put_contents($paramsFile, json_encode($storedParameters));
-
-    dataOutput(['status' => HEURIST_OK, 'data' => $id]);
-}
-
-/**
- * Retrieve previously saved parameters, this will not replace existing keys
- *
- * @param string $type Process type, e.g. 'export' or 'import'
- * @param array $parameters Parameters array to be updated with stored parameters
- * @return bool
- */
-function retrieveParameters($system, $type, &$parameters){
-
-    if(!is_numeric(@$parameters['preparedID'])){
-        $system->addError(HEURIST_INVALID_REQUEST, 'Wrong parameter preparedID. Must be integer');
-        return false;
-    }
-
-    $id = intval($parameters['preparedID']);
-
-    $paramsFile = HEURIST_SCRATCH_DIR . "{$type}_{$id}.json";//yml
-
-    if(!file_exists($paramsFile)){
-        $system->addError(HEURIST_INVALID_REQUEST, 'Query parameters file not found. Either parameter preparedID is wrong or session expired');
-        return false;
-    }
-
-    $storedParameters = file_get_contents($paramsFile);
-
-    $storedParameters = json_decode($storedParameters, true);
-    $storedParameters = json_last_error() !== JSON_ERROR_NONE ? [] : $storedParameters;
-
-    foreach($storedParameters as $key => $value){
-        if(array_key_exists($key, $parameters)){
-            continue;
-        }
-        $parameters[$key] = $value;
-    }
-
-    fileDelete($paramsFile);
-
-    return true;
-}
 ?>

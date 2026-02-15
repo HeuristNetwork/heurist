@@ -300,9 +300,7 @@ $.widget( "heurist.searchInput", {
             if(this.options.sup_filter){
                 qsearch = window.hWin.HEURIST4.query.mergeHeuristQuery(this.options.sup_filter, qsearch);    
             }
-            
-            window.hWin.HAPI4.SystemMgr.user_log('search_Record_direct');
-            
+
             let request = {}; 
 
             request.q = qsearch;
@@ -446,6 +444,22 @@ $.widget( "heurist.searchInput", {
 
             //accept events from the same realm only
             if(!that._isSameRealm(data)) return;
+
+            let recordIDs = data.recordset.entityName === 'Records' ? data.recordset.getIds() : null;
+            let logInfo = {};
+            let query = window.hWin.HEURIST4.util.isObject(this.query_request) ? this.query_request.q : this.query_request;
+            if(recordIDs){
+                logInfo = {
+                    q: query,
+                    ids: recordIDs,
+                    count: recordIDs.length
+                };
+            }else{
+                logInfo = {
+                    query: `FAILED: ${query}`
+                };
+            }
+            window.hWin.HAPI4.SystemMgr.user_log('search_Record_direct', logInfo);
 
             window.hWin.HEURIST4.util.setDisabled(this.input_search, false);
 

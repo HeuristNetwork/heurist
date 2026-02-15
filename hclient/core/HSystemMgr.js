@@ -553,45 +553,46 @@ class HSystemMgr {
       window.hWin.HAPI4.callserver('usr_info', { a: 'groups' }, callback);
   }
 
-  /**
-  * Logs user activity. This can be to Matomo (if configured) or to the Heurist server-side log.
-  *
-  * @param {string} activity - A string describing the activity, often underscore-separated (e.g., "db_create", "rec_edit").
-  *                            Certain prefixes (like 'db', 'st', 'rec') or full action names (like 'VisitPage')
-  *                            determine how the activity is categorized for Matomo.
-  * @param {string|number} [supplementary_info] - Additional information related to the activity.
-  *                                             For 'VisitPage', this might be the page identifier/URL part.
-  *                                             For other actions, it could be a record ID or other relevant value.
-  *                                             If numeric, it might be tracked as a value in Matomo.
-  * @returns {void}
-  */
-  user_log(activity, supplementary_info) {
-      const log_actions = ['VisitPage']; // Specific actions with special handling
-      const log_prefix = ['db', 'st', 'prof', 'cms', 'imp', 'sync', 'exp', 'configure', 'rec', 'hlp', 'search']; // Prefixes for categorization
-      const action_parts = activity.indexOf('_') > 0 ? activity.split('_') : [];
+    /**
+     * Logs user activity. This can be to Matomo (if configured) or to the Heurist server-side log.
+     *
+     * @param {string} activity - A string describing the activity, often underscore-separated (e.g., "db_create", "rec_edit").
+     *                            Certain prefixes (like 'db', 'st', 'rec') or full action names (like 'VisitPage')
+     *                            determine how the activity is categorized for Matomo.
+     * @param {string|number} [supplementary_info] - Additional information related to the activity.
+     *                                             For 'VisitPage', this might be the page identifier/URL part.
+     *                                             For other actions, it could be a record ID or other relevant value.
+     *                                             If numeric, it might be tracked as a value in Matomo.
+     * @returns {void}
+     */
+    user_log(activity, supplementary_info) {
 
-      if (
-          log_actions.includes(activity) ||
-          (action_parts.length > 0 && log_prefix.includes(action_parts[0].toLowerCase()))
-      ) {
-          let category = ''
-          if (action_parts.length > 0) {
-              category = action_parts[0];
-              activity = '';
-              for (let i = 1; i < action_parts.length; i++) {
-                  action_parts[i] = action_parts[i].charAt(0).toUpperCase() + action_parts[i].slice(1);
-                  activity = activity + action_parts[i];
-              }
-          }
-          
-          if(window._paq){
-          
-              //matomo
-              if(activity=='VisitPage'){
-                  
+        const log_actions = ['VisitPage']; // Specific actions with special handling
+        const log_prefix = ['db', 'st', 'prof', 'cms', 'imp', 'sync', 'exp', 'configure', 'rec', 'hlp', 'search']; // Prefixes for categorization
+        const action_parts = activity.indexOf('_') > 0 ? activity.split('_') : [];
+
+        if (
+            log_actions.includes(activity) ||
+            (action_parts.length > 0 && log_prefix.includes(action_parts[0].toLowerCase()))
+        ) {
+            let category = ''
+            if (action_parts.length > 0) {
+                category = action_parts[0];
+                activity = '';
+                for (let i = 1; i < action_parts.length; i++) {
+                    action_parts[i] = action_parts[i].charAt(0).toUpperCase() + action_parts[i].slice(1);
+                    activity = activity + action_parts[i];
+                }
+            }
+            
+            if(window._paq){
+            
+                //matomo
+                if(activity=='VisitPage'){
+                    
                     this.matomoTrackNewPage('web', supplementary_info);
-                  
-              }else if(activity!='editRec'){
+                    
+                }else if(activity!='editRec'){
                     if(category=='db'){
                         category='Database';
                     }else if(category=='st'){
@@ -617,62 +618,20 @@ class HSystemMgr {
                     if(!activity){
                         activity = 'TBD';
                     }
-                  
+                    
                     this.matomoTrackEventAction(category, activity, undefined, value);
-              }
-          
-          }else{
-            let request = { a: 'usr_log', activity: (category+activity), suplementary: supplementary_info, user: this.hapi4.user_id() };
-            this.hapi4.callserver('usr_info', request);
-          }
-      }
-  }
-/*
-      const action_parts = typeof activity === 'string' && activity.includes('_') ? activity.split('_') : [];
-      let category_for_matomo = '';
-      let action_for_matomo = activity;
+                }
+            
+            }else{
 
-      if (
-          log_actions.includes(activity) ||
-          (action_parts.length > 0 && log_prefix.includes(action_parts[0].toLowerCase()))
-      ) {
-          if (action_parts.length > 0) {
-              category_for_matomo = action_parts[0];
-              action_for_matomo = action_parts.slice(1).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join('');
-          }
+                const sessionID = Math.floor(Math.random() * 90000);
+                this.prepareParameters('log', supplementary_info, 0, sessionID);
 
-          if(window._paq){ // Matomo tracking object exists
-              if(activity === 'VisitPage'){
-                  this.matomoTrackNewPage('web', supplementary_info); // Assuming 'web' type for general VisitPage
-              } else if(activity !== 'editRec') { // 'editRec' might be too frequent or handled differently
-                  // Normalize category names for Matomo
-                  const categoryMap = {
-                      'db': 'Database', 'st': 'Structure', 'prof': 'Profile',
-                      'imp': 'Import', 'exp': 'Export', 'rec': 'Record', 'hlp': 'Help'
-                  };
-                  category_for_matomo = categoryMap[category_for_matomo.toLowerCase()] ||
-                                       (category_for_matomo.charAt(0).toUpperCase() + category_for_matomo.slice(1));
-
-                  let value_for_matomo;
-                  if(window.hWin.HEURIST4.util.isPositiveInt(supplementary_info)){
-                      value_for_matomo = Number(supplementary_info);
-                  }
-                  if(!action_for_matomo){ // Ensure action is not empty
-                      action_for_matomo = 'UndefinedAction';
-                  }
-                  this.matomoTrackEventAction(category_for_matomo, action_for_matomo, undefined, value_for_matomo);
-              }
-          } else { // Fallback to server-side logging if Matomo is not available
-            let request = {
-                a: 'usr_log',
-                activity: (category_for_matomo ? category_for_matomo + '_' : '') + action_for_matomo,
-                suplementary: supplementary_info, // Corrected spelling from source
-                user: this.hapi4.user_id()
-            };
-            this.hapi4.callserver('usr_info', request); // Fire-and-forget
-          }
-      }
-  */
+                let request = { a: 'usr_log', activity: (category+activity), session: sessionID, user: this.hapi4.user_id() };
+                this.hapi4.callserver('usr_info', request);
+            }
+        }
+    }
 
   /**
   * Initializes Matomo tracking with custom dimensions for the current user and page context.
@@ -1447,6 +1406,69 @@ class HSystemMgr {
         }
     }
 
-  
+    /**
+     * 
+     * @param {string} type service identifier, e.g. export, import, etc...
+     * @param {object} data parameters to be prepared
+     * @param {int} mode how to handle parameters: 0 - Complete replace, 1 - Merge + maintain existing, 2 - Merge + replace existing
+     * @param {int} id prepared parameters session ID
+     */
+    async prepareParameters(type, data, mode = 2, id = null){
+
+        let HAPI4 = this.hapi4;
+        const CHUNK_SIZE = 2000;
+
+        let _sendParams = async (key, value, curMode = mode) => {
+
+            return new Promise((resolve) => {
+
+                let request = { a: 'prepare_params', preparedID: id, preparedType: type, preparedMode: curMode, [key]: value };
+
+                HAPI4.callserver('usr_info', request, (response) => {
+                    resolve(response.data);
+                });
+            });
+        };
+
+        let chunkValue = async (key, value) => {
+
+            let start = 0;
+
+            while(true){
+
+                if(value.length <= CHUNK_SIZE){
+                    id = await _sendParams(key, value, start === 0 ? mode : 2);
+                    break;
+                }else if((start + CHUNK_SIZE) <= CHUNK_SIZE){
+                    id = await _sendParams(key, value.substr(start, CHUNK_SIZE), 2);
+                    break;
+                }else{
+                    id = await _sendParams(key, value.substr(start, CHUNK_SIZE), start === 0 ? mode : 2);
+                    start += CHUNK_SIZE;
+                }
+            }
+        };
+
+        for(const key in data){
+
+            if(!Object.hasOwn(data, key)){
+                continue;
+            }
+
+            let value = data[key];
+            const isArray = Array.isArray(value);
+            const isObject = window.hWin.HEURIST4.util.isObject(value);
+            if(window.hWin.HEURIST4.util.isFunction(value) || (isObject && !isArray && !$.isPlainObject(value))){ // skip functions and non-plain objects/arrays (i.e. object of class)
+                continue;
+            }
+            if(isArray || isObject){ // stringify objects and arrays
+                value = JSON.stringify(value);
+            }else if(!Number.isNaN(value)){
+                value = value.toString();
+            }
+
+            chunkValue(key, value);
+        }
+    }
   
 }

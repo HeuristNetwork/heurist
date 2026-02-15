@@ -729,8 +729,8 @@ function hexportMenu( container ) {
 
         return new Promise((resolve) => {
 
-            parameters['prepare'] = preparedSessionID;
-            parameters['replace'] = 2;
+            parameters['preparedID'] = preparedSessionID;
+            parameters['preparedMode'] = 2;
 
             window.hWin.HAPI4.callserver('record_output', parameters, (response) => {
                 resolve(response.data);

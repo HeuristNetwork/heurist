@@ -2112,9 +2112,10 @@ class System {
      *                                   If an array, its elements are appended as separate CSV fields.
      *                                   If a string, it's appended as a single CSV field. Defaults to an empty string.
      * @param int|null $user_id Optional. The ID of the user performing the action. If null, the current user ID is fetched.
+     * @param int|null $sessionID Optional. Session ID for pre-prepared parameters.
      * @return void
      */
-    public function userLogActivity($action, $suplementary = '', $user_id=null){
+    public function userLogActivity($action, $suplementary = '', $user_id=null, $sessionID = null){
 
         if($user_id === null){
             // Ensure user is loaded from session if not already, to get ID
@@ -2131,23 +2132,34 @@ class System {
         $addr_IPv4 = USystem::getUserIP();
 
         $info = [
-            $user_id,
-            $action,
-            $now->format(\DateTimeInterface::ATOM), // Using ATOM for ISO 8601 compatibility
-            $user_agent['os'] ?? 'UnknownOS',
-            $user_agent['browser'] ?? 'UnknownBrowser',
-            $addr_IPv4
+            'user' => [
+                'id' => $user_id,
+                'ip' => $addr_IPv4,
+                'os' => $user_agent['os'] ?? 'UnknownOS',
+                'browser' => $user_agent['browser'] ?? 'UnknownBrowser'
+            ],
+            'action' => $action,
+            'date' => $now->format(\DateTimeInterface::ATOM) // Using ATOM for ISO 8601 compatibility
         ];
 
-        if(is_array($suplementary)){
-            $info = array_merge($info, $suplementary);
-        } elseif (!empty($suplementary)) {
-            $info[] = $suplementary;
+        // Add additional details for the log, e.g. record ID, recordset size, etc...
+        if(isPositiveInt($sessionID)){ // use prepared parameters
+            $details = [
+                'preparedID' => $sessionID
+            ];
+            $result = USystem::getPreparedParameters($this, 'log', $details);
+            if(!$result){
+                return;
+            }
+            unset($details['preparedID']);
+            $info['details'] = $details;
+        }elseif(!empty($suplementary)){ // use provided data
+            $info['details'] = $suplementary;
         }
 
         $logFilePath = $this->getSysDir() . 'userInteraction.log'; // getSysDir() gives DB root filestore path
         if ($logFilePath) { // Ensure getSysDir() didn't return null
-            file_put_contents ( $logFilePath , implode(',', $info)."\n", FILE_APPEND );
+            file_put_contents ( $logFilePath , json_encode($info)."\n", FILE_APPEND );
         } else {
             // Log error: could not determine log file path
             error_log("userLogActivity: Could not determine system directory to write userInteraction.log for database " . ($this->dbname() ?? 'unknown'));

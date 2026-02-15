@@ -1061,6 +1061,104 @@ class USystem {
     }
 
     /**
+     * Store parameters to be used in an upcoming server call, this is done to avoid excessively long URLs that lead to 414 errors
+     *
+     * @param string $type Process type, e.g. 'export', 'import', etc...
+     * @param int $replace How to handling replacements: 0 - Complete replace, 1 - Merge + maintain existing, 2 - Merge + replace existing
+     * @param array $parameters Parameters to be saved, ignores 'preparedID' and 'DBGSESSID' keys
+     * @return int|false prepared session ID, or no parameters prepared
+     */
+    public static function prepareParameters(string $type, int $replace, array $parameters){
+
+        if(empty($parameters)){
+            return false;
+        }
+
+        $id = !is_numeric(@$parameters['preparedID']) || \intval($parameters['preparedID']) <= 0 ? time() : \intval($parameters['preparedID']);
+
+        $replace = !is_numeric(@$replace) ? 0 : \intval($replace);
+        $replace = $replace > 2 || $replace < 0 ? 0 : $replace;
+
+        $paramsFile = HEURIST_SCRATCH_DIR . "{$type}_{$id}.json";
+
+        $storedParameters = [];
+        if(file_exists($paramsFile)){
+            $storedParameters = file_get_contents($paramsFile);
+
+            $storedParameters = json_decode($storedParameters, true);
+            $storedParameters = json_last_error() !== JSON_ERROR_NONE ? [] : $storedParameters;
+        }
+
+        foreach($parameters as $key => $value){
+
+            if($key === 'preparedID' || $key === 'DBGSESSID' || $key === 'a' && $value === 'prepare_params'){
+                continue;
+            }elseif($replace !== 0 && \array_key_exists($key, $storedParameters) && $key !== 'db'){
+
+                $isBothArrays = \is_array($storedParameters[$key]) && \is_array($value);
+                $isBothStrings = \is_string($storedParameters[$key]) && \is_string($value);
+
+                if($isBothArrays){
+                    $storedParameters[$key] = $replace === 1 ? array_merge($storedParameters[$key], $value) : array_merge($value, $storedParameters[$key]);
+                }elseif($isBothStrings){
+                    $storedParameters[$key] .= $value;
+                }
+
+                if($isBothArrays || $isBothStrings || $replace === 1){
+                    continue;
+                }
+            }
+
+            $storedParameters[$key] = $value;
+        }
+
+        file_put_contents($paramsFile, json_encode($storedParameters));
+
+        return $id;
+    }
+
+    /**
+     * Retrieve previously saved parameters, this will not replace existing keys
+     *
+     * @param \hserv\System $system Initialised Heurist system instance
+     * @param string $type Process type, e.g. 'export' or 'import'
+     * @param array $parameters Parameters array to be updated with stored parameters
+     * @return bool
+     */
+    public static function getPreparedParameters($system, string $type, array &$parameters) : bool{
+
+        if(!is_numeric(@$parameters['preparedID'])){
+            $system->addError(HEURIST_INVALID_REQUEST, 'Wrong parameter preparedID. Must be integer');
+            return false;
+        }
+
+        $id = \intval($parameters['preparedID']);
+
+        $paramsFile = HEURIST_SCRATCH_DIR . "{$type}_{$id}.json";//yml
+
+        if(!file_exists($paramsFile)){
+            $system->addError(HEURIST_INVALID_REQUEST, 'Query parameters file not found. Either parameter preparedID is wrong or session expired');
+            return false;
+        }
+
+        $storedParameters = file_get_contents($paramsFile);
+
+        $storedParameters = json_decode($storedParameters, true);
+        $storedParameters = json_last_error() !== JSON_ERROR_NONE ? [] : $storedParameters;
+
+        foreach($storedParameters as $key => $value){
+            if(\array_key_exists($key, $parameters)){
+                continue;
+            }
+            $parameters[$key] = $value;
+        }
+
+        fileDelete($paramsFile);
+
+        return true;
+    }
+
+    /**
      * Calculates the difference between two `getrusage` arrays for a specific index (e.g., 'utime' for user time).
      * Primarily used for benchmarking or profiling code execution time.
      *

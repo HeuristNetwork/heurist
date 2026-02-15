@@ -28,6 +28,7 @@ define('PDIR','../../');//need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php';
 
 $log_file = $system->getSysDir().'userInteraction.log';
+$mysqli = $system->getMysqli();
 
 if(!file_exists($log_file)){
     print '<h2>There is no interactions log file</h2>';
@@ -36,6 +37,114 @@ if(!file_exists($log_file)){
     $system->addError(HEURIST_ERROR, 'Unable to read the interaction log file for DB ' . htmlspecialchars($_REQUEST['db']));
     print '<h2>Unable to read User interactions file</h2>';
     exit;
+}
+
+function processJsonLog($json){
+
+    global $mysqli;
+
+    if(!is_array($json)){
+        return null;
+    }
+
+    $line = [];
+
+    if(empty($json['user']) || empty($json['user']['id']) || empty($json['action']) || empty($json['date'])){
+        return null;
+    }
+
+    $line[] = $json['user']['id'];
+    $line[] = mysql__select_value($mysqli, 'SELECT ugr_Name FROM sysUGrps WHERE ugr_ID = ?', ['i', $json['user']['id']]);
+    $line[] = $json['action'];
+
+    if(!empty($json['details']['ids'])){
+        $line[] = is_array($json['details']['ids']) ? implode('|', $json['details']['ids']) : $json['details']['ids'];
+    }else{
+        $line[] = '';
+    }
+
+    if(!empty($json['details']['q'])){
+        $line[] = is_array($json['details']['q']) ? json_encode($json['details']['q']) : $json['details']['q'];
+    }elseif(!empty($json['details']['svs'])){
+        $line[] = 'Saved Search: ' . intval($json['details']['q']);
+    }else{
+        $line[] = '';
+    }
+
+    $line[] = !empty($json['details']['count']) ? $json['details']['count'] : '';
+
+    $date = new DateTime($json['date']);
+    $line[] = $date->format('Y-m-d H:i:s');
+
+    $line[] = !empty($json['user']['ip']) ? $json['user']['ip'] : 'Unknown';
+    $line[] = !empty($json['user']['os']) ? $json['user']['os'] : 'Unknown';
+    $line[] = !empty($json['user']['browser']) ? $json['user']['browser'] : 'Unknown';
+
+    return $line;
+}
+
+function processStringLog($string){
+
+    global $mysqli;
+
+    $line = [];
+
+    $chunks = explode(',', $string);
+
+    if(empty($chunks) || count($chunks) < 3 || count($chunks) > 7){ // check for valid entry (userID, action, timestamp) and apply action filter
+        return null;
+    }
+
+    $line[] = $chunks[0];
+    $line[] = mysql__select_value($mysqli, 'SELECT ugr_Name FROM sysUGrps WHERE ugr_ID = ?', ['i', $chunks[0]]);
+    $line[] = $chunks[1];
+
+    if(count($chunks) >= 4 && strpos($chunks[3], 'recs') !== false){ // contains a listing of rec ids + rec count, re-make indexes
+
+        $part_chunks = explode(' ', $chunks[3]);// [0] => count, [1] => 'recs:', [2] => rec id
+
+        if(count($chunks) == 4){
+            $recids = [$part_chunks[2]];
+        }else{
+            $recids = array_splice($chunks, 4);
+            array_unshift($recids, $part_chunks[2]);
+        }
+
+        $chunks[] = implode('|', $recids);
+        $chunks[] = $part_chunks[0];
+        $chunks[] = '';
+
+    }elseif($chunks[1] === 'recEdit' || $chunks[1] === 'viewRec'){ // expect record ID [6] 
+        $line[] = intval($chunks[6]);
+        $line[] = '';
+        $line[] = 1;
+    }elseif($chunks[1] === 'VisitPage'){ // expect homePageID/pageID [6]
+        $line[] = $chunks[6];
+        $line[] = '';
+        $line[] = '';
+    }else{
+        $line[] = '';
+        $line[] = '';
+        $line[] = '';
+    }
+
+    $date = new DateTime($chunks[2]);
+    $line[6] = $date->format('Y-m-d H:i:s');
+
+    if(empty($chunks[3]) || is_numeric($chunks[3]) ||
+        $chunks[3] == 'Array' || preg_match("/\d\s\d/", $chunks[3])){ // older format
+
+        $line[] = 'Unknown';
+        $line[] = 'Unknown';
+        $line[] = 'Unknown';
+    }else{
+
+        $line[] = $chunks[5];
+        $line[] = $chunks[3];
+        $line[] = $chunks[4];
+    }
+
+    return $line;
 }
 
 if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
@@ -60,33 +169,38 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
     switch ($_REQUEST['actionType']) {
         case 'recuse': // record use [Edit Record, View Record, Custom Report]
             $action_filter = ['rec', 'editRec', 'viewRec', 'custRep'];
-            $filename = "record";
+            $filename = 'record';
             break;
 
         case 'website': // end user visiting a CMS webpage/homepage
             $action_filter = ['VisitPage', 'cms'];
-            $fileprefix = "website";
+            $fileprefix = 'website';
             break;
 
         case 'accounts': // account actions [Log in, Log off, Reset Password]
             $action_filter = ['Login', 'Logout', 'ResetPassword'];
-            $fileprefix = "account";
+            $fileprefix = 'account';
             break;
 
         case 'database': // database actions
             $action_filter = ['db', 'st', 'configure'];
 
-            $fileprefix = "database";
+            $fileprefix = 'database';
             break;
 
         case 'import':  // importing actions
             $action_filter = ['imp', 'sync'];
-            $fileprefix = "import";
+            $fileprefix = 'import';
             break;
 
         case 'export':  // exporting actions
             $action_filter = ['exp'];
-            $fileprefix = "export";
+            $fileprefix = 'export';
+            break;
+
+        case 'search';
+            $action_filter = ['search'];
+            $fileprefix = 'search';
             break;
 
         default: // all actions
@@ -102,15 +216,24 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
     header('Expires: ' . gmdate("D, d M Y H:i:s", time() - 3600));
 
     // Add column headers
-    fputcsv($csv_fd, array("User", "Function", "Date", "Operating System", "Browser", "IP Address", "Record ID", "Resultset Size"));
+    fputcsv($csv_fd, ["User ID", "User name", "Function", "Record ID", "Query", "Resultset Size", "Date", "IP Address", "Operating System", "Browser"]);
 
     // Prepare user filtering by workgroups
-    $users = null;
-    if(array_key_exists('workGroups', $_REQUEST) && $_REQUEST['workGroups'] != ''){
-        $query = 'SELECT DISTINCT ugl_UserID FROM sysUsrGrpLinks WHERE ugl_GroupID IN ('. $_REQUEST['workGroups'] .')';
+    $users = [];
+    $providedWorkgroup = array_key_exists('workGroups', $_REQUEST) && $_REQUEST['workGroups'] != '' ? prepareIds($_REQUEST['workGroups']) : [];
+    $providedUsers = array_key_exists('users', $_REQUEST) && $_REQUEST['users'] != '' ? prepareIds($_REQUEST['users']) : [];
 
-        $users = mysql__select_list2($system->getMysqli(), $query);
+    if(!empty($providedWorkgroup)){
+        $query = 'SELECT DISTINCT ugl_UserID FROM sysUsrGrpLinks WHERE ugl_GroupID IN ('. implode(',', $providedWorkgroup) .')';
+
+        $users = mysql__select_list2($mysqli, $query);
     }
+    if(!empty($providedUsers)){
+        $query = 'SELECT DISTINCT ugr_ID FROM sysUGrps WHERE ugr_ID IN ('. implode(',', $providedUsers) .')';
+
+        $users = array_unique(array_merge($users, mysql__select_list2($mysqli, $query, 'intval')));
+    }
+    $users = !empty($users) ? $users : null;
 
     // Prepare date period filtering
     $today = new DateTime();
@@ -123,61 +246,46 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
         }
     }
 
-    //
-    // [0] => User ID
-    // [1] => Action
-    // [2] => Timestamp
-    // [3] => Operating System
-    // [4] => Web Browser
-    // [5] => Record ID(s) ('|' separated, can also be "Record_Count recs: id1,id2,...")
-    // [6] => Record Count
-    //
     while(!feof($log_fd)){
 
         $line = fgets($log_fd);
         $line = rtrim($line, "\n");// remove trailing newlines, interaction log only uses \n
-        $line_chunks = explode(',', $line);
 
-        $allowed_action = false;
-        foreach($action_filter as $action){
-            if(strpos($action, $line_chunks[1]) === 0){
-                $allowed_action = true;
-                break;
-            }
+        if(empty($line)){
+            continue;
+        }            
+
+        $jsonFormat = json_decode($line, true);
+
+        if(json_last_error() === JSON_ERROR_NONE){
+            $line = processJsonLog($jsonFormat);
+        }else{
+            $line = processStringLog($line);
         }
 
-        if(count($line_chunks) < 3 || (!$is_all_actions && !$allowed_action)){ // check for valid entry (userID, action, timestamp) and apply action filter
-            continue;
-        }elseif(count($line_chunks) >= 4 && strpos($line_chunks[3], 'recs') !== false){ // contains a listing of rec ids + rec count, re-make indexes
-            $part_chunks = explode(' ', $line_chunks[3]);// [0] => count, [1] => 'recs:', [2] => rec id
+        // Apply action filter
+        if(!$is_all_actions){
 
-            if(count($line_chunks) == 4){
-                $recids = array($part_chunks[2]);
-            }else{
-                $recids = array_splice($line_chunks, 4);
-                array_unshift($recids, $part_chunks[2]);
+            $allowedAction = false;
+            foreach($action_filter as $action){
+                if(strpos($line[2], $action) === 0){
+                    $allowedAction = true;
+                    break;
+                }
             }
-
-            $line_chunks[4] = $part_chunks[0];
-            $line_chunks[3] = implode('|', $recids);
-        }elseif(count($line_chunks) > 7){ // currently un-supported entry, skip
-            continue;
+            if(!$allowedAction){
+                continue;
+            }
         }
 
         // Apply user filter
-        if($users != null && !in_array($line_chunks[0], $users)){
+        if(!empty($users) && !in_array($line[0], $users)){
             continue;
-        }
-
-        if(empty($line_chunks[3]) || is_numeric($line_chunks[3]) ||
-        $line_chunks[3] == 'Array' || preg_match("/\d\s\d/", $line_chunks[3])){ // older format
-
-            array_splice($line_chunks, 3, 0, ['Unknown', 'Unknown', 'Unknown']);
         }
 
         // Apply date filtering
         if(@$_REQUEST['enableDF']){
-            $action_date = new DateTime($line_chunks[2]);
+            $action_date = new DateTime($line[6]);
 
             switch (@$_REQUEST['dfType']) {
                 case 1: // time period, e.g. last 3 months
@@ -204,12 +312,15 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
             }
         }
 
-        if(count($line_chunks) < 7){
-            $line_chunks = array_pad($line_chunks, 7, '');
+        $date = new DateTime($line_chunks[2]);
+        $line_chunks[2] = $date->format('Y-m-d H:i:s');
+
+        if(count($line) < 10){
+            $line = array_pad($line, 10, '');
         }
 
         // Add row
-        fputcsv($csv_fd, $line_chunks);
+        fputcsv($csv_fd, $line);
     }// end WHILE
 
     // close descriptors
@@ -242,9 +353,43 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
                 var $dateSection = $('label#dateLastSev, label#dateRange');
 
                 $('input#enableDF').on('click', function(event){
-                    window.hWin.HEURIST4.util.setDisabled($dateSection, !$(this).is(':checked'));
+                    window.hWin.HEURIST4.util.setDisabled($('label#dateLastSev'), !$(this).is(':checked'));
+                    window.hWin.HEURIST4.util.setDisabled($('label#dateRange'), !$(this).is(':checked'));
                 });
-                window.hWin.HEURIST4.util.setDisabled($dateSection, true);
+                window.hWin.HEURIST4.util.setDisabled($('label#dateLastSev'), true);
+                window.hWin.HEURIST4.util.setDisabled($('label#dateRange'), true);
+
+                $('div#usrFilter')
+                .css('cursor', 'pointer')
+                .on('click', function(){
+                    var popup_opts = {
+                        select_mode: 'select_multi',
+                        select_return_mode: 'recordset',
+                        edit_mode: 'popup',
+                        title: 'Filter by User',
+                        onselect: function(event, data){
+                            if(data && data.selection){
+                                var selection = data.selection;
+
+                                var ids = [];
+                                var names = [];
+
+                                selection.each2(function(id, record){
+                                    ids.push(id);
+                                    names.push(record['ugr_Name']);
+                                });
+
+                                $('span#userList').text(names.join(', '));
+                                $('input#users').val(ids.join(','));
+                            }else{
+                                $('span#userList').text('All');
+                                $('input#users').val('');
+                            }
+                        }
+                    };
+
+                    window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', popup_opts);
+                });
 
                 $('div#wrkGroup')
                 .css('cursor', 'pointer')
@@ -313,7 +458,8 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
                 <label for="accUsage"><input type="radio" name="actionType" id="accUsage" value="accounts"> Download account related actions (when accounts login, logout or request a password reset)</label><br><br>
                 <label for="dbUsage"><input type="radio" name="actionType" id="dbUsage" value="database"> Download database related actions (when renamed, cleared, archived, registered, etc...)</label><br><br>
                 <label for="impUsage"><input type="radio" name="actionType" id="impUsage" value="import"> Download importing related actions (when records are imported by CSV, HML, or JSON)</label><br><br>
-                <label for="expUsage"><input type="radio" name="actionType" id="expUsage" value="export"> Download exporting related actions (when records are exported in various formats)</label>
+                <label for="expUsage"><input type="radio" name="actionType" id="expUsage" value="export"> Download exporting related actions (when records are exported in various formats)</label><br><br>
+                <label for="searchUsage"><input type="radio" name="actionType" id="searchUsage" value="search"> Download record searching related actions (when users perform searches, use a facet search, or saved filter)</label>
             </div>
             <!-- Add other actions -->
 
@@ -345,6 +491,12 @@ if(@$_REQUEST['actionType']){ // filter and download interaction log as CSV file
             <!-- User Types -->
             <h2>Filter Users:</h2>
             <!-- Certain workgroups (e.g. Members of DB admins) [utilise manageSysWorkroups' multi select] -->
+            <div id="usrFilter">
+                Filter by Users:
+                <span id="userList" style="font-weight: bold;">All</span>
+                <input type="hidden" name="users" id="users" value="">
+            </div>
+
             <div id="wrkGroup">
                 Filter by Workgroups:
                 <span id="workgroupList" style="font-weight: bold;">All</span>

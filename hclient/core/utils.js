@@ -279,13 +279,12 @@ window.hWin.HEURIST4.util = {
      * @returns {void}
      */
     setDisabled: function(element, is_disabled){
+
         if(!element){ return; }
         if(!Array.isArray(element) && !(element instanceof jQuery)){ // Check if not jQuery object
             element = [element];
         } else if (element instanceof jQuery && element.length > 1) { // If jQuery object with multiple elements
              // Iterate over jQuery collection
-        } else if (element instanceof jQuery) { // Single jQuery element
-            element = [element.get(0)]; // Get underlying DOM element
         }
 
         $.each(element, function(idx, ele_item){ 

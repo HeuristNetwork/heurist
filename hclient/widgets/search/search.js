@@ -1068,6 +1068,22 @@ $.widget( "heurist.search", {
 
                 window.hWin.HEURIST4.util.setDisabled(this.input_search, false);
 
+                let recordIDs = data.recordset.entityName === 'Records' ? data.recordset.getIds() : null;
+                let logInfo = {};
+                let query = window.hWin.HEURIST4.util.isObject(this.query_request) ? this.query_request.q : this.query_request;
+                if(recordIDs){
+                    logInfo = {
+                        q: query,
+                        ids: recordIDs,
+                        count: recordIDs.length
+                    };
+                }else{
+                    logInfo = {
+                        query: `FAILED: ${query}`
+                    };
+                }console.log(logInfo);
+                window.hWin.HAPI4.SystemMgr.user_log('search_Record_direct', logInfo);
+
                 if(!this._is_publication && data.showing_subset && !window.hWin.HEURIST4.util.isempty(data.query)){
                     this.input_search.val(data.query).trigger('change');
 
@@ -1163,8 +1179,6 @@ $.widget( "heurist.search", {
             // q - query string
             // w  all|bookmark
             // stype  key|all   - key-search tags, all-title and pointer record title, by default rec_Title
-
-            window.hWin.HAPI4.SystemMgr.user_log('search_Record_direct');
 
             let request = window.hWin.HEURIST4.query.parseHeuristQuery(qsearch);
 
