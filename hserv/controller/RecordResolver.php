@@ -62,7 +62,7 @@ final class RecordResolver
             $fmt = 'hml';
         } elseif ($action === 'view') {
             $fmt = 'html';
-        } elseif ($action === 'edit' || $params['edit'] == 1) {
+        } elseif ($action === 'edit' || ($params['edit']??null) == 1) {
             $fmt = 'edit';
         }
 
