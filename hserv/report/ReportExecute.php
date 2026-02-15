@@ -1600,6 +1600,7 @@ Javascript wrap:<br>
             $size = '';
             $mapsize = '';
             $style = '';
+            $info = $params['info']??null;
 
             if(array_key_exists('style',$params) && $params['style']!=""){
 
@@ -1649,7 +1650,7 @@ Javascript wrap:<br>
                     $result = "<a href='{$params['var']}' target=_blank rel=noopener $style>{$params['var']}</a>";
                     break;
                 case 'file':
-                    $result = $this->processFieldFile($params, $mode, $style, $size);
+                    $result = $this->processFieldFile($params, $mode, $style, $size, $info);
                     break;
                 case 'geo':
                     $value = $params['var'];
@@ -1710,15 +1711,20 @@ Javascript wrap:<br>
     * @param mixed $style
     * @param mixed $size
     */
-    private function processFieldFile($params, $mode, $style, $size){
+    private function processFieldFile($params, $mode, $style, $size, $info){
         //insert image or link
         $values = $params['var'];
 
         $limit = intval(@$params['limit']);
 
         $sres = "";
+        if(isset($info) && is_string($info)){
+            $info = explode(',',$info);
+        }
 
         if(!is_array($values) || !array_key_exists(0,$values)) {$values = array($values);}
+        
+        $allowedInfoTypes = ['caption','copyright','copyowner','description'];
 
         foreach ($values as $idx => $fileinfo){
 
@@ -1730,7 +1736,7 @@ Javascript wrap:<br>
             $file_desc = htmlspecialchars(strip_tags($fileinfo['ulf_Description']));
             $mimeType = $fileinfo['fxm_MimeType'];
             $file_Ext= $fileinfo['ulf_MimeExt'];
-
+            
             /*in this version we use player tag  see fileGetPlayerTag
                 $file_playerURL = HEURIST_BASE_URL.'?db='.$this->system->dbname().'&file='.$file_nonce.'&mode=tag';
             */
@@ -1746,7 +1752,7 @@ Javascript wrap:<br>
                     $sres = $sres."<a class=\"fancybox-thumb\" data-id=\"$file_nonce\" href='"
                     .$file_URL."' target=_blank rel=noopener title='".$file_desc."' $style>$sname</a>";
                 }else{
-                    $sres = $sres."<a href='$file_URL' target=_blank rel=noopener title='$file_desc' $style>$sname</a>";
+                    $sres .= "<a href='$file_URL' target=_blank rel=noopener title='$file_desc' $style>$sname</a>";
                 }
 
             }elseif($mode=="thumbnail"){
@@ -1754,13 +1760,26 @@ Javascript wrap:<br>
                 if(@$params['fancybox']){
                     $sres .= "<img class=\"fancybox-thumb\" data-id=\"$file_nonce\" src=\"".$file_thumbURL."\" title=\"".$file_desc."\" $size $style/></a>";
                 }else{
-                    $sres = $sres."<a href='$file_URL' target=_blank rel=noopener>".
-                    "<img class=\"\" src=\"".$file_thumbURL."\" title=\"".$file_desc."\" $size $style/></a>";
+                    $sres .= ("<a href='$file_URL' target=_blank rel=noopener>".
+                    "<img class=\"\" src=\"".$file_thumbURL."\" title=\"".$file_desc."\" $size $style/></a>");
                 }
 
             }else{ //player is default
 
-                $sres = $sres.fileGetPlayerTag($this->system, $file_nonce, $mimeType, $params, $external_url, $size, $style);//see recordFile.php
+                $sres .= fileGetPlayerTag($this->system, $file_nonce, $mimeType, $params, $external_url, $size, $style);//see recordFile.php
+                
+                
+                
+                if(is_array($info)){
+                    foreach($info as $info_type){
+                        if(in_array($info_type,$allowedInfoTypes)){
+                            $sval = htmlspecialchars(strip_tags($fileinfo['ulf_'.ucfirst($info_type)]??''), ENT_QUOTES, 'UTF-8');
+                            if($sval){
+                                $sres .= '<span class="file-info">'.$sval.'</span>';            
+                            }
+                        }
+                    }
+                }
 
             }
 
