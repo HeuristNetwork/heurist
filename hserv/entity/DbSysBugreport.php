@@ -729,28 +729,14 @@ class DbSysBugreport extends DbEntityBase
             HEAD;
         }else{ // HeuristRef was unavailable, allows the team to create a new report
 
-            $params = [
-                'a' => 'save',
-                'entity' => 'sysBugreport',
-                'db' => HEURIST_BUGREPORT_DATABASE,
-                'fields' => ['is_bug_report' => 1]
-            ];
-            $script = HEURIST_MAIN_SERVER . '/heurist/hserv/controller/entityScrud.php' . http_build_query($params);
-
             $form = <<<FORM
                 <div style="font-size: 0.9em;">
                     A new ticket has been requested while HeuristRef is unavailable.<br>
                     This message has been forwarded to support@heuristNetwork.org" and a ticket will be added manually
                 </div>
                 <h4>Report details:</h4>
-                <form method="POST" action="{$script}" style="width: 60em;" enctype="multipart/form-data">
+                <form style="width: 60em;">
                     $form
-                    <input type="hidden" name="new_record[ID]" value="0" />
-                    <input type="hidden" name="new_record[RecTypeID]" value="101" />
-                    <input type="hidden" name="new_record[NonOwnerVisibility]" value="public" />
-                    <input type="hidden" name="new_record[NonOwnerVisibilityGroups]" value="0" />
-                    <input type="hidden" name="new_record[OwnerUGrpID]" value="0" />
-                    <button>Create job</button> <span class='smaller'>(for Developer use)</span>
                 </form>
             FORM;
         }
