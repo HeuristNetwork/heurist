@@ -187,6 +187,9 @@ $.widget( "heurist.app_storymap", {
     
     /** @memberof heurist.app_storymap @instance @private @property {?jQuery} _btn_clear_story - Button to clear/close the current story. */
     _btn_clear_story: null,
+    
+    _show_limit_message: false,
+    _limit_message: null,
 
     /** @memberof heurist.app_storymap @instance @private @property {?jQuery} _print_button - Button to print the storymap. */
     _print_button: null,
@@ -427,7 +430,8 @@ $.widget( "heurist.app_storymap", {
         if(this.options.map_widget_id){
             this._mapping = $('#'+this.options.map_widget_id);
         }
-        
+
+
         this._btn_clear_story = $('<button style="position:absolute;top:2px;right:12px;z-index:999;'
         +'border: 2px solid #ccc;background: white;background-clip: padding-box; border-radius: 4px;height: 31px;"'        
         +'">Close</button>')
@@ -471,6 +475,15 @@ $.widget( "heurist.app_storymap", {
                 }
             });
         }
+        
+        this._limit_message = $('<span style="position:absolute;top:2px;left:2px;right:'
+        +(this.options.show_print_button?155:80)
+        +'px;z-index:999;'
+        +'border: 2px solid red;background: white; border-radius: 4px;color:red;padding:4px"'        
+        +'">The story is limited to 3 story elements in website edit mode. Please close the website editor to see the full story.</span>')
+        .hide()
+        .insertBefore(this.options.show_print_button?this._print_button:this._btn_clear_story);
+        
         
         if(window.hWin.HEURIST4.util.isempty(this.options.storyPlaceholder) && !this.options.blank_placeholder){
             this.options.storyPlaceholder = 'Please select a story in the list';
@@ -859,7 +872,7 @@ $.widget( "heurist.app_storymap", {
             if(this.options.storyFields.length>0){
                 //search for story fields for given record
                 request = {q:{ids:this.options.storyRecordID}, detail:this.options.storyFields.join(',')};
-
+                
                 window.hWin.HAPI4.RecordMgr.search(request,
                     function(response) {
                         if(response.status == window.hWin.ResponseStatus.OK){
@@ -871,8 +884,13 @@ $.widget( "heurist.app_storymap", {
                                     recIDs = recIDs.concat(details[dty_ID]);
                                 }
                             }
-                            
                             if(recIDs.length>0){
+    
+                                that._show_limit_message = false;
+                                if(window.isCMS_active || window.parent?.cmsEditor && recIDs.length>3){
+                                    recIDs = recIDs.slice(0,3);
+                                    that._show_limit_message = true;
+                                }
                             
                                 recIDs = recIDs.join(',');
                                 
@@ -892,7 +910,7 @@ $.widget( "heurist.app_storymap", {
                                 if(that.options.storyRectypes.length>0){
                                     request['q'].push({t:that.options.storyRectypes.join(',')});
                                 }
-                                
+
                                 window.hWin.HAPI4.RecordMgr.search(request,
                                     function(response) {
                                         that._resultset = new HRecordSet(response.data);
@@ -1030,6 +1048,7 @@ $.widget( "heurist.app_storymap", {
         this.options.storyRecordID = null;
 
         if (this._btn_clear_story) this._btn_clear_story.hide();
+        if (this._limit_message) this._limit_message.hide();
         if(this.options.show_print_button && this._print_button){
             this._print_button.hide();
         }
@@ -1141,7 +1160,10 @@ $.widget( "heurist.app_storymap", {
         if(this.options.show_print_button && this._print_button){
             this._print_button.show();
         }
-        
+        if(this._show_limit_message && this._limit_message){
+            this._limit_message.show();
+            
+        }
     },
     
     /**
