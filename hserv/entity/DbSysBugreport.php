@@ -340,7 +340,7 @@ class DbSysBugreport extends DbEntityBase
             $new_record['details'][self::DTY_FIELD_MAPPING['bug_Reporter_Name']] = "{$user_info['ugr_FullName']} [{$user['ugr_Organisation']}]";
             $new_record['details'][self::DTY_FIELD_MAPPING['bug_Reporter_Email']] = $user['ugr_eMail'];
 
-            $reportDetails[self::DTY_FIELD_MAPPING['bug_Reporter_Name']] = ["User's name" => $user['ugr_FullName']];
+            $reportDetails[self::DTY_FIELD_MAPPING['bug_Reporter_Name']] = ["User's name" => $user_info['ugr_FullName']];
             $reportDetails[self::DTY_FIELD_MAPPING['bug_Reporter_Email']] = ["User's email" => $user['ugr_eMail']];
         }
 
@@ -679,13 +679,14 @@ class DbSysBugreport extends DbEntityBase
 
             $fieldName = array_keys($values)[0];
             $fieldValues = array_values($values)[0];
+            $isEmptyValue = empty($fieldValues);
             $fieldValues = \is_array($fieldValues) ? $fieldValues : [$fieldValues];
 
-            if(empty($value)){
+            if($isEmptyValue){
                 continue;
             }
 
-            $form .= <<<ROW
+            $row = <<<ROW
                 <div class="row">
                     <div class="fieldName">{$fieldName}</div>
                     <div class="value">
@@ -703,19 +704,21 @@ class DbSysBugreport extends DbEntityBase
                     FLD;
                 }else{
                     $inputType = <<<FLD
-                        <input name="{$fieldID}" type="text" readonly="readonly" size="80" value="{$value}" />
+                        <input name="{$fieldID}" type="text" readonly="readonly" size="80" title="{$value}" value="{$value}" />
                     FLD;
                 }
 
-                $form .= <<<ROW
+                $row .= <<<ROW
                         $inputType
                 ROW;
             }
 
-            $form .= <<<ROW
+            $row .= <<<ROW
                     </div>
                 </div>
             ROW;
+
+            $form .= $row;
         }
 
         if(!empty($reportLink)){ // Report has been made, this is just to inform
@@ -735,7 +738,10 @@ class DbSysBugreport extends DbEntityBase
             $script = HEURIST_MAIN_SERVER . '/heurist/hserv/controller/entityScrud.php' . http_build_query($params);
 
             $form = <<<FORM
-                <div style="font-size: 0.9em;">A new ticket has been requested while HeuristRef is unavailable.</div>
+                <div style="font-size: 0.9em;">
+                    A new ticket has been requested while HeuristRef is unavailable.<br>
+                    This message has been forwarded to support@heuristNetwork.org" and a ticket will be added manually
+                </div>
                 <h4>Report details:</h4>
                 <form method="POST" action="{$script}" style="width: 60em;" enctype="multipart/form-data">
                     $form
@@ -744,7 +750,7 @@ class DbSysBugreport extends DbEntityBase
                     <input type="hidden" name="new_record[NonOwnerVisibility]" value="public" />
                     <input type="hidden" name="new_record[NonOwnerVisibilityGroups]" value="0" />
                     <input type="hidden" name="new_record[OwnerUGrpID]" value="0" />
-                    <button>Create job</button> <span class='smaller'>(this will attempt to create a bug report on the Heurist Job Tracker database, please check it's available before trying)</span>
+                    <button>Create job</button> <span class='smaller'>(for Developer use)</span>
                 </form>
             FORM;
         }
@@ -810,7 +816,7 @@ class DbSysBugreport extends DbEntityBase
         </html>
         EMAIL;
 
-        return sendPHPMailer(null, 'Heurist tickets', $toAddresses, $emailTitle, $emailBody, $files, true);
+        return sendPHPMailer(null, 'Heurist tickets', ['to' => [$toAddresses], 'bcc' => ['support@heuristNetwork.org']], $emailTitle, $emailBody, $files, true);
     }
 
     // ---------------------------------------------------------------------
