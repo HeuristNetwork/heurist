@@ -735,7 +735,7 @@ if (!defined('PDIR')){
                     window.hWin.HEURIST4.msg.sendCoverallToBack();
 
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        availableDatabases[server] = response.data;
+                        availableDatabases[server] = response.data.current ?? response.data;
                     }else{
                         availableDatabases[server] = [];
                         window.hWin.HEURIST4.msg.showMsgErr(response, false);
@@ -1217,7 +1217,7 @@ a{
 
                         <span>Filter: </span>
                         <input id="current-tabs-filter_database" class="text ui-widget-content ui-corner-all" value="" autocomplete="off" />
-                        <button id="btnNewDatabase" onclick="_showStep(1)" class="ui-button-action" style="position: relative;left: 20em;top: 0px;display: none;">New Database</button>
+                        <button id="btnNewDatabase" onclick="_showStep(1)" class="ui-button-action" style="position: relative;left: 2em;top: 0px;display: none;">New Database</button>
 
                         <?php 
                         $showMsgAboutArchived = strpos(strtolower(HEURIST_BASE_URL), strtolower(HEURIST_MAIN_SERVER)) !== false || strpos(strtolower(HEURIST_BASE_URL), 'heuristau.net');
