@@ -1081,7 +1081,8 @@ $.widget( "heurist.search", {
                     logInfo = {
                         query: `FAILED: ${query}`
                     };
-                }console.log(logInfo);
+                }
+                //console.log(logInfo);
                 window.hWin.HAPI4.SystemMgr.user_log('search_Record_direct', logInfo);
 
                 if(!this._is_publication && data.showing_subset && !window.hWin.HEURIST4.util.isempty(data.query)){

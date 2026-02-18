@@ -665,9 +665,12 @@ if(!$system->hasAccess()){
                 if(recID <= 0){
                     return;
                 }
+                const query = `ids:${recID},${connectedRecIDs}`;
 
                 let iframe = $networkElement.find('iframe');
-                let query = encodeURI(`[{"any":[{"links":"${recID}"},{"ids":"${recID}"}]}]`);
+                
+                //let query = encodeURI(`{"links":"${recID}"}`);
+                //`[{"any":[{"links":"${recID}"},{"ids":"${recID}"}]}]`); THIS QUERY IS WRONG - EXECUTION IS TIMED OUT
                 let URL = `${baseURL}viewers/visualize/springDiagram.php?db=${database}&mini=1&q=${query}`; // mini: 1 = small, 2 = large
 
                 if($networkElement.attr('data-recid') == recID){
@@ -1566,7 +1569,7 @@ function print_details($bib) {
     $connectedRecIDCount = count($connectedRecIDs);
     if($connectedRecIDCount > 0){
         ?>
-        <script>connectedRecsCount = <?php echo $connectedRecIDCount; ?>;</script>
+        <script>connectedRecsCount = <?php echo $connectedRecIDCount;?>; connectedRecIDs='<?php echo implode(',',$connectedRecIDs);?>';</script>
         <?php
     }
 
