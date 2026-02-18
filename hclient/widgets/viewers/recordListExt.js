@@ -493,10 +493,10 @@ $.widget( "heurist.recordListExt", {
 
         this._current_url = newurl;
         
-        if(window.isCMS_active || window.parent?.cmsEditor){
+        if(window.isCMS_active || window.hWin.HEURIST4.util.getParentWinProperty('cmsEditor')){
             newurl = newurl + '&limit=5&publish=0&cmseditor=1';
             this.options.showProgress = false;
-        }
+        }        
         
         if(this.options.showProgress){
             const session_id = window.hWin.HEURIST4.msg.showProgress({container:this.element.find('#progressbar_div')});

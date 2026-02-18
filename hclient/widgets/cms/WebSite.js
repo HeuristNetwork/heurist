@@ -73,7 +73,7 @@ class WebSite {
         
         this.pageCache = {};
         
-        this.isEditMode = !window.hWin.HEURIST4.util.isnull(window.parent?.cmsEditor);
+        this.isEditMode = window.hWin.HEURIST4.util.getParentWinProperty('cmsEditor');
         
         this.siteOptions.isEmbeded = this.isEditMode || _options.isEmbeded;
         
@@ -211,7 +211,7 @@ class WebSite {
     * Returns true if action is blocked
     */
     onPageBeforeLoad(){
-        if(window.parent?.cmsEditor){
+        if(window.hWin.HEURIST4.util.getParentWinProperty('cmsEditor')){
             return window.parent.cmsEditor.warningOnExit();    
         }
         return false;
@@ -289,7 +289,7 @@ class WebSite {
             bsOffcanvas.hide();
         }
 
-        if(window.parent?.cmsEditor){ //edit mode
+        if(window.hWin.HEURIST4.util.getParentWinProperty('cmsEditor')){ //edit mode
             window.parent.cmsEditor.onLoadPageContent(this.currentPageRec);    
         }
         
@@ -478,7 +478,7 @@ class WebSite {
         
         let opts = {websiteid:this.siteId, pageid:this.pageId, lang:this.currentLanguage, version:3};
         let loc = window.location;
-        if(window.parent?.cmsEditor){
+        if(window.hWin.HEURIST4.util.getParentWinProperty('cmsEditor')){
             opts['mode'] = 'edit';
             loc = window.parent.location;
         }

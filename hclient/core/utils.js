@@ -1184,6 +1184,46 @@ window.hWin.HEURIST4.util = {
         && (s.window.top === s.window || window.hWin.HEURIST4.util.isFullyActive(s.window.parent));
         */
     },
+
+    /**
+    * Checks whether window.parent is accessible and optionally whether
+    * a specific property can be read without violating Same-Origin Policy.
+    *
+    * @param {string} [prop] - Property name to test
+    *                          If omitted, tests generic accessibility.
+    * @returns true|false
+    */
+    canAccessParentWinProperty: function(prop) {
+
+        const parentWin = window.parent;
+
+        // Not inside an iframe (or parent is self)
+        if (!parentWin || parentWin === window) {
+            if (!prop) return true;
+            return Object.prototype.hasOwnProperty.call(window, prop) || prop in window;
+        }
+
+        try {
+            // Probe same-origin access — MUST touch a restricted property
+            // location.href is reliable across browsers for triggering SOP check
+            void parentWin.location.href;
+
+            // If no property requested, we only needed the accessibility test
+            if (!prop) return true;
+
+            // Now it's safe to inspect
+            return prop in parentWin;
+        } catch {
+            // Cross-origin access blocked (expected case)
+            return false;
+        }        
+    },
+    
+    getParentWinProperty: function(prop) {
+       return prop && window.hWin.HEURIST4.util.canAccessParentWinProperty(prop) ?window.parent.prop :null;
+    },
+    
+    
     
     //constants for saved searches\
     _NAME: 0, 

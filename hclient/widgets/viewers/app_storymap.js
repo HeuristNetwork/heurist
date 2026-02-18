@@ -887,7 +887,9 @@ $.widget( "heurist.app_storymap", {
                             if(recIDs.length>0){
     
                                 that._show_limit_message = false;
-                                if(window.isCMS_active || window.parent?.cmsEditor && recIDs.length>3){
+                                if(recIDs.length>3 && 
+                                    (window.isCMS_active || window.hWin.HEURIST4.util.getParentWinProperty('cmsEditor')))
+                                {
                                     recIDs = recIDs.slice(0,3);
                                     that._show_limit_message = true;
                                 }
