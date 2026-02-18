@@ -606,6 +606,15 @@
 
         return $result;
     }
+    
+    function user_Count($mysqli, $mode=null){
+        $query = 'SELECT COUNT(*) FROM sysUGrps';
+        if($mode){
+            $mode = $mode=='user'?'user':'workgroup';
+            $query = $query.' WHERE ugr_Type="'.$mode.'"';
+        } 
+        return mysql__select_value($mysqli, $query);
+    }
 
     /**
      * Retrieves a list of members for a specific workgroup.

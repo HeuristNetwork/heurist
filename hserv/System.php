@@ -1970,9 +1970,13 @@ class System {
         }
 
         if(!$user){
-            $this->addError(HEURIST_REQUEST_DENIED,  "The credentials supplied are not correct");
+            if(user_Count($this->mysqli)>0){
+                $this->addError(HEURIST_REQUEST_DENIED, 'The credentials supplied are not correct');
+            }else{
+                $this->addError(HEURIST_REQUEST_DENIED, 'Unable to read list of users - please report this problem');
+            }
         } elseif (!$is_guest && ($user['ugr_Enabled'] ?? 'n') === 'n'){
-            $this->addError(HEURIST_REQUEST_DENIED,  "Your user profile is not active. Please contact database owner");
+            $this->addError(HEURIST_REQUEST_DENIED,  'Your user profile is not active. Please contact database owner');
         } elseif ($skip_pwd_check || passwordCheck($password, $user['ugr_Password'], $this->mysqli, $user['ugr_ID']) ) { // passwordCheck is global
 
             $returnBool = true;
@@ -2005,7 +2009,7 @@ class System {
             // $this->loginVerify($user); // Pass the fetched user array to loginVerify
             return $returnBool;
         } else {
-            $this->addError(HEURIST_REQUEST_DENIED,  "The credentials supplied are not correct");
+            $this->addError(HEURIST_REQUEST_DENIED,  'The credentials supplied are not correct');
         }
 
         return false;
