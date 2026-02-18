@@ -567,7 +567,7 @@ class HSystemMgr {
      */
     user_log(activity, supplementary_info) {
 
-        const log_actions = ['VisitPage']; // Specific actions with special handling
+        const log_actions = ['VisitPage', 'editRec']; // Specific actions with special handling
         const log_prefix = ['db', 'st', 'prof', 'cms', 'imp', 'sync', 'exp', 'configure', 'rec', 'hlp', 'search']; // Prefixes for categorization
         const action_parts = activity.indexOf('_') > 0 ? activity.split('_') : [];
 

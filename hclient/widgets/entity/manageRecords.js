@@ -5206,7 +5206,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         //        
         this.onEditFormChange();
         
-        window.hWin.HAPI4.SystemMgr.user_log('rec_Edit', this._currentEditID); // log action
+        window.hWin.HAPI4.SystemMgr.user_log('editRec', {ids: this._currentEditID, count: 1}); // log action
         
         if(window.hWin.HEURIST4.util.isFunction(this.options.onInitEditForm)){
             this.options.onInitEditForm.call();
