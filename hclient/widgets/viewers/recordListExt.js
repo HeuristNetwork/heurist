@@ -75,6 +75,7 @@ $.widget( "heurist.recordListExt", {
         widget_id: null, //outdated: user identificator to find this widget custom js script on web/CMS page
         title: '',
 
+        //display range for current result set - all, page or selection
         is_single_selection: false, //work with the only record - reloads content on every selection event
         is_multi_selection: false, //work with all selectd records
         show_page: false, //work with current page only

@@ -49,7 +49,14 @@ $.widget( "heurist.connections", {
         recordset: null,
         selection: null, //list of record ids
         search_realm:  null,  //accepts search/selection events from elements of the same realm only
-        init_at_once: false
+        search_initial: null,  //Query or svs_ID for initial search
+        init_at_once: false,
+        
+        show_selection: false, //work with all selectd records
+        show_all: true,
+        
+        empty_remark: '', //html content for empty message  (search returns empty result)
+        placeholder_text: '', //text to display while no record/recordset is loaded  (search is not performed)
     },
 
     /**
@@ -142,12 +149,22 @@ $.widget( "heurist.connections", {
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
                 
                 if(that._isSameRealm(data) && data.source!=that.element.attr('id')) { //selection happened somewhere else
-                  
-                    if(data.reset){
+                
+                
+                    if(that.options.show_selection){
+                        
+                        let sel = window.hWin.HAPI4.getSelection(data.selection, true); //get ids
+                        that.options.relations = null;
+                        that.options.selection = sel;
+                        that.recordset_changed = true;
+                        that._refresh();
+                        
+                    }else if(data.reset){
                         that.options.selection = null;
                     }else{
                         that._doVisualizeSelection( window.hWin.HAPI4.getSelection(data.selection, true) );
                     }
+                    
                 }            
             }else if (e.type == window.hWin.HAPI4.Event.ON_SYSTEM_INITED){
                     that._refresh();
@@ -166,13 +183,32 @@ $.widget( "heurist.connections", {
             }
         });
         
-        if(this.options.init_at_once){
+        
+        if(this.options.search_initial){
+            this.doSearch( this.options.search_initial );
+            this.options.search_initial = null;
+        }else if(this.options.init_at_once){
             this._refresh();  
         }
         
         
     }, //end _create
 
+    
+    /**
+     * @memberof heurist.recordListExt
+     * @instance
+     * @description Initiates a Heurist search with the given query.
+     * The search results will be handled by the global event listeners.
+     * @param {string|Object} query - The search query string or query object.
+     */
+    doSearch: function(query){
+        let request = {q:query, w: 'a', detail: 'ids', 
+                        source: 'init', search_realm: this.options.search_realm };
+        window.hWin.HAPI4.RecordSearch.doSearch(this.document, request);
+    },
+    
+    
     /**
      * @memberof heurist.connections
      * @instance
@@ -208,18 +244,19 @@ $.widget( "heurist.connections", {
             // Content loaded already    
             }else{
                 // SPRING DIAGRAM CODE
+                let recset = this.options.show_selection?this.options.selection:this.options.recordset;
                 
-                if(this.options.recordset !== null) {
+                if(recset !== null) {
                     
                     if(this.options.relations == null){ //relation not yet loaded
                         
-                        this._getRelations(this.options.recordset);
+                        this._getRelations(recset);
                         
                     }else{
                         
                         let MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
                     
-                        let records_ids = this.options.recordset.getIds(MAXITEMS);
+                        let records_ids = Array.isArray(recset)?recset:recset.getIds(MAXITEMS);
                         let relations = this.options.relations;
                         
                         // Parse response to spring diagram format
@@ -309,7 +346,7 @@ $.widget( "heurist.connections", {
         let that2 = this; 
         //get first MAXITEMS records and send their IDS to server to get related record IDS
         let MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
-        let records_ids = recordset.getIds(MAXITEMS);
+        let records_ids = Array.isArray(recordset)?recordset:recordset.getIds(MAXITEMS);
         if(records_ids.length>0){
             
             window.hWin.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, function(response)
@@ -326,7 +363,7 @@ $.widget( "heurist.connections", {
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
                 
-                that2.option("recordset", recordset); //HRecordSet
+                //that2.option("recordset", recordset); //HRecordSet
                 that2.loadanimation(false);
                 
             });
@@ -460,14 +497,14 @@ $.widget( "heurist.connections", {
         if(this._isVisualizeInited() ){
             let that = this;
             this.graphframe[0].contentWindow.showData(data, this.options.selection, this._lastRequest,
-                    function(selected){
+                    function(selected){  //on select
                         $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                         { selection:selected, source:that.element.attr('id'), search_realm:that.options.search_realm } );
                     },
-                    function(selected){
+                    function(selected){  //on refresh
                         that._getRelations(that.options.recordset);
                     },
-                    function(type, rec_ID){
+                    function(type, rec_ID){ //on expand search
                         that._expandSearch(type, rec_ID);
                     }
             );

@@ -147,7 +147,7 @@
 
                 </div>
 
-                <div class="heurist_resultListExt">
+                <div class="heurist_resultListExt heurist_Graph">
 
                     <div class="header header_wide">
                         Filter to be applied at start
@@ -171,15 +171,25 @@
                     <i class="help-text">current page</i>
 
                     <br>
-
                     <input value="is_multi_selection" name="selection_mode" type="radio"/>
                     <i class="help-text">all selected records only</i>
 
                     <br>
-
                     <input value="is_single_selection" name="selection_mode" type="radio" style="vertical-align: 7px;"/>
                     <i class="help-text">a single (most recent) selected record.<br>Use this in place of inline or popup record view</i>
 
+                </div>
+                <div class="heurist_Graph">
+                    <div class="header header_wide">
+                        Record(s) to show &nbsp;
+                    </div>
+
+                    <input value="show_recordset" name="show_mode" type="radio" checked="checked"/>
+                    <i class="help-text">entire recordset</i>
+
+                    <br>
+                    <input value="show_selection" name="show_mode" type="radio"/>
+                    <i class="help-text">all selected records only</i>
                 </div>
 
                 <div class="heurist_resultListExt">
