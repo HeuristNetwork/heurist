@@ -185,6 +185,9 @@ function expandNode(rec_ID){
 
         <!-- Functions callable from parent iframe or for standalone mode -->
         <script>
+        
+        var isMinimalVersion = <?php echo $isMinimalVersion?'true':'false';?>;
+
 
         /**
         * Parses Heurist record data and relationship data into a D3-compatible format (nodes and links).
@@ -334,7 +337,7 @@ function expandNode(rec_ID){
 
             return {nodes: nodesArray, links: links};
         }
-
+        
         /**
          * Updates the visualization to highlight a given set of selected record IDs.
          *
@@ -389,8 +392,8 @@ function expandNode(rec_ID){
                 return length;
             }
 
-            $(window).on('onresize',onVisualizeResize); // Bind resize handler
-            onVisualizeResize(); // Initial call
+            $(window).on('resize',onVisualizeResize); // Bind resize handler
+            setTimeout(()=>onVisualizeResize(),1000); // Initial call
 
             // Initialize the visualize plugin
             $("#visualize").visualize({ // Assumes #visualize is the ID of the main container in visualize.php
@@ -411,7 +414,7 @@ function expandNode(rec_ID){
                 showEntitySettings: false,
                 showFormula: false,
                 gravity: 'off', // Start with gravity off; can be 'touch' to initially scatter
-                minimal: <?php echo $isMinimalVersion; ?>
+                minimal: isMinimalVersion 
             });
 
             // Example: setTimeout(function(){ setGravity('off');}, 3000); // turn off gravity after initial scatter
@@ -430,7 +433,23 @@ function expandNode(rec_ID){
          */
         function onVisualizeResize(){
             var width = $(window).width();
-            $('#divSvg').css('top', '0em'); // Assumes #divSvg is the SVG container
+            let topPos = '0em';
+            if(isMinimalVersion){
+                let ele = $('#toolbar').find('.dropdown-content1');
+                if(ele.length>0){
+                    ele.removeClass('dropdown-content1');
+                }
+                /*
+                ele.css('position','relative !important');
+console.log(ele); */               
+                //$('#toolbar').css({'position':'absolute',left:'0px',top:'0px'});
+                topPos = $('#toolbar').height();
+                if(topPos<40) { topPos = 40; }
+                topPos = (topPos+10)+'px';
+                $('#toolbar').find('.heurist-helper2').hide();
+            }
+console.log('>>>',isMinimalVersion, topPos);            
+            $('#divSvg').css('top', topPos); // Assumes #divSvg is the SVG container
         }
 
         </script>

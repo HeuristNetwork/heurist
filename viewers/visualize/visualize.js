@@ -1704,6 +1704,7 @@ function inIframe() {
     $(closewindowbtn).button();
     $(refreshData).button();
 
+    $("#divSvg").css('top','3em');
 }
 
 //New graph refresh button - Created by Travis Doyle 24/9/2022
@@ -1833,7 +1834,11 @@ function setupThematicSettings(){
         if(!link){
             continue;
         }
-
+        
+        continue;
+        
+        //BRANDON, rtyID that is used below is not defined
+        
         const trmID = Number.parseInt(link.id);
         if(!window.hWin.HEURIST4.util.isPositiveInt(trmID) || nodes[trmID]){
             continue;
@@ -1846,7 +1851,7 @@ function setupThematicSettings(){
         let item = `
         <input name="displayNode" type="checkbox" ${existingSettings.display ? 'checked="checked"' : ''}>
         <span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>
-        <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${nodes[rtyID].name}" class="truncate">${nodes[rtyID].name}</span>
+        <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${nodes[rtyID].name}" class="truncate">${edges[trmID].name}</span>
         `;
 
         let div = document.createElement('div');

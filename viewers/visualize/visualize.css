@@ -269,6 +269,7 @@ text.shadow {
     line-height: 10px;    
     display:table-cell;
     height:auto;
+    width: 100%;
 }
 .split_bar{
     height: 0px;
@@ -296,40 +297,39 @@ text.shadow {
 }
 
 
-.dropdown-content1, 
-.dropdown-content2, 
-.dropdown-content3 {
+.dropdown-content {
     padding: 5px;
     margin-top: 5px;
     background-color: #EFEFEF;
     min-width: 200px;
     box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     z-index: 1;
-    position: absolute;
 }
 
 .dropdown-content1{
     top: 1px;
     left: 1px;
+    position: absolute;
 }
 
 .dropdown-content2{
     bottom: 1px;
     left: 1px;
+    position: absolute;
 }
 
 .dropdown-content3{
     top: 1px;
     right: 1px;
+    position: absolute;
 }
 
 .dropdown-content a:hover {
     background-color: #ddd;
 }
 
-.dropdown-content1 div,
-.dropdown-content2 div,
-.dropdown-content3 div {
+.dropdown-content div,
+{
     margin: 5px 0px 0px 5px;
 }
 

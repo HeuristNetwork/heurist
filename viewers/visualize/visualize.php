@@ -134,7 +134,7 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 
 <div id="toolbar" class="split_bar" style="display: none;">
 
-    <div class="dropdown-content1">
+    <div class="dropdown-content dropdown-content1">
         <div>
             <span id="lnkOpenPopup" class="fake_link" style="padding-right: 1em;">popup <span class="ui-icon ui-icon-extlink"></span></span>
 
@@ -230,7 +230,7 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
         </div>
     </div>
 
-    <div class="dropdown-content2">
+    <div class="dropdown-content dropdown-content2">
         <div>
             <span>Links:</span>
             <label><input id="linksEmpty" title="Show empty links (zero count) as faint lines" type="checkbox" />&nbsp;Empty</label>
@@ -249,7 +249,7 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 
     </div> <?php // end dropdown-content2 ?>
 
-    <div class="dropdown-content3">
+    <div class="dropdown-content dropdown-content3">
         <div>
             <button id="resetbutton" onclick="refreshButton();" title="Refresh graph data and layout">Refresh Data</button>
             <button id="windowPopOut" onclick="openWin();" title="Open graph in a new fullscreen window">Open Fullscreen</button>
