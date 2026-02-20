@@ -182,6 +182,24 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 
 </div>
 
+<div id="graphExpander" style="display: none;">
+    Extend <span class="ui-icon ui-icon-arrowthick-1-w" id="descreaseGraphLevel"></span><span id="graphLevel">1</span><span class="ui-icon ui-icon-arrowthick-1-e" id="increaseGraphLevel"></span>
+</div>
+
+<div id="thematicSettings">
+
+    <div id="thematicNodes">
+        <span style="font-size: 1.25em;">Nodes</span>
+        <div id="thematicNodesList"></div>
+    </div>
+
+    <div id="thematicEdges">        
+        <span style="font-size: 1.25em;">Edges</span>
+        <div id="thematicEdgesList"></div>
+    </div>
+
+</div>
+
 <div id="divSvg" class="ent_content_full" style="top:4.5em;overflow:hidden;"> <?php // Main content area for SVG ?>
     <svg id="d3svg" class="fullscreen" style="width: 100%; height: 100%;">
         <text x="25" y="25" fill="black">Building graph ...</text> <?php // Initial loading message ?>

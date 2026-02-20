@@ -17,6 +17,8 @@
 */
 define('PDIR','../../');//need for proper path to js and css
 require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
+
+$isMinimalVersion = intval(@$_REQUEST['mini']);
 ?>
         <style>
             body, html {
@@ -44,6 +46,19 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/jquery.ui-contextmenu.js"></script>
 
+        <!-- Ensure required Heurist files are loaded (RecordSet and Symbology tools) -->
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
+
+        <?php
+        if($isMinimalVersion){
+        ?>
+        <script type="text/javascript" src="<?php echo PDIR;?>external/tinymce5/tinymce.min.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_color.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_exts.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
+        <?php } ?>
+
         <script type="text/javascript">
 
 /**
@@ -53,6 +68,9 @@ require_once dirname(__FILE__).'/../../hclient/framecontent/initPage.php';
 var isStandAlone = false;
 
 var currentRequest = null;
+
+var graphLevels = []; // keep track of each graph level (for handling graph level expansions), beware manual expanding needs to be accounted for
+var nodeRelationMapping = {}; // keep a list of related nodes, to simplify individual node expansions
 
 /**
  * Callback function executed after the page's initial dependencies are loaded.
@@ -129,43 +147,16 @@ function performSearch(q){
 
 function expandNode(rec_ID){
 
-    let q = window.hWin.HEURIST4.util.isJSON(currentRequest.q);
-    if(!q){
+    const currentQuery = currentRequest.q;
+    let parts = typeof currentQuery === 'string' ? currentQuery.split(':') : [];
+    if(!Object.hasOwn(nodeRelationMapping, rec_ID) || parts.length > 2 || parts[0] !== 'ids'){
         return;
     }
 
-    let isUpdated = false; // whether we need to update the graph
-    if(q[0].any){
+    let currentRecIDs = parts[1].split(',');
+    let recIDs = new Set(currentRecIDs).union(nodeRelationMapping[rec_ID]);
 
-        // Add to links clause
-        if(q[0].any[0].links || q[0].any[1].links){
-
-            let linksIdx = q[0].any[0].links ? 0 : 1;
-            let curLinks = q[0].any[linksIdx].links.split(',');
-
-            if(curLinks.indexOf(rec_ID) === -1){
-                curLinks.push(rec_ID);
-                isUpdated = true;
-            }
-
-            q[0].any[linksIdx].links = curLinks.join(',');
-        }
-
-        /* Add to ids clause
-        if(q[0].any[0].ids || q[0].any[1].ids){
-
-            let idsIdx = q[0].any[0].ids ? 0 : 1;
-            let curIds = q[0].any[idsIdx].ids.split(',');
-
-            if(curIds.indexOf(rec_ID) === -1){
-                curIds.push(rec_ID);
-                isUpdated = true;
-            }
-
-            q[0].any[idsIdx].ids = curIds.join(',');
-        }*/
-    }
-
+    let isUpdated = currentRecIDs.length < recIDs.size; // whether we need to update the graph
     if(!isUpdated){
         window.hWin.HEURIST4.msg.showMsgFlash('Node has already been expanded', 3000);
         return;
@@ -176,7 +167,7 @@ function expandNode(rec_ID){
 
     window.hWin.HEURIST4.msg.bringCoverallToFront($('body'), {'background-color': 'white', opacity: 1, color: 'black'}, `Extending graph for ${title}...`);
 
-    performSearch(JSON.stringify(q));
+    performSearch(`ids:${Array.from(recIDs).join(',')}`);
 }
 
         </script>
@@ -189,7 +180,6 @@ function expandNode(rec_ID){
              * @global int $isDatabaseStructure Indicates if the visualization is for database structure (0 for record data).
              */
             $isDatabaseStructure = 0;
-            $isMinimalVersion = intval(@$_REQUEST['mini']);
             include_once "visualize.php"; // Includes the common HTML structure for the visualization
         ?>
 
@@ -212,22 +202,29 @@ function expandNode(rec_ID){
             let links = [];
 
             if(records_ids !== undefined && relations !== undefined) {
+
                 // Construct nodes for each record
                 for(let i=0;i<records_ids.length;i++) {
+
                     const recId = records_ids[i];
                     // Ensure relations.headers[recId] exists to prevent errors
                     if (relations.headers && relations.headers[recId]) {
-                        var node = {id: parseInt(recId),
-                                    name: relations.headers[recId][0],  // record title
-                                    image: window.hWin.HAPI4.iconBaseURL+relations.headers[recId][1],  // record type id for icon
-                                    count: 0, // Default count, might be updated later if applicable
-                                    depth: 1, // Default depth
-                                    rty_ID: relations.headers[recId][1] // Store record type ID
-                                   };
+
+                        let node = {
+                            id: parseInt(recId),
+                            name: relations.headers[recId][0],  // record title
+                            image: window.hWin.HAPI4.iconBaseURL+relations.headers[recId][1],  // record type id for icon
+                            count: 0, // Default count, might be updated later if applicable
+                            depth: 1, // Default depth
+                            rty_ID: relations.headers[recId][1] // Store record type ID
+                        };
                         nodes[recId] = node;
+
+                        if(!Object.hasOwn(nodeRelationMapping, recId)){
+                            nodeRelationMapping[recId] = new Set();
+                        }
                     }
                 }
-
 
                 /**
                 * Helper function to determine links between nodes based on a set of relations.
@@ -239,46 +236,92 @@ function expandNode(rec_ID){
                 * @returns {Array<object>} An array of D3 link objects.
                 */
                 function __getLinks(currentNodes, relationSet) {
+
                     let newLinks = []; // Renamed to avoid conflict
 
+                    if (!relationSet) { // Ensure relationSet is defined
+                        return newLinks;
+                    }
+
                     // Go through all relations
-                    if (relationSet) { // Ensure relationSet is defined
-                        for(let j = 0; j < relationSet.length; j++) { // Changed loop variable
-                            // Null check
-                            const sourceId = relationSet[j].recID;
-                            const targetId = relationSet[j].targetID;
-                            const dtID = relationSet[j].dtID;
-                            const trmID = relationSet[j].trmID;
-                            let relationName = "Floating relationship"; // Default name
+                    for(let j = 0; j < relationSet.length; j++) {
 
-                            if(dtID > 0) {
-                                relationName = $Db.dty(dtID, 'dty_Name'); // Assumes $Db is available
-                            }else if(trmID > 0) {
-                                relationName = $Db.trm(trmID, 'trm_Label'); // Assumes $Db is available
-                            }
+                        // Null check
+                        const sourceId = relationSet[j].recID;
+                        const targetId = relationSet[j].targetID;
+                        const dtID = relationSet[j].dtID;
+                        const trmID = relationSet[j].trmID;
+                        let relationName = "Floating relationship"; // Default name
 
-                            // Link check: ensure both source and target nodes exist in our current set
-                            if(sourceId !== undefined && currentNodes[sourceId] !== undefined &&
-                               targetId !== undefined && currentNodes[targetId] !== undefined) {
-                                // Construct link
-                                var link = {source: currentNodes[sourceId],
-                                            target: currentNodes[targetId],
-                                            targetcount: 1, // Default, might represent cardinality or frequency if available
-                                            relation: {id: dtID>0?dtID:trmID, // Use dtID if available, else trmID
-                                                       name: relationName,
-                                                       type: dtID>0?'resource':'relationship'} // Distinguish type
-                                           };
-                                newLinks.push(link);
-                            }
+                        if(dtID > 0) {
+                            relationName = $Db.dty(dtID, 'dty_Name'); // Assumes $Db is available
+                        }else if(trmID > 0) {
+                            relationName = $Db.trm(trmID, 'trm_Label'); // Assumes $Db is available
+                        }
+
+                        // Link check: ensure both source and target nodes exist in our current set
+                        if(sourceId !== undefined && currentNodes[sourceId] !== undefined &&
+                            targetId !== undefined && currentNodes[targetId] !== undefined) {
+
+                            // Construct link
+                            let link = {
+                                source: currentNodes[sourceId],
+                                target: currentNodes[targetId],
+                                targetcount: 1, // Default, might represent cardinality or frequency if available
+                                relation: {
+                                    id: dtID > 0 ? dtID : trmID, // Use dtID if available, else trmID
+                                    name: relationName,
+                                    type: dtID > 0 ? 'resource' : 'relationship' // Distinguish type
+                                }
+                            };
+                            newLinks.push(link);
                         }
                     }
+
                     return newLinks;
                 }
-
 
                 // Consolidate links from direct and reverse relations
                 links = links.concat( __getLinks(nodes, relations.direct)  );
                 links = links.concat( __getLinks(nodes, relations.reverse) );
+
+                function addNewConnections(){
+
+                    for(let i = 0; i < relations.direct.length; i++){
+
+                        let direct = relations.direct[i];
+                        const recID = Number.parseInt(direct.recID);
+                        const targetID = Number.parseInt(direct.targetID);
+
+                        if(Object.hasOwn(nodeRelationMapping, recID)){
+                            nodeRelationMapping[recID].add(targetID);
+                        }
+                        if(Object.hasOwn(nodeRelationMapping, targetID)){
+                            nodeRelationMapping[targetID].add(recID);
+                        }
+                    }
+
+                    for(let i = 0; i < relations.reverse.length; i++){
+
+                        let reverse = relations.reverse[i];
+                        const recID = Number.parseInt(reverse.recID);
+                        const sourceID = Number.parseInt(reverse.sourceID);
+
+                        if(Object.hasOwn(nodeRelationMapping, recID)){
+                            nodeRelationMapping[recID].add(sourceID);
+                        }
+                        if(Object.hasOwn(nodeRelationMapping, sourceID)){
+                            nodeRelationMapping[sourceID].add(recID);
+                        }
+                    }
+                }
+
+                addNewConnections();
+
+                /*
+                newly_added_nodes = record_ids - previous_nodes;
+                graphLevels.push(newly_added_nodes);
+                */
             }
 
             // Construct data object with nodes as an array
@@ -288,6 +331,7 @@ function expandNode(rec_ID){
                     nodesArray.push(nodes[id]);
                 }
             }
+
             return {nodes: nodesArray, links: links};
         }
 

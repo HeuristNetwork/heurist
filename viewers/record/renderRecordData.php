@@ -208,13 +208,15 @@ if(is_array($formats) && array_key_exists('formats', $formats)){
 $import_webfonts = $system->settings->getWebFontsLinks();
 
 // if we get a record id then see if there is a personal bookmark for it.
+$mysqli = $system->getMysqli();
 if ($rec_id>0 && !@$_REQUEST['bkmk_id'])
 {
-    $bkm_ID = mysql__select_value($system->getMysqli(),
+    $bkm_ID = mysql__select_value($mysqli,
                     'select bkm_ID from usrBookmarks where bkm_recID = '
                         .$rec_id.' and bkm_UGrpID = '.$system->getUserId());
 }else{
     $bkm_ID = intval(@$_REQUEST['bkmk_id']);
+    $rec_id = isPositiveInt($bkm_ID) ? mysql__select_value($mysqli, 'SELECT bkm_recID FROM usrBookmarks WHERE bkm_ID = ?', ['i', $bkm_ID]) : 0;
 }
 $sel_ids = array();
 if(@$_REQUEST['ids']){
@@ -665,12 +667,9 @@ if(!$system->hasAccess()){
                 if(recID <= 0){
                     return;
                 }
-                const query = `ids:${recID},${connectedRecIDs}`;
 
                 let iframe = $networkElement.find('iframe');
-                
-                //let query = encodeURI(`{"links":"${recID}"}`);
-                //`[{"any":[{"links":"${recID}"},{"ids":"${recID}"}]}]`); THIS QUERY IS WRONG - EXECUTION IS TIMED OUT
+                const query = `ids:${recID},${connectedRecIDs}`;
                 let URL = `${baseURL}viewers/visualize/springDiagram.php?db=${database}&mini=1&q=${query}`; // mini: 1 = small, 2 = large
 
                 if($networkElement.attr('data-recid') == recID){

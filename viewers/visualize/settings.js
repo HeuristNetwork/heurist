@@ -17,7 +17,7 @@
 */
 
 /* global svg, settings, currentMode, force, visualizeData, circleSize, maxEntityRadius, getEntityRadius,
-updateCircles, updateRectangles, tick, maxLinkWidth, getLineWidth, getMarkerWidth, updateLabels,
+updateCircles, updateRectangles, tick, maxLinkWidth, getLineWidth, getMarkerWidth, updateScalableElements,
 onVisualizeResize */
 
 /**
@@ -398,7 +398,7 @@ function handleSettingsInUI() {
         let applyGravity = $('#applyGravity').is(':checked');
         setGravity(applyGravity ? 'touch' : 'off');
     });
-    $('#recTitleSize').val(9).on('change', () => updateLabels()); //svg.selectAll('text.nodelabel.namelabel').style('font-size', $('#recTitleSize').val(), 'important');
+    $('#recTitleSize').val(9).on('change', () => updateScalableElements('labels')); //svg.selectAll('text.nodelabel.namelabel').style('font-size', $('#recTitleSize').val(), 'important');
     $('#lnkOpenPopup').on('click', () => {
         if(typeof currentRequest === undefined || typeof currentRequest?.q !== 'string'){
             return;
@@ -554,7 +554,7 @@ function changeViewMode(mode){
 
         _syncUI(); // Update toolbar button states
         tick(); // Apply force layout changes
-        updateLabels(); // Update label content/visibility
+        updateScalableElements('all'); // update scaling for all scalable elements
     }
 }
 

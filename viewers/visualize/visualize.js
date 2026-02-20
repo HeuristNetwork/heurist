@@ -482,6 +482,10 @@ function visualizeData() {
         $('#embed-export').button({icon:'ui-icon-globe',showLabel:false}).on('click', showEmbedDialog);
     }
 
+    if(!settings.isDatabaseStructure && settings.minimal){
+        setupThematicSettings();
+    }
+
     tick()// update display
     
 } //end visualizeData
@@ -532,7 +536,7 @@ function addContainer() {
                            .scaleExtent(scaleExtentVals)
                            .on("zoom", zoomed);
 
-    updateLabels();
+    updateScalableElements('all');
 
     return container;
 }
@@ -540,7 +544,7 @@ function addContainer() {
 /**
 * Update label scaling
 */
-function updateLabels(){
+function updateScalableElements(toScale = 'all'){
 
     if(window.currentMode !== 'icons'){
         return;
@@ -548,26 +552,60 @@ function updateLabels(){
 
     const scale = this.zoomBehaviour.scale();
 
-    let fontSize = $('#recTitleSize').length > 0 ? $('#recTitleSize').val() : getSetting('setting_fontsize', $('#fontSize').val());
-    let nodeSize = $('#nodeSize').length > 0 ? $('#nodeSize').val() : getSetting('setting_nodesize', window.circleSize);
-    let iconSize = $('#iconSize').length > 0 ? $('#iconSize').val() : getSetting('setting_iconsize', window.iconSize);
-    fontSize = Number.parseFloat(fontSize);
-    nodeSize = Number.parseFloat(nodeSize);
-    iconSize = Number.parseFloat(iconSize);
+    if(toScale === 'all' || toScale === 'labels'){
 
-    nodeSize /= scale;
-    iconSize /= scale;
-    const iconPos = -iconSize / 2;
+        let fontSize = $('#recTitleSize').length > 0 ? $('#recTitleSize').val() : getSetting('setting_fontsize', $('#fontSize').val());
+        let nodeSize = $('#nodeSize').length > 0 ? $('#nodeSize').val() : getSetting('setting_nodesize', window.circleSize);
+        let iconSize = $('#iconSize').length > 0 ? $('#iconSize').val() : getSetting('setting_iconsize', window.iconSize);
+        fontSize = Number.parseFloat(fontSize);
+        nodeSize = Number.parseFloat(nodeSize);
+        iconSize = Number.parseFloat(iconSize);
+    
+        nodeSize /= scale;
+        iconSize /= scale;
+        const iconPos = -iconSize / 2;
+    
+        const labelList = document.querySelectorAll('.nodelabel');
+        fontSize /= scale;
+        const labelX = nodeSize + 20;
+        for(let i = 0; i < labelList.length; i++){
+    
+            labelList[i].style.setProperty('font-size', `${fontSize}px`, 'important');
+            labelList[i].style.setProperty('scale', '1');
+            labelList[i].style.setProperty('transform', 'translate(0px, 0px)');
+            //labelList[i].setAttribute('x', labelX);
+        }
+    }
 
-    const labelList = document.querySelectorAll('.nodelabel');
-    fontSize /= scale;
-    const labelX = nodeSize + 20;
-    for(let i = 0; i < labelList.length; i++){
+    if(toScale === 'all' || toScale === 'lines'){
 
-        labelList[i].style.setProperty('font-size', `${fontSize}px`, 'important');
-        labelList[i].style.setProperty('scale', '1');
-        labelList[i].style.setProperty('transform', 'translate(0px, 0px)');
-        //labelList[i].setAttribute('x', labelX);
+        updateLineSize = (lines, thickness = 1, factor = 1) => {
+    
+            for(let i = 0; i < lines.length; i++){
+        
+                const currentLine = lines[i];
+                const data = d3.select(currentLine).data();
+        
+                if(!data[0]){
+                    continue;
+                }
+        
+                const count = parseInt(data[0]['targetcount']);
+                let width = (getLineWidth(count) + thickness) * factor; // base line width
+                width /= scale; // scaled width
+        
+                currentLine.style.setProperty('stroke-width', `${width}px`);
+                currentLine.style.setProperty('scale', '1');
+                currentLine.style.setProperty('transform', 'translate(0px, 0px');
+            }
+        };
+    
+        const bottomLineList = document.querySelectorAll('.bottom-lines');
+        const topLineList = document.querySelectorAll('.top-lines');
+        const rolloverLineList = document.querySelectorAll('.rollover-lines');
+        updateLineSize(bottomLineList, 1, 1);
+        updateLineSize(topLineList, 1, 0.2);
+        updateLineSize(rolloverLineList, 3, 3);
     }
 
     tick();
@@ -580,7 +618,7 @@ function zoomed() {
 
     let scale = window.d3.event.scale; //Math.pow(window.d3.event.scale,0.75);
 
-    updateLabels();
+    updateScalableElements('all');
 
     //keep current setting Translate   
     let translateXY = [];
@@ -997,7 +1035,7 @@ function tick() {
     }
     
     // Update label scaling
-    //updateLabels();
+    //updateScalableElements('all');
 
     // Update node locations
     updateNodes();
@@ -1729,4 +1767,154 @@ function filterData(json_data) {
     let data_visible = {nodes: nodes, links: links};
     settings.getData = function(all_data) { return data_visible; }; 
     visualizeData();
+}
+
+var thematicSettings = {
+    nodes: {},
+    edges: {}
+};
+
+function setupThematicSettings(){
+
+    if(typeof editSymbology !== 'function' || typeof hexToFilter !== 'function'){
+        return;
+    }
+
+    let data = settings.getData.call(this, settings.data);
+    let nodes = {};
+    let edges = {};
+
+    let container = document.querySelector('#thematicSettings');
+    let nodeContainer = document.querySelector('#thematicNodesList');
+    let edgeContainer = document.querySelector('#thematicEdgesList');
+
+    for(let i = 0; i < data.nodes.length; i++){
+
+        let node = data.nodes[i];
+        const rtyID = Number.parseInt(node.rty_ID);
+
+        if(Object.hasOwn(nodes, rtyID)){
+            continue;
+        }
+
+        const rty = $Db.rty(rtyID);
+        const iconURL = `${window.hWin.HAPI4.iconBaseURL}${rtyID}`;
+
+        nodes[rtyID] = {name: rty['rty_Name'], icon: iconURL, settings: {}};
+        let existingSettings = getSetting(`setting_styling_nodes${rtyID}`, {color: '#000000', opacity: '100', fillColor: '#FFFFFF', fillOpacity: '100', display: 1});
+        nodes[rtyID].settings = existingSettings;
+
+        let item = `
+        <input name="displayNode" type="checkbox" ${existingSettings.display ? 'checked="checked"' : ''}>
+        <img src="${nodes[rtyID].icon}" alt="${nodes[rtyID].name}" height="16" width="16" style="top: 5px;position: relative;" data-icon-id="${rtyID}">
+        <span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>
+        <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${nodes[rtyID].name}" class="truncate">${nodes[rtyID].name}</span>
+        `;
+
+        let div = document.createElement('div');
+        div.style.setProperty('padding', '0em 0.3em 0.5em');
+        div.setAttribute('data-id', rtyID);
+        div.innerHTML = item;
+
+        nodeContainer.appendChild(div);
+
+        div.querySelector('.editSymbols').addEventListener('click', () => editThematicSetting('nodes', rtyID));
+        div.querySelector('input[name="displayNode"]').addEventListener('change', (event) => {
+            console.log(event);
+            //toggleDisplay();
+        });
+
+        setThematicSetting('nodes', rtyID, existingSettings);
+    }
+
+    for(let i = 0; i < data.links.length; i++){
+
+        let link = data.links[i].relation;
+        if(!link){
+            continue;
+        }
+
+        const trmID = Number.parseInt(link.id);
+        if(!window.hWin.HEURIST4.util.isPositiveInt(trmID) || nodes[trmID]){
+            continue;
+        }
+
+        edges[trmID] = {name: link['name'], settings: {}};
+        let existingSettings = getSetting(`setting_styling_nodes${rtyID}`, {color: getSetting('setting_linecolor', '#0070C0'), opacity: '100', display: 1});
+        edges[trmID].settings = existingSettings;
+
+        let item = `
+        <input name="displayNode" type="checkbox" ${existingSettings.display ? 'checked="checked"' : ''}>
+        <span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>
+        <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${nodes[rtyID].name}" class="truncate">${nodes[rtyID].name}</span>
+        `;
+
+        let div = document.createElement('div');
+        div.style.setProperty('padding', '0em 0.3em 0.5em');
+        div.setAttribute('data-id', rtyID);
+        div.innerHTML = item;
+
+        nodeContainer.appendChild(div);
+
+        div.querySelector('.editSymbols').addEventListener('click', () => editThematicSetting('edges', trmID));
+        div.querySelector('input[name="displayNode"]').addEventListener('change', (event) => {
+            console.log(event);
+            //toggleDisplay();
+        });
+
+        setThematicSetting('edges', trmID, existingSettings);
+    }
+
+    container.style.setProperty('display', 'block');
+    thematicSettings['nodes'] = nodes;
+    thematicSettings['edges'] = edges;
+}
+
+function editThematicSetting(type, ID){
+
+    if((type !== 'nodes' && type !== 'edges') || !window.hWin.HEURIST4.util.isPositiveInt(ID)){
+        return;
+    }
+
+    let details = thematicSettings[type][ID];
+
+    editSymbology(details.settings, type === 'nodes' ? 6 : 7, (styling) => {
+        
+        setThematicSetting(type, ID, styling);
+        styling.display = 1;
+        
+        putSetting(`setting_styling_${type}${ID}`, styling);
+    });
+}
+
+function setThematicSetting(type, ID, settings){
+
+    if(type === 'nodes'){
+
+        let colourFilter = hexToFilter(settings.color);
+        let icons = document.querySelectorAll(`image[data-icon-id="${ID}"]`);
+
+        for(let i = 0; i < icons.length; i++){
+
+            icons[i].style.setProperty('filter', colourFilter);
+            icons[i].style.setProperty('opacity', `${settings.opacity}%`);
+
+            let foregroundCircle = icons[i].parentNode.querySelector('.foreground');
+            if(!foregroundCircle){
+                continue;
+            }
+
+            foregroundCircle.style.setProperty('fill', settings.fillColor);
+            foregroundCircle.style.setProperty('opacity', settings.fillOpacity);
+        }
+    }else if(type === 'edges'){
+
+        let lines = document.querySelectorAll(`path.bottom-lines[class*="r${ID}t"]`);
+
+        for(let i = 0; i < lines.length; i++){
+
+            lines[i].setAttribute('stroke', settings.color);
+            lines[i].style.setProperty('opacity', settings.opacity);
+        }
+    }
 }

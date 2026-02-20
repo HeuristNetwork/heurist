@@ -133,7 +133,10 @@ function addNodes() {
                 },200);
                 }
             })
-            .style('display', icon_display);
+            .style('display', icon_display)
+            .attr('data-icon-id', (d) => {
+                return d.rty_ID ? d.rty_ID : d.id;
+            });
                            
         let gravity = getSetting('setting_gravity');
         

@@ -33,6 +33,8 @@
  *                             3: Symbology editor from record edit for a map layer.
  *                             4: Symbology editor for a thematic map.
  *                             5: Define symbology ranges (gradient values).
+ *                             6: Symbology editor for visualiser [nodes]
+ *                             7: Symbology editor for visualiser [edges]
  * @param {function} callback - A function to be called when the symbology is saved.
  *                                                         It receives the updated symbology object or array as its argument.
  */
@@ -254,7 +256,71 @@ function editSymbology(current_value, mode_edit, callback){
         }}
         ];
         
-    }    
+    }
+    else if(mode_edit === 6){
+        editFields = [
+            {"dtID": "color",
+                "dtFields":{
+                    "dty_Type":"freetext",
+                    "rst_DisplayName": "Stroke color:",
+                    "rst_DisplayWidth": 17,
+                    "rst_DisplayHelpText": "",
+                    "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
+                }
+            },
+            {"dtID": "opacity",
+                "dtFields":{
+                    "dty_Type":"float",
+                    "rst_DisplayName": "Stroke opacity:",
+                    "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
+                }
+            },
+            {"dtID": "fillColor",
+                "dtFields":{
+                    "dty_Type":"freetext",
+                    "rst_DisplayName": "Fill color:",
+                    "rst_DisplayWidth": 17,
+                    "rst_DisplayHelpText": "Fill color. Defaults to the value of the color option",
+                    "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
+                }
+            },
+            {"dtID": "fillOpacity",
+                "dtFields":{
+                    "dty_Type":"float",
+                    "rst_DisplayName": "Fill opacity:",
+                    "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
+                }
+            }
+        ];
+    }
+    else if(mode_edit === 7){
+
+        editFields = [
+            {"dtID": "color",
+                "dtFields":{
+                    "dty_Type":"freetext",
+                    "rst_DisplayName": "Stroke color:",
+                    "rst_DisplayWidth": 17,
+                    "rst_DisplayHelpText": "",
+                    "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
+                }
+            },
+            {"dtID": "weight",
+                "dtFields":{
+                    "dty_Type":"integer",
+                    "rst_DisplayName": "Stroke width:",
+                    "rst_DisplayHelpText": "Stroke width in pixels"
+                }
+            },
+            {"dtID": "opacity",
+                "dtFields":{
+                    "dty_Type":"float",
+                    "rst_DisplayName": "Stroke opacity:",
+                    "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
+                }
+            }
+        ];
+    }
     else{
         
         let ptr_fields = [];
@@ -575,7 +641,7 @@ function editSymbology(current_value, mode_edit, callback){
     //
     edit_symb_dialog = popup_dlg.dialog({
         autoOpen: true,
-        height: (mode_edit==2)?300:((mode_edit==5)?500:700), //((mode_edit==3)?750:700),
+        height: (mode_edit==2 || mode_edit==6 || mode_edit==7) ? 300 : ((mode_edit==5) ? 500 : 700), //((mode_edit==3)?750:700),
         width:  740,
         modal:  true,
         title: window.hWin.HR((mode_edit==5)?'Define symbology gradient values':'Define Symbology'),
