@@ -1587,9 +1587,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                $ulf_ID = fileGetFullInfo($this->system, $ulf_ID);
        }
 
-       if(!isEmptyArray($ulf_ID)) {$ulf_ID = $ulf_ID[0];}
-       return $ulf_ID;
-
+       if(!isEmptyArray($ulf_ID)) {
+            $ulf_ID = $ulf_ID[0];
+       }
+       return $ulf_ID>0?$ulf_ID:null;
     }
 
     /**

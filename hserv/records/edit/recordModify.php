@@ -2846,7 +2846,6 @@ function _prepareDetails($system, $rectype, $record, $validation_mode, $recID, $
                 $idx_in_vis++;
                 continue;
             }
-
             $dtl_HideFromPublic = null;
             if(@$record['details_visibility'][$dtyID]){
                 $dtl_HideFromPublic = (@$record['details_visibility'][$dtyID][$idx_in_vis]>0)?1:0;
@@ -3168,6 +3167,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex
 
                 case "separator":
                 case "relmarker":
+                    $isValid = 'ignore';
                 default:
                     break;    //noop since separators and relmarker have no detail values
             } //switch
