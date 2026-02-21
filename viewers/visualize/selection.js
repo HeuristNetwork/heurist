@@ -91,11 +91,18 @@ function updateCircles(selector, fgColor, isSelection) {
         fgColor = foregroundColor;
     }
 
+    let handleForeground = !settings.minimal ? fgColor : (d) => {
+
+        let settings = getSetting(`setting_styling_nodes${d.rty_ID}`, {fillColour: foregroundColor});
+
+        return isSelection ? fgColor : settings['fillColour'];
+    };
+
     let bgColor = !isSelection && !settings.isDatabaseStructure ? determineColour : getSetting('setting_entitycolor');
     bgColor = isSelection ? window.selectionColor : bgColor;
 
     let nodes = window.d3.selectAll(selector);
-    nodes.select(".foreground").style("fill", fgColor);
+    nodes.select(".foreground").style("fill", handleForeground);
     nodes.select(".background").style("fill", bgColor);
 }
 

@@ -926,27 +926,30 @@ function addLines(name, color, thickness) {
     
     // Adding shared attributes
     lines.attr("class", function(d) {
-            return name + " link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-         })
-         .attr("stroke", function (d) {
-            if(hide_empty && d.targetcount == 0 || name === 'rollover-lines' || name == 'top-lines'){
-                return 'rgba(255, 255, 255, 0.0)'; //hidden
-            }else if(d.targetcount == 0 && name === 'bottom-lines') {
-                return '#d9d8d6';
-            }else{
-                return color;
-            }
-         })
-         .attr("stroke-linecap", "round")
-         .style("stroke-width", function(d) { 
-             let w = getLineWidth(d.targetcount)+thickness; //width for scale 1
-             if(name == 'top-lines'){
-                w = w*0.2;
-             }else if(name == 'rollover-lines'){
-                w = w*3;
-             }
-             return (scale>1)?w:(w/scale);
-         });
+        return `${name} link `;
+    })
+    .attr("stroke", function (d) {
+        if(hide_empty && d.targetcount == 0 || name === 'rollover-lines' || name == 'top-lines'){
+            return 'rgba(255, 255, 255, 0.0)'; //hidden
+        }else if(d.targetcount == 0 && name === 'bottom-lines') {
+            return '#d9d8d6';
+        }else{
+            return color;
+        }
+    })
+    .attr("stroke-linecap", "round")
+    .style("stroke-width", function(d) { 
+        let w = getLineWidth(d.targetcount)+thickness; //width for scale 1
+        if(name == 'top-lines'){
+            w = w*0.2;
+        }else if(name == 'rollover-lines'){
+            w = w*3;
+        }
+        return (scale>1)?w:(w/scale);
+    })
+    .attr('data-connector', (d) => {
+        return `s${d.source.id}r${d.relation.id}t${d.target.id}`;
+    });
 
     // visible line, pointing from one node to another
     if(name=='top-lines' && linetype == "straight" && currentMode == 'infoboxes_full'){
@@ -1621,8 +1624,8 @@ function addIcons() {
                   .attr("x", iconSize/-2)
                   .attr("y", iconSize/-2)
                   .attr("height", iconSize)
-                  .attr("width", iconSize);  
-                  
+                  .attr("width", iconSize);
+
     return icons;
 }
 
@@ -1777,13 +1780,11 @@ var thematicSettings = {
 
 function setupThematicSettings(){
 
-    if(typeof editSymbology !== 'function' || typeof hexToFilter !== 'function'){
+    if(true || typeof editSymbology !== 'function' || typeof hexToFilter !== 'function'){
         return;
     }
 
     let data = settings.getData.call(this, settings.data);
-    let nodes = {};
-    let edges = {};
 
     let container = document.querySelector('#thematicSettings');
     let nodeContainer = document.querySelector('#thematicNodesList');
@@ -1794,22 +1795,24 @@ function setupThematicSettings(){
         let node = data.nodes[i];
         const rtyID = Number.parseInt(node.rty_ID);
 
-        if(Object.hasOwn(nodes, rtyID)){
+        if(Object.hasOwn(thematicSettings['nodes'], rtyID)){
+            setThematicSetting('nodes', rtyID);
+            toggleDisplay('nodes', rtyID, null);
             continue;
         }
 
         const rty = $Db.rty(rtyID);
         const iconURL = `${window.hWin.HAPI4.iconBaseURL}${rtyID}`;
 
-        nodes[rtyID] = {name: rty['rty_Name'], icon: iconURL, settings: {}};
-        let existingSettings = getSetting(`setting_styling_nodes${rtyID}`, {color: '#000000', opacity: '100', fillColor: '#FFFFFF', fillOpacity: '100', display: 1});
-        nodes[rtyID].settings = existingSettings;
+        thematicSettings['nodes'][rtyID] = {name: rty['rty_Name'], icon: iconURL, settings: {}};
+        let existingSettings = getSetting(`setting_styling_nodes${rtyID}`, {iconColour: '#000000', iconOpacity: '100', fillColour: '#FFFFFF', fillOpacity: '100', display: 1});
+        thematicSettings['nodes'][rtyID].settings = existingSettings;
 
         let item = `
         <input name="displayNode" type="checkbox" ${existingSettings.display ? 'checked="checked"' : ''}>
-        <img src="${nodes[rtyID].icon}" alt="${nodes[rtyID].name}" height="16" width="16" style="top: 5px;position: relative;" data-icon-id="${rtyID}">
+        <img src="${thematicSettings['nodes'][rtyID].icon}" alt="${thematicSettings['nodes'][rtyID].name}" height="16" width="16" style="top: 5px;position: relative;" data-icon-id="${rtyID}">
         <span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>
-        <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${nodes[rtyID].name}" class="truncate">${nodes[rtyID].name}</span>
+        <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${thematicSettings['nodes'][rtyID].name}" class="truncate">${thematicSettings['nodes'][rtyID].name}</span>
         `;
 
         let div = document.createElement('div');
@@ -1820,12 +1823,10 @@ function setupThematicSettings(){
         nodeContainer.appendChild(div);
 
         div.querySelector('.editSymbols').addEventListener('click', () => editThematicSetting('nodes', rtyID));
-        div.querySelector('input[name="displayNode"]').addEventListener('change', (event) => {
-            console.log(event);
-            //toggleDisplay();
-        });
+        div.querySelector('input[name="displayNode"]').addEventListener('change', (event) => toggleDisplay('nodes', rtyID, event.target.checked));
 
-        setThematicSetting('nodes', rtyID, existingSettings);
+        setThematicSetting('nodes', rtyID);
+        toggleDisplay('nodes', rtyID, null);
     }
 
     for(let i = 0; i < data.links.length; i++){
@@ -1834,92 +1835,196 @@ function setupThematicSettings(){
         if(!link){
             continue;
         }
-        
-        continue;
-        
-        //BRANDON, rtyID that is used below is not defined
-        
+
         const trmID = Number.parseInt(link.id);
-        if(!window.hWin.HEURIST4.util.isPositiveInt(trmID) || nodes[trmID]){
+        if(!window.hWin.HEURIST4.util.isPositiveInt(trmID) || Object.hasOwn(thematicSettings['edges'], trmID)){
+            setThematicSetting('edges', trmID);
+            toggleDisplay('edges', trmID, null);
             continue;
         }
 
-        edges[trmID] = {name: link['name'], settings: {}};
-        let existingSettings = getSetting(`setting_styling_nodes${rtyID}`, {color: getSetting('setting_linecolor', '#0070C0'), opacity: '100', display: 1});
-        edges[trmID].settings = existingSettings;
+        thematicSettings['edges'][trmID] = {name: link['name'], settings: {}};
+        let existingSettings = getSetting(`setting_styling_edges${trmID}`, {lineColour: getSetting('setting_linecolor', '#0070C0'), lineOpacity: '100', display: 1});
+        thematicSettings['edges'][trmID].settings = existingSettings;
 
         let item = `
         <input name="displayNode" type="checkbox" ${existingSettings.display ? 'checked="checked"' : ''}>
         <span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>
-        <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${nodes[rtyID].name}" class="truncate">${edges[trmID].name}</span>
+        <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${thematicSettings['edges'][trmID].name}" class="truncate">${thematicSettings['edges'][trmID].name}</span>
         `;
 
         let div = document.createElement('div');
         div.style.setProperty('padding', '0em 0.3em 0.5em');
-        div.setAttribute('data-id', rtyID);
+        div.setAttribute('data-id', trmID);
         div.innerHTML = item;
 
-        nodeContainer.appendChild(div);
+        edgeContainer.appendChild(div);
 
         div.querySelector('.editSymbols').addEventListener('click', () => editThematicSetting('edges', trmID));
-        div.querySelector('input[name="displayNode"]').addEventListener('change', (event) => {
-            console.log(event);
-            //toggleDisplay();
-        });
+        div.querySelector('input[name="displayNode"]').addEventListener('change', (event) => toggleDisplay('edges', trmID, event.target.checked));
 
-        setThematicSetting('edges', trmID, existingSettings);
+        setThematicSetting('edges', trmID);
+        toggleDisplay('edges', trmID, null);
     }
 
-    container.style.setProperty('display', 'block');
-    thematicSettings['nodes'] = nodes;
-    thematicSettings['edges'] = edges;
+    document.querySelector('#showThematicContainer').style.setProperty('display', 'block');
+
+    let showContainer = $('#showThematicContainer');
+    let hideContainer = $('#hideThematicContainer');
+    showContainer.click(() => {
+        showContainer.hide('slide', {direction: 'left'});
+        $(container).show('slide', {direction: 'left'});
+    });
+    hideContainer.click(() => {
+        $(container).hide('slide', {direction: 'left'});
+        showContainer.show('slide', {direction: 'left'});
+    });
 }
 
 function editThematicSetting(type, ID){
 
-    if((type !== 'nodes' && type !== 'edges') || !window.hWin.HEURIST4.util.isPositiveInt(ID)){
+    if((type !== 'nodes' && type !== 'edges') || !window.hWin.HEURIST4.util.isPositiveInt(ID) || !Object.hasOwn(thematicSettings[type], ID)){
         return;
     }
 
     let details = thematicSettings[type][ID];
 
     editSymbology(details.settings, type === 'nodes' ? 6 : 7, (styling) => {
-        
-        setThematicSetting(type, ID, styling);
-        styling.display = 1;
-        
+
         putSetting(`setting_styling_${type}${ID}`, styling);
+
+        setThematicSetting(type, ID);
     });
 }
 
-function setThematicSetting(type, ID, settings){
+function setThematicSetting(type, ID){
+
+    let styling = getSetting(`setting_styling_${type}${ID}`);
 
     if(type === 'nodes'){
 
-        let colourFilter = hexToFilter(settings.color);
-        let icons = document.querySelectorAll(`image[data-icon-id="${ID}"]`);
+        if(!styling?.iconColour){
+            return;
+        }
+
+        let colourFilter = hexToFilter(styling.iconColour);
+        colourFilter = colourFilter.replace(/;$/, '');
+        let icons = document.querySelectorAll(`image[data-icon-id="${ID}"], img[data-icon-id="${ID}"]`);
 
         for(let i = 0; i < icons.length; i++){
 
             icons[i].style.setProperty('filter', colourFilter);
-            icons[i].style.setProperty('opacity', `${settings.opacity}%`);
+            icons[i].style.setProperty('opacity', `${styling.iconOpacity}%`);
 
             let foregroundCircle = icons[i].parentNode.querySelector('.foreground');
             if(!foregroundCircle){
                 continue;
             }
 
-            foregroundCircle.style.setProperty('fill', settings.fillColor);
-            foregroundCircle.style.setProperty('opacity', settings.fillOpacity);
+            foregroundCircle.style.setProperty('fill', styling.fillColour);
+            foregroundCircle.style.setProperty('opacity', styling.fillOpacity);
         }
     }else if(type === 'edges'){
 
-        let lines = document.querySelectorAll(`path.bottom-lines[class*="r${ID}t"]`);
+        let lines = document.querySelectorAll(`path.bottom-lines[data-connector*="r${ID}t"]`);
 
         for(let i = 0; i < lines.length; i++){
 
-            lines[i].setAttribute('stroke', settings.color);
-            lines[i].style.setProperty('opacity', settings.opacity);
+            lines[i].setAttribute('stroke', styling.lineColour);
+            lines[i].style.setProperty('opacity', styling.lineOpacity);
         }
+    }
+}
+
+function toggleDisplay(type, ID, showElement){
+
+    if(type !== 'nodes' && type !== 'edges'){
+        return;
+    }
+
+    if(typeof showElement === 'boolean'){ // updating display setting
+        let styling = getSetting(`setting_styling_${type}${ID}`);
+        styling.display = showElement ? 1 : 0;
+        putSetting(`setting_styling_${type}${ID}`, styling);
+    }else{ // use pre-existing setting
+        let styling = getSetting(`setting_styling_${type}${ID}`);
+        showElement = styling.display == 1;
+    }
+
+    let hiddenLines = new Set();
+    let affectedNodes = new Set();
+
+    let handleLines = (selector) => {
+
+        let lines = document.querySelectorAll(selector);
+
+        for(let i = 0; i < lines.length; i++){
+
+            let line = lines[i];
+            let data = d3.select(line).data();
+            if(!data[0]){
+                continue;
+            }
+
+            const trmID = data[0].relation.id;
+            const sourceID = data[0].source.id;
+            const targetID = data[0].target.id;
+            const fullID = `s${sourceID}r${trmID}t${targetID}`;
+
+            // check thematic setting, and whether the source or target ID appear in the hiddenNodes list
+            let lineSettings = getSetting(`setting_styling_edges${trmID}`);
+            let lineHidden = lineSettings?.display == 0;
+            if(lineHidden || (!showElement && (affectedNodes.has(sourceID) || affectedNodes.has(targetID)))){
+                line.style.display = 'none';
+                hiddenLines.add(fullID);
+                continue;
+            }
+            // check if we've handled this line type already (three for each link)
+            if(hiddenLines.has(fullID)){
+                line.style.display = 'none';
+                continue;
+            }
+
+            // check that both connecting nodes are visible
+            let sourceNode = document.querySelector(`.id${sourceID}`);
+            let targetNode = document.querySelector(`.id${targetID}`);
+            if(sourceNode.style.display === 'none' || targetNode.style.display === 'none'){
+                line.style.display = 'none';
+                hiddenLines.add(fullID);
+                continue;
+            }
+
+            line.style.display = '';
+        }
+    };
+
+    if(type === 'nodes'){
+
+        let icons = document.querySelectorAll(`image[data-icon-id="${ID}"]`);
+
+        for(let i = 0; i < icons.length; i++){
+
+            let node = icons[i].parentNode;
+            if(!node){
+                continue;
+            }
+
+            node.style.display = showElement ? '' : 'none';
+            const data = d3.select(node).data();
+            if(!data[0]){
+                continue;
+            }
+
+            const recID = data[0].id;
+
+            affectedNodes.add(recID);
+        }
+
+        for(const recID of affectedNodes){
+            handleLines(`path[data-connector^="s${recID}r"], path[data-connector$="t${recID}"]`);
+        }
+
+    }else{
+        handleLines(`path[data-connector*="r${ID}t"]`);
     }
 }

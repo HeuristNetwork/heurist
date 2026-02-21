@@ -186,7 +186,15 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
     Extend <span class="ui-icon ui-icon-arrowthick-1-w" id="descreaseGraphLevel"></span><span id="graphLevel">1</span><span class="ui-icon ui-icon-arrowthick-1-e" id="increaseGraphLevel"></span>
 </div>
 
+<div id="showThematicContainer" title="Edit the graph's thematic symbology">
+    <span class="ui-icon ui-icon-marker"></span>
+</div>
+
 <div id="thematicSettings">
+
+    <div id="hideThematicContainer" style="cursor: pointer; padding-bottom: 0.5em;">
+        <span class="ui-icon ui-icon-caret-1-w"></span> Hide settings
+    </div>
 
     <div id="thematicNodes">
         <span style="font-size: 1.25em;">Nodes</span>

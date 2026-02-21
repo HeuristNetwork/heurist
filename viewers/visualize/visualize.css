@@ -328,7 +328,7 @@ text.shadow {
     background-color: #ddd;
 }
 
-.dropdown-content div,
+.dropdown-content div
 {
     margin: 5px 0px 0px 5px;
 }
@@ -379,4 +379,41 @@ text.shadow {
     font-size: 20px;
     padding-left: 2px;
     padding-right: 2px;
+}
+
+#thematicSettings{
+
+    background-color: #EFEFEF;
+    box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+
+    z-index: 3;
+
+    position: absolute;
+    top: 6em;
+
+    min-width: 17.5em;
+    min-height: 20em;
+    max-height: 20em;
+
+    padding: 0.75em;
+    margin: 0.75em;
+
+    overflow-y: auto;
+    display: none;
+}
+
+#showThematicContainer{
+
+    background-color: #EFEFEF;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 10px;
+
+    z-index: 2;
+
+    position: absolute;
+    top: 6.75em;
+
+    padding: 0.25em 0.5em;
+
+    cursor: pointer;
+    display: none;
 }

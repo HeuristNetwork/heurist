@@ -258,27 +258,28 @@ function editSymbology(current_value, mode_edit, callback){
         
     }
     else if(mode_edit === 6){
+
         editFields = [
-            {"dtID": "color",
+            {"dtID": "iconColour",
                 "dtFields":{
                     "dty_Type":"freetext",
-                    "rst_DisplayName": "Stroke color:",
+                    "rst_DisplayName": "Icon color:",
                     "rst_DisplayWidth": 17,
                     "rst_DisplayHelpText": "",
                     "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
                 }
             },
-            {"dtID": "opacity",
+            {"dtID": "iconOpacity",
                 "dtFields":{
                     "dty_Type":"float",
-                    "rst_DisplayName": "Stroke opacity:",
+                    "rst_DisplayName": "Icon opacity:",
                     "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
                 }
             },
-            {"dtID": "fillColor",
+            {"dtID": "fillColour",
                 "dtFields":{
                     "dty_Type":"freetext",
-                    "rst_DisplayName": "Fill color:",
+                    "rst_DisplayName": "Circle colour:",
                     "rst_DisplayWidth": 17,
                     "rst_DisplayHelpText": "Fill color. Defaults to the value of the color option",
                     "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
@@ -287,7 +288,7 @@ function editSymbology(current_value, mode_edit, callback){
             {"dtID": "fillOpacity",
                 "dtFields":{
                     "dty_Type":"float",
-                    "rst_DisplayName": "Fill opacity:",
+                    "rst_DisplayName": "Circle opacity:",
                     "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
                 }
             }
@@ -296,26 +297,26 @@ function editSymbology(current_value, mode_edit, callback){
     else if(mode_edit === 7){
 
         editFields = [
-            {"dtID": "color",
+            {"dtID": "lineColour",
                 "dtFields":{
                     "dty_Type":"freetext",
-                    "rst_DisplayName": "Stroke color:",
+                    "rst_DisplayName": "Line color:",
                     "rst_DisplayWidth": 17,
                     "rst_DisplayHelpText": "",
                     "rst_FieldConfig":{"colorpicker":"colorpicker"}  //use colorpicker widget
                 }
             },
-            {"dtID": "weight",
-                "dtFields":{
-                    "dty_Type":"integer",
-                    "rst_DisplayName": "Stroke width:",
-                    "rst_DisplayHelpText": "Stroke width in pixels"
-                }
-            },
-            {"dtID": "opacity",
+            // {"dtID": "weight",
+            //     "dtFields":{
+            //         "dty_Type":"integer",
+            //         "rst_DisplayName": "Stroke width:",
+            //         "rst_DisplayHelpText": "Stroke width in pixels"
+            //     }
+            // },
+            {"dtID": "lineOpacity",
                 "dtFields":{
                     "dty_Type":"float",
-                    "rst_DisplayName": "Stroke opacity:",
+                    "rst_DisplayName": "Line opacity:",
                     "rst_DisplayHelpText": "Value from 0 (transparent) to 100 (opaque)"
                 }
             }

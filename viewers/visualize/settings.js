@@ -25,7 +25,7 @@ onVisualizeResize */
  * Falls back to localStorage if user is not authenticated.
  * @type {object}
  */
-window.preference_settings = window.hWin && window.hWin.HAPI4 && window.hWin.HAPI4.has_access() ? window.hWin.HAPI4.get_prefs_def('vis_struct', {}) : {};
+window.preference_settings = window.hWin?.HAPI4 && window.hWin.HAPI4.has_access() ? window.hWin.HAPI4.get_prefs_def('vis_struct', {}) : {};
 
 /**
 * Returns the current displayed URL of the visualization page.
@@ -56,10 +56,14 @@ function getSetting(key, defvalue, split_string = '') {
         key = key.join('_');
     }
 
+    if(Object.keys(window.preference_settings).length === 0 && window.hWin?.HAPI4 && window.hWin.HAPI4.has_access()){
+        window.preference_settings = window.hWin.HAPI4.get_prefs_def('vis_struct', {}); // attempt re-retrieval of settings
+    }
+
     if(window.hWin?.HAPI4 ){
 
         if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') === -1 && key.indexOf('scale') === -1){
-            
+
             value = Object.hasOwn(window.preference_settings, key) ? window.preference_settings[key] : localStorage.getItem(`${window.hWin.HAPI4.database}${key}`);
 
             if(!Object.hasOwn(window.preference_settings, key)){
