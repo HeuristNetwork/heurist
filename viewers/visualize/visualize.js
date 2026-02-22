@@ -141,6 +141,7 @@ let maxCountForLinks;
             selectedNodeIds: [], // Array of initially selected node IDs
             onRefreshData: function(){}, // Callback for data refresh
             onExpandNode: null, // Callback for node expansion
+            onExpandLevel: null, // Callback for entire level expansion
             triggerSelection: function(selection){}, // Callback when selection changes
 
             isDatabaseStructure: false, // True if visualizing DB structure, false for record data
@@ -201,7 +202,8 @@ let maxCountForLinks;
             translatey: 200,
             scale: 1,
 
-            minimal: 0
+            minimal: 0,
+            levelsExpanded:0
         }, options );
 
         // Handle settings initialization and UI setup (from settings.js)
@@ -235,6 +237,13 @@ let maxCountForLinks;
         $('#btnRefreshData').button({icon:'ui-icon-refresh'}).on('click',
             function(){ location.reload(); } // Simple page reload for refresh
         );
+        
+        if(window.hWin.HEURIST4.util.isFunction(settings.onExpandLevel)){
+            $('#expandedLevels').on('change', (e)=>settings.onExpandLevel(e));
+        }else{
+        }
+        $('#expandedLevels').hide();
+            
 
         return this; // Return jQuery object for chaining
     };

@@ -61,6 +61,7 @@ $isMinimalVersion = intval(@$_REQUEST['mini']);
 
         <script type="text/javascript">
 
+var isMinimalVersion = <?php echo $isMinimalVersion?'true':'false';?>;
 /**
  * Flag indicating if the visualization is running in standalone mode (i.e., not embedded in a Heurist page).
  * @type {boolean}
@@ -95,7 +96,9 @@ function onPageInit(success){
             performSearch(q);
         }
 }
-
+// 
+// onPageInit or expandNode -> performSearch -> showData
+//    
 function performSearch(q){
 
     var rules = window.hWin.HEURIST4.util.getUrlParameter('rules', location.search);
@@ -110,7 +113,7 @@ function performSearch(q){
         rules = null;
     }
 
-    var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
+    const MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
 
     let query = {q: q, rules: rules, w: 'a', detail: 'detail', l: MAXITEMS};
 
@@ -118,21 +121,21 @@ function performSearch(q){
 
         if(response.status == window.hWin.ResponseStatus.OK){
 
-            var recordset = new HRecordSet(response.data); // Assumes HRecordSet is available globally or via hWin
+            let recordset = new HRecordSet(response.data); // Assumes HRecordSet is available globally or via hWin
 
-            var records_ids = recordset.getIds(MAXITEMS);
+            let records_ids = recordset.getIds(MAXITEMS);
             if(records_ids.length <= 0){
                 return;
             }
-
+            //Finds all directly related (linked or via relationship records) records for a given set of record IDs.
             window.hWin.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, (response_related) => {
 
                 if(response_related.status == window.hWin.ResponseStatus.OK){
                     // Store relationships
                     // Parse response to spring diagram format
-                    var data = __parseData(records_ids, response_related.data);
+                    let data = __parseData(records_ids, response_related.data);
 
-                    showData(data, [], query, null, null, null);
+                    showData(data, [], query, null, null, null, isMinimalVersion?onExpandLevel:null);
 
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response_related);
@@ -143,6 +146,14 @@ function performSearch(q){
             window.hWin.HEURIST4.msg.showMsgErr(response);
         }
     });
+}
+
+function onExpandLevel(event){
+    console.log($(event.target).val());
+    //search linked records for previous level
+    
+    //search links within current recordset
+    
 }
 
 function expandNode(rec_ID){
@@ -186,9 +197,6 @@ function expandNode(rec_ID){
         <!-- Functions callable from parent iframe or for standalone mode -->
         <script>
         
-        var isMinimalVersion = <?php echo $isMinimalVersion?'true':'false';?>;
-
-
         /**
         * Parses Heurist record data and relationship data into a D3-compatible format (nodes and links).
         *
@@ -360,7 +368,7 @@ function expandNode(rec_ID){
          * @param {function} [onRefreshData] - Callback function to request a data refresh (e.g., after structural changes).
          * @param {function} [onExpandRecords] - Callback function to handle requests to expand node connections.
          */
-        function showData(data, selectedRecordsIds, new_request, onSelectEvent, onRefreshData, onExpandRecords) {
+        function showData(data, selectedRecordsIds, new_request, onSelectEvent, onRefreshData, onExpandRecords, onExpandLevel) {
             // Initial message while building graph
             if(data && data.nodes && data.nodes.length > 0){ // Check if nodes array is not empty
                 $("#d3svg").html('<text x="25" y="25" fill="black">Building graph ...</text>');
@@ -406,6 +414,7 @@ function expandNode(rec_ID){
                 triggerSelection: onSelectEvent,       // Callback for selection changes
                 onRefreshData: onRefreshData,          // Callback for data refresh requests
                 onExpandNode: onExpandRecords,         // Callback for node expansion requests
+                onExpandLevel: onExpandLevel,          // Callback for entrire level expansion
 
                 entityradius: 1, // Default, likely overridden by settings.js
                 linewidth: 1,    // Default, likely overridden by settings.js
@@ -414,7 +423,8 @@ function expandNode(rec_ID){
                 showEntitySettings: false,
                 showFormula: false,
                 gravity: 'off', // Start with gravity off; can be 'touch' to initially scatter
-                minimal: isMinimalVersion 
+                minimal: isMinimalVersion,
+                levelsExpanded: isMinimalVersion?1:0 
             });
 
             // Example: setTimeout(function(){ setGravity('off');}, 3000); // turn off gravity after initial scatter
@@ -439,16 +449,11 @@ function expandNode(rec_ID){
                 if(ele.length>0){
                     ele.removeClass('dropdown-content1');
                 }
-                /*
-                ele.css('position','relative !important');
-console.log(ele); */               
-                //$('#toolbar').css({'position':'absolute',left:'0px',top:'0px'});
                 topPos = $('#toolbar').height();
                 if(topPos<40) { topPos = 40; }
                 topPos = (topPos+10)+'px';
                 $('#toolbar').find('.heurist-helper2').hide();
             }
-console.log('>>>',isMinimalVersion, topPos);            
             $('#divSvg').css('top', topPos); // Assumes #divSvg is the SVG container
         }
 

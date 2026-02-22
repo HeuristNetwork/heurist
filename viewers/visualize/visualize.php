@@ -139,6 +139,9 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
             <span id="lnkOpenPopup" class="fake_link" style="padding-right: 1em;">popup <span class="ui-icon ui-icon-extlink"></span></span>
 
             <span style="display: inline-block;">
+                <span title="Expanded Levels" style="padding-left: 0.2em;">Levels:</span>
+                <input id="expandedLevels" class="number-input small" type="number" min="0" max="5" step="1" title="Expanded Levels" value="1" />
+            
                 <button id="btnSingleSelect" name="selectMode" value="single" title="Select and drag single nodes">Select and drag nodes</button>
                 <button id="btnMultipleSelect" name="selectMode" value="multi" title="Select multiple nodes using a selection box (right-click and drag)">Select multiple nodes</button>
             </span>
@@ -222,7 +225,7 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 ?>
 <div id="toolbar" class="split_bar"> <?php // split toolbar, placed in corners (top left, top right and bottom left) ?>
 
-    <div class="dropdown-content1">
+    <div class="dropdown-content dropdown-content1">
         <div>
             <span>Select Mode: </span>
             <button id="btnSingleSelect" name="selectMode" value="single" title="Select and drag single nodes">Select and drag nodes</button>
