@@ -32,10 +32,10 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
 * Handles bug reports and contact form submissions.
 *
 * This class has two main functionalities:
-* 1. Creating bug report records: It can create new task records (Type 56, e.g., "Features, Bug, Issue")
+* 1. Creating ticket/bug report records: It can create new task records (Type 56, e.g., "Features, Bug, Issue")
 *    in a designated Heurist bug tracker database (often `HEURIST_BUGREPORT_DATABASE` on `HEURIST_MAIN_SERVER`).
 *    This may involve remote communication if the current Heurist instance is not the main server.
-*    It also handles sending email notifications about the bug report.
+*    It also handles sending email notifications about the ticket/bug report.
 * 2. Processing website contact forms: If specific 'email' and 'content' fields are provided,
 *    it sends an email to the database owner or a specified address.
 *
@@ -48,7 +48,7 @@ class DbSysBugreport extends DbEntityBase
     /** @var bool Flag to determine if logout should be performed after an action (e.g., public bug submission). */
     private $performLogout = false;
 
-    /** @var string Email template for bug report notifications. Placeholders like __LINK__, __DESC__ are replaced. */
+    /** @var string Email template for ticket/bug report notifications. Placeholders like __LINK__, __DESC__ are replaced. */
     private $reportEmail = <<<EMAIL
     Your ticket has been successfully added to, or updated in, the Heurist Job tracker database. 
     <br>
@@ -129,11 +129,11 @@ class DbSysBugreport extends DbEntityBase
     //   we try to log in as a public 'extern' user to allow anonymous submissions.
     // ---------------------------------------------------------------------
     /**
-     * Validates user permissions for bug report submission.
+     * Validates user permissions for ticket/bug report submission.
      *
      * Overrides the parent method. If the initial permission check fails
      * (e.g., user not logged in) and the current database is the public
-     * bug report database on the main server, it attempts to log in as
+     * tickets/bug reports database on the main server, it attempts to log in as
      * a public guest user ('extern') to allow submission.
      * Sets `$this->performLogout` if public login is successful.
      *
@@ -181,25 +181,25 @@ class DbSysBugreport extends DbEntityBase
     //  (B) creates a ticket/bug-report record (possibly via the main server).
     // ---------------------------------------------------------------------
     /**
-     * Handles saving a bug report or processing a contact form email.
+     * Handles saving a ticket/bug report or processing a contact form email.
      *
      * This method has two main operational modes:
      * 1. **Contact Form Email (Website Integration):** If `$this->records[0]` contains 'email' and 'content' keys
      *    (typically from a CMS website contact form), it calls `_prepareEmail()` to send the content
      *    to the database owner or a pre-configured address.
-     * 2. **Bug Report Creation:** Otherwise, it proceeds to create a bug report.
+     * 2. **Ticket Creation:** Otherwise, it proceeds to create a ticket.
      *    - If `$this->data['new_record']` is set (indicating a request from an external Heurist server),
      *      it calls `createBugReportRecord()` with that data.
      *    - Otherwise, it processes `$this->records[0]` (prepared from `$this->data['fields']` by `prepareRecords`),
      *      gathers necessary information (user details, browser agent, Heurist version, URLs),
      *      and then either creates the record directly (if on the main bug tracker server)
      *      or makes a remote request to the main server's `entityScrud.php` to create the record.
-     *    - Sends an email notification with details of the created bug report.
+     *    - Sends an email notification with details of the created ticket/bug report.
      *
      * Validates user permissions (potentially logging in a public guest user) and mandatory fields.
      *
      * @return array|bool For contact form: Result of `_prepareEmail()`.
-     *                    For bug report: An array containing a success message and link on success,
+     *                    For tickets: An array containing a success message and link on success,
      *                                   or false on failure. Errors are added to the system object.
      */
     public function save(){
@@ -220,7 +220,7 @@ class DbSysBugreport extends DbEntityBase
             }
         }
 
-        // Mode B: bug report submission - enforce permissions (may auto-login 'extern' on main tracker).
+        // Mode B: ticket/bug report submission - enforce permissions (may auto-login 'extern' on main tracker).
         //validate permission for current user and set of records see $this->recordIDs
         if(!$this->_validatePermission()){
             return false;
@@ -283,7 +283,7 @@ class DbSysBugreport extends DbEntityBase
 
         // Title: stored both as record title (detail 1) and used for email subject line.
         $report_title = htmlspecialchars($record['bug_Title']);
-        $bug_title = "Bug report or feature request: $report_title";
+        $bug_title = "Ticket: $report_title";
         $new_record['details'][self::DTY_FIELD_MAPPING['bug_Title']] = $report_title;
         $reportDetails[self::DTY_FIELD_MAPPING['bug_Title']] = ['Title' => $report_title];
 
@@ -466,7 +466,7 @@ class DbSysBugreport extends DbEntityBase
         }else{
 
             // Generic failure path: if no email was sent, surface an error encouraging direct contact.
-            $error_msg = 'An unknown error has prevented Heurist from create the bug report.<br>If you do not receive an email confirming the bug report, please re-try in a few minutes.<br>However, if the issue persists please ' . CONTACT_HEURIST_TEAM . ' directly.';
+            $error_msg = 'An unknown error has prevented Heurist from creating the ticket.<br>If you do not receive an email confirming the ticket, please re-try in a few minutes.<br>However, if the issue persists please ' . CONTACT_HEURIST_TEAM . ' directly.';
             $email_already_sent || $this->system->addError(HEURIST_UNKNOWN_ERROR, $error_msg);
             return false;
         }
@@ -482,16 +482,16 @@ class DbSysBugreport extends DbEntityBase
     // - Send confirmation email to reporter (if reporter email exists).
     // ---------------------------------------------------------------------
     /**
-     * Creates a bug report record in the Heurist Job Tracker database.
+     * Creates a ticket/bug report record in the Heurist Job Tracker database.
      *
-     * This method handles the actual insertion of the bug report data as a new record.
+     * This method handles the actual insertion of the ticket data as a new record.
      * If the current Heurist instance is not the main job tracker, it may involve
      * creating a temporary System object to interact with the job tracker database.
      * It registers any attached files (screenshots) with the job tracker database
-     * and populates default values for the bug report record.
+     * and populates default values for the ticket record.
      * After successfully creating the record, it sends an email notification.
      *
-     * @param array $record The bug report data, structured as a Heurist record array
+     * @param array $record The ticket data, structured as a Heurist record array
      *                      (including 'RecTypeID', 'details', etc.).
      * @return array|false An associative array `['status' => HEURIST_OK, 'data' => ['recID' => ..., 'email_sent' => ...]]`
      *                     on success, or false on failure. Errors are added to `$this->system`.
@@ -643,7 +643,7 @@ class DbSysBugreport extends DbEntityBase
     //  - a plain summary report (for reporter + team) if the ticket exists but email didn't send.
     // ---------------------------------------------------------------------
     /**
-     * Sends a backup bug report email in case the main server cannot be reached, or couldn't send an email
+     * Sends a backup ticket email in case the main server cannot be reached, or couldn't send an email
      *
      * If the main server is unavailable the email is sent to the Heurist team only, and includes:
      *  - A submittable HTML form made from the user's report
@@ -723,7 +723,7 @@ class DbSysBugreport extends DbEntityBase
 
         if(!empty($reportLink)){ // Report has been made, this is just to inform
             $form = <<<HEAD
-                <div style="font-size: 0.9em;">Your bug report has been sent to the Heurist team and can be viewed <a href="{$reportLink}">here</a>.</div>
+                <div style="font-size: 0.9em;">Your ticket has been sent to the Heurist team and can be viewed <a href="{$reportLink}">here</a>.</div>
                 <h4>Report details:</h4>
                 $form
             HEAD;
@@ -939,18 +939,18 @@ class DbSysBugreport extends DbEntityBase
     }
 
     // ---------------------------------------------------------------------
-    // addDefaultValues(): fetch default detail values for the bug report record type
+    // addDefaultValues(): fetch default detail values for the ticket record type
     // (from defRecStructure) and apply them to the outgoing tracker record payload.
     // ---------------------------------------------------------------------
     /**
-     * Adds default values to a bug report record's details.
+     * Adds default values to a ticket record's details.
      *
-     * Retrieves default values defined in the `defRecStructure` for the bug report
+     * Retrieves default values defined in the `defRecStructure` for the ticket
      * record type and applies them to the `$record['details']` if the corresponding
      * detail field is not already present or is empty.
      *
      * @param \hserv\System $system The system object (used to get mysqli connection).
-     * @param array &$record The bug report record array (passed by reference), specifically its 'details' sub-array.
+     * @param array &$record The ticket record array (passed by reference), specifically its 'details' sub-array.
      * @return void
      */
     private function addDefaultValues($system, &$record){

@@ -349,7 +349,7 @@ function recordAdd($system, $record, $return_id_only=false){
 * - Deletion of old details and insertion of new/updated details.
 * - Management of parent-child relationships (adding/removing reverse pointers).
 * - Updating calculated fields, title masks, and temporary flags for the record and related/linked records.
-* - Sending bug report update notifications if applicable.
+* - Sending ticket update notifications if applicable.
 *
 * @param \hserv\System $system The Heurist system object.
 * @param array $record An associative array containing the record data.
@@ -4496,13 +4496,13 @@ function recordCheckLanguages($system, $recID, $recTypeID){
 }
 
 /**
- * Sends an email notification when a bug report record's status is updated to 'DONE' or a child term of 'DONE'.
+ * Sends an email notification when a ticket record's status is updated to 'DONE' or a child term of 'DONE'.
  *
- * This function checks if the updated record is a bug report (identified by `ConceptCode::getRecTypeLocalID('8-23')`).
+ * This function checks if the updated record is a ticket (identified by `ConceptCode::getRecTypeLocalID('8-23')`).
  * If the status field (identified by `ConceptCode::getDetailTypeLocalID('2-810')`) is set to a term that is 'DONE'
  * (identified by `ConceptCode::getTermLocalID('1037-3246')`) or one of its child terms, an email is sent to the
  * reporter (email from field `ConceptCode::getDetailTypeLocalID('1317-242')`).
- * The email includes details like the bug title, description, database, and a link to the bug report.
+ * The email includes details like the bug title, description, database, and a link to the ticket.
  *
  * @param \hserv\System $system The Heurist system object.
  * @param int $recID The ID of the record that was updated.
@@ -4513,7 +4513,7 @@ function bugreportUpdate($system, $recID){
     $mysqli = $system->getMysqli();
     $recRecTypeID = mysql__select_value($mysqli, 'SELECT rec_RecTypeID FROM Records WHERE rec_ID = ?', ['i', $recID]);
 
-    // Get local IDs for bug report fields
+    // Get local IDs for ticket fields
     $system->defineConstant('RT_BUG_REPORT');
     $doneTrmID = ConceptCode::getTermLocalID('1037-3246');
     $statusDtyID = ConceptCode::getDetailTypeLocalID('2-810');
@@ -4524,7 +4524,7 @@ function bugreportUpdate($system, $recID){
     $databaseDtyID = ConceptCode::getDetailTypeLocalID('1623-993');
     $resolutionDtyID = ConceptCode::getDetailTypeLocalID('1623-1066');
 
-    // Get bug report details
+    // Get ticket details
     $record = ['rec_ID' => $recID];
     recordSearchDetails($system, $record, ['freetext', 'blocktext', 'enum']);
 

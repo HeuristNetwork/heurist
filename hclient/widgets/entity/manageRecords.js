@@ -4630,7 +4630,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
      * @memberof heurist.manageRecords
      * This method is responsible for a variety of UI setup tasks post-HEditing initialization:
      * 1. Sets up header controls: "Show Help", "Optional Fields", "Workflow Stage" selector, "Toggle Record Visibility",
-     *    "Modify Structure", "Attributes", "Update Structure", "History", "Template", and "Bug Report" buttons.
+     *    "Modify Structure", "Attributes", "Update Structure", "History", "Template", and "Ticket" buttons.
      * 2. Displays the record title and type information in the dialog header or a dedicated header div.
      * 3. Manages the visibility and state of these controls based on user permissions and widget options (e.g., `edit_structure`, `allowAdminToolbar`).
      * 4. Initializes functionality for the RTS (Record Type Structure) editor integration if active, including "gear" icons on fields.
