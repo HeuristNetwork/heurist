@@ -4791,7 +4791,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             //there is 3d party service for lookup values
             this._setupExternalLookups();           
             
-            //bug report
+            // ticket
             this.element.find('.btn-bugreport').button({icon:'ui-icon-bug'})
                 .css(btn_css).on('click', function(){ window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport'); });
                 

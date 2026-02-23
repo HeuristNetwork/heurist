@@ -146,5 +146,5 @@ Heurist can also be installed on a Windows server. Systemik Solutions is working
 
 ### **Feedback / Questions**
 
-Please add a Feature request / bug report, and we will get back to you promptly.
+Please add a ticket, and we will get back to you promptly.
 

@@ -706,7 +706,7 @@ $.widget( "heurist.controlPanel", {
                     title: 'Move to alpha version',
                     style: 'flex: 0 0 22em;',
                     html: `<a style="cursor: pointer;text-decoration: underline;" href="${response.data}?db=${window.hWin.HAPI4.database}" id="lnk_Change">
-                    Use the latest (alpha) version</a> (recommended)`
+                    Use the alpha (development) version</a>`
                 }).appendTo(this.version_message);
 
                 if(!isVersion7){
@@ -769,7 +769,7 @@ $.widget( "heurist.controlPanel", {
 
     /**
      * Retrieves and handles user-specific notifications from the server.
-     * Currently, if a 'bug_report' notification is received, it triggers the bug report dialog.
+     * Currently, if a 'ticket' notification is received, it triggers the ticket dialog.
      * Ensures this is done only once per widget instance.
      * @memberof Widgets.Navigation.controlPanel
      * @private

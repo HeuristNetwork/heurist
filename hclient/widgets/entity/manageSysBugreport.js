@@ -1,6 +1,6 @@
 /**
 * @file manageSysBugreport.js
-* @brief Manages System Bug Report entities.
+* @brief Manages System ticket (Bug Report) entities.
 * @fileOverview Provides a UI for users to submit bug reports and for administrators to manage them. Includes fields for bug description, reproduction steps, severity, status, etc.
 * @project     Heurist academic knowledge management system
 *
@@ -15,7 +15,7 @@
 
 
 //
-// there is no search, select mode for bug report - only add and send by email
+// there is no search, select mode for ticket - only add and send by email
 //
 
 /**
@@ -23,10 +23,10 @@
  * @brief Widget for managing System Bug Reports.
  * @augments $.heurist.manageEntity
  * @description This widget provides a specialized interface for submitting bug reports.
- * It operates in 'editonly' mode, meaning it directly presents a form for a new bug report.
+ * It operates in 'editonly' mode, meaning it directly presents a form for a new ticket.
  *
  * @property {string} title Overridden to 'Heurist feedback'. Defines the title for the widget's dialog.
- * @property {string} edit_mode Set to 'editonly', so the widget opens directly into the edit form for a new bug report.
+ * @property {string} edit_mode Set to 'editonly', so the widget opens directly into the edit form for a new ticket.
  * @property {string} select_mode Set to 'manager'. Although typically for list management, in this context, combined with 'editonly', it means no list view is presented.
  * @property {string} layout_mode Set to 'editonly', further reinforcing that only the editing interface is shown.
  * @property {number} width Default width of the widget dialog, set to 900 pixels.
@@ -52,7 +52,7 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
      * @override
      * @memberof heurist.manageSysBugreport
      * Sets default options for title, edit_mode, select_mode, layout_mode, width, and height
-     * to tailor the widget for bug report submission.
+     * to tailor the widget for ticket submission.
      */
     _init: function() {
         
@@ -73,7 +73,7 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
      * @returns {boolean} Returns false if the parent `_initControls` fails, otherwise true.
      * Sets the default palette class and then calls the parent's `_initControls`.
      * Since this widget is 'editonly', it immediately calls `addEditRecord(-1)` to present
-     * a form for a new bug report.
+     * a form for a new ticket.
      */
     _initControls: function() {
 
@@ -187,7 +187,7 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
     
 //---------------------------------------------------------------------------------- 
     /**
-     * @brief Handles the event after a bug report is successfully saved (sent).
+     * @brief Handles the event after a ticket is successfully saved (sent).
      * @override
      * @memberof heurist.manageSysBugreport
      * @param {string} message The success message from the server (usually confirmation).

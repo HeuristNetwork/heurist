@@ -42,7 +42,7 @@ if(isset($heuristReferenceServerMirror) && $heuristReferenceServerMirror!=''){
     define('HEURIST_MAIN_SERVER', strtolower($heuristReferenceServerMirror));
     /** @const string Name of the Heurist Reference Index database (mirror version). */
     define('HEURIST_INDEX_DATABASE', 'Heurist_Reference_Index_MIRROR');
-    /** @const string Name of the Heurist Job Tracker/Bug Report database (mirror version). */
+    /** @const string Name of the Heurist Job Tracker/ticket database (mirror version). */
     define('HEURIST_BUGREPORT_DATABASE', 'Heurist_Job_Tracker_MIRROR');
     /** @const string Name of the Heurist Help System database (mirror version). */
     define('HEURIST_HELP_DATABASE', 'Heurist_Help_System_MIRROR');
@@ -51,7 +51,7 @@ if(isset($heuristReferenceServerMirror) && $heuristReferenceServerMirror!=''){
     define('HEURIST_MAIN_SERVER', strtolower($heuristReferenceServer));
     /** @const string Name of the Heurist Reference Index database. */
     define('HEURIST_INDEX_DATABASE', 'Heurist_Reference_Index');
-    /** @const string Name of the Heurist Job Tracker/Bug Report database. */
+    /** @const string Name of the Heurist Job Tracker/ticket database. */
     define('HEURIST_BUGREPORT_DATABASE', 'Heurist_Job_Tracker');
     /** @const string Name of the Heurist Help System database. */
     define('HEURIST_HELP_DATABASE', 'Heurist_Help_System');

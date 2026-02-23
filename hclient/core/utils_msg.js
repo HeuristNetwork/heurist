@@ -2014,7 +2014,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     /**
      * Checks if an error message string indicates the use of a disabled PHP function in a Smarty template (custom report).
      * If such an error is detected, it displays a warning dialog informing the user and suggesting they request
-     * the function to be enabled via a bug report.
+     * the function to be enabled by submitting a ticket.
      *
      * @memberof HEURIST4.msg
      * @param {string} txt - The error message string to check.
