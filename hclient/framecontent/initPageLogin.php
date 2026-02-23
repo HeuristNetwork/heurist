@@ -79,7 +79,7 @@ function onHapiInit(success){
     if(!success){
         window.hWin.HEURIST4.msg.showMsgErr({
             message: 'Cannot initialize system on client side. '
-                    +`Database${database}, please consult Heurist developers`,
+                    +'Database${database} most likely because of outdated version number in bookmarked URL (version 7 from 2026). Consult Heurist developers if necessary.',
             error_title: 'Unable to initialise Heurist'
         });
             return;

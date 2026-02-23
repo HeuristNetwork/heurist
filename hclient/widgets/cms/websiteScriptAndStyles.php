@@ -1346,7 +1346,7 @@ function onHapiInit(success){
 
     if(!success){
         window.hWin.HEURIST4.msg.showMsgErr({
-            message: 'Cannot initialize system on client side, please consult Heurist developers',
+            message: 'Cannot initialize system on client side, most likely due to outdated version number in bookmarked URL (version 7 from 2026). Consult Heurist developers if necessary.',
             error_title: 'Unable to initialise Heurist'
         });
         window.hWin.HEURIST4.msg.sendCoverallToBack();
