@@ -561,28 +561,48 @@ function updateScalableElements(toScale = 'all'){
 
     const scale = this.zoomBehaviour.scale();
 
+    let fontSize = $('#recTitleSize').length > 0 ? $('#recTitleSize').val() : getSetting('setting_fontsize', $('#fontSize').val());
+    fontSize = Number.parseFloat(fontSize);
+    fontSize /= scale;
+
+    let nodeSize = $('#nodeSize').length > 0 ? $('#nodeSize').val() : getSetting('setting_nodesize', window.circleSize);
+    nodeSize = Number.parseFloat(nodeSize);
+    nodeSize /= scale;
+
+    let iconSize = $('#iconSize').length > 0 ? $('#iconSize').val() : getSetting('setting_iconsize', window.iconSize);
+    iconSize = Number.parseFloat(iconSize);
+    iconSize /= scale;
+    const iconPos = -iconSize / 2;
+
+    if(toScale === 'all' || toScale === 'icon'){
+
+        const nodeList = document.querySelectorAll('circle.foreground');
+        for(let i = 0; i < nodeList.length; i++){
+            nodeList[i].setAttribute('r', nodeSize);
+        }
+
+        const iconList = document.querySelectorAll('image.icon');
+        for(let i = 0; i < iconList.length; i++){
+            iconList[i].setAttribute('width', iconSize);
+            iconList[i].setAttribute('height', iconSize);
+            iconList[i].setAttribute('x', iconPos);
+            iconList[i].setAttribute('y', iconPos);
+        }
+    }
+
     if(toScale === 'all' || toScale === 'labels'){
 
-        let fontSize = $('#recTitleSize').length > 0 ? $('#recTitleSize').val() : getSetting('setting_fontsize', $('#fontSize').val());
-        let nodeSize = $('#nodeSize').length > 0 ? $('#nodeSize').val() : getSetting('setting_nodesize', window.circleSize);
-        let iconSize = $('#iconSize').length > 0 ? $('#iconSize').val() : getSetting('setting_iconsize', window.iconSize);
-        fontSize = Number.parseFloat(fontSize);
-        nodeSize = Number.parseFloat(nodeSize);
-        iconSize = Number.parseFloat(iconSize);
-    
-        nodeSize /= scale;
-        iconSize /= scale;
-        const iconPos = -iconSize / 2;
-    
         const labelList = document.querySelectorAll('.nodelabel');
-        fontSize /= scale;
-        const labelX = nodeSize + 20;
+        const labelX = (nodeSize * 2) + 14; // '14' is the translate offset
+        const labelY = 14; // '14' is the translate offset
         for(let i = 0; i < labelList.length; i++){
     
             labelList[i].style.setProperty('font-size', `${fontSize}px`, 'important');
             labelList[i].style.setProperty('scale', '1');
             labelList[i].style.setProperty('transform', 'translate(0px, 0px)');
-            //labelList[i].setAttribute('x', labelX);
+
+            labelList[i].setAttribute('x', labelX);
+            labelList[i].setAttribute('y', labelY);
         }
     }
 
@@ -1818,7 +1838,7 @@ function setupThematicSettings(){
         thematicSettings['nodes'][rtyID].settings = existingSettings;
 
         let item = `
-        <input name="displayNode" type="checkbox" ${existingSettings.display ? 'checked="checked"' : ''}>
+        <input name="displayNode" type="checkbox" ${existingSettings.display == 1 ? 'checked="checked"' : ''}>
         <img src="${thematicSettings['nodes'][rtyID].icon}" alt="${thematicSettings['nodes'][rtyID].name}" height="16" width="16" style="top: 5px;position: relative;" data-icon-id="${rtyID}">
         <span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>
         <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${thematicSettings['nodes'][rtyID].name}" class="truncate">${thematicSettings['nodes'][rtyID].name}</span>
@@ -1857,7 +1877,7 @@ function setupThematicSettings(){
         thematicSettings['edges'][trmID].settings = existingSettings;
 
         let item = `
-        <input name="displayNode" type="checkbox" ${existingSettings.display ? 'checked="checked"' : ''}>
+        <input name="displayNode" type="checkbox" ${existingSettings.display == 1 ? 'checked="checked"' : ''}>
         <span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>
         <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${thematicSettings['edges'][trmID].name}" class="truncate">${thematicSettings['edges'][trmID].name}</span>
         `;
@@ -1906,6 +1926,8 @@ function editThematicSetting(type, ID){
     });
 }
 
+var handledColours = {};
+
 function setThematicSetting(type, ID){
 
     let styling = getSetting(`setting_styling_${type}${ID}`);
@@ -1916,7 +1938,13 @@ function setThematicSetting(type, ID){
             return;
         }
 
-        let colourFilter = hexToFilter(styling.iconColour);
+        const hexCode = styling.iconColour;
+        let colourFilter = handledColours[hexCode];
+        if(!colourFilter){
+            colourFilter = hexToFilter(hexCode);
+            handledColours[hexCode] = colourFilter;
+        }
+
         colourFilter = colourFilter.replace(/;$/, '');
         let icons = document.querySelectorAll(`image[data-icon-id="${ID}"], img[data-icon-id="${ID}"]`);
 

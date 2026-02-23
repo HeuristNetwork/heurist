@@ -402,7 +402,8 @@ function handleSettingsInUI() {
         let applyGravity = $('#applyGravity').is(':checked');
         setGravity(applyGravity ? 'touch' : 'off');
     });
-    $('#recTitleSize').val(9).on('change', () => updateScalableElements('labels')); //svg.selectAll('text.nodelabel.namelabel').style('font-size', $('#recTitleSize').val(), 'important');
+    $('#recTitleSize').val(9).on('change', () => updateScalableElements('labels'));
+    $('#nodeSize').val(window.circleSize).on('change', () => updateScalableElements('all'));
     $('#lnkOpenPopup').on('click', () => {
         if(typeof currentRequest === undefined || typeof currentRequest?.q !== 'string'){
             return;

@@ -156,14 +156,14 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
                 <input id="showRecordTitles" title="Show node record titles" type="checkbox" />
             </span>
 
-            <span style="display: inline-block;">
+            <span style="padding-left: 1em; display: inline-block;">
                 <span>Font:</span>
                 <input id="recTitleSize" title="Font Size (pixels)" class="number-input" style="width: 3em; vertical-align: -1px;" type="number" min="8" max="30" step="1" />
             </span>
 
-            <span style="display: inline-block;">
-                <span title="Node radius sizing" style="padding-left: 1.2em;">Node radius:</span>
-                <input id="nodesRadius" class="number-input small" type="number" min="12" max="45" step="1" title="Base node radius" />
+            <span style="padding-left: 0.5em; display: inline-block;">
+                <span>Node:</span>
+                <input id="nodeSize" title="Node size (pixels)" class="number-input" style="width: 3em; vertical-align: -1px;" type="number" min="8" max="30" step="1" />
             </span>
 
             <span style="padding-left: 1em; display: inline-block;">
