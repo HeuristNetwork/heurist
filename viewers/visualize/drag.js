@@ -191,7 +191,7 @@ function showNodeInformation(d){
     let infoFrame = window.d3.select("#infoIframe"); // select the iframe
     let infoBox = window.d3.select("#infoBox"); // select the info box
 
-    if(infoDiv.length == 0 || infoFrame.length == 0 || infoBox.length == 0 || settings.minimal === 1){
+    if(infoDiv.length == 0 || infoFrame.length == 0 || infoBox.length == 0){
         return;
     }
 
@@ -310,8 +310,14 @@ function showNodeInformation(d){
  */
 function handleNodeAction(action = 'close'){
 
+    if(action == 'minimise' || action == 'maximise'){
+        toggleRecordViewer(action);
+        return;
+    }
+
     if(action == 'close'){
-        window.d3.select('#infoDiv').style('display', 'none');//close the box when clicked 
+        window.d3.select('#infoDiv').style('display', 'none');//close the box when clicked
+        window.d3.select('#infoDiv_stub').style('display', 'none');//close the box when clicked
         return;
     }
 
@@ -319,6 +325,42 @@ function handleNodeAction(action = 'close'){
     let recviewer_URL = `${window.hWin.HAPI4.baseURL}viewers/record/renderRecordData.php?recID=${rec_ID}&db=${window.hWin.HAPI4.database}`;
 
     action == 'popup' ? window.hWin.HEURIST4.ui.openRecordInPopup(rec_ID, null, false) : window.open(recviewer_URL, '_blank');
+}
+
+function toggleRecordViewer(action){
+    
+    let $infoDiv = $('#infoDiv');
+    let $infoStub = $('#infoDiv_stub');
+    let recID = document.querySelector('#infoIframe').getAttribute('data-hid');
+
+    if(!window.hWin.HEURIST4.util.isPositiveInt(recID)){
+        return;
+    }
+
+    if(action == 'minimise'){
+
+        let data = settings.getData.call(this, settings.data);
+        let recTitle = `Record #${recID}`;
+
+        for(let i = 0; i < data.nodes.length; i++){
+
+            if(data.nodes[i].id == recID){
+                recTitle = data.nodes[i].name;
+                break;
+            }
+        }
+
+        $infoStub.find('#infoDiv_stubtitle').html(recTitle);
+
+        $infoDiv.hide('slide', {direction: 'down'});
+        $infoStub.show('slide', {direction: 'up'});
+
+    }else{
+        $infoStub.hide('slide', {direction: 'up'});
+        $infoDiv.show('slide', {direction: 'down'});
+    }
+
+
 }
 
 /**

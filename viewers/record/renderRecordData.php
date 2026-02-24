@@ -1286,6 +1286,10 @@ if(!empty($import_webfonts)){
             background: rgb(233 233 233) !important;
         }
 
+        .detail > .value{
+            width: fit-content;
+        }
+
         .rft{
             width: 18px !important;
             height: 18px;
@@ -2725,7 +2729,7 @@ function print_relation_details($bib) {
                 }
             }
 
-            print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.($is_map_popup?CSS_HIDDEN:'').'">';//FONT_SIZE. && $link_cnt>2 linkRow
+            print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.($is_map_popup?CSS_HIDDEN:'width:100%;').'">';//FONT_SIZE. && $link_cnt>2 linkRow
             $link_cnt++;
             //        print '<span class=label>' . htmlspecialchars($bd['RelationType']) . '</span>';    //saw Enum change
 
@@ -2821,7 +2825,7 @@ function print_relation_details($bib) {
                 }
             }
 
-            print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.($is_map_popup?CSS_HIDDEN:'').'">';//FONT_SIZE. && $link_cnt>2 linkRow
+            print '<div class="detailRow fieldRow" data-id="'. $bd['recID'] .'" style="'.($is_map_popup?CSS_HIDDEN:'width:100%;').'">';//FONT_SIZE. && $link_cnt>2 linkRow
             $link_cnt++;
 
             if($field_name === false && array_key_exists('RelTerm',$bd)){

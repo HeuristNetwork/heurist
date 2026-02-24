@@ -10,7 +10,7 @@
 * It also includes the SVG container where the graph is rendered and a hidden div for node information display.
 *
 * @project     Heurist academic knowledge management system
-* @package  Viewers\Network
+* @package     Viewers\Network
 * @link        https://HeuristNetwork.org
 * @copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -134,21 +134,13 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 
 <div id="toolbar" class="split_bar" style="display: none;">
 
-    <div class="dropdown-content dropdown-content1">
+    <div class="dropdown-content">
         <div>
             <span id="lnkOpenPopup" class="fake_link" style="padding-right: 1em;">popup <span class="ui-icon ui-icon-extlink"></span></span>
 
             <span style="display: inline-block;">
-                <span title="Expanded Levels" style="padding-left: 0.2em;">Levels:</span>
-                <input id="expandedLevels" class="number-input small" type="number" min="0" max="5" step="1" title="Expanded Levels" value="1" />
-            
                 <button id="btnSingleSelect" name="selectMode" value="single" title="Select and drag single nodes">Select and drag nodes</button>
                 <button id="btnMultipleSelect" name="selectMode" value="multi" title="Select multiple nodes using a selection box (right-click and drag)">Select multiple nodes</button>
-            </span>
-
-            <span style="padding-left: 1em; display: inline-block;">
-                <span>Gravity:</span>
-                <input id="applyGravity" title="Apply gravity to the graph" type="checkbox" />
             </span>
 
             <span style="display: inline-block;">
@@ -156,27 +148,60 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
                 <input id="showRecordTitles" title="Show node record titles" type="checkbox" />
             </span>
 
-            <span style="padding-left: 1em; display: inline-block;">
+            <span style="margin-left: 1em; display: inline-block;">
                 <span>Font:</span>
                 <input id="recTitleSize" title="Font Size (pixels)" class="number-input" style="width: 3em; vertical-align: -1px;" type="number" min="8" max="30" step="1" />
             </span>
 
-            <span style="padding-left: 0.5em; display: inline-block;">
+            <span style="margin-left: 0.5em; display: inline-block;">
                 <span>Node:</span>
                 <input id="nodeSize" title="Node size (pixels)" class="number-input" style="width: 3em; vertical-align: -1px;" type="number" min="8" max="30" step="1" />
             </span>
 
-            <span style="padding-left: 1em; display: inline-block;">
+            <span style="margin-left: 1em; display: inline-block;">
                 <span style="border:none;background:none;">Zoom: </span>
                 <button id="btnZoomIn" style="width:20px;" title="Zoom In">In</button>
                 <button id="btnZoomOut" style="width:20px;" title="Zoom Out">Out</button>
                 <button id="btnFitToExtent" style="width:20px;" title="Fit graph to view">Fit to extent</button>
             </span>
 
-            <span style="padding-left: 1em; display: inline-block;">
+            <span style="margin-left: 1em; display: inline-block;">
                 <span style="border:none;background:none;">Export:</span>
                 <button id="gephi-export" onclick="getGephiFormat()" title="Export to GEXF for Gephi">GEPHI</button>
                 <button id="embed-export" title="Get embed code">Embed</button>
+            </span>
+        </div>
+    </div>
+
+    <div id="showSubToolbar" class="showMenuButton" title="Show extended toolbar">
+        <span class="ui-icon ui-icon-wrench"></span>
+    </div>
+
+    <div class="dropdown-content dropdown-subbar">
+        <div>
+            <div id="hideSubToolbar" style="margin-right: 5px; display: inline-block; height: 1em; cursor: pointer;">
+                <span class="ui-icon ui-icon-caret-1-w"></span>
+            </div>
+
+            <span style="display: none;">
+                Extend 
+                <span class="ui-icon ui-icon-triangle-1-w" id="descreaseGraphLevel" title="Decrement graph expand level"></span>
+                <span id="graphLevel">1</span>
+                <span class="ui-icon ui-icon-triangle-1-e" id="increaseGraphLevel" title="Increment graph expand level"></span>
+            </span>
+
+            <span style="display: inline-block;"> <!-- margin-left: 1em; -->
+                Gravity:
+                <span id="setGravityMode">
+                    <button id="gravityMode0" name="gravityMode" value="off" title="Turn off gravity (nodes stay where dragged)">Off</button>
+                    <button id="gravityMode1" name="gravityMode" value="touch" title="Apply gravity when nodes are interacted with">Touch</button>
+                    <button id="gravityMode2" name="gravityMode" value="aggressive" title="Apply gravity constantly">Aggressive</button>
+                </span>
+
+                <span>
+                    Force amount:
+                    <input id="gravityAmount" class="number-input small" type="number" value="0.1" min="0" max="3" step="0.1" title="How much gravity to apply to nodes?" />
+                </span>
             </span>
         </div>
     </div>
@@ -185,28 +210,28 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 
 </div>
 
-<div id="graphExpander" style="display: none;">
-    Extend <span class="ui-icon ui-icon-arrowthick-1-w" id="descreaseGraphLevel"></span><span id="graphLevel">1</span><span class="ui-icon ui-icon-arrowthick-1-e" id="increaseGraphLevel"></span>
-</div>
-
-<div id="showThematicContainer" title="Edit the graph's thematic symbology">
+<div id="showThematicContainer" class="showMenuButton" title="Edit the graph's thematic symbology">
     <span class="ui-icon ui-icon-marker"></span>
 </div>
 
 <div id="thematicSettings">
 
     <div id="hideThematicContainer" style="cursor: pointer; padding-bottom: 0.5em;">
-        <span class="ui-icon ui-icon-caret-1-w"></span> Hide settings
+        <span class="ui-icon ui-icon-caret-1-w"></span> Hide thematic settings
     </div>
 
-    <div id="thematicNodes">
-        <span style="font-size: 1.25em;">Nodes</span>
-        <div id="thematicNodesList"></div>
-    </div>
+    <div style="overflow-y: auto; min-height: 18em; max-height: 18em;">
 
-    <div id="thematicEdges">        
-        <span style="font-size: 1.25em;">Edges</span>
-        <div id="thematicEdgesList"></div>
+        <div id="thematicNodes">
+            <span class="thematicSettingsLabel">Nodes</span>
+            <div id="thematicNodesList"></div>
+        </div>
+
+        <div id="thematicEdges">        
+            <span class="thematicSettingsLabel">Edges</span>
+            <div id="thematicEdgesList"></div>
+        </div>
+
     </div>
 
 </div>
@@ -316,12 +341,18 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 
 <?php // Common elements for both modes ?>
 <!-- HTML for information box shown when a node is clicked (initially hidden) -->
-<div id="infoDiv" style="display:none; position:absolute; border:1px solid #ccc; background-color:white; padding:5px; z-index:1000;">
+<div id="infoDiv">
+    <button id="btnCtrlMinimise" class="iframeControls" onclick="handleNodeAction('minimise')" title="Minimise the record viewer/info"><span class="ui-icon ui-icon-window-minimize"></span></button>
     <button id="btnCtrlNewtab" class="iframeControls" onclick="handleNodeAction('tab')" title="Open in new tab"><span class="ui-icon ui-icon-newwin"></span></button>
     <button id="btnCtrlPopup" class="iframeControls" onclick="handleNodeAction('popup')" title="Open in popup"><span class="ui-icon ui-icon-comment"></span></button>
     <button id="btnCtrlClose" class="iframeControls" onclick="handleNodeAction('close')" title="Close record viewer/info"><span class="ui-icon ui-icon-close"></span></button>
     <iframe title id="infoIframe"></iframe>
     <div id="infoBox" style="padding: 10px;"></div>
+</div>
+<div id="infoDiv_stub">
+    <span id="infoDiv_stubtitle"></span>
+    <button id="btnCtrlMaximise" class="iframeControls" onclick="handleNodeAction('maximise')" title="Open the record viewer/info"><span class="ui-icon ui-icon-window"></span></button>
+    <button id="btnCtrlCloseStub" class="iframeControls" onclick="handleNodeAction('close')" title="Close record viewer/info"><span class="ui-icon ui-icon-close"></span></button>
 </div>
 
 <div id="embed-dialog" style="display:none">
@@ -331,5 +362,5 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
      <label style="font-size:0.9em" for="code-textbox">Readable code:</label>
      <textarea id="code-textbox" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;" readonly=""></textarea>
      <label style="font-size:0.9em" for="code-textbox2">Web-safe code:</label>
-     <textarea id="code-textbox2" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="     border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;" readonly=""></textarea>
+     <textarea id="code-textbox2" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;" readonly=""></textarea>
 </div>

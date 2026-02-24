@@ -219,15 +219,33 @@ text.shadow {
 
 /**Node information iframe
   *ADDED BY ISH */
-#infoDiv {
+#infoDiv,
+#infoDiv_stub {
+
     display: none;
+    min-width: 27.5em;
+    max-width: 27.5em;
+    
+    padding:5px;
+
     position: absolute;
-    right: 10px;
     top: 9em;
-    width: 30%;
-    min-width: 380px;
-    max-width: 380px;
+    right: 10px;
+
     box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+    border:1px solid #ccc;
+    background-color:white;
+
+    z-index:1000;
+}
+#infoDiv_stub{
+    top: unset;
+    bottom: 1em;
+}
+#infoDiv_stubtitle{
+    display: inline-block;
+    width: 25em;
+    cursor: default;
 }
 
 /* Node information iframe buttons */
@@ -242,6 +260,12 @@ text.shadow {
 }
 #btnCtrlPopup{
     right: 5em;
+}
+#btnCtrlMinimise{
+    right: 7.5em;
+}
+#btnCtrlMaximise{
+    right: 2.5em;
 }
 .iframeControls .ui-icon{
     top: 3px;
@@ -324,6 +348,14 @@ text.shadow {
     position: absolute;
 }
 
+.dropdown-subbar{
+    top: 4.25em;
+    position: absolute;
+
+    min-width: 7em;
+    margin: 0px;
+}
+
 .dropdown-content a:hover {
     background-color: #ddd;
 }
@@ -384,36 +416,77 @@ text.shadow {
 #thematicSettings{
 
     background-color: #EFEFEF;
-    box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+    box-shadow: 0 3px 10px rgb(0, 0, 0, 0.2);
 
     z-index: 3;
 
     position: absolute;
-    top: 6em;
+    top: 7.5em;
 
     min-width: 17.5em;
     min-height: 20em;
     max-height: 20em;
 
     padding: 0.75em;
-    margin: 0.75em;
 
-    overflow-y: auto;
     display: none;
 }
 
-#showThematicContainer{
+.thematicSettingsLabel{
+
+    position: sticky;
+    top: 0px;
+
+    z-index: 5;
+
+    font-size: 1.25em;
+    background-color: #EFEFEF;
+
+    display: block;
+
+    cursor: default;
+}
+
+.showMenuButton{
 
     background-color: #EFEFEF;
-    box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 10px;
+    box-shadow: 0 3px 10px rgb(0, 0, 0, 0.2);
 
     z-index: 2;
 
     position: absolute;
-    top: 6.75em;
-
-    padding: 0.25em 0.5em;
 
     cursor: pointer;
     display: none;
+}
+#showThematicContainer{
+
+    top: 7.75em;
+
+    padding: 0.25em 0.5em;
+}
+#showSubToolbar{
+
+    top: 4.75em;
+
+    padding: 0.5em;
+}
+
+#toolbar span{
+    cursor: default;
+}
+
+#toolbar button span,
+#toolbar .showMenuButton{
+    cursor: pointer;
+}
+
+#toolbar [type="checkbox"]{
+    vertical-align: -0.1em;
+}
+
+.ui-heurist-btn-selected{
+    border: none;
+    background-color: #364050 !important;
+    color: #ffffff !important;
 }

@@ -196,7 +196,7 @@ function expandNode(rec_ID){
 
         <!-- Functions callable from parent iframe or for standalone mode -->
         <script>
-        
+
         /**
         * Parses Heurist record data and relationship data into a D3-compatible format (nodes and links).
         *
@@ -345,7 +345,7 @@ function expandNode(rec_ID){
 
             return {nodes: nodesArray, links: links};
         }
-        
+
         /**
          * Updates the visualization to highlight a given set of selected record IDs.
          *
@@ -427,9 +427,14 @@ function expandNode(rec_ID){
                 levelsExpanded: isMinimalVersion?1:0 
             });
 
-            // Example: setTimeout(function(){ setGravity('off');}, 3000); // turn off gravity after initial scatter
+            if(isMinimalVersion){ // trigger additional settings for minimal mode
 
-            changeViewMode('icons'); // set initial view mode
+                let gravity = getSetting('setting_gravity', 'off');
+                setGravity('aggressive');
+                setTimeout(function(){ setGravity('off');}, 3000); // turn off gravity after initial scatter
+    
+                changeViewMode('icons'); // set initial view mode
+            }
             zoomToFit();
 
             currentRequest = new_request;
@@ -450,8 +455,8 @@ function expandNode(rec_ID){
                     ele.removeClass('dropdown-content1');
                 }
                 topPos = $('#toolbar').height();
-                if(topPos<40) { topPos = 40; }
-                topPos = (topPos+10)+'px';
+                if(topPos < 40) { topPos = 40; }
+                topPos = (topPos+15)+'px';
                 $('#toolbar').find('.heurist-helper2').hide();
             }
             $('#divSvg').css('top', topPos); // Assumes #divSvg is the SVG container

@@ -214,12 +214,12 @@ function handleSettingsInUI() {
         .on('click', function(){changeViewMode('infoboxes_full');} );
     $( "#setViewMode" ).controlgroup();
 
-    $('#gravityMode0').button(/*{icon: 'ui-icon-gravity0' , showLabel:false}*/)
-        .on('click', function(){setGravity('off');} );
-    $('#gravityMode1').button(/*{icon: 'ui-icon-gravity1' , showLabel:false}*/)
-        .on('click', function(){setGravity('touch');} );
-    /*$('#gravityMode2').button(/*{icon: 'ui-icon-gravity2' , showLabel:false})
-        .on('click', function(){setGravity('aggressive');} );*/
+    $('#gravityMode0').button()
+        .on('click', () => setGravity('off') );
+    $('#gravityMode1').button()
+        .on('click', () => setGravity('touch') );
+    $('#gravityMode2').button()
+        .on('click', () => setGravity('aggressive') );
     $("#setGravityMode").controlgroup();
 
     //------------ NODES ----------
@@ -395,23 +395,10 @@ function handleSettingsInUI() {
         if(isLabelCurrentlyVisible) visualizeData(); // Redraw if labels are potentially visible
     });
 
-    $('#showRecordTitles').prop('checked', true).on('change', () => { // show node titles
-        svg.selectAll('text.nodelabel.namelabel').style('display', $('#showRecordTitles').is(':checked') ? '' : 'none');
-    });
-    $('#applyGravity').on('change', () => { // gravity controls
-        let applyGravity = $('#applyGravity').is(':checked');
-        setGravity(applyGravity ? 'touch' : 'off');
-    });
-    $('#recTitleSize').val(9).on('change', () => updateScalableElements('labels'));
-    $('#nodeSize').val(window.circleSize).on('change', () => updateScalableElements('all'));
-    $('#lnkOpenPopup').on('click', () => {
-        if(typeof currentRequest === undefined || typeof currentRequest?.q !== 'string'){
-            return;
-        }
-
-        const URL = `${window.hWin.HAPI4.baseURL}viewers/visualize/springDiagram.php?db=${window.hWin.HAPI4.database}&mini=2&q=${currentRequest.q}`;
-        window.hWin.HEURIST4.msg.showDialog(URL, {title: `Record Network Graph`, ok: window.hWin.HR('Cancel'), width: 900, height: 900});
-    });
+    // Mini toolbar controls
+    if(settings.minimal){
+        initialiseMiniToolbar();
+    }
 
     if(settings.isDatabaseStructure){
         initRecTypeSelector();
@@ -422,6 +409,48 @@ function handleSettingsInUI() {
     }
 
     tBar.show();
+}
+
+function initialiseMiniToolbar(){
+
+    $('#showRecordTitles').prop('checked', true).on('change', () => { // show node titles
+        svg.selectAll('text.nodelabel.namelabel').style('display', $('#showRecordTitles').is(':checked') ? '' : 'none');
+    });
+
+    $('#recTitleSize').val(9).on('change', () => updateScalableElements('labels'));
+    $('#nodeSize').val(window.circleSize).on('change', () => updateScalableElements('all'));
+
+    $('#lnkOpenPopup').on('click', () => {
+
+        if(typeof currentRequest === undefined || typeof currentRequest?.q !== 'string'){
+            return;
+        }
+
+        const URL = `${window.hWin.HAPI4.baseURL}viewers/visualize/springDiagram.php?db=${window.hWin.HAPI4.database}&mini=1&q=${currentRequest.q}`;
+        window.hWin.HEURIST4.msg.showDialog(URL, {title: `Record Network Graph`, ok: window.hWin.HR('Cancel'), width: 900, height: 900});
+    });
+
+    $('#showSubToolbar').on('click', () => {
+        $('#showSubToolbar').hide('slide', {direction: 'left'}, 400, () => $('.dropdown-subbar').show('slide', {direction: 'left'}));
+    });
+    $('#hideSubToolbar').on('click', () => {
+        $('.dropdown-subbar').hide('slide', {direction: 'left'}, 400, () => $('#showSubToolbar').show('slide', {direction: 'left'}));
+    });
+
+    $('#gravityAmount').val(0.1).on('change', () => {
+
+        let amount = Number.parseFloat($('#gravityAmount').val());
+        if(!window.force || Number.isNaN(amount) || amount < 0){
+            return;
+        }
+
+        // Apply new gravity
+        const gravity = getSetting('setting_gravity');
+        window.force.gravity(amount);
+        if(gravity !== 'off'){
+            window.force.resume();
+        }
+    });
 }
 
 /**
@@ -487,24 +516,25 @@ function initRecTypeSelector(){
  * @private
  */
 function _syncUI(){
-    $('#toolbar').find('button').removeClass('ui-heurist-btn-header1'); // Base class for styling active buttons
 
-    $('#toolbar').find('button[value="'+window.selectionMode+'"]').addClass('ui-heurist-btn-header1');
-    $('#toolbar').find('button[value="'+window.currentMode+'"]').addClass('ui-heurist-btn-header1');
+    $('#toolbar').find('button').removeClass('ui-heurist-btn-selected'); // Base class for styling active buttons
+
+    $('#toolbar').find('button[value="'+window.selectionMode+'"]').addClass('ui-heurist-btn-selected');
+    $('#toolbar').find('button[value="'+window.currentMode+'"]').addClass('ui-heurist-btn-selected');
 
     let grv = getSetting('setting_gravity','off');
-    if(grv=='aggressive') grv = 'touch'; // Normalize 'aggressive' to 'touch' for UI
-    $('#toolbar').find('button[name="gravityMode"][value="'+grv+'"]').addClass('ui-heurist-btn-header1');
+    if(grv == 'aggressive' && !settings.minimal) grv = 'touch'; // Normalize 'aggressive' to 'touch' for UI
+    $('#toolbar').find('button[name="gravityMode"][value="'+grv+'"]').addClass('ui-heurist-btn-selected');
 
     let formula = getSetting('setting_formula','linear');
-    $('#toolbar').find('button[name="nodesMode"][value="'+formula+'"]').addClass('ui-heurist-btn-header1');
+    $('#toolbar').find('button[name="nodesMode"][value="'+formula+'"]').addClass('ui-heurist-btn-selected');
 
     let linetype = 'straight'; //getSetting('setting_linetype', 'straight'); 
-    $('#toolbar').find('button[name="linksMode"][value="'+linetype+'"]').addClass('ui-heurist-btn-header1');
-
+    $('#toolbar').find('button[name="linksMode"][value="'+linetype+'"]').addClass('ui-heurist-btn-selected');
 
     let is_show_empty = (getSetting('setting_line_empty_link', 1)==1);
     $('#toolbar').find('#linksEmpty').prop('checked', is_show_empty);
+
 }
 
 /**
@@ -573,21 +603,42 @@ function setGravity(gravity) {
 
     putSetting('setting_gravity',  gravity);
 
-    // Update gravity impact on nodes
-    svg.selectAll(".node").attr("fixed", function(d) {
-        if(gravity == "aggressive") {
-            d.fixed = false;
-            return false;
-        }else{ // 'off' or 'touch'
+    if(window.hWin.HEURIST4.util.isPositiveInt(window.gravityTimeout)){
+        clearTimeout(window.gravityTimeout);
+        window.gravityTimeout = null;
+    }
+
+    let updateFixedValues = (mode) => {
+
+        // Update gravity impact on nodes
+        svg.selectAll('.node').attr('fixed', (d) => {
+
+            if(mode == 'aggressive'){
+                d.fixed = false;
+                return false;
+            }
+
+            // 'off' or 'touch'
             d.fixed = true;
             return true;
+        });
+
+        if(gravity !== "off"){
+            force.resume();
+            window.gravityTimeout = setTimeout(() => setGravity('off'), 10000); // automatically disable gravity after 10 seconds
         }
-    });
+    };
 
-    // visualizeData(); // This might be too heavy, consider more targeted updates or rely on force.resume()
+    if(gravity == 'touch'){
 
-    if(gravity !== "off") {
-        force.resume();
+        updateFixedValues('aggressive'); // appoly gravity, for a moment
+        window.gravityTimeout = clearTimeout(window.gravityTimeout); // remove gravity timeout from above call
+
+        setTimeout(() => {
+            updateFixedValues('touch'); // apply requested gravity
+        }, 1000);
+    }else{
+        updateFixedValues(gravity);
     }
 
     _syncUI();

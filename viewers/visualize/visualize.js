@@ -239,8 +239,7 @@ let maxCountForLinks;
         );
         
         if(window.hWin.HEURIST4.util.isFunction(settings.onExpandLevel)){
-            $('#expandedLevels').on('change', (e)=>settings.onExpandLevel(e));
-        }else{
+            $('#expandedLevels').on('change', (e) => settings.onExpandLevel(e));
         }
         $('#expandedLevels').hide();
             
@@ -720,6 +719,8 @@ function zoomToFit(){
         .translate(translate);    
     let transform = "translate(" + zoom.translate() + ")scale(" + zoom.scale() + ")";   
     onZoom(transform);
+
+    updateScalableElements('all'); // fixup elements to avoid large/tiny text, nodes, lines, etc...
 }
 
 //
@@ -1686,7 +1687,7 @@ function showEmbedDialog(){
     let URLParams = new URLSearchParams();
     URLParams.append('db', window.hWin.HAPI4.database);
     if(settings.minimal){
-        URLParams.append('mini', 2);
+        URLParams.append('mini', 1);
     }
 
     let hQuery = typeof currentRequest?.q === 'string' ? currentRequest : window.hWin.HEURIST4.current_query_request;
@@ -1878,6 +1879,7 @@ function setupThematicSettings(){
 
         let item = `
         <input name="displayNode" type="checkbox" ${existingSettings.display == 1 ? 'checked="checked"' : ''}>
+        <span class="ui-icon ui-icon-minusthick" style="top: 5px; position: relative;" data-line-id="${trmID}"></span>
         <span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>
         <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${thematicSettings['edges'][trmID].name}" class="truncate">${thematicSettings['edges'][trmID].name}</span>
         `;
@@ -1901,12 +1903,10 @@ function setupThematicSettings(){
     let showContainer = $('#showThematicContainer');
     let hideContainer = $('#hideThematicContainer');
     showContainer.click(() => {
-        showContainer.hide('slide', {direction: 'left'});
-        $(container).show('slide', {direction: 'left'});
+        showContainer.hide('slide', {direction: 'left'}, 400, () => $(container).show('slide', {direction: 'left'}));
     });
     hideContainer.click(() => {
-        $(container).hide('slide', {direction: 'left'});
-        showContainer.show('slide', {direction: 'left'});
+        $(container).hide('slide', {direction: 'left'}, 400, () => showContainer.show('slide', {direction: 'left'}));
     });
 }
 
@@ -1946,7 +1946,7 @@ function setThematicSetting(type, ID){
         }
 
         colourFilter = colourFilter.replace(/;$/, '');
-        let icons = document.querySelectorAll(`image[data-icon-id="${ID}"], img[data-icon-id="${ID}"]`);
+        let icons = document.querySelectorAll(`image[data-icon-id="${ID}"]`);
 
         for(let i = 0; i < icons.length; i++){
 
@@ -1961,6 +1961,11 @@ function setThematicSetting(type, ID){
             foregroundCircle.style.setProperty('fill', styling.fillColour);
             foregroundCircle.style.setProperty('opacity', styling.fillOpacity);
         }
+
+        let legendIcon = document.querySelector(`img[data-icon-id="${ID}"]`);
+        legendIcon.style.setProperty('filter', colourFilter);
+        legendIcon.style.setProperty('opacity', `${styling.iconOpacity}%`);
+
     }else if(type === 'edges'){
 
         let lines = document.querySelectorAll(`path.bottom-lines[data-connector*="r${ID}t"]`);
@@ -1970,6 +1975,10 @@ function setThematicSetting(type, ID){
             lines[i].setAttribute('stroke', styling.lineColour);
             lines[i].style.setProperty('opacity', styling.lineOpacity);
         }
+
+        let legendLine = document.querySelector(`span[data-line-id="${ID}"]`);
+        legendLine.style.setProperty('color', styling.lineColour);
+        legendLine.style.setProperty('opacity', styling.lineOpacity);
     }
 }
 
