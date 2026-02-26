@@ -3079,7 +3079,7 @@ function recordSearch($system, $params, $relation_query=null)
             while ($row = $res->fetch_row()) {
 
                 if($needThumbField) {
-                    $tres = fileGetThumbnailURL($system, $row[$rec_ID_index], $needThumbBackground);
+                    $tres = fileGetThumbnailURL($system, $row[$rec_ID_index], $needThumbBackground, true);
                     array_push( $row, $tres['url'] );
                     if($needThumbBackground) {array_push( $row, $tres['bg_color'] );}
                 }
