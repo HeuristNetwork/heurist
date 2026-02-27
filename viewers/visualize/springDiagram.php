@@ -70,8 +70,19 @@ var isStandAlone = false;
 
 var currentRequest = null;
 
-var graphLevels = []; // keep track of each graph level (for handling graph level expansions), beware manual expanding needs to be accounted for
-var nodeRelationMapping = {}; // keep a list of related nodes, to simplify individual node expansions
+/**
+ * Array<Set> tracking for each graph level (to handle moving backwards in levels)
+ * Use sets to avoid duplicate record IDs
+ */
+var graphLevels = [];
+/**
+ * Object<Record ID => Set> tracking related records for each record that appears in the graph (or has appeared)
+ */
+var nodeRelationMapping = {};
+/**
+ * Visualiser instance, for calling destroy method
+ */
+var visualise = null;
 
 /**
  * Callback function executed after the page's initial dependencies are loaded.
@@ -149,29 +160,133 @@ function performSearch(q){
 }
 
 function onExpandLevel(event){
-    console.log($(event.target).val());
-    //search linked records for previous level
-    
-    //search links within current recordset
-    
+
+    const currentQuery = currentRequest.q;
+    let parts = typeof currentQuery === 'string' ? currentQuery.split(':') : [];
+    if(parts.length > 2 || parts[0] !== 'ids'){
+        return;
+    }
+
+    const GRAPH_EXTEND_LIMIT = 10;
+    let level = 0;
+    let action = $(event.target).attr('data-value');
+    let currentLevel = Number.parseInt(localStorage.getItem('extendedLevel'));
+
+    // Limit expand to first 10 levels (for now)
+    if(currentLevel < 0 || Number.isNaN(currentLevel)){
+        currentLevel = 0;
+    }else if(currentLevel > GRAPH_EXTEND_LIMIT - 1){
+        currentLevel = GRAPH_EXTEND_LIMIT - 1;
+    }
+
+    if((currentLevel === 0 && action === 'decrease') || (currentLevel === GRAPH_EXTEND_LIMIT - 1 && action === 'increase')){
+        window.hWin.HEURIST4.msg.showMsgFlash(`Cannot ${action === 'decrease' ? 'shrink' : 'grow'} graph any further...`, 3000);
+        if(action === 'decrease'){
+            $('#decreaseGraphLevel').addClass('ui-state-disabled');
+        }else{
+            $('#increaseGraphLevel').addClass('ui-state-disabled');
+        }
+        return;
+    }
+
+    let updateGraphLevels = (fullList, filterOut) => {
+
+        let newList = new Set();
+        for(const ID of fullList){
+            if(filterOut.has(ID)){
+                continue;
+            }
+
+            newList.add(ID);
+        }
+
+        graphLevels.push(newList);
+    };
+
+    currentLevel += (action === 'increase' ? 1 : -1);
+
+    let levelLabel = currentLevel + 1;
+
+    let currentRecIDs = parts[1].split(',').map((x) => +x);
+
+    if(graphLevels.length > currentLevel){
+
+        let toRemove = graphLevels.pop(); // remove outer most layer
+        currentRecIDs = currentRecIDs.filter((id) => !toRemove.has(id));
+        currentRecIDs = new Set(currentRecIDs);
+
+        if(currentRecIDs.size === 0){
+            $('#decreaseGraphLevel').addClass('ui-state-disabled');
+            return;
+        }
+        /** @todo
+         * Manually remove graph nodes and links (was causing issues), AND update the force simulation (this should fix those issues)
+         */
+    }else{
+
+        let toExpand = graphLevels[graphLevels.length - 1];
+        currentRecIDs = new Set(currentRecIDs);
+        let originalIDs = new Set(currentRecIDs);
+        const currentSize = currentRecIDs.size;
+
+        for(const recID of toExpand){
+
+            if(!Object.hasOwn(nodeRelationMapping, recID) || nodeRelationMapping[recID].size === 0){
+                continue;
+            }
+
+            currentRecIDs = currentRecIDs.union(nodeRelationMapping[recID]);
+        }
+
+        if(currentRecIDs.size <= currentSize){
+            window.hWin.HEURIST4.msg.showMsgFlash('The graph cannot grow any further...', 3000);
+            $('#increaseGraphLevel').addClass('ui-state-disabled');
+            return;
+        }
+
+        updateGraphLevels(currentRecIDs, originalIDs);
+    }
+
+    document.querySelector('#graphLevel').innerHTML = levelLabel;
+    localStorage.setItem('extendedLevel', currentLevel);
+
+    if(currentLevel == GRAPH_EXTEND_LIMIT - 1){
+        $('#increaseGraphLevel').addClass('ui-state-disabled');
+    }else{
+        $('#increaseGraphLevel').removeClass('ui-state-disabled');
+    }
+
+    if(currentLevel == 0){
+        $('#decreaseGraphLevel').addClass('ui-state-disabled');
+    }else{
+        $('#decreaseGraphLevel').removeClass('ui-state-disabled');
+    }
+
+    window.hWin.HEURIST4.msg.bringCoverallToFront($('body'), {'background-color': 'white', opacity: 1, color: 'black'}, `${action === 'increase' ? 'Extending' : 'Removing'} leaf nodes...`);
+
+    performSearch(`ids:${Array.from(currentRecIDs).join(',')}`);
 }
 
 function expandNode(rec_ID){
 
     const currentQuery = currentRequest.q;
     let parts = typeof currentQuery === 'string' ? currentQuery.split(':') : [];
-    if(!Object.hasOwn(nodeRelationMapping, rec_ID) || parts.length > 2 || parts[0] !== 'ids'){
+    if(!Object.hasOwn(nodeRelationMapping, rec_ID) || nodeRelationMapping[rec_ID].size === 0 || parts.length > 2 || parts[0] !== 'ids'){
         return;
     }
 
     let currentRecIDs = parts[1].split(',');
     let recIDs = new Set(currentRecIDs).union(nodeRelationMapping[rec_ID]);
+    let newIDs = Array.from(nodeRelationMapping[rec_ID]).filter((ID) => currentRecIDs.indexOf(ID) === -1);
 
-    let isUpdated = currentRecIDs.length < recIDs.size; // whether we need to update the graph
-    if(!isUpdated){
+    if(newIDs.length === 0){
         window.hWin.HEURIST4.msg.showMsgFlash('Node has already been expanded', 3000);
         return;
     }
+
+    // Add to current level in graphLevels
+    let currentLevel = graphLevels.length - 1;
+    graphLevels[currentLevel].union(new Set(newIDs));
 
     let title = d3.select(`.id${rec_ID}`).data();
     title = title[0] && title[0].name ? `${title[0].name} (#${rec_ID})` : `Record #${rec_ID}`;
@@ -329,10 +444,10 @@ function expandNode(rec_ID){
 
                 addNewConnections();
 
-                /*
-                newly_added_nodes = record_ids - previous_nodes;
-                graphLevels.push(newly_added_nodes);
-                */
+                if(graphLevels.length === 0){
+                    graphLevels.push(new Set(records_ids));
+                    localStorage.setItem('extendedLevel', 0);
+                }
             }
 
             // Construct data object with nodes as an array
@@ -400,11 +515,15 @@ function expandNode(rec_ID){
                 return length;
             }
 
-            $(window).on('resize',onVisualizeResize); // Bind resize handler
+            if(visualise !== null){
+                visualise.destroy();
+            }
+
+            $(window).on('resize', onVisualizeResize); // Bind resize handler
             setTimeout(()=>onVisualizeResize(),1000); // Initial call
 
             // Initialize the visualize plugin
-            $("#visualize").visualize({ // Assumes #visualize is the ID of the main container in visualize.php
+            visualise = $("#visualize").visualize({ // Assumes #visualize is the ID of the main container in visualize.php
                 data: data,
                 request: new_request,
                 getData: getData, // Pass the identity function
@@ -423,22 +542,23 @@ function expandNode(rec_ID){
                 showEntitySettings: false,
                 showFormula: false,
                 gravity: 'off', // Start with gravity off; can be 'touch' to initially scatter
-                minimal: isMinimalVersion,
-                levelsExpanded: isMinimalVersion?1:0 
+                minimal: isMinimalVersion
             });
 
             if(isMinimalVersion){ // trigger additional settings for minimal mode
 
-                let gravity = getSetting('setting_gravity', 'off');
                 setGravity('aggressive');
-                setTimeout(function(){ setGravity('off');}, 3000); // turn off gravity after initial scatter
-    
+                setTimeout(() => {
+                    setGravity('off');
+                    zoomToFit();
+                }, 2000); // turn off gravity after initial scatter
+
                 changeViewMode('icons'); // set initial view mode
             }
+
             zoomToFit();
 
             currentRequest = new_request;
-
             window.hWin.HEURIST4.msg.sendCoverallToBack();
         }
 
