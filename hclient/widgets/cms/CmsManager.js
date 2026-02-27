@@ -498,7 +498,7 @@ class CmsManager {
             + '<br><input type="checkbox"> hide website (can be changed later)</p>'
             + '<p>Choose the version for CMS  ' 
             + '<br><input name="rbVer" type="radio" checked id="rbV2"/><label for="rbV2">v 2</label>'
-            + `<br><input name="rbVer" type="radio" id="rbV3" ${disabled}/><label for="rbV3">v 3 (for Heurist association members only)</label>`
+            + `<br><input name="rbVer" type="radio" id="rbV3" ${disabled}/><label for="rbV3">v 3 (responsive layouts, testing, contact Heurist team for access)</label>`
             +'</p>';
 
         let $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg,
