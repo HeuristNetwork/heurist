@@ -1562,11 +1562,9 @@ $.widget( "heurist.mapping", {
                 corner2 = L.latLng(bbox[3], bbox[2]);
             let bbox2 = L.latLngBounds(corner1, corner2);            
     
-
-                
             let sz = this.nativemap.getSize();
             let fz = this.nativemap.getSize; //keep
-            
+
             L.Map.include({
                 getSize: function () {
                     return new L.Point(parseInt(sz.x), parseInt(sz.y));
@@ -1705,7 +1703,6 @@ $.widget( "heurist.mapping", {
     //   default duration is 5 seconds, maxZoom from options.zoomMaxInKM and native map getMaxZoom
     //
     zoomToBounds: function(bounds, fly_params){
-        
         
         const $el = this.element; // map container element for the widget
 

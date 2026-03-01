@@ -708,7 +708,7 @@ class ReportExecute
 
             $this->handleTemplateOutput( $this->smarty->fetch($this->templateFile) );
 
-            /* Apparently need to use $this->smarty->display($templateFile) for huge reprot to direct output to browser*/
+            /* Apparently need to use $this->smarty->display($templateFile) for huge report to direct output to browser*/
 
         } catch (ReportTerminatedException $e) {
             $msg = $e->getMessage();
@@ -1399,9 +1399,11 @@ class ReportExecute
 
         // if param "output" ($outputfile) is defined it saves smarty report into file
         // and
-        // $publishmode - 1 saving into file and produces info page (user report) only
+        // $publishmode - 0 Smarty report editor (preview mode)
+        //                1 saving into file and produces info page (user report) only
         //                2 downloads ONLY it under given output name (no file save, no browser output)
-        //                3 saving into file and outputs smarty report into browser
+        //                3 check existing generated report and if it is outdated, save report into file and outputs it into browser
+        //                4 for calculated field
 
         if ($this->publishmode==2) {//download
 

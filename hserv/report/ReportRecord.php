@@ -236,9 +236,9 @@ class ReportRecord
      */
     public function getRecord($rec, $details=true, $smarty_obj = null)
     {
-        $rec_ID = is_array($rec) && $rec['recID'] ? $rec['recID'] : $rec;
+        $rec_ID = intval(is_array($rec) && $rec['recID'] ? $rec['recID'] : $rec);
         
-        if ($details===true && @$this->recordsCache[$rec_ID]) {
+        if ($details===true && isset($this->recordsCache[$rec_ID])) {
             return $this->recordsCache[$rec_ID];
         }
 
