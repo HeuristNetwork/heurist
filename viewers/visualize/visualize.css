@@ -217,8 +217,7 @@ text.shadow {
     cursor: pointer;
 }
 
-/**Node information iframe
-  *ADDED BY ISH */
+/* Node information iframe */
 #infoDiv,
 #infoDiv_stub {
 
@@ -229,8 +228,8 @@ text.shadow {
     padding:5px;
 
     position: absolute;
-    top: 9em;
-    right: 10px;
+    top: 5em;
+    right: 1em;
 
     box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
     border:1px solid #ccc;
@@ -489,4 +488,8 @@ text.shadow {
     border: none;
     background-color: #364050 !important;
     color: #ffffff !important;
+}
+
+.graphLevelControl{
+    cursor: pointer;
 }

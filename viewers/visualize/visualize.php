@@ -136,7 +136,7 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 
     <div class="dropdown-content">
         <div>
-            <span id="lnkOpenPopup" class="fake_link" style="padding-right: 1em;">popup <span class="ui-icon ui-icon-extlink"></span></span>
+            <span id="lnkOpenPopup" class="fake_link toolbarController" style="padding-right: 1em;">popup <span class="ui-icon ui-icon-extlink"></span></span>
 
             <span style="display: inline-block;">
                 <button id="btnSingleSelect" name="selectMode" value="single" title="Select and drag single nodes">Select and drag nodes</button>
@@ -173,24 +173,24 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
         </div>
     </div>
 
-    <div id="showSubToolbar" class="showMenuButton" title="Show extended toolbar">
+    <div id="showSubToolbar" class="showMenuButton toolbarController" title="Show extended toolbar">
         <span class="ui-icon ui-icon-wrench"></span>
     </div>
 
     <div class="dropdown-content dropdown-subbar">
         <div>
-            <div id="hideSubToolbar" style="margin-right: 5px; display: inline-block; height: 1em; cursor: pointer;">
-                <span class="ui-icon ui-icon-caret-1-w"></span>
+            <div id="hideSubToolbar" class="toolbarController" style="margin-right: 5px; display: inline-block; height: 1em; cursor: pointer;" title="Hide extended toolbar">
+                <span class="ui-icon ui-icon-caret-1-w" style="cursor: pointer;"></span>
             </div>
 
-            <span style="display: none;">
+            <span>
                 Extend 
-                <span class="ui-icon ui-icon-triangle-1-w" id="descreaseGraphLevel" title="Decrement graph expand level"></span>
+                <span class="ui-icon ui-icon-triangle-1-w graphLevelControl ui-state-disabled toolbarController" id="decreaseGraphLevel" data-value="decrease" title="Decrement graph expand level"></span>
                 <span id="graphLevel">1</span>
-                <span class="ui-icon ui-icon-triangle-1-e" id="increaseGraphLevel" title="Increment graph expand level"></span>
+                <span class="ui-icon ui-icon-triangle-1-e graphLevelControl toolbarController" id="increaseGraphLevel" data-value="increase" title="Increment graph expand level"></span>
             </span>
 
-            <span style="display: inline-block;"> <!-- margin-left: 1em; -->
+            <span style="margin-left: 1em;">
                 Gravity:
                 <span id="setGravityMode">
                     <button id="gravityMode0" name="gravityMode" value="off" title="Turn off gravity (nodes stay where dragged)">Off</button>
@@ -210,13 +210,13 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 
 </div>
 
-<div id="showThematicContainer" class="showMenuButton" title="Edit the graph's thematic symbology">
+<div id="showThematicContainer" class="showMenuButton toolbarController" title="Edit the graph's thematic symbology">
     <span class="ui-icon ui-icon-marker"></span>
 </div>
 
 <div id="thematicSettings">
 
-    <div id="hideThematicContainer" style="cursor: pointer; padding-bottom: 0.5em;">
+    <div id="hideThematicContainer" class="toolbarController" style="cursor: pointer; padding-bottom: 0.5em;">
         <span class="ui-icon ui-icon-caret-1-w"></span> Hide thematic settings
     </div>
 

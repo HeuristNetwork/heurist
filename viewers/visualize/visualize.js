@@ -202,8 +202,7 @@ let maxCountForLinks;
             translatey: 200,
             scale: 1,
 
-            minimal: 0,
-            levelsExpanded:0
+            minimal: 0
         }, options );
 
         // Handle settings initialization and UI setup (from settings.js)
@@ -224,25 +223,23 @@ let maxCountForLinks;
             ele_warn.hide();
         }
 
-        // Initialize UI buttons for zoom and refresh
-        $('#btnZoomIn').button({icon:'ui-icon-plus',showLabel:false}).on('click',
-            function(){ zoomBtn(true); }
-        );
-        $('#btnZoomOut').button({icon:'ui-icon-minus',showLabel:false}).on('click',
-            function(){ zoomBtn(false); }
-        );
-        $('#btnFitToExtent').button({icon:'ui-icon-fullscreen',showLabel:false}).on('click',
-            function(){ zoomToFit(); }
-        );
-        $('#btnRefreshData').button({icon:'ui-icon-refresh'}).on('click',
-            function(){ location.reload(); } // Simple page reload for refresh
-        );
-        
-        if(window.hWin.HEURIST4.util.isFunction(settings.onExpandLevel)){
-            $('#expandedLevels').on('change', (e) => settings.onExpandLevel(e));
+        this.destroy = function(){ // remove event listeners
+
+            $('#toolbar input, #toolbar button, #toolbar .toolbarController').off('click');//.visualiser
+            $('#toolbar input, #toolbar button, #toolbar .toolbarController').off('change');//.visualiser
+
+            $('#toolbar button').each((idx, button) => {
+                if($(button).button('instance') !== undefined){
+                    $(button).button('destroy');
+                }
+            });
+
+            $('#setSelectMode, #setViewMode, #setGravityMode, #setNodesMode, #setLinksMode').each((idx, element) => {
+                if($(element).controlgroup('instance') !== undefined){
+                    $(element).controlgroup('destroy');
+                }
+            });
         }
-        $('#expandedLevels').hide();
-            
 
         return this; // Return jQuery object for chaining
     };
@@ -482,12 +479,6 @@ function visualizeData() {
 
     }else if(!settings.minimal){
         inIframe();   
-    }
-
-    if(settings.isDatabaseStructure || (isStandAlone && !settings.minimal)){
-        $('#embed-export').css('visibility','hidden');//hide();
-    }else{
-        $('#embed-export').button({icon:'ui-icon-globe',showLabel:false}).on('click', showEmbedDialog);
     }
 
     if(!settings.isDatabaseStructure && settings.minimal){
@@ -1902,10 +1893,10 @@ function setupThematicSettings(){
 
     let showContainer = $('#showThematicContainer');
     let hideContainer = $('#hideThematicContainer');
-    showContainer.click(() => {
+    showContainer.on('click.visualiser', () => {
         showContainer.hide('slide', {direction: 'left'}, 400, () => $(container).show('slide', {direction: 'left'}));
     });
-    hideContainer.click(() => {
+    hideContainer.on('click.visualiser', () => {
         $(container).hide('slide', {direction: 'left'}, 400, () => showContainer.show('slide', {direction: 'left'}));
     });
 }
