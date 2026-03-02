@@ -1277,7 +1277,7 @@ class USystem {
             'heurist.eu',
             'heuristeu.net'
         ];
-        unset($checkDomains); //remove remark so redirection is enforced for all non-target domains
+        //unset($checkDomains); remove remark so redirection is enforced for all non-target domains
 
         if ($current_domain === '' || $current_domain === $target_domain || 
             (isset($checkDomains) && !in_array($current_domain, $checkDomains, true))) {

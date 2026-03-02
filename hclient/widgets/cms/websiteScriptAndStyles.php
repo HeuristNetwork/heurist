@@ -802,10 +802,12 @@ function assignPageTitle(pageid){
     }
 
     // if page title is visible - increase height of header
-    if($('#main-header').length>0 && $('#main-content-container').length>0 && title_container.length>0){
+    if($('#main-header').length>0 && $('#main-content-container').length>0 && title_container.length>0  
+       && $('#main-content-container').css('position')=='absolute' && $('#main-header').css('position')=='absolute')
+    {
 
-        const eleHeader = $(document.getElementById('main-header'));
-        const h = eleHeader.outerHeight();
+            const eleHeader = $(document.getElementById('main-header'));
+            const h = eleHeader.outerHeight();
 
         //if(h==137 || h==144 || h==151 || h==181){ //values to detect default bhaviour - not reliable
 
@@ -816,8 +818,6 @@ function assignPageTitle(pageid){
             $('#main-content-container').css({top:is_show_pagetitle? 181+title_height :151});
 
             $('#main-menu').css('bottom', is_show_pagetitle ? title_container.outerHeight() : 0);
-        
-
     }
 }
 
