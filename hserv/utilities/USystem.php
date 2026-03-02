@@ -1237,6 +1237,81 @@ class USystem {
 <?php        
     }
     
+   
+    /**
+     * Redirect legacy domains to heurist.huma-num.fr for the MPCE database.
+     *
+     * Requirement:
+     *  - Before connecting to database "MPCE_Mapping_Print_Charting_Enlightenment", if the request is not
+     *    already on heurist.huma-num.fr then redirect the current request to that domain (preserving URI).
+     *  - If headers are already sent and redirection is not possible, return the fatal error message so that
+     *    the caller can add it as a system fatal error.
+     *
+     * @param string|null $db Requested database name (short or full).
+     * @return array{redirected:bool, fatal_message:?string}
+     */
+    public static function enforceMPCEHumaNumDomain(?string $db): array
+    {
+        $target_domain = 'heurist.huma-num.fr';
+        $mpce_db = 'MPCE_Mapping_Print_Charting_Enlightenment';
+
+        // Only apply to web requests
+        if (php_sapi_name() == 'cli') {
+            return ['redirected' => false, 'fatal_message' => null];
+        }
+
+        $db = $db ?? '';
+        // Match both short and full dbname variants.
+        if (stripos($db, $mpce_db) === false) {
+            return ['redirected' => false, 'fatal_message' => null];
+        }
+
+        $current_domain = strtolower((string)($_SERVER['SERVER_NAME'] ?? $_SERVER['HTTP_HOST'] ?? ''));
+        $current_domain = preg_replace('/:\\d+$/', '', $current_domain); // strip port
+
+        // Domains explicitly mentioned for redirection (kept for clarity/logical grouping)
+        $checkDomains = [
+            'heuristref.net',
+            'intersect.org.au',
+            'heuristau.net',
+            'heurist.eu',
+            'heuristeu.net'
+        ];
+        unset($checkDomains); //remove remark so redirection is enforced for all non-target domains
+
+        if ($current_domain === '' || $current_domain === $target_domain || 
+            (isset($checkDomains) && !in_array($current_domain, $checkDomains, true))) {
+            return ['redirected' => false, 'fatal_message' => null];
+        }
+
+        // Build redirect URL (preserve path + query)
+        /* always https
+        $isSecure = false;
+        if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+            $isSecure = true;
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+            $isSecure = true;
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] === 'on') {
+            $isSecure = true;
+        }
+        $scheme = $isSecure ? 'https' : 'http';
+        */
+        
+        $request_uri = (string)($_SERVER['REQUEST_URI'] ?? '/');
+        if ($request_uri === '') {
+            $request_uri = '/';
+        }
+        $redirect_url = 'https://' . $target_domain . $request_uri;
+
+        if (!headers_sent()) {
+            // Permanent redirect: the DB has moved.
+            header('Location: ' . $redirect_url, true, 301);
+            exit;
+        }
+
+        $fatal = "Mapping Print Charting Enlightenment has been moved to the Heurist server on Huma-Num for improved performance in Europe and long term maintenance, as part of a collaboration with European researchers. It can now be accessed at: Heurist.Huma-Num.fr/MPCE_Mapping_Print_Charting_Enlightenment";
+        return ['redirected' => false, 'fatal_message' => $fatal];
+    }   
     
 }
 

@@ -38,6 +38,7 @@
 * @since       4.0
 */
 use hserv\utilities\USanitize;
+use hserv\utilities\USystem;
 
 require_once dirname(__FILE__).'/../../autoload.php';
 require_once dirname(__FILE__).'/../records/search/recordFile.php';
@@ -51,7 +52,13 @@ require_once dirname(__FILE__).'/../records/search/recordFile.php';
         //debug echo $dbFromRequest.'  '.$err;
         return;
     }
-
+    
+    // Enforce MPCE database migration to heurist.huma-num.fr
+    $mpce_check = USystem::enforceMPCEHumaNumDomain($db);
+    if (!empty($mpce_check['fatal_message'])) {
+        //$this->addError(HEURIST_ACTION_BLOCKED, $mpce_check['fatal_message'], null, 'Problem opening database');
+        return;
+    }        
     
     $system = new hserv\System();//without connection
     $fileid = filter_var(@$req_params['thumb'], FILTER_SANITIZE_STRING);
