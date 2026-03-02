@@ -660,13 +660,18 @@ if(!$system->hasAccess()){
                         <iframe style="height: 40em;"></iframe>`
                     }).appendTo($('#network-graph-area'));
 
-                    $networkElement.find('.closeVisualiser').button({icon: 'ui-icon-close', showLabel: false}).on('click', () => $networkElement.hide());
+                    $networkElement.find('.closeVisualiser').button({icon: 'ui-icon-close', showLabel: false}).on('click', () => {
+                        $networkElement.hide();
+                        $('#show_network').show();
+                    });
                 }
 
                 const recID = <?php echo intval($rec_id); ?>;
                 if(recID <= 0){
                     return;
                 }
+
+                $('#show_network').hide();
 
                 let iframe = $networkElement.find('iframe');
                 const query = `ids:${recID},${connectedRecIDs}`;

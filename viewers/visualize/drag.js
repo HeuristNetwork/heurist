@@ -22,6 +22,9 @@ getSetting, putSetting, createOverlay, getEntityRadius, truncateText, updateCirc
 /** @global {null|number} currentNode Stores the ID of the currently dragged node. */
 let currentNode = null;
 
+/** @global {int} whether a click was a double click (avoid opening node information) */
+window.doubleClicked = 0;
+
 /**
 * Appends nodes to the D3 visualisation.
 * This function creates the visual representation of nodes, including circles, icons,
@@ -39,6 +42,9 @@ function addNodes() {
         .enter()
         .append("g")
         .on("dblclick", (d) => {
+
+            window.doubleClicked = 2;
+
             if(settings.minimal && !settings.isDatabaseStructure && typeof expandNode === 'function'){ // expand node
                 expandNode(d.id);
             }else if(!settings.isDatabaseStructure){ //Added Double Click to Edit Function - Travis Doyle 19/9
@@ -171,11 +177,23 @@ function addNodes() {
 function onNodeClick(d){
 
     closeRectypeSelector();
+
     // Check if it's not a click after dragging
-    if(!window.d3.event.defaultPrevented) {
-        // Load record details
-        showNodeInformation(d);//Added by ISH
+    if(window.d3.event.defaultPrevented || window.doubleClicked){
+        return;
     }
+
+    // Ensure it's not a double click
+    setTimeout((d, e) => {
+
+        if(window.doubleClicked > 0){
+            window.doubleClicked--;
+            return;
+        }
+
+        // Load record details
+        showNodeInformation(d);
+    }, 1000, d);
 }
 
 /**

@@ -100,7 +100,7 @@
     }elseif(@$params['mapmarker_csv']){
         downloadMapMarkers($system, $params['ids']);
         exit;
-    }elseif(array_key_exists('preparedID', $params)){
+    }elseif(array_key_exists('preparedMode', $params)){
         $mode = @$params['preparedMode'];
         unset($params['preparedMode']);
         $id = USystem::prepareParameters('export', $mode, $params);

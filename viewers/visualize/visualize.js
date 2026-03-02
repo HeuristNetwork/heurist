@@ -218,10 +218,15 @@ let maxCountForLinks;
         // Display warning if node limit is reached
         let ele_warn = $('#net_limit_warning');
         if(amount >= MAXITEMS) {
-            ele_warn.html('These results are limited to '+MAXITEMS+' records<br>(limit set in your profile Preferences)<br>Please filter to a smaller set of results').show();
+            let flavourText = window.hWin.HAPI4.has_access() ? '<br>(limit set in your profile Preferences)' : '';
+            ele_warn.find('#msgLimitWarning').html(`These results are limited to ${MAXITEMS} records${flavourText}`).show();
+            setTimeout(() => ele_warn.hide(), 5000);
+
+            ele_warn.find('#closeLimitWarning').button({icon: 'ui-icon-close', showLabel: false}).on('click', () => ele_warn.hide());
         }else{
             ele_warn.hide();
         }
+        ele_warn.one('click', () => ele_warn.hide());
 
         this.destroy = function(){ // remove event listeners
 
@@ -1681,7 +1686,7 @@ function showEmbedDialog(){
         URLParams.append('mini', 1);
     }
 
-    let hQuery = typeof currentRequest?.q === 'string' ? currentRequest : window.hWin.HEURIST4.current_query_request;
+    let hQuery = typeof window.visualiserRequest?.q === 'string' ? window.visualiserRequest : window.hWin.HEURIST4.current_query_request;
     let query = window.hWin.HEURIST4.query.composeHeuristQuery2(hQuery, false);
     query += `${query == '?' ? '' : '&'}${URLParams.toString()}`;
     let url = `${window.hWin.HAPI4.baseURL}viewers/visualize/springDiagram.php${query}`;
@@ -1917,8 +1922,6 @@ function editThematicSetting(type, ID){
     });
 }
 
-var handledColours = {};
-
 function setThematicSetting(type, ID){
 
     let styling = getSetting(`setting_styling_${type}${ID}`);
@@ -1930,11 +1933,7 @@ function setThematicSetting(type, ID){
         }
 
         const hexCode = styling.iconColour;
-        let colourFilter = handledColours[hexCode];
-        if(!colourFilter){
-            colourFilter = hexToFilter(hexCode);
-            handledColours[hexCode] = colourFilter;
-        }
+        let colourFilter = hexToFilter(hexCode, true);
 
         colourFilter = colourFilter.replace(/;$/, '');
         let icons = document.querySelectorAll(`image[data-icon-id="${ID}"]`);

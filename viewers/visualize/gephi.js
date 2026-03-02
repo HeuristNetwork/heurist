@@ -23,14 +23,17 @@
  */
 function getGephiFormat() {
 
+    if(window.parent?.document && window.parent.document.querySelector('#export_record_popup')){ // remove previous popup
+        window.parent.document.querySelector('#export_record_popup').parentNode.nextElementSibling.remove();
+        window.parent.document.querySelector('#export_record_popup').parentNode.remove();
+    }
+
     let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
     url += `&output=gephi&skipFields=1`;
 
-    window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568, dialogid: 'export_record_popup', 
-        onpopupload: function(){
-            if(window.parent.document){
-                $(window.parent.document).find('#export_record_popup').dialog('widget').hide();
-            }
-        }
-    });
+    if(typeof window.visualiserRequest !== undefined && typeof window.visualiserRequest?.q === 'string' && settings.minimal){
+        url += `&${window.visualiserRequest.q.replace(':', '=')}`
+    }
+
+    window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568, dialogid: 'export_record_popup'});
 }
