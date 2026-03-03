@@ -68,13 +68,17 @@ var isMinimalVersion = <?php echo $isMinimalVersion?'true':'false';?>;
  */
 var isStandAlone = false;
 
-var currentRequest = null;
+var window.visualiserRequest = null;
 
 /**
  * Array<Set> tracking for each graph level (to handle moving backwards in levels)
  * Use sets to avoid duplicate record IDs
  */
 var graphLevels = [];
+/**
+ * Object<Record ID => RecType ID> tracking records to record types that appear in the graph (or has appeared)
+ */
+var nodeRecTypes = {};
 /**
  * Object<Record ID => Set> tracking related records for each record that appears in the graph (or has appeared)
  */
@@ -161,7 +165,7 @@ function performSearch(q){
 
 function onExpandLevel(event){
 
-    const currentQuery = currentRequest.q;
+    const currentQuery = window.visualiserRequest.q;
     let parts = typeof currentQuery === 'string' ? currentQuery.split(':') : [];
     if(parts.length > 2 || parts[0] !== 'ids'){
         return;
@@ -193,6 +197,7 @@ function onExpandLevel(event){
 
         let newList = new Set();
         for(const ID of fullList){
+
             if(filterOut.has(ID)){
                 continue;
             }
@@ -269,7 +274,7 @@ function onExpandLevel(event){
 
 function expandNode(rec_ID){
 
-    const currentQuery = currentRequest.q;
+    const currentQuery = window.visualiserRequest.q;
     let parts = typeof currentQuery === 'string' ? currentQuery.split(':') : [];
     if(!Object.hasOwn(nodeRelationMapping, rec_ID) || nodeRelationMapping[rec_ID].size === 0 || parts.length > 2 || parts[0] !== 'ids'){
         return;
@@ -296,6 +301,39 @@ function expandNode(rec_ID){
     performSearch(`ids:${Array.from(recIDs).join(',')}`);
 }
 
+function updateRecordCache(mainRecID, rtyID, parentRecID = 0){
+
+    mainRecID = parseInt(mainRecID);
+    rtyID = parseInt(rtyID);
+    parentRecID = parseInt(parentRecID);
+
+    const addToParentList = window.hWin.HEURIST4.util.isPositiveInt(parentRecID);
+
+    if(!window.hWin.HEURIST4.util.isPositiveInt(mainRecID)){
+        return;
+    }
+
+    if(!Object.hasOwn(nodeRelationMapping, mainRecID)){
+        nodeRelationMapping[mainRecID] = new Set();
+    }
+
+    if(addToParentList){
+
+        if(!Object.hasOwn(nodeRelationMapping, parentRecID)){
+            nodeRelationMapping[parentRecID] = new Set();
+        }
+
+        nodeRelationMapping[parentRecID].add(mainRecID);
+    }
+
+    if(!window.hWin.HEURIST4.util.isPositiveInt(rtyID)){
+        return;
+    }
+
+    if(!Object.hasOwn(nodeRecTypes, mainRecID)){
+        nodeRecTypes[mainRecID] = rtyID;
+    }
+}
         </script>
     </head>
 
@@ -336,19 +374,19 @@ function expandNode(rec_ID){
                     // Ensure relations.headers[recId] exists to prevent errors
                     if (relations.headers && relations.headers[recId]) {
 
+                        const recTypeId = relations.headers[recId][1];
+
                         let node = {
                             id: parseInt(recId),
                             name: relations.headers[recId][0],  // record title
-                            image: window.hWin.HAPI4.iconBaseURL+relations.headers[recId][1],  // record type id for icon
+                            image: window.hWin.HAPI4.iconBaseURL+recTypeId,  // record type id for icon
                             count: 0, // Default count, might be updated later if applicable
                             depth: 1, // Default depth
-                            rty_ID: relations.headers[recId][1] // Store record type ID
+                            rty_ID: recTypeId // Store record type ID
                         };
                         nodes[recId] = node;
 
-                        if(!Object.hasOwn(nodeRelationMapping, recId)){
-                            nodeRelationMapping[recId] = new Set();
-                        }
+                        updateRecordCache(recId, recTypeId);
                     }
                 }
 
@@ -419,12 +457,8 @@ function expandNode(rec_ID){
                         const recID = Number.parseInt(direct.recID);
                         const targetID = Number.parseInt(direct.targetID);
 
-                        if(Object.hasOwn(nodeRelationMapping, recID)){
-                            nodeRelationMapping[recID].add(targetID);
-                        }
-                        if(Object.hasOwn(nodeRelationMapping, targetID)){
-                            nodeRelationMapping[targetID].add(recID);
-                        }
+                        updateRecordCache(recID, relations.headers[recID][1], targetID);
+                        updateRecordCache(targetID, relations.headers[targetID][1], recID);
                     }
 
                     for(let i = 0; i < relations.reverse.length; i++){
@@ -433,12 +467,8 @@ function expandNode(rec_ID){
                         const recID = Number.parseInt(reverse.recID);
                         const sourceID = Number.parseInt(reverse.sourceID);
 
-                        if(Object.hasOwn(nodeRelationMapping, recID)){
-                            nodeRelationMapping[recID].add(sourceID);
-                        }
-                        if(Object.hasOwn(nodeRelationMapping, sourceID)){
-                            nodeRelationMapping[sourceID].add(recID);
-                        }
+                        updateRecordCache(recID, relations.headers[recID][1], sourceID);
+                        updateRecordCache(sourceID, relations.headers[sourceID][1], recID);
                     }
                 }
 
@@ -558,7 +588,7 @@ function expandNode(rec_ID){
 
             zoomToFit();
 
-            currentRequest = new_request;
+            window.visualiserRequest = new_request;
             window.hWin.HEURIST4.msg.sendCoverallToBack();
         }
 

@@ -136,7 +136,7 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 
     <div class="dropdown-content">
         <div>
-            <span id="lnkOpenPopup" class="fake_link toolbarController" style="padding-right: 1em;">popup <span class="ui-icon ui-icon-extlink"></span></span>
+            <span id="lnkOpenPopup" class="fake_link toolbarController" style="cursor: pointer;padding-right: 1em;display: <?= $isMinimalVersion === 1 ? 'inline-block' : 'none' ?>;">popup <span class="ui-icon ui-icon-extlink"></span></span>
 
             <span style="display: inline-block;">
                 <button id="btnSingleSelect" name="selectMode" value="single" title="Select and drag single nodes">Select and drag nodes</button>
@@ -178,16 +178,17 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
     </div>
 
     <div class="dropdown-content dropdown-subbar">
-        <div>
-            <div id="hideSubToolbar" class="toolbarController" style="margin-right: 5px; display: inline-block; height: 1em; cursor: pointer;" title="Hide extended toolbar">
-                <span class="ui-icon ui-icon-caret-1-w" style="cursor: pointer;"></span>
-            </div>
 
+        <div id="hideSubToolbar" class="toolbarController" style="margin: 0px; display: inline-block; height: 1em; cursor: pointer;" title="Hide extended toolbar">
+            <span class="ui-icon ui-icon-caret-2-w" style="cursor: pointer;"></span>
+        </div>
+
+        <div style="display: inline-block; margin-left: 15px;">
             <span>
-                Extend 
-                <span class="ui-icon ui-icon-triangle-1-w graphLevelControl ui-state-disabled toolbarController" id="decreaseGraphLevel" data-value="decrease" title="Decrement graph expand level"></span>
+                Expand 
+                <span class="ui-icon ui-icon-triangle-1-w graphLevelControl ui-state-disabled toolbarController" id="decreaseGraphLevel" data-value="decrease" title="Trim the leaf nodes from the graph"></span>
                 <span id="graphLevel">1</span>
-                <span class="ui-icon ui-icon-triangle-1-e graphLevelControl toolbarController" id="increaseGraphLevel" data-value="increase" title="Increment graph expand level"></span>
+                <span class="ui-icon ui-icon-triangle-1-e graphLevelControl toolbarController" id="increaseGraphLevel" data-value="increase" title="Extend the graph's leaf nodes"></span>
             </span>
 
             <span style="margin-left: 1em;">
@@ -242,6 +243,8 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
     </svg>
 
     <div id="net_limit_warning" style="z-index:2000;position:absolute;top:0;right:0;border-radius:6px;background-color: rgb(172, 231, 255);font-weight:bold;color:red; padding:8px; display:none;">
+        <button id="closeLimitWarning" style="min-width: 0px; padding: 0.7em 0.1em; margin: 0px 0px 0px 5px; float: right;"></button>
+        <span id="msgLimitWarning"></span>
     </div> <?php // Warning message for item limit ?>
 </div>
 

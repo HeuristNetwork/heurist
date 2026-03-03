@@ -442,11 +442,11 @@ function initialiseMiniToolbar(){
 
     $('#lnkOpenPopup').on('click', () => {
 
-        if(typeof currentRequest === undefined || typeof currentRequest?.q !== 'string'){
+        if(typeof window.visualiserRequest === undefined || typeof window.visualiserRequest?.q !== 'string'){
             return;
         }
 
-        const URL = `${window.hWin.HAPI4.baseURL}viewers/visualize/springDiagram.php?db=${window.hWin.HAPI4.database}&mini=1&q=${currentRequest.q}`;
+        const URL = `${window.hWin.HAPI4.baseURL}viewers/visualize/springDiagram.php?db=${window.hWin.HAPI4.database}&q=${window.visualiserRequest.q}&mini=2`;
         window.hWin.HEURIST4.msg.showDialog(URL, {title: `Record Network Graph`, ok: window.hWin.HR('Cancel'), width: 900, height: 900});
     });
 

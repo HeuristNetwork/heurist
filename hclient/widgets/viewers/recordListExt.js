@@ -273,7 +273,7 @@ $.widget( "heurist.recordListExt", {
 
             this.export_button = $('<button>', {
                 text: window.hWin.HR('Export'), title: window.hWin.HR('Export current results'), 
-                class: 'btnExportRecords ui-button-action', style: 'height:25px;float:right;'
+                class: 'btnExportRecords', style: 'height:25px;float:right;'
             })
             .button({
                 icon: 'ui-icon-download'

@@ -70,9 +70,17 @@ function hexportMenu( container ) {
             }
         }
 
-        skipFields = window.hWin.HEURIST4.util.getUrlParameter('skipFields', location.search) == 1;
+        let recIDs = window.hWin.HEURIST4.util.getUrlParameter('ids', location.search);
+        if(!window.hWin.HEURIST4.util.isempty(recIDs)){
+            recIDs = recIDs.split(',').filter((recID) => window.hWin.HEURIST4.util.isPositiveInt(recID));
+            if(recIDs.length > 0){
+                this._selectionRecordIDs = recIDs;
+            }
+        }
 
+        skipFields = window.hWin.HEURIST4.util.getUrlParameter('skipFields', location.search) == 1;
         let outputs = window.hWin.HEURIST4.util.getUrlParameter('output', location.search);
+
         if(outputs && outputs != 'all'){
 
             outputs = outputs.split(',');
@@ -164,9 +172,10 @@ function hexportMenu( container ) {
 
             // Make the button itself trigger the click on its associated anchor tag
             ele.button().on('click',
-                    function(event){
-                        $(this).parent().find('a').trigger('click');
-                    });
+                function(event){
+                    $(this).parent().find('a').trigger('click');
+                }
+            );
             
         });
         
@@ -391,7 +400,7 @@ function hexportMenu( container ) {
 
         let isEntireDb = false;
 
-        opts.isAll = (opts.isAll!==false);
+        opts.isAll = (opts.isAll!==false && !window.hWin.HEURIST4.util.isArrayNotEmpty(this._selectionRecordIDs));
         opts.multifile = (opts.multifile===true);
 
         if(opts.isAll){

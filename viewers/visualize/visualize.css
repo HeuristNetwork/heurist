@@ -491,5 +491,5 @@ text.shadow {
 }
 
 .graphLevelControl{
-    cursor: pointer;
+    cursor: pointer !important;
 }
