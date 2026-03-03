@@ -336,8 +336,9 @@ $.widget( "heurist.search_faceted", {
                             .css('color', 'red').insertBefore(this.btn_close);
 
             this._doTerminate();
-                            
-            this.btn_reset.show();
+            
+            this.btn_reset.show();            
+            this._refreshButtons();    
         }});
 
         this.facets_list_container = $( "<div>" )
@@ -378,9 +379,7 @@ $.widget( "heurist.search_faceted", {
             if(e.type == window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE){
 
                 let w = that.element.width();
-                
                 that.element.find('div.facet-item > a > span.truncate').width(w-100); //was 80
-                
                 if(that.btn_reset) that.btn_reset.button({showLabel:(w>250)});
                 that.btn_close.button({showLabel:(w>250)});
                   
@@ -578,12 +577,17 @@ $.widget( "heurist.search_faceted", {
                 if(this.btn_reset && this.div_toolbar.find('#facet_process_msg').attr('data-interrupt') != 1) this.btn_reset.hide();  
                 this.btn_save.hide(); 
             }
-            
+ 
             if(this.options.showclosebutton){
                 this.btn_close.show(); 
             }else{
                 this.btn_close.hide(); 
             }
+            
+            let w = this.element.width();
+            this.element.find('div.facet-item > a > span.truncate').width(w-100); //was 80
+            if(this.btn_reset) this.btn_reset.button({showLabel:(w>250)});
+            this.btn_close.button({showLabel:(w>250)});
         }
         
     },

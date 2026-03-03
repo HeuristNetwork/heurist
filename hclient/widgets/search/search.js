@@ -1068,7 +1068,7 @@ $.widget( "heurist.search", {
 
                 window.hWin.HEURIST4.util.setDisabled(this.input_search, false);
 
-                let recordIDs = data.recordset.entityName === 'Records' ? data.recordset.getIds() : null;
+                let recordIDs = data.recordset?.entityName === 'Records' ? data.recordset.getIds() : null;
                 let logInfo = {};
                 let query = window.hWin.HEURIST4.util.isObject(this.query_request) ? this.query_request.q : this.query_request;
                 if(recordIDs){
