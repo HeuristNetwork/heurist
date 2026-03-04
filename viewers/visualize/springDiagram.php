@@ -68,7 +68,7 @@ var isMinimalVersion = <?php echo $isMinimalVersion?'true':'false';?>;
  */
 var isStandAlone = false;
 
-var window.visualiserRequest = null;
+window.visualiserRequest = null;
 
 /**
  * Array<Set> tracking for each graph level (to handle moving backwards in levels)
