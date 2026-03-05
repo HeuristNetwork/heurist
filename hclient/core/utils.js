@@ -1220,7 +1220,7 @@ window.hWin.HEURIST4.util = {
     },
     
     getParentWinProperty: function(prop) {
-       return prop && window.hWin.HEURIST4.util.canAccessParentWinProperty(prop) ?window.parent.prop :null;
+       return prop && window.hWin.HEURIST4.util.canAccessParentWinProperty(prop) ?window.parent[prop] :null;
     },
     
     

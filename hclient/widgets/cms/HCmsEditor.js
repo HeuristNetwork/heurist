@@ -531,9 +531,9 @@ class HCmsEditor {
             //this.#hidePropertyView();
             
             this._toolbar_WebSite.hide();
-            
-            this._cmsEditorPage.initActionIcons();
-            
+            if(this._cmsEditorPage){
+                this._cmsEditorPage.initActionIcons();
+            }
         }else{
 
             this._tabControl.find('li[aria-controls="treeWebSite"]')
