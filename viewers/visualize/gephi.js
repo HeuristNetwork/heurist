@@ -31,8 +31,8 @@ function getGephiFormat() {
     let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
     url += `&output=gephi&skipFields=1`;
 
-    if(typeof window.visualiserRequest !== undefined && typeof window.visualiserRequest?.q === 'string' && settings.minimal){
-        url += `&${window.visualiserRequest.q.replace(':', '=')}`
+    if(typeof window.visualiserRequest === 'string' && settings.minimal){
+        url += `&${window.visualiserRequest.replace(':', '=')}`
     }
 
     window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568, dialogid: 'export_record_popup'});

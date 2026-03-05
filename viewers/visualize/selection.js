@@ -211,6 +211,11 @@ function onRecordNodeClick(event, data, node) {
 * @param {Array<string|number>} selectedNodeIds - An array of IDs of nodes to be selected.
 */
 function visualizeSelection(selectedNodeIds) {
+
+    if(!settings){
+        return;
+    }
+
     settings.selectedNodeIds = selectedNodeIds; // Update settings object
 
     // Deselect all first

@@ -163,35 +163,7 @@ function performSearch(q){
     });
 }
 
-function onExpandLevel(event){
-
-    const currentQuery = window.visualiserRequest.q;
-    let parts = typeof currentQuery === 'string' ? currentQuery.split(':') : [];
-    if(parts.length > 2 || parts[0] !== 'ids'){
-        return;
-    }
-
-    const GRAPH_EXTEND_LIMIT = 10;
-    let level = 0;
-    let action = $(event.target).attr('data-value');
-    let currentLevel = Number.parseInt(localStorage.getItem('extendedLevel'));
-
-    // Limit expand to first 10 levels (for now)
-    if(currentLevel < 0 || Number.isNaN(currentLevel)){
-        currentLevel = 0;
-    }else if(currentLevel > GRAPH_EXTEND_LIMIT - 1){
-        currentLevel = GRAPH_EXTEND_LIMIT - 1;
-    }
-
-    if((currentLevel === 0 && action === 'decrease') || (currentLevel === GRAPH_EXTEND_LIMIT - 1 && action === 'increase')){
-        window.hWin.HEURIST4.msg.showMsgFlash(`Cannot ${action === 'decrease' ? 'shrink' : 'grow'} graph any further...`, 3000);
-        if(action === 'decrease'){
-            $('#decreaseGraphLevel').addClass('ui-state-disabled');
-        }else{
-            $('#increaseGraphLevel').addClass('ui-state-disabled');
-        }
-        return;
-    }
+function onExpandLevel(action, currentRecIDs){
 
     let updateGraphLevels = (fullList, filterOut) => {
 
@@ -208,31 +180,12 @@ function onExpandLevel(event){
         graphLevels.push(newList);
     };
 
-    currentLevel += (action === 'increase' ? 1 : -1);
-
-    let levelLabel = currentLevel + 1;
-
-    let currentRecIDs = parts[1].split(',').map((x) => +x);
-
-    if(graphLevels.length > currentLevel){
-
-        let toRemove = graphLevels.pop(); // remove outer most layer
-        currentRecIDs = currentRecIDs.filter((id) => !toRemove.has(id));
-        currentRecIDs = new Set(currentRecIDs);
-
-        if(currentRecIDs.size === 0){
-            $('#decreaseGraphLevel').addClass('ui-state-disabled');
-            return;
-        }
-        /** @todo
-         * Manually remove graph nodes and links (was causing issues), AND update the force simulation (this should fix those issues)
-         */
-    }else{
+    let getNextLevel = (newOnly = false) => {
 
         let toExpand = graphLevels[graphLevels.length - 1];
         currentRecIDs = new Set(currentRecIDs);
-        let originalIDs = new Set(currentRecIDs);
-        const currentSize = currentRecIDs.size;
+        let newRecIDs = new Set(newOnly ? null : currentRecIDs);
+        let hasExtensionAvailable = new Set();
 
         for(const recID of toExpand){
 
@@ -240,41 +193,84 @@ function onExpandLevel(event){
                 continue;
             }
 
-            currentRecIDs = currentRecIDs.union(nodeRelationMapping[recID]);
+            if(!newOnly){
+                newRecIDs = newRecIDs.union(nodeRelationMapping[recID]);
+                continue;
+            }
+
+            for(const relRecID of nodeRelationMapping[recID]){
+
+                if(currentRecIDs.has(relRecID)){
+                    continue;
+                }
+
+                newRecIDs.add(relRecID);
+                hasExtensionAvailable.add(recID);
+            }
         }
 
-        if(currentRecIDs.size <= currentSize){
+        if(!newOnly && newRecIDs.size > 0){
+            graphLevels.push(newRecIDs);
+        }
+
+        return [newRecIDs, hasExtensionAvailable];
+    };
+
+    if(action === 'decrease'){
+
+        let toRemove = graphLevels.pop(); // remove outer most layer
+
+        if(toRemove){
+            currentRecIDs = currentRecIDs.filter((id) => !toRemove.has(id));
+            currentRecIDs = new Set(currentRecIDs);
+        }else{
+            currentRecIDs = null;
+        }
+
+        if(currentRecIDs || currentRecIDs.size === 0){
+            $('#decreaseGraphLevel').addClass('ui-state-disabled');
+            return false;
+        }
+        /** @todo
+         * Manually remove graph nodes and links (was causing issues), AND update the force simulation (this should fix those issues)
+         */
+    }else if(action === 'nextLevel'){
+
+        let [newRecIDs, hasExtensionAvailable] = getNextLevel(action === 'nextLevel');
+        currentRecIDs = new Set(currentRecIDs);
+
+        if(action === 'nextLevel'){
+            currentRecIDs = {new: newRecIDs, extending: hasExtensionAvailable};
+        }else if(currentRecIDs.size <= newRecIDs.size){
             window.hWin.HEURIST4.msg.showMsgFlash('The graph cannot grow any further...', 3000);
             $('#increaseGraphLevel').addClass('ui-state-disabled');
-            return;
+            return false;
         }
 
-        updateGraphLevels(currentRecIDs, originalIDs);
+    }else if(action === 'increase'){
+
+        const currentQuery = window.visualiserRequest;
+        let parts = typeof currentQuery === 'string' ? currentQuery.split(':') : [];
+        if(parts.length !== 2 || parts[0] !== 'ids' || !currentRecIDs instanceof Set || currentRecIDs.size === 0){
+            return;
+        }
+        let originalIDs = parts[1].split(',').map((x) => +x);
+        currentRecIDs = currentRecIDs.union(new Set(originalIDs));
     }
 
-    document.querySelector('#graphLevel').innerHTML = levelLabel;
-    localStorage.setItem('extendedLevel', currentLevel);
+    if(action !== 'nextLevel'){
 
-    if(currentLevel == GRAPH_EXTEND_LIMIT - 1){
-        $('#increaseGraphLevel').addClass('ui-state-disabled');
-    }else{
-        $('#increaseGraphLevel').removeClass('ui-state-disabled');
+        window.hWin.HEURIST4.msg.bringCoverallToFront($('body'), {'background-color': 'white', opacity: 1, color: 'black'}, `${action === 'increase' ? 'Extending' : 'Removing'} leaf nodes...`);
+    
+        performSearch(`ids:${Array.from(currentRecIDs).join(',')}`);
     }
 
-    if(currentLevel == 0){
-        $('#decreaseGraphLevel').addClass('ui-state-disabled');
-    }else{
-        $('#decreaseGraphLevel').removeClass('ui-state-disabled');
-    }
-
-    window.hWin.HEURIST4.msg.bringCoverallToFront($('body'), {'background-color': 'white', opacity: 1, color: 'black'}, `${action === 'increase' ? 'Extending' : 'Removing'} leaf nodes...`);
-
-    performSearch(`ids:${Array.from(currentRecIDs).join(',')}`);
+    return action === 'nextLevel' ? currentRecIDs : true;
 }
 
 function expandNode(rec_ID){
 
-    const currentQuery = window.visualiserRequest.q;
+    const currentQuery = window.visualiserRequest;
     let parts = typeof currentQuery === 'string' ? currentQuery.split(':') : [];
     if(!Object.hasOwn(nodeRelationMapping, rec_ID) || nodeRelationMapping[rec_ID].size === 0 || parts.length > 2 || parts[0] !== 'ids'){
         return;
@@ -575,6 +571,7 @@ function updateRecordCache(mainRecID, rtyID, parentRecID = 0){
                 minimal: isMinimalVersion
             });
 
+            let recIDs = new Set();
             if(isMinimalVersion){ // trigger additional settings for minimal mode
 
                 setGravity('aggressive');
@@ -584,12 +581,29 @@ function updateRecordCache(mainRecID, rtyID, parentRecID = 0){
                 }, 2000); // turn off gravity after initial scatter
 
                 changeViewMode('icons'); // set initial view mode
+
+                recIDs = getRecordIDs(data.nodes);
             }
 
             zoomToFit();
 
-            window.visualiserRequest = new_request;
+            window.visualiserRequest = isMinimalVersion && recIDs.size > 0 ? `ids:${Array.from(recIDs).join(',')}` : new_request;
             window.hWin.HEURIST4.msg.sendCoverallToBack();
+        }
+
+        function getRecordIDs(nodes){
+
+            let recIDs = new Set();
+
+            for(let i = 0; i < nodes.length; i++){
+                if(!Object.hasOwn(nodes[i], 'id') || !window.hWin.HEURIST4.util.isPositiveInt(nodes[i]['id'])){
+                    continue;
+                }
+
+                recIDs.add(Number.parseInt(nodes[i]['id']));
+            }
+
+            return recIDs;
         }
 
         /**
@@ -610,6 +624,10 @@ function updateRecordCache(mainRecID, rtyID, parentRecID = 0){
                 $('#toolbar').find('.heurist-helper2').hide();
             }
             $('#divSvg').css('top', topPos); // Assumes #divSvg is the SVG container
+
+            // Update wub-toolbar top as well
+            $('#showSubToolbar, .dropdown-subbar').css('top', topPos);
+            $('#expanderSettings').css('top', topPos + 30);
         }
 
         </script>

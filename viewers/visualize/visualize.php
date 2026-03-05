@@ -135,7 +135,9 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 <div id="toolbar" class="split_bar" style="display: none;">
 
     <div class="dropdown-content">
+
         <div>
+
             <span id="lnkOpenPopup" class="fake_link toolbarController" style="cursor: pointer;padding-right: 1em;display: <?= $isMinimalVersion === 1 ? 'inline-block' : 'none' ?>;">popup <span class="ui-icon ui-icon-extlink"></span></span>
 
             <span style="display: inline-block;">
@@ -170,7 +172,9 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
                 <button id="gephi-export" onclick="getGephiFormat()" title="Export to GEXF for Gephi">GEPHI</button>
                 <button id="embed-export" title="Get embed code">Embed</button>
             </span>
+
         </div>
+
     </div>
 
     <div id="showSubToolbar" class="showMenuButton toolbarController" title="Show extended toolbar">
@@ -184,6 +188,7 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
         </div>
 
         <div style="display: inline-block; margin-left: 15px;">
+
             <span>
                 Expand 
                 <span class="ui-icon ui-icon-triangle-1-w graphLevelControl ui-state-disabled toolbarController" id="decreaseGraphLevel" data-value="decrease" title="Trim the leaf nodes from the graph"></span>
@@ -204,7 +209,25 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
                     <input id="gravityAmount" class="number-input small" type="number" value="0.1" min="0" max="3" step="0.1" title="How much gravity to apply to nodes?" />
                 </span>
             </span>
+
+            <span style="margin-left: 1em; display: none;">
+                Connections:
+                <label title="Outward Pointers">
+                    <input type="checkbox" id="connectorsPtrOutward" name="connectors" value="outward" checked="checked" />
+                    ptr <span class="ui-icon ui-icon-arrowthick-1-e"></span>
+                </label>
+                <label title="Inward Pointers">
+                    <input type="checkbox" id="connectorsPtrInward" name="connectors" value="inward" checked="checked" />
+                    ptr <span class="ui-icon ui-icon-arrowthick-1-w"></span>
+                </label>
+                <label title="Relationships">
+                    <input type="checkbox" id="connectorsRelations" name="connectors" value="relations" checked="checked" />
+                    <span class="ui-icon ui-icon-arrowthick-1-w"></span> rel <span class="ui-icon ui-icon-arrowthick-1-e"></span>
+                </label>
+            </span>
+
         </div>
+
     </div>
 
     <span class="heurist-helper2" style="position: absolute;left: 1em;bottom: 1em;">Double click to expand nodes</span>
@@ -233,6 +256,38 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
             <div id="thematicEdgesList"></div>
         </div>
 
+    </div>
+
+</div>
+
+<div id="expanderSettings">
+
+    <button id="closeExpanderSettings" style="float: right; border: 1px solid black;" title="Close node expansion popup">X</button>
+
+    <div style="margin-bottom: 0.5em;">
+        Expand <span id="expandPrev"></span> <span class="ui-icon ui-icon-arrow-1-e"></span> <span id="expandNext"></span>
+    </div>
+
+    <table class="expanderOptionsTable">
+        <thead class="expanderOptionsHeader">
+            <tr>
+                <th>Use</th>
+                <th>Node type</th>
+                <th>Adds</th>
+            </tr>
+        </thead>
+        <tbody id="expanderOptions">
+        </tbody>
+    </table>
+
+    <div style="margin-top: 1em;">
+        <button id="btnExpanderCommit" style="border: 1px solid black;">Expand <span class="ui-icon ui-icon-triangle-1-e"></span></button>
+        <button id="btnExpanderCancel" style="margin-left: 1em; border: 1px solid black;">Done</button>
+    </div>
+
+    <div style="border-top: 1px solid black;margin-top: 1em;padding: 0.5em; font-size: 0.95em;">
+        double click highlighted nodes<br>
+        to expand individually
     </div>
 
 </div>

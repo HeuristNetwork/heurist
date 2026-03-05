@@ -147,7 +147,7 @@
 
                 </div>
 
-                <div class="heurist_resultListExt heurist_Graph">
+                <div class="heurist_resultListExt heurist_Graph heurist_GraphEgo">
 
                     <div class="header header_wide">
                         Filter to be applied at start
@@ -167,7 +167,7 @@
                     <i class="help-text">entire resultset</i>
 
                     <br>
-                    <input value="show_page" name="selection_mode" type="radio" checked="checked"/>
+                    <input value="show_page" name="selection_mode" type="radio"/>
                     <i class="help-text">current resultset page only</i>
 
                     <br>
@@ -179,7 +179,8 @@
                     <i class="help-text">a single (most recent) selected record.<br>Use this in place of inline or popup record view</i>
 
                 </div>
-                <div class="heurist_Graph">
+
+                <div class="heurist_Graph heurist_GraphEgo">
                     <div class="header header_wide">
                         Record(s) to show &nbsp;
                     </div>
@@ -188,8 +189,25 @@
                     <i class="help-text">entire recordset</i>
 
                     <br>
+                    <input value="show_page" name="show_mode" type="radio"/>
+                    <i class="help-text">current resultset page only</i>
+
+                    <br>
                     <input value="show_selection" name="show_mode" type="radio"/>
                     <i class="help-text">all selected records only</i>
+
+                    <br>
+                    <input value="show_recent_selection" name="show_mode" type="radio" style="vertical-align: 7px;"/>
+                    <i class="help-text">a single (most recent) selected record.<br>Use this in place of inline or popup record view</i>
+                </div>
+
+                <div class="heurist_Graph heurist_GraphEgo">
+                    <div class="header header_wide">
+                        Limit number of nodes &nbsp;
+                    </div>
+
+                    <input type="number" name="nodeLimit" value="20" min="10" />
+                    <i class="help-text">shows a warning when the graph's node count exceeds the limit</i>
                 </div>
 
                 <div class="heurist_resultListExt">

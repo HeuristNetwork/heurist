@@ -84,7 +84,8 @@ function editCMS_SelectElement( callback ){
 
                 heurist_Map:{name:'Map and timeline', description:'#map_timeline'}, //Map and timeline widgets
                 heurist_StoryMap:{name:'Story Map', description:'#story_map'}, //Storyline/map controller widgets
-                heurist_Graph:{name:'Network graph', description:'#network_graph'}, //Visualization for records links and relationships            
+                heurist_Graph:{name:'Network graph', description:'#network_graph'}, //Visualization for records links and relationships
+                heurist_GraphEgo:{name:'Ego Network graph', description:'#network_graph'}, //Visualization for records links and relationships (Ego version)
                 
                 heurist_Navigation:{name:'Menu', description:'#menu'}, //Navigation Menu
                 heurist_recordAddButton:{name:'Add Record', description:'#add_record'}, //Button to addition of new Heurist record
