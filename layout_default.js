@@ -64,6 +64,7 @@ window.hWin.cfg_widgets = [
     {id:'heurist_Frame', name:'Static Page', widgetname:'staticPage', script:'hclient/widgets/viewers/staticPage.js'},
 
     {id:'heurist_Graph', name:'Network', widgetname:'connections', script:'hclient/widgets/viewers/connections.js'},
+    {id:'heurist_GraphEgo', name:'Network', widgetname:'connections', script:'hclient/widgets/viewers/connections.js', options: {egoGraph: true}},
 
     {id:'heurist_recordAddButton', name:'Add Record', widgetname:'recordAddButton', script:'hclient/widgets/record/recordAddButton.js'},
     {id:'heurist_emailForm', name:'Email Us Form', widgetname:'emailForm', script:'hclient/widgets/admin/emailForm.js'},

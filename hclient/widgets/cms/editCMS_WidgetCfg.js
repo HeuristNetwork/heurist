@@ -453,11 +453,11 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
                         $dlg.find(`input[value="${opts['selection_mode']}"]`).prop('checked', true);
                     }
-                }else if(widget_name=='heurist_Graph'){ // standard result list
+                }else if(widget_name=='heurist_Graph' || widget_name=='heurist_GraphEgo'){ // standard result list
 
                     if(!opts['show_mode']){
 
-                        if(opts['show_mode']){
+                        if(widget_name=='heurist_GraphEgo'){
                             opts['show_mode'] = 'show_selection';
                         }else{
                             opts['show_mode'] = 'show_recordset';
@@ -1622,14 +1622,15 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
             opts['useRelmarkerTitle'] = opts['useRelmarkerTitle'] === true ? 1 : 0;
 
-        }else if(widget_name=='heurist_Graph'){
+        }else if(widget_name=='heurist_Graph' || widget_name=='heurist_GraphEgo'){
 
             let show_mode = opts['show_mode'];
             opts['show_selection'] = false;
             opts['show_recordset'] = false;
+            opts['show_page'] = false;
+            opts['show_recent_selection'] = false;
             opts[show_mode] = true;
 
-            
         }else if(widget_name=='heurist_resultList'){
             opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode'] || opts['show_export_button'] || opts['support_collection'];
             if(window.hWin.HEURIST4.util.isempty(opts['recordview_onselect'])){

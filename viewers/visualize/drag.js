@@ -25,6 +25,9 @@ let currentNode = null;
 /** @global {int} whether a click was a double click (avoid opening node information) */
 window.doubleClicked = 0;
 
+/** @global {int} timeout handler, for automatic switch back into no gravity */
+window.autoTurnOffGravity = 0;
+
 /**
 * Appends nodes to the D3 visualisation.
 * This function creates the visual representation of nodes, including circles, icons,
@@ -412,6 +415,9 @@ function dragstart(d, i) {
     window.d3.event.sourceEvent.preventDefault();
 
     force.stop();
+    if(window.autoTurnOffGravity > 0){
+        clearTimeout(window.autoTurnOffGravity);
+    }
 
     // Fixed node positions?
     const gravity = getSetting('setting_gravity');
@@ -484,7 +490,8 @@ function dragend(d, i) {
     
     // Check if force may resume
     if(gravity !== "off") {
-        force.resume(); 
+        force.resume();
+        window.autoTurnOffGravity = setTimeout(() => setGravity('off'), 5000);
     }
 
     if(currentNode == d.id){

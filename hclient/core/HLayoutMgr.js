@@ -467,6 +467,20 @@ console.log(content);
             layout.css['minHeight'] = app.minh;
         }
 
+        // Add default app options
+        if(app.options){
+
+            if(!Object.hasOwn(layout, 'options')){
+                layout.options = {};
+            }
+
+            for(const key in app.options){
+                if(Object.hasOwn(app.options, key) && !Object.hasOwn(layout.options, key)){
+                    layout.options[key] = app.options[key];
+                }
+            }
+        }
+
         if(layout.css && !$.isEmptyObject(layout)){
             
             $d.removeAttr('style');

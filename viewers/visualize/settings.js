@@ -60,7 +60,7 @@ function getSetting(key, defvalue, split_string = '') {
         window.preference_settings = window.hWin.HAPI4.get_prefs_def('vis_struct', {}); // attempt re-retrieval of settings
     }
 
-    if(window.hWin?.HAPI4 ){
+    if(window.hWin?.HAPI4){
 
         if(window.hWin.HAPI4.has_access() && !window.hWin.HEURIST4.util.isNumber(key) && key.indexOf('translate') === -1 && key.indexOf('scale') === -1){
 
@@ -72,6 +72,9 @@ function getSetting(key, defvalue, split_string = '') {
         }else{
             value = localStorage.getItem(window.hWin.HAPI4.database+key);
         }
+    }else{
+        value = localStorage.getItem(window.hWin.HAPI4.database+key);
+        value = typeof value === 'string' && window.hWin.HEURIST4.util.isJSON(value) ? window.hWin.HEURIST4.util.isJSON(value) : value;
     }
 
     if(window.hWin.HEURIST4.util.isempty(value) && !window.hWin.HEURIST4.util.isnull(defvalue)){
@@ -110,6 +113,7 @@ function putSetting(key, value) {
         window.preference_settings[prefKey] = value;
         window.hWin.HAPI4.save_pref('vis_struct', window.preference_settings);
     }else{
+        value = typeof value === 'object' ? JSON.stringify(value) : value;
         localStorage.setItem(window.hWin.HAPI4.database+key, value);
     }
 }
@@ -376,9 +380,7 @@ function handleSettingsInUI() {
     //------------ LABELS ----------
 
     putSetting('setting_labels', 'on'); // Default override: labels always on initially
-    let isLabelVisible = (getSetting('setting_labels', 'on')=='on');
-
-    $('#textOnOff').attr('checked',isLabelVisible).on('change.visualiser', function(event){ // Added event parameter
+    $('#textOnOff').attr('checked', true).on('change.visualiser', function(event){ // Added event parameter
 
         let newval = $(event.target).is(':checked')?'on':'off';
         putSetting('setting_labels', newval);
@@ -442,11 +444,11 @@ function initialiseMiniToolbar(){
 
     $('#lnkOpenPopup').on('click', () => {
 
-        if(typeof window.visualiserRequest === undefined || typeof window.visualiserRequest?.q !== 'string'){
+        if(typeof window.visualiserRequest !== 'string'){
             return;
         }
 
-        const URL = `${window.hWin.HAPI4.baseURL}viewers/visualize/springDiagram.php?db=${window.hWin.HAPI4.database}&q=${window.visualiserRequest.q}&mini=2`;
+        const URL = `${window.hWin.HAPI4.baseURL}viewers/visualize/springDiagram.php?db=${window.hWin.HAPI4.database}&q=${window.visualiserRequest}&mini=2`;
         window.hWin.HEURIST4.msg.showDialog(URL, {title: `Record Network Graph`, ok: window.hWin.HR('Cancel'), width: 900, height: 900});
     });
 
@@ -473,9 +475,7 @@ function initialiseMiniToolbar(){
     });
 
     if(window.hWin.HEURIST4.util.isFunction(settings.onExpandLevel)){
-        $('.graphLevelControl').on('click.visualiser', (e) => {
-            onExpandLevel.call(this, e);
-        });
+        $('.graphLevelControl').on('click.visualiser', (e) => handleGraphLeveler(e));
     }else{
         $('#expandedLevels').hide();
     }
@@ -606,7 +606,7 @@ function changeViewMode(mode){
         }
 
         // Handle label visibility based on current mode and label setting
-        let isLabelCurrentlyVisible = (window.currentMode != 'icons') || (getSetting('setting_labels')=='on');
+        let isLabelCurrentlyVisible = window.currentMode == 'icons' || getSetting('setting_labels')=='on';
         window.d3.selectAll(".nodelabel").style('display', isLabelCurrentlyVisible?'block':'none');
 
         // Close any open menus on nodes (related to overlays)
@@ -653,7 +653,6 @@ function setGravity(gravity) {
 
         if(gravity !== "off"){
             force.resume();
-            window.gravityTimeout = setTimeout(() => setGravity('off'), 5000); // automatically disable gravity after 5 seconds
         }
     };
 
@@ -718,4 +717,198 @@ function setLinkMode(linetype) { // Renamed parameter from formula to linetype f
     putSetting('setting_linetype', linetype);
     visualizeData(); // Redraw to apply new line type
     _syncUI();
+}
+
+const GRAPH_EXTEND_LIMIT = 10;
+function handleGraphLeveler(event){
+
+    const currentQuery = window.visualiserRequest;
+    let parts = typeof currentQuery === 'string' ? currentQuery.split(':') : [];
+    if(parts.length !== 2 || parts[0] !== 'ids'){
+        return;
+    }
+
+    let action = $(event.target).attr('data-value');
+    let currentLevel = Number.parseInt(localStorage.getItem('extendedLevel'));
+
+    // Limit expand to first 10 levels (for now)
+    if(currentLevel < 0 || Number.isNaN(currentLevel)){
+        currentLevel = 0;
+    }else if(currentLevel > GRAPH_EXTEND_LIMIT - 1){
+        currentLevel = GRAPH_EXTEND_LIMIT - 1;
+    }
+
+    if((currentLevel === 0 && action === 'decrease') || (currentLevel === GRAPH_EXTEND_LIMIT - 1 && action === 'increase')){
+        window.hWin.HEURIST4.msg.showMsgFlash(`Cannot ${action === 'decrease' ? 'shrink' : 'grow'} graph any further...`, 3000);
+        if(action === 'decrease'){
+            $('#decreaseGraphLevel').addClass('ui-state-disabled');
+        }else{
+            $('#increaseGraphLevel').addClass('ui-state-disabled');
+        }
+        return;
+    }
+
+    currentLevel += (action === 'increase' ? 1 : -1);
+    let levelLabel = currentLevel + 1;
+
+    let currentRecIDs = parts[1].split(',').map((x) => +x);
+
+    if(action === 'decrease'){ // Trim recent leaves
+        if(onExpandLevel.call(this, 'decrease', currentRecIDs)){
+            updateExpanderUI(levelLabel, currentLevel);
+        }
+        return;
+    }
+
+    let results = onExpandLevel.call(this, 'nextLevel', currentRecIDs);
+    if(!results){
+        return;
+    }
+
+    expanderPopup(currentLevel, levelLabel, results);
+}
+
+function updateExpanderUI(levelLabel, currentLevel){
+
+    document.querySelector('#graphLevel').innerHTML = levelLabel;
+    localStorage.setItem('extendedLevel', currentLevel);
+
+    if(currentLevel == GRAPH_EXTEND_LIMIT - 1){
+        $('#increaseGraphLevel').addClass('ui-state-disabled');
+    }else{
+        $('#increaseGraphLevel').removeClass('ui-state-disabled');
+    }
+
+    if(currentLevel == 0){
+        $('#decreaseGraphLevel').addClass('ui-state-disabled');
+    }else{
+        $('#decreaseGraphLevel').removeClass('ui-state-disabled');
+    }
+}
+
+function expanderPopup(currentLevel, nextLevel, extensionResults){
+
+    let expanderContainer = document.querySelector('#expanderSettings');
+    let $expanderContainer = $(expanderContainer);
+    let optionsContainer = expanderContainer.querySelector('#expanderOptions');
+
+    let newRecords = extensionResults.new;
+    let extensionAvailable = extensionResults.extending;
+
+    if(!expanderContainer || !optionsContainer){
+        return;
+    }
+
+    expanderContainer.querySelector('#expandPrev').innerText = currentLevel;
+    expanderContainer.querySelector('#expandNext').innerText = nextLevel;
+    optionsContainer.innerHTML = '';
+
+    let recordTypes = new Map();
+
+    if(expanderContainer.getAttribute('data-inited') !== '1'){
+
+        let removeHighlight = () => {
+
+            $expanderContainer.hide('slide', {direction: 'left'});
+
+            let highlightedNodes = document.querySelectorAll('.expandingNode');
+            if(!highlightedNodes){
+                return;
+            }
+
+            for(let i = 0; i < highlightedNodes.length; i++){
+                highlightedNodes[i].classList.remove('expandingNode');
+            }
+        };
+
+        $expanderContainer.find('#btnExpanderCommit').button().on('click', () => {
+
+            let selectedRecTypes = expanderContainer.querySelectorAll('input[type="checkbox"]:checked');
+            if(!selectedRecTypes){
+                $expanderContainer.hide('slide', {direction: 'left'});
+            }
+
+            let newRecIDs = new Set();
+            for(let i = 0; i < selectedRecTypes.length; i++){
+
+                let rtyID = Number.parseInt(selectedRecTypes[i].value);
+                if(!window.hWin.HEURIST4.util.isPositiveInt(rtyID)){
+                    continue;
+                }
+
+                let recIDs = recordTypes.get(rtyID);
+                if(!recIDs){
+                    continue;
+                }
+
+                newRecIDs = newRecIDs.union(recIDs);
+            }
+
+            removeHighlight();
+            updateExpanderUI(nextLevel, currentLevel);
+
+            onExpandLevel.call(this, 'increase', newRecIDs);
+        });
+        $expanderContainer.find('#btnExpanderCancel').button().on('click', () => {
+            removeHighlight();
+        });
+        $expanderContainer.find('#closeExpanderSettings').button().on('click', () => {
+            removeHighlight();
+        });
+
+        $expanderContainer.attr('data-inited', 1);
+    }
+
+    for(const recID of newRecords){
+
+        if(!Object.hasOwn(nodeRecTypes, recID)){
+            continue;
+        }
+        const rtyID = nodeRecTypes[recID];
+
+        let currentRecIDs = recordTypes.get(rtyID);
+        if(!currentRecIDs){
+            recordTypes.set(rtyID, new Set([recID]));
+        }else{
+            currentRecIDs.add(recID);
+            recordTypes.set(rtyID, currentRecIDs);
+        }
+    }
+
+    let hasRow = false;
+    for(const [rtyID, recIDs] of recordTypes){
+
+        let optionRow = document.createElement('tr');
+        let rtyName = $Db.rty(rtyID, 'rty_Name');
+
+        if(!rtyName){
+            continue;
+        }
+        rtyName = rtyName.length > 20 ? rtyName.slice(0, 20) + '...' : rtyName;
+
+        let content = `
+        <td>
+            <input type="checkbox"${recIDs.size <= 25 ? ' checked="checked"' : ''} name="nodeTypes" value="${rtyID}" />
+        </td>
+        <td>
+            ${rtyName}
+        </td>
+        <td>
+            ${recIDs.size}
+        </td>`;
+
+        optionRow.innerHTML = content;
+
+        optionsContainer.append(optionRow);
+
+        hasRow = true;
+    }
+
+    if(hasRow){
+        $expanderContainer.show('slide', {direction: 'left'}); // show popup
+
+        for(const recID of extensionAvailable){ console.log(document.querySelector(`.id${recID}`));
+            document.querySelector(`.id${recID}`).classList.add('expandingNode');
+        }
+    }
 }

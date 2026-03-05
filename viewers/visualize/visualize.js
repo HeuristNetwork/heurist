@@ -524,12 +524,10 @@ function addContainer() {
                        .attr("id", "container")
                        .attr("transform", s);
 
-    let scaleExtentVals = [0.9, 2]; ////[0.75, 7.5]
+    let scaleExtentVals = [0.9, 2];
 
     if(!settings.isDatabaseStructure){
-        //scaleExtentVals = [0.5, 3];
-
-        //Travis Doyle 28/9 - Adjusted scale extent values to increase zoom out/in
+        // Adjusted scale extent values to increase zoom out/in
         scaleExtentVals = [0.2, 15];
     }
 
@@ -554,7 +552,8 @@ function updateScalableElements(toScale = 'all'){
         return;
     }
 
-    const scale = this.zoomBehaviour.scale();
+    let scale = this.zoomBehaviour.scale();
+    scale = scale === 0 ? 1 : scale;
 
     let fontSize = $('#recTitleSize').length > 0 ? $('#recTitleSize').val() : getSetting('setting_fontsize', $('#fontSize').val());
     fontSize = Number.parseFloat(fontSize);
@@ -590,6 +589,7 @@ function updateScalableElements(toScale = 'all'){
         const labelList = document.querySelectorAll('.nodelabel');
         const labelX = (nodeSize * 2) + 14; // '14' is the translate offset
         const labelY = 14; // '14' is the translate offset
+
         for(let i = 0; i < labelList.length; i++){
     
             labelList[i].style.setProperty('font-size', `${fontSize}px`, 'important');
@@ -753,7 +753,8 @@ function zoomBtn(zoom_in){
 
     if(isNaN(x) || !isFinite(x)) x = 0;
     if(isNaN(y) || !isFinite(y)) y = 0;
-        
+    if(isNaN(scale) || !isFinite(scale) || scale === 0) scale = 1;
+
     // If we're already at an extent, done
     if (target_scale === extent[0] || target_scale === extent[1]) { return false; }
     // If the factor is too much, scale it down to reach the extent exactly
@@ -1686,7 +1687,7 @@ function showEmbedDialog(){
         URLParams.append('mini', 1);
     }
 
-    let hQuery = typeof window.visualiserRequest?.q === 'string' ? window.visualiserRequest : window.hWin.HEURIST4.current_query_request;
+    let hQuery = typeof window.visualiserRequest === 'string' ? {q: window.visualiserRequest} : window.hWin.HEURIST4.current_query_request;
     let query = window.hWin.HEURIST4.query.composeHeuristQuery2(hQuery, false);
     query += `${query == '?' ? '' : '&'}${URLParams.toString()}`;
     let url = `${window.hWin.HAPI4.baseURL}viewers/visualize/springDiagram.php${query}`;

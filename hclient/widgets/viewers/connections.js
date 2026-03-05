@@ -45,18 +45,24 @@ $.widget( "heurist.connections", {
      *           immediately upon widget creation.
      */
     options: {
+        egoGraph: false, // whether to use the newer minimal graph
+
         title: '',
         recordset: null,
         selection: null, //list of record ids
         search_realm:  null,  //accepts search/selection events from elements of the same realm only
         search_initial: null,  //Query or svs_ID for initial search
         init_at_once: false,
-        
+
+        show_recent_selection: false, //work with the recently selected record
         show_selection: false, //work with all selectd records
-        show_all: true,
+        show_page: false, //work with the current page of records
+        show_all: true, //work with all records in the current results
         
         empty_remark: '', //html content for empty message  (search returns empty result)
         placeholder_text: '', //text to display while no record/recordset is loaded  (search is not performed)
+
+        nodeLimit: 20 // limit the initial number of nodes, to avoid overworking the browser
     },
 
     /**
@@ -75,6 +81,8 @@ $.widget( "heurist.connections", {
      * and the graph display needs to be updated.
      */
     recordset_changed: true,
+
+    page_recordIDs: null,
 
     /**
      * @memberof heurist.connections
@@ -102,10 +110,14 @@ $.widget( "heurist.connections", {
             + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH 
             + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART 
             + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT
-            + ' ' + window.hWin.HAPI4.Event.ON_SYSTEM_INITED;
+            + ' ' + window.hWin.HAPI4.Event.ON_SYSTEM_INITED
+            + ' ' + window.hWin.HAPI4.Event.ON_REC_PAGE_RENDERED;
 
         $(this.document).on(this._events, function(e, data) {
-            
+
+            let isSameRealm = that._isSameRealm(data);
+            let fromThisSource = data.source == that.element.attr('id');
+
             if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS) { 
                 
                 if(!window.hWin.HAPI4.has_access()){ //logout
@@ -119,7 +131,7 @@ $.widget( "heurist.connections", {
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
 
                 //accept events from the same realm only
-                if(!that._isSameRealm(data)) return;
+                if(!isSameRealm) return;
 
                 //find all relation within given result set
                 that.recordset_changed = true;
@@ -133,7 +145,7 @@ $.widget( "heurist.connections", {
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
 
                 //accept events from the same realm only
-                if(!that._isSameRealm(data)) return;
+                if(!isSameRealm) return;
 
                 that.options.relations = null;
                 that.options.recordset = null;
@@ -147,27 +159,34 @@ $.widget( "heurist.connections", {
                 }
             // Record selection  
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
-                
-                if(that._isSameRealm(data) && data.source!=that.element.attr('id')) { //selection happened somewhere else
-                
-                
-                    if(that.options.show_selection){
-                        
-                        let sel = window.hWin.HAPI4.getSelection(data.selection, true); //get ids
-                        that.options.relations = null;
-                        that.options.selection = sel;
-                        that.recordset_changed = true;
-                        that._refresh();
-                        
-                    }else if(data.reset){
-                        that.options.selection = null;
-                    }else{
-                        that._doVisualizeSelection( window.hWin.HAPI4.getSelection(data.selection, true) );
-                    }
-                    
-                }            
-            }else if (e.type == window.hWin.HAPI4.Event.ON_SYSTEM_INITED){
+
+                if(!isSameRealm || fromThisSource) return;
+
+                if(that.options.show_selection || that.options.show_recent_selection){
+
+                    let selection = that.options.show_recent_selection ? data.selection[data.selection.length - 1] : data.selection;
+                    let sel = window.hWin.HAPI4.getSelection(selection, true); //get ids
+                    that.options.relations = null;
+                    that.options.selection = sel;
+                    that.recordset_changed = true;
                     that._refresh();
+
+                }else if(data.reset){
+                    that.options.selection = null;
+                }else{
+                    that._doVisualizeSelection( window.hWin.HAPI4.getSelection(data.selection, true) );
+                }
+
+            }else if(e.type == window.hWin.HAPI4.Event.ON_REC_PAGE_RENDERED && isSameRealm && !fromThisSource && that.options.show_page){
+
+                that.options.relations = null;
+                that.page_recordIDs = data.selection;
+                that.recordset_changed = true;
+
+                that._refresh();
+
+            }else if (e.type == window.hWin.HAPI4.Event.ON_SYSTEM_INITED){
+                that._refresh();
             }
         });
 
@@ -182,19 +201,16 @@ $.widget( "heurist.connections", {
                 that._refresh();
             }
         });
-        
-        
+
         if(this.options.search_initial){
             this.doSearch( this.options.search_initial );
             this.options.search_initial = null;
         }else if(this.options.init_at_once){
             this._refresh();  
         }
-        
-        
+
     }, //end _create
 
-    
     /**
      * @memberof heurist.recordListExt
      * @instance
@@ -207,8 +223,7 @@ $.widget( "heurist.connections", {
                         source: 'init', search_realm: this.options.search_realm };
         window.hWin.HAPI4.RecordSearch.doSearch(this.document, request);
     },
-    
-    
+
     /**
      * @memberof heurist.connections
      * @instance
@@ -238,14 +253,15 @@ $.widget( "heurist.connections", {
             if( window.hWin.HEURIST4.util.isempty(this.graphframe.attr('src')) || this.graphframe.attr('src')!==this.options.url)
             {
                 
-                this.options.url = window.hWin.HAPI4.baseURL + 'viewers/visualize/springDiagram.php?db=' + window.hWin.HAPI4.database;
+                this.options.url = `${window.hWin.HAPI4.baseURL}viewers/visualize/springDiagram.php?db=${window.hWin.HAPI4.database}&mini=${this.options.egoGraph ? 1 : 0}`;
                 this.graphframe.attr('src', this.options.url);
               
-            // Content loaded already    
+            // Content loaded already
             }else{
                 // SPRING DIAGRAM CODE
-                let recset = this.options.show_selection?this.options.selection:this.options.recordset;
-                
+                let recset = this.options.show_selection || this.options.show_recent_selection || this.options.show_page ? this.options.selection : this.options.recordset;
+                recset = this.options.show_page ? this.page_recordIDs : recset;
+
                 if(recset !== null) {
                     
                     if(this.options.relations == null){ //relation not yet loaded
@@ -256,7 +272,7 @@ $.widget( "heurist.connections", {
                         
                         let MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
                     
-                        let records_ids = Array.isArray(recset)?recset:recset.getIds(MAXITEMS);
+                        let records_ids = Array.isArray(recset) ? recset : recset.getIds(MAXITEMS);
                         let relations = this.options.relations;
                         
                         // Parse response to spring diagram format
@@ -334,7 +350,7 @@ $.widget( "heurist.connections", {
     * @param {HRecordSet} recordset - The record set for which to fetch relationships.
     */
     _getRelations: function( recordset ){
-        
+
         if(window.hWin.HEURIST4.util.isnull(recordset)) return;
 
         this.options.relations = null;
@@ -348,7 +364,7 @@ $.widget( "heurist.connections", {
         let MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
         let records_ids = Array.isArray(recordset)?recordset:recordset.getIds(MAXITEMS);
         if(records_ids.length>0){
-            
+
             window.hWin.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, function(response)
             {
                 let resdata = null;
@@ -492,16 +508,49 @@ $.widget( "heurist.connections", {
      * @param {Object} data - The graph data, typically an object with `nodes` and `links` properties,
      *                        as returned by `_parseData`.
      */
-    _doVisualize: function (data) {
-        
+    _doVisualize: function (data, skipNodeCheck = false) {
+
+        let nodeCount = data.nodes.length; console.log(nodeCount, this.options.nodeLimit);
+        if(!skipNodeCheck && nodeCount > this.options.nodeLimit){
+
+            let $dlg;
+            let content = `<div>
+                The website designer has limited the number of initial nodes to ${this.options.nodeLimit} because<br>
+                large number of nodes will bog down your browser and make an unreadable graph.<br><br>
+
+                <label> <input type="checkbox" id="enableContinue" /> check this box if you wish to proceed in any case</label>
+            </div>`;
+
+            let btns = {};
+            btns[window.hWin.HR('Draw graph')] = () => {
+                this._doVisualize(data, true);
+                $dlg.dialog('close');
+            };
+            btns[window.hWin.HR('Cancel')] = () => {
+                $dlg.dialog('close');
+            };
+
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: 'Exceeding limit set'}, {dialogId: 'visualiser-node-limit'});
+
+            let $btnContinue = $dlg.parent().find('.ui-dialog-buttonpane button').first();
+            this._on($dlg.find('#enableContinue'), {
+                change: () => {
+                    window.hWin.HEURIST4.util.setDisabled($btnContinue, !$dlg.find('#enableContinue').is(':checked'));
+                }
+            });
+            window.hWin.HEURIST4.util.setDisabled($btnContinue, true);
+
+            return;
+        }
+
         if(this._isVisualizeInited() ){
             let that = this;
             this.graphframe[0].contentWindow.showData(data, this.options.selection, this._lastRequest,
-                    function(selected){  //on select
+                    function(selected){ //on select
                         $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                         { selection:selected, source:that.element.attr('id'), search_realm:that.options.search_realm } );
                     },
-                    function(selected){  //on refresh
+                    function(selected){ //on refresh
                         that._getRelations(that.options.recordset);
                     },
                     function(type, rec_ID){ //on expand search
@@ -510,11 +559,7 @@ $.widget( "heurist.connections", {
             );
             this.recordset_changed = false;
         }
-        /* Call showData method of the springDiagram iFrame
-        var iframe = $("iframe[src*=springDiagram]");
-        if(iframe != null && iframe !== undefined && iframe.length >= 1) {
-            iframe[0].contentWindow.showData(data);
-        }*/
+
     },    
 
     /**
@@ -551,6 +596,10 @@ $.widget( "heurist.connections", {
      * @param {number|string} rec_ID - The ID of the record (node) from which to expand connections.
      */
     _expandSearch: function(type, rec_ID){
+
+        if(this.options.egoGraph){ // disabled for mini graph - this function is handled by the visualiser directly
+            return;
+        }
 
         let new_query = [];
         let existing_query = window.hWin.HEURIST4.util.isJSON(this._lastRequest.q);
