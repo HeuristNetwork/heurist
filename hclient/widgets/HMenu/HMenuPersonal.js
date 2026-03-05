@@ -70,7 +70,7 @@ $.widget( 'heurist.HMenuPersonal', $.heurist.HMenu, {
                       window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database);
                       
         const isCmsEdit = window.hWin.HEURIST4.util.getParentWinProperty('cmsEditor');
-        const sLabel = window.HR(isEdit?'Close editor':'Website editor');
+        const sLabel = window.HR( isCmsEdit?'Close editor':'Website editor' );
             
         let btn = this._$('button[data-heurist-action="menu-cms-edit"] > span');
         if(btn.length>1){
