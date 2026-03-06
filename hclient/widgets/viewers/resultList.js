@@ -2915,7 +2915,8 @@ $.widget( "heurist.resultList", {
             let hasCollection = this._collection && this._collection.length ? this._collection.length : 0;
             let is_subset = this._isCollectionUsed;
 
-            sinfo = `<a href="#" id="collectSelected" style="padding-right:5px;" title="Add selected records to the collection">Add</a> &rArr; n = ${hasCollection} &rArr; `
+            sinfo = `<a href="#" id="collectSelected" style="padding-right:5px;" title="Add selected records to the collection">Collect</a> `
+                  + `&rArr; <div class="collected" style="display: inline-block;">n = ${hasCollection}</div> &rArr; `
                   + `<a href="#" id="searchCollected" style="padding-left:5px;" title="Show ${is_subset?'the original search result':'collected records'}">Show`  //${is_subset?' results':''}
                   + `</a><span style="font-size:18px;top:3px;"> &#8628; </span>`
                   + `<a href="#" id="clearCollected" style="padding:0px 5px;" title="Clear record collection">Clear</a> | ${sinfo}`;

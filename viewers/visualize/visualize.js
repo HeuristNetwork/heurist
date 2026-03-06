@@ -244,6 +244,8 @@ let maxCountForLinks;
                     $(element).controlgroup('destroy');
                 }
             });
+
+            document.querySelector('#expanderSettings').setAttribute('data-inited', 0);
         }
 
         return this; // Return jQuery object for chaining

@@ -62,7 +62,8 @@ $.widget( "heurist.connections", {
         empty_remark: '', //html content for empty message  (search returns empty result)
         placeholder_text: '', //text to display while no record/recordset is loaded  (search is not performed)
 
-        nodeLimit: 20 // limit the initial number of nodes, to avoid overworking the browser
+        nodeLimit: 20, // limit the initial number of nodes, to avoid overworking the browser
+        autoExtendSelection: true // auto extend the graph when is ONLY ONE record shown
     },
 
     /**
@@ -348,8 +349,9 @@ $.widget( "heurist.connections", {
     * record set. On success, it stores the relationship data in `this.options.relations`,
     * parses the data using `_parseData`, and then visualizes it using `_doVisualize`.
     * @param {HRecordSet} recordset - The record set for which to fetch relationships.
+    * @param {bool} extendingSelection - Is this call extending the previous call.
     */
-    _getRelations: function( recordset ){
+    _getRelations: function( recordset, extendingSelection = false ){
 
         if(window.hWin.HEURIST4.util.isnull(recordset)) return;
 
@@ -369,6 +371,12 @@ $.widget( "heurist.connections", {
             {
                 let resdata = null;
                 if(response.status == window.hWin.ResponseStatus.OK){
+
+                    let isSelection = that.options.show_selection || that.options.show_recent_selection;
+                    if(!extendingSelection && isSelection && that2.options.autoExtendSelection && Object.keys(response.data.headers).length > 1){ // automatically extend when in selection mode
+                        that2._getRelations(Object.keys(response.data.headers), true);
+                        return;
+                    }
 
                     // Store relationships
                     that2.option("relations", response.data);
