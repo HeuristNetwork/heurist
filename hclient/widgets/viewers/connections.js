@@ -93,7 +93,6 @@ $.widget( "heurist.connections", {
      * for data changes and selections, and handles initial loading if `options.init_at_once` is true.
      */
     _create: function() {
-
         let that = this;
         
         this.framecontent = $('<div>')
@@ -130,7 +129,6 @@ $.widget( "heurist.connections", {
 
             // Search results
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
-
                 //accept events from the same realm only
                 if(!isSameRealm) return;
 
@@ -367,29 +365,29 @@ $.widget( "heurist.connections", {
         let records_ids = Array.isArray(recordset)?recordset:recordset.getIds(MAXITEMS);
         if(records_ids.length>0){
 
-            window.hWin.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, function(response)
+            window.hWin.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')},(response)=>
             {
                 let resdata = null;
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    let isSelection = that.options.show_selection || that.options.show_recent_selection;
-                    if(!extendingSelection && isSelection && that2.options.autoExtendSelection && Object.keys(response.data.headers).length > 1){ // automatically extend when in selection mode
-                        that2._getRelations(Object.keys(response.data.headers), true);
+                    let isSelection = this.options.show_selection || this.options.show_recent_selection;
+                    if(!extendingSelection && isSelection && this.options.autoExtendSelection && Object.keys(response.data.headers).length > 1){ // automatically extend when in selection mode
+                        this._getRelations(Object.keys(response.data.headers), true);
                         return;
                     }
 
                     // Store relationships
-                    that2.option("relations", response.data);
+                    this.option("relations", response.data);
                     
                     // Parse response to spring diagram format
-                    let data = that2._parseData(records_ids, response.data);
-                    that2._doVisualize(data);
+                    let data = this._parseData(records_ids, response.data);
+                    this._doVisualize(data);
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
                 
-                //that2.option("recordset", recordset); //HRecordSet
-                that2.loadanimation(false);
+                //this.option("recordset", recordset); //HRecordSet
+                this.loadanimation(false);
                 
             });
         }
