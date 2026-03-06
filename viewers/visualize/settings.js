@@ -754,13 +754,13 @@ function handleGraphLeveler(event){
     let currentRecIDs = parts[1].split(',').map((x) => +x);
 
     if(action === 'decrease'){ // Trim recent leaves
-        if(onExpandLevel.call(this, 'decrease', currentRecIDs)){
+        if(settings.onExpandLevel.call(this, 'decrease', currentRecIDs)){
             updateExpanderUI(levelLabel, currentLevel);
         }
         return;
     }
 
-    let results = onExpandLevel.call(this, 'nextLevel', currentRecIDs);
+    let results = settings.onExpandLevel.call(this, 'nextLevel', currentRecIDs);
     if(!results){
         return;
     }
@@ -847,7 +847,7 @@ function expanderPopup(currentLevel, nextLevel, extensionResults){
             removeHighlight();
             updateExpanderUI(nextLevel, currentLevel);
 
-            onExpandLevel.call(this, 'increase', newRecIDs);
+            settings.onExpandLevel.call(this, 'increase', newRecIDs);
         });
         $expanderContainer.find('#btnExpanderCancel').button().on('click', () => {
             removeHighlight();
@@ -907,7 +907,7 @@ function expanderPopup(currentLevel, nextLevel, extensionResults){
     if(hasRow){
         $expanderContainer.show('slide', {direction: 'left'}); // show popup
 
-        for(const recID of extensionAvailable){ console.log(document.querySelector(`.id${recID}`));
+        for(const recID of extensionAvailable){
             document.querySelector(`.id${recID}`).classList.add('expandingNode');
         }
     }

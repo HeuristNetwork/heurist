@@ -504,8 +504,6 @@ text.shadow {
     position: absolute;
     top: 7.5em;
 
-    min-width: 17.5em;
-    min-height: 20em;
     max-height: 20em;
 
     padding: 0.75em;

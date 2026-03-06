@@ -231,7 +231,7 @@ let maxCountForLinks;
         this.destroy = function(){ // remove event listeners
 
             $('#toolbar input, #toolbar button, #toolbar .toolbarController').off('click');//.visualiser
-            $('#toolbar input, #toolbar button, #toolbar .toolbarController').off('change');//.visualiser
+            $('#toolbar input, #toolbar .toolbarController').off('change');//.visualiser
 
             $('#toolbar button').each((idx, button) => {
                 if($(button).button('instance') !== undefined){
@@ -669,7 +669,7 @@ function zoomed() {
     }
 
     //keep current setting Scale
-    if(!isNaN(window.d3.event.scale) && isFinite(window.d3.event.scale)&& scale != 0){
+    if(!isNaN(window.d3.event.scale) && isFinite(window.d3.event.scale) && scale != 0){
         putSetting('setting_scale', scale);
         transform = transform + "scale("+scale+")";
     }

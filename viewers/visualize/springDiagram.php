@@ -150,7 +150,7 @@ function performSearch(q){
                     // Parse response to spring diagram format
                     let data = __parseData(records_ids, response_related.data);
 
-                    showData(data, [], query, null, null, null, isMinimalVersion?onExpandLevel:null);
+                    showData(data, [], query, null, null, null, isMinimalVersion ? globalOnExpandLevel : null);
 
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response_related);
@@ -163,7 +163,7 @@ function performSearch(q){
     });
 }
 
-function onExpandLevel(action, currentRecIDs){
+function globalOnExpandLevel(action, currentRecIDs){
 
     let updateGraphLevels = (fullList, filterOut) => {
 
@@ -330,6 +330,42 @@ function updateRecordCache(mainRecID, rtyID, parentRecID = 0){
         nodeRecTypes[mainRecID] = rtyID;
     }
 }
+
+function addNewConnections(recordIDs, data){
+
+    if(!Array.isArray(recordIDs) || !window.hWin.HEURIST4.util.isObject(data) || !Object.hasOwn(data, 'headers')){
+        return;
+    }
+
+    const RECRTYID_IDX = 1;
+
+    for(let i = 0; i < recordIDs.length; i++){
+
+        const recID = recordIDs[i];
+
+        updateRecordCache(recID, data.headers[recID][RECRTYID_IDX]);
+    }
+
+    for(let i = 0; i < data.direct.length; i++){
+
+        let direct = data.direct[i];
+        const recID = Number.parseInt(direct.recID);
+        const targetID = Number.parseInt(direct.targetID);
+
+        updateRecordCache(recID, data.headers[recID][RECRTYID_IDX], targetID);
+        updateRecordCache(targetID, data.headers[targetID][RECRTYID_IDX], recID);
+    }
+
+    for(let i = 0; i < data.reverse.length; i++){
+
+        let reverse = data.reverse[i];
+        const recID = Number.parseInt(reverse.recID);
+        const sourceID = Number.parseInt(reverse.sourceID);
+
+        updateRecordCache(recID, data.headers[recID][RECRTYID_IDX], sourceID);
+        updateRecordCache(sourceID, data.headers[sourceID][RECRTYID_IDX], recID);
+    }
+}
         </script>
     </head>
 
@@ -381,8 +417,6 @@ function updateRecordCache(mainRecID, rtyID, parentRecID = 0){
                             rty_ID: recTypeId // Store record type ID
                         };
                         nodes[recId] = node;
-
-                        updateRecordCache(recId, recTypeId);
                     }
                 }
 
@@ -444,37 +478,9 @@ function updateRecordCache(mainRecID, rtyID, parentRecID = 0){
                 // Consolidate links from direct and reverse relations
                 links = links.concat( __getLinks(nodes, relations.direct)  );
                 links = links.concat( __getLinks(nodes, relations.reverse) );
-
-                function addNewConnections(){
-
-                    for(let i = 0; i < relations.direct.length; i++){
-
-                        let direct = relations.direct[i];
-                        const recID = Number.parseInt(direct.recID);
-                        const targetID = Number.parseInt(direct.targetID);
-
-                        updateRecordCache(recID, relations.headers[recID][1], targetID);
-                        updateRecordCache(targetID, relations.headers[targetID][1], recID);
-                    }
-
-                    for(let i = 0; i < relations.reverse.length; i++){
-
-                        let reverse = relations.reverse[i];
-                        const recID = Number.parseInt(reverse.recID);
-                        const sourceID = Number.parseInt(reverse.sourceID);
-
-                        updateRecordCache(recID, relations.headers[recID][1], sourceID);
-                        updateRecordCache(sourceID, relations.headers[sourceID][1], recID);
-                    }
-                }
-
-                addNewConnections();
-
-                if(graphLevels.length === 0){
-                    graphLevels.push(new Set(records_ids));
-                    localStorage.setItem('extendedLevel', 0);
-                }
             }
+
+            addNewConnections(records_ids, relations);
 
             // Construct data object with nodes as an array
             var nodesArray = []; // Renamed for clarity
@@ -548,6 +554,8 @@ function updateRecordCache(mainRecID, rtyID, parentRecID = 0){
             $(window).on('resize', onVisualizeResize); // Bind resize handler
             setTimeout(()=>onVisualizeResize(),1000); // Initial call
 
+            onExpandLevel = typeof onExpandLevel === 'function' ? onExpandLevel : globalOnExpandLevel;
+
             // Initialize the visualize plugin
             visualise = $("#visualize").visualize({ // Assumes #visualize is the ID of the main container in visualize.php
                 data: data,
@@ -583,6 +591,11 @@ function updateRecordCache(mainRecID, rtyID, parentRecID = 0){
                 changeViewMode('icons'); // set initial view mode
 
                 recIDs = getRecordIDs(data.nodes);
+
+                if(graphLevels.length === 0){
+                    graphLevels.push(new Set(recIDs));
+                    localStorage.setItem('extendedLevel', 0);
+                }
             }
 
             zoomToFit();
@@ -611,8 +624,10 @@ function updateRecordCache(mainRecID, rtyID, parentRecID = 0){
          * @global
          */
         function onVisualizeResize(){
+
             var width = $(window).width();
             let topPos = '0em';
+
             if(isMinimalVersion){
                 let ele = $('#toolbar').find('.dropdown-content1');
                 if(ele.length>0){
@@ -620,14 +635,18 @@ function updateRecordCache(mainRecID, rtyID, parentRecID = 0){
                 }
                 topPos = $('#toolbar').height();
                 if(topPos < 40) { topPos = 40; }
-                topPos = (topPos+15)+'px';
+                topPos = topPos + 15;
                 $('#toolbar').find('.heurist-helper2').hide();
-            }
-            $('#divSvg').css('top', topPos); // Assumes #divSvg is the SVG container
 
-            // Update wub-toolbar top as well
-            $('#showSubToolbar, .dropdown-subbar').css('top', topPos);
-            $('#expanderSettings').css('top', topPos + 30);
+                // Update wub-toolbar top as well
+                $('#showSubToolbar, .dropdown-subbar').css('top', `${topPos}px`);
+                let subBarHeight = $('.dropdown-subbar').height() > 0 ? $('.dropdown-subbar').height() : $('.showSubToolbar').height();
+                $('#expanderSettings').css('top', topPos + subBarHeight + 20);
+
+                topPos = `${topPos}px`;
+            }
+
+            $('#divSvg').css('top', topPos); // Assumes #divSvg is the SVG container
         }
 
         </script>

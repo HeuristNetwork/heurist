@@ -262,10 +262,10 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 
 <div id="expanderSettings">
 
-    <button id="closeExpanderSettings" style="float: right; border: 1px solid black;" title="Close node expansion popup">X</button>
+    <button id="closeExpanderSettings" style="border: 1px solid black;padding: 0.4em 0.5em;position: absolute;right: 0.5em;" title="Close node expansion popup">X</button>
 
     <div style="margin-bottom: 0.5em;">
-        Expand <span id="expandPrev"></span> <span class="ui-icon ui-icon-arrow-1-e"></span> <span id="expandNext"></span>
+        Expand <span id="expandPrev" class="toolbarController"></span> <span class="ui-icon ui-icon-arrow-1-e"></span> <span id="expandNext" class="toolbarController"></span>
     </div>
 
     <table class="expanderOptionsTable">

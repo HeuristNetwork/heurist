@@ -116,7 +116,7 @@ $.widget( "heurist.connections", {
         $(this.document).on(this._events, function(e, data) {
 
             let isSameRealm = that._isSameRealm(data);
-            let fromThisSource = data.source == that.element.attr('id');
+            let fromThisSource = data?.source == that.element.attr('id');
 
             if(e.type == window.hWin.HAPI4.Event.ON_CREDENTIALS) { 
                 
@@ -369,6 +369,7 @@ $.widget( "heurist.connections", {
             {
                 let resdata = null;
                 if(response.status == window.hWin.ResponseStatus.OK){
+
                     // Store relationships
                     that2.option("relations", response.data);
                     
@@ -407,11 +408,13 @@ $.widget( "heurist.connections", {
     *                   and `relation` (with `id`, `name`, `type`).
     */
     _parseData: function (records_ids, relations) {
+
         let data = {}; 
         let nodes = {};                         
         let links = [];
 
         if(records_ids !== undefined && relations !== undefined) {
+
             // Construct nodes for each record
             let i;
             for(i=0;i<records_ids.length;i++) {
@@ -469,12 +472,14 @@ $.widget( "heurist.connections", {
                 
                 return links;
             }
-                    
-                   
-            
+
             // Links
             links = links.concat( __getLinks(nodes, relations.direct)  ); // Direct links
             links = links.concat( __getLinks(nodes, relations.reverse) ); // Reverse links
+        }
+
+        if(this._isVisualizeInited && window.hWin.HEURIST4.util.isFunction(this.graphframe[0].contentWindow.addNewConnections)){
+            this.graphframe[0].contentWindow.addNewConnections(records_ids, relations);
         }
 
         // Construct data object with nodes as array
