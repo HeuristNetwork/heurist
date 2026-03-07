@@ -40,17 +40,20 @@ function editCMS_SelectElement( callback ){
 
     let t_components = {
         
-        header1:{name:'Web pages', description:'#web_pages', is_section_header: true},
+        header1:{name:'Complete web pages', description:'#web_pages', is_section_header: true},
+        
+        // The pages to be created are defined by JSon snippets default.json, discover.json, etc. in hclient/widggets/cms/templates/snippets
 
         //grp4:{name:'Composite Pages', description:'#composite_pages', is_group_header:true}, //Content layouts or templates
             tpl_default: {name:'Simple Page', description:'#simple_page'}, //Simple blank page
-            tpl_discover: {name:'Discover (filters/results/map)', description:'#discover'}, //3 columns layout
+            tpl_discover: {name:'Discover (filters/results/map-timeline)', description:'#discover'}, //3 columns layout
+            tpl_network: {name:'Network  (filters/results/network diagram)', description:'#network'}, //3 columns layout
             tpl_database: {name:'Database description', description:'#database'},
             tpl_blog: {name:'Blog', description:'#blog'},
 
             //tpl_cover:{name:'Cover', description:'#cover'},
             tpl_landing:{name:'Landing (Welcome)', description:'#landing'},
-            tpl_about:{name:'About and our team', description:'#about'},
+            tpl_about:{name:'About/our team', description:'#about'},
             //tpl_features:{name:'Features', description:'#features'},
 
         separator:{name:' ', description:'#', is_separator: true},
@@ -73,30 +76,31 @@ function editCMS_SelectElement( callback ){
                 //group_2:{name:'Groups as 2 columns', description:'2 columns layout'},
                 text_banner:{name:'Text on banner', description:'#text_banner'}, //Text over background image
 
-            grp2:{name:'Widgets', description:'#widgets', is_group_header:true}, //Heurist Widgets for dynamic content or interaction
+            grp2:{name:'Search/filter widgets', description:'#widgets', is_group_header:true}, //Heurist Widgets for dynamic content or interaction
                 
-                heurist_SearchInput:{name:'Filter', description:'#filter'}, //Search field (with standard filter builder)
-                heurist_SearchTree:{name:'Saved filters', description:'#saved_filter'}, //Simple &amp; facet filters, selection or tree            
+                heurist_SearchInput:{name:'Filter / search controls', description:'#filter'}, //Search field (with standard filter builder)
+                heurist_SearchTree:{name:'Saved filter(s)`(use to drive results)', description:'#saved_filter'}, //Simple &amp; facet filters, selection or tree            
 
-                heurist_resultList:{name:'Standard filter result', description:'#result_list'}, //Switchable modes, action controls            
-                heurist_resultListExt:{name:'Custom report', description:'#custom_report'}, //Also use for single record view            
-                heurist_resultListDataTable:{name:'Table format', description:'#data_table'}, //Result list as data table            
+                heurist_resultList:{name:'Standard results list (as used in Explore)', description:'#result_list'}, //Switchable modes, action controls            
+                heurist_resultListExt:{name:'Custom report or record viewer', description:'#custom_report'}, //Also use for single record view            
+                heurist_resultListDataTable:{name:'Tabular report', description:'#data_table'}, //Result list as data table            
 
-                heurist_Map:{name:'Map and timeline', description:'#map_timeline'}, //Map and timeline widgets
+                heurist_Map:{name:'Map and/or timeline', description:'#map_timeline'}, //Map and timeline widgets
                 heurist_StoryMap:{name:'Story Map', description:'#story_map'}, //Storyline/map controller widgets
-                heurist_Graph:{name:'Network graph', description:'#network_graph'}, //Visualization for records links and relationships
-                heurist_GraphEgo:{name:'Ego Network graph', description:'#network_graph'}, //Visualization for records links and relationships (Ego version)
+                heurist_GraphEgo:{name:'Network graph', description:'#network_graph'}, //Visualization for records links and relationships (Ego version)
+                
+
+            grp4:{name:'Other Widgets', description:'#widgets2', is_group_header:true}, //Heurist Widgets for dynamic content or interaction
                 
                 heurist_Navigation:{name:'Menu', description:'#menu'}, //Navigation Menu
-                heurist_recordAddButton:{name:'Add Record', description:'#add_record'}, //Button to addition of new Heurist record
-                heurist_emailForm:{name:'Email Us Form', description:'#email_form'}, //Form to send email to addrees specified in home page as site owner email
-                heurist_mediaViewer:{name:'Media Viewer/Image Gallery', description:'#mediaViewer'}, //Image gallery                  
-            grp4:{name:'New Widgets', description:'#widgets2', is_group_header:true}, //Heurist Widgets for dynamic content or interaction
-                
+                HMenu:{name:'Menu/Actions/Links', description:'#HMenu'},
                 HRecordList:{name:'Records list', description:'#HRecordList'},
                 //HRecordView:{name:'Record view', description:'#HRecordView'},
-                HMenu:{name:'Menu/Actions/Links', description:'#HMenu'},
-        
+                heurist_recordAddButton:{name:'Add Record', description:'#add_record'}, //Button to addition of new Heurist record
+                heurist_emailForm:{name:'Email Us Form', description:'#email_form'}, //Form to send email to addrees specified in home page as site owner email
+                heurist_mediaViewer:{name:'Media Viewer/xImage Gallery', description:'#mediaViewer'}, //Image gallery                  
+                heurist_Graph:{name:'Network graph (old)', description:'#network_graph'}, //Visualization for records links and relationships
+          
     };
 
 
