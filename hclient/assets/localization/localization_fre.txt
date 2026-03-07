@@ -576,7 +576,7 @@
 #filter_facet_resetall_hint#Effacer tous les champs / Réinitialiser tous les filtres à leur état initial
 #filter_facet_reset#Pour effacer la recherche précédente, cliquez sur le bouton RESET
 #filter_facet_savestate#Sauvegarder l'état
-#filter_facet_titleprefix#filtrer : 
+#filter_facet_titleprefix#
 #filter_facet_apply_preliminary#Appliquer le filtre préliminaire
 #filter_facet_mapsearch#Recherche spatiale
 #filter_facet_mapsearch_hint#Cliquez sur ce bouton pour définir et appliquer des limites de recherche spatiale
