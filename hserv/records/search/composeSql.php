@@ -1668,8 +1668,8 @@ class HPredicate {
                         break;
                     }
                 }
-            }elseif($p_type == 'lt' || $p_type == 'linked_to' || $p_type == 'linkedto'
-                 || $p_type == 'lf' || $p_type == 'linked_from' || $p_type == 'linkedfrom'){
+            }elseif(!$isFacetCount && ($p_type == 'lt' || $p_type == 'linked_to' || $p_type == 'linkedto'
+                 || $p_type == 'lf' || $p_type == 'linked_from' || $p_type == 'linkedfrom')){
 
                 $this->handleResourceExistsPred($value);
             }
@@ -2663,7 +2663,7 @@ QUERY;
         $p = $this->qlevel;
         $rl = "rl".$p."x".$this->index_of_predicate;
 
-        if($this->existsFilter['exists']){
+        if(isset($this->existsFilter['exists']) && $this->existsFilter['exists']){
             return ['where' => $this->getExistsWhere(false, $p)];
         }
 
@@ -2770,7 +2770,7 @@ QUERY;
         $p = $this->qlevel;
         $rl = "rl".$p."x".$this->index_of_predicate;
 
-        if($this->existsFilter['exists']){
+        if(isset($this->existsFilter['exists']) && $this->existsFilter['exists']){
             return ['where' => $this->getExistsWhere(false, $p)];
         }
 
@@ -2996,7 +2996,6 @@ QUERY;
             return array(null, null);
         }
     }
-
 
     /**
     * find records that are source relation for specified records
@@ -4159,9 +4158,6 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
         $new_values = [];
         $has_other_filter = false;
 
-        [, $complete_rty_IDs] = $this->_getRelationFieldConstraints();
-        $complete_rty_IDs = prepareIds($complete_rty_IDs);
-
         $rty_negate = false;
         $rty_IDs = [];
 
@@ -4188,26 +4184,38 @@ $stopwords = array('a','about','an','are','as','at','be','by','com','de','en','f
             return $values;
         }
 
-        if($rty_negate){
-            $rty_IDs = array_diff($complete_rty_IDs, $rty_IDs);
-        }
-        $rty_count = empty($rty_IDs) ? count($complete_rty_IDs) : count($rty_IDs);
-        $rty_IDs = implode(',', empty($rty_IDs) ? $complete_rty_IDs : $rty_IDs);
-
-        // Get list of relevant record IDs
         $to = $this->pred_type == 'links' || $this->pred_type == 'lt' || $this->pred_type == 'linked_to' || $this->pred_type == 'linkedto';
         $from = $this->pred_type == 'links' || $this->pred_type == 'lf' || $this->pred_type == 'linked_from' || $this->pred_type == 'linkedfrom';
 
+        if($to && empty($rty_IDs)){ // || $rty_negate
+            [, $complete_rty_IDs] = $this->_getRelationFieldConstraints();
+            /*
+            if($rty_negate){
+                $rty_IDs = array_diff($complete_rty_IDs, $rty_IDs);
+            }
+            */
+            $rty_IDs = prepareIds($complete_rty_IDs);
+        }
+
+        // Get list of relevant record IDs
         $rec_IDs = [];
-        $rty_where = $rty_count == 1 ? "= {$rty_IDs}" : "IN ({$rty_IDs})";
+        $rty_where =  predicateId('rec_RecTypeID', $rty_IDs);
+        
+        $field_ids = null;
+        if($this->field_id){
+            $field_ids = prepareIds($this->field_id);//getCommaSepIds - returns validated string
+        }
+        if(is_array($field_ids) && !empty($field_ids)){
+            $rty_where = $rty_where.' AND '.predicateId('rl_DetailTypeID', $field_ids);
+        }
 
         if($to){
-            $to_query = "SELECT DISTINCT rl_SourceID FROM recLinks INNER JOIN Records ON rec_ID = rl_TargetID WHERE rl_RelationTypeID IS NULL AND rec_RecTypeID {$rty_where}";
+            $to_query = "SELECT DISTINCT rl_SourceID FROM recLinks INNER JOIN Records ON rec_ID = rl_TargetID WHERE rl_RelationTypeID IS NULL AND {$rty_where}";
             $rec_IDs = mysql__select_list2($mysqli, $to_query, 'intval');
         }
 
         if($from){
-            $from_query = "SELECT DISTINCT rl_TargetID FROM recLinks INNER JOIN Records ON rec_ID = rl_SourceID WHERE rl_RelationTypeID IS NULL AND rec_RecTypeID {$rty_where}";
+            $from_query = "SELECT DISTINCT rl_TargetID FROM recLinks INNER JOIN Records ON rec_ID = rl_SourceID WHERE rl_RelationTypeID IS NULL AND {$rty_where}";
             $rec_IDs_from = mysql__select_list2($mysqli, $from_query, 'intval');
             $rec_IDs = array_unique(array_merge($rec_IDs, $rec_IDs_from));
         }

@@ -1876,13 +1876,25 @@ $mysqli->kill($thread_id);
     {
         $ids = prepareIds($ids);
 
+        $isNegate = false;
+        if($operation==SQL_NOT){
+            $operation='';
+            $isNegate = true;
+        }
+        
         $cnt = count($ids);
         if($cnt==0){
             return isEmptyStr($operation)?SQL_FALSE:''; // (1=0) none
         }elseif($cnt==1){
             $q = '='.$ids[0];
+            if($isNegate){
+                $q = '!'.$q;
+            }
         }elseif($cnt>1){
             $q = SQL_IN.implode(',',$ids).')';
+            if($isNegate){
+                $q = ' '.SQL_NOT.' '.$q;
+            }
         }
 
         return (!isEmptyStr($operation)?" $operation ":'').'('.$field.$q.')';
