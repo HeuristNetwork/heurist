@@ -3681,7 +3681,7 @@ $.widget( "heurist.search_faceted", {
     ,_getCountSpan: function(sl_count){          
         let s_counts = '';                  
         if((sl_count>0) && this.options.params.ui_counts_mode!='none'){
-            let s_slign = (this.options.params.ui_counts_align=='left')?'margin-left:3px;text-decoration:none':'float:right';
+            let s_slign = (this.options.params.ui_counts_align=='left')?'margin-left:3px;text-decoration:none':'float:right;';
             if(this.options.params.ui_counts_mode=='bracket'){
                 s_counts = '<span class="facet-count" style="'+s_slign+'">('+sl_count+')</span>';
             }else{
@@ -4063,7 +4063,7 @@ $.widget( "heurist.search_faceted", {
                 }else{
                     if(this.options.params.ui_counts_mode!='bracket'){
                         dcount.addClass('truncate')
-                              .css('max-width', this.options.is_publication ? '3em' : '45px')
+                              .css('max-width', '3em') //this.options.is_publication ? '3em' : '45px')
                               .attr('title', dcount.text());
                     }
                     dcount.appendTo(f_link);    
@@ -4451,7 +4451,7 @@ $.widget( "heurist.search_faceted", {
                 
                 
                 if(that.options.params.rulesonly==1 || that.options.params.rulesonly==2){
-                    //remove original 
+                    //remove original
                     $count_lbl.text(ext_count);
                 }else{
                     //keep original
