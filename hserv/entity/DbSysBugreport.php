@@ -567,8 +567,10 @@ class DbSysBugreport extends DbEntityBase
 
                 $record['details'][self::DTY_FIELD_MAPPING['bug_Image']][$idx] = $fileResult;
                 $ulf_ID = $record['details'][self::DTY_FIELD_MAPPING['bug_Image']][$idx];
-                $ulf_file_name = mysql__select_value($this->system->getMysqli(), "SELECT ulf_FileName FROM recUploadedFiles WHERE ulf_ID = {$ulf_ID}");
-                $files[] = $this->system->getSysDir(DIR_FILEUPLOADS) . $ulf_file_name;
+                if($ulf_ID>0){
+                    $ulf_file_name = mysql__select_value($this->system->getMysqli(), "SELECT ulf_FileName FROM recUploadedFiles WHERE ulf_ID = {$ulf_ID}");
+                    $files[] = $this->system->getSysDir(DIR_FILEUPLOADS) . $ulf_file_name;
+                }
             }
 
             $record['details'][self::DTY_FIELD_MAPPING['bug_Image']] = array_filter($record['details'][self::DTY_FIELD_MAPPING['bug_Image']]); // remove null/false values

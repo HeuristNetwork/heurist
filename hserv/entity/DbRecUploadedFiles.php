@@ -1449,11 +1449,13 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);
 
             $this->setData($fileinfo);
-            $ret = $this->save();//copies temp from scratch to file_upload it returns ulf_ID
+            $ulf_ID = $this->save();//copies temp from scratch to file_upload it returns ulf_ID
 
-            return $ret;
+            if($ulf_ID && is_array($ulf_ID)) {$ulf_ID = $ulf_ID[0];}
+            
+            return $ulf_ID;
        }else{
-           return false;
+            return false;
        }
 
     }
@@ -1523,7 +1525,6 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
             //temp file will be removed in save method
             $ulf_ID = $this->registerFile($tmp_file, null, false, false, $fields);
-            if($ulf_ID && is_array($ulf_ID)) {$ulf_ID = $ulf_ID[0];}
 
             return $ulf_ID;
         }else{

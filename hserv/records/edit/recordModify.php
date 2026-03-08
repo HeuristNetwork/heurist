@@ -3058,7 +3058,8 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex
                                 $err_msg = $err_msg['message'];
                                 $system->clearError();
                             }else{
-                                $dtl_UploadedFileID = $dtl_UploadedFileID[0];
+                                if(is_array($dtl_UploadedFileID)&&!empty($dtl_UploadedFileID)){$dtl_UploadedFileID = $dtl_UploadedFileID[0];}
+                                $new_values[] = $dtl_UploadedFileID;
                             }
                         }
 
@@ -3086,7 +3087,7 @@ $dtl_Value = preg_replace('#<([A-Z][A-Z0-9]*)(\s*)(?:(?:(?:(?!'.$allowed2.$regex
                             $dtl_UploadedFileID = -1; //fail
                             $err_msg = 'Can\'t register snapshot image';
                         }
-                        if(is_array($dtl_UploadedFileID)){
+                        if(is_array($dtl_UploadedFileID)&&!empty($dtl_UploadedFileID)){
                             $dtl_UploadedFileID = $dtl_UploadedFileID[0];
                         }
 

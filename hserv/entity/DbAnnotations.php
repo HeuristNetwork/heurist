@@ -758,7 +758,8 @@ class DbAnnotations extends DbEntityBase
                     $err_msg = $err_msg['message'];
                     $this->system->clearError();
                 }else{
-                    return $dtl_UploadedFileID[0];
+                    if(is_array($dtl_UploadedFileID)&&!empty($dtl_UploadedFileID)){$dtl_UploadedFileID = $dtl_UploadedFileID[0];}
+                    return $dtl_UploadedFileID;
                 }
             }
     }

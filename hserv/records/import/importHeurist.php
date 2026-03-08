@@ -1345,7 +1345,7 @@ EOD;
                                     self::$system->clearError();
                                     $dtl_UploadedFileID = null;
                                 }else{
-                                    $dtl_UploadedFileID = $dtl_UploadedFileID[0];
+                                    if(is_array($dtl_UploadedFileID)&&!empty($dtl_UploadedFileID)){$dtl_UploadedFileID = $dtl_UploadedFileID[0];}
                                     $new_values[] = $dtl_UploadedFileID;
                                 }
                             }
