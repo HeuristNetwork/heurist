@@ -434,7 +434,7 @@
 #filter_facet_resetall_hint#Clear all fields / Reset all the filters to their initial states
 #filter_facet_reset#To clear previous search click the RESET button
 #filter_facet_savestate#Save state
-#filter_facet_titleprefix#filter : 
+#filter_facet_titleprefix# 
 #filter_facet_apply_preliminary#Apply preliminary filter
 #filter_facet_mapsearch#Map Search
 #filter_facet_mapsearch_hint#Click this button to set and apply spatial search limits
