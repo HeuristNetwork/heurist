@@ -221,7 +221,7 @@ $.widget('heurist.progressReport', {
 
             // ETA like your existing code :contentReference[oaicite:2]{index=2}
             let est = (this._elapsed / done) * (total - done);
-            let estTxt = 'a few seconds';
+            let estTxt = '10 seconds';
             if (est >= 60000) estTxt = `${Math.ceil(est/60000)} minutes`;
             else if (est >= 10000) estTxt = `${Math.ceil(est/1000)} seconds`;
 

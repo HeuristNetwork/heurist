@@ -1924,7 +1924,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                             let est_remaining = (elapsed / resp[0]) * (resp[1] - resp[0]);
 
                             if(est_remaining < 10000){ // less than 10 seconds
-                                est_remaining = 'a few seconds';
+                                est_remaining = '10 seconds';
                             }else if(est_remaining < 60000){ // less than a minute
                                 est_remaining = `${Math.ceil(est_remaining / 1000)} seconds`;
                             }else{
