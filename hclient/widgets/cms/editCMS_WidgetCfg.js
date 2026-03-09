@@ -465,6 +465,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
                         $dlg.find(`input[value="${opts['show_mode']}"]`).prop('checked', true);
                     }
+
+                    if(!opts['autoExtendSingle']){
+                        opts['autoExtendSingle'] = true;
+                    }
                 
                 }else if(widget_name=='heurist_resultList'){ // standard result list
 

@@ -394,7 +394,7 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         });
     }
 
-    const outline_colour = (type == 'record') ? '#666' : '#ff0000';
+    const outline_colour = type == 'record' ? '#666' : '#ff0000';
     
     const nodecolor = getSetting('setting_entitycolor');
 

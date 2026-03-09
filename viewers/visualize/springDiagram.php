@@ -116,6 +116,30 @@ function onPageInit(success){
 //    
 function performSearch(q){
 
+    let getRelationDetails = (recordIDs, query) => {
+
+        //Finds all directly related (linked or via relationship records) records for a given set of record IDs.
+        window.hWin.HAPI4.RecordMgr.search_related({ids:recordIDs.join(',')}, (response_related) => {
+
+            if(response_related.status == window.hWin.ResponseStatus.OK){
+                // Store relationships
+                // Parse response to spring diagram format
+                let data = __parseData(recordIDs, response_related.data);
+
+                showData(data, [], query, null, null, null, isMinimalVersion ? globalOnExpandLevel : null);
+
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response_related);
+            }
+        });
+    };
+
+    if(q instanceof Set){
+
+        getRelationDetails(Array.from(q), null);
+        return;
+    }
+
     var rules = window.hWin.HEURIST4.util.getUrlParameter('rules', location.search);
 
     if(!window.hWin.HEURIST4.util.isempty(rules)){
@@ -142,20 +166,8 @@ function performSearch(q){
             if(records_ids.length <= 0){
                 return;
             }
-            //Finds all directly related (linked or via relationship records) records for a given set of record IDs.
-            window.hWin.HAPI4.RecordMgr.search_related({ids:records_ids.join(',')}, (response_related) => {
 
-                if(response_related.status == window.hWin.ResponseStatus.OK){
-                    // Store relationships
-                    // Parse response to spring diagram format
-                    let data = __parseData(records_ids, response_related.data);
-
-                    showData(data, [], query, null, null, null, isMinimalVersion ? globalOnExpandLevel : null);
-
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response_related);
-                }
-            });
+            getRelationDetails(records_ids, query);
 
         }else{
             window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -165,27 +177,15 @@ function performSearch(q){
 
 function globalOnExpandLevel(action, currentRecIDs){
 
-    let updateGraphLevels = (fullList, filterOut) => {
-
-        let newList = new Set();
-        for(const ID of fullList){
-
-            if(filterOut.has(ID)){
-                continue;
-            }
-
-            newList.add(ID);
-        }
-
-        graphLevels.push(newList);
-    };
-
     let getNextLevel = (newOnly = false) => {
 
-        let toExpand = graphLevels[graphLevels.length - 1];
+        let toExpand = graphLevels.map((set) => Array.from(set)).flat();
+        if(false){ // options.expandLastLevelOnly
+            toExpand = graphLevels[graphLevels.length - 1];
+        }
         currentRecIDs = new Set(currentRecIDs);
         let newRecIDs = new Set(newOnly ? null : currentRecIDs);
-        let hasExtensionAvailable = new Set();
+        let hasExtensionAvailable = {};
 
         for(const recID of toExpand){
 
@@ -205,7 +205,11 @@ function globalOnExpandLevel(action, currentRecIDs){
                 }
 
                 newRecIDs.add(relRecID);
-                hasExtensionAvailable.add(recID);
+
+                if(!Object.hasOwn(hasExtensionAvailable, recID)){
+                    hasExtensionAvailable[recID] = new Set();
+                }
+                hasExtensionAvailable[recID].add(relRecID);
             }
         }
 
@@ -227,7 +231,7 @@ function globalOnExpandLevel(action, currentRecIDs){
             currentRecIDs = null;
         }
 
-        if(currentRecIDs || currentRecIDs.size === 0){
+        if(!currentRecIDs || currentRecIDs.size === 0){
             $('#decreaseGraphLevel').addClass('ui-state-disabled');
             return false;
         }
@@ -254,6 +258,9 @@ function globalOnExpandLevel(action, currentRecIDs){
         if(parts.length !== 2 || parts[0] !== 'ids' || !currentRecIDs instanceof Set || currentRecIDs.size === 0){
             return;
         }
+
+        graphLevels.push(currentRecIDs); // add new level
+
         let originalIDs = parts[1].split(',').map((x) => +x);
         currentRecIDs = currentRecIDs.union(new Set(originalIDs));
     }
@@ -262,7 +269,7 @@ function globalOnExpandLevel(action, currentRecIDs){
 
         window.hWin.HEURIST4.msg.bringCoverallToFront($('body'), {'background-color': 'white', opacity: 1, color: 'black'}, `${action === 'increase' ? 'Extending' : 'Removing'} leaf nodes...`);
     
-        performSearch(`ids:${Array.from(currentRecIDs).join(',')}`);
+        performSearch(currentRecIDs);
     }
 
     return action === 'nextLevel' ? currentRecIDs : true;
@@ -294,7 +301,7 @@ function expandNode(rec_ID){
 
     window.hWin.HEURIST4.msg.bringCoverallToFront($('body'), {'background-color': 'white', opacity: 1, color: 'black'}, `Extending graph for ${title}...`);
 
-    performSearch(`ids:${Array.from(recIDs).join(',')}`);
+    performSearch(recIDs);
 }
 
 function updateRecordCache(mainRecID, rtyID, parentRecID = 0){
@@ -629,17 +636,9 @@ function addNewConnections(recordIDs, data){
             let topPos = '0em';
 
             if(isMinimalVersion){
-                let ele = $('#toolbar').find('.dropdown-content1');
-                if(ele.length>0){
-                    ele.removeClass('dropdown-content1');
-                }
-                topPos = $('#toolbar').height();
-                if(topPos < 40) { topPos = 40; }
-                topPos = topPos + 15;
-                $('#toolbar').find('.heurist-helper2').hide();
 
-                // Update wub-toolbar top as well
-                $('#showSubToolbar, .dropdown-subbar').css('top', `${topPos}px`);
+                topPos = '2em';
+
                 let subBarHeight = $('.dropdown-subbar').height() > 0 ? $('.dropdown-subbar').height() : $('.showSubToolbar').height();
                 $('#expanderSettings').css('top', topPos + subBarHeight + 20);
 

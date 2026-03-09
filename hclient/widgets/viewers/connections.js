@@ -521,13 +521,14 @@ $.widget( "heurist.connections", {
      */
     _doVisualize: function (data, skipNodeCheck = false) {
 
-        let nodeCount = data.nodes.length; console.log(nodeCount, this.options.nodeLimit);
+        let nodeCount = data.nodes.length;
         if(!skipNodeCheck && nodeCount > this.options.nodeLimit){
 
             let $dlg;
             let content = `<div>
-                The website designer has limited the number of initial nodes to ${this.options.nodeLimit} because<br>
-                large number of nodes will bog down your browser and make an unreadable graph.<br><br>
+                The website designer has limited the number of initial nodes to <strong>${this.options.nodeLimit}</strong> because<br>
+                large number of nodes will bog down your browser and make an unreadable graph.<br>
+                Node count: <strong>${nodeCount}</strong><br><br>
 
                 <label> <input type="checkbox" id="enableContinue" /> check this box if you wish to proceed in any case</label>
             </div>`;

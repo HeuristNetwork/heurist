@@ -134,11 +134,19 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 
 <div id="toolbar" class="split_bar" style="display: none;">
 
-    <div class="dropdown-content">
+    <div id="showSubToolbar" class="showMenuButton toolbarController" title="Show extended toolbar">
+        <span class="ui-icon ui-icon-wrench"></span>
+    </div>
 
-        <div>
+    <div class="dropdown-content dropdown-subbar">
 
-            <span id="lnkOpenPopup" class="fake_link toolbarController" style="cursor: pointer;padding-right: 1em;display: <?= $isMinimalVersion === 1 ? 'inline-block' : 'none' ?>;">popup <span class="ui-icon ui-icon-extlink"></span></span>
+        <div id="hideSubToolbar" class="toolbarController" style="margin: 0px;cursor: pointer;flex: 0 0 1em;padding-top: 0.8em;" title="Hide extended toolbar">
+            <span class="ui-icon ui-icon-caret-2-w" style="cursor: pointer;"></span>
+        </div>
+
+        <div style="padding-right: 0.5em;flex: 1 1 33em;line-height: 1.1em;min-width: 10em;">
+
+            <span id="lnkOpenPopup" class="fake_link toolbarController" style="cursor: pointer;margin-right: 0.2em;display: <?= $isMinimalVersion === 1 ? 'inline-block' : 'none' ?>;">popup <span class="ui-icon ui-icon-extlink"></span></span>
 
             <span style="display: inline-block;">
                 <button id="btnSingleSelect" name="selectMode" value="single" title="Select and drag single nodes">Select and drag nodes</button>
@@ -146,71 +154,53 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
             </span>
 
             <span style="display: inline-block;">
-                <span>Titles:</span>
-                <input id="showRecordTitles" title="Show node record titles" type="checkbox" />
-            </span>
-
-            <span style="margin-left: 1em; display: inline-block;">
-                <span>Font:</span>
-                <input id="recTitleSize" title="Font Size (pixels)" class="number-input" style="width: 3em; vertical-align: -1px;" type="number" min="8" max="30" step="1" />
-            </span>
-
-            <span style="margin-left: 0.5em; display: inline-block;">
-                <span>Node:</span>
-                <input id="nodeSize" title="Node size (pixels)" class="number-input" style="width: 3em; vertical-align: -1px;" type="number" min="8" max="30" step="1" />
-            </span>
-
-            <span style="margin-left: 1em; display: inline-block;">
-                <span style="border:none;background:none;">Zoom: </span>
                 <button id="btnZoomIn" style="width:20px;" title="Zoom In">In</button>
                 <button id="btnZoomOut" style="width:20px;" title="Zoom Out">Out</button>
                 <button id="btnFitToExtent" style="width:20px;" title="Fit graph to view">Fit to extent</button>
             </span>
 
-            <span style="margin-left: 1em; display: inline-block;">
-                <span style="border:none;background:none;">Export:</span>
-                <button id="gephi-export" onclick="getGephiFormat()" title="Export to GEXF for Gephi">GEPHI</button>
-                <button id="embed-export" title="Get embed code">Embed</button>
+            <span style="display: inline-block;margin-left: 0.2em;">
+                <span class="controlLabel">titles</span>
+                <input id="showRecordTitles" title="Show node record titles" type="checkbox" />
             </span>
 
-        </div>
+            <span style="display: inline-block;margin-left: 0.2em;">
+                <span class="controlLabel">font</span>
+                <input id="recTitleSize" title="Font Size (pixels)" class="number-input" style="width: 2.3em; vertical-align: -1px;" type="number" min="8" max="30" step="1" />
+            </span>
 
-    </div>
+            <span style="display: inline-block;margin-left: 0.2em;">
+                <span class="controlLabel">node</span>
+                <input id="nodeSize" title="Node size (pixels)" class="number-input" style="width: 2.3em; vertical-align: -1px;" type="number" min="8" max="30" step="1" />
+            </span>
 
-    <div id="showSubToolbar" class="showMenuButton toolbarController" title="Show extended toolbar">
-        <span class="ui-icon ui-icon-wrench"></span>
-    </div>
-
-    <div class="dropdown-content dropdown-subbar">
-
-        <div id="hideSubToolbar" class="toolbarController" style="margin: 0px; display: inline-block; height: 1em; cursor: pointer;" title="Hide extended toolbar">
-            <span class="ui-icon ui-icon-caret-2-w" style="cursor: pointer;"></span>
-        </div>
-
-        <div style="display: inline-block; margin-left: 15px;">
-
-            <span>
-                Expand 
+            <span style="display: inline-block;margin-left: 0.2em;">
+                <span class="controlLabel">expand</span> 
                 <span class="ui-icon ui-icon-triangle-1-w graphLevelControl ui-state-disabled toolbarController" id="decreaseGraphLevel" data-value="decrease" title="Trim the leaf nodes from the graph"></span>
                 <span id="graphLevel">1</span>
                 <span class="ui-icon ui-icon-triangle-1-e graphLevelControl toolbarController" id="increaseGraphLevel" data-value="increase" title="Extend the graph's leaf nodes"></span>
             </span>
 
-            <span style="margin-left: 1em;">
-                Gravity:
+            <span style="display: inline-block;margin-left: 0.2em;">
+                <span class="controlLabel">gravity</span>
                 <span id="setGravityMode">
                     <button id="gravityMode0" name="gravityMode" value="off" title="Turn off gravity (nodes stay where dragged)">Off</button>
                     <button id="gravityMode1" name="gravityMode" value="touch" title="Apply gravity when nodes are interacted with">Touch</button>
-                    <button id="gravityMode2" name="gravityMode" value="aggressive" title="Apply gravity constantly">Aggressive</button>
-                </span>
-
-                <span>
-                    Force amount:
-                    <input id="gravityAmount" class="number-input small" type="number" value="0.1" min="0" max="3" step="0.1" title="How much gravity to apply to nodes?" />
+                    <button id="gravityMode2" name="gravityMode" value="aggressive" title="Apply gravity constantly">On</button>
                 </span>
             </span>
 
-            <span style="margin-left: 1em; display: none;">
+            <span style="display: inline-block;margin-left: 0.2em;">
+                <span class="controlLabel">force</span>
+                <input id="gravityAmount" title="How much gravity to apply to nodes?" class="number-input small" style="width: 2.3em; vertical-align: -1px;" type="number" value="1" min="0" max="30" step="1" />
+            </span>
+
+            <span style="display: inline-block;margin-left: 0.2em;">
+                <button id="gephi-export" onclick="getGephiFormat()" title="Export to GEXF for Gephi">GEPHI</button>
+                <button id="embed-export" title="Get embed code">Embed</button>
+            </span>
+
+            <span style="display: none;">
                 Connections:
                 <label title="Outward Pointers">
                     <input type="checkbox" id="connectorsPtrOutward" name="connectors" value="outward" checked="checked" />
@@ -229,8 +219,6 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
         </div>
 
     </div>
-
-    <span class="heurist-helper2" style="position: absolute;left: 1em;bottom: 1em;">Double click to expand nodes</span>
 
 </div>
 
@@ -286,7 +274,7 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
     </div>
 
     <div style="border-top: 1px solid black;margin-top: 1em;padding: 0.5em; font-size: 0.95em;">
-        double click highlighted nodes<br>
+        single click highlighted nodes<br>
         to expand individually
     </div>
 

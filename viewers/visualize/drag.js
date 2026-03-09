@@ -48,8 +48,14 @@ function addNodes() {
 
             window.doubleClicked = 2;
 
-            if(settings.minimal && !settings.isDatabaseStructure && typeof expandNode === 'function'){ // expand node
-                expandNode(d.id);
+            if(settings.minimal && !settings.isDatabaseStructure && typeof expandNode === 'function'){
+                if(window.extendableNodes){
+                    // Load record details
+                    showNodeInformation(d);
+                }else{
+                    // expand node
+                    expandNode(d.id);
+                }
             }else if(!settings.isDatabaseStructure){ //Added Double Click to Edit Function - Travis Doyle 19/9
                 window.open(window.hWin.HAPI4.baseURL + '?fmt=edit&db=' + window.hWin.HAPI4.database + '&recID=' + d.id, '_blank');
             }else if(window.hWin.HAPI4.is_admin()){
@@ -166,10 +172,99 @@ function addNodes() {
           })    
          .on("click", onNodeClick)
          .on("contextmenu", onNodeClick)
+         .on('mouseover', (d) => {
+            let id = Number.parseInt(d.id);
+            if(!window.hWin.HEURIST4.util.isPositiveInt(id) || !window.extendableNodes || !Object.hasOwn(window.extendableNodes, id)){
+                return;
+            }
+            showNodeExtendCount(window.d3.event.offsetX, window.d3.event.offsetY, d.id);
+         })
+         .on('mouseleave', (d) => {
+            let id = Number.parseInt(d.id);
+            let ele = document.querySelector(`[id="${id}-extendcount"]`);
+            if(!ele){
+                return;
+            }
+            ele.remove();
+         })
          .call(drag);
 
      });            
      return nodes;
+}
+
+function showNodeExtendCount(x, y, id){
+
+    if(!window.extendableNodes || !Object.hasOwn(window.extendableNodes, id)){
+        return;
+    }
+
+    const nodecolour = getSetting('setting_entitycolor');
+    const eleID = `${id}-extendcount`;
+
+    if(document.querySelector(`[id="${eleID}"]`)){
+        document.querySelector(`[id="${eleID}"]`).setAttribute('transform', `translate(${x}, ${y})`);
+        return;
+    }
+
+    let rectypeString = '';
+    let rectypeCounts = {};
+    for(const recID of window.extendableNodes[id]){
+        if(!Object.hasOwn(nodeRecTypes, recID)){
+            continue;
+        }
+        const rtyID = nodeRecTypes[recID];
+        if(!Object.hasOwn(rectypeCounts, rtyID)){
+            rectypeCounts[rtyID] = 0;
+        }
+        rectypeCounts[rtyID] ++;
+    }
+
+    let firstRecType = true;
+    for(const rtyID in rectypeCounts){
+        if(!Object.hasOwn(rectypeCounts, rtyID)){
+            continue;
+        }
+
+        const dy = firstRecType ? '2.2em' : '1.2em';
+
+        let rtyLabel = $Db.rty(rtyID, 'rty_Name');
+        rectypeString += `<tspan x="10" dy="${dy}">${rtyLabel}: ${rectypeCounts[rtyID]}</tspan>`
+        firstRecType = false;
+    }
+
+    const content = `
+    <tspan x="10" dy="2.2em">Will add <tspan style="font-weight: bold;">${window.extendableNodes[id].size}</tspan> record(s)</tspan>
+    ${rectypeString}
+    `;
+
+    let overlay = svg.append('g')
+        .attr('transform', `translate(${x}, ${y})`)
+        .attr('id', eleID);
+
+    let rect = overlay.append('rect')
+        .attr('class', 'semi-transparant info-mode rect-info')
+        .attr('x', 0)
+        .attr('y', '1em')
+        .attr('rx', 6)
+        .attr('ry', 6)
+        .attr('fill', nodecolour)
+        .attr('stoke', '#FF0000')
+        .attr('stoke-width', 0.75);
+
+    let text = overlay.append('text')
+        .html(content)
+        .attr('x', 10)
+        .attr('y', 15)
+        .style('font-size', '0.9em');
+
+    let textDims = text.node().getBBox();
+    if(!textDims){
+        return;
+    }
+
+    rect.style('width', `${textDims.width + textDims.x + 10}px`)
+        .style('height', `${textDims.height + textDims.y}px`);
 }
 
 /**
@@ -194,8 +289,13 @@ function onNodeClick(d){
             return;
         }
 
-        // Load record details
-        showNodeInformation(d);
+        if(window.extendableNodes){
+            // expand node
+            expandNode(d.id);
+        }else{
+            // Load record details
+            showNodeInformation(d);
+        }
     }, 1000, d);
 }
 

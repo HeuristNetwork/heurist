@@ -202,10 +202,10 @@ function handleSettingsInUI() {
     }
 
     // Initialize UI buttons for zoom and refresh
-    $('#btnZoomIn').button({icon:'ui-icon-plus',showLabel:false}).on('click',
+    $('#btnZoomIn').button({icon:'ui-icon-circle-b-plus',showLabel:false}).on('click',
         function(){ zoomBtn(true); }
     );
-    $('#btnZoomOut').button({icon:'ui-icon-minus',showLabel:false}).on('click',
+    $('#btnZoomOut').button({icon:'ui-icon-circle-b-minus',showLabel:false}).on('click',
         function(){ zoomBtn(false); }
     );
     $('#btnFitToExtent').button({icon:'ui-icon-fullscreen',showLabel:false}).on('click',
@@ -465,6 +465,7 @@ function initialiseMiniToolbar(){
         if(!window.force || Number.isNaN(amount) || amount < 0){
             return;
         }
+        amount *= 0.1; // get ten percent
 
         // Apply new gravity
         const gravity = getSetting('setting_gravity');
@@ -846,14 +847,17 @@ function expanderPopup(currentLevel, nextLevel, extensionResults){
 
             removeHighlight();
             updateExpanderUI(nextLevel, currentLevel);
+            window.extendableNodes = null;
 
             settings.onExpandLevel.call(this, 'increase', newRecIDs);
         });
         $expanderContainer.find('#btnExpanderCancel').button().on('click', () => {
             removeHighlight();
+            window.extendableNodes = null;
         });
         $expanderContainer.find('#closeExpanderSettings').button().on('click', () => {
             removeHighlight();
+            window.extendableNodes = null;
         });
 
         $expanderContainer.attr('data-inited', 1);
@@ -907,8 +911,13 @@ function expanderPopup(currentLevel, nextLevel, extensionResults){
     if(hasRow){
         $expanderContainer.show('slide', {direction: 'left'}); // show popup
 
-        for(const recID of extensionAvailable){
+        for(const recID in extensionAvailable){
+            if(!Object.hasOwn(extensionAvailable, recID) || !document.querySelector(`.id${recID}`)){
+                continue;
+            }
             document.querySelector(`.id${recID}`).classList.add('expandingNode');
         }
+
+        window.extendableNodes = extensionAvailable;
     }
 }

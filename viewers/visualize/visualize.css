@@ -348,10 +348,17 @@ text.shadow {
 }
 
 .dropdown-subbar{
-    top: 4.25em;
+
+    top: 2.5em;
     position: absolute;
 
-    min-width: 7em;
+    min-width: unset;
+    margin: 0px;
+
+    display: flex;
+}
+
+.dropdown-subbar div{
     margin: 0px;
 }
 
@@ -466,7 +473,7 @@ text.shadow {
 }
 #showSubToolbar{
 
-    top: 4.75em;
+    top: 2.75em;
 
     padding: 0.5em;
 }
@@ -526,4 +533,17 @@ text.shadow {
 
 .expandingNode circle.foreground{
     fill: #2196F3 !important;
+}
+
+.controlLabel{
+    font-size: 0.8em;
+}
+
+#showRecordTitles{
+    vertical-align: middle;
+    margin: 0px 0.5em 0px 0px;
+}
+
+.dropdown-subbar .ui-controlgroup-item{
+    line-height: 0.9em;
 }
