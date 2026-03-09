@@ -47,12 +47,13 @@
                 "rst_TermsAsButtons": 1,
                 "rst_RequirementType": "required",
                 "rst_FieldConfig": [
-                    {"key": "7615", "title": "Suggestion or feature request"},
-                    {"key": "7608", "title": "Minor annoyance, workflow or cosmetic issue"},
-                    {"key": "6980", "title": "Major annoyance or unexpected behaviour"},
-                    {"key": "6982", "title": "Minor bug or small glitch"},
-                    {"key": "6977", "title": "Significant bug or problematic behaviour"},
-                    {"key": "6976", "title": "Urgent and/or severe bug"}
+                    {"key": "7615", "title": "1. Suggestion or feature request"},
+                    {"key": "6984", "title": "2. Cosmetic issues, improve documentation"},
+                    {"key": "7608", "title": "3. Minor annoyance or workflow issue"},
+                    {"key": "6982", "title": "4. Minor bug or small glitch"},
+                    {"key": "6980", "title": "5. Major annoyance or unexpected behaviour"},
+                    {"key": "6979", "title": "6. Significant bug or problematic behaviour"},
+                    {"key": "6977", "title": "7. Fatal and/or severe bug"}
                 ]
             }
         },
