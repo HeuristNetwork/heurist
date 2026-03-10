@@ -181,19 +181,19 @@ function editCMS2(website_document){
                 
                 new_ele.appendTo(_ws_body);
                 
-                
+                let websiteEditorBtn = !isWebPage ? '<div class="btn-website-edit" style="font-weight:normal !important; width: 15em;margin:0.7em 0px;"><em>Click here to set the</em><br>website layout, styles and behaviours</div>' : '';
                 _editor_panel = $('<div class="ui-layout-'+options.editor_pos+'">'
-                        +'<div class="ent_wrapper editStructure" id="tabsEditCMS"><div class="ent_header" style="height:5.5em">' 
+                        +'<div class="ent_wrapper editStructure" id="tabsEditCMS"><div class="ent_header" style="height:10.5em">' 
 
-                            +(!isWebPage ? '<div class="btn-website-edit" style="font-weight:normal !important; width: fit-content;margin:0.7em 0px;">Website layout / properties</div>' : '')
-                            +`<div style="line-height: 1em;font-size: smaller;"><span class="btn-website-url" style="display:inline-block;color:black;padding-right:5px;">Website URL</span>`
-                            +`<a href="#" class="website-url truncate" style="color: blue;display: inline-block;width: ${isWebPage ? '65' : '70'}%;vertical-align: -1px;"></a></div>`
+                            +websiteEditorBtn
+                            +`<div style="line-height: 1em;font-size: smaller;"><span class="btn-website-url" style="display:inline-block;color:black;padding-right:5px;">Cite website URL as:</span><br>`
+                            +`<a href="#" class="website-url truncate" style="color: blue;display: inline-block;width: ${isWebPage ? '65' : '90'}%;padding: 0.5em 0px 0px 0.5em;"></a></div>`
 
                             +'<span style="position:absolute;top: 0.3em; width: 1em; height: 1em; font-size: 3em; cursor: pointer;'
                                         +(options.editor_pos=='west'?'right:0.05em':'')+'" '
                             +'class="bnt-cms-hidepanel ui-icon ui-icon-carat-2-'+(options.editor_pos=='west'?'w':'e')+'"></span>'
 
-                            +'</div><div class="ent_content_full" style="top:5.5em">'
+                            +'</div><div class="ent_content_full" style="top:10.5em">'
                             
                             +'<ul style="margin-'+(options.editor_pos=='west'?'right':'left')+':40px;font-size:9px;">'
                                 +'<li><a href="#treeWebSite">Site</a></li><li><a href="#treePage">Page</a></li>'
@@ -294,7 +294,8 @@ function editCMS2(website_document){
                             }
                         },
                         onresize_end: function(){
-                            let width = _ws_body.layout().state['west']['outerWidth'] <= 215 ? '60%' : '70%';
+                            let width = _ws_body.layout().state['west']['outerWidth'] <= 215 ? '60%' : '90%';
+                            width = isWebPage && width === '90%' ? '70%' : width;
                             _editor_panel.find('a.website-url').css('width', width);
                         },
                         togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-'+(options.editor_pos=='west'?'w':'e')+'"></div>',
@@ -369,7 +370,7 @@ function editCMS2(website_document){
         if(!isWebPage){
             _editor_panel.find('.btn-website-edit')
                          .button({classes:{'ui-button': 'ui-button-action'}})
-                         .css({'padding':'5px','font-size':'smaller'});
+                         .css({'padding':'1em 0.5em'});
         }
 
         _editor_panel.find('.btn-website-addpage').on('click',_addNewRootMenu); // button({icon:'ui-icon-plus'}).
