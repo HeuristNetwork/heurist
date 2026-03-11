@@ -2714,9 +2714,9 @@ window.hWin.HEURIST4.ui = {
         // owned params (options take priority)
         if (isEdit) {
             params.push('edit=' + options.edit);
-        }
-        if (version !== '' && version !== '2') {
-            params.push('ver=' + version);
+            if (version !== '' && version !== '2') {
+                params.push('ver=' + version);
+            }
         }
         if (options.header) {
             params.push('header=' + options.header);
