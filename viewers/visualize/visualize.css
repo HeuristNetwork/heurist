@@ -80,9 +80,13 @@
 .number-input { 
     cursor: text;
     text-align: center;
+
+    border: none;
+    outline: none;
+    background-color: #EFEFEF;
 }
 .number-input.small {
-     max-width: 40px;
+    max-width: 40px;
 }
 .number-input.medium {
     max-width: 50px;

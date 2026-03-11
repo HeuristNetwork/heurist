@@ -98,7 +98,7 @@ function updateCircles(selector, fgColor, isSelection) {
         return isSelection ? fgColor : settings['fillColour'];
     };
 
-    let bgColor = !isSelection && !settings.isDatabaseStructure ? determineColour : getSetting('setting_entitycolor');
+    let bgColor = getSetting('setting_entitycolor');
     bgColor = isSelection ? window.selectionColor : bgColor;
 
     let nodes = window.d3.selectAll(selector);

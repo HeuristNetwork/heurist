@@ -100,16 +100,38 @@ function onPageInit(success){
 
     if(!success) {return;}
 
-        var q = window.hWin.HEURIST4.util.getUrlParameter('q', location.search);
+    var q = window.hWin.HEURIST4.util.getUrlParameter('q', location.search);
 
-        // Example query: t:26 f:85:3313  f:1:building
-        // Perform database query if possible (for standalone mode - when springDiagram.php is a separate page)
-        if( !window.hWin.HEURIST4.util.isempty(q) )
-        {
-            isStandAlone = true;
+    // Example query: t:26 f:85:3313  f:1:building
+    // Perform database query if possible (for standalone mode - when springDiagram.php is a separate page)
+    if( !window.hWin.HEURIST4.util.isempty(q) )
+    {
+        isStandAlone = true;
 
-            performSearch(q);
+        performSearch(q);
+
+        return;
+    }
+
+    if(isMinimalVersion){
+
+        window.visualiserID = window.hWin.HEURIST4.util.getUrlParameter('visID', location.search);
+
+        if(!window.visualiserID){
+
+            window.visualiserID = Math.round(Math.random() * 9000);
+            window.addEventListener('beforeunload', () => localStorage.removeItem(`visConnection${window.visualiserID}`));
+        }else{
+
+            let newestUpdate = localStorage.getItem(`visConnection${window.visualiserID}`);
+            newestUpdate = window.hWin.HEURIST4.util.isJSON(newestUpdate);
+            if(newestUpdate.q){
+
+                isStandAlone = true;
+                performSearch(newestUpdate.q);
+            }
         }
+    }
 }
 // 
 // onPageInit or expandNode -> performSearch -> showData
@@ -155,6 +177,7 @@ function performSearch(q){
     const MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
 
     let query = {q: q, rules: rules, w: 'a', detail: 'detail', l: MAXITEMS};
+    query['verify_credentials'] = <?= $isMinimalVersion === 3 ? '"ok"' : '""' ?>;
 
     window.hWin.HAPI4.RecordMgr.search(query, (response) => {
 
@@ -603,6 +626,44 @@ function addNewConnections(recordIDs, data){
                     graphLevels.push(new Set(recIDs));
                     localStorage.setItem('extendedLevel', 0);
                 }
+
+                <?php if($isMinimalVersion === 3){ ?>
+                    let lastUpdate = Date.now();
+                    if(window.hWin.HEURIST4.util.isPositiveInt(window.visualiserID)){
+
+                        let latestUpdate = localStorage.getItem(`visConnection${window.visualiserID}`);
+                        latestUpdate = window.hWin.HEURIST4.util.isJSON(latestUpdate);
+
+                        let intervalID;
+                        intervalID = setInterval(() => {
+
+                            let newestUpdate = localStorage.getItem(`visConnection${window.visualiserID}`);
+                            newestUpdate = window.hWin.HEURIST4.util.isJSON(newestUpdate);
+                            if(!newestUpdate || !newestUpdate.q){
+                                localStorage.removeItem(`visConnection${window.visualiserID}`);
+                                clearInterval(intervalID);
+                                return;
+                            }
+                            if(newestUpdate.timestamp <= lastUpdate){
+                                return;
+                            }
+
+                            lastUpdate = newestUpdate.timestamp;
+                            clearInterval(intervalID);
+                            performSearch(newestUpdate.q);
+                        }, 1000);
+
+                        lastUpdate = latestUpdate.timestamp ?? lastUpdate;
+                        if(!new_request && latestUpdate.q){
+                            performSearch(latestUpdate.q);
+                        }
+                    }
+                <?php }else{ ?>
+
+                    if(new_request && window.visualiserID){
+                        localStorage.setItem(`visConnection${window.visualiserID}`, JSON.stringify({q: `ids:${Array.from(recIDs).join(',')}`, timestamp: Date.now()}) );
+                    }
+                <?php } ?>
             }
 
             zoomToFit();

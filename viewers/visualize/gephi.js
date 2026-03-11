@@ -23,17 +23,20 @@
  */
 function getGephiFormat() {
 
-    if(window.parent?.document && window.parent.document.querySelector('#export_record_popup')){ // remove previous popup
-        window.parent.document.querySelector('#export_record_popup').parentNode.nextElementSibling.remove();
-        window.parent.document.querySelector('#export_record_popup').parentNode.remove();
-    }
+    const ID = Math.floor(Math.random() * 90000);
+    let query = typeof window.visualiserRequest === 'string' ? {q: window.visualiserRequest} : window.visualiserRequest;
+    window.hWin.HAPI4.SystemMgr.prepareParameters('export', query, 0, ID);
 
-    let url = `${window.hWin.HAPI4.baseURL}hclient/framecontent/exportMenu.php?db=${window.hWin.HAPI4.database}`;
-    url += `&output=gephi&skipFields=1`;
+    let params = new URLSearchParams();
 
-    if(typeof window.visualiserRequest === 'string' && settings.minimal){
-        url += `&${window.visualiserRequest.replace(':', '=')}`
-    }
+    params.set('w', 'all');
+    params.set('format', 'gephi');
+    params.set('file', '1');
+    params.set('linkmode', 'none');
+    params.set('preparedID', ID);
+    params.set('db', window.hWin.HAPI4.database);
 
-    window.hWin.HEURIST4.msg.showDialog(url, {width: 650, height: 568, dialogid: 'export_record_popup'});
+    const url = `${window.hWin.HAPI4.baseURL}hserv/controller/record_output.php?${params.toString()}`;
+
+    window.open(url, '_blank');
 }

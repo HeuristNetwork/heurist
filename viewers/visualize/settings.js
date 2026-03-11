@@ -448,18 +448,64 @@ function initialiseMiniToolbar(){
             return;
         }
 
-        const URL = `${window.hWin.HAPI4.baseURL}viewers/visualize/springDiagram.php?db=${window.hWin.HAPI4.database}&q=${window.visualiserRequest}&mini=2`;
-        window.hWin.HEURIST4.msg.showDialog(URL, {title: `Record Network Graph`, ok: window.hWin.HR('Cancel'), width: 900, height: 900});
+        if(!window.visualiserID){
+            window.visualiserID = Math.round(Math.random() * 9000);
+            window.addEventListener('beforeunload', () => localStorage.removeItem(`visConnection${window.visualiserID}`));
+        }
+        const visID = window.visualiserID;
+        localStorage.setItem(`visConnection${visID}`, JSON.stringify({q: window.visualiserRequest, timestamp: Date.now()}) );
+
+        const URL = `${window.hWin.HAPI4.baseURL}viewers/visualize/springDiagram.php?db=${window.hWin.HAPI4.database}&visID=${visID}&mini=2`;
+        window.hWin.HEURIST4.msg.showDialog(URL, {title: `Record Network Graph`, ok: window.hWin.HR('Cancel'), width: 900, height: 900,
+            onOpen: function(event, ui){
+
+                let $dialog = $(this);
+                let $dialogContainer = $dialog.parent();
+                let $toolbar = $dialogContainer.find('.ui-dialog-titlebar');
+
+                let $btnFullscreen = $('<button>', {
+                    class: 'ui-dialog-titlebar-close',
+                    title: 'Enlarge popup to maximum size',
+                    style: 'right: 3.3em;'
+                }).button({icon: 'ui-icon-fullscreen', showLabel: false}).appendTo($toolbar);
+
+                let $btnNewTab = $('<button>', {
+                    class: 'ui-dialog-titlebar-close',
+                    title: 'Open diagram in a new tab',
+                    style: 'right: 6.3em;'
+                }).button({icon: 'ui-icon-newwin', showLabel: false}).appendTo($toolbar);
+
+                $btnFullscreen.on('click', () => {
+
+                    let width = window.hWin.innerWidth * 0.9;
+                    let height = window.hWin.innerHeight * 0.9;
+
+                    $dialogContainer.width(width);
+                    $dialog.height(height);
+
+                    $dialogContainer.position({my: 'center', at: 'center', of: window.hWin});
+                });
+
+                $btnNewTab.on('click', () => {
+
+                    localStorage.setItem(`visConnection${visID}`, JSON.stringify({q: window.visualiserRequest, timestamp: Date.now()}) );
+
+                    const URL = `${window.hWin.HAPI4.baseURL}viewers/visualize/springDiagram.php?db=${window.hWin.HAPI4.database}&visID=${visID}&mini=3`;
+                    window.open(URL, '_blank');
+                });
+            }
+        });
     });
 
     $('#showSubToolbar').on('click.visualiser', () => {
         $('#showSubToolbar').hide('slide', {direction: 'left'}, 400, () => $('.dropdown-subbar').show('slide', {direction: 'left'}));
+        setTimeout(setupAutoHideToolbar, 500);
     });
     $('#hideSubToolbar').on('click.visualiser', () => {
         $('.dropdown-subbar').hide('slide', {direction: 'left'}, 400, () => $('#showSubToolbar').show('slide', {direction: 'left'}));
     });
 
-    $('#gravityAmount').val(0.1).on('change.visualiser', () => {
+    $('#gravityAmount').val(1).on('change.visualiser', () => {
 
         let amount = Number.parseFloat($('#gravityAmount').val());
         if(!window.force || Number.isNaN(amount) || amount < 0){

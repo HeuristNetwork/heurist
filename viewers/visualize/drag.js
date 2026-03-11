@@ -105,7 +105,7 @@ function addNodes() {
             })
             .attr("class", "background icon-background")
             .style({'fill-opacity': '0.5', 'display': icon_display})
-            .attr("fill", determineColour); //entitycolor        
+            .attr("fill", entitycolor);
         
         //add internal circle
         node.append("circle")

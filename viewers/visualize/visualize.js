@@ -246,6 +246,16 @@ let maxCountForLinks;
             });
 
             document.querySelector('#expanderSettings').setAttribute('data-inited', 0);
+
+            document.removeEventListener('mousedown', setupAutoHideToolbar);
+            if(window.hWin.HEURIST4.util.isPositiveInt(window.visualiserInactivity)){
+                clearTimeout(window.visualiserInactivity);
+            }
+        }
+
+        if(settings.minimal){
+            document.addEventListener('mousedown', setupAutoHideToolbar);
+            setupAutoHideToolbar();
         }
 
         return this; // Return jQuery object for chaining
@@ -2067,3 +2077,32 @@ function toggleDisplay(type, ID, showElement){
         handleLines(`path[data-connector*="r${ID}t"]`);
     }
 }
+
+function autoHideToolbar(){
+
+    window.visualiserInactivity = null;
+
+    let hideToolbarEle = document.querySelector('#hideSubToolbar');
+    if(!hideToolbarEle || !hideToolbarEle.checkVisibility()){
+        return;
+    }
+
+    let event = new Event('click');
+    hideToolbarEle.dispatchEvent(event);
+
+    window.visualiserInactivity = null;
+};
+
+function setupAutoHideToolbar(){
+
+    let hideToolbarEle = document.querySelector('#hideSubToolbar');
+    if(!hideToolbarEle || !hideToolbarEle.checkVisibility()){
+        return;
+    }
+
+    if(window.hWin.HEURIST4.util.isPositiveInt(window.visualiserInactivity)){
+        clearTimeout(window.visualiserInactivity);
+    }
+
+    window.visualiserInactivity = setTimeout(autoHideToolbar, 10000);
+};
