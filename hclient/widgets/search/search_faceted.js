@@ -181,7 +181,8 @@ $.widget( "heurist.search_faceted", {
         hide_no_value_facets: true, // hide facets with no values, default true
         
         search_page: null, //target page (for CMS) - it will navigate to this page and pass search results to search_realm group
-        search_realm:  null  //accepts search/selection events from elements of the same realm only
+        search_realm:  null,  //accepts search/selection events from elements of the same realm only
+        onSelect: null  // callback for facet selection
     },
     
     _current_query_request_id:null,
@@ -1742,7 +1743,7 @@ $.widget( "heurist.search_faceted", {
     //
     //
     //
-    ,doSearch: function(){
+    ,doSearch: function(invokeCallback){
 
         let query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q ); //clone 
         let isform_empty = this._fillQueryWithValues(query);
@@ -1842,7 +1843,10 @@ $.widget( "heurist.search_faceted", {
         //perform search
         this._facetXhr = window.hWin.HAPI4.RecordSearch.doSearch( this, request );
         
-        //perform search for facet values
+        //
+        if(invokeCallback && window.hWin.HEURIST4.util.isFunction(this.options.onSelect)){
+            this.options.onSelect.call(this);
+        }
        
     }
     
@@ -3907,7 +3911,7 @@ $.widget( "heurist.search_faceted", {
                         }
 
                         that._last_active_facet = facet_index;
-                        that.doSearch();
+                        that.doSearch(true);
                         
                         return false;
                     }
@@ -3959,7 +3963,7 @@ $.widget( "heurist.search_faceted", {
         
         if(prevvalue!=value){
             this._last_active_facet = facet_index;
-            this.doSearch();
+            this.doSearch(true);
         }
     }
 
@@ -4129,7 +4133,7 @@ $.widget( "heurist.search_faceted", {
 
                     that._last_term_value = value != '' ? value : null;
 
-                    that.doSearch();
+                    that.doSearch(true);
                     
                     return false;
                 }
