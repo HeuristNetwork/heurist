@@ -605,10 +605,10 @@ class USystem {
      * Uses a flag file (e.g., "once_per_day_YYYY-MM-DD") in HEURIST_FILESTORE_ROOT to ensure tasks run only once per day.
      * Removes flag files for previous days.
      * Tasks include sending daily error reports, checking Heurist version, and updating DeepL languages.
-     *
+     * @param \hserv\System $system Initialised Heurist system instance
      * @return void
      */
-    public static function executeScriptOncePerDay(){
+    public static function executeScriptOncePerDay($system){
 
         $now = getNow();
         $flag_file = HEURIST_FILESTORE_ROOT.'once_per_day_'.$now->format('Y-m-d');
@@ -638,7 +638,7 @@ class USystem {
         self::sendDailyErrorReport();
         self::heuristVersionCheck();// Check if different local and server code versions are different
         self::updateDeeplLanguages();// Get list of allowed target languages from Deepl API
-        self::removePreparedParameters();// Remove potential leftover prepared parameters
+        self::removePreparedParameters($system);// Remove potential leftover prepared parameters
     }
 
     /**
@@ -801,40 +801,55 @@ class USystem {
     }
 
     /**
-     * Clear temporary perpared parameters from DB scratch directory
-     *
+     * Clear temporary perpared parameters from DB scratch directories
+     * @param \hserv\System $system Initialised Heurist system instance
      * @return void
      */
-    private static function removePreparedParameters(){
+    private static function removePreparedParameters($system){
 
-        if(defined('HEURIST_SCRATCH_DIR')){
+        if(!\defined('DIR_SCRATCH') || !\defined('HEURIST_FILESTORE_ROOT')){
             return;
         }
 
-        $files = scandir(HEURIST_SCRATCH_DIR);
+        $types = ['export', 'log'];
+        $databases = mysql__getdatabases4($system->getMysqli(), false);
         $yesterday = strtotime('-1 day');
 
-        foreach($files as $filename){
+        foreach($databases as $database){
 
-            $file = HEURIST_SCRATCH_DIR.$filename;
-            if(empty($filename) || $filename === '.' || $filename === '..' || $filename === 'index' || is_dir($file)){
+            $dbRoot = HEURIST_FILESTORE_ROOT.basename($database).'/';
+            $dbScratch = $dbRoot . DIR_SCRATCH;
+
+            if(!folderExists($dbScratch, false)){
                 continue;
             }
 
-            [$name, $ext] = explode('.', $filename);
+            $files = scandir($dbScratch);
 
-            if($ext !== 'json'){
-                continue;
+            foreach($files as $filename){
+
+                $file = "{$dbScratch}{$filename}";
+                if(empty($filename) || $filename === '.' || $filename === '..' || $filename === 'index' || is_dir($file)){
+                    continue;
+                }
+
+                [$name, $ext] = explode('.', $filename);
+
+                if($ext !== 'json'){
+                    continue;
+                }
+
+                $nameParts = explode('_', $name);
+                $date = filemtime($file);
+
+                if(!\in_array($nameParts[0], $types) || !is_numeric($nameParts[1]) || $yesterday < $date){
+                    continue;
+                }
+
+                fileDelete($file);
             }
-
-            $date = explode('_', $name)[1];
-
-            if(!is_numeric($date) || intval($date) > $yesterday){
-                continue;
-            }
-
-            fileDelete($file);
         }
+
     }
     
     /**

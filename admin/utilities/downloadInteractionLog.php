@@ -59,6 +59,10 @@ function processJsonLog($json){
 
     if(!empty($json['details']['ids'])){
         $line[] = is_array($json['details']['ids']) ? implode('|', $json['details']['ids']) : $json['details']['ids'];
+    }elseif($json['action'] === 'VisitPage' && !empty($json['details']['website'])){
+        $value = $json['details']['website'];
+        $value .= !empty($json['details']['website']) && $json['details']['website'] != $json['details']['page'] ? "/{$json['details']['page']}" : '';
+        $line[] = $value;
     }else{
         $line[] = '';
     }

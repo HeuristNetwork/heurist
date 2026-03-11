@@ -624,6 +624,12 @@ class HSystemMgr {
             
             }else{
 
+                if(supplementary_info && activity === 'VisitPage'){
+                    let [website, page] = supplementary_info.toString().split('/');
+                    page = window.hWin.HEURIST4.util.isempty(page) ? website : page;
+                    supplementary_info = {website: website, page: page};
+                }
+
                 const sessionID = Math.floor(Math.random() * 90000);
                 this.prepareParameters('log', supplementary_info, 0, sessionID);
 

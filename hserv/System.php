@@ -174,7 +174,7 @@ class System {
             && $this->initPathConstants()){
 
             if($this->needFullSessionCheck){
-                USystem::executeScriptOncePerDay();
+                USystem::executeScriptOncePerDay($this);
             }
 
             $this->loginVerify( false );//load user info from session on system init
