@@ -138,6 +138,8 @@ $.widget( "heurist.recordListExt", {
     /** @memberof heurist.recordListExt @instance @private @property {?jQuery} _print_frame - Hidden iframe used for printing content. */
     _print_frame: null, // for printing
     
+    _progressDiv: null,
+    
     /**
      * @memberof heurist.recordListExt
      * @instance
@@ -200,7 +202,7 @@ $.widget( "heurist.recordListExt", {
             .appendTo( this.div_content );
         }
         if(this.options.showProgress){
-            $('<div id="progressbar_div" class="ent_content_full" style="display:none;top:0px;padding:5px;z-index:999;background:white;"></div>').appendTo( this.div_content );
+            this._progressDiv = $('<div id="progressbar_div" class="ent_content_full" style="display:none;top:0px;padding:5px;z-index:999;background:white;"></div>').appendTo( this.div_content );
         }
         
         if(this.options.is_popup){
@@ -478,6 +480,8 @@ $.widget( "heurist.recordListExt", {
             this.options.is_single_selection = true;
         }
         
+        
+        
     }, //end _create
 
     /**
@@ -500,7 +504,7 @@ $.widget( "heurist.recordListExt", {
         }        
         
         if(this.options.showProgress){
-            const session_id = window.hWin.HEURIST4.msg.showProgress({container:this.element.find('#progressbar_div')});
+            const session_id = window.hWin.HEURIST4.msg.showProgress({container:this._progressDiv});
             newurl = newurl + '&session=' + session_id;
         }else{
             this.loadanimation(true);    
@@ -1028,7 +1032,7 @@ $.widget( "heurist.recordListExt", {
         }else{
             this.div_content.css('background','none');
             if(this.options.showProgress){
-                window.hWin.HEURIST4.msg.hideProgress();
+                window.hWin.HEURIST4.msg.hideProgress(this._progressDiv);
             }
         }
     },
