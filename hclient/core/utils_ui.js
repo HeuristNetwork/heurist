@@ -1882,7 +1882,7 @@ window.hWin.HEURIST4.ui = {
                 rec_Title += (' - '+info['dtl_EndDate']);
             }
         }
-        rec_Title = window.hWin.HEURIST4.util.stripTags(rec_Title); //was htmlEscape
+        rec_Title = window.hWin.HEURIST4.util.stripTags(rec_Title, 'strong,em,b,i,u'); //was htmlEscape
         
         let ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
         let sRelBtn = '';
