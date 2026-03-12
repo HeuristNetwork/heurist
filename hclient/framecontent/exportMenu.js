@@ -445,10 +445,12 @@ function hexportMenu( container ) {
                 if(opts.format!='iiif' && opts.questionResolved!==true){
                     let $expdlg = window.hWin.HEURIST4.msg.showMsgDlg(
     '<p>The records you are exporting may contain pointers to other records which are not in your current results set. These records may additionally point to other records.</p>'
-    +'<p style="padding:20px 0"><label><input type="radio" name="links" value="direct" style="float:left;margin-right:8px;" checked/>Follow pointers and relationship markers in records <b>(recommended)</b></label>'
+    +'<p style="padding:20px 0">'
+    +'<label><input type="radio" name="links" value="none" style="float:left;margin-right:8px;" checked />'
+        +'<span style="display: inline-block;width: 50em;">Only export current results and connections within this set<br><em>(record pointers and relationship markers to other records will be represented by the target record title and relationship type where applicable)</em></span></label>'
     +'<br><br><label><input type="radio" name="links" value="direct_links" style="float:left;margin-right:8px;"/>Follow only pointers, ignore relationship markers <warning about losing relationships></label>'
-    +'<br><br><label><input type="radio" name="links" value="none" style="float:left;margin-right:8px;"/>Don\'t follow pointers or relationship markers (you will lose any data which is referenced by pointer fields in the exported records)</label>'
-    +'<br><br><label><input type="radio" name="links" value="all" style="float:left;margin-right:8px;"/>Follow ALL connections including reverse pointers" (warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</label></p>'
+    +'<br><br><label><input type="radio" name="links" value="direct" style="float:left;margin-right:8px;" />Follow pointers and relationship markers in records<br><em>(recommended for XML/JSON export)</em></label>'
+    +'<br><br><label><input type="radio" name="links" value="all" style="float:left;margin-right:8px;"/>Follow ALL connections including reverse pointers"<br><em>(warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</em></label></p>'
     +(opts.format=='hml'?'<p><input type="checkbox" name="human_readable_names"/>Include human-readable names and local IDs for everything '
     +'<div class="heurist-helper3">(NOT RECOMMENDED except for small subset troubleshooting.If checked this will result in a VERY large file and VERY long export time)</div>':'')
     +(opts.format=='rdf'?'<p>Since, RDF export is experimental please specify the access word: <input type="password" name="rdfpwd"/>':'')
@@ -469,7 +471,8 @@ function hexportMenu( container ) {
                     },
                     {
                         yes: 'Proceed',
-                        no: 'Cancel'
+                        no: 'Cancel',
+                        title: 'Record pointer and Relationship marker handling'
                     });
 
                     return;
@@ -494,7 +497,6 @@ function hexportMenu( container ) {
         const toStoreParams = {};
         const longParameters = new Set(['q', 'columns']);
 
-        // IMPORTANT: forEach(async ...) won't await; use for..of
         for (const [key, value] of qParams.entries()) {
 
             if (typeof value === 'string' && value.length > parameterLimit) {
