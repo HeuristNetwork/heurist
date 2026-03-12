@@ -113,6 +113,7 @@ spatial_filter  - spatial filter (optional)
 search_on_reset - search for empty form (on reset and on init)
 
 ui_prelim_filter_toggle   - allow toggle on/off "sup_filter"
+ui_prelim_filter_toggle_init - whether the super filter is applied from start
 ui_prelim_filter_toggle_mode - direct or reverse mode (0|1)
 ui_prelim_filter_toggle_label - label on UI
 
@@ -890,19 +891,27 @@ $.widget( "heurist.search_faceted", {
        //add toggle for supplementary filter
        if(this.options.params.sup_filter){
            if(this.options.params.ui_prelim_filter_toggle){
-               
-               if(this._use_sup_filter==null){
-                    this._use_sup_filter = (that.options.params.ui_prelim_filter_toggle_mode==0);
-               }
+
+                let checkedStatus = '';
+                if(this._use_sup_filter==null){
+
+                    let defChecked = !Object.hasOwn(that.options.params, 'ui_prelim_filter_toggle_init') || that.options.params.ui_prelim_filter_toggle_init;
+                    this._use_sup_filter = defChecked && this.options.params.ui_prelim_filter_toggle_mode == 0 || !defChecked && this.options.params.ui_prelim_filter_toggle_mode == 1;
+                    checkedStatus = defChecked ? 'checked' : '';
+
+                }else{
+
+                    checkedStatus = (this.options.params.ui_prelim_filter_toggle_mode == 0 && this._use_sup_filter)
+                                 || (this.options.params.ui_prelim_filter_toggle_mode != 0 && !this._use_sup_filter)
+                                 ? 'checked' : '';
+                }
                
                let lbl = window.hWin.HRJ('ui_prelim_filter_toggle_label', this.options.params, this.options.language);
                if(!lbl) lbl = window.hWin.HR('filter_facet_apply_preliminary');
                
                let ele = $("<div>").html(
                             '<h4 style="margin:0;"><div class="input-cell" style="display:block;">'
-                                +'<input type="checkbox" '+(((this.options.params.ui_prelim_filter_toggle_mode==0 && this._use_sup_filter)
-                                || (this.options.params.ui_prelim_filter_toggle_mode!=0 && !this._use_sup_filter))
-                                ?'checked':'')+'/>'                            
+                                +'<input type="checkbox" '+checkedStatus+'/>'                            
                                 +lbl
                             +'</h4>').css({'border-bottom': '1px solid lightgray'}).appendTo($fieldset);
                             

@@ -1026,6 +1026,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 $dlg.find('#svs_AdditionalFilterLabel').val(this.options.params.ui_additional_filter_label);
 
                 $dlg.find('#svs_PrelimFilterToggle').prop('checked', this.options.params.ui_prelim_filter_toggle!==false);
+                $dlg.find('#svs_PrelimFilterToggleInit').prop('checked', !Object.hasOwn(this.options.params, 'ui_prelim_filter_toggle_init') || this.options.params.ui_prelim_filter_toggle_init!==false);
                 $dlg.find('#svs_PrelimFilterToggleMode'
                         +(this.options.params.ui_prelim_filter_toggle_mode==1)?'1':'0')
                         .prop('checked', true);
@@ -1085,6 +1086,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 $dlg.find('#svs_AdditionalFilterLabel').val(window.hWin.HR('filter_facet_general_search'));
                 
                 $dlg.find('#svs_PrelimFilterToggle').prop('checked', true);
+                $dlg.find('#svs_PrelimFilterToggleInit').prop('checked', true);
                 $dlg.find('#svs_PrelimFilterToggleMode0').prop('checked', true);
                 $dlg.find('#svs_PrelimFilterToggleLabel').val(window.hWin.HR('filter_facet_apply_preliminary'));
                 
@@ -2448,6 +2450,7 @@ $.widget( "heurist.search_faceted_wiz", {
         this.options.params.search_on_reset = $dlg.find('#svs_SearchOnReset').is(':checked');
          
         this.options.params.ui_prelim_filter_toggle = $dlg.find('#svs_PrelimFilterToggle').is(':checked');
+        this.options.params.ui_prelim_filter_toggle_init = $dlg.find('#svs_PrelimFilterToggleInit').is(':checked');
         this.options.params.ui_prelim_filter_toggle_mode =  $dlg.find('#svs_PrelimFilterToggleMode0').is(':checked')?0:1;
         this.options.params.ui_prelim_filter_toggle_label = $dlg.find('#svs_PrelimFilterToggleLabel').val();
         
