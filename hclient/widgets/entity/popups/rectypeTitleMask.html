@@ -35,30 +35,34 @@
         </div>
             
         <div id="formContainer" style="position:absolute;top:0px;bottom:0px;left:220px;right:5px;overflow-y:auto;overflow-x: hidden">
-                <div style="padding:10px;text-align:left;padding-bottom:0px;" class="heurist-helper2">
-                    The title mask builds a composite title from fields in the record (see manual).
+                <div style="padding:10px;text-align:left;padding-bottom:0px;" class="heurist-helper">
 
-                    Field values identified by [ ] are inserted into the mask,<br>
+                    The title mask builds a constructed/composite title from fields in the record.
+                    <br>The constructed value is used as the extended title displayed in search results and other lists.
+                    <br>It can also be used in the construction of other titles eg. parent records or relationships.
+                    <br><u>It is well worth investing time and thought</u> in defining good constructed titles.
+                    
+                    <p><u>Field values</u> are inserted into the title mask by enclosing the field name in [  ]
+                    <br>e.g. <b>[Title], pp. [Start_Page]-[End_Page]</b> might generate: <b>"Alice in Wonderland, pp. 37-39" </b>
+                    </p>
+                    
+                    <p><u>Inserting fields</u>: The element names in square brackets MUST match field names for this record type.
+                    <br>Use the tree view of fields on the left to select fields to insert
+                    <br>To insert a literal square-bracket, use two consecutive square-brackets: [[ or ]] 
+                    </p>
 
-                    e.g. <b>[Title], pp. [Start_Page]-[End_Page] </b> might generate:
-
-                    <b>"Alice in Wonderland, pp. 37-39" </b><br>&nbsp;<br>
-
-                    The element names in square brackets should match field names for this record type.<br>
-
-                    The constructed value is used as the extended title displayed in search results and other lists.<br>
-
-                    To insert a literal square-bracket, use two consecutive square-brackets ([[ or ]]).<br>&nbsp;<br>
-
-                    Add optional text if a value is not available by adding {\Text for existing value \Text for missing value} after a field.<br>
-
-                    e.g. <b>[Starting_date] {\Starting date of: \No starting date}</b> will either generate:<br>
-
-                    <b>"Starting date of: 04-11-1974"</b> or <b>"No starting date"</b> if Start_date is empty.<br>
-
-                    Additional add a character cap to field values by adding the desire amount within the optional text like so,<br>
-
-                    {<b>50</b> \Text for existing value \Text for missing value} will cause the value, if it exists, to show 50 characters max.<br>&nbsp;<br>
+                    <p><u>Optional text</u>: Fixed texts can precede the value or replace the value if the value is missing:
+                    <br> e.g. <b>[Starting_date] {\Starting date: \No starting date}</b> will either generate:
+                    <br><b>"Starting date: 04-11-1974"</b> or <b>"No starting date"</b> if Start_date is empty.
+                    </p>
+                    
+                    <p><u>Limit length</u>: To add a character limit to field values, add the count within the optional text specification:
+                    <br><b>{50 \Text for existing value \Text for missing value}</b>  will limit the value, if it exists, to 50 characters followed by an elipsis ...
+                    </p>
+                    <p><u>We strongly recommend putting each field on a separate line</u> for readability (line breaks in the title mask are ignored)
+                    </p> 
+                    <p>You may use <u>underline</u>, <b>bold</b>, <i>italics</i>, and other simple html in the title.
+                    </p>
                 </div>
 
                 <hr>
@@ -67,7 +71,9 @@
                     <b>Build Mask:</b> &nbsp;&nbsp;&nbsp; <button id="btnInsertField" style="width:60px;">Insert fields</button>
                     &nbsp;&nbsp;<span class="heurist-helper2">Select fields in tree and click button to insert in mask at cursor position</span>
                     <br>
-                    <span class="heurist-helper2" style="display: inline-block;padding:10px 0px;">For legibility we strongly advise splitting field specifications onto separate lines (which will be combined in the result)</span>
+                    <span class="heurist-helper2" style="display: inline-block;padding:10px 0px;">
+                    For legibility we strongly advise splitting field specifications onto separate lines (which will be combined in the result)</span>
+                    <br>Use <u>underline</u>, <b>bold</b>, <i>italics</i> liberally to promote readability, and limit length of long text fields eg. {50}
                     <br>
                     <textarea cols="550" id="rty_TitleMask" rows="10" style="font-size:1em;width:550px;"></textarea><br>
                     <br>
