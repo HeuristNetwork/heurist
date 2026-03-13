@@ -482,11 +482,10 @@ text.shadow {
     padding: 0.5em;
 }
 
-#toolbar span{
+#toolbar .controlLabel{
     cursor: default;
 }
 
-#toolbar button span,
 #toolbar .showMenuButton{
     cursor: pointer;
 }

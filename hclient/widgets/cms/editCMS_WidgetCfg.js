@@ -69,6 +69,14 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             placeholder_def: 'Please select a story in the list',
             elementsPlaceholder_def: 'There are no story elements to display for the selected item',
             elementsPlaceholderSub_def: 'Story elements may exist but not be publicly visible'
+        },
+        heurist_Graph: {
+            placeholder_def: 'recvis_nodata',
+            empty_remark_def: 'recvis_nodata'
+        },
+        heurist_GraphEgo: {
+            placeholder_def: 'recvis_nodata',
+            empty_remark_def: 'recvis_nodata'
         }
     };
 
@@ -1706,6 +1714,9 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             }
 
             opts['elementsPlaceholder'] = elePlaceholder;
+        }else if(widget_name == 'heurist_Graph' || widget_name == 'heurist_GraphEgo'){
+            opts['empty_remark'] = empty_remark;
+            opts['placeholder_text'] = placeholder;
         }
 
         if($dlg.find(`.${widget_name} input[name="export_options"]`).is(':visible')){

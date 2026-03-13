@@ -456,12 +456,12 @@ class Solver {
  * It assumes the base color being filtered is black.
  *
  * @param {string} hex - The HEX color string (e.g., "#FF0000" for red).
- * @param {bool} autoReattempt - Rerun the function on significant loss (5 or more)
+ * @param {int|bool} lossThreshold - How much loss is acceptable (false to skip auto re-attempt)
  * @returns {string|undefined} A CSS filter string (e.g., "invert(20%) sepia(79%) ..."),
  *                             or undefined if the hex input is invalid.
  */
-function hexToFilter(hex, autoReattempt = false) {
-      
+function hexToFilter(hex, lossThreshold = false) {
+
     const rgb = window.hWin.HEURIST4.ui.hexToRgb(hex); // Assumes HEURIST4.ui.hexToRgb is available
     if (rgb==null) {
       alert('Invalid format!');
@@ -472,8 +472,11 @@ function hexToFilter(hex, autoReattempt = false) {
     const solver = new Solver(color);
     const result = solver.solve();
 
-    if(autoReattempt && result.loss >= 5){
-      return hexToFilter(hex);
+    lossThreshold = typeof lossThreshold !== 'boolean' ? Number.parseFloat(lossThreshold) : false;
+    lossThreshold = Number.isNaN(lossThreshold) || !Number.isFinite(lossThreshold) ? false : lossThreshold;
+
+    if(lossThreshold !== false && result.loss > lossThreshold){
+      return hexToFilter(hex, lossThreshold);
     }
 
     return result.filter;  

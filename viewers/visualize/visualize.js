@@ -1829,6 +1829,9 @@ function setupThematicSettings(){
     let nodeContainer = document.querySelector('#thematicNodesList');
     let edgeContainer = document.querySelector('#thematicEdgesList');
 
+    const defaultNodeStyling = {iconColour: '#000000', iconOpacity: '100', fillColour: '#FFFFFF', fillOpacity: '100', display: 1};
+    const defaultLineStyling = {lineColour: '#0070C0', lineOpacity: '100', display: 1};
+
     for(let i = 0; i < data.nodes.length; i++){
 
         let node = data.nodes[i];
@@ -1844,7 +1847,8 @@ function setupThematicSettings(){
         const iconURL = `${window.hWin.HAPI4.iconBaseURL}${rtyID}`;
 
         thematicSettings['nodes'][rtyID] = {name: rty['rty_Name'], icon: iconURL, settings: {}};
-        let existingSettings = getSetting(`setting_styling_nodes${rtyID}`, {iconColour: '#000000', iconOpacity: '100', fillColour: '#FFFFFF', fillOpacity: '100', display: 1});
+        let existingSettings = getSetting(`setting_styling_nodes${rtyID}`, defaultNodeStyling);
+        existingSettings = window.hWin.HEURIST4.util.isJSON(existingSettings) || defaultNodeStyling;
         thematicSettings['nodes'][rtyID].settings = existingSettings;
 
         let item = `
@@ -1883,7 +1887,8 @@ function setupThematicSettings(){
         }
 
         thematicSettings['edges'][trmID] = {name: link['name'], settings: {}};
-        let existingSettings = getSetting(`setting_styling_edges${trmID}`, {lineColour: getSetting('setting_linecolor', '#0070C0'), lineOpacity: '100', display: 1});
+        let existingSettings = getSetting(`setting_styling_edges${trmID}`, defaultLineStyling);
+        existingSettings = window.hWin.HEURIST4.util.isJSON(existingSettings) || defaultLineStyling;
         thematicSettings['edges'][trmID].settings = existingSettings;
 
         let item = `
@@ -1935,9 +1940,16 @@ function editThematicSetting(type, ID){
     });
 }
 
+const hexToFilterCache = {};
+
 function setThematicSetting(type, ID){
 
     let styling = getSetting(`setting_styling_${type}${ID}`);
+    styling = window.hWin.HEURIST4.util.isJSON(styling);
+
+    if(styling === false || !window.hWin.HEURIST4.util.isObject(styling)){
+        return;
+    }
 
     if(type === 'nodes'){
 
@@ -1946,7 +1958,11 @@ function setThematicSetting(type, ID){
         }
 
         const hexCode = styling.iconColour;
-        let colourFilter = hexToFilter(hexCode, true);
+        let colourFilter = hexToFilterCache[hexCode];
+        if(!colourFilter){
+            colourFilter = hexToFilter(hexCode, 0);
+            hexToFilterCache[hexCode] = colourFilter;
+        }
 
         colourFilter = colourFilter.replace(/;$/, '');
         let icons = document.querySelectorAll(`image[data-icon-id="${ID}"]`);
@@ -1992,12 +2008,20 @@ function toggleDisplay(type, ID, showElement){
     }
 
     if(typeof showElement === 'boolean'){ // updating display setting
+
         let styling = getSetting(`setting_styling_${type}${ID}`);
+        styling = window.hWin.HEURIST4.util.isJSON(styling) || {};
         styling.display = showElement ? 1 : 0;
+
         putSetting(`setting_styling_${type}${ID}`, styling);
+
     }else{ // use pre-existing setting
+
         let styling = getSetting(`setting_styling_${type}${ID}`);
+        styling = window.hWin.HEURIST4.util.isJSON(styling) || {};
+
         showElement = styling.display == 1;
+
     }
 
     let hiddenLines = new Set();

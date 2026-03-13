@@ -94,6 +94,7 @@ function updateCircles(selector, fgColor, isSelection) {
     let handleForeground = !settings.minimal ? fgColor : (d) => {
 
         let settings = getSetting(`setting_styling_nodes${d.rty_ID}`, {fillColour: foregroundColor});
+        settings = window.hWin.HEURIST4.util.isJSON(settings) || {fillColour: foregroundColor};
 
         return isSelection ? fgColor : settings['fillColour'];
     };

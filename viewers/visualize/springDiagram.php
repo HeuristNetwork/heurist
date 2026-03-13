@@ -61,12 +61,12 @@ $isMinimalVersion = intval(@$_REQUEST['mini']);
 
         <script type="text/javascript">
 
-var isMinimalVersion = <?php echo $isMinimalVersion?'true':'false';?>;
+let isMinimalVersion = <?php echo $isMinimalVersion?'true':'false';?>;
 /**
  * Flag indicating if the visualization is running in standalone mode (i.e., not embedded in a Heurist page).
  * @type {boolean}
  */
-var isStandAlone = false;
+let isStandAlone = false;
 
 window.visualiserRequest = null;
 
@@ -74,19 +74,19 @@ window.visualiserRequest = null;
  * Array<Set> tracking for each graph level (to handle moving backwards in levels)
  * Use sets to avoid duplicate record IDs
  */
-var graphLevels = [];
+let graphLevels = [];
 /**
  * Object<Record ID => RecType ID> tracking records to record types that appear in the graph (or has appeared)
  */
-var nodeRecTypes = {};
+let nodeRecTypes = {};
 /**
  * Object<Record ID => Set> tracking related records for each record that appears in the graph (or has appeared)
  */
-var nodeRelationMapping = {};
+let nodeRelationMapping = {};
 /**
  * Visualiser instance, for calling destroy method
  */
-var visualise = null;
+let visualise = null;
 
 /**
  * Callback function executed after the page's initial dependencies are loaded.
@@ -546,11 +546,14 @@ function addNewConnections(recordIDs, data){
          * @param {function} [onExpandRecords] - Callback function to handle requests to expand node connections.
          */
         function showData(data, selectedRecordsIds, new_request, onSelectEvent, onRefreshData, onExpandRecords, onExpandLevel) {
+
             // Initial message while building graph
             if(data && data.nodes && data.nodes.length > 0){ // Check if nodes array is not empty
                 $("#d3svg").html('<text x="25" y="25" fill="black">Building graph ...</text>');
             }else{
-                $("#d3svg").html('<text x="25" y="25" fill="black">No data for graph</text>');
+                let placeholderText = Object.hasOwn(data, 'message') ? data.message : 'recvis_nodata';
+                placeholderText = window.hWin.HR(placeholderText);
+                $("#d3svg").html(`<text x="25" y="25" fill="black">${placeholderText}</text>`);
                 return;
             }
 

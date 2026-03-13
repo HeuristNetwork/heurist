@@ -63,7 +63,13 @@ $.widget( "heurist.connections", {
         placeholder_text: '', //text to display while no record/recordset is loaded  (search is not performed)
 
         nodeLimit: 20, // limit the initial number of nodes, to avoid overworking the browser
-        autoExtendSelection: true // auto extend the graph when is ONLY ONE record shown
+        autoExtendSelection: true, // auto extend the graph when is ONLY ONE record shown
+
+        // Message options
+        blank_placeholder: false,
+        placeholder_text: 'recvis_nodata',
+        blank_empty_remark: false,
+        empty_remark: 'recvis_nodata'
     },
 
     /**
@@ -93,6 +99,7 @@ $.widget( "heurist.connections", {
      * for data changes and selections, and handles initial loading if `options.init_at_once` is true.
      */
     _create: function() {
+
         let that = this;
         
         this.framecontent = $('<div>')
@@ -129,6 +136,7 @@ $.widget( "heurist.connections", {
 
             // Search results
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
+
                 //accept events from the same realm only
                 if(!isSameRealm) return;
 
@@ -280,8 +288,16 @@ $.widget( "heurist.connections", {
 
                     }
                 }else if(this._isVisualizeInited()){
+
                     //clear
-                    this.graphframe[0].contentWindow.showData(null);
+                    let message = '';
+                    if(this.options.show_selection || this.options.show_recent_selection){
+                        message = this.options.blank_placeholder ? '' : this.options.placeholder_text;
+                    }else{
+                        message = this.options.blank_empty_remark ? '' : this.options.empty_remark;
+                    }
+
+                    this.graphframe[0].contentWindow.showData({message: message});
                 }
                 
             }
@@ -358,8 +374,7 @@ $.widget( "heurist.connections", {
         if(!this.element.is(':visible')){
             return;
         }
-        
-        let that2 = this; 
+
         //get first MAXITEMS records and send their IDS to server to get related record IDS
         let MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
         let records_ids = Array.isArray(recordset)?recordset:recordset.getIds(MAXITEMS);
@@ -556,7 +571,18 @@ $.widget( "heurist.connections", {
         }
 
         if(this._isVisualizeInited() ){
+
             let that = this;
+            if(nodeCount == 0){
+                let message = '';
+                if(this.options.show_selection || this.options.show_recent_selection){
+                    message = this.options.blank_placeholder ? '' : this.options.placeholder_text;
+                }else{
+                    message = this.options.blank_empty_remark ? '' : this.options.empty_remark;
+                }
+                data = {message: message};
+            }
+
             this.graphframe[0].contentWindow.showData(data, this.options.selection, this._lastRequest,
                     function(selected){ //on select
                         $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
@@ -571,7 +597,6 @@ $.widget( "heurist.connections", {
             );
             this.recordset_changed = false;
         }
-
     },    
 
     /**

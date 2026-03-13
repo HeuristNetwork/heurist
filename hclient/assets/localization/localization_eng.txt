@@ -517,3 +517,4 @@
 #record_action_errors#Errors
 #thumbs3#preview
 #feature_request#Please request from Heurist team if needed or add to code and do a pull request
+#recvis_nodata#No data for graph

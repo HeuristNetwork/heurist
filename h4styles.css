@@ -2138,6 +2138,13 @@ background: #8ea9b9
     background-size: contain;
 }
 
+.ui-icon-network{
+    background-image: url(hclient/assets/network.svg) !important; 
+    width: 18px;
+    height: 18px;
+    background-size: contain;
+}
+
 .ui-icon-aa { 
     background-image: url(hclient/assets/Aa.png) !important; 
     width: 18px;
