@@ -331,7 +331,11 @@ $.widget( "heurist.svs_list", {
         if(this.options.is_h6style){
             this.element.css({'overflow':'hidden'});
             //add title 
-            this.div_header =  $('<div class="ui-heurist-header" style="top:0px;">'+window.hWin.HR('Saved Filters')+'</div>') 
+            this.div_header =  $('<div class="ui-heurist-header" style="top:0px;padding:9px;"><span>'+window.hWin.HR('Saved Filters')
++'</span><button type="button" class="ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close" '
++'style="float:right;height: 17px;min-width: 17px;" title="Close">'
++'<span class="ui-button-icon ui-icon ui-icon-closethick"></span><span class="ui-button-icon-space"> </span>Close</button>'            
+            +'</div>') 
             // <span style="font-style:italic;font-size:x-small">by workgroups</span>
                 .hide()
                 .appendTo(this.element);
@@ -348,6 +352,15 @@ $.widget( "heurist.svs_list", {
                 .css({'top':36, 'bottom':0, 'width':'100%','position': 'absolute', 'overflow-y': 'auto',
                         'overflow-x': 'hidden','font-size':'0.9em'})
                         .appendTo( this.search_tree );
+            
+            
+            this._on( this.div_header.find('button'), {  click: function(){
+                    if(window.hWin.HEURIST4.util.isFunction(this.options.onClose)){
+                        this.options.onClose();
+                    }
+            } });
+            
+            
                         
                         
         }else{
@@ -556,7 +569,7 @@ $.widget( "heurist.svs_list", {
             this._refresh();
         }else if(key=='filter_by_type'){
             if (this.div_header) { // Ensure div_header exists
-                this.div_header.text(window.hWin.HR(value=='2'?'RuleSets':'Saved Filters'));
+                this.div_header.find('span')[0].innerText = window.hWin.HR(value=='2'?'RuleSets':'Saved Filters');
             }
             let that = this;            
             $.each(this.treeviews, function(groupID, tree){ // Changed from $(this.treeviews) to $.each
