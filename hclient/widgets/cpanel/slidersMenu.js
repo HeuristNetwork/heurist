@@ -860,7 +860,6 @@ $.widget( "heurist.slidersMenu", {
             }
             
             let { explore_top, explore_left, explore_height, explore_width } = that._getMenuPosition(menu_item, action_name, position);
-            
             if(action_name=='svsAdd'){
                 that._closeExploreMenuPopup();
                 that.addSavedSearch( 'saved', false, explore_left, explore_top );
@@ -889,16 +888,24 @@ $.widget( "heurist.slidersMenu", {
                         left: explore_left
                     });
             }
-                        
-            cont.fadeIn(delay+200, function(){
-                let action_name = $(this).attr('id');
-                that.menues_explore_popup.find('.explore-widgets[id!="'+action_name+'"]').hide();
-                
-                if(action_name=='searchByEntity'){
-                    //trigger refresh  myOnShowEvent
-                    $(this).searchByEntity('refreshOnShow');
-                }
-            });
+
+            //hide others
+            that.menues_explore_popup.find('.explore-widgets[id!="'+action_name+'"]').hide();
+            if(action_name=='search_filters'){
+                cont.effect('slide',{},delay+200);
+            }else{
+                cont.fadeIn(delay+200, function(){
+                    let action_name = $(this).attr('id');
+                    //hide others
+                    //that.menues_explore_popup.find('.explore-widgets[id!="'+action_name+'"]').hide();
+                    
+                    if(action_name=='searchByEntity'){
+                        //trigger refresh  myOnShowEvent
+                        $(this).searchByEntity('refreshOnShow');
+                    }
+                });
+            }
+            //cont.show();
 
         }, delay);
         
@@ -917,7 +924,7 @@ $.widget( "heurist.slidersMenu", {
     _getMenuPosition: function(menu_item, action_name, position){
       
         let explore_left = ((this.divMainMenu.width()>this._left_position)?this._widthMenu:this._left_position)+4;
-        let explore_top = '2px';
+        let explore_top = 2;
         let explore_height = 'auto';
         let explore_width = '300px';
 
@@ -1251,7 +1258,6 @@ $.widget( "heurist.slidersMenu", {
      * @memberof Widgets.Navigation.slidersMenu
      */
     _init_SvsList: function(cont, mode){  //, group_ID
-        
         if(!cont.svs_list('instance')){
             let that = this;
             
@@ -1383,6 +1389,11 @@ $.widget( "heurist.slidersMenu", {
             $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [
                 {reset:true, search_realm:this.options.search_realm} ]);  //global app event to clear views
             this.search_faceted.hide();
+        }else{
+            let cont = this.menues_explore_popup.find('#search_filters');
+            if(cont.length>0){
+                cont.parent().hide();    
+            }
         }
     },
 

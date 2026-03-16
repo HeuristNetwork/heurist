@@ -987,6 +987,10 @@ class ReportRecord
         if(is_array($functions) && count($functions)==2 && !is_array($functions[0])){
             $functions = array($functions);
         }
+        
+        if(count($functions)==1 && $func[0]==0){
+            return count($ids);
+        }
 
         foreach ($functions as $func) {
             $dty_ID = $func[0];
@@ -997,7 +1001,7 @@ class ReportRecord
                     array_push($select, $func_type . '(d' . $idx . '.dtl_Value)');
                     array_push($from, 'JOIN recDetails d' . $idx . ' ON rec_ID=d' . $idx . '.dtl_RecID AND d' . $idx . '.dtl_DetailTypeID=' . $dty_ID);
                 } else {
-                    array_push($select, 'count(rec_ID)');
+                    array_push($select, 'count(DISTINCT rec_ID)');
                 }
                 array_push($result, array($dty_ID, $func_type, 0));
                 $idx++;

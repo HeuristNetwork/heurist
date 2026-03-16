@@ -431,8 +431,8 @@ $.widget( "heurist.search", {
                 let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
                 if(widget){
                     let ele = this.btn_saved_filters;
-                    widget.slidersMenu('show_ExploreMenu', null, 'search_filters', 
-                        {top:ele.position().top+18 , left:ele.offset().left });
+                    widget.slidersMenu('show_ExploreMenu', null, 'search_filters'); 
+                        //{top:ele.position().top+18 , left:ele.offset().left });
                 }            
             }});
 
