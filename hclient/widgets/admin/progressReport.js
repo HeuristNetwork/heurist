@@ -74,12 +74,22 @@ $.widget('heurist.progressReport', {
                 o.steps.forEach((s)=>{ content += `<li style="color:gray">${s}</li>`; });
                         content += '</ol>';
             } else {
-                content += '<div class="loading" style="height:20%;min-height:50px"></div>';
+                content += '<div class="loading" style="height:15%;min-height:50px"></div>';
             }
+            /*
             content += '<div class="progress-bottom" style="display:none;width:80%;height:40px;padding:5px;text-align:center;margin:auto;margin-top:10px">'
             + '<div class="progressbar"><div class="progress-label">Processing data.</div></div>'
             + '<div class="progress_stop" style="text-align:center;margin-top:4px;cursor:pointer">Abort</div>'
             + '</div>';
+            */
+            
+content += ''
+  + '<div class="progress-bottom" style="display:none;width:85%;padding:5px;margin:5px auto 0 auto;">'
+  + '  <div class="progress-label" style="text-align:center;margin-bottom:6px;">Processing data.</div>'
+  + '  <div class="progressbar" style="height:20px;padding:4px;margin:4px 0;"></div>'
+  + '  <button type="button" class="progress_stop" style="margin-top:8px;">Abort</button>'
+  + '</div>';   
+            this.options.defaultContent = true;         
         }
 
         this.element.empty().append(content);
@@ -211,7 +221,7 @@ $.widget('heurist.progressReport', {
     },
 
     setProgress: function(done, total, note){
-        if (!this.$bar.length) return;
+        if (!this.$bar.length || !this.$bar.progressbar('instance')) return;
 
         if (done>0 && total>0) {
             this.$bottom.show();
@@ -229,6 +239,10 @@ $.widget('heurist.progressReport', {
         } else {
             this.$label.text('preparing...');
             this.$bar.progressbar('value', 0);
+        }
+        
+        if(this.options.defaultContent){
+           // this.$bar.find('.ui-progressbar-value').css('height','12px');    
         }
     },
 
