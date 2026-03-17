@@ -1336,6 +1336,14 @@ function initLinksAndImages($container, search_data){
     }else{
         $('#btn_signin.cms-button').show();
     }
+    
+    const isMobileOrTablet =
+      window.matchMedia("(pointer: coarse)").matches &&
+      window.matchMedia("(max-width: 1024px)").matches;
+
+    if(isMobileOrTablet){
+        $('.cms-button').hide();
+    }
 }
 
 //

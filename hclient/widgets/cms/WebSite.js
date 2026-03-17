@@ -107,6 +107,19 @@ class WebSite {
             window.hWin.HAPI4.layoutMgr.layoutInit(null, 'header', this.suppOptions); 
             window.hWin.HAPI4.layoutMgr.layoutInit(null, 'footer', this.suppOptions); 
             
+            /*
+            const smallestSide = Math.min(window.innerWidth, window.innerHeight);
+            const isTouch = navigator.maxTouchPoints > 0;
+            const isMobileOrTablet = isTouch && smallestSide <= 900;
+            */
+            const isMobileOrTablet =
+              window.matchMedia("(pointer: coarse)").matches &&
+              window.matchMedia("(max-width: 1024px)").matches;
+  
+            if(isMobileOrTablet){
+                $('div[data-heurist-cms="HMenuPersonal"]').hide();    
+            }
+        
             this.loadPage({pageId:this.pageId});
         
         }else{
