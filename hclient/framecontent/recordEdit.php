@@ -99,8 +99,8 @@ if(@$_REQUEST['annotationId'] || @$_REQUEST['a']){
         if(@$_REQUEST['u']){
             $params['u'] = $url;
         }
-        if(@$_REQUEST['f']){ //favicon
-
+        if(@$_REQUEST['f']){
+            $params['f'] = $_REQUEST['f'];
         }
 
         // preprocess any description
@@ -274,7 +274,7 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
                     //some values for new record can be passed as url parameters
                     var rec_rectype = __param('rec_rectype');
                     var new_record_params = {};
-                    if(rec_rectype>0){
+                    if(rec_rectype > 0){
                         new_record_params['RecTypeID'] = rec_rectype;
                         new_record_params['OwnerUGrpID'] = __param('rec_owner');
                         new_record_params['NonOwnerVisibility'] = __param('rec_visibility');
@@ -285,15 +285,10 @@ print '<script>var prepared_params = '.json_encode($params).';</script>';
                         new_record_params['URL']   = __param('u');
                         new_record_params['ScratchPad']   = __param('d');
 
-                        /*
-                        $details = array();
-                        new_record_params['title'] = __param('d');
-                        new_record_params['title'] = __param('f');//favicon
-
-                        if(!empty($details))
-                            new_record_params['details'] = $details;
-                        */
-
+                        let details = __param('f');
+                        if(details && details.length > 0){
+                            new_record_params['details'] = window.hWin.HEURIST4.util.isJSON(details);
+                        }
                     }
 
                     //hidden result list, inline edit form

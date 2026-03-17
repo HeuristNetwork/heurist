@@ -16,115 +16,117 @@
 -->
 <fieldset id="div_fieldset"><legend style="display:none"></legend>
 
-<div style="padding: 0.2em; width: 100%;" class="input">
-    <div class="header" style="padding: 0px 16px 0px 0px;">
-        <label for="sel_record_scope">Records scope:</label>
-    </div>
-    <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
-</div>
-
-<div id="div_operation_mode" class="input">
-
-    <div class="header_narrow" style="padding:  0px 16px 0px 0px;">Change:</div>
-
-    <div class="detailRow" style="padding-bottom:1em;">
-
-        <label for="owner_only"><input type="radio" name="mode" id="owner_only" value="1"> Owner</label>
-        <label for="vis_only"><input type="radio" name="mode" id="vis_only" value="2"> Visibility</label>
-        <label for="both_vals"><input type="radio" name="mode" id="both_vals" checked="checked" value="0"> Both</label>
-
+    <div style="padding: 0.2em; width: 100%;" class="input">
+        <div class="header" style="padding: 0px 16px 0px 0px;">
+            <label for="sel_record_scope">Records scope:</label>
+        </div>
+        <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
     </div>
 
-</div>
+    <div id="div_operation_mode" class="input">
 
-<div id="div_sel_ownership" style="min-width: 410px;" class="input">
-    <div class="header_narrow" style="padding:  0px 16px 0px 0px;">Record is owned (editable) by:</div>
+        <div class="header_narrow" style="padding:  0px 16px 0px 0px;">Change:</div>
 
-    <div class="detailRow" style="padding-bottom:1em;display:none;">
-        <label><input type="radio" name="rb_Owner" value="everyone" id="rb_Owner-everyone">
-        Any logged-in user</label>
+        <div class="detailRow" style="padding-bottom:1em;">
+
+            <label for="owner_only"><input type="radio" name="mode" id="owner_only" value="1"> Owner</label>
+            <label for="vis_only"><input type="radio" name="mode" id="vis_only" value="2"> Visibility</label>
+            <label for="both_vals"><input type="radio" name="mode" id="both_vals" checked="checked" value="0"> Both</label>
+
+        </div>
+
     </div>
-    <div class="detailRow" style="padding-bottom:1em;display:none;">
-        <label><input type="radio" name="rb_Owner" value="user" id="rb_Owner-user">
-        Current user</label>
+
+    <div id="div_sel_ownership" style="min-width: 410px;" class="input">
+        <div class="header_narrow" style="padding:  0px 16px 0px 0px;">Record is owned (editable) by:</div>
+
+        <div class="detailRow" style="padding-bottom:1em;display:none;">
+            <label><input type="radio" name="rb_Owner" value="everyone" id="rb_Owner-everyone">
+            Any logged-in user</label>
+        </div>
+        <div class="detailRow" style="padding-bottom:1em;display:none;">
+            <label><input type="radio" name="rb_Owner" value="user" id="rb_Owner-user">
+            Current user</label>
+        </div>
+        <div class="detailRow" style="padding-bottom:1em;display:none;">
+            <label><input type="radio" name="rb_Owner" value="group" id="rb_Owner-group">
+            Members of selected groups can edit the record</label>
+        </div>
+        
+        <select id="sel_Ownership" style="border:solid 1px gray;max-width:40em;margin-bottom:1em;"></select>
+        
     </div>
-    <div class="detailRow" style="padding-bottom:1em;display:none;">
-        <label><input type="radio" name="rb_Owner" value="group" id="rb_Owner-group">
-        Members of selected groups can edit the record</label>
+
+    <div id="sel_OwnerGroups"  style="padding: 0.2em; min-width: 480px;display:none;" class="input"></div>
+
+    <div id="div_sel_access" class="input">
+        <div class="header_narrow" style="padding:  10px 16px 0px 0px;">Record is viewable by:</div>
+        <div></div>
+    </div>
+    <div id="div_sel_access2" style="min-width: 410px;display:block;padding-left:80px" class="input">
+        
+        <div class="detailRow access-hidden" style="padding-bottom:1em;">
+            <label><input type="radio" name="rb_Access" value="hidden" id="rb_Access-hidden">
+            User or group specified above</label>
+        </div>
+        <div id="div_AccessGroups" class="detailRow access-hidden" style="padding-bottom:1em;display:none">
+            <span class="heurist-helper3">Members of the following groups can also view the record(s)</span><br><br>
+            <div id="sel_AccessGroups"  style="padding:0.2em;min-width:480px;display:table-row" class="input"></div>
+        </div>
+    </div>
+
+    <div id="div_sel_access3" style="padding:0.2em; min-width: 410px;" class="input">
+
+        <div class="detailRow" style="padding-bottom:1em;display:block;padding-left:80px">
+            <label><input type="radio" name="rb_Access" value="viewable" id="rb_Access-viewable">
+            Any logged-in user can view the record(s)</label>
+        </div>
+
+        <div class="detailRow" style="padding-bottom:20px;display:block;padding-left:80px">
+            <label>
+            <input type="radio" name="rb_Access" value="public" id="rb_Access-public">
+            Public - viewable for anyone in published live view<br>including data export eg.XML requested without a login</label>
+        </div>
+    </div>
+
+    <div id="div_more_options" style="padding: 0.2em; width: 100%;display:none">
+        <div id="btn_more_options" style="cursor:pointer;color:#7D9AAA;padding:2px 21px;">show more options</div>
+    </div>
+
+    <hr class="add_record" style="display:none;color:#6A7C99"/>
+    
+    <div style="padding: 0.2em; max-width: 480px;display:none;border-top:1px solid #6A7C99" class="add_record">
+        <div class="header" style="padding:0 16px;padding-top:20px;text-align:left">ADVANCED</div>
     </div>
     
-    <select id="sel_Ownership" style="border:solid 1px gray;max-width:40em;margin-bottom:1em;"></select>
-    
-</div>
-
-<div id="sel_OwnerGroups"  style="padding: 0.2em; min-width: 480px;display:none;" class="input"></div>
-
-<div id="div_sel_access" class="input">
-    <div class="header_narrow" style="padding:  10px 16px 0px 0px;">Record is viewable by:</div>
-    <div></div>
-</div>
-<div id="div_sel_access2" style="min-width: 410px;display:block;padding-left:80px" class="input">
-    
-    <div class="detailRow access-hidden" style="padding-bottom:1em;">
-        <label><input type="radio" name="rb_Access" value="hidden" id="rb_Access-hidden">
-        User or group specified above</label>
+    <div id="div_sel_tags" style="padding: 0.2em; max-width:480px;display:none;" class="add_record">
+        <div class="header_narrow" style="display:inline-block;width:115px;">Add these tags:</div>
+        <div id="div_sel_tags2" style="display:inline-block;padding-bottom:20px;"></div>
     </div>
-    <div id="div_AccessGroups" class="detailRow access-hidden" style="padding-bottom:1em;display:none">
-        <span class="heurist-helper3">Members of the following groups can also view the record(s)</span><br><br>
-        <div id="sel_AccessGroups"  style="padding:0.2em;min-width:480px;display:table-row" class="input"></div>
-    </div>
-</div>
-
-<div id="div_sel_access3" style="padding:0.2em; min-width: 410px;" class="input">
-
-    <div class="detailRow" style="padding-bottom:1em;display:block;padding-left:80px">
-        <label><input type="radio" name="rb_Access" value="viewable" id="rb_Access-viewable">
-        Any logged-in user can view the record(s)</label>
+    <div id="div_def_acc" style="padding: 0.2em; max-width:480px;display:none;" class="add_record">
+        <div class="heurist-helper1" style="display:block;padding-bottom: 1em;">
+            Provide a default account to use for creating the new record, if the user isn't already logged in<br>
+            Only accounts that are not the database owner or an administrator can be used here<br>
+            <strong>BE AWARE</strong> that this will mean the account is publicly accessible
+        </div>
     </div>
 
-    <div class="detailRow" style="padding-bottom:20px;display:block;padding-left:80px">
-        <label>
-        <input type="radio" name="rb_Access" value="public" id="rb_Access-public">
-        Public - viewable for anyone in published live view<br>including data export eg.XML requested without a login</label>
+    <div id="div_def_values" style="padding: 0.2em; max-width:480px;display:none;" class="add_record">
+        <div class="header_narrow" style="display:inline-block;width:115px;">Add default values:</div>
+        <button id="btn_add_def_value" style="padding: 0.4em;" title="Add a new field for default values"></button>
+        <div id="div_add_def_values" style="display: block; padding: 1em 0.5em 2em;"></div>
     </div>
-</div>
 
+    <span id="div_add_link" style="padding: 0.2em; min-width: 480px;display:none;" class="input add_record">
 
-            <div id="div_more_options" style="padding: 0.2em; width: 100%;display:none">
-                <div id="btn_more_options" style="cursor:pointer;color:#7D9AAA;padding:2px 21px;">show more options</div>
-            </div>
-
-            <hr class="add_record" style="display:none;color:#6A7C99"/>
-            
-            <div style="padding: 0.2em; max-width: 480px;display:none;border-top:1px solid #6A7C99" class="add_record">
-                <div class="header" style="padding:0 16px;padding-top:20px;text-align:left">ADVANCED</div>
-            </div>
-            
-            <div id="div_sel_tags" style="padding: 0.2em; max-width:480px;display:none;" class="add_record">
-                <div class="header_narrow" style="display:inline-block;width:115px;">Add these tags:</div>
-                <div id="div_sel_tags2" style="display:inline-block;padding-bottom:20px;"></div>
-            </div>
-            <div id="div_def_acc" style="padding: 0.2em; max-width:480px;display:none;" class="add_record">
-                <div class="heurist-helper1" style="display:block;padding-bottom: 1em;">
-                    Provide a default account to use for creating the new record, if the user isn't already logged in<br>
-                    Only accounts that are not the database owner or an administrator can be used here<br>
-                    <strong>BE AWARE</strong> that this will mean the account is publicly accessible
-                </div>
-            </div>
-
-            <span id="div_add_link" style="padding: 0.2em; min-width: 480px;display:none;" class="input add_record">
-                <div class="heurist-helper1" style="padding-bottom: 1em; display: block;">
-                    Hyperlink this URL in a web page, browser bookmark or desktop shortcut to provide one-click addition of records
-                </div>    
-                <textarea id="txt_add_link" readonly    
-                    onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"
-                    class="text ui-widget-content ui-corner-all" rows=5 style="width:480px;resize: none"></textarea>
-            </span>
-            
-
-
-
-
+        <div class="heurist-helper1" style="padding-bottom: 1em; display: block;">
+            Copy text below to a bookmark or web link on a page to allow repeated<br>
+            addition of records with the same characteristics
+        </div>    
+        <textarea id="txt_add_link" readonly    
+            onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);"
+            class="text ui-widget-content ui-corner-all" rows=5 style="width:36em;resize: none"></textarea>
+    </span>
 
 </fieldset>
 
