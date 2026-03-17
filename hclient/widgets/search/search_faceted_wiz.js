@@ -2089,7 +2089,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(facets[k].trm_tree === true){
                     def_facet = 'tree';
                 }
-                let btn = listdiv.find('button.btnset_radio[data-idx="'+idd+'"][data-value="'+facets[k].isfacet+'"]');
+                let btn = listdiv.find('button.btnset_radio[data-idx="'+idd+'"][data-value="'+def_facet+'"]');
                 btn.addClass('ui-heurist-btn-header1');  //heighlight               
 
                 function __dateGrouping(idd){ //for year-date
