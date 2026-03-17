@@ -61,6 +61,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         currentRecType: 0,
         currentRecTags: null,
         scope_types: 'none',
+        currentDefaultValues: {},
         
         isExpanded: false,  //false - show list, true - show preferences dialog
         
@@ -119,30 +120,38 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
 
         if(this.options.RecTypeID>0){
 
-            this.options.currentRecType =  this.options.RecTypeID;           
-            this.options.currentOwner = this.options.OwnerUGrpID;           
-            this.options.currentAccess = this.options.NonOwnerVisibility;           
-            this.options.currentRecTags = this.options.RecTags;           
-            this.options.currentAccessGroups = this.options.NonOwnerVisibilityGroups;           
+            this.options.currentRecType =  this.options.RecTypeID;
+            this.options.currentOwner = this.options.OwnerUGrpID;
+            this.options.currentAccess = this.options.NonOwnerVisibility;
+            this.options.currentRecTags = this.options.RecTags;
+            this.options.currentAccessGroups = this.options.NonOwnerVisibilityGroups;
+            this.options.currentDefaultValues = this.options.defaultValues;
 
-        }else
-            if(this.options.currentRecType==0){
-                //take from current user preferences
-                let add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
-                if(!Array.isArray(add_rec_prefs) || add_rec_prefs.length<4){
-                    add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
-                }
-                if(add_rec_prefs.length<5){ //visibility groups
-                    add_rec_prefs.push('');
-                }
-                if(!this.options.get_params_only){
-                    this.options.currentRecType =  add_rec_prefs[0];           
-                }
-                this.options.currentOwner = add_rec_prefs[1];           
-                this.options.currentAccess = add_rec_prefs[2];           
-                this.options.currentRecTags = add_rec_prefs[3];           
-                this.options.currentAccessGroups = add_rec_prefs[4];           
+        }else if(this.options.currentRecType == 0){
+
+            //take from current user preferences
+            let add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+            if(!Array.isArray(add_rec_prefs) || add_rec_prefs.length<4){
+                add_rec_prefs = [0, 0, 'viewable', '', '', {}]; // rt, owner, access, tags, visibility, default values  (default to Everyone)
             }
+
+            if(add_rec_prefs.length < 5){ // visibility groups
+                add_rec_prefs.push('');
+            }
+            if(add_rec_prefs.length < 6){ // default value groups
+                add_rec_prefs.push({});
+            }
+
+            if(!this.options.get_params_only){
+                this.options.currentRecType =  add_rec_prefs[0];
+            }
+
+            this.options.currentOwner = add_rec_prefs[1];
+            this.options.currentAccess = add_rec_prefs[2];
+            this.options.currentRecTags = add_rec_prefs[3];
+            this.options.currentAccessGroups = add_rec_prefs[4];
+            this.options.currentDefaultValues = add_rec_prefs[5];
+        }
 
         let $dlg = this.element.children('fieldset');
 
@@ -257,9 +266,6 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
 
 
             let that = this;
-            //
-            //$(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-            //window.hWin.HAPI4.addEventListener(this, 
             $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE
             +' '+window.hWin.HAPI4.Event.ON_CREDENTIALS, 
                 function(e, data) { 
@@ -269,10 +275,8 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                         that._fillSelectRecordTypes(that.options.currentRecType);    
                     }
             });
-            //window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_CREDENTIALS, 
-            //    function(data) { 
-           
 
+            this._setupDefaultValue();
         }
 
         //let res = this._super();
@@ -288,6 +292,418 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         return true;
     },
 
+    _setupDefaultValue: function(){
+
+        let $defFields = this._$('#div_add_def_values');
+        let $btnAddDefField = this._$('#btn_add_def_value').button({icon: 'ui-icon-plus'});
+        this._on($btnAddDefField, {
+            click: () => this._handleNewDefaultValue('')
+        });
+
+        const rtyID = this.options.currentRecType;
+        if(!window.hWin.HEURIST4.util.isPositiveInt(rtyID)){
+            return;
+        }
+
+        const widthStyle = 'width: 10em; max-width: 10em; display: inline-block;';
+        for(let dtyID in this.options.currentDefaultValues){
+            
+            const rstField = $Db.rst(rtyID, dtyID);
+            let values = this.options.currentDefaultValues[dtyID];
+            if(!rstField || values.length === 0){
+                continue;
+            }
+
+            const listed = `"${values.join('","')}"`;
+            $('<div>', {
+                'data-id': dtyID,
+                title: `${rstField['rst_DisplayName']} => ${listed}`,
+                html: `<span class="truncate" style="${widthStyle}">${rstField['rst_DisplayName']}</span>
+                <span style="width: 3em; display: inline-block;">&rArr;</span>
+                <span class="fieldValues truncate" style="${widthStyle}">${listed}</span>
+                <span class="ui-icon ui-icon-pencil" class="padding: 0.2em 0.5em;" title="Edit the default values for ${rstField['rst_DisplayName']}"></span>
+                <span class="ui-icon ui-icon-close" class="padding: 0.2em 0.5em;" title="Remove all default values for ${rstField['rst_DisplayName']}"></span>`
+            }).appendTo($defFields);
+        }
+
+        this._on($defFields.find('.ui-icon-pencil').button(), {
+            click: (event) => {
+                let dtyID = $(event.target).parent().attr('data-id');
+                if(!window.hWin.HEURIST4.util.isPositiveInt(dtyID)){
+                    return;
+                }
+                this._handleNewDefaultValue(dtyID);
+            }
+        });
+        this._on($defFields.find('.ui-icon-close').button(), {
+            click: (event) => {
+                let $parent = $(event.target).parent();
+                let dtyID = $parent.attr('data-id');
+                if(!window.hWin.HEURIST4.util.isPositiveInt(dtyID) || !Object.hasOwn(this.options.currentDefaultValues, dtyID)){
+                    return;
+                }
+                delete this.options.currentDefaultValues[dtyID];
+                $parent.remove();
+            }
+        });
+    },
+
+    _updateDefaultValue: function(dtyID){
+
+        let $divValue = this._$(`#div_add_def_values`);
+        const widthStyle = 'width: 10em; max-width: 10em; display: inline-block;';
+
+        const rtyID = this.options.currentRecType;
+        if(!window.hWin.HEURIST4.util.isPositiveInt(dtyID) || !window.hWin.HEURIST4.util.isPositiveInt(rtyID)){
+            return;
+        }
+
+        const rstField = $Db.rst(rtyID, dtyID);
+        let values = this.options.currentDefaultValues[dtyID];
+        if(!values || values.length === 0){
+
+            delete this.options.currentDefaultValues[dtyID];
+            $divValue.find(`div[data-id="${dtyID}"]`).remove();
+
+            this._onRecordScopeChange();
+
+            return;
+        }
+        const listed = `"${values.join('","')}"`;
+
+        let $div = $divValue.find(`div[data-id="${dtyID}"]`);
+        if($div.length === 1){ // update existing field
+
+            $div.attr('title', `${rstField['rst_DisplayName']} => ${listed}`);
+            $div.find('.fieldValues').text(listed);
+            return;
+        }
+
+        // add new field
+        $div = $('<div>', {
+            'data-id': dtyID,
+            title: `${rstField['rst_DisplayName']} => ${listed}`,
+            html: `<span class="truncate" style="${widthStyle}">${rstField['rst_DisplayName']}</span>
+            <span style="width: 3em; display: inline-block;">&rArr;</span>
+            <span class="fieldValues truncate" style="${widthStyle}">${listed}</span>
+            <span class="ui-icon ui-icon-pencil" class="padding: 0.2em 0.5em;" title="Edit the default values for ${rstField['rst_DisplayName']}"></span>
+            <span class="ui-icon ui-icon-close" class="padding: 0.2em 0.5em;" title="Remove all default values for ${rstField['rst_DisplayName']}"></span>`
+        }).appendTo($divValue);
+
+        this._on($div.find('.ui-icon-pencil').button(), {
+            click: () => this._handleNewDefaultValue(dtyID)
+        });
+        this._on($div.find('.ui-icon-close').button(), {
+            click: (event) => {
+                delete this.options.currentDefaultValues[dtyID];
+                $(event.target).parent().remove();
+            }
+        });
+
+        this._onRecordScopeChange();
+    },
+
+    _handleNewDefaultValue: function(originalDTYID = ''){
+
+        const rtyID = this.options.currentRecType;
+        if(!window.hWin.HEURIST4.util.isPositiveInt(rtyID)){
+            window.hWin.HEURIST4.msg.showMsgFlash('Select a record type first...', 3000);
+            return;
+        }
+
+        let $dlg;
+        let content = `
+        <div>
+            <span style="display: inline-block; width: 6em; text-align: right; margin-right: 2em;">Record field:</span>
+            <div id="dtyField" style="display: inline-block;"><select id="sel_dtyField"></select></div><br><br>
+            <span style="display: inline-block; width: 8em; vertical-align: top;">Default value:</span>
+            <div id="deffield_Value" style="display: inline-block;"></div>
+        </div>`;
+
+        let btns = {};
+        let label = !window.hWin.HEURIST4.util.isPositiveInt(originalDTYID) ? 'Add new default values' : 'Update default values';
+        btns[window.hWin.HR(label)] = () => {
+
+            const dtyID = $dlg.find('#sel_dtyField').val();
+            if(!window.hWin.HEURIST4.util.isPositiveInt(dtyID)){
+                window.hWin.HEURIST4.msg.showMsgFlash('Select a record field...', 3000);
+                return;
+            }
+
+            const $inputs = $dlg.find('#deffield_Value input, #deffield_Value select');
+
+            let values = [];
+
+            const type = $Db.dty(dtyID, 'dty_Type');
+            $inputs.each((idx, input) => {
+
+                let value = input.value;
+                if(window.hWin.HEURIST4.util.isempty(value)){
+                    return;
+                }
+
+                let tag = input.tagName.toLowerCase();
+                if(type === 'resource' || type === 'file' || type === 'enum' && tag !== 'select'){
+                    values = value.split(',').map((x) => +x);
+                    return;
+                }
+
+                values.push(value);
+            });
+
+            if(values.length === 0){
+                window.hWin.HEURIST4.msg.showMsgFlash('Define a default value to save...', 3000);
+                return;
+            }
+
+            if(originalDTYID != dtyID){
+                this.options.currentDefaultValues = [];
+                this._updateDefaultValue(originalDTYID);
+            }
+
+            if(!Object.hasOwn(this.options.currentDefaultValues, dtyID)){
+                this.options.currentDefaultValues[dtyID] = values;
+            }else{
+                this.options.currentDefaultValues[dtyID].push(...values);
+            }
+
+            this._updateDefaultValue(dtyID);
+
+            $dlg.dialog('close');
+        };
+        btns[window.hWin.HR('Cancel')] = () => {
+            $dlg.dialog('close');
+        };
+
+        let labels = {title: `Assign default values for ${$Db.rty(rtyID, 'rty_Name')}`};
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, labels, {
+            default_palette_class: 'ui-heurist-explore',
+            dialogId: 'add-default-value-for-field',
+            width: '35em',
+            position: {
+                my: 'center',
+                at: 'center',
+                of: this._$('#div_fieldset')
+            }
+        });console.log(this._$('#div_fieldset'));
+
+        let $selField = $dlg.find('#sel_dtyField');
+        let $divValue = $dlg.find('#deffield_Value');
+
+        window.hWin.HEURIST4.ui.createRectypeDetailSelect($selField.get(0), rtyID,
+            ['freetext','blocktext','enum','date','float','year','integer','resource','file'], [{key: '', title: 'Select a field...'}], //,'geo'
+            {
+                useHtmlSelect: false,
+                selectedValue: originalDTYID,
+                eventHandlers: {
+                    onSelectMenu: () => {
+
+                        const dtyID = $selField.val();
+                        if(!window.hWin.HEURIST4.util.isPositiveInt(dtyID)){
+                            return;
+                        }
+
+                        this._handleDefaultValueField(dtyID, $divValue);
+                    }
+                }
+            }
+        );
+
+        if(window.hWin.HEURIST4.util.isPositiveInt(originalDTYID)){
+            this._handleDefaultValueField(originalDTYID, $divValue);
+        }
+    },
+
+    _handleDefaultValueField: function(dtyID, container){
+
+        const rtyID = this.options.currentRecType;
+        if(!container instanceof jQuery || container.length === 0 || !window.hWin.HEURIST4.util.isPositiveInt(rtyID)){
+            return;
+        }
+
+        let multiselect = Number.parseInt($Db.rst(10, 19, 'rst_MaxValues')) !== 1;
+
+        let handleTerm = (initialValue) => {
+
+            let $input = null;
+            let vocabID = $Db.dty(dtyID, 'dty_JsonTermIDTree');
+            initialValue = window.hWin.HEURIST4.util.isPositiveInt(initialValue) ? initialValue : '';
+            if(vocabID){
+
+                let $select = $('<select>').appendTo(container);
+                let options = {
+                    vocab_id: vocabID, defaultTermID: initialValue, topOptions: [{key: '', title: 'Select a term...'}], supressTermCode: true, useHtmlSelect: false
+                };
+                window.hWin.HEURIST4.ui.createTermSelect($select.get(0), options);
+
+                $input = $select;
+            }else{
+                $input = $('<input>').appendTo(container);
+            }
+
+            return $input;
+        };
+
+        let handleEntitySelector = (type, initialValue) => {
+
+            const rtyIDs = $Db.dty(dtyID, 'dty_PtrTargetRectypeIDs');
+            const vocabID = $Db.dty(dtyID, 'dty_JsonTermIDTree');
+            let $input = $('<input>', {readonly: true, type: 'text', class: 'text ui-widget-content ui-corner-all', value: initialValue, style: 'cursor: pointer;'}).uniqueId().appendTo(container);
+            this._on($input, {
+                click: () => {
+
+                    let popup_options = {
+                        isdialog: true,
+                        select_mode: multiselect ? 'select_multi' : 'select_single',
+                        select_return_mode: 'ids',
+                        edit_addrecordfirst: false,
+                        selection_on_init: multiselect ? $input.val().join(',') : [],
+                        onselect: (event, data) => {
+
+                            if(!data){
+                                return;
+                            }
+
+                            let recIDs = window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection) ? data.selection : [];
+                            $input.val(recIDs.join(','));
+                        }
+                    };//popup_options
+
+                    if(type === 'records'){
+                        popup_options['rectype_set'] = rtyIDs;
+                    }else if(type === 'defTerms'){
+                        popup_options['initial_filter'] = vocabID;
+                        popup_options['hide_searchForm'] = true;
+                    }
+
+                    window.hWin.HEURIST4.ui.showEntityDialog(type, popup_options);
+                }
+            });
+
+            let flavourText = type === 'records' ? 'records' : 'files';
+            flavourText = type === 'defTerms' ? 'terms' : flavourText;
+            $('<span>', {text: `Click to edit the selected ${flavourText}`, class: 'heurist-helper2'}).appendTo(container);
+
+            return $input;
+        };
+
+        const dtyType = $Db.dty(dtyID, 'dty_Type');
+
+        let addInput = (initialValue) => {
+
+            let $input = null;
+            switch(dtyType){
+
+                case 'float':
+                case 'year':
+                case 'integer':
+                    $input = $('<input>', {type: 'number', step: '1', style: 'width: 15em; display: block;', value: initialValue}).uniqueId().appendTo(container);
+                    break;
+
+                case 'date':
+                    $input = $('<input>', {type: 'date', style: 'display: block;', value: initialValue}).uniqueId().appendTo(container);
+                    break;
+
+                case 'enum':
+                    if(multiselect){
+                        $input = handleEntitySelector('defTerms', initialValue);
+                    }else{
+                        $input = handleTerm(initialValue);
+                    }
+                    break;
+
+                case 'resource':
+                    $input = handleEntitySelector('records', initialValue);
+                    break;
+
+                case 'file':
+                    $input = handleEntitySelector('recUploadedFiles', initialValue);
+                    break;
+
+                default:
+                    $input = $('<input>', {type: 'text', class: 'text ui-widget-content ui-corner-all', style: 'width: 20em; display: block;', value: initialValue}).uniqueId().appendTo(container);
+                    break;
+            }
+
+            if(dtyType === 'enum' || dtyType === 'resource' || dtyType === 'file'){
+                return;
+            }
+
+            if(container.find('input').length === 1 && multiselect){
+
+                let $firstInput = container.find('input');
+                let $repeater = $('<button>', {
+                    title: 'Add new input field',
+                    class: 'ui-icon ui-icon-circlesmall-plus',
+                    style: 'cursor: pointer; background: transparent; border: none; font-size: 16px;'
+                }).appendTo(container);
+
+                this._on($repeater, {
+                    click: () => {
+
+                        let $inputs = container.find('input');
+                        let allowNewInput = true;
+                        $inputs.each((idx, input) => {
+                            if(window.hWin.HEURIST4.util.isempty(input.value)){
+                                allowNewInput = false;
+                                return false;
+                            }
+                        });
+
+                        if(allowNewInput){
+                            addInput();
+                        }
+                    }
+                });
+
+                $repeater.position({
+                    my: 'right-5 center',
+                    at: 'left center',
+                    of: $firstInput
+                });
+            }
+
+            if(container.find('input').length > 1){
+
+                let $clear = $('<span>', {
+                    title: 'Remove input field',
+                    class: 'ui-icon ui-icon-circlesmall-close',
+                    style: 'cursor: pointer; font-size: 16px;'
+                }).appendTo(container);
+    
+                this._on($clear, {
+                    click: () => {
+                        $input.remove();
+                        $clear.remove();
+                    }
+                });
+    
+                $clear.position({
+                    my: 'left+10 center',
+                    at: 'right center',
+                    of: $input
+                });console.log($input, $clear, container);
+            }
+        };
+
+        container.empty();
+
+        if(dtyType === 'resource' || dtyType === 'file' || dtyType === 'enum'){
+            addInput(this.options.currentDefaultValues[dtyID]);
+            return;
+        }
+
+        if(!Object.hasOwn(this.options.currentDefaultValues, dtyID)){
+            addInput();
+            return;
+        }
+
+        let values = this.options.currentDefaultValues[dtyID];
+        for(let idx = 0; idx < values.length; idx ++){
+            addInput(values[idx]);
+        }
+    },
     
     /**
      * @function _destroy
@@ -313,16 +729,16 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
      * This is typically called when expanding options or when the dialog layout changes.
      */
     _adjustHeight:function(){
-                let ele = this._$('#txt_add_link');
-                let t1 = ele.offset().top;
-                let ele2 = this._$('.ent_footer');
-                if(ele2.length>0){
-                    let t2 = ele2.offset().top;
-                    if(t2>0){
-                        let h = Math.max(t2-t1-40,40);
-                        ele.height(h);                
-                    }
-                }
+        let ele = this._$('#txt_add_link');
+        let t1 = ele.offset().top;
+        let ele2 = this._$('.ent_footer');
+        if(ele2.length>0){
+            let t2 = ele2.offset().top;
+            if(t2>0){
+                let h = Math.max(t2-t1-40,40);
+                ele.height(h);                
+            }
+        }
     },
     
     /**
@@ -354,6 +770,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         
             if(this.options.allowExpanded){
                 this._$('#div_sel_tags').css('display','block');
+                this._$('#div_def_values').css('display','block');
                 this._$('#div_add_link').show();
                 this._$('#div_more_options').hide();
                 this.element.parent().height('auto');
@@ -436,10 +853,11 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         if (!this.getSelectedParameters(true))  return;
         
         let new_record_params = {
-                'RecTypeID': this.options.currentRecType,
-                'OwnerUGrpID': this.options.currentOwner,
-                'NonOwnerVisibility': this.options.currentAccess,
-                'NonOwnerVisibilityGroups':this.options.currentAccessGroups,
+            'RecTypeID': this.options.currentRecType,
+            'OwnerUGrpID': this.options.currentOwner,
+            'NonOwnerVisibility': this.options.currentAccess,
+            'NonOwnerVisibilityGroups':this.options.currentAccessGroups,
+            'details': this.options.currentDefaultValues
         };
                 
         if(this.options.get_params_only==true){
@@ -451,13 +869,13 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         }else{
             
             let add_rec_prefs = [this.options.currentRecType, this.options.currentOwner, this.options.currentAccess, 
-                        this.options.currentRecTags, this.options.currentAccessGroups];    
+                        this.options.currentRecTags, this.options.currentAccessGroups, this.options.currentDefaultValues];
 
-            window.hWin.HAPI4.save_pref('record-add-defaults', add_rec_prefs);        
-            
+            window.hWin.HAPI4.save_pref('record-add-defaults', add_rec_prefs);
+
             window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, 
                     {origin:'recordAdd', preferences:add_rec_prefs});
-            
+
             let action = null;
             if(event){
                 let ele = $(event.target);
@@ -468,9 +886,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                     action = ele.parent('button').attr('id');
                 }
             }
-                
-            
-                
+
             if(action=='btnAddRecordInNewWin'){
                 let url = this._onRecordScopeChange();
                window.open(url, '_blank');
@@ -626,6 +1042,10 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 }
                 //encodeuricomponent
                 url = url + '&tag='+this.options.currentRecTags;    
+            }
+
+            if(Object.keys(this.options.currentDefaultValues).length > 0){
+                url += `&f=${JSON.stringify(this.options.currentDefaultValues)}`;
             }
         }
         $('#txt_add_link').val(url);

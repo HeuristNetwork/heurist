@@ -74,9 +74,10 @@ of the codebase and rename it to index.html
 // ---------------------------------------------------------------------------------
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "7.1.0";// sets current program version number, determined by Heurist development lead
+$version = "7.1.1";// sets current program version number, determined by Heurist development lead
 
 // ---------------------------------------------------------------------------------
+// 7.1.1  13 March 2026 Improved network viualiser and website generation speed fixes
 // 7.1.0  9 March 2026 New egoNetwork visualiser, working draft
 // 7.0.3  1 Feb 2026 Tidy up custom domains and simplified db names
 // 7.0.2  25 Jan 2026 Stuff to do with custiom domain and simplified DBnames
