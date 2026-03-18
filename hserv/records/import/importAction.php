@@ -2571,14 +2571,22 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
     $record['RecTypeID'] = $recordType;
     $record['AddedByImport'] = 1;
     $record['no_validation'] = $ignore_errors?'ignore_all':true; //if true - don't check resouces and enums
-    if(@$details['URL']) {$record['URL'] = @$details['URL'];}
-    if(@$details['ScratchPad']) {$record['ScratchPad'] = @$details['ScratchPad'];}
+
+    $updatingRecHeader = false;
+    if(@$details['URL']) {
+        $record['URL'] = $details['URL'];
+        unset($details['URL']);
+        $updatingRecHeader = true;
+    }
+    if(@$details['ScratchPad']) {
+        $record['ScratchPad'] = $details['ScratchPad'];
+        unset($details['ScratchPad']);
+        $updatingRecHeader = true;
+    }
     $record['details'] = $details;
 
     $updating_record = $recordId != 0 && // Check that a record is actually being updated, for the final count
-                       (array_key_exists('URL', $record) && !empty($record['URL'])
-                        || array_key_exists('ScratchPad', $record) && !empty($record['ScratchPad'])
-                        || is_array($details) && !empty($details));
+                       ($updatingRecHeader || is_array($details) && !empty($details));
 
     $ignore_dtys = array();
 
@@ -2639,8 +2647,8 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
 
     $increment_update = true;
     if($updating_record){
-        //AO $increment_update = self::_isRecordUpdating($recordId, $record);
-        $increment_update = count($record['details'])>1;
+
+        $increment_update = count($record['details']) > 1 || $updatingRecHeader;
         if($increment_update){
             $out = recordUpdate(self::$system, $record);//see recordModify.php    
         }else{
@@ -2650,9 +2658,6 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
     }else{
         $out = recordSave(self::$system, $record, false, false, 0, $record_count);//see recordModify.php    
     }
-        
-
-    
 
     $new_recordID = null;
 

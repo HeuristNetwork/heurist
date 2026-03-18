@@ -883,16 +883,19 @@ function recordUpdate($system, $record){
     $query = 'UPDATE Records set rec_Modified=? ';
 
     $rec_url = USanitize::sanitizeURL(@$record['URL']);
+    $updateRecHeader = false;
     if($rec_url){
         $params[0] = $params[0].'s';
         $params[] = $rec_url;
         $query = $query.', rec_URL=?';
+        $updateRecHeader = true;
     }
     $rec_spad = @$record['ScratchPad'];
     if($rec_spad){
         $params[0] = $params[0].'s';
         $params[] = $rec_spad;
         $query = $query.', rec_ScratchPad=?';
+        $updateRecHeader = true;
     }
 
     $query = $query.' where rec_ID='.$recID;
@@ -909,9 +912,17 @@ function recordUpdate($system, $record){
     }
     $stmt->close();
     
-    $detailValues = _prepareDetails($system, $rectype, $record, 0, $recID, 1);
-    if(!$detailValues){
-        return $system->getError();
+    $importIDOnly = count($record['details']) === 1 && array_key_exists('imp_id', $record['details']);
+    if(!$importIDOnly){
+        $detailValues = _prepareDetails($system, $rectype, $record, 0, $recID, 1);
+        if(!$detailValues){
+            return $system->getError();
+        }
+    }elseif($updateRecHeader){
+        $detailValues = [];
+        $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['Title']); // for main record on save
+    }else{
+        return $system->addError(HEURIST_INVALID_REQUEST, 'No new record data has been provided, the record updating has been skipped.');
     }
     
     $newTitle = '';
@@ -930,7 +941,6 @@ function recordUpdate($system, $record){
         }
 
         $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['Title']); //for main record on save
-
     }
 
     return [
