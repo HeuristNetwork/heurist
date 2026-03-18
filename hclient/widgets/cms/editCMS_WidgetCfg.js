@@ -1533,6 +1533,11 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 cont.find('input[name="mediaViewer_recIDs"]').val('');
                 cont.find('input[name="selector"]').val('');
             }
+            
+            const headerCss = cont.find('textarea[name="slideshowHeaderCss"]').val();
+            if(headerCss){
+                opts['slideshowHeaderCss'] = window.hWin.HEURIST4.ui.sanitizeUserCss(headerCss).cssText;
+            }
         }else
 
         if(widget_name=='heurist_StoryMap')

@@ -67,7 +67,8 @@ showPublishDialog
 Other UI functions    
 initDialogHintButtons - add show hint and context buttons into dialog header
 initHelper - Inits helper div (slider) and button   
-
+sanitizeUserCss - sanitize user input css
+mergeCss
 
 createRecordLinkInfo - return ui for link and relationship
 
@@ -1641,6 +1642,121 @@ window.hWin.HEURIST4.ui = {
             options.container.find('.ui-helper-popup').hide();
             $help_button.trigger('click');    
         }
+    },
+    
+    /*
+        - allows only specific CSS properties
+        - blocks dangerous values like expression(), javascript:, and most url(...)
+        - strips extra whitespace
+        - returns a safe style object and a CSS string
+    */    
+    sanitizeUserCss: function(input) {
+        if (typeof input !== 'string') {
+            return { cssText: '', styles: {} };
+        }
+
+        const allowedProps = new Set([
+            'color',
+            'background-color',
+            'font-size',
+            'font-weight',
+            'font-style',
+            'text-align',
+            'text-decoration',
+            'line-height',
+            'letter-spacing',
+            'margin',
+            'margin-top',
+            'margin-right',
+            'margin-bottom',
+            'margin-left',
+            'padding',
+            'padding-top',
+            'padding-right',
+            'padding-bottom',
+            'padding-left',
+            'border',
+            'border-width',
+            'border-style',
+            'border-color',
+            'border-radius',
+            'width',
+            'height',
+            'max-width',
+            'max-height',
+            'min-width',
+            'min-height',
+            'display',
+            'overflow',
+            'white-space',
+            'object-fit',
+            'opacity'
+        ]);
+
+        const safeValue = (value) => {
+            const v = value.trim();
+
+            if (!v) return false;
+
+            // Block obvious CSS/script injection vectors
+            if (/expression\s*\(/i.test(v)) return false;
+            if (/javascript\s*:/i.test(v)) return false;
+            if (/vbscript\s*:/i.test(v)) return false;
+            if (/behavior\s*:/i.test(v)) return false;
+            if (/@import/i.test(v)) return false;
+
+            // Allow url() only for http/https/data:image optionally; easiest safe choice is block all url()
+            if (/url\s*\(/i.test(v)) return false;
+
+            // Block characters commonly used to break declarations
+            if (/[{}<>]/.test(v)) return false;
+
+            return v.replace(/\s+/g, ' ');
+        };
+
+        const styles = {};
+
+        input.split(';').forEach(rule => {
+            const idx = rule.indexOf(':');
+            if (idx === -1) return;
+
+            const prop = rule.slice(0, idx).trim().toLowerCase();
+            const value = rule.slice(idx + 1).trim();
+
+            if (!allowedProps.has(prop)) return;
+
+            const cleaned = safeValue(value);
+            if (!cleaned) return;
+
+            styles[prop] = cleaned;
+        });
+
+        const cssText = Object.entries(styles)
+            .map(([k, v]) => `${k}: ${v}`)
+            .join('; ');
+
+        return { cssText, styles };
+    },
+    
+    mergeCss: function (userCss, defaultCss) {
+        let userObj = {};
+
+        if (!userCss) {
+            userObj = {};
+        } else if (typeof userCss === 'string') {
+            userObj = window.hWin.HEURIST4.ui.sanitizeUserCss(userCss).styles;
+        } else if (typeof userCss === 'object') {
+            // optional: sanitize object values too
+            userObj = {};
+            for (const [k, v] of Object.entries(userCss)) {
+                const safe = window.hWin.HEURIST4.ui.sanitizeUserCss(`${k}:${v}`).styles;
+                if (safe[k]) {
+                    userObj[k] = safe[k];
+                }
+            }
+        }
+
+        return Object.assign({}, defaultCss, userObj);
     },
     
     //

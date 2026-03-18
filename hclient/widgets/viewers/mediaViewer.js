@@ -74,7 +74,10 @@ $.widget( "heurist.mediaViewer", {
         slideshowFull: false,           // if true use full image URL (images only), else thumbnails
         showTitle: true,
         maxHeight: null,
-        maxWidth: null
+        maxWidth: null,
+        
+        slideshowStretch: 'height', // contain | cover | fill | none | width | height
+        slideshowHeaderCss: null
     },
 
     /**
@@ -254,20 +257,20 @@ _startSlideshow: function(){
 
     this._slideshowTimer = setInterval(function(){
         let cur = that._slideshowIdx;
-        let next = (cur === that._slideshowImgs.length-1) ? 0 : (cur + 1);
-        that._slideshowIdx = next;
+        let next = (cur === that._slideshowImgs.length - 1) ? 0 : (cur + 1);
 
         let $cur = $(that._slideshowImgs[cur]);
         let $next = $(that._slideshowImgs[next]);
 
-        $next.show();
+        $cur.stop(true, true).fadeOut(fade, function(){
+            $next.stop(true, true).fadeIn(fade);
 
-        $cur.fadeOut(fade, function(){
             if(that._slideshowTitleEle && that.options.showTitle){
                 that._slideshowTitleEle.html($next.attr('title') || '');
             }
         });
 
+        that._slideshowIdx = next;
     }, duration);
 },
 
@@ -296,6 +299,55 @@ _prepareFile: function(file){
     file.thumbURL = `${this.options.baseURL}?db=${this.options.database}&thumb=${file.obf_recID}&t=${randomNumber}`;
     
     return file;    
+},
+
+_getSlideshowImageCss: function(){
+    let mode = this.options.slideshowStretch || 'contain';
+
+    switch(mode){
+        case 'fill':      // stretch both directions
+            return {
+                width: '100%',
+                height: '100%',
+                'object-fit': 'fill'
+            };
+
+        case 'cover':     // fill container, crop if needed
+            return {
+                width: '100%',
+                height: '100%',
+                'object-fit': 'cover'
+            };
+
+        case 'none':      // original size, no stretching
+            return {
+                width: 'auto',
+                height: 'auto',
+                'max-width': '100%',
+                'max-height': '100%',
+                'object-fit': 'none'
+            };
+
+        case 'width':     // full container width
+            return {
+                width: '100%',
+                height: 'auto'
+            };
+
+        case 'height':    // full container height
+            return {
+                width: 'auto',
+                height: '100%'
+            };
+
+        case 'contain':
+        default:          // fit inside container, preserve aspect ratio
+            return {
+                width: '100%',
+                height: '100%',
+                'object-fit': 'contain'
+            };
+    }
 },
 
 /**
@@ -339,13 +391,14 @@ _renderSlideshow: function(title){
     // container for stacking images
     let $container = $('<div>')
         .addClass('media-viewer-slideshow')
-        .css({position:'relative', overflow:'hidden',height:'100%'})
+        .css({position:'relative', overflow:'hidden',height:'100%','text-align':'center'})
         .appendTo(this.mediacontent);
 
     // optional title overlay
+    let headerCss = window.hWin.HEURIST4.ui.mergeCss(this.options.slideshowHeaderCss, {'background-color': 'rgba(0,0,0,0.65)', bottom: 0,
+            color: '#fff', left: 0, margin:'0.2em 0em', padding: '0.75em 1em', position: 'absolute', 'z-index':9999});
     let $title = $('<h4>')
-        .css({'background-color': 'rgba(0,0,0,0.65)', bottom: 0,
-            color: '#fff', left: 0, margin:'0.2em 0em', padding: '0.75em 1em', position: 'absolute', 'z-index':9999})
+        .css(headerCss)
         .appendTo($container);
 
     if(!this.options.showTitle){
@@ -354,7 +407,6 @@ _renderSlideshow: function(title){
     this._slideshowTitleEle = $title;
 
     // build <img> layers
-    let z_index = files.length;
     let firstTitle = '';
 
     for(let i=0; i<files.length; i++){
@@ -385,13 +437,16 @@ _renderSlideshow: function(title){
         let t = file.title || title || '';
         if(i===0) firstTitle = t;
 
+        let imgCss = this._getSlideshowImageCss();
+
         let $img = $('<img>')
-            .css({'z-index': z_index, 'position':'absolute', top:0, left:0, 'max-width':'100%', 'max-height':'100%'})
+            .css($.extend({
+                display: 'block',
+                margin: '0 auto'
+            }, imgCss))
             .attr('title', t)
             .attr('src', src)
             .appendTo($container);
-
-        z_index--;
 
         if(this.options.maxHeight){
             $img.css('max-height', this.options.maxHeight);
@@ -404,6 +459,7 @@ _renderSlideshow: function(title){
         if(this._slideshowImgs.length>0){
             $img.hide();
         }else{
+            $img.show();
             if(this.options.showTitle){
                 $title.html(t);
             }

@@ -1828,7 +1828,7 @@ function browseRecords(_editing_input, $input, popupTitle){
 
                     $inputdiv.addClass('selectmenu-parent');
                     $(that.selObj).css('max-width','300px');
-                    that.selObj = window.hWin.HEURIST4.ui.initHSelect(that.selObj, false,null, events);
+                    that.selObj = window.hWin.HEURIST4.ui.initHSelect(that.selObj, false, null, events);
                 }else{
                     that._off($(that.selObj), 'change');    
                 }

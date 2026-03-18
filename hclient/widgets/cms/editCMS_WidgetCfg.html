@@ -427,6 +427,32 @@
                     <input type="checkbox" name="slideshowFull"/>
                 </div>
 
+                <div class="heurist_mediaViewer">
+
+                    <div class="header header_wide">
+                        Image position in slideshow
+                    </div>
+
+                    <select name="slideshowStretch">
+                        <option value="contain" selected>Fit inside container, preserve aspect ratio</option>
+                        <option value="height">Full container height</option>
+                        <option value="width">Full container width</option>
+                        <option value="none">Original size, no stretching</option>
+                        <option value="cover">Fill container, crop if needed</option>
+                        <option value="fill">Stretch both directions</option>
+                    </select>
+                </div>
+                
+                <div class="heurist_mediaViewer">
+
+                    <div class="header header_wide" style="vertical-align:top">
+                        CSS for slideshow header
+                    </div>
+
+                    <textarea name="slideshowHeaderCss" rows="5" cols="45">
+                    </textarea>
+                </div>
+
             </fieldset>
 
         </div>
@@ -1617,7 +1643,7 @@
 
                 </div>
         
-                <div Xclass="heurist_Navigation heurist_Search heurist_SearchTree heurist_resultList heurist_resultListExt heurist_resultListDataTable heurist_resultListCollection heurist_Map">
+                <div class="heurist_Navigation heurist_Search heurist_SearchTree heurist_resultList heurist_resultListExt heurist_resultListDataTable heurist_resultListCollection heurist_Map">
 
                     <div class="header header_narrow">
                         Search group&nbsp;
