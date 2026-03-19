@@ -220,10 +220,10 @@ $.widget( "heurist.editTranslations", {
 
                     let source = '';
 
-                    if(first_val.match(/^\w{3}:/)){ // check for a source language
+                    if(first_val.match(/^\w{2,3}:/)){ // check for a source language
 
                         // Pass as source language
-                        source = first_val.match(/^\w{3}:/)[0];
+                        source = first_val.match(/^\w{2,3}:/)[0];
                         source = source.slice(0, -1);
 
                         first_val = first_val.slice(4); // remove lang prefix
