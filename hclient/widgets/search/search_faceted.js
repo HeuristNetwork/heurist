@@ -3637,9 +3637,9 @@ $.widget( "heurist.search_faceted", {
                             });                            
                             */
 
-                            if ($sel && typeof $sel.hSelect === 'function') {
+                            if ($sel && typeof $sel.hSelect === 'function') {                           
                                 let selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
-                                selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
+                                selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em','max-width':'400px'});
                                 selObj.hSelect( "widget" ).css({'background':'none',
                                                                     'width':'auto',
                                                                     'min-width':'100px',
@@ -4076,7 +4076,7 @@ $.widget( "heurist.search_faceted", {
                 }else{
                     if(this.options.params.ui_counts_mode!='bracket'){
                         dcount.addClass('truncate')
-                              .css('max-width', '3em') //this.options.is_publication ? '3em' : '45px')
+                              .css('max-width', '4em') //this.options.is_publication ? '3em' : '45px')
                               .attr('title', dcount.text());
                     }
                     dcount.appendTo(f_link);    
@@ -4089,7 +4089,7 @@ $.widget( "heurist.search_faceted", {
                 if(display_mode!=='inline-block' && cterm.level > 1){
                          let label_width = this.facets_list_container.width();
                          if(label_width<10) label_width = content_max_width - 80;
-                         label_width = label_width - 30;
+                         //label_width = label_width - 30;
                          f_link_content.css('width', label_width);
                 }
             }
@@ -4332,11 +4332,87 @@ $.widget( "heurist.search_faceted", {
         }
 
     },
+    
+  _getFacetQueryWithValue: function(query, facetPlaceholder, facetValue) {
+    function isPlaceholder(value) {
+        return typeof value === 'string' && /^\$X\d+$/.test(value);
+    }
+
+    function hasUnresolvedPlaceholder(node) {
+        if (Array.isArray(node)) {
+            return node.some(hasUnresolvedPlaceholder);
+        }
+
+        if (node && typeof node === 'object') {
+            for (const [key, value] of Object.entries(node)) {
+                if ((key.startsWith('f:') || key === 'title') && isPlaceholder(value)) {
+                    return true;
+                }
+                if (value && typeof value === 'object' && hasUnresolvedPlaceholder(value)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    function walk(node, isTopLevel = false) {
+        if (Array.isArray(node)) {
+            if (isTopLevel) {
+                for (const item of node) {
+                    const found = walk(item, false);
+                    if (found !== null) return found;
+                }
+                return null;
+            }
+
+            let matched = false;
+            const result = [];
+
+            for (const item of node) {
+                const found = walk(item, false);
+
+                if (found !== null) {
+                    matched = true;
+                    result.push(found);
+                } else if (!hasUnresolvedPlaceholder(item)) {
+                    result.push(item);
+                }
+            }
+
+            return matched ? result : null;
+        }
+
+        if (node && typeof node === 'object') {
+            // replace current facet/title placeholder
+            for (const [key, value] of Object.entries(node)) {
+                if ((key.startsWith('f:') || key === 'title') && value === facetPlaceholder) {
+                    return { [key]: facetValue };
+                }
+            }
+
+            // search children
+            for (const [key, value] of Object.entries(node)) {
+                if (value && typeof value === 'object') {
+                    const found = walk(value, false);
+                    if (found !== null) {
+                        return { [key]: found };
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        return null;
+    }
+
+    return walk(query, true);
+},    
 
     _getExpandedFacetCount: function(){
     
-        //return;
-        
         const that = this;
         
 
@@ -4364,23 +4440,20 @@ $.widget( "heurist.search_faceted", {
         }
         
         let facet_placeholder = `$X${this.options.params.facets[f_idx].var}`; // placeholder for field, e.g. $X76917
-        let field = ''; // field id, e.g. f:10
 
-        for(let q_facet of this.options.params.q){
-
-            field = Object.keys(q_facet)[0];
-
-            if((field.startsWith('f:')||field=='title') && q_facet[field] == facet_placeholder){
-                break;
-            }
-
-            field = null;
+        //create new query with current facet value
+        //find token in query to assign value of current facet
+        let facet_query = this._getFacetQueryWithValue(this.options.params.q, facet_placeholder, current_facet[0]);
+        if(facet_query==null){
+            //can not substitute value
+            this._getExpandedFacetCount();
+            return;
         }
 
-        let query = window.hWin.HEURIST4.util.cloneJSON( this._current_query );
-        let facet_query = {};
-        facet_query[field] = current_facet[0];
+        
+        
 
+        let query = window.hWin.HEURIST4.util.cloneJSON( this._current_query );
         if(window.hWin.HEURIST4.util.isempty(query)){
             // Construct a basic query
             query = window.hWin.HEURIST4.query.mergeHeuristQuery(
@@ -4442,7 +4515,7 @@ $.widget( "heurist.search_faceted", {
                 let $count_lbl = $($(node.title)[1]);
 
                 $count_lbl.removeClass('badge');
-                
+ 
                 if(that.options.params.rulesonly==1 || that.options.params.rulesonly==2){
                     //remove original 
                     if($count_lbl.text().startsWith('(')){
