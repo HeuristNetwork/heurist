@@ -3938,7 +3938,10 @@ $.widget( "heurist.search_faceted", {
         if(!hist) hist = [];
         let step = hist.length+1;
         
-        let lbl = cterm.title; //(new Array( indent + 1 ).join( " . " )) + 
+        let lbl = cterm.title;
+        if(lbl.match(/^\w{2,3}:/)){ // check and remove lanuage prefix
+            lbl = lbl.replace(/^\w{2,3}:/, '');
+        }
         if(cterm.count>0 && this.options.params.ui_counts_mode!='none' && field['suppress_counts']!==true){
             lbl =  lbl + " ("+cterm.count+")";
         } 
@@ -4008,9 +4011,14 @@ $.widget( "heurist.search_faceted", {
             hideEle = true;
         }
 
+        let title = cterm.title;
+        if(title.match(/^\w{2,3}:/)){ // check and remove lanuage prefix
+            title = title.replace(/^\w{2,3}:/, '');
+        }
+
         let f_link = $("<a>",{href:'#', facet_index:facet_index, 
                         facet_value: (cterm.count=='reset')?'':cterm.value, 
-                        facet_label: cterm.title, 
+                        facet_label: title, 
                         step:step})
                     .addClass("facet_link")
         
@@ -4022,7 +4030,7 @@ $.widget( "heurist.search_faceted", {
                 .attr('title','Reset facet value')
                 .css({'font-size':'11px','font-style':'normal'}); //1.2em
         }else{
-            f_link_content = $("<span>").html(cterm.title);
+            f_link_content = $("<span>").html(title);
             
             if(display_mode=='block'){         
 
@@ -4033,7 +4041,7 @@ $.widget( "heurist.search_faceted", {
                 
                 f_link_content.css('max-width', width)
                               .addClass('truncate')
-                              .attr('title', cterm.title);
+                              .attr('title', title);
             }
             
             if(!window.hWin.HEURIST4.util.isempty(currval)){
