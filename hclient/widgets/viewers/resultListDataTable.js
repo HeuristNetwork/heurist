@@ -96,7 +96,9 @@ $.widget( "heurist.resultListDataTable", {
         show_export_buttons:false,
 
         emptyTableMsg: null,
+        blank_empty_remark: true,
         placeholder_text: null,
+        blank_placeholder: true,
         
         search_initial:null,
         
@@ -250,11 +252,18 @@ $.widget( "heurist.resultListDataTable", {
             });
         
         }
-        
-        if(!window.hWin.HEURIST4.util.isempty(this.options.emptyTableMsg)){
+
+        const blankEmptyTable = this.options.blank_empty_remark || window.hWin.HEURIST4.util.isempty(this.options.emptyTableMsg)
+                             || this.options.emptyTableMsg === 'def' || this.options.empty_remark_option == 'def';
+        const blankPlaceholder = this.options.blank_placeholder || window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)
+                              || this.options.placeholder_text === 'def' || this.options.placeholder_option == 'def';
+
+        if(!blankEmptyTable){
+
             if(this.options.dataTableParams['language'] == null){
                 this.options.dataTableParams['language'] = {};
             }
+
             this.options.dataTableParams['language']['emptyTable'] = this.options.emptyTableMsg;
 
             this.no_records_message = $('<div>')
@@ -263,7 +272,8 @@ $.widget( "heurist.resultListDataTable", {
                 .appendTo(this.div_content)
                 .hide();
         }
-        if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)){
+        if(!blankPlaceholder){
+
             this.placeholder_ele = $('<div>')
                 .css('white-space', 'pre-wrap')
                 .prependTo(this.div_content)

@@ -51,10 +51,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
     const _def_labels = {
         heurist_SearchInput: {
             placeholder_def: 'filter_placeholder',
-            empty_remark_def: 'No default'
+            empty_remark_def: ''
         },
         heurist_resultList: {
-            placeholder_def: 'No default',
+            placeholder_def: '',
             empty_remark_def: 'resultList_empty_remark'
         },
         heurist_resultListExt: {
@@ -62,8 +62,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             empty_remark_def: 'resultListExt_empty_remark'
         },
         heurist_resultListDataTable: {
-            placeholder_def: 'No default',
-            empty_remark_def: 'No default'
+            placeholder_def: '',
+            empty_remark_def: ''
         },
         heurist_StoryMap: {
             placeholder_def: 'Please select a story in the list',
@@ -71,11 +71,11 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             elementsPlaceholderSub_def: 'Story elements may exist but not be publicly visible'
         },
         heurist_Graph: {
-            placeholder_def: 'recvis_nodata',
+            placeholder_def: 'recvis_placeholder',
             empty_remark_def: 'recvis_nodata'
         },
         heurist_GraphEgo: {
-            placeholder_def: 'recvis_nodata',
+            placeholder_def: 'recvis_placeholder',
             empty_remark_def: 'recvis_nodata'
         }
     };
@@ -1334,6 +1334,15 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
 
             $dlg.find(`div.${widget_name} select`).on('change', on_change);
             $dlg.find(`div.${widget_name} input, div.${widget_name} textarea`).on('input', on_change);
+
+            $dlg.find('input[name="placeholder_option"], input[name="empty_remark_option"], input[name="elementsPlaceholder_option"]').on('change', (event) => {
+                let option = event.target.value;
+                window.hWin.HEURIST4.util.setDisabled(event.target.parentNode.parentNode.querySelector('textarea'), option !== 'provided');
+            });
+            $dlg.find('input[name="placeholder_option"]:checked, input[name="empty_remark_option"]:checked, input[name="elementsPlaceholder_option"]:checked').each((idx, element) => {
+                let option = element.value;
+                window.hWin.HEURIST4.util.setDisabled(element.parentNode.parentNode.querySelector('textarea'), option !== 'provided');
+            });
         }
     }
     
@@ -1648,6 +1657,9 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             opts['show_recent_selection'] = false;
             opts[show_mode] = true;
 
+            opts['empty_remark'] = empty_remark;
+            opts['placeholder_text'] = placeholder;
+
         }else if(widget_name=='heurist_resultList'){
             opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode'] || opts['show_export_button'] || opts['support_collection'];
             if(window.hWin.HEURIST4.util.isempty(opts['recordview_onselect'])){
@@ -1719,9 +1731,6 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             }
 
             opts['elementsPlaceholder'] = elePlaceholder;
-        }else if(widget_name == 'heurist_Graph' || widget_name == 'heurist_GraphEgo'){
-            opts['empty_remark'] = empty_remark;
-            opts['placeholder_text'] = placeholder;
         }
 
         if($dlg.find(`.${widget_name} input[name="export_options"]`).is(':visible')){

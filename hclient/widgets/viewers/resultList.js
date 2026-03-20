@@ -139,6 +139,8 @@ $.widget( "heurist.resultList", {
         auto_select_first: false,   //automatically select first record within result list
         placeholder_text: null,     //text to display while no recordset is loaded (search is not prefromed yet)
         blank_placeholder: false,   // leave placeholder blank
+        empty_remark: 'resultList_empty_remark',
+        blank_empty_remark: false,   // leave empty remark blank
         
         init_completed: false,   //flag to be set to true on full widget initializtion
 
@@ -242,8 +244,14 @@ $.widget( "heurist.resultList", {
             this.options.pagesize = window.hWin.HAPI4.get_prefs('search_result_pagesize');
         }
 
-        this.options.empty_remark = this.options.empty_remark=='def' ? window.hWin.HR('resultList_empty_remark') : this.options.empty_remark;
-        this.options.placeholder_text = this.options.placeholder_text=='def' ? '' : this.options.placeholder_text;
+        this.options.blank_empty_remark = this.options.blank_empty_remark || this.options.empty_remark_option === 'provided' && this.options.empty_remark === '';
+        this.options.blank_placeholder = !Object.hasOwn(this.options, 'blank_placeholder') || this.options.blank_placeholder
+                                      || this.options.placeholder_option === 'def' || this.options.placeholder_text === 'def'
+                                      || this.options.placeholder_option === 'provided' && this.options.placeholder_text === '';
+
+        this.options.empty_remark = this.options.blank_empty_remark ? '' : this.options.empty_remark;
+        this.options.empty_remark = this.options.empty_remark == 'def' || this.options.empty_remark_option == 'def' ? window.hWin.HR('resultList_empty_remark') : this.options.empty_remark;
+        this.options.placeholder_text = this.options.blank_placeholder ? '' : this.options.placeholder_text;
 
         this._is_publication = window.hWin.HAPI4.is_publish_mode;
 
@@ -1500,16 +1508,16 @@ $.widget( "heurist.resultList", {
     //
     _renderEmptyMessage: function(mode){
 
-        if( !window.hWin.HEURIST4.util.isempty(this.options['empty_remark']) ){
+        if( !window.hWin.HEURIST4.util.isempty(this.options.empty_remark) ){
             
-            $('<div>').css('padding','8px').html(this.options['empty_remark']).appendTo(this.div_content);
+            $('<div>').css('padding','8px').html(this.options.empty_remark).appendTo(this.div_content);
 
         }else
         if(this.options.entityName!='records'){
 
             window.hWin.HRes('resultListEmptyEntity', this.div_content);
             
-        }else if(!this.options.blank_empty_remark){
+        }else if(!this.options.blank_empty_remark && this.options.empty_remark !== ''){
 
             let that = this;
             

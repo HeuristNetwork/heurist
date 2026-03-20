@@ -62,7 +62,6 @@ $.widget( "heurist.app_storymap", {
      * @property {boolean} [options.init_completed=false] - Internal flag, set to true when widget initialization is fully complete.
      * @property {?function} options.onClearStory - Callback function executed when the story is cleared.
      * @property {string} [options.storyPlaceholder='Please select a story in the list'] - Placeholder text when no story is selected.
-     * @property {boolean} [options.blank_placeholder=false] - If true, placeholder is blank instead of default text.
      * @property {string} [options.elementsPlaceholder='<br><br>There are no story elements to display for the selected item'] - Placeholder when a story has no elements.
      * @property {string} [options.elementsPlaceholderSub='<i>Story elements may exist but not be publicly visible</i>'] - Sub-text for empty elements placeholder.
      * @property {boolean} [options.show_print_button=false] - If true, shows a button to print the story map.
@@ -119,7 +118,6 @@ $.widget( "heurist.app_storymap", {
         onClearStory: null,
 
         storyPlaceholder: 'Please select a story in the list',
-        blank_placeholder: false,
         elementsPlaceholder: '<br><br>There are no story elements to display for the selected item',
         elementsPlaceholderSub: '<i>Story elements may exist but not be publicly visible</i>',
 
@@ -297,7 +295,7 @@ $.widget( "heurist.app_storymap", {
 
         let placeholder = !window.hWin.HEURIST4.util.isempty(this.options.storyPlaceholder) && this.options.storyPlaceholder != 'def' ? 
                             this.options.storyPlaceholder : '';
-        placeholder = this.options.storyPlaceholder == 'def' 
+        placeholder = this.options.storyPlaceholder == 'def' || this.options.placeholder_option == 'def'
             ? '<br><h3 class="not-found" style="color:teal;display:inline-block">Please select a story in the list</h3>' : placeholder;
         
         this._initial_div_message = 
@@ -483,9 +481,9 @@ $.widget( "heurist.app_storymap", {
         +'">The story is limited to 3 story elements in website edit mode. Please close the website editor to see the full story.</span>')
         .hide()
         .insertBefore(this.options.show_print_button?this._print_button:this._btn_clear_story);
-        
-        
-        if(window.hWin.HEURIST4.util.isempty(this.options.storyPlaceholder) && !this.options.blank_placeholder){
+
+        let useBlank = this.options.placeholder_option == 'blank' || this.options.placeholder_option == 'provided' && this.options.storyPlaceholder === '';
+        if(window.hWin.HEURIST4.util.isempty(this.options.storyPlaceholder) && !useBlank){
             this.options.storyPlaceholder = 'Please select a story in the list';
         }
 
@@ -565,15 +563,22 @@ $.widget( "heurist.app_storymap", {
                     
                     let recset = data.recordset; //record in main result set (for example Persons)
 
-                    let placeholder = (recset.length()>0)?'Please select a story in the list'
-                                                         :'No records match the filter criteria'
-                    if(!window.hWin.HEURIST4.util.isempty(that.options.storyPlaceholder) && that.options.storyPlaceholder != 'def'){
+                    let usePlaceholder = recset.length() > 0;
+                    let placeholder = usePlaceholder ? 'Please select a story in the list'
+                                                     : 'No records match the filter criteria';
+
+                    let useBlank = usePlaceholder ? that.options.placeholder_option == 'blank' || that.options.placeholder_option == 'provided' && that.options.storyPlaceholder === ''
+                        : that.options.elementsPlaceholder_option == 'blank' || that.options.elementsPlaceholder_option == 'provided' && that.options.elementsPlaceholder === '';
+
+                    if(usePlaceholder && (useBlank || that.options.storyPlaceholder != 'def')){
                         placeholder = that.options.storyPlaceholder;
+                    }else if(!usePlaceholder && (useBlank || that.options.elementsPlaceholder != 'def')){
+                        placeholder = that.options.elementsPlaceholder;
                     }else{
                         placeholder = `<br><h3 class="not-found" style="color:teal;display:inline-block">${placeholder}</h3>`;
                     }
-                    
-                    if(that._initial_div_message.html()!=placeholder){
+
+                    if(that._initial_div_message.html() != placeholder){
                         that._initial_div_message.html(placeholder).show();    
                     }
                     

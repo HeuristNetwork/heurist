@@ -58,18 +58,15 @@ $.widget( "heurist.connections", {
         show_selection: false, //work with all selectd records
         show_page: false, //work with the current page of records
         show_all: true, //work with all records in the current results
-        
-        empty_remark: '', //html content for empty message  (search returns empty result)
-        placeholder_text: '', //text to display while no record/recordset is loaded  (search is not performed)
 
         nodeLimit: 20, // limit the initial number of nodes, to avoid overworking the browser
         autoExtendSelection: true, // auto extend the graph when is ONLY ONE record shown
 
         // Message options
         blank_placeholder: false,
-        placeholder_text: 'recvis_nodata',
+        placeholder_text: 'recvis_nodata', // text to display while no record/recordset is loaded  (search is not performed)
         blank_empty_remark: false,
-        empty_remark: 'recvis_nodata'
+        empty_remark: 'recvis_nodata' // html content for empty message  (search returns empty result)
     },
 
     /**
@@ -292,9 +289,11 @@ $.widget( "heurist.connections", {
                     //clear
                     let message = '';
                     if(this.options.show_selection || this.options.show_recent_selection){
-                        message = this.options.blank_placeholder ? '' : this.options.placeholder_text;
+                        let useBlank = this.options.placeholder_option == 'blank' || this.options.placeholder_option == 'provided' && this.options.placeholder_text === '';
+                        message = useBlank ? '' : this.options.placeholder_text;
                     }else{
-                        message = this.options.blank_empty_remark ? '' : this.options.empty_remark;
+                        let useBlank = this.options.empty_remark_option == 'blank' || this.options.empty_remark_option == 'provided' && this.options.empty_remark === '';
+                        message = useBlank ? '' : this.options.empty_remark;
                     }
 
                     this.graphframe[0].contentWindow.showData({message: message});
@@ -577,8 +576,10 @@ $.widget( "heurist.connections", {
                 let message = '';
                 if(this.options.show_selection || this.options.show_recent_selection){
                     message = this.options.blank_placeholder ? '' : this.options.placeholder_text;
+                    message = this.options.placeholder_option === 'def' ? 'recvis_placeholder' : message;
                 }else{
                     message = this.options.blank_empty_remark ? '' : this.options.empty_remark;
+                    message = this.options.empty_remark_option === 'def' ? 'recvis_nodata' : message;
                 }
                 data = {message: message};
             }

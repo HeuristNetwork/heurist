@@ -163,24 +163,27 @@ $.widget( "heurist.recordListExt", {
         if(this.div_content.parent('.tab_ctrl').length==0 && !this.element.attr('data-widgetid')){
             this.div_content.css({width:'100%', height:'100%'}); 
         }
-        
-        if(this.options.empty_remark_option=='provided' && this.options.empty_remark_recent){
+
+        let useBlankEmptyRemark = this.options.empty_remark_option == 'blank' || this.options.empty_remark_option == 'provided' && this.options.empty_remark === '';
+        if(this.options.empty_remark_option == 'provided' && this.options.empty_remark_recent){
             this.options.empty_remark = this.options.empty_remark_recent;
-        }else if(this.options.empty_remark_option=='blank'){
+        }else if(useBlankEmptyRemark){
             this.options.empty_remark = '';
         }else{
             this.options.empty_remark = window.hWin.HR('resultListExt_empty_remark');
             let templateName = window.hWin.HEURIST4.util.getUrlParameter('template', this.options.url) ?? 'Record Viewer';
             this.options.empty_remark = templateName ? this.options.empty_remark.replace('__REPORTNAME__', templateName) : this.options.empty_remark;
         }
-        if(this.options.placeholder_option=='provided' && this.options.placeholder_recent){
+
+        let useBlankPlaceholder = this.options.placeholder_option == 'blank' || this.options.placeholder_option == 'provided' && this.options.placeholder_text === '';
+        if(this.options.placeholder_option == 'provided' && this.options.placeholder_recent){
             this.options.placeholder_text = this.options.placeholder_recent;
-        }else if(this.options.placeholder_option=='blank'){
+        }else if(useBlankPlaceholder){
             this.options.placeholder_text = '';
         }else{
             this.options.placeholder_text = window.hWin.HR('resultListExt_placeholder_text');
         }
-       
+
         if(this.options.css){
             this.div_content.css( this.options.css );
         }
@@ -465,23 +468,17 @@ $.widget( "heurist.recordListExt", {
             this.doSearch( this.options.search_initial );
             this.options.search_initial = null;
         }        
-        
-        //if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)
-        //|| !window.hWin.HEURIST4.util.isempty(this.options.empty_remark)){
+
         this.placeholder_ele = $('<div>')
                 .css({'white-space': 'pre-wrap', 'padding-top': '20px'})
                 .prependTo(this.element)
                 .html(this.options.empty_remark);
-        //?this.options.placeholder_text:this.options.empty_remark);
-        //}
 
         // Force single selection for normal record viewer
         if(!window.hWin.HEURIST4.util.isempty(this.options.url) && this.options.url.indexOf('renderRecordData.php') != -1){
             this.options.is_single_selection = true;
         }
-        
-        
-        
+
     }, //end _create
 
     /**
@@ -501,7 +498,7 @@ $.widget( "heurist.recordListExt", {
         if(window.isCMS_active || window.hWin.HEURIST4.util.getParentWinProperty('cmsEditor')){
             newurl = newurl + '&limit=5&publish=0&cmseditor=1';
             this.options.showProgress = false;
-        }        
+        }
         
         if(this.options.showProgress){
             const session_id = window.hWin.HEURIST4.msg.showProgress({container:this._progressDiv});
@@ -818,6 +815,7 @@ $.widget( "heurist.recordListExt", {
 
                 this._current_url = null;
                 
+                let useBlank = this.options.placeholder_option == 'blank' || this.options.placeholder_option == 'provided' && this.options.placeholder_text === '';
                 if(!window.hWin.HEURIST4.util.isempty(this.options.placeholder_text)){
                     if(this.placeholder_ele != null) {
                         this.placeholder_ele.html(this.options.placeholder_text).show();   
@@ -827,7 +825,7 @@ $.widget( "heurist.recordListExt", {
                     }else{
                         this.div_content.empty();
                     }
-                }else if(!this.options.blank_placeholder){
+                }else if(!useBlank){
                     
                     if(this.options.is_frame_based){
                         this.dosframe.attr('src', window.hWin.HRes('recordSelectMsg'));
