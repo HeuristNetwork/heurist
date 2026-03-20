@@ -84,7 +84,7 @@ if(!($max_size>0)) {$max_size = 0;}
     </head>
 
 
-    <body class="popup ui-heurist-populate" style="margin:0 !important; color:black;"">
+    <body class="popup ui-heurist-populate" style="margin:0 !important; color:black;">
 
         <div class="banner">
             <h2>FILE MANAGEMENT</h2>
@@ -420,6 +420,7 @@ if(!($max_size>0)) {$max_size = 0;}
             function closeCheck(event){
 
                 var files = $('tbody.files [data-uploaded="1"]');
+                let hMenu6 = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
 
                 if(files.length > 0){
 
@@ -432,6 +433,10 @@ if(!($max_size>0)) {$max_size = 0;}
                         // Close popup
                         var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                         $dlg.dialog('close');
+
+                        if(hMenu6.length > 0){
+                            hMenu6.slidersMenu('manageSwitchHandler', 'remove', 'upload-files');
+                        }
 
                         //Cancel possible uploads and reset form
                         $('#btnCancel').trigger('click');
@@ -449,6 +454,10 @@ if(!($max_size>0)) {$max_size = 0;}
                         var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
                         $dlg.dialog('close');
 
+                        if(hMenu6.length > 0){
+                            hMenu6.slidersMenu('manageSwitchHandler', 'remove', 'upload-files');
+                        }
+
                         // Close Upload media window
                         if($(event?.target).is('button')) {
                             $('#btnCancel').trigger('click');//reset form
@@ -461,6 +470,9 @@ if(!($max_size>0)) {$max_size = 0;}
 
                     return false;
                 }else if($(event?.target).is('button')){
+                    if(hMenu6.length > 0){
+                        hMenu6.slidersMenu('manageSwitchHandler', 'remove', 'upload-files');
+                    }
                     $('#btnCancel').trigger('click');
                     setTimeout(function(){ window.close();}, 100);
                 }
