@@ -1951,19 +1951,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             }
         });
 
-        $('.lnk_SelectAll').attr('data-checked',is_all_checked?1:0)
-            .text( is_all_checked?'Select none':'Select all');
+        $('.lnk_SelectAll').attr('data-checked', is_all_checked ? 1 : 0)
+            .text(is_all_checked ? 'Select none' : 'Select all');
 
-        $('.lnk_SelectAll').on('click', function(e){
+        $('.lnk_SelectAll').off('click').on('click', function(e){
             let cb = $(e.target);
-            let was_checked = (cb.attr('data-checked')==1);
+            let was_checked = cb.attr('data-checked') == 1;
             $("input[id^='cbsa_dt_']").each(function(i,item){
                 let dt = $(item).attr('data-type');
-                if(dt=='remain' || dt=='processed')
-                    $(item).prop('checked',was_checked?0:1).trigger('change'); 
+                if(dt == 'remain' || dt == 'processed')
+                    $(item).prop('checked', was_checked ? 0 : 1).trigger('change'); 
             });
-            $('.lnk_SelectAll').attr('data-checked',(was_checked?0:1) );
-            $('.lnk_SelectAll').text(was_checked?'Select all':'Select none');
+            $('.lnk_SelectAll').attr('data-checked', was_checked ? 0 : 1);
+            $('.lnk_SelectAll').text(was_checked ? 'Select all' : 'Select none');
         });
     }
 
