@@ -2589,11 +2589,12 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
             }
 
             $orgFileDetails = mysql__select_row($mysqli, "SELECT ulf_FilePath, ulf_FileName FROM recUploadedFiles WHERE ulf_ID = ?", ['i', $id]);
+            $newFileName = "ulf_{$id}_$file";
 
             // Prepare data - add ULF ID and Obfuscated ID to avoid creating a new record
             $fields['ulf_ID'] = $id;
             $fields['ulf_ObfuscatedFileID'] = $ulfObfID;
-            $fields['ulf_FileName'] = "ulf_{$id}_$file";
+            $fields['ulf_FileName'] = $newFileName;
             $fileinfo = ['entity' => 'recUploadedFiles', 'fields' => $fields];
 
             $this->setData($fileinfo);
@@ -2601,8 +2602,10 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
 
             if($res !== false){
                 $results['replaced'][] = $res;
-                $orgPath = resolveFilePath($orgFileDetails[0] . $orgFileDetails[1]);
-                fileDelete($orgPath);
+                if($orgFileDetails[1] != $newFileName){
+                    $orgPath = resolveFilePath($orgFileDetails[0] . $orgFileDetails[1]);
+                    fileDelete($orgPath);
+                }
                 continue;
             }
 
