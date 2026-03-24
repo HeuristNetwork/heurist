@@ -819,7 +819,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     }else if(selval==1){
                         //tree
                         $dlg.find('#allowed_UGrpID').css('display','table-row');
-                        $dlg.find('#allowed_svsIDs').css('display','table-row');
+                        $dlg.find('#allowed_svsIDs').css('display','none');
                         $dlg.find('#allowed_UGrpID').editing_input('setDisabled', false);
                         $dlg.find('#allowed_svsIDs').editing_input('setDisabled', true);
                         $dlg.find('input[name="allowed_svsIDs"]').val('');
@@ -992,6 +992,11 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 }else{
                     $dlg.find('#simple_search_header').parent().css('display','none');
                     $dlg.find('#simple_search_text').parent().css('display','none');
+                }
+
+                let $editSearches = $dlg.find('#editSvs');
+                if($editSearches.length > 0 && $editSearches.attr('init-svs') == 0){
+                    $editSearches.button().on('click', _editSavedFilters);
                 }
             }else
             if(widget_name=='heurist_Map' && 
@@ -1777,7 +1782,47 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
         return opts;
     }//_getValues
 
+    function _editSavedFilters(){
 
+        let $layoutContainer = $dlg.parents('.ui-layout-pane');
+        if($layoutContainer.length === 0){
+            return;
+        }
+
+        const containerLeft = $layoutContainer.width() + 15;
+        let $container = $('#editSvsList');
+        if($container.length > 0){
+
+            $container.show().css('left', `${containerLeft}px`);
+            return;
+        }
+
+        const h6SectionStyling = 'background: #FFFFFF 0% 0% no-repeat padding-box; border: 0.25px solid #707070; border-radius: 4px;';
+        $container = $('<div>', {
+            style: `position: absolute; top: 1em; bottom: 1.5em; left: ${containerLeft}px; width: 320px; z-index: 105; ${h6SectionStyling}`,
+            class: 'explore-widgets ui-menu6 ui-heurist-explore',
+            id: 'editSvsList'
+        }).appendTo(document.body);
+
+        $container.svs_list({
+            is_h6style: true,
+            hide_header: false,
+            container_width: 300,
+            filter_by_type: 1,
+            editOnly: true,
+            onClose: () => $container.hide()
+        });
+
+        $container.svs_list('reloadSavedSearches');
+
+        $layoutContainer.on('click', (event) => {
+            const openEditor = $(event.target).attr('id') == 'editSvs' || $(event.target).closest('#editSvs').length > 0;
+            if($container.length > 0 && !openEditor){
+                $container.hide();
+            }
+        })
+
+    }
 
     //public members
     let that = {

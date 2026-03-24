@@ -99,8 +99,9 @@ $.widget( "heurist.svs_list", {
         hide_no_value_facets: true, // for facet searches, hide facets that have no available values
         
         search_page: null, //target page (for CMS) - it will navigate to this page and pass search results to search_realm group
-        search_realm:  null  //accepts search/selection events from elements of the same realm only
+        search_realm: null, //accepts search/selection events from elements of the same realm only
         
+        editOnly: false // only allowed to edit the saved searches, blocks attempts at running them from this widget
     },
 
     /**
@@ -718,18 +719,6 @@ $.widget( "heurist.svs_list", {
                         }else{
                             that.loaded_saved_searches = response.data; //svs_id=>array()
                         }
-                        /* IAN request 2022-09-19 Just display that 'Website filters' doesn't exist/has no filters
-                        if(window.hWin.HEURIST4.util.isempty(that.loaded_saved_searches) &&
-                            that.options.allowed_UGrpID.length==1 && that.options.allowed_UGrpID[0]==4){
-                                //special case if allowed_UGrpID is #4 (Website filters) and this group is missed - replace it to group#2
-                                that.options.allowed_UGrpID[0] = 1;
-                                if(!window.hWin.HAPI4.currentUser.ugr_Groups[1]) {
-                                    window.hWin.HAPI4.currentUser.ugr_Groups[1] = 'member';   
-                                }
-                                that.reloadSavedSearches(callback);
-                                return;
-                        }
-                        */
 
                         window.hWin.HAPI4.currentUser.usr_SavedSearch = that.loaded_saved_searches
                         
@@ -1583,6 +1572,12 @@ $.widget( "heurist.svs_list", {
 
 
             click: function(event, data) {
+
+                if(that.options.editOnly){
+                    that.editSavedSearch(null, groupID, data.node.key, null, data.node);
+                    return;
+                }
+
                 if(!data.node.folder){
                     let qname, qsearch, svs_ID = 0;
                     if(data.node.data && data.node.data.url){
@@ -2262,6 +2257,10 @@ $.widget( "heurist.svs_list", {
      */
     doSearchByID: function(svs_ID, query_name){
     
+        if(this.options.editOnly){
+            return;
+        }
+
         if(window.hWin.HAPI4.currentUser?.usr_SavedSearch?.[svs_ID]){
 
             let qsearch = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID][Hul._QUERY];
@@ -2298,6 +2297,10 @@ $.widget( "heurist.svs_list", {
      * @param {Element} [ele] - The UI element that triggered the search (for context/feedback).
      */
     doSearch: function(svs_ID, qname, qsearch, ele){
+
+        if(this.options.editOnly){
+            return;
+        }
 
         if ( qsearch ) {
 

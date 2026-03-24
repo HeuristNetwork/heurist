@@ -1290,7 +1290,19 @@
 
             <fieldset><legend style="display:none"></legend>
 
-                <div class="heurist_SearchTree"  style="padding-top:10px">
+                <div class="heurist_SearchTree">
+
+                    <div class="header header_wide">
+                        Prepare the filters you plan to display
+                    </div>
+
+                    <span id="editSvs" init-svs="0" style="font-size: 1em;padding: 0.1em 0.4em;vertical-align: -0.6em;margin-left: 2.5em;">
+                        edit filters&nbsp;&nbsp;<span class="ui-icon ui-icon-newwin"></span>
+                    </span>
+
+                </div>
+
+                <div class="heurist_SearchTree" style="padding-top:10px">
                     <!-- Allowed groups -->
                     <input name="allowed_UGrpID" type="hidden" value=""/>
                     <div id="allowed_UGrpID" style="display:table-row"></div>
@@ -1305,6 +1317,13 @@
                 </div>
 
                 <div class="heurist_SearchTree">
+                    <!-- Initial filter to trigger -->
+                    <input name="init_svsID" type="hidden" value=""/>
+                    <div id="init_svsID" style="display:table-row"></div>
+
+                </div>
+
+                <div class="heurist_SearchTree">
 
                     <div class="header header_wide">
                         Display filters as&nbsp;
@@ -1313,13 +1332,6 @@
                     <label><input id="heurist_SearchTreeMode1" type="radio" name="searchTreeMode" value="0" checked="checked"/>Buttons</label>&nbsp;
                     <label><input id="heurist_SearchTreeMode2" type="radio" name="searchTreeMode" value="1"/>Tree</label>
                     <label><input id="heurist_SearchTreeMode3" type="radio" name="searchTreeMode" value="2"/>Complete tree</label>
-
-                </div>
-
-                <div class="heurist_SearchTree">
-                    <!-- Initial filter to trigger -->
-                    <input name="init_svsID" type="hidden" value=""/>
-                    <div id="init_svsID" style="display:table-row"></div>
 
                 </div>
 
@@ -1588,7 +1600,7 @@
                     <br>
 
                     <i class="help-text-block">
-                        Message to be shown if query returns no records<br>
+                        Message to be shown if query or selection returns no story elements<br>
                         You may format with HTML
                     </i>
 
