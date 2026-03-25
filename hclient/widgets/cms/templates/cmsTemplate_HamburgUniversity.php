@@ -112,7 +112,7 @@ body{
             </div-->
 <?php
     if(!$edit_OldEditor && $system->isMember(1)){
-        print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'" id="btn_editor" target="_blank" '
+        print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'" id="btn_editor" target="_databaseLink" '
         .'style="position:absolute;left:120px; font-size:14px !important; top:5px;color:blue !important;" class="cms-button">database</a>'
         .'<a href="#" id="btnOpenCMSeditor" onclick="_openCMSeditor(event); return false;" '
         .'style="position:absolute;left:5px; font-size:14px !important; top:5px;color:blue !important;" class="cms-button">website editor</a>';
