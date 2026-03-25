@@ -64,6 +64,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //             name:'Name',description:'Description',show:'Show',duplicate:'Dup',fields:'Info',status:'Del'},
 
     moving_record_type_to_trash: false,
+    options: {
+        skipFieldAdditions: false
+    },
 
     /**
      * @brief Initializes the widget.
@@ -1683,7 +1686,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             this._super( recID, fieldvalues );
         }
         
-        if(this.it_was_insert){
+        if(this.it_was_insert && !this.options.skipFieldAdditions){
             this.searchForm.searchDefRecTypes('startSearch'); //refresh
 
             if(this.options.select_mode=='select_multi'){ // auto select new rectype, and force close

@@ -2412,8 +2412,7 @@ class RecordsBatch
         $record_ids = mysql__select_list2($mysqli, "SELECT rec_ID FROM Records WHERE rec_FlagTemporary != 1 AND rec_RecTypeID = $source_rty", 'intval');
 
         if(empty($record_ids)){
-            $system->addError(HEURIST_ACTION_BLOCKED, 'No source records found');
-            return false;
+            return ['count' => 0, 'record_ids' => []];
         }
 
         $rec_count = count($record_ids);// this is to avoid multiple swf emails when creating records

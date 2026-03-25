@@ -2468,6 +2468,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         // Add required class to header
         $ele = this._editing.getFieldByName('dty_PtrTargetRectypeIDs');
         $ele.find('.header').addClass('required');
+        $ele.editing_input('option', 'selectSubRecord', true);
 
         // Main message
         $('<h2 style="margin-block:0;margin-bottom:0.2em">Create a new field</h2>'

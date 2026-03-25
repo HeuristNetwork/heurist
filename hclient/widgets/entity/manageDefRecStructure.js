@@ -3660,13 +3660,13 @@ console.log('onEditFormChange @todo check buttons!!!');
                     return;
                 }
 
-                let count = response.data.count;
+                let count = Number.parseInt(response.data.count);
+                count = Number.isNaN(count) || !Number.isFinite(count) ? 0 : count;
                 let new_rec_ids = response.data.record_ids;
 
-                if(count == 0){
-                    window.hWin.HEURIST4.msg.showMsgFlash('No sub records created...', 3000);
-                }else{
-                    let url = window.hWin.HAPI4.baseURL + '?db='+window.hWin.HAPI4.database+'&q=ids:'+new_rec_ids;
+                if(count > 0){
+
+                    let url = `${window.hWin.HAPI4.baseURL}?db=${window.hWin.HAPI4.database}&q=ids:${new_rec_ids}`;
                     let $res_dlg = window.hWin.HEURIST4.msg.showMsgDlg(`Created ${count} ${cur_target_name} records (view new records <a href="${url}" target="_blank">here</a>)`, 
                         null, {title: 'Sub-records created'}, {default_palette_class: 'ui-heurist-populate', close: function(){
 
@@ -3677,7 +3677,15 @@ console.log('onEditFormChange @todo check buttons!!!');
                             window.hWin.HAPI4.EntityMgr.refreshEntityData('rst');
                         }
                     });
+
+                    return;
                 }
+
+                $dlg.dialog('close');
+                that.previewEditor.manageRecords('reloadEditForm', true);
+                window.hWin.HAPI4.EntityMgr.refreshEntityData('rst');
+
+                window.hWin.HEURIST4.msg.showMsgFlash('Structure has been updated, but no sub records were created...', 3000);
             });
         }
 

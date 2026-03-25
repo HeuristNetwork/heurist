@@ -224,7 +224,9 @@ $.widget( "heurist.editing_input", {
          * @type {number|null}
          * @default null
          */
-        force_displayheight: null // for textareas
+        force_displayheight: null, // for textareas
+
+        selectSubRecord: false // for resource rectype selection
     },
 
     /**
@@ -2674,7 +2676,7 @@ $.widget( "heurist.editing_input", {
                 let sels = that.newvalues[$input.attr('id')];
                 
                 let rg_options = {
-                    select_mode: (this.configMode.csv!==false?'select_multi':'select_single'),
+                    select_mode: this.configMode.csv !== false ? 'select_multi' : 'select_single',
                     edit_mode: 'popup',
                     isdialog: true,
                     width: 440,
@@ -2694,7 +2696,10 @@ $.widget( "heurist.editing_input", {
                 if(this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_TIMELINE_FIELDS']){
                     rg_options['filters']= {types: ['date','year']};
                 }
-                
+                if(this.options.selectSubRecord){
+                    rg_options['skipFieldAdditions'] = true;
+                }
+
                 window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, rg_options);
             }
             
