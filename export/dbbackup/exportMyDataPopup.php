@@ -877,10 +877,8 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                     $repo_account = htmlspecialchars($_REQUEST['repo_account']);
                     $display_format = ($format == 'tar' || $format == 'tar.bz2') ? 'tar.bz2' : 'zip';
 
-                    // REMARK: user_getRepositoryCredentials2 function is external to this file.
                     $repo_details_all = user_getRepositoryCredentials2($system, $repo_account);
                     $repo_details = $repo_details_all[$repo_account] ?? null;
-
 
                     echo_flush2('<hr><br>Uploading archive to ' . htmlspecialchars($repo) . '...');
 
@@ -904,11 +902,14 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                             'typeUri' => W3_XML_SCHEMA_STRING, 'propertyUri' => NAKALA_REPO.'terms#title'
                         ];
                         $usr = $system->getCurrentUser();
+                        $usrID = !empty($usr['ugr_ID']) ? $usr['ugr_ID'] : '';
                         if (is_array($usr) && !empty($usr['ugr_FullName'])) {
                             $params['meta']['creator'] = [
                                 'value' => $usr['ugr_FullName'], 'lang' => null,
                                 'typeUri' => W3_XML_SCHEMA_STRING, 'propertyUri' => 'http://purl.org/dc/terms/creator'
                             ];
+
+                            $usrID = "{$usr['ugr_FullName']} [#{$usrID}]";
                         }
                         $params['meta']['created'] = [
                             'value' => $date, 'lang' => null,
@@ -976,19 +977,31 @@ Use BZip format rather than Zip (BZip is more efficient for archiving, but Zip i
                         $params['apiKey'] = $repo_details['params']['writeApiKey'];
 
                         $params['status'] = 'pending'; // Keep new record private initially
-                        $params['returnType'] = 'editor'; // Return link to the editor interface
+                        $params['returnType'] = 'editor+id'; // Return link to the editor interface
 
-                        // REMARK: uploadFileToNakala function is external to this file.
                         $rtn_upload = uploadFileToNakala($system, $params);
 
                         if ($rtn_upload === false) {
                             $rtn_msg = $system->getErrorMsg();
                             echo_flush2('failed<br>');
                         } else {
+
+                            $nakalaID = htmlspecialchars($rtn_upload['id']);
+                            $nakalaURL = $rtn_upload['link'];
+
+                            $rtn_msg = htmlspecialchars($nakalaURL);
+                            $rtn_msg = "The uploaded archive is at <a href='{$rtn_msg}' target='_blank'>{$rtn_msg}&nbsp;<span class='ui-icon ui-icon-extlink'></span></a>";
+
+                            $system->settings->setDatabaseSetting('External IDs', ['NakalaDBBackup' => [
+                                'ID' => $nakalaID,
+                                'Name' => 'Nakal - Database Archive',
+                                'URL' => $nakalaURL,
+                                'Date' => $date,
+                                'Note' => "Nakala DOI for Database Archive backup.\nHeurist User: {$usrID}\nNakala Account: {$repo_account}"
+                            ]], 1);
+
                             echo_flush2('finished<br>');
-                            $rtn_msg = htmlspecialchars($rtn_upload);
-                            $rtn_msg = 'The uploaded archive is at <a href="' . $rtn_msg . '" target="_blank">'
-                                        . $rtn_msg . '&nbsp;<span class="ui-icon ui-icon-extlink"></span> </a>';
+
                         }
                         echo_flush2('<br>'. $rtn_msg .'<br>');
                     } else { // Other repositories not supported for direct upload

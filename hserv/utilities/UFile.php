@@ -2054,9 +2054,13 @@ function uploadFilesToNakala($system, $parameters, $filesToUpload, $datas){
     if(array_key_exists('id', $payload)){
 
         $nakalaID = $result['payload']['id'];
-        $linkToUI = array_key_exists('returnType', $parameters) && $parameters['returnType'] === 'editor';
+        $returnType = array_key_exists('returnType', $parameters) ? $parameters['returnType'] : '';
+        $linkToUI = $returnType === 'editor';
+        $linkToUIAndID = $returnType === 'editor+id';
 
-        if($linkToUI){ // returns link to private view
+        if($linkToUIAndID){
+            $externalURLs[] = ['id' => $nakalaID, 'link' => "{$NAKALA_BASE_URL}{$nakalaID}"];
+        }elseif($linkToUI){ // returns link to private view
             $externalURLs[] = "{$NAKALA_BASE_URL}{$nakalaID}";
         }else{ // returns link to publically available file
             foreach($uploadedFiles as $file){

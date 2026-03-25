@@ -63,7 +63,8 @@ class SystemSettings {
         'Webfonts' => 'webfonts.json',
         'Invalid URLs' => 'invalid_urls.json',
         'Notifications' => 'user_notifications.json',
-        'Languages' => 'db_languages.json'
+        'Languages' => 'db_languages.json',
+        'External IDs' => 'external_IDs.json'
     ];
 
     /**
@@ -194,18 +195,9 @@ class SystemSettings {
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid settings format provided for ' . htmlspecialchars($setting_name));
             return false;
         }
-        
-        // If existing_settings is false (due to read error on an existing file for example, but not simple non-existence for $replace_settings=0)
-        // it should ideally not proceed with a merge. However, original logic implies empty array for non-existent.
-        // getDatabaseSetting returns empty array for non-existent file, false for error.
-        // If $existing_settings is false, it means an error occurred, so we should stop.
-        if ($existing_settings === false && $replace_settings > 0) {
-             $this->system->addError(HEURIST_ERROR, "Cannot merge settings for '".htmlspecialchars($setting_name)."' as existing settings could not be definitively read.");
-             return false;
-        }
+
         // If file didn't exist, $existing_settings will be an empty array.
         if ($existing_settings === false) $existing_settings = [];
-
 
         $merged_settings = [];
         if($replace_settings === 0 || isEmptyArray($existing_settings) ){
