@@ -490,7 +490,6 @@
      * @param {boolean} [is_force=false] - If true, the `beforeClose` event will not be triggered.
      */
     closeDialog: function(is_force){
-
         if(this._as_dialog && this._as_dialog.length > 0 && this._as_dialog.dialog('instance') !== undefined){
 
             if(is_force===true){

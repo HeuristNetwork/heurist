@@ -1,0 +1,49 @@
+<!--
+/**
+ * reportEditor.html - Template for the report selector widget
+ *
+ * @project     Heurist academic knowledge management system
+ * @package hclient\widgets\report
+ * @link https://HeuristNetwork.org
+ * @copyright (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ * @license https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+ * @author Artem Osmakov <osmakov@gmail.com>
+ * @author Ian Johnson <ian.johnson.heurist@gmail.com>
+ * @since 6.0
+ */
+-->
+<div class="report-selector">
+  <div style="margin-bottom: 15px;">
+    <a href="#" id="lnkDefTemplate" style="font-size:0.9em">select default templates</a>
+  </div>
+
+  <div style="margin-bottom: 25px;">
+    <label for="selTemplates">Select template</label>
+    <select id="selTemplates" name="template">
+      <option selected>select ...</option>
+    </select>
+  </div>
+
+  <div style="display: flex;flex-direction: column;gap:5px;">
+    <label>
+      <input type="radio" name="template_action" checked value="use">
+      <span>Use this time only</span>
+    </label>
+    <br>
+    <label>
+      <input type="radio" name="template_action" value="edit">
+      <span>Edit selected template</span>
+    </label>
+    <br>
+    <div>
+      <label>
+        <input type="radio" name="template_action" value="new">
+        <span>
+          Create new template
+          <small>(based on selected template)</small>
+        </span>
+      </label>
+      <a href="#" id="lnkMinTemplate" style="margin-left:20px;font-size:0.9em">create minimalist template</a>
+    </div>
+  </div>
+</div>

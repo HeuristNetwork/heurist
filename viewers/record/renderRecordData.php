@@ -1125,6 +1125,24 @@ if(!$system->hasAccess()){
                     });
                 });
             }
+            
+            function openReportSelector(){
+            
+                let popup_dialog_options = {path: 'widgets/report/', 
+                            keep_instance:true, 
+                            rty_ID: <?php echo intval($bibInfo['rec_RecTypeID']);?>,
+                            rec_ID: <?php echo intval($rec_id);?>,
+                            onClose: function( url ){
+                                if(url){
+                                    document.location.href = url;
+                                    return false;
+                                }
+                            }
+                };
+            
+                window.hWin.HEURIST4.ui.showRecordActionDialog('reportSelector', popup_dialog_options);
+                
+            }
 
             $(document).ready(function() {
                 showHidePrivateInfo(null);
@@ -1167,8 +1185,10 @@ if(!$system->hasAccess()){
                     $('#connectionsPlaceholder').text(connectedRecsCount);
                 }
 
-            });
+                $('#custom-report-link').on('click', () => openReportSelector());
 
+            });
+            
             /*NOT USED
             //on document load onLoad="add_sid();"
             function add_sid() {
@@ -1618,9 +1638,13 @@ function print_header_line($bib) {
                 target=_new href="<?php echo HEURIST_BASE_URL;?>?fmt=edit&db=<?=$system->dbname()?>&recID=<?= $bib['rec_ID'] ?>">
                 <img class="rv-editpencil" src="<?php echo HEURIST_BASE_URL;?>hclient/assets/edit-pencil.png" alt="Edit record" title="Edit record" style="vertical-align: top"></a>
             </span>
-
+            
         <?php }else{ ?>
             <span class="login-viewer ui-icon ui-icon-sign-in" title="Sign-in to gain full access" style="cursor: pointer;"></span>
+        <?php }
+        if(!($is_map_popup || $without_header)){
+        ?>
+            <span class="link"><a id="custom-report-link" class="normal" style="font-size:0.9em" href="#">Custom report</a></span>
         <?php }
         if(!empty($wfs_details)){
 

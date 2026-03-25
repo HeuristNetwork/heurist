@@ -473,7 +473,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
             this._currentTemplate = this.options.template;
 
             let that = this;
-            window.hWin.HAPI4.SystemMgr.reportAction({action:'get', template:this._currentTemplate}, 
+            window.hWin.HAPI4.SystemMgr.reportAction({action:'get', template:this.options.basedOn?this.options.basedOn:this._currentTemplate}, 
                 function(response){
                     that._initEditor(response.message);
             });
