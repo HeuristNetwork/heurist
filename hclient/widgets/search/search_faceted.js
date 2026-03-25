@@ -236,7 +236,7 @@ $.widget( "heurist.search_faceted", {
         
         if(!this.options.language) this.options.language = 'def'; //"xx" means use current language
 
-        this._is_publication = window.hWin.HAPI4.is_publish_mode;
+        this._is_publication = !window.hWin.HAPI4.isAdminInterface;
         
         if(!this.element.attr('id')){
             this.element.uniqueId();

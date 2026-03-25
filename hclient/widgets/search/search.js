@@ -130,7 +130,7 @@ $.widget( "heurist.search", {
 
         let that = this;
         
-        this._is_publication = window.hWin.HAPI4.is_publish_mode;
+        this._is_publication = !window.hWin.HAPI4.isAdminInterface;
 
         if(this._is_publication){
             this.options.button_class = '';

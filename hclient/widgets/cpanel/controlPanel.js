@@ -465,7 +465,7 @@ $.widget( "heurist.controlPanel", {
             //executes arbitrary command
             this.actionHandler.executeActionById(cmd);
             return;
-        }else if(window.hWin.HAPI4.is_publish_mode || window.hWin.HAPI4.sysinfo['db_total_records']==0){
+        }else if(!window.hWin.HAPI4.isAdminInterface || window.hWin.HAPI4.sysinfo['db_total_records']==0){
             return;
         }
 
@@ -536,7 +536,7 @@ $.widget( "heurist.controlPanel", {
      */
     _dashboardVisibility: function(is_startup){
 
-        if (window.hWin.HAPI4.is_publish_mode || window.hWin.HAPI4.sysinfo.db_has_active_dashboard==0){
+        if (!window.hWin.HAPI4.isAdminInterface || window.hWin.HAPI4.sysinfo.db_has_active_dashboard==0){
             return;
         }
 

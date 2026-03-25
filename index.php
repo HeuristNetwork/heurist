@@ -428,7 +428,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
         ?>
 
         var lt = window.hWin.HAPI4.sysinfo['layout'];
-        window.hWin.HAPI4.is_publish_mode = (lt=='WebSearch'); //deprecated
+        window.hWin.HAPI4.isAdminInterface = (lt!=='WebSearch');
 
         //
         // init layout
@@ -478,7 +478,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
      */
     function onInitCompleted_PerformSearch(){
 
-        if(!window.hWin.HAPI4.is_publish_mode)
+        if(window.hWin.HAPI4.isAdminInterface)
         {
 
             if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {

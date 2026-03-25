@@ -104,7 +104,7 @@ define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br><span>');//for
 $noclutter = array_key_exists('noclutter', $_REQUEST);//like for map popup, but with header
 
 $layout_name = @$_REQUEST['ll'];
-$is_production = !$is_map_popup && $layout_name=='WebSearch';
+$is_production = !$is_map_popup && $layout_name=='WebSearch'; // not in main heurist admin interface
 
 $is_reloadPopup = array_key_exists('reloadPopup', $_REQUEST) && ($_REQUEST['reloadPopup']==1);
 // 0 - No private details, 1 - collapsed private details, 2 - expanded private details
@@ -264,6 +264,11 @@ if(!$system->hasAccess()){
         <script type="text/javascript" src="<?=HEURIST_BASE_URL?>hclient/widgets/viewers/mediaViewer.js"></script>
 
         <script type="text/javascript">
+
+            var isAdminInterface = true;
+            if(!window.hWin.HAPI4?.isAdminInterface){
+                isAdminInterface = false;
+            }
 
             if(!window.hWin.HAPI4 && typeof hAPI === 'function'){
                 window.hWin.HAPI4 = new hAPI('<?php echo $system->dbname(); ?>', $.noop, '<?php echo HEURIST_BASE_URL;?>');
@@ -1185,7 +1190,11 @@ if(!$system->hasAccess()){
                     $('#connectionsPlaceholder').text(connectedRecsCount);
                 }
 
-                $('#custom-report-link').on('click', () => openReportSelector());
+                if(isAdminInterface){
+                    $('#custom-report-link').show();
+                    $('#custom-report-link').on('click', () => openReportSelector());    
+                }
+                
 
             });
             
@@ -1644,7 +1653,7 @@ function print_header_line($bib) {
         <?php }
         if(!($is_map_popup || $without_header)){
         ?>
-            <span class="link"><a id="custom-report-link" class="normal" style="font-size:0.9em" href="#">Custom report</a></span>
+            <span class="link"><a id="custom-report-link" class="normal" style="font-size:0.9em;display:none" href="#">Custom report</a></span>
         <?php }
         if(!empty($wfs_details)){
 

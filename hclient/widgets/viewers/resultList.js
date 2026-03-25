@@ -253,7 +253,7 @@ $.widget( "heurist.resultList", {
         this.options.empty_remark = this.options.empty_remark == 'def' || this.options.empty_remark_option == 'def' ? window.hWin.HR('resultList_empty_remark') : this.options.empty_remark;
         this.options.placeholder_text = this.options.blank_placeholder ? '' : this.options.placeholder_text;
 
-        this._is_publication = window.hWin.HAPI4.is_publish_mode;
+        this._is_publication = !window.hWin.HAPI4.isAdminInterface;
 
         if(this.options.fontsize==0 && this.element.css('font-size')){
             this.options.fontsize = parseFloat(this.element.css('font-size'));

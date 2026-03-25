@@ -155,7 +155,7 @@ $.widget( "heurist.recordListExt", {
             this.element.attr('data-widgetid', this.options.widget_id);
         }
         
-        this._is_publication = window.hWin.HAPI4.is_publish_mode;
+        this._is_publication = !window.hWin.HAPI4.isAdminInterface;
         
         let that = this;
 

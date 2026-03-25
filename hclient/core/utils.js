@@ -1122,7 +1122,7 @@ window.hWin.HEURIST4.util = {
                 extra_params += '&fancybox=1';
             }
 
-            if(window.HAPI4.is_publish_mode){ // image for a webpage
+            if(!window.HAPI4.isAdminInterface){ // image for a webpage
 
                 let webcached = window.hWin.HEURIST4.util.getUrlParameter('fullres', query);
                 webcached = !webcached ? 0 : webcached;

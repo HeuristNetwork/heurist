@@ -1313,7 +1313,7 @@ class HSystemMgr {
   versionCheck() {
 
       // Only run version checks if not in publish/production mode
-      if (window.hWin.HAPI4.is_publish_mode) {
+      if (!window.hWin.HAPI4.isAdminInterface) {
           return false;
       }
 

@@ -30,7 +30,7 @@
 *    iconBaseURL - url for record type icon (rty_ID to be added)
 *    database - current database name
 *    sysinfo
-*    is_publish_mode - false if Heurist is inited via main index.php and layout is not from the set of application (DH, EN, WebSearch)
+*    isAdminInterface - true if Heurist is inited via main index.php and layout is not from the set of application (DH, EN, WebSearch)
 *
 * Localization routines (assigned to window.hWin)
 *
@@ -618,7 +618,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             */
             search: function (request, callback) {
 
-                if (!window.hWin.HAPI4.is_publish_mode && request['verify_credentials'] != 'ok') {
+                if (window.hWin.HAPI4.isAdminInterface && request['verify_credentials'] != 'ok') {
                     window.hWin.HAPI4.SystemMgr.verify_credentials(function () {
                         request['verify_credentials'] = 'ok';
                         that.search(request, callback);
@@ -1239,7 +1239,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         iconBaseURL: '',
         database: '',
         currentUser: _guestUser,
-        is_publish_mode: false,
+        isAdminInterface: true,
         sysinfo: {},
 
         Event: {
@@ -1282,7 +1282,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
 
                 if (that.currentUser['ugr_ID'] > 0) {
 
-                    if (!window.hWin.HAPI4.is_publish_mode && window.hWin.HEURIST4?.ui) 
+                    if (window.hWin.HAPI4.isAdminInterface && window.hWin.HEURIST4?.ui) 
                     {
 
                             window.hWin.HEURIST4.ui.onInactiveStart(5000, function () {  //300000 5 minutes 

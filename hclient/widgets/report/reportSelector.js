@@ -98,8 +98,12 @@ $.widget( "heurist.reportSelector", $.heurist.baseAction, {
         
         this._context_on_close = null;
         
-        
         this._on(this._$('#lnkMinTemplate'), {click:()=>this._onTemplateEdit(true)});
+
+        this._on(this._$('#lnkDefTemplate'), {click:()=>{
+                window.hWin.HAPI4.actionHandler.executeActionById('menu-profile-preferences');
+                this.closeDialog();
+        }});
         
         return true;
     },
@@ -149,7 +153,6 @@ $.widget( "heurist.reportSelector", $.heurist.baseAction, {
                 let template_file = $(event.target).val();
                 window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('.btnDoAction'), template_file===''); 
         }});
-        
     },        
 
     _onTemplateEdit: function(isNew, basedOn) {
