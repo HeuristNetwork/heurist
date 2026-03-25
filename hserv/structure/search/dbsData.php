@@ -627,7 +627,7 @@ function dbs_GetRectypeConstraint($system) {
         if(version_compare('1.3.0', $current_db_version)>0){
             $query = str_replace('trm_VocabularyGroupID', '1 as trm_VocabularyGroupID', $query);
         }
-        if(version_compare('1.4.6', $current_db_version)>0){
+        if(version_compare('1.3.6', $current_db_version)>0){
             $query = str_replace('trm_OrderInBranch', '0 as trm_OrderInBranch', $query);
         }
 
