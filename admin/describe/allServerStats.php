@@ -82,12 +82,14 @@ $dir_name = array_pop($dir_name);
 
 $is_dir_writable = folderExists(ALL_STATS, true);
 if($is_dir_writable === -1){
-    $res = folderCreate2(ALL_STATS, '');
+    $res = folderCreate2(ALL_STATS, '', true);
     if($res !== ''){
         $system->errorExitApi("Heurist is unable to create the {$dir_name} directory", HEURIST_ERROR, false);
     }
 }elseif($is_dir_writable < 0){
     $system->errorExitApi("Heurist is unable to access the {$dir_name} directory", HEURIST_ERROR, false);
+}elseif(!file_exists(ALL_STATS . '/.htaccess')){
+    allowWebAccessForForlder(ALL_STATS . '/');
 }
 
 $new_file = ALL_STATS . "/{$server_name}_{$type_label}_stats." . ($is_zip ? 'zip' : 'txt'); // in case the zipping fails, add server name as prefix
