@@ -229,22 +229,6 @@
     }
 
     /**
-     * Peforms one of three actions:
-     *  Validates the captcha and sends a reset pin to the user's email
-     *  Sends a new reset pin, or
-     *  Validates the provided pin, allowing a password reset
-     *
-     * @param object $system - initialised System class object
-     * @param string $username User's username or email address.
-     * @param string $pin (Optional) If provided and not empty, this function attempts to validate this PIN.
-     *                    If 1, it forces a resend. If empty, it attempts to generate and send a new PIN.
-     * @param string $captcha (Optional) The user's answer to a CAPTCHA challenge, required when generating a new PIN.
-     * @return bool|string Returns `true` if a PIN is successfully validated or successfully sent.
-     *                     Returns a specific string message if a PIN is re-sent or an old one expired and a new one sent.
-     *                     Returns `false` on any error (e.g., user not found, CAPTCHA failed, email failed, too many attempts).
-     *                     Errors are added to `$system`.
-     */
-    /**
      * Manages the PIN-based password reset process.
      *
      * This function has multiple modes based on the `$pin` parameter:
@@ -421,16 +405,6 @@
         }
     }
 
-    /**
-     * Resets user's password to the provided value, via the use of a reset pin
-     *
-     * @param object $system - initialised System class object
-     * @param string $username User's username or email address.
-     * @param string $password The new password to set.
-     * @param string $pin The reset PIN previously validated by `user_HandleResetPin`.
-     * @return bool True if the password was successfully reset, false otherwise.
-     *              Errors are added to `$system`.
-     */
     /**
      * Resets a user's password after successful PIN validation.
      *
@@ -1304,17 +1278,6 @@
     }  // sendApprovalEmail
 
     /**
-     * Get notifications to display to the user, currently handled:
-     *  Monthly Bug / Suggestion report
-     *
-     * Monthly bug / suggestion report is handled separatly
-     *
-     * @param \hserv\System $system The Heurist system object.
-     * @return array An array of notification messages to display to the user. Each message
-     *               can be a string or an array with 'message' and 'links' components.
-     *               Currently, only a 'bug_report' notification type is implemented.
-     */
-    /**
      * Retrieves system notifications to be displayed to the current user.
      *
      * This function checks for conditions under which specific notifications should be shown,
@@ -1517,14 +1480,6 @@
         return $messages;
     }
 
-    /**
-     * Set blocked notifications to avoid displaying to the current user
-     *
-     * @param \hserv\System $system The Heurist system object.
-     * @param string|array $blocking A comma-separated string or an array of notification type keys
-     *                               (e.g., 'bug_report') to be blocked for the current user.
-     * @return bool True on success, false on failure (errors are added to `$system`).
-     */
     /**
      * Allows the current user to block (snooze/dismiss) specific types of system notifications.
      *

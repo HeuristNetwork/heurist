@@ -177,13 +177,6 @@ class ReportExecute
 
 
     /**
-     * Initializes properties from parameters or sets defaults.
-     * Handles the output mode and sets appropriate flags.
-     * Sets the search limit based on publishing mode or user preferences.
-     *
-     * @param array|null $params The parameters array to set.
-     */
-    /**
      * Sets and sanitizes various operational parameters for the report execution.
      *
      * This method initializes class properties based on the input `$params` array,
@@ -244,11 +237,6 @@ class ReportExecute
     }
 
     /**
-     * Prepares and sanitizes the output file name.
-     *
-     * @return string The sanitized output file name.
-     */
-    /**
      * Prepares and sanitizes the output file name for saving or downloading.
      *
      * It uses the 'output' parameter if provided, otherwise falls back to the
@@ -266,12 +254,6 @@ class ReportExecute
     }
 
 
-    /**
-     * Fetch record IDs based on the provided query parameters.
-     *
-     * @return array|null The query result as an array (expected to contain 'records' and 'reccount'),
-     *                    or null if fetching fails (e.g., `recordSearch` returns an error).
-     */
     /**
      * Fetches the set of record IDs to be processed in the report.
      *
@@ -406,12 +388,6 @@ class ReportExecute
     }
 
     /**
-     * Handles empty result sets and outputs an appropriate error message or info.
-     *
-     * @param array|null $qresult The query result, expected to have 'records' and 'reccount'.
-     * @return bool True if the result set is not empty and valid, false otherwise (and outputs an error/message).
-     */
-    /**
      * Checks if the fetched record set is empty and handles output accordingly.
      *
      * If the record set (`$qresult['records']`) is empty or `reccount` is not positive:
@@ -447,12 +423,6 @@ class ReportExecute
 
     }
 
-    /**
-     * Loads the template content from a file or from a provided template body.
-     *
-     * @return string|false The loaded template content as a string, or `false` on failure (e.g., template empty).
-     *                      Errors are set using `outputError()`.
-     */
     /**
      * Loads the Smarty template content, either from a specified file or directly from parameters.
      *
@@ -532,13 +502,6 @@ class ReportExecute
     }
 
     /**
-     * Initializes the Smarty engine if it is not already initialized.
-     *
-     * @param bool $force_init If true, forces re-initialization even if Smarty is already initialized.
-     * @return bool True if Smarty is successfully initialized (or was already), false on error.
-     *              Errors are set via `outputError()`.
-     */
-    /**
      * Initializes the Smarty templating engine.
      *
      * If Smarty is not already initialized (or if `$force_init` is true), this method
@@ -576,13 +539,6 @@ class ReportExecute
         return true;
     }
 
-    /**
-     * Executes the Smarty template with the provided records and template content.
-     *
-     * @param array $qresult The result set containing records.
-     * @param string $content The Smarty template string content.
-     * @return bool True if template execution and output handling complete without critical errors, false otherwise.
-     */
     /**
      * Sets up Smarty variables and plugins, then initiates template processing.
      *
@@ -652,13 +608,6 @@ class ReportExecute
         return $this->executeTemplateContinue($content, $results);
     }
 
-    /**
-     * Continues the template execution by processing output and handling filters.
-     *
-     * @param string $content The template content.
-     * @param array $results An array of record IDs to be processed by the template.
-     * @return bool True if the template fetches and is handled successfully, false on Smarty exception.
-     */
     /**
      * Continues template execution: sets up filters, fetches, and handles output.
      *

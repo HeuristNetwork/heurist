@@ -518,14 +518,6 @@ class ReportTemplateMgr
     }
 
     /**
-     * Safely replaces an array of search strings in the subject with the corresponding replacement strings.
-     *
-     * @param array $search Array of search strings.
-     * @param array $replace Array of replacement strings.
-     * @param string $subject The string in which to perform replacements.
-     * @return string The modified string with replacements applied.
-     */
-    /**
      * A custom string replacement function that iterates through search terms to replace them.
      *
      * This method is designed to handle replacements more carefully than a simple `str_replace`
@@ -557,14 +549,6 @@ class ReportTemplateMgr
         return $result;
     }
 
-    /**
-     * Helper function to find the next match for any of the search terms.
-     *
-     * @param array $search Array of strings to search for.
-     * @param string $subject The string to search within.
-     * @return array An array containing two elements: the index of the found search term in the `$search`
-     *               array (or -1 if no match), and the offset of the match within `$subject` (or -1 if no match).
-     */
     /**
      * Finds the first occurrence of any of the given search terms in a subject string.
      *

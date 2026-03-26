@@ -2662,10 +2662,6 @@ class BibIDPredicate extends Predicate {
  * Abstract base class for predicates that deal with linked records (via `recLinks` table).
  * Provides common structure but `makeSQL` needs to be implemented by subclasses.
  */
-/**
- * Abstract base class for predicates that deal with linked records (via `recLinks` table).
- * Provides common structure but `makeSQL` needs to be implemented by subclasses.
- */
 abstract class LinkedPredicate extends Predicate {
 
     /** @var string SQL field name for the source ID in `recLinks` (e.g., "rl.rl_SourceID"). Set by subclasses. */
@@ -2832,10 +2828,6 @@ class LinkedToParentPredicate extends LinkedPredicate {
     }
 }
 
-/**
- * Abstract base class for predicates dealing with related records (via type 1 records in `recLinks`).
- * Provides helper methods `buildWhereClause` and `buildSelectClause`.
- */
 /**
  * Abstract base class for predicates dealing with related records (via type 1 records in `recLinks`).
  * Provides helper methods `buildWhereClause` and `buildSelectClause`.

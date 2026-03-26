@@ -448,15 +448,7 @@ class ReportRecord
 
         return array('linkedto' => $to_records, 'linkedfrom' => $from_records);
     }
-    
 
-    /**
-     * Converts a record array into an array that can be assigned to a Smarty variable.
-     *
-     * @param array|null $rec The raw record data array from `recordSearchByID`.
-     * @return array|null A Smarty-friendly associative array representing the record,
-     *                    or null if input `$rec` is null.
-     */
     /**
      * Converts a raw Heurist record array into a format more accessible for Smarty templates.
      *
