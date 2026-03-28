@@ -245,7 +245,8 @@ let maxCountForLinks;
                 }
             });
 
-            document.querySelector('#expanderSettings').setAttribute('data-inited', 0);
+            $('#expanderSettings').attr('data-inited', 0).hide();
+            $('.graphLevelControl').show();
 
             document.removeEventListener('mousedown', setupAutoHideToolbar);
             if(window.hWin.HEURIST4.util.isPositiveInt(window.visualiserInactivity)){
@@ -580,6 +581,10 @@ function updateScalableElements(toScale = 'all'){
     iconSize /= scale;
     const iconPos = -iconSize / 2;
 
+    let markerSize = 30;
+    markerSize = (markerSize / scale) * 2;
+    markerSize = markerSize > 30 ? 30 : markerSize;
+
     if(toScale === 'all' || toScale === 'icon'){
 
         const nodeList = document.querySelectorAll('circle.foreground');
@@ -642,6 +647,16 @@ function updateScalableElements(toScale = 'all'){
         updateLineSize(bottomLineList, 1, 1);
         updateLineSize(topLineList, 1, 0.2);
         updateLineSize(rolloverLineList, 3, 3);
+    }
+
+    if(toScale === 'all' || toScale === 'markers'){
+
+        const markers = document.querySelectorAll('#marker-rel-mid, #marker-ptr-end');
+        for(let i = 0; i < markers.length; i++){
+
+            const marker = markers[i];
+            marker.setAttribute('markerWidth', markerSize);
+        }
     }
 
     tick();
@@ -1819,7 +1834,7 @@ var thematicSettings = {
 
 function setupThematicSettings(){
 
-    if(true || typeof editSymbology !== 'function' || typeof hexToFilter !== 'function'){
+    if(typeof editSymbology !== 'function' || typeof hexToFilter !== 'function'){
         return;
     }
 
@@ -1854,7 +1869,7 @@ function setupThematicSettings(){
         let item = `
         <input name="displayNode" type="checkbox" ${existingSettings.display == 1 ? 'checked="checked"' : ''}>
         <img src="${thematicSettings['nodes'][rtyID].icon}" alt="${thematicSettings['nodes'][rtyID].name}" height="16" width="16" style="top: 5px;position: relative;" data-icon-id="${rtyID}">
-        <span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>
+        <!--<span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>-->
         <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${thematicSettings['nodes'][rtyID].name}" class="truncate">${thematicSettings['nodes'][rtyID].name}</span>
         `;
 
@@ -1865,7 +1880,7 @@ function setupThematicSettings(){
 
         nodeContainer.appendChild(div);
 
-        div.querySelector('.editSymbols').addEventListener('click', () => editThematicSetting('nodes', rtyID));
+        //div.querySelector('.editSymbols').addEventListener('click', () => editThematicSetting('nodes', rtyID));
         div.querySelector('input[name="displayNode"]').addEventListener('change', (event) => toggleDisplay('nodes', rtyID, event.target.checked));
 
         setThematicSetting('nodes', rtyID);
@@ -1894,7 +1909,7 @@ function setupThematicSettings(){
         let item = `
         <input name="displayNode" type="checkbox" ${existingSettings.display == 1 ? 'checked="checked"' : ''}>
         <span class="ui-icon ui-icon-minusthick" style="top: 5px; position: relative;" data-line-id="${trmID}"></span>
-        <span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>
+        <!--<span class="ui-icon ui-icon-pencil editSymbols" title="Edit symbology styling" style="position: relative; top: 3px;"></span>-->
         <span style="position: relative;top: 6px;max-width: 16em;display: inline-block;cursor: default;" title="${thematicSettings['edges'][trmID].name}" class="truncate">${thematicSettings['edges'][trmID].name}</span>
         `;
 
@@ -1905,7 +1920,7 @@ function setupThematicSettings(){
 
         edgeContainer.appendChild(div);
 
-        div.querySelector('.editSymbols').addEventListener('click', () => editThematicSetting('edges', trmID));
+        //div.querySelector('.editSymbols').addEventListener('click', () => editThematicSetting('edges', trmID));
         div.querySelector('input[name="displayNode"]').addEventListener('change', (event) => toggleDisplay('edges', trmID, event.target.checked));
 
         setThematicSetting('edges', trmID);
@@ -1947,11 +1962,11 @@ function setThematicSetting(type, ID){
     let styling = getSetting(`setting_styling_${type}${ID}`);
     styling = window.hWin.HEURIST4.util.isJSON(styling);
 
-    if(styling === false || !window.hWin.HEURIST4.util.isObject(styling)){
+    if(true || styling === false || !window.hWin.HEURIST4.util.isObject(styling)){
         return;
     }
 
-    if(type === 'nodes'){
+    if(type === 'nodes'){ // @todo the filter is inconsistent (colour picker is also bugged)
 
         if(!styling?.iconColour){
             return;
@@ -1985,7 +2000,7 @@ function setThematicSetting(type, ID){
         legendIcon.style.setProperty('filter', colourFilter);
         legendIcon.style.setProperty('opacity', `${styling.iconOpacity}%`);
 
-    }else if(type === 'edges'){
+    }else if(type === 'edges'){ // @todo colour picker is bugged
 
         let lines = document.querySelectorAll(`path.bottom-lines[data-connector*="r${ID}t"]`);
 

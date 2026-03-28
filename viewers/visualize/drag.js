@@ -463,12 +463,9 @@ function toggleRecordViewer(action){
         let data = settings.getData.call(this, settings.data);
         let recTitle = `Record #${recID}`;
 
-        for(let i = 0; i < data.nodes.length; i++){
-
-            if(data.nodes[i].id == recID){
-                recTitle = data.nodes[i].name;
-                break;
-            }
+        let node = getNodeDataById(recID);
+        if(!window.hWin.HEURIST4.util.isempty(node?.name)){
+            recTitle = node.name;
         }
 
         $infoStub.find('#infoDiv_stubtitle').html(recTitle);

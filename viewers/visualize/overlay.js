@@ -56,11 +56,12 @@ function truncateText(text, maxLength) {
 function getRecordOverlayData(record) {
 
     let maxLength = getSetting('setting_textlength');
-    let rectypeLength = 20;
+    let rectypeLength = $('#labelLength').length > 0 ? $('#labelLength').val() : 20;
     let array = [];
 
     // Header
-    let header = {text: truncateText(window.hWin.HEURIST4.util.stripTags(record.name), rectypeLength), 
+    const recName = window.hWin.HEURIST4.util.stripTags(record.name);
+    let header = {text: truncateText(recName, rectypeLength), fullName: recName,
                   count: record.count, rtyid: record.id,
                   size: "9px", weight: "bold", height: 15, enter: true, image:record.image}; 
 
@@ -494,6 +495,12 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
                       .style("font-size", function(d) {   // Font size based on size property
                         return d.size;
                       }, "important");
+
+        overlay.selectAll('title')
+               .data(info)
+               .enter()
+               .append('title')
+               .text((d) => d.fullName);
 
         if(settings.isDatabaseStructure){
 

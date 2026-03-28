@@ -134,8 +134,8 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 
 <div id="toolbar" class="split_bar" style="display: none;">
 
-    <div id="showSubToolbar" class="showMenuButton toolbarController" title="Show extended toolbar">
-        <span class="ui-icon ui-icon-wrench"></span>
+    <div id="showSubToolbar" class="showMenuButton toolbarController" title="Show toolbar">
+        <span class="ui-icon ui-icon-caret-2-e"></span>
     </div>
 
     <div class="dropdown-content dropdown-subbar">
@@ -172,6 +172,15 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
             <span style="display: inline-block;margin-left: 0.2em;">
                 <span class="controlLabel">node</span>
                 <input id="nodeSize" title="Node size (pixels)" class="number-input" style="width: 2.3em; vertical-align: -1px;" type="number" min="8" max="30" step="1" />
+            </span>
+
+            <span style="display: inline-block;margin-left: 0.2em;">
+                <span class="controlLabel">label</span>
+                <input id="labelLength" title="Label length (characters)" class="number-input" style="width: 2.9em; vertical-align: -1px;" type="number" min="8" max="100" step="1" />
+            </span>
+
+            <span style="display: inline-block;margin: 0px 0.2em;">
+                <span class="controlLabel toolbarController" id="showThematicSettings" title="Hide edges and nodes" style="cursor: pointer;">prune</span>
             </span>
 
             <span style="display: inline-block;margin-left: 0.2em;">
@@ -229,7 +238,7 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 <div id="thematicSettings">
 
     <div id="hideThematicContainer" class="toolbarController" style="cursor: pointer; padding-bottom: 0.5em;">
-        <span class="ui-icon ui-icon-caret-1-w"></span> Hide thematic settings
+        <span class="ui-icon ui-icon-caret-2-w"></span>
     </div>
 
     <div style="overflow-y: auto; min-height: 18em; max-height: 18em;">
@@ -239,7 +248,7 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
             <div id="thematicNodesList"></div>
         </div>
 
-        <div id="thematicEdges">        
+        <div id="thematicEdges" style="padding-top: 1em;">        
             <span class="thematicSettingsLabel">Edges</span>
             <div id="thematicEdgesList"></div>
         </div>
@@ -280,7 +289,7 @@ if(@$isDatabaseStructure == 1){ // Toolbar and layout for Database Structure Vis
 
 </div>
 
-<div id="divSvg" class="ent_content_full" style="top:4.5em;overflow:hidden;"> <?php // Main content area for SVG ?>
+<div id="divSvg" class="ent_content_full" style="top:1.5em;overflow:hidden;"> <?php // Main content area for SVG ?>
     <svg id="d3svg" class="fullscreen" style="width: 100%; height: 100%;">
         <text x="25" y="25" fill="black">Building graph ...</text> <?php // Initial loading message ?>
     </svg>

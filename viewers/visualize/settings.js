@@ -441,6 +441,12 @@ function initialiseMiniToolbar(){
 
     $('#recTitleSize').val(9).on('change.visualiser', () => updateScalableElements('labels'));
     $('#nodeSize').val(window.circleSize).on('change.visualiser', () => updateScalableElements('all'));
+    $('#labelLength').val(20).on('change.visualiser', () => {
+        const labelLength = $('#labelLength').val();
+        const labels = window.d3.selectAll('.nodelabel');
+
+        labels.text((d) => truncateText(d.fullName, labelLength));
+    });
 
     $('#lnkOpenPopup').on('click', () => {
 
@@ -526,6 +532,13 @@ function initialiseMiniToolbar(){
     }else{
         $('#expandedLevels').hide();
     }
+
+    $('#showThematicSettings').on('click.visualiser', () => {
+        if($('#thematicSettings').is(':visible')){
+            return;
+        }
+        $('#showThematicContainer').trigger('click')
+    });
 }
 
 /**
