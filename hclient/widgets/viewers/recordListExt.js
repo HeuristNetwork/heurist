@@ -165,10 +165,10 @@ $.widget( "heurist.recordListExt", {
         }
 
         let useBlankEmptyRemark = this.options.empty_remark_option == 'blank' || this.options.empty_remark_option == 'provided' && this.options.empty_remark === '';
-        if(this.options.empty_remark_option == 'provided' && this.options.empty_remark_recent){
-            this.options.empty_remark = this.options.empty_remark_recent;
-        }else if(useBlankEmptyRemark){
+        if(useBlankEmptyRemark){
             this.options.empty_remark = '';
+        }else if(this.options.empty_remark_option == 'provided' && this.options.empty_remark_recent){
+            this.options.empty_remark = this.options.empty_remark_recent;
         }else{
             this.options.empty_remark = window.hWin.HR('resultListExt_empty_remark');
             let templateName = window.hWin.HEURIST4.util.getUrlParameter('template', this.options.url) ?? 'Record Viewer';
@@ -176,10 +176,10 @@ $.widget( "heurist.recordListExt", {
         }
 
         let useBlankPlaceholder = this.options.placeholder_option == 'blank' || this.options.placeholder_option == 'provided' && this.options.placeholder_text === '';
-        if(this.options.placeholder_option == 'provided' && this.options.placeholder_recent){
-            this.options.placeholder_text = this.options.placeholder_recent;
-        }else if(useBlankPlaceholder){
+        if(useBlankPlaceholder){
             this.options.placeholder_text = '';
+        }else if(this.options.placeholder_option == 'provided' && this.options.placeholder_recent){
+            this.options.placeholder_text = this.options.placeholder_recent;
         }else{
             this.options.placeholder_text = window.hWin.HR('resultListExt_placeholder_text');
         }
@@ -749,11 +749,12 @@ $.widget( "heurist.recordListExt", {
             || window.hWin.HEURIST4.util.isempty(this.options.url)){
             return;  
         }else{
-            
-            if(this.options.empty_remark_option=='provided' && this.options.empty_remark_recent){
-                this.options.empty_remark = this.options.empty_remark_recent;
-            }else if(this.options.empty_remark_option=='blank'){
+
+            let useBlankEmptyRemark = this.options.empty_remark_option == 'blank' || this.options.empty_remark_option == 'provided' && this.options.empty_remark === '';
+            if(useBlankEmptyRemark){
                 this.options.empty_remark = '';
+            }else if(this.options.empty_remark_option=='provided' && this.options.empty_remark_recent){
+                this.options.empty_remark = this.options.empty_remark_recent;
             }else{
                 this.options.empty_remark = window.hWin.HR('resultListExt_empty_remark');
             }
