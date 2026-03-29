@@ -68,7 +68,7 @@ window.hWin.cfg_widgets = [
 
     {id:'heurist_recordAddButton', name:'Add Record', widgetname:'recordAddButton', script:'hclient/widgets/record/recordAddButton.js'},
     {id:'heurist_emailForm', name:'Email Us Form', widgetname:'emailForm', script:'hclient/widgets/admin/emailForm.js'},
-    {id:'heurist_mediaViewer', name:'Media Viewer', widgetname:'mediaViewer', script:'hclient/widgets/viewers/mediaViewer.js', minh:200, minw:200},
+    {id:'heurist_mediaViewer', name:'Media Viewer', widgetname:'mediaViewer', script:'hclient/widgets/viewers/mediaViewer.js', minh:200, minw:200, options:{slideshowShow: true}},
         
     //fake app - reference to another layout to include
     {id:'include_layout',name:'Inner Layout', widgetname:'include_layout'}

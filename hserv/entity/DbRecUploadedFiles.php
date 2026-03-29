@@ -145,10 +145,12 @@ class DbRecUploadedFiles extends DbEntityBase
 
         $value = @$this->data['fxm_MimeType'];
         $needMimeType = !($value==null || $value=='any');
+        $detailsMode = $this->data['details'] ?? null;
+        
         if($needMimeType){
             array_push($where, "(fxm_MimeType like '$value%')");
         }
-        if($needMimeType || @$this->data['details']=='full' || @$this->data['details']=='list'){
+        if($needMimeType || $detailsMode=='full' || $detailsMode=='list' || $detailsMode=='mediaViewer'){
             array_push($where, "(fxm_Extension=ulf_MimeExt)");
             array_push($from_table, ',defFileExtToMimetype');
         }
@@ -177,24 +179,27 @@ class DbRecUploadedFiles extends DbEntityBase
         $calculatedFields = null;
 
         //compose SELECT it depends on param 'details' ------------------------
-        if(@$this->data['details']=='id'){
+        
+        if($detailsMode=='id'){
 
             $this->data['details'] = 'DISTINCT ulf_ID';
 
-        }elseif(@$this->data['details']=='name'){
+        }elseif($detailsMode=='name'){
 
             $this->data['details'] = 'DISTINCT ulf_ID,ulf_OrigFileName';
 
-        }elseif(@$this->data['details']=='list'){
+        }elseif($detailsMode=='list'){
 
             $this->data['details'] = 'DISTINCT ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_FilePath,fxm_MimeType,ulf_PreferredSource,ulf_FileSizeKB,ulf_WhoCanView';
             $needCalcFields = true;
 
-        }elseif(@$this->data['details']=='full'){
+        }elseif($detailsMode=='full' || $detailsMode=='mediaViewer'){
 
             $this->data['details'] = 'DISTINCT ulf_ID,ulf_OrigFileName,ulf_ExternalFileReference,ulf_ObfuscatedFileID,ulf_Caption,ulf_Description,ulf_Copyright,ulf_Copyowner,ulf_FileSizeKB,ulf_MimeExt,ulf_Added,ulf_UploaderUGrpID,fxm_MimeType,ulf_PreferredSource,ulf_WhoCanView';
-            $needRelations = true;
-            $needCalcFields = true;
+            if($detailsMode!=='mediaViewer'){
+                $needRelations = true;
+                $needCalcFields = true;
+            }
         }else{
             $needCheck = true;
         }
@@ -265,9 +270,33 @@ class DbRecUploadedFiles extends DbEntityBase
 
 
         }//end find related records
+        
+        if($detailsMode=='mediaViewer'){
+            $result = $this->_getMediaViewerData($result);
+        }
 
         return $result;
 
+    }
+    
+    protected function _getMediaViewerData($records){
+        
+        $info = $this->getRecords($records);
+        $res = [];
+            
+        foreach($info as $record){
+        
+            if(strpos($record['ulf_OrigFileName'],ULF_TILED_IMAGE)===0) {continue;}
+            $res[] = array('rec_ID'=>0,
+                           'caption'=>htmlspecialchars($record['ulf_Caption']),
+                           'title'=>'',
+                           'id'=>$record['ulf_ObfuscatedFileID'],
+                           'mimeType'=>$record['fxm_MimeType'],
+                           'filename'=>htmlspecialchars($record['ulf_OrigFileName']),
+                           'external'=>htmlspecialchars($record['ulf_ExternalFileReference']));//important need restore on client side
+        }    
+        
+        return $res;
     }
 
     /**

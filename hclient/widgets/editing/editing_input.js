@@ -2756,7 +2756,7 @@ $.widget( "heurist.editing_input", {
             $( "<button>", {title: "Select"})
                         .button({icon:"ui-icon-triangle-1-e",
                                label:('&nbsp;&nbsp;&nbsp;select')})
-                        .addClass('sel_link2').hide()
+                        .addClass('sel_link2') //.hide()
                         .appendTo( $inputdiv );
             
             let $input_img;
@@ -2809,6 +2809,11 @@ $.widget( "heurist.editing_input", {
 
                 }
             };//popup_options
+
+            if(Array.isArray(value) && value[0]===0){
+                $inputdiv.find('.sel_link2').show();
+                value = [];
+            }
             
             $input.hide();
             that._findAndAssignTitle($input, value);

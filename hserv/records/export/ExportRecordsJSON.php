@@ -752,7 +752,8 @@ private static function _getMediaViewerData($record){
                 */
 
                 $res = $res.$comma.json_encode(array('rec_ID'=>$record['rec_ID'],
-                               'caption'=>htmlspecialchars($record['rec_Title']),
+                               'caption'=>htmlspecialchars($fileinfo['ulf_Caption']),
+                               'title'=>htmlspecialchars($record['rec_Title']),
                                'id'=>$fileid,
                                'mimeType'=>$mimeType,
                                'filename'=>htmlspecialchars($fileinfo['ulf_OrigFileName']),

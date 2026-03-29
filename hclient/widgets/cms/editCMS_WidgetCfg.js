@@ -694,8 +694,10 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         opts['content_source'] = 'selector';
                     }else if(opts['mediaViewer_recIDs']){
                         opts['content_source'] = 'list';
-                    }else{
+                    }else if(opts['search_initial']){
                         opts['content_source'] = 'search';
+                    }else{  //if(opts['mediaViewer_fileIDs']){
+                        opts['content_source'] = 'files';
                     }
                 }
 
@@ -707,6 +709,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     $dlg.find('.mv-src-search').toggle(mode=='search');
                     $dlg.find('.mv-src-selector').toggle(mode=='selector');
                     $dlg.find('.mv-src-list').toggle(mode=='list');
+                    $dlg.find('.mv-src-files').toggle(mode=='files');
                 }
 
                 $dlg.find('.heurist_mediaViewer input[name="content_source"]').off('change.mediaViewer')
@@ -742,6 +745,33 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                     ele.parent().css('display','block');
                 }
 
+                
+                // init file list selector (editing_input)
+                rval = $dlg.find('.heurist_mediaViewer input[name="mediaViewer_fileIDs"]').val();
+                rval = rval ? rval.split(',') : null;
+
+                ele = $dlg.find('#mediaViewer_fileIDs');
+
+                if(!ele.editing_input('instance')){
+
+                    const ed_options = {
+                        recID: -1,
+                        dtID: ele.attr('id'),
+                        values: rval,
+                        readonly: false,
+                        showclear_button: true,
+                        dtFields:{
+                            dty_Type:"resource", rst_MaxValues:0, rst_MinValues:1,
+                            rst_DisplayName: 'Select files:', rst_DisplayHelpText:'',
+                            rst_FieldConfig: {entity:'recUploadedFiles', csv:false}
+                        },
+                        change: on_change
+                    };
+
+                    ele.editing_input(ed_options);
+                    ele.parent().css('display','block');
+                }
+                
                 __mvToggle();
             }else
             if (widget_name=='heurist_recordAddButton'){
@@ -1504,7 +1534,7 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
             cont.find('input[name="menu_recIDs"]').val( menu_recIDs );
         }else
         if(widget_name=='heurist_mediaViewer'){
-            let mode = cont.find('input[name="content_source"]:checked').val() || 'search';
+            let mode = cont.find('input[name="content_source"]:checked').val() || 'files';
             opts['content_source'] = mode;
 
             if(mode=='list'){
@@ -1524,6 +1554,27 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                 // clear other inputs
                 cont.find('input[name="search_initial"]').val('');
                 cont.find('input[name="selector"]').val('');
+                cont.find('input[name="mediaViewer_fileIDs"]').val('');
+            }else if(mode=='files'){
+                
+                let fileIDs = cont.find('#mediaViewer_fileIDs').editing_input('getValues');
+                if(window.hWin.HEURIST4.util.isempty(fileIDs) ||
+                    (Array.isArray(fileIDs) && (fileIDs.length==0 || window.hWin.HEURIST4.util.isempty(fileIDs[0]))))
+                {
+                    window.hWin.HEURIST4.msg.showMsgErr({
+                        message: 'Please select at least one registered file',
+                        error_title: 'Missing required setting'
+                    });
+                    return false;
+                }
+                if(Array.isArray(fileIDs)) fileIDs = fileIDs.join(',');
+                cont.find('input[name="mediaViewer_fileIDs"]').val(fileIDs);
+
+                // clear other inputs
+                cont.find('input[name="search_initial"]').val('');
+                cont.find('input[name="selector"]').val('');
+                cont.find('input[name="mediaViewer_recIDs"]').val('');
+                
             }else if(mode=='selector'){
                 let sel = cont.find('input[name="selector"]').val();
                 if(window.hWin.HEURIST4.util.isempty(sel)){

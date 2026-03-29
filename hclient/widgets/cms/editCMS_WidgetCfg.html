@@ -350,8 +350,9 @@
                         Content source
                     </div>
 
-                    <label><input type="radio" name="content_source" value="search" checked/>search result</label>&nbsp;&nbsp;
-                    <label><input type="radio" name="content_source" value="list"/>manually selected list</label>&nbsp;&nbsp;
+                    <label><input type="radio" name="content_source" value="files" checked/>files</label>&nbsp;&nbsp;
+                    <label><input type="radio" name="content_source" value="search"/>search result</label>&nbsp;&nbsp;
+                    <label><input type="radio" name="content_source" value="list"/>media records</label>&nbsp;&nbsp;
                     <label><input type="radio" name="content_source" value="selector"/>selector</label>
 
                 </div>
@@ -381,7 +382,7 @@
                 <div class="heurist_mediaViewer mv-src-list" style="display:none">
 
                     <div class="header header_wide">
-                        Record list
+                        Media records
                     </div>
 
                     <input type="hidden" name="mediaViewer_recIDs" value=""/>
@@ -389,6 +390,17 @@
 
                 </div>
 
+                <div class="heurist_mediaViewer mv-src-files" style="display:none">
+
+                    <div class="header header_wide">
+                        Registered files
+                    </div>
+
+                    <input type="hidden" name="mediaViewer_fileIDs" value=""/>
+                    <div id="mediaViewer_fileIDs" style="display:table-row"></div>
+
+                </div>
+                
                 <hr class="heurist_mediaViewer"/>
 
                 <div class="heurist_mediaViewer">
@@ -397,7 +409,7 @@
                         Show as slide show
                     </div>
 
-                    <input type="checkbox" name="slideshowShow"/>
+                    <input type="checkbox" name="slideshowShow" checked/>
                 </div>
 
                 <div class="heurist_mediaViewer">
@@ -424,7 +436,16 @@
                         Show full images
                     </div>
 
-                    <input type="checkbox" name="slideshowFull"/>
+                    <input type="checkbox" name="slideshowFull" checked/>
+                </div>
+                    
+                <div class="heurist_mediaViewer">
+                    <div class="header header_wide">
+                        Use captions
+                    </div>
+
+                    <input type="checkbox" name="slideshowCaptions" checked/>
+                    
                 </div>
 
                 <div class="heurist_mediaViewer">

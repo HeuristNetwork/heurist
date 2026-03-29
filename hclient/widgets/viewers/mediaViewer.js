@@ -57,6 +57,7 @@ $.widget( "heurist.mediaViewer", {
         rec_Files: null, //array of objects {rec_ID, (obfuscation_file_)id, mimeType, filename, extrernal}
         search_initial:null, //if rec_Files are not defined - use this search query to retrieve rec_Files
         mediaViewer_recIDs: null,
+        mediaViewer_fileIDs: null,
         
         selector: null,  //if defined it does not render thumbnails, it searches for elements that will trigger fancybox
         
@@ -68,10 +69,11 @@ $.widget( "heurist.mediaViewer", {
         database: null,
 
         // slideshow options
-        slideshowShow: false,          // render slideshow stack and auto-rotate on show()
+        slideshowShow: false,           // render slideshow stack and auto-rotate on show()
         slideshowDuration: 5000,       // ms each slide visible
         showFade: 300,                 // ms fade transition
-        slideshowFull: false,           // if true use full image URL (images only), else thumbnails
+        slideshowFull: true,           // if true use full image URL (images only), else thumbnails
+        slideshowCaptions: true,
         showTitle: true,
         maxHeight: null,
         maxWidth: null,
@@ -136,6 +138,31 @@ $.widget( "heurist.mediaViewer", {
             this.options.search_initial = 'ids:'+this.options.mediaViewer_recIDs.join(',');
         }else if(this.options.mediaViewer_recIDs){
             this.options.search_initial = 'ids:'+this.options.mediaViewer_recIDs;
+        }else if(this.options.mediaViewer_fileIDs){
+            
+            const _search_request = {
+            a:'search', //action
+            entity:'recUploadedFiles',
+            request_id:window.hWin.HEURIST4.util.random(),
+            details: 'mediaViewer',
+            recID: this.options.mediaViewer_fileIDs,
+            db: window.hWin.HAPI4.database
+            }    
+
+            window.hWin.HAPI4.EntityMgr.doRequest(_search_request, 
+                (response)=>{
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        this.options.rec_Files = response['data'];
+                        if(this.options.rec_Files && this.options.rec_Files.length>0){
+                            this._initControls();    
+                        }                
+
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+            });      
+            
+            return;
         }
         
         if(this.options.search_initial)
@@ -148,13 +175,11 @@ $.widget( "heurist.mediaViewer", {
                     extended: 3, 
                     format:'json'};
                         
-            let that = this;
-                        
-            window.hWin.HAPI4.RecordMgr.search_new(request, function(response){
+            window.hWin.HAPI4.RecordMgr.search_new(request, (response)=>{
                 if(window.hWin.HEURIST4.util.isJSON(response)) {
-                   that.options.rec_Files = response['records'];
-                   if(that.options.rec_Files && that.options.rec_Files.length>0){
-                        that._initControls();    
+                   this.options.rec_Files = response['records'];
+                   if(this.options.rec_Files && this.options.rec_Files.length>0){
+                        this._initControls();    
                    }                
                    
                 }else{
@@ -288,7 +313,7 @@ _prepareFile: function(file){
     }
     
     file.mimeType = file.mimeType??'';
-    file.title = file.caption || file.title || '';
+    file.title = (this.options.slideshowCaptions || !file.title  ? file.caption : file.title) || '';
     file.filename = file.filename ?? '';
     file.external = file.external ?? '';
     file.mode_3d_viewer = file.mode_3d_viewer ?? '';
@@ -499,7 +524,6 @@ _renderSlideshow: function(title){
         
             for (let i=0; i<files.length; i++)
             { 
-
                     let file = this._prepareFile(this.options.rec_Files[idx]);
                     if(!file || !file.thumbURL) continue;
 
