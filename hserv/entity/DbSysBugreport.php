@@ -50,16 +50,16 @@ class DbSysBugreport extends DbEntityBase
 
     /** @var string Email template for ticket/bug report notifications. Placeholders like __LINK__, __DESC__ are replaced. */
     private $reportEmail = <<<EMAIL
-    Your ticket has been successfully added to, or updated in, the Heurist Job tracker database. 
+    Your ticket has been added to, or updated in, the Heurist Job tracker database. 
     <br>
     <br>
     Description:__DESC__
  
     <hr>
     
-    You can test in the hx-alpha version which is updated nightly (it may therefore not be updated until tomorrow). The standard /heurist/ version is updated infrequently (our target is monthly).
-    <br>
-    If you are not running the alpha version, replace /heurist/ in the URL with /hx-alpha/ where x is the version required (7 as of 2026).
+    You can test in the hx-alpha version which is updated nightly (it may therefore not be updated until tomorrow). 
+    <br>The standard /heurist/ version is updated infrequently (our target is monthly).
+    <br>If you are not running the alpha version, replace /heurist/ in the URL with /hx-alpha/ where x is the version required (7 as of 2026).
     <br>
     <br>
     You can view your ticket at: <a href="__LINK__">__LINK__</a><br><br>
