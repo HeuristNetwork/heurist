@@ -31,7 +31,8 @@ if(!defined('PDIR')){
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
-    
+
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/temporalObjectLibrary.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_query.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
@@ -39,6 +40,9 @@ if(!defined('PDIR')){
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/HSystemMgr.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/recordset.js"></script>
+
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageEntity.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchEntity.js"></script>
 
     <script type="module" src="<?php echo PDIR;?>hclient/widgets/HRecordList/HRecordView.js"></script>
     <script type="module" src="<?php echo PDIR;?>hclient/widgets/HRecordList/HRecordList.js"></script>
@@ -79,8 +83,7 @@ if($useOldCode){
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/app_storymap.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/app_timemap.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cpanel/buttonsMenu.js"></script>
-    
-    
+
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.css" />
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.fancybox/jquery.fancybox.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery.widgets/jquery.layout.js"></script>
