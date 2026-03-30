@@ -254,7 +254,6 @@ class HSystemMgr {
           } else if (requiredLevel == 0 && is_expired) {
               response.message = '';
           }
-
           if (response.message) {
               window.hWin.HEURIST4.msg.showMsgFlash(response.message, 2000);
           } else {

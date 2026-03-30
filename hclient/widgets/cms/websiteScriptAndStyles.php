@@ -330,7 +330,7 @@ function onPageInit(success)
 
     $('#main-menu').hide();
 
-    
+    window.hWin.HAPI4.is_publish_mode = true;
     window.hWin.HAPI4.isAdminInterface = false;
     
     //cfg_widgets is from layout_defaults.js

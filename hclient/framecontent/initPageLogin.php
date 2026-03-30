@@ -123,7 +123,6 @@ function verify_credentials( show_warning ){
         if(msg!=''){
             var win_mappreview = window.parent.hWin;
             if(show_warning){
-
                 var $dlg2 = win_mappreview.HEURIST4.msg.showMsgDlg(msg+'<br> Database: '+window.hWin.HAPI4.database,
                     {OK:
                     function(){

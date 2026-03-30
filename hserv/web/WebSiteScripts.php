@@ -163,7 +163,7 @@ echo $this->getWebSiteInfo();
             }
             
             // Successfully initialized system
-            
+            window.hWin.HAPI4.is_publish_mode = true;   //backward 
             window.hWin.HAPI4.isAdminInterface = false; //to avoid mandatory login and other checks for admin part
 
             window.isHapiInited = true;

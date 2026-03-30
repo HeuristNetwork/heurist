@@ -428,6 +428,7 @@ if(@$_SERVER['REQUEST_METHOD']=='POST'){
         ?>
 
         var lt = window.hWin.HAPI4.sysinfo['layout'];
+        window.hWin.HAPI4.is_publish_mode = (lt=='WebSearch'); //for backward
         window.hWin.HAPI4.isAdminInterface = (lt!=='WebSearch');
 
         //
