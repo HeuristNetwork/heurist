@@ -4602,9 +4602,14 @@ function bugreportUpdate($system, $recID){
     EMAIL;
 
     $to = [$reportersEmail];
+    $bcc = ['support@HeuristNetwork.org'];
 
-    sendPHPMailer(null, 'Heurist Tickets updater', ['to' => $to], "H#{$recID}: {$title}", $updateEmail, null, true);
-    sendPHPMailer(null, 'Heurist Tickets updater', ['to' => 'support@HeuristNetwork.org'], "H#{$recID}: {$title}", $updateEmail, null, true);
+    $dbownerEmail = user_getDbOwner($mysqli, 'ugr_eMail');
+    if(!empty($dbownerEmail)){
+        $bcc[] = $dbownerEmail;
+    }
+
+    sendPHPMailer(null, 'Heurist Tickets updater', ['to' => $to, 'bcc' => $bcc], "H#{$recID}: {$title}", $updateEmail, null, true);
 }
 
 /**
