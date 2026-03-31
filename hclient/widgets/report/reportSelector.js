@@ -126,7 +126,11 @@ $.widget( "heurist.reportSelector", $.heurist.baseAction, {
             //reload viewer tab with given template
             this._context_on_close = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                 +'&template='+this._currentTemplate+'&q=ids:'+this.options.rec_ID;
+        }else if(action=='setdefault'){
             
+            window.hWin.HAPI4.save_pref('main_recview', this._currentTemplate);
+            this._context_on_close = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                +'&template='+this._currentTemplate+'&q=ids:'+this.options.rec_ID;
             
         }else if(action=='new'){
             //create new template based on selected one

@@ -13,10 +13,11 @@
  */
 -->
 <div class="report-selector">
+<!-- remarked until we define recordtype -> template relations 
   <div style="margin-bottom: 15px;">
     <a href="#" id="lnkDefTemplate" style="font-size:0.9em">select default templates</a>
   </div>
-
+-->
   <div style="margin-bottom: 25px;">
     <label for="selTemplates">Select template</label>
     <select id="selTemplates" name="template">
@@ -29,12 +30,14 @@
       <input type="radio" name="template_action" checked value="use">
       <span>Use this time only</span>
     </label>
-    <br>
+    <label>
+      <input type="radio" name="template_action" value="setdefault">
+      <span>Use until reset</span>
+    </label>
     <label>
       <input type="radio" name="template_action" value="edit">
       <span>Edit selected template</span>
     </label>
-    <br>
     <div>
       <label>
         <input type="radio" name="template_action" value="new">
