@@ -539,6 +539,7 @@ function recordSearchFacets($system, $params){
         $select_field  = "";
         $detail_link   = "";
         $details_where = "";
+        $recHeader = true;
 
         if($fieldid=="rectype" || $fieldid=="typeid"){
             $select_field = "r0.rec_RecTypeID";
@@ -581,6 +582,7 @@ function recordSearchFacets($system, $params){
             $select_field = "r0.rec_Modified";
         }else{
             
+            $recHeader = false;
             $compare_field = '';
             
             if(strpos($fieldid,',')>0 && getCommaSepIds($fieldid)!=null){
@@ -604,31 +606,25 @@ function recordSearchFacets($system, $params){
         if($dt_type=='date'){
 
             //select valid dates
-            $select_field = 'dt0.rdi_estMinDate';
+            $fieldMin = $recHeader ? "getEstDate({$select_field}, 0)" : 'dt0.rdi_estMinDate';
+            $fieldMax = $recHeader ? "getEstDate({$select_field}, 1)" : 'dt0.rdi_estMaxDate';
             $detail_link = ', recDetailsDateIndex dt0';
-            $details_where = " AND (dt0.rdi_estMinDate<2100 and dt0.rdi_RecID=r0.rec_ID and dt0.rdi_DetailTypeID $compare_field) ";
-
-            //OLD ' AND (cast(getTemporalDateString('.$select_field.') as DATETIME) is not null ';
-            //OLD .'OR (cast(getTemporalDateString('.$select_field.') as SIGNED) is not null  AND '
-            //OLD .'cast(getTemporalDateString('.$select_field.') as SIGNED) !=0) )';
+            $details_where = " AND ({$fieldMin}<2100 and dt0.rdi_RecID=r0.rec_ID and dt0.rdi_DetailTypeID $compare_field) ";
 
             //for dates we search min and max values to provide data to slider
             //facet_groupby   by year, day, month, decade, century
             if ($facet_groupby=='month') {
 
+                $select_field = "ROUND({$fieldMin} ,2)";
 
-                $select_field = 'ROUND(dt0.rdi_estMinDate ,2)';
-
-                //OLD $select_field = 'LAST_DAY(cast(getTemporalDateString('.$select_field.') as DATE))';
-
-                $select_clause = "SELECT $select_field as rng, count(*) as cnt ";
+                $select_clause = "SELECT {$select_field} as rng, count(*) as cnt ";
                 if($grouporder_clause==''){
                     $grouporder_clause = ' GROUP BY rng ORDER BY rng';
                 }
 
             }elseif($facet_groupby=='year' || $facet_groupby=='decade' || $facet_groupby=='century') {
 
-                $select_field = 'ROUND(dt0.rdi_estMinDate ,0)';
+                $select_field = "ROUND({$fieldMin}, 0)";
 
                 if($facet_groupby=='decade'){
                     $select_field = $select_field.' DIV 10 * 10';
@@ -639,17 +635,11 @@ function recordSearchFacets($system, $params){
                 $select_clause = "SELECT $select_field as rng, count(*) as cnt ";
                 if($grouporder_clause==''){
                     $grouporder_clause = ' GROUP BY rng ORDER BY rng';
-                    //" GROUP BY $select_field ORDER BY $select_field";
                 }
 
             }else{
 
-                //concat('00',
-                //OLD $select_field = "cast(if(cast(getTemporalDateString( $select_field ) as DATETIME) is null,"
-                //OLD ."concat('00',cast(getTemporalDateString( $select_field ) as SIGNED),'-1-1'),"  //year
-                //OLD ."concat('00',getTemporalDateString( $select_field ))) as DATETIME)";
-
-                $select_clause = "SELECT min(dt0.rdi_estMinDate) as min, max(dt0.rdi_estMaxDate) as max, count(distinct r0.rec_ID) as cnt ";
+                $select_clause = "SELECT min({$fieldMin}) as min, max({$fieldMax}) as max, count(distinct r0.rec_ID) as cnt ";
 
                 if($facet_type==$ft_Select){
                     $rec_query = "SELECT r0.rec_ID ";
@@ -958,7 +948,7 @@ function __assignFacetValue(&$params, $subs){ // Note: PHP passes arrays by valu
  * @param array $range An array with two elements: [min_date_string, max_date_string].
  * @param int $interval The desired number of intervals or a starting interval size.
  * @param array|string $rec_ids An array or comma-separated string of record IDs to analyze.
- * @param int $dty_id The Detail Type ID of the date field to use for histogram calculation.
+ * @param int|string $dty_id The Detail Type ID of the date field to use for histogram calculation, 'Access' and 'Modified' for the record header field.
  * @param string $format The initial date format/unit to consider for intervals ("year", "month", "day"). Defaults to "year".
  * @param bool $is_between If true (default), a record counts in an interval if its date range is *within* the interval.
  *                         If false, it counts if its date range *overlaps* with the interval. (Note: current implementation detail for $is_between might differ)
@@ -988,7 +978,10 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
         return $system->addError(HEURIST_INVALID_REQUEST, "Record ids have been provided in an un-supported format<br>".$rec_ids);
     }
 
-    if($dty_id == null || !is_numeric($dty_id)){
+    $dty_id ??= '';
+    $useRecHeader = in_array($dty_id, ['added', 'modified']);
+    $dty_id = isPositiveInt($dty_id) ? intval($dty_id) : $dty_id;
+    if(!isPositiveInt($dty_id) && !$useRecHeader){
         return $system->addError(HEURIST_INVALID_REQUEST, "An invalid detail type id has been provided");
     }
 
@@ -1202,10 +1195,18 @@ function getDateHistogramData($system, $range, $interval, $rec_ids, $dty_id, $fo
         }
     }
 
-    $sql = 'SELECT rdi_estMinDate, rdi_estMaxDate '
-    .' FROM recDetailsDateIndex'
-    .' WHERE rdi_estMaxDate<2100 AND rdi_RecID IN ('
-    .implode(',', $rec_ids).") AND rdi_DetailTypeID = ".$dty_id;
+    if(!$useRecHeader){
+
+        $sql = 'SELECT rdi_estMinDate, rdi_estMaxDate '
+        .' FROM recDetailsDateIndex'
+        .' WHERE rdi_estMaxDate<2100 AND rdi_RecID IN ('
+        .implode(',', $rec_ids).") AND rdi_DetailTypeID = ".$dty_id;
+    }else{
+
+        $field = $dty_id === 'added' ? 'rec_Added' : 'rec_Modified';
+
+        $sql = "SELECT getEstDate($field, 0) as d1, getEstDate($field, 1) as d2 FROM Records WHERE rec_ID IN (". implode(',', $rec_ids) .")";
+    }
 
     $res = mysql__select($mysqli, $sql);
     if(!$res){

@@ -446,7 +446,7 @@ $.widget( "heurist.search_faceted", {
         
         setTimeout(function(){that._adjustSearchDivTop();},500);
 
-        this.doReset();            
+        this.doReset();
 
     }, //end _create
 
