@@ -130,6 +130,8 @@ $.widget( "heurist.recordListExt", {
     /** @memberof heurist.recordListExt @instance @private @property {?jQuery} placeholder_ele - jQuery element holding the placeholder or empty message text. */
     placeholder_ele: null, //element holding the placeholder text
     
+    resetLink: null,
+    
     /** @memberof heurist.recordListExt @instance @private @property {?jQuery} export_button - jQuery object for the export button. */
     export_button: null, // export button
     /** @memberof heurist.recordListExt @instance @private @property {?jQuery} print_button - jQuery object for the print button. */
@@ -204,6 +206,16 @@ $.widget( "heurist.recordListExt", {
             //.attr('src',window.hWin.HAPI4.baseURL+"common/html/msgNoRecordsSelected.html")
             .appendTo( this.div_content );
         }
+        if(!this._is_publication){
+            this.resetLink = $( '<a href="#">Standard View</a>' ).css({zIndex: 99999, position: 'absolute', right:'15px', top:'2px'})
+            .appendTo( this.element ).hide();
+            this._on(this.resetLink, {
+                click: ()=>{
+                    window.hWin.HAPI4.save_pref('main_recview', 'default');
+                    this._refresh();
+                }});
+        }
+        
         if(this.options.showProgress){
             this._progressDiv = $('<div id="progressbar_div" class="ent_content_full" style="display:none;top:0px;padding:5px;z-index:999;background:white;"></div>').appendTo( this.div_content );
         }
@@ -399,7 +411,7 @@ $.widget( "heurist.recordListExt", {
                         that.options.selection = sel;
                        
                     }
-                    
+             
                     let smarty_template = window.hWin.HAPI4.get_prefs_def('main_recview', 'default'); // default = standard record viewer
                     if(window.hWin.HEURIST4.util.isArrayNotEmpty(that.options.selection) && that.options['url'] 
                         && that.options['url'].indexOf('renderRecordData') != -1 && smarty_template != 'default'){
@@ -536,6 +548,9 @@ $.widget( "heurist.recordListExt", {
         if(window.hWin.HEURIST4.util.isFunction(this.options.onLoadComplete)){
             this.options.onLoadComplete.call(this);
         }
+        if(this.placeholder_ele != null){
+            this.placeholder_ele.hide();
+        }
         
         //add custom css to iframe  besides see cssid parameter
         if(this.options.is_frame_based && this.options.custom_css_for_frame){
@@ -605,6 +620,15 @@ $.widget( "heurist.recordListExt", {
                     
                 });
             }
+            
+            if(this.resetLink){
+                if(smarty_template || window.hWin.HAPI4.get_prefs_def('main_recview', 'default')!=='default'){
+                    this.resetLink.show();
+                }else{
+                    this.resetLink.hide();
+                }
+            }
+            
 
             // Toggle display of buttons
             let hasContent = !window.hWin.HEURIST4.util.isempty(this.dosframe.attr('src')) || fdoc.body.childElementCount > 0;
@@ -738,11 +762,11 @@ $.widget( "heurist.recordListExt", {
             $(".header"+id).html(this.options.title);
             $('a[href="#'+id+'"]').html(this.options.title);
         }
-
+console.log('!!!!');
         if(this.placeholder_ele != null){
             this.placeholder_ele.hide();
         }
-
+        
         //refesh if element is visible only - otherwise it costs much resources
         let templateName = window.hWin.HEURIST4.util.getUrlParameter('template', this.options.url) ?? 'Record Viewer';
         if(  (!this.element.is(':visible') && !this._is_publication) 

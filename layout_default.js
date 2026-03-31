@@ -53,7 +53,7 @@ window.hWin.cfg_widgets = [
     {id:'heurist_resultListExt', name:'&nbsp;&nbsp;&nbsp;', widgetname:'recordListExt', script:'hclient/widgets/viewers/recordListExt.js'},
     {id:'heurist_resultListCollection', name:'Records Collection', widgetname:'resultListCollection', script:'hclient/widgets/viewers/resultListCollection.js'},
 
-    {id:'heurist_reportViewer', name:'Report', widgetname:'reportViewer', script:'hclient/widgets/viewers/reportViewer.js'},
+    {id:'heurist_reportViewer', name:'Report', widgetname:'reportViewer', script:'hclient/widgets/report/reportViewer.js'},
     
     
     {id:'heurist_Map', name:'Map (old)', title:'Map and timeline', widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js'},  // map in iframe
