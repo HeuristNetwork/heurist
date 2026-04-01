@@ -16,24 +16,24 @@
 <div class="editSmarty ent_wrapper editor">
     <div class="ui-layout-west">
         <div class="insertForm">
-                <div class="ent_header" style="height:130px;">
+
+                <div class="ent_header" style="height:180px;">                    
+                
                     <span title="Close patterns panel" class="closeInsertForm ui-icon ui-icon-carat-2-w" 
                         style="height: 32px; width: 32px; position: absolute; top: 13px; right: 0px; font-size: 32px; cursor: pointer; z-index: 1000;"></span>            
 
-                    <div style="height:44px; border-bottom:1px lightgray solid" class="hide-for-snippet">
+                    <div  class="hide-for-snippet">
                         <a href="../documentation/context_help/smarty_reports.html" class="heurist-helper3" style="float:left;padding:4px 10px"
                         onClick="window.hWin.HEURIST4.msg.showDialog( this.href );return false;"
                         title="Read full documentation on the Smarty templating language">
                         <b>Help on using this function</b></a>
                         <br><br>
-                        <div class="heurist-helper3" style="padding-left:10px">Position cursor in text on right <br>
-                        before selecting actions below</div>
+                        <div class="heurist-helper3" style="padding-left:10px"></div>
                     </div>
-                    
-                    
-                    <div style="margin-top: 10px;height:30px; border-bottom:1px lightgray solid" class="hide-for-snippet">
 
-                        <select id="selInsertPattern" style="min-width:150px">
+                    <div style="padding:10px 0px;border-bottom:1px lightgray solid" class="hide-for-snippet">
+                        <span style="font-weight:bold;width:auto;display:none">Select Pattern</span>
+                        <select id="selInsertPattern" style="min-width:150px;max-width:90%">
                             <option value="1">Heading for record type</option>
                             <option value="2">Simple table</option>
                             <option value="3">Information on first element of a loop</option>
@@ -41,19 +41,54 @@
                             <option value="99">Outer records loop</option>
                             <option value="98">Add Record Link</option>
                         </select>
+                        <br>
+                        <div style="width:100%;text-align:left;;margin-top:10px;">
                         <button id="btnInsertPattern">
                             Insert pattern
                         </button>
+                        </div>
                     </div>
                     
-                    <div style="margin:14px 0px;">
-                        <span style="font-weight:bold;width:auto;">Select Type</span>
-                        <select id="rectype_selector"></select>
+                    <div style="padding:10px 0px;border-bottom:1px lightgray solid">
+                        <div style="padding-bottom:10px;font-weight:bold;">Add data</div>
+                        <span style="font-weight:bold;width:auto;display:none">Select Type</span>
+                        <select id="rectype_selector" style="width:206px;max-width:180px"></select>
+                        <div style="width:100%;text-align:left;margin-top:10px;">
+                        <button id="btnInsertFields">
+                            Add selected fields
+                        </button>
+                        </div>
                     </div>
+                    
                 </div>
 
-                <div style="background-color: #FFFFFF;top:130px;" class="ent_content_full rtt-tree">
-                    Please select a record type from the pulldown above
+                <div style="background-color: #FFFFFF;top:180px" class="ent_content_full rtt-tree-placeholder">
+                    <div style="margin: 30px auto;text-align:center">
+                    Please select a record type above in order <br> to add fields to the report template
+                    <br><br>
+                    Position cursor in text <br> before inserting a pattern or adding fields
+                    </div>                    
+                </div>    
+                
+                <div style="display:none;background-color: #FFFFFF;top:180px;" class="ent_content_full rtt-tree">
+                    <!--
+                    <label for="fsw_showreverse">
+                        <input type="checkbox" id="fsw_showreverse" style="vertical-align: middle;" />&nbsp;
+                        Show linked-from record types<br>(reverse pointers, indicated as &lt;&lt;)
+                    </label>
+                    <br> -->
+                    <label for='order_alphabetic'>
+                        <input type='radio' name='tree_order' id='order_alphabetic' style='vertical-align: middle;' value='1'/>&nbsp;Alphabetic
+                    </label>
+                    <label for='order_default'>
+                        <input type='radio' name='tree_order' id='order_default' style='vertical-align: middle;' value='0' checked />&nbsp;Form order
+                    </label><br>
+                    <label id='selectAll_container' style='font-size: 11px;position: relative;top: 10px;left: 20px;'>
+                        <input type='checkbox' id='selectAll'>
+                        Select All Visible Options
+                    </label>
+                    <br>
+                    <div id="field_treeview" style="padding-top:10px"></div>
                 </div>        
         </div>
     </div>
@@ -239,4 +274,41 @@
         <span class="ins_isloop">Fields inserted within the loop should be inserted using the lower set of buttons.</span>
         
     </div>
+</div>
+
+<div id="insert-popup2" style="display:none;overflow:hidden;">
+
+    <label for="insWrap">
+        <input type="checkbox" id="insWrap" style="vertical-align: middle;" />&nbsp;
+        Add wrapper e.g. &lt;img&gt; tags
+    </label><br>
+
+    <label for="insIfNull">
+        <input type="checkbox" id="insIfNull" style="vertical-align: middle;" />&nbsp;
+        Test if value exists (if...)
+    </label><br>
+
+    <label for="insRepeat">
+        <input type="checkbox" id="insRepeat" style="vertical-align: middle;" />&nbsp;
+        Multiple values loop (repeat...)
+    </label><br>
+
+    <label for="insCaption">
+        <input type="checkbox" id="insCaption" style="vertical-align: middle;" />&nbsp;
+        Precede with field name
+    </label><br>
+
+    <label for="insRemark">
+        <input type="checkbox" id="insRemark" style="vertical-align: middle;" />&nbsp;
+        Add field name as comment
+    </label><br>
+
+    <hr>
+    
+    <label for="insAll">
+        <input type="checkbox" id="insAll" style="vertical-align: middle;" />&nbsp;
+        Apply setting above to all fields<br>
+        (Does not affect fields already added)
+    </label><br>
+
 </div>

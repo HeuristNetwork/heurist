@@ -310,6 +310,14 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
            this._loadRecordTypeTreeView();
            const rty_ID = this._$('#rectype_selector').val();
            this._loadTestRecords( rty_ID );
+           
+           if(rty_ID>0){
+                this._$('#btnInsertPattern').addClass('ui-button-action');
+                this._$('#btnInsertFields').addClass('ui-button-action');
+           }else{
+                this._$('#btnInsertPattern').removeClass('ui-button-action');
+                this._$('#btnInsertFields').removeClass('ui-button-action');
+           }
         }});
         if(!this.options.rty_ID && this.is_snippet_editor){
             rtSelect.val(rtSelect.find('option').get(1).value);
@@ -320,6 +328,27 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         
       
         this._on(this._$('#btnInsertPattern').button(), {click:this._insertPattern});
+        this._on(this._$('#btnInsertFields').button(), {click:()=>this._insertFields(0)});
+        
+        
+        this._on(this._$('#selectAll'), {
+            click: (e)=>{
+                let treediv = this._$('#field_treeview');
+
+                let check_status = $(e.target).is(":checked");
+
+                if(!treediv.is(':empty') && treediv.fancytree("instance")){
+                    let tree = $.ui.fancytree.getTree(treediv);
+                    tree.visit(function(node){
+                        if(!node.hasChildren() && node.type != "relmarker" && node.type != "resource" && node.type != "separator"
+                            && (node.getLevel()==2 || (!window.hWin.HEURIST4.util.isempty(node.span) && $(node.span.parentNode.parentNode).is(":visible")))
+                        ){    
+                            node.setSelected(check_status);
+                        }
+                    });
+                }
+            }
+        });        
 
         //init test panel
         this._on(this._$('.btnStartTest').button({icon: 'ui-icon-circle-arrow-s'}), 
@@ -491,7 +520,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
      */
     changeTitle: function( new_title ){
         if(!new_title){
-           new_title = window.hWin.HR('Edit Report Template')+': '+
+           new_title = window.hWin.HR('Edit')+': '+
                     (this._currentTemplate?this._currentTemplate:'new template');
         }
         this._super(new_title);
@@ -972,21 +1001,27 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         let rty_ID = this._$('#rectype_selector').val();
 
         //load treeview
-        let treediv = this._$('.rtt-tree');
+        let treedivContainer = this._$('.rtt-tree');
+        let treedivPlaceholder = this._$('.rtt-tree-placeholder');
+        
+        let treediv = this._$('#field_treeview');
         if(!treediv.is(':empty') && treediv.fancytree("instance")){
             treediv.fancytree("destroy");
         }
         
         if(!window.hWin.HEURIST4.util.isPositiveInt(rty_ID)){
-            treediv.text('Please select a record type from the pulldown above');
+            treedivPlaceholder.show();
+            treedivContainer.hide();
             return;
         }
-        
+        treedivPlaceholder.hide();
+        treedivContainer.show();
         treediv.empty();
         
+        let node_order = treedivContainer.find('[name="tree_order"]:checked').val();
         //generate treedata from rectype structure
         let treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 7, rty_ID, 
-                        ['ID','title','typeid','typename','modified','url','tags','all','parent_link'] );
+                        ['ID','title','typeid','typename','modified','url','tags','all','parent_link'], null, node_order );
 
         treedata[0].expanded = true; //first expanded
 
@@ -998,8 +1033,11 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         let that = this;
 
         treediv.fancytree({
-            checkbox: false,
-            selectMode: 1,  // single
+            //oldd checkbox: false,
+            //oldd selectMode: 1,  // single
+                checkbox: true,
+                selectMode: 3,  // hierarchical multi-selection
+            
             source: treedata,
             beforeSelect: function(event, data){
                 // A node is about to be selected: prevent this, for folder-nodes:
@@ -1011,9 +1049,11 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                 let node = data.node;
                 let parentcode = node.data.code; 
                 let rectypes = node.data.rt_ids;
+                
+                let node_order = treedivContainer.find('[name="tree_order"]:checked').val();
 
                 let res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 7, 
-                    rectypes, ['ID','title','typeid','typename','modified','url','tags','all'], parentcode );
+                    rectypes, ['ID','title','typeid','typename','modified','url','tags','all'], parentcode, node_order );
 
                 if(res.length>1){
                     data.result = res;
@@ -1028,11 +1068,23 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
             select: function(e, data) {
             },
             click: function(e, data){
-
+                
                 if(data.node.type == 'separator'){
                     return false;
                 }
 
+                let isExpander = $(e.originalEvent.target).hasClass('fancytree-expander');
+
+                if(isExpander){
+                    return;
+                }
+
+                if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
+                    data.node.setExpanded(!data.node.isExpanded());
+                }else if( data.node.lazy) {
+                    data.node.setExpanded( true );
+                }                
+ /* oldd               
                 let ele = $(e.originalEvent.target);
                 if(ele.is('a')){
                     
@@ -1058,19 +1110,33 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                         }
                     }
                 }
-                
-               
-                /*
-                if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
-                    data.node.setExpanded(!data.node.isExpanded());
-                    //treediv.find('.fancytree-expander').hide();
-
-                }else if( data.node.lazy) {
-                    data.node.setExpanded( true );
-                }
-                */
+*/
             },
             renderNode: function(event, data) {
+              
+                let order = treedivContainer.find('[name="tree_order"]:checked').val();
+
+                if(data.node.data.is_generic_fields) { // hide blue arrow for generic fields
+                    $(data.node.span.childNodes[1]).hide();
+                }else if(data.node.type == 'separator'){
+                    $(data.node.span).attr('style', 'background: none !important;color: black !important;'); //stop highlighting
+                    $(data.node.span.childNodes[1]).hide(); //checkbox for separators
+
+                    if(order == 1){
+                        $(data.node.li).addClass('fancytree-hidden');
+                    }
+                }else if(data.node.type == 'enum'){ // TODO - Move to CSS for general use when field colours are set out
+                    $(data.node.span.childNodes[3]).css('color', '#871F78');
+                }else if(data.node.type == 'date'){ // TODO - Move to CSS for general use when field colours are set out
+                    $(data.node.span.childNodes[3]).css('color', 'darkgreen');
+                }
+                
+                if(data.node.hasChildren() || data.node.type == 'resource'){
+                   //data.node.type == 'enum' || data.node.type == 'resource' || data.node.type == 'relationship' 
+                   $(data.node.span.childNodes[1]).hide(); //hide checkbox
+                }
+                
+/* oldd                                  
                 // Optionally tweak data.node.span
                 let node = data.node;
 
@@ -1099,6 +1165,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                 }
                 
                 $span.find("> span.fancytree-title").html(new_title);
+*/                
             }            
         });
         
@@ -1164,7 +1231,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
      * @param {Object} _nodep - The Fancytree node object.
      * @param {number} inloop - Loop insertion mode (0: outside loop, 1: insert loop operator, 2: inside loop).
      * @param {boolean} isif - Whether to insert an `if` condition.
-     * @param {number} _insertMode - Variable insertion mode.
+     * @param {number} _insertMode - Variable insertion mode (0-var only, 1 caption+var)
      * @param {string} [language_code] - Language code for translation.
      * @param {string} [file_field] - Specific field for file data.
      */
@@ -1751,7 +1818,110 @@ this_id       : "term"
         }
     },
 
+    //
+    // new method for fields addition
+    //
+    _insertFields: function(index){
+        //1. get selected fields
+        let tree = $.ui.fancytree.getTree( this._$('#field_treeview') );
+        let fieldIds = tree.getSelectedNodes(false);
+        len = fieldIds.length;
         
+        if(index>=len) return;
+        if(!index) index = 0;
+        
+        //2. popup in loop
+        let _nodep =  fieldIds[index];      //FancytreeNode
+        //name, type, query,  ranges
+        if(window.hWin.HEURIST4.util.isArrayNotEmpty(_nodep.children)){  //ignore top levels selection
+            this._insertFields(index+1);
+        }
+    
+        let field_name = _nodep.data.name;
+        if(window.hWin.HEURIST4.util.isempty(field_name)){
+            let codes = _nodep.data.code.split(':');
+
+            if(codes.length >= 3){
+                let rtyid = codes[codes.length-3];
+                let dtyid = codes[codes.length-2];
+
+                field_name = $Db.rst(rtyid, dtyid, 'rst_DisplayName');
+            }
+        }            
+
+        function __on_add(){
+            /*
+            let $ele = $(event.target);
+            if($ele.is('strong')){
+                $ele = $ele.parent();
+            }
+
+            let $dlg2 = $ele.parents('.ui-dialog-content');
+            let insertMode = $dlg2.find("#selInsertMode").val();
+            let language = $dlg2.find('#selLanguage').val();
+            let file_data = $dlg2.find('#selFileData').val();
+            
+            let bid = $ele.attr('id');
+            let inloop = 0;
+            
+            if(bid=='btn_insert_loop'){
+                inloop = 1;
+            }else if(bid.indexOf('_loop')>0){
+                inloop = 2;
+            }
+            
+            this._insertSelectedVars2(_nodep, inloop, bid.indexOf('_if')>0, insertMode, language, file_data);
+            */
+        }
+        
+        this._closeInsertPopup();
+        
+        
+        let btns = [
+            {text:window.hWin.HR('Insert'),
+                click: ()=>{
+                    
+                    const inloop = this._addVariableDlg.find('#insRepeat').is(':checked');
+                    const ifnull = this._addVariableDlg.find('#insIfNull').is(':checked');
+                    const insertMode = this._addVariableDlg.find('#insCaption').is(':checked')?1:0
+                    
+                    this._insertSelectedVars2(_nodep, inloop, ifnull, insertMode); //, language, file_data);
+                    this._closeInsertPopup();
+                    this._insertFields(index+1);
+                }
+            },
+            {text:window.hWin.HR('Cancel'),
+                click: ()=>{
+                    this._closeInsertPopup()
+                    this._insertFields(index+1);
+                }
+            },
+            {text:window.hWin.HR('Cancel All'),
+                click: ()=>{
+                    this._closeInsertPopup()
+                }
+            }
+        ];            
+        
+        
+        this._addVariableDlg = window.hWin.HEURIST4.msg.showElementAsDialog(   
+            {element: this._$('#insert-popup2')[0],
+            modal: true,
+            width:400,
+            height: 300,
+            resizable: false,
+            title:`Inserting '${field_name}'`,
+            buttons:btns,
+            open: null,
+            beforeClose:null,
+            close:function(){
+                return true; //remove
+            },
+            borderless: false,
+            default_palette_class:'ui-heurist-populate'});
+
+    
+    }   
 
         
 });

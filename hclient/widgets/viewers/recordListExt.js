@@ -762,7 +762,6 @@ $.widget( "heurist.recordListExt", {
             $(".header"+id).html(this.options.title);
             $('a[href="#'+id+'"]').html(this.options.title);
         }
-console.log('!!!!');
         if(this.placeholder_ele != null){
             this.placeholder_ele.hide();
         }
