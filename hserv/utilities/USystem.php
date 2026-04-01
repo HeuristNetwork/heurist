@@ -1078,12 +1078,13 @@ class USystem {
     /**
      * Store parameters to be used in an upcoming server call, this is done to avoid excessively long URLs that lead to 414 errors
      *
+     * @param \hserv\System $system Initialised Heurist system instance
      * @param string $type Process type, e.g. 'export', 'import', etc...
      * @param int $replace How to handling replacements: 0 - Complete replace, 1 - Merge + maintain existing, 2 - Merge + replace existing
      * @param array $parameters Parameters to be saved, ignores 'preparedID' and 'DBGSESSID' keys
      * @return int|false prepared session ID, or no parameters prepared
      */
-    public static function prepareParameters(string $type, int $replace, array $parameters){
+    public static function prepareParameters(\hserv\System $system, string $type, int $replace, array $parameters){
 
         if(empty($parameters)){
             return false;
@@ -1094,7 +1095,22 @@ class USystem {
         $replace = !is_numeric(@$replace) ? 0 : \intval($replace);
         $replace = $replace > 2 || $replace < 0 ? 0 : $replace;
 
+        if(!defined('HEURIST_PREPARED_PARAMS_DIR')){
+            $system->getSysDir('prepared-parameters');
+        }
+
         $paramsFile = HEURIST_SCRATCH_DIR . "{$type}_{$id}.json";
+        if($type === 'export-feed'){
+
+            if(folderCreate2(HEURIST_PREPARED_PARAMS_DIR . 'export-feed/', '', false) !== ''){
+                $system->addError(HEURIST_ERROR, 'Failed to setup the export-feed directory');
+                return false;
+            }
+
+            $format = $parameters['format'];
+
+            $paramsFile = HEURIST_PREPARED_PARAMS_DIR . "export-feed/{$format}_{$id}.json";
+        }
 
         $storedParameters = [];
         if(file_exists($paramsFile)){
@@ -1104,9 +1120,10 @@ class USystem {
             $storedParameters = json_last_error() !== JSON_ERROR_NONE ? [] : $storedParameters;
         }
 
+        $skipKeys = ['preparedID', 'DBGSESSID', 'preparedType'];
         foreach($parameters as $key => $value){
 
-            if($key === 'preparedID' || $key === 'DBGSESSID' || $key === 'a' && $value === 'prepare_params'){
+            if(in_array($key, $skipKeys) || $key === 'a' && $value === 'prepare_params'){
                 continue;
             }elseif($replace !== 0 && \array_key_exists($key, $storedParameters) && $key !== 'db'){
 
@@ -1140,7 +1157,7 @@ class USystem {
      * @param array $parameters Parameters array to be updated with stored parameters
      * @return bool
      */
-    public static function getPreparedParameters($system, string $type, array &$parameters) : bool{
+    public static function getPreparedParameters(\hserv\System $system, string $type, array &$parameters) : bool{
 
         if(!is_numeric(@$parameters['preparedID'])){
             $system->addError(HEURIST_INVALID_REQUEST, 'Wrong parameter preparedID. Must be integer');
@@ -1148,11 +1165,29 @@ class USystem {
         }
 
         $id = \intval($parameters['preparedID']);
+        $deleteFile = true;
 
-        $paramsFile = HEURIST_SCRATCH_DIR . "{$type}_{$id}.json";//yml
+        if(!\defined('HEURIST_PREPARED_PARAMS_DIR')){
+            $system->getSysDir('prepared-parameters');
+        }
+
+        $paramsFile = HEURIST_SCRATCH_DIR . "{$type}_{$id}.json";
+        if($type === 'export-feed'){
+
+            if(folderExists(HEURIST_PREPARED_PARAMS_DIR . 'export-feed/', false) !== 1){
+                $paramsFile = '';
+            }else{
+
+                $format = $parameters['format'];
+
+                $paramsFile = HEURIST_PREPARED_PARAMS_DIR . "export-feed/{$format}_{$id}.json";
+                $deleteFile = false;
+            }
+
+        }
 
         if(!file_exists($paramsFile)){
-            $system->addError(HEURIST_INVALID_REQUEST, 'Query parameters file not found. Either parameter preparedID is wrong or session expired');
+            $system->addError(HEURIST_INVALID_REQUEST, 'Pre-prepared parameters file could not be found.');
             return false;
         }
 
@@ -1168,7 +1203,9 @@ class USystem {
             $parameters[$key] = $value;
         }
 
-        fileDelete($paramsFile);
+        if($deleteFile){
+            fileDelete($paramsFile);
+        }
 
         return true;
     }

@@ -506,7 +506,7 @@ function hexportMenu( container ) {
                 let start = 0;
 
                 for (let i = 0; i < paramChunks; i++) {
-                    preparedSessionID = await _preSendParameters({ [key]: value.substring(start, start + parameterLimit) });
+                    preparedSessionID = await _preSendParameters({ [key]: value.substring(start, start + parameterLimit) }, opts.format, !opts.save_as_file);
                     start += parameterLimit;
                 }
 
@@ -521,7 +521,7 @@ function hexportMenu( container ) {
         }
 
         if(Object.keys(toStoreParams).length > 0){
-            preparedSessionID = await _preSendParameters(toStoreParams);
+            preparedSessionID = await _preSendParameters(toStoreParams, opts.format, !opts.save_as_file);
         }
 
         // depth/linkmode (only when showOptionsDialog true in old logic)
@@ -736,12 +736,19 @@ function hexportMenu( container ) {
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Add additional fields to export'}, {default_palette_class: 'ui-heurist-publish'});
     }
 
-    async function _preSendParameters(parameters){
+    async function _preSendParameters(parameters, type, isFeed){
 
         return new Promise((resolve) => {
 
             parameters['preparedID'] = preparedSessionID;
             parameters['preparedMode'] = 2;
+
+            if(isFeed){
+                parameters['preparedType'] = 'export-feed';
+                parameters['format'] = type;
+            }else{
+                parameters['preparedType'] = 'export';
+            }
 
             window.hWin.HAPI4.callserver('record_output', parameters, (response) => {
                 resolve(response.data);

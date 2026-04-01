@@ -1412,13 +1412,15 @@ class HSystemMgr {
     }
 
     /**
-     * 
+     * Pre-send parameters server side, stored in a temporary file, to avoid long URLs
+     *
      * @param {string} type service identifier, e.g. export, import, etc...
      * @param {object} data parameters to be prepared
      * @param {int} mode how to handle parameters: 0 - Complete replace, 1 - Merge + maintain existing, 2 - Merge + replace existing
      * @param {int} id prepared parameters session ID
+     * @param {object} header additional parameters for the server side prepare_params script
      */
-    async prepareParameters(type, data, mode = 2, id = null){
+    async prepareParameters(type, data, mode = 2, id = null, header = {}){
 
         let HAPI4 = this.hapi4;
         const CHUNK_SIZE = 2000;
@@ -1428,6 +1430,9 @@ class HSystemMgr {
             return new Promise((resolve) => {
 
                 let request = { a: 'prepare_params', preparedID: id, preparedType: type, preparedMode: curMode, [key]: value };
+                if($.isPlainObject(header)){
+                    request = Object.assign({}, request, header);
+                }
 
                 HAPI4.callserver('usr_info', request, (response) => {
                     resolve(response.data);

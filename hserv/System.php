@@ -618,6 +618,7 @@ class System {
         $folders['settings']      = array('SETTING','', false, true);
         // do not create constant (if name is empty)
         $folders['xsl-templates'] = array('XSL_TEMPLATES','', false, true);
+        $folders['prepared-parameters'] = ['PREPARED_PARAMS', 'prepared parameters that will be used more than once (either permanent or long-lived)', false, true];
 
 
         if(!$is_for_backup)

@@ -458,20 +458,41 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         let settings = this.getSettings(true);
         if(!settings) return;
 
+        if(outputMode === 'feed'){
+
+            let settings = {
+                ids: scope,
+                prefs: JSON.stringify(settings),
+                output_raw: 1
+            };
+
+            if(rec_RecTypeID > 0){
+                settings['rec_RecTypeID'] = rec_RecTypeID;
+            }
+
+            const ID = Math.floor(Math.random() * 90000);
+            window.hWin.HAPI4.SystemMgr.prepareParameters('export-feed', settings, 0, ID, {format: 'csv'});
+
+            let url = `${window.hWin.HAPI4.baseURL}hserv/controller/record_output.php?db=${window.hWin.HAPI4.database}&format=csv&preparedID=${ID}`;
+
+            window.open(url, '_blank');
+
+            return;
+        }
+
         let request = {
             'request_id' : window.hWin.HEURIST4.util.random(),
             'db': window.hWin.HAPI4.database,
             'ids'  : scope,
             'format': 'csv',
-            'prefs': settings};
+            'prefs': settings,
+            'file': 1
+        };
             
         if(rec_RecTypeID>0){
             request['rec_RecTypeID'] = rec_RecTypeID;
         }
-        if(outputMode === 'feed'){
-            request['output_raw'] = 1;
-        }
-        
+
         let url = window.hWin.HAPI4.baseURL + 'hserv/controller/record_output.php'
 
         //posting via form allows send large list of ids

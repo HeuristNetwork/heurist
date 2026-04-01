@@ -361,6 +361,8 @@ define('DIR_GENERATED_REPORTS','generated-reports/');
 define('DIR_GENERATED_HTML','html-output/');
 /** @const string Default directory name for Smarty templates. */
 define('DIR_SMARTY_TEMPLATES', 'smarty-templates/');
+/** @const string Default directory name for stored permanent/long-lived paraameters. */
+define('DIR_PREPARED_PARAMS', 'prepared-parameters/');
 
 // Icon Paths
 /** @const string URL to a placeholder icon (16x16 GIF). */

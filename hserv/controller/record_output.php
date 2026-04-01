@@ -101,14 +101,27 @@
         downloadMapMarkers($system, $params['ids']);
         exit;
     }elseif(array_key_exists('preparedMode', $params)){
+
         $mode = @$params['preparedMode'];
         unset($params['preparedMode']);
-        $id = USystem::prepareParameters('export', $mode, $params);
+        $type = @$params['preparedType'];
+        unset($params['preparedType']);
+
+        $id = USystem::prepareParameters($system, $type ?? 'export', $mode, $params);
+
         dataOutput(['status' => HEURIST_OK, 'data' => $id]);
         exit;
+
     }elseif(array_key_exists('preparedID', $params)){
-        if(!USystem::getPreparedParameters($system, 'export', $params)){
+
+        $type = array_key_exists('file', $params) ? 'export' : 'export-feed';
+
+        if(!USystem::getPreparedParameters($system, $type, $params)){
             $system->errorExitApi();
+        }
+        
+        if(array_key_exists('prefs', $params)){
+            $params['prefs'] = json_decode($params['prefs'], true);
         }
     }
 
