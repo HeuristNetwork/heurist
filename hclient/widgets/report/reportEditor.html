@@ -50,11 +50,11 @@
                     </div>
                     
                     <div style="padding:10px 0px;border-bottom:1px lightgray solid">
-                        <div style="padding-bottom:10px;font-weight:bold;">Add data</div>
+                        <h3 style="padding-bottom:10px;margin:0px;font-weight:bold;">Add data</h3>
                         <span style="font-weight:bold;width:auto;display:none">Select Type</span>
                         <select id="rectype_selector" style="width:206px;max-width:180px"></select>
                         <div style="width:100%;text-align:left;margin-top:10px;">
-                        <button id="btnInsertFields">
+                        <button id="btnInsertFields" style="display:none">
                             Add selected fields
                         </button>
                         </div>
@@ -64,7 +64,7 @@
 
                 <div style="background-color: #FFFFFF;top:180px" class="ent_content_full rtt-tree-placeholder">
                     <div style="margin: 30px auto;text-align:center">
-                    Please select a record type above in order <br> to add fields to the report template
+                    <strong>Please select a record type above in order <br> to add fields to the report template</strong>
                     <br><br>
                     Position cursor in text <br> before inserting a pattern or adding fields
                     </div>                    
@@ -278,6 +278,8 @@
 
 <div id="insert-popup2" style="display:none;overflow:hidden;">
 
+    <h3 id="fieldName" style="margin-top:0px"></h3>
+
     <label for="insWrap">
         <input type="checkbox" id="insWrap" style="vertical-align: middle;" />&nbsp;
         Add wrapper e.g. &lt;img&gt; tags
@@ -304,11 +306,12 @@
     </label><br>
 
     <hr>
-    
+    <div style="padding:10px 0 0 30px">
     <label for="insAll">
         <input type="checkbox" id="insAll" style="vertical-align: middle;" />&nbsp;
         Apply setting above to all fields<br>
-        (Does not affect fields already added)
-    </label><br>
+    </label>
+    <span style="font-size:smaller;padding-left:25px">(Does not affect fields already added)</span>
+    </div>
 
 </div>

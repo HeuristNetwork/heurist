@@ -312,11 +312,11 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
            this._loadTestRecords( rty_ID );
            
            if(rty_ID>0){
-                this._$('#btnInsertPattern').addClass('ui-button-action');
-                this._$('#btnInsertFields').addClass('ui-button-action');
+                //this._$('#btnInsertPattern').addClass('ui-button-action');
+                this._$('#btnInsertFields').addClass('ui-button-action').show();
            }else{
-                this._$('#btnInsertPattern').removeClass('ui-button-action');
-                this._$('#btnInsertFields').removeClass('ui-button-action');
+                //this._$('#btnInsertPattern').removeClass('ui-button-action');
+                this._$('#btnInsertFields').removeClass('ui-button-action').hide();
            }
         }});
         if(!this.options.rty_ID && this.is_snippet_editor){
@@ -658,6 +658,12 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         inner_val = file_handle !== '' ? file_handle : inner_val;
         return "\n{if ($"+varname+")}"+_remark+"\n\n   "+inner_val+" \n\n{/if}\n"+_remark+" {* you can also add {/else} before {/if}} *}\n";
     },
+
+    //NEW 
+    _insertPatternIfOperator2: function(_nodep, varname, innerVal){
+        return "{if ($"+varname+")}\n\n   "+innerVal+" \n{/if}\n";
+    },
+
     
     /**
      * @memberof heurist.reportEditor
@@ -670,7 +676,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
      * @param {string} [file_handle=''] - Optional file handle for file-specific content within the loop.
      * @returns {string} The generated Smarty `foreach` block.
      */
-    _insertPatternMagicLoop: function(_nodep, varname, language_handle = '', file_handle = ''){
+    _insertPatternMagicLoop: function(_nodep, varname, content_for_loop='', language_handle = '', file_handle = ''){
         
         let _remark = '{* ' + this._getRemark(_nodep) + ' *}';
         
@@ -690,7 +696,9 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         if(codes[1]=='Relationship'){
             this._insertGetRelatedRecords();
             
-            return '{foreach $r.Relationships as $Relationship name='+loopname+'}'+_remark +'\n\n{/foreach}'+_remark;
+            return '{foreach $r.Relationships as $Relationship name='+loopname+'}'+_remark +'\n'
+                        +content_for_loop
+                        +'\n{/foreach}'+_remark;
             
         }else{
             
@@ -704,7 +712,8 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                     +'\n\t'+getrecord+'\n'  //' {* '+_remark + '*}'
                     + language_handle
                     + file_handle
-                    +'\n{/foreach} '+_remark;
+                    + content_for_loop
+                    +'\n{/foreach} '+_remark+'\n';
         }
 
     },
@@ -747,24 +756,26 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
      * @returns {string} The generated Smarty code for the variable.
      */
     _insertPatternVariable: function(_nodep, varname, insertMode, inLoop, language_handle = '', file_handle = ''){
+        addCaption = (insertMode==1);
+        addWrap = (insertMode!=0 && insertMode!=1);
+        addRemark = true;
+        this._insertPatternVariable2(_nodep, varname, addCaption, addRemark, addWrap, inLoop, language_handle, file_handle);
+    },
+    _insertPatternVariable2: function(_nodep, varname, addCaption, addRemark, addWrap, inLoop, language_handle = '', file_handle = ''){
         
         let res= '';
+        if(!_nodep){
+            return '';
+        }
         
-        let remark = this._getRemark(_nodep);
+        if (addCaption){ //label+field
+            res = _nodep.title+': ';
+        }
+        
+        if(addWrap){ // insert with 'wrap' function which provides URL and image handling
 
-        if(insertMode==0){ //variable only
-
-            let inner_val = language_handle !== '' ? language_handle : "{$"+varname+"}";
-            inner_val = file_handle !== '' ? file_handle : inner_val;
-            res = inner_val + " {*" +  remark + "*}";
-
-        }else if (insertMode==1){ //label+field
-
-            res = _nodep.title+": {$"+varname+"}";  //not used
-
-        }else if(_nodep){ // insert with 'wrap' function which provides URL and image handling
             let dtype = _nodep.type;
-            res = '{wrap var=$'+varname;
+            res = res + '{wrap var=$'+varname;
             if(!(_nodep.data.code && _nodep.data.code.indexOf('Relationship')==0))
             {
                 const origvalue = inLoop?'':'_originalvalue';
@@ -783,10 +794,18 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                     res = res + ' width="300" height="auto" auto_play="0" show_artwork="0"';
                 }
             }
-            res = res +'}{*' +  remark + '*}';
+            res = res +'}';
+        }else{ //variable only
+            let inner_val = language_handle !== '' ? language_handle : "{$"+varname+"}";
+            inner_val = file_handle !== '' ? file_handle : inner_val;
+            res = res + inner_val;
         }
-
-        return (res+((insertMode==0)?' ':'\n'));
+        let remark = this._getRemark(_nodep);
+        if(addRemark && remark){
+            res = res +' {*' +  remark + '*}';    
+        }
+        
+        return (res+(addWrap?' ':'\n'));
     },
 
     /**
@@ -1179,7 +1198,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
      * @description Inserts text at the current cursor position in the CodeMirror editor, maintaining indentation.
      * @param {string} myValue - The text to insert.
      */
-    _insertAtCursor: function(myValue){
+    _insertAtCursor: function(myValue, supressCursorPos){
 
         
         //for codemirror
@@ -1209,7 +1228,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
 
         this.codeEditor.replaceSelection(myValue);
 
-        if(myValue.indexOf("{if")>=0 || myValue.indexOf("{foreach")>=0){
+        if(!supressCursorPos && (myValue.indexOf("{if")>=0 || myValue.indexOf("{foreach")>=0)){
             crs.line = crs.line+2;
             crs.ch = indent + 2;
             //crs.ch = 0;
@@ -1245,7 +1264,9 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
         language_handle = '',
         file_handle = '';
         
-        if(_nodep){
+        if(!_nodep){
+            return;
+        }
             
             key = _nodep.key;
 /*            
@@ -1399,7 +1420,7 @@ this_id       : "term"
             if(inloop == 1){
                 
                 //** _getrec = '';
-                _text = this._insertPatternMagicLoop(_nodep, _varname, language_handle, file_handle);
+                _text = this._insertPatternMagicLoop(_nodep, _varname, '', language_handle, file_handle);
                 
             }else if(isif){
                 
@@ -1419,7 +1440,7 @@ this_id       : "term"
                 _text = _getrec + _text;
                 this._insertAtCursor(_text);
             }
-        }
+        
     },
 
     /**
@@ -1832,7 +1853,6 @@ this_id       : "term"
         
         //2. popup in loop
         let _nodep =  fieldIds[index];      //FancytreeNode
-        //name, type, query,  ranges
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(_nodep.children)){  //ignore top levels selection
             this._insertFields(index+1);
         }
@@ -1876,18 +1896,31 @@ this_id       : "term"
         
         this._closeInsertPopup();
         
-        
         let btns = [
             {text:window.hWin.HR('Insert'),
+                id:'btnStartInsert',
                 click: ()=>{
                     
-                    const inloop = this._addVariableDlg.find('#insRepeat').is(':checked');
+                    const addLoop = this._addVariableDlg.find('#insRepeat').is(':checked');
                     const ifnull = this._addVariableDlg.find('#insIfNull').is(':checked');
-                    const insertMode = this._addVariableDlg.find('#insCaption').is(':checked')?1:0
+                    const addCaption = this._addVariableDlg.find('#insCaption').is(':checked');
+                    const addRemark = this._addVariableDlg.find('#insRemark').is(':checked');
                     
-                    this._insertSelectedVars2(_nodep, inloop, ifnull, insertMode); //, language, file_data);
+                    const insertAll = this._addVariableDlg.find('#insAll').is(':checked');
                     this._closeInsertPopup();
-                    this._insertFields(index+1);
+                    
+                    for(let k=index; k<len; k++){
+                        let _nodep =  fieldIds[k];      //FancytreeNode
+                        if(window.hWin.HEURIST4.util.isArrayNotEmpty(_nodep.children)){  //ignore top levels selection
+                            continue;
+                        }
+                        
+                        this._insertSelectedVars3(_nodep, addLoop, ifnull, addCaption, addRemark); //, language, file_data);
+                        if(!insertAll){
+                            this._insertFields(index+1); //insert next
+                            break;
+                        }
+                    }
                 }
             },
             {text:window.hWin.HR('Cancel'),
@@ -1912,16 +1945,245 @@ this_id       : "term"
             resizable: false,
             title:`Inserting '${field_name}'`,
             buttons:btns,
-            open: null,
+            open: (event, ui)=>{
+                $(event.target).find('#fieldName').text(field_name);
+                let insAll = $(event.target).find('#insAll')
+                insAll.off('click');
+                insAll.on({click:()=>{
+                    const newLabel = insAll.is(':checked')?'Insert All':'Insert';
+                    $(event.target).parent().find('#btnStartInsert').button("option", "label", newLabel);
+
+
+                }});
+            },
             beforeClose:null,
             close:function(){
                 return true; //remove
             },
             borderless: false,
             default_palette_class:'ui-heurist-populate'});
+            
 
     
-    }   
+    },
+    
+    /**
+     * @memberof heurist.reportEditor
+     * @instance
+     * @private
+     * @description Inserts selected Smarty variables/patterns into the editor based on Fancytree node selection and options.
+     * @param {Object} _nodep - The Fancytree node object.
+     * @param {number} inloop - Loop insertion mode (0: outside loop, 1: insert loop operator, 2: inside loop).
+     * @param {boolean} isif - Whether to insert an `if` condition.
+     * @param {number} _insertMode - Variable insertion mode (0-var only, 1 caption+var)
+     * @param {string} [language_code] - Language code for translation.
+     * @param {string} [file_field] - Specific field for file data.
+     */
+    _insertSelectedVars3: function( _nodep, addLoop, isif, addCaption, addRemark, addWrap, language_code, file_field ){
+
+        let _text = "",
+        _varname = '',
+        rectypeId = 0,
+        key = '',
+        _getrec = '',
+        language_handle = '',
+        file_handle = '';
+        
+        if(!_nodep){
+            return;
+        }
+            
+            key = _nodep.key;
+/*            
+code:  rt:dtid   like   10:lt134:12:ids3
+key 
+
+id            : "r.f15.f26.term"
+labelonly     : "Term"
+parent_full_id: "r.f15.f26"
+parent_id     : "f26"
+this_id       : "term"          
+
+  
+*/
+
+                
+            _varname = '';
+            _varname_for_loop = '';
+            
+            let codes = _nodep.data.code;
+            if(!codes) codes = key;
+            
+            let prefix = 'r';
+                
+            codes = codes.split(':');
+            
+            if(key.startsWith('rec_')){
+                _varname = key.replace('_','');
+            }
+            
+            if(codes[0]=='Relationship'){ //_nodep.type == 'relationship'){
+                this._insertGetRelatedRecords();
+                prefix = '';
+                if(_varname!='') {
+//!!!                    if(inloop!=1) inloop = 2; //Relationship will be without prefix $r
+                }else if(codes[1]){
+                    _varname = codes[1];
+                }
+
+                if(Number.isInteger(+_varname)){
+                    _varname = `relationRecord.f${_varname}`;
+                }
+
+                _varname = codes[0]+(_varname!=''?('.'+_varname):'');
+            }else{
+
+                let offset = 3;
+                let lastcode = codes[codes.length-1];
+                                    
+                if(_nodep.type == 'rectype'){
+                    rectypeId = _nodep.data.rtyID_local;
+                    _varname = '';
+                    addLoop = false;
+                }else if(key.startsWith('rec_')){
+                    
+                    addLoop = false;
+                    
+                }else {
+
+                    if(key=='label' || key=='term' || key=='code' || key=='conceptid' || key=='internalid' || key=='desc'){ //terms
+                        
+                        _varname = ('.'+key);
+                        
+                        offset = 4;
+                        lastcode = codes[codes.length-2];
+                    }else if (lastcode.indexOf('lt')==0) {
+                        lastcode = lastcode.substring(2);
+                    }
+                    
+                    _varname = 'f'+lastcode+_varname;
+                    _varname_for_loop = 'f'+lastcode;
+                    
+                    if(_nodep.type == 'date' || _nodep.type == 'geo' || _nodep.type == 'file'){
+                        _varname_for_loop = _varname+'_originalvalue'; //for loop it contains all value
+                    }
+                    
+                }
+/*
+0: "5"   rt
+1: "lt15"   -5
+2: "10"  rt
+3: "lt240"  -3
+4: "48"  rt
+5: "title"
+
+0: "5"
+1: "lt15"  -4
+2: "10"
+3: "263"
+4: "Term"
+*/                            
+                if(codes.length>3){ //second level (isif && codes.length==2) || 
+                    
+                    let parent_key = '';
+                    let pkeys = [];
+                    while(codes.length-offset>0){
+                        let pkey = codes[codes.length-offset];
+                        if(pkey.indexOf('lt')==0){ //resource
+                            pkey = 'f'+pkey.substring(2);
+                        }else{
+                            pkey = 'f'+pkey;
+                        }
+                        offset = offset + 2;
+                        //prefix = prefix + '.' + pkey;
+                        
+                        pkeys.unshift(pkey);
+                        
+                        if(!parent_key) parent_key = pkey;
+                        if(pkeys.length==2) break;
+                    }
+                    if(pkeys.length<2) pkeys.unshift(prefix);
+                    prefix = pkeys.join('.');
+                    //prefix = prefix + '.' + pkey;
+                    //prefix = parent_key; 
+                    
+                    if(true || inloop < 2){ //!!!
+
+                        _getrec = '{$' + parent_key + '=$heurist->getRecord($'+prefix+')}\n';
+                        let _getrec2 = '{$' + parent_key + '=$heurist->getRecord($'+parent_key+')}\n';console.log(arguments, _getrec, _getrec2);
+
+                        //find if above cursor code already has such line             
+                        if(this._findAboveCursor(_getrec) || this._findAboveCursor(_getrec2)) {
+                            _getrec = '';
+                        }else if(this._findAboveCursor(`{foreach $${prefix}s as`)){
+                            _getrec = _getrec2;
+                        }
+
+                        _varname = parent_key +  (_varname?('.' + _varname):'');
+                    }
+                    prefix = '';
+                }
+            }
+            
+//console.log(_varname, _varname_for_loop, _getrec);            
+            
+            // 0 - outside loop
+            // 1 - insert loop operator
+            // 2 - in loop
+            if(addLoop){ //inloop < 2
+                _varname_for_loop = prefix + ((prefix && _varname)?'.':'') + (_varname_for_loop!=''?_varname_for_loop:_varname);
+
+                if(language_code && language_code != '' && (key == 'term' || key == 'desc')){
+
+                    let id_fld = _varname.replace(`.${key}`, '.id');
+                    let fld = (inloop==1) ? 'replace_id.id' : id_fld;  //!!!!!
+                    let trm_fld = key == 'term' ? 'label' : 'desc';
+
+                    language_handle = `{$translated_label = $heurist->getTranslation("trm", $${fld}, "${trm_fld}", "${language_code}")} {* Get translated label *}\n\n`
+                        + (inloop==1 ? '\n\t' : '') + `{$translated_label} {* Print translated label *}`;
+                }else if(file_field && _nodep.type == 'file'){
+
+                    let fld = (inloop==1) ? 'replace_id' : _varname;
+                    file_handle = `{$file_details = $${fld}_originalvalue|file_data:${file_field}} {* Get the requested field *}\n\n`
+                        + (inloop==1 ? '\n\t' : '') + `{$file_details} {* Print the field *}`;
+                }
+            }else{
+                _varname = prefix + ((prefix && _varname)?'.':'') + _varname;
+            }
+            
+            _nodep.data.varname = _varname;
+            //_nodep.data.key = _varname;
+                
+            
+            _variable = this._insertPatternVariable2(_nodep, _varname, addCaption, addRemark, addWrap, addLoop, language_handle, file_handle);
+            
+            if(isif){
+                if(rectypeId>0){
+                    _text = this._insertPatternRectypeIf(_nodep, _varname, rectypeId);
+                }else{
+                    _text = this._insertPatternIfOperator2(_nodep, _varname, _variable);    
+                }
+                //this._insertAtCursor(_text);
+                
+            }else{
+                _text = _variable;
+                //this._insertAtCursor(_variable);    
+            }
+
+            if(addLoop){
+                //** _getrec = '';
+                _text = this._insertPatternMagicLoop(_nodep, _varname_for_loop, _text, language_handle, file_handle);
+                
+            }
+            
+            if(_text!=='')    {
+                _text = _getrec + _text;
+            }
+            this._insertAtCursor(_text, true);
+        
+        
+    },
+    
 
         
 });
