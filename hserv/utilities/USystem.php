@@ -1100,16 +1100,19 @@ class USystem {
         }
 
         $paramsFile = HEURIST_SCRATCH_DIR . "{$type}_{$id}.json";
-        if($type === 'export-feed'){
+        if($system->hasAccess()){
 
-            if(folderCreate2(HEURIST_PREPARED_PARAMS_DIR . 'export-feed/', '', false) !== ''){
-                $system->addError(HEURIST_ERROR, 'Failed to setup the export-feed directory');
-                return false;
+            if($type === 'export-feed'){
+
+                if(folderCreate2(HEURIST_PREPARED_PARAMS_DIR . 'export-feed/', '', false) !== ''){
+                    $system->addError(HEURIST_ERROR, 'Failed to setup the export-feed directory');
+                    return false;
+                }
+
+                $format = $parameters['format'];
+
+                $paramsFile = HEURIST_PREPARED_PARAMS_DIR . "export-feed/{$format}_{$id}.json";
             }
-
-            $format = $parameters['format'];
-
-            $paramsFile = HEURIST_PREPARED_PARAMS_DIR . "export-feed/{$format}_{$id}.json";
         }
 
         $storedParameters = [];
