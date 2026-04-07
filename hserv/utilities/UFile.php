@@ -1345,95 +1345,191 @@ function getURLExtension($url){
     return $extension;
 }
 
-    /**
-     * Recognizes the MIME type from a URL, updates the `defFileExtToMimetype` table if a new mapping is found
-     * (especially for known services like YouTube, Vimeo, SoundCloud), and returns the determined file extension.
-     *
-     * @param \mysqli $mysqli The mysqli database connection object.
-     * @param string $url The URL to analyze.
-     * @param bool $use_default_ext Optional. If true (default) and no specific extension can be determined,
-     *                              returns 'bin' as a generic binary extension.
-     * @return array An associative array with 'extension' (string|null), 'mimeType' (string|null), and 'needrefresh' (bool).
-     */
+/**
+ * Retrieve and prepare details about Wikimedia hosted files
+ *
+ * @param string $url Wikipedia/Wikimedia URL to a file
+ * @return array|array{page: string, mimeType: string, url: string, copyright: string, description: string, copyowner: string, caption: string}
+ */
+function getWikimediaFileType($url){
+
+    if(!filter_var($url, FILTER_VALIDATE_URL) || strpos($url, 'wikipedia.org') === false && strpos($url, 'wikimedia.org') === false){
+        return [];
+    }
+    $url = filter_var($url, FILTER_SANITIZE_URL);
+
+    $wikimediaParams = [
+        'action' => 'query',
+        'titles' => '',
+        'prop' => 'imageinfo',
+        'iiprop' => 'mime|url|user|extmetadata',
+        'iiextmetadatafilter' => 'LicenseUrl|LicenseShortName|ImageDescription|Artist|ObjectName|DateTimeOriginal', // limit extended metadata
+        'format' => 'json'
+    ];
+
+    $urlPath = parse_url($url, PHP_URL_PATH);
+    $urlPath = explode('/', $urlPath);
+    foreach($urlPath as $pathPart){
+
+        if(empty($pathPart)){
+            continue;
+        }
+
+        if(strpos($pathPart, 'File:') !== false){
+            $wikimediaParams['titles'] = $pathPart;
+            break;
+        }else if(preg_match("/\.[A-Za-z]{2,4}$/", $pathPart)){
+            $wikimediaParams['titles'] = "File:{$pathPart}";
+            break;
+        }
+    }
+
+    if(empty($wikimediaParams['titles'])){
+        return [];
+    }
+
+    $wikimediaURL = 'https://commons.wikimedia.org/w/api.php?';
+
+    $wikimediaURL .= http_build_query($wikimediaParams);
+
+    $response = loadRemoteURLContent($wikimediaURL);
+
+    $jsonResponse = json_decode($response, true);
+    if(json_last_error() !== JSON_ERROR_NONE || empty($jsonResponse)){
+        return [];
+    }
+
+    $results = [];
+    $pages = $jsonResponse['query']['pages'];
+    foreach($pages as $page){
+
+        $imageInfo = $page['imageinfo'][0];
+        $metadata = $imageInfo['extmetadata'];
+
+        $results['page'] = $imageInfo['descriptionshorturl'];
+        $results['mimeType'] = $imageInfo['mime'];
+        $results['url'] = $imageInfo['url'];
+
+        $results['copyright'] = '';
+        $ccLicense = array_key_exists('LicenseUrl', $metadata) ? $metadata['LicenseUrl']['value'] : '';
+        $ccType = array_key_exists('LicenseShortName', $metadata) ? $metadata['LicenseShortName']['value'] : '';
+
+        $results['copyright'] = $ccLicense !== '' && $ccType !== '' ? "<a href=\"{$ccLicense}\" target=\"_blank\">{$ccType} ({$ccLicense})</a>" : '';
+        $results['copyright'] = $results['copyright'] !== '' && $ccLicense !== '' ? "<a href=\"{$ccLicense}\" target=\"_blank\">{$ccType} ({$ccLicense})</a>" : $results['copyright'];
+        $results['copyright'] = $results['copyright'] !== '' && $ccType !== '' ? $ccType : $results['copyright'];
+
+        $results['description'] = array_key_exists('ImageDescription', $metadata) ? $metadata['ImageDescription']['value'] : '';
+
+        $results['copyowner'] = array_key_exists('Artist', $metadata) ? $metadata['Artist']['value'] : '';
+
+        $results['caption'] = '';
+        $fileName = array_key_exists('ObjectName', $metadata) ? $metadata['ObjectName']['value'] : '';
+        $date = array_key_exists('DateTimeOriginal', $metadata) ? " @ {$metadata['DateTimeOriginal']['value']}" : '';
+        $date = $fileName === '' ? "Uploaded{$date}" : $date;
+        $results['caption'] = $fileName !== '' ? $fileName : '';
+        $results['caption'] .= $date !== '' ? $date : '';
+        $results['caption'] = !empty($results['page']) ? "<a href=\"{$results['page']}\" target=\"_blank\">{$results['caption']}</a>" : $results['caption'];
+    }
+
+    return $results;
+}
+
+/**
+ * Recognizes the MIME type from a URL, updates the `defFileExtToMimetype` table if a new mapping is found
+ * (especially for known services like YouTube, Vimeo, SoundCloud), and returns the determined file extension.
+ *
+ * @param \mysqli $mysqli The mysqli database connection object.
+ * @param string $url The URL to analyze.
+ * @param bool $use_default_ext Optional. If true (default) and no specific extension can be determined,
+ *                              returns 'bin' as a generic binary extension.
+ * @return array An associative array with 'extension' (string|null), 'mimeType' (string|null), and 'needrefresh' (bool).
+ */
 function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true){
 
+    $url = filter_var($url, FILTER_SANITIZE_URL);
 
-        $url = filter_var($url, FILTER_SANITIZE_URL);
+    //special cases for well known resources
+    $force_add = null;
+    $extension = null;
+    $needrefresh = false;
+    $mimeType = null;
+    $extraDetails = [];
 
-        //special cases for well known resources
-        $force_add = null;
-        $extension = null;
-        $needrefresh = false;
-        $mimeType = null;
+    if(strpos($url, 'soundcloud.com')!==false){
+        $mimeType  = MT_SOUNDCLOUD;
+        $extension = 'soundcloud';
+        $force_add = "('soundcloud','".MT_SOUNDCLOUD."', '0','','Soundcloud','')";
+    }elseif(strpos($url, 'vimeo.com')!==false){
+        $mimeType  = MT_VIMEO;
+        $extension = 'vimeo';
+        $force_add = "('vimeo','".MT_VIMEO."', '0','','Vimeo Video','')";
+    }elseif(strpos($url, 'youtu.be')!==false || strpos($url, 'youtube.com')!==false){
+        $mimeType  = MT_YOUTUBE;
+        $extension = 'youtube';
+        $force_add = "('youtube','".MT_YOUTUBE."', '0','','Youtube Video','')";
+    }elseif(strpos($url, 'wikipedia.org') !== false || strpos($url, 'wikimedia.org') !== false){
+        $extraDetails = getWikimediaFileType($url);
+        $mimeType = @$extraDetails['mimeType'];
+    }else{
+        //get extension from url - unreliable
+        //$f_extension = getURLExtension($url)
 
-        if(strpos($url, 'soundcloud.com')!==false){
-            $mimeType  = MT_SOUNDCLOUD;
-            $extension = 'soundcloud';
-            $force_add = "('soundcloud','".MT_SOUNDCLOUD."', '0','','Soundcloud','')";
-        }elseif(strpos($url, 'vimeo.com')!==false){
-            $mimeType  = MT_VIMEO;
-            $extension = 'vimeo';
-            $force_add = "('vimeo','".MT_VIMEO."', '0','','Vimeo Video','')";
-        }elseif(strpos($url, 'youtu.be')!==false || strpos($url, 'youtube.com')!==false){
-            $mimeType  = MT_YOUTUBE;
-            $extension = 'youtube';
-            $force_add = "('youtube','".MT_YOUTUBE."', '0','','Youtube Video','')";
-        }else{
-            //get extension from url - unreliable
-            //$f_extension = getURLExtension($url)
+        $mimeType = loadRemoteURLContentType($url);
 
-            $mimeType = loadRemoteURLContentType($url);
-
-        }
+    }
 
 
-        if($mimeType!=null && $mimeType!==false){
+    if($mimeType!=null && $mimeType!==false){
 
-            //remove charset section
-            if(strpos($mimeType,';')>0){
-                $parts = explode(';', $mimeType);
-                $k = 0;
-                while($k<count($parts)){
-                    if(strpos($parts[$k],'charset')!==false){
-                        array_splice($parts, $k, 1);
-                        //unset($parts[$k]);
-                    }else{
-                        $k++;
-                    }
-                }//while
-                $mimeType = @$parts[0];
-            }
-
-            if($mimeType){
-
-                if($mimeType==MIMETYPE_JSON ||  $mimeType=='application/ld+json'){
-                    $mimeType = MIMETYPE_JSON;
-                    $extension = 'json';
-                    $force_add = "('json','application/json', '0','','JSON','')";
-                }
-
-                $ext_query = 'SELECT fxm_Extension FROM defFileExtToMimetype WHERE fxm_MimeType="'
-                            .$mimeType.'"';
-                $f_extension = mysql__select_value($mysqli, $ext_query);
-
-                if($f_extension==null && $force_add!=null){
-                    $mysqli->query('insert into defFileExtToMimetype ('
-        .'`fxm_Extension`,`fxm_MimeType`,`fxm_OpenNewWindow`,`fxm_IconFileName`,`fxm_FiletypeName`,`fxm_ImagePlaceholder`'
-                    .') values '.$force_add);
-                    $needrefresh = true;
+        //remove charset section
+        if(strpos($mimeType,';')>0){
+            $parts = explode(';', $mimeType);
+            $k = 0;
+            while($k<count($parts)){
+                if(strpos($parts[$k],'charset')!==false){
+                    array_splice($parts, $k, 1);
+                    //unset($parts[$k]);
                 }else{
-                    $extension = $f_extension;
+                    $k++;
                 }
+            }//while
+            $mimeType = @$parts[0];
+        }
 
+        if($mimeType){
+
+            if($mimeType==MIMETYPE_JSON ||  $mimeType=='application/ld+json'){
+                $mimeType = MIMETYPE_JSON;
+                $extension = 'json';
+                $force_add = "('json','application/json', '0','','JSON','')";
             }
-        }
-        //if extension not found apply bin: application/octet-stream - generic mime type
-        if($extension==null && $use_default_ext) {
-            $extension = 'bin';
-        }
-        $res = array('extension'=>$extension, 'mimeType' => $mimeType, 'needrefresh'=>$needrefresh);
 
-        return $res;
+            $ext_query = 'SELECT fxm_Extension FROM defFileExtToMimetype WHERE fxm_MimeType="'
+                        .$mimeType.'"';
+            $f_extension = mysql__select_value($mysqli, $ext_query);
+
+            if($f_extension==null && $force_add!=null){
+                $mysqli->query('insert into defFileExtToMimetype ('
+    .'`fxm_Extension`,`fxm_MimeType`,`fxm_OpenNewWindow`,`fxm_IconFileName`,`fxm_FiletypeName`,`fxm_ImagePlaceholder`'
+                .') values '.$force_add);
+                $needrefresh = true;
+            }else{
+                $extension = $f_extension;
+            }
+
+        }
+    }
+    //if extension not found apply bin: application/octet-stream - generic mime type
+    if($extension==null && $use_default_ext) {
+        $extension = 'bin';
+    }
+
+    $res = array('extension'=>$extension, 'mimeType' => $mimeType, 'needrefresh'=>$needrefresh);
+    if(!empty($extraDetails)){
+        $res['details'] = $extraDetails;
+    }
+
+    return $res;
 }
 
 

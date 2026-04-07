@@ -827,7 +827,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
         return msg_error;
     },
-    
+
     //
     //
     //
@@ -850,20 +850,28 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
         let url = that._previousURL;
 
+        let mimeTypeEle = this._editing.getFieldByName('ulf_MimeExt');
+        let descriptionEle = this._editing.getFieldByName('ulf_Description');
+        let captionEle = this._editing.getFieldByName('ulf_Caption');
+        let ownerEle = this._editing.getFieldByName('ulf_Copyowner');
+        let copyrightEle = this._editing.getFieldByName('ulf_Copyright');
+
+        descriptionEle.hide();
+        descriptionEle.editing_input('setValue', ''); // reset value
+
         that._requestForMimeType_Timeout = 0;
         that._requestForMimeType = true;                          
         //request server to detect content type
         window.hWin.HAPI4.SystemMgr.get_url_content_type(url, function(response){
 
             that._requestForMimeType = false;
-            let ele2 = that._editing.getFieldByName('ulf_MimeExt');
 
             let ext = '';
             if(response.status == window.hWin.ResponseStatus.OK){
                 ext = response.data.extension;
 
                 if(response.data.needrefresh){
-                    let cfg = ele2.editing_input('getConfigMode');
+                    let cfg = mimeTypeEle.editing_input('getConfigMode');
                     window.hWin.HAPI4.EntityMgr.clearEntityData( cfg.entity );
                 }
 
@@ -872,15 +880,15 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
 
             let msg_error = that._validateExt( ext );
 
-            ele2.editing_input('setValue', ext );
-            ele2.show();
+            mimeTypeEle.editing_input('setValue', ext );
+            mimeTypeEle.show();
             that.onEditFormChange();
 
             if(msg_error){
-                ele2.editing_input('showErrorMsg', msg_error);    
-                that.editForm.animate({scrollTop: ele2.offset().top}, 1);
+                mimeTypeEle.editing_input('showErrorMsg', msg_error);    
+                that.editForm.animate({scrollTop: mimeTypeEle.offset().top}, 1);
             }else{
-                ele2.editing_input('showErrorMsg', ''); //hide
+                mimeTypeEle.editing_input('showErrorMsg', ''); //hide
             }
 
             if(that.mediaviewer){
@@ -891,6 +899,20 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                     $('<h4 style="padding: 15px 75px;position: absolute;cursor: default;">Preview image:</h4>').insertBefore(that.mediaviewer);
                     that.mediaviewer.find('img').attr('src', url);
                 }
+            }
+
+            if(response.data.details){
+
+                let details = response.data.details;
+
+                if(details.description){
+                    descriptionEle.editing_input('setValue', details.description, false, true);
+                    descriptionEle.show();
+                }
+
+                captionEle.editing_input('setValue', details.caption, false, true);
+                ownerEle.editing_input('setValue', details.copyowner, false, true);
+                copyrightEle.editing_input('setValue', details.copyright, false, true);
             }
 
             window.hWin.HEURIST4.msg.closeMsgFlash();

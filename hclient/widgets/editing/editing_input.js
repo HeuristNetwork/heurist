@@ -5849,8 +5849,14 @@ $.widget( "heurist.editing_input", {
      *                                             to reflect the new values, effectively marking the field as unchanged
      *                                             relative to this new state. If false (default), `options.values` is not updated,
      *                                             and subsequent calls to `isChanged()` will likely return true.
+     * @param {boolean} [doNotReplace=false] - If true, it will maintain the existing value (if any) instead of replacing it
      */
-    setValue: function(values, make_as_nochanged){
+    setValue: function(values, make_as_nochanged, doNotReplace = false){
+
+        if(doNotReplace && !$.isEmptyObject(this.newvalues)){
+            return;
+        }
+
         //clear ALL previous inputs
         this.input_cell.find('.input-div').remove();
         this.inputs = [];
