@@ -1175,18 +1175,21 @@ class USystem {
         }
 
         $paramsFile = HEURIST_SCRATCH_DIR . "{$type}_{$id}.json";
-        if($type === 'export-feed'){
+        if(!file_exists($paramsFile)){
 
-            if(folderExists(HEURIST_PREPARED_PARAMS_DIR . 'export-feed/', false) !== 1){
-                $paramsFile = '';
-            }else{
+            if($type === 'export-feed'){
 
-                $format = $parameters['format'];
+                if(folderExists(HEURIST_PREPARED_PARAMS_DIR . 'export-feed/', false) !== 1){
+                    $paramsFile = '';
+                }else{
 
-                $paramsFile = HEURIST_PREPARED_PARAMS_DIR . "export-feed/{$format}_{$id}.json";
-                $deleteFile = false;
+                    $format = $parameters['format'];
+
+                    $paramsFile = HEURIST_PREPARED_PARAMS_DIR . "export-feed/{$format}_{$id}.json";
+                    $deleteFile = false;
+                }
+
             }
-
         }
 
         if(!file_exists($paramsFile)){
