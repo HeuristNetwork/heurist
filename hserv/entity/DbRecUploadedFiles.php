@@ -868,32 +868,49 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
                         $fres = mysql__select_value($mysqli, $file_query);
                     }
 
-                                if($fres>0){
-                                    $ulf_ID = $fres;
-                                    $cnt_skipped++;
+                    if($fres>0){
+                        $ulf_ID = $fres;
+                        $cnt_skipped++;
 
-                                }elseif($is_url) {
+                    }elseif($is_url) {
 
-                                    $fields = array(
-                                        'ulf_Caption'=>$caption,
-                                        'ulf_Copyright'=>$copyright,
-                                        'ulf_Copyowner'=>$copyowner,
-                                        'ulf_Description'=>$description,
-                                        'ulf_MimeExt'=>getURLExtension($url));
+                        $mimeType = '';
+                        $urlLookup = recognizeMimeTypeFromURL($mysqli, $url);
+                        if(empty($urlLookup['mimeType'])){
+                            $mimeType = getURLExtension($url);
+                        }else{
 
-                                    if($is_download){
-                                        //download and register , last parameter - validate name and hash
-                                        $ulf_ID = $this->downloadAndRegisterdURL($url, $fields, 2);//it returns ulf_ID
-                                    }else{
-                                        $ulf_ID = $this->registerURL( $url, false, 0, $fields);
-                                    }
+                            $mimeType = $urlLookup['extension'];
+                            if(!empty($urlLookup['details'])){
 
-                                    if($ulf_ID>0){
-                                        $cnt_imported++;
-                                    }else {
-                                        $cnt_error++;
-                                    }
-                                }
+                                $caption = !empty($caption) ? $caption : $urlLookup['caption'];
+                                $copyright = !empty($copyright) ? $copyright : $urlLookup['copyright'];
+                                $copyowner = !empty($copyowner) ? $copyowner : $urlLookup['copyowner'];
+                                $description = !empty($description) ? $description : $urlLookup['description'];
+                            }
+                        }
+
+                        $fields = array(
+                            'ulf_Caption'=>$caption,
+                            'ulf_Copyright'=>$copyright,
+                            'ulf_Copyowner'=>$copyowner,
+                            'ulf_Description'=>$description,
+                            'ulf_MimeExt'=> $mimeType
+                        );
+
+                        if($is_download){
+                            //download and register , last parameter - validate name and hash
+                            $ulf_ID = $this->downloadAndRegisterdURL($url, $fields, 2);//it returns ulf_ID
+                        }else{
+                            $ulf_ID = $this->registerURL( $url, false, 0, $fields);
+                        }
+
+                        if($ulf_ID>0){
+                            $cnt_imported++;
+                        }else {
+                            $cnt_error++;
+                        }
+                    }
 
                 } //foreach
 
@@ -1584,18 +1601,27 @@ When we open "iiif_image" in mirador viewer we generate manifest dynamically.
        $fields['ulf_OrigFileName']    = $tiledImageStack?ULF_TILED_IMAGE.'@':ULF_REMOTE;//or _iiif
        $fields['ulf_ExternalFileReference'] = $url;
 
-       if(!@$fields['ulf_MimeExt']){
-           if($tiledImageStack){
+        if(!@$fields['ulf_MimeExt']){
+            if($tiledImageStack){
                 $fields['ulf_MimeExt'] = 'png';
-           }else{
-               $ext = recognizeMimeTypeFromURL($this->system->getMysqli(), $url);
-               if(@$ext['extension']){
-                   $fields['ulf_MimeExt'] = $ext['extension'];
-               }else{
-                   $fields['ulf_MimeExt'] = 'bin';//default value
-               }
-           }
-       }
+            }else{
+
+                $ext = recognizeMimeTypeFromURL($this->system->getMysqli(), $url);
+                if(@$ext['extension']){
+                    $fields['ulf_MimeExt'] = $ext['extension'];
+                }else{
+                    $fields['ulf_MimeExt'] = 'bin';//default value
+                }
+
+                if(!empty($ext['details'])){
+
+                    $fields['ulf_Caption'] = !empty(@$fields['ulf_Caption']) ? $fields['ulf_Caption'] : $ext['caption'];
+                    $fields['ulf_Copyright'] = !empty(@$fields['ulf_Copyright']) ? $fields['ulf_Copyright'] : $ext['copyright'];
+                    $fields['ulf_Copyowner'] = !empty(@$fields['ulf_Copyowner']) ? $fields['ulf_Copyowner'] : $ext['copyowner'];
+                    $fields['ulf_Description'] = !empty(@$fields['ulf_Description']) ? $fields['ulf_Description'] : $ext['description'];
+                }
+            }
+        }
        $fields['ulf_UploaderUGrpID'] = $this->system->getUserId();
 
        $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$fields);

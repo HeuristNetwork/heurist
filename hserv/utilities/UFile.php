@@ -1471,11 +1471,7 @@ function recognizeMimeTypeFromURL($mysqli, $url, $use_default_ext = true){
         $extraDetails = getWikimediaFileType($url);
         $mimeType = @$extraDetails['mimeType'];
     }else{
-        //get extension from url - unreliable
-        //$f_extension = getURLExtension($url)
-
         $mimeType = loadRemoteURLContentType($url);
-
     }
 
 
