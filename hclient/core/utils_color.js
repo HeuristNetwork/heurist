@@ -470,14 +470,29 @@ function hexToFilter(hex, lossThreshold = false) {
 
     const color = new Color(rgb.r, rgb.g, rgb.b);
     const solver = new Solver(color);
-    const result = solver.solve();
 
-    lossThreshold = typeof lossThreshold !== 'boolean' ? Number.parseFloat(lossThreshold) : false;
-    lossThreshold = Number.isNaN(lossThreshold) || !Number.isFinite(lossThreshold) ? false : lossThreshold;
+    let count = 0;
+    let bestResult = null;
+    let bestResultThreshold = null;
 
-    if(lossThreshold !== false && result.loss > lossThreshold){
-      return hexToFilter(hex, lossThreshold);
+    while(count < 10){
+
+      const result = solver.solve();
+  
+      lossThreshold = typeof lossThreshold !== 'boolean' ? Number.parseFloat(lossThreshold) : false;
+      lossThreshold = Number.isNaN(lossThreshold) || !Number.isFinite(lossThreshold) ? false : lossThreshold;
+  
+      if(bestResultThreshold === null || lossThreshold < bestResultThreshold){
+        bestResultThreshold = lossThreshold;
+        bestResult = result;
+      }
+
+      if(lossThreshold === false || result.loss <= lossThreshold){
+        break;
+      }
+
+      count ++;
     }
 
-    return result.filter;  
+    return bestResult.filter;  
 }

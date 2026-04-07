@@ -2110,6 +2110,19 @@ background: #8ea9b9
     background-size: contain;
 }
 
+.recordDiv .recvis-hidden .ui-icon { /* Hidden / Red */
+    filter: invert(14%) sepia(76%) saturate(4972%) hue-rotate(349deg) brightness(106%) contrast(93%);
+}
+.recordDiv .recvis-viewable .ui-icon { /* Viewable / Orange */
+    filter: invert(61%) sepia(23%) saturate(4356%) hue-rotate(341deg) brightness(101%) contrast(101%);
+}
+.recordDiv .recvis-pending .ui-icon { /* Pending / Green */
+    filter: invert(84%) sepia(9%) saturate(1723%) hue-rotate(46deg) brightness(95%) contrast(88%);
+}
+.recordDiv .recvis-public .ui-icon { /* Public / Blue */
+    filter: invert(8%) sepia(98%) saturate(7493%) hue-rotate(247deg) brightness(91%) contrast(146%);
+}
+
 .ui-icon-eye-explore {
     background-image: url(hclient/assets/eye_explore.svg) !important; 
     width: 18px;

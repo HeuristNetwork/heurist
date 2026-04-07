@@ -1761,6 +1761,7 @@ $.widget( "heurist.resultList", {
             // 0 owner group is 'everyone' which is treated as automatically making it public (although this is not logical)
             // TODO: I think 0 should be treated like any other owner group in terms of public visibility
             let visibility = fld('rec_NonOwnerVisibility');
+            let visLabel = visibility;
             // gray - hidden, green = viewable (logged in user) = default, orange = pending, red = public = most 'dangerous'
             let clr  = 'blue';
             
@@ -1777,14 +1778,16 @@ $.widget( "heurist.resultList", {
                 clr = 'blue';
                 visibility = 'public (viewable by anyone)';
             }
-            
+
+            let isPublicForEveryone = owner_id == 0 && clr === 'blue'; // hide owner and eye icon
             let hint = __getOwnerName(owner_id)+', '+window.hWin.HR(visibility);
+            owner_id = isPublicForEveryone ? '' : owner_id;
 
             // Displays owner group ID, green if hidden, gray if visible to others, red if public visibility
             html_owner =  '<span class="rec_owner logged-in-only" style="width:20px;padding-top:2px;display:inline-block;color:'
                      + clr + '" title="' + hint + '"><b>' + owner_id + '</b></span>';
 
-            if(is_logged){ // hide eye if user not logged in
+            if(is_logged && !isPublicForEveryone){ // hide eye if user not logged in
 
                 // Display eye if record is publicly viewable, otherwise use a crossed out eye - Both icons come from: iconoir.com
                 let vis_icon = '<span class="ui-icon ui-icon-eye-open"></span>';
@@ -1796,10 +1799,8 @@ $.widget( "heurist.resultList", {
 
                     vis_title = window.hWin.HR('resultList_private_record');
                 }
-                html_owner = html_owner 
-                + '<span title="'+vis_title+'" style="position:relative;left:-8px;">'
-                    + vis_icon
-                + '</span>';
+
+                html_owner += `<span title="${vis_title}" style="position:relative;left:-8px;" class="recvis-${visLabel}">${vis_icon}</span>`;
             }
         }
         
