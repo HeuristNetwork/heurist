@@ -598,7 +598,7 @@ if(!$system->hasAccess()){
                     var group_name = group[0];
                     var order = group[1];
                     var sep_type = group[2];
-                    let inner_group = sep_type == 'group' || sep_type == 'accordion_inner' || sep_type == 'expanded_inner';
+                    let inner_group = sep_type == 'group' || sep_type == 'accordion_inner' || sep_type == 'expanded_inner' || sep_type == 'explanation';
                     if(!inner_group){
                         parent_group = order;
                     }
@@ -621,7 +621,7 @@ if(!$system->hasAccess()){
                         }
                     });
 
-                    if(group_name != '-'){
+                    if(group_name != '-' && (sep_type != 'explanation' || sep_type != 'explanation_break')){
                         if(inner_group){
                             $('<h5>').attr('data-order', order)
                                 .css({'margin': '5px 15px 2px', 'font-size': '1em', 'font-style': 'italic'})

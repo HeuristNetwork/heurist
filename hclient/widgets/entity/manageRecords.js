@@ -214,39 +214,63 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         //create field actions for rts editor
         const is_create_actions_buttons = true;
         if(is_create_actions_buttons){ // || this.options.rts_editor
+
             this.rts_actions_menu = 
-            $('<div class="rts-editor-actions" '
-                +'style="width:110px;background:lightblue;display:none;padding-top:2px;'
-                +'font-size:10px;font-weight:normal;cursor:pointer">'
-                //+'<div style="line-height:18px">&nbsp;</div>' 
-                +'<div data-action="edit" style="background:lightblue;padding:2px 4px;width:102px;">'
-                    +'<span class="ui-icon ui-icon-pencil" title="Edit" style="font-size:9px;font-weight:normal"></span>Edit</div>'
-                +'<div data-action="field" style="background:lightcyan;padding:2px 4px;display:block;width: 102px;">'
-                    +'<span class="ui-icon ui-icon-arrowreturn-1-e" title="Add a new field to this record type" '
-                    +'style="transform: rotate(90deg);font-size:9px;font-weight:normal"></span>Insert field</div>'
-                +'<div data-action="block" title="Add a new group/separator" style="background:lightgreen;padding:2px 4px;width:102px;">'    
-                    +'<span class="ui-icon ui-icon-arrowreturn-1-e" '
-                    +'style="transform: rotate(90deg);font-size:9px;font-weight:normal"></span>Insert tab/divider</div>'
-                +'<div data-action="sub-record" title="Create a sub-record" style="background:lightcyan;padding:2px 4px;width:102px;" class="admin-only">'    
-                    +'<span class="ui-icon ui-icon-arrowreturn-1-e" '
-                    +'style="transform: rotate(90deg);font-size:9px;font-weight:normal"></span>Insert sub-record</div>'
-                    
-                +'<div class="edit_rts_sel" style="padding:2px 4px;width: 102px;" title="Requirement type">'
-                    +'<select class="edit_rts s_reqtype"><option>required</option><option>recommended</option><option>optional</option>'
-                    +'<option value="forbidden">hidden</option></select></div>' 
-                                
-                +'<div class="edit_rts_sel" style="padding:2px 4px;width: 102px;" title="Repeatability">'
-                    +'<select class="edit_rts s_repeat"><option value="1">single</option><option value="0">repeatable</option>'
-                    +'<option value="2">limited 2</option><option value="3">limited 3</option>'
-                    +'<option value="5">limited 5</option><option value="10">limited 10</option></select></div>'
-                    
-                +'<div class="edit_rts_sel s_width" style="padding:2px 4px;width: 102px;" title="Width of field">Width: '
-                    +'<select class="edit_rts s_width" style="display:none">'
-                    +'<option>5</option><option>10</option><option>20</option><option>30</option>'
-                    +'<option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>'
-                    +'<option>120</option><option>150</option>'
-                    +'<option>200</option><option>250</option>'
-                    +'<option value="0">Max</option></select></div>'
+            $('<div class="rts-editor-actions" style="display: none;">'
+
+                +`<div data-action="edit" class="rts-editor-action">
+                    <span class="ui-icon ui-icon-pencil" title="Edit" style="margin-right: 0.5em;"></span>
+                    edit field definition
+                </div>`
+
+                +`<div data-action="field" class="rts-editor-action" title="Add a new field to this record type">
+                    <span class="ui-icon ui-icon-plus"></span>
+                    field
+                    <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"></span>
+                </div>`
+
+                +`<div data-action="block" class="rts-editor-action" title="Add a new group/separator">
+                    <span class="ui-icon ui-icon-plus"></span>
+                    tab or heading
+                    <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"></span>
+                </div>`
+
+                +`<div data-action="explain" class="rts-editor-action" title="Add a new explanation separator">
+                    <span class="ui-icon ui-icon-plus"></span>
+                    explanatory text
+                    <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"></span>
+                </div>`
+
+                +`<div data-action="sub-record" class="rts-editor-action" title="Create a sub-record" class="admin-only">
+                    <span class="ui-icon ui-icon-plus"></span>
+                    sub-record
+                    <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"></span>
+                </div>`
+
+                +`<div class="edit_rts_sel" class="rts-editor-action" title="Requirement type">
+                    <select class="edit_rts s_reqtype">
+                        <option>required</option><option>recommended</option>
+                        <option>optional</option><option value="forbidden">hidden</option>
+                    </select>
+                </div>`
+
+                +`<div class="edit_rts_sel" title="Repeatability">
+                    <select class="edit_rts s_repeat">
+                        <option value="1">single</option><option value="0">repeatable</option>
+                        <option value="2">limited 2</option><option value="3">limited 3</option>
+                        <option value="5">limited 5</option><option value="10">limited 10</option>
+                    </select>
+                </div>`
+
+                +`<div class="edit_rts_sel s_width" title="Width of field">
+                    Width: 
+                    <select class="edit_rts s_width" style="display:none">
+                        <option>5</option><option>10</option><option>20</option><option>30</option>
+                        <option>40</option><option>50</option><option>60</option><option>80</option>
+                        <option>100</option><option>120</option><option>150</option><option>200</option>
+                        <option>250</option><option value="0">Max</option>
+                    </select>
+                </div>`
 
                 +'<span class="edit_rts_btn" style="top:24px;left:80px;position:absolute;background:lightblue;display:none" '
                 +' data-apply="1" title="Save changes for field properties">Apply</span>'
@@ -266,71 +290,71 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                             false, {'max-width':'100px','font-size':'0.9em', padding:0});
             window.hWin.HEURIST4.ui.initHSelect(this.rts_actions_menu.find('select.s_width'),
                                             false, {'max-width':'60px','font-size':'0.9em', padding:0});
-            
+
             //save/cancel rts buttons
             this.edit_rts_apply = this.rts_actions_menu.find('.edit_rts_btn').button();
             this._on( this.edit_rts_apply, {
                 click: function(e){
                     if($(e.target).attr('data-apply')){
 
-                            let dtId = this.rts_actions_menu.attr('data-did');
-                        
-                            let fields = {
-                                rst_RecTypeID: this._currentEditRecTypeID,
-                                rst_DetailTypeID: dtId,
-                                rst_MaxValues: this.rts_actions_menu.find('select.s_repeat').val(), 
-                                rst_DisplayWidth: this.rts_actions_menu.find('select.s_width').val(), 
-                                rst_RequirementType: this.rts_actions_menu.find('select.s_reqtype').val()};
+                        let dtId = this.rts_actions_menu.attr('data-did');
+                    
+                        let fields = {
+                            rst_RecTypeID: this._currentEditRecTypeID,
+                            rst_DetailTypeID: dtId,
+                            rst_MaxValues: this.rts_actions_menu.find('select.s_repeat').val(), 
+                            rst_DisplayWidth: this.rts_actions_menu.find('select.s_width').val(), 
+                            rst_RequirementType: this.rts_actions_menu.find('select.s_reqtype').val()};
 
-                            let request = {
-                                'a'          : 'save',
-                                'entity'     : 'defRecStructure',
-                                'request_id' : window.hWin.HEURIST4.util.random(),
-                                'fields'     : fields                     
-                                };
-                                
-                            let dlged = that._getEditDialog();
-                            if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
+                        let request = {
+                            'a'          : 'save',
+                            'entity'     : 'defRecStructure',
+                            'request_id' : window.hWin.HEURIST4.util.random(),
+                            'fields'     : fields                     
+                        };
                             
-                            window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                                function(response){
+                        let dlged = that._getEditDialog();
+                        if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
+                        
+                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                            function(response){
+                                
+                                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                                
+                                if(response.status == window.hWin.ResponseStatus.OK){
                                     
-                                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+                                    //update db definitions and tree    
+                                    that.options.rts_editor.manageDefRecStructure(
+                                        'refreshRecset_Definition_TreeNodeItem', dtId, fields);
                                     
-                                    if(response.status == window.hWin.ResponseStatus.OK){
-                                        
-                                        //update db definitions and tree    
-                                        that.options.rts_editor.manageDefRecStructure(
-                                            'refreshRecset_Definition_TreeNodeItem', dtId, fields);
-                                        
-                                        //recreate edit field
-                                        let dtFields = that._prepareFieldForEditor( null, that._currentEditRecTypeID, dtId );
-                                        let inpt = that._editing.getFieldByName(dtId);
-                                        inpt.editing_input('option', {dtFields:dtFields, recreate:true} );
-                                        that._createRtsEditButton(dtId, $(that.element).find('div[data-dtid="'+dtId+'"]') );
-                                        
-                                        if(fields['rst_RequirementType']=='forbidden'){
-                                            inpt.find('.header').css({'opacity':'0.3'});   //header
-                                            inpt.find('.header').next().css({'opacity':'0.3'}); //repeat btn 
-                                            inpt.find('input,textarea,button,.ui-selectmenu-button').css('border','1px dotted red');
-                                        }
-                                        
-										/* Hide Help Text if 'Show Help' isn't checked, help text is shown by default */
-                                        if(!that.element.find('.chb_show_help').is(':checked')){
-                                            $('.heurist-helper1').hide();
-                                        }
-                                        
-                                        if((dtFields['dty_Type'] == 'freetext' || dtFields['dty_Type'] == 'blocktext' || dtFields['dty_Type'] == 'float') 
-                                                && dtFields['rst_DisplayWidth'] == 0){
-
-                                            let width = that.editForm.width() * ((that.options.rts_editor) ? 0.7 : 0.8);
-
-                                            inpt.find('input, textarea').css({'min-width': width, width: width});
-                                        }
-                                    }else{
-                                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                                    //recreate edit field
+                                    let dtFields = that._prepareFieldForEditor( null, that._currentEditRecTypeID, dtId );
+                                    let inpt = that._editing.getFieldByName(dtId);
+                                    inpt.editing_input('option', {dtFields:dtFields, recreate:true} );
+                                    that._createRtsEditButton(dtId, $(that.element).find('div[data-dtid="'+dtId+'"]') );
+                                    
+                                    if(fields['rst_RequirementType']=='forbidden'){
+                                        inpt.find('.header').css({'opacity':'0.3'});   //header
+                                        inpt.find('.header').next().css({'opacity':'0.3'}); //repeat btn 
+                                        inpt.find('input,textarea,button,.ui-selectmenu-button').css('border','1px dotted red');
                                     }
-                                });
+                                    
+                                    /* Hide Help Text if 'Show Help' isn't checked, help text is shown by default */
+                                    if(!that.element.find('.chb_show_help').is(':checked')){
+                                        $('.heurist-helper1').hide();
+                                    }
+                                    
+                                    if((dtFields['dty_Type'] == 'freetext' || dtFields['dty_Type'] == 'blocktext' || dtFields['dty_Type'] == 'float') 
+                                            && dtFields['rst_DisplayWidth'] == 0){
+
+                                        let width = that.editForm.width() * ((that.options.rts_editor) ? 0.7 : 0.8);
+
+                                        inpt.find('input, textarea').css({'min-width': width, width: width});
+                                    }
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                                }
+                            });
                         
                     }
                     this.hideRtsMenu();
@@ -379,109 +403,111 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         let ele = $(event.target);
                         let action = ele.attr('data-action');
                         if(!action) action = ele.parent().attr('data-action');
-                        
-                        if(action=='field' || action=='block' || action=='edit' || action=='sub-record'){
-                            
-                            function __modifyStructureAction(){
-                                
-                                that._editing.setModified(0);
-                                let rec_dlg = that.options.isdialog && that._as_dialog != null ? that._as_dialog.parent() : null; 
 
-                                if(action=='field'){
-
-                                    that.options.rts_editor.manageDefRecStructure(
-                                        'showBaseFieldEditor', -1, dt_id, null, rec_dlg);
-                                }else if(action=='block'){
-
-                                    window.hWin.HAPI4.EntityMgr.getEntityConfig('defRecStructure', function(response){
-
-                                        let fields = response.fields;
-
-                                        for(const idx in fields){
-
-                                            if(fields[idx]['dtID'] != 'rst_SeparatorType'){
-                                                continue;
-                                            }
-
-                                            let fieldConfig = fields[idx]['dtFields']['rst_FieldConfig'];
-
-                                            let $dlg;
-                                            let msg = '<label>Choose separator type:</label><div style="margin: 10px 0px 0px 10px"><select id="sep_type"></select></div>';
-
-                                            let btns = {};
-                                            btns[window.HR('Insert')] = () => {
-
-                                                let sep_type = $dlg.find('#sep_type').val(); // get value first
-
-                                                $dlg.dialog('close'); // then close dialog
-
-                                                that.options.rts_editor.manageDefRecStructure('addNewSeparator', dt_id, sep_type);
-                                            };
-                                            btns[window.HR('Cancel')] = () => { $dlg.dialog('close'); };
-
-                                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Inserting separator'}, 
-                                                    {default_palette_class: 'ui-heurist-design', height: 385, width: 285});
-
-                                            let $select = $dlg.find('#sep_type');
-
-                                            window.hWin.HEURIST4.ui.createSelector($select[0], fieldConfig);
-                                            window.hWin.HEURIST4.ui.initHSelect($select, false);
-
-                                            if($select.hSelect('instance') !== undefined){
-
-                                                $select.hSelect('option', 'position', {
-                                                    my: 'left top',
-                                                    at: 'left top',
-                                                    of: $select.hSelect('widget')
-                                                });
-
-                                                $select.hSelect('open');
-
-                                                let $menu = $select.hSelect('menuWidget');
-
-                                                that._on($select, {
-                                                    'hselectchange': function(event, ui){ // highlight selection
-
-                                                        const idx = ui.item.index;
-
-                                                        $menu.find('li > div').removeClass('ui-heurist-header');
-                                                        $($menu.find('li > div')[idx]).addClass('ui-heurist-header');
-                                                    },
-                                                    'hselectclose': function(){ // keep open
-                                                        $select.hSelect('open');
-                                                    }
-                                                });
-
-                                                $($menu.find('li > div')[1]).addClass('ui-heurist-header'); // highlight first option
-                                            }
-
-                                            // Changes to dialog buttons
-                                            $($dlg.parent().find('.ui-dialog-buttonset button')[0]).css({
-                                                'margin-right': '20px',
-                                                'font-weight': 'bold'
-                                            });
-                                            $($dlg.parent().find('.ui-dialog-buttonset button')[1]).css({
-                                                'margin-right': '10px'
-                                            });
-
-                                            break;
-                                        }
-                                    });
-                                    
-                                }else if(action=='edit'){
-                                    that.options.rts_editor.manageDefRecStructure(
-                                        'editField', dt_id);
-                                }else if(action=='sub-record'){
-
-                                    that.options.rts_editor.manageDefRecStructure(
-                                        'showBaseFieldEditor', -1, dt_id, null, rec_dlg, true);
-                                }
-                            }
-                            
-                            //save record silently
-                            that.saveQuickWithoutValidation( __modifyStructureAction );
-                            
+                        if(['field', 'block', 'edit', 'sub-record', 'explain'].indexOf(action) < 0){
+                            return;
                         }
+
+                        function __modifyStructureAction(){
+                            
+                            that._editing.setModified(0);
+                            let rec_dlg = that.options.isdialog && that._as_dialog != null ? that._as_dialog.parent() : null; 
+
+                            if(action=='field'){
+
+                                that.options.rts_editor.manageDefRecStructure('showBaseFieldEditor', -1, dt_id, null, rec_dlg);
+                            }else if(action=='block'){
+
+                                window.hWin.HAPI4.EntityMgr.getEntityConfig('defRecStructure', function(response){
+
+                                    let fields = response.fields;
+
+                                    for(const idx in fields){
+
+                                        if(fields[idx]['dtID'] != 'rst_SeparatorType'){
+                                            continue;
+                                        }
+
+                                        let fieldConfig = fields[idx]['dtFields']['rst_FieldConfig'];
+
+                                        let $dlg;
+                                        let msg = '<label>Choose separator type:</label><div style="margin: 10px 0px 0px 10px"><select id="sep_type"></select></div>';
+
+                                        let btns = {};
+                                        btns[window.HR('Insert')] = () => {
+
+                                            let sep_type = $dlg.find('#sep_type').val(); // get value first
+
+                                            $dlg.dialog('close'); // then close dialog
+
+                                            that.options.rts_editor.manageDefRecStructure('addNewSeparator', dt_id, sep_type);
+                                        };
+                                        btns[window.HR('Cancel')] = () => { $dlg.dialog('close'); };
+
+                                        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, {title: 'Inserting separator'}, 
+                                                {default_palette_class: 'ui-heurist-design', height: 465, width: 285, dialogId: 'add-new-separator'});
+
+                                        let $select = $dlg.find('#sep_type');
+
+                                        window.hWin.HEURIST4.ui.createSelector($select[0], fieldConfig);
+                                        window.hWin.HEURIST4.ui.initHSelect($select, false);
+
+                                        if($select.hSelect('instance') !== undefined){
+
+                                            $select.hSelect('option', 'position', {
+                                                my: 'left top',
+                                                at: 'left top',
+                                                of: $select.hSelect('widget')
+                                            });
+
+                                            $select.hSelect('open');
+
+                                            let $menu = $select.hSelect('menuWidget');
+
+                                            that._on($select, {
+                                                'hselectchange': function(event, ui){ // highlight selection
+
+                                                    const idx = ui.item.index;
+
+                                                    $menu.find('li > div').removeClass('ui-heurist-header');
+                                                    $($menu.find('li > div')[idx]).addClass('ui-heurist-header');
+                                                },
+                                                'hselectclose': function(){ // keep open
+                                                    $select.hSelect('open');
+                                                }
+                                            });
+
+                                            $($menu.find('li > div')[1]).addClass('ui-heurist-header'); // highlight first option
+                                            $menu.css('max-height', '30em');
+                                        }
+
+                                        // Changes to dialog buttons
+                                        $($dlg.parent().find('.ui-dialog-buttonset button')[0]).css({
+                                            'margin-right': '20px',
+                                            'font-weight': 'bold'
+                                        });
+                                        $($dlg.parent().find('.ui-dialog-buttonset button')[1]).css({
+                                            'margin-right': '10px'
+                                        });
+
+                                        break;
+                                    }
+                                });
+                                
+                            }else if(action=='edit'){
+
+                                that.options.rts_editor.manageDefRecStructure('editField', dt_id);
+                            }else if(action=='sub-record'){
+
+                                that.options.rts_editor.manageDefRecStructure('showBaseFieldEditor', -1, dt_id, null, rec_dlg, true);
+                            }else if(action=='explain'){
+
+                                that.options.rts_editor.manageDefRecStructure('addExplanationSeparator', dt_id);
+                            }
+                        }
+                        
+                        //save record silently
+                        that.saveQuickWithoutValidation( __modifyStructureAction );
                             
                     }
             });
@@ -561,10 +587,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 let dt_type = $Db.dty(dtId, 'dty_Type');
                 if(dt_type=='separator'){
-                    that.rts_actions_menu.width(110); //43
+
                     that.rts_actions_menu.find('.edit_rts_sel').hide();
                 }else{
-                    that.rts_actions_menu.width(110); //280
+
                     that.rts_actions_menu.find('.edit_rts_sel').show();
                     that.rts_actions_menu.find('select.s_reqtype').val(rst_fields['rst_RequirementType']).hSelect('refresh');
                     let v = rst_fields['rst_MaxValues'];
@@ -595,10 +621,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 that.rts_actions_menu.find('.edit_rts_btn').hide();
                 that._rts_changed_flag = false;
+                let positionElement = el.hasClass('ui-icon') ? el : el.find('.ui-icon').first();
                 that.rts_actions_menu
-                .attr('data-did', dtId)
-                .show()
-                .position({ my:'left top', at:'left+20 top', of: el});
+                    .attr('data-did', dtId)
+                    .show()
+                    .position({ my:'left top', at:'left bottom', of: positionElement});
 
                 that.options.rts_editor.manageDefRecStructure('highlightNode', dtId);
 
@@ -2681,7 +2708,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 if(that.options.new_record_params['OwnerUGrpID']=='current_user') {
                     that.options.new_record_params.OwnerUGrpID = window.hWin.HAPI4.user_id();
                 }
-                
+
                 if(that.options.new_record_params['details']){                     
                     //need to use save because method "add" inserts only header
                     
@@ -2691,7 +2718,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     }
                     let dlged = that._getEditDialog();
                     if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged,null,msg);
-                    
+
                     window.hWin.HAPI4.RecordMgr.saveRecord( that.options.new_record_params,
                         function(response){ 
                                 window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -3220,7 +3247,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             let max_length_fields = []; // freetext, blobktext, and float fields that are set to max width
             let terms_as_buttons = []; // enum fields, for adjusting each button+label's width
             let check_for_errors = []; // fields that could have additional errors (e.g. date fields that haven't been indexed into recDetailsDateIndex) 
-            let available_groups = ['group', 'group_break', 'tabs', 'tabs_new', 'accordion', 'accordion_inner', 'expanded', 'expanded_inner'];
+            let available_groups = ['group', 'group_break', 'tabs', 'tabs_new', 'accordion', 'accordion_inner', 'expanded', 'expanded_inner', 'explanation', 'explanation_break'];
 
             let has_rec_access = window.hWin.HAPI4.has_access(this._getField('rec_OwnerUGrpID'));
             let cur_record = that._currentEditRecordset.getFirstRecord();
