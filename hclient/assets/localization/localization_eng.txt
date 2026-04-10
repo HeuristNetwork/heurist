@@ -519,3 +519,12 @@
 #feature_request#Please request from Heurist team if needed or add to code and do a pull request
 #recvis_placeholder#Select or search for records to visualise as a graph
 #recvis_nodata#No data for graph
+#fieldDesc_enum#A flat or hierarchical list of categories, generally from a single vocabulary eg. countries, languages, source, condition, material, colour. Use where the list is relatively static and the categories do not exist as separate records in the database (in which case use record pointers).
+#fieldDesc_numeric#A positive or negative number, with or without decimals. Non-numeric characters other than minus, decimal point or comma are ignored.
+#fieldDesc_freetext#A single line of plain text, typically used for names, titles and short descriptions. Use multi-line text for longer descriptions. Max 250 characters.
+#fieldDesc_blocktext#A plain text field which can accomodate multiple lines of text. Use for longer descriptions.
+#fieldDesc_datetime#A calendar date with or without time of day. Whole years can be used. BCE dates are expressed as negative. Can also accommodate date range and uncertainty.
+#fieldDesc_geo#A vector spatial object describing a location on the earth's surface. The location can be digitised by clicking on a map or entered as coordinates.
+#fieldDesc_file#A file such as a photo, PDF, scanned document, spreadsheet or XML, uploaded and stored in the database or a URL to a remote file or streamed content.
+#fieldDesc_resource#A simple connection to another record, normally constrained to specific target record type(s). Use where the field represents a direct connection and is permanent eg.parent, author, component, place, period.
+#fieldDesc_relmarker#A more complex connection which allows specification of relationship type and period of validity. Use where there are numerous possible connection types and/or connections have a time span eg.roles in an event, social relationships, ownership, marriage, address.

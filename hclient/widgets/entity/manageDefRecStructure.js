@@ -1242,17 +1242,18 @@ console.log('onEditFormChange @todo check buttons!!!');
      * @param {boolean} [allow_proceed=false] If true, bypasses modification checks.
      * @param {?jQuery} [parent_dialog] The parent dialog, if applicable, for positioning.
      * @param {boolean} [create_sub_record=false] If true, configures the new field for automatic sub-record creation.
+     * @param {boolean} [create_connector=false] If true, configures the new field for resource and relmarker types only.
      * @description This function opens the `manageDefDetailTypes` widget in 'editonly' mode to edit
      * an existing field's base definition or in a selection/creation mode to add a new field
      * to the record type structure. Handles modification checks and callbacks for updating the structure.
      */
-    showBaseFieldEditor: function( arg1, arg2, allow_proceed, parent_dialog, create_sub_record = false ){
+    showBaseFieldEditor: function( arg1, arg2, allow_proceed, parent_dialog, create_sub_record = false, create_connector = false ){
 
         let that = this;
         
         if(allow_proceed!==true){
             this._allowActionIfModified( function(){ 
-                that.showBaseFieldEditor( arg1, arg2, true, parent_dialog, create_sub_record );
+                that.showBaseFieldEditor( arg1, arg2, true, parent_dialog, create_sub_record, create_connector );
             } );
             return;
         }
@@ -1277,7 +1278,8 @@ console.log('onEditFormChange @todo check buttons!!!');
         }
 
         this.create_sub_record = create_sub_record;
-        
+        this.create_connector = create_connector;
+
         if(!(dtyID>0)){ //new field
         
             let after_dty_ID = 0;
@@ -1294,6 +1296,7 @@ console.log('onEditFormChange @todo check buttons!!!');
             popup_options['newFieldForRtyID'] = this.options.rty_ID;
             popup_options['selectOnSave'] = true;
             popup_options['create_sub_record'] = this.create_sub_record;
+            popup_options['create_connector'] = this.create_connector;
             popup_options['onselect'] = function(event, res)
             {
                 //update recordset

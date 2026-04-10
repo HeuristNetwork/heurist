@@ -2197,7 +2197,7 @@ $.widget( "heurist.editing_input", {
             // Display term selector as radio buttons/checkboxes
             if(this.f('rst_TermsAsButtons') == 1 && this.child_terms && this.child_terms.length<=20){
 
-                this.enum_buttons = (Number(this.f('rst_MaxValues')) != 1) ? 'checkbox' : 'radio';
+                this.enum_buttons = Number.parseInt(this.f('rst_MaxValues')) != 1 ? 'checkbox' : 'radio';
                 let inpt_id = $input.attr('id');
                 let dtb_res = false;
 
@@ -7328,9 +7328,10 @@ $.widget( "heurist.editing_input", {
 
         for(let i = 0; i < terms_list.length; i++){
 
-            let [trm_id, trm_label] = window.hWin.HEURIST4.util.isPositiveInt(terms_list[i])
-                ? [terms_list[i], $Db.trm(terms_list[i], 'trm_Label')]
-                : [terms_list[i]['key'], terms_list[i]['title']];
+            const term = terms_list[i];
+            let [trm_id, trm_label, trm_desc] = window.hWin.HEURIST4.util.isPositiveInt(term)
+                ? [terms_list[i], $Db.trm(term, 'trm_Label'), '']
+                : [term['key'], term['title'], term['description']];
 
             let isChecked = (values && values.includes(trm_id)) ? true : false;
 
@@ -7395,15 +7396,22 @@ $.widget( "heurist.editing_input", {
                     that.onChange();
                 });
 
-            $('<label>', {'title': trm_label, append: [$btn, trm_label]})
+            const $input = $('<label>', {'title': window.hWin.HEURIST4.util.stripTags(trm_label), append: [$btn, trm_label]})
                     .addClass('truncate enum_input')
                     .css({
                         'max-width': '120px',
-                        //'min-width': '120px',
                         'display': 'inline-block',
                         'margin-right': '15px'
                     })
                     .appendTo($inputdiv);
+            if(!window.hWin.HEURIST4.util.isempty(trm_desc)){
+                $('<div>', {class: 'heurist-helper1', append: trm_desc, style: 'margin-bottom: 10px;'}).insertAfter($input);
+            }
+
+            if(!window.hWin.HEURIST4.util.isPositiveInt(term)){ // for entity, not a record
+                $input.css('max-width', '');
+                this.options.showclear_button = false;
+            }
         }
 
         let $other_btns = $inputdiv.find('.smallicon, .smallbutton');

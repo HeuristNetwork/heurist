@@ -229,6 +229,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"></span>
                 </div>`
 
+                +`<div data-action="connector" class="rts-editor-action" title="Add a new connecting field to this record type">
+                    <span class="ui-icon ui-icon-plus"></span>
+                    connection
+                    <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"></span>
+                </div>`
+
                 +`<div data-action="block" class="rts-editor-action" title="Add a new group/separator">
                     <span class="ui-icon ui-icon-plus"></span>
                     tab or heading
@@ -404,7 +410,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         let action = ele.attr('data-action');
                         if(!action) action = ele.parent().attr('data-action');
 
-                        if(['field', 'block', 'edit', 'sub-record', 'explain'].indexOf(action) < 0){
+                        if(['field', 'block', 'edit', 'sub-record', 'explain', 'connector'].indexOf(action) < 0){
                             return;
                         }
 
@@ -503,6 +509,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             }else if(action=='explain'){
 
                                 that.options.rts_editor.manageDefRecStructure('addExplanationSeparator', dt_id);
+                            }else if(action=='connector'){
+
+                                that.options.rts_editor.manageDefRecStructure('showBaseFieldEditor', -1, dt_id, null, rec_dlg, false, true);
                             }
                         }
                         
