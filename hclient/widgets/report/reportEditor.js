@@ -772,7 +772,7 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
             res = _nodep.title+': ';
         }
         
-        if(addWrap){ // insert with 'wrap' function which provides URL and image handling
+        if(addWrap){ // insert with 'wrap' function which provides URL, geo, file(img) handling
 
             let dtype = _nodep.type;
             res = res + '{wrap var=$'+varname;
@@ -1900,26 +1900,32 @@ this_id       : "term"
             {text:window.hWin.HR('Insert'),
                 id:'btnStartInsert',
                 click: ()=>{
-                    
+
+                    const insertAll = this._addVariableDlg.find('#insAll').is(':checked');
+
                     const addLoop = this._addVariableDlg.find('#insRepeat').is(':checked');
                     const ifnull = this._addVariableDlg.find('#insIfNull').is(':checked');
                     const addCaption = this._addVariableDlg.find('#insCaption').is(':checked');
                     const addRemark = this._addVariableDlg.find('#insRemark').is(':checked');
-                    
-                    const insertAll = this._addVariableDlg.find('#insAll').is(':checked');
+                    const addWrap = this._addVariableDlg.find('#insWrap').is(':checked');
+                    const useOwnLoop = !insertAll || this._addVariableDlg.find('#insOwnLoop').is(':checked');
+
                     this._closeInsertPopup();
-                    
+
+                    if(insertAll){
+                        this._insertSelectedVars4(index, addLoop, ifnull, addCaption, addRemark, addWrap, useOwnLoop);
+                        return;
+                    }
+
                     for(let k=index; k<len; k++){
-                        let _nodep =  fieldIds[k];      //FancytreeNode
-                        if(window.hWin.HEURIST4.util.isArrayNotEmpty(_nodep.children)){  //ignore top levels selection
+                        let _nodep = fieldIds[k];
+                        if(window.hWin.HEURIST4.util.isArrayNotEmpty(_nodep.children)){
                             continue;
                         }
-                        
-                        this._insertSelectedVars3(_nodep, addLoop, ifnull, addCaption, addRemark); //, language, file_data);
-                        if(!insertAll){
-                            this._insertFields(index+1); //insert next
-                            break;
-                        }
+
+                        this._insertSelectedVars4(_nodep, addLoop, ifnull, addCaption, addRemark, addWrap, useOwnLoop);
+                        this._insertFields(index+1);
+                        break;
                     }
                 }
             },
@@ -1965,6 +1971,103 @@ this_id       : "term"
             
 
     
+    },
+/*
+
+User selects variables in hierarchical treeview. Treeview reflects record type structure (list of fields). 
+
+
+Fields are different types. 
+1) Resource field is a link to another record (it contains record id) 
+2) Term field is complex field (array) it may have label,term,code,conceptid,internalid,desc subvalues 
+3) File and geo fields
+
+
+*/    
+    /**
+    * Insert nested statements to access resource record
+    * 
+    * @type Object
+    */
+    _insertSelectedResourceVar: function( _nodep, addLoop, isif, iDepth) {
+        
+        let _text = '';
+        
+        if(!_nodep){
+            return _text;
+        }
+        
+        let codes = _nodep.data.code;
+        if(!codes) codes = key;
+        
+        if(codes.length<4){
+            return _text;
+        }
+        
+        if(!iDepth){
+            iDepth = 0;
+        }
+        // 10:lt134:12:ids3
+ /*
+0: "5"   rt
+1: "lt15"   -5
+2: "10"  rt
+3: "lt240"  -3
+4: "48"  rt
+5: "title"
+
+0: "5"
+1: "lt15"  -4
+2: "10"
+3: "263"
+4: "Term"
+
+
+
+ONE LEVEL
+5:1
+{$r.$f1}
+
+ONE LEVEL WITH Extension: label,term,code,conceptid,internalid,desc
+5:41:term    
+{$r.f41.term}
+
+5:lt15:4:1
+{$f15=$heurist->getRecord($r.f15)}
+{$f15.f1}
+or
+{foreach $r.f15s as $f15 name=valueloop} {* Organization *}
+    {$f15=$heurist->getRecord($f15)} {* get Organization record by record id *}
+    {if ($f15)}
+        {$f15.f1}  }{* Organization name *}
+    {/if}
+{/foreach}
+
+5:lt15:4:lt1432:12:1376
+
+{foreach $r.f15s as $f15 name=valueloop}{* Organization *}
+    {$f15=$heurist->getRecord($f15)} {* get Organization record by record id *}
+    {if ($f15 && $f15.f1432s)}
+        {foreach $f15.f1432s as $f1432 name=valueloop2}{* Organization location *}
+            {$f1432=$heurist->getRecord($f1432)} {* get Organization location record by record id *}
+            {if ($f1432)}
+                {$f1432.f1376}  }{* location description *}
+            {/if}
+        {/foreach}        
+    {/if}
+{/foreach}
+*/          
+        let pkey = codes[iDepth+1];
+        if(pkey.indexOf('lt')==0){ //resource - link to
+            
+            _getrec = '{$' + parent_key + '=$heurist->getRecord($'+prefix+')}\n';
+        
+            this._insertSelectedResourceVar( _nodep, addLoop, isif, iDepth+2 );
+        }else if(pkey.indexOf('lf')==0){ //resource - link from
+        
+        }
+        
+        
     },
     
     /**
@@ -2015,7 +2118,6 @@ this_id       : "term"
             if(!codes) codes = key;
             
             let prefix = 'r';
-                
             codes = codes.split(':');
             
             if(key.startsWith('rec_')){
@@ -2184,7 +2286,1024 @@ this_id       : "term"
         
     },
     
+//========================
+_insertSelectedVars4: function(_nodep, addLoop, ifnull, addCaption, addRemark, addWrap, useOwnLoop){
 
-        
+    // single insert mode
+    if(useOwnLoop){
+        const snippet = this._buildSmartySnippetForNode(
+            _nodep,
+            addLoop,
+            ifnull,
+            addCaption,
+            addRemark,
+            addWrap,
+            0,
+            'r'
+        );
+
+        if(snippet){
+            this._insertAtCursor(snippet, true);
+        }
+        return;
+    }
+
+    // grouped insert-all mode
+    const tree = $.ui.fancytree.getTree(this._$('#field_treeview'));
+    let selected = tree.getSelectedNodes(false).filter(
+        n => !window.hWin.HEURIST4.util.isArrayNotEmpty(n.children)
+    );
+
+    let startIndex = Number.isInteger(_nodep) ? _nodep : parseInt(_nodep, 10);
+    if(Number.isNaN(startIndex)) startIndex = 0;
+    if(startIndex > 0){
+        selected = selected.slice(startIndex);
+    }
+
+    if(selected.length === 0) return;
+
+    let snippets = [];
+    let i = 0;
+
+    while(i < selected.length){
+        const rootNode = selected[i];
+        const parsed = this._parseNodeCode(rootNode);
+
+        let snippet = '';
+        let j = i + 1;
+
+        if(parsed?.rootRectypeId === 'Relationship'){
+            const group = [rootNode];
+
+            while(j < selected.length){
+                const p2 = this._parseNodeCode(selected[j]);
+                if(!p2 || p2.rootRectypeId !== 'Relationship') break;
+                group.push(selected[j]);
+                j++;
+            }
+                            
+            snippet = this._buildGroupedRelationshipSnippet(
+                group,
+                ifnull,
+                addCaption,
+                addRemark
+            );
+
+        }else{
+            const group = [rootNode];
+            const rootBranchKey = this._getBranchKey(rootNode);
+
+            while(j < selected.length){
+                const p2 = this._parseNodeCode(selected[j]);
+                if(!p2 || p2.rootRectypeId === 'Relationship') break;
+                if(this._getBranchKey(selected[j]) !== rootBranchKey) break;
+                group.push(selected[j]);
+                j++;
+            }
+            
+            if(group.length > 1){
+                snippet = this._buildGroupedSmartySnippet(
+                    group,
+                    addLoop,
+                    ifnull,
+                    addCaption,
+                    addRemark,
+                    addWrap
+                );
+            }else{
+                snippet = this._buildSmartySnippetForNode(
+                    rootNode,
+                    addLoop,
+                    ifnull,
+                    addCaption,
+                    addRemark,
+                    addWrap,
+                    0,
+                    'r'
+                );
+            }
+        }
+
+        if(snippet){
+            snippets.push(snippet);
+        }
+
+        i = j;
+    }
+
+    if(snippets.length > 0){
+        this._insertAtCursor(snippets.join('\n'), true);
+    }
+},
+
+
+/**
+ * Build grouped snippet for selected nodes sharing common path prefixes
+ */
+_buildGroupedSmartySnippet: function(nodes, addLoop, ifnull, addCaption, addRemark, addWrap){
+
+    if(!nodes || nodes.length === 0) return '';
+
+    const tree = this._buildSelectionTree(nodes);
+    if(!tree) return '';
+
+    const rootVar = 'r';
+    return this._renderSelectionTree(tree, {
+        addLoop,
+        ifnull,
+        addCaption,
+        addRemark,
+        addWrap,
+        indent: 0,
+        parentVar: rootVar,
+        loopDepth: 0
+    });
+},
+
+
+/**
+ * Build single-path snippet
+ */
+_buildSmartySnippetForNode: function(_nodep, addLoop, ifnull, addCaption, addRemark, addWrap, indent, parentVar){
+
+    const code = _nodep?.data?.code || '';
+    if(!code) return '';
+    
+    const parsed = this._parseNodeCode(_nodep);
+    if(!parsed || !parsed.segments || parsed.segments.length === 0) return '';
+
+    // Relationship special case
+    if(parsed.rootRectypeId === 'Relationship'){
+        const leaf = parsed.segments[0];
+        let res = this._renderRelationshipsInit();
+
+        // per your note, always safe to use loop
+        res += '{foreach $r.Relationships as $Relationship name=relations}';
+        if(addRemark){
+            const remark = this._getRemark(_nodep);
+            if(remark) res += ' {* ' + remark + ' *}';
+        }
+        res += '\n';
+
+        res += this._renderRelationshipLeafExpression({
+            node: _nodep,
+            leaf,
+            ifnull,
+            addCaption,
+            addRemark,
+            indent: 1
+        });
+
+        res += '{/foreach}\n';
+        return res;
+    }    
+    
+    let snippet = '';
+    let currentVar = parentVar || 'r';
+    let currentRectype = parsed.rootRectypeId;
+    let pad = this._indent(indent);
+    let loopDepth = 0;
+
+    for(let i = 0; i < parsed.segments.length - 1; i++){
+        const seg = parsed.segments[i];
+        if(seg.kind !== 'resource') continue;
+
+        const fieldId = seg.fieldId;
+        const linkedRectypeId = seg.targetRectypeId;
+        const isRepeatable = this._isRepeatableField(currentRectype, fieldId);
+        const loopVar = 'f' + fieldId;
+        const loopName = 'valueloop' + (loopDepth ? (loopDepth + 1) : '');
+
+        if(addLoop && isRepeatable){
+            snippet += pad + '{foreach $' + currentVar + '.f' + fieldId + 's as $' + loopVar + ' name=' + loopName + '}';
+            if(addRemark){
+                const remark = this._getRemarkForResource(seg, linkedRectypeId, true);
+                if(remark) snippet += ' {* ' + remark + ' *}';
+            }
+            snippet += '\n';
+
+            pad = this._indent(indent + 1 + loopDepth);
+            snippet += pad + '{$' + loopVar + '=$heurist->getRecord($' + loopVar + ')}';
+            if(addRemark){
+                snippet += ' {* get record by record id *}';
+            }
+            snippet += '\n';
+
+            currentVar = loopVar;
+            currentRectype = linkedRectypeId;
+            loopDepth++;
+        }else{
+            snippet += pad + '{$' + loopVar + '=$heurist->getRecord($' + currentVar + '.f' + fieldId + ')}';
+            if(addRemark){
+                snippet += ' {* get record by record id *}';
+            }
+            snippet += '\n';
+
+            currentVar = loopVar;
+            currentRectype = linkedRectypeId;
+        }
+    }
+
+    const leaf = parsed.segments[parsed.segments.length - 1];
+    const leafNode = this._renderLeafExpression({
+        node: _nodep,
+        leaf,
+        currentVar,
+        currentRectype,
+        addLoop,
+        ifnull,
+        addCaption,
+        addRemark,
+        addWrap,
+        indent: indent + loopDepth
+    });
+
+    snippet += leafNode;
+
+    while(loopDepth > 0){
+        snippet += this._indent(indent + loopDepth - 1) + '{/foreach}\n';
+        loopDepth--;
+    }
+
+    return snippet;
+},
+
+
+/**
+ * Build prefix tree from selected nodes
+ */
+_buildSelectionTree: function(nodes){
+
+    if(!nodes || nodes.length === 0) return null;
+
+    const root = {
+        kind: 'root',
+        rectypeId: null,
+        children: []
+    };
+
+    for(const node of nodes){
+        const parsed = this._parseNodeCode(node);
+        if(!parsed || !parsed.segments?.length) continue;
+
+        if(root.rectypeId == null){
+            root.rectypeId = parsed.rootRectypeId;
+        }
+
+        let cursor = root;
+
+        for(let i = 0; i < parsed.segments.length; i++){
+            const seg = parsed.segments[i];
+            const isLeaf = i === parsed.segments.length - 1;
+
+            let child = cursor.children.find(c =>
+                c.kind === seg.kind &&
+                c.fieldId === seg.fieldId &&
+                c.targetRectypeId === seg.targetRectypeId &&
+                c.headerKey === seg.headerKey &&
+                c.headerAlias === seg.headerAlias &&
+                c.propName === seg.propName &&
+                (
+                    seg.kind !== 'term' // <-- key fix
+                    || c.fieldId === seg.fieldId
+                )
+            );
+
+            if(!child){
+                child = {
+                    ...seg,
+                    subfields: seg.kind === 'term' ? [{
+                        subfield: seg.subfield,
+                        title: isLeaf ? node.title : null,
+                        nodeRef: isLeaf ? node : null
+                    }] : null,
+                    title: isLeaf ? node.title : null,
+                    nodeRef: isLeaf ? node : null,
+                    children: []
+                };
+                cursor.children.push(child);
+            }else if(isLeaf){
+
+                if(seg.kind === 'term'){
+                    if(!child.subfields) child.subfields = [];
+
+                    const exists = child.subfields.some(s => s.subfield === seg.subfield);
+                    if(!exists){
+                        child.subfields.push({
+                            subfield: seg.subfield,
+                            title: node.title,
+                            nodeRef: node
+                        });
+                    }
+                }else{
+                    child.title = node.title;
+                    child.nodeRef = node;
+                }
+            }
+
+            cursor = child;
+        }
+    }
+
+    return root;
+},
+
+
+/**
+ * Render grouped tree recursively
+ */
+_renderSelectionTree: function(tree, opts){
+
+    const { addLoop, ifnull, addCaption, addRemark, addWrap } = opts;
+    let { indent, parentVar, loopDepth } = opts;
+
+    if(!tree || !tree.children || tree.children.length === 0) return '';
+
+    let res = '';
+    let currentRectype = tree.rectypeId;
+
+    for(const child of tree.children){
+
+        if(child.kind === 'resource'){
+            const fieldId = child.fieldId;
+            const linkedRectypeId = child.targetRectypeId;
+            const isRepeatable = this._isRepeatableField(currentRectype, fieldId);
+            const varname = 'f' + fieldId;
+            const pad = this._indent(indent);
+            let openedLoop = false;
+
+            if(addLoop && isRepeatable){
+                const loopName = 'valueloop' + (loopDepth ? (loopDepth + 1) : '');
+                res += pad + '{foreach $' + parentVar + '.f' + fieldId + 's as $' + varname + ' name=' + loopName + '}';
+                if(addRemark){
+                    const remark = this._getRemarkForResource(child, linkedRectypeId, true);
+                    if(remark) res += ' {* ' + remark + ' *}';
+                }
+                res += '\n';
+
+                res += this._indent(indent + 1) + '{$' + varname + '=$heurist->getRecord($' + varname + ')}';
+                if(addRemark){
+                    res += ' {* get record by record id *}';
+                }
+                res += '\n';
+
+                openedLoop = true;
+            }else{
+                res += pad + '{$' + varname + '=$heurist->getRecord($' + parentVar + '.f' + fieldId + ')}';
+                if(addRemark){
+                    res += ' {* get record by record id *}';
+                }
+                res += '\n';
+            }
+
+            res += this._renderSelectionTree({
+                ...child,
+                rectypeId: linkedRectypeId
+            }, {
+                addLoop,
+                ifnull,
+                addCaption,
+                addRemark,
+                addWrap,
+                indent: indent + (openedLoop ? 1 : 0),
+                parentVar: varname,
+                loopDepth: loopDepth + (openedLoop ? 1 : 0)
+            });
+
+            if(openedLoop){
+                res += pad + '{/foreach}\n';
+            }
+        }else if(child.kind === 'term' && child.subfields && child.subfields.length > 1){
+
+            const fieldId = child.fieldId;
+            const isRepeatable = this._isRepeatableField(currentRectype, fieldId);
+            const varname = 'f' + fieldId;
+            const pad = this._indent(indent);
+
+            // Use parent title as the loop-level remark, e.g. "Honorific"
+            const baseRemark =
+                child.subfields?.[0]?.nodeRef?.parent?.title ||
+                child.subfields?.[0]?.nodeRef?.parent?.data?.name ||
+                child.nodeRef?.parent?.title ||
+                child.nodeRef?.parent?.data?.name ||
+                '';
+
+            if(addLoop && isRepeatable){
+                const loopName = 'valueloop' + (loopDepth ? (loopDepth + 1) : '');
+
+                res += pad + '{foreach $' + parentVar + '.f' + fieldId + 's as $' + varname + ' name=' + loopName + '}';
+                if(addRemark && baseRemark){
+                    res += ' {* ' + baseRemark + ' *}';
+                }
+                res += '\n';
+
+                for(const sub of child.subfields){
+                    res += this._renderLeafExpression({
+                        node: sub.nodeRef || child.nodeRef,
+                        leaf: { kind: 'term', fieldId, subfield: sub.subfield },
+                        currentVar: varname,
+                        currentRectype,
+                        addLoop: false,
+                        ifnull,
+                        addCaption,
+                        addRemark,
+                        addWrap,
+                        indent: indent + 1
+                    });
+                }
+
+                res += pad + '{/foreach}\n';
+            }else{
+                for(const sub of child.subfields){
+                    res += this._renderLeafExpression({
+                        node: sub.nodeRef || child.nodeRef,
+                        leaf: { kind: 'term', fieldId, subfield: sub.subfield },
+                        currentVar: parentVar,
+                        currentRectype,
+                        addLoop: false,
+                        ifnull,
+                        addCaption,
+                        addRemark,
+                        addWrap,
+                        indent
+                    });
+                }
+            }
+
+            continue;
+        }else{
+                res += this._renderLeafExpression({ 
+                    node: child.nodeRef, 
+                    leaf: child, 
+                    currentVar: parentVar, 
+                    currentRectype, 
+                    addLoop, 
+                    ifnull, 
+                    addCaption, 
+                    addRemark, 
+                    addWrap, indent });        
+        }            
+    }
+
+    return res;
+},
+
+
+/**
+ * Render final field/header/term leaf
+ */
+_renderLeafExpression: function(cfg){
+
+    const {
+        node,
+        leaf,
+        currentVar,
+        currentRectype,
+        addLoop,
+        ifnull,
+        addCaption,
+        addRemark,
+        addWrap,
+        indent
+    } = cfg;
+
+    if(!leaf) return '';
+
+    const pad = this._indent(indent);
+    let res = '';
+    let expr = '';
+    let cond = '';
+    let varname = currentVar;
+    let localVar = null;
+    let inLoop = false;
+    let dtype = node?.type || leaf.type || '';
+    let remark = addRemark ? this._getRemark(node || leaf.nodeRef || leaf) : '';
+
+    if(leaf.kind === 'header'){
+        const headerName = this._headerSmartyName(leaf.headerKey);
+        expr = '$' + currentVar + '.' + headerName;
+        cond = expr;
+
+    }else if(leaf.kind === 'field'){
+        const isRepeatable = this._isRepeatableField(currentRectype, leaf.fieldId);
+
+        if(addLoop && isRepeatable){
+            localVar = 'f' + leaf.fieldId;
+            const loopName = 'valueloop' + ((indent > 0) ? (indent + 1) : '');
+            res += pad + '{foreach $' + currentVar + '.f' + leaf.fieldId + 's as $' + localVar + ' name=' + loopName + '}';
+            if(addRemark && remark){
+                res += ' {* ' + remark + ' *}';
+            }
+            res += '\n';
+            inLoop = true;
+            varname = localVar;
+            expr = '$' + localVar;
+            cond = '$' + localVar;
+        }else{
+            expr = '$' + currentVar + '.f' + leaf.fieldId;
+            cond = expr;
+        }
+
+    }else if(leaf.kind === 'term'){
+        const isRepeatable = this._isRepeatableField(currentRectype, leaf.fieldId);
+
+        if(addLoop && isRepeatable){
+            localVar = 'f' + leaf.fieldId;
+            const loopName = 'valueloop' + ((indent > 0) ? (indent + 1) : '');
+            res += pad + '{foreach $' + currentVar + '.f' + leaf.fieldId + 's as $' + localVar + ' name=' + loopName + '}';
+            if(addRemark && remark){
+                res += ' {* ' + remark + ' *}';
+            }
+            res += '\n';
+            inLoop = true;
+            varname = localVar;
+            expr = '$' + localVar + '.' + leaf.subfield;
+            cond = expr;
+        }else{
+            // grouped term rendering inside an existing enum loop uses $f19.term, not $f19.f19.term
+            if(currentVar === ('f' + leaf.fieldId)){
+                expr = '$' + currentVar + '.' + leaf.subfield;
+            }else{
+                expr = '$' + currentVar + '.f' + leaf.fieldId + '.' + leaf.subfield;
+            }
+            cond = expr;
+        }
+    }
+
+    let linePad = inLoop ? this._indent(indent + 1) : pad;
+    let line = '';
+
+    if(addCaption){
+        line += this._escapeSmartyText((node?.title || leaf.title || 'Value') + ': ');
+    }
+
+    if(addWrap && this._shouldUseWrap(node || leaf)){
+        line += this._buildWrapExpression(node || leaf, expr, inLoop);
+    }else{
+        line += '{' + expr + '}';
+    }
+
+    if(addRemark && remark){
+        line += ' {* ' + remark + ' *}';
+    }
+
+    if(ifnull && cond){
+        res += linePad + '{if ' + cond + '}\n';
+        res += this._indent((inLoop ? indent + 2 : indent + 1)) + line + '\n';
+        res += linePad + '{/if}\n';
+    }else{
+        res += linePad + line + '\n';
+    }
+
+    if(inLoop){
+        res += pad + '{/foreach}\n';
+    }
+
+    return res;
+},
+
+_parseNodeCode: function(_nodep){
+
+    const code = _nodep?.data?.code || '';
+    const key = _nodep?.key || '';
+
+    // Relationship special source must be handled FIRST
+    if(code && code.indexOf('Relationship:') === 0){
+        const relKey = code.substring('Relationship:'.length);
+        const relKeyNorm = String(relKey || '').trim().toLowerCase();
+
+        let leaf;
+
+        if(/^\d+$/.test(relKey)){
+            leaf = {
+                kind: 'relationship_field',
+                fieldId: relKey
+            };
+        }else if(key && key.indexOf('rec_') === 0){
+            leaf = {
+                kind: 'relationship_header',
+                headerKey: key
+            };
+        }else if(relKey.indexOf('rec_') === 0){
+            leaf = {
+                kind: 'relationship_header',
+                headerKey: relKey
+            };
+        }else if([
+            'title', 'rectitle',
+            'url', 'recurl',
+            'id', 'ids', 'recid',
+            'typeid', 'rectypeid',
+            'type', 'typename', 'rectypename',
+            'modified', 'recmodified',
+            'tag', 'tags', 'rectags'
+        ].includes(relKeyNorm)){
+            leaf = {
+                kind: 'relationship_header_alias',
+                headerAlias: relKey
+            };
+        }else{
+            leaf = {
+                kind: 'relationship_prop',
+                propName: relKey
+            };
+        }
+
+        return {
+            rootRectypeId: 'Relationship',
+            segments: [leaf]
+        };
+    }
+
+    if(!code) return null;
+
+    const parts = code.split(':');
+    if(parts.length < 2) return null;
+
+    const rootRectypeId = parts[0];
+    const segments = [];
+    let i = 1;
+
+    // normal record header fields:
+    // preserve nested path from code, but take final header identity from key
+    if(key && key.indexOf('rec_') === 0){
+        while(i < parts.length - 1){
+            const part = parts[i];
+
+            if(part && part.indexOf('lt') === 0){
+                const fieldId = part.substring(2);
+                const targetRectypeId = parts[i + 1];
+                segments.push({
+                    kind: 'resource',
+                    fieldId,
+                    targetRectypeId
+                });
+                i += 2;
+                continue;
+            }
+
+            // unexpected structure; stop safely
+            break;
+        }
+
+        segments.push({
+            kind: 'header',
+            headerKey: key
+        });
+
+        return {
+            rootRectypeId,
+            segments
+        };
+    }
+
+    i = 1;
+    while(i < parts.length){
+        const part = parts[i];
+
+        if(part && part.indexOf('lt') === 0){
+            const fieldId = part.substring(2);
+            const targetRectypeId = parts[i + 1];
+            segments.push({
+                kind: 'resource',
+                fieldId,
+                targetRectypeId
+            });
+            i += 2;
+            continue;
+        }
+
+        if(i === parts.length - 2 && this._isTermSubfield(parts[i + 1])){
+            segments.push({
+                kind: 'term',
+                fieldId: part,
+                subfield: parts[i + 1],
+                type: _nodep?.type || ''
+            });
+            i += 2;
+            continue;
+        }
+
+        segments.push({
+            kind: 'field',
+            fieldId: part,
+            type: _nodep?.type || ''
+        });
+        i++;
+    }
+
+    return {
+        rootRectypeId,
+        segments
+    };
+},
+
+_isTermSubfield: function(name){
+    return ['label', 'term', 'code', 'conceptid', 'internalid', 'desc'].includes(name);
+},
+
+_headerSmartyName: function(headerKey){
+    const map = {
+        'rec_ID': 'recID',
+        'rec_RecTypeID': 'recTypeID',
+        'rec_Title': 'recTitle',
+        'rec_URL': 'recURL',
+        'rec_Modified': 'recModified',
+        'rec_Tags': 'rec_Tags'
+    };
+
+    if(map[headerKey]) return map[headerKey];
+
+    const tail = headerKey.substring(4);
+    return 'rec' + tail.replace(/_([a-zA-Z])/g, (m, ch) => ch.toUpperCase());
+},
+
+_isRepeatableField: function(rectypeId, fieldId){
+    return Number.parseInt($Db.rst(rectypeId, fieldId, 'rst_MaxValues')) !== 1;
+},
+
+_sameBranchRoot: function(n1, n2){
+
+    if(!n1 || !n2 || !n1.data || !n2.data) return false;
+
+    const c1 = n1.data.code || '';
+    const c2 = n2.data.code || '';
+
+    if(!c1 || !c2) return false;
+    if(c1.indexOf('Relationship:') === 0 || c2.indexOf('Relationship:') === 0) return false;
+
+    const p1 = c1.split(':');
+    const p2 = c2.split(':');
+
+    if(p1[0] !== p2[0]) return false;
+
+    const len = Math.min(p1.length, p2.length);
+    let i = 0;
+    for(; i < len; i++){
+        if(p1[i] !== p2[i]) break;
+    }
+
+    // group only when there is a shared branch beyond root rectype
+    return i > 1;
+},
+
+_shouldUseWrap: function(_nodep, leaf){
+    const dtype = _nodep?.type || leaf?.type || '';
+    const key = _nodep?.key || '';
+    const headerKey = leaf?.headerKey || '';
+
+    return (
+        dtype === 'geo' ||
+        dtype === 'file' ||
+        dtype === 'date' ||
+        key === 'rec_URL' ||
+        headerKey === 'rec_URL'
+    );
+},
+
+_buildWrapExpression: function(_nodep, expr, inLoop){
+
+    let res = '';
+    let dtype = _nodep?.type || '';
+    let key = _nodep?.key || '';
+
+    res += '{wrap var=' + expr;
+
+    if(!(_nodep?.data?.code && _nodep.data.code.indexOf('Relationship') === 0)){
+        const origvalue = inLoop ? '' : '_originalvalue';
+
+        if(_nodep.parent?.type !== 'enum' && (window.hWin.HEURIST4.util.isempty(dtype) || key === 'rec_URL')){
+            res += ' dt="url"';
+        }else if(dtype === 'geo'){
+            res += origvalue + ' dt="geo"';
+        }else if(dtype === 'date'){
+            res += origvalue + ' dt="date" mode="0" calendar="native"';
+        }else if(dtype === 'file'){
+            res += origvalue + ' dt="file" width="300" height="auto" auto_play="0" show_artwork="0"';
+        }
+    }
+
+    res += '}';
+    return res;
+},
+
+
+_getRemarkForResource: function(seg, linkedRectypeId, isLoop){
+    let name = $Db.rty(linkedRectypeId, 'rty_Name') || ('Record ' + linkedRectypeId);
+    return name;
+},
+
+
+_indent: function(level){
+    return '    '.repeat(Math.max(0, level || 0));
+},
+
+
+_escapeSmartyText: function(text){
+    return String(text || '').replace(/\{/g, '&#123;').replace(/\}/g, '&#125;');
+},
+
+
+_renderRelationshipsInit: function(){
+    return '{if !isset($r.Relationships)}\n'
+        + '{$r.Relationships = $heurist->getRelatedRecords($r)}\n'
+        + '{/if}\n';
+},
+
+_renderRelationshipLeafExpression: function(cfg){
+
+    const {
+        node,
+        leaf,
+        ifnull,
+        addCaption,
+        addRemark,
+        indent
+    } = cfg;
+
+    const pad = this._indent(indent);
+    const title = node?.title || node?.data?.name || 'Relationship';
+    const remark = addRemark ? this._getRemark(node) : '';
+
+    let expr = '';
+
+    if(leaf.kind === 'relationship_header'){
+        const mapped = this._headerSmartyName(leaf.headerKey);
+        expr = mapped ? ('$Relationship.' + mapped) : '';
+
+    }else if(leaf.kind === 'relationship_header_alias'){
+        const mapped = this._relationshipHeaderSmartyName(leaf.headerAlias);
+        expr = mapped ? ('$Relationship.' + mapped) : '';
+
+    }else if(leaf.kind === 'relationship_prop'){
+        expr = leaf.propName ? ('$Relationship.' + leaf.propName) : '';
+
+    }else if(leaf.kind === 'relationship_field'){
+        expr = leaf.fieldId ? ('$Relationship.relationRecord.f' + leaf.fieldId) : '';
+    }
+
+    if(!expr){
+        return '';
+    }
+
+    let line = '';
+    if(addCaption){
+        line += this._escapeSmartyText(title + ': ');
+    }
+    line += '{' + expr + '}';
+    if(addRemark && remark){
+        line += ' {* ' + remark + ' *}';
+    }
+
+    let res = '';
+    if(ifnull){
+        res += pad + '{if ' + expr + '}\n';
+        res += this._indent(indent + 1) + line + '\n';
+        res += pad + '{/if}\n';
+    }else{
+        res += pad + line + '\n';
+    }
+
+    return res;
+}, 
+
+_buildGroupedRelationshipSnippet: function(nodes, ifnull, addCaption, addRemark){
+
+    if(!nodes || nodes.length === 0) return '';
+
+    let res = this._renderRelationshipsInit();
+    res += '{foreach $r.Relationships as $Relationship name=relations}\n';
+
+    for(const node of nodes){
+        const parsed = this._parseNodeCode(node);
+        if(!parsed || parsed.rootRectypeId !== 'Relationship' || !parsed.segments?.[0]) continue;
+
+        res += this._renderRelationshipLeafExpression({
+            node,
+            leaf: parsed.segments[0],
+            ifnull,
+            addCaption,
+            addRemark,
+            indent: 1
+        });
+    }
+
+    res += '{/foreach}\n';
+    return res;
+},  
+
+_relationshipHeaderSmartyName: function(name){
+    if(!name) return '';
+
+    const key = String(name).trim().toLowerCase();
+
+    const map = {
+        'title': 'recTitle',
+        'rectitle': 'recTitle',
+
+        'url': 'recURL',
+        'recurl': 'recURL',
+
+        'id': 'recID',
+        'ids': 'recID',
+        'recid': 'recID',
+
+        'typeid': 'recTypeID',
+        'rectypeid': 'recTypeID',
+
+        'type': 'recTypeName',
+        'typename': 'recTypeName',
+        'rectypename': 'recTypeName',
+
+        'modified': 'recModified',
+        'recmodified': 'recModified',
+
+        'tag': 'rec_Tags',
+        'tags': 'rec_Tags',
+        'rectags': 'rec_Tags'
+    };
+
+    return map[key] || '';
+},
+
+_getGroupKey: function(node){
+    const parsed = this._parseNodeCode(node);
+    if(!parsed || !parsed.segments?.length) return '';
+
+    if(parsed.rootRectypeId === 'Relationship'){
+        return 'Relationship';
+    }
+
+    const parts = [parsed.rootRectypeId];
+
+    for(let i = 0; i < parsed.segments.length; i++){
+        const seg = parsed.segments[i];
+
+        if(seg.kind === 'resource'){
+            parts.push('lt' + seg.fieldId, seg.targetRectypeId);
+            continue;
+        }
+
+        if(seg.kind === 'field'){
+            parts.push('f' + seg.fieldId);
+            break;
+        }
+
+        if(seg.kind === 'term'){
+            // group all subfields of the same enum field together
+            parts.push('f' + seg.fieldId);
+            break;
+        }
+
+        if(seg.kind === 'header'){
+            parts.push('header:' + seg.headerKey);
+            break;
+        }
+
+        if(seg.kind === 'relationship_field'){
+            parts.push('relfield:' + seg.fieldId);
+            break;
+        }
+
+        if(seg.kind === 'relationship_header'){
+            parts.push('relheader:' + seg.headerKey);
+            break;
+        }
+
+        if(seg.kind === 'relationship_header_alias'){
+            parts.push('relheaderalias:' + String(seg.headerAlias).toLowerCase());
+            break;
+        }
+
+        if(seg.kind === 'relationship_prop'){
+            parts.push('relprop:' + seg.propName);
+            break;
+        }
+    }
+
+    return parts.join(':');
+},
+
+_getBranchKey: function(node){
+    const parsed = this._parseNodeCode(node);
+    if(!parsed || !parsed.segments?.length) return '';
+
+    if(parsed.rootRectypeId === 'Relationship'){
+        return 'Relationship';
+    }
+
+    const parts = [parsed.rootRectypeId];
+
+    for(const seg of parsed.segments){
+        if(seg.kind === 'resource'){
+            parts.push('lt' + seg.fieldId, seg.targetRectypeId);
+        }else{
+            break; // stop before header/field/term leaf
+        }
+    }
+
+    return parts.join(':');
+},
+
 });
 

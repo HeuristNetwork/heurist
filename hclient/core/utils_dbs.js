@@ -453,72 +453,76 @@ window.hWin.HEURIST4.dbs = {
                 }  
                 
                 let recTitle_item = null;
+                let $thisRecType = '';
+                if($recTypeId!=='Relationship'){
+                    $thisRecType = $recTypeId+_separator;
+                }
                 
                 if(all_header_fields || $fieldtypes.indexOf('ID')>=0 || $fieldtypes.indexOf('rec_ID')>=0){
                     $children.push({key:'rec_ID', type:'integer',
                         title:('ID'+($mode!=7?' <span style="font-size:0.7em">(Integer)</span>':'')), 
-                        code:($recTypeId+_separator+'ids'), name:'Record ID'});
+                        code:($thisRecType+'ids'), name:'Record ID'});
                 }
 
                 if(all_header_fields || $fieldtypes.indexOf('title')>=0 || $fieldtypes.indexOf('rec_Title')>=0){
                    
                     recTitle_item = {key:'rec_Title', type:'freetext',
                         title:('Title'+($mode!=7?' <span style="font-size:0.7em">(Constructed Text)</span>':'')), 
-                        code:($recTypeId+_separator+'title'), name:'Record title'};
+                        code:($thisRecType+'title'), name:'Record title'};
                 }
                 
                 if(all_header_fields || $fieldtypes.indexOf('typeid')>=0 || $fieldtypes.indexOf('rec_RecTypeID')>=0){
                     $children.push({key:'rec_RecTypeID', 
                         title:('Record TypeID'+($mode!=7?' <span style="font-size:0.7em">(Integer)</span>':'')), 
-                        code:$recTypeId+_separator+'typeid', name: 'Record type ID'});
+                        code:$thisRecType+'typeid', name: 'Record type ID'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('typename')>=0 || $fieldtypes.indexOf('rec_TypeName')>=0){
                     $children.push({key:'rec_TypeName', 
                         title:('Record TypeName'+($mode!=7?' <span style="font-size:0.7em">(Text)</span>':'')), 
-                        code:$recTypeId+_separator+'typename', name: 'Record type'});
+                        code:$thisRecType+'typename', name: 'Record type'});
                 }
                 
                 if(all_header_fields || $fieldtypes.indexOf('added')>=0 || $fieldtypes.indexOf('rec_Added')>=0){
                     $children.push({key:'rec_Added', type:'date',
                         title:('Added'+($mode!=7?' <span style="font-size:0.7em">(Date)</span>':'')), 
-                        code:($recTypeId+_separator+'added'), name:'Date added'});
+                        code:($thisRecType+'added'), name:'Date added'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('modified')>=0 || $fieldtypes.indexOf('rec_Modified')>=0){
                     $children.push({key:'rec_Modified', type:'date',
                         title:('Modified'+($mode!=7?' <span style="font-size:0.7em">(Date)</span>':'')), 
-                        code:($recTypeId+_separator+'modified'), name:'Date modified'});
+                        code:($thisRecType+'modified'), name:'Date modified'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('addedby')>=0 || $fieldtypes.indexOf('rec_AddedBy')>=0){
                     $children.push({key:'rec_AddedBy', type:'enum',
                         title:('Creator'+($mode!=7?' <span style="font-size:0.7em">(User)</span>':'')), 
-                        code:($recTypeId+_separator+'addedby'), name:'Creator (user)'});
+                        code:($thisRecType+'addedby'), name:'Creator (user)'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('url')>=0 || $fieldtypes.indexOf('rec_URL')>=0){
                     $children.push({key:'rec_URL', type:'freetext',
                         title:('URL'+($mode!=7?' <span style="font-size:0.7em">(Text)</span>':'')), 
-                        code:($recTypeId+_separator+'url'), name:'Record URL'});
+                        code:($thisRecType+'url'), name:'Record URL'});
                 }
                 
                 if(all_header_fields || $fieldtypes.indexOf('notes')>=0 || $fieldtypes.indexOf('rec_ScratchPad')>=0){
                     $children.push({key:'rec_ScratchPad', type:'freetext',
                         title:('Notes'+($mode!=7?' <span style="font-size:0.7em">(Text)</span>':'')), 
-                        code:($recTypeId+_separator+'notes'), name:'Record Notes'});
+                        code:($thisRecType+'notes'), name:'Record Notes'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('owner')>=0 || $fieldtypes.indexOf('rec_OwnerUGrpID')>=0){
                     $children.push({key:'rec_OwnerUGrpID', type:'enum',
                         title:('Owner'+($mode!=7?' <span style="font-size:0.7em">(User or Group)</span>':'')), 
-                        code:($recTypeId+_separator+'owner'), name:'Record Owner'});
+                        code:($thisRecType+'owner'), name:'Record Owner'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('visibility')>=0 || $fieldtypes.indexOf('rec_NonOwnerVisibility')>=0){
                     $children.push({key:'rec_NonOwnerVisibility', type:'enum',
                         title:('Visibility'+($mode!=7?' <span style="font-size:0.7em">(Terms)</span>':'')), 
-                        code:($recTypeId+_separator+'access'), name:'Record Visibility'});
+                        code:($thisRecType+'access'), name:'Record Visibility'});
                 }
 
                 if(all_header_fields || $fieldtypes.indexOf('tags')>=0 || $fieldtypes.indexOf('rec_Tags')>=0){
                     $children.push({key:'rec_Tags', type:'terms',
                         title:('Tags'+($mode!=7?' <span style="font-size:0.7em">(Terms)</span>':'')), 
-                        code:($recTypeId+_separator+'tag'), name:'Record Tags'});
+                        code:($thisRecType+'tag'), name:'Record Tags'});
                 }
                 
                 if(all_header_fields || $mode == 7){
