@@ -73,6 +73,23 @@
                     }
                 },
                 {
+                    "dtID": "dty_TypeConnection",
+                    "dtFields":{
+                        "dty_Type": "enum",
+                        "dty_Role": "virtual",
+                        "rst_DisplayName": "Connection type",
+                        "rst_DisplayHelpText": "",
+                        "rst_MaxValues": 1,
+                        "rst_TermsAsButtons": 1,
+                        "rst_Display": "hidden",
+                        "rst_RequirementType": "required",
+                        "rst_FieldConfig": [
+                            {"key": "resource", "title": "<strong>Record pointer field</strong>", "description": "<span data-translate='fieldDesc_resource'></span><a href='#' data-helper='field_data_types #resource' style='cursor: pointer;'>more...</a>"},
+                            {"key": "relmarker", "title": "<strong>Relationship marker field</strong>", "description": "<span data-translate='fieldDesc_relmarker'></span><a href='#' data-helper='field_data_types #relmarker' style='cursor: pointer;'>more...</a>"}
+                        ]
+                    }
+                },
+                {
                     "dtID": "rst_RequirementType",
                     "dtFields":{
                         "dty_Type":"enum",

@@ -360,6 +360,10 @@ input.text, select.text {
     padding: 5px 0 0 20px;
     text-align:left;
 }
+.explanation-separator,
+.explanation_break-separator{
+    border-top: none !important;
+}
 
 .smallbutton, .smallicon{
     width: 16px !important;
@@ -2729,4 +2733,30 @@ li.edit-form-tab > a{
 .cell {
     display: table-cell;
     padding: 8px;
+}
+
+.rts-editor-actions{
+
+    width: 11em;
+    padding: 0.4em 0.3em;
+
+    background: lightcyan;
+
+    font-size: 10px;
+
+    cursor: pointer;
+
+    transform: scale(1.2);
+
+    box-shadow: 0 5px 10px rgb(0,0,0,0.5);
+}
+.rts-editor-actions > div{
+    padding: 2.5px 5px;
+}
+.rts-editor-actions .rts-editor-action .ui-icon{
+    font-size: 9px;
+    width: 0.8em;
+}
+.rts-editor-actions .rts-editor-action:hover{
+    background: lightblue;
 }

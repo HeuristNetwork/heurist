@@ -822,6 +822,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     if(this.options.create_sub_record){
                         this._setupSubRecordField();
                         this.options.newFieldType = 'resource';
+                    }else if(this.options.create_connector){
+                        this._setupConnectorField();
                     }else
                     if(this.options.newFieldForRtyID > 0){ // Ensure that the new field is for a specific rectype
                         $('<h2 style="margin-block:0;margin-bottom:0.2em">Choose existing base field(s)</h2>'
@@ -1075,16 +1077,23 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 },
                                 open: function(){
                                     $dlg.css({padding:0});
-                                    
-                                    window.hWin.HEURIST4.ui.initHelper( {button:$dlg.find('#hint_more_info1'), 
-                                                    title:'Field data type: Record pointer', 
-                                                    url: window.hWin.HRes('field_data_types #resource'),
-                                                    position:{ my: "left top", at: "left top", of:$dlg}, no_init:true} ); 
-                                    window.hWin.HEURIST4.ui.initHelper( {button:$dlg.find('#hint_more_info2'), 
-                                                    title:'Field data type: Relationship marker', 
-                                                    url: window.hWin.HRes('field_data_types #relmarker'),
-                                                    position:{ my: "left top", at: "left top", of:$dlg}, no_init:true} ); 
-                                    
+
+                                    $dlg.find('[data-helper]').each((idx, element) => {
+                                        const helperStub = element.getAttribute('data-helper');
+                                        const type = idx === 0 ? 'Record pointer' : 'Relationship marker';
+                                        window.hWin.HEURIST4.ui.initHelper({
+                                            button: $(element), 
+                                            title: `Field data type: ${type}`,
+                                            url: window.hWin.HRes(helperStub),
+                                            position: { my: "left top", at: "left top", of: $dlg},
+                                            no_init:true
+                                        });
+                                    });
+
+                                    $dlg.find('[data-translate]').each((idx, element) => {
+                                        const translationStub = element.getAttribute('data-translate');
+                                        element.innerHTML = window.hWin.HR(translationStub);
+                                    });
                                 }  //end open event
                         });
 
@@ -1146,40 +1155,39 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
      */
     _onDataTypeChange: function(dt_type)
     {
-           /*
-           let ele = this._editing.getFieldByName('dty_Type');
-           ele.editing_input('setValue', dt_type);
-           */
-           if(this.set_detail_type_btn){
-               let elements = this._editing.getInputs('dty_Type');
-               $(elements[0]).val( dt_type );
-               if($(elements[0]).hSelect("instance")!=undefined){
-                   $(elements[0]).hSelect("refresh"); 
-               }
-               
-               let ele = this._editing.getFieldByName('dty_Type');  
-               ele.editing_input('showErrorMsg',null);
-           }
-           
-        
-           //hide all 
-           let depended_fields = this._editing.getFieldByValue("rst_Class","[not empty]");
-           for(let idx in depended_fields){
-               $(depended_fields[idx]).hide();
-           }
-           //show specific
-           depended_fields = this._editing.getFieldByClass(dt_type);
-           for(let idx in depended_fields){
-               $(depended_fields[idx]).show();
-           }
-           if(dt_type=='enum' || dt_type=='relmarker'){
+            /*
+            let ele = this._editing.getFieldByName('dty_Type');
+            ele.editing_input('setValue', dt_type);
+            */
+            if(this.set_detail_type_btn){
+                let elements = this._editing.getInputs('dty_Type');
+                $(elements[0]).val( dt_type );
+                if($(elements[0]).hSelect("instance")!=undefined){
+                    $(elements[0]).hSelect("refresh"); 
+                }
+
+                let ele = this._editing.getFieldByName('dty_Type');  
+                ele.editing_input('showErrorMsg',null);
+            }
+
+            //hide all 
+            let depended_fields = this._editing.getFieldByValue("rst_Class","[not empty]");
+            for(let idx in depended_fields){
+                $(depended_fields[idx]).hide();
+            }
+            //show specific
+            depended_fields = this._editing.getFieldByClass(dt_type);
+            for(let idx in depended_fields){
+                $(depended_fields[idx]).show();
+            }
+            if(dt_type=='enum' || dt_type=='relmarker'){
                 let ele = this._editing.getFieldByName('dty_Mode_enum');  
                 this._activateEnumControls(ele);
-           }else if(dt_type=='relationtype'){
+            }else if(dt_type=='relationtype'){
                 let ele = this._editing.getFieldByName('dty_Mode_enum');  
                 this._activateRelationTypeControls(ele);
-           }
-           if(this.options.newFieldForRtyID>0){
+            }
+            if(this.options.newFieldForRtyID>0){
                 depended_fields = this._editing.getFieldByClass('newFieldForRtyID');
                 for(let idx in depended_fields){
                     $(depended_fields[idx]).show();
@@ -1194,7 +1202,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     }
                     ele.hide();
                 }
-           }
+            }
     },
     
     /**
@@ -1260,13 +1268,15 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 field_name = $Db.dty(dty_ID, 'dty_Name');
                 field_type  = $Db.dty(dty_ID, 'dty_Type');
                 let sub_rec_check = !that.options.create_sub_record || (field_type == 'resource' && !window.hWin.HEURIST4.util.isempty($Db.dty(dty_ID, 'dty_PtrTargetRectypeIDs')));
+                let connector_check = !that.options.create_connector || field_type == 'resource' || field_type == 'relmarker';
 
                 if( $Db.dty(dty_ID, 'dty_ShowInLists')!='0'
                     && field_type!='separator'
                     && (!aUsage || !aUsage.getById(dty_ID))
                     && (field_name.toLowerCase().indexOf( entered )>=0)
                     && (field_name.toLowerCase().indexOf( entered )>=0)
-                    && sub_rec_check )
+                    && sub_rec_check
+                    && connector_check )
                 {
 
                     let ele;
@@ -1751,7 +1761,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 if(window.hWin.HEURIST4.util.isempty(dt_type)){ //actually it is already checked in _getValidatedValues
                     window.hWin.HEURIST4.msg.showMsgDlg('Field "Data type" is required');
                     fields = null;
-                }else if(this.options.create_sub_record && dt_type != 'resource'){
+                }else if((this.options.create_sub_record && dt_type != 'resource') || (this.options.create_connector && dt_type != 'resource' && dt_type != 'relmarker')){
                     return;
                 }else
                 //last check for constrained pointer
@@ -2477,6 +2487,39 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         + '<br>When you select the target record type(s), Create or select only ONE target record type.'
         + '<br>You will probably want to create a new target record type, but you need not create any fields.'
         + '<br>In the next step you will select fields to be transferred to the sub-records</div><br>').prependTo($(this._editing.getContainer()[0]).find('fieldset')[0]);
+    },
+
+    _setupConnectorField: function(){
+
+        let $typeEle = this._editing.getFieldByName('dty_Type');
+        $typeEle.editing_input('setValue', 'resource');
+        $typeEle.hide();
+
+        let $ele = this._editing.getFieldByName('dty_TypeConnection');
+        $ele.editing_input('setValue', 'resource');
+        $ele.show();
+
+        this._on($ele.find('input'), {
+            change: (event) => {
+                $typeEle.editing_input('setValue', event.target.value);
+            }
+        });
+
+        $ele.find('[data-helper]').each((idx, element) => {
+            const helperStub = element.getAttribute('data-helper');
+            const type = idx === 0 ? 'Record pointer' : 'Relationship marker';
+            window.hWin.HEURIST4.ui.initHelper({
+                button: $(element), 
+                title: `Field data type: ${type}`, 
+                url: window.hWin.HRes(helperStub),
+                position: { my: "left top", at: "left top", of: this.$ele},
+                no_init:true
+            });
+        });
+        $ele.find('[data-translate]').each((idx, element) => {
+            const translationStub = element.getAttribute('data-translate');
+            element.innerHTML = window.hWin.HR(translationStub);
+        });
     },
 
     /**

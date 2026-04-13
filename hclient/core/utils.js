@@ -492,6 +492,25 @@ window.hWin.HEURIST4.util = {
             return text;
         }
     },
+
+    /**
+     * Strips inline event handlers from HTML tags within a string.
+     * @param {string} text - The HTML string to process.
+     * @returns {string} The processed string.
+     */
+    removeInlineHandlers: function(text){
+
+        let $tempElement = $('<span>', {html: text});
+        $tempElement.find('*').each((idx, element) => {
+            for(const attribute of element.attributes){
+                if(attribute.name.match(/^on/i) !== null){
+                    element.removeAttribute(attribute.name);
+                }
+            }
+        });
+
+        return $tempElement.html();
+    },
     
     /**
      * Removes the first HTML element found in a string, returning the remaining inner HTML of the parent.
@@ -1054,6 +1073,96 @@ window.hWin.HEURIST4.util = {
         let matches = url.match(/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?&\"'>]+)/);
 
         return matches[1];
+    },
+
+    getWikiFileDetails: async function(url){
+
+        if(url.indexOf('wikimedia.org') === -1 && url.indexOf('wikipedia.org') === -1){
+            return {};
+        }
+
+        const parameters = {
+            action: 'query',
+            titles: '',
+            prop: 'imageinfo',
+            iiprop: 'mime|url|user|extmetadata',
+            iiextmetadatafilter: 'LicenseUrl|LicenseShortName|ImageDescription|Artist',
+            format: 'json',
+            origin: '*'
+        };
+        const wikimediaParams = new URLSearchParams(parameters);
+
+        const providedURL = new URL(url);
+        for(const pathPart of providedURL.pathname.split('/')){
+
+            if(pathPart.indexOf('File:') !== -1){
+                wikimediaParams.set('titles', pathPart);
+                break;
+            }else if(pathPart.match(/\.[A-Za-z]{2,4}$/)){
+                wikimediaParams.set('titles', `File:${pathPart}`);
+                break;
+            }
+        }
+
+        if(wikimediaParams.get('titles') === ''){
+            return {};
+        }
+
+        const wikimediaURL = `https://commons.wikimedia.org/w/api.php?${wikimediaParams.toString()}`;
+
+        const results = {};
+        try{
+
+            const response = await fetch(wikimediaURL);
+            if(!response.ok){
+                throw new Error(`Failed to retrieve data from Wikimedia, file: ${wikimediaParams.get('titles')}`); //Response status: ${response.status}
+            }
+
+            const queryResult = await response.json();
+            if(!queryResult.query){
+                throw new Error(`Unknown results retrieved from Wikimedia, file: ${wikimediaParams.get('titles')}`);
+            }
+
+            const resultPages = queryResult.query.pages;
+            for(const pageID in resultPages){
+
+                if(!Object.hasOwn(resultPages, pageID)){
+                    continue;
+                }
+
+                const page = resultPages[pageID];
+                const imageInfo = page.imageinfo[0];
+                const extendedMetadata = imageInfo.extmetadata;
+
+                results.page = imageInfo.descriptionshorturl;
+                results.mimeType = imageInfo.mime;
+                results.url = imageInfo.url;
+
+                results.copyright = '';
+                const ccLicense = extendedMetadata.LicenseUrl?.value;
+                const ccType = extendedMetadata.LicenseShortName?.value;
+
+                results.copyright = !window.hWin.HEURIST4.util.isempty(ccLicense) && !window.hWin.HEURIST4.util.isempty(ccType)
+                    ? `<a href="${ccLicense}" target="_blank">${ccType} (${ccLicense})</a>`
+                    : '';
+
+                results.copyright = results.copyright === '' && !window.hWin.HEURIST4.util.isempty(ccLicense)
+                    ? `<a href="${ccLicense}" target="_blank">${ccLicense}</a>`
+                    : results.copyright;
+
+                results.copyright = results.copyright === '' && !window.hWin.HEURIST4.util.isempty(ccType) ? ccType : results.copyright;
+
+                results.description = extendedMetadata.ImageDescription?.value ?? '';
+
+                results.copyowner = extendedMetadata.Artist?.value ?? '';
+            }
+
+        }catch(error){
+            //console.error(error.message);
+            results.message = error.message;
+        }
+
+        return results;
     },
 
     //

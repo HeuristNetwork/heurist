@@ -1027,7 +1027,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         
         if(!isdisabled){
             
-            url = window.hWin.HAPI4.baseURL+'hclient/framecontent/recordEdit.php?db='+window.hWin.HAPI4.database
+            url = window.hWin.HAPI4.baseURL_pro+'hclient/framecontent/recordEdit.php?db='+window.hWin.HAPI4.database
             +'&rec_rectype=' + this.options.currentRecType
             +'&rec_owner='+this.options.currentOwner
             +'&rec_visibility='+this.options.currentAccess;

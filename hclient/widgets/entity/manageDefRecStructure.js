@@ -399,7 +399,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         treeData = [];
         
-        let available_outer_groups = ['tabs', 'tabs_new', 'group_break', 'accordion', 'expanded'];
+        let available_outer_groups = ['tabs', 'tabs_new', 'group_break', 'explanation_break', 'accordion', 'expanded'];
         let outer_group = {};
         let inner_group = {}; // simple dividers or accordions placed within tabs
 
@@ -1242,17 +1242,18 @@ console.log('onEditFormChange @todo check buttons!!!');
      * @param {boolean} [allow_proceed=false] If true, bypasses modification checks.
      * @param {?jQuery} [parent_dialog] The parent dialog, if applicable, for positioning.
      * @param {boolean} [create_sub_record=false] If true, configures the new field for automatic sub-record creation.
+     * @param {boolean} [create_connector=false] If true, configures the new field for resource and relmarker types only.
      * @description This function opens the `manageDefDetailTypes` widget in 'editonly' mode to edit
      * an existing field's base definition or in a selection/creation mode to add a new field
      * to the record type structure. Handles modification checks and callbacks for updating the structure.
      */
-    showBaseFieldEditor: function( arg1, arg2, allow_proceed, parent_dialog, create_sub_record = false ){
+    showBaseFieldEditor: function( arg1, arg2, allow_proceed, parent_dialog, create_sub_record = false, create_connector = false ){
 
         let that = this;
         
         if(allow_proceed!==true){
             this._allowActionIfModified( function(){ 
-                that.showBaseFieldEditor( arg1, arg2, true, parent_dialog, create_sub_record );
+                that.showBaseFieldEditor( arg1, arg2, true, parent_dialog, create_sub_record, create_connector );
             } );
             return;
         }
@@ -1277,7 +1278,8 @@ console.log('onEditFormChange @todo check buttons!!!');
         }
 
         this.create_sub_record = create_sub_record;
-        
+        this.create_connector = create_connector;
+
         if(!(dtyID>0)){ //new field
         
             let after_dty_ID = 0;
@@ -1294,6 +1296,7 @@ console.log('onEditFormChange @todo check buttons!!!');
             popup_options['newFieldForRtyID'] = this.options.rty_ID;
             popup_options['selectOnSave'] = true;
             popup_options['create_sub_record'] = this.create_sub_record;
+            popup_options['create_connector'] = this.create_connector;
             popup_options['onselect'] = function(event, res)
             {
                 //update recordset
@@ -1408,8 +1411,8 @@ console.log('onEditFormChange @todo check buttons!!!');
             rst_DisplayOrder: "001",
             rst_DetailTypeID: dty_ID,
             //rst_Modified: "2020-03-16 15:31:23"
-            rst_DisplayName: $Db.dty(dty_ID,'dty_Name'),
-            rst_DisplayHelpText: $Db.dty(dty_ID,'dty_HelpText'),
+            rst_DisplayName: rst_fields['rst_DisplayName'] ?? $Db.dty(dty_ID,'dty_Name'),
+            rst_DisplayHelpText: rst_fields['rst_DisplayHelpText'] ?? $Db.dty(dty_ID,'dty_HelpText'),
             rst_RequirementType: rst_fields['rst_RequirementType'] ?rst_fields['rst_RequirementType']:'optional',
             rst_MaxValues: (rst_fields['rst_MaxValues']>=0) ?rst_fields['rst_MaxValues']:'1',  //0 repeatable
             rst_DisplayWidth: rst_fields['rst_DisplayWidth'] ?rst_fields['rst_DisplayWidth']:'100',  
@@ -1884,7 +1887,7 @@ console.log('onEditFormChange @todo check buttons!!!');
         if(dt_type=='separator'){
             
             let sep_type = this._editing.getValue('rst_DefaultValue'); //take from db
-            if(!(sep_type=='accordion' || sep_type=='tabs' || sep_type=='tabs_new' || sep_type=='expanded')){
+            if(['tabs', 'tabs_new', 'group_break', 'accordion', 'expanded', 'explanation_break', 'group', 'accordion_inner', 'expanded_inner', 'explanation'].indexOf(sep_type) < 0){
                 sep_type = 'group';
             }
             this._editing.setFieldValueByName( 'rst_SeparatorType', sep_type, false ); //assign to entry selector
@@ -1894,13 +1897,13 @@ console.log('onEditFormChange @todo check buttons!!!');
             this._editing.setFieldValueByName( 'rst_SeparatorRequirementType', sep_type, false );
 
             //clear title to force change default one
-            if(this._clear_title_for_separator){
+            if(this._clear_title_for_separator && !this._skip_title_clear){
                 this._editing.setFieldValueByName( 'rst_DisplayName', '', true );
-                //sep_type = 'tabs'; //default for new separator    
                 this._editing.setFocus();
                 this._editing.setModified(true);
             }
             this._clear_title_for_separator = false;
+            this._skip_title_clear = false;
 
             this.editForm.find('.ui-accordion').hide();
 
@@ -2677,6 +2680,8 @@ console.log('onEditFormChange @todo check buttons!!!');
         //rare case when edited edit form reload with another record
         this._stillNeedUpdateForRecID = 0;
         //record is already updated in _saveEditAndClose
+
+        this._triggerRefresh('rst', recID);
        
         // Check if user is going to update the base field's name or help text
         if(this.editForm.find('input#alter_basefield').is(':checked')){
@@ -2774,88 +2779,88 @@ console.log('onEditFormChange @todo check buttons!!!');
      * @brief Adds a new separator/group field to the record type structure.
      * @memberof heurist.manageDefRecStructure
      * @param {?number} [after_dtid] The dty_ID of the field after which the new separator should be inserted.
-     * @param {string} [seperator_type='tabs'] The type of separator to add (e.g., 'tabs', 'group', 'accordion'). Note original typo "seperator_type".
+     * @param {string} [separator_type='tabs'] The type of separator to add (e.g., 'tabs', 'group', 'accordion').
      * @param {?boolean} [allow_proceed=null] If true, bypasses modification checks.
+     * @param {object} [rstFields={}] Preset field details
      * @description Finds an unused separator-type Detail Type or creates a new one,
      * then calls `addNewFieldToStructure` to add it to the current record type's structure.
      */
-    addNewSeparator: function( after_dtid, seperator_type = 'tabs', allow_proceed = null ){
+    addNewSeparator: function( after_dtid, separator_type = 'tabs', allow_proceed = null, rstFields = {} ){
         
         let that = this;
         
         if(allow_proceed!==true){
             this._allowActionIfModified( function(){ 
-                that.addNewSeparator( after_dtid, seperator_type, true );                            
+                that.addNewSeparator( after_dtid, separator_type, true );                            
             } );
             return;
         }
         
-            if(after_dtid>0){
-                this._lockDefaultEdit = true;
-                let node = this._tree.getNodeByKey(after_dtid);
-                if(node) node.setActive();
-            }
-            
-            this._lockDefaultEdit = false;
-            
-            
-            //THIS IS nearly exact piece of code from editRecStructure
-            
-            let rty_ID = this.options.rty_ID;
-    
-            //find seprator field type ID that is not yet added to this record strucuture
-            
-            let ft_separator_id =  null;
-            let ft_separator_group =  $Db.dtg().getOrder()[0]; //add to first group
-            
-            let all_fields_ids = $Db.rst(rty_ID).getIds();
+        if(after_dtid>0){
+            this._lockDefaultEdit = true;
+            let node = this._tree.getNodeByKey(after_dtid);
+            if(node) node.setActive();
+        }
+        
+        this._lockDefaultEdit = false;
 
-            let k = 1;
-            $Db.dty().each(function(dty_ID, rec){
-               if($Db.dty(dty_ID,'dty_Type')=='separator'){
-                   k++;
-                   if( window.hWin.HEURIST4.util.findArrayIndex( dty_ID, all_fields_ids )<0){
-                       ft_separator_group = $Db.dty(dty_ID,'dty_DetailTypeGroupID');
-                       ft_separator_id = dty_ID; //not used yet
-                       return false;
-                   }
-                   
-               } 
-            });
-            
-            if(!window.hWin.HEURIST4.util.isnull(ft_separator_id)){
-                this.addNewFieldToStructure( ft_separator_id, after_dtid, {rst_SeparatorType: seperator_type} );
-            }else{ //"not used" separator field type not found - create new one
-            
-                let fields = {                
-                    dty_DetailTypeGroupID: ft_separator_group,
-                    dty_ID: -1,
-                    dty_Name: 'Header '+k+' - edit the name',
-                    dty_HelpText: 'new separator',
-                    dty_NonOwnerVisibility: "viewable",
-                    dty_Status: "open",
-                    dty_Type: "separator"};
+        let rty_ID = this.options.rty_ID;
+
+        //find seprator field type ID that is not yet added to this record strucuture
+
+        let ft_separator_id =  null;
+        let ft_separator_group =  $Db.dtg().getOrder()[0]; //add to first group
+
+        let all_fields_ids = $Db.rst(rty_ID).getIds();
+
+        let k = 1;
+        $Db.dty().each(function(dty_ID, rec){
+            if($Db.dty(dty_ID,'dty_Type')=='separator'){
+                k++;
+                if( window.hWin.HEURIST4.util.findArrayIndex( dty_ID, all_fields_ids )<0){
+                    ft_separator_group = $Db.dty(dty_ID,'dty_DetailTypeGroupID');
+                    ft_separator_id = dty_ID; //not used yet
+                    return false;
+                }
+                
+            } 
+        });
+
+        rstFields['rst_SeparatorType'] = separator_type;
+
+        if(!window.hWin.HEURIST4.util.isnull(ft_separator_id)){
+            this.addNewFieldToStructure( ft_separator_id, after_dtid, rstFields );
+        }else{ //"not used" separator field type not found - create new one
+
+            let fields = {                
+                dty_DetailTypeGroupID: ft_separator_group,
+                dty_ID: -1,
+                dty_Name: 'Header '+k+' - edit the name',
+                dty_HelpText: 'new separator',
+                dty_NonOwnerVisibility: "viewable",
+                dty_Status: "open",
+                dty_Type: "separator"};
+
+            let request = {
+                'a'          : 'save',
+                'entity'     : 'defDetailTypes',
+                'fields'     : fields                     
+                };
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        let dty_ID = response.data[0];
+                        fields[ 'dty_ID' ] = (''+dty_ID);
                     
-                let request = {
-                    'a'          : 'save',
-                    'entity'     : 'defDetailTypes',
-                    'fields'     : fields                     
-                    };
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            let dty_ID = response.data[0];
-                            fields[ 'dty_ID' ] = (''+dty_ID);
+                        $Db.dty(dty_ID, null, fields); //add on client side  
                         
-                            $Db.dty(dty_ID, null, fields); //add on client side  
-                            
-                            that.addNewFieldToStructure( dty_ID, after_dtid, {rst_SeparatorType: seperator_type} );
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
+                        that.addNewFieldToStructure( dty_ID, after_dtid, rstFields );
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
 
-                    });
-            }  
+                });
+        }
         
         
     },
@@ -2916,6 +2921,8 @@ console.log('onEditFormChange @todo check buttons!!!');
         //remove from local cache
         let rfr = $Db.rst(this.options.rty_ID);
         rfr.removeRecord(recID);
+
+        this._triggerRefresh('rst', recID);
 
         this._super(recID);
         
@@ -3683,7 +3690,7 @@ console.log('onEditFormChange @todo check buttons!!!');
 
                 $dlg.dialog('close');
                 that.previewEditor.manageRecords('reloadEditForm', true);
-                window.hWin.HAPI4.EntityMgr.refreshEntityData('rst');
+                that._triggerRefresh('rst', recID);
 
                 window.hWin.HEURIST4.msg.showMsgFlash('Structure has been updated, but no sub records were created...', 3000);
             });
@@ -3804,6 +3811,66 @@ console.log('onEditFormChange @todo check buttons!!!');
 
             $cont.html(list);
         });
+    },
+
+    addExplanationSeparator: function(afterDTYID, type = 'explanation'){
+
+        if(type !== 'explanation' && type !== 'explanation_break'){
+            type = 'explanation';
+        }
+
+        let $dlg;
+        const content = `<h2 style="margin-top: 0px;">Explanatory text</h2>
+        <div>
+            A block of formatted text which will appear at this point in your data entry form.<br>
+            It can be used to explain the data, give data entry guidelines, leave temporary reminders,<br>
+            provide links to relevant websites and so forth.<br>
+            It appears for every record of this type, but does not form part of the data.<br>
+            It can be formatted with simple html (headings, paragraphs, breaks, font styles, horizontal line, hyperlinks etc...).
+        </div>
+        <div style="padding-top: 1em;">
+            <span class="header required" style="display: table-cell; padding-right: 1em;">Identifying name</span>
+            <div style="display: table-cell; min-width: 120px; padding-bottom: 0.5em;">
+                <div class="input-div">
+                    <input type="text" name="rst_DisplayName" style="border:none;" class="text ui-corner-all" size="30" />
+                </div>
+                <span class="heurist-helper1">For display in the list of fields on the left</span>
+            </div>
+        </div>
+        <div>
+            <div class="required" style="margin-bottom: 7.5px;">Enter html formatted text here</div>
+            <textarea id="rst_DisplayHelpText" class="text ui-corner-all" style="border:none;" cols="100" rows="10"></textarea>
+        </div>`;
+
+        const btns = {};
+        btns[window.hWin.HR('Insert explanation')] = () => {
+
+            const rstName = $dlg.find('[name="rst_DisplayName"]').val();
+            const rstHelp = $dlg.find('#rst_DisplayHelpText').val();
+
+            if(window.hWin.HEURIST4.util.isempty(rstName) || window.hWin.HEURIST4.util.isempty(rstHelp)){
+
+                let msg = window.hWin.HEURIST4.util.isempty(rstName) && window.hWin.HEURIST4.util.isempty(rstHelp) ? 'An identifying name and explanation text are required...' : '';
+                msg = msg === '' && window.hWin.HEURIST4.util.isempty(rstName) ? 'An identifying name is required...' : msg;
+                msg = msg === '' && window.hWin.HEURIST4.util.isempty(rstHelp) ? 'The explanation text is required...' : msg;
+
+                window.hWin.HEURIST4.msg.showMsgFlash(msg, 3000);
+                return;
+            }
+
+            this._skip_title_clear = true;
+
+            this.addNewSeparator(afterDTYID, 'explanation', true, {rst_DisplayName: rstName, rst_DisplayHelpText: rstHelp});
+            $dlg.dialog('close');
+        };
+
+        btns[window.hWin.HR('Cancel')] = () => {
+            $dlg.dialog('close');
+        };
+
+        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(content, btns, {title: 'Adding new explanation'}, {dialogId: 'new-explanation', default_palette_class: 'ui-heurist-design'});
+
+        $dlg.parent().find('.ui-dialog-buttonpane button').first().addClass('ui-button-action');
     }
 
 });
