@@ -739,7 +739,7 @@ function loadRecordContent(url_or_record_id, target){
                 container.fadeOut(500);
                 container.parent()[0].scrollTop = 0;
                 main_content.show();
-                window.hWin.HEURIST4.msg.bringCoverallToFront(main_content.parent());
+                window.hWin.HEURIST4.msg.bringCoverallToFront(main_content.parent(),{'background-color':'rgb(0, 0, 0, 0)'},' ');
                 var frm = container.find('iframe')
                 frm.attr('src',url);
                 frm.off('load');
@@ -1647,7 +1647,7 @@ $(document).ready(function() {
 
     let ele = $('body').find('#main-content');
     ele.css('min-height', '70px');// set min height to ensure the coverall is some what viewable
-    window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
+    window.hWin.HEURIST4.msg.bringCoverallToFront(ele,{'background-color':'rgb(0, 0, 0, 0)'},' ');
     ele.show();
 
     $('body').find('#main-menu').hide();//will be visible after menu init
@@ -1669,7 +1669,7 @@ $(document).ready(function() {
 if(!$edit_OldEditor){
 ?>
 div.coverall-div {
-    background-position: top;
+    /*background-position: top;*/
     background-color: white;
     opacity: 1;
 }

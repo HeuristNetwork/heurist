@@ -526,9 +526,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             $dlg.parent().find('.ui-dialog-titlebar').hide();
         }
     
-        $dlg.parent().css({background: '#7092BE', 'border-radius': "6px", 'border-color': '#7092BE !important',
+        $dlg.parent().css({background: '#95A7B7', 'border-radius': '6px',   //#7092BE
                     'outline-style':'none', outline:'none'})
-        $dlg.css({color:'white', border:'none', overflow:'hidden' });
+        $dlg.css({color:'white', border:'none !important', overflow:'hidden' });
         
         if(timeout!==false){
 
