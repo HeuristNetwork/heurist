@@ -422,7 +422,7 @@ class ReportRecord
      *               - 'linkedfrom': An array of record IDs that link to `$rec`.
      *               Each array is empty if no links are found for that direction or filter.
      */
-    public function getLinkedRecords($rec, $rty_ID = null, $direction = null, $smarty_obj = null)
+    public function getLinkedRecords($rec, $rty_ID = null, $direction = null, $dty_ID = null, $smarty_obj = null)
     {                        
         $rec_ID = is_array($rec) && $rec['recID'] ? $rec['recID'] : $rec;
         $where = SQL_WHERE;
@@ -438,15 +438,29 @@ class ReportRecord
 
         if ($direction == null || $direction == 'linkedto') {
             $from_query = 'SELECT rl_TargetID as linkID FROM recLinks ' . str_replace('linkID', 'rl_TargetID', $where) . ' rl_RelationID IS NULL AND rl_SourceID=' . $rec_ID;
+            if($dty_ID>0){
+                $to_query = $to_query.' AND rl_DetailTypeID='.intval($dty_ID);
+            }
             $to_records = mysql__select_list2($mysqli, $from_query);
         }
 
         if ($direction == null || $direction == 'linkedfrom') {
             $to_query = 'SELECT rl_SourceID as linkID FROM recLinks ' . str_replace('linkID', 'rl_SourceID', $where) . ' rl_RelationID IS NULL AND rl_TargetID=' . $rec_ID;
+            if($dty_ID>0){
+                $to_query = $to_query.' AND rl_DetailTypeID='.intval($dty_ID);
+            }
             $from_records = mysql__select_list2($mysqli, $to_query);
         }
+        
 
         return array('linkedto' => $to_records, 'linkedfrom' => $from_records);
+    }
+    
+    public function getLinkedFromRecords($rec, $rty_ID, $dty_ID, $smarty_obj = null)
+    {
+        $res = $this->getLinkedRecords($rec, $rty_ID, 'linkedfrom', $dty_ID, $smarty_obj);
+        
+        return $res['linkedfrom'];
     }
 
     /**

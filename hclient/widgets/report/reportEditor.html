@@ -71,22 +71,21 @@
                 </div>    
                 
                 <div style="display:none;background-color: #FFFFFF;top:180px;" class="ent_content_full rtt-tree">
-                    <!--
-                    <label for="fsw_showreverse">
-                        <input type="checkbox" id="fsw_showreverse" style="vertical-align: middle;" />&nbsp;
-                        Show linked-from record types<br>(reverse pointers, indicated as &lt;&lt;)
-                    </label>
-                    <br> -->
                     <label for='order_alphabetic'>
                         <input type='radio' name='tree_order' id='order_alphabetic' style='vertical-align: middle;' value='1'/>&nbsp;Alphabetic
                     </label>
                     <label for='order_default'>
                         <input type='radio' name='tree_order' id='order_default' style='vertical-align: middle;' value='0' checked />&nbsp;Form order
                     </label><br>
+                    <label for='fsw_showreverse' style="font-size:0.8em">
+                        <input type='checkbox' id='fsw_showreverse' style='vertical-align: middle' />
+                        Show linked-from record types (reverse pointers, indicated as &lt;&lt;)
+                    </label><br>
                     <label id='selectAll_container' style='font-size: 11px;position: relative;top: 10px;left: 20px;'>
                         <input type='checkbox' id='selectAll'>
                         Select All Visible Options
                     </label>
+                    
                     <br>
                     <div id="field_treeview" style="padding-top:10px"></div>
                 </div>        
