@@ -1,0 +1,430 @@
+{
+  "info": {
+    "name": "Heurist API - Starter Collection",
+    "_postman_id": "2b9a5f31-5ac8-4d79-9d5a-heurist-starter-v1",
+    "description": "Starter Postman collection for Heurist API testing. Covers session auth, JWT auth, records search/export, structure reads, and example entity CRUD requests based on the current API router and controllers.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://example.net" },
+    { "key": "version", "value": "heurist" },
+    { "key": "db", "value": "mydb" },
+    { "key": "username", "value": "user" },
+    { "key": "password", "value": "pass" },
+    { "key": "jwtToken", "value": "" },
+    { "key": "recordId", "value": "1" },
+    { "key": "entityId", "value": "1" },
+    { "key": "query", "value": "ids:1" }
+  ],
+  "item": [
+    {
+      "name": "Session Auth",
+      "item": [
+        {
+          "name": "Login (session cookie)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"login\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{db}}/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{db}}", "login"]
+            },
+            "description": "Creates a cookie-backed session using /api/{db}/login."
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{db}}/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{db}}", "logout"]
+            },
+            "description": "Ends the current session."
+          }
+        }
+      ]
+    },
+    {
+      "name": "JWT Auth",
+      "item": [
+        {
+          "name": "Get JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.access_token) pm.collectionVariables.set('jwtToken', data.access_token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\",\n  \"db\": \"{{db}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/{{version}}/hserv/controller/auth.php",
+              "host": ["{{baseUrl}}"],
+              "path": ["{{version}}", "hserv", "controller", "auth.php"]
+            },
+            "description": "Issues a JWT bearer token and stores it in {{jwtToken}}."
+          }
+        },
+        {
+          "name": "Get JWT (versionless path if deployed that way)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\",\n  \"db\": \"{{db}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/heurist/hserv/controller/auth.php",
+              "host": ["{{baseUrl}}"],
+              "path": ["heurist", "hserv", "controller", "auth.php"]
+            },
+            "description": "Alternate auth.php URL if production is always under /heurist. Keep the one that matches your deployment."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Records",
+      "item": [
+        {
+          "name": "Search records (JWT)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{jwtToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{db}}/records?q={{query}}&fmt=json",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{db}}", "records"],
+              "query": [
+                { "key": "q", "value": "{{query}}" },
+                { "key": "fmt", "value": "json" }
+              ]
+            },
+            "description": "Routes to record_output.php. If q is omitted, the controller defaults to sortby:-m."
+          }
+        },
+        {
+          "name": "Get single record by path ID (JWT)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{jwtToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{db}}/records/{{recordId}}?fmt=json",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{db}}", "records", "{{recordId}}"],
+              "query": [
+                { "key": "fmt", "value": "json" }
+              ]
+            },
+            "description": "Path segment 4 becomes recID in api.php, then record_output.php uses it as a single-record lookup."
+          }
+        },
+        {
+          "name": "Search records (extended JSON)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{jwtToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{db}}/records?q={{query}}&fmt=json&extended=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{db}}", "records"],
+              "query": [
+                { "key": "q", "value": "{{query}}" },
+                { "key": "fmt", "value": "json" },
+                { "key": "extended", "value": "1" }
+              ]
+            },
+            "description": "JSON export with interpretable output mode."
+          }
+        },
+        {
+          "name": "Search records (GeoJSON)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{jwtToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{db}}/records?q={{query}}&fmt=geojson",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{db}}", "records"],
+              "query": [
+                { "key": "q", "value": "{{query}}" },
+                { "key": "fmt", "value": "geojson" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search records (XML)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{jwtToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{db}}/records?q={{query}}&fmt=xml",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{db}}", "records"],
+              "query": [
+                { "key": "q", "value": "{{query}}" },
+                { "key": "fmt", "value": "xml" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Prepared export token",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{jwtToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{db}}/records?preparedMode=create&preparedType=export&q={{query}}&fmt=json",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{db}}", "records"],
+              "query": [
+                { "key": "preparedMode", "value": "create" },
+                { "key": "preparedType", "value": "export" },
+                { "key": "q", "value": "{{query}}" },
+                { "key": "fmt", "value": "json" }
+              ]
+            },
+            "description": "Exercises preparedMode / preparedType flow in record_output.php."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Definitions / Structure",
+      "item": [
+        {
+          "name": "Get record structure by ID (JWT)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{jwtToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{db}}/rst/{{entityId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{db}}", "rst", "{{entityId}}"]
+            },
+            "description": "Maps rst to DefRecStructure through api.php and entityScrud.php."
+          }
+        },
+        {
+          "name": "Get record types (JWT)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{jwtToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{db}}/rectypes",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{db}}", "rectypes"]
+            }
+          }
+        },
+        {
+          "name": "Get detail types (JWT)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{jwtToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{db}}/fields",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{db}}", "fields"]
+            }
+          }
+        },
+        {
+          "name": "Get terms (JWT)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{jwtToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{db}}/terms",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{db}}", "terms"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entity CRUD templates",
+      "item": [
+        {
+          "name": "Search tags (JWT)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{jwtToken}}", "type": "string" }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{db}}/tag",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{db}}", "tag"]
+            }
+          }
+        },
+        {
+          "name": "Create entity template (POST)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{jwtToken}}", "type": "string" }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"db\": \"{{db}}\",\n  \"fields\": {\n    \"TODO\": \"Replace with the concrete payload for the target entity\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{db}}/fields",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{db}}", "fields"]
+            },
+            "description": "api.php maps POST to add. The JSON body is read into req_params.fields. Replace endpoint and payload for the real entity."
+          }
+        },
+        {
+          "name": "Update entity template (PUT)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{jwtToken}}", "type": "string" }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"db\": \"{{db}}\",\n  \"fields\": {\n    \"TODO\": \"Replace with the concrete payload for the target entity\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{db}}/fields/{{entityId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{db}}", "fields", "{{entityId}}"]
+            },
+            "description": "api.php maps PUT to save and passes path segment 4 as recID."
+          }
+        },
+        {
+          "name": "Delete entity template (DELETE)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                { "key": "token", "value": "{{jwtToken}}", "type": "string" }
+              ]
+            },
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{db}}/fields/{{entityId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{db}}", "fields", "{{entityId}}"]
+            },
+            "description": "api.php maps DELETE to delete. Replace endpoint with the target entity as needed."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public route",
+      "item": [
+        {
+          "name": "IIIF public route",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{db}}/iiif/manifest/{{recordId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{db}}", "iiif", "manifest", "{{recordId}}"]
+            },
+            "description": "iiif is left public in api.php."
+          }
+        }
+      ]
+    }
+  ]
+}
