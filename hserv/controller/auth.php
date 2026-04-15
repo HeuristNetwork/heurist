@@ -12,10 +12,8 @@ if(!isset($jwt_Secret) || strlen($jwt_Secret)<8){
   UJwt::json_out(405, ['error'=>'method_not_allowed']);
 }
 
-$contentType = $_SERVER['CONTENT_TYPE'];
+$contentType = $_SERVER['CONTENT_TYPE'] ?? '';
 $raw = file_get_contents('php://input');
-
-echo $contentType.' ';
 
 if(false && $contentType=='application/x-www-form-urlencoded'){
     $in = [];
@@ -39,12 +37,14 @@ if (!$username || !$password || !$system->doLogin($username, $password, 'none'))
   UJwt::json_out(401, ['error'=>'invalid_credentials'], ['WWW-Authenticate' => 'Basic realm="api", charset="UTF-8"']);
 }
 
+$ttl = ($jwt_TTL??600); //10 minutes
+
 $now = time();
 $claims = [
   'sub' => $system->getUserId(),  //$username
   'iat' => $now,
   'nbf' => $now,
-  'exp' => $now + $jwt_TTL??600,   //10 minutes
+  'exp' => $now + $ttl,   
   'scope' => 'read:data' // example
 ];
 
@@ -53,5 +53,5 @@ $token = UJwt::jwt_create($claims, $jwt_Secret);
 UJwt::json_out(200, [
   'access_token' => $token,
   'token_type'   => 'Bearer',
-  'expires_in'   => $jwt_TTL??600
+  'expires_in'   => $ttl
 ]);
