@@ -965,7 +965,7 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
                             + '<textarea rows="6" cols="65" id="figcap"></textarea>';
                         
                         let btns = {};
-                        btns['Add caption'] = () => {
+                        btns['Insert media'] = () => {
                             let caption = $dlg.find('#figcap').val();
 
                             if(!window.hWin.HEURIST4.util.isempty(caption)){
@@ -975,13 +975,9 @@ const sMsg = '<p>The internal storage format of web pages has changed for greate
                             tinymce.activeEditor.insertContent( playerTag );
                             $dlg.dialog('close');
                         };
-                        btns['No caption'] = () => {
-                            tinymce.activeEditor.insertContent( playerTag );
-                            $dlg.dialog('close');
-                        };
 
                         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
-                            {title: 'Adding caption to media', yes: 'Add caption', no: 'No caption'}, 
+                            {title: 'Adding caption to media', yes: 'Insert media'}, 
                             { default_palette_class: 'ui-heurist-populate', appendTo: 'body' }
                         );
                     }

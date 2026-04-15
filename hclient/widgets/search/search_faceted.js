@@ -802,7 +802,8 @@ $.widget( "heurist.search_faceted", {
 
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(facets)){
             let facet_index, len = facets.length;
-            let invalid_fields = [];
+            let invalid_fields = {};
+            let invalid_count = 0;
             let check_fields = !this._warned_missing_fields && !this.options.ispreview && 
                 !this.options.is_publication && (window.hWin.HAPI4.currentUser.ugr_ID !== 0);
 
@@ -824,31 +825,54 @@ $.widget( "heurist.search_faceted", {
                     let rtyid = codes[codes.length-2];
                     let dtyid = codes[codes.length-1];
 
-                    rtyid = rtyid.indexOf(',') >= 0 ? rtyid.split(',')[0] : rtyid; // take first rectype id
+                    let rtyIDs = rtyid.indexOf(',') >= 0 ? rtyid.split(',') : [rtyid];
 
-                    if(rtyid && dtyid && Number.isInteger(+dtyid) && !$Db.rst(rtyid, dtyid)){
-                        let fld_name = !window.hWin.HEURIST4.util.isempty(facets['title']) ? facets['title'] : null;
-                        invalid_fields.push(fld_name);
+                    if(!window.hWin.HEURIST4.util.isPositiveInt(dtyid)){
+                        continue;
+                    }
+
+                    for(const rtyID of rtyIDs){
+
+                        let recType = $Db.rty(rtyID, 'rty_Name');
+                        let facetField = !window.hWin.HEURIST4.util.isempty(facets[facet_index]['title']) ? facets[facet_index]['title'] : null;
+                        let fieldName = $Db.dty(dtyid, 'dty_Name') ?? null;
+
+                        let fieldID = window.hWin.HEURIST4.util.isempty(facetField) ? `facet #${facet_index + 1}` : facetField;
+                        fieldID = !window.hWin.HEURIST4.util.isempty(facetField) && !window.hWin.HEURIST4.util.isempty(fieldName) ? `${fieldID} [${fieldName} #${dtyid}]` : fieldID;
+
+                        if(window.hWin.HEURIST4.util.isempty(recType)){
+                            recType = 'Missing Record Type';
+                        }else if($Db.rst(rtyID, dtyid)){
+                            continue;
+                        }
+
+                        if(!Object.hasOwn(invalid_fields, recType)){
+                            invalid_fields[recType] = [];
+                        }
+                        invalid_fields[recType].push(fieldID);
+                        invalid_count ++;
                     }
                 }
             }
-            
-            if(Object.keys(invalid_fields).length > 0 && check_fields){
 
-                let several_fields = invalid_fields.length > 1;
+            if(invalid_count > 0 && check_fields){
 
-                let msg = '';
-                let fld_name = invalid_fields[0];
-                if(several_fields){
-                    msg = 'Several fields referenced by this facet filter are no longer part of their respective record type(s).';
-                }else{
-                    msg = (window.hWin.HEURIST4.util.isempty(fld_name) ? 'A field' : `The field ${fld_name}`)
-                        + ' referenced in this facet filter is no longer part of the record type on which this filter is based.';
+                let invalidList = '';
+                for(const [recType, fields] of Object.entries(invalid_fields)){
+                    invalidList += `<strong>${recType}</strong>:<br>${fields.join('<br>')}`;
                 }
+
+                msg = `The following field(s) are referenced in this facet filter, but are no longer part of their record type:
+                <div style="max-height: 30em;overflow-y: auto;margin: 1em 0.5em 0px;">
+                    ${invalidList}
+                </div>`;
 
                 if(msg !== ''){
                     msg += '<br>Please edit the facet search and remove the field (this will occurr automatically if you open the facet filter for editing and save)';
-                    window.hWin.HEURIST4.msg.showMsgDlg(msg, null, {title: 'Missing field(s) referenced in facet filter'}, {default_palette_class: this.options.is_publication ? 'ui-heurist-publish' : 'ui-heurist-explore'});
+                    window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 
+                        {title: 'Missing field(s) referenced in facet filter'},
+                        {default_palette_class: this.options.is_publication ? 'ui-heurist-publish' : 'ui-heurist-explore'}
+                    );
                 }
 
                 this._warned_missing_fields = true;
