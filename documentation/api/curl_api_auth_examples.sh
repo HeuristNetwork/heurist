@@ -10,8 +10,7 @@ echo "=== SESSION AUTH ==="
 
 # Login (store cookies)
 curl -c cookies.txt -X POST "$BASE/api/$DB/login" \
-  -H "Content-Type: application/json" \
-  -d '{"login":"user","password":"pass"}'
+  -H "Content-Type: application/json" --data-binary '{"username":"user","password":"pass","db":"'$DB'"}'
 
 # Use session
 curl -b cookies.txt "$BASE/api/$DB/records"
