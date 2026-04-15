@@ -78,8 +78,6 @@ use hserv\utilities\UJwt;
 
 require_once dirname(__FILE__).'/../../autoload.php';
 
-$requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
-
 if(@$_REQUEST['method']){
     $method = $_REQUEST['method'];
 }else{
@@ -98,11 +96,6 @@ if(@$_REQUEST['method']){
         $method = 'PUT';
     }
 }
-
-//$requestUri[1] = "api"
-//$requestUri[2] - database name
-//$requestUri[3] - resource(entity )
-//$requestUri[4] - selector - id or name
 
 //allowed entities for entityScrud
 $entities = array(
@@ -148,22 +141,75 @@ $entities = array(
 // http://127.0.0.1/heurist/api/osmak_9a/rem/1
 // http://127.0.0.1/heurist/api/osmak_9a/tag?rtl_RecID=9
 
-if(!empty($requestUri)){ //splitted path
-// api/db/entity/recID
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$requestUri = explode('/', trim($path, '/'));
 
-    $params = array();
-    foreach($requestUri as $prm){
-        $k = strpos($prm, '?');
-        if($k>0){
-            $params[] = substr($prm,0,$k);
-            break;
-        }
-        $params[] = $prm;
-    }
-    $requestUri = $params;
+if(@$requestUri[0]=='api'){
+   array_unshift($requestUri,'heurist');
 }
 
+//$requestUri[1] = "api"
+//$requestUri[2] - database name
+//$requestUri[3] - resource(entity )
+//$requestUri[4] - selector - id or name
+
+
+
+$raw_body = file_get_contents('php://input');
+$contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+
 $req_params = USanitize::sanitizeInputArray();
+
+$json = null;
+$json_error = null;
+
+if (
+    ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' ||
+    ($_SERVER['REQUEST_METHOD'] ?? '') === 'PUT' ||
+    ($_SERVER['REQUEST_METHOD'] ?? '') === 'PATCH'
+) {
+    if (stripos($contentType, 'application/json') === 0) {
+        $json = json_decode($raw_body, true);
+        $json_error = json_last_error_msg();
+
+        if (is_array($json)) {
+            if (!isset($req_params['fields']) || !is_array($req_params['fields'])) {
+                $req_params['fields'] = $json;
+            }
+
+            foreach ($json as $k => $v) {
+                if (!array_key_exists($k, $req_params)) {
+                    $req_params[$k] = $v;
+                }
+            }
+        }
+    }
+}
+/*
+echo "<pre>";
+echo "REQUEST_METHOD:\n";
+var_dump($_SERVER['REQUEST_METHOD'] ?? null);
+
+echo "\nCONTENT_TYPE:\n";
+var_dump($contentType);
+
+echo "\nRAW BODY LENGTH:\n";
+var_dump(strlen($raw_body));
+
+echo "\nRAW BODY:\n";
+var_dump($raw_body);
+
+echo "\nJSON DECODED:\n";
+var_dump($json);
+
+echo "\nJSON ERROR:\n";
+var_dump($json_error);
+
+echo "\nREQ_PARAMS:\n";
+var_dump($req_params);
+echo "</pre>";
+exit;
+*/
 
 if(@$requestUri[1]!== 'api' || @$req_params['ent']!=null){
     //takes all parameters from $req_params
@@ -196,7 +242,7 @@ if($method == null || !in_array($method, $allowed_methods)){
 }
 
 if($method=='save' || $method=='add'){
-    //get request body
+    /*get request body
     if(!@$req_params['fields']){
         $data = json_decode(file_get_contents('php://input'), true);
         if($data){
@@ -209,7 +255,7 @@ if($method=='save' || $method=='add'){
     if(@$req_params['fields']['db']){ //may contain db
         $req_params['db'] = $req_params['fields']['db'];
         unset($req_params['fields']['db']);
-    }
+    }*/
 }else{
 
     if(@$req_params['limit']==null || $req_params['limit']>100 || $req_params['limit']<1){
@@ -222,24 +268,34 @@ if($method=='save' || $method=='add'){
 // Resolve auth for API requests
 // ----------------------------------------------------
 $resource = @$requestUri[3];
-$is_public_request = ($resource === 'login' || $resource === 'logout' || $resource === 'iiif');
 
-if(!$is_public_request){
+// Routes where auth processing is not needed here
+$skip_auth_processing =
+    ($resource === 'login') ||
+    ($resource === 'logout') ||
+    ($resource === 'iiif');
+
+// Routes that may be used anonymously, but should still use
+// current session/JWT if provided
+$allow_anonymous = ($resource === 'records' && $method === 'search');
+
+if(!$skip_auth_processing){
     $system = new hserv\System();
 
     if(!$system->init(@$req_params['db'])){
         $system->errorExitApi(); // exits
     }
 
-    // If there is already an authenticated cookie/session user, keep it.
+    // Preserve existing cookie-backed user if present.
     // Otherwise try Bearer token auth.
     if(!$system->getUserId()){
         authenticateApiRequestWithJwt($system);
     }
 
-    if(!$system->getUserId()){
+    // Only require authentication for protected routes.
+    if(!$allow_anonymous && !$system->getUserId()){
         exitWithError('Unauthorized', 401, [
-            'WWW-Authenticate' => 'Bearer realm="api"'
+            'WWW-Authenticate' => 'Bearer realm=\"api\"'
         ]);
     }
 }
@@ -268,8 +324,8 @@ if (@$requestUri[3]=='iiif') {
 
     if($requestUri[3]==='login'){
 
-        if(!$system->doLogin(filter_var(@$req_params['fields']['login'], FILTER_SANITIZE_STRING),
-                             @$req_params['fields']['password'], 'shared'))
+        if(!$system->doLogin(filter_var($req_params['fields']['login']??$req_params['login']??null, FILTER_SANITIZE_STRING),
+                             $req_params['fields']['password']??$req_params['password']??null, 'shared'))
         {
             $system->errorExitApi();
         }else{
