@@ -1527,7 +1527,7 @@ $.widget( "heurist.editing_input", {
                         
                         relative_urls : true,
                         remove_script_host: false,
-                        //document_base_url : window.hWin.HAPI4.baseURL,
+                        document_base_url: location.href.indexOf('recordEdit.php') > 0 ? window.hWin.HAPI4.baseURL_pro : null,
                         urlconverter_callback : 'tinymceURLConverter',
 
                         entity_encoding:'raw',
@@ -6487,7 +6487,7 @@ $.widget( "heurist.editing_input", {
             + '<textarea rows="6" cols="65" id="figcap"></textarea>';
         
         let btns = {};
-        btns[window.HR('Add caption')] = () => {
+        btns[window.HR('Insert media')] = () => {
             let caption = $dlg.find('#figcap').val();
 
             if(caption){
@@ -6497,25 +6497,19 @@ $.widget( "heurist.editing_input", {
                     return;
                 }
                 content = '<figure>'+ content +'<figcaption>'+ caption +'</figcaption></figure>';
-
-                if(is_insert){
-                    tinyMCE.activeEditor.insertContent( content );
-                }else{
-                    tinyMCE.activeEditor.selection.setContent( content );
-                }
             }
 
-            $dlg.dialog('close');
-        };
-        btns[window.HR('No caption')] = () => {
             if(is_insert){
                 tinyMCE.activeEditor.insertContent( content );
+            }else{
+                tinyMCE.activeEditor.selection.setContent( content );
             }
+
             $dlg.dialog('close');
         };
 
         $dlg = window.hWin.HEURIST4.msg.showMsgDlg(msg, btns, 
-            {title: 'Adding caption to media', yes: window.HR('Add caption'), no: window.HR('No caption')}, 
+            {title: 'Adding caption to media', yes: window.HR('Insert media')}, 
             {default_palette_class: 'ui-heurist-populate'}
         );
     },
