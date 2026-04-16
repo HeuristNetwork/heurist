@@ -668,7 +668,7 @@ function recordSearchFacets($system, $params){
             // 2.  find all children as plain array  [[parentid, child_id, child_id....],.....]
             $terms = array();
             foreach ($first_level as $parentID){
-                $children = getTermChildren($parentID, $system, false);//get first level for vocabulary
+                $children = getTermChildren($parentID, $system, false);//get next level for term tree
                 array_unshift($children, $parentID);
                 array_push($terms, $children);
             }
@@ -677,9 +677,11 @@ function recordSearchFacets($system, $params){
             $select_clause = "SELECT count(distinct r0.rec_ID) as cnt ";
 
             $data = array();
+            $keep_count_query = $count_query;
 
             foreach ($terms as $vocab){
-
+                
+                $count_query = $keep_count_query;
 
                 if($params_enum!=null){ //new way
                     $params_enum['q'] = __assignFacetValue($count_query, implode(',', $vocab) );
@@ -710,7 +712,7 @@ function recordSearchFacets($system, $params){
             }//for
             return array("status"=>HEURIST_OK, "data"=> $data, "svs_id"=>@$params['svs_id'],
                 "request_id"=>@$params['request_id'], //'dbg_query'=>$query,
-                "facet_index"=>@$params['facet_index'], 'q'=>$params['q'], 'count_query'=>$count_query );
+                "facet_index"=>@$params['facet_index'], 'q'=>$params['q'], 'count_query'=>$keep_count_query );
 
         }
         //SLIDER

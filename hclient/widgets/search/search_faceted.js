@@ -2327,7 +2327,7 @@ $.widget( "heurist.search_faceted", {
                         dty_ID = dty_ID.slice(2);    
                     }
 
-                    if((field['type']=='enum' || field['type']=='reltype') && field['groupby']!='firstlevel'){
+                    if((field['type']=='enum' || field['type']=='reltype') && field['groupby']!='firstlevel' ){
                         
                         let is_first_level = false;
                         if(!field['step0_vals']){
@@ -4049,12 +4049,18 @@ $.widget( "heurist.search_faceted", {
         //----
         let f_link_content;
         
-        if(window.hWin.HEURIST4.util.isempty(cterm.value)){
-            f_link_content = $("<span>").addClass("ui-icon ui-icon-arrowreturnthick-1-w")
+        const f_link_reset = $("<span>").addClass("ui-icon ui-icon-arrowreturnthick-1-w")
                 .attr('title','Reset facet value')
                 .css({'font-size':'11px','font-style':'normal'}); //1.2em
+        
+        if(window.hWin.HEURIST4.util.isempty(cterm.value)){
+            f_link_content = f_link_reset;
         }else{
+            
             f_link_content = $("<span>").html(title);
+            if(cterm.count=='reset'){
+                f_link_reset.prependTo(f_link_content);
+            }
             
             if(display_mode=='block'){         
 
