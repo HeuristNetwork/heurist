@@ -339,7 +339,7 @@ window.hWin.HEURIST4.dbs = {
      *  - `4`: Finds reverse links and relations.
      *  - `5`: For filter builder. Lazy treeview with reverse links.
      *  - `6`: For import structure, export CSV. Lazy tree without reverse links.
-     *  - `7`: For Smarty editor. Lazy tree without reverse links, with relationship stub. Enum fields include id, label, code, internal id.
+     *  - `7`: For Smarty editor. Lazy tree WITH reverse links, with relationship stub. Enum fields include id, label, code, internal id.
      *  - `8`: For faceted search wizard. Similar to mode 5 but excludes "record exists" options.
      * @param {(string|string[])} rectypeids - A comma-separated string or an array of record type IDs to include in the tree.
      * @param {(string|string[])} fieldtypes - Array or comma-separated string of field types to include. Special values:
@@ -453,72 +453,76 @@ window.hWin.HEURIST4.dbs = {
                 }  
                 
                 let recTitle_item = null;
+                let $thisRecType = '';
+                if($recTypeId!=='Relationship'){
+                    $thisRecType = $recTypeId+_separator;
+                }
                 
                 if(all_header_fields || $fieldtypes.indexOf('ID')>=0 || $fieldtypes.indexOf('rec_ID')>=0){
                     $children.push({key:'rec_ID', type:'integer',
                         title:('ID'+($mode!=7?' <span style="font-size:0.7em">(Integer)</span>':'')), 
-                        code:($recTypeId+_separator+'ids'), name:'Record ID'});
+                        code:($thisRecType+'ids'), name:'Record ID'});
                 }
 
                 if(all_header_fields || $fieldtypes.indexOf('title')>=0 || $fieldtypes.indexOf('rec_Title')>=0){
                    
                     recTitle_item = {key:'rec_Title', type:'freetext',
                         title:('Title'+($mode!=7?' <span style="font-size:0.7em">(Constructed Text)</span>':'')), 
-                        code:($recTypeId+_separator+'title'), name:'Record title'};
+                        code:($thisRecType+'title'), name:'Record title'};
                 }
                 
                 if(all_header_fields || $fieldtypes.indexOf('typeid')>=0 || $fieldtypes.indexOf('rec_RecTypeID')>=0){
                     $children.push({key:'rec_RecTypeID', 
                         title:('Record TypeID'+($mode!=7?' <span style="font-size:0.7em">(Integer)</span>':'')), 
-                        code:$recTypeId+_separator+'typeid', name: 'Record type ID'});
+                        code:$thisRecType+'typeid', name: 'Record type ID'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('typename')>=0 || $fieldtypes.indexOf('rec_TypeName')>=0){
                     $children.push({key:'rec_TypeName', 
                         title:('Record TypeName'+($mode!=7?' <span style="font-size:0.7em">(Text)</span>':'')), 
-                        code:$recTypeId+_separator+'typename', name: 'Record type'});
+                        code:$thisRecType+'typename', name: 'Record type'});
                 }
                 
                 if(all_header_fields || $fieldtypes.indexOf('added')>=0 || $fieldtypes.indexOf('rec_Added')>=0){
                     $children.push({key:'rec_Added', type:'date',
                         title:('Added'+($mode!=7?' <span style="font-size:0.7em">(Date)</span>':'')), 
-                        code:($recTypeId+_separator+'added'), name:'Date added'});
+                        code:($thisRecType+'added'), name:'Date added'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('modified')>=0 || $fieldtypes.indexOf('rec_Modified')>=0){
                     $children.push({key:'rec_Modified', type:'date',
                         title:('Modified'+($mode!=7?' <span style="font-size:0.7em">(Date)</span>':'')), 
-                        code:($recTypeId+_separator+'modified'), name:'Date modified'});
+                        code:($thisRecType+'modified'), name:'Date modified'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('addedby')>=0 || $fieldtypes.indexOf('rec_AddedBy')>=0){
                     $children.push({key:'rec_AddedBy', type:'enum',
                         title:('Creator'+($mode!=7?' <span style="font-size:0.7em">(User)</span>':'')), 
-                        code:($recTypeId+_separator+'addedby'), name:'Creator (user)'});
+                        code:($thisRecType+'addedby'), name:'Creator (user)'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('url')>=0 || $fieldtypes.indexOf('rec_URL')>=0){
                     $children.push({key:'rec_URL', type:'freetext',
                         title:('URL'+($mode!=7?' <span style="font-size:0.7em">(Text)</span>':'')), 
-                        code:($recTypeId+_separator+'url'), name:'Record URL'});
+                        code:($thisRecType+'url'), name:'Record URL'});
                 }
                 
                 if(all_header_fields || $fieldtypes.indexOf('notes')>=0 || $fieldtypes.indexOf('rec_ScratchPad')>=0){
                     $children.push({key:'rec_ScratchPad', type:'freetext',
                         title:('Notes'+($mode!=7?' <span style="font-size:0.7em">(Text)</span>':'')), 
-                        code:($recTypeId+_separator+'notes'), name:'Record Notes'});
+                        code:($thisRecType+'notes'), name:'Record Notes'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('owner')>=0 || $fieldtypes.indexOf('rec_OwnerUGrpID')>=0){
                     $children.push({key:'rec_OwnerUGrpID', type:'enum',
                         title:('Owner'+($mode!=7?' <span style="font-size:0.7em">(User or Group)</span>':'')), 
-                        code:($recTypeId+_separator+'owner'), name:'Record Owner'});
+                        code:($thisRecType+'owner'), name:'Record Owner'});
                 }
                 if(all_header_fields || $fieldtypes.indexOf('visibility')>=0 || $fieldtypes.indexOf('rec_NonOwnerVisibility')>=0){
                     $children.push({key:'rec_NonOwnerVisibility', type:'enum',
                         title:('Visibility'+($mode!=7?' <span style="font-size:0.7em">(Terms)</span>':'')), 
-                        code:($recTypeId+_separator+'access'), name:'Record Visibility'});
+                        code:($thisRecType+'access'), name:'Record Visibility'});
                 }
 
                 if(all_header_fields || $fieldtypes.indexOf('tags')>=0 || $fieldtypes.indexOf('rec_Tags')>=0){
                     $children.push({key:'rec_Tags', type:'terms',
                         title:('Tags'+($mode!=7?' <span style="font-size:0.7em">(Terms)</span>':'')), 
-                        code:($recTypeId+_separator+'tag'), name:'Record Tags'});
+                        code:($thisRecType+'tag'), name:'Record Tags'});
                 }
                 
                 if(all_header_fields || $mode == 7){
@@ -733,7 +737,7 @@ window.hWin.HEURIST4.dbs = {
 
                     //--------------------------------------------
                     //find all reverse links and relations
-                    if( ($mode==4 && $recursion_depth<2) || (($mode==5 || $mode==8) && $recursion_depth==0) )
+                    if( ($mode==4 && $recursion_depth<2) || (($mode==5 || $mode==7 || $mode==8) && $recursion_depth==0) ) //7 added
                     {
                         let rev_fields = {};
                         let reverse_fields = rst_links.reverse[$recTypeId]; //all:, dty_ID:[rty_ID,...]
@@ -965,11 +969,10 @@ window.hWin.HEURIST4.dbs = {
 
             case 'resource': // link to another record type
             case 'relmarker':
-            
                 
                 if ($mode==4 || $mode==3){ //record titlemask
                    //max_allowed_depth = 3; calculated
-                }else if ($mode==5 || $mode==6 || $mode==7 || $mode==8) //make it 1 for lazy load
+                }else if ($mode==5 || $mode==6 || $mode==7 || $mode==8) //make it 1 for lazy load, 7 added
                    max_allowed_depth = 1; 
                                                                 
                 if($recursion_depth<max_allowed_depth){
@@ -984,7 +987,7 @@ window.hWin.HEURIST4.dbs = {
                                 $dt_title = "<span>&lt;&lt; <span style='font-weight:bold'>" 
                                         + $Db.rty($recTypeId, 'rty_Name') + "</span> . " + $dt_title + '</span>';
                                 
-                                if($mode==5 || $mode==6 || $mode==8){
+                                if($mode==5 || $mode==6 || $mode==7 || $mode==8){ //7 added
                                     $res['lazy'] = true;
                                 }
 
@@ -1088,7 +1091,7 @@ window.hWin.HEURIST4.dbs = {
                 
             } 
             $res['key'] = "f:"+$dtID;
-            if($mode==4 || $mode==5 || $mode==6 || $mode==8){
+            if($mode==4 || $mode==5 || $mode==6 || $mode==7 || $mode==8){
                     
                 let $stype = ($detailType=='resource' || $detailType=='relmarker' || $detailType=='separator')?'':$Db.baseFieldType[$detailType];
                 if($reverseRecTypeId!=null){

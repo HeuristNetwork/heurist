@@ -11,10 +11,57 @@
 * for handling incoming requests
 * or routing to record_output.php controller for Records and iiif_presentation.php for iiif.
 * 
-* To activate this service, add to httpd.conf
+* APACHE CONFIGURATION (CENTRALIZED ROUTING)
+* ---
+* All requests are routed through the root /index.php entrypoint.
+* 
+* Place these rules in the VirtualHost config (preferred) or .htaccess:
+* 
 * RewriteEngine On
-* RewriteRule ^/heurist/api/(.*)$ /heurist/hserv/controller/api.php
-* if URI starts with api/ redirect request to controller/api.php
+* 
+* # 1) Do not rewrite existing files or directories (serve directly)
+* RewriteCond %{REQUEST_FILENAME} -f [OR]
+* RewriteCond %{REQUEST_FILENAME} -d
+* RewriteRule ^ - [L]
+* 
+* # 2) Route all other requests to the root router
+* RewriteRule ^.*$ /index.php [L,QSA]
+* 
+* 
+* ROUTING BEHAVIOUR
+* ---
+* All non-static requests are first handled by the root /index.php router.
+* 
+* The router (RequestRouter) then decides how to process the request:
+* 
+* - API requests (/api/...) are internally dispatched to:
+*     /<version>/hserv/controller/api.php
+* 
+* - Record and file requests may be redirected to specific scripts
+*   (e.g. record_output.php, fileDownload.php)
+* 
+* - UI requests are handled by including: /<root>/index.php
+* 
+* This replaces the old direct Apache rewrites to controller scripts.
+* The original entrypoint (index.php) now resides in /movetoparent
+* copy it to webserver <root>.
+* 
+* 
+* JWT AUTHENTICATION
+* ---
+* To enable JWT-based API authentication, define the following in:
+* 
+* <root>/heuristConfigIni.php
+* 
+*     $jwt_Secret = 'your-long-random-secret'; // REQUIRED (min 8 chars)
+*     $jwt_TTL    = 600; // token lifetime in seconds (default: 10 minutes)
+* 
+* When configured:
+* 
+* - Tokens are issued via auth.php
+* - API requests can authenticate using:
+*       Authorization: Bearer <token>
+* - Token verification is performed in api.php before request dispatch
 * 
 * @project     Heurist academic knowledge management system
 * @package Controller
@@ -27,10 +74,9 @@
 */
 use hserv\utilities\USanitize;
 use hserv\utilities\USystem;
+use hserv\utilities\UJwt;
 
 require_once dirname(__FILE__).'/../../autoload.php';
-
-$requestUri = explode('/', trim($_SERVER['REQUEST_URI'],'/'));
 
 if(@$_REQUEST['method']){
     $method = $_REQUEST['method'];
@@ -50,11 +96,6 @@ if(@$_REQUEST['method']){
         $method = 'PUT';
     }
 }
-
-//$requestUri[1] = "api"
-//$requestUri[2] - database name
-//$requestUri[3] - resource(entity )
-//$requestUri[4] - selector - id or name
 
 //allowed entities for entityScrud
 $entities = array(
@@ -100,24 +141,75 @@ $entities = array(
 // http://127.0.0.1/heurist/api/osmak_9a/rem/1
 // http://127.0.0.1/heurist/api/osmak_9a/tag?rtl_RecID=9
 
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$requestUri = explode('/', trim($path, '/'));
 
-
-if(!empty($requestUri)){ //splitted path
-// api/db/entity/recID
-
-    $params = array();
-    foreach($requestUri as $prm){
-        $k = strpos($prm, '?');
-        if($k>0){
-            $params[] = substr($prm,0,$k);
-            break;
-        }
-        $params[] = $prm;
-    }
-    $requestUri = $params;
+if(@$requestUri[0]=='api'){
+   array_unshift($requestUri,'heurist');
 }
 
+//$requestUri[1] = "api"
+//$requestUri[2] - database name
+//$requestUri[3] - resource(entity )
+//$requestUri[4] - selector - id or name
+
+
+
+$raw_body = file_get_contents('php://input');
+$contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+
 $req_params = USanitize::sanitizeInputArray();
+
+$json = null;
+$json_error = null;
+
+if (
+    ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' ||
+    ($_SERVER['REQUEST_METHOD'] ?? '') === 'PUT' ||
+    ($_SERVER['REQUEST_METHOD'] ?? '') === 'PATCH'
+) {
+    if (stripos($contentType, 'application/json') === 0) {
+        $json = json_decode($raw_body, true);
+        $json_error = json_last_error_msg();
+
+        if (is_array($json)) {
+            if (!isset($req_params['fields']) || !is_array($req_params['fields'])) {
+                $req_params['fields'] = $json;
+            }
+
+            foreach ($json as $k => $v) {
+                if (!array_key_exists($k, $req_params)) {
+                    $req_params[$k] = $v;
+                }
+            }
+        }
+    }
+}
+/*
+echo "<pre>";
+echo "REQUEST_METHOD:\n";
+var_dump($_SERVER['REQUEST_METHOD'] ?? null);
+
+echo "\nCONTENT_TYPE:\n";
+var_dump($contentType);
+
+echo "\nRAW BODY LENGTH:\n";
+var_dump(strlen($raw_body));
+
+echo "\nRAW BODY:\n";
+var_dump($raw_body);
+
+echo "\nJSON DECODED:\n";
+var_dump($json);
+
+echo "\nJSON ERROR:\n";
+var_dump($json_error);
+
+echo "\nREQ_PARAMS:\n";
+var_dump($req_params);
+echo "</pre>";
+exit;
+*/
 
 if(@$requestUri[1]!== 'api' || @$req_params['ent']!=null){
     //takes all parameters from $req_params
@@ -142,16 +234,15 @@ elseif(@$req_params['db'] && @$requestUri[2]!=null){ //backward when database is
     $req_params['db'] = $requestUri[2];
 }
 
-
 $allowed_methods = array('search','add','save','delete');
 
 $method = getAction($method);
 if($method == null || !in_array($method, $allowed_methods)){
-    exitWithError('Method Not Allowed', 405);
+    exitWithError('Method Not Allowed CCC', 405);
 }
 
 if($method=='save' || $method=='add'){
-    //get request body
+    /*get request body
     if(!@$req_params['fields']){
         $data = json_decode(file_get_contents('php://input'), true);
         if($data){
@@ -164,7 +255,7 @@ if($method=='save' || $method=='add'){
     if(@$req_params['fields']['db']){ //may contain db
         $req_params['db'] = $req_params['fields']['db'];
         unset($req_params['fields']['db']);
-    }
+    }*/
 }else{
 
     if(@$req_params['limit']==null || $req_params['limit']>100 || $req_params['limit']<1){
@@ -173,7 +264,46 @@ if($method=='save' || $method=='add'){
 
 }
 
-// throw new RuntimeException('Unauthorized - authentication failed', 401);
+// ----------------------------------------------------
+// Resolve auth for API requests
+// ----------------------------------------------------
+$resource = @$requestUri[3];
+
+// Routes where auth processing is not needed here
+$skip_auth_processing =
+    ($resource === 'login') ||
+    ($resource === 'logout') ||
+    ($resource === 'iiif');
+
+// Routes that may be used anonymously, but should still use
+// current session/JWT if provided
+$allow_anonymous = false;
+if($method === 'search'){
+    $allow_anonymous = ($resource === 'records' || $resource === 'groups' || $resource === 'users');
+}
+
+if(!$skip_auth_processing){
+    $system = new hserv\System();
+
+    if(!$system->init(@$req_params['db'])){
+        $system->errorExitApi(); // exits
+    }
+
+    // Preserve existing cookie-backed user if present.
+    // Otherwise try Bearer token auth.
+    if(!$system->getUserId()){
+        authenticateApiRequestWithJwt($system);
+    }
+
+    // Only require authentication for protected routes.
+    if(!$allow_anonymous && !$system->getUserId()){
+        exitWithError('Unauthorized', 401, [
+            'WWW-Authenticate' => 'Bearer realm=\"api\"'
+        ]);
+    }
+}
+// ----------------------------------------------------
+
 if (@$requestUri[3]=='iiif') {
 
     if($method=='search'){
@@ -183,9 +313,8 @@ if (@$requestUri[3]=='iiif') {
 
         include_once '../../hserv/controller/iiif_presentation.php';
     }else{
-        exitWithError('Method Not Allowed', 405);
+        exitWithError('Method Not Allowed DDD', 405);
     }
-
 
 }elseif (@$entities[@$requestUri[3]]=='System') {
     //login and logout actions
@@ -198,8 +327,8 @@ if (@$requestUri[3]=='iiif') {
 
     if($requestUri[3]==='login'){
 
-        if(!$system->doLogin(filter_var(@$req_params['fields']['login'], FILTER_SANITIZE_STRING),
-                             @$req_params['fields']['password'], 'shared'))
+        if(!$system->doLogin(filter_var($req_params['fields']['login']??$req_params['login']??null, FILTER_SANITIZE_STRING),
+                             $req_params['fields']['password']??$req_params['password']??null, 'shared'))
         {
             $system->errorExitApi();
         }else{
@@ -237,6 +366,62 @@ else
 exit;
 
 /**
+ * ADDED:
+ * Authenticate current API request from Authorization: Bearer <jwt>
+ * and set current user into System.
+ *
+ * @param hserv\System $system
+ * @return void
+ */
+function authenticateApiRequestWithJwt($system){
+
+    global $jwt_Secret;
+
+    if(!isset($jwt_Secret) || strlen($jwt_Secret) < 8){
+        // JWT auth is not configured; just return without authenticating.
+        return;
+    }
+
+    $auth = UJwt::get_auth_header();
+    if(!$auth){
+        return;
+    }
+
+    if(!preg_match('/^Bearer\s+(.+)$/i', $auth, $m)){
+        exitWithError('Invalid Authorization header', 401, [
+            'WWW-Authenticate' => 'Bearer error="invalid_request"'
+        ]);
+    }
+
+    $payload = UJwt::jwt_verify($m[1], $jwt_Secret);
+    if($payload === false){
+        exitWithError('Invalid token', 401, [
+            'WWW-Authenticate' => 'Bearer error="invalid_token"'
+        ]);
+    }
+
+    $userID = @$payload['sub'];
+    if(!$userID){
+        exitWithError('Invalid token payload', 401, [
+            'WWW-Authenticate' => 'Bearer error="invalid_token"'
+        ]);
+    }
+
+    // Optional scope enforcement:
+    // $scope = $payload['scope'] ?? null;
+    // if($scope !== 'read:data'){
+    //     exitWithError('Insufficient scope', 403, [
+    //         'WWW-Authenticate' => 'Bearer error="insufficient_scope"'
+    //     ]);
+    // }
+
+    $system->setCurrentUser([
+        'ugr_ID' => $userID,
+        'ugr_Groups' => user_getWorkgroups($system->getMysqli(), $userID)
+    ]);
+}
+
+/**
  * Outputs a JSON error message and exits the script.
  *
  * Sets the HTTP response code and content type, then prints a JSON
@@ -244,12 +429,17 @@ exit;
  *
  * @param string $message The error message.
  * @param int $code The HTTP status code.
+ * @param array $headers Optional response headers.
  * @return void
  */
-function exitWithError($message, $code){
+function exitWithError($message, $code, $headers = array()){
 
     header(HEADER_CORS_POLICY);
     header(CTYPE_JSON);
+
+    foreach($headers as $k => $v){
+        header("$k: $v");
+    }
 
     http_response_code($code);
     print json_encode(array("status"=>'invalid', "message"=>$message));

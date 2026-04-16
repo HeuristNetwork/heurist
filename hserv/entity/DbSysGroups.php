@@ -122,6 +122,8 @@ class DbSysGroups extends DbEntityBase
                     array_push($from_table, 'sysUsrGrpLinks');
                 }
         }
+        
+        if(@$this->data['details']==null) {$this->data['details'] = 'full';}
 
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){

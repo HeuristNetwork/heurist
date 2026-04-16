@@ -869,7 +869,7 @@ abstract class DbEntityBase
     protected function _validateFieldsForSearch(){
 
             foreach($this->data['details'] as $fieldname){
-                if(!@$this->fields[$fieldname]){
+                if($fieldname && !@$this->fields[$fieldname]){
                     $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid field name ".$fieldname);
                     return false;
                 }

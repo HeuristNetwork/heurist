@@ -504,12 +504,13 @@ abstract class ExportRecords {
         }
 
         if(@$params['restapi']){
-
+            /*
             if(empty($this->rt_counts)){
                 http_response_code(404);
             }else{
                 http_response_code(200);
-            }
+            }*/
+            http_response_code(200);
         }
         //read and download file
         fileReadByChunks($this->tmp_destination);
