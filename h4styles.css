@@ -2737,7 +2737,7 @@ li.edit-form-tab > a{
 
 .rts-editor-actions{
 
-    width: 11em;
+    width: 13em;
     padding: 0.4em 0.3em;
 
     background: lightcyan;
@@ -2754,7 +2754,7 @@ li.edit-form-tab > a{
     padding: 2.5px 5px;
 }
 .rts-editor-actions .rts-editor-action .ui-icon{
-    font-size: 9px;
+    font-size: 1.3em;
     width: 0.8em;
 }
 .rts-editor-actions .rts-editor-action:hover{

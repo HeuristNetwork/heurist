@@ -1334,8 +1334,16 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             let it_was_vocab = recIDs.length == 1 && $Db.trm(recIDs[0], 'trm_ParentTermID') == 0;
 
+            let deleteMsg = it_was_vocab ? 'Deleting vocabulary...' : '';
+            deleteMsg = !it_was_vocab && recIDs.length > 1 ? `Deleting ${recIDs.length} terms...` : deleteMsg;
+            deleteMsg = !it_was_vocab && recIDs.length == 1 ? `Deleting term...` : deleteMsg;
+
+            window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, {'background-color':'#fff', 'opacity':1}, deleteMsg);
+
             window.hWin.HAPI4.EntityMgr.doRequest(request, 
                 function(response){
+
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
 
                     if(response.status == window.hWin.ResponseStatus.OK){
 
@@ -1382,7 +1390,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             let msg = 'Are you sure you wish to delete the ';
             msg += is_multi ? 'following terms:<br>' : this.options.auxilary;
-            msg += ' <strong>' + (!is_multi ? trm_labels[0] : trm_labels.join('<br>')) + '</strong>' + (is_multi ? '' : '?');
+            msg += ` <div style="max-height: 30em;overflow-y: auto;font-weight: bold;margin: 1em 0.5em 0px;">${!is_multi ? trm_labels[0] : trm_labels.join('<br>')}</div>${is_multi ? '' : '?'}`;
 
             window.hWin.HEURIST4.msg.showMsgDlg( 
                 msg, 
