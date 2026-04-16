@@ -238,7 +238,7 @@ $allowed_methods = array('search','add','save','delete');
 
 $method = getAction($method);
 if($method == null || !in_array($method, $allowed_methods)){
-    exitWithError('Method Not Allowed', 405);
+    exitWithError('Method Not Allowed CCC', 405);
 }
 
 if($method=='save' || $method=='add'){
@@ -277,7 +277,10 @@ $skip_auth_processing =
 
 // Routes that may be used anonymously, but should still use
 // current session/JWT if provided
-$allow_anonymous = ($resource === 'records' && $method === 'search');
+$allow_anonymous = false;
+if($method === 'search'){
+    $allow_anonymous = ($resource === 'records' || $resource === 'groups' || $resource === 'users');
+}
 
 if(!$skip_auth_processing){
     $system = new hserv\System();
@@ -310,7 +313,7 @@ if (@$requestUri[3]=='iiif') {
 
         include_once '../../hserv/controller/iiif_presentation.php';
     }else{
-        exitWithError('Method Not Allowed', 405);
+        exitWithError('Method Not Allowed DDD', 405);
     }
 
 }elseif (@$entities[@$requestUri[3]]=='System') {

@@ -6,10 +6,9 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    {"key":"localBaseUrl","value":"http://127.0.0.1"},
-    {"key":"baseUrl","value":"https://heuristref.net","type":"default","enabled":true},
-    {"key":"apiPrefix","value":"/heurist/api"},
-    {"key":"version","value":"heurist"},
+    {"key":"baseUrl","value":"https://heuristref.net"},
+    {"key":"apiPrefix","value":"/h7-alpha/api"},
+    {"key":"version","value":"h7-alpha"},
     {"key":"db","value":"api_test"},
     {"key":"username","value":"CHANGE_ME"},
     {"key":"password","value":"CHANGE_ME"},
@@ -77,4 +76,116 @@
     },
     {
       "name": "3. Session auth",
+      "item": [
+        {
+          "name": "Login (session cookie)",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });"]}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"login\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"},
+            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/login","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","login"]}
+          }
+        },
+        {
+          "name": "Session-authenticated private record",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });","const body = pm.response.json();","pm.test('private record visible after session login', function () { pm.expect(body.records.length).to.eql(1); });"]}}],
+          "request": {
+            "method": "GET",
+            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/records?q=ids:{{privateRecordId}}&fmt=json","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","records"],"query":[{"key":"q","value":"ids:{{privateRecordId}}"},{"key":"fmt","value":"json"}]}
+          }
+        },
+        {
+          "name": "Session-authenticated RST",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });","pm.test('rst_ID returned', function () { pm.expect(pm.response.json()).to.have.property('rst_ID'); });"]}}],
+          "request": {
+            "method": "GET",
+            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/rst/{{rstId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","rst","{{rstId}}"]}
+          }
+        },
+        {
+          "name": "Logout",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });"]}}],
+          "request": {
+            "method": "POST",
+            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/logout","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","logout"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. JWT auth",
+      "item": [
+        {
+          "name": "Get JWT",
+          "event": [
+            {"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });","const body = pm.response.json();","pm.test('access_token exists', function () { pm.expect(body.access_token).to.be.a('string').and.not.empty; });","pm.test('token_type is Bearer', function () { pm.expect(body.token_type).to.eql('Bearer'); });","pm.collectionVariables.set('jwtToken', body.access_token);"]}}
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key":"Content-Type","value":"application/json"}],
+            "body": {"mode":"raw","raw":"{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\",\n  \"db\": \"{{db}}\"\n}"},
+            "url": {"raw":"{{baseUrl}}/heurist/hserv/controller/auth.php","host":["{{baseUrl}}"],"path":["heurist","hserv","controller","auth.php"]}
+          }
+        },
+        {
+          "name": "JWT-authenticated private record",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });","const body = pm.response.json();","pm.test('private record visible with JWT', function () { pm.expect(body.records.length).to.eql(1); });"]}}],
+          "request": {
+            "auth": {"type":"bearer","bearer":[{"key":"token","value":"{{jwtToken}}","type":"string"}]},
+            "method": "GET",
+            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/records?q=ids:{{privateRecordId}}&fmt=json","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","records"],"query":[{"key":"q","value":"ids:{{privateRecordId}}"},{"key":"fmt","value":"json"}]}
+          }
+        },
+        {
+          "name": "JWT-authenticated RST",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 200', function () { pm.response.to.have.status(200); });","pm.test('rst_ID returned', function () { pm.expect(pm.response.json()).to.have.property('rst_ID'); });"]}}],
+          "request": {
+            "auth": {"type":"bearer","bearer":[{"key":"token","value":"{{jwtToken}}","type":"string"}]},
+            "method": "GET",
+            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/rst/{{rstId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","rst","{{rstId}}"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Negative JWT test",
+      "item": [
+        {
+          "name": "Invalid JWT -> 401",
+          "event": [{"listen":"test","script":{"type":"text/javascript","exec":["pm.test('Status is 401', function () { pm.response.to.have.status(401); });","const body = pm.response.json();","pm.test('Invalid token message', function () { pm.expect(body.message).to.eql('Invalid token'); });"]}}],
+          "request": {
+            "header": [{"key":"Authorization","value":"Bearer abracadabra"}],
+            "method": "GET",
+            "url": {"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/rst/{{rstId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","rst","{{rstId}}"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Extra reference reads",
+      "item": [
+        {
+          "name": "Get rectype 10",
+          "request": {"auth": {"type":"bearer","bearer":[{"key":"token","value":"{{jwtToken}}","type":"string"}]},"method":"GET","url":{"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/rty/{{rtyId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","rty","{{rtyId}}"]}}
+        },
+        {
+          "name": "Get detail type 1",
+          "request": {"auth": {"type":"bearer","bearer":[{"key":"token","value":"{{jwtToken}}","type":"string"}]},"method":"GET","url":{"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/dty/{{dtyId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","dty","{{dtyId}}"]}}
+        },
+        {
+          "name": "Get term 6529",
+          "request": {"auth": {"type":"bearer","bearer":[{"key":"token","value":"{{jwtToken}}","type":"string"}]},"method":"GET","url":{"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/trm/{{trmId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","trm","{{trmId}}"]}}
+        },
+        {
+          "name": "Get user 2",
+          "request": {"auth": {"type":"bearer","bearer":[{"key":"token","value":"{{jwtToken}}","type":"string"}]},"method":"GET","url":{"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/users/{{userId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","users","{{userId}}"]}}
+        },
+        {
+          "name": "Get group 1",
+          "request": {"auth": {"type":"bearer","bearer":[{"key":"token","value":"{{jwtToken}}","type":"string"}]},"method":"GET","url":{"raw":"{{baseUrl}}{{apiPrefix}}/{{db}}/groups/{{groupId}}","host":["{{baseUrl}}"],"path":["heurist","api","{{db}}","groups","{{groupId}}"]}}
+        }
+      ]
+    }
+  ]
 }

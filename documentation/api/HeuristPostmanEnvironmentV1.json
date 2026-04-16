@@ -1,0 +1,24 @@
+{
+  "name": "Heurist API - Local",
+  "values": [
+    {"key":"localBaseUrl","value":"http://127.0.0.1","type":"default","enabled":true},
+    {"key":"baseUrl","value":"https://heuristref.net","type":"default","enabled":true},
+    {"key":"apiPrefix","value":"/h7-alpha/api","type":"default","enabled":true},
+    {"key":"version","value":"h7-alpha","type":"default","enabled":true},
+    {"key":"db","value":"api_test","type":"default","enabled":true},
+    {"key":"username","value":"CHANGE_ME","type":"default","enabled":true},
+    {"key":"password","value":"CHANGE_ME","type":"secret","enabled":true},
+    {"key":"jwtToken","value":"","type":"default","enabled":true},
+    {"key":"publicRecordId","value":"1","type":"default","enabled":true},
+    {"key":"privateRecordId","value":"2","type":"default","enabled":true},
+    {"key":"rtyId","value":"10","type":"default","enabled":true},
+    {"key":"dtyId","value":"1","type":"default","enabled":true},
+    {"key":"rstId","value":"12","type":"default","enabled":true},
+    {"key":"trmId","value":"6529","type":"default","enabled":true},
+    {"key":"userId","value":"2","type":"default","enabled":true},
+    {"key":"groupId","value":"1","type":"default","enabled":true},
+    {"key":"iiifFileId","value":"a26f83404b3689e9473b90563ae874b959b849ed","type":"default","enabled":true}
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2026-04-15T00:00:00.000Z"
+}

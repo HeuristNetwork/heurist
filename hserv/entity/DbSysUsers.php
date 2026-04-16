@@ -124,6 +124,8 @@ class DbSysUsers extends DbEntityBase
             array_push($where, '(ugr_ID NOT IN (SELECT ugr_ID FROM sysUGrps,sysUsrGrpLinks '
                 .'WHERE (ugl_UserID = ugr_ID) AND (ugl_GroupID='.$not_in_group.') ))');
         }
+        
+        if(@$this->data['details']==null) {$this->data['details'] = 'list';}
 
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
