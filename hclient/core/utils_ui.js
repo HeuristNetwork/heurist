@@ -2894,8 +2894,15 @@ window.hWin.HEURIST4.ui = {
         let surl = window.hWin.HAPI4.baseURL;
         
         if(window.hWin.HAPI4.sysinfo.use_redirect){
+
             let extraSlash = surl.endsWith('/') ? '' : '/';
             surl += `${extraSlash}${window.hWin.HAPI4.database}/tpl/${smarty_template}/`+encodeURIComponent(query);
+
+            // check for Huma-Num custom sub-domain (e.g. DB_NAME.huma-num.fr), otherwise it won't redirect to report
+            let leadingURI = surl.indexOf('huma-num.fr') > 0 && surl.indexOf('heurist.huma-num.fr') < 0 ? extraSlash : `${extraSlash}${window.hWin.HAPI4.database}/`;
+
+            surl += `${leadingURI}tpl/${smarty_template}/${query}`;
+
         }else{
             if(window.hWin.HEURIST4.util.isPositiveInt(query)){
                 query = 'ids:'+query;
