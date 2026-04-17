@@ -2608,6 +2608,7 @@ $.widget( "heurist.search_faceted", {
 
                             //convert to jquery selectmenu
                             let selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
+                            selObj.hSelect('option', { searchable: true, searchType: 'trm', searchNoResults: 'No terms match the filter' });
                             selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
                             selObj.hSelect( "widget" ).css({'background':'none',
                                                                 'width':'auto',
@@ -3661,9 +3662,11 @@ $.widget( "heurist.search_faceted", {
                             });                            
                             */
 
-                            if ($sel && typeof $sel.hSelect === 'function') {                           
+                            if ($sel && typeof $sel.hSelect === 'function') {
+                                const isFreetext = field.type === 'freetext';
                                 let selObj = window.hWin.HEURIST4.ui.initHSelect($sel, false);
-                                selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em','max-width':'400px'});
+                                selObj.hSelect('option', { searchable: true, searchType: isFreetext ? 'std' : 'trm', searchNoResults: `No ${isFreetext ? 'labels' : 'terms'} match the filter` })
+                                selObj.hSelect( "menuWidget" ).css({'font-size':'0.9em'});
                                 selObj.hSelect( "widget" ).css({'background':'none',
                                                                     'width':'auto',
                                                                     'min-width':'100px',

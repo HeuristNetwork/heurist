@@ -3724,11 +3724,25 @@ hSelect - decendant of jquery.selectmenu
 */
 $.widget( "heurist.hSelect", $.ui.selectmenu, {
 
+    /**
+     * @property {boolean} groupings whether to group terms under headings/expanders
+     * @property {string} groupingsType what to base the grouping on {'trm', 'depth'}
+     * @property {function} onClickingExpand event handler for when an expander is click
+     * @property {boolean} searchable whether to include a searchbox to the dropdown
+     * @property {Array|Object} searchControls allow additional controls placed next to the search box
+     * @property {function} onSearchInput event handler for when the searchbox has a change (input event)
+     * @property {string} searchNoResults message to show when there are no results
+     * @property {string} searchType what to base the searching on {'trm', 'rec', 'std'}
+     */
     options:{
         groupings: false,
         groupingsType: '',
         onClickingExpand: null,
-        searchable: false // to implmenet, general search
+        searchable: false,
+        searchControls: [],
+        onSearchInput: null,
+        searchNoResults: 'No results found',
+        searchType: ''
     },
 
     _toggleAttr: function(){
@@ -3742,9 +3756,14 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
 
         let buttonItem = $( "<span>", {
             "class": "ui-selectmenu-text"
-        })
+        });
 
-        buttonItem.html(item.label).css({'min-height': '17px'});
+        let label = item.label;
+        if(!label && this.options.searchable){
+            label = this.menu.find('.ui-menu-item-wrapper').first().html();
+        }
+
+        buttonItem.html(label).css({'min-height': '17px'});
 
         if(window.hWin.HEURIST4.util.isColor(item.value)){
             buttonItem.css( "background-color", item.value )
@@ -3755,8 +3774,31 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
         return buttonItem;
     },
 
+    open: function(event){
+        this._super(event);
+
+        if(this.options.disabled){
+            return;
+        }
+
+        if(this._searchItem){ // ensure the search 'option' cannot be selected
+
+            this._searchItem.removeClass('ui-menu-item');
+            this._searchItem.find('[role="option"]').attr('role', '');
+            this._searchItem.find('.ui-menu-search-container').removeClass('ui-menu-item-wrapper ui-state-active');
+
+            this._searchInput.trigger('focus'); // auto focus input
+            this._searchInput[0].select(); // highlight text
+        }
+    },
+
     _renderMenu: function( ul, items ) {
+
         this._super(ul, items);
+
+        if(this.options.searchable){
+            this._setupSearchBox();
+        }
 
         if(this.options.groupings){
             this._setupGrouping();
@@ -3764,6 +3806,7 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     },
 
     _renderItem: function( ul, item ) {
+
         let li = $( "<li>" ),
         wrapper = $( "<div>", { html: item.label } ); 
 
@@ -3863,11 +3906,368 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
 
     },
 
+    /* Internal Search */
+    _searchItem: null,
+    _searchInput: null,
+    _searchControls: {},
+    _searchNoResults: null,
+    _searchType: null,
+    _handledSearching: ['trm', 'rec', 'std'],
+    _searchTimeout: 0,
+    _searchStartPosition: 0,
+
+    _setupSearchBox: function(){
+
+        if(this._searchItem){ // search 'option' already exists
+            return;
+        }
+        if(this._handledSearching.indexOf(this.options.searchType) < 0){
+            this.options.searchType = 'std';
+        }
+        this._searchType = this.options.searchType;
+
+        let searchInput = `<div class="ui-menu-search-container" style="padding: 10px 0px;">
+            <span style="padding-right: 10px;vertical-align: sub;">
+                <img src="${window.hWin.HAPI4.baseURL}hclient/assets/16x16.gif" class="rt-icon rt-icon2" style="background-image: url(&quot;${window.hWin.HAPI4.baseURL}hclient/assets/v6/filter_icon_black18.png&quot;);" />
+                <input class="ui-menu-search-input" size="8" style="outline: none;background: none;border: 1px solid lightgray;" />
+                <span class="ui-menu-search-clear smallbutton ui-icon ui-icon-circlesmall-close" tabindex="-1" title="Clear entered" style="position: relative;cursor: pointer;outline: none;box-shadow: none;border-color: transparent;"></span>
+                <span class="ui-menu-search-controls" style="padding: 0 0 0 10px;cursor: pointer;"></span>
+            </span>
+            <div class="ui-menu-search-not-found" style="padding: 10px;color: darkgreen;display: none;width: 210px;">${this.options.searchNoResults}</div>
+        </div>`;
+
+        this._searchItem = $('<li>', {
+            html: searchInput,
+            class: 'ui-menu-search',
+            style: 'position: sticky;top: 0px;background: inherit;z-index: 1000;'
+        }).data('ui-selectmenu-item', {index: 0, value: '', disabled: false, hidden: false, optgroup: ''});
+
+        this.menu.prepend(this._searchItem);
+
+        this._searchInput = this._searchItem.find('.ui-menu-search-input');
+        this._searchControls['clear'] = this._searchItem.find('.ui-menu-search-clear');
+        this._searchNoResults = this._searchItem.find('.ui-menu-search-not-found');
+
+        this._on(this._searchInput, {
+            keyup: (event) => {
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+                event.stopImmediatePropagation();
+
+                let value = this._searchInput.val();
+                this.performSearch(value);
+            },
+            keydown: (event) => {
+
+                let value = this._searchInput.val();
+                if(typeof this.options.onSearchInput === 'function'){
+                    this.options.onSearchInput.call(this, event, value);
+                    if(event.defaultPrevented){
+                        return;
+                    }
+                }
+
+                this._searchInputHandler(event);
+            },
+            change: (event) => {
+
+                window.hWin.HEURIST4.util.stopEvent(event);
+                event.stopImmediatePropagation();
+
+                let value = this._searchInput.val();
+                this.performSearch(value);
+            }
+        });
+
+        this._on(this._searchControls['clear'], {
+            click: () => {
+                this._searchInput.val('').trigger('change');
+            }
+        });
+    },
+
+    _searchInputHandler: function(event){
+
+        /**
+         * Allows:
+         *  Space bar to add a space (default was select and close)
+         *  Press Enter to auto select the only displayed option
+         *  Press Tab to change focus to the dropdown's first item
+         *  Control/Meta + 'A' to select all input, and
+         *  Highlighting input via arrow keys, control/meta, and shift keys
+         */
+
+        const curValue = this._searchInput.val();
+
+        const keyCode = event.keyCode || event.which;
+
+        const CTRLPressed = event.ctrlKey || event.metaKey;
+        const shiftPressed = event.shiftKey;
+
+        const enterPressed = event.key === "Enter" || keyCode === 13;
+        const tabPressed = event.key === "Tab" || keyCode === 9;
+
+        const leftArrow = event.key === "ArrowLeft" || keyCode === 37;
+        const rightArrow = event.key === "ArrowRight" || keyCode === 39;
+
+        const addSpace = event.key === " " || keyCode === 32 || (enterPressed && (shiftPressed || CTRLPressed));
+
+        const autoSelectResult = enterPressed && $menu.find('.ui-menu-item:visible').length === 1;
+        const focusResults = tabPressed && $menu.find('.ui-menu-item:visible').length > 0;
+        const highlightAllText = (event.key === "A" || keyCode === 13 || keyCode === 65) && CTRLPressed;
+        const moveCursor = leftArrow || rightArrow;
+
+        let handledKey = true;
+
+        if(addSpace){
+
+            let value = this._searchInput.val();
+            let start = this._searchInput[0].selectionStart;
+            let end = this._searchInput[0].selectionEnd;
+
+            // Add space and update value
+            value = `${value.substring(0, start)} ${value.substring(end)}`;
+            this._searchInput.val(value);
+
+            // Correct cursor position
+            this._searchStartPosition = ++start;
+            this._searchInput[0].setSelectionRange(this._searchStartPosition, this._searchStartPosition);
+        }else if(autoSelectResult){ // auto select only result
+
+            $menu.find('.ui-menu-item:visible').trigger('mouseover').trigger('click'); // trigger selection, needs focus first
+        }else if(focusResults){ // focus first item
+
+            $($menu.find('.ui-menu-item:visible')[0]).trigger('mouseover'); // change focus to options
+        }else if(highlightAllText){
+
+            // Highlight input text
+            this._searchInput[0].setSelectionRange(0, curValue.length);
+            this._searchStartPosition = curValue.length;
+        }else if(moveCursor){
+
+            // ensure start is within bounds
+            this._searchStartPosition = this._searchStartPosition < 0 ? 0 : this._searchStartPosition;
+            this._searchStartPosition = this._searchStartPosition > curValue.length ? curValue.length : this._searchStartPosition;
+
+            let swap_start = false;
+            let cur_start = this._searchInput[0].selectionStart;
+            let end_pos = this._searchInput[0].selectionEnd;
+
+            if(CTRLPressed && shiftPressed){
+
+                if(cur_start == end_pos){
+                    this._searchStartPosition = rightArrow ? cur_start : 0;
+                    end_pos = rightArrow ? curValue.length : end_pos;
+                    swap_start = rightArrow;
+                }else if(this._searchStartPosition == end_pos){ // already selected section
+                    this._searchStartPosition = cur_start;
+                    end_pos = rightArrow ? curValue.length : this._searchStartPosition;
+                    swap_start = true;
+                }else{
+                    this._searchStartPosition = rightArrow ? end_pos : 0;
+                }
+
+            }else if(shiftPressed){
+
+                if(cur_start == end_pos){
+                    this._searchStartPosition = rightArrow ? cur_start : --cur_start;
+                    end_pos = rightArrow ? ++end_pos : end_pos;
+                    swap_start = rightArrow;
+                }else if(this._searchStartPosition == end_pos){ // already selected section
+                    this._searchStartPosition = cur_start;
+                    end_pos = rightArrow ? ++end_pos : --end_pos;
+                    swap_start = true;
+                }else{
+                    this._searchStartPosition = rightArrow ? ++cur_start : --cur_start;
+                }
+
+            }else if(CTRLPressed){
+
+                this._searchStartPosition = rightArrow ? curValue.length : 0;
+                end_pos = this._searchStartPosition;
+
+            }else{
+
+                if(cur_start == end_pos){
+                    this._searchStartPosition = rightArrow ? ++this._searchStartPosition : --this._searchStartPosition;
+                }else if(this._searchStartPosition == end_pos){
+                    this._searchStartPosition = rightArrow ? this._searchStartPosition : cur_start; 
+                }else{
+                    this._searchStartPosition = rightArrow ? end_pos : this._searchStartPosition;
+                }
+
+                this._searchStartPosition = this._searchStartPosition < 0 ? 0 : this._searchStartPosition;
+                this._searchStartPosition = this._searchStartPosition > curValue.length ? curValue.length : this._searchStartPosition;
+
+                end_pos = this._searchStartPosition;
+            }
+
+            this._searchInput[0].setSelectionRange(this._searchStartPosition, end_pos);
+
+            if(swap_start){ // replace this._searchStartPosition w/ end_pos
+                this._searchStartPosition = end_pos;
+            }
+
+        }else{
+            ++this._searchStartPosition;
+            handledKey = false;
+        }
+
+        if(handledKey){
+            window.hWin.HEURIST4.util.stopEvent(event);
+            event.stopImmediatePropagation();
+        }
+    },
+
+    performSearch: function(value){
+
+        if(!value){
+            value = this._searchInput.val();
+        }
+
+        if(value.length < 2){
+
+            this.menu.find('li').css('display','list-item');
+            this._searchNoResults.hide();
+
+            value.length === 0 || this.openAllGroupings();
+
+            return;
+        }
+
+        value = value.toLowerCase();
+
+        if(this._searchTimeout == 0){
+            this.menu.find('.ui-menu-item-wrapper').css('cursor','progress');
+        }
+
+        const elementData = this.element.data('hselect-data');
+        let key = '';
+        if(elementData){
+            key = `${elementData['rst_RecTypeID']}-${elementData['rst_DetailTypeID']}`;
+        }
+
+        let showingOptions = [];
+
+        let hierarchy = [];
+        if(this._searchType === 'trm' && value.indexOf('.') > 0){
+            hierarchy = value.split('.');
+            value = hierarchy.pop();
+        }
+
+        $.each(this.menu.find('.ui-menu-item-wrapper'), (i, item) => {
+
+            let title = $(item).text().toLowerCase();
+            if(this._searchType === 'rec' && Object.hasOwn(window.hWin.HEURIST4.browseRecordCache, key)){
+                title = window.hWin.HEURIST4.browseRecordCache[key][i]['rec_Title'].toLowerCase();
+                title = title.replace(/[\r\n]+/g, ' ');
+            }
+
+            if(title.indexOf(value) >= 0){
+                
+                let isOK = true;
+
+                if(hierarchy.length > 0){ // check parents if there is hierarchy
+
+                    let $childItem = $(item);
+                    let depth = parseInt($childItem.attr('data-depth'));
+                    
+                    //find previous element with depth-1 - parent term
+                    isOK = false;
+                    if(depth > 0){
+
+                        let idx = hierarchy.length - 1;
+
+                        $.each($childItem.parent().prevAll(), (i, li_item) => {
+
+                            let $parentItem = $(li_item).find('.ui-menu-item-wrapper');
+                            let parentDepth = parseInt($parentItem.attr('data-depth'));
+
+                            if(parentDepth < depth){
+
+                                let title = $parentItem.text().toLowerCase();
+
+                                if(title.indexOf(hierarchy[idx]) < 0){
+                                    return false; //not found
+                                }
+
+                                idx--;
+                                if(parentDepth == 0 || idx < 0){
+                                    isOK = idx < 0;
+                                    return false; //break
+                                }
+                            }
+                        });                        
+                    }
+                }
+
+                if(isOK){
+                    $(item).parent().css('display', 'list-item');
+                    showingOptions.push( item ); //found
+                }
+
+            }else{
+                $(item).parent().css('display', 'none');
+            }
+        });
+
+        //show children of found items - for terms
+        if(this._searchType === 'trm'){
+
+            showingOptions.forEach((item) => {
+
+                item = $(item);
+                let depth = parseInt(item.attr('data-depth'));
+
+                //find previous element with depth-1 - parent term
+                if(depth > 0){
+
+                    $.each(item.parent().prevAll(), (i, li_item) => {
+
+                        let opt_item = $(li_item).find('.ui-menu-item-wrapper');
+                        let depth2 = parseInt(opt_item.attr('data-depth'));
+
+                        if(depth2 < depth){
+                            $(li_item).css('display', 'list-item');
+                            if(depth2 == 0) return false; //break
+                        }
+
+                    });
+                }
+
+                //find next elements with depth+1
+                if(depth >= 0){
+
+                    $.each(item.parent().nextAll(), (i, li_item) => {
+
+                        let opt_item = $(li_item).find('.ui-menu-item-wrapper');
+                        let depth2 = parseInt(opt_item.attr('data-depth'));
+
+                        if(depth2 <= depth){
+                            return false; //break - the same level
+                        }else if(depth2 == depth + 1){
+                            //children
+                            $(li_item).css('display', 'list-item');
+                        }
+                    });
+
+                }
+            });
+        }
+
+        this._searchNoResults.css('display', showingOptions.length === 0 ? 'block' : 'none');
+
+        this._searchTimeout = setTimeout(() => {
+            this.menu.find('.ui-menu-item-wrapper').css('cursor','default');
+            this._searchTimeout=0;
+        },500);
+    },
+
     /* Headings/Groupings */
     _hasGroupings: false,
     _groupings: {},
     _groupType: null,
-    _handledGrouping: ['trm', 'other'],
+    _handledGrouping: ['trm', 'depth'],
     _groupExpanded: [],
 
     _setupGrouping: function(){
