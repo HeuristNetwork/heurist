@@ -213,7 +213,7 @@ $.widget( "heurist.search", {
         this.input_search_prompt = $( "<span>" )
         .text(this._is_publication?'':window.hWin.HR('search_filter_hint'))
         .addClass('graytext')
-        .css({'font-size':'0.8em', 'margin': '18px 0 0 0.5em','position': 'absolute'})
+        .css({'font-size':'0.8em', 'margin': '18px 0 55px 0.5em','position': 'absolute'})
         .appendTo( this.div_search_input );
         this._on( this.input_search_prompt, {click: function(){
             this._setFocus();
@@ -222,11 +222,11 @@ $.widget( "heurist.search", {
 
         this.input_search = $( "<textarea>", {rows: 2, title: 'Insert value to search'} )
         .css({
-            'max-width':'99%',
+            'width':'calc(100% - 55px)',
             'resize':'none', 
-            'padding':'2px 50px 2px 1.5em',
+            'padding':'2px 0px 2px 1.5em',
             'line-height': '14px', 
-            'min-width':'80px', 'width':'100%' }) 
+            'min-width':'80px' }) 
         .addClass("text ui-widget-content ui-corner-all")
         .uniqueId()
         .appendTo( this.div_search_input );
@@ -270,10 +270,9 @@ $.widget( "heurist.search", {
             this.input_search_prompt2.addClass('ui-widget-content').css({border:'none',top:'52px'});
 
             this.input_search_prompt2.css({height:'calc(100%-2px)',
-                width:'calc(100%-2px)'});    
+                width: this.input_search.outerWidth()-5});   //'calc(100%-55px)'  
         }else{
             this.input_search_prompt2.css({top:'52px'}); //'background':'#F4F2F4',
-            this.input_search.css('padding-right', '28px');
         }
 
         // Search textarea
@@ -320,7 +319,7 @@ $.widget( "heurist.search", {
         //disable because of initial search
         if(this.options.btn_visible_newrecord){
             window.hWin.HEURIST4.util.setDisabled(this.input_search, true); 
-            this.input_search.css({'width':'400px','height':'1.4em','max-width':'650px'});
+            this.input_search.css({'height':'1.4em','max-width':'650px'});
             this.div_search.css({'float':'left'});
         }else{
 
@@ -420,12 +419,14 @@ $.widget( "heurist.search", {
 
             // Saved filters 'dropdown'
             this.btn_saved_filters = 
-            $('<span class="ui-main-color" '
-                +'style="font-size: 9px;position: absolute;min-width: 50px;cursor:pointer;">'
-                +'<span style="display:inline-block;width:30px;margin-top: 4px;">saved filters</span>'
-                +'<span class="ui-icon ui-icon-carat-1-s" style="font-size: inherit;height: 11px;display: inline-block;vertical-align: super;">'
+            $('<span class="ui-heurist-explore ui-widget-content" '  //ui-main-color
+                +'style="font-size:10px;cursor:pointer;float:right;height:90%;width:30px;text-align:center">'
+                +'<span style="display:inline-block;width:30px;margin-top: 4px;">saved filters</span><br>'
+                +'<span class="ui-icon ui-icon-carat-1-s" style="font-size: 12px;height: 11px;display: inline-block;vertical-align: super;">'
                 +'</span></span>')
-            .appendTo(this.div_buttons);
+            .appendTo(this.div_search_input);  //div_buttons
+            
+            //position: absolute;min-width: 50px;
 
             this._on(this.btn_saved_filters, {click: function(){
                 let widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('slidersMenu');
@@ -945,8 +946,10 @@ $.widget( "heurist.search", {
 
                 if(this.element.width()<201){
                     this.div_buttons.hide();
+                    this.btn_saved_filters.hide();
                 }else{
                     this.div_buttons.show();
+                    this.btn_saved_filters.show();
                 }
 
                 if(!this.options.btn_visible_newrecord){
@@ -954,8 +957,7 @@ $.widget( "heurist.search", {
                     let parent_width = this.element.width() * (showing_label ? 0.65 : 0.75);
 
                     this.input_search.parent().width(parent_width);
-                    this.input_search.width(parent_width - 52);
-                    this.input_search_prompt2.width(parent_width);
+                    this.input_search_prompt2.width(this.input_search.outerWidth()-5); //parent_width-55
                 }
 
                 this.div_buttons.position({
@@ -964,15 +966,6 @@ $.widget( "heurist.search", {
                     of: this.div_search_input
                 });
 
-            // Move 'saved filters' dropdown
-            if(this.btn_saved_filters && this.btn_saved_filters.length != 0){
-
-                this.btn_saved_filters.position({
-                    my: 'right top',
-                    at: 'right top',
-                    of: this.div_search_input
-                });
-            }
         }
 
     },

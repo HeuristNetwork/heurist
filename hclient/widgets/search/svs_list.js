@@ -332,7 +332,8 @@ $.widget( "heurist.svs_list", {
         if(this.options.is_h6style){
             this.element.css({'overflow':'hidden'});
             //add title 
-            this.div_header =  $('<div class="ui-heurist-header" style="top:0px;padding:9px;"><span>'+window.hWin.HR('Saved Filters')
+            this.div_header =  $('<div class="ui-heurist-header" style="top:0px;padding:9px;">'
++'<span>'+window.hWin.HR('Saved Filters')
 +'</span><button type="button" class="ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close" '
 +'style="float:right;height: 17px;min-width: 17px;" title="Close">'
 +'<span class="ui-button-icon ui-icon ui-icon-closethick"></span><span class="ui-button-icon-space"> </span>Close</button>'            
@@ -557,6 +558,10 @@ $.widget( "heurist.svs_list", {
                 this.accordeon.css('top', this.div_header.height() + additional_height + 5);
             }
         }
+    },
+    
+    refresh: function(){
+        this._refresh();
     },
 
     _setOption: function( key, value ) {
@@ -2454,6 +2459,16 @@ $.widget( "heurist.svs_list", {
                     //get hapi and perform search
                     window.hWin.HAPI4.RecordSearch.doSearch( this, request );
                     
+                }
+                
+                if(this.options.is_h6style){
+                    context_on_exit = { 
+                        svs_ID: svs_ID,
+                        query_name:qname, 
+                        params: params,
+                        search_realm: this.options.search_realm,
+                        search_page: this.options.search_page
+                    }
                 }
                 
             }
