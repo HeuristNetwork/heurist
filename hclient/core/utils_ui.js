@@ -1690,7 +1690,8 @@ window.hWin.HEURIST4.ui = {
             'overflow',
             'white-space',
             'object-fit',
-            'opacity'
+            'opacity',
+            'visibility'
         ]);
 
         const safeValue = (value) => {

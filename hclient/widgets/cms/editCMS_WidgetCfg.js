@@ -718,6 +718,8 @@ function editCMS_WidgetCfg( widget_cfg, _layout_content, $dlg, main_callback, on
                         on_change();
                     });
 
+                $dlg.find('.heurist_mediaViewer textarea[name="slideshowHeaderCss"]').val(opts['slideshowHeaderCss']??'');
+
                 // init record list selector (editing_input)
                 let rval = $dlg.find('.heurist_mediaViewer input[name="mediaViewer_recIDs"]').val();
                 rval = rval ? rval.split(',') : [0];
