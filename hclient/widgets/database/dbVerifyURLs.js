@@ -47,8 +47,8 @@ $.widget( "heurist.dbVerifyURLs", $.heurist.dbAction, {
      * @private
      */
     _initControls:function(){
-                // Backward compatibility: old dialogs may still instantiate with actionName="verifyurls"
-this._checkPreviousSession();
+        // Backward compatibility: old dialogs may still instantiate with actionName="verifyurls"
+        this._checkPreviousSession();
         return this._super();
     },
 

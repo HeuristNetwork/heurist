@@ -56,7 +56,7 @@ $.widget('heurist.progressReport', {
     _buildUI: function(){
         const o = this.options;
 
-        if (!o.session_id) {
+        if (!o.endpoint) {
             o.endpoint = window.hWin.HAPI4.baseURL + 'hserv/controller/progress.php';
         }
 
