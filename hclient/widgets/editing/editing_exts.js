@@ -1351,7 +1351,7 @@ function openSearchMenu(that, $select, has_filter=true, is_terms=false){
         }
     }
 
-    $inpt.trigger('focus');
+    $inpt.trigger('select'); // auto focus + highlight existing search
 }
 
 /**
@@ -1856,6 +1856,7 @@ function browseRecords(_editing_input, $input, popupTitle){
                     }
                 }
                 that.selObj.hSelect('menuWidget')
+                        .css('background', '#E1FFFF')
                         .position({my: "left top", at: "left bottom", of: $inpt_ele});
 
             }
@@ -2115,6 +2116,8 @@ function browseTerms(_editing_input, $input, value){
                 useHtmlSelect:false, eventHandlers:events, language_code: lang_code});
 
         that.selObj.hSelect('option', { groupings: allTerms !== 'relation', groupingsType: 'trm' });
+
+        that.selObj.hSelect('menuWidget').css('background', '#E1FFFF');
 
         $(that.selObj).hide(); //button will be hidden        
     }
