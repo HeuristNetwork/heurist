@@ -4719,7 +4719,8 @@ $.widget( "heurist.resultList", {
             recordset: this._currentRecordset,
             showing_subset: true,
             search_realm: this.options.search_realm,
-            query: query
+            query: query,
+            showing_collection: this._isCollectionUsed
         });
 
         this._renderPage(0);

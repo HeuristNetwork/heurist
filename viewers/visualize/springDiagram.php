@@ -547,6 +547,10 @@ function addNewConnections(recordIDs, data){
          */
         function showData(data, selectedRecordsIds, new_request, onSelectEvent, onRefreshData, onExpandRecords, onExpandLevel) {
 
+            if(visualise !== null){
+                visualise.destroy();
+            }
+
             // Initial message while building graph
             if(data && data.nodes && data.nodes.length > 0){ // Check if nodes array is not empty
                 $("#d3svg").html('<text x="25" y="25" fill="black">Building graph ...</text>');
@@ -578,10 +582,6 @@ function addNewConnections(recordIDs, data){
                     length = length / (record.depth+1);
                 }
                 return length;
-            }
-
-            if(visualise !== null){
-                visualise.destroy();
             }
 
             $(window).on('resize', onVisualizeResize); // Bind resize handler

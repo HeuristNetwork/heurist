@@ -248,10 +248,17 @@ let maxCountForLinks;
             $('#expanderSettings').attr('data-inited', 0).hide();
             $('.graphLevelControl').show();
 
+            $('#thematicNodesList').empty();
+            $('#thematicEdgesList').empty();
+            $('#showThematicContainer').hide();
+            $('#thematicSettings').hide();
+
             document.removeEventListener('mousedown', setupAutoHideToolbar);
             if(window.hWin.HEURIST4.util.isPositiveInt(window.visualiserInactivity)){
                 clearTimeout(window.visualiserInactivity);
             }
+
+            $('#toolbar').hide();
         }
 
         if(settings.minimal){
@@ -1846,6 +1853,9 @@ function setupThematicSettings(){
 
     const defaultNodeStyling = {iconColour: '#000000', iconOpacity: '100', fillColour: '#FFFFFF', fillOpacity: '100', display: 1};
     const defaultLineStyling = {lineColour: '#0070C0', lineOpacity: '100', display: 1};
+
+    nodeContainer.innerHTML = '';
+    edgeContainer.innerHTML = '';
 
     for(let i = 0; i < data.nodes.length; i++){
 

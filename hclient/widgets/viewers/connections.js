@@ -137,6 +137,11 @@ $.widget( "heurist.connections", {
                 //accept events from the same realm only
                 if(!isSameRealm) return;
 
+                if(data.showing_subset && that.options.show_selection){
+                    let selection = data.showing_collection ? window.hWin.HAPI4.getSelection(data.recordset, true) : null;
+                    that.options.selection = selection;
+                }
+
                 //find all relation within given result set
                 that.recordset_changed = true;
                 that.options.relations = null;
