@@ -1,13 +1,20 @@
+
+-- AddProceduresTriggers.sql - Adds necessary procedures and triggers to the raw database structure
+-- project     Heurist academic knowledge management system
+-- package     Admin
+-- ink         https://HeuristNetwork.org
+-- license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+-- copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ 
 -- Created by Steve White 2010-10-23
 -- Last updated 2 April 2011 Ian Johnson - removed deprecated archive triggers
 -- 2013-05-13 Arjen Lentz - added replacement functions for levenshtein.c and liposuction.c UDFs
 -- 2023-08  Artem Osmakov - added getEstDate
 
-
 -- This file contains the stored procedures and triggers for Heurist databases
 
 -- RUN FROM COMMAND LINE LOGGED IN AS ROOT IN DIRECTORY /var/www/html/h5-xx WITH:
---   mysql -u root -ppassword hdb_databasename < admin/setup/dbcreate/addProceduresTriggers.sql
+-- mysql -u root -ppassword hdb_databasename < admin/setup/dbcreate/addProceduresTriggers.sql
 -- Note: this file cannot be run in PHPMySQL because it doesn't recognise the delimiter changes
 
 -- MAY NOT REPORT ERRORS, POSSIBLE NEED TO SET STDOUT FIRST AND/OR USE TEE TO WRITE TO OUTPUT FILE

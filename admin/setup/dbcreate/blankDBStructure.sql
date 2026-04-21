@@ -1,6 +1,14 @@
+
+-- blankDBStrucutre.sql - create the basic table structure of the database
+-- project     Heurist academic knowledge management system
+-- package     Admin
+-- ink         https://HeuristNetwork.org
+-- license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+-- copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+
 -- --------------------------------------------------------
 
--- TO DO: After creating the structure from this file we need to:
+-- After creating the structure from this file we need to:
 --
 --        1. create referential constraints with AddReferentialConstraints.sql
 --        2. add stored procedures from AddProceduresTriggers.sql
@@ -952,6 +960,9 @@ CREATE TABLE usrWorkingSubsets (
 -- ------------------------------------------------------------------------------------------------
 
 -- STANDARD DATA FOR A NEW DATABASE
+
+-- *********  DO NOT DELETE THESE INSERTS WHICH ARE NOT PART OF THE DATABASE STRUCTURE DUMP ABOVE  ************
+
 -- This is run BEFORE triggers and referential constraints
 
 -- *** Update the following INSERT statement if database version # is changed

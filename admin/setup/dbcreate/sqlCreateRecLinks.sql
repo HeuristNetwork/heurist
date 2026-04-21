@@ -1,5 +1,13 @@
--- Created by Artem Osmakov 2014-11-12
--- Last updated 
+
+-- sqlCreateRecLinks.sql - create the record links cache table used to speed rfelationships
+-- project     Heurist academic knowledge management system
+-- package     Admin
+-- ink         https://HeuristNetwork.org
+-- license     https://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+-- copyright   (C) 2005-2023 University of Sydney, (C) 2024 onwards Heurist Network
+ 
+-- Created by Artem Osmakov (osmakov@gmail.com) 2014-11-12
+
 
 DROP TABLE IF EXISTS recLinks;
 
