@@ -1,0 +1,26 @@
+Documentation for merge_h7dev_to_h8dev.sh
+-----------------------------------------
+
+
+# For use on HeuristRef.net only
+# Merges changes in h7dev into a development branch h8dev
+# Fails and emails server managers if there are merge conflicts (successful merge does not mean the code is coherent ...)
+# ChatGPT 21 april 2026
+
+Use it with cron like this:
+
+MAILTO=support@heuristnetwork.org
+
+15 2 * * * /usr/local/bin/nightly_merge_h7_to_h8.sh > /dev/null
+
+Notes for your developers:
+
+this should run in a separate clone, not in a working copy anyone edits manually
+it will push automatically only if the merge succeeds
+if the merge fails, it prints the conflict details to stderr, exits non-zero, and cron will email the error output to MAILTO
+origin/h8dev is left untouched on failure
+
+One small practical point: if the server may create merge commits without a configured git identity, set these once in that clone or for that user:
+
+git config user.name "Heurist nightly merge"
+git config user.email "support@heuristnetwork.org"
