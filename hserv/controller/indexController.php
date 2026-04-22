@@ -75,8 +75,10 @@ require_once dirname(__FILE__).'/../../autoload.php';
     }
 
     if($allow_action){
-        if($action=='info'){
-            $res = DbRegis::registrationGet($req_params);
+        if($action=='url'){
+            $res = DbRegis::getDatabaseUrlLocal($req_params);
+        }elseif($action=='info'){
+            $res = DbRegis::registrationGetFromCentralIndexDb($req_params);
         }elseif($action=='register'){
             $res = DbRegis::registrationAdd($req_params);//returns ID or false
         }elseif($action=='update'){

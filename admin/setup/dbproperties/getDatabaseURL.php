@@ -66,7 +66,7 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
         $database_id = @$_REQUEST["id"];
     }
     $rec = array();
-    if($database_id>0){
+    if(isPositiveInt($database_id)){
 
         ConceptCode::setSystem($system2);
         $rty_ID_registered_database = ConceptCode::getRecTypeLocalID(HEURIST_INDEX_DBREC);

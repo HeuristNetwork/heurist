@@ -84,7 +84,7 @@ use hserv\structure\ConceptCode;
      * @return \mysqli|array A mysqli instance on success, or an array with an error code
      *                       and message on failure.
      */
-    function mysql__init($dbname){
+    function mysql__init($dbname=null){
         
         //connecction parameter defined in heuristConfigIni.php
         $mysqli = mysql__connection(HEURIST_DBSERVER_NAME, ADMIN_DBUSERNAME, ADMIN_DBUSERPSWD, HEURIST_DB_PORT);

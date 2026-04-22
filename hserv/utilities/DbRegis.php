@@ -58,17 +58,27 @@ class DbRegis {
      */
     public static function initialize()
     {
+        
         if (self::$initialized){
             return true;
         }
 
         self::$isOutSideRequest = (strpos(strtolower(HEURIST_INDEX_BASE_URL), strtolower(HEURIST_SERVER_URL))===false);
 
+        self::$system = new System();
+        
         if(!self::$isOutSideRequest){
             //connect
-            self::$system = new System();
-            if(self::$system->init(HEURIST_INDEX_DATABASE, true, false)){ //init without paths and consts
+            if(self::$system->init(HEURIST_INDEX_DATABASE, true, false)){ //init without consts
+                self::$system->initPathConstants();
                 self::$mysqli = self::$system->getMysqli();
+            }else{
+                self::addError();
+                return false;
+            }
+        }else{
+            if(self::$system->init(null, false, false)){ //init without consts
+                self::$system->initPathConstants();
             }else{
                 self::addError();
                 return false;
@@ -80,11 +90,12 @@ class DbRegis {
     }
 
     /**
-    * Request Heurist reference server
+    * Request Heurist reference server or a specific Heurist server.
     *
     * @param mixed $params
+    * @param string|null $serverBaseUrl Base Heurist URL, e.g. https://host/heurist/
     */
-    private static function registrationRemoteCall($params){
+    private static function registrationRemoteCall($params, $serverBaseUrl=null){
 
         if(@$params['db']!=null){
             unset($params['db']);//reset to avoid recursion
@@ -92,7 +103,13 @@ class DbRegis {
 
         $reg_record = null;
 
-        $remote_url = HEURIST_MAIN_SERVER.'/heurist/'  //temp - replace with HEURIST_INDEX_BASE_URL as soon as heurist will be updated
+        if($serverBaseUrl==null || $serverBaseUrl==''){
+            $serverBaseUrl = HEURIST_MAIN_SERVER.'/heurist/'; //temp - replace with HEURIST_INDEX_BASE_URL as soon as heurist will be updated
+        }else{
+            $serverBaseUrl = rtrim($serverBaseUrl, '/').'/';
+        }
+
+        $remote_url = $serverBaseUrl
                 .'hserv/controller/indexController.php?'
                 .http_build_query($params);
 
@@ -129,14 +146,299 @@ class DbRegis {
     */
     private static function addError($error=null, $msg=null)
     {
-        global $system;
+        //global $system;
         if($error==null){
-            $system->addErrorArr(self::$system->getError());//transfer from this $system
+            self::$system->addErrorArr(self::$system->getError());//transfer from this $system
         }elseif (is_array($error)){
-            $system->addErrorArr($error);
+            self::$system->addErrorArr($error);
         }else{
-            $system->addError($error, $msg);
+            self::$system->addError($error, $msg);
         }
+    }
+
+    private static function addErrorToCache($dbID, $errorMsg){
+        self::setCachedDatabaseUrl($dbID, 'failure:'.$errorMsg);
+        self::addError(HEURIST_NOT_FOUND, $errorMsg);
+    }
+    
+
+    private static function getLocalIndexFilePath(){
+        return rtrim(HEURIST_FILESTORE_ROOT, '/\\').DIRECTORY_SEPARATOR.'_INDEX_OF_REGISTERED_DATABASES.txt';
+    }
+
+    private static function getLocalUrlCacheFilePath(){
+        return rtrim(HEURIST_FILESTORE_ROOT, '/\\').DIRECTORY_SEPARATOR.'_CACHE_OF_REGISTERED_DATABASE_URLS.txt';
+    }
+
+    private static function isFileOutdated($filename, $maxAge){
+        return (!file_exists($filename) || !is_readable($filename) || (time() - @filemtime($filename)) > $maxAge);
+    }
+
+    private static function normalizeServerUrl($server, $withPortAndPath=false){
+        $server = trim((string)$server);
+        if($server=='') {return '';}
+
+        $server_lc = strtolower($server);
+        if(!(strpos($server_lc, HTTP_SCHEMA)===0 || strpos($server_lc, HTTPS_SCHEMA)===0)){
+            $server = HTTPS_SCHEMA.$server;
+        }
+
+        $parts = @parse_url($server);
+        if(!$parts || !@$parts['host']){
+            return rtrim($server, '/');
+        }
+
+        $scheme = @$parts['scheme'] ? strtolower($parts['scheme']) : 'https';
+        $host = strtolower($parts['host']);
+        $port = @$parts['port'] ? ':'.$parts['port'] : '';
+        $path = @$parts['path'] ? rtrim($parts['path'], '/') : '';
+
+        return $scheme.'://'.$host . ($withPortAndPath? $port.$path :'');
+    }
+
+    public static function extractServerUrl($url){
+        $url = trim((string)$url);
+        if($url=='') {return '';}
+
+        $parts = @parse_url($url);
+        if(!$parts || !@$parts['host']){
+            return rtrim(preg_replace('/[?&]db=[^&]*/i', '', $url), '?&/');
+        }
+
+        $scheme = @$parts['scheme'] ? strtolower($parts['scheme']) : 'https';
+        $host = strtolower($parts['host']);
+        $port = @$parts['port'] ? ':'.$parts['port'] : '';
+        $path = @$parts['path'] ? rtrim($parts['path'], '/') : '';
+
+        return $scheme.'://'.$host.$port.$path;
+    }
+
+    private static function makeDatabaseUrl($dbName){
+        return HEURIST_BASE_URL_PRO.'?db='.$dbName;
+    }
+
+    private static function readKeyValueFile($filename){
+        $rows = array();
+        if(!file_exists($filename) || !is_readable($filename)){
+            return $rows;
+        }
+
+        $lines = @file($filename, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if(!is_array($lines)){
+            return $rows;
+        }
+
+        foreach($lines as $line){
+            $line = trim($line);
+            if($line=='' || $line[0]=='#') {continue;}
+
+            $pos = strpos($line, '=');
+            if($pos===false) {continue;}
+
+            $key = trim(substr($line, 0, $pos));
+            $val = trim(substr($line, $pos+1));
+            if($key!==''){
+                $rows[$key] = $val;
+            }
+        }
+
+        return $rows;
+    }
+
+    private static function writeKeyValueFile($filename, $data){
+        $dir = dirname($filename);
+        if(!is_dir($dir) && !@mkdir($dir, 0775, true)){
+            self::addError(HEURIST_FILE_WRITE_ERROR, 'Cannot create folder for file '.htmlspecialchars($filename));
+            return false;
+        }
+
+        ksort($data, SORT_NATURAL);
+
+        $tmp = $filename.'.tmp';
+        $fh = @fopen($tmp, 'wb');
+        if(!$fh){
+            self::addError(HEURIST_FILE_WRITE_ERROR, 'Cannot write file '.htmlspecialchars($filename));
+            return false;
+        }
+
+        if(!@flock($fh, LOCK_EX)){
+            fclose($fh);
+            @unlink($tmp);
+            self::addError(HEURIST_FILE_WRITE_ERROR, 'Cannot lock file '.htmlspecialchars($filename));
+            return false;
+        }
+
+        foreach($data as $key=>$val){
+            fwrite($fh, $key.'='.$val."\n");
+        }
+
+        fflush($fh);
+        flock($fh, LOCK_UN);
+        fclose($fh);
+
+        if(!@rename($tmp, $filename)){
+            @unlink($tmp);
+            self::addError(HEURIST_FILE_WRITE_ERROR, 'Cannot replace file '.htmlspecialchars($filename));
+            return false;
+        }
+        return true;
+    }
+
+    public static function rebuildRegisteredDatabaseIndexFile($force=false){
+
+        $filename = self::getLocalIndexFilePath();
+        if(!$force && !self::isFileOutdated($filename, 24*3600)){
+            return true;
+        }
+
+        $mysqli = mysql__init();
+        if(!$mysqli){
+            self::addError(HEURIST_DB_ERROR, 'Cannot connect to MySQL server to rebuild registered database index');
+            return false;
+        }
+
+        $dbs = mysql__getdatabases4($mysqli, true);
+        $rows = array();
+
+        foreach($dbs as $database_name){
+            list($database_name_full, $database_name_plain) = mysql__get_names($database_name);
+            $sql = 'SELECT sys_dbRegisteredID FROM `'.$database_name_full.'`.sysIdentification LIMIT 1';
+            $dbID = intval(mysql__select_value($mysqli, $sql));
+            if($dbID>0){
+                $rows[$dbID] = $database_name_plain;
+            }
+        }
+
+        return self::writeKeyValueFile($filename, $rows);
+    }
+
+    /**
+    * Retrieves database url from _INDEX_OF_REGISTERED_DATABASES.txt 
+    * 
+    * @param mixed $dbID
+    */
+    private static function getLocalDatabaseNameByDbId($dbID){
+        if(self::isFileOutdated(self::getLocalIndexFilePath(), 24*3600)){
+            if(!self::rebuildRegisteredDatabaseIndexFile(true)){
+                return null;
+            }
+        }
+
+        $rows = self::readKeyValueFile(self::getLocalIndexFilePath());
+        $dbID = (string)intval($dbID);
+
+        return @$rows[$dbID] ?: null;
+    }
+
+    private static function readUrlCacheFile(){
+        $rows = array();
+        $filename = self::getLocalUrlCacheFilePath();
+        if(!file_exists($filename) || !is_readable($filename)){
+            return $rows;
+        }
+
+        $lines = @file($filename, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        if(!is_array($lines)){
+            return $rows;
+        }
+
+        foreach($lines as $line){
+            $parts = explode("	", trim($line));
+            if(count($parts)<3) {continue;}
+            $rows[intval($parts[0])] = array('url'=>$parts[1], 'ts'=>intval($parts[2]));
+        }
+        return $rows;
+    }
+
+    private static function writeUrlCacheFile($rows){
+        $filename = self::getLocalUrlCacheFilePath();
+        $dir = dirname($filename);
+        if(!is_dir($dir) && !@mkdir($dir, 0775, true)){
+            return false;
+        }
+        ksort($rows, SORT_NUMERIC);
+        $tmp = $filename.'.tmp';
+        $fh = @fopen($tmp, 'wb');
+        if(!$fh){ return false; }
+        if(!@flock($fh, LOCK_EX)){
+            fclose($fh);
+            @unlink($tmp);
+            return false;
+        }
+        foreach($rows as $dbID=>$row){
+            fwrite($fh, intval($dbID)."	".$row['url']."	".intval($row['ts'])."\n");
+        }
+        fflush($fh);
+        flock($fh, LOCK_UN);
+        fclose($fh);
+        if(!@rename($tmp, $filename)){
+            @unlink($tmp);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+    * Retrieves url from local cached file _CACHE_OF_REGISTERED_DATABASE_URLS.txt
+    * if last access was less than hour ago
+    * 
+    * @param mixed $dbID
+    */
+    private static function getCachedDatabaseUrl($dbID){
+        $rows = self::readUrlCacheFile();
+        $dbID = intval($dbID);
+        if(!isset($rows[$dbID])){
+            return null;
+        }
+        if((time() - intval($rows[$dbID]['ts'])) > 3600){
+            unset($rows[$dbID]);
+            self::writeUrlCacheFile($rows);
+            return null;
+        }
+        return $rows[$dbID]['url'];
+    }
+
+    private static function setCachedDatabaseUrl($dbID, $url){
+        $rows = self::readUrlCacheFile();
+        $now = time();
+        foreach($rows as $id=>$row){
+            if(($now - intval($row['ts'])) > 3600){
+                unset($rows[$id]);
+            }
+        }
+        $rows[intval($dbID)] = array('url'=>$url, 'ts'=>$now);
+        self::writeUrlCacheFile($rows);
+    }
+    
+    private static function checkDbId($params){
+        $dbID = intval(is_array($params)?@$params['dbID']:$params);
+        if($dbID<=0){
+            self::addError(HEURIST_INVALID_REQUEST, 'Database ID is not set or invalid. It must be an integer positive value.');
+            return false;
+        }
+        return $dbID;
+    }
+
+    /**
+    * Retrieves database url from _INDEX_OF_REGISTERED_DATABASES.txt
+    * 
+    * @param mixed $params
+    */
+    public static function getDatabaseUrlLocal($params){
+        
+        $dbID = self::checkDbId($params);
+        if(!$dbID){
+            return false;
+        }
+
+        $dbName = self::getLocalDatabaseNameByDbId($dbID);
+        if(!$dbName){
+            self::addError(HEURIST_NOT_FOUND, 'Database with ID#'.$dbID.' is not found on server '
+                            .self::normalizeServerUrl(self::extractServerUrl(HEURIST_BASE_URL_PRO)));
+            return false;
+        }
+
+        return self::makeDatabaseUrl($dbName);
     }
 
     /**
@@ -403,7 +705,80 @@ class DbRegis {
 
         return $dbID;
     }
+    
+    /**
+    * Get URL for registered database by its $dbID
+    * 
+    * 1. Ar first it checks local cache file 
+    * 
+    * @param mixed $server
+    * @param mixed $dbID
+    * @return null
+    */
+    public static function registrationGet($params){
+        //global $system;
 
+        $dbID = self::checkDbId($params);
+        if(!$dbID){
+            return false;
+        }
+        if(!self::initialize()) {return false;} //can not connect to index database
+        
+        // checks local cache file
+        $dburl = self::getCachedDatabaseUrl($dbID);
+        if(is_string($dburl) && strpos($dburl ,'failure:')===0){ //this $dbID - is marked as failured
+            self::addError(HEURIST_NOT_FOUND, substr(strstr($dburl, 'failure:'), strlen('failure:')));
+            return false;
+        }elseif($dburl){
+            //found in cache
+            return $dburl;
+        }
+        
+        // is this db registered on this server
+        $dburl = self::getDatabaseUrlLocal($dbID); //from _INDEX_OF_REGISTERED_DATABASES 
+        if($dburl){
+            //found in index file
+            self::setCachedDatabaseUrl($dbID, $dburl);
+            return $dburl;
+        }
+        $dburl = false;
+        $server = null;
+        
+        if(@$params['action']!=='url'){
+            // returns url from central index database
+            // it can be incorrect - because db name is not reliable
+            // we have to extract server and check the presence ot this db on given server by id
+            $res = self::registrationGetFromCentralIndexDb($params);
+            if($res){
+                $server = self::normalizeServerUrl($res);
+            }
+            if($server===null || $server===''){
+                self::addErrorToCache($dbID, 'Database server URL is not defined in central index database');
+                return false;
+            }
+
+            $localServer = self::normalizeServerUrl(self::extractServerUrl(HEURIST_BASE_URL_PRO));
+
+            if($server === $localServer){ //if $server is current one 
+                //we already checked it on previos step - database missed on this server
+                self::addErrorToCache($dbID, 'Database with ID#'.$dbID.' is not found in Heurist Reference Index database');
+                
+            }else{
+                //request to server where database can reside
+                $dburl = self::registrationRemoteCall(array('action'=>'url', 'dbID'=>$dbID), self::normalizeServerUrl($server, true));
+            }
+        }
+        
+        //keep url in cache - if dburl is false - it means failure
+        if($dburl){
+            self::setCachedDatabaseUrl($dbID, $dburl);
+        }else{
+            self::setCachedDatabaseUrl($dbID, 'failure:'.self::$system->getErrorMsg());
+        }
+
+        return $dburl;
+    }        
+        
     /**
      * Retrieves registration information for a database from the Heurist reference index.
      * Handles remote calls if necessary.
@@ -413,22 +788,22 @@ class DbRegis {
      *                      'action' (string, optional) - Set to 'info' for remote calls.
      * @return string|false|array The database URL (string) on success, false on failure, or an array from remote call.
      */
-    public static function registrationGet($params){
+    public static function registrationGetFromCentralIndexDb($params){
 
+        $dbID = self::checkDbId($params);
+        if(!$dbID){
+            return false;
+        }
+        
         if(!self::initialize()) {return false;} //can not connect to index database
 
-        if(self::$isOutSideRequest){
+        
+        if(self::$isOutSideRequest){ //request goes not from index server
             $params['action'] = 'info';
-            return self::registrationRemoteCall($params);
-        }
-
-        if(!isPositiveInt(@$params['dbID'])){
-            self::addError(HEURIST_INVALID_REQUEST, 'Database ID is not set or invalid. It must be an integer positive value.');
-            return false;
+            return self::registrationRemoteCall($params); //send request to index server
         }
 
             $database_url = null;
-            $database_id = intval(@$params['dbID']);
 
             $sys = self::$system;
             $mysqli = $sys->getMysqli();
@@ -439,13 +814,13 @@ class DbRegis {
             $rec = mysql__select_row_assoc($mysqli,
                 'select rec_Title, rec_URL from Records where rec_RecTypeID='
                 .$rty_ID_registered_database.' and rec_ID='  //1-22
-                .$database_id);
+                .$dbID);
 
             if ($rec!=null){
                 $database_url = @$rec['rec_URL'];
                 if(isEmptyStr($database_url)){
                     self::addError(HEURIST_NOT_FOUND,
-                        'Database URL is not set in Heurist Reference Index database for database ID#'.$database_id);
+                        'Database URL is not set in Heurist Reference Index database for database ID#'.$dbID);
                     return false;
                 }
                 return $database_url;
@@ -458,7 +833,7 @@ class DbRegis {
                      'Heurist Reference Index database is not accessible at the moment. Please try later');
             }else{
                 self::addError(HEURIST_NOT_FOUND,
-                     'Database with ID#'.$database_id.' is not found in Heurist Reference Index database');
+                     'Database with ID#'.$dbID.' is not found in Heurist Reference Index database');
             }
             return false;
     }
