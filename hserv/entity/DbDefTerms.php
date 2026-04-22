@@ -45,6 +45,20 @@ class DbDefTerms extends DbEntityBase
     'trm_LocallyModified'=>'bool2',
     */
 
+    /**
+     * Calls EntityBase setData function, with extra handling for term separator parameter
+     *
+     * @param array $data The data to be set for the entity.
+     * @return void
+     */
+    public function setData($data){
+
+        parent::setData($data);
+
+        if(\array_key_exists('term_separator', $this->data) && \array_key_exists('term_separator', $_REQUEST)){ // avoid issue with spaces used within the separator
+            $this->data['term_separator'] = USanitize::sanitizeString($_REQUEST['term_separator'], false, false);
+        }
+    }
 
     /**
      * Searches for Term definitions based on criteria in `$this->data`.
@@ -205,9 +219,6 @@ class DbDefTerms extends DbEntityBase
 
     }
 
-    //
-    // loads all term links   from defTermsLinks
-    //
     /**
      * Loads all term links (parent-child relationships) from `defTermsLinks` or `defTerms`.
      *
@@ -249,10 +260,7 @@ class DbDefTerms extends DbEntityBase
         return $matches;
 
     }
-    
-    //
-    // get list of icons ids
-    //
+
     /**
      * Gets a list of term IDs that have associated thumbnail images.
      *
@@ -276,9 +284,6 @@ class DbDefTerms extends DbEntityBase
        return $res;
     }    
 
-    //
-    // trm_Label may have periods. Periods are taken as indicators of hierarchy.
-    //
     /**
      * Imports terms, potentially creating a hierarchy based on a separator in `trm_Label`.
      *
@@ -305,7 +310,6 @@ class DbDefTerms extends DbEntityBase
         if(@$this->records[0]['trm_VocabularyGroupID']>0){
             return $this->save();
         }
-
 
         //group by parent term ID
         $records_by_prent_id = array();
@@ -350,9 +354,6 @@ class DbDefTerms extends DbEntityBase
         return $terms_added;
     }
 
-    //
-    //
-    //
     /**
      * Parses a flat list of term labels into a hierarchical tree structure.
      *
@@ -383,20 +384,51 @@ class DbDefTerms extends DbEntityBase
 
             $prev = &$result;
 
+            $s = '';
             if($trm_sep!=''){
-                $s = strtok($path, $trm_sep);
 
-                $hierarchy = "{$s}{$trm_sep}";
+                if(mb_strlen($trm_sep) === 1){
 
-                //iterate path
-                while (($next = strtok($trm_sep)) !== false) {
-                    if (!isset($prev[$s])) {
-                        $prev[$s] = array();
+                    $s = strtok($path, $trm_sep);
+
+                    $s = trim($s);
+
+                    $hierarchy = "{$s}{$trm_sep}";
+
+                    //iterate path
+                    while (($next = strtok($trm_sep)) !== false) {
+                        if (!isset($prev[$s])) {
+                            $prev[$s] = array();
+                        }
+
+                        $next = trim($next);
+
+                        $prev = &$prev[$s];
+                        $s = !$trm_extendLabel ? $next : "{$hierarchy}{$next}";
+                        $hierarchy .= "{$next}{$trm_sep}";
                     }
+                }else{
 
-                    $prev = &$prev[$s];
-                    $s = !$trm_extendLabel ? $next : "{$hierarchy}{$next}";
-                    $hierarchy .= "{$next}{$trm_sep}";
+                    $parts = explode($trm_sep, $path);
+
+                    $s = trim(array_shift($parts));
+
+                    $hierarchy = "{$s}{$trm_sep}";
+
+                    while(!empty($parts)){
+
+                        if(!isset($prev[$s])){
+                            $prev[$s] = [];
+                        }
+
+                        $nextLabel = trim(array_shift($parts));
+
+                        $prev = &$prev[$s];
+
+                        $s = !$trm_extendLabel ? $nextLabel : "{$hierarchy}{$nextLabel}";
+
+                        $hierarchy .= "{$nextLabel}{$trm_sep}";
+                    }
                 }
 
             }else{
@@ -411,9 +443,6 @@ class DbDefTerms extends DbEntityBase
         return $result;
     }
 
-    //
-    // tree: idx->array(idx->array(),.... )
-    //
     /**
      * Recursively saves a tree of terms to the database.
      *
@@ -440,15 +469,16 @@ class DbDefTerms extends DbEntityBase
         //fill records array
         foreach($tree as $label => $children)
         {
-            $record_idx = @$this->labels_to_idx[$parentLabel.$label];
+            $trmLabel = trim($label);
+            $record_idx = @$this->labels_to_idx[$parentLabel.$trmLabel];
             if($record_idx===null){ //one of parent terms not defined - add it
                 $record_idx = count($this->records_all);
-                $this->labels_to_idx[$parentLabel.$label] = $record_idx;
+                $this->labels_to_idx[$parentLabel.$trmLabel] = $record_idx;
                 $this->records_all[] = array();
             }
 
             $this->records_all[$record_idx]['trm_ParentTermID'] = $parentID;
-            $this->records_all[$record_idx]['trm_Label'] = $label;
+            $this->records_all[$record_idx]['trm_Label'] = $trmLabel;
             $this->records_all[$record_idx]['trm_Domain'] = $this->records_all[0]['trm_Domain'];
 
             $record = $this->records_all[$record_idx];
@@ -459,7 +489,7 @@ class DbDefTerms extends DbEntityBase
                 continue;
             }else{
                 $query = 'select trm_ID from defTerms where trm_ParentTermID='
-                .$parentID.' and trm_Label="'.$mysqli->real_escape_string($label).'"';
+                .$parentID.' and trm_Label="'.$mysqli->real_escape_string($trmLabel).'"';
                 $trmID = mysql__select_value($mysqli, $query);
                 if($trmID>0){
                     //already exists
@@ -489,12 +519,18 @@ class DbDefTerms extends DbEntityBase
                 $this->records_all[$record_idx]['trm_ID'] = $record['trm_ID'];
             }
 
+            $trm_sep = @$this->data['term_separator'];
+
+            if($trm_sep === null){
+                $trm_sep = '.';
+            }
+
             //go to next level
             foreach($tree as $label => $children)
             {
                 if(!isEmptyArray($children)){
                     $record_idx = @$this->labels_to_idx[$parentLabel.$label];
-                    $ret = $this->_saveTree($children, $this->records_all[$record_idx]['trm_ID'], $parentLabel.$label.'.');
+                    $ret = $this->_saveTree($children, $this->records_all[$record_idx]['trm_ID'], $parentLabel.$label.$trm_sep);
                     if($ret===false){
                         return false;
                     }
@@ -510,9 +546,6 @@ class DbDefTerms extends DbEntityBase
 
     }
 
-    //
-    // Validates values before save and sets default values
-    //
     /**
      * Prepares term records before saving.
      *
@@ -651,9 +684,6 @@ class DbDefTerms extends DbEntityBase
         return $ret;
     }
 
-    //
-    // returns array of saved record ids or false
-    //
     /**
      * Saves term records.
      *
@@ -767,12 +797,6 @@ class DbDefTerms extends DbEntityBase
         return $ret;
     }
 
-    //   Actions:
-    //   1) reference=1 - add/move/remove terms by reference
-    //   2) merge_id>0 retain_id>0 - merge terms within vocabulary
-    //   3) import terms from csv
-    //   4) get_translations - from defTranslations
-    //
     /**
      * Performs batch actions on terms.
      *
@@ -1071,9 +1095,6 @@ class DbDefTerms extends DbEntityBase
         return $ret;
     }
 
-    //
-    // Retrieve and create a recordset of term translations
-    //
     /**
      * Retrieves term translations from the `defTranslations` table.
      *
@@ -1127,9 +1148,6 @@ class DbDefTerms extends DbEntityBase
         );
     }
 
-    //
-    //
-    //
     /**
      * Sets (inserts or updates) term translations in the `defTranslations` table.
      *
@@ -1152,7 +1170,7 @@ class DbDefTerms extends DbEntityBase
         }
         if(!is_array($data)){
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Data to be imported is not valid json');
-            $res = false;
+            return false;
         }else{
 
             $cnt_lang_missed = 0;
@@ -1239,10 +1257,6 @@ class DbDefTerms extends DbEntityBase
 
     }
 
-    //
-    //  Checks that term can be removed
-    //   1) Has no
-    //
     /**
      * Validates if the current user has permission for the requested term operation (especially delete).
      *
@@ -1294,12 +1308,6 @@ class DbDefTerms extends DbEntityBase
         return true;
     }
 
-    //--------------------------------------------------------------------------
-    //
-
-    //
-    //  get all enum and relmarker fields where vocabulary is in use
-    //
     /**
      * Gets all detail type IDs (enum or relmarker) that use the given vocabulary ID.
      *
@@ -1317,15 +1325,6 @@ class DbDefTerms extends DbEntityBase
 
     }
 
-    //
-    // returns array - list of fields (where vocabulary is in use) and number of records
-    // false - mysql error
-    // true - term and its children are not in use
-    //
-    // $trm_ID - vocabulary
-    // $infield - check in base fields
-    // $indetails - check in recDetails
-    //
     /**
      * Checks if a term (and its children, if it's a vocabulary root) is currently in use.
      *
@@ -1368,11 +1367,6 @@ class DbDefTerms extends DbEntityBase
         }
     }
 
-    //
-    // Returns flat array of all children for given term
-    // uses defTermsLinks
-    // $all_levels - false return direct children only
-    //
     /**
      * Gets all children (descendants) of given parent term(s).
      *
@@ -1386,9 +1380,6 @@ class DbDefTerms extends DbEntityBase
         return getTermChildrenAll($this->system->getMysqli(),$parent_ids, $all_levels);
     }
 
-    //
-    // get flat array of trm_ID=>trm_Label for given parent
-    //
     /**
      * Gets the labels and codes for all children of a given parent term.
      *
@@ -1411,9 +1402,6 @@ class DbDefTerms extends DbEntityBase
         return null;
     }
 
-    //
-    //
-    //
     /**
      * Finds records where a given term (or its children) is used.
      *
@@ -1491,10 +1479,6 @@ class DbDefTerms extends DbEntityBase
 
     }
 
-    //
-    // Counts:
-    //  term_usage => count the usage for the provided term ids
-    //
     /**
      * Retrieves usage counts for specified terms.
      *
@@ -1555,7 +1539,7 @@ class DbDefTerms extends DbEntityBase
                     return false;
                 }
             }else{
-                $this->system->addError(HEURIST_ACTION_BLOCK, 'Invalid term id(s) provided ' . $trm_ID);
+                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Invalid term id(s) provided ' . $trm_ID);
                 $res = false;
             }
         }
