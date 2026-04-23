@@ -1,6 +1,8 @@
 <?php
 namespace hserv\controller;
 
+require_once dirname(__FILE__).'/../../autoload.php';
+
 /**
  * RecordResolver
  *
@@ -170,12 +172,13 @@ final class RecordResolver
             return array(null, $recid);                
         }
         
-        $autoload = dirname(__FILE__).'/../../autoload.php';
         $dbregis = dirname(__FILE__).'/../utilities/DbRegis.php';
-
+        /*
+        $autoload = dirname(__FILE__).'/../../autoload.php';
         if (is_file($autoload)) {
             require_once $autoload;
-        }
+        }*/
+
         if (is_file($dbregis)) {
             require_once $dbregis;
         }

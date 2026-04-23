@@ -77,12 +77,15 @@ class DbRegis {
                 return false;
             }
         }else{
+            self::$system->initPathConstants();
+            /*
             if(self::$system->init(null, false, false)){ //init without consts
                 self::$system->initPathConstants();
             }else{
                 self::addError();
                 return false;
             }
+            */
         }
         self::$initialized = true;
         return true;
@@ -104,7 +107,7 @@ class DbRegis {
         $reg_record = null;
 
         if($serverBaseUrl==null || $serverBaseUrl==''){
-            $serverBaseUrl = HEURIST_MAIN_SERVER.'/heurist/'; //temp - replace with HEURIST_INDEX_BASE_URL as soon as heurist will be updated
+            $serverBaseUrl = HEURIST_MAIN_SERVER.'/h7-alpha/'; //temp - replace with HEURIST_INDEX_BASE_URL as soon as heurist will be updated
         }else{
             $serverBaseUrl = rtrim($serverBaseUrl, '/').'/';
         }
@@ -193,7 +196,7 @@ class DbRegis {
         $port = @$parts['port'] ? ':'.$parts['port'] : '';
         $path = @$parts['path'] ? rtrim($parts['path'], '/') : '';
 
-        return $scheme.'://'.$host . ($withPortAndPath? $port.$path :'');
+        return $scheme.'://'.$host . ($withPortAndPath? $port.$path.'/' :'');
     }
 
     public static function extractServerUrl($url){
@@ -748,9 +751,9 @@ class DbRegis {
             // returns url from central index database
             // it can be incorrect - because db name is not reliable
             // we have to extract server and check the presence ot this db on given server by id
-            $res = self::registrationGetFromCentralIndexDb($params);
-            if($res){
-                $server = self::normalizeServerUrl($res);
+            $resServer = self::registrationGetFromCentralIndexDb($params);
+            if($resServer){
+                $server = self::normalizeServerUrl($resServer);
             }
             if($server===null || $server===''){
                 self::addErrorToCache($dbID, 'Database server URL is not defined in central index database');
@@ -765,7 +768,9 @@ class DbRegis {
                 
             }else{
                 //request to server where database can reside
-                $dburl = self::registrationRemoteCall(array('action'=>'url', 'dbID'=>$dbID), self::normalizeServerUrl($server, true));
+                $server = self::normalizeServerUrl($resServer, true);
+                $server = str_replace('/heurist/','/h7-alpha/',$server); //TEMPORARY
+                $dburl = self::registrationRemoteCall(array('action'=>'url', 'dbID'=>$dbID), $server);
             }
         }
         

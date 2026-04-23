@@ -72,6 +72,8 @@ require_once dirname(__FILE__).'/../../autoload.php';
                             'To perform this action you must be logged in as Database Owner');
             }
         }
+    }else{
+        $system->initPathConstants();
     }
 
     if($allow_action){
