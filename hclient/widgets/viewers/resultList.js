@@ -1757,14 +1757,13 @@ $.widget( "heurist.resultList", {
         // Show owner group and accessibility to others as colour code
         let html_owner = '';
         let owner_id = fld('rec_OwnerUGrpID');
-        if(owner_id){  // && owner_id!='0'
-            // 0 owner group is 'everyone' which is treated as automatically making it public (although this is not logical)
-            // TODO: I think 0 should be treated like any other owner group in terms of public visibility
+        if(owner_id){
+
             let visibility = fld('rec_NonOwnerVisibility');
             let visLabel = visibility;
-            // gray - hidden, green = viewable (logged in user) = default, orange = pending, red = public = most 'dangerous'
-            let clr  = 'blue';
-            
+            // red - hidden, orange = viewable (logged in user) = default, green = pending, grey/silver = public = most 'dangerous'
+            let clr  = 'silver';
+
             if(visibility=='hidden'){
                 clr = 'red';
                 visibility = 'private - hidden from non-owners';
@@ -1774,26 +1773,25 @@ $.widget( "heurist.resultList", {
             }else if(visibility=='pending'){
                 clr = 'green';
                 visibility = 'pending (viewable by anyone, changes pending)';
-            }else { //(visibility=='public')
-                clr = 'blue';
+            }else{
+                clr = 'silver';
                 visibility = 'public (viewable by anyone)';
             }
 
-            let isPublicForEveryone = owner_id == 0 && clr === 'blue'; // hide owner and eye icon
             let hint = __getOwnerName(owner_id)+', '+window.hWin.HR(visibility);
-            owner_id = isPublicForEveryone ? '' : owner_id;
+            owner_id = owner_id == 0 ? '' : owner_id;
 
             // Displays owner group ID, green if hidden, gray if visible to others, red if public visibility
             html_owner =  '<span class="rec_owner logged-in-only" style="width:20px;padding-top:2px;display:inline-block;color:'
                      + clr + '" title="' + hint + '"><b>' + owner_id + '</b></span>';
 
-            if(is_logged && !isPublicForEveryone){ // hide eye if user not logged in
+            if(is_logged){ // hide eye if user not logged in
 
                 // Display eye if record is publicly viewable, otherwise use a crossed out eye - Both icons come from: iconoir.com
                 let vis_icon = '<span class="ui-icon ui-icon-eye-open"></span>';
                 let vis_title = window.hWin.HR('Publicly visible');
 
-                if(clr != 'blue'){
+                if(clr != 'silver'){
 
                     vis_icon = '<span class="ui-icon ui-icon-eye-crossed"></span>';
 
@@ -1840,7 +1838,7 @@ $.widget( "heurist.resultList", {
         + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/> '
-        +     '<span class="logged-in-only ui-icon ui-icon-bookmark" style="color:'+(bkm_ID?'#ff8844':'#dddddd')+';display:inline-block;"></span>'
+        +     `<span class="logged-in-only ui-icon ui-icon-bookmark" style="color:${bkm_ID ? '#ff8844' : '#dddddd'};display:inline-block;"></span>`
         +     html_owner
         +     html_p_reminder
         + '</div>'

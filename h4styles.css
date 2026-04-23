@@ -1075,6 +1075,9 @@ div.div-result-list-content.icons_list{
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+.list .recordDiv .ui-icon-bookmark{
+    visibility: hidden;
+}
 
 
 .icons .recordDiv .recordTitle .inlist, .thumbs .recordDiv .recordTitle .inlist{
@@ -2124,7 +2127,7 @@ background: #8ea9b9
     filter: invert(84%) sepia(9%) saturate(1723%) hue-rotate(46deg) brightness(95%) contrast(88%);
 }
 .recordDiv .recvis-public .ui-icon { /* Public / Blue */
-    filter: invert(8%) sepia(98%) saturate(7493%) hue-rotate(247deg) brightness(91%) contrast(146%);
+    filter: invert(100%) sepia(0%) saturate(5734%) hue-rotate(100deg) brightness(78%) contrast(89%);
 }
 
 .ui-icon-eye-explore {
