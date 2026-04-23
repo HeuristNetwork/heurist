@@ -1269,20 +1269,22 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
                 this._closeInsertPopup();
 
                 if(insertAll){
-                this._insertSelectedVars(index, addLoop, ifnull, addCaption, addRemark, addWrap, useOwnLoop);
-                return;
-            }
-
-            for(let k=index; k<len; k++){
-                let _nodep = fieldIds[k];
-                if(window.hWin.HEURIST4.util.isArrayNotEmpty(_nodep.children)){
-                    continue;
+                    this._insertSelectedVars(index, addLoop, ifnull, addCaption, addRemark, addWrap, useOwnLoop);
+                    return;
                 }
 
-                this._insertSelectedVars(_nodep, addLoop, ifnull, addCaption, addRemark, addWrap, useOwnLoop);
-                this._insertFields(index+1);
-                break;
-            }
+                for(let k=index; k<len; k++){
+                    let _nodep = fieldIds[k];
+                    _nodep.setSelected(false);
+                    $(_nodep.li).css('color','#B5FF00');
+                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(_nodep.children)){
+                        continue;
+                    }
+
+                    this._insertSelectedVars(_nodep, addLoop, ifnull, addCaption, addRemark, addWrap, useOwnLoop);
+                    this._insertFields(index);
+                    break;
+                }
             }
             },
             {text:window.hWin.HR('Cancel'),
@@ -1367,7 +1369,6 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
 
         let snippets = [];
         let i = 0;
-
         while(i < selected.length){
             const rootNode = selected[i];
             const parsed = this._parseNodeCode(rootNode);
@@ -1433,6 +1434,12 @@ $.widget( "heurist.reportEditor", $.heurist.baseAction, {
 
             i = j;
         }
+        
+        for(i=0; i < selected.length; i++){
+            selected[i].setSelected(false);
+            $(selected[i].li).css('color','#B5FF00');
+        }
+
 
         if(snippets.length > 0){
             this._insertAtCursor(snippets.join('\n'), true);
