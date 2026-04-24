@@ -4,7 +4,7 @@ set -Eeuo pipefail
 # For use on HeuristRef.net only.
 # Nightly sync/merge workflow for h8dev:
 #   1) discard all local changes in h8dev working tree
-#   2) fetch/sync from remote, matching the h7dev sync process
+#   2) fetch/sync h7dev from upstream and h8dev from origin
 #   3) merge h7dev into h8dev
 #   4) email a failure report if the merge/process fails
 #   5) restore ownership
@@ -13,7 +13,8 @@ REPO_DIR="/var/www/html/HEURIST/h8-alpha"
 LOG_PREFIX="[heurist-h8-merge]"
 OWNER="osmakov"
 GROUP="heurist"
-REMOTE="upstream"
+SOURCE_REMOTE="upstream"
+TARGET_REMOTE="origin"
 SOURCE_BRANCH="h7dev"
 TARGET_BRANCH="h8dev"
 
@@ -26,7 +27,7 @@ MAIL_SUBJECT_PREFIX="Heurist h8dev nightly merge failed"
 # Change to "-fd" if ignored local runtime files must be preserved.
 GIT_CLEAN_FLAGS="-fdx"
 
-# Push merged h8dev back to the remote after a successful merge commit.
+# Push merged h8dev back to TARGET_REMOTE after a successful merge commit.
 # Set to 0 if this server should only update its local working tree.
 PUSH_AFTER_MERGE=1
 
@@ -50,7 +51,8 @@ send_failure_report() {
     echo
     echo "Host: $(hostname -f 2>/dev/null || hostname)"
     echo "Repository: $REPO_DIR"
-    echo "Remote: $REMOTE"
+    echo "Source remote: $SOURCE_REMOTE"
+    echo "Target remote: $TARGET_REMOTE"
     echo "Source branch: $SOURCE_BRANCH"
     echo "Target branch: $TARGET_BRANCH"
     echo "Exit code: $exit_code"
@@ -105,7 +107,7 @@ run_git() {
   git "$@"
 }
 
-echo "$LOG_PREFIX Starting nightly merge of $SOURCE_BRANCH into $TARGET_BRANCH..."
+echo "$LOG_PREFIX Starting nightly merge of $SOURCE_REMOTE/$SOURCE_BRANCH into $TARGET_REMOTE/$TARGET_BRANCH..."
 echo "$LOG_PREFIX Log file: $LOG_FILE"
 
 if [ ! -d "$REPO_DIR/.git" ]; then
@@ -131,20 +133,29 @@ if [ -f .git/CHERRY_PICK_HEAD ]; then
   git cherry-pick --abort || true
 fi
 
-# Fetch latest remote state, equivalent in intent to the h7dev sync script.
-run_git fetch --prune "$REMOTE"
+# Fetch latest remote state. h7dev is read from SOURCE_REMOTE; h8dev is read/pushed via TARGET_REMOTE.
+run_git fetch --prune "$SOURCE_REMOTE"
+run_git fetch --prune "$TARGET_REMOTE"
 
 # Verify required remote branches exist before modifying local branch pointers.
-run_git rev-parse --verify --quiet "$REMOTE/$SOURCE_BRANCH" >/dev/null
-run_git rev-parse --verify --quiet "$REMOTE/$TARGET_BRANCH" >/dev/null
+if ! git rev-parse --verify --quiet "$SOURCE_REMOTE/$SOURCE_BRANCH" >/dev/null; then
+  FAILURE_CONTEXT="Missing remote branch $SOURCE_REMOTE/$SOURCE_BRANCH"
+  echo "$LOG_PREFIX ERROR: $FAILURE_CONTEXT" >&2
+  exit 1
+fi
+if ! git rev-parse --verify --quiet "$TARGET_REMOTE/$TARGET_BRANCH" >/dev/null; then
+  FAILURE_CONTEXT="Missing remote branch $TARGET_REMOTE/$TARGET_BRANCH"
+  echo "$LOG_PREFIX ERROR: $FAILURE_CONTEXT" >&2
+  exit 1
+fi
 
 # Reset h8dev working tree completely to remote h8dev.
-run_git checkout -B "$TARGET_BRANCH" "$REMOTE/$TARGET_BRANCH"
-run_git reset --hard "$REMOTE/$TARGET_BRANCH"
+run_git checkout -B "$TARGET_BRANCH" "$TARGET_REMOTE/$TARGET_BRANCH"
+run_git reset --hard "$TARGET_REMOTE/$TARGET_BRANCH"
 run_git clean "$GIT_CLEAN_FLAGS"
 
 # Refresh local h7dev reference to match remote h7dev exactly.
-run_git branch -f "$SOURCE_BRANCH" "$REMOTE/$SOURCE_BRANCH"
+run_git branch -f "$SOURCE_BRANCH" "$SOURCE_REMOTE/$SOURCE_BRANCH"
 
 BEFORE_MERGE_HEAD="$(git rev-parse HEAD)"
 
@@ -192,7 +203,7 @@ else
   run_git commit -m "Nightly merge $SOURCE_BRANCH into $TARGET_BRANCH"
 
   if [ "$PUSH_AFTER_MERGE" -eq 1 ]; then
-    run_git push "$REMOTE" "$TARGET_BRANCH"
+    run_git push "$TARGET_REMOTE" "$TARGET_BRANCH"
   else
     echo "$LOG_PREFIX PUSH_AFTER_MERGE=0; skipping push."
   fi
