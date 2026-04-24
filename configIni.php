@@ -231,6 +231,13 @@ if (is_file($parentIni)){
     include_once $parentIni;
 }
 
+$branchVersionFile = __DIR__ . '/configVersion.local.php';
+if (file_exists($branchVersionFile)) {
+    include_once $branchVersionFile;
+}
+
+define('HEURIST_IS_V8', version_compare($version, '8.0', '>='));
+
 
 /**
 * Returns a pair - server code and short database name
